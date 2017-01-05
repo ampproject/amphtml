@@ -237,7 +237,7 @@
       this.container.appendChild(this.iframe);
 
       // Notice that name can only be set once the IFrame is in the DOM.
-      this.iframe.contentWindow.name = SENTINEL + paramsStr(params);
+      this.iframe.contentWindow.name = APP + paramsStr(params);
 
       this.awaitHandshake_();
 
@@ -257,7 +257,7 @@
       var targetOrigin = this.frameOrigin_;
       var listener = function(event) {
         if (event.origin == targetOrigin &&
-                event.data.app == SENTINEL &&
+                event.data.app == APP &&
                 event.data.name == 'amp-handshake-request' &&
                 (!event.source || event.source == target)) {
           log('event: ',event);
@@ -266,7 +266,7 @@
           window.removeEventListener('message', listener, false);
 
           const message = {
-            app: SENTINEL,
+            app: APP,
             requestid: event.data.requestid,
             data: {},
             type: MessageType_.RESPONSE,

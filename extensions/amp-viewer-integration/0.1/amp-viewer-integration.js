@@ -33,7 +33,7 @@ export class AmpViewerIntegration {
     /** @const {!Window} win */
     this.win = win;
 
-    /** @private {?string} */
+    /** @private {?string|undefined} */
     this.unconfirmedViewerOrigin_ = null;
   }
 
@@ -46,7 +46,7 @@ export class AmpViewerIntegration {
   init() {
     dev().info(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
-    this.unconfirmedViewerOrigin_ = viewer.getParam('viewerorigin') || null;
+    this.unconfirmedViewerOrigin_ = viewer.getParam('viewerorigin');
     if (!this.unconfirmedViewerOrigin_) {
       dev().info(TAG, 'Viewer origin not specified.');
       return null;
@@ -66,7 +66,7 @@ export class AmpViewerIntegration {
 
           dev().info(TAG, 'setMessageDeliverer');
           viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
-            this.unconfirmedViewerOrigin_);
+            dev().assertString(this.unconfirmedViewerOrigin_));
         });
   }
 }

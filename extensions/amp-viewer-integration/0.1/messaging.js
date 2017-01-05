@@ -19,7 +19,7 @@ import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
-const SENTINEL = '__AMPHTML__';
+const APP = '__AMPHTML__';
 
 /**
  * @enum {string}
@@ -48,13 +48,13 @@ export class Messaging {
   constructor(source, target, targetOrigin) {
     /**  @private {!number} */
     this.requestIdCounter_ = 0;
-    /**  @private {!Object<string, {resolve: function(*), reject: function(!Error)}>} */
+    /**  @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};
     /** @const @private {!Window} */
     this.target_ = target;
     /** @const @private {string} */
     this.targetOrigin_ = targetOrigin;
-    /**  @private {function(string, *, boolean):(!Promise<*>|undefined)} */
+    /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
     this.requestProcessor_ = null;
 
     dev().assert(this.targetOrigin_, 'Target origin must be specified!');
@@ -74,7 +74,7 @@ export class Messaging {
       return;
     }
     const message = event.data;
-    if (message.app != SENTINEL) {
+    if (message.app != APP) {
       return;
     }
     if (message.type == MessageType_.REQUEST) {
@@ -101,7 +101,7 @@ export class Messaging {
       });
     }
     const message = {
-      app: SENTINEL,
+      app: APP,
       requestid: requestId,
       rsvp: awaitResponse,
       name: eventType,
@@ -121,7 +121,7 @@ export class Messaging {
   sendResponse_(requestId, payload) {
     dev().info(TAG, 'messaging.js -> sendResponse_');
     const message = {
-      app: SENTINEL,
+      app: APP,
       requestid: requestId,
       data: payload,
       type: MessageType_.RESPONSE,
@@ -143,7 +143,7 @@ export class Messaging {
    */
   sendResponseError_(requestId, reason) {
     const message = {
-      app: SENTINEL,
+      app: APP,
       requestid: requestId,
       error: reason,
       type: MessageType_.RESPONSE,
@@ -159,7 +159,7 @@ export class Messaging {
    * @private
    */
   handleRequest_(message) {
-    dev().info(TAG, 'messaging.js -> handleRequest_');
+    dev().info(TAG, 'messaging.js -> handleRequest_', message);
     dev().assert(this.requestProcessor_,
       'Cannot handle request because handshake is not yet confirmed!');
     const requestId = message.requestid;

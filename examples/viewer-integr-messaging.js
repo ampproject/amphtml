@@ -24,7 +24,7 @@ const MessageType_ = {
   RESPONSE: 's',
 };
 
-const SENTINEL = '__AMPHTML__';
+const APP = '__AMPHTML__';
 
 /**
  * This is a very simple messaging protocol between viewer and viewer client.
@@ -70,7 +70,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
       this.waitingForResponse_[requestId] = {resolve, reject};
     }.bind(this));
     const message = {
-      app: SENTINEL,
+      app: APP,
       requestid: requestId,
       rsvp: true,
       name: eventType,
@@ -81,7 +81,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
     return promise;
   }
   const message = {
-    app: SENTINEL,
+    app: APP,
     requestid: requestId,
     name: eventType,
     data: payload,
@@ -166,7 +166,7 @@ ViewerMessaging.prototype.sendMessage_ = function(message) {
  */
 ViewerMessaging.prototype.sendResponse_ = function(requestId, payload) {
   const message = {
-    app: SENTINEL,
+    app: APP,
     requestid: requestId,
     data: payload,
     type: MessageType_.RESPONSE,
@@ -182,7 +182,7 @@ ViewerMessaging.prototype.sendResponse_ = function(requestId, payload) {
  */
 ViewerMessaging.prototype.sendResponseError_ = function(requestId, reason) {
   const message = {
-    app: SENTINEL,
+    app: APP,
     requestid: requestId,
     error: reason,
     type: MessageType_.RESPONSE,
