@@ -425,22 +425,22 @@ let ParsedReferencePoint;
  */
 class ParsedReferencePoints {
   /**
-   * @param {!amp.validator.TagSpec} parent
+   * @param {!amp.validator.TagSpec} parentTagSpec
    * @param {!Object<string, number>} tagSpecIdsByTagSpecName
    */
-  constructor(parent, tagSpecIdsByTagSpecName) {
+  constructor(parentTagSpec, tagSpecIdsByTagSpecName) {
     /**
      * @type {!amp.validator.TagSpec}
      * @private
      */
-    this.parent_ = parent;
+    this.parentTagSpec_ = parentTagSpec;
 
     /**
      * @type {!Array<ParsedReferencePoint>}
      * @private
      */
     this.parsed_ = [];
-    for (const p of parent.referencePoints) {
+    for (const p of parentTagSpec.referencePoints) {
       goog.asserts.assert(p.tagSpecName !== null);
       this.parsed_.push(
           {point: p, tagSpecId: tagSpecIdsByTagSpecName[p.tagSpecName]});
@@ -464,12 +464,12 @@ class ParsedReferencePoints {
 
   /** @return {?string} */
   parentSpecUrl() {
-    return this.parent_.specUrl;
+    return this.parentTagSpec_.specUrl;
   }
 
   /** @return {string} */
   parentTagSpecName() {
-    return getTagSpecName(this.parent_);
+    return getTagSpecName(this.parentTagSpec_);
   }
 }
 
