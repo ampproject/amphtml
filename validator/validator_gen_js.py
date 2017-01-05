@@ -89,7 +89,20 @@ class OutputFormatter(object):
     self.lines.append('%s%s' % (' ' * self.indent_by_[-1], line))
 
   def TagIdForTagName(self, tag_name):
-    """Returns the TagId allocated for tag_name or allocates a new one."""
+    """Returns the TagId allocated for tag_name or allocates a new one.
+
+    If the input is a repeated field, returns an array of integers.
+
+    Args:
+      tag_name: string or iterable containing strings of tag names
+
+    Returns:
+      tag spec id number or array of tag spec id numbers.
+    """
+    # This lets us handle repeated fields of strings as well.
+    if not isinstance(tag_name, str) and not isinstance(tag_name, unicode):
+      return [self.TagIdForTagName(el) for el in tag_name]
+
     if tag_name not in self.tag_spec_id_by_tag_name_:
       self.tag_spec_id_by_tag_name_[tag_name] = self.next_tagspec_id_
       self.next_tagspec_id_ += 1
@@ -126,6 +139,10 @@ def FieldTypeFor(descriptor, field_desc, nullable):
       descriptor.FieldDescriptor.TYPE_MESSAGE: (
           lambda: field_desc.message_type.full_name),
   }[field_desc.type]()
+  # However, if the field is actually a reference to a tagspec name (string),
+  # make it a number instead as we'll be replacing this with the tagspec id.
+  if field_desc.full_name in TAG_NAME_REFERENCE_FIELD:
+    element_type = 'number'
   if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
     if nullable:
       return 'Array<!%s>' % element_type
@@ -215,6 +232,12 @@ CONSTRUCTOR_ARG_FIELDS = [
     'amp.validator.ValidatorRules.tags',
 ]
 
+TAG_NAME_REFERENCE_FIELD = [
+    'amp.validator.ReferencePoint.tag_spec_name',
+    'amp.validator.TagSpec.also_requires_tag',
+    'amp.validator.TagSpec.also_requires_tag_warning',
+]
+
 
 class GenerateDetailedErrorsIf(object):
   """Wraps output lines in a condition for a light validator.
@@ -286,6 +309,7 @@ def PrintClassFor(descriptor, msg_desc, out):
         constructor_arg_fields.append(field)
         constructor_arg_field_names[field.name] = 1
     out.Line('/**')
+    # Special casing for amp.validator.TagSpec
     if msg_desc.full_name == 'amp.validator.TagSpec':
       out.Line(' * @param {number} tagSpecId')
     for field in constructor_arg_fields:
@@ -300,8 +324,10 @@ def PrintClassFor(descriptor, msg_desc, out):
       export_or_empty = ' @export'
     out.Line(' */')
     arguments = ''
+    # Special casing for amp.validator.TagSpec
     if msg_desc.full_name == 'amp.validator.TagSpec':
       arguments = 'tagSpecId, '
+
     arguments += ','.join([UnderscoreToCamelCase(f.name)
                            for f in constructor_arg_fields])
     out.Line('%s = function(%s) {' % (msg_desc.full_name, arguments))
@@ -325,8 +351,6 @@ def PrintClassFor(descriptor, msg_desc, out):
         # TODO(johannes): Increase coverage for default values, e.g. enums.
         type_name = FieldTypeFor(
             descriptor, field, nullable=assigned_value == 'null')
-        if field.name in ['also_requires_tag', 'also_requires_tag_warning']:
-          type_name = '!Array<number>'
         out.Line('/**%s @type {%s} */' % (export_or_empty, type_name))
         out.Line('this.%s = %s;' % (UnderscoreToCamelCase(field.name),
                                     assigned_value))
@@ -446,29 +470,20 @@ def PrintTagSpec(descriptor, tag_spec, out):
   out.Line("var tag_%d = new amp.validator.TagSpec(%d, '%s');" %
            (this_id, this_id, tag_name))
 
-  if tag_spec.also_requires_tag:
-    also_required_tags = []
-    for also_required_tag in tag_spec.also_requires_tag:
-      also_required_tags.append(str(out.TagIdForTagName(also_required_tag)))
-    out.Line('tag_%d.alsoRequiresTag = [%s];' %
-             (this_id, ','.join(also_required_tags)))
-  if tag_spec.also_requires_tag_warning:
-    with GenerateDetailedErrorsIf(True, out):
-      also_required_tag_warnings = []
-      for also_required_tag_warning in tag_spec.also_requires_tag_warning:
-        also_required_tag_warnings.append(
-            str(out.TagIdForTagName(also_required_tag_warning)))
-      out.Line('tag_%d.alsoRequiresTagWarning = [%s];' %
-               (this_id, ','.join(also_required_tag_warnings)))
-
   for (field, value) in field_and_assigned_values:
-    if field.full_name not in [
-        'amp.validator.TagSpec.tag_name',
-        'amp.validator.TagSpec.also_requires_tag',
-        'amp.validator.TagSpec.also_requires_tag_warning']:
+    if field.full_name not in ['amp.validator.TagSpec.tag_name']:
       with GenerateDetailedErrorsIf(field.name in SKIP_FIELDS_FOR_LIGHT, out):
-        out.Line('tag_%d.%s = %s;' % (this_id,
-                                      UnderscoreToCamelCase(field.name), value))
+        if field.full_name in TAG_NAME_REFERENCE_FIELD:
+          # For fields which refer to a tag name of a different tagspec,
+          # replace the unique tag name with a unique tag spec id. This
+          # is more efficient for the javascript code, whereas the tag name
+          # is more readable for the author of the TagSpec.
+          out.Line('tag_%d.%s = %s;' %
+                   (this_id, UnderscoreToCamelCase(field.name),
+                    out.TagIdForTagName(getattr(tag_spec, field.name))))
+        else:
+          out.Line('tag_%d.%s = %s;' %
+                   (this_id, UnderscoreToCamelCase(field.name), value))
 
   return this_id
 
@@ -506,8 +521,17 @@ def PrintObject(descriptor, msg, out):
   for (field, value) in field_and_assigned_values:
     if field.full_name not in CONSTRUCTOR_ARG_FIELDS:
       with GenerateDetailedErrorsIf(field.name in SKIP_FIELDS_FOR_LIGHT, out):
-        out.Line('obj_%d.%s = %s;' % (this_id,
-                                      UnderscoreToCamelCase(field.name), value))
+        if field.full_name in TAG_NAME_REFERENCE_FIELD:
+          # For fields which refer to a tag name of a different tagspec,
+          # replace the unique tag name with a unique tag spec id. This
+          # is more efficient for the javascript code, whereas the tag name
+          # is more readable for the author of the TagSpec.
+          out.Line('obj_%d.%s = %d;' %
+                   (this_id, UnderscoreToCamelCase(field.name),
+                    out.TagIdForTagName(getattr(msg, field.name))))
+        else:
+          out.Line('obj_%d.%s = %s;' %
+                   (this_id, UnderscoreToCamelCase(field.name), value))
 
   return this_id
 
