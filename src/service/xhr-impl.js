@@ -25,8 +25,10 @@ import {isArray, isObject, isFormData} from '../types';
 
 
 /**
- * The "init" argument of the Fetch API. Currently, only `credentials: include`
- * and `credentials: omit` is implemented.
+ * The "init" argument of the Fetch API. Currently, only "credentials: include"
+ * is implemented.  Note ampCors with explicit false indicates that
+ * __amp_source_origin should not be appended to the URL to allow for
+ * potential caching or response across pages.
  *
  * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
  *
@@ -35,7 +37,8 @@ import {isArray, isObject, isFormData} from '../types';
  *   credentials: (string|undefined),
  *   headers: (!Object|undefined),
  *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined)
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
  * }}
  */
 let FetchInitDef;
@@ -107,15 +110,28 @@ export class Xhr {
    * returned in the response; and (3) It requires
    * "AMP-Access-Control-Allow-Source-Origin" to be present in the response
    * if the `init.requireAmpResponseSourceOrigin = true`.
+   * USE WITH CAUTION: setting ampCors false disables AMP source origin check
+   * but allows for caching resources cross pages.
    *
    * @param {string} input
-   * @param {!FetchInitDef=} opt_init
+   * @param {!FetchInitDef=} init
    * @return {!Promise<!FetchResponse>}
    * @private
    */
-  fetchAmpCors_(input, opt_init) {
-    const init = opt_init || {};
-    input = this.getCorsUrl(this.win, input);
+  fetchAmpCors_(input, init = {}) {
+    // Do not append __amp_source_origin if explicitly disabled.
+    if (init.ampCors !== false) {
+      input = this.getCorsUrl(this.win, input);
+    } else {
+      init.requireAmpResponseSourceOrigin = false;
+    }
+    if (init.requireAmpResponseSourceOrigin === undefined) {
+      // TODO: this is an intermediate step of migrating
+      // requireAmpResponseSourceOrigin to ampCors. Once deployed to production,
+      // we can default requireAmpResponseSourceOrigin to true.
+      dev().error(
+          'XHR', 'Please explicitly specify requireAmpResponseSourceOrigin');
+    }
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
     const currentOrigin = parseUrl(this.win.location.href).origin;
@@ -344,7 +360,7 @@ export function fetchPolyfill(input, opt_init) {
       }
       if (xhr.status < 100 || xhr.status > 599) {
         xhr.onreadystatechange = null;
-        reject(new Error(`Unknown HTTP status ${xhr.status}`));
+        reject(user().createExpectedError(`Unknown HTTP status ${xhr.status}`));
         return;
       }
 
@@ -356,10 +372,10 @@ export function fetchPolyfill(input, opt_init) {
       }
     };
     xhr.onerror = () => {
-      reject(new Error('Network failure'));
+      reject(user().createExpectedError('Network failure'));
     };
     xhr.onabort = () => {
-      reject(new Error('Request aborted'));
+      reject(user().createExpectedError('Request aborted'));
     };
 
     if (init.method == 'POST') {
@@ -385,7 +401,7 @@ function createXhrRequest(method, url) {
     xhr = new XDomainRequest();
     xhr.open(method, url);
   } else {
-    throw new Error('CORS is not supported');
+    throw dev().createExpectedError('CORS is not supported');
   }
   return xhr;
 }

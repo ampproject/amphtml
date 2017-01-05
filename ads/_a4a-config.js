@@ -66,4 +66,6 @@ if (getMode().localDev || getMode().test) {
 export const signingServerURLs = {
   'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
   'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
+  'cloudflare': 'https://amp.cloudflare.com/amp-ad-verifying-keyset.json',
+  'cloudflare-dev': 'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
 };

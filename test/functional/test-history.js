@@ -131,6 +131,33 @@ describes.fakeWin('History', {
     });
   });
 
+  it('should pop previously pushed state via goBack', () => {
+    const onPop = sandbox.spy();
+    bindingMock.expects('push').withExactArgs()
+        .returns(Promise.resolve(11)).once();
+    bindingMock.expects('pop').withExactArgs(11)
+        .returns(Promise.resolve(10)).once();
+    return history.push(onPop).then(historyId => {
+      expect(historyId).to.equal(11);
+      expect(history.stackOnPop_.length).to.equal(12);
+      expect(history.stackOnPop_[11]).to.equal(onPop);
+      expect(onPop).to.not.be.called;
+      return history.goBack().then(() => {
+        expect(history.stackIndex_).to.equal(10);
+        expect(history.stackOnPop_.length).to.equal(11);
+        clock.tick(1);
+        expect(onPop).to.be.calledOnce;
+      });
+    });
+  });
+
+  it('should NOT pop first state via goBack', () => {
+    bindingMock.expects('pop').never();
+    return history.goBack().then(() => {
+      expect(history.stackIndex_).to.equal(0);
+    });
+  });
+
   it('should get fragment', () => {
     bindingMock.expects('getFragment').withExactArgs()
         .returns(Promise.resolve('fragment')).once();

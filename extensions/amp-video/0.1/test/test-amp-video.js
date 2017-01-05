@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
@@ -17,14 +16,12 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-video';
-import {
-  installVideoManagerForDoc,
-} from '../../../../src/service/video-manager-impl';
 import * as sinon from 'sinon';
 
-const TAG = 'amp-video2';
+const TAG = 'amp-video';
 
 describe(TAG, () => {
+
   let sandbox;
 
   beforeEach(() => {
@@ -42,7 +39,6 @@ describe(TAG, () => {
   function getVideo(attributes, children, opt_beforeLayoutCallback) {
     return createIframePromise(
         true, opt_beforeLayoutCallback).then(iframe => {
-          installVideoManagerForDoc(iframe.win.document);
           const v = iframe.doc.createElement(TAG);
           for (const key in attributes) {
             v.setAttribute(key, attributes[key]);
@@ -62,6 +58,9 @@ describe(TAG, () => {
       width: 160,
       height: 90,
     }).then(v => {
+      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('src')).to.equal('video.mp4');
@@ -78,6 +77,9 @@ describe(TAG, () => {
       'muted': '',
       'loop': '',
     }).then(v => {
+      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
@@ -108,6 +110,9 @@ describe(TAG, () => {
       'muted': '',
       'loop': '',
     }, sources).then(v => {
+      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(mediatypes.length);
@@ -289,6 +294,22 @@ describe(TAG, () => {
       const impl = v.implementation_;
       expect(impl.toggleFallback.called).to.be.true;
       expect(impl.toggleFallback.calledWith(true)).to.be.true;
+    });
+  });
+
+  it('play() should not log promise rejections', () => {
+    const playPromise = Promise.reject('The play() request was interrupted');
+    const catchSpy = sandbox.spy(playPromise, 'catch');
+    return getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+    }, null, function(element) {
+      const impl = element.implementation_;
+      sandbox.stub(impl.video_, 'play').returns(playPromise);
+      impl.play();
+    }).then(() => {
+      expect(catchSpy.called).to.be.true;
     });
   });
 

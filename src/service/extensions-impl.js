@@ -33,7 +33,6 @@ import {
 import {installImg} from '../../builtins/amp-img';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installStyles} from '../style-installer';
-import {installVideo} from '../../builtins/amp-video';
 import {calculateExtensionScriptUrl} from './extension-location';
 
 
@@ -542,7 +541,10 @@ export class Extensions {
     scriptElement.async = true;
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
-    const loc = this.win.location;
+    let loc = this.win.location;
+    if (getMode().test && this.win.testLocation) {
+      loc = this.win.testLocation;
+    }
     const useCompiledJs = shouldUseCompiledJs();
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
         getMode().localDev, getMode().test, useCompiledJs);
@@ -569,7 +571,6 @@ function shouldUseCompiledJs() {
 export function installBuiltinElements(win) {
   installImg(win);
   installPixel(win);
-  installVideo(win);
 }
 
 
@@ -581,7 +582,6 @@ export function installBuiltinElements(win) {
 function copyBuiltinElementsToChildWindow(parentWin, childWin) {
   copyElementToChildWindow(parentWin, childWin, 'amp-img');
   copyElementToChildWindow(parentWin, childWin, 'amp-pixel');
-  copyElementToChildWindow(parentWin, childWin, 'amp-video');
 }
 
 
@@ -591,6 +591,7 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
 export function stubLegacyElements(win) {
   stubElementIfNotKnown(win, 'amp-ad');
   stubElementIfNotKnown(win, 'amp-embed');
+  stubElementIfNotKnown(win, 'amp-video');
 }
 
 

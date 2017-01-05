@@ -16,6 +16,8 @@
 import {listen} from '../src/event-helper';
 import {map} from '../src/utils/object';
 import {serializeMessage, deserializeMessage} from '../src/3p-frame';
+import {getMode} from '../src/mode';
+import {dev} from '../src/log';
 
 export class IframeMessagingClient {
 
@@ -25,6 +27,8 @@ export class IframeMessagingClient {
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
+    /** @private {?string} */
+    this.rtvVersion_ = getMode().rtvVersion || null;
     /** @private {!Window} */
     this.hostWindow_ = win.parent;
     /** @private {?string} */
@@ -75,7 +79,10 @@ export class IframeMessagingClient {
    */
   sendMessage(type, opt_payload) {
     this.hostWindow_.postMessage/*OK*/(
-        serializeMessage(type, this.sentinel_, opt_payload), '*');
+        serializeMessage(
+            type, dev().assertString(this.sentinel_),
+            opt_payload, this.rtvVersion_),
+        '*');
   }
 
   /**

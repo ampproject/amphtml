@@ -62,6 +62,13 @@ describes.fakeWin('runtime', {
     installAmpdocServices(ampdoc);
   });
 
+  function regularExtension(fn) {
+    return {
+      n: 'extension for testing',
+      f: fn,
+    };
+  }
+
   afterEach(() => {
     ampdocServiceMock.verify();
   });
@@ -84,18 +91,22 @@ describes.fakeWin('runtime', {
     const initial = win.ampExtendedElements || {};
     expect(initial['amp-ad']).to.be.undefined;
     expect(initial['amp-embed']).to.be.undefined;
+    expect(initial['amp-video']).to.be.undefined;
     adopt(win);
     expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
     expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
+    expect(win.ampExtendedElements['amp-video']).to.equal(ElementStub);
   });
 
   it('should install legacy stubs in shadow-doc', () => {
     const initial = win.ampExtendedElements || {};
     expect(initial['amp-ad']).to.be.undefined;
     expect(initial['amp-embed']).to.be.undefined;
+    expect(initial['amp-video']).to.be.undefined;
     adoptShadowMode(win);
     expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
     expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
+    expect(win.ampExtendedElements['amp-video']).to.equal(ElementStub);
   });
 
   it('should NOT set cursor:pointer on document element on non-IOS', () => {
@@ -122,39 +133,39 @@ describes.fakeWin('runtime', {
   it('should execute scheduled extensions & execute new extensions', () => {
     let progress = '';
     const queueExtensions = win.AMP;
-    win.AMP.push(amp => {
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '1';
-    });
-    win.AMP.push(amp => {
+    }));
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '2';
-    });
-    win.AMP.push(amp => {
+    }));
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '3';
-    });
+    }));
     expect(queueExtensions).to.have.length(3);
     adopt(win);
     runChunksForTesting(win.document);
     expect(queueExtensions).to.have.length(0);
     expect(progress).to.equal('123');
-    win.AMP.push(amp => {
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '4';
-    });
+    }));
     runChunksForTesting(win.document);
     expect(progress).to.equal('1234');
-    win.AMP.push(amp => {
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '5';
-    });
+    }));
     runChunksForTesting(win.document);
     expect(progress).to.equal('12345');
     expect(queueExtensions).to.have.length(0);
   });
 
-  it('should execute function and struct AMP.push callbacks', () => {
+  it('support struct AMP.push raw functions and high priority', () => {
     // New format: {n:string, f:function()}.
     let progress = '';
     const queueExtensions = win.AMP;
@@ -165,40 +176,52 @@ describes.fakeWin('runtime', {
       progress += '1';
     });
     win.AMP.push({
-      n: 'ext1',
+      n: 'ext2',
+      p: 'high',
       f: amp => {
         expect(amp).to.equal(win.AMP);
-        progress += 'A';
+        progress += 'HIGH';
       },
     });
     expect(queueExtensions).to.have.length(2);
     expect(progress).to.equal('');
     adopt(win);
-    runChunksForTesting(win.document);
     expect(queueExtensions).to.have.length(0);
-    expect(progress).to.equal('1A');
+    return Promise.resolve().then(() => {
+      expect(progress).to.equal('1HIGH');
+      win.AMP.push({
+        n: 'ext1',
+        f: amp => {
+          expect(amp).to.equal(win.AMP);
+          progress += 'A';
+        },
+      });
+      runChunksForTesting(win.document);
+      expect(progress).to.equal('1HIGHA');
 
-    // Runtime mode.
-    win.AMP.push(amp => {
-      expect(amp).to.equal(win.AMP);
-      progress += '2';
-    });
-    win.AMP.push({
-      n: 'ext2',
-      f: amp => {
+      // Runtime mode.
+      win.AMP.push(amp => {
         expect(amp).to.equal(win.AMP);
-        progress += 'B';
-      },
+        progress += '2';
+      });
+      win.AMP.push({
+        n: 'ext2',
+        f: amp => {
+          expect(amp).to.equal(win.AMP);
+          progress += 'B';
+        },
+      });
+      return Promise.resolve().then(() => {
+        expect(queueExtensions).to.have.length(0);
+
+        expect(progress).to.equal('1HIGHAB2');
+
+        const extensions = ext.installExtensionsService(win);
+        const ext1 = extensions.waitForExtension('ext1');
+        const ext2 = extensions.waitForExtension('ext2');
+        return Promise.all([ext1, ext2]);
+      });
     });
-    runChunksForTesting(win.document);
-    expect(queueExtensions).to.have.length(0);
-
-    expect(progress).to.equal('1A2B');
-
-    const extensions = ext.installExtensionsService(win);
-    const ext1 = extensions.waitForExtension('ext1');
-    const ext2 = extensions.waitForExtension('ext2');
-    return Promise.all([ext1, ext2]);
   });
 
   it('should wait for body before processing extensions', () => {
@@ -209,32 +232,29 @@ describes.fakeWin('runtime', {
 
     let progress = '';
     const queueExtensions = win.AMP;
-    win.AMP.push(amp => {
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '1';
-    });
-    win.AMP.push(amp => {
+    }));
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '2';
-    });
-    win.AMP.push(amp => {
+    }));
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '3';
-    });
-    expect(queueExtensions).to.have.length(3);
+    }));
     adopt(win);
     runChunksForTesting(win.document);
     // Extensions are still unprocessed
-    expect(queueExtensions).to.have.length(3);
     expect(progress).to.equal('');
 
     // Add one more
-    win.AMP.push(amp => {
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '4';
-    });
+    }));
     runChunksForTesting(win.document);
-    expect(queueExtensions).to.have.length(3);
     expect(progress).to.equal('');
 
     // Body is available now.
@@ -246,15 +266,15 @@ describes.fakeWin('runtime', {
 
   it('should be robust against errors in early extensions', () => {
     let progress = '';
-    win.AMP.push(() => {
+    win.AMP.push(regularExtension(() => {
       progress += '1';
-    });
-    win.AMP.push(() => {
+    }));
+    win.AMP.push(regularExtension(() => {
       throw new Error('extension error');
-    });
-    win.AMP.push(() => {
+    }));
+    win.AMP.push(regularExtension(() => {
       progress += '3';
-    });
+    }));
     adopt(win);
     expect(() => {
       runChunksForTesting(win.document);

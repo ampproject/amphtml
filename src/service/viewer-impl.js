@@ -21,7 +21,6 @@ import {getServiceForDoc} from '../service';
 import {dev} from '../log';
 import {isIframed} from '../dom';
 import {
-  getSourceUrl,
   parseQueryString,
   parseUrl,
   removeFragment,
@@ -335,7 +334,7 @@ export class Viewer {
           } else {
             resolve(this.win.document.referrer);
             if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
-              dev().error(TAG_, 'Untrusted viewer referrer override: ' +
+              dev().expectedError(TAG_, 'Untrusted viewer referrer override: ' +
                   this.unconfirmedReferrerUrl_ + ' at ' +
                   this.messagingOrigin_);
               this.unconfirmedReferrerUrl_ = this.win.document.referrer;
@@ -721,17 +720,6 @@ export class Viewer {
    */
   onHistoryPoppedEvent(handler) {
     return this.historyPoppedObservable_.add(handler);
-  }
-
-  /**
-   * Triggers "documentLoaded" event for the viewer.
-   * TODO: move this to resources-impl, and use sendMessage()
-   */
-  postDocumentReady() {
-    this.sendMessage('documentLoaded', {
-      title: this.win.document.title,
-      sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
-    }, /* cancelUnsent */true);
   }
 
   /**

@@ -607,8 +607,9 @@ export class FixedLayer {
     if (!this.transfer_ || this.fixedLayer_) {
       return this.fixedLayer_;
     }
-    this.fixedLayer_ = this.ampdoc.win.document.createElement('body');
-    this.fixedLayer_.id = '-amp-fixedlayer';
+    const doc = this.ampdoc.win.document;
+    this.fixedLayer_ = doc.body.cloneNode(/* deep */ false);
+    this.fixedLayer_.removeAttribute('style');
     setStyles(this.fixedLayer_, {
       position: 'absolute',
       top: 0,
@@ -635,15 +636,7 @@ export class FixedLayer {
       transition: 'none',
       visibility: 'visible',
     });
-    this.ampdoc.win.document.documentElement.appendChild(this.fixedLayer_);
-    // TODO(erwinm, #4097): Remove this when safari technology preview has merged
-    // the fix for https://github.com/ampproject/amphtml/issues/4047
-    // https://bugs.webkit.org/show_bug.cgi?id=159791 which is in r202950.
-    if (this.fixedLayer_.style['webkitAnimation'] !== undefined) {
-      this.fixedLayer_.style['webkitAnimation'] = 'none';
-    } else if (this.fixedLayer_.style['WebkitAnimation'] !== undefined) {
-      this.fixedLayer_.style['WebkitAnimation'] = 'none';
-    }
+    doc.documentElement.appendChild(this.fixedLayer_);
     return this.fixedLayer_;
   }
 

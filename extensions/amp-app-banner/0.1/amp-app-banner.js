@@ -398,8 +398,9 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
       return Promise.resolve();
     }
 
-    return xhrFor(this.win).fetchJson(this.manifestHref_)
-        .then(response => this.parseManifest_(response))
+    return xhrFor(this.win).fetchJson(this.manifestHref_, {
+      requireAmpResponseSourceOrigin: false,
+    }).then(response => this.parseManifest_(response))
         .catch(error => {
           this.hide_();
           rethrowAsync(error);

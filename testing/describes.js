@@ -19,6 +19,7 @@ import installCustomElements from
 import {BaseElement} from '../src/base-element';
 import {
   FakeCustomElements,
+  FakeLocation,
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
@@ -337,7 +338,7 @@ class RealWinFixture {
       env.iframe = iframe;
       iframe.name = 'test_' + iframeCount++;
       iframe.srcdoc = '<!doctype><html><head>' +
-          '<style>.-amp-element {display: block;}</style>' +
+          '<style>.i-amphtml-element {display: block;}</style>' +
           '<body style="margin:0"><div id=parent></div>';
       iframe.onload = function() {
         const win = iframe.contentWindow;
@@ -345,6 +346,11 @@ class RealWinFixture {
 
         // Flag as being a test window.
         win.AMP_TEST_IFRAME = true;
+        // Set the testLocation on iframe to parent's location since location of
+        // the test iframe is about:srcdoc.
+        // Unfortunately location object is not configurable, so we have to
+        // define a new property.
+        win.testLocation = new FakeLocation(window.location.href, win);
 
         if (!spec.allowExternalResources) {
           doNotLoadExternalResourcesInTest(win);
@@ -568,6 +574,6 @@ function createAmpElement(win, opt_name, opt_implementationClass) {
   element.implementationClassForTesting =
       opt_implementationClass || BaseElement;
   element.createdCallback();
-  element.classList.add('-amp-element');
+  element.classList.add('i-amphtml-element');
   return element;
 };
