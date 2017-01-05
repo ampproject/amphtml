@@ -37,6 +37,12 @@ const AmpAdImplementation = {
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
 };
 
+/** @const {!Object} */
+export const ValidAdContainerTypes = [
+  'AMP-STICKY-AD',
+  'AMP-FX-FLYING-CARPET',
+];
+
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
 
@@ -145,6 +151,9 @@ function buildAdUrl(
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
   const adElement = a4a.element;
+  if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
+    queryParams.push({name: 'amp_ct', value: adElement.parentElement.tagName});
+  }
   const allQueryParams = queryParams.concat(
     [
       {
