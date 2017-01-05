@@ -163,7 +163,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz engaging items',
+    name: 'AMP extension for playbuzz items',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },

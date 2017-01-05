@@ -221,7 +221,7 @@ describe('CustomElement', () => {
 
     container.appendChild(element);
     element.attachedCallback();
-    expect(element).to.have.class('-amp-element');
+    expect(element).to.have.class('i-amphtml-element');
     expect(element).to.have.class('i-amphtml-notbuilt');
     expect(element).to.have.class('amp-notbuilt');
     expect(element.everAttached).to.equal(true);
@@ -247,7 +247,7 @@ describe('CustomElement', () => {
 
     container.appendChild(element);
     element.attachedCallback();
-    expect(element).to.have.class('-amp-element');
+    expect(element).to.have.class('i-amphtml-element');
     expect(element).to.have.class('i-amphtml-notbuilt');
     expect(element).to.have.class('amp-notbuilt');
     expect(element.everAttached).to.equal(true);
@@ -260,23 +260,23 @@ describe('CustomElement', () => {
     const element = new ElementClass();
     sandbox.stub(element, 'build');
 
-    expect(element).to.not.have.class('-amp-element');
+    expect(element).to.not.have.class('i-amphtml-element');
     expect(element).to.not.have.class('i-amphtml-notbuilt');
     expect(element).to.not.have.class('amp-notbuilt');
 
     container.appendChild(element);
     element.attachedCallback();
 
-    expect(element).to.have.class('-amp-element');
+    expect(element).to.have.class('i-amphtml-element');
     expect(element).to.have.class('i-amphtml-notbuilt');
     expect(element).to.have.class('amp-notbuilt');
-    element.classList.remove('-amp-element');
+    element.classList.remove('i-amphtml-element');
     element.classList.remove('i-amphtml-notbuilt');
     element.classList.remove('amp-notbuilt');
 
     element.attachedCallback();
 
-    expect(element).to.not.have.class('-amp-element');
+    expect(element).to.not.have.class('i-amphtml-element');
     expect(element).to.not.have.class('i-amphtml-notbuilt');
     expect(element).to.not.have.class('amp-notbuilt');
   });

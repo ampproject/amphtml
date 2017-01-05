@@ -753,7 +753,7 @@ describe('DOM', () => {
     let div, img1, iframe, ampEl;
     beforeEach(() => {
       ampEl = document.createElement('amp-ad');
-      ampEl.className = '-amp-element';
+      ampEl.className = 'i-amphtml-element';
       ampEl.id = 'ampEl';
       iframe = document.createElement('iframe');
       div = document.createElement('div');
