@@ -14,8 +14,52 @@
  * limitations under the License.
  */
 
-import {ASTNodeType} from './bind-expr-defines';
+import {AstNodeType} from './bind-expr-defines';
 import {parser} from './bind-expr-impl';
+
+/**
+ * Map of object type to function name to whitelisted function.
+ * @type {!Object<string, !Object<string, Function>>}
+ */
+const FUNCTION_WHITELIST = (function() {
+  const whitelist = {
+    '[object Array]':
+      [
+        Array.prototype.concat,
+        Array.prototype.indexOf,
+        Array.prototype.join,
+        Array.prototype.lastIndexOf,
+        Array.prototype.slice,
+      ],
+    '[object String]':
+      [
+        String.prototype.charAt,
+        String.prototype.charCodeAt,
+        String.prototype.concat,
+        String.prototype.indexOf,
+        String.prototype.lastIndexOf,
+        String.prototype.slice,
+        String.prototype.split,
+        String.prototype.substr,
+        String.prototype.substring,
+        String.prototype.toLowerCase,
+        String.prototype.toUpperCase,
+      ],
+  };
+  // Creates a prototype-less map of function name to the function itself.
+  // This makes function lookups faster (compared to Array.indexOf).
+  const out = Object.create(null);
+  Object.keys(whitelist).forEach(type => {
+    out[type] = Object.create(null);
+
+    const functions = whitelist[type];
+    for (let i = 0; i < functions.length; i++) {
+      const f = functions[i];
+      out[type][f.name] = f;
+    }
+  });
+  return out;
+})();
 
 /**
  * A single Bind expression.
@@ -29,11 +73,8 @@ export class BindExpression {
     /** @const {string} */
     this.expressionString = expressionString;
 
-    /** {!./bind-expr-defines.ASTNode} */
+    /** {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
-
-    /** @const {!Object<string, !Object<string, Function>>} */
-    this.functionWhitelist_ = this.createFunctionWhitelist_();
   }
 
   /**
@@ -48,7 +89,7 @@ export class BindExpression {
 
   /**
    * Recursively evaluates and returns value of `node` and its children.
-   * @param {?./bind-expr-defines.ASTNode} node
+   * @param {?./bind-expr-defines.AstNode} node
    * @param {!Object} scope
    * @throws {Error}
    * @return {*}
@@ -61,24 +102,21 @@ export class BindExpression {
 
     const {type, args, value} = node;
 
-    if (type === ASTNodeType.LITERAL) {
+    if (type === AstNodeType.LITERAL) {
       return value;
     }
 
-    // Concise helper function for evaluating child nodes.
-    const e = node => this.eval_(node, scope);
-
     switch (type) {
-      case ASTNodeType.EXPRESSION:
-        return e(args[0]);
+      case AstNodeType.EXPRESSION:
+        return this.eval_(args[0], scope);
 
-      case ASTNodeType.INVOCATION:
-        const caller = e(args[0]);
+      case AstNodeType.INVOCATION:
+        const caller = this.eval_(args[0], scope);
         const method = args[1];
-        const params = e(args[2]);
+        const params = this.eval_(args[2], scope);
 
         const callerType = Object.prototype.toString.call(caller);
-        const whitelist = this.functionWhitelist_[callerType];
+        const whitelist = FUNCTION_WHITELIST[callerType];
         if (whitelist) {
           const func = caller[method];
           if (func && func === whitelist[method]) {
@@ -91,9 +129,9 @@ export class BindExpression {
         }
         throw new Error(`${method}() is not a supported function.`);
 
-      case ASTNodeType.MEMBER_ACCESS:
-        const target = e(args[0]);
-        const member = e(args[1]);
+      case AstNodeType.MEMBER_ACCESS:
+        const target = this.eval_(args[0], scope);
+        const member = this.eval_(args[1], scope);
         if (target === null || member === null) {
           return null;
         }
@@ -104,137 +142,99 @@ export class BindExpression {
         }
         return null;
 
-      case ASTNodeType.MEMBER:
-        return value || e(args[0]);
+      case AstNodeType.MEMBER:
+        return value || this.eval_(args[0], scope);
 
-      case ASTNodeType.VARIABLE:
+      case AstNodeType.VARIABLE:
         const variable = value;
         if (Object.prototype.hasOwnProperty.call(scope, variable)) {
           return scope[variable];
         }
         return null;
 
-      case ASTNodeType.ARGS:
-      case ASTNodeType.ARRAY_LITERAL:
-        return (args.length > 0) ? e(args[0]) : [];
+      case AstNodeType.ARGS:
+      case AstNodeType.ARRAY_LITERAL:
+        return (args.length > 0) ? this.eval_(args[0], scope) : [];
 
-      case ASTNodeType.ARRAY:
-        return args.map(element => e(element));
+      case AstNodeType.ARRAY:
+        return args.map(element => this.eval_(element, scope));
 
-      case ASTNodeType.OBJECT_LITERAL:
-        return (args.length > 0) ? e(args[0]) : Object.create(null);
+      case AstNodeType.OBJECT_LITERAL:
+        return (args.length > 0)
+            ? this.eval_(args[0], scope)
+            : Object.create(null);
 
-      case ASTNodeType.OBJECT:
+      case AstNodeType.OBJECT:
         const object = Object.create(null);
         args.forEach(keyValue => {
-          const {k, v} = e(keyValue);
+          const {k, v} = this.eval_(keyValue, scope);
           object[k] = v;
         });
         return object;
 
-      case ASTNodeType.KEY_VALUE:
-        return {k: e(args[0]), v: e(args[1])};
+      case AstNodeType.KEY_VALUE:
+        return {
+          k: this.eval_(args[0], scope),
+          v: this.eval_(args[1], scope),
+        };
 
-      case ASTNodeType.NOT:
-        return !e(args[0]);
+      case AstNodeType.NOT:
+        return !this.eval_(args[0], scope);
 
-      case ASTNodeType.UNARY_MINUS:
-        return -e(args[0]);
+      case AstNodeType.UNARY_MINUS:
+        return -this.eval_(args[0], scope);
 
-      case ASTNodeType.UNARY_PLUS:
+      case AstNodeType.UNARY_PLUS:
         /*eslint no-implicit-coercion: 0*/
-        return +e(args[0]);
+        return +this.eval_(args[0], scope);
 
-      case ASTNodeType.PLUS:
-        return e(args[0]) + e(args[1]);
+      case AstNodeType.PLUS:
+        return this.eval_(args[0], scope) + this.eval_(args[1], scope);
 
-      case ASTNodeType.MINUS:
-        return e(args[0]) - e(args[1]);
+      case AstNodeType.MINUS:
+        return this.eval_(args[0], scope) - this.eval_(args[1], scope);
 
-      case ASTNodeType.MULTIPLY:
-        return e(args[0]) * e(args[1]);
+      case AstNodeType.MULTIPLY:
+        return this.eval_(args[0], scope) * this.eval_(args[1], scope);
 
-      case ASTNodeType.DIVIDE:
-        return e(args[0]) / e(args[1]);
+      case AstNodeType.DIVIDE:
+        return this.eval_(args[0], scope) / this.eval_(args[1], scope);
 
-      case ASTNodeType.MODULO:
-        return e(args[0]) % e(args[1]);
+      case AstNodeType.MODULO:
+        return this.eval_(args[0], scope) % this.eval_(args[1], scope);
 
-      case ASTNodeType.LOGICAL_AND:
-        return e(args[0]) && e(args[1]);
+      case AstNodeType.LOGICAL_AND:
+        return this.eval_(args[0], scope) && this.eval_(args[1], scope);
 
-      case ASTNodeType.LOGICAL_OR:
-        return e(args[0]) || e(args[1]);
+      case AstNodeType.LOGICAL_OR:
+        return this.eval_(args[0], scope) || this.eval_(args[1], scope);
 
-      case ASTNodeType.LESS_OR_EQUAL:
-        return e(args[0]) <= e(args[1]);
+      case AstNodeType.LESS_OR_EQUAL:
+        return this.eval_(args[0], scope) <= this.eval_(args[1], scope);
 
-      case ASTNodeType.LESS:
-        return e(args[0]) < e(args[1]);
+      case AstNodeType.LESS:
+        return this.eval_(args[0], scope) < this.eval_(args[1], scope);
 
-      case ASTNodeType.GREATER_OR_EQUAL:
-        return e(args[0]) >= e(args[1]);
+      case AstNodeType.GREATER_OR_EQUAL:
+        return this.eval_(args[0], scope) >= this.eval_(args[1], scope);
 
-      case ASTNodeType.GREATER:
-        return e(args[0]) > e(args[1]);
+      case AstNodeType.GREATER:
+        return this.eval_(args[0], scope) > this.eval_(args[1], scope);
 
-      case ASTNodeType.NOT_EQUAL:
-        return e(args[0]) != e(args[1]);
+      case AstNodeType.NOT_EQUAL:
+        return this.eval_(args[0], scope) != this.eval_(args[1], scope);
 
-      case ASTNodeType.EQUAL:
-        return e(args[0]) == e(args[1]);
+      case AstNodeType.EQUAL:
+        return this.eval_(args[0], scope) == this.eval_(args[1], scope);
 
-      case ASTNodeType.TERNARY:
-        return e(args[0]) ? e(args[1]) : e(args[2]);
+      case AstNodeType.TERNARY:
+        return this.eval_(args[0], scope)
+            ? this.eval_(args[1], scope)
+            : this.eval_(args[2], scope);
 
       default:
         throw new Error(`${type} is not a valid node type.`);
     }
-  }
-
-  /**
-   * Returns map of object type to function name to whitelisted function.
-   * @return {!Object<string, !Object<string, Function>>}
-   * @private
-   */
-  createFunctionWhitelist_() {
-    const whitelist = {
-      '[object Array]':
-        [
-          Array.prototype.concat,
-          Array.prototype.indexOf,
-          Array.prototype.join,
-          Array.prototype.lastIndexOf,
-          Array.prototype.slice,
-        ],
-      '[object String]':
-        [
-          String.prototype.charAt,
-          String.prototype.charCodeAt,
-          String.prototype.concat,
-          String.prototype.indexOf,
-          String.prototype.lastIndexOf,
-          String.prototype.slice,
-          String.prototype.split,
-          String.prototype.substr,
-          String.prototype.substring,
-          String.prototype.toLowerCase,
-          String.prototype.toUpperCase,
-        ],
-    };
-    // Creates a prototype-less map of function name to the function itself.
-    // This makes function lookups faster (compared to Array.indexOf).
-    const out = Object.create(null);
-    Object.keys(whitelist).forEach(type => {
-      out[type] = Object.create(null);
-
-      const functions = whitelist[type];
-      for (let i = 0; i < functions.length; i++) {
-        const f = functions[i];
-        out[type][f.name] = f;
-      }
-    });
-    return out;
   }
 
   /**

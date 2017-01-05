@@ -16,19 +16,30 @@
 
 /**
  * A single node in the AST of a `BindExpression`.
- * @typedef {{
- *   type: ASTNodeType,
- *   args: Array<ASTNode>,
- *   value: (ASTNodeValue|undefined),
- * }}
  */
-export let ASTNode;
+export class AstNode {
+  /**
+   * @param {AstNodeType} type
+   * @param {?Array<AstNode>} args
+   * @param {(AstNodeValue|undefined)=} opt_value
+   */
+  constructor(type, args, opt_value) {
+    /** @const {AstNodeType} */
+    this.type = type;
+
+    /** @const {?Array<AstNode>} */
+    this.args = args;
+
+    /** @const {(AstNodeValue|undefined)} */
+    this.value = opt_value;
+  }
+}
 
 /**
  * Type of a node in the AST of a `BindExpression`.
  * @enum {string}
  */
-export const ASTNodeType = {
+export const AstNodeType = {
   // Grammar rules.
   EXPRESSION: 'expression',
   INVOCATION: 'invocation',
@@ -67,5 +78,5 @@ export const ASTNodeType = {
  * Value of a primitive or variable node.
  * @typedef {(boolean|string|number|null)}
  */
-export let ASTNodeValue;
+export let AstNodeValue;
 

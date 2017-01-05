@@ -103,137 +103,138 @@ expr:
 operation:
     '!' expr
       %{
-        $$ = {type: ASTNodeType.NOT, args: [$2]};
+        $$ = new AstNode(AstNodeType.NOT, [$2]);
       %}
   | '-' expr %prec UMINUS
       %{
-        $$ = {type: ASTNodeType.UNARY_MINUS, args: [$2]};
+        $$ = new AstNode(AstNodeType.UNARY_MINUS, [$2]);
       %}
   | '+' expr %prec UPLUS
       %{
-        $$ = {type: ASTNodeType.UNARY_PLUS, args: [$2]};
+        $$ = new AstNode(AstNodeType.UNARY_PLUS, [$2]);
       %}
   |  expr '+' expr
       %{
-        $$ = {type: ASTNodeType.PLUS, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.PLUS, [$1, $3]);
       %}
   | expr '-' expr
       %{
-        $$ = {type: ASTNodeType.MINUS, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.MINUS, [$1, $3]);
       %}
   | expr '*' expr
       %{
-        $$ = {type: ASTNodeType.MULTIPLY, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.MULTIPLY, [$1, $3]);
       %}
   | expr '/' expr
       %{
-        $$ = {type: ASTNodeType.DIVIDE, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.DIVIDE, [$1, $3]);
       %}
   | expr '%' expr
       %{
-        $$ = {type: ASTNodeType.MODULO, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.MODULO, [$1, $3]);
       %}
   | expr '&&' expr
       %{
-        $$ = {type: ASTNodeType.LOGICAL_AND, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.LOGICAL_AND, [$1, $3]);
       %}
   | expr '||' expr
       %{
-        $$ = {type: ASTNodeType.LOGICAL_OR, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.LOGICAL_OR, [$1, $3]);
       %}
   | expr '<=' expr
       %{
-        $$ = {type: ASTNodeType.LESS_OR_EQUAL, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.LESS_OR_EQUAL, [$1, $3]);
       %}
   | expr '<' expr
       %{
-        $$ = {type: ASTNodeType.LESS, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.LESS, [$1, $3]);
       %}
   | expr '>=' expr
       %{
-        $$ = {type: ASTNodeType.GREATER_OR_EQUAL, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.GREATER_OR_EQUAL, [$1, $3]);
       %}
   | expr '>' expr
       %{
-        $$ = {type: ASTNodeType.GREATER, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.GREATER, [$1, $3]);
       %}
   | expr '!=' expr
       %{
-        $$ = {type: ASTNodeType.NOT_EQUAL, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.NOT_EQUAL, [$1, $3]);
       %}
   | expr '==' expr
       %{
-        $$ = {type: ASTNodeType.EQUAL, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.EQUAL, [$1, $3]);
       %}
   | expr '?' expr ':' expr
       %{
-        $$ = {type: ASTNodeType.TERNARY, args: [$1, $3, $5]};
+        $$ = new AstNode(AstNodeType.TERNARY, [$1, $3, $5]);
       %}
   ;
 
 invocation:
     expr '.' NAME args
       %{
-        $$ = {type: ASTNodeType.INVOCATION, args: [$1, $3, $4]};
+        $$ = new AstNode(AstNodeType.INVOCATION, [$1, $3, $4]);
       %}
   ;
 
 args:
     '(' ')'
       %{
-        $$ = {type: ASTNodeType.ARGS, args: []};
+        $$ = new AstNode(AstNodeType.ARGS, []);
       %}
   | '(' array ')'
       %{
-        $$ = {type: ASTNodeType.ARGS, args: [$2]};
+        $$ = new AstNode(AstNodeType.ARGS, [$2]);
       %}
   ;
 
 member_access:
     expr member
       %{
-        $$ = {type: ASTNodeType.MEMBER_ACCESS, args: [$1, $2]};
+        $$ = new AstNode(AstNodeType.MEMBER_ACCESS, [$1, $2]);
       %}
   ;
 
 member:
     '.' NAME
       %{
-        $$ = {type: ASTNodeType.MEMBER, value: $2};
+        $$ = new AstNode(AstNodeType.MEMBER, null, $2);
       %}
   | '[' expr ']'
       %{
-        $$ = {type: ASTNodeType.MEMBER, args: [$2]};
+        $$ = new AstNode(AstNodeType.MEMBER, [$2]);
       %}
   ;
 
 variable:
     NAME
       %{
-        $$ = {type: ASTNodeType.VARIABLE, value: $1};
+        $$ = new AstNode(AstNodeType.VARIABLE, null, $1);
       %}
   ;
 
 literal:
     STRING
       %{
-        $$ = {type: ASTNodeType.LITERAL, value: yytext.substr(1, yyleng - 2)};
+        const string = yytext.substr(1, yyleng - 2);
+        $$ = new AstNode(AstNodeType.LITERAL, null, string);
       %}
   | NUMBER
       %{
-        $$ = {type: ASTNodeType.LITERAL, value: Number(yytext)};
+        $$ = new AstNode(AstNodeType.LITERAL, null, Number(yytext));
       %}
   | TRUE
       %{
-        $$ = {type: ASTNodeType.LITERAL, value: true};
+        $$ = new AstNode(AstNodeType.LITERAL, null, true);
       %}
   | FALSE
       %{
-        $$ = {type: ASTNodeType.LITERAL, value: false};
+        $$ = new AstNode(AstNodeType.LITERAL, null, false);
       %}
   | NULL
       %{
-        $$ = {type: ASTNodeType.LITERAL, value: null};
+        $$ = new AstNode(AstNodeType.LITERAL, null, null);
       %}
   | object_literal
       %{
@@ -248,18 +249,18 @@ literal:
 array_literal:
     '[' ']'
       %{
-        $$ = {type: ASTNodeType.ARRAY_LITERAL, args: []};
+        $$ = new AstNode(AstNodeType.ARRAY_LITERAL, []);
       %}
   | '[' array ']'
       %{
-        $$ = {type: ASTNodeType.ARRAY_LITERAL, args: [$2]};
+        $$ = new AstNode(AstNodeType.ARRAY_LITERAL, [$2]);
       %}
   ;
 
 array:
     expr
       %{
-        $$ = {type: ASTNodeType.ARRAY, args: [$1]};
+        $$ = new AstNode(AstNodeType.ARRAY, [$1]);
       %}
   | array ',' expr
       %{
@@ -271,18 +272,18 @@ array:
 object_literal:
     '{' '}'
       %{
-        $$ = {type: ASTNodeType.OBJECT_LITERAL, args: []};
+        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, []);
       %}
   | '{' object '}'
       %{
-        $$ = {type: ASTNodeType.OBJECT_LITERAL, args: [$2]};
+        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$2]);
       %}
   ;
 
 object:
     key_value
       %{
-        $$ = {type: ASTNodeType.OBJECT, args: [$1]};
+        $$ = new AstNode(AstNodeType.OBJECT, [$1]);
       %}
   | object ',' key_value
       %{
@@ -294,6 +295,6 @@ object:
 key_value:
   expr ':' expr
       %{
-        $$ = {type: ASTNodeType.KEY_VALUE, args: [$1, $3]};
+        $$ = new AstNode(AstNodeType.KEY_VALUE, [$1, $3]);
       %}
   ;

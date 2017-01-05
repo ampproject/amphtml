@@ -30,7 +30,7 @@ gulp.task('compile-bind-expr', function() {
       'build-system/tasks/js-license.txt', 'utf8');
   var suppressCheckTypes = '/** @fileoverview ' +
       '@suppress {checkTypes, suspiciousCode, uselessCode} */';
-  var imports = 'import {ASTNodeType} from \'./bind-expr-defines\';';
+  var imports = 'import {AstNode, AstNodeType} from \'./bind-expr-defines\';';
   var jsExports = 'exports.parser = parser;';
 
   var out = [
