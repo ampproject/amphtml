@@ -285,6 +285,8 @@ def PrintClassFor(descriptor, msg_desc, out):
         constructor_arg_fields.append(field)
         constructor_arg_field_names[field.name] = 1
     out.Line('/**')
+    if msg_desc.full_name == 'amp.validator.TagSpec':
+      out.Line(' * @param {number} tagSpecId')
     for field in constructor_arg_fields:
       out.Line(' * @param {%s} %s' % (FieldTypeFor(descriptor, field,
                                                    nullable=False),
@@ -296,11 +298,17 @@ def PrintClassFor(descriptor, msg_desc, out):
       out.Line(' * @export')
       export_or_empty = ' @export'
     out.Line(' */')
-    out.Line('%s = function(%s) {' % (
-        msg_desc.full_name,
-        ','.join([UnderscoreToCamelCase(f.name)
-                  for f in constructor_arg_fields])))
+    arguments = ''
+    if msg_desc.full_name == 'amp.validator.TagSpec':
+      arguments = 'tagSpecId, '
+    arguments += ','.join([UnderscoreToCamelCase(f.name)
+                           for f in constructor_arg_fields])
+    out.Line('%s = function(%s) {' % (msg_desc.full_name, arguments))
     out.PushIndent(2)
+    if msg_desc.full_name == 'amp.validator.TagSpec':
+      out.Line('/** @type {number} */')
+      out.Line('this.tagSpecId = tagSpecId;')
+
     for field in msg_desc.fields:
       with GenerateDetailedErrorsIf(field.name in SKIP_FIELDS_FOR_LIGHT, out):
         assigned_value = 'null'
@@ -417,8 +425,8 @@ def PrintTagSpec(descriptor, tag_spec, out):
   field_and_assigned_values = FieldAndAssignedValues(descriptor, tag_spec, out)
 
   tag_name = tag_spec.tag_name
-  out.Line("var tag_%d = new amp.validator.TagSpec('%s');" %
-           (this_id, tag_name))
+  out.Line("var tag_%d = new amp.validator.TagSpec(%d, '%s');" %
+           (this_id, this_id, tag_name))
 
   for (field, value) in field_and_assigned_values:
     if field.full_name != 'amp.validator.TagSpec.tag_name':

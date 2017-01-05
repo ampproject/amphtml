@@ -598,22 +598,15 @@ class ParsedTagSpec {
    * @param {!Object<string, number>} tagSpecIdsByTagSpecName
    * @param {boolean} shouldRecordTagspecValidated
    * @param {!amp.validator.TagSpec} tagSpec
-   * @param {number} tagId
    */
   constructor(
       templateSpecUrl, parsedAttrSpecs, tagSpecIdsByTagSpecName,
-      shouldRecordTagspecValidated, tagSpec, tagId) {
+      shouldRecordTagspecValidated, tagSpec) {
     /**
      * @type {!amp.validator.TagSpec}
      * @private
      */
     this.spec_ = tagSpec;
-    /**
-     * Globally unique attribute rule id.
-     * @type {number}
-     * @private
-     */
-    this.id_ = tagId;
     /**
      * @type {!ParsedReferencePoints}
      * @private
@@ -726,7 +719,7 @@ class ParsedTagSpec {
    * @return {number} unique id for this tag spec.
    */
   getId() {
-    return this.id_;
+    return this.spec_.tagSpecId;
   }
 
   /**
@@ -3686,10 +3679,10 @@ class ParsedValidatorRules {
   constructor(htmlFormat) {
     /**
      * ParsedTagSpecs in id order.
-     * @type {!Array<!ParsedTagSpec>}
+     * @type {!Object<number, !ParsedTagSpec>}
      * @private
      */
-    this.tagSpecById_ = [];
+    this.tagSpecById_ = {};
     /**
      * ParsedTagSpecs keyed by name
      * @type {!Object<string, !TagSpecDispatch>}
@@ -3719,11 +3712,10 @@ class ParsedValidatorRules {
     const tagSpecIdsByTagSpecName = {};
     /** @type {!Object<string, boolean>} */
     const tagSpecNamesToTrack = {};
-    for (let i = 0; i < this.rules_.tags.length; ++i) {
-      const tag = this.rules_.tags[i];
+    for (const tag of this.rules_.tags) {
       const tagSpecName = getTagSpecName(tag);
       goog.asserts.assert(!tagSpecIdsByTagSpecName.hasOwnProperty(tagSpecName));
-      tagSpecIdsByTagSpecName[tagSpecName] = i;
+      tagSpecIdsByTagSpecName[tagSpecName] = tag.tagSpecId;
       if (tag.alsoRequiresTag.length > 0) {
         tagSpecNamesToTrack[tagSpecName] = true;
       }
@@ -3739,16 +3731,15 @@ class ParsedValidatorRules {
         }
       }
     }
-    for (let i = 0; i < this.rules_.tags.length; ++i) {
-      const tag = this.rules_.tags[i];
+    for (const tag of this.rules_.tags) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         goog.asserts.assert(this.rules_.templateSpecUrl !== null);
       }
       const parsedTagSpec = new ParsedTagSpec(
           this.rules_.templateSpecUrl, this.parsedAttrSpecs_,
           tagSpecIdsByTagSpecName,
-          shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
-      this.tagSpecById_.push(parsedTagSpec);
+          shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag);
+      this.tagSpecById_[tag.tagSpecId] = parsedTagSpec;
       if (!parsedTagSpec.isReferencePoint()) {
         if (!this.tagSpecByTagName_.hasOwnProperty(tag.tagName)) {
           this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
@@ -3756,13 +3747,13 @@ class ParsedValidatorRules {
         const tagnameDispatch = this.tagSpecByTagName_[tag.tagName];
         if (parsedTagSpec.hasDispatchKey()) {
           tagnameDispatch.registerDispatchKey(
-              parsedTagSpec.getDispatchKey(), i);
+              parsedTagSpec.getDispatchKey(), tag.tagSpecId);
         } else {
-          tagnameDispatch.registerTagSpec(i);
+          tagnameDispatch.registerTagSpec(tag.tagSpecId);
         }
       }
       if (tag.mandatory) {
-        this.mandatoryTagSpecs_.push(i);
+        this.mandatoryTagSpecs_.push(tag.tagSpecId);
       }
     }
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
