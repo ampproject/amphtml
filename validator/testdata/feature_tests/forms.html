@@ -90,6 +90,10 @@
   <form method="post" action-xhr="https://example-com.cdn.ampproject.org/subscribe" target="_blank">
     <input type="submit" value="Subscribe">
   </form>
+  <!-- Invalid: form action must be a non-cdn link -->
+  <form method="post" action-xhr="https://example-com.amp.cloudflare.com/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+  </form>
   <!-- Valid: disallowed domain checks subdomains, not suffix -->
   <form method="post" action-xhr="https://example-cdn.ampproject.org/subscribe" target="_blank">
     <input type="submit" value="Subscribe">
