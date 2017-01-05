@@ -38,6 +38,7 @@ import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {viewerForDoc} from '../../../src/viewer';
+import {AdsenseSharedState} from './adsense-shared-state';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -53,6 +54,18 @@ const visibilityStateCodes = {
   'unloaded': '5',
 };
 
+/**
+ * Shared state for AdSense ad slots. This is used primarily for ad request url
+ * parameters that depend on previous slots.
+ * @const {!AdsenseSharedState}
+ */
+const sharedState = new AdsenseSharedState();
+
+/** @visibleForTesting */
+export function resetSharedState() {
+  sharedState.reset();
+}
+
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /**
@@ -66,6 +79,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      */
     this.lifecycleReporter_ = this.lifecycleReporter_ ||
         this.initLifecycleReporter();
+
+    /**
+     * A unique identifier for this slot.
+     * Not initialized until getAdUrl() is called; updated upon each invocation
+     * of getAdUrl().
+     * @private {?string}
+     */
+    this.uniqueSlotId_ = null;
   }
 
   /** @override */
@@ -78,23 +99,30 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   getAdUrl() {
     const startTime = Date.now();
     const global = this.win;
+    const adClientId = this.element.getAttribute('data-ad-client');
     const slotId = this.element.getAttribute('data-amp-slot-index');
     const slotIdNumber = Number(slotId);
     const correlator = getCorrelator(this.win, slotId);
     const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
-    const visibilityState = viewerForDoc(this.getAmpDoc()).getVisibilityState();
+    const visibilityState = viewerForDoc(this.getAmpDoc())
+        .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
-    return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotIdNumber, [
-      {name: 'client', value: this.element.getAttribute('data-ad-client')},
+    const adk = this.adKey_(format);
+    this.uniqueSlotId_ = slotId + adk;
+    const sharedStateParams = sharedState.addNewSlot(
+        format, this.uniqueSlotId_, adClientId);
+
+    const paramList = [
+      {name: 'client', value: adClientId},
       {name: 'format', value: format},
       {name: 'w', value: slotRect.width},
       {name: 'h', value: slotRect.height},
       {name: 'iu', value: this.element.getAttribute('data-ad-slot')},
       {name: 'adtest', value: adTestOn},
-      {name: 'adk', value: this.adKey_(format)},
+      {name: 'adk', value: adk},
       {
         name: 'bc',
         value: global.SVGElement && global.document.createElementNS ?
@@ -105,6 +133,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'ifi', value: slotIdNumber},
       {name: 'c', value: correlator},
       {name: 'to', value: this.element.getAttribute('data-tag-origin')},
+      {name: 'pv', value: sharedStateParams.pv},
       {name: 'u_ah', value: screen ? screen.availHeight : null},
       {name: 'u_aw', value: screen ? screen.availWidth : null},
       {name: 'u_cd', value: screen ? screen.colorDepth : null},
@@ -113,7 +142,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'u_w', value: screen ? screen.width : null},
       {name: 'vis', value: visibilityStateCodes[visibilityState] || '0'},
       {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
-    ], []);
+    ];
+
+    if (sharedStateParams.prevFmts) {
+      paramList.push({name: 'prev_fmts', value: sharedStateParams.prevFmts});
+    }
+
+    return googleAdUrl(
+        this, ADSENSE_BASE_URL, startTime, slotIdNumber, paramList, []);
   }
 
   /** @override */
@@ -165,6 +201,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
+    if (this.uniqueSlotId_) {
+      sharedState.removeSlot(this.uniqueSlotId_);
+    }
   }
 
 
