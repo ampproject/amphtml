@@ -27,7 +27,7 @@ import {
 } from '../../src/3p-frame';
 import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
-import {isExperimentOn} from '../../src/experiments';
+import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {preconnectForElement} from '../../src/preconnect';
 import {validateData} from '../../3p/3p';
 import {viewerForDoc} from '../../src/viewer';
@@ -105,7 +105,8 @@ describe('3p-frame', () => {
       test: false,
       version: '$internalRuntimeVersion$',
     };
-
+    toggleExperiment(window, 'exp-a', true);
+    toggleExperiment(window, 'exp-b', true);
     clock.tick(1234567888);
     const link = document.createElement('link');
     link.setAttribute('rel', 'canonical');
@@ -186,6 +187,7 @@ describe('3p-frame', () => {
         // Note also that running it using --files uses different DOM.
         ',"domFingerprint":"1725030182"' +
         ',"startTime":1234567888' +
+        ',"experimentToggles":{"exp-a":true,"exp-b":true}' +
         ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
