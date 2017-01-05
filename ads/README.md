@@ -226,7 +226,7 @@ If you're adding support for a new 3P ad service, changes to the following files
 - `/ads/_config.js` - add service specific configuration here.
 - `/3p/integration.js` - register your service here.
 - `/extensions/amp-ad/amp-ad.md` - add a link that points to your publisher doc.
-- `/examples/ads.amp.html` - add publisher examples here. Since real ad isn't guaranteed to fill, a fake ad that can be consistently displayed is highly recommended here, so that AMP developers can confidently identify new bugs.
+- `/examples/ads.amp.html` - add publisher examples here. Since real ad isn't guaranteed to fill, a consistently displayed fake ad is highly recommended here to help AMP developers confidently identify new bugs.
 
 ### Verify your examples
 
