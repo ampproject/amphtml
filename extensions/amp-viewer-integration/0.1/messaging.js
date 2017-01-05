@@ -31,6 +31,19 @@ const MessageType_ = {
 };
 
 /**
+ * @typedef {{
+ *   app: !string,
+ *   type: !string,
+ *   requestid: !number,
+ *   name: ?string,
+ *   data: *,
+ *   rsvp: ?boolean,
+ *   error: *
+ * }}
+ */
+export let Message;
+
+/**
  * @fileoverview This is used in amp-viewer-integration.js for the
  * communication protocol between AMP and the viewer. In the comments, I will
  * refer to the communication as a conversation between me and Bob. The
@@ -73,6 +86,7 @@ export class Messaging {
       event.origin != this.targetOrigin_) {
       return;
     }
+    /** @type {Message} */
     const message = event.data;
     if (message.app != APP) {
       return;
@@ -87,11 +101,11 @@ export class Messaging {
   /**
    * I'm sending Bob a new outgoing request.
    * @param {string} eventType
-   * @param {*} payload
+   * @param {*} data
    * @param {boolean} awaitResponse
    * @return {!Promise<*>|undefined}
    */
-  sendRequest(eventType, payload, awaitResponse) {
+  sendRequest(eventType, data, awaitResponse) {
     dev().info(TAG, 'messaging.js -> sendRequest, eventType: ', eventType);
     const requestId = ++this.requestIdCounter_;
     let promise = undefined;
@@ -100,39 +114,43 @@ export class Messaging {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    const message = {
-      app: APP,
-      requestid: requestId,
-      rsvp: awaitResponse,
-      name: eventType,
-      data: payload,
-      type: MessageType_.REQUEST,
-    };
-    this.sendMessage_(message);
+    this.sendMessage_(requestId, MessageType_.REQUEST, eventType, data,
+      awaitResponse, null);
     return promise;
   }
 
   /**
    * I'm responding to a request that Bob made earlier.
    * @param {number} requestId
-   * @param {*} payload
+   * @param {*} data
    * @private
    */
-  sendResponse_(requestId, payload) {
+  sendResponse_(requestId, data) {
     dev().info(TAG, 'messaging.js -> sendResponse_');
-    const message = {
-      app: APP,
-      requestid: requestId,
-      data: payload,
-      type: MessageType_.RESPONSE,
-    };
-    this.sendMessage_(message);
+    this.sendMessage_(
+      requestId, MessageType_.RESPONSE, null, data, null, null);
   }
 
   /**
+   * @param {number} mId
+   * @param {string} mType
+   * @param {?string} mName
+   * @param {*} mData
+   * @param {?boolean} mRsvp
+   * @param {*} mErr
    * @private
    */
-  sendMessage_(message) {
+  sendMessage_(mId, mType, mName, mData, mRsvp, mErr) {
+    /** @type {Message} */
+    const message = {
+      app: APP,
+      requestid: mId,
+      type: mType,
+      name: mName,
+      data: mData,
+      rsvp: mRsvp,
+      error: mErr,
+    };
     this.target_./*OK*/postMessage(message, this.targetOrigin_);
   }
 
@@ -142,20 +160,15 @@ export class Messaging {
    * @private
    */
   sendResponseError_(requestId, reason) {
-    const message = {
-      app: APP,
-      requestid: requestId,
-      error: reason,
-      type: MessageType_.RESPONSE,
-    };
-    this.sendMessage_(message);
+    this.sendMessage_(
+      requestId, MessageType_.RESPONSE, null, null, null, reason);
   }
 
   /**
    * I'm handing an incoming request from Bob. I'll either respond normally
    * (ex: "got it Bob!") or with an error (ex: "I didn't get a word of what
    * you said!").
-   * @param {*} message
+   * @param {Message} message
    * @private
    */
   handleRequest_(message) {
@@ -163,16 +176,17 @@ export class Messaging {
     dev().assert(this.requestProcessor_,
       'Cannot handle request because handshake is not yet confirmed!');
     const requestId = message.requestid;
-    const promise =
-      this.requestProcessor_(message.name, message.data, message.rsvp);
     if (message.rsvp) {
+      const promise =
+        this.requestProcessor_(
+          dev().assertString(message.name), message.data, message.rsvp);
       if (!promise) {
         this.sendResponseError_(requestId, 'no response');
         dev().assert(promise,
           'expected response but none given: ' + message.name);
       }
-      promise.then(payload => {
-        this.sendResponse_(requestId, payload);
+      promise.then(data => {
+        this.sendResponse_(requestId, data);
       }, reason => {
         this.sendResponseError_(requestId, reason);
       });
@@ -182,7 +196,7 @@ export class Messaging {
   /**
    * I sent out a request to Bob. He responded. And now I'm handling that
    * response.
-   * @param {*} message
+   * @param {Message} message
    * @private
    */
   handleResponse_(message) {
@@ -192,7 +206,7 @@ export class Messaging {
     if (pending) {
       delete this.waitingForResponse_[requestId];
       if (message.error) {
-        pending.reject(message.error);
+        pending.reject(/** @type {!Error} */ (message.error));
       } else {
         pending.resolve(message.data);
       }
