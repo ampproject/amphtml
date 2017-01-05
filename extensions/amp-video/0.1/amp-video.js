@@ -126,7 +126,9 @@ class AmpVideo extends AMP.BaseElement {
         }
         if (this.shouldPropagateAttributeOnMutation_(name)) {
           this.propagateAttributes(
-              name, this.video_, /* opt_removeMissingAttrs */ true);
+              name,
+              /** @type {!Element} */ (this.video_),
+              /* opt_removeMissingAttrs */ true);
         }
       }, this);
     }
