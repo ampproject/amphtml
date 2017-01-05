@@ -158,14 +158,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
-  /** @override */
-  unlayoutCallback() {
-    super.unlayoutCallback();
-    if (this.uniqueSlotId_) {
-      sharedState.removeSlot(this.uniqueSlotId_);
-    }
-  }
-
   /**
    * @param {string} format
    * @return {string} The ad unit hash key string.
@@ -209,6 +201,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
+    if (this.uniqueSlotId_) {
+      sharedState.removeSlot(this.uniqueSlotId_);
+    }
   }
 
 
