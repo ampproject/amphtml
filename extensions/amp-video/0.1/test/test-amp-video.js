@@ -328,4 +328,37 @@ describe(TAG, () => {
       expect(video.getAttribute('aria-describedby')).to.equal('id3');
     });
   });
+
+  it('should propagate attribute mutations', () => {
+    return getVideo({
+      src: 'foo.mp4',
+      width: 160,
+      height: 90,
+      controls: '',
+    }).then(v => {
+      const mutations = [
+        {
+          name: 'src',
+          oldValue: 'foo.mp4',
+          newValue: 'bar.mp4',
+        },
+        {
+          name: 'controls',
+          oldValue: '',
+          newValue: null,
+        },
+      ];
+      mutations.forEach(m => {
+        if (m.newValue === null) {
+          v.removeAttribute(m.name);
+        } else {
+          v.setAttribute(m.name, m.newValue);
+        }
+      });
+      v.mutatedAttributesCallback(mutations);
+      const video = v.querySelector('video');
+      expect(video.getAttribute('src')).to.equal('bar.mp4');
+      expect(video.controls).to.be.false;
+    });
+  });
 });

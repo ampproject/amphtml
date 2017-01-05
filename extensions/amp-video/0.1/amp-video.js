@@ -28,6 +28,17 @@ import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-video';
 
+/** @type {!Array<string>} */
+const ATTRS_TO_PROPAGATE_ON_BUILD = ['poster', 'controls', 'aria-label',
+  'aria-describedby', 'aria-labelledby'];
+
+/**
+ * @note Do not propagate `autoplay`. Autoplay behaviour is managed by
+ *       video manager since amp-video implements the VideoInterface.
+ * @type {!Array<string>}
+ */
+const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['src', 'loop', 'preload'];
+
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
@@ -90,8 +101,8 @@ class AmpVideo extends AMP.BaseElement {
       this.video_.setAttribute('webkit-playsinline', '');
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
-      this.propagateAttributes(['poster', 'controls', 'aria-label',
-          'aria-describedby', 'aria-labelledby'], this.video_);
+      this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_BUILD, this.video_,
+          /* opt_removeMissingAttrs */ true);
       this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], this.video_);
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
@@ -99,6 +110,25 @@ class AmpVideo extends AMP.BaseElement {
       const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
       installVideoManagerForDoc(ampdoc);
       videoManagerForDoc(this.win.document).register(this);
+    }
+
+    /** @override */
+    mutatedAttributesCallback(mutations) {
+      if (!this.video_) {
+        return;
+      }
+      mutations.forEach(mutation => {
+        const name = mutation.name;
+        switch (name) {
+          case 'src':
+            assertHttpsUrl(this.element.getAttribute('src'), this.element);
+            break;
+        }
+        if (this.shouldPropagateAttributeOnMutation_(name)) {
+          this.propagateAttributes(
+              name, this.video_, /* opt_removeMissingAttrs */ true);
+        }
+      }, this);
     }
 
     /** @override */
@@ -119,18 +149,8 @@ class AmpVideo extends AMP.BaseElement {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
 
-      // Do not propagate `autoplay`. Autoplay behaviour is managed by
-      // video manager since amp-video implements the VideoInterface
-      this.propagateAttributes(
-          ['src', 'loop'],
-          this.video_);
-
-      if (this.element.hasAttribute('preload')) {
-        this.video_.setAttribute(
-            'preload', this.element.getAttribute('preload'));
-      } else {
-        this.video_.removeAttribute('preload');
-      }
+      this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT, this.video_,
+          /* opt_removeMissingAttrs */ true);
 
       this.getRealChildNodes().forEach(child => {
         // Skip the video we already added to the element.
@@ -160,6 +180,21 @@ class AmpVideo extends AMP.BaseElement {
     /** @private */
     isVideoSupported_() {
       return !!this.video_.play;
+    }
+
+    /**
+     * @param {string} attributeName
+     * @return {boolean}
+     * @private
+     */
+    shouldPropagateAttributeOnMutation_(attributeName) {
+      if (ATTRS_TO_PROPAGATE_ON_BUILD.indexOf(attributeName) >= 0) {
+        return true;
+      }
+      if (ATTRS_TO_PROPAGATE_ON_LAYOUT.indexOf(attributeName) >= 0) {
+        return true;
+      }
+      return false;
     }
 
     // VideoInterface Implementation. See ../src/video-interface.VideoInterface
