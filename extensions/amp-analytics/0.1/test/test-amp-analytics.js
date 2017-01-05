@@ -1056,6 +1056,7 @@ describe('amp-analytics', function() {
     check('client id', 'client id', '');
     check('client id\nand something', 'client id\nand something', '');
     check('client id()', 'client id()', '');
+    check('client id\nclientId()', 'client id\nclientId()', '');
     check('client id (abc)', 'client id (abc)', '');
 
 
