@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {validateData} from '../3p/3p';
 import {dev} from '../src/log';
 
 /**
@@ -21,7 +22,7 @@ import {dev} from '../src/log';
  * @param {!Object} data
  */
 export function _ping_(global, data) {
-  //validateData(data, [], ['adWidth', 'adHeight', 'valid']);
+  validateData(data, [], ['valid', 'adHeight', 'adWidth', 'enableIo', 'url']);
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
 
