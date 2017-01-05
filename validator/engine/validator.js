@@ -132,17 +132,6 @@ class ParsedUrlSpec {
         this.allowedProtocols_[protocol] = 0;
       }
     }
-
-    /**
-     * @type {!Object<string, number>}
-     * @private
-     */
-    this.disallowedDomains_ = {};
-    if (this.spec_ !== null) {
-      for (const domain of this.spec_.disallowedDomain) {
-        this.disallowedDomains_[domain] = 0;
-      }
-    }
   }
 
   /** @return {amp.validator.UrlSpec} */
@@ -163,7 +152,23 @@ class ParsedUrlSpec {
    * @return {boolean}
    */
   isDisallowedDomain(domain) {
-    return this.disallowedDomains_.hasOwnProperty(domain);
+    for (const disallowedDomain of this.spec_.disallowedDomain) {
+      if (goog.string./*OK*/ endsWith(domain, disallowedDomain)) {
+        // If here, then we have three possibilities. For example purposes,
+        // consider 'example.com' as the disallowedDomain.
+        // 1) domain === 'example.com'      ->  isDisallowedDomain = true
+        // 2) domain === 'www.example.com'  ->  isDisallowedDomain = true
+        // 3) domain === 'someexample.com'  ->  isDisallowedDomain = false
+        //
+        // Case 1:
+        if (domain === disallowedDomain) return true;
+
+        // Case 2/3, determine if the character before the matching suffix
+        // is a '.':
+        return domain[domain.length - 1 - disallowedDomain.length] === '.';
+      }
+    }
+    return false;
   }
 }
 
