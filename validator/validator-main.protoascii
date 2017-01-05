@@ -25,7 +25,7 @@ min_validator_revision_required: 189
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 340
+spec_file_revision: 341
 
 # Validator extensions.
 # =====================
@@ -2527,6 +2527,29 @@ tags: {
   attrs: { name: "wrap"}
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
+# 4.10.13 The output element
+tags: {
+  tag_name: "OUTPUT"
+  attrs: { name: "for" }
+  attrs: { name: "form" }
+  attr_lists: "input-name-attr"
+}
+# 4.10.14 The progress element
+tags: {
+  tag_name: "PROGRESS"
+  attrs: { name: "max" }
+  attrs: { name: "value" }
+}
+# 4.10.15 The meter element
+tags: {
+  tag_name: "METER"
+  attrs: { name: "high" }
+  attrs: { name: "low" }
+  attrs: { name: "max" }
+  attrs: { name: "min" }
+  attrs: { name: "optimum" }
+  attrs: { name: "value" }
 }
 # 4.10.16 The fieldset element
 tags: {
