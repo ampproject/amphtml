@@ -132,17 +132,6 @@ class ParsedUrlSpec {
         this.allowedProtocols_[protocol] = 0;
       }
     }
-
-    /**
-     * @type {!Object<string, number>}
-     * @private
-     */
-    this.disallowedDomains_ = {};
-    if (this.spec_ !== null) {
-      for (const domain of this.spec_.disallowedDomain) {
-        this.disallowedDomains_[domain] = 0;
-      }
-    }
   }
 
   /** @return {amp.validator.UrlSpec} */
@@ -163,7 +152,23 @@ class ParsedUrlSpec {
    * @return {boolean}
    */
   isDisallowedDomain(domain) {
-    return this.disallowedDomains_.hasOwnProperty(domain);
+    for (const disallowedDomain of this.spec_.disallowedDomain) {
+      if (goog.string./*OK*/ endsWith(domain, disallowedDomain)) {
+        // If here, then we have three possibilities. For example purposes,
+        // consider 'example.com' as the disallowedDomain.
+        // 1) domain === 'example.com'      ->  isDisallowedDomain = true
+        // 2) domain === 'www.example.com'  ->  isDisallowedDomain = true
+        // 3) domain === 'someexample.com'  ->  isDisallowedDomain = false
+        //
+        // Case 1:
+        if (domain === disallowedDomain) return true;
+
+        // Case 2/3, determine if the character before the matching suffix
+        // is a '.':
+        return domain[domain.length - 1 - disallowedDomain.length] === '.';
+      }
+    }
+    return false;
   }
 }
 
@@ -412,64 +417,45 @@ function getTagSpecName(tagSpec) {
 }
 
 /**
- * @typedef {{ point: !amp.validator.ReferencePoint,
- *             tagSpecId: number }}
- */
-let ParsedReferencePoint;
-
-/**
  * Holds the reference points for a particular parent tag spec, including
- * their resolved tagspec ids. This class is a container of
- * |ParsedReferencePoint| for convenient iteration.
+ * their resolved tagspec ids.
  * @private
  */
 class ParsedReferencePoints {
   /**
-   * @param {!amp.validator.TagSpec} parent
-   * @param {!Object<string, number>} tagSpecIdsByTagSpecName
+   * @param {!amp.validator.TagSpec} parentTagSpec
    */
-  constructor(parent, tagSpecIdsByTagSpecName) {
+  constructor(parentTagSpec) {
     /**
      * @type {!amp.validator.TagSpec}
      * @private
      */
-    this.parent_ = parent;
-
-    /**
-     * @type {!Array<ParsedReferencePoint>}
-     * @private
-     */
-    this.parsed_ = [];
-    for (const p of parent.referencePoints) {
-      goog.asserts.assert(p.tagSpecName !== null);
-      this.parsed_.push(
-          {point: p, tagSpecId: tagSpecIdsByTagSpecName[p.tagSpecName]});
-    }
+    this.parentTagSpec_ = parentTagSpec;
   }
 
-  /** @return {!Array<ParsedReferencePoint>} */
+  /** @return {!Array<!amp.validator.ReferencePoint>} */
   iterate() {
-    return this.parsed_;
+    return this.parentTagSpec_.referencePoints;
   }
 
   /** @return {boolean} */
   empty() {
-    return this.parsed_.length === 0;
+    return this.size() === 0;
   }
 
   /** @return {number} */
   size() {
-    return this.parsed_.length;
+    return this.parentTagSpec_.referencePoints.length;
   }
 
   /** @return {?string} */
   parentSpecUrl() {
-    return this.parent_.specUrl;
+    return this.parentTagSpec_.specUrl;
   }
 
   /** @return {string} */
   parentTagSpecName() {
-    return getTagSpecName(this.parent_);
+    return getTagSpecName(this.parentTagSpec_);
   }
 }
 
@@ -595,31 +581,21 @@ class ParsedTagSpec {
   /**
    * @param {?string} templateSpecUrl
    * @param {!ParsedAttrSpecs} parsedAttrSpecs
-   * @param {!Object<string, number>} tagSpecIdsByTagSpecName
    * @param {boolean} shouldRecordTagspecValidated
    * @param {!amp.validator.TagSpec} tagSpec
-   * @param {number} tagId
    */
   constructor(
-      templateSpecUrl, parsedAttrSpecs, tagSpecIdsByTagSpecName,
-      shouldRecordTagspecValidated, tagSpec, tagId) {
+      templateSpecUrl, parsedAttrSpecs, shouldRecordTagspecValidated, tagSpec) {
     /**
      * @type {!amp.validator.TagSpec}
      * @private
      */
     this.spec_ = tagSpec;
     /**
-     * Globally unique attribute rule id.
-     * @type {number}
-     * @private
-     */
-    this.id_ = tagId;
-    /**
      * @type {!ParsedReferencePoints}
      * @private
      */
-    this.referencePoints_ =
-        new ParsedReferencePoints(tagSpec, tagSpecIdsByTagSpecName);
+    this.referencePoints_ = new ParsedReferencePoints(tagSpec);
     /**
      * @type {boolean}
      * @private
@@ -657,16 +633,6 @@ class ParsedTagSpec {
      * @private
      */
     this.requires_ = [];
-    /**
-     * @type {!Array<number>}
-     * @private
-     */
-    this.alsoRequiresTag_ = [];
-    /**
-     * @type {!Array<number>}
-     * @private
-     */
-    this.alsoRequiresTagWarning_ = [];
     /**
      * @type {ParsedAttrSpec}
      * @private
@@ -712,19 +678,13 @@ class ParsedTagSpec {
     for (const condition of tagSpec.requires) {
       this.requires_.push(condition);
     }
-    for (const tagSpecName of tagSpec.alsoRequiresTag) {
-      this.alsoRequiresTag_.push(tagSpecIdsByTagSpecName[tagSpecName]);
-    }
-    for (const tagSpecName of tagSpec.alsoRequiresTagWarning) {
-      this.alsoRequiresTagWarning_.push(tagSpecIdsByTagSpecName[tagSpecName]);
-    }
   }
 
   /**
    * @return {number} unique id for this tag spec.
    */
   getId() {
-    return this.id_;
+    return this.spec_.tagSpecId;
   }
 
   /**
@@ -780,7 +740,7 @@ class ParsedTagSpec {
    * @return {!Array<number>}
    */
   getAlsoRequiresTag() {
-    return this.alsoRequiresTag_;
+    return this.spec_.alsoRequiresTag;
   }
 
   /**
@@ -791,7 +751,11 @@ class ParsedTagSpec {
    * @return {!Array<number>}
    */
   getAlsoRequiresTagWarning() {
-    return this.alsoRequiresTagWarning_;
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      return this.spec_.alsoRequiresTagWarning;
+    } else {
+      return [];
+    }
   }
 
   /**
@@ -1153,7 +1117,10 @@ class ReferencePointMatcher {
     const resultForBestAttempt = new amp.validator.ValidationResult();
     resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
     for (const p of this.parsedReferencePoints_.iterate()) {
-      const parsedSpec = this.parsedValidatorRules_.getTagSpec(p.tagSpecId);
+      // p.tagSpecName here is actually a number, which was replaced in
+      // validator_gen_js.py from the name string, so this works.
+      const tagSpecId = /** @type {!number} */ (p.tagSpecName);
+      const parsedSpec = this.parsedValidatorRules_.getTagSpec(tagSpecId);
       validateTagAgainstSpec(
           this.parsedValidatorRules_, parsedSpec, context, attrs,
           resultForBestAttempt);
@@ -1183,7 +1150,8 @@ class ReferencePointMatcher {
           [
             context.getTagStack().getCurrent(),
             this.parsedReferencePoints_.parentTagSpecName(),
-            this.parsedReferencePoints_.iterate()[0].point.tagSpecName
+            this.parsedValidatorRules_.getReferencePointName(
+                this.parsedReferencePoints_.iterate()[0])
           ],
           this.parsedReferencePoints_.parentSpecUrl(), result);
       result.mergeFrom(resultForBestAttempt);
@@ -1193,7 +1161,7 @@ class ReferencePointMatcher {
     // message with the acceptable reference points listed.
     const acceptable = [];
     for (const p of this.parsedReferencePoints_.iterate()) {
-      acceptable.push(p.point.tagSpecName);
+      acceptable.push(this.parsedValidatorRules_.getReferencePointName(p));
     }
     context.addError(
         amp.validator.ValidationError.Severity.ERROR,
@@ -1242,8 +1210,11 @@ class ReferencePointMatcher {
           1;
     }
     for (const p of this.parsedReferencePoints_.iterate()) {
-      if (p.point.mandatory &&
-          !referencePointByCount.hasOwnProperty(p.tagSpecId)) {
+      // p.tagSpecName here is actually a number, which was replaced in
+      // validator_gen_js.py from the name string, so this works.
+      const RefPointTagSpecId = /** @type {number} */ (p.tagSpecName);
+      if (p.mandatory &&
+          !referencePointByCount.hasOwnProperty(RefPointTagSpecId)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -1252,7 +1223,7 @@ class ReferencePointMatcher {
               this.lineCol_,
               /*params*/
               [
-                p.point.tagSpecName,
+                this.parsedValidatorRules_.getReferencePointName(p),
                 this.parsedReferencePoints_.parentTagSpecName()
               ],
               this.parsedReferencePoints_.parentSpecUrl(), result);
@@ -1261,8 +1232,8 @@ class ReferencePointMatcher {
           return;
         }
       }
-      if (p.point.unique && referencePointByCount.hasOwnProperty(p.tagSpecId) &&
-          referencePointByCount[p.tagSpecId] !== 1) {
+      if (p.unique && referencePointByCount.hasOwnProperty(RefPointTagSpecId) &&
+          referencePointByCount[RefPointTagSpecId] !== 1) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -1270,7 +1241,7 @@ class ReferencePointMatcher {
               this.lineCol_,
               /*params*/
               [
-                p.point.tagSpecName,
+                this.parsedValidatorRules_.getReferencePointName(p),
                 this.parsedReferencePoints_.parentTagSpecName()
               ],
               this.parsedReferencePoints_.parentSpecUrl(), result);
@@ -2730,12 +2701,17 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  * - Unique tags
  * - Tags (identified by their TagSpecName() that are required by other tags.
  * @param {!amp.validator.TagSpec} tag
- * @param {!Object<string, ?>} tagSpecNamesToTrack
+ * @param {!Object<number, boolean>} tagSpecIdsToTrack
  * @return {boolean}
  */
-function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
-  return tag.mandatory || tag.unique || tag.uniqueWarning ||
-      tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
+function shouldRecordTagspecValidated(tag, tagSpecIdsToTrack) {
+  if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    return tag.mandatory || tag.unique || tag.uniqueWarning ||
+        tagSpecIdsToTrack.hasOwnProperty(tag.tagSpecId);
+  } else {
+    return tag.mandatory || tag.unique ||
+        tagSpecIdsToTrack.hasOwnProperty(tag.tagSpecId);
+  }
 }
 
 /**
@@ -3608,8 +3584,8 @@ function validateTagAgainstSpec(
               amp.validator.ValidationResult.Status.FAIL;
         }
         return;
-      } else if (spec.uniqueWarning) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      } else if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        if (spec.uniqueWarning) {
           context.addError(
               amp.validator.ValidationError.Severity.WARNING,
               amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING,
@@ -3675,10 +3651,10 @@ class ParsedValidatorRules {
   constructor(htmlFormat) {
     /**
      * ParsedTagSpecs in id order.
-     * @type {!Array<!ParsedTagSpec>}
+     * @type {!Object<number, !ParsedTagSpec>}
      * @private
      */
-    this.tagSpecById_ = [];
+    this.tagSpecById_ = {};
     /**
      * ParsedTagSpecs keyed by name
      * @type {!Object<string, !TagSpecDispatch>}
@@ -3704,36 +3680,33 @@ class ParsedValidatorRules {
      */
     this.parsedAttrSpecs_ = new ParsedAttrSpecs(this.rules_.attrLists);
 
-    /** @type {!Object<string, number>} */
-    const tagSpecIdsByTagSpecName = {};
-    /** @type {!Object<string, boolean>} */
-    const tagSpecNamesToTrack = {};
-    for (let i = 0; i < this.rules_.tags.length; ++i) {
-      const tag = this.rules_.tags[i];
+    /** @type {!Object<number, boolean>} */
+    const tagSpecIdsToTrack = {};
+    for (const tag of this.rules_.tags) {
       const tagSpecName = getTagSpecName(tag);
-      goog.asserts.assert(!tagSpecIdsByTagSpecName.hasOwnProperty(tagSpecName));
-      tagSpecIdsByTagSpecName[tagSpecName] = i;
-      if (tag.alsoRequiresTag.length > 0 ||
-          tag.alsoRequiresTagWarning.length > 0) {
-        tagSpecNamesToTrack[tagSpecName] = true;
+      if (tag.alsoRequiresTag.length > 0) {
+        tagSpecIdsToTrack[tag.tagSpecId] = true;
       }
       for (const alsoRequiresTag of tag.alsoRequiresTag) {
-        tagSpecNamesToTrack[alsoRequiresTag] = true;
+        tagSpecIdsToTrack[alsoRequiresTag] = true;
       }
-      for (const alsoRequiresTagWarning of tag.alsoRequiresTagWarning) {
-        tagSpecNamesToTrack[alsoRequiresTagWarning] = true;
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        if (tag.alsoRequiresTagWarning.length > 0) {
+          tagSpecIdsToTrack[tag.tagSpecId] = true;
+        }
+        for (const alsoRequiresTagWarning of tag.alsoRequiresTagWarning) {
+          tagSpecIdsToTrack[alsoRequiresTagWarning] = true;
+        }
       }
     }
-    for (let i = 0; i < this.rules_.tags.length; ++i) {
-      const tag = this.rules_.tags[i];
+    for (const tag of this.rules_.tags) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         goog.asserts.assert(this.rules_.templateSpecUrl !== null);
       }
       const parsedTagSpec = new ParsedTagSpec(
           this.rules_.templateSpecUrl, this.parsedAttrSpecs_,
-          tagSpecIdsByTagSpecName,
-          shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
-      this.tagSpecById_.push(parsedTagSpec);
+          shouldRecordTagspecValidated(tag, tagSpecIdsToTrack), tag);
+      this.tagSpecById_[tag.tagSpecId] = parsedTagSpec;
       if (!parsedTagSpec.isReferencePoint()) {
         if (!this.tagSpecByTagName_.hasOwnProperty(tag.tagName)) {
           this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
@@ -3741,13 +3714,13 @@ class ParsedValidatorRules {
         const tagnameDispatch = this.tagSpecByTagName_[tag.tagName];
         if (parsedTagSpec.hasDispatchKey()) {
           tagnameDispatch.registerDispatchKey(
-              parsedTagSpec.getDispatchKey(), i);
+              parsedTagSpec.getDispatchKey(), tag.tagSpecId);
         } else {
-          tagnameDispatch.registerTagSpec(i);
+          tagnameDispatch.registerTagSpec(tag.tagSpecId);
         }
       }
       if (tag.mandatory) {
-        this.mandatoryTagSpecs_.push(i);
+        this.mandatoryTagSpecs_.push(tag.tagSpecId);
       }
     }
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -3856,7 +3829,6 @@ class ParsedValidatorRules {
     }
     return max;
   };
-
 
   /**
    * Emits errors for tags that are specified to be mandatory.
@@ -4028,6 +4000,20 @@ class ParsedValidatorRules {
    */
   getParsedAttrSpecs() {
     return this.parsedAttrSpecs_;
+  }
+
+  /**
+   * Computes the name for a given reference point.
+   * Used in generating error strings.
+   * @param {!amp.validator.ReferencePoint} referencePoint
+   * @return {string}
+   */
+  getReferencePointName(referencePoint) {
+    // tagSpecName here is actually a number, which was replaced in
+    // validator_gen_js.py from the name string, so this works.
+    const tagSpecId = /** @type {!number} */ (referencePoint.tagSpecName);
+    const refPointSpec = this.getTagSpec(tagSpecId);
+    return getTagSpecName(refPointSpec.getSpec());
   }
 }
 

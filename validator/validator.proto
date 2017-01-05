@@ -58,7 +58,9 @@ message UrlSpec {
   optional bool allow_relative = 2 [default = true];
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3 [default = false];
-  // Must be lowercase.
+  // Must be lowercase. Subdomains of disallowed domains are also disallowed,
+  // so if 'example.com' is disallowed then 'www.example.com' is also disallowed
+  // but 'some-example.com' is allowed.
   repeated string disallowed_domain = 4;
 }
 
