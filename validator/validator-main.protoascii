@@ -25,7 +25,7 @@ min_validator_revision_required: 189
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 338
+spec_file_revision: 339
 
 # Validator extensions.
 # =====================
@@ -592,11 +592,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     }
     # These regex blacklists are temporary hacks to validate essential CSS
     # rules. They will be replaced later with more principled solutions.
-    # TODO(honeybadgerdontcare): Remove the .i-amp- case after i-amphtml launch.
-    blacklisted_cdata_regex: {
-      regex: "\\.i?-amp-"
-      error_message: "CSS -amp- class name prefix"
-    }
     blacklisted_cdata_regex: {
       regex: "(^|\\W)i-amphtml-"
       error_message: "CSS i-amphtml- name prefix"
@@ -687,11 +682,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
     }
     # These regex blacklists are temporary hacks to validate essential CSS
     # rules. They will be replaced later with more principled solutions.
-    # TODO(honeybadgerdontcare): Remove the .i-amp- case after i-amphtml launch.
-    blacklisted_cdata_regex: {
-      regex: "\\.i?-amp-"
-      error_message: "CSS -amp- class name prefix"
-    }
     blacklisted_cdata_regex: {
       regex: "(^|\\W)i-amphtml-"
       error_message: "CSS i-amphtml- name prefix"
