@@ -25,7 +25,7 @@ min_validator_revision_required: 189
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 331
+spec_file_revision: 332
 
 # Validator extensions.
 # =====================
@@ -2289,9 +2289,54 @@ attr_lists: {
         "__noSuchMethod__|"
         "__parent__|"
         "__proto__|"
+        "addEventListener|"
+        "appendChild|"
+        "attachShadow|"
         "baseURI|"
+        "compareDocumentPosition|"
+        "createShadowRoot|"
+        "getAttribute|"
+        "getAttributeNS|"
+        "getAttributeNode|"
+        "getAttributeNodeNS|"
+        "getBoundingClientRect|"
+        "getClientRects|"
+        "getDestinationInsertionPoints|"
+        "getElementsByClassName|"
+        "getElementsByTagName|"
+        "getElementsByTagNameNS|"
+        "getRootNode|"
+        "hasAttribute|"
+        "hasAttributeNS|"
+        "hasAttributes|"
+        "hasChildNodes|"
         "innerHTML|"
-        "outerHTML"
+        "insertAdjacentElement|"
+        "insertAdjacentHTML|"
+        "insertAdjacentText|"
+        "isDefaultNamespace|"
+        "isEqualNode|"
+        "isSameNode|"
+        "lookupNamespaceURI|"
+        "outerHTML|"
+        "querySelector|"
+        "querySelectorAll|"
+        "removeAttribute|"
+        "removeAttributeNS|"
+        "removeAttributeNode|"
+        "removeChild|"
+        "removeEventListener|"
+        "replaceChild|"
+        "requestPointerLock|"
+        "scrollIntoView|"
+        "scrollIntoViewIfNeeded|"
+        "setAttribute|"
+        "setAttributeNS|"
+        "setAttributeNode|"
+        "setAttributeNodeNS|"
+        "(webkit|moz|ms|o)MatchesSelector|"
+        "(webkit|moz|ms|o)RequestFullScreen|"
+        "(webkit|moz|ms|o)RequestFullscreen"
         ")(\\s|$)"
   }
 }
@@ -2694,6 +2739,39 @@ tags: {  # <amp-pixel>
     supported_layouts: NODISPLAY
   }
 }
+tags: {  # <amp-video>
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "AMP-VIDEO"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "autoplay" value: "" }
+  attrs: { name: "controls" value: "" }
+  attrs: { name: "loop"     value: "" }
+  attrs: { name: "muted"    value: "" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "poster" }
+  attrs: { name: "preload" value_regex: "(none|metadata|auto|)" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
 
 # AMP Layout attributes: implied for TagSpecs with amp_layout field
 # set. Note that while these attributes are defined as optional here,
@@ -2746,10 +2824,55 @@ attr_lists: {
         "__noSuchMethod__|"
         "__parent__|"
         "__proto__|"
+        "addEventListener|"
+        "appendChild|"
+        "attachShadow|"
         "baseURI|"
+        "compareDocumentPosition|"
+        "createShadowRoot|"
+        "getAttribute|"
+        "getAttributeNS|"
+        "getAttributeNode|"
+        "getAttributeNodeNS|"
+        "getBoundingClientRect|"
+        "getClientRects|"
+        "getDestinationInsertionPoints|"
+        "getElementsByClassName|"
+        "getElementsByTagName|"
+        "getElementsByTagNameNS|"
+        "getRootNode|"
+        "hasAttribute|"
+        "hasAttributeNS|"
+        "hasAttributes|"
+        "hasChildNodes|"
         "i-amphtml-.*|"
         "innerHTML|"
-        "outerHTML"
+        "insertAdjacentElement|"
+        "insertAdjacentHTML|"
+        "insertAdjacentText|"
+        "isDefaultNamespace|"
+        "isEqualNode|"
+        "isSameNode|"
+        "lookupNamespaceURI|"
+        "outerHTML|"
+        "querySelector|"
+        "querySelectorAll|"
+        "removeAttribute|"
+        "removeAttributeNS|"
+        "removeAttributeNode|"
+        "removeChild|"
+        "removeEventListener|"
+        "replaceChild|"
+        "requestPointerLock|"
+        "scrollIntoView|"
+        "scrollIntoViewIfNeeded|"
+        "setAttribute|"
+        "setAttributeNS|"
+        "setAttributeNode|"
+        "setAttributeNodeNS|"
+        "(webkit|moz|ms|o)MatchesSelector|"
+        "(webkit|moz|ms|o)RequestFullScreen|"
+        "(webkit|moz|ms|o)RequestFullscreen"
         ")(\\s|$)"
   }
   attrs: { name: "lang" }
