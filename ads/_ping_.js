@@ -25,10 +25,6 @@ export function _ping_(global, data) {
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
 
-  global.ping.resetLastIO = () => {
-    global.ping.lastIO = undefined;
-  };
-
   global.context.onResizeSuccess(() => {
     global.ping.resizeSuccess = true;
   });

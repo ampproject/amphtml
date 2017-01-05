@@ -35,7 +35,7 @@ describes.realWin('3P Ad', {
       });
     });
 
-    // TODO(#3561): unmute the test.
+    // TODO(#6892): unskip the test on Edge.
     it.configure().skipEdge().run('create an iframe with APIs', function() {
       this.timeout(20000);
       let iframe;
@@ -43,7 +43,6 @@ describes.realWin('3P Ad', {
       let lastIO = null;
       return pollForLayout(fixture.win, 1, 5500).then(() => {
         // test amp-ad will create an iframe
-        console.log('waht');
         return poll('frame to be in DOM', () => {
           return fixture.doc.querySelector('iframe');
         });

@@ -295,6 +295,8 @@ describe('amp-ad-3p-impl', () => {
         const newIntersection = ad3p.getIntersectionElementLayoutBox();
         expect(newIntersection).not.to.deep.equal(intersection);
         expect(newIntersection.top).to.equal(intersection.top + 100);
+        expect(newIntersection.width).to.equal(300);
+        expect(newIntersection.height).to.equal(200);
       });
     });
   });
