@@ -261,7 +261,7 @@ export class AmpSidebar extends AMP.BaseElement {
       mask.addEventListener('click', () => {
         this.close_();
       });
-      this.element.parentNode.appendChild(mask);
+      this.element.ownerDocument.body.appendChild(mask);
       mask.addEventListener('touchmove', e => {
         e.preventDefault();
       });
