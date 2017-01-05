@@ -715,8 +715,10 @@ class ParsedTagSpec {
     for (const tagSpecName of tagSpec.alsoRequiresTag) {
       this.alsoRequiresTag_.push(tagSpecIdsByTagSpecName[tagSpecName]);
     }
-    for (const tagSpecName of tagSpec.alsoRequiresTagWarning) {
-      this.alsoRequiresTagWarning_.push(tagSpecIdsByTagSpecName[tagSpecName]);
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      for (const tagSpecName of tagSpec.alsoRequiresTagWarning) {
+        this.alsoRequiresTagWarning_.push(tagSpecIdsByTagSpecName[tagSpecName]);
+      }
     }
   }
 
@@ -791,7 +793,11 @@ class ParsedTagSpec {
    * @return {!Array<number>}
    */
   getAlsoRequiresTagWarning() {
-    return this.alsoRequiresTagWarning_;
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      return this.alsoRequiresTagWarning_;
+    } else {
+      return [];
+    }
   }
 
   /**
@@ -2734,8 +2740,13 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  * @return {boolean}
  */
 function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
-  return tag.mandatory || tag.unique || tag.uniqueWarning ||
-      tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
+  if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    return tag.mandatory || tag.unique || tag.uniqueWarning ||
+        tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
+  } else {
+    return tag.mandatory || tag.unique ||
+        tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
+  }
 }
 
 /**
@@ -3608,8 +3619,8 @@ function validateTagAgainstSpec(
               amp.validator.ValidationResult.Status.FAIL;
         }
         return;
-      } else if (spec.uniqueWarning) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      } else if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        if (spec.uniqueWarning) {
           context.addError(
               amp.validator.ValidationError.Severity.WARNING,
               amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING,
@@ -3713,15 +3724,19 @@ class ParsedValidatorRules {
       const tagSpecName = getTagSpecName(tag);
       goog.asserts.assert(!tagSpecIdsByTagSpecName.hasOwnProperty(tagSpecName));
       tagSpecIdsByTagSpecName[tagSpecName] = i;
-      if (tag.alsoRequiresTag.length > 0 ||
-          tag.alsoRequiresTagWarning.length > 0) {
+      if (tag.alsoRequiresTag.length > 0) {
         tagSpecNamesToTrack[tagSpecName] = true;
       }
       for (const alsoRequiresTag of tag.alsoRequiresTag) {
         tagSpecNamesToTrack[alsoRequiresTag] = true;
       }
-      for (const alsoRequiresTagWarning of tag.alsoRequiresTagWarning) {
-        tagSpecNamesToTrack[alsoRequiresTagWarning] = true;
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        if (tag.alsoRequiresTagWarning.length > 0) {
+          tagSpecNamesToTrack[tagSpecName] = true;
+        }
+        for (const alsoRequiresTagWarning of tag.alsoRequiresTagWarning) {
+          tagSpecNamesToTrack[alsoRequiresTagWarning] = true;
+        }
       }
     }
     for (let i = 0; i < this.rules_.tags.length; ++i) {
