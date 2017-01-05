@@ -659,7 +659,7 @@ var forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 var requiredTerms = {
-  'Copyright 20(15|16) The AMP HTML Authors\\.':
+  'Copyright 20(15|16|17) The AMP HTML Authors\\.':
       dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0':
       dedicatedCopyrightNoteSources,
