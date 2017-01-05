@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-selector-0.1.css';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
@@ -180,4 +181,4 @@ export class AmpSelector extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-selector', AmpSelector);
+AMP.registerElement('amp-selector', AmpSelector, CSS);
