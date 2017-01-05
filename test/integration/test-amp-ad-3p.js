@@ -19,6 +19,8 @@ import {
   pollForLayout,
   poll,
 } from '../../testing/iframe';
+import {platformFor} from '../../src/platform';
+import {installPlatformService} from '../../src/service/platform-impl';
 
 describes.realWin('3P Ad', {
   amp: {
@@ -32,15 +34,16 @@ describes.realWin('3P Ad', {
       return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {
       }).then(f => {
         fixture = f;
+        installPlatformService(fixture.win);
       });
     });
 
-    // TODO(#6892): unskip the test on Edge.
-    it.configure().skipEdge().run('create an iframe with APIs', function() {
+    it.configure().run('create an iframe with APIs', function() {
       this.timeout(20000);
       let iframe;
       let ampAd;
       let lastIO = null;
+      const platform = platformFor(fixture.win);
       return pollForLayout(fixture.win, 1, 5500).then(() => {
         // test amp-ad will create an iframe
         return poll('frame to be in DOM', () => {
@@ -66,9 +69,9 @@ describes.realWin('3P Ad', {
         expect(context.hidden).to.be.false;
         // In some browsers the referrer is empty. But in Chrome it works, so
         // we always check there.
-        if (context.referrer !== '' ||
-            (navigator.userAgent.match(/Chrome/))) {
-          expect(context.referrer).to.contain('http://localhost:' + location.port);
+        if (context.referrer !== '' || platform.isChrome()) {
+          expect(context.referrer).to.contain(
+              'http://localhost:' + location.port);
         }
 
         expect(context.canonicalUrl).to.equal(
