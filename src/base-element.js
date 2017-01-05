@@ -776,7 +776,6 @@ export class BaseElement {
   * @public
   */
   attemptChangeSize(newHeight, newWidth) {
-    this.bwtf = 'hate it';
     return this.element.getResources().attemptChangeSize(
         this.element, newHeight, newWidth);
   }

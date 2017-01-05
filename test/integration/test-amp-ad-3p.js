@@ -20,11 +20,11 @@ import {
   poll,
 } from '../../testing/iframe';
 
-describes.realWin.only('3P Ad', {
+describes.realWin('3P Ad', {
   amp: {
     runtimeOn: true,
   },
-}, env => {
+}, () => {
   describe.configure().retryOnSaucelabs().run('render an ad should', () => {
     let fixture;
 
@@ -110,20 +110,16 @@ describes.realWin.only('3P Ad', {
           }).length;
         });
       }).then(() => {
-        env.flushVsync();
-        console.log('resize');
         return poll('wait for attemptChangeSize', () => {
           return iframe.contentWindow.ping.resizeSuccess != undefined;
         });
       }).then(() => {
-        console.log('complete!!');
         lastIO = null;
         iframe.contentWindow.context.observeIntersection(changes => {
           lastIO = changes[changes.length - 1];
         });
         fixture.win.scrollTo(0, 1000);
         fixture.win.document.body.dispatchEvent(new Event('scroll'));
-        console.log('complete!');
         return poll('wait for new IO entry', () => {
           return lastIO != null;
         });

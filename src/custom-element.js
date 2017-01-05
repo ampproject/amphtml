@@ -557,7 +557,6 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getResources() {
-      this.cwtf = 'cwtf2';
       return /** @type {!./service/resources-impl.Resources} */ (
         dev().assert(this.resources_,
           'no resources yet, since element is not attached'));

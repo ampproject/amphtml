@@ -25,21 +25,15 @@ export function _ping_(global, data) {
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
 
-  global.ping.resetResizeResult = () => {
-    global.ping.resizeSuccess = undefined;
-  };
-
   global.ping.resetLastIO = () => {
     global.ping.lastIO = undefined;
   };
 
-  global.context.onResizeSuccess(data => {
-    console.log('resize sucess!!!!', data.height, data.width);
+  global.context.onResizeSuccess(() => {
     global.ping.resizeSuccess = true;
   });
 
-  global.context.onResizeDenied(data => {
-    console.log('resize fail!!!!', data.height, data.width);
+  global.context.onResizeDenied(() => {
     global.ping.resizeSuccess = false;
   });
 
@@ -68,9 +62,6 @@ export function _ping_(global, data) {
       global.context.renderStart({width, height});
     } else {
       global.context.renderStart();
-      window.setTimeout(() => {
-        global.context.requestResize(200, 50);
-      }, 5000);
     }
     if (data.enableIo) {
       global.context.observeIntersection(function(changes) {

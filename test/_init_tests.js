@@ -102,10 +102,6 @@ class TestConfig {
     return this.skip(this.platform_.isSafari.bind(this.platform_));
   }
 
-  // skipIos10() {
-  //   return this.skip(this.platform_.isSafari.bind())
-  // }
-
   /**
    * @param {function():boolean} fn
    */
