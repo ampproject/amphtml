@@ -49,7 +49,7 @@ describe('amp-jwplayer', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html');
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

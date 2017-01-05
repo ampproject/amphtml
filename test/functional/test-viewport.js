@@ -131,37 +131,37 @@ describes.fakeWin('Viewport', {}, env => {
 
     it('should set singledoc class', () => {
       new Viewport(ampdoc, binding, viewer);
-      expect(root).to.have.class('-amp-singledoc');
+      expect(root).to.have.class('i-amphtml-singledoc');
     });
 
     it('should not set singledoc class', () => {
       sandbox.stub(ampdoc, 'isSingleDoc', () => false);
       new Viewport(ampdoc, binding, viewer);
-      expect(root).to.not.have.class('-amp-singledoc');
+      expect(root).to.not.have.class('i-amphtml-singledoc');
     });
 
     it('should set standalone class', () => {
       new Viewport(ampdoc, binding, viewer);
-      expect(root).to.have.class('-amp-standalone');
-      expect(root).to.not.have.class('-amp-embedded');
+      expect(root).to.have.class('i-amphtml-standalone');
+      expect(root).to.not.have.class('i-amphtml-embedded');
     });
 
     it('should set embedded class', () => {
       sandbox.stub(viewer, 'isEmbedded', () => true);
       new Viewport(ampdoc, binding, viewer);
-      expect(root).to.have.class('-amp-embedded');
-      expect(root).to.not.have.class('-amp-standalone');
+      expect(root).to.have.class('i-amphtml-embedded');
+      expect(root).to.not.have.class('i-amphtml-standalone');
     });
 
     it('should not set iframed class', () => {
       new Viewport(ampdoc, binding, viewer);
-      expect(root).to.not.have.class('-amp-iframed');
+      expect(root).to.not.have.class('i-amphtml-iframed');
     });
 
     it('should set iframed class', () => {
       ampdoc.win.parent = {};
       new Viewport(ampdoc, binding, viewer);
-      expect(root).to.have.class('-amp-iframed');
+      expect(root).to.have.class('i-amphtml-iframed');
     });
   });
 
@@ -586,7 +586,7 @@ describes.fakeWin('Viewport', {}, env => {
     const docElement = windowApi.document.documentElement;
     const addStub = sandbox.stub(docElement.classList, 'add');
     viewport = new Viewport(ampdoc, binding, viewer);
-    expect(addStub).to.be.calledWith('-amp-make-body-block');
+    expect(addStub).to.be.calledWith('i-amphtml-make-body-block');
   });
 
   describes.realWin('top-level styles', {amp: 1}, env => {
@@ -1260,7 +1260,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
     expect(bodyChildren.length).to.equal(3);
 
-    expect(bodyChildren[0].id).to.equal('-amp-scrollpos');
+    expect(bodyChildren[0].id).to.equal('i-amphtml-scrollpos');
     expect(bodyChildren[0].style.position).to.equal('absolute');
     expect(bodyChildren[0].style.top).to.equal(0);
     expect(bodyChildren[0].style.left).to.equal(0);
@@ -1268,7 +1268,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(bodyChildren[0].style.height).to.equal(0);
     expect(bodyChildren[0].style.visibility).to.equal('hidden');
 
-    expect(bodyChildren[1].id).to.equal('-amp-scrollmove');
+    expect(bodyChildren[1].id).to.equal('i-amphtml-scrollmove');
     expect(bodyChildren[1].style.position).to.equal('absolute');
     expect(bodyChildren[1].style.top).to.equal(0);
     expect(bodyChildren[1].style.left).to.equal(0);
@@ -1276,7 +1276,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(bodyChildren[1].style.height).to.equal(0);
     expect(bodyChildren[1].style.visibility).to.equal('hidden');
 
-    expect(bodyChildren[2].id).to.equal('-amp-endpos');
+    expect(bodyChildren[2].id).to.equal('i-amphtml-endpos');
     expect(bodyChildren[2].style.position).to.be.undefined;
     expect(bodyChildren[2].style.top).to.be.undefined;
     expect(bodyChildren[2].style.width).to.equal(0);
@@ -1473,7 +1473,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   it('should have UI setup', () => {
     expect(binding.setupDone_).to.be.true;
     expect(win.document.documentElement)
-        .to.have.class('-amp-ios-embed');
+        .to.have.class('i-amphtml-ios-embed');
     expect(win.document.body).to.exist;
     expect(win.document.body.parentNode)
         .to.not.equal(win.document.documentElement);
@@ -1482,7 +1482,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(binding.wrapper_.parentNode)
         .to.equal(win.document.documentElement);
     expect(binding.wrapper_.tagName).to.equal('HTML');
-    expect(binding.wrapper_.id).to.equal('i-amp-html-wrapper');
+    expect(binding.wrapper_.id).to.equal('i-amphtml-wrapper');
     expect(win.document.body.contains(child)).to.be.true;
     expect(binding.wrapper_.contains(child)).to.be.true;
     expect(win.document.contains(child)).to.be.true;
@@ -1502,7 +1502,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     // `<html>` must have `position: static` or layout is broken.
     expect(htmlCss.position).to.equal('static');
 
-    // `<html>` and `<i-amp-html-wrapper>` must be scrollable, but not `body`.
+    // `<html>` and `<i-amphtml-wrapper>` must be scrollable, but not `body`.
     // Unfortunately, we can't test here `-webkit-overflow-scrolling`.
     expect(htmlCss.overflowY).to.equal('auto');
     expect(htmlCss.overflowX).to.equal('hidden');

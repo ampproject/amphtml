@@ -30,15 +30,15 @@ const LINE_LOADER_ELEMENTS = {
 export function createLoaderElement(doc, elementName) {
   const loader = doc.createElement('div');
   if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
-    loader.classList.add('-amp-loader-line');
+    loader.classList.add('i-amphtml-loader-line');
     const line = doc.createElement('div');
-    line.classList.add('-amp-loader-moving-line');
+    line.classList.add('i-amphtml-loader-moving-line');
     loader.appendChild(line);
   } else {
-    loader.classList.add('-amp-loader');
+    loader.classList.add('i-amphtml-loader');
     for (let i = 0; i < 3; i++) {
       const dot = doc.createElement('div');
-      dot.classList.add('-amp-loader-dot');
+      dot.classList.add('i-amphtml-loader-dot');
       loader.appendChild(dot);
     }
   }

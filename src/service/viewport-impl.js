@@ -166,22 +166,23 @@ export class Viewport {
 
     // Top-level mode classes.
     if (this.ampdoc.isSingleDoc()) {
-      this.globalDoc_.documentElement.classList.add('-amp-singledoc');
+      this.globalDoc_.documentElement.classList.add('i-amphtml-singledoc');
     }
     if (viewer.isEmbedded()) {
-      this.globalDoc_.documentElement.classList.add('-amp-embedded');
+      this.globalDoc_.documentElement.classList.add('i-amphtml-embedded');
     } else {
-      this.globalDoc_.documentElement.classList.add('-amp-standalone');
+      this.globalDoc_.documentElement.classList.add('i-amphtml-standalone');
     }
     if (isIframed(this.ampdoc.win)) {
-      this.globalDoc_.documentElement.classList.add('-amp-iframed');
+      this.globalDoc_.documentElement.classList.add('i-amphtml-iframed');
     }
 
     // TODO(sriramkrish85, #5319): Cleanup the experiment by making the effects
     // on CSS permanent and removing the code block below.
     if (this.ampdoc.isSingleDoc() &&
             isExperimentOn(this.ampdoc.win, 'make-body-block')) {
-      this.globalDoc_.documentElement.classList.add('-amp-make-body-block');
+      this.globalDoc_.documentElement.classList.add(
+          'i-amphtml-make-body-block');
     }
   }
 
@@ -1163,7 +1164,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Insert scrollPos element into DOM. See {@link onScrolled_} for why
     // this is needed.
     this.scrollPosEl_ = this.win.document.createElement('div');
-    this.scrollPosEl_.id = '-amp-scrollpos';
+    this.scrollPosEl_.id = 'i-amphtml-scrollpos';
     setStyles(this.scrollPosEl_, {
       position: 'absolute',
       top: 0,
@@ -1177,7 +1178,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Insert scrollMove element into DOM. See {@link adjustScrollPos_} for why
     // this is needed.
     this.scrollMoveEl_ = this.win.document.createElement('div');
-    this.scrollMoveEl_.id = '-amp-scrollmove';
+    this.scrollMoveEl_.id = 'i-amphtml-scrollmove';
     setStyles(this.scrollMoveEl_, {
       position: 'absolute',
       top: 0,
@@ -1191,7 +1192,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Insert endPos element into DOM. See {@link getScrollHeight} for why
     // this is needed.
     this.endPosEl_ = this.win.document.createElement('div');
-    this.endPosEl_.id = '-amp-endpos';
+    this.endPosEl_.id = 'i-amphtml-endpos';
     setStyles(this.endPosEl_, {
       width: 0,
       height: 0,
@@ -1404,7 +1405,7 @@ export class ViewportBindingNaturalIosEmbed_ {
 /**
  * Implementation of ViewportBindingDef based for iframed iOS case where iframes
  * are not scrollable. Scrolling accomplished here by inserting a scrollable
- * wrapper `<html id="i-amp-html-wrapper">` inside the `<html>` element and
+ * wrapper `<html id="i-amphtml-wrapper">` inside the `<html>` element and
  * reparenting the original `<body>` inside.
  *
  * @implements {ViewportBindingDef}
@@ -1420,11 +1421,11 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.win = win;
     const topClasses = this.win.document.documentElement.className;
     this.win.document.documentElement.className = '';
-    this.win.document.documentElement.classList.add('-amp-ios-embed');
+    this.win.document.documentElement.classList.add('i-amphtml-ios-embed');
 
     /** @private @const {!Element} */
     this.wrapper_ = this.win.document.createElement('html');
-    this.wrapper_.id = 'i-amp-html-wrapper';
+    this.wrapper_.id = 'i-amphtml-wrapper';
     this.wrapper_.className = topClasses;
 
     /** @private @const {!Observable} */

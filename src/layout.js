@@ -118,7 +118,7 @@ export function parseLayout(s) {
  * @return {string}
  */
 export function getLayoutClass(layout) {
-  return '-amp-layout-' + layout;
+  return 'i-amphtml-layout-' + layout;
 }
 
 
