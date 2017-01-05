@@ -37,41 +37,41 @@ export class AstNode {
 
 /**
  * Type of a node in the AST of a `BindExpression`.
- * @enum {string}
+ * @enum {number}
  */
 export const AstNodeType = {
   // Grammar rules.
-  EXPRESSION: 'expression',
-  INVOCATION: 'invocation',
-  ARGS: 'args',
-  MEMBER_ACCESS: 'member_access',
-  MEMBER: 'member',
-  VARIABLE: 'variable',
-  LITERAL: 'literal',
-  ARRAY_LITERAL: 'array_literal',
-  ARRAY: 'array',
-  OBJECT_LITERAL: 'object_literal',
-  OBJECT: 'object',
-  KEY_VALUE: 'key_value',
+  EXPRESSION: 0,
+  INVOCATION: 1,
+  ARGS: 2,
+  MEMBER_ACCESS: 3,
+  MEMBER: 4,
+  VARIABLE: 5,
+  LITERAL: 6,
+  ARRAY_LITERAL: 7,
+  ARRAY: 8,
+  OBJECT_LITERAL: 9,
+  OBJECT: 10,
+  KEY_VALUE: 11,
   // Instead of using having an OPERATION type with subtypes, flatten and use
   // the operation types directly.
-  NOT: 'not',
-  UNARY_MINUS: 'unary_minus',
-  UNARY_PLUS: 'unary_plus',
-  PLUS: 'plus',
-  MINUS: 'minus',
-  MULTIPLY: 'multiply',
-  DIVIDE: 'divide',
-  MODULO: 'modulo',
-  LOGICAL_AND: 'logical_and',
-  LOGICAL_OR: 'logical_or',
-  LESS_OR_EQUAL: 'less_or_equal',
-  LESS: 'less',
-  GREATER_OR_EQUAL: 'greater_or_equal',
-  GREATER: 'greater',
-  NOT_EQUAL: 'not_equal',
-  EQUAL: 'equal',
-  TERNARY: 'ternary',
+  NOT: 12,
+  UNARY_MINUS: 13,
+  UNARY_PLUS: 14,
+  PLUS: 15,
+  MINUS: 16,
+  MULTIPLY: 17,
+  DIVIDE: 18,
+  MODULO: 19,
+  LOGICAL_AND: 20,
+  LOGICAL_OR: 21,
+  LESS_OR_EQUAL: 22,
+  LESS: 23,
+  GREATER_OR_EQUAL: 24,
+  GREATER: 25,
+  NOT_EQUAL: 26,
+  EQUAL: 27,
+  TERNARY: 28,
 };
 
 /**

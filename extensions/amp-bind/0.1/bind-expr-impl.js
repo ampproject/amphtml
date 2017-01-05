@@ -203,7 +203,7 @@ case 25:
 break;
 case 26:
 
-        this.$ = new AstNode(AstNodeType.INVOCATION, [$$[$0-3], $$[$0-1], $$[$0]]);
+        this.$ = new AstNode(AstNodeType.INVOCATION, [$$[$0-3], $$[$0]], $$[$0-1]);
       
 break;
 case 27:

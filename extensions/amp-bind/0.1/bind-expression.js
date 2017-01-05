@@ -112,15 +112,15 @@ export class BindExpression {
 
       case AstNodeType.INVOCATION:
         const caller = this.eval_(args[0], scope);
-        const method = args[1];
-        const params = this.eval_(args[2], scope);
+        const params = this.eval_(args[1], scope);
+        const method = String(value);
 
         const callerType = Object.prototype.toString.call(caller);
         const whitelist = FUNCTION_WHITELIST[callerType];
         if (whitelist) {
           const func = caller[method];
           if (func && func === whitelist[method]) {
-            if (!this.containsObject_(params)) {
+            if (Array.isArray(params) && !this.containsObject_(params)) {
               return func.apply(caller, params);
             } else {
               throw new Error(`Unexpected argument type in ${method}().`);
@@ -132,12 +132,21 @@ export class BindExpression {
       case AstNodeType.MEMBER_ACCESS:
         const target = this.eval_(args[0], scope);
         const member = this.eval_(args[1], scope);
+
         if (target === null || member === null) {
           return null;
         }
+        const targetType = typeof target;
+        if (targetType !== 'string' && targetType !== 'object') {
+          return null;
+        }
         const memberType = typeof member;
-        const validType = (memberType === 'string' || memberType === 'number');
-        if (validType && Object.prototype.hasOwnProperty.call(target, member)) {
+        if (memberType !== 'string' && memberType !== 'number') {
+          return null;
+        }
+        // Ignore Closure's type constraint for `hasOwnProperty`.
+        if (Object.prototype.hasOwnProperty.call(
+              /** @type {Object} */ (target), member)) {
           return target[member];
         }
         return null;
@@ -182,26 +191,29 @@ export class BindExpression {
         return !this.eval_(args[0], scope);
 
       case AstNodeType.UNARY_MINUS:
-        return -this.eval_(args[0], scope);
+        return -Number(this.eval_(args[0], scope));
 
       case AstNodeType.UNARY_PLUS:
-        /*eslint no-implicit-coercion: 0*/
-        return +this.eval_(args[0], scope);
+        return +Number(this.eval_(args[0], scope));
 
       case AstNodeType.PLUS:
         return this.eval_(args[0], scope) + this.eval_(args[1], scope);
 
       case AstNodeType.MINUS:
-        return this.eval_(args[0], scope) - this.eval_(args[1], scope);
+        return Number(this.eval_(args[0], scope)) -
+            Number(this.eval_(args[1], scope));
 
       case AstNodeType.MULTIPLY:
-        return this.eval_(args[0], scope) * this.eval_(args[1], scope);
+        return Number(this.eval_(args[0], scope)) *
+            Number(this.eval_(args[1], scope));
 
       case AstNodeType.DIVIDE:
-        return this.eval_(args[0], scope) / this.eval_(args[1], scope);
+        return Number(this.eval_(args[0], scope)) /
+            Number(this.eval_(args[1], scope));
 
       case AstNodeType.MODULO:
-        return this.eval_(args[0], scope) % this.eval_(args[1], scope);
+        return Number(this.eval_(args[0], scope)) %
+            Number(this.eval_(args[1], scope));
 
       case AstNodeType.LOGICAL_AND:
         return this.eval_(args[0], scope) && this.eval_(args[1], scope);

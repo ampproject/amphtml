@@ -174,7 +174,7 @@ operation:
 invocation:
     expr '.' NAME args
       %{
-        $$ = new AstNode(AstNodeType.INVOCATION, [$1, $3, $4]);
+        $$ = new AstNode(AstNodeType.INVOCATION, [$1, $4], $3);
       %}
   ;
 
