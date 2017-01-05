@@ -72,7 +72,8 @@ class OutputFormatter(object):
     """Initializes the indenter with indent 0."""
     self.lines = lines
     self.indent_by_ = [0]
-    self.tag_id_ = 0
+    self.next_tagspec_id_ = 0
+    self.tag_spec_id_by_tag_name_ = {}
     self.object_id_ = 0
 
   def PushIndent(self, indent):
@@ -87,13 +88,13 @@ class OutputFormatter(object):
     """Adds a line to self.lines, applying the indent."""
     self.lines.append('%s%s' % (' ' * self.indent_by_[-1], line))
 
-  def NextTagId(self):
-    """Returns the next unallocated tag id. Does not increment."""
-    return self.tag_id_
+  def TagIdForTagName(self, tag_name):
+    """Returns the TagId allocated for tag_name or allocates a new one."""
+    if tag_name not in self.tag_spec_id_by_tag_name_:
+      self.tag_spec_id_by_tag_name_[tag_name] = self.next_tagspec_id_
+      self.next_tagspec_id_ += 1
 
-  def IncrementTagId(self):
-    """Increments the next unallocated tag id. Does not increment."""
-    self.tag_id_ += 1
+    return self.tag_spec_id_by_tag_name_[tag_name]
 
   def NextObjectId(self):
     """Returns the next unallocated object id. Does not increment."""
@@ -322,10 +323,11 @@ def PrintClassFor(descriptor, msg_desc, out):
         elif field.type == descriptor.FieldDescriptor.TYPE_INT32:
           assigned_value = str(field.default_value)
         # TODO(johannes): Increase coverage for default values, e.g. enums.
-
-        out.Line('/**%s @type {%s} */' % (
-            export_or_empty,
-            FieldTypeFor(descriptor, field, nullable=assigned_value == 'null')))
+        type_name = FieldTypeFor(
+            descriptor, field, nullable=assigned_value == 'null')
+        if field.name in ['also_requires_tag', 'also_requires_tag_warning']:
+          type_name = '!Array<number>'
+        out.Line('/**%s @type {%s} */' % (export_or_empty, type_name))
         out.Line('this.%s = %s;' % (UnderscoreToCamelCase(field.name),
                                     assigned_value))
     out.PopIndent()
@@ -402,6 +404,23 @@ def FieldAndAssignedValues(descriptor, msg, out):
   return field_and_assigned_values
 
 
+def TagSpecName(tag_spec):
+  """Generates a name for a given TagSpec. This should be unique.
+
+  Same logic as getTagSpecName(tagSpec) in javascript. We choose the spec_name
+  if one is set, otherwise use the lower cased version of the tagname
+
+  Args:
+    tag_spec: A TagSpec protocol message instance.
+
+  Returns:
+    This TagSpec's name (string).
+  """
+  if tag_spec.HasField('spec_name'):
+    return tag_spec.spec_name
+  return tag_spec.tag_name.lower()
+
+
 def PrintTagSpec(descriptor, tag_spec, out):
   """Prints an TagSpec, by recursively constructing it.
 
@@ -419,8 +438,7 @@ def PrintTagSpec(descriptor, tag_spec, out):
     This TagSpec's tagspec id, that is, the consumed variable for creating
     TagSpec objects.
   """
-  this_id = out.NextTagId()
-  out.IncrementTagId()
+  this_id = out.TagIdForTagName(TagSpecName(tag_spec))
 
   field_and_assigned_values = FieldAndAssignedValues(descriptor, tag_spec, out)
 
@@ -428,8 +446,26 @@ def PrintTagSpec(descriptor, tag_spec, out):
   out.Line("var tag_%d = new amp.validator.TagSpec(%d, '%s');" %
            (this_id, this_id, tag_name))
 
+  if tag_spec.also_requires_tag:
+    also_required_tags = []
+    for also_required_tag in tag_spec.also_requires_tag:
+      also_required_tags.append(str(out.TagIdForTagName(also_required_tag)))
+    out.Line('tag_%d.alsoRequiresTag = [%s];' %
+             (this_id, ','.join(also_required_tags)))
+  if tag_spec.also_requires_tag_warning:
+    with GenerateDetailedErrorsIf(True, out):
+      also_required_tag_warnings = []
+      for also_required_tag_warning in tag_spec.also_requires_tag_warning:
+        also_required_tag_warnings.append(
+            str(out.TagIdForTagName(also_required_tag_warning)))
+      out.Line('tag_%d.alsoRequiresTagWarning = [%s];' %
+               (this_id, ','.join(also_required_tag_warnings)))
+
   for (field, value) in field_and_assigned_values:
-    if field.full_name != 'amp.validator.TagSpec.tag_name':
+    if field.full_name not in [
+        'amp.validator.TagSpec.tag_name',
+        'amp.validator.TagSpec.also_requires_tag',
+        'amp.validator.TagSpec.also_requires_tag_warning']:
       with GenerateDetailedErrorsIf(field.name in SKIP_FIELDS_FOR_LIGHT, out):
         out.Line('tag_%d.%s = %s;' % (this_id,
                                       UnderscoreToCamelCase(field.name), value))
@@ -527,6 +563,12 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   # message of type ValidatorRules.
   rules = validator_pb2.ValidatorRules()
   text_format.Merge(open(specfile).read(), rules)
+
+  # Build a mapping from TagSpec name (unique string) to a TagSpec Id
+  # (shorter, unique integer).
+  for tag_spec in rules.tags:
+    out.TagIdForTagName(TagSpecName(tag_spec))
+
   out.Line('/**')
   out.Line(' * @return {!%s}' % rules.DESCRIPTOR.full_name)
   out.Line(' */')

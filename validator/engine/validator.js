@@ -651,16 +651,6 @@ class ParsedTagSpec {
      */
     this.requires_ = [];
     /**
-     * @type {!Array<number>}
-     * @private
-     */
-    this.alsoRequiresTag_ = [];
-    /**
-     * @type {!Array<number>}
-     * @private
-     */
-    this.alsoRequiresTagWarning_ = [];
-    /**
      * @type {ParsedAttrSpec}
      * @private
      */
@@ -704,14 +694,6 @@ class ParsedTagSpec {
 
     for (const condition of tagSpec.requires) {
       this.requires_.push(condition);
-    }
-    for (const tagSpecName of tagSpec.alsoRequiresTag) {
-      this.alsoRequiresTag_.push(tagSpecIdsByTagSpecName[tagSpecName]);
-    }
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      for (const tagSpecName of tagSpec.alsoRequiresTagWarning) {
-        this.alsoRequiresTagWarning_.push(tagSpecIdsByTagSpecName[tagSpecName]);
-      }
     }
   }
 
@@ -775,7 +757,7 @@ class ParsedTagSpec {
    * @return {!Array<number>}
    */
   getAlsoRequiresTag() {
-    return this.alsoRequiresTag_;
+    return this.spec_.alsoRequiresTag;
   }
 
   /**
@@ -787,7 +769,7 @@ class ParsedTagSpec {
    */
   getAlsoRequiresTagWarning() {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      return this.alsoRequiresTagWarning_;
+      return this.spec_.alsoRequiresTagWarning;
     } else {
       return [];
     }
@@ -2729,16 +2711,16 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  * - Unique tags
  * - Tags (identified by their TagSpecName() that are required by other tags.
  * @param {!amp.validator.TagSpec} tag
- * @param {!Object<string, ?>} tagSpecNamesToTrack
+ * @param {!Object<number, boolean>} tagSpecIdsToTrack
  * @return {boolean}
  */
-function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
+function shouldRecordTagspecValidated(tag, tagSpecIdsToTrack) {
   if (amp.validator.GENERATE_DETAILED_ERRORS) {
     return tag.mandatory || tag.unique || tag.uniqueWarning ||
-        tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
+        tagSpecIdsToTrack.hasOwnProperty(tag.tagSpecId);
   } else {
     return tag.mandatory || tag.unique ||
-        tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
+        tagSpecIdsToTrack.hasOwnProperty(tag.tagSpecId);
   }
 }
 
@@ -3710,24 +3692,24 @@ class ParsedValidatorRules {
 
     /** @type {!Object<string, number>} */
     const tagSpecIdsByTagSpecName = {};
-    /** @type {!Object<string, boolean>} */
-    const tagSpecNamesToTrack = {};
+    /** @type {!Object<number, boolean>} */
+    const tagSpecIdsToTrack = {};
     for (const tag of this.rules_.tags) {
       const tagSpecName = getTagSpecName(tag);
       goog.asserts.assert(!tagSpecIdsByTagSpecName.hasOwnProperty(tagSpecName));
       tagSpecIdsByTagSpecName[tagSpecName] = tag.tagSpecId;
       if (tag.alsoRequiresTag.length > 0) {
-        tagSpecNamesToTrack[tagSpecName] = true;
+        tagSpecIdsToTrack[tag.tagSpecId] = true;
       }
       for (const alsoRequiresTag of tag.alsoRequiresTag) {
-        tagSpecNamesToTrack[alsoRequiresTag] = true;
+        tagSpecIdsToTrack[alsoRequiresTag] = true;
       }
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         if (tag.alsoRequiresTagWarning.length > 0) {
-          tagSpecNamesToTrack[tagSpecName] = true;
+          tagSpecIdsToTrack[tag.tagSpecId] = true;
         }
         for (const alsoRequiresTagWarning of tag.alsoRequiresTagWarning) {
-          tagSpecNamesToTrack[alsoRequiresTagWarning] = true;
+          tagSpecIdsToTrack[alsoRequiresTagWarning] = true;
         }
       }
     }
@@ -3738,7 +3720,7 @@ class ParsedValidatorRules {
       const parsedTagSpec = new ParsedTagSpec(
           this.rules_.templateSpecUrl, this.parsedAttrSpecs_,
           tagSpecIdsByTagSpecName,
-          shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag);
+          shouldRecordTagspecValidated(tag, tagSpecIdsToTrack), tag);
       this.tagSpecById_[tag.tagSpecId] = parsedTagSpec;
       if (!parsedTagSpec.isReferencePoint()) {
         if (!this.tagSpecByTagName_.hasOwnProperty(tag.tagName)) {
