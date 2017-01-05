@@ -18,15 +18,29 @@ limitations under the License.
 
 ## Example
 
+### Normal ad
+
 ```html
-<amp-ad width=300 height=250
+<amp-ad width="300" height="250"
     type="valuecommerce"
     data-sid="99999999"
     data-pid="99999999"
-    data-vcptn="vpc605"
-    data-om="0">
+    data-vcptn="test">
 </amp-ad>
 ```
+
+### Omakase ad
+
+```html
+<amp-ad width="300" height="250"
+    type="valuecommerce"
+    data-pid="99999999"
+    data-vcptn="test"
+    data-om="1">
+</amp-ad>
+```
+
+###
 
 ## Configuration
 
