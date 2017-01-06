@@ -828,11 +828,11 @@ export class BaseElement {
 
   /**
    * Called when one or more attributes are mutated.
-   * Must be invoked during `mutator` block in `Resources#mutateElement`.
-   * Boolean attributes have a value of empty string and `null` when
-   * present and missing, respectively.
+   * @note Must be called inside a mutate context.
+   * @note Boolean attributes have a value of '' and null when
+   *       present and missing, respectively.
    * @param {
-   *   !Array<{name: string, oldValue: ?string, newValue: ?string}>
+   *   !Array<{name: string, value: (null|boolean|string|number|Array|Object)}>
    * } unusedMutations
    */
   mutatedAttributesCallback(unusedMutations) {

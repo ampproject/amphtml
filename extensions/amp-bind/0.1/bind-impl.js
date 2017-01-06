@@ -229,7 +229,7 @@ export class Bind {
       const {element, bindings} = boundElement;
 
       this.resources_.mutateElement(element, () => {
-        const attributeChanges = [];
+        const mutations = [];
         let width, height;
 
         bindings.forEach(binding => {
@@ -242,9 +242,9 @@ export class Bind {
             binding.previousResult = newValue;
           }
 
-          const attrChange = this.applyBinding_(binding, element, newValue);
-          if (attrChange) {
-            attributeChanges.push(attrChange);
+          const mutation = this.applyBinding_(binding, element, newValue);
+          if (mutation) {
+            mutations.push(mutation);
           }
 
           switch (binding.property) {
@@ -265,7 +265,7 @@ export class Bind {
         }
 
         if (typeof element.mutatedAttributesCallback === 'function') {
-          element.mutatedAttributesCallback(attributeChanges);
+          element.mutatedAttributesCallback(mutations);
         }
       });
     });
@@ -276,7 +276,7 @@ export class Bind {
    * @param {!BindingDef} binding
    * @param {!Element} element
    * @param {./bind-expression.BindExpressionResultDef} newValue
-   * @return ({name: string, oldValue: ?string, newValue:?string}|null)
+   * @return (?{name: string, value:./bind-expression.BindExpressionResultDef})
    * @private
    */
   applyBinding_(binding, element, newValue) {
@@ -301,7 +301,7 @@ export class Bind {
         } else if (typeof newValue === 'string') {
           element.className = ampClasses.join(' ') + ' ' + newValue;
         } else {
-          user().error(TAG, 'Invalid result for class binding', newValue);
+          user().error(TAG, 'Invalid result for [class]', newValue);
         }
         break;
 
@@ -320,11 +320,7 @@ export class Bind {
         }
 
         if (attributeChanged) {
-          return {
-            name: property,
-            oldValue,
-            newValue: element.getAttribute(property),
-          };
+          return {name: property, value: newValue};
         }
         break;
     }
