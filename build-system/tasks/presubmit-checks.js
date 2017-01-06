@@ -490,8 +490,6 @@ var forbiddenTerms = {
       'src/service-worker/error-reporting.js',
       'src/mode.js',
       'src/experiments.js',
-      'src/error.js',
-      'src/3p-frame.js',
       'src/config.js',
       'dist.3p/current/integration.js',
     ],
