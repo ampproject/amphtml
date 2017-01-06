@@ -24,7 +24,6 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
-import {timerFor} from '../../../src/timer';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/video-manager';
