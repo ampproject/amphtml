@@ -25,7 +25,6 @@ import {
   SAFEFRAME_IMPL_PATH,
   protectFunctionWrapper,
 } from '../amp-a4a';
-import {signingServerURLs} from '../../../../ads/_a4a-config';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
