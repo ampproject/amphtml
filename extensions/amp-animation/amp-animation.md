@@ -105,16 +105,63 @@ media query will match the current environment.
 Top-level animation and animation components may contain timing properties. These properties are defined in detail in the
 [AnimationEffectTimingProperties](https://www.w3.org/TR/web-animations/#dictdef-animationeffecttimingproperties) of the Web Animation spec. The set of properties allowed here includes:
 
-Property | Type | Default | Description
--------- | ---- | ------- | -----------
-`duration` | number | 0 | The animation duration in milliseconds
-`delay` | number | 0 | The delay in milliseconds before animation starts executing
-`endDelay` | number | 0 | The delay in milliseconds after animation completes and before it's actually considered to be complete
-`iterations` | number or "Infinity" | 1 | The number of times to the animation effect repeats
-`iterationStart` | number | 0 | The time offset at which the effect begins animating
-`easing` | string | "linear" | The [timing function](https://www.w3.org/TR/web-animations/#timing-function) used to scale the time to produce easing effects
-`direction` | string | "normal" | One of "normal", "reverse", "alternate" or "alternate-reverse"
-`fill` | string | "none" | One of "none", "forwards", "backwards", "both", "auto"
+
+<table>
+  <tr>
+    <th class="col-twenty">Property</th>
+    <th class="col-twenty">Type</th>
+    <th class="col-twenty">Default</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>duration</code></td>
+    <td>number</td>
+    <td>0</td>
+    <td>The animation duration in milliseconds.</td>
+  </tr>
+  <tr>
+    <td><code>delay</code></td>
+    <td>number</td>
+    <td>0</td>
+    <td>The delay in milliseconds before animation starts executing.</td>
+  </tr>
+  <tr>
+    <td><code>endDelay</code></td>
+    <td>number</td>
+    <td>0</td>
+    <td>The delay in milliseconds after the animation completes and before it's actually considered to be complete.</td>
+  </tr>
+  <tr>
+    <td><code>iterations</code></td>
+    <td>number or<br>"Infinity"</td>
+    <td>1</td>
+    <td>The number of times the animation effect repeats.</td>
+  </tr>
+  <tr>
+    <td><code>iterationStart</code></td>
+    <td>number</td>
+    <td>0</td>
+    <td>The time offset at which the effect begins animating.</td>
+  </tr>
+  <tr>
+    <td><code>easing</code></td>
+    <td>string</td>
+    <td>"linear"</td>
+    <td>The <a href="https://www.w3.org/TR/web-animations/#timing-function">timing function</a> used to scale the time to produce easing effects.</td>
+  </tr>
+  <tr>
+    <td><code>direction</code></td>
+    <td>string</td>
+    <td>"normal" </td>
+    <td>One of "normal", "reverse", "alternate" or "alternate-reverse".</td>
+  </tr>
+  <tr>
+    <td><code>fill</code></td>
+    <td>string</td>
+    <td>"none"</td>
+    <td>One of "none", "forwards", "backwards", "both", "auto".</td>
+  </tr>
+</table>
 
 An example of timing properties in JSON:
 ```text
