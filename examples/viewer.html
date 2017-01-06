@@ -236,9 +236,6 @@
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
 
-      // Notice that name can only be set once the IFrame is in the DOM.
-      this.iframe.contentWindow.name = APP + paramsStr(params);
-
       this.awaitHandshake_();
 
       this.iframe.onload = this.loaded_.bind(this);

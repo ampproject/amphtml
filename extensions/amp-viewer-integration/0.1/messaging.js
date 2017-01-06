@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 
+import {MessagingErrorLogger} from './messaging-error-logger.js';
 import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
@@ -69,6 +70,8 @@ export class Messaging {
     this.targetOrigin_ = targetOrigin;
     /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
     this.requestProcessor_ = null;
+    /** @private {?MessagingErrorLogger} */
+    this.errorLogger_ = null;
 
     dev().assert(this.targetOrigin_, 'Target origin must be specified!');
 
@@ -84,11 +87,15 @@ export class Messaging {
   handleMessage_(event) {
     if (!event || event.source != this.target_ ||
       event.origin != this.targetOrigin_) {
+      this.logError_(TAG +
+        ': handleMessage_ failed. This message is not for us: ', event);
       return;
     }
     /** @type {Message} */
     const message = event.data;
     if (message.app != APP) {
+      this.logError_(
+        TAG + ': handleMessage_ failed, wrong APP: ', event);
       return;
     }
     if (message.type == MessageType_.REQUEST) {
@@ -106,7 +113,7 @@ export class Messaging {
    * @return {!Promise<*>|undefined}
    */
   sendRequest(eventType, data, awaitResponse) {
-    dev().info(TAG, 'messaging.js -> sendRequest, eventType: ', eventType);
+    dev().info(TAG, 'sendRequest, eventType: ', eventType);
     const requestId = ++this.requestIdCounter_;
     let promise = undefined;
     if (awaitResponse) {
@@ -127,7 +134,7 @@ export class Messaging {
    * @private
    */
   sendResponse_(requestId, name, data) {
-    dev().info(TAG, 'messaging.js -> sendResponse_');
+    dev().info(TAG, 'sendResponse_');
     this.sendMessage_(
       requestId, MessageType_.RESPONSE, name, data, null, null);
   }
@@ -162,6 +169,8 @@ export class Messaging {
    * @private
    */
   sendResponseError_(requestId, name, reason) {
+    this.logError_(
+      TAG + ': sendResponseError_, Message name: ' + name, reason);
     this.sendMessage_(
       requestId, MessageType_.RESPONSE, name, null, null, reason);
   }
@@ -174,7 +183,7 @@ export class Messaging {
    * @private
    */
   handleRequest_(message) {
-    dev().info(TAG, 'messaging.js -> handleRequest_', message);
+    dev().info(TAG, 'handleRequest_', message);
     dev().assert(this.requestProcessor_,
       'Cannot handle request because handshake is not yet confirmed!');
     const requestId = message.requestid;
@@ -202,12 +211,13 @@ export class Messaging {
    * @private
    */
   handleResponse_(message) {
-    dev().info(TAG, 'messaging.js -> handleResponse_');
+    dev().info(TAG, 'handleResponse_');
     const requestId = message.requestid;
     const pending = this.waitingForResponse_[requestId];
     if (pending) {
       delete this.waitingForResponse_[requestId];
       if (message.error) {
+        this.logError_(TAG + ': handleResponse_ error: ', message.error);
         pending.reject(/** @type {!Error} */ (message.error));
       } else {
         pending.resolve(message.data);
@@ -222,5 +232,22 @@ export class Messaging {
   setRequestProcessor(requestProcessor) {
     dev().info(TAG, 'setRequestProcessor');
     this.requestProcessor_ = requestProcessor;
+  }
+
+  /**
+   * @param {MessagingErrorLogger} errorLogger
+   */
+  setErrorLogger(errorLogger) {
+    this.errorLogger_ = errorLogger;
+  }
+
+  /**
+   * @param {string} msg
+   * @param {?Object} opt_data
+   */
+  logError_(msg, opt_data) {
+    if (this.errorLogger_) {
+      this.errorLogger_.logError(msg, opt_data);
+    }
   }
 }

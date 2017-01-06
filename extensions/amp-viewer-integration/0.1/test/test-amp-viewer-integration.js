@@ -151,10 +151,17 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         reject: rejectSpy,
       }};
 
+      const logErrorSpy = sandbox.stub(messaging, 'logError_');
       sandbox.stub(messaging, 'waitingForResponse_', waitingForResponse);
       messaging.handleMessage_(event);
 
       expect(rejectSpy).to.have.been.calledOnce;
+
+      expect(logErrorSpy).to.have.been.calledOnce;
+
+      expect(logErrorSpy).to.have.been.calledWith(
+        'amp-viewer-messaging: handleResponse_ error: ',
+        'reason');
     });
 
     it('sendRequest should call postMessage correctly', () => {
@@ -201,7 +208,9 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       const mName = 'name';
       const reason = 'reason';
       const requestId = 1;
+      const logErrorSpy = sandbox.stub(messaging, 'logError_');
       messaging.sendResponseError_(requestId, mName, reason);
+
       return postMessagePromise.then(function() {
         expect(postMessageSpy).to.have.been.calledOnce;
         expect(postMessageSpy).to.have.been.calledWith({
@@ -213,6 +222,11 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           rsvp: null,
           type: 's',
         });
+
+        expect(logErrorSpy).to.have.been.calledOnce;
+        expect(logErrorSpy).to.have.been.calledWith(
+          'amp-viewer-messaging: sendResponseError_, Message name: name',
+          'reason');
       });
     });
   });
