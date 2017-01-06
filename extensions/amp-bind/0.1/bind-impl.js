@@ -36,7 +36,7 @@ const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
  * `previousResult` is the result of this expression during the last digest.
  * @typedef {{
  *   property: string,
- *   expression: string,
+ *   expressionString: string,
  *   previousResult: (./bind-expression.BindExpressionResultDef|undefined),
  * }}
  */
@@ -154,7 +154,7 @@ export class Bind {
           evaluatees.push({
             tagName: element.tagName,
             property: binding.property,
-            expressionString: binding.expression,
+            expressionString: binding.expressionString,
           });
         }
       }
@@ -178,7 +178,7 @@ export class Bind {
     if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
       const property = name.substr(1, name.length - 2);
       // TODO(choumx): Validate that (unusedElement, attribute) can be bound.
-      return {property, expression: attribute.value};
+      return {property, expressionString: attribute.value};
     }
     return null;
   }
@@ -193,7 +193,7 @@ export class Bind {
   digest_(opt_verifyOnly) {
     this.evaluatePromise_ = this.evaluator_.evaluate(this.scope_);
     this.evaluatePromise_.then(results => {
-      if (!!opt_verifyOnly) {
+      if (opt_verifyOnly) {
         this.verify_(results);
       } else {
         this.apply_(results);
@@ -213,7 +213,7 @@ export class Bind {
       const {element, bindings} = boundElement;
 
       bindings.forEach(binding => {
-        const newValue = results[binding.expression];
+        const newValue = results[binding.expressionString];
         this.verifyBinding_(binding, element, newValue);
       });
     });
@@ -233,7 +233,7 @@ export class Bind {
         let width, height;
 
         bindings.forEach(binding => {
-          const newValue = results[binding.expression];
+          const newValue = results[binding.expressionString];
 
           // Don't apply mutation if the result hasn't changed.
           if (this.shallowEquals_(newValue, binding.previousResult)) {

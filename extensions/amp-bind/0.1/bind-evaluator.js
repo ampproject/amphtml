@@ -53,7 +53,6 @@ export class BindEvaluator {
         this.evaluatees_.push({
           tagName: e.tagName,
           property: e.property,
-          expressionString: e.expressionString,
           expression,
         });
       }
@@ -72,7 +71,7 @@ export class BindEvaluator {
     return new Promise(resolve => {
       const cache = {};
       this.evaluatees_.forEach(evaluatee => {
-        const string = evaluatee.expressionString;
+        const string = evaluatee.expression.expressionString;
         if (cache[string] === undefined) {
           try {
             cache[string] = evaluatee.expression.evaluate(scope);

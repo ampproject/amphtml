@@ -48,8 +48,8 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    mutations.forEach(mutation => {
-      const name = mutation.name;
+    for (let i = 0; i < mutations.length; i++) {
+      const name = mutations[i].name;
 
       if (name == 'src') {
         this.srcset_ = srcsetFromElement(this.element);
@@ -61,7 +61,7 @@ export class AmpImg extends BaseElement {
         this.propagateAttributes(
           name, this.img_, /* opt_removeMissingAttrs */ true);
       }
-    });
+    }
   }
 
   /** @override */
