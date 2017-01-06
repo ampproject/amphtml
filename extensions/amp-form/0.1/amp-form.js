@@ -155,6 +155,8 @@ export class AmpForm {
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
+    // TODO(mkhatib, #6927): Wait for amp-selector to finish loading if the current form
+    // is using it.
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this));
     this.installEventHandlers_();
@@ -291,6 +293,11 @@ export class AmpForm {
       // Non-xhr GET requests replacement should happen synchronously.
       for (let i = 0; i < varSubsFields.length; i++) {
         this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
+      }
+
+      // If this wasn't a submission event, trigger form submit.
+      if (!opt_event) {
+        this.form_.submit();
       }
     }
   }

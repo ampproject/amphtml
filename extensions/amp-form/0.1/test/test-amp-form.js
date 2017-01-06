@@ -1044,6 +1044,7 @@ describe('amp-form', () => {
         canonicalUrlField.setAttribute('data-amp-replace', 'CANONICAL_URL');
         canonicalUrlField.value = 'CANONICAL_URL';
         form.appendChild(canonicalUrlField);
+        sandbox.stub(form, 'submit');
         sandbox.stub(form, 'checkValidity').returns(true);
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
@@ -1058,6 +1059,7 @@ describe('amp-form', () => {
         expect(ampForm.urlReplacement_.expandInputValueSync)
             .to.have.been.calledWith(canonicalUrlField);
         return timer.promise(10).then(() => {
+          expect(form.submit).to.have.been.called;
           expect(clientIdField.value).to.equal('');
           expect(canonicalUrlField.value).to.equal('about%3Asrcdoc');
         });
@@ -1164,6 +1166,39 @@ describe('amp-form', () => {
           expect(errors[0]).to.match(/Form submission failed/);
           expect(env.win.top.location.href).to.be.equal(redirectToValue);
         });
+      });
+    });
+  });
+
+  describe('non-XHR GET', () => {
+    it('should execute form submit when not triggered through event', () => {
+      return getAmpForm().then(ampForm => {
+        const form = ampForm.form_;
+        ampForm.method_ = 'GET';
+        ampForm.xhrAction_ = null;
+        sandbox.stub(form, 'submit');
+        sandbox.stub(form, 'checkValidity').returns(true);
+        sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+        ampForm.handleSubmit_();
+        expect(form.submit).to.have.been.called;
+      });
+    });
+
+    it('should not execute form submit when triggered through event', () => {
+      return getAmpForm().then(ampForm => {
+        const form = ampForm.form_;
+        ampForm.method_ = 'GET';
+        ampForm.xhrAction_ = null;
+        sandbox.stub(form, 'submit');
+        sandbox.stub(form, 'checkValidity').returns(true);
+        sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+        const event = {
+          stopImmediatePropagation: sandbox.spy(),
+          target: form,
+          preventDefault: sandbox.spy(),
+        };
+        ampForm.handleSubmit_(event);
+        expect(form.submit).to.have.not.been.called;
       });
     });
   });
