@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
@@ -78,8 +77,6 @@ export class AmpForm {
    * @param {string} id
    */
   constructor(element, id) {
-    installFormProxy(element);
-
     /** @private @const {string} */
     this.id_ = id;
 
