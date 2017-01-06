@@ -48,8 +48,7 @@ Javascript object you would pass in the ad request of a standard CSA request.
 <amp-ad 
     height=300
     type='csa'
-    data-afsh-page-options='{"pubId": "partner-vert-pla-pubid-pdp",
-    "query": "flowers"}'
+    data-afsh-page-options='{"pubId": "partner-vert-pla-pubid-pdp", "query": "flowers"}'
     data-afsh-adblock-options='{"width": "auto", "height": 300}'>
 </amp-ad>
 ```
@@ -72,11 +71,9 @@ attributes.
 <amp-ad 
     height=400
     type='csa'
-    data-afsh-page-options='{"pubId": "partner-vert-pla-pubid-pdp",
-    "query": "flowers"}'
+    data-afsh-page-options='{"pubId": "partner-vert-pla-pubid-pdp", "query": "flowers"}'
     data-afsh-adblock-options='{"width": "auto", "height": 400}'
-    data-afs-page-options='{"pubId": "partner-pub-id", "query": "flowers",
-    "channel": "backfill"}'
+    data-afs-page-options='{"pubId": "partner-pub-id", "query": "flowers", "channel": "backfill"}'
     data-afs-adblock-options='{"width": "auto"}'>
 </amp-ad>
 ```
