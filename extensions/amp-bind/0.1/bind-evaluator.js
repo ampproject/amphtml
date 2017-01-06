@@ -24,10 +24,18 @@ const TAG = 'AMP-BIND';
  *   tagName: string,
  *   property: string,
  *   expressionString: string,
- *   expression: (!BindExpression|undefined),
  * }}
  */
 export let EvaluateeDef;
+
+/**
+ * @typedef {{
+ *   tagName: string,
+ *   property: string,
+ *   expression: !BindExpression,
+ * }}
+ */
+let ParsedEvaluateeDef;
 
 /**
  * Asynchronously evaluates a set of Bind expressions.
@@ -37,7 +45,7 @@ export class BindEvaluator {
    * @param {!Array<EvaluateeDef>} evaluatees
    */
   constructor(evaluatees) {
-    /** @const {!Array<EvaluateeDef>} */
+    /** @const {!Array<ParsedEvaluateeDef>} */
     this.evaluatees_ = [];
 
     // TODO(choumx): Add expression result validation to this class.
