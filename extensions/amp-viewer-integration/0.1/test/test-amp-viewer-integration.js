@@ -93,7 +93,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           app: '__AMPHTML__',
           data: {},
           error: null,
-          name: null,
+          name: 'message',
           requestid: 1,
           rsvp: null,
           type: 's',
@@ -178,9 +178,10 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
     it('sendResponse_ should call postMessage correctly', () => {
+      const mName = 'name';
       const payload = {};
       const requestId = 1;
-      messaging.sendResponse_(requestId, payload);
+      messaging.sendResponse_(requestId, mName, payload);
 
       return postMessagePromise.then(function() {
         expect(postMessageSpy).to.have.been.calledOnce;
@@ -188,7 +189,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           app: '__AMPHTML__',
           data: {},
           error: null,
-          name: null,
+          name: mName,
           requestid: 1,
           rsvp: null,
           type: 's',
@@ -197,16 +198,17 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
     it('sendResponseError_ should call postMessage correctly', () => {
+      const mName = 'name';
       const reason = 'reason';
       const requestId = 1;
-      messaging.sendResponseError_(requestId, reason);
+      messaging.sendResponseError_(requestId, mName, reason);
       return postMessagePromise.then(function() {
         expect(postMessageSpy).to.have.been.calledOnce;
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: null,
           error: reason,
-          name: null,
+          name: mName,
           requestid: 1,
           rsvp: null,
           type: 's',
