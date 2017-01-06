@@ -50,7 +50,7 @@ const DEFAULT_MESSAGES = {
  *   articleId: string=
  * }}
  */
-let LaterpayConfig;
+let LaterpayConfigDef;
 
 /**
  * @typedef {{
@@ -64,17 +64,17 @@ let LaterpayConfig;
  *   validity_value: !number
  * }}
  */
-let PurchaseOption;
+let PurchaseOptionDef;
 
 /**
  * @typedef {{
  *   access: boolean,
  *   apl: string,
- *   premiumcontent: !PurchaseOption,
- *   timepasses: Array<PurchaseOption>=
+ *   premiumcontent: !PurchaseOptionDef,
+ *   timepasses: Array<PurchaseOptionDef>=
  * }}
  */
-let PurchaseConfig;
+let PurchaseConfigDef;
 
 
 /**
@@ -86,36 +86,36 @@ export class LaterpayVendor {
    * @param {!AccessService} accessService
    */
   constructor(accessService) {
-    /** @private @const {!AccessService} */
+    /** @const @private {!AccessService} */
     this.accessService_ = accessService;
 
-    /** @private @const {!Window} */
+    /** @const @private {!Window} */
     this.win_ = this.accessService_.win;
 
-    /** @private @const {!Document} */
+    /** @const @private {!Document} */
     this.doc_ = this.win_.document;
 
-    /** @private @const {!LaterpayConfig} */
+    /** @const @private {!LaterpayConfigDef} */
     this.laterpayConfig_ = this.accessService_.getAdapterConfig();
 
-    /** @private @const {!PurchaseConfig} */
+    /** @const @private {!PurchaseConfigDef} */
     this.purchaseConfig_ = null;
 
-    /** @private @const {?Function} */
+    /** @const @private {?Function} */
     this.purchaseButtonListener_ = null;
 
-    /** @private @const {?Function} */
+    /** @const @private {?Function} */
     this.alreadyPurchasedListener_ = null;
-    /** @private @const {!Array<Event>} */
+    /** @const @private {!Array<Event>} */
     this.purchaseOptionListeners_ = [];
 
-    /** @private @const {!boolean} */
+    /** @const @private {!boolean} */
     this.containerEmpty_ = true;
 
-    /** @private @const {?Node} */
+    /** @const @private {?Node} */
     this.selectedPurchaseOption_ = null;
 
-    /** @private @const {?Node} */
+    /** @const @private {?Node} */
     this.purchaseButton_ = null;
 
     const configUrl = (
@@ -141,10 +141,10 @@ export class LaterpayVendor {
     /** @const @private {!Timer} */
     this.timer_ = timerFor(this.win_);
 
-    /** @private @const {!Vsync} */
+    /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(this.win_);
 
-    /** @private @const {!Xhr} */
+    /** @const @private {!Xhr} */
     this.xhr_ = xhrFor(this.win_);
 
     installStyles(this.win_.document, CSS, () => {}, false, TAG);
@@ -186,7 +186,7 @@ export class LaterpayVendor {
    */
   getPurchaseConfig_() {
     const url = this.purchaseConfigBaseUrl_ +
-                '&article_title=' + this.getArticleTitle_();
+                '&article_title=' + encodeURIComponent(this.getArticleTitle_());
     const urlPromise = this.accessService_.buildUrl(
       url, /* useAuthData */ false);
     return urlPromise.then(url => {
@@ -280,7 +280,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!PurchaseOption} option
+   * @param {!PurchaseOptionDef} option
    * @param {!string} purchaseActionLabel
    * @return {!Node}
    * @private
@@ -307,7 +307,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!PurchaseOption} option
+   * @param {!PurchaseOptionDef} option
    * @param {!string} purchaseActionLabel
    * @return {!Node}
    * @private
