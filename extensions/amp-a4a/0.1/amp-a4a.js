@@ -613,7 +613,11 @@ export class AmpA4A extends AMP.BaseElement {
                   }
                   // Only report if signature is expected to match, given that
                   // multiple key providers could have been specified.
-                  if (verifyHashVersion(signature, keyInfo)) {
+                  // Note: the 'keyInfo &&' check here is not strictly
+                  // necessary, because we checked that above.  But
+                  // Closure type compiler can't seem to recognize that, so
+                  // this guarantees it to the compiler.
+                  if (keyInfo && verifyHashVersion(signature, keyInfo)) {
                     user().error(TAG, this.element.getAttribute('type'),
                         'Key failed to validate creative\'s signature',
                         keyInfo.serviceName, keyInfo.cryptoKey);
