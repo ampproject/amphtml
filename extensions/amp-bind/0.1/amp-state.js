@@ -59,7 +59,7 @@ export class AmpState extends AMP.BaseElement {
         const json = tryParseJson(children[0].textContent, e => {
           user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
         });
-        this.updateState_(json, true);
+        this.updateState_(json, /* opt_isInit */ true);
       } else {
         user().error(TAG,
             'State should be in a <script> tag with type="application/json"');
