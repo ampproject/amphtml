@@ -82,7 +82,7 @@ export class ViewerForTesting {
       height: this.containerEl./*OK*/offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
-      viewerorigin: parseUrl(window.location.href).origin,
+      origin: parseUrl(window.location.href).origin,
       csi: 1,
       cap: 'foo,a2a',
     };

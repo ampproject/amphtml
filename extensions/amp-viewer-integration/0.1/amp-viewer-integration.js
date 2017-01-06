@@ -52,7 +52,7 @@ export class AmpViewerIntegration {
   init() {
     dev().info(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
-    this.unconfirmedViewerOrigin_ = viewer.getParam('viewerorigin');
+    this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
     if (!this.unconfirmedViewerOrigin_) {
       dev().info(TAG, 'Viewer origin not specified.');
       return null;

@@ -43,7 +43,7 @@ function whenMessagingLoaded(callback) {
 
   if (window.parent && window.parent != window) {
     var handshakePromise = new Promise(function(resolve) {
-      var unconfirmedViewerOrigin = viewer.getParam('viewerorigin');
+      var unconfirmedViewerOrigin = viewer.getParam('origin');
       if (!unconfirmedViewerOrigin) {
         throw new Error('Expected viewer origin must be specified!');
       }
