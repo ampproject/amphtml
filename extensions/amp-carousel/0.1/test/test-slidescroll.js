@@ -933,5 +933,42 @@ describe('SlideScroll', () => {
         expect(showSlideSpy.callCount).to.equal(3);
       });
     });
+
+    it('should update slide when `slide` attribute is mutated', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+
+        impl.mutatedAttributesCallback([
+          {
+            name: 'slide',
+            oldValue: 0,
+            newValue: 2,
+          }
+        ]);
+        expect(showSlideSpy).to.have.been.calledWith(2);
+      });
+    });
+
+    it('should trigger `slide` action when user changes slides', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+
+        impl.goCallback(-1, /* animate */ false);
+        expect(triggerSpy).to.have.been.calledWith(
+            ampSlideScroll,
+            'slidechange',
+            /* CustomEvent */ sinon.match.has('detail', {slide: 4}));
+
+        impl.goCallback(1, /* animate */ false);
+        expect(triggerSpy).to.have.been.calledWith(
+            ampSlideScroll,
+            'slidechange',
+            /* CustomEvent */ sinon.match.has('detail', {slide: 0}));
+      });
+    });
   });
 });

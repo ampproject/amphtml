@@ -178,8 +178,11 @@ export class AmpSlideScroll extends BaseSlides {
       switch (mutation.name) {
         case 'slide':
           const slide = parseInt(newValue, 10);
-          user().assert(isFinite(slide), 'Invalid [slide] value: %s', newValue);
-          this.showSlide_(slide);
+          if (isFinite(slide)) {
+            this.showSlide_(slide);
+          } else {
+            user().fine('Invalid [slide] value: %s', newValue);
+          }
           break;
       }
     });

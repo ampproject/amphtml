@@ -60,9 +60,8 @@
     <h2>Linked carousels</h2>
     <p [text]="'Selected slide: ' + selectedSlide">Selected slide: None<p>
 
-    <!-- Default [slide] to 0 if `selectedSlide` is null. -->
     <amp-carousel controls type=slides width=400 height=300
-        [slide]="selectedSlide || 0"
+        [slide]="selectedSlide"
         on="slidechange:AMP.setState(selectedSlide=event.slide)">
       <amp-img src="https://ampbyexample.com/img/image1.jpg" width=400 height=300></amp-img>
       <amp-img src="https://ampbyexample.com/img/image2.jpg" width=400 height=300></amp-img>

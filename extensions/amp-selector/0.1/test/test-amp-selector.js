@@ -37,6 +37,7 @@ describes.realWin('amp-selector', {
     afterEach(() => {
       toggleExperiment(window, 'amp-selector', false);
     });
+
     function getSelector(options) {
       win = env.win;
       const attributes = options.attributes || {};
@@ -511,6 +512,53 @@ describes.realWin('amp-selector', {
       impl.clickHandler_(e);
       expect(setSelectionSpy).to.not.have.been.called;
       expect(clearSelectionSpy).to.not.have.been.called;
+    });
+
+    it('should update selection when `selected` attribute is mutated', () => {
+      const ampSelector = getSelector({
+        config: {
+          count: 5,
+          selectedCount: 1,
+        },
+      });
+
+      const impl = ampSelector.implementation_;
+      ampSelector.build();
+
+      expect(impl.options_[0].hasAttribute('selected')).to.be.true;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.false;
+
+      impl.mutatedAttributesCallback([{
+        name: 'selected',
+        oldValue: '0',
+        newValue: '3',
+      }]);
+
+      expect(impl.options_[0].hasAttribute('selected')).to.be.false;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+    });
+
+    it('should trigger `select` action when user selects an option', () => {
+      const ampSelector = getSelector({
+        config: {
+          count: 5,
+          selectedCount: 2,
+        },
+      });
+
+      const impl = ampSelector.implementation_;
+      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+      ampSelector.build();
+
+      let e = {
+        target: impl.options_[3],
+      };
+      impl.clickHandler_(e);
+
+      const eventMatcher =
+          sandbox.match.has('detail', sandbox.match.has('targetOption', '3'));
+      expect(triggerSpy).to.have.been.calledWith(
+          ampSelector, 'select', /* CustomEvent */ eventMatcher);
     });
   });
 });
