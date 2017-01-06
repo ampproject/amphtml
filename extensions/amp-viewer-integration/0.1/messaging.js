@@ -243,7 +243,7 @@ export class Messaging {
 
   /**
    * @param {string} msg
-   * @param {?Object} opt_data
+   * @param {*} opt_data
    */
   logError_(msg, opt_data) {
     if (this.errorLogger_) {
