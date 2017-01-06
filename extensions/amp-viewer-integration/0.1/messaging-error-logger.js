@@ -29,7 +29,7 @@ export class MessagingErrorLogger {
 
   /**
    * @param {string} e
-   * @param {Object} opt_data
+   * @param {*} opt_data
    */
   logError(e, opt_data) {
     if (!this.setState_) {
