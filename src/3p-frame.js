@@ -16,7 +16,7 @@
 
 import {dev, user} from './log';
 import {documentInfoForDoc} from './document-info';
-import {isExperimentOn, isCanary} from './experiments';
+import {isExperimentOn, experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from '../src/layout';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
