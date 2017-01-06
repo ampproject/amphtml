@@ -272,6 +272,7 @@ describe('amp-ad-3p-impl', () => {
         iframe.style.width = '300px';
         iframe.style.height = '200px';
         iframe.style.display = 'block';
+        iframe.style.minHeight = '0px';
 
         const stub = sandbox.stub(ad3p, 'getLayoutBox');
         const box = {
