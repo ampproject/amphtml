@@ -195,13 +195,6 @@ class AmpYoutube extends AMP.BaseElement {
     videoManagerForDoc(this.win.document).register(this);
 
     return this.loadPromise(iframe)
-        .then(() => {
-          // Make sure the YT player is ready for this. For some reason YT player
-          // would send couple of messages but then stop. Waiting for a bit before
-          // sending the 'listening' event seems to fix that and allow YT
-          // Player to send messages continuously.
-          return timerFor(this.win).promise(300);
-        })
         .then(() => this.listenToFrame_())
         .then(() => this.playerReadyPromise_);
   }
