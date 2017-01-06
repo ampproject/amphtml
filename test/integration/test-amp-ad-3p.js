@@ -38,7 +38,7 @@ describes.realWin('3P Ad', {
       });
     });
 
-    it.configure().run('create an iframe with APIs', function() {
+    it('create an iframe with APIs', function() {
       this.timeout(20000);
       let iframe;
       let ampAd;
