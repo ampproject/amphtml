@@ -33,6 +33,7 @@ import {domFingerprint} from './utils/dom-fingerprint';
  * has been moved from the iframe src hash to the iframe name attribute.
  */
 const iframeContextInName = isExperimentOn(self, '3p-frame-context-in-name');
+const sentinelNameChange = isExperimentOn(self, 'sentinel-name-change');
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -85,12 +86,13 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     mode: getModeObject(),
     canary: !!(parentWindow.AMP_CONFIG && parentWindow.AMP_CONFIG.canary),
     hidden: !viewer.isVisible(),
-    amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
     startTime,
     experimentToggles: experimentToggles(parentWindow),
   };
+  attributes._context[sentinelNameChange ? 'sentinel' : 'amp3pSentinel'] =
+      generateSentinel(parentWindow);
   Object.assign(attributes._context, opt_context);
   const adSrc = element.getAttribute('src');
   if (adSrc) {

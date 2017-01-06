@@ -237,6 +237,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6760',
     Spec: '',
   },
+  {
+    id: 'sentinel-name-change',
+    name: 'Changed sentinel name from amp3pSentinel to sentinel',
+    cleanupIssue: '',
+    Spec: '',
+  },
 ];
 
 if (getMode().localDev) {

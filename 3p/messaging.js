@@ -19,13 +19,18 @@
  * @param {string} type Type of messages
  * @param {*=} opt_object Data for the message.
  */
+import {isExperimentOn} from '../src/experiments';
+
+const sentinelNameChange = isExperimentOn(self, 'sentinel-name-change');
+
 export function nonSensitiveDataPostMessage(type, opt_object) {
   if (window.parent == window) {
     return;  // Nothing to do.
   }
   const object = opt_object || {};
   object.type = type;
-  object.sentinel = window.context.amp3pSentinel;
+  object.sentinel = sentinelNameChange ? window.context.sentinel :
+      window.context.amp3pSentinel;
   window.parent./*OK*/postMessage(object,
       window.context.location.origin);
 }
@@ -79,7 +84,9 @@ function startListening(win) {
     // Parse JSON only once per message.
     const data = /** @type {!Object} */ (
         JSON.parse(event.data.substr(4)));
-    if (data.sentinel != win.context.amp3pSentinel) {
+    if (sentinelNameChange && data.sentinel != win.context.sentinel) {
+      return;
+    } else if (data.sentinel != win.context.amp3pSentinel) {
       return;
     }
     // Don't let other message handlers interpret our events.
