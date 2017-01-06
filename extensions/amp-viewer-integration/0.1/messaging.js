@@ -35,7 +35,7 @@ const MessageType_ = {
  *   app: !string,
  *   type: !string,
  *   requestid: !number,
- *   name: ?string,
+ *   name: !string,
  *   data: *,
  *   rsvp: ?boolean,
  *   error: *
@@ -122,19 +122,20 @@ export class Messaging {
   /**
    * I'm responding to a request that Bob made earlier.
    * @param {number} requestId
+   * @param {string} name
    * @param {*} data
    * @private
    */
-  sendResponse_(requestId, data) {
+  sendResponse_(requestId, name, data) {
     dev().info(TAG, 'messaging.js -> sendResponse_');
     this.sendMessage_(
-      requestId, MessageType_.RESPONSE, null, data, null, null);
+      requestId, MessageType_.RESPONSE, name, data, null, null);
   }
 
   /**
    * @param {number} mId
    * @param {string} mType
-   * @param {?string} mName
+   * @param {string} mName
    * @param {*} mData
    * @param {?boolean} mRsvp
    * @param {*} mErr
@@ -156,12 +157,13 @@ export class Messaging {
 
   /**
    * @param {number} requestId
+   * @param {string} name
    * @param {*} reason
    * @private
    */
-  sendResponseError_(requestId, reason) {
+  sendResponseError_(requestId, name, reason) {
     this.sendMessage_(
-      requestId, MessageType_.RESPONSE, null, null, null, reason);
+      requestId, MessageType_.RESPONSE, name, null, null, reason);
   }
 
   /**
@@ -176,19 +178,19 @@ export class Messaging {
     dev().assert(this.requestProcessor_,
       'Cannot handle request because handshake is not yet confirmed!');
     const requestId = message.requestid;
+    const msg = dev().assertString(message.name);
     if (message.rsvp) {
       const promise =
-        this.requestProcessor_(
-          dev().assertString(message.name), message.data, message.rsvp);
+        this.requestProcessor_(msg, message.data, message.rsvp);
       if (!promise) {
-        this.sendResponseError_(requestId, 'no response');
+        this.sendResponseError_(requestId, msg, 'no response');
         dev().assert(promise,
           'expected response but none given: ' + message.name);
       }
       promise.then(data => {
-        this.sendResponse_(requestId, data);
+        this.sendResponse_(requestId, msg, data);
       }, reason => {
-        this.sendResponseError_(requestId, reason);
+        this.sendResponseError_(requestId, msg, reason);
       });
     }
   }

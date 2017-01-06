@@ -57,7 +57,7 @@ export class AmpViewerIntegration {
       this.win, this.win.parent, this.unconfirmedViewerOrigin_);
 
     dev().info(TAG, 'Send a handshake request');
-    return messaging.sendRequest('amp-handshake-request', {}, true)
+    return this.openChannel(messaging)
         .then(() => {
           messaging.setRequestProcessor((type, payload, awaitResponse) => {
             return viewer.receiveMessage(
@@ -68,6 +68,15 @@ export class AmpViewerIntegration {
           viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
             dev().assertString(this.unconfirmedViewerOrigin_));
         });
+  }
+
+  /**
+   * Opens the channel to initiate the handshake.
+   * @param {!Messaging} messaging
+   * @return {Promise<*>|undefined}
+   */
+  openChannel(messaging) {
+    return messaging.sendRequest('amp-handshake-request', {}, true);
   }
 }
 
