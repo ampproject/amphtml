@@ -73,7 +73,7 @@ export class BindExpression {
     /** @const {string} */
     this.expressionString = expressionString;
 
-    /** {!./bind-expr-defines.AstNode} */
+    /** @const {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
   }
 
