@@ -67,6 +67,8 @@ export class AmpViewerIntegration {
     dev().info(TAG, 'Send a handshake request');
     return this.openChannel(messaging)
         .then(() => {
+          dev().info(TAG, 'Channel has been opened!');
+
           messaging.setRequestProcessor((type, payload, awaitResponse) => {
             return viewer.receiveMessage(
               type, /** @type {!JSONType} */ (payload), awaitResponse);

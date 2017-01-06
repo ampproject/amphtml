@@ -24,22 +24,21 @@ const APP = '__AMPHTML__';
 
 /**
  * @enum {string}
- * @private
  */
-const MessageType_ = {
+const MessageType = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
 
 /**
  * @typedef {{
- *   app: !string,
- *   type: !string,
- *   requestid: !number,
- *   name: !string,
+ *   app: string,
+ *   type: string,
+ *   requestid: number,
+ *   name: string,
  *   data: *,
- *   rsvp: ?boolean,
- *   error: *
+ *   rsvp: (boolean|undefined),
+ *   error: (string|undefined)
  * }}
  */
 export let Message;
@@ -62,7 +61,7 @@ export class Messaging {
   constructor(source, target, targetOrigin) {
     /**  @private {!number} */
     this.requestIdCounter_ = 0;
-    /**  @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
+    /**  @private {!Object<number, {resolve: function(*), reject: function(!string)}>} */
     this.waitingForResponse_ = {};
     /** @const @private {!Window} */
     this.target_ = target;
@@ -98,22 +97,22 @@ export class Messaging {
         TAG + ': handleMessage_ failed, wrong APP: ', event);
       return;
     }
-    if (message.type == MessageType_.REQUEST) {
+    if (message.type == MessageType.REQUEST) {
       this.handleRequest_(message);
-    } else if (message.type == MessageType_.RESPONSE) {
+    } else if (message.type == MessageType.RESPONSE) {
       this.handleResponse_(message);
     }
   }
 
   /**
    * I'm sending Bob a new outgoing request.
-   * @param {string} eventType
-   * @param {*} data
+   * @param {string} messageName
+   * @param {*} messageData
    * @param {boolean} awaitResponse
    * @return {!Promise<*>|undefined}
    */
-  sendRequest(eventType, data, awaitResponse) {
-    dev().info(TAG, 'sendRequest, eventType: ', eventType);
+  sendRequest(messageName, messageData, awaitResponse) {
+    dev().info(TAG, 'sendRequest, event name: ', messageName);
     const requestId = ++this.requestIdCounter_;
     let promise = undefined;
     if (awaitResponse) {
@@ -121,58 +120,64 @@ export class Messaging {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    this.sendMessage_(requestId, MessageType_.REQUEST, eventType, data,
-      awaitResponse, null);
+    this.sendMessage_({
+      app: APP,
+      requestid: requestId,
+      type: MessageType.REQUEST,
+      name: messageName,
+      data: messageData,
+      rsvp: awaitResponse,
+      error: undefined,
+    });
     return promise;
   }
 
   /**
    * I'm responding to a request that Bob made earlier.
    * @param {number} requestId
-   * @param {string} name
-   * @param {*} data
+   * @param {string} messageName
+   * @param {*} messageData
    * @private
    */
-  sendResponse_(requestId, name, data) {
+  sendResponse_(requestId, messageName, messageData) {
     dev().info(TAG, 'sendResponse_');
-    this.sendMessage_(
-      requestId, MessageType_.RESPONSE, name, data, null, null);
-  }
-
-  /**
-   * @param {number} mId
-   * @param {string} mType
-   * @param {string} mName
-   * @param {*} mData
-   * @param {?boolean} mRsvp
-   * @param {*} mErr
-   * @private
-   */
-  sendMessage_(mId, mType, mName, mData, mRsvp, mErr) {
-    /** @type {Message} */
-    const message = {
+    this.sendMessage_({
       app: APP,
-      requestid: mId,
-      type: mType,
-      name: mName,
-      data: mData,
-      rsvp: mRsvp,
-      error: mErr,
-    };
-    this.target_./*OK*/postMessage(message, this.targetOrigin_);
+      requestid: requestId,
+      type: MessageType.RESPONSE,
+      name: messageName,
+      data: messageData,
+      rsvp: undefined,
+      error: undefined,
+    });
   }
 
   /**
    * @param {number} requestId
-   * @param {string} name
-   * @param {*} reason
+   * @param {string} messageName
+   * @param {string|undefined} reason
    * @private
    */
-  sendResponseError_(requestId, name, reason) {
+  sendResponseError_(requestId, messageName, reason) {
     this.logError_(
-      TAG + ': sendResponseError_, Message name: ' + name, reason);
-    this.sendMessage_(
-      requestId, MessageType_.RESPONSE, name, null, null, reason);
+      TAG + ': sendResponseError_, Message name: ' + messageName, reason);
+    this.sendMessage_({
+      app: APP,
+      requestid: requestId,
+      type: MessageType.RESPONSE,
+      name: messageName,
+      data: null,
+      rsvp: undefined,
+      error: reason,
+    });
+  }
+
+  /**
+   * @param {Message} message
+   * @private
+   */
+  sendMessage_(message) {
+    this.target_./*OK*/postMessage(message, this.targetOrigin_);
   }
 
   /**
@@ -184,8 +189,10 @@ export class Messaging {
    */
   handleRequest_(message) {
     dev().info(TAG, 'handleRequest_', message);
-    dev().assert(this.requestProcessor_,
-      'Cannot handle request because handshake is not yet confirmed!');
+    if (!this.requestProcessor_) {
+      throw new Error(
+        'Cannot handle request because handshake is not yet confirmed!');
+    }
     const requestId = message.requestid;
     const msg = dev().assertString(message.name);
     if (message.rsvp) {
@@ -199,7 +206,7 @@ export class Messaging {
       promise.then(data => {
         this.sendResponse_(requestId, msg, data);
       }, reason => {
-        this.sendResponseError_(requestId, msg, reason);
+        this.sendResponseError_(requestId, msg, /** @type {string} */(reason));
       });
     }
   }
@@ -218,7 +225,7 @@ export class Messaging {
       delete this.waitingForResponse_[requestId];
       if (message.error) {
         this.logError_(TAG + ': handleResponse_ error: ', message.error);
-        pending.reject(/** @type {!Error} */ (message.error));
+        pending.reject(message.error);
       } else {
         pending.resolve(message.data);
       }
@@ -230,7 +237,6 @@ export class Messaging {
    *    requestProcessor
    */
   setRequestProcessor(requestProcessor) {
-    dev().info(TAG, 'setRequestProcessor');
     this.requestProcessor_ = requestProcessor;
   }
 

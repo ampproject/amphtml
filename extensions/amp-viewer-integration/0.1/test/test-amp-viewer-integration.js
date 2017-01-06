@@ -92,10 +92,10 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
-          error: null,
+          error: undefined,
           name: 'message',
           requestid: 1,
-          rsvp: null,
+          rsvp: undefined,
           type: 's',
         });
       });
@@ -108,7 +108,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         data: {
           app: '__AMPHTML__',
           data: null,
-          error: null,
+          error: undefined,
           name: 'messageName',
           requestid: 1,
           rsvp: true,
@@ -175,7 +175,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
-          error: null,
+          error: undefined,
           name: message,
           requestid: 1,
           rsvp: awaitResponse,
@@ -195,10 +195,10 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
-          error: null,
+          error: undefined,
           name: mName,
           requestid: 1,
-          rsvp: null,
+          rsvp: undefined,
           type: 's',
         });
       });
@@ -219,7 +219,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           error: reason,
           name: mName,
           requestid: 1,
-          rsvp: null,
+          rsvp: undefined,
           type: 's',
         });
 

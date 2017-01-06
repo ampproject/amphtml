@@ -17,9 +17,8 @@
 
 /**
  * @enum {string}
- * @private
  */
-const MessageType_ = {
+var MessageType = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
@@ -75,7 +74,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
       rsvp: true,
       name: eventType,
       data: payload,
-      type: MessageType_.REQUEST,
+      type: MessageType.REQUEST,
     };
     this.sendMessage_(message);
     return promise;
@@ -85,7 +84,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
     requestid: requestId,
     name: eventType,
     data: payload,
-    type: MessageType_.REQUEST,
+    type: MessageType.REQUEST,
   };
   this.sendMessage_(message);
   return undefined;
@@ -101,10 +100,10 @@ ViewerMessaging.prototype.onMessage_ = function(event) {
     return;
   }
   var message = event.data;
-  if (message.type == MessageType_.REQUEST) {
+  if (message.type == MessageType.REQUEST) {
     this.onRequest_(message);
   }
-  if (message.type == MessageType_.RESPONSE) {
+  if (message.type == MessageType.RESPONSE) {
     this.onResponse_(message);
   }
 };
@@ -165,11 +164,11 @@ ViewerMessaging.prototype.sendMessage_ = function(message) {
  * @private
  */
 ViewerMessaging.prototype.sendResponse_ = function(requestId, payload) {
-  const message = {
+  var message = {
     app: APP,
     requestid: requestId,
     data: payload,
-    type: MessageType_.RESPONSE,
+    type: MessageType.RESPONSE,
   };
   this.sendMessage_(message);
 };
@@ -181,11 +180,11 @@ ViewerMessaging.prototype.sendResponse_ = function(requestId, payload) {
  * @private
  */
 ViewerMessaging.prototype.sendResponseError_ = function(requestId, reason) {
-  const message = {
+  var message = {
     app: APP,
     requestid: requestId,
     error: reason,
-    type: MessageType_.RESPONSE,
+    type: MessageType.RESPONSE,
   };
   this.sendMessage_(message);
 };
