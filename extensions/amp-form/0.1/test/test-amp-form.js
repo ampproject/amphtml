@@ -436,7 +436,9 @@ describe('amp-form', () => {
         expect(form.className).to.contain('amp-form-submit-success');
         expect(ampForm.actions_.trigger).to.be.called;
         expect(ampForm.actions_.trigger.calledWith(
-            form, 'submit-success', null)).to.be.true;
+            form,
+            'submit-success',
+            /** CustomEvent */ sinon.match.has('detail'))).to.be.true;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
             'amp-form-submit-success');
       });
@@ -481,7 +483,9 @@ describe('amp-form', () => {
         expect(form.className).to.contain('amp-form-submit-error');
         expect(ampForm.actions_.trigger).to.be.called;
         expect(ampForm.actions_.trigger.calledWith(
-            form, 'submit-error', null)).to.be.true;
+            form,
+            'submit-error',
+            /** CustomEvent */ sinon.match.has('detail'))).to.be.true;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
             'amp-form-submit-error');
       });

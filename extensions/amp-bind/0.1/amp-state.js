@@ -38,23 +38,28 @@ export class AmpState extends AMP.BaseElement {
   }
 
   /** @override */
+  activate(invocation) {
+    const event = invocation.event;
+    if (event && event.detail) {
+      this.updateState_(event.detail.response);
+    }
+  }
+
+  /** @override */
   buildCallback() {
     const TAG = this.getName_();
 
     toggle(this.element, false);
     this.element.setAttribute('aria-hidden', 'true');
 
-    const id = user().assert(this.element.id,
-        '%s element must have an id.', TAG);
-
-    let json;
     const children = this.element.children;
     if (children.length == 1) {
       const child = children[0];
       if (isJsonScriptTag(child)) {
-        json = tryParseJson(children[0].textContent, e => {
+        const json = tryParseJson(children[0].textContent, e => {
           user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
         });
+        this.updateState_(json, /* opt_isInit */ true);
       } else {
         user().error(TAG,
             'State should be in a <script> tag with type="application/json"');
@@ -62,21 +67,29 @@ export class AmpState extends AMP.BaseElement {
     } else if (children.length > 1) {
       user().error(TAG, 'Should contain only one <script> child.');
     }
-
-    if (id && json) {
-      const state = Object.create(null);
-      state[id] = json;
-
-      bindForDoc(this.getAmpDoc()).then(bind => {
-        bind.setState(state, true);
-      });
-    }
   }
 
   /** @override */
   renderOutsideViewport() {
     // We want the state data to be available wherever it is in the document.
     return true;
+  }
+
+  /**
+   * @param {*} json
+   * @param {boolean=} opt_isInit
+   * @private
+   */
+  updateState_(json, opt_isInit) {
+    if (json === undefined || json === null) {
+      return;
+    }
+    const id = user().assert(this.element.id, '<amp-state> must have an id.');
+    const state = Object.create(null);
+    state[id] = json;
+    bindForDoc(this.getAmpDoc()).then(bind => {
+      bind.setState(state, opt_isInit);
+    });
   }
 
   /**

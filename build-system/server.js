@@ -521,7 +521,12 @@ app.get('/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json.html', func
   });
 });
 
-
+app.use('/bind/form/get', function(req, res, next) {
+  assertCors(req, res, ['GET']);
+  res.json({
+    bindXhrResult: 'I was fetched from the server!'
+  });
+});
 
 /*
  * Start Cache SW LOCALDEV section
