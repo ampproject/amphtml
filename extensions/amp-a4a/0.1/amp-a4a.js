@@ -115,6 +115,12 @@ export let AdResponseDef;
     }} */
 let CreativeMetaDataDef;
 
+/** @typedef {{serviceName: string, keys: !Array<!Promise<?PublicKeyInfoDef>>}} */
+let SingleServiceKeySetInfoDef;
+
+/** @typedef {Array<!Promise<!SingleServiceKeySetInfoDef>>} */
+let PerServiceKeySetsInfoDef;
+
 /** @private */
 export const LIFECYCLE_STAGES = {
   // Note: Use strings as values here, rather than numbers, so that "0" does
@@ -224,9 +230,11 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {boolean} whether creative has been verified as AMP */
     this.isVerifiedAmpCreative_ = false;
 
-    /** @private {Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
-    this.win.ampA4aValidationKeys =
-      this.win.ampA4aValidationKeys || this.getKeyInfoSets_();
+    if (!this.win.ampA4aValidationKeys) {
+      /** @type {!PerServiceKeySetsInfoDef} */
+      const forTypeSafety = this.getKeyInfoSets_();
+      this.win.ampA4aValidationKeys = forTypeSafety;
+    }
 
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
@@ -572,14 +580,16 @@ export class AmpA4A extends AMP.BaseElement {
     // keyInfoSetPromise, that holds an Array of Promises of signing keys.
     // So long as any one of these signing services can verify the
     // signature, then the creative is valid AMP.
+    /** @type {!PerServiceKeySetsInfoDef} */
     const keyInfoSetPromises = this.win.ampA4aValidationKeys;
     return some(keyInfoSetPromises.map(keyInfoSetPromise => {
-      // Resolve Promise into Array of Promises of signing keys.
+      // Resolve Promise into an object containing a 'keys' field, which
+      // is an Array of Promises of signing keys.  *whew*
       return keyInfoSetPromise.then(keyInfoSet => {
         // As long as any one individual key of a particular signing
         // service, keyInfoPromise, can verify the signature, then the
         // creative is valid AMP.
-        return some(keyInfoSet.map(keyInfoPromise => {
+        return some(keyInfoSet.keys.map(keyInfoPromise => {
           // Resolve Promise into signing key.
           return keyInfoPromise.then(keyInfo => {
             if (!keyInfo) {
@@ -828,14 +838,14 @@ export class AmpA4A extends AMP.BaseElement {
    * Retrieves all public keys, as specified in _a4a-config.js.
    * None of the (inner or outer) promises returned by this function can reject.
    *
-   * @return {!Array<!Promise<!{serviceName: string, keys: !Array<!Promise<?PublicKeyInfoDef>>}>>}
+   * @return {!PerServiceKeySetsInfoDef}
    * @private
    */
   getKeyInfoSets_() {
     if (!isCryptoAvailable()) {
       return [];
     }
-    const jwkSetPromises = this.getSigningServiceNames().map(serviceName => {
+    return this.getSigningServiceNames().map(serviceName => {
       dev().assert(getMode().localDev || !endsWith(serviceName, '-dev'));
       const url = signingServerURLs[serviceName];
       const currServiceName = serviceName;
@@ -860,10 +870,22 @@ export class AmpA4A extends AMP.BaseElement {
             result.keys = [];
           }
           return result;
+        }).then(jwkSet => {
+          return {
+            serviceName: jwkSet.serviceName,
+            keys: jwkSet.keys.map(jwk =>
+                importPublicKey(jwkSet.serviceName, jwk)
+                .catch(err => {
+                  user().error(TAG, this.element.getAttribute('type'),
+                      `error importing keys for service: ${jwkSet.serviceName}`,
+                      err, this.element);
+                  return null;
+                })),
+          };
         }).catch(err => {
           user().error(
               TAG, this.element.getAttribute('type'), err, this.element);
-          return {serviceName: currServiceName};
+          return {serviceName: currServiceName, keys: []};
         });
       } else {
         // The given serviceName does not have a corresponding URL in
@@ -871,20 +893,9 @@ export class AmpA4A extends AMP.BaseElement {
         const reason = `Signing service '${serviceName}' does not exist.`;
         user().error(
             TAG, this.element.getAttribute('type'), reason, this.element);
-        return {serviceName: currServiceName};
+        return Promise.resolve({serviceName: currServiceName, keys: []});
       }
     });
-    return jwkSetPromises.map(jwkSetPromise =>
-        jwkSetPromise.then(jwkSet => {
-          return jwkSet.keys.map(jwk =>
-            importPublicKey(jwkSet.serviceName, jwk)
-            .catch(err => {
-              user().error(TAG, this.element.getAttribute('type'),
-                  `error importing keys for service: ${jwkSet.serviceName}`,
-                  err, this.element);
-              return null;
-            }));
-        }));
   }
 
   /**
