@@ -24,7 +24,7 @@ const TAG = 'AMP-BIND';
  *   tagName: string,
  *   property: string,
  *   expressionString: string,
- *   expression: (BindExpression|undefined),
+ *   expression: (!BindExpression|undefined),
  * }}
  */
 export let EvaluateeDef;
