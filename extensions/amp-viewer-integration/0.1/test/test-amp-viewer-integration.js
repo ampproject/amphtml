@@ -78,6 +78,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         origin: viewerOrigin,
         data: {
           app: '__AMPHTML__',
+          name: 'message',
           type: 'q',
           requestid: 1,
           rsvp: true,
@@ -91,7 +92,10 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
+          error: null,
+          name: null,
           requestid: 1,
+          rsvp: null,
           type: 's',
         });
       });
@@ -103,10 +107,12 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         origin: viewerOrigin,
         data: {
           app: '__AMPHTML__',
-          type: 's',
+          data: null,
+          error: null,
+          name: 'messageName',
           requestid: 1,
           rsvp: true,
-          name: 'messageName',
+          type: 's',
         },
       };
 
@@ -129,10 +135,12 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         origin: viewerOrigin,
         data: {
           app: '__AMPHTML__',
-          type: 's',
+          data: {},
+          error: 'reason',
+          name: null,
           requestid: 1,
           rsvp: true,
-          error: 'reason',
+          type: 's',
         },
       };
 
@@ -160,6 +168,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
+          error: null,
           name: message,
           requestid: 1,
           rsvp: awaitResponse,
@@ -178,7 +187,10 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
+          error: null,
+          name: null,
           requestid: 1,
+          rsvp: null,
           type: 's',
         });
       });
@@ -192,8 +204,11 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledOnce;
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
+          data: null,
           error: reason,
+          name: null,
           requestid: 1,
+          rsvp: null,
           type: 's',
         });
       });
