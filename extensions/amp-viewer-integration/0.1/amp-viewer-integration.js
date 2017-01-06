@@ -86,7 +86,7 @@ export class AmpViewerIntegration {
    * @return {Promise<*>|undefined}
    */
   openChannel(messaging) {
-    return messaging.sendRequest('amp-handshake-request', {}, true);
+    return messaging.sendRequest('channelOpen', {}, true);
   }
 }
 

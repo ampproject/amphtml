@@ -58,7 +58,7 @@ function whenMessagingLoaded(callback) {
       };
       window.addEventListener('message', listener, false);
 
-      window.parent./*OK*/postMessage('amp-handshake-request',
+      window.parent./*OK*/postMessage('channelOpen',
           unconfirmedViewerOrigin);
     });
 

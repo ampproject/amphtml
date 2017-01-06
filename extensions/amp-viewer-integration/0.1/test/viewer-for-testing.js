@@ -112,7 +112,7 @@ export class ViewerForTesting {
         this.log('This message is not for us: ', e);
         return;
       }
-      if (e.data.name == 'amp-handshake-request' &&
+      if (e.data.name == 'channelOpen' &&
           this.handshakeReceivedResolve_) {
         // Send handshake confirmation.
         const message = {
