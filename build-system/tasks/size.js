@@ -97,7 +97,7 @@ function normalizeRows(rows) {
   // normalize integration.js
   normalizeRow(rows, 'current-min/f.js', 'current/integration.js', true);
 
-  normalizeRow(rows, 'current-min/ampcontext-lib.js',
+  normalizeRow(rows, 'current-min/ampcontext-v0.js',
       'current/ampcontext-lib.js', true);
 
   // normalize alp.js

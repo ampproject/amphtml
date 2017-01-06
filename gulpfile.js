@@ -197,10 +197,11 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minifiedName: 'ampcontext-v0.js',
     checkTypes: opt_checkTypes,
     watch: watch,
-    minify: false,
+    minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     externs: ['ads/ads.extern.js',],
-    includeBasicPolyfills: false,
+    include3pDirectories: true,
+    includePolyfills: false,
   });
 
   // For compilation with babel we start with the amp-babel entry point,
