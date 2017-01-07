@@ -126,9 +126,9 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     expect(tgt.checkValidity.callCount).to.equal(0);
   });
 
-  it('should do nothing of no target', () => {
+  it('should throw if no target', () => {
     evt.target = null;
-    onDocumentFormSubmit_(evt);
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(/Element expected/);
     expect(preventDefaultSpy.callCount).to.equal(0);
     expect(tgt.checkValidity.callCount).to.equal(0);
   });
