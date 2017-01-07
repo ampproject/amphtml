@@ -26,7 +26,7 @@ describe('BindExpression', () => {
    * @return {*}
    */
   function evaluate(expression, opt_scope) {
-    return new BindExpression(expression).evaluate(opt_scope);
+    return new BindExpression(expression).evaluate(opt_scope || {});
   }
 
   it('should evaluate arithmetic operations', () => {
