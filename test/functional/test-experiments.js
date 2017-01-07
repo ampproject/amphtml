@@ -15,8 +15,7 @@
  */
 
 import {
-  isDevChannel,
-  isDevChannelVersionDoNotUse_,
+  isCanary,
   isExperimentOn,
   isExperimentOnAllowUrlOverride,
   experimentToggles,
@@ -418,21 +417,7 @@ describe('toggleExperiment', () => {
   });
 });
 
-describe('isDevChannel', () => {
-
-  function expectDevChannel(cookiesString) {
-    resetExperimentTogglesForTesting();
-    return expect(isDevChannel({
-      document: {
-        cookie: cookiesString,
-      },
-    }));
-  }
-
-  it('should return value based on cookie', () => {
-    expectDevChannel('AMP_EXP=other').to.be.false;
-    expectDevChannel('AMP_EXP=dev-channel').to.be.true;
-  });
+describe('isCanary', () => {
 
   it('should return value based on binary version', () => {
     const win = {
@@ -440,9 +425,9 @@ describe('isDevChannel', () => {
         canary: 0,
       },
     };
-    expect(isDevChannelVersionDoNotUse_(win)).to.be.false;
+    expect(isCanary(win)).to.be.false;
     win.AMP_CONFIG.canary = 1;
-    expect(isDevChannelVersionDoNotUse_(win)).to.be.true;
+    expect(isCanary(win)).to.be.true;
   });
 });
 
