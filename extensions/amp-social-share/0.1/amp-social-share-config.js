@@ -44,6 +44,7 @@ const BUILTINS = {
     shareEndpoint: 'https://www.pinterest.com/pin/create/button/',
     defaultParams: {
       url: 'CANONICAL_URL',
+      description: 'TITLE',
     },
   },
   linkedin: {
@@ -71,6 +72,12 @@ const BUILTINS = {
     defaultParams: {
       name: 'TITLE',
       url: 'CANONICAL_URL',
+    },
+  },
+  whatsapp: {
+    shareEndpoint: 'whatsapp://send',
+    defaultParams: {
+      text: 'TITLE - CANONICAL_URL',
     },
   },
 };
