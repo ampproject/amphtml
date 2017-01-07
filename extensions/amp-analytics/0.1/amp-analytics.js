@@ -529,7 +529,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
 
-    const paramString = s.length > 0 ? s.join('&') : '';
+    const paramString = s.join('&');
     if (request.indexOf('${extraUrlParams}') >= 0) {
       return request.replace('${extraUrlParams}', paramString);
     } else {
