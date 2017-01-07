@@ -98,7 +98,7 @@ export class BindExpression {
    * @param {?./bind-expr-defines.AstNode} node
    * @param {!Object} scope
    * @throws {Error}
-   * @return {*}
+   * @return {BindExpressionResultDef}
    * @private
    */
   eval_(node, scope) {
@@ -108,7 +108,8 @@ export class BindExpression {
 
     const {type, args, value} = node;
 
-    if (type === AstNodeType.LITERAL) {
+    // `value` should always exist for literals.
+    if (type === AstNodeType.LITERAL && value !== undefined) {
       return value;
     }
 
@@ -251,7 +252,7 @@ export class BindExpression {
             : this.eval_(args[2], scope);
 
       default:
-        throw new Error(`${type} is not a valid node type.`);
+        throw new Error(`Unexpected AstNodeType: ${type}.`);
     }
   }
 

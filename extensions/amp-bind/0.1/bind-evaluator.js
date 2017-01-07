@@ -57,7 +57,7 @@ export class BindEvaluator {
         user().error(TAG, 'Malformed expression:', error);
       }
 
-	  if (expression) {
+      if (expression) {
         this.evaluatees_.push({
           tagName: e.tagName,
           property: e.property,
