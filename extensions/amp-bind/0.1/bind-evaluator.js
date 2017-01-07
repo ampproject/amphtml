@@ -15,6 +15,9 @@
  */
 
 import {BindExpression} from './bind-expression';
+import {user} from '../../../src/log';
+
+const TAG = 'AMP-BIND';
 
 /**
  * Asynchronously evaluates a set of Bind expressions.
@@ -27,7 +30,12 @@ export class BindEvaluator {
     /** @const {!Array<!BindExpression>} */
     this.expressions_ = [];
     for (let i = 0; i < expressionStrings.length; i++) {
-      this.expressions_[i] = new BindExpression(expressionStrings[i]);
+      try {
+        const expr = new BindExpression(expressionStrings[i]);
+        this.expressions_.push(expr);
+      } catch (error) {
+        user().error(TAG, 'Malformed expression:', error);
+      }
     }
   }
 
@@ -44,7 +52,11 @@ export class BindEvaluator {
       this.expressions_.forEach(expression => {
         const string = expression.expressionString;
         if (cache[string] === undefined) {
-          cache[string] = expression.evaluate(scope);
+          try {
+            cache[string] = expression.evaluate(scope);
+          } catch (error) {
+            user().error(TAG, error);
+          }
         }
       });
       resolve(cache);
