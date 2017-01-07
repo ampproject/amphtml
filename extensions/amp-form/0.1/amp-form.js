@@ -15,6 +15,7 @@
  */
 
 import {installFormProxy} from './form-proxy';
+import {extensionsFor} from '../../../src/extensions';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
@@ -49,6 +50,15 @@ import {
 
 /** @type {string} */
 const TAG = 'amp-form';
+
+
+/**
+ * A list of external dependencies that can be included in forms.
+ * @type {Array<string>}
+ */
+const EXTERNAL_DEPS = [
+  'amp-selector',
+];
 
 
 /** @const @enum {string} */
@@ -93,6 +103,9 @@ export class AmpForm {
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(this.win_);
+
+    /** @const @private {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = extensionsFor(this.win_);
 
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacement_ = urlReplacementsForDoc(this.win_.document);
@@ -155,11 +168,32 @@ export class AmpForm {
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
-    // TODO(mkhatib, #6927): Wait for amp-selector to finish loading if the current form
-    // is using it.
-    this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this));
+    // Wait for amp-selector to finish loading if the current form is using it.
+    this.whenDependenciesReady_().then(() => {
+      this.actions_.installActionHandler(
+          this.form_, this.actionHandler_.bind(this));
+    });
     this.installEventHandlers_();
+  }
+
+  /**
+   * Returns a promise that will be resolved when all dependencies used inside the form
+   * tag are loaded (e.g. amp-selector)
+   * @return {!Promise}
+   * @private
+   */
+  whenDependenciesReady_() {
+    const usedDeps = this.form_.querySelectorAll(EXTERNAL_DEPS.join(','));
+    const depsDict = {};
+    const depsPromises = [];
+    for (let i = usedDeps.length - 1; i >= 0; i--) {
+      const tagName = usedDeps[i].tagName.toLowerCase();
+      if (depsDict[tagName] === undefined) {
+        depsPromises.push(this.extensions_.waitForExtension(tagName));
+        depsDict[tagName] = true;
+      }
+    }
+    return Promise.all(depsPromises);
   }
 
   /**
@@ -563,6 +597,10 @@ function updateInvalidTypesClasses(element) {
  * @return {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
+  // If this is not a field type with checkValidity don't do anything.
+  if (!element.checkValidity) {
+    return true;
+  }
   let shouldPropagate = false;
   const previousValidityState = getUserValidityStateFor(element);
   const isCurrentlyValid = element.checkValidity();
