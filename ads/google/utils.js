@@ -41,9 +41,9 @@ export function getMultiSizeDimensions(
     opt_dimensions) {
 
   const dimensions = opt_dimensions || [];
-  const sizesStr = multiSizeDataStr.split(',');
+  const arrayOfSizeStrs = multiSizeDataStr.split(',');
 
-  sizesStr.forEach(sizeStr => {
+  arrayOfSizeStrs.forEach(sizeStr => {
 
     const size = sizeStr.split('x');
 
@@ -53,20 +53,17 @@ export function getMultiSizeDimensions(
       return;
     }
 
-    const widthStr = size[0];
-    const heightStr = size[1];
+    const width = Number(size[0]);
+    const height = Number(size[1]);
 
     // Make sure that both dimensions given are numbers.
-    if (!validateDimensions(widthStr, heightStr,
+    if (!validateDimensions(width, height,
           w => isNaN(Number(w)),
           h => isNaN(Number(h)),
           ({badDim, badVal}) =>
           `Invalid ${badDim} of ${badVal} given for secondary size.`)) {
       return;
     }
-
-    const width = Number(widthStr);
-    const height = Number(heightStr);
 
     // Check that secondary size is not larger than primary size.
     if (!validateDimensions(width, height,
@@ -79,8 +76,8 @@ export function getMultiSizeDimensions(
 
     // Check that if multi-size-validation is on, that the secondary sizes
     // are at least minRatio of the primary size.
-    const validate = multiSizeValidation || 'true';
-    if (validate != 'false' && validate != false) {
+    const validate = multiSizeValidation || true;
+    if (validate != 'false' && !validate) {
 
       // The minimum ratio of each secondary dimension to its corresponding
       // primary dimension.

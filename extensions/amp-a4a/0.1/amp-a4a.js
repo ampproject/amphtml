@@ -497,7 +497,7 @@ export class AmpA4A extends AMP.BaseElement {
               && creativeParts.size.length == 2) {
             // We'll need to remember the creative size for the x-domain case.
             this.creativeSize_ = creativeParts.size;
-            this.handleResize(creativeParts.size);
+            this.handleResize(creativeParts.size[0], creativeParts.size[1]);
           }
           if (!creativeParts || !creativeParts.signature) {
             return Promise.resolve();
@@ -791,11 +791,11 @@ export class AmpA4A extends AMP.BaseElement {
    *
    * To be implemented by network.
    *
-   * @param {!Array<string>} size An array containing two elements, the first
-   *     being the width and the second the height.
-   */
-  handleResize(size) {
-    user().info('A4A', 'Received creative with size ' + size.join('x') + '.');
+   * @param {number} width
+   * @param {number} height
+   * */
+  handleResize(width, height) {
+    user().info('A4A', `Received creative with size ${width}x${height}.`);
   }
 
   /**
@@ -1024,7 +1024,7 @@ export class AmpA4A extends AMP.BaseElement {
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
     if (this.creativeSize_) {
-      this.handleResize(this.creativeSize_);
+      this.handleResize(this.creativeSize_[0], this.creativeSize_[1]);
     }
     return this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
   }

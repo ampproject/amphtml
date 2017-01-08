@@ -104,7 +104,7 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
         multiSizeDataStr,
         primaryWidth,
         primaryHeight,
-        data.multiSizeValidation || 'true',
+        data.multiSizeValidation || true,
         dimensions);
   }
 
