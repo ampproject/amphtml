@@ -96,7 +96,7 @@ declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '0.1', true);
 declareExtension('amp-sticky-ad', '1.0', true);
-declareExtension('amp-selector', '0.1', false);
+declareExtension('amp-selector', '0.1', true);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -197,10 +197,11 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minifiedName: 'ampcontext-v0.js',
     checkTypes: opt_checkTypes,
     watch: watch,
-    minify: false,
+    minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     externs: ['ads/ads.extern.js',],
-    includeBasicPolyfills: false,
+    include3pDirectories: true,
+    includePolyfills: false,
   });
 
   // For compilation with babel we start with the amp-babel entry point,

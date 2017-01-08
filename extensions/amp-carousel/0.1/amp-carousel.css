@@ -129,6 +129,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   flex: 0 0 100% !important;
   height: 100% !important;
   justify-content: center !important;
+  overflow: hidden !important;
   position: relative !important;
   scroll-snap-coordinate: 0 0 !important;
   width: 100% !important;

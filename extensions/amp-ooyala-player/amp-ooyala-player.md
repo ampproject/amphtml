@@ -31,11 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FLEX_ITEM, RESPONSIVE</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td></td>
+    <td>fill, fixed, flex-item, responsive</td>
   </tr>
 </table>
 
@@ -51,25 +47,29 @@ limitations under the License.
 
 ## Attributes
 
-**data-embedcode**
+**data-embedcode** (required)
 
 The video embed code from [Backlot](https://backlot.ooyala.com).
 
-**data-playerid**
+**data-playerid** (required)
 
 The ID of the player to load from [Backlot](https://backlot.ooyala.com).
 
-**data-pcode**
+**data-pcode** (required)
 
 The provider code for the account owning the embed code and player.
 
-**data-playerversion**
+**data-playerversion** (optional)
 
-An optional attribute to specify which version of the Ooyala player to use, V3 or V4. Defaults to V3.
+Specifies which version of the Ooyala player to use, V3 or V4. Defaults to V3.
 
-**data-config**
+**data-config** (optional)
 
-An optional attribute to specify a skin.json config file URL for player V4.
+Specifies a skin.json config file URL for player V4.
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

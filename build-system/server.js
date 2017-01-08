@@ -22,7 +22,6 @@ var BBPromise = require('bluebird');
 var app = require('express')();
 var bacon = require('baconipsum');
 var bodyParser = require('body-parser');
-var morgan = require('morgan');
 var fs = BBPromise.promisifyAll(require('fs'));
 var formidable = require('formidable');
 var jsdom = require('jsdom');
@@ -520,7 +519,12 @@ app.get('/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json.html', func
   });
 });
 
-
+app.use('/bind/form/get', function(req, res, next) {
+  assertCors(req, res, ['GET']);
+  res.json({
+    bindXhrResult: 'I was fetched from the server!'
+  });
+});
 
 /*
  * Start Cache SW LOCALDEV section
