@@ -126,7 +126,6 @@ export class AccessClientAdapter {
           this.authorizationTimeout_,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-            requireAmpResponseSourceOrigin: true,
           }));
     });
   }
@@ -145,7 +144,6 @@ export class AccessClientAdapter {
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },

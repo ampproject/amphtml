@@ -119,7 +119,6 @@ describe('integration test: a4a', () => {
       mode: 'cors',
       method: 'GET',
       credentials: 'include',
-      requireAmpResponseSourceOrigin: true,
     }).onFirstCall().returns(Promise.resolve(mockResponse));
     adConfig['mock'] = {};
     a4aRegistry['mock'] = () => {return true;};

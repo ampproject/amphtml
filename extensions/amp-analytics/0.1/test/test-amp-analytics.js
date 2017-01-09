@@ -76,7 +76,7 @@ describe('amp-analytics', function() {
       resetServiceForTesting(iframe.win, 'xhr');
       getService(iframe.win, 'xhr', () => {
         return {fetchJson: (url, init) => {
-          expect(init.requireAmpResponseSourceOrigin).to.be.true;
+          expect(init.requireAmpResponseSourceOrigin).to.be.undefined;
           if (configWithCredentials) {
             expect(init.credentials).to.equal('include');
           } else {

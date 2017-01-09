@@ -836,7 +836,6 @@ export class AmpA4A extends AMP.BaseElement {
       mode: 'cors',
       method: 'GET',
       credentials: 'include',
-      requireAmpResponseSourceOrigin: true,
     };
     return xhrFor(this.win)
         .fetch(adUrl, xhrInit)
