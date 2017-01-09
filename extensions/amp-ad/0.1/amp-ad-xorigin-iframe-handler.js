@@ -100,8 +100,8 @@ export class AmpAdXOriginIframeHandler {
         return;
       }
 
-      const {selector, attrs} = info;
-      const content = getHtml(selector,attrs);
+      const {selector, attributes} = info;
+      const content = getHtml(selector, attributes);
 
       postMessageToWindows(
           this.iframe, [{win: source, origin}],

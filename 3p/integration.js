@@ -453,11 +453,11 @@ function triggerRenderStart(opt_data) {
 
 /**
  * @param {!String} selector
- * @param {!Array<String>} attrs
+ * @param {!Array<String>} attributes
  * @param {!Function} callback
  */
-function getHtml(selector, attrs, callback) {
-  nonSensitiveDataPostMessage('get-html', {selector, attrs});
+function getHtml(selector, attributes, callback) {
+  nonSensitiveDataPostMessage('get-html', {selector, attributes});
 
   const unlisten = listenParent(window, 'get-html-result', data => {
     callback(data.content);
