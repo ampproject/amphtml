@@ -23,6 +23,9 @@ import {adopt} from '../../../../src/runtime';
 import {facebook} from '../../../../3p/facebook';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 import {resetServiceForTesting} from '../../../../src/service';
+import {isExperimentOn} from '../../../../src/experiments';
+
+const sentinelNameChange = isExperimentOn(self, 'sentinel-name-change');
 
 adopt(window);
 
@@ -120,13 +123,22 @@ describe('amp-facebook', function() {
               expect(newHeight).to.equal(666);
               resolve(ampFB);
             };
-            iframe.contentWindow.postMessage({
-              sentinel: 'amp-test',
-              type: 'requestHeight',
-              is3p: true,
-              height: 666,
-              amp3pSentinel: iframe.getAttribute('data-amp-3p-sentinel'),
-            }, '*');
+            if (sentinelNameChange) {
+              iframe.contentWindow.postMessage({
+                type: 'requestHeight',
+                is3p: true,
+                height: 666,
+                sentinel: iframe.getAttribute('data-amp-3p-sentinel'),
+              }, '*');
+            } else {
+              iframe.contentWindow.postMessage({
+                sentinel: 'amp-test',
+                type: 'requestHeight',
+                is3p: true,
+                height: 666,
+                amp3pSentinel: iframe.getAttribute('data-amp-3p-sentinel'),
+              }, '*');
+            }
           });
         });
   });

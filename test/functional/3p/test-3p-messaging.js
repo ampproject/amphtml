@@ -16,8 +16,11 @@
 
 import {createIframePromise} from '../../../testing/iframe';
 import {listenParent} from '../../../3p/messaging';
+import {isExperimentOn} from '../../../src/experiments';
 import {postMessage} from '../../../src/iframe-helper';
 import {timerFor} from '../../../src/timer';
+
+const sentinelNameChange = isExperimentOn(self, 'sentinel-name-change');
 
 describe('3p messaging', () => {
 
@@ -28,10 +31,17 @@ describe('3p messaging', () => {
   beforeEach(() => {
     return createIframePromise(true).then(i => {
       testWin = i.win;
-      testWin.context = {
-        location: window.location,
-        amp3pSentinel: 'test',
-      };
+      if (sentinelNameChange) {
+        testWin.context = {
+          location: window.location,
+          sentinel: 'test',
+        };
+      } else {
+        testWin.context = {
+          location: window.location,
+          amp3pSentinel: 'test',
+        };
+      }
       iframe = {
         contentWindow: testWin,
         getAttribute(attr) {

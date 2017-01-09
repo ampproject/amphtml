@@ -86,7 +86,8 @@ function startListening(win) {
         JSON.parse(event.data.substr(4)));
     if (sentinelNameChange && data.sentinel != win.context.sentinel) {
       return;
-    } else if (data.sentinel != win.context.amp3pSentinel) {
+    } else if (!sentinelNameChange &&
+        data.sentinel != win.context.amp3pSentinel) {
       return;
     }
     // Don't let other message handlers interpret our events.

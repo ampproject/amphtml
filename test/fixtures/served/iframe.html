@@ -34,7 +34,15 @@ window.addEventListener('message', function(event) {
             width: event.data.width,
           }, '*');
     } else if (event.data.type == 'subscribeToEmbedState') {
-      var sentinel = event.data.is3p ? event.data.amp3pSentinel : 'amp';
+      if (event.data.is3p) {
+        if (event.data.amp3pSentinel) {
+          var sentinel = event.data.amp3pSentinel;
+        } else {
+          var sentinel = event.data.amp3pSentinel;
+        }
+      } else {
+        var sentinel = 'amp';
+      }
       getAmpWindow(sentinel)./*OK*/postMessage(
           {
             sentinel: sentinel,

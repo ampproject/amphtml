@@ -46,6 +46,7 @@ describe('3p-frame', () => {
    */
   const iframeContextInName = isExperimentOn(
       window, '3p-frame-context-in-name');
+  const sentinelNameChange = isExperimentOn(window, 'sentinel-name-change');
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -165,9 +166,14 @@ describe('3p-frame', () => {
     const docInfo = documentInfoForDoc(window.document);
     expect(docInfo.pageViewId).to.not.be.empty;
     let amp3pSentinel;
+    let sentinel;
     if (iframeContextInName) {
       const name = JSON.parse(decodeURIComponent(iframe.name));
-      amp3pSentinel = name.attributes._context.sentinel;
+      if (sentinelNameChange) {
+        sentinel = name.attributes._context.sentinel;
+      } else {
+        amp3pSentinel = name.attributes._context.amp3pSentinel;
+      }
     } else {
       amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
     }
@@ -188,7 +194,8 @@ describe('3p-frame', () => {
         ',"domFingerprint":"1725030182"' +
         ',"startTime":1234567888' +
         ',"experimentToggles":{"exp-a":true,"exp-b":true}' +
-        ',"amp3pSentinel":"' + amp3pSentinel + '"' +
+        (sentinelNameChange ? ',"sentinel":"' + sentinel + '"' :
+        ',"amp3pSentinel":"' + amp3pSentinel + '"') +
         ',"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
         height + ',"bottom":' + height + ',"right":' + width +
