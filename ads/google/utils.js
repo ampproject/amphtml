@@ -76,9 +76,7 @@ export function getMultiSizeDimensions(
 
     // Check that if multi-size-validation is on, that the secondary sizes
     // are at least minRatio of the primary size.
-    const validate = multiSizeValidation || true;
-    if (validate != 'false' && !validate) {
-
+    if (multiSizeValidation) {
       // The minimum ratio of each secondary dimension to its corresponding
       // primary dimension.
       const minRatio = 2 / 3;
