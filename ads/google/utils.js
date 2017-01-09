@@ -27,9 +27,9 @@ import {user} from '../../src/log';
  * @param {number} primaryHeight The primary height of the ad slot.
  * @param {!Array<Array<number>>=} opt_dimensions An array into which to put
  *   the multi-size dimensions.
- * @param {boolean} multiSizeValidation A flag that if set to anything other
- *   than false will enforce the rule that ensures multi-size dimensions are no
- *   less than 2/3rds of their primary dimension counterpart.
+ * @param {boolean} multiSizeValidation A flag that if set to true will enforce
+ *   the rule that ensures multi-size dimensions are no less than 2/3rds of
+ *   their primary dimension's counterpart.
  * @return {!Array<Array<number>>} An array of arrays, the latter of which
  *   contains the width and height as its sole elements (in that order).
  */
