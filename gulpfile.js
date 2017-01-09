@@ -290,10 +290,29 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 function compileCss() {
   $$.util.log('Recompiling CSS.');
   return jsifyCssAsync('css/amp.css').then(function(css) {
-    return gulp.src('css/**.css')
-        .pipe($$.file('css.js', 'export const cssText = ' + css))
-        .pipe(gulp.dest('build'));
+    var resolve;
+    var promise = Promise(r => {
+      resolve = r;
+    });
+    gulp.src('css/**.css')
+        .pipe($$.file('css.js', 'export const cssText = ' +
+            JSON.stringify(css)))
+        .pipe(gulp.dest('build'))
+        .on('end', function() {
+          fs.writeFileSync('build/amp.css');
+          resolve(css);
+        });
+    return promise;
   });
+}
+
+/**
+ * Copies the css from the build folder to the dist folder
+ */
+function copyCss() {
+  fs.copySync('build/amp.css', 'dist/amp.css');
+  return gulp.src('build/**/amp-*.css')
+      .pipe(gulp.dest('dist/v0'));
 }
 
 /**
@@ -366,9 +385,11 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
   if (hasCss) {
     mkdirSync('build');
     return jsifyCssAsync(path + '/' + name + '.css').then(function(css) {
-      var jsCss = 'export const CSS = ' + css + ';\n';
-      var builtName = 'build/' + name + '-' + version + '.css.js';
-      fs.writeFileSync(builtName, jsCss, 'utf-8');
+      var jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
+      var cssName = 'build/' + name + '-' + version + '.css';
+      var jsName = 'build/' + name + '-' + version + '.css.js';
+      fs.writeFileSync(cssName, css, 'utf-8');
+      fs.writeFileSync(jsName, jsCss, 'utf-8');
       if (cssOnly) {
         return Promise.resolve();
       }
@@ -454,6 +475,7 @@ function dist() {
   buildExtensions({minify: true, preventRemoveAndMakeDir: true});
   buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
+  copyCss();
 }
 
 /**
