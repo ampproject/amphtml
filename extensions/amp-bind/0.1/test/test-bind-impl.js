@@ -200,16 +200,24 @@ describes.realWin('amp-bind', {
   });
 
   it('should call mutatedAttributesCallback on AMP elements', () => {
-    const binding = '[onePlusOne]="1+1" [added]="true" removed';
+    const binding = '[onePlusOne]="1+1" [twoPlusTwo]="2+2" twoPlusTwo="4"'
+        + '[add]="true" alreadyAdded [alreadyAdded]="true"'
+        + 'remove [remove]="false" [nothingToRemove]="false"';
     const element = createAmpElementWithBinding(binding);
     const spy = env.sandbox.spy(element, 'mutatedAttributesCallback');
-    spy.withArgs('onePlusOne', null, 2);
-    spy.withArgs('added', null, '');
-    spy.withArgs('removed', '', null);
     return onBindReadyAndSetState({}, () => {
-      expect(spy.withArgs('onePlusOne', null, 2).calledOnce);
-      expect(spy.withArgs('added', null, '').calledOnce);
-      expect(spy.withArgs('removed', '', null).calledOnce);
+      // Attribute names are automatically lower-cased.
+      expect(spy).calledWithMatch({
+        oneplusone: 2,
+        add: true,
+        remove: false,
+      });
+      // Callback shouldn't include attributes whose values haven't changed.
+      expect(spy.neverCalledWithMatch({
+        twoplustwo: 4,
+        alreadyadded: true,
+        nothingtoremove: false,
+      })).to.be.true; // sinon-chai doesn't support "never" API.
     });
   });
 

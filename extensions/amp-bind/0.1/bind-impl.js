@@ -229,7 +229,7 @@ export class Bind {
       const {element, bindings} = boundElement;
 
       this.resources_.mutateElement(element, () => {
-        const mutations = [];
+        const mutations = {};
         let width, height;
 
         bindings.forEach(binding => {
@@ -244,7 +244,7 @@ export class Bind {
 
           const mutation = this.applyBinding_(binding, element, newValue);
           if (mutation) {
-            mutations.push(mutation);
+            mutations[mutation.name] = mutation.value;
           }
 
           switch (binding.property) {
@@ -308,15 +308,18 @@ export class Bind {
       default:
         const oldValue = element.getAttribute(property);
 
-        let attributeChanged = true;
-        if (newValue === true && oldValue !== '') {
-          element.setAttribute(property, '');
-        } else if (newValue === false && oldValue !== null) {
-          element.removeAttribute(property);
+        let attributeChanged = false;
+        if (typeof newValue === 'boolean') {
+          if (newValue && oldValue !== '') {
+            element.setAttribute(property, '');
+            attributeChanged = true;
+          } else if (!newValue && oldValue !== null) {
+            element.removeAttribute(property);
+            attributeChanged = true;
+          }
         } else if (newValue !== oldValue) {
           element.setAttribute(property, String(newValue));
-        } else {
-          attributeChanged = false;
+          attributeChanged = true;
         }
 
         if (attributeChanged) {

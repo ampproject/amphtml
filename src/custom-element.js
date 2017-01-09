@@ -1225,11 +1225,10 @@ function createBaseCustomElementClass(win) {
     /**
      * Called when one or more attributes are mutated.
      * @note Must be called inside a mutate context.
-     * @note Boolean attributes have a value of '' and null when
+     * @note Boolean attributes have a value of `true` and `false` when
      *       present and missing, respectively.
      * @param {
-     *   !Array<{name: string,
-     *           value: (null|boolean|string|number|Array|Object)}>
+     *   !Object<string, (null|boolean|string|number|Array|Object)>
      * } mutations
      */
     mutatedAttributesCallback(mutations) {
