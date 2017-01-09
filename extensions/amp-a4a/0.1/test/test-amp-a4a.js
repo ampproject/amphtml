@@ -1164,7 +1164,7 @@ describe('amp-a4a', () => {
     });
 
     function verifyIsKeyInfo(keyInfo) {
-      expect(keyInfo).not.to.be.null;
+      expect(keyInfo).to.be.ok;
       expect(keyInfo).to.have.all.keys(
           ['serviceName', 'hash', 'cryptoKey']);
       expect(keyInfo.serviceName).to.be.a('string').and.not.to.equal('');
@@ -1314,7 +1314,6 @@ describe('amp-a4a', () => {
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(1);  // Only one service.
       return result[0].then(serviceInfo => {
-        console.log('serviceInfo[keys] = ', serviceInfo['keys']);
         expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
         expect(serviceInfo['serviceName']).to.equal('google');
         expect(serviceInfo['keys']).to.be.an.instanceof(Array);

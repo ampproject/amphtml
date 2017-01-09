@@ -115,11 +115,26 @@ export let AdResponseDef;
     }} */
 let CreativeMetaDataDef;
 
-/** @typedef {{serviceName: string, keys: !Array<!Promise<?PublicKeyInfoDef>>}} */
-let SingleServiceKeySetInfoDef;
+/**
+ * A set of public keys for a single AMP signing service.  A single service may
+ * return more than one key if, e.g., they're rotating keys and they serve
+ * the current and upcoming keys.  A CryptoKeysDef stores one or more
+ * (promises to) keys, in the order given by the return value from the
+ * signing service.
+ *
+ * @typedef {{serviceName: string, keys: !Array<!Promise<?PublicKeyInfoDef>>}}
+ */
+let CryptoKeysDef;
 
-/** @typedef {Array<!Promise<!SingleServiceKeySetInfoDef>>} */
-let PerServiceKeySetsInfoDef;
+/**
+ * The public keys for all signing services.  This is an array of promises,
+ * one per signing service, in the order given by the array returned by
+ * #getSigningServiceNames().  Each entry resolves to the keys returned by
+ * that service, represented by a `CryptoKeysDef` object.
+ *
+ * @typedef {Array<!Promise<!CryptoKeysDef>>}
+ */
+let AllServicesCryptoKeysDef;
 
 /** @private */
 export const LIFECYCLE_STAGES = {
@@ -231,7 +246,12 @@ export class AmpA4A extends AMP.BaseElement {
     this.isVerifiedAmpCreative_ = false;
 
     if (!this.win.ampA4aValidationKeys) {
-      /** @type {!PerServiceKeySetsInfoDef} */
+      // Without the following variable assignment, there's no way to apply a
+      // type annotation to a win-scoped variable, so the type checker doesn't
+      // catch type errors here.  This no-op allows us to enforce some type
+      // expectations.  The const assignment will hopefully be optimized
+      // away by the compiler.  *fingers crossed*
+      /** @type {!AllServicesCryptoKeysDef} */
       const forTypeSafety = this.getKeyInfoSets_();
       this.win.ampA4aValidationKeys = forTypeSafety;
     }
@@ -580,7 +600,7 @@ export class AmpA4A extends AMP.BaseElement {
     // keyInfoSetPromise, that holds an Array of Promises of signing keys.
     // So long as any one of these signing services can verify the
     // signature, then the creative is valid AMP.
-    /** @type {!PerServiceKeySetsInfoDef} */
+    /** @type {!AllServicesCryptoKeysDef} */
     const keyInfoSetPromises = this.win.ampA4aValidationKeys;
     return some(keyInfoSetPromises.map(keyInfoSetPromise => {
       // Resolve Promise into an object containing a 'keys' field, which
@@ -842,7 +862,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Retrieves all public keys, as specified in _a4a-config.js.
    * None of the (inner or outer) promises returned by this function can reject.
    *
-   * @return {!PerServiceKeySetsInfoDef}
+   * @return {!AllServicesCryptoKeysDef}
    * @private
    */
   getKeyInfoSets_() {
@@ -889,6 +909,9 @@ export class AmpA4A extends AMP.BaseElement {
         }).catch(err => {
           user().error(
               TAG, this.element.getAttribute('type'), err, this.element);
+          // TODO(a4a-team): This is a failure in the initial attempt to get
+          // the keys, probably b/c of a network condition.  We should
+          // re-trigger key fetching later.
           return {serviceName: currServiceName, keys: []};
         });
       } else {
