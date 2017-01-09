@@ -318,6 +318,7 @@ var forbiddenTerms = {
       'build-system/test-server.js',
       'src/cookies.js',
       'extensions/amp-analytics/0.1/cid-impl.js',
+      'dist.3p/current/integration.js',
     ],
   },
   'getCookie\\W': {
@@ -327,6 +328,7 @@ var forbiddenTerms = {
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
+      'dist.3p/current/integration.js',
     ],
   },
   'setCookie\\W': {
@@ -335,6 +337,7 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
+      'dist.3p/current/integration.js',
       'tools/experiments/experiments.js',
     ],
   },
