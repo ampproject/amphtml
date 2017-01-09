@@ -129,7 +129,6 @@ amp-carousel .amp-carousel-button.amp-disabled {
   flex: 0 0 100% !important;
   height: 100% !important;
   justify-content: center !important;
-  overflow: hidden !important;
   position: relative !important;
   scroll-snap-coordinate: 0 0 !important;
   width: 100% !important;
@@ -138,6 +137,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 .-amp-slide-item > * {
   height: 100%;
   width: 100%;
+  overflow: hidden !important;
 }
 
 .-amp-slide-item-show {
