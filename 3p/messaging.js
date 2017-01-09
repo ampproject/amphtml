@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import {isExperimentOn} from '../src/experiments';
+
+const sentinelNameChange = isExperimentOn(self, 'sentinel-name-change');
+
 /**
  * Send messages to parent frame. These should not contain user data.
  * @param {string} type Type of messages
  * @param {*=} opt_object Data for the message.
  */
-import {isExperimentOn} from '../src/experiments';
-
-const sentinelNameChange = isExperimentOn(self, 'sentinel-name-change');
-
 export function nonSensitiveDataPostMessage(type, opt_object) {
   if (window.parent == window) {
     return;  // Nothing to do.

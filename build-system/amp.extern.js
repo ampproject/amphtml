@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {isExperimentOn} from '../src/experiments';
-const sentinelNameChange = isExperimentOn(self, 'sentinel-name-change');
 
 // Node.js global
 var process = {};
@@ -23,11 +21,8 @@ process.end.NODE_ENV;
 
 // Exposed to ads.
 window.context = {};
-if (sentinelNameChange){
-  window.context.sentinel;
-} else {
-  window.context.amp3pSentinel;
-}
+window.context.sentinel;
+window.context.amp3pSentinel;
 window.context.clientId;
 window.context.initialIntersection;
 window.context.sourceUrl;
