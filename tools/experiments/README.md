@@ -21,11 +21,13 @@ AMP.toggleExperiment('experiment')
 ```
 
 ## Enable an experiment for a particular document
-Document can choose to opt in a certain experiments. To do that, simply put a meta tag of name `amp-experiments-opt-in` in the head of the HTML document. Its `content` value is a comma separated string of experiment IDs to opt in.
+Document can choose to opt in a certain experiments. To do that, simply put a meta tag of name `amp-experiments-opt-in` in the head of the HTML document before your AMP script (`https://cdn.ampproject.org/v0.js`). Its `content` value is a comma separated string of experiment IDs to opt in.
 ```HTML
 <head>
   ...
   <meta name="amp-experiments-opt-in" content="experiment-a,experiment-b">
+  ... <!-- The meta tag needs to be placed before AMP runtime script. ->
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
   ...
 </head>
 ```
