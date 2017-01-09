@@ -34,8 +34,7 @@ var watchify = require('watchify');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
-var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
-
+var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 var cssOnly = argv['css-only'];
 
 require('./build-system/tasks');
@@ -97,7 +96,7 @@ declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '0.1', true);
 declareExtension('amp-sticky-ad', '1.0', true);
-declareExtension('amp-selector', '0.1', false);
+declareExtension('amp-selector', '0.1', true);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -198,10 +197,11 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minifiedName: 'ampcontext-v0.js',
     checkTypes: opt_checkTypes,
     watch: watch,
-    minify: false,
+    minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     externs: ['ads/ads.extern.js',],
-    includeBasicPolyfills: false,
+    include3pDirectories: true,
+    includePolyfills: false,
   });
 
   // For compilation with babel we start with the amp-babel entry point,
@@ -288,7 +288,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
  * @return {!Promise} containing a Readable	Stream
  */
 function compileCss() {
-  console.info('Recompiling CSS.');
+  $$.util.log('Recompiling CSS.');
   return jsifyCssAsync('css/amp.css').then(function(css) {
     return gulp.src('css/**.css')
         .pipe($$.file('css.js', 'export const cssText = ' + css))
@@ -349,7 +349,9 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       return;
     }
   }
-  $$.util.log('Bundling ' + name);
+  if (!process.env.TRAVIS) {
+    $$.util.log('Bundling ' + name);
+  }
   // Building extensions is a 2 step process because of the renaming
   // and CSS inlining. This watcher watches the original file, copies
   // it to the destination and adds the CSS.
@@ -424,10 +426,10 @@ function build() {
       thirdPartyFrameRegex: TESTING_HOST,
       localDev: true,
     };
-    console.log($$.util.colors.green('trying to write AMP_CONFIG.'));
+    $$.util.log($$.util.colors.green('trying to write AMP_CONFIG.'));
     fs.writeFileSync('node_modules/AMP_CONFIG.json',
         JSON.stringify(AMP_CONFIG));
-    console.log($$.util.colors.green('AMP_CONFIG written successfully.'));
+    $$.util.log($$.util.colors.green('AMP_CONFIG written successfully.'));
   }
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
@@ -587,7 +589,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
     function minify() {
-      console.log('Minifying ' + srcFilename);
+      if (!process.env.TRAVIS) {
+        $$.util.log('Minifying ' + srcFilename);
+      }
       closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
           options)
           .then(function() {
@@ -640,7 +644,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(lazywrite())
       .on('end', function() {
         appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
-        $$.util.log('Compiled ' + srcFilename);
+        if (!process.env.TRAVIS) {
+          $$.util.log('Compiled ' + srcFilename);
+        }
         activeBundleOperationCount--;
         if (activeBundleOperationCount == 0) {
           $$.util.log($$.util.colors.green('All current JS updates done.'));
@@ -830,7 +836,7 @@ function buildAlp(options) {
  * @param {!Object} options
  */
 function buildSw(options) {
-  console.log('Bundling service-worker.js');
+  $$.util.log('Bundling service-worker.js');
   var opts = {};
   for (var prop in options) {
     opts[prop] = options[prop];

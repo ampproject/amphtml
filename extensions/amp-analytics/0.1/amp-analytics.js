@@ -541,7 +541,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!key) {
       return {name: '', argList: ''};
     }
-    const match = key.match(/^(?:([^ ]*)(\([^)]*\))|.+)$/);
+    const match = key.match(/^(?:([^\s]*)(\([^)]*\))|[^]+)$/);
     if (!match) {
       const TAG = this.getName_();
       user().error(TAG,

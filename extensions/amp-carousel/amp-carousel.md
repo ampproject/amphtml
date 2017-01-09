@@ -47,7 +47,7 @@ The carousel consists of an arbitrary number of items, as well as optional navig
 
 The carousel advances between items if the user swipes, uses arrow keys, or clicks an optional navigation arrow.
 
-**Example**: While the example shows a carousel of images, `amp-carousel` supports arbitrary children.
+**Example**: While the example shows a carousel of images, `amp-carousel` supports arbitrary HTML children.
 
 ```html
 <amp-carousel width=300 height=400>
@@ -96,6 +96,14 @@ By default, a slide will advance in 5000 millisecond intervals (5 seconds)
 when `autoplay` is specified and will use the value of the `delay`
 attribute if present (minimum of 1000 ms; an error will be thrown if it's any lower). The value of `delay` must be a number of milliseconds, e.g. `delay=5000`.
 
+**height** (required)
+
+The height of the carousel, in pixels.
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
 ## Styling
 - You may use the `amp-carousel` element selector to style it freely.
 - You may use the `.amp-carousel-slide` class selector to target carousel items.
@@ -108,7 +116,7 @@ attribute if present (minimum of 1000 ms; an error will be thrown if it's any lo
 ```css
 .amp-carousel-button-prev {
   left: 16px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
 }
 ```
 
@@ -117,7 +125,7 @@ attribute if present (minimum of 1000 ms; an error will be thrown if it's any lo
 ```css
 .amp-carousel-button-prev {
   left: 5%;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
 }
 ```
 
