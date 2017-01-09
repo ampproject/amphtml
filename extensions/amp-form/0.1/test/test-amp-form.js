@@ -26,6 +26,7 @@ import {
 } from '../form-validators';
 import * as sinon from 'sinon';
 import {toggleExperiment} from '../../../../src/experiments';
+import {extensionsFor} from '../../../../src/extensions';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
@@ -931,18 +932,72 @@ describe('amp-form', () => {
     });
   });
 
-  it('should install action handler and handle submit action', () => {
-    const form = getForm();
-    const actions = actionServiceForDoc(form.ownerDocument);
-    sandbox.stub(actions, 'installActionHandler');
-    const ampForm = new AmpForm(form);
-    sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
-    expect(actions.installActionHandler).to.be.calledWith(form);
-    sandbox.spy(ampForm, 'handleSubmitAction_');
-    ampForm.actionHandler_({method: 'anything'});
-    expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-    ampForm.actionHandler_({method: 'submit'});
-    expect(ampForm.handleSubmitAction_).to.have.been.called;
+  describe('installActionHandler', () => {
+
+    it('should not wait to install action handler if no dependencies', () => {
+      const form = getForm();
+      const actions = actionServiceForDoc(form.ownerDocument);
+      sandbox.stub(actions, 'installActionHandler');
+      const ampForm = new AmpForm(form);
+      sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+
+      return timer.promise(1).then(() => {
+        expect(actions.installActionHandler).to.be.calledWith(form);
+        sandbox.spy(ampForm, 'handleSubmitAction_');
+        ampForm.actionHandler_({method: 'anything'});
+        expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+        ampForm.actionHandler_({method: 'submit'});
+        expect(ampForm.handleSubmitAction_).to.have.been.called;
+      });
+    });
+
+    it('should install after timeout', () => {
+      const form = getForm();
+      const ampSelector = document.createElement('amp-selector');
+      ampSelector.setAttribute('name', 'color');
+      form.appendChild(ampSelector);
+      const actions = actionServiceForDoc(form.ownerDocument);
+      const extensions = extensionsFor(window);
+      sandbox.stub(actions, 'installActionHandler');
+      sandbox.stub(extensions, 'waitForExtension').returns(
+          new Promise(() => {}));
+      const ampForm = new AmpForm(form);
+      sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+      expect(extensions.waitForExtension)
+          .to.have.been.calledWith('amp-selector');
+      return timer.promise(10).then(() => {
+        expect(actions.installActionHandler).to.have.not.been.called;
+        return timer.promise(491).then(() => {
+          expect(actions.installActionHandler).to.have.been.calledWith(form);
+        });
+      });
+    });
+
+    it('should wait for amp-selector to be downloaded', () => {
+      const form = getForm();
+      let ampSelectorLoadResolver;
+      const ampSelector = document.createElement('amp-selector');
+      ampSelector.setAttribute('name', 'color');
+      form.appendChild(ampSelector);
+      const actions = actionServiceForDoc(form.ownerDocument);
+      const extensions = extensionsFor(window);
+      sandbox.stub(actions, 'installActionHandler');
+      sandbox.stub(extensions, 'waitForExtension').returns(
+          new Promise(resolve => {
+            ampSelectorLoadResolver = resolve;
+          }));
+      const ampForm = new AmpForm(form);
+      sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+      expect(extensions.waitForExtension)
+          .to.have.been.calledWith('amp-selector');
+      return timer.promise(10).then(() => {
+        expect(actions.installActionHandler).to.have.not.been.called;
+        ampSelectorLoadResolver();
+        return timer.promise(1).then(() => {
+          expect(actions.installActionHandler).to.have.been.calledWith(form);
+        });
+      });
+    });
   });
 
   describe('Var Substitution', () => {

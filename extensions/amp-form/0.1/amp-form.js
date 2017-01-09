@@ -178,7 +178,7 @@ export class AmpForm {
 
   /**
    * Returns a promise that will be resolved when all dependencies used inside the form
-   * tag are loaded (e.g. amp-selector)
+   * tag are loaded (e.g. amp-selector) or 500ms timeout - whichever is first.
    * @return {!Promise}
    * @private
    */
@@ -193,7 +193,8 @@ export class AmpForm {
         depsDict[tagName] = true;
       }
     }
-    return Promise.all(depsPromises);
+    return Promise.race(
+        [Promise.all(depsPromises), this.timer_.promise(500)]);
   }
 
   /**
