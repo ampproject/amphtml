@@ -32,7 +32,6 @@ const VERSION = 0x00;
  *
  * @typedef {{
  *   serviceName: string,
- *   publicKey: !Object,
  *   hash: Uint8Array,
  *   cryptoKey: !webCrypto.CryptoKey
  * }}
