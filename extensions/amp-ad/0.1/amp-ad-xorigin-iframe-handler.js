@@ -22,12 +22,13 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {
-  IntersectionObserverApi,
-} from '../../../src/intersection-observer-polyfill';
+  IntersectionObserver,
+} from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 import {setStyle} from '../../../src/style';
+import {loadPromise} from '../../../src/event-helper';
 import {AdDisplayState} from './amp-ad-ui';
 import {getHtml} from '../../../src/get-html';
 
@@ -52,8 +53,8 @@ export class AmpAdXOriginIframeHandler {
     /** {?Element} iframe instance */
     this.iframe = null;
 
-    /** @private {?IntersectionObserverApi} */
-    this.intersectionObserverApi_ = null;
+    /** @private {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
 
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
@@ -73,7 +74,6 @@ export class AmpAdXOriginIframeHandler {
    * @param {!Element} iframe
    * @param {boolean=} opt_isA4A when true do not listen to ad response
    * @return {!Promise} awaiting render complete promise
-   * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
   init(iframe, opt_isA4A) {
     dev().assert(
@@ -83,7 +83,7 @@ export class AmpAdXOriginIframeHandler {
     this.baseInstance_.applyFillContent(this.iframe);
 
     // Init IntersectionObserver service.
-    this.intersectionObserverApi_ = new IntersectionObserverApi(
+    this.intersectionObserver_ = new IntersectionObserver(
         this.baseInstance_, this.iframe, true);
 
     this.embedStateApi_ = new SubscriptionApi(
@@ -119,6 +119,14 @@ export class AmpAdXOriginIframeHandler {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
 
+    if (this.baseInstance_.emitLifecycleEvent) {
+      // Only set up a load listener if we know that we can send lifecycle
+      // messages.
+      loadPromise(this.iframe).then(() => {
+        this.baseInstance_.emitLifecycleEvent('xDomIframeLoaded');
+      });
+    }
+
     if (opt_isA4A) {
       // A4A writes creative frame directly to page therefore does not expect
       // post message to unset visibility hidden
@@ -126,7 +134,7 @@ export class AmpAdXOriginIframeHandler {
       return Promise.resolve();
     }
 
-    // Install API that listen to ad response
+    // Install API that listens to ad response
     if (this.baseInstance_.config
         && this.baseInstance_.config.renderStartImplemented) {
       // If support render-start, create a race between render-start no-content
@@ -161,6 +169,9 @@ export class AmpAdXOriginIframeHandler {
         }).then(() => {
           if (this.iframe) {
             setStyle(this.iframe, 'visibility', '');
+            if (this.baseInstance_.emitLifecycleEvent) {
+              this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
+            }
           }
         });
   }
@@ -175,15 +186,14 @@ export class AmpAdXOriginIframeHandler {
     this.uiHandler_.setDisplayState(AdDisplayState.LOADED_RENDER_START);
     this.updateSize_(data.height, data.width,
                 info.source, info.origin);
-    if (this.baseInstance_.lifecycleReporter) {
-      this.baseInstance_.lifecycleReporter.sendPing(
-          'renderCrossDomainStart');
+    if (this.baseInstance_.emitLifecycleEvent) {
+      this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
     }
   }
 
   /**
-   * Cleans up the listeners on the cross domain ad iframe.
-   * And free the iframe resource
+   * Cleans up the listeners on the cross domain ad iframe and frees the
+   * iframe resource.
    * @param {boolean=} opt_keep
    */
   freeXOriginIframe(opt_keep) {
@@ -223,9 +233,9 @@ export class AmpAdXOriginIframeHandler {
       this.embedStateApi_.destroy();
       this.embedStateApi_ = null;
     }
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.destroy();
-      this.intersectionObserverApi_ = null;
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.destroy();
+      this.intersectionObserver_ = null;
     }
   }
 
@@ -304,8 +314,8 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.onViewportCallback(inViewport);
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.onViewportCallback(inViewport);
     }
     this.sendEmbedInfo_(inViewport);
   }
@@ -317,8 +327,8 @@ export class AmpAdXOriginIframeHandler {
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed.
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.fire();
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.fire();
     }
   }
 }

@@ -37,6 +37,27 @@ const AmpAdImplementation = {
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
 };
 
+/** @const {!Object} */
+export const ValidAdContainerTypes = [
+  'AMP-STICKY-AD',
+  'AMP-FX-FLYING-CARPET',
+];
+
+/** @const {string} */
+export const QQID_HEADER = 'X-QQID';
+
+/**
+ * Element attribute that stores experiment IDs.
+ *
+ * Note: This attribute should be used only for tracking experimental
+ * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
+ * added by a publisher page.
+ *
+ * @const {!string}
+ * @visibleForTesting
+ */
+export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
+
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
  * environment by ensuring native crypto support and page originated in the
@@ -83,7 +104,7 @@ export function googleAdUrl(
 
 /**
  * @param {!ArrayBuffer} creative
- * @param {!Headers} responseHeaders
+ * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
  */
 export function extractGoogleAdCreativeAndSignature(
@@ -130,6 +151,9 @@ function buildAdUrl(
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
   const adElement = a4a.element;
+  if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
+    queryParams.push({name: 'amp_ct', value: adElement.parentElement.tagName});
+  }
   const allQueryParams = queryParams.concat(
     [
       {
@@ -149,6 +173,7 @@ function buildAdUrl(
       {name: 'adx', value: slotRect.left},
       {name: 'ady', value: slotRect.top},
       {name: 'u_hist', value: getHistoryLength(global)},
+      {name: 'oid', value: '2'},
       dtdParam,
     ],
     unboundedQueryParams,
