@@ -338,19 +338,6 @@ var forbiddenTerms = {
       'tools/experiments/experiments.js',
     ],
   },
-  'isDevChannel\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'src/experiments.js',
-      'tools/experiments/experiments.js',
-    ],
-  },
-  'isDevChannelVersionDoNotUse_\\W': {
-    message: shouldNeverBeUsed,
-    whitelist: [
-      'src/experiments.js',
-    ],
-  },
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
@@ -489,6 +476,22 @@ var forbiddenTerms = {
     message: 'Use setStyle instead!',
     whitelist: [
       'testing/iframe.js',
+    ],
+  },
+  'AMP_CONFIG': {
+    message: 'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
+        'and getMode() to access config',
+    whitelist: [
+      'build-system/server.js',
+      'build-system/amp.extern.js',
+      'build-system/tasks/prepend-global/test.js',
+      'build-system/tasks/prepend-global/index.js',
+      'src/service-worker/core.js',
+      'src/service-worker/error-reporting.js',
+      'src/mode.js',
+      'src/experiments.js',
+      'src/config.js',
+      'dist.3p/current/integration.js',
     ],
   },
 };
@@ -641,7 +644,7 @@ var forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 var requiredTerms = {
-  'Copyright 20(15|16) The AMP HTML Authors\\.':
+  'Copyright 20(15|16|17) The AMP HTML Authors\\.':
       dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0':
       dedicatedCopyrightNoteSources,

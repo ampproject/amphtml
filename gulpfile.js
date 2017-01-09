@@ -34,8 +34,7 @@ var watchify = require('watchify');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
-var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
-
+var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 var cssOnly = argv['css-only'];
 
 require('./build-system/tasks');
@@ -97,7 +96,7 @@ declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '0.1', true);
 declareExtension('amp-sticky-ad', '1.0', true);
-declareExtension('amp-selector', '0.1', false);
+declareExtension('amp-selector', '0.1', true);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -111,27 +110,41 @@ declareExtension('amp-vimeo', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-vine', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-viz-vega', '0.1', true);
 declareExtension('amp-google-vrview-image', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-viewer-integration', '0.1', false);
+declareExtension('amp-viewer-integration', '0.1', {
+  // The viewer integration code needs to run asap, so that viewers
+  // can influence document state asap. Otherwise the document may take
+  // a long time to learn that it should start process other extensions
+  // faster.
+  loadPriority: 'high',
+});
 declareExtension('amp-video', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
 
 /**
  * @param {string} name
  * @param {string} version E.g. 0.1
- * @param {boolean} hasCss Whether the extension comes with CSS.
+ * @param {boolean|!Object} hasCssOrOptions Whether the extension comes with CSS
+ *   or an extension options object.
  * @param {string=} opt_noTypeCheck Whether not to check types.
  *     No new extension must pass this.
  * @param {!Array<string>=} opt_extraGlobs
  */
-function declareExtension(name, version, hasCss, opt_noTypeCheck,
+function declareExtension(name, version, hasCssOrOptions, opt_noTypeCheck,
     opt_extraGlobs) {
-  extensions[name + '-' + version] = {
+  var hasCss = false;
+  var options = {};
+  if (typeof hasCssOrOptions == 'boolean') {
+    hasCss = hasCssOrOptions;
+  } else {
+    options = hasCssOrOptions
+  }
+  extensions[name + '-' + version] = Object.assign({
     name: name,
     version: version,
     hasCss: hasCss,
     noTypeCheck: !!opt_noTypeCheck,
     extraGlobs: opt_extraGlobs,
-  }
+  }, options);
 }
 
 /**
@@ -142,7 +155,9 @@ function declareExtension(name, version, hasCss, opt_noTypeCheck,
 function buildExtensions(options) {
   for (var key in extensions) {
     var e = extensions[key];
-    buildExtension(e.name, e.version, e.hasCss, options, e.extraGlobs);
+    var o = Object.assign({}, options);
+    o = Object.assign(o, e);
+    buildExtension(e.name, e.version, e.hasCss, o, e.extraGlobs);
   }
 }
 
@@ -182,10 +197,11 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minifiedName: 'ampcontext-v0.js',
     checkTypes: opt_checkTypes,
     watch: watch,
-    minify: false,
+    minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     externs: ['ads/ads.extern.js',],
-    includeBasicPolyfills: false,
+    include3pDirectories: true,
+    includePolyfills: false,
   });
 
   // For compilation with babel we start with the amp-babel entry point,
@@ -272,7 +288,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
  * @return {!Promise} containing a Readable	Stream
  */
 function compileCss() {
-  console.info('Recompiling CSS.');
+  $$.util.log('Recompiling CSS.');
   return jsifyCssAsync('css/amp.css').then(function(css) {
     return gulp.src('css/**.css')
         .pipe($$.file('css.js', 'export const cssText = ' + css))
@@ -333,7 +349,9 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       return;
     }
   }
-  $$.util.log('Bundling ' + name);
+  if (!process.env.TRAVIS) {
+    $$.util.log('Bundling ' + name);
+  }
   // Building extensions is a 2 step process because of the renaming
   // and CSS inlining. This watcher watches the original file, copies
   // it to the destination and adds the CSS.
@@ -374,6 +392,10 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
  */
 function buildExtensionJs(path, name, version, options) {
   var filename = options.filename || name + '.js';
+  if (options.loadPriority && options.loadPriority != 'high') {
+    throw new Error('Unsupported loadPriority: ' + options.loadPriority);
+  }
+  var priority = options.loadPriority ? 'p:"high",' : '';
   compileJs(path + '/', filename, './dist/v0', {
     watch: options.watch,
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
@@ -387,8 +409,9 @@ function buildExtensionJs(path, name, version, options) {
     // The `function` is wrapped in `()` to avoid lazy parsing it,
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
-    wrapper: options.noWrapper ? '' : ('(self.AMP = self.AMP || [])' +
-        '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});'),
+    wrapper: options.noWrapper ? '' : ('(self.AMP=self.AMP||[])' +
+        '.push({n:"' + name + '",' + priority +
+        'f:(function(AMP){<%= contents %>\n})});'),
   });
 }
 
@@ -403,10 +426,10 @@ function build() {
       thirdPartyFrameRegex: TESTING_HOST,
       localDev: true,
     };
-    console.log($$.util.colors.green('trying to write AMP_CONFIG.'));
+    $$.util.log($$.util.colors.green('trying to write AMP_CONFIG.'));
     fs.writeFileSync('node_modules/AMP_CONFIG.json',
         JSON.stringify(AMP_CONFIG));
-    console.log($$.util.colors.green('AMP_CONFIG written successfully.'));
+    $$.util.log($$.util.colors.green('AMP_CONFIG written successfully.'));
   }
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
@@ -566,7 +589,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
     function minify() {
-      console.log('Minifying ' + srcFilename);
+      if (!process.env.TRAVIS) {
+        $$.util.log('Minifying ' + srcFilename);
+      }
       closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
           options)
           .then(function() {
@@ -619,7 +644,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(lazywrite())
       .on('end', function() {
         appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
-        $$.util.log('Compiled ' + srcFilename);
+        if (!process.env.TRAVIS) {
+          $$.util.log('Compiled ' + srcFilename);
+        }
         activeBundleOperationCount--;
         if (activeBundleOperationCount == 0) {
           $$.util.log($$.util.colors.green('All current JS updates done.'));
@@ -809,7 +836,7 @@ function buildAlp(options) {
  * @param {!Object} options
  */
 function buildSw(options) {
-  console.log('Bundling service-worker.js');
+  $$.util.log('Bundling service-worker.js');
   var opts = {};
   for (var prop in options) {
     opts[prop] = options[prop];

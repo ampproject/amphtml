@@ -118,7 +118,7 @@ describe('amp-apester-media', () => {
       'width': '500',
     }, true).then(ape => {
       const iframe = ape.querySelector('iframe');
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

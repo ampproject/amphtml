@@ -22,10 +22,9 @@
  * impacts on click-throughs.
  */
 
-import {isGoogleAdsA4AValidEnvironment} from './utils';
+import {isGoogleAdsA4AValidEnvironment, EXPERIMENT_ATTRIBUTE} from './utils';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
 import {viewerForDoc} from '../../../src/viewer';
 import {parseQueryString} from '../../../src/url';
 
@@ -209,20 +208,12 @@ function selectRandomProperty(obj) {
  */
 export function randomlySelectUnsetPageExperiments(win, experiments) {
   win.pageExperimentBranches = win.pageExperimentBranches || {};
-  if (getMode(win).localDev) {
-    // In local dev mode, it can be difficult to configure AMP_CONFIG
-    // externally.  Default it here if necessary.
-    win.AMP_CONFIG = win.AMP_CONFIG || {};
-  }
   for (const experimentName in experiments) {
     // Skip experimentName if it is not a key of experiments object or if it
     // has already been populated by some other property.
     if (!experiments.hasOwnProperty(experimentName) ||
         win.pageExperimentBranches.hasOwnProperty(experimentName)) {
       continue;
-    }
-    if (getMode(win).localDev) {
-      win.AMP_CONFIG[experimentName] = win.AMP_CONFIG[experimentName] || 0.0;
     }
     // If we're in the experiment, but we haven't already forced a specific
     // experiment branch (e.g., via a test setup), then randomize the branch
@@ -346,18 +337,6 @@ export function mergeExperimentIds(newId, currentIdString) {
   }
   return currentIdString || '';
 }
-
-/**
- * Element attribute that stores experiment IDs.
- *
- * Note: This attribute should be used only for tracking experimental
- * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
- * added by a publisher page.
- *
- * @const {!string}
- * @visibleForTesting
- */
-export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
 
 /**
  * Adds a single experimentID to an element iff it's a valid experiment ID.

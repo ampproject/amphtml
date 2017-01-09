@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,13 @@
 import './polyfills';
 import {installEmbedStateListener, manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
-import {computeInMasterFrame, nextTick, register, run} from './3p';
+import {
+  computeInMasterFrame,
+  nextTick,
+  register,
+  run,
+  setExperimentToggles,
+} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
@@ -66,6 +72,7 @@ import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
+import {csa} from '../ads/google/csa';
 import {distroscale} from '../ads/distroscale';
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
@@ -166,6 +173,10 @@ if (data && data._context) {
 // This should only be invoked after window.context is set
 initLogConstructor();
 
+// Experiment toggles
+setExperimentToggles(window.context.experimentToggles);
+delete window.context.experimentToggles;
+
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
 }
@@ -198,6 +209,7 @@ register('chargeads', chargeads);
 register('colombia', colombia);
 register('contentad', contentad);
 register('criteo', criteo);
+register('csa', csa);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);

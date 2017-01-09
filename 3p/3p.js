@@ -285,3 +285,23 @@ function validateAllowedFields(data, allowedFields) {
     }
   }
 }
+
+/** @private {!Object<string, boolean>} */
+let experimentToggles = {};
+
+/**
+ * Returns true if an experiment is enabled.
+ * @param {string} experimentId
+ * @return {boolean}
+ */
+export function isExperimentOn(experimentId) {
+  return !!experimentToggles[experimentId];
+}
+
+/**
+ * Set experiment toggles.
+ * @param {!Object<string, boolean>} toggles
+ */
+export function setExperimentToggles(toggles) {
+  experimentToggles = toggles;
+}

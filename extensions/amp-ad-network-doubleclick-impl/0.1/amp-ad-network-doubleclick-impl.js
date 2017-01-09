@@ -30,7 +30,10 @@ import {
   isGoogleAdsA4AValidEnvironment,
   getCorrelator,
 } from '../../../ads/google/a4a/utils';
-import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
+import {
+  googleLifecycleReporterFactory,
+  setGoogleLifecycleVarsFromHeaders,
+} from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
@@ -100,54 +103,31 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
+    setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
   /** @override */
-  emitLifecycleEvent(eventName, opt_associatedEventData) {
-    this.lifecycleReporter_ = this.lifecycleReporter_ ||
-        this.initLifecycleReporter();
-    switch (eventName) {
-      case 'adRequestEnd':
-        const fetchResponse = opt_associatedEventData;
-        const qqid = fetchResponse.headers.get(
-            this.lifecycleReporter_.QQID_HEADER);
-        this.lifecycleReporter_.setQqid(qqid);
-        break;
-      case 'adSlotCleared':
-        this.lifecycleReporter_.sendPing(eventName);
-        this.lifecycleReporter_.reset();
-        this.element.setAttribute('data-amp-slot-index',
-            this.win.ampAdSlotIdCounter++);
-        this.lifecycleReporter_ = this.initLifecycleReporter();
-        return;
-      case 'adSlotBuilt':
-      case 'urlBuilt':
-      case 'adRequestStart':
-      case 'extractCreativeAndSignature':
-      case 'adResponseValidateStart':
-      case 'renderFriendlyStart':
-      case 'renderCrossDomainStart':
-      case 'renderFriendlyEnd':
-      case 'renderCrossDomainEnd':
-      case 'preAdThrottle':
-      case 'renderSafeFrameStart':
-        break;
-      default:
+  emitLifecycleEvent(eventName, opt_extraVariables) {
+    if (opt_extraVariables) {
+      this.lifecycleReporter_.setPingParameters(opt_extraVariables);
     }
     this.lifecycleReporter_.sendPing(eventName);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    super.unlayoutCallback();
+    this.element.setAttribute('data-amp-slot-index',
+        this.win.ampAdSlotIdCounter++);
+    this.lifecycleReporter_ = this.initLifecycleReporter();
   }
 
   /**
    * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
    */
   initLifecycleReporter() {
-    const reporter =
-        /** @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter} */
-        (getLifecycleReporter(this, 'a4a', undefined,
-                              this.element.getAttribute(
-                                  'data-amp-slot-index')));
-    return reporter;
+    return googleLifecycleReporterFactory(this);
   }
 
   /**
