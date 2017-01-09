@@ -29,7 +29,7 @@ import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 import {setStyle} from '../../../src/style';
 import {AdDisplayState} from './amp-ad-ui';
-import {getHTML} from '../../../src/get-html';
+import {getHtml} from '../../../src/get-html';
 
 const TIMEOUT_VALUE = 10000;
 
@@ -96,12 +96,13 @@ export class AmpAdXOriginIframeHandler {
           this.element_.creativeId = info.data.id;
         });
     listenFor(this.iframe, 'get-html', (info, source, origin) => {
-      const {selector, attrs} = info;
-
-      const content = getHTML(selector,attrs);
       if (!this.iframe) {
         return;
       }
+
+      const {selector, attrs} = info;
+      const content = getHtml(selector,attrs);
+
       postMessageToWindows(
           this.iframe, [{win: source, origin}],
           'get-html-result', {content}, true

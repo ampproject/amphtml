@@ -404,7 +404,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.addContextToIframe = iframe => {
       iframe.name = iframeName;
     };
-    window.context.getHTML = getHTML;
+    window.context.getHtml = getHtml;
     delete data._context;
     manageWin(window);
     installEmbedStateListener();
@@ -446,7 +446,7 @@ function triggerRenderStart(opt_data) {
  * @param {!Array<String>} attrs
  * @param {!Function} callback
  */
-function getHTML(selector, attrs, callback) {
+function getHtml(selector, attrs, callback) {
   nonSensitiveDataPostMessage('get-html', {selector, attrs});
 
   const unlisten = listenParent(window, 'get-html-result', data => {

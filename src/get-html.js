@@ -19,10 +19,11 @@ const excludedTags = ['amp-analytics', 'amp-experiment', 'amp-bind-state'];
 
 /**
  * Returns content of HTML node
- * @param {!string} selector
- * @param {!Array<string>} attrs
+ * @param {!string} selector - CSS selector of the node to take content from
+ * @param {!Array<string>} attrs - tag attributes to be left in the stringified HTML
+ * @return {string}
  */
-export function getHTML(selector, attrs) {
+export function getHtml(selector, attrs) {
   const root = self.document.querySelector(selector);
   const result = [];
 
@@ -34,8 +35,8 @@ export function getHTML(selector, attrs) {
 }
 
 /**
- * @param {!Element} node
- * @param {!Array<string>} attrs
+ * @param {!Element} node - node to take content from
+ * @param {!Array<string>} attrs - tag attributes to be left in the stringified HTML
  * @param {!Array<string>} result
  */
 function appendToResult(node, attrs, result) {
@@ -54,7 +55,7 @@ function appendToResult(node, attrs, result) {
       result.push(node);
     } else if (node && node.nodeType === Node.TEXT_NODE) {
       result.push(node.textContent);
-    } else if (isCorrectNode(node)) {
+    } else if (isApplicableNode(node)) {
       appendOpenTag(node, attrs, result);
       stack.push(`</${node.tagName.toLowerCase()}>`);
 
@@ -73,7 +74,7 @@ function appendToResult(node, attrs, result) {
  * @param {?Element} node
  * @return {!boolean}
  */
-function isCorrectNode(node) {
+function isApplicableNode(node) {
   return !!(node &&
       excludedTags.indexOf(node.tagName.toLowerCase()) === -1 &&
       node.textContent);

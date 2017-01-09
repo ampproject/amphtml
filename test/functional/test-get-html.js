@@ -26,9 +26,9 @@ const template = `<div id="wrapper">
 </div>
 `;
 
-import {getHTML} from '../../src/get-html';
+import {getHtml} from '../../src/get-html';
 
-describe('getHTML', () => {
+describe('getHtml', () => {
   let element;
 
   beforeEach(() => {
@@ -42,25 +42,25 @@ describe('getHTML', () => {
   });
 
   it('should correctly works with empty second parameter', () => {
-    const result = getHTML('#wrapper', []);
+    const result = getHtml('#wrapper', []);
     const expected = '<div> <div>Lorem ipsum</div> dolor sit amet </div>';
     expect(result).to.equal(expected);
   });
 
   it('should correctly works with attributes array', () => {
-    const result = getHTML('#wrapper', ['class', 'id']);
+    const result = getHtml('#wrapper', ['class', 'id']);
     const expected = '<div id="wrapper"> ' +
         '<div class="tmp">Lorem ipsum</div> dolor sit amet </div>';
     expect(result).to.equal(expected);
   });
 
   it('should correctly works with attributes array', () => {
-    const result = getHTML('.tmp', ['class', 'id']);
+    const result = getHtml('.tmp', ['class', 'id']);
     expect(result).to.equal('<div class="tmp">Lorem ipsum</div>');
   });
 
   it('should correctly work with wrong selector', () => {
-    const result = getHTML('.no-such-class', ['class', 'id']);
+    const result = getHtml('.no-such-class', ['class', 'id']);
     expect(result).to.equal('');
   });
 });
