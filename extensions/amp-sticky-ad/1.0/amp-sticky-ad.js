@@ -129,11 +129,6 @@ class AmpStickyAd extends AMP.BaseElement {
   displayAfterScroll_() {
     const scrollTop = this.viewport_.getScrollTop();
     const viewportHeight = this.viewport_.getSize().height;
-    const scrollHeight = this.viewport_.getScrollHeight();
-    if (scrollHeight < viewportHeight * 2) {
-      this.removeOnScrollListener_();
-      return;
-    }
 
     // Check user has scrolled at least one viewport from init position.
     if (scrollTop > viewportHeight) {
