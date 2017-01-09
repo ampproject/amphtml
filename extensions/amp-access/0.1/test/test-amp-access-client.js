@@ -154,7 +154,6 @@ describe('AccessClientAdapter', () => {
         xhrMock.expects('fetchJson')
             .withExactArgs('https://acme.com/a?rid=reader1', {
               credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
             })
             .returns(Promise.resolve({access: 'A'}))
             .once();
@@ -174,7 +173,6 @@ describe('AccessClientAdapter', () => {
         xhrMock.expects('fetchJson')
             .withExactArgs('https://acme.com/a?rid=reader1', {
               credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
             })
             .returns(Promise.reject('intentional'))
             .once();
@@ -195,7 +193,6 @@ describe('AccessClientAdapter', () => {
         xhrMock.expects('fetchJson')
             .withExactArgs('https://acme.com/a?rid=reader1', {
               credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
             })
             .returns(new Promise(() => {}))  // Never resolved.
             .once();
@@ -224,7 +221,7 @@ describe('AccessClientAdapter', () => {
                 sinon.match(init => {
                   return (init.method == 'POST' &&
                       init.credentials == 'include' &&
-                      init.requireAmpResponseSourceOrigin == true &&
+                      init.requireAmpResponseSourceOrigin == undefined &&
                       init.body == '' &&
                       init.headers['Content-Type'] ==
                           'application/x-www-form-urlencoded');
@@ -246,7 +243,7 @@ describe('AccessClientAdapter', () => {
                 sinon.match(init => {
                   return (init.method == 'POST' &&
                       init.credentials == 'include' &&
-                      init.requireAmpResponseSourceOrigin == true &&
+                      init.requireAmpResponseSourceOrigin == undefined &&
                       init.body == '' &&
                       init.headers['Content-Type'] ==
                           'application/x-www-form-urlencoded');

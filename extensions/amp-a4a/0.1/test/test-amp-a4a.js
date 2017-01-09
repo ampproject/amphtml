@@ -214,7 +214,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(f => {
         fixture = f;
@@ -333,7 +332,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -514,7 +512,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -565,7 +562,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -644,7 +640,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -711,7 +706,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -1073,7 +1067,6 @@ describe('amp-a4a', () => {
           mode: 'cors',
           method: 'GET',
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         }).returns(Promise.resolve(mockResponse));
         return a4a.onLayoutMeasure(() => {
           expect(a4a.adPromise_).to.not.be.null;
