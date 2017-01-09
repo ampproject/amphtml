@@ -1150,6 +1150,235 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('#getKeyInfoSets_', () => {
+    let fixture;
+    let win;
+    let a4aElement;
+    beforeEach(() => {
+      return createAdTestingIframePromise().then(f => {
+        fixture = f;
+        win = fixture.win;
+        a4aElement = createA4aElement(fixture.doc);
+        return fixture;
+      });
+    });
+
+    function verifyIsKeyInfo(keyInfo) {
+      expect(keyInfo).to.be.ok;
+      expect(keyInfo).to.have.all.keys(
+          ['serviceName', 'hash', 'cryptoKey']);
+      expect(keyInfo.serviceName).to.be.a('string').and.not.to.equal('');
+      expect(keyInfo.hash).to.be.instanceOf(Uint8Array);
+    }
+
+    it('should fetch a single key', () => {
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).to.be.calledOnce;
+      expect(xhrMockJson).to.be.calledWith(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          });
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);
+      expect(result[0]).to.be.instanceof(Promise);
+      return result[0].then(serviceInfo => {
+        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfo['serviceName']).to.equal('google');
+        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfo['keys']).to.have.lengthOf(1);
+        const keyInfoPromise = serviceInfo['keys'][0];
+        expect(keyInfoPromise).to.be.an.instanceof(Promise);
+        return keyInfoPromise.then(keyInfo => {
+          verifyIsKeyInfo(keyInfo);
+        });
+      });
+    });
+
+    it('should fetch multiple keys', () => {
+      // For our purposes, re-using the same key is fine.
+      const testKey = JSON.parse(validCSSAmp.publicKey);
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(
+          Promise.resolve({keys: [testKey, testKey, testKey]}));
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).to.be.calledOnce;
+      expect(xhrMockJson).to.be.calledWith(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          });
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);  // Only one service.
+      expect(result[0]).to.be.instanceof(Promise);
+      return result[0].then(serviceInfo => {
+        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfo['serviceName']).to.equal('google');
+        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfo['keys']).to.have.lengthOf(3);
+        return Promise.all(serviceInfo['keys'].map(keyInfoPromise =>
+          keyInfoPromise.then(keyInfo => verifyIsKeyInfo(keyInfo))));
+      });
+    });
+
+    it('should fetch from multiple services', () => {
+      getSigningServiceNamesMock.returns(['google', 'google-dev']);
+      // For our purposes, we don't care what the key is, so long as it's valid.
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(
+              Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).to.be.calledTwice;
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(2);  // Two services.
+      return Promise.all(result.map(  // For each service...
+          serviceInfoPromise => serviceInfoPromise.then(serviceInfo => {
+            expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+            expect(serviceInfo['serviceName']).to.have.string('google');
+            expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+            expect(serviceInfo['keys']).to.have.lengthOf(1);
+            const keyInfoPromise = serviceInfo['keys'][0];
+            expect(keyInfoPromise).to.be.an.instanceof(Promise);
+            return keyInfoPromise.then(keyInfo => {
+              verifyIsKeyInfo(keyInfo);
+            });
+          })));
+    });
+
+    it('Should gracefully handle malformed key responses', () => {
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(Promise.resolve({keys: ['invalid key data']}));
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).to.be.calledOnce;
+      expect(xhrMockJson).to.be.calledWith(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          });
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);  // Only one service.
+      return result[0].then(serviceInfo => {
+        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfo['serviceName']).to.equal('google');
+        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfo['keys']).to.be.empty;
+      });
+    });
+
+    it('should gracefully handle network errors in a single service', () => {
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(Promise.reject(
+              new TypeError('some random network error')));
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);  // Only one service.
+      return result[0].then(serviceInfo => {
+        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfo['serviceName']).to.equal('google');
+        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfo['keys']).to.be.empty;
+      });
+    });
+
+    it('should handle success in one service and net error in another', () => {
+      getSigningServiceNamesMock.returns(['google', 'google-dev']);
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(Promise.reject(
+              new TypeError('some random network error')));
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).to.be.calledTwice;
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(2);  // Two services.
+      return Promise.all(result.map(  // For each service...
+          serviceInfoPromise => serviceInfoPromise.then(serviceInfo => {
+            expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+            const serviceName = serviceInfo.serviceName;
+            expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+            if (serviceName == 'google') {
+              expect(serviceInfo['keys']).to.have.lengthOf(1);
+              const keyInfoPromise = serviceInfo['keys'][0];
+              expect(keyInfoPromise).to.be.an.instanceof(Promise);
+              return keyInfoPromise.then(keyInfo => {
+                verifyIsKeyInfo(keyInfo);
+              });
+            } else if (serviceName == 'google-dev') {
+              expect(serviceInfo['keys']).to.be.empty;
+            } else {
+              throw new Error(
+                  `Unexpected service name: ${serviceName} is neither ` +
+                  'google nor google-dev');
+            }
+          })));
+    });
+
+    it('should return valid object on invalid service name', () => {
+      getSigningServiceNamesMock.returns(['fnord']);
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).not.to.be.called;
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);
+      expect(result[0]).to.be.instanceof(Promise);
+      return result[0].then(serviceInfo => {
+        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfo['serviceName']).to.equal('fnord');
+        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfo['keys']).to.be.empty;
+      });
+    });
+  });
+
   // TODO(tdrl): Other cases to handle for parsing JSON metadata:
   //   - Metadata tag(s) missing
   //   - JSON parse failure
