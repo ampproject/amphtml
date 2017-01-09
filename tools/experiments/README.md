@@ -4,7 +4,7 @@ AMP experiments are features that are released but not yet ready for wide use, s
 
 Developers and users can opt-in into these features before they are fully released. However, experimental components should be used with caution, as they may contain bugs or have unexpected side effects.
 
-## User opts in an experiment
+## Enable an experiment for yourself
 
 Experimental components can be served from [https://cdn.ampproject.org](https://cdn.ampproject.org) or any other domain.
 
@@ -20,7 +20,7 @@ For content served from any other domain, you can toggle experiments in the Chro
 AMP.toggleExperiment('experiment')
 ```
 
-## Document opts in an experiment
+## Enable an experiment for a particular document
 Document can choose to opt in a certain experiments. To do that, simply put a meta tag of name `amp-experiments-opt-in` in the head of the HTML document. Its `content` value is a comma separated string of experiment IDs to opt in.
 ```HTML
 <head>
@@ -37,7 +37,7 @@ Note not all experiments allow document level opt-in. For a full list of whiteli
 To add a new experiment:
 
 1. Add the new experiment to this [list](https://github.com/ampproject/amphtml/blob/master/tools/experiments/experiments.js).
-1. Decide if the experiment should allow document level opt-in, add it to `allow-doc-opt-in` in `prod-config.json` and `canary-config.json` if so.
+1. (This is rare, most new experiments can skip this step) Decide if the experiment should allow document level opt-in. One top consideration is that switching the experiment on/off should not break any document. For example, experimental custom elements should never be whitelisted, as any documents start using it will get broken if the we switch it off. Add it to `allow-doc-opt-in` in `prod-config.json` and `canary-config.json` if so. 
 1. Use it like this:
 
 ```javascript
