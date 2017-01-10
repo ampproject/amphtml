@@ -155,7 +155,7 @@ function tryUpgradeElementNoInline(element, toClass) {
  */
 export function stubElements(win) {
   const knownElements = getExtendedElements(win);
-  const list = win.document.querySelectorAll('[custom-element]');
+  const list = win.document.head.querySelectorAll('script[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
     if (knownElements[name]) {
