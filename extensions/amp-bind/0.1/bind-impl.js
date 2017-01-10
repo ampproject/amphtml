@@ -147,7 +147,10 @@ export class Bind {
    * a tuple containing bound elements and binding data for the evaluator.
    * @param {!Element} body
    * @return {
-   *   !Promise<{boundElements: !Array<BoundElementDef>, evaluatees: !Array<./bind-evaluator.EvaluateeDef>}>
+   *   !Promise<{
+   *     boundElements: !Array<BoundElementDef>,
+   *     evaluatees: !Array<./bind-evaluator.EvaluateeDef>
+   *   }>
    * }
    * @private
    */
