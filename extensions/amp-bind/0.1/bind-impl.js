@@ -173,7 +173,7 @@ export class Bind {
    * Returns a struct representing the binding corresponding to the
    * attribute param, if applicable.
    * @param {!Attr} attribute
-   * @param {!Element} unusedElement
+   * @param {!Element} element
    * @return {?{property: string, expressionString: string}}
    * @private
    */
