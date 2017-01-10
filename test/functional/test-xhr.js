@@ -683,3 +683,30 @@ describe('XHR', function() {
     });
   });
 });
+
+describes.fakeWin('XHR', {
+  win: {
+    location: 'https://example.com',
+    top: {
+      location: 'https://example-top.com',
+    },
+  },
+}, env => {
+  let xhr;
+
+  beforeEach(() => {
+    xhr = installXhrService(env.win);
+  });
+
+  describe('AMP-Redirect-To', () => {
+    it('should redirect users if header is set', () => {
+      const init = {ampCors: false};
+      const url = 'http://localhost:31862/response-headers?' +
+          'AMP-Redirect-To=https://google.com&' +
+          'Access-Control-Expose-Headers=AMP-Redirect-To';
+      return xhr.fetchJson(url, init).then(() => {
+        expect(env.win.top.location.href).to.be.equal('https://google.com/');
+      });
+    });
+  });
+});

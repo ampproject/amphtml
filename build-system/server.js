@@ -116,6 +116,14 @@ app.use('/form/html/post', function(req, res) {
   });
 });
 
+
+app.use('/form/redirect-to/post', function(req, res) {
+  assertCors(req, res, ['POST']);
+  res.setHeader('AMP-Redirect-To', 'https://google.com');
+  res.end();
+});
+
+
 function assertCors(req, res, opt_validMethods) {
   const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
   const invalidMethod = req.method + ' method is not allowed. Use POST.';

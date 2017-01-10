@@ -25,6 +25,7 @@ import {parseUrl, resolveRelativeUrl} from '../src/url';
  *   location: (string|undefined),
  *   navigator: ({userAgent:(string|undefined)}|undefined),
  *   readyState: (boolean|undefined),
+ *   top: (FakeWindowSpec|undefined),
  * }}
  */
 export let FakeWindowSpec;
@@ -50,6 +51,10 @@ export class FakeWindow {
     this.HTMLElement = window.HTMLElement;
     /** @const */
     this.DOMTokenList = window.DOMTokenList;
+
+    // Top Window points to itself if spec.top was not passed.
+    /** @const */
+    this.top = spec.top ? new FakeWindow(spec.top) : this;
 
     // Events.
     EventListeners.intercept(this);
