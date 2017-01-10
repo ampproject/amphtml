@@ -16,6 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
+import {startsWith} from '../../../src/string';
 
 
 /**
@@ -104,7 +105,7 @@ function createFormProxyConstr(win) {
           // Exclude constants.
           name.toUpperCase() == name ||
           // Exclude on-events.
-          name.startsWith('on') ||
+          startsWith(name, 'on') ||
           // Exclude properties that already been created.
           win.Object.prototype.hasOwnProperty.call(FormProxyProto, name) ||
           // Exclude some properties. Currently only used for testing.
@@ -151,24 +152,25 @@ function createFormProxyConstr(win) {
  * @param {!Object} proxy
  */
 function setupLegacyProxy(form, proxy) {
-  const proto = form.cloneNode(/* deep */ false);
+  const win = form.ownerDocument.defaultView;
+  const proto = win.HTMLFormElement.prototype.cloneNode.call(
+      form, /* deep */ false);
   for (const name in proto) {
     if (name in proxy ||
         // Exclude constants.
         name.toUpperCase() == name ||
         // Exclude on-events.
-        name.startsWith('on')) {
+        startsWith(name, 'on')) {
       continue;
     }
     const desc = LEGACY_PROPS[name];
     const current = form[name];
-    const isElement = (current && current.nodeType);
     if (desc) {
       if (desc.access == LegacyPropAccessType.READ_ONCE) {
         // A property such as `style`. The only way is to read this value
         // once and use it for all subsequent calls.
         let actual;
-        if (isElement) {
+        if (current && current.nodeType) {
           // The overriding input, if present, has to be removed and re-added
           // (renaming does NOT work). Completely insane, I know.
           const element = dev().assertElement(current);
