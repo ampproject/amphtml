@@ -619,17 +619,17 @@ app.get('/dist/rtv/99*/*.js', function(req, res, next) {
   }).catch(next);
 });
 
-app.get(['/dist/rtv/*/v0/amp-ad-0.1.js', '/dist/rtv/*/v0/amp-video-0.1.js'], function(req, res, next) {
-  // console.log(req.params.filename);
-  // if (req.params.filename != 'amp-ad-0.1.js'
-  //     || req.params.filename != 'amp-video-0.1.js') {
-  //   next();
-  // }
+app.get('/dist/rtv/*/v0/:filename', function(req, res, next) {
+  if (req.params.filename != 'amp-ad-0.1.js'
+      && req.params.filename != 'amp-video-0.1.js') {
+    return next();
+  }
   var filePath = req.path.replace(/\/rtv\/\d{13}/, '');
   filePath = replaceUrls(exampleMode, filePath);
-  console.log('final filePath is ', filePath);
   req.url = filePath;
-  next();
+  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    res.end(file);
+  }).catch(next);
 });
 
 app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, res, next) {
