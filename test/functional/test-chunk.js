@@ -16,7 +16,6 @@
 
 import {
   activateChunkingForTesting,
-  chunk,
   chunkInstanceForTesting,
   deactivateChunking,
   onIdle,

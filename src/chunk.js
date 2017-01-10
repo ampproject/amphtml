@@ -65,7 +65,6 @@ export function startupChunk(nodeOrAmpDoc, fn) {
  * @param {ChunkPriority} priority
  * @return {!Promise} Resolved when the task is executed.
  */
-
 export function chunk(nodeOrAmpDoc, fn, priority) {
   const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
   return service.run_(fn, priority);
@@ -220,7 +219,7 @@ class StartupTask extends Task {
   /**
    * @param {!Function} fn
    * @param {!Window} win
-   * @param {!./service/viewer-impl.Viewer|Promise} viewerOrPromise
+   * @param {!./service/viewer-impl.Viewer|!Promise} viewerOrPromise
    */
   constructor(fn, win, viewerOrPromise) {
     super(fn);
