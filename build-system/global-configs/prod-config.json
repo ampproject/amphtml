@@ -15,5 +15,6 @@
   "ios-embed-wrapper": 1,
   "amp-apester-media": 1,
   "amp-accordion-session-state-optout": 1,
-  "amp-playbuzz": 1
+  "amp-playbuzz": 1,
+  "amp-selector": 1
 }
