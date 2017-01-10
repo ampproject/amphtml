@@ -165,7 +165,7 @@ describe('amp-ad-network-adsense-impl', () => {
         ampStickyAd.appendChild(adsenseImplElem);
         fixture.doc.body.appendChild(ampStickyAd);
         return adsenseImpl.getAdUrl().then(adUrl => {
-          expect(adUrl.indexOf('a_ct=AMP-STICKY-AD') >= 0).to.be.true;
+          expect(adUrl.indexOf('a_ct=sa') >= 0).to.be.true;
         });
       });
     });
