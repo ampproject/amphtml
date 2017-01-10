@@ -82,8 +82,11 @@ export class Bind {
     /** {?./bind-evaluator.BindEvaluator} */
     this.evaluator_ = null;
 
-    /** {?Promise<!Object<string,*>>} */
+    /** @visibleForTesting {?Promise<!Object<string,*>>} */
     this.evaluatePromise_ = null;
+
+    /** @visibleForTesting {?Promise} */
+    this.scanPromise_ = null;
 
     /** @const {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
@@ -94,29 +97,8 @@ export class Bind {
      */
     this.digestQueuedAfterScan_ = false;
 
-    /**
-     * Keys correspond to valid attribute value types.
-     * @const {!Object<string,boolean>}
-     */
-    this.attributeValueTypes_ = {
-      'string': true,
-      'boolean': true,
-      'number': true,
-    };
-
     this.ampdoc.whenReady().then(() => {
-      this.scanForBindings_(ampdoc.getBody()).then(results => {
-        const {boundElements, evaluatees} = results;
-
-        this.boundElements_ = boundElements;
-        this.evaluator_ = new BindEvaluator(evaluatees);
-
-        // Trigger verify-only digest in development.
-        const development = getMode().development;
-        if (development || this.digestQueuedAfterScan_) {
-          this.digest_(/* opt_verifyOnly */ development);
-        }
-      });
+      this.initialize_();
     });
   }
 
@@ -140,6 +122,26 @@ export class Bind {
         this.digestQueuedAfterScan_ = true;
       }
     }
+  }
+
+  /**
+   * Scans the ampdoc for bindings and creates the expression evaluator.
+   * @private
+   */
+  initialize_() {
+    this.scanPromise_ = this.scanForBindings_(this.ampdoc.getBody());
+    this.scanPromise_.then(results => {
+      const {boundElements, evaluatees} = results;
+
+      this.boundElements_ = boundElements;
+      this.evaluator_ = new BindEvaluator(evaluatees);
+
+      // Trigger verify-only digest in development.
+      const development = getMode().development;
+      if (development || this.digestQueuedAfterScan_) {
+        this.digest_(/* opt_verifyOnly */ development);
+      }
+    });
   }
 
   /**

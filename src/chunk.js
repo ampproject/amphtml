@@ -37,30 +37,39 @@ let deactivated = /nochunking=1/.test(self.location.hash);
 const resolved = Promise.resolve();
 
 /**
+ * Run the given function. For visible documents the function will be
+ * called in a micro task (Essentially ASAP). If the document is
+ * not visible, tasks will yield to the event loop (to give the browser
+ * time to do other things) and may even be further delayed until
+ * there is time.
+ *
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {function()} fn Function that will be called as a "chunk".
+ */
+export function startupChunk(nodeOrAmpDoc, fn) {
+  if (deactivated) {
+    return resolved.then(fn);
+  }
+  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  return service.runForStartup_(fn);
+};
+
+/**
  * Run the given function sometime in the future without blocking UI.
  *
  * Higher priority tasks are executed before lower priority tasks.
  * Tasks with the same priority are executed in FIFO order.
  *
- * For ChunkPriority.STARTUP:
- *   In visible documents, `fn` will be called in a micro task
- *   (essentially ASAP). If the document is not visible, tasks will yield
- *   to the event loop (to give the browser time to do other things)
- *   and may even be further delayed until there is time.
- *
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  * @param {function()} fn Function that will be called as a "chunk".
- * @param {ChunkPriority=} opt_priority
+ * @param {ChunkPriority} priority
  * @return {!Promise} Resolved when the task is executed.
  */
-export function chunk(nodeOrAmpDoc, fn, opt_priority) {
-  if (deactivated) {
-    return resolved.then(fn);
-  }
+
+export function chunk(nodeOrAmpDoc, fn, priority) {
   const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  const p = (opt_priority === undefined) ? ChunkPriority.STARTUP : opt_priority;
-  return service.run_(fn, p);
-};
+  return service.run_(fn, priority);
+}
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
@@ -112,7 +121,6 @@ export function runChunksForTesting(nodeOrAmpDoc) {
  * @enum {number}
  */
 export const ChunkPriority = {
-  STARTUP: 100,
   HIGH: 20,
   LOW: 10,
   BACKGROUND: 0,
@@ -211,13 +219,14 @@ class Task {
 class StartupTask extends Task {
   /**
    * @param {!Function} fn
-   * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
+   * @param {!Window} win
+   * @param {!./service/viewer-impl.Viewer|Promise} viewerOrPromise
    */
-  constructor(fn, ampDoc) {
+  constructor(fn, win, viewerOrPromise) {
     super(fn);
 
     /** @private {!Window} */
-    this.win_ = ampDoc.win;
+    this.win_ = win;
 
     /** @private @const {boolean} */
     this.active_ = isExperimentOnAllowUrlOverride(this.win_, 'chunked-amp');
@@ -227,17 +236,30 @@ class StartupTask extends Task {
 
     /** @private {?./service/viewer-impl.Viewer} */
     this.viewer_ = null;
-    viewerPromiseForDoc(ampDoc).then(viewer => {
-      this.viewer_ = viewer;
-      viewer.onVisibilityChanged(() => {
-        if (viewer.isVisible()) {
-          this.runTask();
-        }
+
+    if (viewerOrPromise instanceof Promise) {
+      viewerOrPromise.then(viewer => {
+        this.setViewer(viewer);
       });
-      if (viewer.isVisible()) {
+    } else {
+      this.setViewer(viewerOrPromise);
+    }
+  }
+
+  /**
+   * @param {!./service/viewer-impl.Viewer} viewer
+   */
+  setViewer(viewer) {
+    this.viewer_ = viewer;
+
+    this.viewer_.onVisibilityChanged(() => {
+      if (this.viewer_.isVisible()) {
         this.runTask();
       }
     });
+    if (this.viewer_.isVisible()) {
+      this.runTask();
+    }
   }
 
   /** @override */
@@ -298,6 +320,15 @@ class Chunks {
     /** @protected @const {function()} */
     this.boundExecute_ = () => this.execute_();
 
+    /** @private {?./service/viewer-impl.Viewer} */
+    this.viewer_ = null;
+
+    /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
+    this.viewerPromise_ = viewerPromiseForDoc(ampDoc);
+    this.viewerPromise_.then(viewer => {
+      this.viewer_ = viewer;
+    });
+
     this.win_.addEventListener('message', e => {
       if (e.data = 'amp-macro-task') {
         this.execute_();
@@ -308,18 +339,36 @@ class Chunks {
   /**
    * Run fn as a "chunk".
    * @param {function()} fn
-   * @param {ChunkPriority} priority
+   * @param {number} priority
+   * @return {!Promise} promise
    * @private
    */
   run_(fn, priority) {
-    // Use special subclass for startup tasks.
-    const t = (priority === ChunkPriority.STARTUP)
-        ? new StartupTask(fn, this.ampDoc_)
-        : new Task(fn);
-    this.tasks_.enqueue(t, priority);
-    // TODO(choumx): Fix this issue with tests.
-    Promise.resolve().then(() => this.schedule_());
+    const t = new Task(fn);
+    this.scheduleTask_(t, priority);
     return t.promise;
+  }
+
+  /**
+   * @param {function()} fn
+   * @return {!Promise} promise
+   * @private
+   */
+  runForStartup_(fn) {
+    const viewerOrPromise = this.viewer_ || this.viewerPromise_;
+    const t = new StartupTask(fn, this.win_, viewerOrPromise);
+    this.scheduleTask_(t, Number.POSITIVE_INFINITY);
+    return t.promise;
+  }
+
+  /**
+   * @param {!Task} task
+   * @param {number} priority
+   * @private
+   */
+  scheduleTask_(task, priority) {
+    this.tasks_.enqueue(task, priority);
+    this.schedule_();
   }
 
   /**

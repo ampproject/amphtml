@@ -21,6 +21,7 @@ import {
   deactivateChunking,
   onIdle,
   resolvedObjectforTesting,
+  startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {toggleExperiment} from '../../src/experiments';
@@ -62,7 +63,7 @@ describe('chunk', () => {
     });
 
     it('should execute a chunk', done => {
-      chunk(fakeWin.document, done);
+      startupChunk(fakeWin.document, done);
     });
 
     it('should execute chunks', done => {
@@ -77,14 +78,14 @@ describe('chunk', () => {
           }
         };
       }
-      chunk(fakeWin.document, complete('a'));
-      chunk(fakeWin.document, complete('b'));
-      chunk(fakeWin.document, function() {
+      startupChunk(fakeWin.document, complete('a'));
+      startupChunk(fakeWin.document, complete('b'));
+      startupChunk(fakeWin.document, function() {
         complete('c')();
-        chunk(fakeWin.document, function() {
+        startupChunk(fakeWin.document, function() {
           complete('d')();
-          chunk(fakeWin.document, complete('e'));
-          chunk(fakeWin.document, complete('f'));
+          startupChunk(fakeWin.document, complete('e'));
+          startupChunk(fakeWin.document, complete('f'));
         });
       });
     });
@@ -173,10 +174,10 @@ describe('chunk', () => {
       });
 
       it('should proceed on error and rethrowAsync', d => {
-        chunk(fakeWin.document, () => {
+        startupChunk(fakeWin.document, () => {
           throw new Error('test async');
         });
-        chunk(fakeWin.document, () => {
+        startupChunk(fakeWin.document, () => {
           done = d;
         });
       });
