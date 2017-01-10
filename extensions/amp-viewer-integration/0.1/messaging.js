@@ -37,7 +37,7 @@ const MessageType = {
  *   name: string,
  *   data: *,
  *   rsvp: (boolean|undefined),
- *   error: (string|undefined)
+ *   error: (string|undefined),
  * }}
  */
 export let Message;
@@ -151,19 +151,20 @@ export class Messaging {
   /**
    * @param {number} requestId
    * @param {string} messageName
-   * @param {!Error} reason
+   * @param {*} reason !Error most of time, string sometimes, * rarely.
    * @private
    */
   sendResponseError_(requestId, messageName, reason) {
+    const errString = this.errorToString_(reason);
     this.logError_(
-      TAG + ': sendResponseError_, Message name: ' + messageName, reason);
+      TAG + ': sendResponseError_, Message name: ' + messageName, errString);
     this.sendMessage_({
       app: APP,
       requestid: requestId,
       type: MessageType.RESPONSE,
       name: messageName,
       data: null,
-      error: this.errorToString_(reason),
+      error: errString,
     });
   }
 
@@ -189,20 +190,19 @@ export class Messaging {
         'Cannot handle request because handshake is not yet confirmed!');
     }
     const requestId = message.requestid;
-    const msg = dev().assertString(message.name);
     if (message.rsvp) {
       const promise =
-        this.requestProcessor_(msg, message.data, message.rsvp);
+        this.requestProcessor_(message.name, message.data, message.rsvp);
       if (!promise) {
         this.sendResponseError_(
-          requestId, msg, new Error('no response'));
+          requestId, message.name, new Error('no response'));
         dev().assert(promise,
           'expected response but none given: ' + message.name);
       }
       promise.then(data => {
-        this.sendResponse_(requestId, msg, data);
+        this.sendResponse_(requestId, message.name, data);
       }, reason => {
-        this.sendResponseError_(requestId, msg, new Error(reason));
+        this.sendResponseError_(requestId, message.name, reason);
       });
     }
   }
@@ -249,7 +249,7 @@ export class Messaging {
   };
 
   /**
-   * @param {!Error|string} err
+   * @param {*} err !Error most of time, string sometimes, * rarely.
    * @return {string}
    * @private
    */
