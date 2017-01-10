@@ -827,14 +827,15 @@ export class BaseElement {
   }
 
   /**
-   * Called when an attribute's value changes.
-   * Boolean attributes have a value of empty string and `null` when
-   * present and missing, respectively.
-   * @param {string} unusedName
-   * @param {?string} unusedOldValue
-   * @param {?string} unusedNewValue
+   * Called when one or more attributes are mutated.
+   * @note Must be called inside a mutate context.
+   * @note Boolean attributes have a value of `true` and `false` when
+   *       present and missing, respectively.
+   * @param {
+   *   !Object<string, (null|boolean|string|number|Array|Object)>
+   * } unusedMutations
    */
-  attributeChangedCallback(unusedName, unusedOldValue, unusedNewValue) {
+  mutatedAttributesCallback(unusedMutations) {
     // Subclasses may override.
   }
 

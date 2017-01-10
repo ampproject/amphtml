@@ -18,6 +18,12 @@ import {AstNodeType} from './bind-expr-defines';
 import {parser} from './bind-expr-impl';
 
 /**
+ * Possible types of a Bind expression evaluation.
+ * @typedef {(null|boolean|string|number|Array|Object)}
+ */
+export let BindExpressionResultDef;
+
+/**
  * Map of object type to function name to whitelisted function.
  * @type {!Object<string, !Object<string, Function>>}
  */
@@ -81,7 +87,7 @@ export class BindExpression {
    * Evaluates the expression given a scope.
    * @param {!Object} scope
    * @throws {Error} On illegal function invocation.
-   * @return {*}
+   * @return {BindExpressionResultDef}
    */
   evaluate(scope) {
     return this.eval_(this.ast_, scope);
@@ -92,7 +98,7 @@ export class BindExpression {
    * @param {?./bind-expr-defines.AstNode} node
    * @param {!Object} scope
    * @throws {Error}
-   * @return {*}
+   * @return {BindExpressionResultDef}
    * @private
    */
   eval_(node, scope) {
@@ -102,7 +108,8 @@ export class BindExpression {
 
     const {type, args, value} = node;
 
-    if (type === AstNodeType.LITERAL) {
+    // `value` should always exist for literals.
+    if (type === AstNodeType.LITERAL && value !== undefined) {
       return value;
     }
 
@@ -245,7 +252,7 @@ export class BindExpression {
             : this.eval_(args[2], scope);
 
       default:
-        throw new Error(`${type} is not a valid node type.`);
+        throw new Error(`Unexpected AstNodeType: ${type}.`);
     }
   }
 

@@ -52,9 +52,10 @@ describes.realWin('amp-bind', {
    */
   function createAmpElementWithBinding(binding) {
     const parent = env.win.document.getElementById('parent');
-    parent.innerHTML = '<p ' + binding + '></p>';
+    const ampCss = 'i-amphtml-foo -amp-foo amp-foo';
+    parent.innerHTML = `<p class="${ampCss}" ${binding}></p>`;
     const fakeAmpElement = parent.firstElementChild;
-    fakeAmpElement.attributeChangedCallback = () => {};
+    fakeAmpElement.mutatedAttributesCallback = () => {};
     return fakeAmpElement;
   }
 
@@ -64,7 +65,7 @@ describes.realWin('amp-bind', {
    * @return {!Promise}
    */
   function onBindReady(callback) {
-    return env.ampdoc.whenBodyAvailable().then(() => {
+    return env.ampdoc.whenReady().then(() => {
       if (bind.evaluatePromise_) {
         return bind.evaluatePromise_.then(() => {
           env.flushVsync();
@@ -83,7 +84,7 @@ describes.realWin('amp-bind', {
    * @return {!Promise}
    */
   function onBindReadyAndSetState(state, callback) {
-    return env.ampdoc.whenBodyAvailable().then(() => {
+    return env.ampdoc.whenReady().then(() => {
       bind.setState(state);
       return bind.evaluatePromise_.then(() => {
         env.flushVsync();
@@ -99,11 +100,11 @@ describes.realWin('amp-bind', {
     }).to.throw('Experiment "AMP-BIND" is disabled.');
   });
 
-  it('should scan for bindings when body is available', () => {
+  it('should scan for bindings when ampdoc is ready', () => {
     createElementWithBinding('[onePlusOne]="1+1"');
-    expect(bind.bindings_.length).to.equal(0);
+    expect(bind.boundElements_.length).to.equal(0);
     return onBindReady(() => {
-      expect(bind.bindings_.length).to.equal(1);
+      expect(bind.boundElements_.length).to.equal(1);
     });
   });
 
@@ -188,17 +189,35 @@ describes.realWin('amp-bind', {
     });
   });
 
-  it('should call attributeChangedCallback on AMP elements', () => {
-    const binding = '[onePlusOne]="1+1" [added]="true" removed';
-    const element = createAmpElementWithBinding(binding);
-    const spy = env.sandbox.spy(element, 'attributeChangedCallback');
-    spy.withArgs('onePlusOne', null, 2);
-    spy.withArgs('added', null, '');
-    spy.withArgs('removed', '', null);
+  it('should support NOT override internal AMP CSS classes', () => {
+    const element = createAmpElementWithBinding(`[class]="['abc']"`);
+    expect(toArray(element.classList)).to.deep.equal(
+        ['i-amphtml-foo', '-amp-foo', 'amp-foo']);
     return onBindReadyAndSetState({}, () => {
-      expect(spy.withArgs('onePlusOne', null, 2).calledOnce);
-      expect(spy.withArgs('added', null, '').calledOnce);
-      expect(spy.withArgs('removed', '', null).calledOnce);
+      expect(toArray(element.classList)).to.deep.equal(
+          ['i-amphtml-foo', '-amp-foo', 'amp-foo', 'abc']);
+    });
+  });
+
+  it('should call mutatedAttributesCallback on AMP elements', () => {
+    const binding = '[onePlusOne]="1+1" [twoPlusTwo]="2+2" twoPlusTwo="4"'
+        + '[add]="true" alreadyAdded [alreadyAdded]="true"'
+        + 'remove [remove]="false" [nothingToRemove]="false"';
+    const element = createAmpElementWithBinding(binding);
+    const spy = env.sandbox.spy(element, 'mutatedAttributesCallback');
+    return onBindReadyAndSetState({}, () => {
+      // Attribute names are automatically lower-cased.
+      expect(spy).calledWithMatch({
+        oneplusone: 2,
+        add: true,
+        remove: false,
+      });
+      // Callback shouldn't include attributes whose values haven't changed.
+      expect(spy.neverCalledWithMatch({
+        twoplustwo: 4,
+        alreadyadded: true,
+        nothingtoremove: false,
+      })).to.be.true; // sinon-chai doesn't support "never" API.
     });
   });
 
@@ -248,6 +267,4 @@ describes.realWin('amp-bind', {
       expect(stub.calledOnce).to.be.true;
     });
   });
-
-  // TODO(choumx): Add tests for security (binding to banned attributes, etc.).
 });
