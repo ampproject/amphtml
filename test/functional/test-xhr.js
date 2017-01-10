@@ -708,5 +708,31 @@ describes.fakeWin('XHR', {
         expect(env.win.top.location.href).to.be.equal('https://google.com/');
       });
     });
+
+    it('should fail to redirect to non-secure urls', () => {
+      const init = {ampCors: false};
+      const url = 'http://localhost:31862/response-headers?' +
+          'AMP-Redirect-To=http://google.com&' +
+          'Access-Control-Expose-Headers=AMP-Redirect-To';
+      return xhr.fetchJson(url, init).then(() => {
+        throw new Error('xhr.fetchJson Should not have resolved');
+      }, () => {
+        expect(env.win.top.location.href).to.be.equal(
+            'https://example-top.com/');
+      });
+    });
+
+    it('should fail to redirect to non-absolute urls', () => {
+      const init = {ampCors: false};
+      const url = 'http://localhost:31862/response-headers?' +
+          'AMP-Redirect-To=/hello&' +
+          'Access-Control-Expose-Headers=AMP-Redirect-To';
+      return xhr.fetchJson(url, init).then(() => {
+        throw new Error('xhr.fetchJson Should not have resolved');
+      }, () => {
+        expect(env.win.top.location.href).to.be.equal(
+            'https://example-top.com/');
+      });
+    });
   });
 });

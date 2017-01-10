@@ -20,6 +20,8 @@ import {
   getSourceOrigin,
   getCorsUrl,
   parseUrl,
+  assertHttpsUrl,
+  assertAbsoluteHttpOrHttpsUrl,
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
 
@@ -166,6 +168,8 @@ export class Xhr {
       // given URL.
       const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
       if (redirectTo) {
+        assertAbsoluteHttpOrHttpsUrl(redirectTo);
+        assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
         this.win.top.location.href = redirectTo;
       }
       return response;
