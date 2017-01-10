@@ -1,4 +1,6 @@
 {
+  "allow-doc-opt-in": ["visibility-v2"],
+
   "canary": 0,
   "amp-ios-overflow-x": 1,
   "amp-experiment": 1,

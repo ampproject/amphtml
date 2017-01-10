@@ -23,6 +23,7 @@ import {
   resetExperimentTogglesForTesting,
   getExperimentToglesFromCookieForTesting,
 } from '../../src/experiments';
+import {createElementWithAttributes} from '../../src/dom';
 import * as sinon from 'sinon';
 
 describe('experimentToggles', () => {
@@ -414,6 +415,42 @@ describe('toggleExperiment', () => {
 
     // Sanity check, the global setting should never be changed.
     expect(win.AMP_CONFIG.e1).to.equal(1);
+  });
+});
+
+describes.realWin('meta override', {}, env => {
+
+  let win;
+
+  beforeEach(() => {
+    win = env.win;
+  });
+
+  it('should allow override iff the experiment is whitelisted', () => {
+    win.AMP_CONFIG = {
+      'allow-doc-opt-in': ['e1', 'e3'],
+      e1: 0,
+      e2: 0,
+    };
+
+    win.document.head.appendChild(
+        createElementWithAttributes(win.document, 'meta', {
+          name: 'amp-experiments-opt-in',
+          content: 'e1,e2,e3',
+        }));
+
+    resetExperimentTogglesForTesting();
+
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
+    expect(isExperimentOn(win, 'e3')).to.be.true;
+
+    toggleExperiment(win, 'e1', false);
+    toggleExperiment(win, 'e2', true);
+    toggleExperiment(win, 'e3', false);
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+    expect(isExperimentOn(win, 'e2')).to.be.true;
+    expect(isExperimentOn(win, 'e3')).to.be.false;
   });
 });
 
