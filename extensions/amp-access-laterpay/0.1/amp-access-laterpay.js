@@ -37,8 +37,8 @@ const AUTHORIZATION_TIMEOUT = 3000;
 const DEFAULT_MESSAGES = {
   decimalDelimeter: '.',
   premiumContentTitle: 'Buy only this article',
-  ppuButton: 'Buy Now, Pay Later',
-  sisButton: 'Buy Now',
+  payLaterButton: 'Buy Now, Pay Later',
+  payNowButton: 'Buy Now',
   defaultButton: 'Buy Now',
   alreadyPurchasedLink: 'I already bought this',
 };
@@ -256,13 +256,10 @@ export class LaterpayVendor {
       this.i18n_.premiumContentTitle;
     this.purchaseConfig_.premiumcontent.description = this.getArticleTitle_();
     listContainer.appendChild(
-      this.createPurchaseOption_(
-        this.purchaseConfig_.premiumcontent, this.i18n_.ppuButton)
+      this.createPurchaseOption_(this.purchaseConfig_.premiumcontent)
     );
     this.purchaseConfig_.timepasses.forEach(timepass => {
-      listContainer.appendChild(
-        this.createPurchaseOption_(timepass, this.i18n_.sisButton)
-      );
+      listContainer.appendChild(this.createPurchaseOption_(timepass));
     });
     const purchaseButton = this.doc_.createElement('button');
     purchaseButton.className = TAG + '-purchase-button';
@@ -281,15 +278,14 @@ export class LaterpayVendor {
 
   /**
    * @param {!PurchaseOptionDef} option
-   * @param {!string} purchaseActionLabel
    * @return {!Node}
    * @private
    */
-  createPurchaseOption_(option, purchaseActionLabel) {
+  createPurchaseOption_(option) {
     const li = this.doc_.createElement('li');
     const control = this.doc_.createElement('label');
     control.for = option.tp_title;
-    control.appendChild(this.createRadioControl_(option, purchaseActionLabel));
+    control.appendChild(this.createRadioControl_(option));
     const metadataContainer = this.doc_.createElement('div');
     metadataContainer.className = TAG + '-metadata';
     const title = this.doc_.createElement('span');
@@ -308,18 +304,19 @@ export class LaterpayVendor {
 
   /**
    * @param {!PurchaseOptionDef} option
-   * @param {!string} purchaseActionLabel
    * @return {!Node}
    * @private
    */
-  createRadioControl_(option, purchaseActionLabel) {
+  createRadioControl_(option) {
     const radio = this.doc_.createElement('input');
     radio.name = 'purchaseOption';
     radio.type = 'radio';
     radio.id = option.tp_title;
     radio.value = option.purchase_url;
+    const purchaseType = option['purchase_type'] === 'ppu' ? 'payLater' : 'payNow';
+    const purchaseActionLabel = this.i18n_[purchaseType + 'Button'];
     radio.setAttribute('data-purchase-action-label', purchaseActionLabel);
-    radio.setAttribute('data-purchase-type', option['purchase_type']);
+    radio.setAttribute('data-purchase-type', purchaseType);
     this.purchaseOptionListeners_.push(listen(
       radio, 'change', this.handlePurchaseOptionSelection_.bind(this)
     ));
@@ -367,7 +364,7 @@ export class LaterpayVendor {
   */
   createAlreadyPurchasedLink_(href) {
     const p = this.doc_.createElement('p');
-    p.className = TAG + '-already-purchased-container';
+    p.className = TAG + '-already-purchased-link-container';
     const a = this.doc_.createElement('a');
     a.href = href;
     a.textContent = this.i18n_.alreadyPurchasedLink;
