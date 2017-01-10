@@ -23,6 +23,7 @@ import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeChildren} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
+import {viewportForDoc} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
 
@@ -46,7 +47,8 @@ const DEFAULT_MESSAGES = {
  * @typedef {{
  *   articleTitleSelector: !string,
  *   configUrl: string=,
- *   articleId: string=
+ *   articleId: string=,
+ *   scrollTopAfterAuth: boolean=,
  * }}
  */
 let LaterpayConfigDef;
@@ -94,6 +96,9 @@ export class LaterpayVendor {
     /** @const @private {!Document} */
     this.doc_ = this.win_.document;
 
+    /** @private @const {!Viewport} */
+    this.viewport_ = viewportForDoc(this.win_.document);
+
     /** @const @private {!LaterpayConfigDef} */
     this.laterpayConfig_ = this.accessService_.getAdapterConfig();
 
@@ -105,6 +110,7 @@ export class LaterpayVendor {
 
     /** @const @private {?Function} */
     this.alreadyPurchasedListener_ = null;
+
     /** @const @private {!Array<Event>} */
     this.purchaseOptionListeners_ = [];
 
@@ -161,6 +167,10 @@ export class LaterpayVendor {
         throw user()
           .createError('No merchant domains have been matched for this ' +
             'article, or no paid content configurations are setup.');
+      }
+
+      if (this.laterpayConfig_.scrollTopAfterAuth) {
+        this.vsync_.mutate(() => this.viewport_.setScrollTop(0));
       }
       this.emptyContainer_();
       return {access: response.access};
