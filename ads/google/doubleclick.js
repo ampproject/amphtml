@@ -100,14 +100,12 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
     const primaryWidth = primarySize[0];
     const primaryHeight = primarySize[1];
     // By default, this flag is true.
-    const multiSizeValidation = data.multiSizeValidation ?
-        data.multiSizeValidation == 'true' : true;
 
     getMultiSizeDimensions(
         multiSizeDataStr,
         primaryWidth,
         primaryHeight,
-        multiSizeValidation,
+        (data.multiSizeValidation || 'true') == 'true',
         dimensions);
   }
 

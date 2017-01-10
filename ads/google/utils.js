@@ -30,8 +30,7 @@ import {user} from '../../src/log';
  * @param {boolean} multiSizeValidation A flag that if set to true will enforce
  *   the rule that ensures multi-size dimensions are no less than 2/3rds of
  *   their primary dimension's counterpart.
- * @return {!Array<Array<number>>} An array of arrays, the latter of which
- *   contains the width and height as its sole elements (in that order).
+ * @return {!Array<Array<number>>} An array of dimensions.
  */
 export function getMultiSizeDimensions(
     multiSizeDataStr,
