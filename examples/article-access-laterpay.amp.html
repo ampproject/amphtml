@@ -121,20 +121,6 @@
       background-color: #f4f4f4;
     }
 
-    .login-section {
-      margin: 16px;
-      margin-top: 24px;
-      padding: 16px;
-      background: #ffc;
-    }
-
-    .meter-section {
-      margin: 16px;
-      margin-top: 24px;
-      padding: 16px;
-      background: #ffa;
-    }
-
     .error-section {
       margin: 16px;
       margin-top: 24px;
@@ -229,8 +215,8 @@
           </div>
         </div>
 
-        <section amp-access="NOT error AND NOT access" amp-access-hide class="login-section">
-          <div id="amp-access-laterpay-dialog"></div>
+        <section amp-access="NOT error AND NOT access" amp-access-hide>
+          <div id="amp-access-laterpay-dialog" class="amp-access-laterpay"></div>
         </section>
 
         <section amp-access="error" amp-access-hide class="error-section">

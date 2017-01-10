@@ -114,9 +114,11 @@ Access Content Markup should be used in the same way as with AMP Access.
 
 The element with id `amp-access-laterpay-dialog` will render a list of purchase options when the user does not have access to the article. This list has some very basic styling and can be customized to feel more integrated in the publisher's page.
 
+Make sure you add the `amp-access-laterpay` class if you want to use the default styling.
+
 ```html
-<section amp-access="NOT error AND NOT access" amp-access-hide class="login-section">
-  <div id="amp-access-laterpay-dialog"></div>
+<section amp-access="NOT error AND NOT access" amp-access-hide>
+  <div id="amp-access-laterpay-dialog" class="amp-access-laterpay"></div>
 </section>
 
 <section amp-access="error" amp-access-hide class="error-section">
@@ -137,7 +139,7 @@ Some basic layout CSS already exists, but it's recommended that publishers style
 The structure created for the dialog looks as follows:
 
 ```html
-<div id="amp-access-laterpay-dialog">
+<div id="amp-access-laterpay-dialog" class="amp-access-laterpay">
   <p class="amp-access-laterpay-header">
     Optional, appears if header locale message is defined.
   </p>
