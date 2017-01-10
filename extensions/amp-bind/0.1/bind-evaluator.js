@@ -20,40 +20,69 @@ import {user} from '../../../src/log';
 const TAG = 'AMP-BIND';
 
 /**
+ * @typedef {{
+ *   tagName: string,
+ *   property: string,
+ *   expressionString: string,
+ * }}
+ */
+export let EvaluateeDef;
+
+/**
+ * @typedef {{
+ *   tagName: string,
+ *   property: string,
+ *   expression: !BindExpression,
+ * }}
+ */
+let ParsedEvaluateeDef;
+
+/**
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
   /**
-   * @param {!Array<string>} expressionStrings
+   * @param {!Array<EvaluateeDef>} evaluatees
    */
-  constructor(expressionStrings) {
-    /** @const {!Array<!BindExpression>} */
-    this.expressions_ = [];
-    for (let i = 0; i < expressionStrings.length; i++) {
+  constructor(evaluatees) {
+    /** @const {!Array<ParsedEvaluateeDef>} */
+    this.evaluatees_ = [];
+
+    // TODO(choumx): Add expression result validation to this class.
+    evaluatees.forEach(e => {
+      let expression;
       try {
-        const expr = new BindExpression(expressionStrings[i]);
-        this.expressions_.push(expr);
+        expression = new BindExpression(e.expressionString);
       } catch (error) {
         user().error(TAG, 'Malformed expression:', error);
       }
-    }
+
+      if (expression) {
+        this.evaluatees_.push({
+          tagName: e.tagName,
+          property: e.property,
+          expression,
+        });
+      }
+    });
   }
 
   /**
    * Evaluates all expressions with the given `scope` data and resolves
-   * the returned Promise with the results.
+   * the returned Promise with a map of expression strings to results.
    * @param {!Object} scope
-   * @return {!Promise<!Object<string,*>>} Maps expression strings to results.
+   * @return {
+   *   !Promise<!Object<string, ./bind-expression.BindExpressionResultDef>>
+   * }
    */
   evaluate(scope) {
     return new Promise(resolve => {
-      /** @type {!Object<string,*>} */
       const cache = {};
-      this.expressions_.forEach(expression => {
-        const string = expression.expressionString;
+      this.evaluatees_.forEach(evaluatee => {
+        const string = evaluatee.expression.expressionString;
         if (cache[string] === undefined) {
           try {
-            cache[string] = expression.evaluate(scope);
+            cache[string] = evaluatee.expression.evaluate(scope);
           } catch (error) {
             user().error(TAG, error);
           }
