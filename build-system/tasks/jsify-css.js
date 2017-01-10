@@ -67,6 +67,6 @@ exports.jsifyCssAsync = function(filename) {
           $$.util.log($$.util.colors.red(warn.toString()));
         });
         var css = result.css;
-        return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
+        return css + '\n/*# sourceURL=/' + filename + '*/';
       });
 };
