@@ -155,8 +155,6 @@ export class Messaging {
    * @private
    */
   sendResponseError_(requestId, messageName, reason) {
-    console.log(TAG + ': sendResponseError_, Message name: ' + messageName);
-    console.log(reason);
     this.logError_(
       TAG + ': sendResponseError_, Message name: ' + messageName, reason);
     this.sendMessage_({
@@ -165,7 +163,7 @@ export class Messaging {
       type: MessageType.RESPONSE,
       name: messageName,
       data: null,
-      error: JSON.stringify(reason),
+      error: this.errorToString_(reason),
     });
   }
 
@@ -240,14 +238,24 @@ export class Messaging {
 
   /**
    * @param {string} state
-   * @param {*} opt_data
+   * @param {!Error|string} opt_data
    * @private
    */
   logError_(state, opt_data) {
     let stateStr = 'amp-messaging-error-logger: ' + state;
-    if (opt_data) {
-      stateStr += ' data: ' + JSON.stringify(opt_data);
-    }
+    const dataStr = ' data: ' + this.errorToString_(opt_data);
+    stateStr += dataStr;
     this.source_['viewerState'] = stateStr;
   };
+
+  /**
+   * @param {!Error|string} err
+   * @return {string}
+   * @private
+   */
+  errorToString_(err) {
+    return err ?
+      (err.message ? err.message : String(err)) :
+      'unknown error';
+  }
 }
