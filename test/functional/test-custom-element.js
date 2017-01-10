@@ -1663,15 +1663,17 @@ describe('CustomElement Overflow Element', () => {
       elements = [];
 
       doc = {
-        querySelectorAll: selector => {
-          if (selector == '[custom-element]') {
-            return elements;
-          }
-          return [];
-        },
         registerElement: sandbox.spy(),
         documentElement: {
           ownerDocument: doc,
+        },
+        head: {
+          querySelectorAll: selector => {
+            if (selector == 'script[custom-element]') {
+              return elements;
+            }
+            return [];
+          },
         },
         body: {},
       };
