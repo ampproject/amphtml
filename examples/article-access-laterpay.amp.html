@@ -9,7 +9,6 @@
   <script id="amp-access" type="application/json">
     {
       "vendor": "laterpay",
-      "authorizationFallbackResponse": {"error": true},
       "laterpay": {
         "articleTitleSelector": ".content-container > header > h1"
       }
@@ -24,11 +23,6 @@
 
     .brand-logo {
       font-family: 'Open Sans';
-    }
-
-    .ad-container {
-      display: flex;
-      justify-content: center;
     }
 
     .content-container p {
@@ -152,7 +146,6 @@
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
   <script async custom-element="amp-access-laterpay" src="https://cdn.ampproject.org/v0/amp-access-laterpay-0.1.js"></script>
-  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -244,14 +237,6 @@
           Oops... Something broke.
         </section>
 
-        <amp-ad amp-access="access" amp-access-hide
-            width=300 height=250
-            type="a9"
-            data-aax_size="300x250"
-            data-aax_pubname="abc123"
-            data-aax_src="302">
-        </amp-ad>
-
         <div amp-access="access" amp-access-hide class="article-body" itemprop="articleBody">
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -271,15 +256,6 @@
             Mauris sem est, accumsan sed tincidunt ut, sagittis vel arcu.
             Nullam in libero nisi.
           </p>
-
-          <div class="ad-container">
-            <amp-ad width=300 height=250
-                type="a9"
-                data-aax_size="300x250"
-                data-aax_pubname="abc123"
-                data-aax_src="302">
-            </amp-ad>
-          </div>
 
           <p>
             Sed pharetra semper fringilla. Nulla fringilla, neque eget
@@ -339,13 +315,6 @@
             Ut elementum velit fermentum felis volutpat sodales in non libero.
             Aliquam erat volutpat.
           </p>
-
-          <div class="ad-container">
-            <amp-ad width=300 height=200
-                type="adsense"
-                data-ad-client="ca-pub-9350112648257122">
-            </amp-ad>
-          </div>
 
           <p>
             Morbi at velit vitae eros congue congue venenatis non dui.
