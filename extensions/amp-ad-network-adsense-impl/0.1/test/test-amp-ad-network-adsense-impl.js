@@ -170,8 +170,12 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           expect(adUrl.indexOf('amp_ct=AMP-STICKY-AD') >= 0).to.be.true;
 =======
         return adsenseImpl.getAdUrl().then(adUrl => {
+<<<<<<< HEAD
           expect(adUrl.indexOf('a_ct=AMP-STICKY-AD') >= 0).to.be.true;
 >>>>>>> Updated tests.
+=======
+          expect(adUrl.indexOf('a_ct=sa') >= 0).to.be.true;
+>>>>>>> Updated URL parameter value aliases to match those expected by GPT.
         });
       });
     });
