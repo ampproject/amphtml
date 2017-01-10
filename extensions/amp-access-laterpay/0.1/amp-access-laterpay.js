@@ -35,7 +35,6 @@ const CONFIG_BASE_PATH = '/api/public/amp?' +
 const AUTHORIZATION_TIMEOUT = 3000;
 
 const DEFAULT_MESSAGES = {
-  decimalDelimeter: '.',
   premiumContentTitle: 'Buy only this article',
   payLaterButton: 'Buy Now, Pay Later',
   payNowButton: 'Buy Now',
@@ -313,7 +312,9 @@ export class LaterpayVendor {
     radio.type = 'radio';
     radio.id = option.tp_title;
     radio.value = option.purchase_url;
-    const purchaseType = option['purchase_type'] === 'ppu' ? 'payLater' : 'payNow';
+    const purchaseType = option['purchase_type'] === 'ppu' ?
+      'payLater' :
+      'payNow';
     const purchaseActionLabel = this.i18n_[purchaseType + 'Button'];
     radio.setAttribute('data-purchase-action-label', purchaseActionLabel);
     radio.setAttribute('data-purchase-type', purchaseType);

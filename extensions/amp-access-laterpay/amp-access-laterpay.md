@@ -46,7 +46,7 @@ limitations under the License.
 
 This component uses AMP Access internally to provide a behavior similar to AMP Access, but tailored for usage with the LaterPay service.
 
-It does not require an authorization or pingback configuration, as it is pre-configured to work with the LaterPay service. It also does not require manually setup of login links.
+It does not require an authorization or pingback configuration, as it is pre-configured to work with the LaterPay service. It also does not require manual setup of login links.
 
 The different purchase options can be configured on the publisher's LaterPay account, and the component will retrieve the configuration and create a list of available purchase options.
 
@@ -207,11 +207,6 @@ The following message keys can be translated or customized, but be aware that th
     <td class="col-fourty"><code>alreadyPurchasedLink</code></td>
     <td>If the user has purchased the article in the past but they have lost their cookies (or are in a different device) they can use this link to login to LaterPay and retrieve their purchases.</td>
     <td>'I already bought this'</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><code>decimalDelimeter</code></td>
-    <td>Decimal delimeter used in the price display.</td>
-    <td>'.'</td>
   </tr>
 </table>
 
