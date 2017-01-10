@@ -149,6 +149,51 @@ export const realWin = describeEnv(spec => [
 
 
 /**
+ * A repeating test.
+ * @param {string} name
+ * @param {!Object<string, *>} variants
+ * @param {function(string, *)} fn
+ */
+export const repeated = (function() {
+  /**
+   * @param {string} name
+   * @param {!Object<string, *>} variants
+   * @param {function(string, *)} fn
+   * @param {function(string, function())} describeFunc
+   */
+  const templateFunc = function(name, variants, fn, describeFunc) {
+    return describeFunc(name, function() {
+      for (const name in variants) {
+        describe(name ? ` ${name} ` : SUB, function() {
+          fn.call(this, name, variants[name]);
+        });
+      }
+    });
+  };
+
+  /**
+   * @param {string} name
+   * @param {!Object<string, *>} variants
+   * @param {function(string, *)} fn
+   */
+  const mainFunc = function(name, variants, fn) {
+    return templateFunc(name, variants, fn, describe);
+  };
+
+  /**
+   * @param {string} name
+   * @param {!Object<string, *>} variants
+   * @param {function(string, *)} fn
+   */
+  mainFunc.only = function(name, variants, fn) {
+    return templateFunc(name, variants, fn, describe./*OK*/only);
+  };
+
+  return mainFunc;
+})();
+
+
+/**
  * A test within a described environment.
  * @param {function(!Object):!Array<?Fixture>} factory
  */
