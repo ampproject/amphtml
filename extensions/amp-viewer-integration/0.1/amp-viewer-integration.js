@@ -74,7 +74,6 @@ export class AmpViewerIntegration {
               type, /** @type {!JSONType} */ (payload), awaitResponse);
           });
 
-          dev().info(TAG, 'setMessageDeliverer');
           viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
             dev().assertString(this.unconfirmedViewerOrigin_));
         });

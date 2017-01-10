@@ -61,7 +61,7 @@ export class Messaging {
   constructor(source, target, targetOrigin) {
     /**  @private {!number} */
     this.requestIdCounter_ = 0;
-    /**  @private {!Object<number, {resolve: function(*), reject: function(!string)}>} */
+    /**  @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};
     /** @const @private {!Window} */
     this.target_ = target;
@@ -86,15 +86,15 @@ export class Messaging {
   handleMessage_(event) {
     if (!event || event.source != this.target_ ||
       event.origin != this.targetOrigin_) {
-      this.logError_(TAG +
-        ': handleMessage_ failed. This message is not for us: ', event);
+      dev().info(TAG +
+        ': handleMessage_, This message is not for us: ', event);
       return;
     }
     /** @type {Message} */
     const message = event.data;
     if (message.app != APP) {
-      this.logError_(
-        TAG + ': handleMessage_ failed, wrong APP: ', event);
+      dev().info(
+        TAG + ': handleMessage_, wrong APP: ', event);
       return;
     }
     if (message.type == MessageType.REQUEST) {
@@ -127,7 +127,6 @@ export class Messaging {
       name: messageName,
       data: messageData,
       rsvp: awaitResponse,
-      error: undefined,
     });
     return promise;
   }
@@ -147,15 +146,13 @@ export class Messaging {
       type: MessageType.RESPONSE,
       name: messageName,
       data: messageData,
-      rsvp: undefined,
-      error: undefined,
     });
   }
 
   /**
    * @param {number} requestId
    * @param {string} messageName
-   * @param {string|undefined} reason
+   * @param {!Error} reason
    * @private
    */
   sendResponseError_(requestId, messageName, reason) {
@@ -167,8 +164,7 @@ export class Messaging {
       type: MessageType.RESPONSE,
       name: messageName,
       data: null,
-      rsvp: undefined,
-      error: reason,
+      error: reason.toString(),
     });
   }
 
@@ -199,14 +195,15 @@ export class Messaging {
       const promise =
         this.requestProcessor_(msg, message.data, message.rsvp);
       if (!promise) {
-        this.sendResponseError_(requestId, msg, 'no response');
+        this.sendResponseError_(
+          requestId, msg, new Error('no response'));
         dev().assert(promise,
           'expected response but none given: ' + message.name);
       }
       promise.then(data => {
         this.sendResponse_(requestId, msg, data);
       }, reason => {
-        this.sendResponseError_(requestId, msg, /** @type {string} */(reason));
+        this.sendResponseError_(requestId, msg, new Error(reason));
       });
     }
   }
@@ -225,7 +222,7 @@ export class Messaging {
       delete this.waitingForResponse_[requestId];
       if (message.error) {
         this.logError_(TAG + ': handleResponse_ error: ', message.error);
-        pending.reject(message.error);
+        pending.reject(new Error(message.error));
       } else {
         pending.resolve(message.data);
       }

@@ -23,7 +23,7 @@ var MessageType = {
   RESPONSE: 's',
 };
 
-const APP = '__AMPHTML__';
+var APP = '__AMPHTML__';
 
 /**
  * This is a very simple messaging protocol between viewer and viewer client.
@@ -38,13 +38,13 @@ function ViewerMessaging(target, targetOrigin, requestProcessor, opt_targetId) {
   this.requestIdCounter_ = 0;
   this.waitingForResponse_ = {};
 
-  /** @const @private {!Widnow} */
+  /** @private {!Widnow} */
   this.target_ = target;
-  /** @const @private {string|undefined} */
+  /** @private {string|undefined} */
   this.targetId_ = opt_targetId;
-  /** @const @private {string} */
+  /** @private {string} */
   this.targetOrigin_ = targetOrigin;
-  /** @const @private {function(string, *, boolean):(!Promise<*>|undefined)} */
+  /** @private {function(string, *, boolean):(!Promise<*>|undefined)} */
   this.requestProcessor_ = requestProcessor;
 
   if (!this.targetOrigin_) {
@@ -68,7 +68,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
     var promise = new Promise(function(resolve, reject) {
       this.waitingForResponse_[requestId] = {resolve, reject};
     }.bind(this));
-    const message = {
+    var message = {
       app: APP,
       requestid: requestId,
       rsvp: true,
@@ -79,7 +79,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
     this.sendMessage_(message);
     return promise;
   }
-  const message = {
+  var message = {
     app: APP,
     requestid: requestId,
     name: eventType,
