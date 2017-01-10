@@ -48,6 +48,15 @@
         href="http://xss.com/https://fonts.googleapis.com/css?foobar">
 
   <!--
+    Regexp to allow font-awesome css, but not path traversal.
+    The first example is valid, the second is not.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class">
+
+  <!--
   rel value_regex: lengthy, see protoascii
   The first three examples are valid. The latter three examples are invalid.
   -->
@@ -108,6 +117,16 @@
   -->
   <div id="exampe-amp-font"></div>
   <div id="i-amphtml-abc"></div>
+
+  <!--
+  name blacklisted_value_regex: lengthy, see protoascii
+  The first two examples are valid. The latter three are invalid.
+  -->
+  <input name="" />
+  <input name="email" />
+  <input name="innerHTML" />
+  <input name="__amp_source_origin" />
+  <input name="webkitRequestFullscreen" />
 
 </body>
 </html>

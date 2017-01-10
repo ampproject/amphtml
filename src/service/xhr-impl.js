@@ -104,14 +104,15 @@ export class Xhr {
   }
 
   /**
-   * Performs the final initialization and requests the fetch. It does three
-   * main things: (1) It adds "__amp_source_origin" URL parameter with source
-   * origin; (2) It verifies "AMP-Access-Control-Allow-Source-Origin" if it's
-   * returned in the response; and (3) It requires
-   * "AMP-Access-Control-Allow-Source-Origin" to be present in the response
-   * if the `init.requireAmpResponseSourceOrigin = true`.
-   * USE WITH CAUTION: setting ampCors false disables AMP source origin check
+   * Performs the final initialization and requests the fetch. It does two
+   * main things:
+   * - It adds "__amp_source_origin" URL parameter with source origin
+   * - It verifies "AMP-Access-Control-Allow-Source-Origin" in the response
+   * USE WITH CAUTION: setting ampCors to false disables AMP source origin check
    * but allows for caching resources cross pages.
+   *
+   * Note: requireAmpResponseSourceOrigin is deprecated. It defaults to
+   *   true. Use "ampCors: false" to disable AMP source origin check.
    *
    * @param {string} input
    * @param {!FetchInitDef=} init
@@ -125,12 +126,12 @@ export class Xhr {
     } else {
       init.requireAmpResponseSourceOrigin = false;
     }
+    if (init.requireAmpResponseSourceOrigin === true) {
+      dev().error('XHR',
+          'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
+    }
     if (init.requireAmpResponseSourceOrigin === undefined) {
-      // TODO: this is an intermediate step of migrating
-      // requireAmpResponseSourceOrigin to ampCors. Once deployed to production,
-      // we can default requireAmpResponseSourceOrigin to true.
-      dev().error(
-          'XHR', 'Please explicitly specify requireAmpResponseSourceOrigin');
+      init.requireAmpResponseSourceOrigin = true;
     }
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.

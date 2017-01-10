@@ -142,7 +142,6 @@ export class AmpShareTracking extends AMP.BaseElement {
     const postReq = {
       method: 'POST',
       credentials: 'include',
-      requireAmpResponseSourceOrigin: true,
       body: {},
     };
     return xhrFor(this.win).fetchJson(vendorUrl, postReq).then(response => {
