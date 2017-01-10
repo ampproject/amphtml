@@ -151,8 +151,15 @@ function buildAdUrl(
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
   const adElement = a4a.element;
-  if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
-    queryParams.push({name: 'amp_ct', value: adElement.parentElement.tagName});
+  let parentElement = adElement.parentElement;
+  const containerTypes = [];
+  while (parentElement
+      && ValidAdContainerTypes.indexOf(parentElement.tagName) >= 0) {
+    containerTypes.push(parentElement.tagName);
+    parentElement = parentElement.parentElement;
+  }
+  if (containerTypes.length > 0) {
+    queryParams.push({name: 'a_ct', value: containerTypes.join()});
   }
   const allQueryParams = queryParams.concat(
     [
