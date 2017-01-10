@@ -237,6 +237,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6760',
     Spec: '',
   },
+  {
+    id: 'variable-filters',
+    name: 'Format to apply filters to analytics variables',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
+  },
 ];
 
 if (getMode().localDev) {
