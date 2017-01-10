@@ -104,7 +104,7 @@ function createFormProxyConstr(win) {
           // Exclude constants.
           name.toUpperCase() == name ||
           // Exclude on-events.
-          name.substring(0, 2) == 'on' ||
+          name.startsWith('on') ||
           // Exclude properties that already been created.
           win.Object.prototype.hasOwnProperty.call(FormProxyProto, name) ||
           // Exclude some properties. Currently only used for testing.
@@ -157,7 +157,7 @@ function setupLegacyProxy(form, proxy) {
         // Exclude constants.
         name.toUpperCase() == name ||
         // Exclude on-events.
-        name.substring(0, 2) == 'on') {
+        name.startsWith('on')) {
       continue;
     }
     const desc = LEGACY_PROPS[name];
@@ -170,7 +170,7 @@ function setupLegacyProxy(form, proxy) {
         let actual;
         if (isElement) {
           // The overriding input, if present, has to be removed and re-added
-          // (renaming does NOT work).
+          // (renaming does NOT work). Completely insane, I know.
           const element = dev().assertElement(current);
           const nextSibling = element.nextSibling;
           const parent = element.parentNode;
@@ -197,20 +197,19 @@ function setupLegacyProxy(form, proxy) {
             let value = proxy.getAttribute(attr);
             if (value == null && desc.def !== undefined) {
               value = desc.def;
-            } else if (desc.bool) {
-              if (desc.toggle) {
-                value = (value != null);
-              } else {
-                value = (value === 'true');
-              }
-            }
-            if (value && desc.url) {
-              value = parseUrl(/** @type {string} */ (value)).href;
+            } else if (desc.type == LegacyPropDataType.BOOL) {
+              value = (value === 'true');
+            } else if (desc.type == LegacyPropDataType.TOGGLE) {
+              value = (value != null);
+            } else if (desc.type == LegacyPropDataType.URL) {
+              // URLs, e.g. in `action` attribute are resolved against the
+              // document's base.
+              value = parseUrl(/** @type {string} */ (value || '')).href;
             }
             return value;
           },
           set: function(value) {
-            if (desc.bool && desc.toggle) {
+            if (desc.type == LegacyPropDataType.TOGGLE) {
               if (value) {
                 value = '';
               } else {
@@ -228,7 +227,7 @@ function setupLegacyProxy(form, proxy) {
         dev().assert(false, 'unknown property access type: %s', desc.access);
       }
     } else {
-      // Not currently overriden by an input.
+      // Not a known property - proxy directly.
       Object.defineProperty(proxy, name, {
         get: function() {
           return form[name];
@@ -252,12 +251,20 @@ const LegacyPropAccessType = {
 
 
 /**
+ * @enum {number}
+ */
+const LegacyPropDataType = {
+  URL: 1,
+  BOOL: 2,
+  TOGGLE: 3,
+};
+
+
+/**
  * @const {!Object<string, {
  *   access: !LegacyPropAccessType,
  *   attr: (string|undefined),
- *   url: (boolean|undefined),
- *   bool: (boolean|undefined),
- *   toggle: (boolean|undefined),
+ *   type: (LegacyPropDataType|undefined),
  *   def: *,
  * }>}
  */
@@ -272,7 +279,7 @@ const LEGACY_PROPS = {
   },
   'action': {
     access: LegacyPropAccessType.ATTR,
-    url: true,
+    type: LegacyPropDataType.URL,
   },
   'attributes': {
     access: LegacyPropAccessType.READ_ONCE,
@@ -292,7 +299,7 @@ const LEGACY_PROPS = {
   },
   'draggable': {
     access: LegacyPropAccessType.ATTR,
-    bool: true,
+    type: LegacyPropDataType.BOOL,
     def: false,
   },
   'elements': {
@@ -306,8 +313,7 @@ const LEGACY_PROPS = {
   },
   'hidden': {
     access: LegacyPropAccessType.ATTR,
-    bool: true,
-    toggle: true,
+    type: LegacyPropDataType.TOGGLE,
     def: false,
   },
   'id': {
@@ -330,8 +336,7 @@ const LEGACY_PROPS = {
   'noValidate': {
     access: LegacyPropAccessType.ATTR,
     attr: 'novalidate',
-    bool: true,
-    toggle: true,
+    type: LegacyPropDataType.TOGGLE,
     def: false,
   },
   'prefix': {
