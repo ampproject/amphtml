@@ -15,7 +15,6 @@
  */
 
 
-import {MessagingErrorLogger} from './messaging-error-logger.js';
 import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
@@ -59,9 +58,11 @@ export class Messaging {
    * @param {string} targetOrigin
    */
   constructor(source, target, targetOrigin) {
-    /**  @private {!number} */
+    /** @private {!Window} */
+    this.source_ = source;
+    /** @private {!number} */
     this.requestIdCounter_ = 0;
-    /**  @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
+    /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};
     /** @const @private {!Window} */
     this.target_ = target;
@@ -69,8 +70,6 @@ export class Messaging {
     this.targetOrigin_ = targetOrigin;
     /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
     this.requestProcessor_ = null;
-    /** @private {?MessagingErrorLogger} */
-    this.errorLogger_ = null;
 
     dev().assert(this.targetOrigin_, 'Target origin must be specified!');
 
@@ -156,6 +155,8 @@ export class Messaging {
    * @private
    */
   sendResponseError_(requestId, messageName, reason) {
+    console.log(TAG + ': sendResponseError_, Message name: ' + messageName);
+    console.log(reason);
     this.logError_(
       TAG + ': sendResponseError_, Message name: ' + messageName, reason);
     this.sendMessage_({
@@ -164,7 +165,7 @@ export class Messaging {
       type: MessageType.RESPONSE,
       name: messageName,
       data: null,
-      error: reason.toString(),
+      error: JSON.stringify(reason),
     });
   }
 
@@ -238,19 +239,15 @@ export class Messaging {
   }
 
   /**
-   * @param {MessagingErrorLogger} errorLogger
-   */
-  setErrorLogger(errorLogger) {
-    this.errorLogger_ = errorLogger;
-  }
-
-  /**
-   * @param {string} msg
+   * @param {string} state
    * @param {*} opt_data
+   * @private
    */
-  logError_(msg, opt_data) {
-    if (this.errorLogger_) {
-      this.errorLogger_.logError(msg, opt_data);
+  logError_(state, opt_data) {
+    let stateStr = 'amp-messaging-error-logger: ' + state;
+    if (opt_data) {
+      stateStr += ' data: ' + JSON.stringify(opt_data);
     }
-  }
+    this.source_['viewerState'] = stateStr;
+  };
 }

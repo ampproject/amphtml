@@ -15,7 +15,6 @@
  */
 
 import {Messaging} from './messaging.js';
-import {MessagingErrorLogger} from './messaging-error-logger.js';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev} from '../../../src/log';
 
@@ -36,11 +35,6 @@ export class AmpViewerIntegration {
 
     /** @private {?string|undefined} */
     this.unconfirmedViewerOrigin_ = null;
-
-    /** @private {MessagingErrorLogger} */
-    this.messagingErrorLogger_ = new MessagingErrorLogger(state => {
-      this.win['viewerState'] = state;
-    });
   }
 
   /**
@@ -61,8 +55,6 @@ export class AmpViewerIntegration {
     dev().info(TAG, 'listening for messages', this.unconfirmedViewerOrigin_);
     const messaging = new Messaging(
       this.win, this.win.parent, this.unconfirmedViewerOrigin_);
-
-    messaging.setErrorLogger(this.messagingErrorLogger_);
 
     dev().info(TAG, 'Send a handshake request');
     return this.openChannel(messaging)

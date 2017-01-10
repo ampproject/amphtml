@@ -92,10 +92,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
-          error: undefined,
           name: 'message',
           requestid: 1,
-          rsvp: undefined,
           type: 's',
         });
       });
@@ -108,7 +106,6 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         data: {
           app: '__AMPHTML__',
           data: null,
-          error: undefined,
           name: 'messageName',
           requestid: 1,
           rsvp: true,
@@ -175,7 +172,6 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
-          error: undefined,
           name: message,
           requestid: 1,
           rsvp: awaitResponse,
@@ -195,10 +191,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
-          error: undefined,
           name: mName,
           requestid: 1,
-          rsvp: undefined,
           type: 's',
         });
       });
@@ -206,27 +200,26 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
 
     it('sendResponseError_ should call postMessage correctly', () => {
       const mName = 'name';
-      const reason = 'reason';
+      const err = new Error('reason');
       const requestId = 1;
       const logErrorSpy = sandbox.stub(messaging, 'logError_');
-      messaging.sendResponseError_(requestId, mName, reason);
+      messaging.sendResponseError_(requestId, mName, err);
 
       return postMessagePromise.then(function() {
         expect(postMessageSpy).to.have.been.calledOnce;
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: null,
-          error: reason,
+          error: JSON.stringify(err),
           name: mName,
           requestid: 1,
-          rsvp: undefined,
           type: 's',
         });
 
         expect(logErrorSpy).to.have.been.calledOnce;
-        expect(logErrorSpy).to.have.been.calledWith(
-          'amp-viewer-messaging: sendResponseError_, Message name: name',
-          'reason');
+        const state = 'amp-viewer-messaging: sendResponseError_, ' +
+          'Message name: name';
+        expect(logErrorSpy).to.have.been.calledWith(state, err);
       });
     });
   });
