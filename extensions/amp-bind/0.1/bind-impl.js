@@ -16,6 +16,7 @@
 
 import {BindEvaluator} from './bind-evaluator';
 import {user} from '../../../src/log';
+import {BindValidator} from './bind-validator';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -70,6 +71,9 @@ export class Bind {
 
     /** {!Array<BoundElementDef>} */
     this.boundElements_ = [];
+
+    /** @const {!./bind-validator.BindValidator} */
+    this.validator_ = new BindValidator();
 
     /** @const {!Object} */
     this.scope_ = Object.create(null);
@@ -173,12 +177,13 @@ export class Bind {
    * @return {?BindingDef}
    * @private
    */
-  bindingForAttribute_(attribute, unusedElement) {
+  bindingForAttribute_(attribute, element) {
     const name = attribute.name;
     if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
       const property = name.substr(1, name.length - 2);
-      // TODO(choumx): Validate that (unusedElement, attribute) can be bound.
-      return {property, expressionString: attribute.value};
+      if (this.validator_.canBind(element.tagName, property)) {
+        return {property, expression: attribute.value, element};
+      }
     }
     return null;
   }

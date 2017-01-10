@@ -1,0 +1,335 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @typedef {{
+ *   allowedProtocols: (!Object<string,boolean>|undefined),
+ *   blockedURLs: (Array<string>|undefined),
+ * }}
+ */
+let AttributeRulesDef;
+
+/**
+ * Maps tag names to attribute names to AttributeRulesDef.
+ * If `RulesDef[tagName][attributeName]` is null, then all values are valid
+ * for that attribute in that tag.
+ * @typedef {Object<string,Object<string,?AttributeRulesDef>>}}
+ */
+let RulesDef;
+
+/**
+ * Attribute rules that apply to any and all tags.
+ * @type {Object<string,?AttributeRulesDef>}
+ */
+const GLOBAL_ATTRIBUTE_RULES = {
+  'class': {
+    blacklistedValueRegex: '(^|\\W)i-amphtml-',
+  },
+};
+
+/**
+ * BindValidator performs runtime validation of Bind expression results.
+ * For performance reasons, the validation rules enforced are a subset
+ * of the AMP validator's, selected with a focus on security and UX.
+ */
+export class BindValidator {
+  constructor() {
+    /**
+     * A map of tag names to attribute names to AttributeRules.
+     * @const {!RulesDef}
+     */
+    this.rules_ = this.createRules_();
+  }
+
+  /**
+   * Returns true if (tag, attribute) binding is allowed.
+   * Otherwise, returns false.
+   * @note `tag` and `attribute` are case-sensitive.
+   * @param {!string} tag
+   * @param {!string} attribute
+   * @return {boolean}
+   */
+  canBind(tag, attribute) {
+    return (this.rulesForTagAndAttribute_(tag, attribute) !== undefined);
+  }
+
+
+  /**
+   * Returns true if `value` is a valid result for a (tag, attribute) binding.
+   * Otherwise, returns false.
+   * @param {!string} tag
+   * @param {!string} attribute
+   * @param {!string} value
+   * @return {boolean}
+   */
+  isResultValid(tag, attribute, value) {
+    const attrRules = this.rulesForTagAndAttribute_(tag, attribute);
+
+    // If binding to (tag, attribute) is not allowed, return false.
+    if (attrRules === undefined) {
+      return false;
+    }
+
+    // If binding is allowed but have no specific rules, return true.
+    if (attrRules === null) {
+      return true;
+    }
+
+    // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
+    const allowedProtocols = attrRules.allowedProtocols;
+    if (allowedProtocols) {
+      const re = /^([^:\/?#.]+):.*$/;
+      const match = re.exec(value);
+      if (match !== null) {
+        const protocol = match[1].toLowerCase().trimLeft();
+        if (!allowedProtocols.hasOwnProperty(protocol)) {
+          return false;
+        }
+      }
+    }
+
+    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
+    const blockedURLs = attrRules.blockedURLs;
+    if (blockedURLs) {
+      for (let i = 0; i < blockedURLs.length; i++) {
+        let decodedURL;
+        try {
+          decodedURL = decodeURIComponent(value);
+        } catch (e) {
+          decodedURL = unescape(value);
+        }
+        if (decodedURL.trim() === blockedURLs[i]) {
+          return false;
+        }
+      }
+    }
+
+    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
+    const blacklistedValueRegex = attrRules.blacklistedValueRegex;
+    if (blacklistedValueRegex) {
+      const re = new RegExp(blacklistedValueRegex, 'i');
+      if (re.test(value)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Returns the attribute rules object for (tag, attribute), if it exists.
+   * Returns null if binding is allowed without constraints.
+   * Returns undefined if binding is not allowed.
+   * @return {(?AttributeRulesDef|undefined)}
+   * @private
+   */
+  rulesForTagAndAttribute_(tag, attribute) {
+    if (GLOBAL_ATTRIBUTE_RULES.hasOwnProperty(attribute)) {
+      return GLOBAL_ATTRIBUTE_RULES[attribute];
+    }
+    let tagRules;
+    if (this.rules_.hasOwnProperty(tag)) {
+      tagRules = this.rules_[tag];
+    }
+    if (tagRules && tagRules.hasOwnProperty(attribute)) {
+      return tagRules[attribute];
+    }
+    return undefined;
+  }
+
+  /**
+   * @return {!RulesDef}
+   * @private
+   */
+  createRules_() {
+    // Initialize `rules` with tag-specific constraints.
+    const rules = {
+      'AMP-IMG': {
+        src: {
+          allowedProtocols: {
+            data: true,
+            http: true,
+            https: true,
+          },
+          blockedURLs: ['__amp_source_origin'],
+        },
+        srcset: {
+          allowedProtocols: {
+            data: true,
+            http: true,
+            https: true,
+          },
+          blockedURLs: ['__amp_source_origin'],
+        },
+      },
+      A: {
+        href: {
+          allowedProtocols: {
+            ftp: true,
+            http: true,
+            https: true,
+            mailto: true,
+            'fb-messenger': true,
+            intent: true,
+            skype: true,
+            sms: true,
+            snapchat: true,
+            tel: true,
+            tg: true,
+            threema: true,
+            twitter: true,
+            viber: true,
+            whatsapp: true,
+          },
+          blockedURLs: ['__amp_source_origin'],
+        },
+      },
+      BUTTON: {
+        disabled: null,
+        type: null,
+        value: null,
+      },
+      FIELDSET: {
+        disabled: null,
+      },
+      INPUT: {
+        accept: null,
+        accesskey: null,
+        autocomplete: null,
+        checked: null,
+        disabled: null,
+        height: null,
+        inputmode: null,
+        max: null,
+        maxlength: null,
+        min: null,
+        minlength: null,
+        multiple: null,
+        name: {
+          blockedURLs: ['__amp_source_origin'],
+        },
+        pattern: null,
+        placeholder: null,
+        readonly: null,
+        required: null,
+        selectiondirection: null,
+        size: null,
+        spellcheck: null,
+        step: null,
+        type: {
+          blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
+        },
+        value: null,
+        width: null,
+      },
+      OPTION: {
+        disabled: null,
+        label: null,
+        selected: null,
+        value: null,
+      },
+      OPTGROUP: {
+        disabled: null,
+        label: null,
+      },
+      SELECT: {
+        disabled: null,
+        multiple: null,
+        name: null,
+        required: null,
+        size: null,
+      },
+      SOURCE: {
+        src: {
+          allowedProtocols: {
+            https: true,
+          },
+          blockedURLs: ['__amp_source_origin'],
+        },
+        type: null,
+      },
+      TRACK: {
+        label: null,
+        src: {
+          allowedProtocols: {
+            https: true,
+          },
+          blockedURLs: ['__amp_source_origin'],
+        },
+        srclang: null,
+      },
+      TEXTAREA: {
+        autocomplete: null,
+        cols: null,
+        disabled: null,
+        maxlength: null,
+        minlength: null,
+        name: null,
+        placeholder: null,
+        readonly: null,
+        required: null,
+        rows: null,
+        selectiondirection: null,
+        selectionend: null,
+        selectionstart: null,
+        spellcheck: null,
+        wrap: null,
+      },
+    };
+
+    // Collate all standard elements that should support [text] binding
+    // and add them to `rules` object.
+    // 4.3 Sections
+    const sectionTags = ['ASIDE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+        'HEADER', 'FOOTER', 'ADDRESS'];
+    // 4.4 Grouping content
+    const groupingTags = ['P', 'PRE', 'BLOCKQUOTE', 'LI', 'DT', 'DD',
+        'FIGCAPTION', 'DIV'];
+    // 4.5 Text-level semantics
+    const textTags = ['A', 'EM', 'STRONG', 'SMALL', 'S', 'CITE', 'Q',
+        'DFN', 'ABBR', 'DATA', 'TIME', 'CODE', 'VAR', 'SAMP', 'KBD',
+        'SUB', 'SUP', 'I', 'B', 'U', 'MARK', 'RUBY', 'RB', 'RT', 'RTC',
+        'RP', 'BDI', 'BDO', 'SPAN'];
+    // 4.6 Edits
+    const editTags = ['INS', 'DEL'];
+    // 4.9 Tabular data
+    const tabularTags = ['CAPTION', 'THEAD', 'TFOOT', 'TD'];
+    // 4.10 Forms
+    const formTags = ['BUTTON', 'LABEL', 'LEGEND', 'OPTION',
+        'OUTPUT', 'PROGRESS', 'TEXTAREA'];
+    const allTextTags = sectionTags.concat(groupingTags).concat(textTags)
+        .concat(editTags).concat(tabularTags).concat(formTags);
+    allTextTags.forEach(tag => {
+      if (rules[tag] === undefined) {
+        rules[tag] = {};
+      }
+      rules[tag]['text'] = null;
+    });
+
+    // AMP extensions support additional attributes.
+    const ampExtensions = ['AMP-IMG'];
+    ampExtensions.forEach(tag => {
+      if (rules[tag] === undefined) {
+        rules[tag] = {};
+      }
+      const tagRule = rules[tag];
+      tagRule['width'] = null;
+      tagRule['height'] = null;
+    });
+
+    return rules;
+  }
+}
