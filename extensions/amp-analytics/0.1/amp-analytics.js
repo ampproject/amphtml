@@ -261,9 +261,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     assertHttpsUrl(remoteConfigUrl, this.element);
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
-    const fetchConfig = {
-      requireAmpResponseSourceOrigin: true,
-    };
+    const fetchConfig = {};
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
@@ -541,7 +539,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!key) {
       return {name: '', argList: ''};
     }
-    const match = key.match(/^(?:([^ ]*)(\([^)]*\))|.+)$/);
+    const match = key.match(/^(?:([^\s]*)(\([^)]*\))|[^]+)$/);
     if (!match) {
       const TAG = this.getName_();
       user().error(TAG,

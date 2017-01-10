@@ -22,9 +22,9 @@
 
 import {
   googleAdsIsA4AEnabled,
-  EXPERIMENT_ATTRIBUTE,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {EXPERIMENT_ATTRIBUTE} from '../../../ads/google/a4a/utils';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 

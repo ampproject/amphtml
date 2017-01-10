@@ -76,7 +76,7 @@ describe('amp-analytics', function() {
       resetServiceForTesting(iframe.win, 'xhr');
       getService(iframe.win, 'xhr', () => {
         return {fetchJson: (url, init) => {
-          expect(init.requireAmpResponseSourceOrigin).to.be.true;
+          expect(init.requireAmpResponseSourceOrigin).to.be.undefined;
           if (configWithCredentials) {
             expect(init.credentials).to.equal('include');
           } else {
@@ -1054,7 +1054,9 @@ describe('amp-analytics', function() {
 
     check('abc', 'abc', '');
     check('client id', 'client id', '');
+    check('client id\nand something', 'client id\nand something', '');
     check('client id()', 'client id()', '');
+    check('client id\nclientId()', 'client id\nclientId()', '');
     check('client id (abc)', 'client id (abc)', '');
 
 
