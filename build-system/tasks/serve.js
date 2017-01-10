@@ -19,7 +19,7 @@ var gulp = require('gulp-help')(require('gulp'));
 var util = require('gulp-util');
 var webserver = require('gulp-webserver');
 var app = require('../server').app;
-
+var morgan = require('morgan');
 var host = argv.host || 'localhost';
 var port = argv.port || process.env.PORT || 8000;
 var useHttps = argv.https != undefined;
@@ -34,7 +34,7 @@ function serve() {
         host,
         directoryListing: true,
         https: useHttps,
-        middleware: [app]
+        middleware: [morgan('dev'), app],
       }));
 
   util.log(util.colors.yellow('Run `gulp build` then go to '

@@ -22,7 +22,6 @@ var BBPromise = require('bluebird');
 var app = require('express')();
 var bacon = require('baconipsum');
 var bodyParser = require('body-parser');
-var morgan = require('morgan');
 var fs = BBPromise.promisifyAll(require('fs'));
 var formidable = require('formidable');
 var jsdom = require('jsdom');
@@ -31,7 +30,6 @@ var request = require('request');
 var url = require('url');
 
 app.use(bodyParser.json());
-app.use(morgan('dev'));
 
 app.use('/pwa', function(req, res, next) {
   var file;

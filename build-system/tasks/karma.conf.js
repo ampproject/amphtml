@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+var app = require('../server').app;
+
 /**
  * @param {!Object} config
  */
@@ -160,4 +162,24 @@ module.exports = {
   browserDisconnectTolerance: 2,
   browserNoActivityTimeout: 4 * 60 * 1000,
   captureTimeout: 4 * 60 * 1000,
+
+  // Import our gulp webserver as a Karma server middleware
+  // So we instantly have all the custom server endpoints available
+  middleware: ['custom'],
+  plugins: [
+    'karma-browserify',
+    'karma-chai',
+    'karma-chai-as-promised',
+    'karma-chrome-launcher',
+    'karma-firefox-launcher',
+    'karma-fixture',
+    'karma-html2js-preprocessor',
+    'karma-mocha',
+    'karma-safari-launcher',
+    'karma-sauce-launcher',
+    'karma-sinon-chai',
+    {
+      'middleware:custom': ['factory', function() {return app;}],
+    },
+  ],
 };
