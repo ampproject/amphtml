@@ -246,7 +246,6 @@ export class AmpForm {
           body,
           method: this.method_,
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         }).then(response => {
           this.triggerAction_(/* success */ true, response);
           // TODO(mkhatib, #6032): Update docs to reflect analytics events.

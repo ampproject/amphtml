@@ -15,41 +15,41 @@
  */
 
 import {BindEvaluator} from './bind-evaluator';
-import {dev, user} from '../../../src/log';
+import {user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
-import {vsyncFor} from '../../../src/vsync';
+import {resourcesForDoc} from '../../../src/resources';
 
 const TAG = 'AMP-BIND';
 
 /**
- * A single binding, e.g. <element [property]="expression"></element>.
+ * Regular expression that identifies AMP CSS classes.
+ * Includes 'i-amphtml-', '-amp-', and 'amp-' prefixes.
+ * @type {!RegExp}
+ */
+const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
+
+/**
+ * A single binding, e.g. [property]="expression".
  * `previousResult` is the result of this expression during the last digest.
  * @typedef {{
- *   property: !string,
- *   expression: !string,
- *   element: !Element,
- *   previousResult: (BindExpressionResultDef|undefined)
+ *   property: string,
+ *   expressionString: string,
+ *   previousResult: (./bind-expression.BindExpressionResultDef|undefined),
  * }}
  */
 let BindingDef;
 
 /**
- * The state passed through vsync measure/mutate during a Bind digest cycle.
+ * A one or more bindings belonging to a single element.
  * @typedef {{
- *   results: !Object<string,BindExpressionResultDef>,
- *   verifyOnly: boolean
+ *   bindings: !Array<BindingDef>,
+ *   element: !Element,
  * }}
  */
-let BindVsyncStateDef;
-
-/**
- * Possible types of a Bind expression evaluation.
- * @typedef {(null|boolean|string|number|Array|Object)}
- */
-let BindExpressionResultDef;
+let BoundElementDef;
 
 /**
  * Bind is the service that handles the Bind lifecycle, from identifying
@@ -68,8 +68,8 @@ export class Bind {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** {!Array<BindingDef>} */
-    this.bindings_ = [];
+    /** {!Array<BoundElementDef>} */
+    this.boundElements_ = [];
 
     /** @const {!Object} */
     this.scope_ = Object.create(null);
@@ -80,14 +80,8 @@ export class Bind {
     /** {?Promise<!Object<string,*>>} */
     this.evaluatePromise_ = null;
 
-    /** @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
-
-    /** @const {!Function} */
-    this.boundMeasure_ = this.measure_.bind(this);
-
-    /** @const {!Function} */
-    this.boundMutate_ = this.mutate_.bind(this);
+    /** @const {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = resourcesForDoc(ampdoc);
 
     /**
      * Keys correspond to valid attribute value types.
@@ -99,10 +93,11 @@ export class Bind {
       'number': true,
     };
 
-    this.ampdoc.whenBodyAvailable().then(body => {
-      const {bindings, expressions} = this.scanForBindings_(body);
-      this.bindings_ = bindings;
-      this.evaluator_ = new BindEvaluator(expressions);
+    this.ampdoc.whenReady().then(() => {
+      const {boundElements, evaluatees} =
+          this.scanForBindings_(ampdoc.getBody());
+      this.boundElements_ = boundElements;
+      this.evaluator_ = new BindEvaluator(evaluatees);
 
       // Trigger verify-only digest in development.
       if (getMode().development) {
@@ -120,6 +115,7 @@ export class Bind {
   setState(state, opt_skipDigest) {
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
+    // TODO(choumx): What if `state` contains references to globals?
     Object.assign(this.scope_, state);
 
     if (!opt_skipDigest) {
@@ -128,235 +124,267 @@ export class Bind {
   }
 
   /**
-   * Scans children for attributes that conform to bind syntax and returns
-   * all bindings.
+   * Scans `body` for attributes that conform to bind syntax and returns
+   * a tuple containing bound elements and binding data for the evaluator.
    * @param {!Element} body
-   * @return {{bindings: !Array<BindingDef>, expressions: !Array<string>}}
+   * @return {{
+   *   boundElements: !Array<BoundElementDef>,
+   *   evaluatees: !Array<./bind-evaluator.EvaluateeDef>,
+   * }}
    * @private
    */
   scanForBindings_(body) {
     // TODO(choumx): Chunk if taking too long in a single frame.
 
-    const bindings = [];
-    const expressions = [];
+    /** @type {!Array<BoundElementDef>} */
+    const boundElements = [];
+    /** @type {!Array<./bind-evaluator.EvaluateeDef>} */
+    const evaluatees = [];
+
     const elements = body.getElementsByTagName('*');
     for (let i = 0; i < elements.length; i++) {
-      const el = elements[i];
-      const attributes = el.attributes;
+      const element = elements[i];
+      const attributes = element.attributes;
+
+      const bindings = [];
       for (let j = 0; j < attributes.length; j++) {
-        const binding = this.bindingForAttribute_(attributes[j], el);
+        const binding = this.bindingForAttribute_(attributes[j], element);
         if (binding) {
           bindings.push(binding);
-          expressions.push(binding.expression);
+          evaluatees.push({
+            tagName: element.tagName,
+            property: binding.property,
+            expressionString: binding.expressionString,
+          });
         }
       }
+      if (bindings.length > 0) {
+        boundElements.push({element, bindings});
+      }
     }
-    return {bindings, expressions};
+    return {boundElements, evaluatees};
   }
 
   /**
    * Returns a struct representing the binding corresponding to the
    * attribute param, if applicable.
    * @param {!Attr} attribute
-   * @param {!Element} element
+   * @param {!Element} unusedElement
    * @return {?BindingDef}
    * @private
    */
-  bindingForAttribute_(attribute, element) {
-    // TODO(choumx): Only allow binding to attributes allowed by validator.
-
+  bindingForAttribute_(attribute, unusedElement) {
     const name = attribute.name;
-    if (name.length > 2) {
-      if (name[0] === '[' && name[name.length - 1] === ']') {
-        return {
-          property: name.substr(1, name.length - 2),
-          expression: attribute.value,
-          element,
-        };
-      }
+    if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
+      const property = name.substr(1, name.length - 2);
+      // TODO(choumx): Validate that (unusedElement, attribute) can be bound.
+      return {property, expressionString: attribute.value};
     }
     return null;
   }
 
   /**
-   * Schedules a vsync task to reevaluate all binding expressions.
+   * Asynchronously reevaluates all expressions and applies results to DOM.
+   * If `opt_verifyOnly` is true, does not apply results but verifies them
+   * against current element values instead.
    * @param {boolean=} opt_verifyOnly
    * @private
    */
   digest_(opt_verifyOnly) {
-    // TODO(choumx): Chunk if takes too long for a single frame.
-
     this.evaluatePromise_ = this.evaluator_.evaluate(this.scope_);
     this.evaluatePromise_.then(results => {
-      /** {!VsyncTaskSpecDef} */
-      const task = {measure: this.boundMeasure_, mutate: this.boundMutate_};
-      this.vsync_.run(task, {
-        results,
-        verifyOnly: !!opt_verifyOnly,
-      });
+      if (opt_verifyOnly) {
+        this.verify_(results);
+      } else {
+        this.apply_(results);
+      }
     }).catch(error => {
       user().error(TAG, error);
     });
   }
 
   /**
-   * @param {BindVsyncStateDef} unusedState
+   * Verifies expression results against current DOM state.
+   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
    * @private
    */
-  measure_(unusedState) {
-    // TODO(choumx): Validate here or in applyBinding_()?
+  verify_(results) {
+    this.boundElements_.forEach(boundElement => {
+      const {element, bindings} = boundElement;
+
+      bindings.forEach(binding => {
+        const newValue = results[binding.expressionString];
+        this.verifyBinding_(binding, element, newValue);
+      });
+    });
   }
 
   /**
-   * Either applies or verifies the binding evaluation results in `state`.
-   * @param {BindVsyncStateDef} state
+   * Applies expression results to DOM.
+   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
    * @private
    */
-  mutate_(state) {
-    for (let i = 0; i < this.bindings_.length; i++) {
-      const binding = this.bindings_[i];
-      const expression = binding.expression;
-      const result = state.results[expression];
+  apply_(results) {
+    this.boundElements_.forEach(boundElement => {
+      const {element, bindings} = boundElement;
 
-      // Don't apply mutation if the result hasn't changed.
-      if (this.shallowEquals_(result, binding.previousResult)) {
-        continue;
-      } else {
-        binding.previousResult = result;
-      }
+      this.resources_.mutateElement(element, () => {
+        const mutations = {};
+        let width, height;
 
-      if (state.verifyOnly) {
-        this.verifyBinding_(binding, result);
-      } else {
-        this.applyBinding_(binding, result);
-      }
-    }
-  }
+        bindings.forEach(binding => {
+          const newValue = results[binding.expressionString];
 
-  /**
-   * Applies `newValue` to the element bound in `binding`.
-   * @param {!BindingDef} binding
-   * @param {BindExpressionResultDef} newValue
-   * @private
-   */
-  applyBinding_(binding, newValue) {
-    const property = binding.property;
-    const element = binding.element;
+          // Don't apply mutation if the result hasn't changed.
+          if (this.shallowEquals_(newValue, binding.previousResult)) {
+            return;
+          } else {
+            binding.previousResult = newValue;
+          }
 
-    // TODO(choumx): Does `element.tagName` support binding to `property`?
-    // TODO(choumx): Support objects for attributes.
+          const mutation = this.applyBinding_(binding, element, newValue);
+          if (mutation) {
+            mutations[mutation.name] = mutation.value;
+          }
 
-    if (property === 'text') {
-      // TODO(choumx): How to trigger reflow when necessary?
+          switch (binding.property) {
+            case 'width':
+              width = isFiniteNumber(newValue) ? Number(newValue) : width;
+              break;
+            case 'height':
+              height = isFiniteNumber(newValue) ? Number(newValue) : height;
+              break;
+          }
+        });
 
-      element.textContent = newValue;
-    } else if (property === 'class') {
-      // TODO(choumx): SVG elements are an issue, should disallow in validator.
-      // TODO(choumx): Avoid removing internal classes for AMP elements.
-
-      if (Array.isArray(newValue)) {
-        element.className = newValue.join(' ');
-      } else if (typeof newValue === 'string') {
-        element.className = newValue;
-      } else {
-        user().error(TAG, 'Invalid result for class binding', newValue);
-      }
-    } else {
-      // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
-      // form is in PROD for 1-2 weeks.
-      const isAmpElement = (element.classList.contains('-amp-element') ||
-          element.classList.contains('i-amphtml-element'));
-      const oldValue = element.getAttribute(property);
-      /** @type {(boolean|number|string|null|undefined)} */
-      let attributeValue;
-
-      if (newValue === true) {
-        element.setAttribute(property, '');
-        attributeValue = '';
-      } else if (newValue === false) {
-        element.removeAttribute(property);
-        attributeValue = null;
-      } else {
-        dev().assert(oldValue !== newValue,
-          `Applying [${property}] binding but value hasn't changed.`);
-
-        attributeValue = this.attributeValueOf_(newValue);
-        if (attributeValue === null) {
-          user().error(TAG, 'Invalid result for attribute binding', newValue);
-          return;
+        if (width !== undefined || height !== undefined) {
+          // TODO(choumx): Add new Resources method for adding change-size
+          // request without scheduling vsync pass since `mutateElement()`
+          // will schedule a pass after a short delay anyways.
+          this.resources_./*OK*/changeSize(element, height, width);
         }
 
-        // TODO(choumx): Does `newValue` pass validator value_casei,
-        // value_regex, blacklisted_value_regex, value_url>allowed_protocol,
-        // mandatory?
+        if (typeof element.mutatedAttributesCallback === 'function') {
+          element.mutatedAttributesCallback(mutations);
+        }
+      });
+    });
+  }
 
-        element.setAttribute(property, attributeValue);
+  /**
+   * Mutates the bound property of `element` with `newValue`.
+   * @param {!BindingDef} binding
+   * @param {!Element} element
+   * @param {./bind-expression.BindExpressionResultDef} newValue
+   * @return (?{name: string, value:./bind-expression.BindExpressionResultDef})
+   * @private
+   */
+  applyBinding_(binding, element, newValue) {
+    const property = binding.property;
 
-        // Update internal state for AMP elements.
-        if (isAmpElement) {
-          const resources = element.getResources();
-          if (property === 'width') {
-            user().assert(isFiniteNumber(attributeValue),
-                'Invalid result for [width]: %s', attributeValue);
-            resources./*OK*/changeSize(element, undefined, attributeValue);
-          } else if (property === 'height') {
-            user().assert(isFiniteNumber(attributeValue),
-                'Invalid result for [height]: %s', attributeValue);
-            resources./*OK*/changeSize(element, attributeValue, undefined);
+    switch (property) {
+      case 'text':
+        element.textContent = String(newValue);
+        break;
+
+      case 'class':
+        // Preserve internal AMP classes.
+        const ampClasses = [];
+        for (let i = 0; i < element.classList.length; i++) {
+          const cssClass = element.classList[i];
+          if (AMP_CSS_RE.test(cssClass)) {
+            ampClasses.push(cssClass);
           }
         }
-      }
+        if (Array.isArray(newValue)) {
+          element.className = ampClasses.concat(newValue).join(' ');
+        } else if (typeof newValue === 'string') {
+          element.className = ampClasses.join(' ') + ' ' + newValue;
+        } else {
+          user().error(TAG, 'Invalid result for [class]', newValue);
+        }
+        break;
 
-      if (isAmpElement) {
-        element.attributeChangedCallback(property, oldValue, attributeValue);
-      }
+      default:
+        const oldValue = element.getAttribute(property);
+
+        let attributeChanged = false;
+        if (typeof newValue === 'boolean') {
+          if (newValue && oldValue !== '') {
+            element.setAttribute(property, '');
+            attributeChanged = true;
+          } else if (!newValue && oldValue !== null) {
+            element.removeAttribute(property);
+            attributeChanged = true;
+          }
+        } else if (newValue !== oldValue) {
+          element.setAttribute(property, String(newValue));
+          attributeChanged = true;
+        }
+
+        if (attributeChanged) {
+          return {name: property, value: newValue};
+        }
+        break;
     }
+    return null;
   }
 
   /**
-   * If the current value of `binding` equals `expectedValue`, returns true.
+   * If current bound element state equals `expectedValue`, returns true.
    * Otherwise, returns false.
    * @param {!BindingDef} binding
-   * @param {BindExpressionResultDef} expectedValue
+   * @param {!Element} element
+   * @param {./bind-expression.BindExpressionResultDef} expectedValue
    * @private
    */
-  verifyBinding_(binding, expectedValue) {
+  verifyBinding_(binding, element, expectedValue) {
     const property = binding.property;
-    const element = binding.element;
-
-    // TODO(choumx): Support objects for attributes.
 
     let initialValue;
     let match = true;
 
-    if (property === 'text') {
-      initialValue = element.textContent;
-      expectedValue = Object.prototype.toString.call(expectedValue);
-      match = (initialValue.trim() === expectedValue.trim());
-    } else if (property === 'class') {
-      initialValue = element.classList;
-      /** @type {!Array<string>} */
-      let classes = [];
-      if (Array.isArray(expectedValue)) {
-        classes = expectedValue;
-      } else if (typeof expectedValue === 'string') {
-        classes = expectedValue.split(' ');
-      } else {
-        user().error(TAG,
-            'Unsupported result for class binding', expectedValue);
-      }
-      match = this.compareStringArrays_(initialValue, classes);
-    } else {
-      const attribute = element.getAttribute(property);
-      initialValue = attribute;
-      // Boolean attributes return values of either '' or null.
-      if (expectedValue === true) {
-        match = (initialValue === '');
-      } else if (expectedValue === false) {
-        match = (initialValue === null);
-      } else {
-        match = (initialValue === expectedValue);
-      }
+    switch (property) {
+      case 'text':
+        initialValue = element.textContent;
+        expectedValue = Object.prototype.toString.call(expectedValue);
+        match = (initialValue.trim() === expectedValue.trim());
+        break;
+
+      case 'class':
+        initialValue = [];
+        // Ignore internal AMP classes.
+        for (let i = 0; i < element.classList.length; i++) {
+          const cssClass = element.classList[i];
+          if (AMP_CSS_RE.test(cssClass)) {
+            initialValue.push(cssClass);
+          }
+        }
+        /** @type {!Array<string>} */
+        let classes = [];
+        if (Array.isArray(expectedValue)) {
+          classes = expectedValue;
+        } else if (typeof expectedValue === 'string') {
+          classes = expectedValue.split(' ');
+        } else {
+          user().error(TAG,
+              'Unsupported result for class binding', expectedValue);
+        }
+        match = this.compareStringArrays_(initialValue, classes);
+        break;
+
+      default:
+        const attribute = element.getAttribute(property);
+        initialValue = attribute;
+        // Boolean attributes return values of either '' or null.
+        if (expectedValue === true) {
+          match = (initialValue === '');
+        } else if (expectedValue === false) {
+          match = (initialValue === null);
+        } else {
+          match = (initialValue === expectedValue);
+        }
+        break;
     }
 
     if (!match) {
@@ -388,23 +416,9 @@ export class Bind {
   }
 
   /**
-   * Returns `value` if it's an appropriate Element attribute type.
-   * Otherwise, returns null.
-   * @param {BindExpressionResultDef} value
-   * @return {(string|boolean|number|null)}
-   */
-  attributeValueOf_(value) {
-    if (this.attributeValueTypes_[typeof value]) {
-      return /** @type {(string|boolean|number)} */ (value);
-    } else {
-      return null;
-    }
-  }
-
-  /**
    * Checks strict equality of 1D children in arrays and objects.
-   * @param {BindExpressionResultDef|undefined} a
-   * @param {BindExpressionResultDef|undefined} b
+   * @param {./bind-expression.BindExpressionResultDef|undefined} a
+   * @param {./bind-expression.BindExpressionResultDef|undefined} b
    * @return {boolean}
    */
   shallowEquals_(a, b) {
