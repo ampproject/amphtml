@@ -26,7 +26,7 @@ export function adverticum(global, data) {
   const d = global.document.createElement('div');
 
   d.id = 'zoneid';
-  d..classList.add('goAdverticum', 'goa-embedded');
+  d.classList.add('goAdverticum', 'goa-embedded');
 
   document.getElementById('c').appendChild(d);
   if (data['costumetargetstring']) {
