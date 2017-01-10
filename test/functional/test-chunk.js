@@ -62,8 +62,6 @@ describe('chunk', () => {
     });
 
     it('should execute a chunk', done => {
-      expect(chunkInstanceForTesting(env.win.document).active_).to.equal(
-          experimentOn);
       chunk(fakeWin.document, done);
     });
 

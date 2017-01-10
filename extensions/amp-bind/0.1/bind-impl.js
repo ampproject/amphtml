@@ -16,12 +16,13 @@
 
 import {BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
-import {user} from '../../../src/log';
+import {chunk, ChunkPriority} from '../../../src/chunk';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {resourcesForDoc} from '../../../src/resources';
+import {user} from '../../../src/log';
 
 const TAG = 'AMP-BIND';
 
@@ -88,6 +89,12 @@ export class Bind {
     this.resources_ = resourcesForDoc(ampdoc);
 
     /**
+     * True if a digest is triggered before scan for bindings completes.
+     * {boolean}
+     */
+    this.digestQueuedAfterScan_ = false;
+
+    /**
      * Keys correspond to valid attribute value types.
      * @const {!Object<string,boolean>}
      */
@@ -98,15 +105,18 @@ export class Bind {
     };
 
     this.ampdoc.whenReady().then(() => {
-      const {boundElements, evaluatees} =
-          this.scanForBindings_(ampdoc.getBody());
-      this.boundElements_ = boundElements;
-      this.evaluator_ = new BindEvaluator(evaluatees);
+      this.scanForBindings_(ampdoc.getBody()).then(results => {
+        const {boundElements, evaluatees} = results;
 
-      // Trigger verify-only digest in development.
-      if (getMode().development) {
-        this.digest_(true);
-      }
+        this.boundElements_ = boundElements;
+        this.evaluator_ = new BindEvaluator(evaluatees);
+
+        // Trigger verify-only digest in development.
+        const development = getMode().development;
+        if (development || this.digestQueuedAfterScan_) {
+          this.digest_(/* opt_verifyOnly */ development);
+        }
+      });
     });
   }
 
@@ -123,7 +133,12 @@ export class Bind {
     Object.assign(this.scope_, state);
 
     if (!opt_skipDigest) {
-      this.digest_();
+      // If scan hasn't completed yet, set `digestQueuedAfterScan_`.
+      if (this.boundElements_) {
+        this.digest_();
+      } else {
+        this.digestQueuedAfterScan_ = true;
+      }
     }
   }
 
@@ -131,42 +146,57 @@ export class Bind {
    * Scans `body` for attributes that conform to bind syntax and returns
    * a tuple containing bound elements and binding data for the evaluator.
    * @param {!Element} body
-   * @return {{
-   *   boundElements: !Array<BoundElementDef>,
-   *   evaluatees: !Array<./bind-evaluator.EvaluateeDef>,
-   * }}
+   * @return {
+   *   !Promise<{boundElements: !Array<BoundElementDef>, evaluatees: !Array<./bind-evaluator.EvaluateeDef>}>
+   * }
    * @private
    */
   scanForBindings_(body) {
-    // TODO(choumx): Chunk if taking too long in a single frame.
-
     /** @type {!Array<BoundElementDef>} */
     const boundElements = [];
     /** @type {!Array<./bind-evaluator.EvaluateeDef>} */
     const evaluatees = [];
 
+    // TODO(choumx): Use TreeWalker if this is too slow.
     const elements = body.getElementsByTagName('*');
-    for (let i = 0; i < elements.length; i++) {
-      const element = elements[i];
-      const attributes = element.attributes;
 
-      const bindings = [];
-      for (let j = 0; j < attributes.length; j++) {
-        const binding = this.bindingForAttribute_(attributes[j], element);
-        if (binding) {
-          bindings.push(binding);
-          evaluatees.push({
-            tagName: element.tagName,
-            property: binding.property,
-            expressionString: binding.expressionString,
-          });
+    // Helper function for scanning a slice of elements.
+    const scanFromTo = (start, end) => {
+      for (let i = start; i < Math.min(end, elements.length); i++) {
+        const el = elements[i];
+        const attrs = el.attributes;
+
+        const bindings = [];
+        for (let j = 0; j < attrs.length; j++) {
+          const binding = this.bindingForAttribute_(attrs[j], el);
+          if (binding) {
+            bindings.push(binding);
+            evaluatees.push({
+              tagName: el.tagName,
+              property: binding.property,
+              expressionString: binding.expressionString,
+            });
+          }
+        }
+        if (bindings.length > 0) {
+          boundElements.push({element: el, bindings});
         }
       }
-      if (bindings.length > 0) {
-        boundElements.push({element, bindings});
-      }
+    };
+
+    // Divide elements into buckets to be scanned, one bucket per chunk.
+    const bucketSize = 10;
+    const promises = [];
+    for (let i = 0; i < elements.length; i += bucketSize) {
+      const promise = chunk(this.ampdoc, () => {
+        scanFromTo(i, i + bucketSize);
+      }, ChunkPriority.LOW);
+      promises.push(promise);
     }
-    return {boundElements, evaluatees};
+
+    return Promise.all(promises)
+        .then(() => Promise.resolve({boundElements, evaluatees}))
+        .catch(e => user().error(TAG, `Scan failed: ${e}`));
   }
 
   /**
