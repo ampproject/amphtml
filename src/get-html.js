@@ -19,12 +19,13 @@ const excludedTags = ['amp-analytics', 'amp-experiment', 'amp-bind-state'];
 
 /**
  * Returns content of HTML node
+ * @param {!Window} win
  * @param {!string} selector - CSS selector of the node to take content from
  * @param {!Array<string>} attrs - tag attributes to be left in the stringified HTML
  * @return {string}
  */
-export function getHtml(selector, attrs) {
-  const root = self.document.querySelector(selector);
+export function getHtml(win, selector, attrs) {
+  const root = win.document.querySelector(selector);
   const result = [];
 
   if (root) {
@@ -40,20 +41,14 @@ export function getHtml(selector, attrs) {
  * @param {!Array<string>} result
  */
 function appendToResult(node, attrs, result) {
-  const stack = [];
-
-  if (!node) {
-    return result;
-  }
-
-  stack.push(node);
+  const stack = [node];
 
   while (stack.length > 0) {
     node = stack.pop();
 
     if (typeof node === 'string') {
       result.push(node);
-    } else if (node && node.nodeType === Node.TEXT_NODE) {
+    } else if (node.nodeType === Node.TEXT_NODE) {
       result.push(node.textContent);
     } else if (isApplicableNode(node)) {
       appendOpenTag(node, attrs, result);
@@ -71,12 +66,11 @@ function appendToResult(node, attrs, result) {
 
 /**
  *
- * @param {?Element} node
+ * @param {!Element} node
  * @return {!boolean}
  */
 function isApplicableNode(node) {
-  return !!(node &&
-      excludedTags.indexOf(node.tagName.toLowerCase()) === -1 &&
+  return !!(excludedTags.indexOf(node.tagName.toLowerCase()) === -1 &&
       node.textContent);
 }
 
