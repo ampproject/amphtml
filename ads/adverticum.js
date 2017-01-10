@@ -25,8 +25,8 @@ export function adverticum(global, data) {
   const zoneid = 'zone' + data['goa3zone'];
   const d = global.document.createElement('div');
 
-  d.setAttribute('id', zoneid);
-  d.setAttribute('class', 'goAdverticum goa-embedded');
+  d.id = 'zoneid';
+  d..classList.add('goAdverticum', 'goa-embedded');
 
   document.getElementById('c').appendChild(d);
   if (data['costumetargetstring']) {
@@ -34,7 +34,7 @@ export function adverticum(global, data) {
     const v = global.document.createElement('var');
     v.setAttribute('id', 'cT');
     v.setAttribute('class', 'customtarget');
-    v.setAttribute('style', 'display:none');
+    v.style.display = 'none';
     v.appendChild(s);
     document.getElementById(zoneid).appendChild(v);
   }
