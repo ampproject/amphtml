@@ -39,6 +39,9 @@ var cssOnly = argv['css-only'];
 
 require('./build-system/tasks');
 
+var hostname = argv.hostname || 'cdn.ampproject.org';
+var hostname3p = argv.hostname3p || '3p.ampproject.net';
+
 // All declared extensions.
 var extensions = {};
 
@@ -561,7 +564,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
   // version is not available on the absolute path.
   var integrationJs = argv.fortesting
       ? './f.js'
-      : `https://3p.ampproject.net/${internalRuntimeVersion}/f.js`;
+      : `https://${hostname3p}/${internalRuntimeVersion}/f.js`;
   // Convert default relative URL to absolute min URL.
   var html = fs.readFileSync(input, 'utf8')
       .replace(/\.\/integration\.js/g, integrationJs);
@@ -728,7 +731,7 @@ function buildExperiments(options) {
   $$.util.log('Processing ' + htmlPath);
   var html = fs.readFileSync(htmlPath, 'utf8');
   var minHtml = html.replace('/dist.tools/experiments/experiments.js',
-      'https://cdn.ampproject.org/v0/experiments.js');
+      `https://${hostname}/v0/experiments.js`);
   gulp.src(htmlPath)
       .pipe($$.file('experiments.cdn.html', minHtml))
       .pipe(gulp.dest('dist.tools/experiments/'));
@@ -796,7 +799,7 @@ function buildLoginDoneVersion(version, options) {
   var html = fs.readFileSync(htmlPath, 'utf8');
   var minHtml = html.replace(
       '../../../dist/v0/amp-login-done-' + version + '.max.js',
-      'https://cdn.ampproject.org/v0/amp-login-done-' + version + '.js');
+      `https://${hostname}/v0/amp-login-done-` + version + '.js');
 
   mkdirSync('dist');
   mkdirSync('dist/v0');
