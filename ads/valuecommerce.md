@@ -23,8 +23,8 @@ limitations under the License.
 ```html
 <amp-ad width="300" height="250"
     type="valuecommerce"
-    data-sid="99999999"
-    data-pid="99999999"
+    data-sid="3008"
+    data-pid="884466614"
     data-vcptn="test">
 </amp-ad>
 ```
@@ -34,7 +34,7 @@ limitations under the License.
 ```html
 <amp-ad width="300" height="250"
     type="valuecommerce"
-    data-pid="99999999"
+    data-pid="884466614"
     data-vcptn="test"
     data-om="1">
 </amp-ad>
