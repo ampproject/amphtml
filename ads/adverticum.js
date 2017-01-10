@@ -16,6 +16,7 @@
 
 import {writeScript} from '../3p/3p';
 import {validateData} from '../3p/3p';
+import {setStyle} from '../src/style';
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -34,7 +35,7 @@ export function adverticum(global, data) {
     const v = global.document.createElement('var');
     v.setAttribute('id', 'cT');
     v.setAttribute('class', 'customtarget');
-    v.style.display = 'none';
+    setStyle(v, 'display', 'none');
     v.appendChild(s);
     document.getElementById(zoneid).appendChild(v);
   }
