@@ -15,8 +15,8 @@
  */
 
 import {BindEvaluator} from './bind-evaluator';
-import {user} from '../../../src/log';
 import {BindValidator} from './bind-validator';
+import {user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -174,7 +174,7 @@ export class Bind {
    * attribute param, if applicable.
    * @param {!Attr} attribute
    * @param {!Element} unusedElement
-   * @return {?BindingDef}
+   * @return {?{property: string, expressionString: string}}
    * @private
    */
   bindingForAttribute_(attribute, element) {
@@ -182,7 +182,10 @@ export class Bind {
     if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
       const property = name.substr(1, name.length - 2);
       if (this.validator_.canBind(element.tagName, property)) {
-        return {property, expression: attribute.value, element};
+        return {property, expressionString: attribute.value};
+      } else {
+        user().warn(TAG,
+            `<${element.tagName} [${property}]> binding is not allowed.`);
       }
     }
     return null;

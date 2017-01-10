@@ -20,21 +20,21 @@
  *   blockedURLs: (Array<string>|undefined),
  * }}
  */
-let AttributeRulesDef;
+let PropertyRulesDef;
 
 /**
- * Maps tag names to attribute names to AttributeRulesDef.
- * If `RulesDef[tagName][attributeName]` is null, then all values are valid
- * for that attribute in that tag.
- * @typedef {Object<string,Object<string,?AttributeRulesDef>>}}
+ * Maps tag names to property names to PropertyRulesDef.
+ * If `RulesDef[tagName][propertyName]` is null, then all values are valid
+ * for that property in that tag.
+ * @typedef {Object<string,Object<string,?PropertyRulesDef>>}}
  */
 let RulesDef;
 
 /**
- * Attribute rules that apply to any and all tags.
- * @type {Object<string,?AttributeRulesDef>}
+ * Property rules that apply to any and all tags.
+ * @type {Object<string,?PropertyRulesDef>}
  */
-const GLOBAL_ATTRIBUTE_RULES = {
+const GLOBAL_PROPERTY_RULES = {
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
@@ -48,37 +48,37 @@ const GLOBAL_ATTRIBUTE_RULES = {
 export class BindValidator {
   constructor() {
     /**
-     * A map of tag names to attribute names to AttributeRules.
+     * A map of tag names to property names to PropertyRules.
      * @const {!RulesDef}
      */
     this.rules_ = this.createRules_();
   }
 
   /**
-   * Returns true if (tag, attribute) binding is allowed.
+   * Returns true if (tag, property) binding is allowed.
    * Otherwise, returns false.
-   * @note `tag` and `attribute` are case-sensitive.
+   * @note `tag` and `property` are case-sensitive.
    * @param {!string} tag
-   * @param {!string} attribute
+   * @param {!string} property
    * @return {boolean}
    */
-  canBind(tag, attribute) {
-    return (this.rulesForTagAndAttribute_(tag, attribute) !== undefined);
+  canBind(tag, property) {
+    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
   }
 
 
   /**
-   * Returns true if `value` is a valid result for a (tag, attribute) binding.
+   * Returns true if `value` is a valid result for a (tag, property) binding.
    * Otherwise, returns false.
    * @param {!string} tag
-   * @param {!string} attribute
-   * @param {!string} value
+   * @param {!string} property
+   * @param {?string} value
    * @return {boolean}
    */
-  isResultValid(tag, attribute, value) {
-    const attrRules = this.rulesForTagAndAttribute_(tag, attribute);
+  isResultValid(tag, property, value) {
+    const attrRules = this.rulesForTagAndProperty_(tag, property);
 
-    // If binding to (tag, attribute) is not allowed, return false.
+    // If binding to (tag, property) is not allowed, return false.
     if (attrRules === undefined) {
       return false;
     }
@@ -90,7 +90,7 @@ export class BindValidator {
 
     // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
     const allowedProtocols = attrRules.allowedProtocols;
-    if (allowedProtocols) {
+    if (allowedProtocols && value) {
       const re = /^([^:\/?#.]+):.*$/;
       const match = re.exec(value);
       if (match !== null) {
@@ -103,7 +103,7 @@ export class BindValidator {
 
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
     const blockedURLs = attrRules.blockedURLs;
-    if (blockedURLs) {
+    if (blockedURLs && value) {
       for (let i = 0; i < blockedURLs.length; i++) {
         let decodedURL;
         try {
@@ -119,7 +119,7 @@ export class BindValidator {
 
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
     const blacklistedValueRegex = attrRules.blacklistedValueRegex;
-    if (blacklistedValueRegex) {
+    if (blacklistedValueRegex && value) {
       const re = new RegExp(blacklistedValueRegex, 'i');
       if (re.test(value)) {
         return false;
@@ -130,22 +130,22 @@ export class BindValidator {
   }
 
   /**
-   * Returns the attribute rules object for (tag, attribute), if it exists.
+   * Returns the property rules object for (tag, property), if it exists.
    * Returns null if binding is allowed without constraints.
    * Returns undefined if binding is not allowed.
-   * @return {(?AttributeRulesDef|undefined)}
+   * @return {(?PropertyRulesDef|undefined)}
    * @private
    */
-  rulesForTagAndAttribute_(tag, attribute) {
-    if (GLOBAL_ATTRIBUTE_RULES.hasOwnProperty(attribute)) {
-      return GLOBAL_ATTRIBUTE_RULES[attribute];
+  rulesForTagAndProperty_(tag, property) {
+    if (GLOBAL_PROPERTY_RULES.hasOwnProperty(property)) {
+      return GLOBAL_PROPERTY_RULES[property];
     }
     let tagRules;
     if (this.rules_.hasOwnProperty(tag)) {
       tagRules = this.rules_[tag];
     }
-    if (tagRules && tagRules.hasOwnProperty(attribute)) {
-      return tagRules[attribute];
+    if (tagRules && tagRules.hasOwnProperty(property)) {
+      return tagRules[property];
     }
     return undefined;
   }
@@ -158,6 +158,11 @@ export class BindValidator {
     // Initialize `rules` with tag-specific constraints.
     const rules = {
       'AMP-IMG': {
+        alt: null,
+        'aria-describedby': null,
+        'aria-label': null,
+        'aria-labelledby': null,
+        referrerpolicy: null,
         src: {
           allowedProtocols: {
             data: true,
@@ -319,7 +324,7 @@ export class BindValidator {
       rules[tag]['text'] = null;
     });
 
-    // AMP extensions support additional attributes.
+    // AMP extensions support additional properties.
     const ampExtensions = ['AMP-IMG'];
     ampExtensions.forEach(tag => {
       if (rules[tag] === undefined) {
