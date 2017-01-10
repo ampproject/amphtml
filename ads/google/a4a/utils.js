@@ -45,10 +45,11 @@ const AmpAdImplementation = {
 };
 
 /** @const {!Object} */
-export const ValidAdContainerTypes = [
-  'AMP-STICKY-AD',
-  'AMP-FX-FLYING-CARPET',
-];
+export const ValidAdContainerTypes = {
+  'AMP-STICKY-AD': 'sa',
+  'AMP-FX-FLYING-CARPET': 'fc',
+  'AMP-LIGHTBOX': 'lb',
+};
 
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
@@ -149,9 +150,8 @@ function buildAdUrl(
   const adElement = a4a.element;
   let parentElement = adElement.parentElement;
   const containerTypes = [];
-  while (parentElement
-      && ValidAdContainerTypes.indexOf(parentElement.tagName) >= 0) {
-    containerTypes.push(parentElement.tagName);
+  while (parentElement && ValidAdContainerTypes[parentElement.tagName]) {
+    containerTypes.push(ValidAdContainerTypes[parentElement.tagName]);
     parentElement = parentElement.parentElement;
   }
   if (containerTypes.length > 0) {
