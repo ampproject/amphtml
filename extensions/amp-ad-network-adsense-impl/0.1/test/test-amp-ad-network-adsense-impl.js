@@ -171,7 +171,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         });
       });
     });
-    it('should contain amp_ct', () => {
+    it('should contain a_ct', () => {
       return createIframePromise().then(fixture => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
@@ -182,8 +182,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
               });
         ampStickyAd.appendChild(element);
         fixture.doc.body.appendChild(ampStickyAd);
-        return impl.getAdUrl().then(adUrl => {
-          expect(adUrl.indexOf('amp_ct=AMP-STICKY-AD') >= 0).to.be.true;
+        return adsenseImpl.getAdUrl().then(adUrl => {
+          expect(adUrl.indexOf('a_ct=AMP-STICKY-AD') >= 0).to.be.true;
         });
       });
     });
