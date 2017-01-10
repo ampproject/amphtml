@@ -138,6 +138,9 @@ The structure created for the dialog looks as follows:
 
 ```html
 <div id="amp-access-laterpay-dialog">
+  <p class="amp-access-laterpay-header">
+    Optional, appears if header locale message is defined.
+  </p>
   <ul>
     <li>
       <label>
@@ -157,6 +160,9 @@ The structure created for the dialog looks as follows:
   <button class="amp-access-laterpay-purchase-button">Buy Now</button>
   <p class="amp-access-laterpay-already-purchased-container">
     <a href="...">I already bought this</a>
+  </p>
+  <p class="amp-access-laterpay-footer">
+    Optional, appears if footer locale message is defined.
   </p>
 </div>
 ```
@@ -212,6 +218,16 @@ The following message keys can be translated or customized, but be aware that th
     <td class="col-fourty"><code>alreadyPurchasedLink</code></td>
     <td>If the user has purchased the article in the past but they have lost their cookies (or are in a different device) they can use this link to login to LaterPay and retrieve their purchases.</td>
     <td>'I already bought this'</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><code>header</code></td>
+    <td>Optional header text.</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><code>footer</code></td>
+    <td>Optional footer text.</td>
+    <td></td>
   </tr>
 </table>
 

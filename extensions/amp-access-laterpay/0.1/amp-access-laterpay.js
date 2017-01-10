@@ -259,7 +259,8 @@ export class LaterpayVendor {
    * @private
    */
   renderPurchaseOverlay_() {
-    const laterpayList = this.getContainer_();
+    const dialogContainer = this.getContainer_();
+    this.renderTextBlock_('header');
     const listContainer = this.doc_.createElement('ul');
     this.purchaseConfig_.premiumcontent['tp_title'] =
       this.i18n_.premiumContentTitle;
@@ -278,12 +279,27 @@ export class LaterpayVendor {
     this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
       this.handlePurchase_(ev, this.selectedPurchaseOption_.value);
     });
-    laterpayList.appendChild(listContainer);
-    laterpayList.appendChild(purchaseButton);
-    laterpayList.appendChild(
+    dialogContainer.appendChild(listContainer);
+    dialogContainer.appendChild(purchaseButton);
+    dialogContainer.appendChild(
       this.createAlreadyPurchasedLink_(this.purchaseConfig_.apl));
+    this.renderTextBlock_('footer');
     this.containerEmpty_ = false;
   }
+
+  /**
+   * @private
+   * @param {!string} area
+   */
+  renderTextBlock_(area) {
+    if (this.i18n_[area]) {
+      const el = this.doc_.createElement('p');
+      el.className = TAG + '-' + area;
+      el.textContent = this.i18n_[area];
+      this.getContainer_().appendChild(el);
+    }
+  }
+
 
   /**
    * @param {!PurchaseOptionDef} option
