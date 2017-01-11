@@ -282,7 +282,7 @@ export class AmpForm {
         opt_event.preventDefault();
       }
       user().assert(false,
-          'Only XHR based (via action-xhr attribute) submissions are' +
+          'Only XHR based (via action-xhr attribute) submissions are ' +
           'support for POST requests. %s',
           this.form_);
     } else if (this.method_ == 'GET') {
