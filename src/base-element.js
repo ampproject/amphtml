@@ -32,7 +32,7 @@ import {user} from './log';
  * The base class implements a set of lifecycle methods that are called by
  * the runtime as appropriate. These are mostly based on the custom element
  * lifecycle (See
- * http://www.html5rocks.com/en/tutorials/webcomponents/customelements/)
+ * https://developers.google.com/web/fundamentals/getting-started/primers/customelements)
  * and adding AMP style late loading to the mix.
  *
  * The complete lifecycle of custom DOM element is:
