@@ -263,6 +263,8 @@ export class AmpForm {
             this.maybeHandleRedirect_(
                 /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
                     response));
+          }, error => {
+            rethrowAsync('Failed to parse response JSON:', error);
           });
         }, error => {
           this.triggerAction_(
@@ -299,21 +301,19 @@ export class AmpForm {
    * @private
    */
   maybeHandleRedirect_(response) {
-    // If the `AMP-Redirect-To` header is set. Redirect the user to the
-    // given URL.
-    const redirectTo = /** @type {string} */ (response.headers &&
-        response.headers.get(REDIRECT_TO_HEADER));
+    if (!response.headers) {
+      return;
+    }
+    const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
     if (redirectTo) {
-      if (this.target_ == '_blank') {
-        dev().assert(false, 'Redirecting to target=_blank using ' +
-            'AMP-Redirect-To is currently not supported, ' +
-            'use target=_top instead. %s', this.form_);
-      }
+      user().assert(this.target_ != '_blank',
+          'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
+          'not supported, use target=_top instead. %s', this.form_);
       try {
         assertAbsoluteHttpOrHttpsUrl(redirectTo);
         assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
       } catch (e) {
-        dev().assert(false, 'The `AMP-Redirect-To` header value must be an ' +
+        user().assert(false, 'The `AMP-Redirect-To` header value must be an ' +
             'absolute URL starting with https://. Found %s', redirectTo);
       }
       this.win_.top.location.href = redirectTo;
