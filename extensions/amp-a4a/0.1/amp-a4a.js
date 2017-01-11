@@ -603,7 +603,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Track if verification found as it will ensure that promises yet to
     // resolve will "cancel" as soon as possible saving unnecessary resource
     // allocation.
-    let verificationFound = false;
+    let verified = false;
     return some(keyInfoSetPromises.map(keyInfoSetPromise => {
       // Resolve Promise into an object containing a 'keys' field, which
       // is an Array of Promises of signing keys.  *whew*
@@ -611,13 +611,13 @@ export class AmpA4A extends AMP.BaseElement {
         // As long as any one individual key of a particular signing
         // service, keyInfoPromise, can verify the signature, then the
         // creative is valid AMP.
-        if (verificationFound) {
+        if (verified) {
           return Promise.reject('noop');
         }
         return some(keyInfoSet.keys.map(keyInfoPromise => {
           // Resolve Promise into signing key.
           return keyInfoPromise.then(keyInfo => {
-            if (verificationFound) {
+            if (verified) {
               return Promise.reject('noop');
             }
             if (!keyInfo) {
@@ -631,7 +631,7 @@ export class AmpA4A extends AMP.BaseElement {
                 keyInfo)
                 .then(isValid => {
                   if (isValid) {
-                    verificationFound = true;
+                    verified = true;
                     this.protectedEmitLifecycleEvent_(
                         'signatureVerifySuccess', {
                           'met.delta.AD_SLOT_ID': Math.round(
