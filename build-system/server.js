@@ -462,6 +462,13 @@ app.use('/a4a(|-3p)/', function(req, res) {
   var force3p = req.baseUrl.indexOf('/a4a-3p') == 0;
   var adUrl = req.url;
   var templatePath = '/build-system/server-a4a-template.html';
+  var urlPrefix = getUrlPrefix(req);
+  if (force3p && !adUrl.startsWith('/m') &&
+      urlPrefix.indexOf('//localhost') != -1) {
+    // This is a special case for testing. `localhost` URLs are transformed to
+    // `ads.localhost` to ensure that the iframe is fully x-origin.
+    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
+  }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/FORCE3P/g, force3p)
