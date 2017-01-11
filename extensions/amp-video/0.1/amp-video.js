@@ -28,16 +28,20 @@ import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-video';
 
-/** @type {!Array<string>} */
+/** @private {!Array<string>} */
 const ATTRS_TO_PROPAGATE_ON_BUILD = ['poster', 'controls', 'aria-label',
   'aria-describedby', 'aria-labelledby'];
 
 /**
  * @note Do not propagate `autoplay`. Autoplay behaviour is managed by
  *       video manager since amp-video implements the VideoInterface.
- * @type {!Array<string>}
+ * @private {!Array<string>}
  */
 const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['src', 'loop', 'preload'];
+
+/** @private {!Array<string>} */
+const ATTRS_TO_PROPAGATE =
+    ATTRS_TO_PROPAGATE_ON_BUILD.concat(ATTRS_TO_PROPAGATE_ON_LAYOUT);
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -117,20 +121,15 @@ class AmpVideo extends AMP.BaseElement {
       if (!this.video_) {
         return;
       }
-      mutations.forEach(mutation => {
-        const name = mutation.name;
-        switch (name) {
-          case 'src':
-            assertHttpsUrl(this.element.getAttribute('src'), this.element);
-            break;
-        }
-        if (this.shouldPropagateAttributeOnMutation_(name)) {
-          this.propagateAttributes(
-              name,
-              /** @type {!Element} */ (this.video_),
-              /* opt_removeMissingAttrs */ true);
-        }
-      }, this);
+      if (mutations['src']) {
+        assertHttpsUrl(this.element.getAttribute('src'), this.element);
+      }
+      const attrs = ATTRS_TO_PROPAGATE.filter(
+          value => mutations[value] !== undefined);
+      this.propagateAttributes(
+          attrs,
+          dev().assertElement(this.video_),
+          /* opt_removeMissingAttrs */ true);
     }
 
     /** @override */
