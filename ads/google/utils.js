@@ -57,8 +57,8 @@ export function getMultiSizeDimensions(
 
     // Make sure that both dimensions given are numbers.
     if (!validateDimensions(width, height,
-          w => isNaN(Number(w)),
-          h => isNaN(Number(h)),
+          w => isNaN(w),
+          h => isNaN(h),
           ({badDim, badVal}) =>
           `Invalid ${badDim} of ${badVal} given for secondary size.`)) {
       return;
