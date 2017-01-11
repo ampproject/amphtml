@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
-import {installPixel} from '../../builtins/amp-pixel';
-
 
 describes.realWin('amp-pixel', {amp: true}, env => {
   let win;
@@ -51,19 +48,14 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     return whenFirstVisiblePromise.then(() => {
       expect(implementation.triggerPromise_).to.be.not.null;
       return implementation.triggerPromise_;
-    }).then(() => {
-      expect(pixel.children).to.have.length(1);
-      const img = pixel.children[0];
-      expect(img.tagName).to.equal('IMG');
-      return img;
     });
   }
 
   it('should be non-displayed', () => {
-    expect(pixel.style.display).to.equal('none');
     expect(pixel.style.width).to.equal('0px');
     expect(pixel.style.height).to.equal('0px');
     expect(pixel.getAttribute('aria-hidden')).to.equal('true');
+    expect(win.getComputedStyle(pixel).display).to.equal('none');
   });
 
   it('should trigger when doc becomes visible', () => {

@@ -18,7 +18,6 @@ import {BaseElement} from '../src/base-element';
 import {Layout} from '../src/layout';
 import {dev, user} from '../src/log';
 import {registerElement} from '../src/custom-element';
-import {toggle} from '../src/style';
 import {urlReplacementsForDoc} from '../src/url-replacements';
 import {viewerForDoc} from '../src/viewer';
 
@@ -34,7 +33,7 @@ export class AmpPixel extends BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Promise} */
+    /** @private {?Promise<!Image>} */
     this.triggerPromise_ = null;
   }
 
@@ -47,7 +46,6 @@ export class AmpPixel extends BaseElement {
   /** @override */
   buildCallback() {
     // Element is invisible.
-    toggle(this.element, false);
     this.element.setAttribute('aria-hidden', 'true');
 
     // Trigger, but only when visible.
@@ -67,8 +65,8 @@ export class AmpPixel extends BaseElement {
           .then(src => {
             const image = new Image();
             image.src = src;
-            this.element.appendChild(image);
             dev().info(TAG, 'pixel triggered: ', src);
+            return image;
           });
     });
   }
