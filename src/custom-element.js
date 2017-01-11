@@ -155,7 +155,7 @@ function tryUpgradeElementNoInline(element, toClass) {
  */
 export function stubElements(win) {
   const knownElements = getExtendedElements(win);
-  const list = win.document.querySelectorAll('[custom-element]');
+  const list = win.document.head.querySelectorAll('script[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
     if (knownElements[name]) {
@@ -1223,14 +1223,16 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Called when an attribute's value changes.
-     * Only called for observedAttributes or from amp-bind.
-     * @param {!string} name
-     * @param {?string} oldValue
-     * @param {?string} newValue
+     * Called when one or more attributes are mutated.
+     * @note Must be called inside a mutate context.
+     * @note Boolean attributes have a value of `true` and `false` when
+     *       present and missing, respectively.
+     * @param {
+     *   !Object<string, (null|boolean|string|number|Array|Object)>
+     * } mutations
      */
-    attributeChangedCallback(name, oldValue, newValue) {
-      this.implementation_.attributeChangedCallback(name, oldValue, newValue);
+    mutatedAttributesCallback(mutations) {
+      this.implementation_.mutatedAttributesCallback(mutations);
     }
 
     /**

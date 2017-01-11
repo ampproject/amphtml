@@ -16,7 +16,7 @@
 
 import {dev, user} from './log';
 import {documentInfoForDoc} from './document-info';
-import {isExperimentOn, experimentToggles} from './experiments';
+import {isExperimentOn, experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from '../src/layout';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
@@ -84,7 +84,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     },
     tagName: element.tagName,
     mode: getModeObject(),
-    canary: !!(parentWindow.AMP_CONFIG && parentWindow.AMP_CONFIG.canary),
+    canary: isCanary(parentWindow),
     hidden: !viewer.isVisible(),
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),

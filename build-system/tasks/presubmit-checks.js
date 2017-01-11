@@ -341,19 +341,6 @@ var forbiddenTerms = {
       'tools/experiments/experiments.js',
     ],
   },
-  'isDevChannel\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'src/experiments.js',
-      'tools/experiments/experiments.js',
-    ],
-  },
-  'isDevChannelVersionDoNotUse_\\W': {
-    message: shouldNeverBeUsed,
-    whitelist: [
-      'src/experiments.js',
-    ],
-  },
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
@@ -506,8 +493,6 @@ var forbiddenTerms = {
       'src/service-worker/error-reporting.js',
       'src/mode.js',
       'src/experiments.js',
-      'src/error.js',
-      'src/3p-frame.js',
       'src/config.js',
       'dist.3p/current/integration.js',
     ],
