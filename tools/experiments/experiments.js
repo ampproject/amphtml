@@ -240,7 +240,7 @@ const EXPERIMENTS = [
   {
     id: 'sentinel-name-change',
     name: 'Changed sentinel name from amp3pSentinel to sentinel',
-    cleanupIssue: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6990',
     Spec: '',
   },
 ];
