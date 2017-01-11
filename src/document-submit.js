@@ -118,12 +118,12 @@ export function onDocumentFormSubmit_(e) {
   // the actual submission. For non-XHR GET we let the submission go through
   // to allow _blank target to work.
   if (actionXhr) {
-    actionServiceForDoc(form).execute(form, 'submit', null, form, e);
     e.preventDefault();
 
     // It's important to stop propagation of the submission to avoid double
     // handling of the event in cases were we are delegating to action service
     // to deliver the submission event.
     e.stopImmediatePropagation();
+    actionServiceForDoc(form).execute(form, 'submit', /*args*/ null, form, e);
   }
 }
