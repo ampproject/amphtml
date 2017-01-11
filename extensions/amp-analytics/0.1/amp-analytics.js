@@ -41,7 +41,6 @@ AMP.registerServiceForDoc(
 AMP.registerServiceForDoc('activity', Activity);
 
 installCidService(AMP.win);
-installCryptoService(AMP.win);
 variableServiceFor(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
