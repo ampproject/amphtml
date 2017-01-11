@@ -15,6 +15,7 @@
  */
 
 import {BindEvaluator} from './bind-evaluator';
+import {BindValidator} from './bind-validator';
 import {user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
@@ -70,6 +71,9 @@ export class Bind {
 
     /** {!Array<BoundElementDef>} */
     this.boundElements_ = [];
+
+    /** @const {!./bind-validator.BindValidator} */
+    this.validator_ = new BindValidator();
 
     /** @const {!Object} */
     this.scope_ = Object.create(null);
@@ -169,16 +173,20 @@ export class Bind {
    * Returns a struct representing the binding corresponding to the
    * attribute param, if applicable.
    * @param {!Attr} attribute
-   * @param {!Element} unusedElement
-   * @return {?BindingDef}
+   * @param {!Element} element
+   * @return {?{property: string, expressionString: string}}
    * @private
    */
-  bindingForAttribute_(attribute, unusedElement) {
+  bindingForAttribute_(attribute, element) {
     const name = attribute.name;
     if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
       const property = name.substr(1, name.length - 2);
-      // TODO(choumx): Validate that (unusedElement, attribute) can be bound.
-      return {property, expressionString: attribute.value};
+      if (this.validator_.canBind(element.tagName, property)) {
+        return {property, expressionString: attribute.value};
+      } else {
+        user().warn(TAG,
+            `<${element.tagName} [${property}]> binding is not allowed.`);
+      }
     }
     return null;
   }
