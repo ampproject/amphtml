@@ -201,6 +201,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     it('sendResponseError_ should call postMessage correctly', () => {
       const mName = 'name';
       const err = new Error('reason');
+      const errString = messaging.errorToString_(err);
       const requestId = 1;
       const logErrorSpy = sandbox.stub(messaging, 'logError_');
       messaging.sendResponseError_(requestId, mName, err);
@@ -210,7 +211,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: null,
-          error: JSON.stringify(err),
+          error: errString,
           name: mName,
           requestid: 1,
           type: 's',
@@ -219,7 +220,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(logErrorSpy).to.have.been.calledOnce;
         const state = 'amp-viewer-messaging: sendResponseError_, ' +
           'Message name: name';
-        expect(logErrorSpy).to.have.been.calledWith(state, err);
+        expect(logErrorSpy).to.have.been.calledWith(state, errString);
       });
     });
   });
