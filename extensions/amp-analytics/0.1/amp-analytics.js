@@ -27,7 +27,6 @@ import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
 import {Activity} from './activity-impl';
 import {installCidService} from './cid-impl';
-import {installCryptoService} from './crypto-impl';
 import {
     InstrumentationService,
     instrumentationServiceForDoc,
@@ -40,7 +39,6 @@ AMP.registerServiceForDoc(
 AMP.registerServiceForDoc('activity', Activity);
 
 installCidService(AMP.win);
-installCryptoService(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 

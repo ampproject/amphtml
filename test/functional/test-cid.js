@@ -20,7 +20,7 @@ import {
   getProxySourceOrigin,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService, Crypto,}
-    from '../../extensions/amp-analytics/0.1/crypto-impl';
+    from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
@@ -87,6 +87,14 @@ describe('cid', () => {
     fakeWin.document.defaultView = fakeWin;
     const ampdocService = installDocService(fakeWin, /* isSingleDoc */ true);
     ampdoc = ampdocService.getAmpDoc();
+    crypto = installCryptoService(fakeWin);
+    crypto.sha384Base64 = val => {
+      if (val instanceof Uint8Array) {
+        val = '[' + Array.apply([], val).join(',') + ']';
+      }
+      return Promise.resolve('sha384(' + val + ')');
+    };
+    cid = installCidService(fakeWin);
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
     const viewer = installViewerServiceForDoc(ampdoc);
@@ -99,20 +107,6 @@ describe('cid', () => {
       }
       return Promise.resolve(viewerStorage || undefined);
     });
-
-    return Promise
-        .all([installCidService(fakeWin), installCryptoService(fakeWin)])
-        .then(results => {
-          cid = results[0];
-          crypto = results[1];
-          crypto.sha384Base64 = val => {
-            if (val instanceof Uint8Array) {
-              val = '[' + Array.apply([], val).join(',') + ']';
-            }
-
-            return Promise.resolve('sha384(' + val + ')');
-          };
-        });
   });
 
   afterEach(() => {
@@ -265,8 +259,8 @@ describe('cid', () => {
     installTimerService(win);
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
-    installCidService(win);
     installCryptoService(win);
+    installCidService(win);
     return cidFor(win).then(cid => {
       return cid.get('foo', hasConsent).then(c1 => {
         return cid.get('foo', hasConsent).then(c2 => {

@@ -16,7 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
-import {Crypto} from '../crypto-impl';
+import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {InstrumentationService} from '../instrumentation';
 import {
   installUserNotificationManager,
@@ -88,7 +88,7 @@ describe('amp-analytics', function() {
 
 
       resetServiceForTesting(iframe.win, 'crypto');
-      crypto = new Crypto(iframe.win);
+      crypto = installCryptoService(iframe.win);
       getService(iframe.win, 'crypto', () => crypto);
       const link = document.createElement('link');
       link.setAttribute('rel', 'canonical');

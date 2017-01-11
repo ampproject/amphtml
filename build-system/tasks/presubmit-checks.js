@@ -164,8 +164,8 @@ var forbiddenTerms = {
   'installCryptoService': {
     message: privateServiceFactory,
     whitelist: [
-      'extensions/amp-analytics/0.1/amp-analytics.js',
-      'extensions/amp-analytics/0.1/crypto-impl.js',
+      'src/service/crypto-impl.js',
+      'src/runtime.js',
     ],
   },
   'installDocService': {

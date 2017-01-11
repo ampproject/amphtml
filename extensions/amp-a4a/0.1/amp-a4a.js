@@ -42,13 +42,7 @@ import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/platform';
-import {
-  importPublicKey,
-  isCryptoAvailable,
-  verifySignature,
-  verifyHashVersion,
-  PublicKeyInfoDef,
-} from './crypto-verifier';
+import {PublicKeyInfoDef, cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
@@ -245,6 +239,9 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {boolean} whether creative has been verified as AMP */
     this.isVerifiedAmpCreative_ = false;
 
+    /** @private @const {!../../../src/service/crypto-impl.Crypto} */
+    this.crypto_ = cryptoFor(this.win);
+
     if (!this.win.ampA4aValidationKeys) {
       // Without the following variable assignment, there's no way to apply a
       // type annotation to a win-scoped variable, so the type checker doesn't
@@ -384,7 +381,8 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.onLayoutMeasure();
     }
-    if (this.layoutMeasureExecuted_ || !isCryptoAvailable()) {
+    if (this.layoutMeasureExecuted_ ||
+        !this.crypto_.isCryptoAvailable()) {
       // onLayoutMeasure gets called multiple times.
       return;
     }
@@ -606,10 +604,6 @@ export class AmpA4A extends AMP.BaseElement {
     // resolve will "cancel" as soon as possible saving unnecessary resource
     // allocation.
     let verificationFound = false;
-    const alreadyVerified = () => {
-      return verificationFound ?
-          Promise.reject('verification already found') : null;
-    };
     return some(keyInfoSetPromises.map(keyInfoSetPromise => {
       // Resolve Promise into an object containing a 'keys' field, which
       // is an Array of Promises of signing keys.  *whew*
@@ -617,20 +611,27 @@ export class AmpA4A extends AMP.BaseElement {
         // As long as any one individual key of a particular signing
         // service, keyInfoPromise, can verify the signature, then the
         // creative is valid AMP.
+        if (verificationFound) {
+          return Promise.reject('noop');
+        }
         return some(keyInfoSet.keys.map(keyInfoPromise => {
           // Resolve Promise into signing key.
           return keyInfoPromise.then(keyInfo => {
+            if (verificationFound) {
+              return Promise.reject('noop');
+            }
             if (!keyInfo) {
               return Promise.reject('Promise resolved to null key.');
             }
             const signatureVerifyStartTime = this.getNow_();
             // If the key exists, try verifying with it.
-            return !alreadyVerified() && verifySignature(
+            return this.crypto_.verifySignature(
                 new Uint8Array(creative),
                 signature,
                 keyInfo)
                 .then(isValid => {
                   if (isValid) {
+                    verificationFound = true;
                     this.protectedEmitLifecycleEvent_(
                         'signatureVerifySuccess', {
                           'met.delta.AD_SLOT_ID': Math.round(
@@ -645,7 +646,8 @@ export class AmpA4A extends AMP.BaseElement {
                   // necessary, because we checked that above.  But
                   // Closure type compiler can't seem to recognize that, so
                   // this guarantees it to the compiler.
-                  if (keyInfo && verifyHashVersion(signature, keyInfo)) {
+                  if (keyInfo &&
+                      this.crypto_.verifyHashVersion(signature, keyInfo)) {
                     user().error(TAG, this.element.getAttribute('type'),
                         'Key failed to validate creative\'s signature',
                         keyInfo.serviceName, keyInfo.cryptoKey);
@@ -653,7 +655,7 @@ export class AmpA4A extends AMP.BaseElement {
                   // Reject to ensure the some operation waits for other
                   // possible providers to properly verify and resolve.
                   return Promise.reject(
-                      `${keyInfo.serviceName} failed to verify`);
+                      `${keyInfo.serviceName} key failed to verify`);
                 },
                 err => {
                   user().error(
@@ -663,12 +665,20 @@ export class AmpA4A extends AMP.BaseElement {
           });
         }))
         // some() returns an array of which we only need a single value.
-        .then(returnedArray => returnedArray[0]);
+        .then(returnedArray => returnedArray[0], () => {
+          // Rejection occurs if all keys for this provider fail to validate.
+          return Promise.reject(
+              `All keys ${keyInfoSet.serviceName} failed to verify`);
+        });
       });
     }))
     .then(returnedArray => {
       this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
       return returnedArray[0];
+    }, () => {
+      // rejection occurs if all providers fail to verify.
+      this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
+      return null;
     });
   }
 
@@ -876,7 +886,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   getKeyInfoSets_() {
-    if (!isCryptoAvailable()) {
+    if (!this.crypto_.isCryptoAvailable()) {
       return [];
     }
     return this.getSigningServiceNames().map(serviceName => {
@@ -908,7 +918,7 @@ export class AmpA4A extends AMP.BaseElement {
           return {
             serviceName: jwkSet.serviceName,
             keys: jwkSet.keys.map(jwk =>
-                importPublicKey(jwkSet.serviceName, jwk)
+                this.crypto_.importPublicKey(jwkSet.serviceName, jwk)
                 .catch(err => {
                   user().error(TAG, this.element.getAttribute('type'),
                       `error importing keys for service: ${jwkSet.serviceName}`,

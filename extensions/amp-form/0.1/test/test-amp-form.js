@@ -39,7 +39,7 @@ import {
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {
     installCryptoService,
-} from '../../../../extensions/amp-analytics/0.1/crypto-impl';
+} from '../../../../src/service/crypto-impl';
 
 describe('amp-form', () => {
 

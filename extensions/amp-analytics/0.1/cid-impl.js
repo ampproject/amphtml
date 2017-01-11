@@ -80,6 +80,9 @@ class Cid {
      * @private {!Object<string, !Promise<string>>}
      */
     this.externalCidCache_ = Object.create(null);
+
+    /** @private @const {!../../../src/service/crypto-impl.Crypto} */
+    this.crypto_ = cryptoFor(this.win);
   }
 
   /**
@@ -140,11 +143,9 @@ function getExternalCid(cid, getCidStruct, persistenceConsent) {
   if (!isProxyOrigin(url)) {
     return getOrCreateCookie(cid, getCidStruct, persistenceConsent);
   }
-  return Promise.all([getBaseCid(cid, persistenceConsent), cryptoFor(cid.win)])
-      .then(results => {
-        const baseCid = results[0];
-        const crypto = results[1];
-        return crypto.sha384Base64(
+  return getBaseCid(cid, persistenceConsent)
+      .then(baseCid => {
+        return cid.crypto_.sha384Base64(
             baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
       });
 }
@@ -193,8 +194,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
         Promise.resolve(existingCookie));
   }
 
-  const newCookiePromise = cryptoFor(win)
-      .then(crypto => crypto.sha384Base64(getEntropy(win)))
+  const newCookiePromise = cid.crypto_.sha384Base64(getEntropy(win))
       // Create new cookie, always prefixed with "amp-", so that we can see from
       // the value whether we created it.
       .then(randomStr => 'amp-' + randomStr);
@@ -255,8 +255,7 @@ function getBaseCid(cid, persistenceConsent) {
       }
     } else {
       // We need to make a new one.
-      baseCid = cryptoFor(win)
-          .then(crypto => crypto.sha384Base64(getEntropy(win)));
+      baseCid = cid.crypto_.sha384Base64(getEntropy(win));
       needsToStore = true;
     }
 
