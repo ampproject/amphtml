@@ -358,7 +358,7 @@ describe('amp-form', () => {
         expect(config.body).to.not.be.null;
         expect(config.method).to.equal('POST');
         expect(config.credentials).to.equal('include');
-        expect(config.requireAmpResponseSourceOrigin).to.be.undefined;
+        expect(config.requireAmpResponseSourceOrigin).to.be.true;
       });
     });
   });
@@ -612,7 +612,7 @@ describe('amp-form', () => {
           expect(config.body).to.be.undefined;
           expect(config.method).to.equal('GET');
           expect(config.credentials).to.equal('include');
-          expect(config.requireAmpResponseSourceOrigin).to.be.undefined;
+          expect(config.requireAmpResponseSourceOrigin).to.be.true;
         });
       });
     });
