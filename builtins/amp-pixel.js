@@ -16,59 +16,81 @@
 
 import {BaseElement} from '../src/base-element';
 import {Layout} from '../src/layout';
-import {urlReplacementsForDoc} from '../src/url-replacements';
+import {dev, user} from '../src/log';
 import {registerElement} from '../src/custom-element';
 import {toggle} from '../src/style';
-import {user} from '../src/log';
+import {urlReplacementsForDoc} from '../src/url-replacements';
+import {viewerForDoc} from '../src/viewer';
+
+const TAG = 'amp-pixel';
+
 
 /**
- * @param {!Window} win Destination window for the new element.
- * @this {undefined}  // Make linter happy
- * @return {undefined}
+ * A simple analytics instrument. Fires as an impression signal.
  */
-export function installPixel(win) {
-  class AmpPixel extends BaseElement {
+export class AmpPixel extends BaseElement {
 
-    /** @override */
-    getPriority() {
-      // Loads after other content.
-      return 1;
-    }
+  /** @override */
+  constructor(element) {
+    super(element);
 
-    /** @override */
-    isLayoutSupported(layout) {
-      return layout == Layout.FIXED;
-    }
+    /** @private {?Promise} */
+    this.triggerPromise_ = null;
+  }
 
-    /** @override */
-    buildCallback() {
-      // Consider the element invisible.
-      this.element.setAttribute('aria-hidden', 'true');
-    }
+  /** @override */
+  isLayoutSupported(layout) {
+    // "fixed" layout is supported, but in reality it's always width/height = 0.
+    return layout == Layout.FIXED;
+  }
 
-    /** @override */
-    layoutCallback() {
-      // Now that we are rendered, stop rendering the element to reduce
-      // resource consumption.
-      toggle(this.element, false);
+  /** @override */
+  buildCallback() {
+    // Element is invisible.
+    toggle(this.element, false);
+    this.element.setAttribute('aria-hidden', 'true');
+
+    // Trigger, but only when visible.
+    const viewer = viewerForDoc(this.getAmpDoc());
+    viewer.whenFirstVisible().then(this.trigger_.bind(this));
+  }
+
+  /**
+   * Triggers the signal.
+   * @private
+   */
+  trigger_() {
+    this.triggerPromise_ = Promise.resolve().then(() => {
       const src = this.element.getAttribute('src');
       return urlReplacementsForDoc(this.getAmpDoc())
-          .expandAsync(this.assertSource(src))
+          .expandAsync(this.assertSource_(src))
           .then(src => {
             const image = new Image();
             image.src = src;
             this.element.appendChild(image);
+            dev().info(TAG, 'pixel triggered: ', src);
           });
-    }
+    });
+  }
 
-    assertSource(src) {
-      user().assert(
-          /^(https\:\/\/|\/\/)/i.test(src),
-          'The <amp-pixel> src attribute must start with ' +
-          '"https://" or "//". Invalid value: ' + src);
-      return src;
-    }
-  };
+  /**
+   * @param {?string} src
+   * @return {string}
+   * @private
+   */
+  assertSource_(src) {
+    user().assert(
+        /^(https\:\/\/|\/\/)/i.test(src),
+        'The <amp-pixel> src attribute must start with ' +
+        '"https://" or "//". Invalid value: ' + src);
+    return src;
+  }
+}
 
-  registerElement(win, 'amp-pixel', AmpPixel);
+
+/**
+ * @param {!Window} win Destination window for the new element.
+ */
+export function installPixel(win) {
+  registerElement(win, TAG, AmpPixel);
 }
