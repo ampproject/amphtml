@@ -115,6 +115,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [E-Planning](../../ads/eplanning.md)
 - [Ezoic](../../ads/ezoic.md)
 - [FlexOneELEPHANT](../../ads/f1e.md)
+- [F1H](../../ads/f1h.md)
 - [Felmat](../../ads/felmat.md)
 - [Flite](../../ads/flite.md)
 - [Fusion](../../ads/fusion.md) 
