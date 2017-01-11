@@ -81,7 +81,7 @@ export class AmpPixel extends BaseElement {
         /^(https\:\/\/|\/\/)/i.test(src),
         'The <amp-pixel> src attribute must start with ' +
         '"https://" or "//". Invalid value: ' + src);
-    return src;
+    return /** @type {string} */ (src);
   }
 }
 
