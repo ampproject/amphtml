@@ -246,7 +246,7 @@ const EXPERIMENTS = [
   {
     id: 'variable-filters',
     name: 'Format to apply filters to analytics variables',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',r
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
 ];
 
