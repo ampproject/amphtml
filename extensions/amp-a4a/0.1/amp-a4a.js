@@ -242,9 +242,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.experimentalNonAmpCreativeRenderMethod_ =
       platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
 
-    /** @private {?Array<String>} */
-    this.creativeSize_ = null;
-
     /**
      * Gets a notion of current time, in ms.  The value is not necessarily
      * absolute, so should be used only for computing deltas.  When available,
@@ -496,8 +493,6 @@ export class AmpA4A extends AMP.BaseElement {
             this.creativeBody_ = creativeParts.creative;
           }
           if (creativeParts.size && creativeParts.size.length == 2) {
-            // We'll need to remember the creative size for the x-domain case.
-            this.creativeSize_ = creativeParts.size;
             this.handleResize(creativeParts.size[0], creativeParts.size[1]);
           }
           if (!creativeParts.signature) {
@@ -1024,9 +1019,6 @@ export class AmpA4A extends AMP.BaseElement {
   iframeRenderHelper_(iframe) {
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
-    if (this.creativeSize_) {
-      this.handleResize(this.creativeSize_[0], this.creativeSize_[1]);
-    }
     return this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
   }
 
