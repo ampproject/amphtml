@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../src/experiments';
-
-const sentinelNameChange = isExperimentOn(self, 'sentinel-name-change');
-
 /**
  * Send messages to parent frame. These should not contain user data.
  * @param {string} type Type of messages
@@ -29,7 +25,7 @@ export function nonSensitiveDataPostMessage(type, opt_object) {
   }
   const object = opt_object || {};
   object.type = type;
-  object.sentinel = sentinelNameChange ? window.context.sentinel :
+  object.sentinel = window.context.sentinel ? window.context.sentinel :
       window.context.amp3pSentinel;
   window.parent./*OK*/postMessage(object,
       window.context.location.origin);
@@ -84,9 +80,9 @@ function startListening(win) {
     // Parse JSON only once per message.
     const data = /** @type {!Object} */ (
         JSON.parse(event.data.substr(4)));
-    if (sentinelNameChange && data.sentinel != win.context.sentinel) {
+    if (win.context.sentinel && data.sentinel != win.context.sentinel) {
       return;
-    } else if (!sentinelNameChange &&
+    } else if (win.context.amp3pSentinel &&
         data.sentinel != win.context.amp3pSentinel) {
       return;
     }
