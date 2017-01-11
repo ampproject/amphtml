@@ -164,9 +164,7 @@
   <script src="./viewer-integr-messaging.js"></script>
 
   <script>
-    var SENTINEL = '__AMPHTML__';
-
-    var allViewers = [];
+    var allViewers = []; 
 
     function Viewer(containerId, id, url, visible) {
       this.id = id;
@@ -221,7 +219,7 @@
         paddingTop: this.header./*OK*/offsetHeight,
         visibilityState: this.visibilityState_,
         prerenderSize: this.prerenderSize_,
-        viewerorigin: parseUrl(window.location.href).origin,
+        origin: parseUrl(window.location.href).origin,
         csi: this.csi_,
         cap: 'foo,a2a',
       };
@@ -237,9 +235,6 @@
       log('AMP URL = ', url);
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
-
-      // Notice that name can only be set once the IFrame is in the DOM.
-      this.iframe.contentWindow.name = SENTINEL + paramsStr(params);
 
       this.awaitHandshake_();
 
@@ -259,14 +254,20 @@
       var targetOrigin = this.frameOrigin_;
       var listener = function(event) {
         if (event.origin == targetOrigin &&
-                event.data == 'amp-handshake-request' &&
+                this.isChannelOpen_(event.data) &&
                 (!event.source || event.source == target)) {
           log('event: ',event);
           log('Viewer ' + this.id + ' messaging established with ',
               targetOrigin);
           window.removeEventListener('message', listener, false);
 
-          target./*OK*/postMessage('amp-handshake-response', targetOrigin);
+          const message = {
+            app: APP,
+            requestid: event.data.requestid,
+            data: {},
+            type: MessageType.RESPONSE,
+          };
+          target./*OK*/postMessage(message, targetOrigin);
 
           this.messaging_ = new ViewerMessaging(target, targetOrigin,
               this.processRequest_.bind(this), targetId);
@@ -277,6 +278,11 @@
         }
       }.bind(this);
       window.addEventListener('message', listener, false);
+    };
+
+    Viewer.prototype.isChannelOpen_ = function(eventData) {
+      return eventData.app == APP &&
+        eventData.name == 'channelOpen';
     };
 
 

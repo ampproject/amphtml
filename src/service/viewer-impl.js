@@ -231,7 +231,6 @@ export class Viewer {
         // After https://github.com/ampproject/amphtml/issues/6070
         // is fixed we should probably only keep the amp_js_v check here.
         && (this.params_['origin']
-            || this.params_['viewerorigin']
             || this.params_['visibilityState']
             // Parent asked for viewer JS. We must be embedded.
             || (this.win.location.search.indexOf('amp_js_v') != -1))
