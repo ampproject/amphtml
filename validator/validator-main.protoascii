@@ -2385,8 +2385,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.5 The input element
-attr_lists: {
-  name: "input-attributes"
+tags: {
+  tag_name: "INPUT"
   attrs: { name: "accept" }
   attrs: { name: "accesskey" }
   attrs: { name: "autocomplete" }
@@ -2410,36 +2410,17 @@ attr_lists: {
   attrs: { name: "spellcheck" }
   attrs: { name: "step" }
   attrs: { name: "tabindex" }
-  attrs: { name: "value" }
-  attrs: { name: "width" }
-}
-tags: {
-  tag_name: "INPUT"
   attrs: {
     name: "type"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
         "button|"
         "file|"
-        "hidden|"  # Handled separately below.
         "image|"
         "password|"
         ")(\\s|$)"
   }
-  attr_lists: "input-attributes"
-  attr_lists: "input-name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
-}
-tags: {
-  tag_name: "INPUT"
-  spec_name: "input [type=hidden]"
-  attrs: { name: "data-amp-replace" }
-  attrs: {
-    name: "type"
-    mandatory: true
-    value: "hidden"
-    dispatch_key: true
-  }
-  attr_lists: "input-attributes"
+  attrs: { name: "value" }
+  attrs: { name: "width" }
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
