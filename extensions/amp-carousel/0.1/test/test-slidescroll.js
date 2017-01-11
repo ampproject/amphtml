@@ -940,14 +940,13 @@ describe('SlideScroll', () => {
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
 
-        impl.mutatedAttributesCallback([
-          {
-            name: 'slide',
-            oldValue: 0,
-            newValue: 2,
-          }
-        ]);
+        impl.mutatedAttributesCallback({slide: 2});
         expect(showSlideSpy).to.have.been.calledWith(2);
+
+        // Don't call showSlide_() if slide is not finite.
+        showSlideSpy.reset();
+        impl.mutatedAttributesCallback({slide: Number.POSITIVE_INFINITY});
+        expect(showSlideSpy.called).to.be.false;
       });
     });
 
@@ -960,14 +959,14 @@ describe('SlideScroll', () => {
         impl.goCallback(-1, /* animate */ false);
         expect(triggerSpy).to.have.been.calledWith(
             ampSlideScroll,
-            'slidechange',
-            /* CustomEvent */ sinon.match.has('detail', {slide: 4}));
+            'goToSlide',
+            /* CustomEvent */ sinon.match.has('detail', {index: 4}));
 
         impl.goCallback(1, /* animate */ false);
         expect(triggerSpy).to.have.been.calledWith(
             ampSlideScroll,
-            'slidechange',
-            /* CustomEvent */ sinon.match.has('detail', {slide: 0}));
+            'goToSlide',
+            /* CustomEvent */ sinon.match.has('detail', {index: 0}));
       });
     });
   });

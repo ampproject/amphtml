@@ -173,19 +173,15 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    mutations.forEach(mutation => {
-      const newValue = mutation.newValue;
-      switch (mutation.name) {
-        case 'slide':
-          const slide = parseInt(newValue, 10);
-          if (isFinite(slide)) {
-            this.showSlide_(slide);
-          } else {
-            user().fine('Invalid [slide] value: %s', newValue);
-          }
-          break;
+    const slide = mutations['slide'];
+    if (slide) {
+      const index = parseInt(slide, 10);
+      if (isFinite(index)) {
+        this.showSlide_(index);
+      } else {
+        user().warn('Invalid [slide] value: %s', slide);
       }
-    });
+    }
   }
 
   /**
@@ -504,15 +500,15 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
-   * Shows the slide at the given index and triggers a `slidechange` action.
+   * Shows the slide at the given index and triggers a `goToSlide` action.
    * @param {number} newIndex
    * @private
    */
   showSlideAndTriggerAction_(newIndex) {
     this.showSlide_(newIndex);
 
-    const name = 'slidechange';
-    const detail = {slide: newIndex};
+    const name = 'goToSlide';
+    const detail = {index: newIndex};
     const event = new CustomEvent(`slidescroll.${name}`, {detail});
     this.action_.trigger(this.element, name, event);
   }

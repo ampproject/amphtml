@@ -74,22 +74,18 @@ export class AmpSelector extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    mutations.forEach(mutation => {
-      switch (mutation.name) {
-        case 'selected':
-          this.selectedAttributeMutated_(mutation.oldValue, mutation.newValue);
-          break;
-      }
-    });
+    const selected = mutations['selected'];
+    if (selected !== undefined) {
+      this.selectedAttributeMutated_(selected);
+    }
   }
 
   /**
    * Handles mutation of the `selected` attribute.
-   * @param {string|Array|null} unusedOldValue
    * @param {string|Array|null} newValue
    * @private
    */
-  selectedAttributeMutated_(unusedOldValue, newValue) {
+  selectedAttributeMutated_(newValue) {
     if (!newValue) {
       this.clearAllSelections_();
       return;

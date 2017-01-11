@@ -523,19 +523,18 @@ describes.realWin('amp-selector', {
       });
 
       const impl = ampSelector.implementation_;
+      const setInputsSpy = sandbox.spy(impl, 'setInputs_');
       ampSelector.build();
 
       expect(impl.options_[0].hasAttribute('selected')).to.be.true;
       expect(impl.options_[3].hasAttribute('selected')).to.be.false;
 
-      impl.mutatedAttributesCallback([{
-        name: 'selected',
-        oldValue: '0',
-        newValue: '3',
-      }]);
+      impl.mutatedAttributesCallback({selected: '3'});
 
       expect(impl.options_[0].hasAttribute('selected')).to.be.false;
       expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+
+      expect(setInputsSpy).calledOnce;
     });
 
     it('should trigger `select` action when user selects an option', () => {
@@ -550,10 +549,7 @@ describes.realWin('amp-selector', {
       const triggerSpy = sandbox.spy(impl.action_, 'trigger');
       ampSelector.build();
 
-      let e = {
-        target: impl.options_[3],
-      };
-      impl.clickHandler_(e);
+      impl.clickHandler_({target: impl.options_[3]});
 
       const eventMatcher =
           sandbox.match.has('detail', sandbox.match.has('targetOption', '3'));
