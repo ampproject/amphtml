@@ -20,8 +20,6 @@ import {
   getSourceOrigin,
   getCorsUrl,
   parseUrl,
-  assertHttpsUrl,
-  assertAbsoluteHttpOrHttpsUrl,
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
 
@@ -60,9 +58,6 @@ const allowedFetchTypes_ = {
 
 /** @private @const {string} */
 const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
-
-/** @private @const {string} */
-const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
 
 
 /**
@@ -162,15 +157,6 @@ export class Xhr {
         // returned but required, return error.
         user().assert(false, `Response must contain the` +
             ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
-      }
-
-      // If the `AMP-Redirect-To` header is set. Redirect the user to the
-      // given URL.
-      const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
-      if (redirectTo) {
-        assertAbsoluteHttpOrHttpsUrl(redirectTo);
-        assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
-        this.win.top.location.href = redirectTo;
       }
       return response;
     }, reason => {
