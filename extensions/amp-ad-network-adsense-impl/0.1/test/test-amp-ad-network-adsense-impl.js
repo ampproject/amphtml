@@ -261,7 +261,7 @@ describe('amp-ad-network-adsense-impl', () => {
             get: function() { return undefined; },
             has: function() { return false; },
           })).to.eventually.deep.equal(
-                {creative, signature: null});
+                {creative, signature: null, size: null});
       });
     });
     it('with signature', () => {
@@ -276,7 +276,9 @@ describe('amp-ad-network-adsense-impl', () => {
               return name === 'X-AmpAdSignature';
             },
           })).to.eventually.deep.equal(
-              {creative, signature: base64UrlDecodeToBytes('AQAB')});
+              {creative,
+               signature: base64UrlDecodeToBytes('AQAB'),
+               size: null});
       });
     });
   });

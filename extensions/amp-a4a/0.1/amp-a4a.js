@@ -105,7 +105,11 @@ const SHARED_IFRAME_PROPERTIES = {
   marginheight: '0',
 };
 
-/** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
+/** @typedef {{
+ *    creative: ArrayBuffer,
+ *    signature: ?Uint8Array,
+ *    size: ?Array<number>
+ *  }} */
 export let AdResponseDef;
 
 /** @typedef {{
@@ -161,7 +165,6 @@ export const LIFECYCLE_STAGES = {
   layoutAdPromiseDelay: '18',
   signatureVerifySuccess: '19',
 };
-
 
 /**
  * Utility function that ensures any error thrown is handled by optional
@@ -509,13 +512,18 @@ export class AmpA4A extends AMP.BaseElement {
           // src cache issue.  If we decide to keep a SafeFrame-like solution,
           // we should restructure the promise chain to pass this info along
           // more cleanly, without use of an object variable outside the chain.
+          if (!creativeParts) {
+            return Promise.resolve();
+          }
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&
-              creativeParts &&
               creativeParts.creative) {
             this.creativeBody_ = creativeParts.creative;
           }
-          if (!creativeParts || !creativeParts.signature) {
+          if (creativeParts.size && creativeParts.size.length == 2) {
+            this.handleResize(creativeParts.size[0], creativeParts.size[1]);
+          }
+          if (!creativeParts.signature) {
             return Promise.resolve();
           }
           this.protectedEmitLifecycleEvent_('adResponseValidateStart');
@@ -804,6 +812,20 @@ export class AmpA4A extends AMP.BaseElement {
   extractCreativeAndSignature(unusedResponseArrayBuffer,
       unusedResponseHeaders) {
     throw new Error('extractCreativeAndSignature not implemented!');
+  }
+
+  /**
+   * This function is called if the ad response contains a creative size header
+   * indicating the size of the creative. It provides an opportunity to resize
+   * the creative, if desired, before it is rendered.
+   *
+   * To be implemented by network.
+   *
+   * @param {number} width
+   * @param {number} height
+   * */
+  handleResize(width, height) {
+    user().info('A4A', `Received creative with size ${width}x${height}.`);
   }
 
   /**
