@@ -487,7 +487,7 @@ export class AmpA4A extends AMP.BaseElement {
           // src cache issue.  If we decide to keep a SafeFrame-like solution,
           // we should restructure the promise chain to pass this info along
           // more cleanly, without use of an object variable outside the chain.
-          if (!creativeParts) {
+          if (!creativeParts || !creativeParts.signature) {
             return Promise.resolve();
           }
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
@@ -499,9 +499,6 @@ export class AmpA4A extends AMP.BaseElement {
             // We'll need to remember the creative size for the x-domain case.
             this.creativeSize_ = creativeParts.size;
             this.handleResize(creativeParts.size[0], creativeParts.size[1]);
-          }
-          if (!creativeParts.signature) {
-            return Promise.resolve();
           }
           this.protectedEmitLifecycleEvent_('adResponseValidateStart');
           return this.verifyCreativeSignature_(
