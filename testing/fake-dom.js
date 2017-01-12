@@ -50,6 +50,14 @@ export class FakeWindow {
     /** @const */
     this.HTMLElement = window.HTMLElement;
     /** @const */
+    this.HTMLFormElement = window.HTMLFormElement;
+    /** @const */
+    this.Element = window.Element;
+    /** @const */
+    this.Node = window.Node;
+    /** @const */
+    this.EventTarget = window.EventTarget;
+    /** @const */
     this.DOMTokenList = window.DOMTokenList;
 
     // Top Window points to itself if spec.top was not passed.
