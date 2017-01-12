@@ -42,6 +42,10 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
       inProgress++;
       compile(entryModuleFilename, outputDir, outputFilename, options)
           .then(function() {
+            if (process.env.TRAVIS) {
+              // When printing simplified log in travis, use dot for each task.
+              process.stdout.write('.');
+            }
             inProgress--;
             next();
             resolve();
@@ -94,9 +98,6 @@ function compile(entryModuleFilenames, outputDir,
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     if (!process.env.TRAVIS) {
       util.log('Starting closure compiler for', entryModuleFilenames);
-    } else {
-      // When printing simplified log in travis, print dot for each task.
-      process.stdout.write('.');
     }
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
