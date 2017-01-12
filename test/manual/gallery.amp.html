@@ -1,0 +1,68 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-carousel" src="../../dist/v0/amp-carousel-0.1.max.js"></script>
+  <script async custom-element="amp-youtube" src="../../dist/v0/amp-youtube-0.1.max.js"></script>
+  <script async custom-element="amp-analytics" src="../../dist/v0/amp-analytics-0.1.js"></script>
+  <style amp-custom>
+  /* AMP.CSS */
+  html, body {
+    overflow-x: hidden !important;
+    height: auto !important;
+  }
+
+  /**
+   * Margin:0 is currently needed for iOS viewer embeds.
+   * See:
+   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+   * and {@link ViewportBindingNaturalIosEmbed_} for more info.
+   */
+  body {
+    margin: 0 !important;
+  }
+  /* END AMP.CSS */
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="../../dist/amp.js"></script>
+</head>
+<body>
+  <h1>amp #0</h1>
+  <button onclick="AMP.toggleExperiment('amp-slidescroll');window.location.href=window.location.href;">Toggle Experiment</button>
+
+  <h1> Main carousel</h1>
+  <amp-carousel id="carousel1" width=400 height=300 type=slides controls>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h100-no" layout=fill></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h100-no" width=80 height=60></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h100-no" layout=fill></amp-img>
+    <amp-youtube
+        data-videoid="mGENRKrdoGY"
+        width="400" height="300">
+    </amp-youtube>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h100-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+  </amp-carousel>
+
+  <h1>Selectable carousel</h1>
+
+  <amp-carousel id="carousel-2" width=400 height=75 controls>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h100-no" width=100 height=75 on="tap:carousel1.goToSlide(index=0)"></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h100-no" width=100 height=75 on="tap:carousel1.goToSlide(index=1)"></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=100 height=75 on="tap:carousel1.goToSlide(index=2)"></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h100-no" width=100 height=75 on="tap:carousel1.goToSlide(index=3)"></amp-img>
+    <div on="tap:carousel1.goToSlide(index=4)" style="height:75px; width:100px;background:blue;">
+      Video
+    </div>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h100-no" width=100 height=75 on="tap:carousel1.goToSlide(index=5)"></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=100 height=75 on="tap:carousel1.goToSlide(index=6)"></amp-img>
+  </amp-carousel>
+
+
+</body>
+</html>
+
