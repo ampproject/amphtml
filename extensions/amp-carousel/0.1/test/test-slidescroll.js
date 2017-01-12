@@ -933,5 +933,41 @@ describe('SlideScroll', () => {
         expect(showSlideSpy.callCount).to.equal(3);
       });
     });
+
+    it('should update slide when `slide` attribute is mutated', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+
+        impl.mutatedAttributesCallback({slide: 2});
+        expect(showSlideSpy).to.have.been.calledWith(2);
+
+        // Don't call showSlide_() if slide is not finite.
+        showSlideSpy.reset();
+        impl.mutatedAttributesCallback({slide: Number.POSITIVE_INFINITY});
+        expect(showSlideSpy.called).to.be.false;
+      });
+    });
+
+    it('should trigger `slide` action when user changes slides', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+
+        impl.goCallback(-1, /* animate */ false);
+        expect(triggerSpy).to.have.been.calledWith(
+            ampSlideScroll,
+            'goToSlide',
+            /* CustomEvent */ sinon.match.has('detail', {index: 4}));
+
+        impl.goCallback(1, /* animate */ false);
+        expect(triggerSpy).to.have.been.calledWith(
+            ampSlideScroll,
+            'goToSlide',
+            /* CustomEvent */ sinon.match.has('detail', {index: 0}));
+      });
+    });
   });
 });
