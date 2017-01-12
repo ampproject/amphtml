@@ -629,9 +629,7 @@ app.get('/dist/rtv/*/v0/*.js', function(req, res, next) {
   var filePath = req.path;
   filePath = replaceUrls(mode, filePath);
   req.url = filePath;
-  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
-    res.end(file);
-  }).catch(next);
+  next();
 });
 
 app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, res, next) {
