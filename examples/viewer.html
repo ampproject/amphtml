@@ -457,9 +457,20 @@
         log('a2a navigation', data);
         return;
       }
+      if (type == 'unloaded') {
+        log('unloaded');
+        return this.handleUnload_();
+      }
       return Promise.reject('request not supported: ' + type);
     };
 
+    Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
+      log('Viewer.prototype.handleUnload_');
+      if (this.messaging_) {
+        this.messaging_ = null;
+      }
+      return goog.Promise.resolve();
+    };
 
     Viewer.prototype.sendRequest_ = function(type, data, awaitResponse) {
       log('Viewer.prototype.sendRequest_');

@@ -16,9 +16,18 @@
 
 import {Messaging} from './messaging.js';
 import {viewerForDoc} from '../../../src/viewer';
+import {listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-integration';
+
+/**
+ * @enum {string}
+ */
+const RequestNames = {
+  CHANNEL_OPEN: 'channelOpen',
+  UNLOADED: 'unloaded',
+};
 
 /**
  * @fileoverview This is the communication protocol between AMP and the viewer.
@@ -68,6 +77,9 @@ export class AmpViewerIntegration {
 
           viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
             dev().assertString(this.unconfirmedViewerOrigin_));
+
+          listenOnce(
+            this.win, 'unload', this.handleUnload_.bind(this, messaging));
         });
   }
 
@@ -77,7 +89,18 @@ export class AmpViewerIntegration {
    * @return {Promise<*>|undefined}
    */
   openChannel(messaging) {
-    return messaging.sendRequest('channelOpen', {}, true);
+    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {}, true);
+  }
+
+
+  /**
+   * Notifies the viewer when this document is unloaded.
+   * @param {!Messaging} messaging
+   * @return {Promise<*>|undefined}
+   * @private
+   */
+  handleUnload_(messaging) {
+    return messaging.sendRequest(RequestNames.UNLOADED, {}, true);
   }
 }
 
