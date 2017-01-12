@@ -265,7 +265,7 @@ var doctype = '<!doctype html>\n';
 // Only handle min/max
 app.use('/examples/live-list-update.amp.(min|max).html', function(req, res) {
   var filePath = req.baseUrl;
-  var mode = getPathMode(filePath);
+  var mode = getMode(filePath);
   // When we already have state in memory and user refreshes page, we flush
   // the dom we maintain on the server.
   if (!('amp_latest_update_time' in req.query) && liveListDoc) {
@@ -517,7 +517,7 @@ app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
 
 app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   var filePath = req.path;
-  var mode = getPathMode(filePath);
+  var mode = getMode(filePath);
   if (!mode) {
     return next();
   }
@@ -593,8 +593,10 @@ app.get([ fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], function(req, 
 /*
  * Start Cache SW LOCALDEV section
  */
-app.get(['/dist/sw.js', '/dist/sw.max.js'], function(req, res, next) {
+app.get(['/sw.js', '/sw.max.js'], function(req, res, next) {
   var filePath = req.path;
+  filePath = filePath.replace('/sw.max.js', '/dist/sw.max.js');
+  filePath = filePath.replace('/sw.js', '/dist/sw.js');
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     var n = new Date();
     // Round down to the nearest 5 minutes.
@@ -618,14 +620,8 @@ app.get('/dist/rtv/99*/*.js', function(req, res, next) {
   }).catch(next);
 });
 
-app.get('/dist/rtv/*/v0/*.js', function(req, res, next) {
-  var mode = getPathMode(req.headers.referer);
-  if (process.argv.includes('test', 2)) {
-    mode = 'max';
-    if (process.argv.includes('--compiled', 3)) {
-      mode = 'min';
-    }
-  }
+app.get('/rtv/*/v0/*.js', function(req, res, next) {
+  var mode = getMode(req.headers.referer);
   var filePath = req.path;
   filePath = replaceUrls(mode, filePath);
   req.url = filePath;
@@ -652,7 +648,7 @@ app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, re
 function replaceUrls(mode, file) {
   if (mode) {
     file = file.replace('https://cdn.ampproject.org/viewer/google/v5.js', 'https://cdn1.ampproject.org/viewer/google/v5.js');
-    file = file.replace(/\/rtv\/\d{13}/, '');
+    file = file.replace(/\/rtv\/\d{13}/, '/dist/');
     file = file.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
     file = file.replace('https://cdn.ampproject.org/v0.max.js', '/dist/amp.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.max.js', '/dist/amp-inabox.js');
@@ -681,7 +677,15 @@ function extractFilePathSuffix(path) {
  * @param {string} path
  * @return {?string}
  */
-function getPathMode(path) {
+function getMode(path) {
+  // If is in test mode. Determine mode by  --compiled argv input
+  if (process.argv.includes('test', 2)) {
+    return 'max';
+    if (process.argv.includes('--compiled', 3)) {
+      return 'min';
+    }
+  }
+
   var suffix = extractFilePathSuffix(path);
   if (suffix == '.max.html') {
     return 'max';

@@ -63,7 +63,7 @@ describes.sandboxed('Extension Location', {}, () => {
         host: 'localhost:8000',
         protocol: 'http:',
       }, 'sw', true, true);
-      expect(script).to.equal('http://localhost:8000/dist/sw.js');
+      expect(script).to.equal('http://localhost:8000/sw.js');
     });
 
     it('with local mode normal pathname', () => {
@@ -81,7 +81,7 @@ describes.sandboxed('Extension Location', {}, () => {
         host: 'localhost:8000',
         protocol: 'http:',
       }, 'sw', true);
-      expect(script).to.equal('http://localhost:8000/dist/sw.js');
+      expect(script).to.equal('http://localhost:8000/sw.js');
     });
 
     it('with local mode max pathname', () => {
@@ -90,7 +90,7 @@ describes.sandboxed('Extension Location', {}, () => {
         host: 'localhost:8000',
         protocol: 'http:',
       }, 'sw', true);
-      expect(script).to.equal('http://localhost:8000/dist/sw.max.js');
+      expect(script).to.equal('http://localhost:8000/sw.max.js');
     });
 
     it('with remote mode', () => {
@@ -110,7 +110,7 @@ describes.sandboxed('Extension Location', {}, () => {
         host: 'localhost:80',
         protocol: 'http:',
       }, 'sw', true);
-      expect(script).to.equal('http://localhost:80/dist/sw.js');
+      expect(script).to.equal('http://localhost:80/sw.js');
     });
   });
 });
