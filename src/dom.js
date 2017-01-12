@@ -138,6 +138,19 @@ export function copyChildren(from, to) {
 }
 
 /**
+ * Add attributes to an element.
+ * @param {!Element} element
+ * @param {!Object<string, string>} attributes
+ * @return {!Element} created element
+ */
+export function addAttributesToElement(element, attributes) {
+  for (const attr in attributes) {
+    element.setAttribute(attr, attributes[attr]);
+  }
+  return element;
+}
+
+/**
  * Create a new element on document with specified tagName and attributes.
  * @param {!Document} doc
  * @param {string} tagName
@@ -146,10 +159,7 @@ export function copyChildren(from, to) {
  */
 export function createElementWithAttributes(doc, tagName, attributes) {
   const element = doc.createElement(tagName);
-  for (const attr in attributes) {
-    element.setAttribute(attr, attributes[attr]);
-  }
-  return element;
+  return addAttributesToElement(element, attributes);
 }
 
 
