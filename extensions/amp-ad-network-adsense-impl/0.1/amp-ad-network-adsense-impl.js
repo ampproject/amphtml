@@ -24,7 +24,7 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {dev} from '../../../src/log';
+// import {dev} from '../../../src/log';
 import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
