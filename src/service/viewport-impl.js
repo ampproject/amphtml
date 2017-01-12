@@ -1709,7 +1709,8 @@ function createViewport(ampdoc) {
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')
         // The overriding of document.body fails in iOS7.
-        && platformFor(ampdoc.win).getMajorVersion() > 7) {
+        // Also, iOS8 sometimes freezes scrolling.
+        && platformFor(ampdoc.win).getMajorVersion() > 8) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
