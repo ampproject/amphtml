@@ -146,15 +146,21 @@ describe('BindValidator', () => {
       expect(val.isResultValid('A', 'href',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
       expect(val.isResultValid('A', 'href',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+      expect(val.isResultValid('A', 'href',
         '__amp_source_origin')).to.be.false;
 
       expect(val.isResultValid('SOURCE', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
       expect(val.isResultValid('SOURCE', 'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+      expect(val.isResultValid('SOURCE', 'src',
           '__amp_source_origin')).to.be.false;
 
       expect(val.isResultValid('TRACK', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
+      expect(val.isResultValid('TRACK', 'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
       expect(val.isResultValid('TRACK', 'src',
           '__amp_source_origin')).to.be.false;
     });
