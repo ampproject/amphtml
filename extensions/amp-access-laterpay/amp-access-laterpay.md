@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ limitations under the License.
   </tr>
 </table>
 
-<a href="https://laterpay.net">LaterPay</a> is a micropayments platform which allows users to buy an individual article but only pay it when they reach a certain amount on their tab. It also allows users to buy passes which allow access to articles for an amount of time specified by the publisher.
+<a href="https://laterpay.net">LaterPay</a> is a micropayment platform which allows users to buy any online content with just two clicks, and get immediate access – without upfront registration, personal data, or payment. Users only pay, once their purchases have reached a total of $5 or 5€ across websites. Content providers can sell individual items or time passes, which allow flatrate access or time limited access to content.
 
 ## Behavior
 

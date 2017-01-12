@@ -812,6 +812,7 @@ export class AccessService {
    * Type can be either an empty string for a default login or a name of the
    * login URL.
    *
+   * @private
    * @param {string} loginUrl
    * @param {string} eventLabel A label used for the analytics event for this action
    * @return {!Promise}
@@ -827,7 +828,7 @@ export class AccessService {
       return this.loginPromise_;
     }
 
-    dev().fine(TAG, 'Start login: ', eventLabel);
+    dev().fine(TAG, 'Start login: ', loginUrl, eventLabel);
 
     this.loginAnalyticsEvent_(eventLabel, 'started');
     const dialogPromise = this.signIn_.requestSignIn(loginUrl) ||

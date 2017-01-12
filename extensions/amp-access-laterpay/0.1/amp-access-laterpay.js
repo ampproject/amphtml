@@ -102,25 +102,25 @@ export class LaterpayVendor {
     /** @const @private {!LaterpayConfigDef} */
     this.laterpayConfig_ = this.accessService_.getAdapterConfig();
 
-    /** @const @private {!PurchaseConfigDef} */
+    /** @private {?PurchaseConfigDef} */
     this.purchaseConfig_ = null;
 
-    /** @const @private {?Function} */
+    /** @private {?Function} */
     this.purchaseButtonListener_ = null;
 
-    /** @const @private {?Function} */
+    /** @private {?Function} */
     this.alreadyPurchasedListener_ = null;
 
     /** @const @private {!Array<Event>} */
     this.purchaseOptionListeners_ = [];
 
-    /** @const @private {!boolean} */
+    /** @private {!boolean} */
     this.containerEmpty_ = true;
 
-    /** @const @private {?Node} */
+    /** @private {?Node} */
     this.selectedPurchaseOption_ = null;
 
-    /** @const @private {?Node} */
+    /** @private {?Node} */
     this.purchaseButton_ = null;
 
     const configUrl = (
@@ -140,7 +140,7 @@ export class LaterpayVendor {
     this.purchaseConfigBaseUrl_ = configUrl + CONFIG_BASE_PATH;
     const articleId = this.laterpayConfig_.articleId;
     if (articleId) {
-      this.purchaseConfigBaseUrl_ += '&article_id=' + articleId;
+      this.purchaseConfigBaseUrl_ += '&article_id=' + encodeURIComponent(articleId);
     }
 
     /** @const @private {!Timer} */
@@ -216,7 +216,7 @@ export class LaterpayVendor {
   getArticleTitle_() {
     const title = this.doc_.querySelector(
       this.laterpayConfig_.articleTitleSelector);
-    dev().assert(
+    user().assert(
       title, 'No article title element found with selector %s',
       this.laterpayConfig_.articleTitleSelector);
     return title.textContent.trim();
@@ -227,12 +227,18 @@ export class LaterpayVendor {
    * @private
    */
   getContainer_() {
-    return this.doc_.getElementById(TAG + '-dialog');
+    const id = TAG + '-dialog';
+    const dialogContainer = this.doc_.getElementById(id);
+    user().assert(
+      dialogContainer,
+      'No element found with id %s', id
+    );
+    return dialogContainer;
   }
 
   /**
    * @private
-   * @returns Promise
+   * @returns {!Promise}
    */
   emptyContainer_() {
     // no need to do all of this if the container is already empty
@@ -443,10 +449,10 @@ export class LaterpayVendor {
   }
 
   /**
-   * @returns {boolean}
+   * @returns {!Promise}
    */
   pingback() {
-    return true;
+    return Promise.resolve();
   }
 }
 
