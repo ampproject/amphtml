@@ -85,14 +85,14 @@ export class Messaging {
   handleMessage_(event) {
     if (!event || event.source != this.target_ ||
       event.origin != this.targetOrigin_) {
-      dev().info(TAG +
+      dev().fine(TAG +
         ': handleMessage_, This message is not for us: ', event);
       return;
     }
     /** @type {Message} */
     const message = event.data;
     if (message.app != APP) {
-      dev().info(
+      dev().fine(
         TAG + ': handleMessage_, wrong APP: ', event);
       return;
     }
@@ -111,7 +111,7 @@ export class Messaging {
    * @return {!Promise<*>|undefined}
    */
   sendRequest(messageName, messageData, awaitResponse) {
-    dev().info(TAG, 'sendRequest, event name: ', messageName);
+    dev().fine(TAG, 'sendRequest, event name: ', messageName);
     const requestId = ++this.requestIdCounter_;
     let promise = undefined;
     if (awaitResponse) {
@@ -138,7 +138,7 @@ export class Messaging {
    * @private
    */
   sendResponse_(requestId, messageName, messageData) {
-    dev().info(TAG, 'sendResponse_');
+    dev().fine(TAG, 'sendResponse_');
     this.sendMessage_({
       app: APP,
       requestid: requestId,
@@ -184,7 +184,7 @@ export class Messaging {
    * @private
    */
   handleRequest_(message) {
-    dev().info(TAG, 'handleRequest_', message);
+    dev().fine(TAG, 'handleRequest_', message);
     if (!this.requestProcessor_) {
       throw new Error(
         'Cannot handle request because handshake is not yet confirmed!');
@@ -214,7 +214,7 @@ export class Messaging {
    * @private
    */
   handleResponse_(message) {
-    dev().info(TAG, 'handleResponse_');
+    dev().fine(TAG, 'handleResponse_');
     const requestId = message.requestid;
     const pending = this.waitingForResponse_[requestId];
     if (pending) {
