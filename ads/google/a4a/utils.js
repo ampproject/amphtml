@@ -89,19 +89,84 @@ export function isGoogleAdsA4AValidEnvironment(win, element) {
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
- * @param {number} slotNumber
  * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
  * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
+ *     Parameters that will be put at the end of the URL, where they may be
+ *     elided for length reasons. Intended for parameters with potentially
+ *     long values, like URLs.
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
-    a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams) {
+    a4a, baseUrl, startTime, queryParams, unboundedQueryParams) {
+  // TODO: Maybe add checks in case these promises fail.
   /** @const {!Promise<string>} */
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
-  return getAdCid(a4a).then(clientId => referrerPromise.then(referrer =>
-      buildAdUrl(
-          a4a, baseUrl, startTime, slotNumber, queryParams,
-          unboundedQueryParams, clientId, referrer)));
+  return getAdCid(a4a).then(clientId => referrerPromise.then(referrer => {
+    const adElement = a4a.element;
+    const slotNumber = adElement.getAttribute('data-amp-slot-index');
+    const win = a4a.win;
+    const documentInfo = documentInfoForDoc(adElement);
+      // Read by GPT for GA/GPT integration.
+    win.gaGlobal = win.gaGlobal ||
+      {vid: clientId, hid: documentInfo. pageViewId};
+    const slotRect = a4a.getIntersectionElementLayoutBox();
+    const screen = win.screen;
+    const viewport = a4a.getViewport();
+    const viewportRect = viewport.getRect();
+    const iframeDepth = iframeNestingDepth(win);
+    const viewportSize = viewport.getSize();
+    if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
+      queryParams.push({name: 'amp_ct',
+                        value: adElement.parentElement.tagName});
+    }
+    const allQueryParams = queryParams.concat(
+      [
+        {
+          name: 'is_amp',
+          value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+        },
+        {name: 'amp_v', value: '$internalRuntimeVersion$'},
+        {name: 'd_imp', value: '1'},
+        {name: 'dt', value: startTime},
+        {name: 'ifi', value: slotNumber},
+        {name: 'adf', value: domFingerprint(adElement)},
+        {name: 'c', value: getCorrelator(win, clientId)},
+        {name: 'output', value: 'html'},
+        {name: 'nhd', value: iframeDepth},
+        {name: 'iu', value: adElement.getAttribute('data-ad-slot')},
+        {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
+        {name: 'biw', value: viewportRect.width},
+        {name: 'bih', value: viewportRect.height},
+        {name: 'adx', value: slotRect.left},
+        {name: 'ady', value: slotRect.top},
+        {name: 'u_aw', value: screen ? screen.availWidth : null},
+        {name: 'u_ah', value: screen ? screen.availHeight : null},
+        {name: 'u_cd', value: screen ? screen.colorDepth : null},
+        {name: 'u_w', value: screen ? screen.width : null},
+        {name: 'u_h', value: screen ? screen.height : null},
+        {name: 'u_tz', value: -new Date().getTimezoneOffset()},
+        {name: 'u_his', value: getHistoryLength(win)},
+        {name: 'oid', value: '2'},
+        {name: 'brdim', value: additionalDimensions(win, viewportSize)},
+        {name: 'isw', value: viewportSize.width},
+        {name: 'ish', value: viewportSize.height},
+      ],
+      unboundedQueryParams,
+      [
+        {name: 'url', value: documentInfo.canonicalUrl},
+        {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
+        {
+          name: 'loc',
+          value: win.location.href == documentInfo.canonicalUrl ?
+            null : win.location.href,
+        },
+        {name: 'ref', value: referrer},
+      ]
+    );
+    const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
+                         {name: 'trunc', value: '1'});
+    return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
+  }));
 }
 
 
@@ -134,153 +199,56 @@ export function extractGoogleAdCreativeAndSignature(
 }
 
 /**
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {string} baseUrl
- * @param {number} startTime
- * @param {number} slotNumber
- * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
- * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
- * @param {(string|undefined)} clientId
- * @param {string} referrer
- * @return {string}
- */
-function buildAdUrl(
-    a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams,
-    clientId, referrer) {
-  const global = a4a.win;
-  const documentInfo = documentInfoForDoc(a4a.element);
-  if (!global.gaGlobal) {
-    // Read by GPT for GA/GPT integration.
-    global.gaGlobal = {
-      vid: clientId,
-      hid: documentInfo.pageViewId,
-    };
-  }
-  const slotRect = a4a.getIntersectionElementLayoutBox();
-  const viewportRect = a4a.getViewport().getRect();
-  const iframeDepth = iframeNestingDepth(global);
-  const dtdParam = {name: 'dtd'};
-  const adElement = a4a.element;
-  if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
-    queryParams.push({name: 'amp_ct', value: adElement.parentElement.tagName});
-  }
-  const allQueryParams = queryParams.concat(
-    [
-      {
-        name: 'is_amp',
-        value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
-      },
-      {name: 'amp_v', value: '$internalRuntimeVersion$'},
-      {name: 'd_imp', value: '1'},
-      {name: 'dt', value: startTime},
-      {name: 'adf', value: domFingerprint(adElement)},
-      {name: 'c', value: makeCorrelator(clientId, documentInfo.pageViewId)},
-      {name: 'output', value: 'html'},
-      {name: 'nhd', value: iframeDepth},
-      {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
-      {name: 'biw', value: viewportRect.width},
-      {name: 'bih', value: viewportRect.height},
-      {name: 'adx', value: slotRect.left},
-      {name: 'ady', value: slotRect.top},
-      {name: 'u_hist', value: getHistoryLength(global)},
-      {name: 'oid', value: '2'},
-      dtdParam,
-    ],
-    unboundedQueryParams,
-    [
-      {name: 'url', value: documentInfo.canonicalUrl},
-      {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(global) : null},
-      {
-        name: 'loc',
-        value: global.location.href == documentInfo.canonicalUrl ?
-            null : global.location.href,
-      },
-      {name: 'ref', value: referrer},
-    ]
-  );
-  dtdParam.value = elapsedTimeWithCeiling(Date.now(), startTime);
-  return buildUrl(
-      baseUrl, allQueryParams, MAX_URL_LENGTH, {name: 'trunc', value: '1'});
-}
-
-/**
  * @param {!Window} win
- * @return {!GoogleAdSlotCounter}
- */
-export function getGoogleAdSlotCounter(win) {
-  if (!win.AMP_GOOGLE_AD_SLOT_COUNTER) {
-    win.AMP_GOOGLE_AD_SLOT_COUNTER = new GoogleAdSlotCounter();
-  }
-  return win.AMP_GOOGLE_AD_SLOT_COUNTER;
-}
-
-class GoogleAdSlotCounter {
-
-  constructor() {
-    /** @private {number} */
-    this.nextSlotNumber_ = 0;
-  }
-
-  /**
-   * @return {number}
-   */
-  nextSlotNumber() {
-    return ++this.nextSlotNumber_;
-  }
-
-}
-
-/**
- * @param {!Window} global
  * @return {number}
  */
-function iframeNestingDepth(global) {
-  let win = global;
+function iframeNestingDepth(win) {
+  let w = win;
   let depth = 0;
-  while (win != win.parent) {
-    win = win.parent;
+  while (w != w.parent && depth < 100) {
+    w = w.parent;
     depth++;
   }
-  dev().assert(win == global.top);
+  dev().assert(w == win.top);
   return depth;
 }
 
 /**
- * @param {!Window} global
+ * @param {!Window} win
  * @return {number}
  */
-function getHistoryLength(global) {
+function getHistoryLength(win) {
   // We have seen cases where accessing history length causes errors.
   try {
-    return global.history.length;
+    return win.history.length;
   } catch (e) {
     return 0;
   }
 }
 
 /**
- * @param {!Window} global
+ * @param {!Window} win
  * @return {?string}
  */
-function topWindowUrlOrDomain(global) {
-  const ancestorOrigins = global.location.ancestorOrigins;
+function topWindowUrlOrDomain(win) {
+  const ancestorOrigins = win.location.ancestorOrigins;
   if (ancestorOrigins) {
-    const origin = global.location.origin;
+    const origin = win.location.origin;
     const topOrigin = ancestorOrigins[ancestorOrigins.length - 1];
     if (origin == topOrigin) {
-      return global.top.location.href;
+      return win.top.location.href;
     }
-    const secondFromTop = secondWindowFromTop(global);
-    if (secondFromTop == global ||
+    const secondFromTop = secondWindowFromTop(win);
+    if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
       return secondFromTop./*REVIEW*/document.referrer;
     }
     return topOrigin;
   } else {
     try {
-      return global.top.location.href;
+      return win.top.location.href;
     } catch (e) {}
-    const secondFromTop = secondWindowFromTop(global);
+    const secondFromTop = secondWindowFromTop(win);
     try {
       return secondFromTop./*REVIEW*/document.referrer;
     } catch (e) {}
@@ -289,15 +257,18 @@ function topWindowUrlOrDomain(global) {
 }
 
 /**
- * @param {!Window} global
+ * @param {!Window} win
  * @return {!Window}
  */
-function secondWindowFromTop(global) {
-  let secondFromTop = global;
-  while (secondFromTop.parent != secondFromTop.parent.parent) {
+function secondWindowFromTop(win) {
+  let secondFromTop = win;
+  let depth = 0;
+  while (secondFromTop.parent != secondFromTop.parent.parent &&
+        depth < 100) {
     secondFromTop = secondFromTop.parent;
+    depth++;
   }
-  dev().assert(secondFromTop.parent == global.top);
+  dev().assert(secondFromTop.parent == win.top);
   return secondFromTop;
 }
 
@@ -328,3 +299,37 @@ export function getCorrelator(win, opt_cid) {
   }
   return win.ampAdPageCorrelator;
 }
+
+/**
+ * Collect additional dimensions for the brdim parameter.
+ * @param {!Window} win The window for which we read the browser dimensions.
+ * @param {{width: number, height: number}|null} viewportSize
+ * @return {string}
+ * @visibleForTesting
+ */
+export function additionalDimensions(win, viewportSize) {
+  // Some browsers throw errors on some of these.
+  let screenX, screenY, outerWidth, outerHeight, innerWidth, innerHeight;
+  try {
+    screenX = win.screenX;
+    screenY = win.screenY;
+  } catch (e) {}
+  try {
+    outerWidth = win.outerWidth;
+    outerHeight = win.outerHeight;
+  } catch (e) {}
+  try {
+    innerWidth = viewportSize.width;
+    innerHeight = viewportSize.height;
+  } catch (e) {}
+  return [win.screenLeft,
+          win.screenTop,
+          screenX,
+          screenY,
+          win.screen ? win.screen.availWidth : undefined,
+          win.screen ? win.screen.availTop : undefined,
+          outerWidth,
+          outerHeight,
+          innerWidth,
+          innerHeight].join();
+};
