@@ -83,8 +83,9 @@ export class BindValidator {
     // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
     const allowedProtocols = attrRules.allowedProtocols;
     if (allowedProtocols && value) {
-      const re = /^([^:\/?#.]+):.*$/;
+      const re = /^([^:\/?#.]+):[\s\S]*$/;
       const match = re.exec(value);
+
       if (match !== null) {
         const protocol = match[1].toLowerCase().trimLeft();
         if (!allowedProtocols.hasOwnProperty(protocol)) {
