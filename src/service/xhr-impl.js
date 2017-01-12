@@ -549,7 +549,7 @@ export class FetchResponseHeaders {
 
   /**
    * @param {string} name
-   * @return {*}
+   * @return {string}
    */
   get(name) {
     return this.xhr_.getResponseHeader(name);
