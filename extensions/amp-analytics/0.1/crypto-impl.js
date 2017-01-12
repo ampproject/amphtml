@@ -48,7 +48,7 @@ export class Crypto {
    */
   sha384(input) {
     // polyfill is (being) loaded,
-    // means native Crypto API is not available or failed.
+    // means native Crypto API is not available or failed before.
     if (this.polyfillPromise_) {
       return this.polyfillPromise_.then(polyfill => polyfill.sha384(input));
     }
@@ -70,6 +70,7 @@ export class Crypto {
               });
     } catch (e) {
       dev().error(TAG, FALLBACK_MSG, e);
+      return this.loadPolyfill_().then(polyfill => polyfill.sha384(input));
     }
   }
 
