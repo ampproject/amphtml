@@ -118,7 +118,6 @@ export function googleAdUrl(
     const viewportRect = viewport.getRect();
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
-    const dtdParam = {name: 'dtd'};
     const adElement = a4a.element;
     if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
       queryParams.push({name: 'amp_ct',
@@ -155,7 +154,6 @@ export function googleAdUrl(
         {name: 'brdim', value: additionalDimensions(win, viewportSize)},
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
-        dtdParam,
       ],
       unboundedQueryParams,
       [
@@ -169,9 +167,9 @@ export function googleAdUrl(
         {name: 'ref', value: referrer},
       ]
     );
-    dtdParam.value = elapsedTimeWithCeiling(Date.now(), startTime);
-    return buildUrl(
-      baseUrl, allQueryParams, MAX_URL_LENGTH, {name: 'trunc', value: '1'});
+    const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
+                         {name: 'trunc', value: '1'});
+    return url += '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
   }));
 }
 
