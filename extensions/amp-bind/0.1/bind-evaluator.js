@@ -47,25 +47,29 @@ export class BindEvaluator {
    */
   constructor(evaluatees) {
     /** @const {!Array<ParsedEvaluateeDef>} */
-    this.evaluatees_ = [];
+    this.parsedEvaluatees_ = [];
 
     /** @const {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
 
-    evaluatees.forEach(e => {
+    // Create BindExpression objects from expression strings.
+    for (let i = 0; i < evaluatees.length; i++) {
+      const e = evaluatees[i];
+
       let expression;
       try {
         expression = new BindExpression(e.expressionString);
       } catch (error) {
         user().error(TAG, 'Malformed expression:', error);
-        return;
+        continue;
       }
-      this.evaluatees_.push({
+
+      this.parsedEvaluatees_.push({
         tagName: e.tagName,
         property: e.property,
         expression,
       });
-    });
+    }
   }
 
   /**
@@ -83,7 +87,7 @@ export class BindEvaluator {
       /** @type {!Object<string, boolean>} */
       const invalid = {};
 
-      this.evaluatees_.forEach(evaluatee => {
+      this.parsedEvaluatees_.forEach(evaluatee => {
         const {tagName, property, expression} = evaluatee;
         const expr = expression.expressionString;
 
