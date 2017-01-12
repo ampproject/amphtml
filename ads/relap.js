@@ -22,10 +22,10 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function relap(global, data) {
   validateData(data, [], ['token', 'url', 'anchorid']);
-  const url = `https://relap.io/api/v6/head.js?token=${encodeURIComponent(data.token)}&url=${encodeURIComponent(data.url)}`;
+  const url = `https://relap.io/api/v6/head.js?token=${encodeURIComponent(data['token'])}&url=${encodeURIComponent(data['url'])}`;
   loadScript(global, url);
 
   const anchorEl = global.document.createElement('div');
-  anchorEl.id = data.anchorid;
+  anchorEl.id = data['anchorid'];
   global.document.getElementById('c').appendChild(anchorEl);
 }
