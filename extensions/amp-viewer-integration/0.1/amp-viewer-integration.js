@@ -44,22 +44,22 @@ export class AmpViewerIntegration {
    * @return {?Promise}
    */
   init() {
-    dev().info(TAG, 'handshake init()');
+    dev().fine(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
     if (!this.unconfirmedViewerOrigin_) {
-      dev().info(TAG, 'Viewer origin not specified.');
+      dev().fine(TAG, 'Viewer origin not specified.');
       return null;
     }
 
-    dev().info(TAG, 'listening for messages', this.unconfirmedViewerOrigin_);
+    dev().fine(TAG, 'listening for messages', this.unconfirmedViewerOrigin_);
     const messaging = new Messaging(
       this.win, this.win.parent, this.unconfirmedViewerOrigin_);
 
-    dev().info(TAG, 'Send a handshake request');
+    dev().fine(TAG, 'Send a handshake request');
     return this.openChannel(messaging)
         .then(() => {
-          dev().info(TAG, 'Channel has been opened!');
+          dev().fine(TAG, 'Channel has been opened!');
 
           messaging.setRequestProcessor((type, payload, awaitResponse) => {
             return viewer.receiveMessage(
