@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,28 @@ import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
-const sentinel_ = '__AMPHTML__';
-const requestSentinel_ = sentinel_ + 'REQUEST';
-const responseSentinel_ = sentinel_ + 'RESPONSE';
+const APP = '__AMPHTML__';
+
+/**
+ * @enum {string}
+ */
+const MessageType = {
+  REQUEST: 'q',
+  RESPONSE: 's',
+};
+
+/**
+ * @typedef {{
+ *   app: string,
+ *   type: string,
+ *   requestid: number,
+ *   name: string,
+ *   data: *,
+ *   rsvp: (boolean|undefined),
+ *   error: (string|undefined),
+ * }}
+ */
+export let Message;
 
 /**
  * @fileoverview This is used in amp-viewer-integration.js for the
@@ -37,20 +56,20 @@ export class Messaging {
    * @param {!Window} source
    * @param {!Window} target
    * @param {string} targetOrigin
-   * @param {function(string, *, boolean):(!Promise<*>|undefined)}
-   *    requestProcessor
    */
-  constructor(source, target, targetOrigin, requestProcessor) {
-    /**  @private {!number} */
+  constructor(source, target, targetOrigin) {
+    /** @private {!Window} */
+    this.source_ = source;
+    /** @private {!number} */
     this.requestIdCounter_ = 0;
-    /**  @private {!Object<string, {resolve: function(*), reject: function(!Error)}>} */
+    /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};
     /** @const @private {!Window} */
     this.target_ = target;
     /** @const @private {string} */
     this.targetOrigin_ = targetOrigin;
-    /** @const @private {function(string, *, boolean):(!Promise<*>|undefined)} */
-    this.requestProcessor_ = requestProcessor;
+    /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
+    this.requestProcessor_ = null;
 
     dev().assert(this.targetOrigin_, 'Target origin must be specified!');
 
@@ -66,102 +85,124 @@ export class Messaging {
   handleMessage_(event) {
     if (!event || event.source != this.target_ ||
       event.origin != this.targetOrigin_) {
+      dev().info(TAG +
+        ': handleMessage_, This message is not for us: ', event);
       return;
     }
+    /** @type {Message} */
     const message = event.data;
-    if (message.sentinel == requestSentinel_) {
+    if (message.app != APP) {
+      dev().info(
+        TAG + ': handleMessage_, wrong APP: ', event);
+      return;
+    }
+    if (message.type == MessageType.REQUEST) {
       this.handleRequest_(message);
-    } else if (message.sentinel == responseSentinel_) {
+    } else if (message.type == MessageType.RESPONSE) {
       this.handleResponse_(message);
-    } else {
-      throw new Error('Invalid Format!');
     }
   }
 
   /**
    * I'm sending Bob a new outgoing request.
-   * @param {string} eventType
-   * @param {*} payload
+   * @param {string} messageName
+   * @param {*} messageData
    * @param {boolean} awaitResponse
    * @return {!Promise<*>|undefined}
    */
-  sendRequest(eventType, payload, awaitResponse) {
-    dev().info(TAG, 'messaging.js -> sendRequest, eventType: ', eventType);
-    const requestId = String(++this.requestIdCounter_);
+  sendRequest(messageName, messageData, awaitResponse) {
+    dev().info(TAG, 'sendRequest, event name: ', messageName);
+    const requestId = ++this.requestIdCounter_;
     let promise = undefined;
     if (awaitResponse) {
       promise = new Promise((resolve, reject) => {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    this.sendMessage_(requestSentinel_, requestId, eventType,
-      payload, awaitResponse);
+    this.sendMessage_({
+      app: APP,
+      requestid: requestId,
+      type: MessageType.REQUEST,
+      name: messageName,
+      data: messageData,
+      rsvp: awaitResponse,
+    });
     return promise;
   }
 
   /**
    * I'm responding to a request that Bob made earlier.
-   * @param {string} requestId
-   * @param {*} payload
+   * @param {number} requestId
+   * @param {string} messageName
+   * @param {*} messageData
    * @private
    */
-  sendResponse_(requestId, payload) {
-    dev().info(TAG, 'messaging.js -> sendResponse_');
-    this.sendMessage_(
-      responseSentinel_, requestId, null, payload, false);
+  sendResponse_(requestId, messageName, messageData) {
+    dev().info(TAG, 'sendResponse_');
+    this.sendMessage_({
+      app: APP,
+      requestid: requestId,
+      type: MessageType.RESPONSE,
+      name: messageName,
+      data: messageData,
+    });
   }
 
   /**
-   * @param {string} sentinel
-   * @param {string} requestId
-   * @param {string|null} eventType
-   * @param {*} payload
-   * @param {boolean} awaitResponse
+   * @param {number} requestId
+   * @param {string} messageName
+   * @param {*} reason !Error most of time, string sometimes, * rarely.
    * @private
    */
-  sendMessage_(sentinel, requestId, eventType, payload, awaitResponse) {
-    const message = {
-      sentinel,
-      requestId,
-      type: eventType,
-      payload,
-      rsvp: awaitResponse,
-    };
+  sendResponseError_(requestId, messageName, reason) {
+    const errString = this.errorToString_(reason);
+    this.logError_(
+      TAG + ': sendResponseError_, Message name: ' + messageName, errString);
+    this.sendMessage_({
+      app: APP,
+      requestid: requestId,
+      type: MessageType.RESPONSE,
+      name: messageName,
+      data: null,
+      error: errString,
+    });
+  }
+
+  /**
+   * @param {Message} message
+   * @private
+   */
+  sendMessage_(message) {
     this.target_./*OK*/postMessage(message, this.targetOrigin_);
-  }
-
-  /**
-   * @param {string} requestId
-   * @param {*} reason
-   * @private
-   */
-  sendResponseError_(requestId, reason) {
-    this.sendMessage_(
-      responseSentinel_, requestId, 'ERROR', reason, false);
   }
 
   /**
    * I'm handing an incoming request from Bob. I'll either respond normally
    * (ex: "got it Bob!") or with an error (ex: "I didn't get a word of what
    * you said!").
-   * @param {*} message
+   * @param {Message} message
    * @private
    */
   handleRequest_(message) {
-    dev().info(TAG, 'messaging.js -> handleRequest_');
-    const requestId = message.requestId;
-    const promise = this.requestProcessor_(message.type, message.payload,
-        message.rsvp);
+    dev().info(TAG, 'handleRequest_', message);
+    if (!this.requestProcessor_) {
+      throw new Error(
+        'Cannot handle request because handshake is not yet confirmed!');
+    }
+    const requestId = message.requestid;
     if (message.rsvp) {
+      const promise =
+        this.requestProcessor_(message.name, message.data, message.rsvp);
       if (!promise) {
-        this.sendResponseError_(requestId, 'no response');
+        this.sendResponseError_(
+          requestId, message.name, new Error('no response'));
         dev().assert(promise,
-          'expected response but none given: ' + message.type);
+          'expected response but none given: ' + message.name);
       }
-      promise.then(payload => {
-        this.sendResponse_(requestId, payload);
+      promise.then(data => {
+        this.sendResponse_(requestId, message.name, data);
       }, reason => {
-        this.sendResponseError_(requestId, reason);
+        this.sendResponseError_(requestId, message.name, reason);
       });
     }
   }
@@ -169,20 +210,52 @@ export class Messaging {
   /**
    * I sent out a request to Bob. He responded. And now I'm handling that
    * response.
-   * @param {*} message
+   * @param {Message} message
    * @private
    */
   handleResponse_(message) {
-    dev().info(TAG, 'messaging.js -> handleResponse_');
-    const requestId = message.requestId;
+    dev().info(TAG, 'handleResponse_');
+    const requestId = message.requestid;
     const pending = this.waitingForResponse_[requestId];
     if (pending) {
       delete this.waitingForResponse_[requestId];
-      if (message.type == 'ERROR') {
-        pending.reject(message.payload);
+      if (message.error) {
+        this.logError_(TAG + ': handleResponse_ error: ', message.error);
+        pending.reject(new Error(message.error));
       } else {
-        pending.resolve(message.payload);
+        pending.resolve(message.data);
       }
     }
+  }
+
+  /**
+   * @param {function(string, *, boolean):(!Promise<*>|undefined)}
+   *    requestProcessor
+   */
+  setRequestProcessor(requestProcessor) {
+    this.requestProcessor_ = requestProcessor;
+  }
+
+  /**
+   * @param {string} state
+   * @param {!Error|string} opt_data
+   * @private
+   */
+  logError_(state, opt_data) {
+    let stateStr = 'amp-messaging-error-logger: ' + state;
+    const dataStr = ' data: ' + this.errorToString_(opt_data);
+    stateStr += dataStr;
+    this.source_['viewerState'] = stateStr;
+  };
+
+  /**
+   * @param {*} err !Error most of time, string sometimes, * rarely.
+   * @return {string}
+   * @private
+   */
+  errorToString_(err) {
+    return err ?
+      (err.message ? err.message : String(err)) :
+      'unknown error';
   }
 }
