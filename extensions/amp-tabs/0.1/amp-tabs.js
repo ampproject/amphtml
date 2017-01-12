@@ -14,5 +14,26 @@
  * limitations under the License.
  */
 
-export class AmpTabs {
+import {isExperimentOn} from '../../../src/experiments';
+import {user} from '../../../src/log';
+
+/** @const */
+const TAG = 'amp-tabs';
+
+export class AmpTabs extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+  }
+
+  /** @override */
+  buildCallback() {
+    user().assert(isExperimentOn(this.win, TAG),
+        `Experiment "${TAG}" is disabled.`);
+  }
 }
+
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerElement(TAG, AmpTabs);
+});
