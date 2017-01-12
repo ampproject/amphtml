@@ -169,7 +169,7 @@ export function googleAdUrl(
     );
     const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
                          {name: 'trunc', value: '1'});
-    return url += '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
+    return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
   }));
 }
 
