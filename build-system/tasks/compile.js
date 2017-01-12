@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-var $$ = require('gulp-load-plugins')();
 var fs = require('fs-extra');
 var argv = require('minimist')(process.argv.slice(2));
 var closureCompiler = require('gulp-closure-compiler');
