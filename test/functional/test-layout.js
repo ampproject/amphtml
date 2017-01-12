@@ -317,8 +317,8 @@ describe('Layout', () => {
   it('should configure natural dimensions; default layout', () => {
     const pixel = document.createElement('amp-pixel');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
-    expect(pixel.style.width).to.equal('1px');
-    expect(pixel.style.height).to.equal('1px');
+    expect(pixel.style.width).to.equal('0px');
+    expect(pixel.style.height).to.equal('0px');
   });
 
   it('should configure natural dimensions; default layout; with width', () => {
@@ -326,14 +326,14 @@ describe('Layout', () => {
     pixel.setAttribute('width', '11');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
     expect(pixel.style.width).to.equal('11px');
-    expect(pixel.style.height).to.equal('1px');
+    expect(pixel.style.height).to.equal('0px');
   });
 
   it('should configure natural dimensions; default layout; with height', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('height', '11');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
-    expect(pixel.style.width).to.equal('1px');
+    expect(pixel.style.width).to.equal('0px');
     expect(pixel.style.height).to.equal('11px');
   });
 
@@ -341,15 +341,15 @@ describe('Layout', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('layout', 'fixed');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
-    expect(pixel.style.width).to.equal('1px');
-    expect(pixel.style.height).to.equal('1px');
+    expect(pixel.style.width).to.equal('0px');
+    expect(pixel.style.height).to.equal('0px');
   });
 
   it('should configure natural dimensions; layout=fixed-height', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('layout', 'fixed-height');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED_HEIGHT);
-    expect(pixel.style.height).to.equal('1px');
+    expect(pixel.style.height).to.equal('0px');
     expect(pixel.style.width).to.equal('');
   });
 

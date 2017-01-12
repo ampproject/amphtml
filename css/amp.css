@@ -432,7 +432,7 @@ i-amp-scroll-container.amp-active {
 }
 
 
-/* Polyfill for IE and any other browser that don't understand templates . */
+/* Polyfill for IE and any other browser that don't understand templates. */
 template {
   display: none !important;
 }
@@ -448,14 +448,9 @@ template {
   box-sizing: border-box;
 }
 
+/* amp-pixel is always non-displayed. */
 amp-pixel {
-  /* Fixed to make position independent of page other elements. */
-  position: fixed !important;
-  top: 0 !important;
-  width: 1px !important;
-  height: 1px !important; /* Only things with height are ever loaded. */
-  overflow: hidden !important;
-  visibility: hidden;
+  display: none !important;
 }
 
 /**
