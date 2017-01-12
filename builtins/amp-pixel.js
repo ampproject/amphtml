@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {Layout} from '../src/layout';
 import {dev, user} from '../src/log';
 import {registerElement} from '../src/custom-element';
 import {timerFor} from '../src/timer';
@@ -39,7 +38,7 @@ export class AmpPixel extends BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
+  isLayoutSupported(unusedLayout) {
     // No matter what layout is: the pixel is always non-displayed.
     return true;
   }
