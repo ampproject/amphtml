@@ -328,4 +328,30 @@ describe(TAG, () => {
       expect(video.getAttribute('aria-describedby')).to.equal('id3');
     });
   });
+
+  it('should propagate attribute mutations', () => {
+    return getVideo({
+      src: 'foo.mp4',
+      width: 160,
+      height: 90,
+      controls: '',
+    }).then(v => {
+      const mutations = {
+        src: 'bar.mp4',
+        controls: null,
+      };
+      Object.keys(mutations).forEach(property => {
+        const value = mutations[property];
+        if (value === null) {
+          v.removeAttribute(property);
+        } else {
+          v.setAttribute(property, value);
+        }
+      });
+      v.mutatedAttributesCallback(mutations);
+      const video = v.querySelector('video');
+      expect(video.getAttribute('src')).to.equal('bar.mp4');
+      expect(video.controls).to.be.false;
+    });
+  });
 });
