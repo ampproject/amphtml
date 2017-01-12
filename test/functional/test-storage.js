@@ -41,7 +41,7 @@ describe('Storage', () => {
 
     viewerBroadcastHandler = undefined;
     viewer = {
-      onBroadcast: handler => {
+      onMessage: (eventType, handler) => {
         viewerBroadcastHandler = handler;
       },
       broadcast: () => {},

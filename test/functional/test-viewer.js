@@ -200,7 +200,7 @@ describe('Viewer', () => {
 
   it('should receive viewport event', () => {
     let viewportEvent = null;
-    viewer.onViewportEvent(event => {
+    viewer.onMessage('viewport', event => {
       viewportEvent = event;
     });
     viewer.receiveMessage('viewport', {
@@ -500,7 +500,7 @@ describe('Viewer', () => {
 
     it('should receive broadcast event', () => {
       let broadcastMessage = null;
-      viewer.onBroadcast(message => {
+      viewer.onMessage('broadcast', message => {
         broadcastMessage = message;
       });
       viewer.receiveMessage('broadcast', {type: 'type1'});

@@ -740,7 +740,7 @@ describe('AccessService authorization', () => {
 
   it('should run authorization for broadcast events on same origin', () => {
     let broadcastHandler;
-    sandbox.stub(service.viewer_, 'onBroadcast', handler => {
+    sandbox.stub(service.viewer_, 'onMessage', (eventType, handler) => {
       broadcastHandler = handler;
     });
     service.runAuthorization_ = sandbox.spy();

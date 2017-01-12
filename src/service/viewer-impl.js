@@ -115,20 +115,14 @@ export class Viewer {
     /** @private {number} */
     this.paddingTop_ = 0;
 
+    /** @private {!Object<string, !Observable<!JSONType>>} */
+    this.messageObservables_ = [];
+
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
 
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
-
-    /** @private {!Observable<!JSONType>} */
-    this.viewportObservable_ = new Observable();
-
-    /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
-    this.historyPoppedObservable_ = new Observable();
-
-    /** @private {!Observable<!JSONType>} */
-    this.broadcastObservable_ = new Observable();
 
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
     this.messageDeliverer_ = null;
@@ -704,21 +698,18 @@ export class Viewer {
   }
 
   /**
-   * Adds a "viewport" event listener for viewer events.
-   * @param {function(!JSONType)} handler
+   * Adds a eventType listener for viewer events.
+   * @param {string} eventType
+   * @param {function()} handler
    * @return {!UnlistenDef}
    */
-  onViewportEvent(handler) {
-    return this.viewportObservable_.add(handler);
-  }
-
-  /**
-   * Adds a "history popped" event listener for viewer events.
-   * @param {function(ViewerHistoryPoppedEventDef)} handler
-   * @return {!UnlistenDef}
-   */
-  onHistoryPoppedEvent(handler) {
-    return this.historyPoppedObservable_.add(handler);
+  onMessage(eventType, handler) {
+    let observable = this.messageObservables_[eventType];
+    if (!observable) {
+      observable = new Observable();
+      this.messageObservables_[eventType] = observable;
+    }
+    return this.messageObservables_[eventType].add(handler);
   }
 
   /**
@@ -766,14 +757,14 @@ export class Viewer {
     if (eventType == 'viewport') {
       if (data['paddingTop'] !== undefined) {
         this.paddingTop_ = data['paddingTop'];
-        this.viewportObservable_.fire(
-          /** @type {!JSONType} */ (data));
+        this.messageObservables_[eventType].fire(
+            /** @type {!JSONType} */ (data));
         return Promise.resolve();
       }
       return undefined;
     }
     if (eventType == 'historyPopped') {
-      this.historyPoppedObservable_.fire({
+      this.messageObservables_[eventType].fire({
         newStackIndex: data['newStackIndex'],
       });
       return Promise.resolve();
@@ -787,7 +778,7 @@ export class Viewer {
       return Promise.resolve();
     }
     if (eventType == 'broadcast') {
-      this.broadcastObservable_.fire(
+      this.messageObservables_[eventType].fire(
           /** @type {!JSONType|undefined} */ (data));
       return Promise.resolve();
     }
@@ -939,15 +930,6 @@ export class Viewer {
     }
 
     this.sendMessage('broadcast', message);
-  }
-
-  /**
-   * Registers receiver for the broadcast events.
-   * @param {function(!JSONType)} handler
-   * @return {!UnlistenDef}
-   */
-  onBroadcast(handler) {
-    return this.broadcastObservable_.add(handler);
   }
 
   /**

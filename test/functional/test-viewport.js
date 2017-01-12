@@ -60,7 +60,7 @@ describes.fakeWin('Viewport', {}, env => {
     viewer = {
       isEmbedded: () => false,
       getPaddingTop: () => 19,
-      onViewportEvent: handler => {
+      onMessage: (eventType, handler) => {
         viewerViewportHandler = handler;
       },
       sendMessage: sandbox.spy(),
@@ -846,7 +846,7 @@ describe('Viewport META', () => {
       viewer = {
         isEmbedded: () => false,
         getPaddingTop: () => 0,
-        onViewportEvent: () => {},
+        onMessage: () => {},
         isVisible: () => true,
         onVisibilityChanged: () => {},
       };
@@ -1010,7 +1010,7 @@ describe('ViewportBindingNatural', () => {
     viewer = {
       isEmbedded: () => false,
       getPaddingTop: () => 19,
-      onViewportEvent: () => {},
+      onMessage: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     binding = new ViewportBindingNatural_(windowApi, viewer);

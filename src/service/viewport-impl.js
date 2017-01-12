@@ -151,7 +151,7 @@ export class Viewport {
     /** @private @const (function()) */
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
-    this.viewer_.onViewportEvent(this.updateOnViewportEvent_.bind(this));
+    this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.binding_.updatePaddingTop(this.paddingTop_);
 
     this.binding_.onScroll(this.scroll_.bind(this));
