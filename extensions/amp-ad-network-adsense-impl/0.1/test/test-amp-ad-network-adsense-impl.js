@@ -288,20 +288,22 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         expect(url).to.match(new RegExp(
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
           '\\?client=adsense&format=0x0&w=0&h=0&adtest=false' +
-          '&adk=[0-9]+&bc=1&pv=1&vis=1&wgl=1&prev_fmts=320x50%2C0x0%2C0x0' +
+          '&adk=[0-9]+&bc=1&pv=1&vis=1&wgl=1' +
+          '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           // Depending on how the test is run, it can get different
           // results.
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
           '&c=[0-9]+&output=html&nhd=1&eid=8675309&biw=[0-9]+&bih=[0-9]+' +
-          '&adx=8&ady=8&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
+          '&adx=-?[0-9]+&ady=-?[0-9]+&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&oid=2&brdim=[0-9]+(%2C[0-9]+){9}' +
-          '&isw=[0-9]+&ish=[0-9]+&dtd=[0-9]+' +
+          '&isw=[0-9]+&ish=[0-9]+' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
-          '&ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+$'));
+          '&ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
+          '&dtd=[0-9]+$'));
       });
     });
   });
