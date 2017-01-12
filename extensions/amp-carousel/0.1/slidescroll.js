@@ -38,6 +38,8 @@ const NATIVE_TOUCH_TIMEOUT = 120;
 /** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
 
+const TAG = 'AMP-CAROUSEL';
+
 export class AmpSlideScroll extends BaseSlides {
 
   /** @param {!AmpElement} element */
@@ -179,7 +181,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (isFinite(index)) {
         this.showSlide_(index);
       } else {
-        user().warn('Invalid [slide] value: %s', slide);
+        user().warn(TAG, 'Invalid [slide] value: %s', slide);
       }
     }
   }

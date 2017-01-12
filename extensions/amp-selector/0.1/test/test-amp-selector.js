@@ -523,8 +523,8 @@ describes.realWin('amp-selector', {
       });
 
       const impl = ampSelector.implementation_;
-      const setInputsSpy = sandbox.spy(impl, 'setInputs_');
       ampSelector.build();
+      const setInputsSpy = sandbox.spy(impl, 'setInputs_');
 
       expect(impl.options_[0].hasAttribute('selected')).to.be.true;
       expect(impl.options_[3].hasAttribute('selected')).to.be.false;
