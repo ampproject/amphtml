@@ -102,23 +102,19 @@ export function googleAdUrl(
   /** @const {!Promise<string>} */
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
   return getAdCid(a4a).then(clientId => referrerPromise.then(referrer => {
-    const slotNumber = a4a.element.getAttribute('data-amp-slot-index');
+    const adElement = a4a.element;
+    const slotNumber = adElement.getAttribute('data-amp-slot-index');
     const win = a4a.win;
-    const documentInfo = documentInfoForDoc(a4a.element);
-    if (!win.gaGlobal) {
+    const documentInfo = documentInfoForDoc(adElement);
       // Read by GPT for GA/GPT integration.
-      win.gaGlobal = {
-        vid: clientId,
-        hid: documentInfo.pageViewId,
-      };
-    }
+    win.gaGlobal = win.gaGlobal ||
+      {vid: clientId, hid: documentInfo. pageViewId};
     const slotRect = a4a.getIntersectionElementLayoutBox();
     const screen = win.screen;
     const viewport = a4a.getViewport();
     const viewportRect = viewport.getRect();
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
-    const adElement = a4a.element;
     if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
       queryParams.push({name: 'amp_ct',
                         value: adElement.parentElement.tagName});
@@ -137,8 +133,8 @@ export function googleAdUrl(
         {name: 'c', value: getCorrelator(win, clientId)},
         {name: 'output', value: 'html'},
         {name: 'nhd', value: iframeDepth},
-        {name: 'iu', value: a4a.element.getAttribute('data-ad-slot')},
-        {name: 'eid', value: a4a.element.getAttribute('data-experiment-id')},
+        {name: 'iu', value: adElement.getAttribute('data-ad-slot')},
+        {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
         {name: 'biw', value: viewportRect.width},
         {name: 'bih', value: viewportRect.height},
         {name: 'adx', value: slotRect.left},
@@ -209,7 +205,7 @@ export function extractGoogleAdCreativeAndSignature(
 function iframeNestingDepth(win) {
   let w = win;
   let depth = 0;
-  while (w != w.parent) {
+  while (w != w.parent && depth < 100) {
     w = w.parent;
     depth++;
   }
@@ -266,8 +262,11 @@ function topWindowUrlOrDomain(win) {
  */
 function secondWindowFromTop(win) {
   let secondFromTop = win;
-  while (secondFromTop.parent != secondFromTop.parent.parent) {
+  let depth = 0;
+  while (secondFromTop.parent != secondFromTop.parent.parent &&
+        depth < 100) {
     secondFromTop = secondFromTop.parent;
+    depth++;
   }
   dev().assert(secondFromTop.parent == win.top);
   return secondFromTop;

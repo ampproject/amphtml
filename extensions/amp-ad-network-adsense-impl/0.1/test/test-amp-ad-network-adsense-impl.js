@@ -27,16 +27,18 @@ import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {createIframePromise} from '../../../../testing/iframe';
 import {upgradeOrRegisterElement} from '../../../../src/custom-element';
+import {
+  createElementWithAttributes,
+  addAttributesToElement,
+} from '../../../../src/dom';
 
 function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
   const doc = opt_doc || document;
   const tag = opt_tag || 'amp-ad';
-  const element = doc.createElement(tag);
-  element.setAttribute('type', 'adsense');
-  for (const attrName in attributes) {
-    element.setAttribute(attrName, attributes[attrName]);
-  }
-  return element;
+  const element = createElementWithAttributes(doc, tag, {
+    'type': 'adsense',
+  });
+  return addAttributesToElement(element, attributes);
 }
 
 describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
@@ -157,8 +159,10 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
             AmpAdNetworkAdsenseImpl);
-        const ampStickyAd = fixture.doc.createElement('amp-sticky-ad');
-        ampStickyAd.setAttribute('layout', 'nodisplay');
+        const ampStickyAd =
+              createElementWithAttributes(fixture.doc, 'amp-sticky-ad', {
+                'layout': 'nodisplay',
+              });
         ampStickyAd.appendChild(element);
         fixture.doc.body.appendChild(ampStickyAd);
         return impl.getAdUrl().then(adUrl => {

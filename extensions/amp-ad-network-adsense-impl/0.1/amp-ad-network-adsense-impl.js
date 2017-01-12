@@ -24,6 +24,7 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {dev} from '../../../src/log';
 import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
@@ -97,7 +98,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   getAdUrl() {
     // TODO: Check for required and allowed parameters. Probably use
-    // validateData, from 3p/3p/js, after noving it someplace common.
+    // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
     const global = this.win;
     const adClientId = this.element.getAttribute('data-ad-client');
@@ -108,6 +109,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
+    // data-amp-slot-index is populated within amp-ad.
+    dev().assert(slotId != undefined);
     const adk = this.adKey_(format);
     this.uniqueSlotId_ = slotId + adk;
     const sharedStateParams = sharedState.addNewSlot(
