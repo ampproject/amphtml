@@ -183,21 +183,6 @@ class AmpVideo extends AMP.BaseElement {
       return !!this.video_.play;
     }
 
-    /**
-     * @param {string} attributeName
-     * @return {boolean}
-     * @private
-     */
-    shouldPropagateAttributeOnMutation_(attributeName) {
-      if (ATTRS_TO_PROPAGATE_ON_BUILD.indexOf(attributeName) >= 0) {
-        return true;
-      }
-      if (ATTRS_TO_PROPAGATE_ON_LAYOUT.indexOf(attributeName) >= 0) {
-        return true;
-      }
-      return false;
-    }
-
     // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
     /**

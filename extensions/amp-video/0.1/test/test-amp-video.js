@@ -336,23 +336,16 @@ describe(TAG, () => {
       height: 90,
       controls: '',
     }).then(v => {
-      const mutations = [
-        {
-          name: 'src',
-          oldValue: 'foo.mp4',
-          newValue: 'bar.mp4',
-        },
-        {
-          name: 'controls',
-          oldValue: '',
-          newValue: null,
-        },
-      ];
-      mutations.forEach(m => {
-        if (m.newValue === null) {
-          v.removeAttribute(m.name);
+      const mutations = {
+        src: 'bar.mp4',
+        controls: null,
+      };
+      Object.keys(mutations).forEach(property => {
+        const value = mutations[property];
+        if (value === null) {
+          v.removeAttribute(property);
         } else {
-          v.setAttribute(m.name, m.newValue);
+          v.setAttribute(property, value);
         }
       });
       v.mutatedAttributesCallback(mutations);
