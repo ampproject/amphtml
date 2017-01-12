@@ -33,7 +33,6 @@ import {domFingerprint} from './utils/dom-fingerprint';
  * has been moved from the iframe src hash to the iframe name attribute.
  */
 const iframeContextInName = isExperimentOn(self, '3p-frame-context-in-name');
-const sentinelNameChange = isExperimentOn(self, 'sentinel-name-change');
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -58,6 +57,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
+  const sentinelNameChange = isExperimentOn(self, 'sentinel-name-change');
   user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
   const attributes = {};
   // Do these first, as the other attributes have precedence.
@@ -120,6 +120,8 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   const attributes =
       getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
   const iframe = parentWindow.document.createElement('iframe');
+  const sentinelNameChange = isExperimentOn(self, 'sentinel-name-change');
+
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
   }
@@ -159,13 +161,8 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  if (sentinelNameChange) {
-    iframe.setAttribute(
-        'data-amp-3p-sentinel', attributes._context.sentinel);
-  } else {
-    iframe.setAttribute(
-        'data-amp-3p-sentinel', attributes._context.amp3pSentinel);
-  }
+  iframe.setAttribute('data-amp-3p-sentinel', attributes._context[
+    sentinelNameChange ? 'sentinel' : 'amp3pSentinel']);
   return iframe;
 }
 
