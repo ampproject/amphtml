@@ -16,6 +16,7 @@
 
 import {
   extractGoogleAdCreativeAndSignature,
+  additionalDimensions,
 } from '../utils';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 
@@ -68,6 +69,31 @@ describe('Google A4A utils', () => {
             signature: null,
             size: null,
           });
+    });
+  });
+
+  //TODO: Add tests for other utils functions.
+
+  describe('#additionalDimensions', () => {
+    it('should return the right value when fed mocked inputs', () => {
+      const fakeWin = {
+        screenX: 1,
+        screenY: 2,
+        screenLeft: 3,
+        screenTop: 4,
+        outerWidth: 5,
+        outerHeight: 6,
+        screen: {
+          availWidth: 11,
+          availTop: 12,
+        },
+      };
+      const fakeSize = {
+        width: '100px',
+        height: '101px',
+      };
+      return expect(additionalDimensions(fakeWin, fakeSize)).to.equal(
+        '3,4,1,2,11,12,5,6,100px,101px');
     });
   });
 });

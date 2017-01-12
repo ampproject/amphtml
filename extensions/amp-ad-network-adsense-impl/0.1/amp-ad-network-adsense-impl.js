@@ -24,11 +24,11 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+// import {dev} from '../../../src/log';
 import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
-  getCorrelator,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -97,19 +97,22 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
+    // TODO: Check for required and allowed parameters. Probably use
+    // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
     const global = this.win;
     const adClientId = this.element.getAttribute('data-ad-client');
-    const slotId = this.element.getAttribute('data-amp-slot-index');
-    const slotIdNumber = Number(slotId);
-    const correlator = getCorrelator(this.win, slotId);
-    const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
     const visibilityState = viewerForDoc(this.getAmpDoc())
         .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
+    const slotId = this.element.getAttribute('data-amp-slot-index');
+    // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
+    // TODO(bcassels): Uncomment the assertion, fixing the tests.
+    // But not all tests arrange to call upgradeCallback.
+    // dev().assert(slotId != undefined);
     const adk = this.adKey_(format);
     this.uniqueSlotId_ = slotId + adk;
     const sharedStateParams = sharedState.addNewSlot(
@@ -120,7 +123,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'format', value: format},
       {name: 'w', value: slotRect.width},
       {name: 'h', value: slotRect.height},
-      {name: 'iu', value: this.element.getAttribute('data-ad-slot')},
       {name: 'adtest', value: adTestOn},
       {name: 'adk', value: adk},
       {
@@ -130,16 +132,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       },
       {name: 'ctypes', value: this.getCtypes_()},
       {name: 'host', value: this.element.getAttribute('data-ad-host')},
-      {name: 'ifi', value: slotIdNumber},
-      {name: 'c', value: correlator},
       {name: 'to', value: this.element.getAttribute('data-tag-origin')},
       {name: 'pv', value: sharedStateParams.pv},
-      {name: 'u_ah', value: screen ? screen.availHeight : null},
-      {name: 'u_aw', value: screen ? screen.availWidth : null},
-      {name: 'u_cd', value: screen ? screen.colorDepth : null},
-      {name: 'u_h', value: screen ? screen.height : null},
-      {name: 'u_tz', value: -new Date().getTimezoneOffset()},
-      {name: 'u_w', value: screen ? screen.width : null},
+      {name: 'channel', value: this.element.getAttribute('data-ad-channel')},
       {name: 'vis', value: visibilityStateCodes[visibilityState] || '0'},
       {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
     ];
@@ -149,7 +144,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
 
     return googleAdUrl(
-        this, ADSENSE_BASE_URL, startTime, slotIdNumber, paramList, []);
+        this, ADSENSE_BASE_URL, startTime, paramList, []);
   }
 
   /** @override */
