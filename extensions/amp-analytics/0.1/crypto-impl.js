@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import * as lib from '../../../third_party/closure-library/sha384-generated';
 import {fromClass} from '../../../src/service';
 import {dev} from '../../../src/log';
+import {getExistingServiceForWindow} from '../../../src/service';
+import {extensionsFor} from '../../../src/extensions';
 import {stringToBytes} from '../../../src/utils/bytes';
+import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
 
 /** @const {string} */
 const TAG = 'Crypto';
@@ -28,6 +30,13 @@ export class Crypto {
   constructor(win) {
     /** @private @const {?webCrypto.SubtleCrypto} */
     this.subtle_ = getSubtle(win);
+
+    /** @private {!Window} */
+    this.win_ = win;
+
+    if (!this.subtle_) {
+      this.loadPolyfill_();
+    }
   }
 
   /**
@@ -38,27 +47,30 @@ export class Crypto {
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384(input) {
-    if (this.subtle_) {
-      try {
-        return this.subtle_.digest({name: 'SHA-384'},
-                input instanceof Uint8Array ? input : stringToBytes(input))
-            // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
-            /** @param {?} buffer */
-            .then(buffer => [].slice.call(new Uint8Array(buffer)),
-                e => {
-                  // Chrome doesn't allow the usage of Crypto API under
-                  // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
-                  if (e.message && e.message.indexOf('secure origin') < 0) {
-                    // Log unexpected fallback.
-                    dev().error(TAG, FALLBACK_MSG, e);
-                  }
-                  return lib.sha384(input);
-                });
-      } catch (e) {
-        dev().error(TAG, FALLBACK_MSG, e);
-      }
+    // polyfill is (being) loaded,
+    // means native Crypto API is not available or failed.
+    if (this.polyfillPromise_) {
+      return this.polyfillPromise_.then(polyfill => polyfill.sha384(input));
     }
-    return Promise.resolve(lib.sha384(input));
+    try {
+      return this.subtle_.digest({name: 'SHA-384'},
+              input instanceof Uint8Array ? input : stringToBytes(input))
+          // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
+          /** @param {?} buffer */
+          .then(buffer => [].slice.call(new Uint8Array(buffer)),
+              e => {
+                // Chrome doesn't allow the usage of Crypto API under
+                // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
+                if (e.message && e.message.indexOf('secure origin') < 0) {
+                  // Log unexpected fallback.
+                  dev().error(TAG, FALLBACK_MSG, e);
+                }
+                return this.loadPolyfill_()
+                    .then(polyfill => polyfill.sha384(input));
+              });
+    } catch (e) {
+      dev().error(TAG, FALLBACK_MSG, e);
+    }
   }
 
   /**
@@ -70,9 +82,7 @@ export class Crypto {
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384Base64(input) {
-    return this.sha384(input).then(buffer => {
-      return lib.base64(buffer);
-    });
+    return this.sha384(input).then(buffer => base64UrlEncodeFromBytes(buffer));
   }
 
   /**
@@ -92,6 +102,20 @@ export class Crypto {
       }
       return result;
     });
+  }
+
+  /**
+   * Loads Crypto polyfill library.
+   * @returns {!Promise}
+   * @private
+   */
+  loadPolyfill_() {
+    if (this.polyfillPromise_) {
+      return this.polyfillPromise_;
+    }
+    return this.polyfillPromise_ = extensionsFor(this.win_)
+        .loadExtension('amp-crypto-polyfill')
+        .then(() => getExistingServiceForWindow(this.win_, 'crypto-polyfill'));
   }
 }
 
