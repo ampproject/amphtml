@@ -24,7 +24,6 @@ describe('SlideScroll', () => {
   let sandbox;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-slidescroll', true);
     sandbox = sinon.sandbox.create();
   });
 
@@ -967,6 +966,27 @@ describe('SlideScroll', () => {
             ampSlideScroll,
             'goToSlide',
             /* CustomEvent */ sinon.match.has('detail', {index: 0}));
+      });
+    });
+
+    it('should goToSlide on action', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        let args = {'index': '123'};
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+
+
+        impl.executeAction({method: 'goToSlide', args});
+        expect(showSlideSpy).to.have.been.calledWith(123);
+
+        args = {'index': 'ssds11'};
+        impl.executeAction({method: 'goToSlide', args});
+        expect(showSlideSpy.callCount).to.equal(1);
+
+        args = {'index': '0'};
+        impl.executeAction({method: 'goToSlide', args});
+        expect(showSlideSpy).to.have.been.calledWith(0);
       });
     });
   });

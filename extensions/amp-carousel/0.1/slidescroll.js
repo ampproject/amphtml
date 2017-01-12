@@ -166,6 +166,19 @@ export class AmpSlideScroll extends BaseSlides {
       this.slidesContainer_.addEventListener(
           'touchend', this.touchEndHandler_.bind(this));
     }
+
+    this.registerAction('goToSlide', invocation => {
+      const args = invocation.args;
+      if (!args) {
+        return;
+      }
+      const newIndex = Number(args['index']);
+      if (isFinite(newIndex)) {
+        this.showSlide_(newIndex);
+      } else {
+        user().warn(TAG, 'Invalid [slide] value: %s', newIndex);
+      }
+    });
   }
 
   /** @override */
