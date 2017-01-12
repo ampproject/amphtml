@@ -184,7 +184,7 @@ export class Bind {
       if (this.validator_.canBind(element.tagName, property)) {
         return {property, expressionString: attribute.value};
       } else {
-        user().warn(TAG,
+        user().error(TAG,
             `<${element.tagName} [${property}]> binding is not allowed.`);
       }
     }
@@ -222,7 +222,9 @@ export class Bind {
 
       bindings.forEach(binding => {
         const newValue = results[binding.expressionString];
-        this.verifyBinding_(binding, element, newValue);
+        if (newValue !== undefined) {
+          this.verifyBinding_(binding, element, newValue);
+        }
       });
     });
   }
@@ -243,8 +245,9 @@ export class Bind {
         bindings.forEach(binding => {
           const newValue = results[binding.expressionString];
 
-          // Don't apply mutation if the result hasn't changed.
-          if (this.shallowEquals_(newValue, binding.previousResult)) {
+          // Don't apply if the result hasn't changed or is missing.
+          if (newValue === undefined ||
+              this.shallowEquals_(newValue, binding.previousResult)) {
             return;
           } else {
             binding.previousResult = newValue;
