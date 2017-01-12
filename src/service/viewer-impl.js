@@ -16,6 +16,7 @@
 
 import {Observable} from '../observable';
 import {findIndex} from '../utils/array';
+import {map} from '../utils/object';
 import {documentStateFor} from './document-state';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
@@ -116,7 +117,7 @@ export class Viewer {
     this.paddingTop_ = 0;
 
     /** @private {!Object<string, !Observable<!JSONType>>} */
-    this.messageObservables_ = [];
+    this.messageObservables_ = map();
 
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
@@ -700,8 +701,9 @@ export class Viewer {
   /**
    * Adds a eventType listener for viewer events.
    * @param {string} eventType
-   * @param {function()} handler
+   * @param {function(T)} handler
    * @return {!UnlistenDef}
+   * @template T
    */
   onMessage(eventType, handler) {
     let observable = this.messageObservables_[eventType];
@@ -764,9 +766,8 @@ export class Viewer {
       return undefined;
     }
     if (eventType == 'historyPopped') {
-      this.messageObservables_[eventType].fire({
-        newStackIndex: data['newStackIndex'],
-      });
+      this.messageObservables_[eventType].fire(
+          /** @type {!JSONType} */ (data));
       return Promise.resolve();
     }
     if (eventType == 'visibilitychange') {
