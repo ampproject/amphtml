@@ -518,7 +518,6 @@ app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
 app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   var filePath = req.path;
   var mode = getPathMode(filePath);
-  exampleMode = mode;
   if (!mode) {
     return next();
   }
@@ -619,13 +618,16 @@ app.get('/dist/rtv/99*/*.js', function(req, res, next) {
   }).catch(next);
 });
 
-app.get('/dist/rtv/*/v0/:filename', function(req, res, next) {
-  if (req.params.filename != 'amp-ad-0.1.js'
-      && req.params.filename != 'amp-video-0.1.js') {
-    return next();
+app.get('/dist/rtv/*/v0/*.js', function(req, res, next) {
+  var mode = getPathMode(req.headers.referer);
+  if (process.argv.includes('test', 2)) {
+    mode = 'max';
+    if (process.argv.includes('--compiled', 3)) {
+      mode = 'min';
+    }
   }
-  var filePath = req.path.replace(/\/rtv\/\d{13}/, '');
-  filePath = replaceUrls(exampleMode, filePath);
+  var filePath = req.path;
+  filePath = replaceUrls(mode, filePath);
   req.url = filePath;
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     res.end(file);
