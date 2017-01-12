@@ -28,25 +28,36 @@ export class AdStrategy {
    * @param {!Array<!DataAttributeDef>} baseDataAttributes Any data attributes
    *     that should be added to any inserted ads. These will be combined with
    *     any additional data atrributes specified by the configuration.
+   * @param {!./ad-tracker.AdTracker} adTracker
+   * @param {number} targetAdCount
    */
-  constructor(type, placements, baseDataAttributes) {
+  constructor(type, placements, baseDataAttributes, adTracker, targetAdCount) {
     this.type_ = type;
 
     this.availablePlacements_ = placements.slice(0);
 
     this.baseDataAttributes_ = baseDataAttributes;
 
-    /** @type {!Array<!./placement.Placement>} */
-    this.placedAds_ = [];
+    /** @type {!./ad-tracker.AdTracker} */
+    this.adTracker_ = adTracker;
+
+    /** @type {number} */
+    this.targetAdCount_ = targetAdCount;
   }
 
   /**
    * @return {!Promise<boolean>} True if strategy succeeds false otherwise.
    */
   run() {
-    // TODO: Implement a more extensive strategy based on parameters set in the
-    // configuration.
-    return this.placeNextAd_();
+    if (this.adTracker_.getAdCount() >= this.targetAdCount_) {
+      return Promise.resolve(true);
+    }
+    return this.placeNextAd_().then(success => {
+      if (success) {
+        return this.run();
+      }
+      return false;
+    });
   }
 
   /**
@@ -62,10 +73,10 @@ export class AdStrategy {
       dev().warn(TAG, 'unable to fulfill ad strategy');
       return Promise.resolve(false);
     }
-    return nextPlacement.placeAd(this.type_, this.baseDataAttributes_)
-        .then(state => {
+    return nextPlacement.placeAd(this.type_, this.baseDataAttributes_,
+        this.adTracker_).then(state => {
           if (state == PlacementState.PLACED) {
-            this.placedAds_.push(nextPlacement);
+            this.adTracker_.addAd(nextPlacement.getAdElement());
             return true;
           } else {
             return this.placeNextAd_();
