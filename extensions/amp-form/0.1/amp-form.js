@@ -19,6 +19,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 import {
+  assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
   addParamsToUrl,
   SOURCE_ORIGIN_PARAM,
@@ -68,6 +69,10 @@ const UserValidityState = {
 
 /** @typedef {!HTMLInputElement|!HTMLSelectElement|!HTMLTextAreaElement} */
 let FormFieldDef;
+
+
+/** @private @const {string} */
+const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
 
 
 export class AmpForm {
@@ -245,22 +250,31 @@ export class AmpForm {
           xhrUrl = this.xhrAction_;
           body = new FormData(this.form_);
         }
-        return this.xhr_.fetchJson(dev().assertString(xhrUrl), {
+        return this.xhr_.fetch(dev().assertString(xhrUrl), {
           body,
           method: this.method_,
           credentials: 'include',
         }).then(response => {
-          this.triggerAction_(/* success */ true, response);
-          // TODO(mkhatib, #6032): Update docs to reflect analytics events.
-          this.analyticsEvent_('amp-form-submit-success');
-          this.setState_(FormState_.SUBMIT_SUCCESS);
-          this.renderTemplate_(response || {});
-        }).catch(error => {
+          return response.json().then(json => {
+            this.triggerAction_(/* success */ true, json);
+            this.analyticsEvent_('amp-form-submit-success');
+            this.setState_(FormState_.SUBMIT_SUCCESS);
+            this.renderTemplate_(json || {});
+            this.maybeHandleRedirect_(
+                /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
+                    response));
+          }, error => {
+            rethrowAsync('Failed to parse response JSON:', error);
+          });
+        }, error => {
           this.triggerAction_(
               /* success */ false, error ? error.responseJson : null);
           this.analyticsEvent_('amp-form-submit-error');
           this.setState_(FormState_.SUBMIT_ERROR);
           this.renderTemplate_(error.responseJson || {});
+          this.maybeHandleRedirect_(
+              /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
+                  error));
           rethrowAsync('Form submission failed:', error);
         });
       });
@@ -270,14 +284,39 @@ export class AmpForm {
         opt_event.preventDefault();
       }
       user().assert(false,
-          'Only XHR based (via action-xhr attribute) submissions are support ' +
-          'for POST requests. %s',
+          'Only XHR based (via action-xhr attribute) submissions are ' +
+          'support for POST requests. %s',
           this.form_);
     } else if (this.method_ == 'GET') {
       // Non-xhr GET requests replacement should happen synchronously.
       for (let i = 0; i < varSubsFields.length; i++) {
         this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
       }
+    }
+  }
+
+  /**
+   * Handles response redirect throught the AMP-Redirect-To response header.
+   * @param {../../../src/service/xhr-impl.FetchResponse} response
+   * @private
+   */
+  maybeHandleRedirect_(response) {
+    if (!response.headers) {
+      return;
+    }
+    const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
+    if (redirectTo) {
+      user().assert(this.target_ != '_blank',
+          'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
+          'not supported, use target=_top instead. %s', this.form_);
+      try {
+        assertAbsoluteHttpOrHttpsUrl(redirectTo);
+        assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
+      } catch (e) {
+        user().assert(false, 'The `AMP-Redirect-To` header value must be an ' +
+            'absolute URL starting with https://. Found %s', redirectTo);
+      }
+      this.win_.top.location.href = redirectTo;
     }
   }
 
