@@ -166,6 +166,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         ampStickyAd.appendChild(element);
         fixture.doc.body.appendChild(ampStickyAd);
 <<<<<<< HEAD
+<<<<<<< HEAD
         return impl.getAdUrl().then(adUrl => {
           expect(adUrl.indexOf('amp_ct=AMP-STICKY-AD') >= 0).to.be.true;
 =======
@@ -174,6 +175,9 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           expect(adUrl.indexOf('a_ct=AMP-STICKY-AD') >= 0).to.be.true;
 >>>>>>> Updated tests.
 =======
+=======
+        return impl.getAdUrl().then(adUrl => {
+>>>>>>> Update test-amp-ad-network-adsense-impl.js
           expect(adUrl.indexOf('a_ct=sa') >= 0).to.be.true;
 >>>>>>> Updated URL parameter value aliases to match those expected by GPT.
         });
