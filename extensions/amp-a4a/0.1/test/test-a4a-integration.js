@@ -119,7 +119,6 @@ describe('integration test: a4a', () => {
       mode: 'cors',
       method: 'GET',
       credentials: 'include',
-      requireAmpResponseSourceOrigin: true,
     }).onFirstCall().returns(Promise.resolve(mockResponse));
     adConfig['mock'] = {};
     a4aRegistry['mock'] = () => {return true;};
@@ -188,6 +187,7 @@ describe('integration test: a4a', () => {
     extractCreativeAndSignatureStub.onFirstCall().returns({
       creative: utf8Encode(validCSSAmp.reserialized),
       signature: null,
+      size: null,
     });
     return fixture.addElement(a4aElement).then(unusedElement => {
       expect(extractCreativeAndSignatureStub).to.be.calledOnce;
@@ -201,6 +201,7 @@ describe('integration test: a4a', () => {
             .onFirstCall().returns({
               creative: null,
               signature: validCSSAmp.signature,
+              size: null,
             })
             .onSecondCall().throws(new Error(
             'Testing extractCreativeAndSignature should not occur error'));

@@ -34,6 +34,25 @@ describe('Google A4A utils', () => {
           .to.eventually.deep.equal({
             creative,
             signature: base64UrlDecodeToBytes('AQAB'),
+            size: null,
+          });
+    });
+
+    it('should return body and signature and size', () => {
+      const creative = 'some test data';
+      const headerData = {
+        'X-AmpAdSignature': 'AQAB',
+        'X-CreativeSize': '320x50',
+      };
+      const headers = {
+        has: h => { return h in headerData; },
+        get: h => { return headerData[h]; },
+      };
+      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
+          .to.eventually.deep.equal({
+            creative,
+            signature: base64UrlDecodeToBytes('AQAB'),
+            size: [320, 50],
           });
     });
 
@@ -47,6 +66,7 @@ describe('Google A4A utils', () => {
           .to.eventually.deep.equal({
             creative,
             signature: null,
+            size: null,
           });
     });
   });

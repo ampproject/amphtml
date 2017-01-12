@@ -357,7 +357,7 @@ describe('amp-form', () => {
         expect(config.body).to.not.be.null;
         expect(config.method).to.equal('POST');
         expect(config.credentials).to.equal('include');
-        expect(config.requireAmpResponseSourceOrigin).to.be.true;
+        expect(config.requireAmpResponseSourceOrigin).to.be.undefined;
       });
     });
   });
@@ -436,7 +436,9 @@ describe('amp-form', () => {
         expect(form.className).to.contain('amp-form-submit-success');
         expect(ampForm.actions_.trigger).to.be.called;
         expect(ampForm.actions_.trigger.calledWith(
-            form, 'submit-success', null)).to.be.true;
+            form,
+            'submit-success',
+            /** CustomEvent */ sinon.match.has('detail'))).to.be.true;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
             'amp-form-submit-success');
       });
@@ -481,7 +483,9 @@ describe('amp-form', () => {
         expect(form.className).to.contain('amp-form-submit-error');
         expect(ampForm.actions_.trigger).to.be.called;
         expect(ampForm.actions_.trigger.calledWith(
-            form, 'submit-error', null)).to.be.true;
+            form,
+            'submit-error',
+            /** CustomEvent */ sinon.match.has('detail'))).to.be.true;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
             'amp-form-submit-error');
       });
@@ -603,7 +607,7 @@ describe('amp-form', () => {
           expect(config.body).to.be.undefined;
           expect(config.method).to.equal('GET');
           expect(config.credentials).to.equal('include');
-          expect(config.requireAmpResponseSourceOrigin).to.be.true;
+          expect(config.requireAmpResponseSourceOrigin).to.be.undefined;
         });
       });
     });

@@ -163,7 +163,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz engaging items',
+    name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
@@ -236,6 +236,11 @@ const EXPERIMENTS = [
     name: 'Move passing context metadata from url hash to name attribute',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6760',
     Spec: '',
+  },
+  {
+    id: 'variable-filters',
+    name: 'Format to apply filters to analytics variables',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
 ];
 

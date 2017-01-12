@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,13 @@
 import './polyfills';
 import {installEmbedStateListener, manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
-import {computeInMasterFrame, nextTick, register, run} from './3p';
+import {
+  computeInMasterFrame,
+  nextTick,
+  register,
+  run,
+  setExperimentToggles,
+} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
@@ -55,6 +61,7 @@ import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
 import {adverline} from '../ads/adverline';
+import {adverticum} from '../ads/adverticum';
 import {advertserve} from '../ads/advertserve';
 import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
@@ -167,6 +174,10 @@ if (data && data._context) {
 // This should only be invoked after window.context is set
 initLogConstructor();
 
+// Experiment toggles
+setExperimentToggles(window.context.experimentToggles);
+delete window.context.experimentToggles;
+
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
 }
@@ -188,6 +199,7 @@ register('adstir', adstir);
 register('adtech', adtech);
 register('aduptech', aduptech);
 register('adverline', adverline);
+register('adverticum', adverticum);
 register('advertserve', advertserve);
 register('affiliateb', affiliateb);
 register('amoad', amoad);

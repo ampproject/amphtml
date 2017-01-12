@@ -28,6 +28,9 @@ import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
+/** @const {string} */
+const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
+
 /** @const {number} */
 const MAX_URL_LENGTH = 4096;
 
@@ -37,6 +40,27 @@ const AmpAdImplementation = {
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
 };
 
+/** @const {!Object} */
+export const ValidAdContainerTypes = [
+  'AMP-STICKY-AD',
+  'AMP-FX-FLYING-CARPET',
+];
+
+/** @const {string} */
+export const QQID_HEADER = 'X-QQID';
+
+/**
+ * Element attribute that stores experiment IDs.
+ *
+ * Note: This attribute should be used only for tracking experimental
+ * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
+ * added by a publisher page.
+ *
+ * @const {!string}
+ * @visibleForTesting
+ */
+export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
+
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
  * environment by ensuring native crypto support and page originated in the
@@ -44,7 +68,7 @@ const AmpAdImplementation = {
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
- * @param {!Element} element The AMP tag element.
+ * @param {!Element} element Ad tag Element.
  * @returns {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
@@ -83,22 +107,29 @@ export function googleAdUrl(
 
 /**
  * @param {!ArrayBuffer} creative
- * @param {!Headers} responseHeaders
+ * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
  */
 export function extractGoogleAdCreativeAndSignature(
     creative, responseHeaders) {
   let signature = null;
+  let size = null;
   try {
     if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
       signature =
         base64UrlDecodeToBytes(dev().assertString(
             responseHeaders.get(AMP_SIGNATURE_HEADER)));
     }
+    if (responseHeaders.has(CREATIVE_SIZE_HEADER)) {
+      const sizeStr = responseHeaders.get(CREATIVE_SIZE_HEADER);
+      // We should trust that the server returns the size information in the
+      // form of a WxH string.
+      size = sizeStr.split('x').map(dim => Number(dim));
+    }
   } finally {
     return Promise.resolve(/** @type {
           !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
-          {creative, signature}));
+          {creative, signature, size}));
   }
 }
 
@@ -130,6 +161,9 @@ function buildAdUrl(
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
   const adElement = a4a.element;
+  if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
+    queryParams.push({name: 'amp_ct', value: adElement.parentElement.tagName});
+  }
   const allQueryParams = queryParams.concat(
     [
       {
@@ -149,6 +183,7 @@ function buildAdUrl(
       {name: 'adx', value: slotRect.left},
       {name: 'ady', value: slotRect.top},
       {name: 'u_hist', value: getHistoryLength(global)},
+      {name: 'oid', value: '2'},
       dtdParam,
     ],
     unboundedQueryParams,

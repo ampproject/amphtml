@@ -30,7 +30,11 @@ import {
   isGoogleAdsA4AValidEnvironment,
   getCorrelator,
 } from '../../../ads/google/a4a/utils';
-import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {
+  googleLifecycleReporterFactory,
+  setGoogleLifecycleVarsFromHeaders,
+} from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
@@ -69,11 +73,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const slotIdNumber = Number(slotId);
     const correlator = getCorrelator(global, slotId);
     const slotRect = this.getIntersectionElementLayoutBox();
-    const size = `${slotRect.width}x${slotRect.height}`;
+    let size = `${slotRect.width}x${slotRect.height}`;
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tfcd'];
     const adTestOn = isInManualExperiment(this.element);
+
+    const multiSizeDataStr = this.element.getAttribute('data-multi-size');
+    if (multiSizeDataStr) {
+      const multiSizeValidation = this.element
+          .getAttribute('data-multi-size-validation') || 'true';
+      // The following call will check all specified multi-size dimensions,
+      // verify that they meet all requirements, and then return all the valid
+      // dimensions in an array.
+      const dimensions = getMultiSizeDimensions(
+          multiSizeDataStr,
+          Number(this.element.getAttribute('width')),
+          Number(this.element.getAttribute('height')),
+          multiSizeValidation == 'true');
+      size += '|' + dimensions.map(dimension => dimension.join('x')).join('|');
+    }
+
     return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotIdNumber, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
@@ -87,7 +107,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       {name: 'adtest', value: adTestOn},
       {name: 'ifi', value: slotIdNumber},
       {name: 'c', value: correlator},
-
     ], [
       {
         name: 'scp',
@@ -99,55 +118,45 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+  handleResize(width, height) {
+    const pWidth = this.element.getAttribute('width');
+    const pHeight = this.element.getAttribute('height');
+    // We want to resize only if neither returned dimension is larger than its
+    // primary counterpart, and if at least one of the returned dimensions
+    // differ from its primary counterpart.
+    if ((width != pWidth || height != pHeight)
+        && (width <= pWidth && height <= pHeight)) {
+      this.attemptChangeSize(height, width).catch(() => {});
+    }
+  }
+
+  /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
+    setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
   /** @override */
-  emitLifecycleEvent(eventName, opt_associatedEventData) {
-    this.lifecycleReporter_ = this.lifecycleReporter_ ||
-        this.initLifecycleReporter();
-    switch (eventName) {
-      case 'adRequestEnd':
-        const fetchResponse = opt_associatedEventData;
-        const qqid = fetchResponse.headers.get(
-            this.lifecycleReporter_.QQID_HEADER);
-        this.lifecycleReporter_.setQqid(qqid);
-        break;
-      case 'adSlotCleared':
-        this.lifecycleReporter_.sendPing(eventName);
-        this.lifecycleReporter_.reset();
-        this.element.setAttribute('data-amp-slot-index',
-            this.win.ampAdSlotIdCounter++);
-        this.lifecycleReporter_ = this.initLifecycleReporter();
-        return;
-      case 'adSlotBuilt':
-      case 'urlBuilt':
-      case 'adRequestStart':
-      case 'extractCreativeAndSignature':
-      case 'adResponseValidateStart':
-      case 'renderFriendlyStart':
-      case 'renderCrossDomainStart':
-      case 'renderFriendlyEnd':
-      case 'renderCrossDomainEnd':
-      case 'preAdThrottle':
-      case 'renderSafeFrameStart':
-        break;
-      default:
+  emitLifecycleEvent(eventName, opt_extraVariables) {
+    if (opt_extraVariables) {
+      this.lifecycleReporter_.setPingParameters(opt_extraVariables);
     }
     this.lifecycleReporter_.sendPing(eventName);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    super.unlayoutCallback();
+    this.element.setAttribute('data-amp-slot-index',
+        this.win.ampAdSlotIdCounter++);
+    this.lifecycleReporter_ = this.initLifecycleReporter();
   }
 
   /**
    * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
    */
   initLifecycleReporter() {
-    const reporter =
-        /** @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter} */
-        (getLifecycleReporter(this, 'a4a', undefined,
-                              this.element.getAttribute(
-                                  'data-amp-slot-index')));
-    return reporter;
+    return googleLifecycleReporterFactory(this);
   }
 
   /**

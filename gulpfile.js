@@ -96,7 +96,7 @@ declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '0.1', true);
 declareExtension('amp-sticky-ad', '1.0', true);
-declareExtension('amp-selector', '0.1', false);
+declareExtension('amp-selector', '0.1', true);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -185,16 +185,18 @@ function polyfillsForTests() {
 function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     opt_checkTypes) {
   var results = [
-    compileJs('./3p/', 'integration.js',
-        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-      minifiedName: 'f.js',
-      checkTypes: opt_checkTypes,
-      watch: watch,
-      minify: shouldMinify,
-      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-      externs: ['ads/ads.extern.js',],
-      include3pDirectories: true,
-      includePolyfills: true,
+    compileCss().then(function() {
+      compileJs('./3p/', 'integration.js',
+          './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+            minifiedName: 'f.js',
+            checkTypes: opt_checkTypes,
+            watch: watch,
+            minify: shouldMinify,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            externs: ['ads/ads.extern.js',],
+            include3pDirectories: true,
+            includePolyfills: true,
+      });
     }),
 
     compileJs('./3p/', 'ampcontext-lib.js',
@@ -295,9 +297,22 @@ function compileCss() {
   $$.util.log('Recompiling CSS.');
   return jsifyCssAsync('css/amp.css').then(function(css) {
     return toPromise(gulp.src('css/**.css')
-        .pipe($$.file('css.js', 'export const cssText = ' + css))
-        .pipe(gulp.dest('build')));
+          .pipe($$.file('css.js', 'export const cssText = ' +
+              JSON.stringify(css)))
+          .pipe(gulp.dest('build'))
+          .on('end', function() {
+            fs.writeFileSync('build/css/v0.css', css);
+          }));
   });
+}
+
+/**
+ * Copies the css from the build folder to the dist folder
+ */
+function copyCss() {
+  fs.copySync('build/css/v0.css', 'dist/v0.css');
+  return toPromise(gulp.src('build/css/amp-*.css')
+      .pipe(gulp.dest('dist/v0')));
 }
 
 /**
@@ -369,10 +384,13 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
   }
   if (hasCss) {
     mkdirSync('build');
+    mkdirSync('build/css');
     return jsifyCssAsync(path + '/' + name + '.css').then(function(css) {
-      var jsCss = 'export const CSS = ' + css + ';\n';
-      var builtName = 'build/' + name + '-' + version + '.css.js';
-      fs.writeFileSync(builtName, jsCss, 'utf-8');
+      var jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
+      var jsName = 'build/' + name + '-' + version + '.css.js';
+      var cssName = 'build/css/' + name + '-' + version + '.css';
+      fs.writeFileSync(jsName, jsCss, 'utf-8');
+      fs.writeFileSync(cssName, css, 'utf-8');
       if (cssOnly) {
         return Promise.resolve();
       }
@@ -463,6 +481,7 @@ function dist() {
     buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
     buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+    copyCss(),
   ]);
 }
 
