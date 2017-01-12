@@ -175,7 +175,7 @@ export class AmpForm {
   /** @private */
   installEventHandlers_() {
     this.form_.addEventListener(
-        'submit', e => this.handleSubmitEvent_(e), true);
+        'submit', this.handleSubmitEvent_.bind(this), true);
     this.form_.addEventListener('blur', e => {
       onInputInteraction_(e);
       this.validator_.onBlur(e);
@@ -210,7 +210,13 @@ export class AmpForm {
    * For example, action service shouldn't trigger 'submit' event if form is actually
    * invalid. stopImmediatePropagation allows us to make sure we don't trigger it.
    *
-   * @param {Event} event
+   * This prevents the default submission event in any of following cases:
+   *   - The form is still finishing a previous submission.
+   *   - The form is invalid.
+   *   - Handling an XHR submission.
+   *   - It's a non-XHR POST submission (unsupported).
+   * 
+   * @param {!Event} event
    * @private
    */
   handleSubmitEvent_(event) {
