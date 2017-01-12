@@ -79,7 +79,7 @@ export class AmpViewerIntegration {
             dev().assertString(this.unconfirmedViewerOrigin_));
 
           listenOnce(
-            this.win, 'unload', this.handleUnload.bind(this, messaging));
+            this.win, 'unload', this.handleUnload_.bind(this, messaging));
         });
   }
 
@@ -95,9 +95,11 @@ export class AmpViewerIntegration {
 
   /**
    * Notifies the viewer when this document is unloaded.
+   * @param {!Messaging} messaging
    * @return {Promise<*>|undefined}
+   * @private
    */
-  handleUnload(messaging) {
+  handleUnload_(messaging) {
     return messaging.sendRequest(RequestNames.UNLOADED, {}, true);
   }
 }
