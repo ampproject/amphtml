@@ -221,8 +221,17 @@ export function upgradeElementInChildWindow(parentWin, childWin, name) {
 /**
  * Applies layout to the element. Visible for testing only.
  * @param {!Element} element
+ * @return {!Layout}
  */
 export function applyLayout_(element) {
+  // Check if the layout has already been done by the server.
+  const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
+  if (completedLayoutAttr) {
+    return /** @type {!Layout} */ (dev().assert(
+        parseLayout(completedLayoutAttr)));
+  }
+
+  // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
   const widthAttr = element.getAttribute('width');
   const heightAttr = element.getAttribute('height');

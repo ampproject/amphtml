@@ -382,4 +382,26 @@ describe('Layout', () => {
       applyLayout_(pixel);
     }).to.throw(/Invalid height value/);
   });
+
+  it('should trust server layout', () => {
+    div.setAttribute('i-amphtml-layout', 'flex-item');
+    div.setAttribute('layout', 'responsive');
+    div.setAttribute('width', 'invalid');
+    div.setAttribute('height', 'invalid');
+    div.className = 'other';
+    div.style.width = '111px';
+    div.style.height = '112px';
+    expect(applyLayout_(div)).to.equal(Layout.FLEX_ITEM);
+    // No other attributes are read or changed.
+    expect(div.style.width).to.equal('111px');
+    expect(div.style.height).to.equal('112px');
+    expect(div.className).to.equal('other');
+    expect(div.style.display).to.equal('');
+    expect(div.children.length).to.equal(0);
+  });
+
+  it('should fail when server generates invalid layout', () => {
+    div.setAttribute('i-amphtml-layout', 'invalid');
+    expect(() => applyLayout_(div)).to.throw(/failed/);
+  });
 });
