@@ -25,19 +25,18 @@ import {
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
-import * as sinon from 'sinon';
 import {createIframePromise} from '../../../../testing/iframe';
 import {upgradeOrRegisterElement} from '../../../../src/custom-element';
 
 function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
   const doc = opt_doc || document;
   const tag = opt_tag || 'amp-ad';
-  const adsenseImplElem = doc.createElement(tag);
-  adsenseImplElem.setAttribute('type', 'adsense');
+  const element = doc.createElement(tag);
+  element.setAttribute('type', 'adsense');
   for (const attrName in attributes) {
-    adsenseImplElem.setAttribute(attrName, attributes[attrName]);
+    element.setAttribute(attrName, attributes[attrName]);
   }
-  return adsenseImplElem;
+  return element;
 }
 
 describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
@@ -49,14 +48,14 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         () => {
           return ['google'];
         });
-    adsenseImplElem = createAdsenseImplElement({
+    element = createAdsenseImplElement({
       'data-ad-client': 'adsense',
       'width': '320',
       'height': '50',
       'data-experiment-id': '8675309',
     });
-    document.body.appendChild(adsenseImplElem);
-    adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
+    document.body.appendChild(element);
+    impl = new AmpAdNetworkAdsenseImpl(element);
   });
 
   afterEach(() => {
@@ -104,10 +103,10 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         }, fixture.doc, 'amp-a4a');
         return fixture.addElement(elem).then(addedElem => {
           // Create AdsenseImpl instance.
-          adsenseImpl = new AmpAdNetworkAdsenseImpl(addedElem);
+          impl = new AmpAdNetworkAdsenseImpl(addedElem);
           // The expected url parameters whose values are known and fixed.
           const urlParams = Object.assign({}, invariantParams, {pv: '2'});
-          return adsenseImpl.getAdUrl().then(adUrl => {
+          return impl.getAdUrl().then(adUrl => {
             const queryPairs = adUrl.split('?')[1].split('&');
             const actualQueryParams = {};
             queryPairs.forEach(pair => {
@@ -160,9 +159,9 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             AmpAdNetworkAdsenseImpl);
         const ampStickyAd = fixture.doc.createElement('amp-sticky-ad');
         ampStickyAd.setAttribute('layout', 'nodisplay');
-        ampStickyAd.appendChild(adsenseImplElem);
+        ampStickyAd.appendChild(element);
         fixture.doc.body.appendChild(ampStickyAd);
-        return adsenseImpl.getAdUrl().then(adUrl => {
+        return impl.getAdUrl().then(adUrl => {
           expect(adUrl.indexOf('amp_ct=AMP-STICKY-AD') >= 0).to.be.true;
         });
       });
@@ -196,18 +195,18 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         }, fixture.doc, 'amp-a4a');
         return fixture.addElement(elem1).then(addedElem1 => {
           // Create AdsenseImpl instance.
-          const adsenseImpl1 = new AmpAdNetworkAdsenseImpl(addedElem1);
-          return adsenseImpl1.getAdUrl().then(adUrl1 => {
+          const impl1 = new AmpAdNetworkAdsenseImpl(addedElem1);
+          return impl1.getAdUrl().then(adUrl1 => {
             expect(adUrl1.indexOf('pv=2') >= 0).to.be.true;
             expect(adUrl1.indexOf('prev_fmts') < 0).to.be.true;
             return fixture.addElement(elem2).then(addedElem2 => {
-              const adsenseImpl2 = new AmpAdNetworkAdsenseImpl(addedElem2);
-              return adsenseImpl2.getAdUrl().then(adUrl2 => {
+              const impl2 = new AmpAdNetworkAdsenseImpl(addedElem2);
+              return impl2.getAdUrl().then(adUrl2 => {
                 expect(adUrl2.indexOf('pv=1') >= 0).to.be.true;
                 expect(adUrl2.indexOf('prev_fmts=320x50') >= 0).to.be.true;
                 return fixture.addElement(elem3).then(addedElem3 => {
-                  const adsenseImpl3 = new AmpAdNetworkAdsenseImpl(addedElem3);
-                  return adsenseImpl3.getAdUrl().then(adUrl3 => {
+                  const impl3 = new AmpAdNetworkAdsenseImpl(addedElem3);
+                  return impl3.getAdUrl().then(adUrl3 => {
                     expect(adUrl3.indexOf('pv=2') >= 0).to.be.true;
                     // By some quirk of the test infrastructure, when this test
                     // is ran individually, each added slot after the first one
@@ -231,10 +230,10 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       expect(impl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      adsenseImplElem = createAdsenseImplElement({'data-ad-client': 'adsense'},
+      element = createAdsenseImplElement({'data-ad-client': 'adsense'},
           document, 'amp-ad-network-adsense-impl');
-      adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
-      expect(adsenseImpl.isValidElement()).to.be.false;
+      impl = new AmpAdNetworkAdsenseImpl(element);
+      expect(impl.isValidElement()).to.be.false;
     });
     it.skip('should be NOT valid (missing ad client)', () => {
       // TODO(taymonbeal): reenable this test after clarifying validation
@@ -243,10 +242,10 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       expect(impl.isValidElement()).to.be.false;
     });
     it('should be valid (amp-embed)', () => {
-      adsenseImplElem = createAdsenseImplElement({'data-ad-client': 'adsense'},
+      element = createAdsenseImplElement({'data-ad-client': 'adsense'},
           document, 'amp-embed');
-      adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
-      expect(adsenseImpl.isValidElement()).to.be.true;
+      impl = new AmpAdNetworkAdsenseImpl(element);
+      expect(impl.isValidElement()).to.be.true;
     });
   });
 
@@ -285,19 +284,19 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
       impl.onLayoutMeasure();
-      impl.getAdUrl().then(url => {
+      return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
           '\\?client=adsense&format=0x0&w=0&h=0&adtest=false' +
-          '&adk=4075575999&bc=1&vis=1&wgl=1' +
+          '&adk=[0-9]+&bc=1&pv=1&vis=1&wgl=1&prev_fmts=320x50%2C0x0%2C0x0' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           // Depending on how the test is run, it can get different
           // results.
-          '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=1597394791' +
-          '&c=[0-9]+&output=html&nhd=1&biw=[0-9]+&bih=[0-9]+' +
-          '&adx=-10000&ady=-10000&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
+          '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
+          '&c=[0-9]+&output=html&nhd=1&eid=8675309&biw=[0-9]+&bih=[0-9]+' +
+          '&adx=8&ady=8&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
-          '&brdim=[0-9]+(%2C[0-9]+){9}' +
+          '&oid=2&brdim=[0-9]+(%2C[0-9]+){9}' +
           '&isw=[0-9]+&ish=[0-9]+&dtd=[0-9]+' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +

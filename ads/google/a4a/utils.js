@@ -120,6 +120,10 @@ export function googleAdUrl(
     const viewportSize = viewport.getSize();
     const dtdParam = {name: 'dtd'};
     const adElement = a4a.element;
+    if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
+      queryParams.push({name: 'amp_ct',
+                        value: adElement.parentElement.tagName});
+    }
     const allQueryParams = queryParams.concat(
       [
         {
@@ -147,6 +151,7 @@ export function googleAdUrl(
         {name: 'u_h', value: screen ? screen.height : null},
         {name: 'u_tz', value: -new Date().getTimezoneOffset()},
         {name: 'u_his', value: getHistoryLength(win)},
+        {name: 'oid', value: '2'},
         {name: 'brdim', value: additionalDimensions(win, viewportSize)},
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},

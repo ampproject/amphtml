@@ -107,6 +107,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
+    const slotId = this.element.getAttribute('data-amp-slot-index');
     const adk = this.adKey_(format);
     this.uniqueSlotId_ = slotId + adk;
     const sharedStateParams = sharedState.addNewSlot(
