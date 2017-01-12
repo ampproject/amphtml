@@ -18,6 +18,7 @@ import {BaseElement} from '../src/base-element';
 import {Layout} from '../src/layout';
 import {dev, user} from '../src/log';
 import {registerElement} from '../src/custom-element';
+import {timerFor} from '../src/timer';
 import {urlReplacementsForDoc} from '../src/url-replacements';
 import {viewerForDoc} from '../src/viewer';
 
@@ -39,8 +40,8 @@ export class AmpPixel extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    // "fixed" layout is supported, but in reality it's always width/height = 0.
-    return layout == Layout.FIXED;
+    // No matter what layout is: the pixel is always non-displayed.
+    return true;
   }
 
   /** @override */
@@ -58,7 +59,9 @@ export class AmpPixel extends BaseElement {
    * @private
    */
   trigger_() {
-    this.triggerPromise_ = Promise.resolve().then(() => {
+    // Delay(1) provides a rudimentary "idle" signal.
+    // TODO(dvoytenko): use an improved idle signal when available.
+    this.triggerPromise_ = timerFor(this.win).promise(1).then(() => {
       const src = this.element.getAttribute('src');
       return urlReplacementsForDoc(this.getAmpDoc())
           .expandAsync(this.assertSource_(src))
