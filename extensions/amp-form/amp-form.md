@@ -226,6 +226,20 @@ Publishers can render these in a template inside their forms as follows.
 
 See the [full example here](../../examples/forms.amp.html).
 
+### Redirecting after a submission
+`amp-form` also allows publishers to redirect users to a new page after a submission happens through `AMP-Redirect-To` response header.
+
+Note that you'd also have to update your `Access-Control-Expose-Headers` response header to include `AMP-Redirect-To` to the list of allowed headers.
+
+The redirect URL must be absolute HTTPS URL otherwise AMP will throw an error and redirection won't happen. 
+
+**Known Issue**: Due to an [issue in Safari iOS](https://bugs.webkit.org/show_bug.cgi?id=165627) redirecting to deep linked URLs (URLs that would actually end up opening a native app) might fail when the AMP document is embedded. This is [tracked in this issue](https://github.com/ampproject/amphtml/issues/6953). 
+
+```
+AMP-Redirect-To: https://example.com/forms/thank-you
+Access-Control-Expose-Headers: AMP-Redirect-To, Another-Header, And-Some-More
+```
+
 ## Polyfills
 `amp-form` provide polyfills for behaviors and functionality missing from some browsers or being implemented in the next version of CSS.
 
