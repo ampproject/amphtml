@@ -175,6 +175,8 @@ export class AmpSlideScroll extends BaseSlides {
       const newIndex = Number(args['index']);
       if (isFinite(newIndex)) {
         this.showSlide_(newIndex);
+      } else {
+        user().warn(TAG, 'Invalid [slide] value: %s', newIndex);
       }
     });
   }
