@@ -554,6 +554,42 @@ describe('amp-a4a', () => {
         });
       });
     });
+
+    it('should call handleResize for multi-size ads', () => {
+      // Make sure there's no signature, so that we go down the 3p iframe path.
+      delete headers[SIGNATURE_HEADER];
+      // If rendering type is safeframe, we SHOULD attach a SafeFrame.
+      headers[RENDERING_TYPE_HEADER] = 'safeframe';
+      headers['X-CreativeSize'] = '320x50';
+      xhrMock.withArgs(TEST_URL, {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        a4aElement.setAttribute('width', 480);
+        a4aElement.setAttribute('height', 75);
+        a4aElement.setAttribute('type', 'doubleclick');
+        const a4a = new MockA4AImpl(a4aElement);
+        const handleResizeMock = sandbox.stub(a4a, 'handleResize');
+        doc.body.appendChild(a4aElement);
+        a4a.onLayoutMeasure();
+        const renderPromise = a4a.layoutCallback();
+        return renderPromise.then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          const child = a4aElement.querySelector('iframe[name]');
+          expect(child).to.be.ok;
+          expect(child.getAttribute('src')).to.have.string('safeframe');
+          expect(child.getAttribute('name')).to.match(/[^;]+;\d+;[\s\S]+/);
+          expect(handleResizeMock).to.be.called.once;
+        });
+      });
+    });
   });
 
   describe('#onLayoutMeasure', () => {
