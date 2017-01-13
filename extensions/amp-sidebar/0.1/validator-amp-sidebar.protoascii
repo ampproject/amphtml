@@ -20,7 +20,7 @@ tags: {  # amp-sidebar
   mandatory_parent: "HEAD"
   spec_name: "amp-sidebar extension .js script"
   unique_warning: true
-  also_requires_tag_warning: "amp-sidebar"
+  extension_unused_unless_tag_present: "amp-sidebar"
   attrs: {
     name: "async"
     mandatory: true

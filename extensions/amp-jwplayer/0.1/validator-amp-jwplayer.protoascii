@@ -21,7 +21,7 @@ tags: {  # amp-jwplayer
   spec_name: "amp-jwplayer extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-jwplayer"
+  extension_unused_unless_tag_present: "amp-jwplayer"
   attrs: {
     name: "async"
     mandatory: true

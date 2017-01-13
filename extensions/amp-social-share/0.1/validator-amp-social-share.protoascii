@@ -21,7 +21,7 @@ tags: {  # amp-social-share
   spec_name: "amp-social-share extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-social-share"
+  extension_unused_unless_tag_present: "amp-social-share"
   attrs: {
     name: "async"
     mandatory: true

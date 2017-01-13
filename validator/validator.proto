@@ -281,7 +281,7 @@ message ReferencePoint {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 26
+// NEXT AVAILABLE TAG: 27
 message TagSpec {
   // The HtmlFormat field tells the validator which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
@@ -341,6 +341,9 @@ message TagSpec {
   // Same as also_requires_tag, but rather than invalidating a document if not
   // present, emits a deprecation warning.
   repeated string also_requires_tag_warning = 22;
+  // Similar to also_requires_tag_warning, except emits a more specific warning
+  // string with different wording. See WARNING_EXTENSION_UNUSED.
+  repeated string extension_unused_unless_tag_present = 26;
   // Expresses a generic condition which is satisfied if this tag is found. Used
   // in combination with the `requires` attribute on a different tag.
   repeated string satisfies = 23;
@@ -396,25 +399,12 @@ message ValidatorRules {
 
   // Spec URL for information about mustache templates.
   optional string template_spec_url = 8;
-  // If we encounter a manufactured body tag, this flag determines if
-  // it is treated as an error or a warning.
-  // TODO(gregable): Eventually change this to true and remove the code
-  // for it, making the error permanent.
-  optional bool manufactured_body_tag_is_error = 11 [default = false];
-  // Spec URL for information about manufactured body tags.
-  optional string manufactured_body_spec_url = 12;
-
-  // If enabled, reference points can define additinal reference points
-  // for child elements.
-  // TODO(powdercloud): Flip to true and remove this flag.
-  optional bool reference_points_can_define_reference_points = 14
-      [default = false];
 
   repeated ErrorFormat error_formats = 9;
   repeated ErrorSpecificity error_specificity = 13;
 
   // Deprecated fields, do not reuse.
-  extensions 5, 2;
+  extensions 2, 5, 11, 12, 14;
 }
 
 // We categorize error messages into higher-level groups. This makes it
@@ -471,12 +461,13 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 79
+  // NEXT AVAILABLE TAG: 80
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
     WARNING_TAG_REQUIRED_BY_MISSING = 76;
+    WARNING_EXTENSION_UNUSED = 79;
     ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;
@@ -520,7 +511,6 @@ message ValidationError {
     DISALLOWED_CHILD_TAG_NAME = 57;
     DISALLOWED_FIRST_CHILD_TAG_NAME = 58;
     DISALLOWED_MANUFACTURED_BODY = 64;
-    DEPRECATED_MANUFACTURED_BODY = 65;
     CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT = 66;
     MANDATORY_REFERENCE_POINT_MISSING = 67;
     DUPLICATE_REFERENCE_POINT = 68;

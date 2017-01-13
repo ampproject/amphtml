@@ -20,7 +20,7 @@ tags: {  # amp-live-list
   spec_name: "amp-live-list extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-live-list"
+  extension_unused_unless_tag_present: "amp-live-list"
   attrs: {
     name: "async"
     mandatory: true

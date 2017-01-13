@@ -21,7 +21,7 @@ tags: {  # amp-youtube
   spec_name: "amp-youtube extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-youtube"
+  extension_unused_unless_tag_present: "amp-youtube"
   attrs: {
     name: "async"
     mandatory: true
