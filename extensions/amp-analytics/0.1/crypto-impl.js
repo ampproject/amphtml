@@ -49,11 +49,11 @@ export class Crypto {
    * Returns the SHA-384 hash of the input string in a number array.
    * Input string cannot contain chars out of range [0,255].
    * @param {string|!Uint8Array} input
-   * @returns {!Promise<!Uint8Array>}
+   * @return {!Promise<!Uint8Array>}
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384(input) {
-    if (!(input instanceof Uint8Array)) {
+    if (typeof input === 'string') {
       input = stringToBytes(input);
     }
 
@@ -73,12 +73,11 @@ export class Crypto {
                   // Log unexpected fallback.
                   dev().error(TAG, FALLBACK_MSG, e);
                 }
-                return this.loadPolyfill_()
-                    .then(polyfill => polyfill.sha384(input));
+                return this.loadPolyfill_().then(() => this.sha384(input));
               });
     } catch (e) {
       dev().error(TAG, FALLBACK_MSG, e);
-      return this.loadPolyfill_().then(polyfill => polyfill.sha384(input));
+      return this.loadPolyfill_().then(() => this.sha384(input));
     }
   }
 
@@ -87,7 +86,7 @@ export class Crypto {
    * base64 (using -_. instead of +/=).
    * Input string cannot contain chars out of range [0,255].
    * @param {string|!Uint8Array} input
-   * @returns {!Promise<string>}
+   * @return {!Promise<string>}
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384Base64(input) {
@@ -99,7 +98,7 @@ export class Crypto {
    * of [0, 1).
    * Input string cannot contain chars out of range [0,255].
    * @param {string|!Uint8Array} input
-   * @returns {!Promise<number>}
+   * @return {!Promise<number>}
    */
   uniform(input) {
     return this.sha384(input).then(buffer => {
@@ -115,7 +114,7 @@ export class Crypto {
 
   /**
    * Loads Crypto polyfill library.
-   * @returns {!Promise}
+   * @return {!Promise<{sha384: function((string|Uint8Array))}>}
    * @private
    */
   loadPolyfill_() {
