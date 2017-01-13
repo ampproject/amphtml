@@ -106,6 +106,11 @@ The following values can be set in the `laterpay` config object:
     <td>&lt;boolean&gt;</td>
     <td>If true, scrolls the page to the top after the authorization process is sucessful. This can be helpful if the place where you show the dialog is further below in the page and the user could be confused by their current scroll position after returning to the page.</td>
   </tr>
+  <tr>
+    <td class="col-fourty"><code>sandbox</code></td>
+    <td>&lt;boolean&gt;</td>
+    <td>Only needed if you are using the sandbox mode to test out your server configuration. You also need to use AMP's [development mode](https://www.ampproject.org/docs/reference/spec#amp-runtime).</td>
+  </tr>
 </table>
 
 ## Using Access Content Markup and showing the purchase list

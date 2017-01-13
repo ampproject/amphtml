@@ -29,6 +29,7 @@ import {xhrFor} from '../../../src/xhr';
 
 const TAG = 'amp-access-laterpay';
 const CONFIG_URL = 'https://connector.laterpay.net';
+const SANDBOX_CONFIG_URL = 'https://connector.sandbox.laterpaytest.net';
 const CONFIG_BASE_PATH = '/api/public/amp?' +
                          'article_url=CANONICAL_URL' +
                          '&amp_reader_id=READER_ID' +
@@ -51,6 +52,7 @@ const DEFAULT_MESSAGES = {
  *   scrollTopAfterAuth: boolean=,
  *   locale: string=,
  *   localeMessages: object=,
+ *   sandbox: boolean=,
  * }}
  */
 let LaterpayConfigDef;
@@ -125,12 +127,6 @@ export class LaterpayVendor {
     /** @private {?Node} */
     this.purchaseButton_ = null;
 
-    const configUrl = (
-      (getMode().localDev || getMode().development) &&
-      this.laterpayConfig_.configUrl
-    ) ? this.laterpayConfig_.configUrl
-      : CONFIG_URL;
-
     /** @private {string} */
     this.currentLocale_ = this.laterpayConfig_.locale || 'en';
 
@@ -139,7 +135,7 @@ export class LaterpayVendor {
                   this.laterpayConfig_.localeMessages || {});
 
     /** @private {string} */
-    this.purchaseConfigBaseUrl_ = configUrl + CONFIG_BASE_PATH;
+    this.purchaseConfigBaseUrl_ = this.getConfigUrl_() + CONFIG_BASE_PATH;
     const articleId = this.laterpayConfig_.articleId;
     if (articleId) {
       this.purchaseConfigBaseUrl_ +=
@@ -156,6 +152,23 @@ export class LaterpayVendor {
     this.xhr_ = xhrFor(this.win_);
 
     installStyles(this.win_.document, CSS, () => {}, false, TAG);
+  }
+
+  /**
+   * @private
+   * @return {!string}
+   */
+  getConfigUrl_() {
+    if (
+      (getMode().localDev || getMode().development) &&
+      this.laterpayConfig_.configUrl
+    ) {
+      return this.laterpayConfig_.configUrl;
+    } else if (getMode().development && this.laterpayConfig_.sandbox) {
+      return SANDBOX_CONFIG_URL;
+    } else {
+      return CONFIG_URL;
+    }
   }
 
   /**
