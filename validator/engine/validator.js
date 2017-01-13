@@ -579,13 +579,11 @@ class ParsedAttrSpecs {
  */
 class ParsedTagSpec {
   /**
-   * @param {?string} templateSpecUrl
    * @param {!ParsedAttrSpecs} parsedAttrSpecs
    * @param {boolean} shouldRecordTagspecValidated
    * @param {!amp.validator.TagSpec} tagSpec
    */
-  constructor(
-      templateSpecUrl, parsedAttrSpecs, shouldRecordTagspecValidated, tagSpec) {
+  constructor(parsedAttrSpecs, shouldRecordTagspecValidated, tagSpec) {
     /**
      * @type {!amp.validator.TagSpec}
      * @private
@@ -618,11 +616,6 @@ class ParsedTagSpec {
      * @private
      */
     this.mandatoryOneofs_ = [];
-    /**
-     * @type {?string}
-     * @private
-     */
-    this.templateSpecUrl_ = templateSpecUrl;
     /**
      * @type {boolean}
      * @private
@@ -799,13 +792,6 @@ class ParsedTagSpec {
    */
   hasAttrWithName(name) {
     return this.attrsByName_.hasOwnProperty(name);
-  }
-
-  /**
-   * @return {?string}
-   */
-  getTemplateSpecUrl() {
-    return this.templateSpecUrl_;
   }
 
   /**
@@ -1565,8 +1551,10 @@ function computeCssParsingConfig(cssSpec) {
       goog.asserts.fail('Unrecognized atRuleSpec type: ' + atRuleSpec.type);
     }
   }
-  const config = { atRuleSpec: ampAtRuleParsingSpec,
-                   defaultSpec: parse_css.BlockType.PARSE_AS_IGNORE };
+  const config = {
+    atRuleSpec: ampAtRuleParsingSpec,
+    defaultSpec: parse_css.BlockType.PARSE_AS_IGNORE
+  };
   if (cssSpec.atRuleSpec.length > 0) {
     config.defaultSpec = ampAtRuleParsingSpec['$DEFAULT'];
   }
@@ -1750,8 +1738,8 @@ class CdataMatcher {
       const cssParsingConfig = computeCssParsingConfig(cdataSpec.cssSpec);
       /** @type {!parse_css.Stylesheet} */
       const sheet = parse_css.parseAStylesheet(
-          tokenList, cssParsingConfig.atRuleSpec,
-          cssParsingConfig.defaultSpec, cssErrors);
+          tokenList, cssParsingConfig.atRuleSpec, cssParsingConfig.defaultSpec,
+          cssErrors);
       if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -1851,7 +1839,15 @@ class CdataMatcher {
  * @private
  */
 class Context {
-  constructor() {
+  /**
+   * @param {!amp.validator.ValidatorRules} rules
+   */
+  constructor(rules) {
+    /**
+     * @type {!amp.validator.ValidatorRules}
+     * @private
+     */
+    this.rules_ = rules;
     /**
      * The mandatory alternatives that we've validated.
      * @type {!Object<string, ?>}
@@ -1891,6 +1887,11 @@ class Context {
      * @private
      */
     this.firstUrlSeenTag_ = null;
+  }
+
+  /** @return {!amp.validator.ValidatorRules} */
+  getRules() {
+    return this.rules_;
   }
 
   /**
@@ -3103,7 +3104,7 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
           amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
           context.getDocLocator(),
           /* params */[attrName, getTagSpecName(parsedTagSpec.getSpec())],
-          parsedTagSpec.getTemplateSpecUrl(), result);
+          context.getRules().templateSpecUrl, result);
     } else {
       context.addError(
           amp.validator.ValidationError.Severity.ERROR,
@@ -3135,7 +3136,7 @@ function validateAttrValueBelowTemplateTag(
           amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
           context.getDocLocator(),
           /* params */[attrName, getTagSpecName(spec), attrValue],
-          parsedTagSpec.getTemplateSpecUrl(), result);
+          context.getRules().templateSpecUrl, result);
     } else {
       result.status = amp.validator.ValidationResult.Status.FAIL;
     }
@@ -3147,7 +3148,7 @@ function validateAttrValueBelowTemplateTag(
           amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
           context.getDocLocator(),
           /* params */[attrName, getTagSpecName(spec), attrValue],
-          parsedTagSpec.getTemplateSpecUrl(), result);
+          context.getRules().templateSpecUrl, result);
     } else {
       result.status = amp.validator.ValidationResult.Status.FAIL;
     }
@@ -3704,7 +3705,7 @@ class ParsedValidatorRules {
         goog.asserts.assert(this.rules_.templateSpecUrl !== null);
       }
       const parsedTagSpec = new ParsedTagSpec(
-          this.rules_.templateSpecUrl, this.parsedAttrSpecs_,
+          this.parsedAttrSpecs_,
           shouldRecordTagspecValidated(tag, tagSpecIdsToTrack), tag);
       this.tagSpecById_[tag.tagSpecId] = parsedTagSpec;
       if (!parsedTagSpec.isReferencePoint()) {
@@ -3748,6 +3749,11 @@ class ParsedValidatorRules {
             errorSpecificity.specificity;
       }
     }
+  }
+
+  /** @return {!amp.validator.ValidatorRules} */
+  getRules() {
+    return this.rules_;
   }
 
   /**
@@ -4052,17 +4058,17 @@ amp.validator.ValidationHandler =
     this.validationResult_.status =
         amp.validator.ValidationResult.Status.UNKNOWN;
     /**
-     * Validation Context.
-     * @type {!Context}
-     * @private
-     */
-    this.context_ = new Context();
-    /**
      * Rules from parsed JSON configuration.
      * @type {!ParsedValidatorRules}
      * @private
      */
     this.rules_ = getParsedValidatorRules(htmlFormat);
+    /**
+     * Validation Context.
+     * @type {!Context}
+     * @private
+     */
+    this.context_ = new Context(this.rules_.getRules());
   }
 
   /**
@@ -4123,7 +4129,7 @@ amp.validator.ValidationHandler =
           amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY,
           this.context_.getDocLocator(),
-          /* params */[], /* url */"", this.validationResult_);
+          /* params */[], /* url */ '', this.validationResult_);
     } else {
       this.validationResult_.status =
           amp.validator.ValidationResult.Status.FAIL;
