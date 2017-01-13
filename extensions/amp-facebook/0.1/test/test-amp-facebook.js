@@ -56,6 +56,10 @@ describe('amp-facebook', function() {
     });
   }
 
+  afterEach(() => {
+    toggleExperiment(window, 'sentinel-name-change', false);
+  });
+
   it('renders iframe in amp-facebook', () => {
     return getAmpFacebook(fbPostHref).then(ampFB => {
       const iframe = ampFB.firstChild;

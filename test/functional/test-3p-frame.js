@@ -67,6 +67,7 @@ describe('3p-frame', () => {
       m.parentElement.removeChild(m);
     }
     document.body.removeChild(container);
+    toggleExperiment(window, 'sentinel-name-change', false);
   });
 
   function addCustomBootstrap(url) {
@@ -195,7 +196,8 @@ describe('3p-frame', () => {
           ',"startTime":1234567888' +
           ',"experimentToggles":{"exp-a":true,"exp-b":true' +
           (sentinelName == 'sentinel' ?
-          ',"sentinel-name-change": true}' : '}') +
+          ',"sentinel-name-change": true}' :
+          ',"sentinel-name-change": false}') +
           ',"' + sentinelName + '":"' + sentinel + '"' +
           ',"initialIntersection":{"time":1234567888,' +
           '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
