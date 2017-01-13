@@ -183,12 +183,16 @@ export class AmpForm {
    * @private
    */
   whenDependenciesReady_() {
-    const usedDeps = this.form_.querySelectorAll(EXTERNAL_DEPS.join(','));
     const depsDict = {};
     const depsPromises = [];
-    for (let i = usedDeps.length - 1; i >= 0; i--) {
-      const tagName = usedDeps[i].tagName.toLowerCase();
-      if (depsDict[tagName] === undefined) {
+    for (let i = EXTERNAL_DEPS.length - 1; i >= 0; i--) {
+      const tagName = EXTERNAL_DEPS[i];
+      const depIsUsed = this.form_.getElementsByTagName(tagName).length !== 0;
+      if (depIsUsed && depsDict[tagName] === undefined) {
+        // TODO(mkhatib, #7032): Implement a way to wait for an element to be built to
+        // make sure it is really "ready" and has been built.
+        // This currently still have a small chance of race condition if the
+        // submission went through before the build callback has been called.
         depsPromises.push(this.extensions_.waitForExtension(tagName));
         depsDict[tagName] = true;
       }
