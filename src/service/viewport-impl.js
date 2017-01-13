@@ -108,7 +108,7 @@ export class Viewport {
     this./*OK*/scrollLeft_ = null;
 
     /** @private {number} */
-    this.paddingTop_ = viewer.getPaddingTop();
+    this.paddingTop_ = Number(viewer.getParam('paddingTop') || 0);
 
     /** @private {number} */
     this.lastPaddingTop_ = 0;
@@ -151,7 +151,7 @@ export class Viewport {
     /** @private @const (function()) */
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
-    this.viewer_.onViewportEvent(this.updateOnViewportEvent_.bind(this));
+    this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.binding_.updatePaddingTop(this.paddingTop_);
 
     this.binding_.onScroll(this.scroll_.bind(this));
@@ -584,28 +584,31 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} event
+   * @param {!JSONType} data
    * @private
    */
-  updateOnViewportEvent_(event) {
-    const paddingTop = event['paddingTop'];
-    const duration = event['duration'] || 0;
-    const curve = event['curve'];
+  updateOnViewportEvent_(data) {
+    const paddingTop = data['paddingTop'];
+    const duration = data['duration'] || 0;
+    const curve = data['curve'];
     /** @const {boolean} */
-    const transient = event['transient'];
+    const transient = data['transient'];
 
-    if (paddingTop != this.paddingTop_) {
-      this.lastPaddingTop_ = this.paddingTop_;
-      this.paddingTop_ = paddingTop;
-      if (this.paddingTop_ < this.lastPaddingTop_) {
-        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-        this.animateFixedElements_(duration, curve, transient);
-      } else {
-        this.animateFixedElements_(duration, curve, transient).then(() => {
-          this.binding_.showViewerHeader(transient, this.paddingTop_);
-        });
-      }
+    if (paddingTop == undefined || paddingTop == this.paddingTop_) {
+      return;
     }
+
+    this.lastPaddingTop_ = this.paddingTop_;
+    this.paddingTop_ = paddingTop;
+    if (this.paddingTop_ < this.lastPaddingTop_) {
+      this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+      this.animateFixedElements_(duration, curve, transient);
+    } else {
+      this.animateFixedElements_(duration, curve, transient).then(() => {
+        this.binding_.showViewerHeader(transient, this.paddingTop_);
+      });
+    }
+
   }
 
   /**
