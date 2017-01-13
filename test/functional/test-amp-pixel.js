@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {installUrlReplacementsForEmbed,}
+    from '../../src/service/url-replacements-impl';
+import {VariableSource} from '../../src/service/variable-source';
+
 
 describes.realWin('amp-pixel', {amp: true}, env => {
   let win;
@@ -101,6 +105,71 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     return trigger(url).then(img => {
       expect(img.src).to.equal(
           'https://pubads.g.doubleclick.net/activity;r=111');
+    });
+  });
+});
+
+
+describes.realWin('amp-pixel in embed', {
+  amp: {
+    ampdoc: 'fie',
+  },
+}, env => {
+
+  class TestVariableSource extends VariableSource {
+    constructor() {
+      super();
+    }
+    initialize() {
+      this.set('TEST', () => 'value1');
+    }
+  }
+
+  let win, parentWin;
+  let whenFirstVisiblePromise, whenFirstVisibleResolver;
+  let pixel;
+  let implementation;
+
+  beforeEach(() => {
+    win = env.win;
+    parentWin = env.parentWin;
+
+    const viewer = parentWin.services.viewer.obj;
+    whenFirstVisiblePromise = new Promise(resolve => {
+      whenFirstVisibleResolver = resolve;
+    });
+    sandbox.stub(viewer, 'whenFirstVisible', () => whenFirstVisiblePromise);
+
+    installUrlReplacementsForEmbed(env.ampdoc, win, new TestVariableSource());
+
+    pixel = win.document.createElement('amp-pixel');
+    pixel.setAttribute('src',
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+    win.document.body.appendChild(pixel);
+    pixel.build();
+    implementation = pixel.implementation_;
+  });
+
+  /**
+   * @param {string=} opt_src
+   * @return {!Promise<?Image>}
+   */
+  function trigger(opt_src) {
+    if (opt_src) {
+      pixel.setAttribute('src', opt_src);
+    }
+    whenFirstVisibleResolver();
+    return whenFirstVisiblePromise.then(() => {
+      expect(implementation.triggerPromise_).to.be.not.null;
+      return implementation.triggerPromise_;
+    });
+  }
+
+  it('should use embed\'s URL replacer', () => {
+    const url = 'https://pubads.g.doubleclick.net/activity;t=TEST';
+    return trigger(url).then(img => {
+      expect(img.src).to.equal(
+          'https://pubads.g.doubleclick.net/activity;t=value1');
     });
   });
 });
