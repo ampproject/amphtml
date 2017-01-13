@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {actionServiceForDoc} from '../../src/action';
 import {onDocumentFormSubmit_} from '../../src/document-submit';
 import * as sinon from 'sinon';
 
@@ -22,22 +23,27 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
   let evt;
   let tgt;
   let preventDefaultSpy;
+  let stopImmediatePropagationSpy;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     preventDefaultSpy = sandbox.spy();
+    stopImmediatePropagationSpy = sandbox.spy();
     tgt = document.createElement('form');
     tgt.action = 'https://www.google.com';
     tgt.target = '_blank';
-    tgt.checkValidity = sandbox.stub();
+    tgt.checkValidity = sandbox.stub().returns(true);
     evt = {
       target: tgt,
       preventDefault: preventDefaultSpy,
+      stopImmediatePropagation: stopImmediatePropagationSpy,
       defaultPrevented: false,
     };
+    document.body.appendChild(tgt);
   });
 
   afterEach(() => {
+    document.body.removeChild(tgt);
     sandbox.restore();
   });
 
@@ -120,9 +126,9 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     expect(tgt.checkValidity.callCount).to.equal(0);
   });
 
-  it('should do nothing of no target', () => {
+  it('should throw if no target', () => {
     evt.target = null;
-    onDocumentFormSubmit_(evt);
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(/Element expected/);
     expect(preventDefaultSpy.callCount).to.equal(0);
     expect(tgt.checkValidity.callCount).to.equal(0);
   });
@@ -155,5 +161,24 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     onDocumentFormSubmit_(evt);
     expect(preventDefaultSpy.callCount).to.equal(0);
     expect(tgt.checkValidity.callCount).to.equal(1);
+  });
+
+  it('should delegate xhr submit through action service', () => {
+    evt.target.setAttribute('action-xhr', 'https://example.com');
+    const actionService = actionServiceForDoc(tgt);
+    sandbox.stub(actionService, 'execute');
+    onDocumentFormSubmit_(evt);
+    expect(actionService.execute).to.have.been.calledOnce;
+    expect(actionService.execute).to.have.been.calledWith(
+        tgt, 'submit', null, tgt, evt);
+    expect(preventDefaultSpy).to.have.been.calledOnce;
+    expect(stopImmediatePropagationSpy).to.have.been.calledOnce;
+  });
+
+  it('should not delegate non-XHR submit through action service', () => {
+    const actionService = actionServiceForDoc(tgt);
+    sandbox.stub(actionService, 'execute');
+    onDocumentFormSubmit_(evt);
+    expect(actionService.execute).to.have.not.been.called;
   });
 });
