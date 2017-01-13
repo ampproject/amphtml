@@ -331,8 +331,8 @@ export class AmpForm {
     if (isCheckValiditySupported(this.win_.document)) {
       // Validity checking should always occur, novalidate only circumvent
       // reporting and blocking submission on non-valid forms.
-       const isValid = checkUserValidityOnSubmission(this.form_);
-       if (this.shouldValidate_ && !isValid) {
+      const isValid = checkUserValidityOnSubmission(this.form_);
+      if (this.shouldValidate_ && !isValid) {
         // TODO(#3776): Use .mutate method when it supports passing state.
         this.vsync_.run({
           measure: undefined,
@@ -342,7 +342,7 @@ export class AmpForm {
         });
         return false;
       }
-     }
+    }
     return true;
   }
 
