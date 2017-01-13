@@ -204,11 +204,12 @@ def ValueToString(descriptor, field_desc, value):
 # putting them inside a conditional with
 # amp.validator.GENERATE_DETAILED_ERRORS. The Closure compiler will then
 # leave them out via dead code elimination.
-SKIP_FIELDS_FOR_LIGHT = ['error_formats', 'spec_url', 'validator_revision',
-                         'spec_file_revision', 'template_spec_url',
-                         'min_validator_revision_required', 'deprecation_url',
-                         'errors', 'unique_warning',
-                         'also_requires_tag_warning']
+SKIP_FIELDS_FOR_LIGHT = [
+    'error_formats', 'spec_url', 'validator_revision', 'spec_file_revision',
+    'template_spec_url', 'min_validator_revision_required', 'deprecation_url',
+    'errors', 'unique_warning', 'also_requires_tag_warning',
+    'extension_unused_unless_tag_present'
+]
 SKIP_CLASSES_FOR_LIGHT = ['amp.validator.ValidationError']
 EXPORTED_CLASSES = ['amp.validator.ValidationResult',
                     'amp.validator.ValidationError']
@@ -236,6 +237,7 @@ TAG_NAME_REFERENCE_FIELD = [
     'amp.validator.ReferencePoint.tag_spec_name',
     'amp.validator.TagSpec.also_requires_tag',
     'amp.validator.TagSpec.also_requires_tag_warning',
+    'amp.validator.TagSpec.extension_unused_unless_tag_present',
 ]
 
 

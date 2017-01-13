@@ -21,7 +21,7 @@ tags: {  # amp-soundcloud
   spec_name: "amp-soundcloud extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-soundcloud"
+  extension_unused_unless_tag_present: "amp-soundcloud"
   attrs: {
     name: "async"
     mandatory: true

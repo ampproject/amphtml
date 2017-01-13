@@ -281,7 +281,7 @@ message ReferencePoint {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 26
+// NEXT AVAILABLE TAG: 27
 message TagSpec {
   // The HtmlFormat field tells the validator which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
@@ -341,6 +341,9 @@ message TagSpec {
   // Same as also_requires_tag, but rather than invalidating a document if not
   // present, emits a deprecation warning.
   repeated string also_requires_tag_warning = 22;
+  // Similar to also_requires_tag_warning, except emits a more specific warning
+  // string with different wording. See WARNING_EXTENSION_UNUSED.
+  repeated string extension_unused_unless_tag_present = 26;
   // Expresses a generic condition which is satisfied if this tag is found. Used
   // in combination with the `requires` attribute on a different tag.
   repeated string satisfies = 23;
@@ -464,12 +467,13 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 79
+  // NEXT AVAILABLE TAG: 80
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
     WARNING_TAG_REQUIRED_BY_MISSING = 76;
+    WARNING_EXTENSION_UNUSED = 79;
     ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;

@@ -566,8 +566,10 @@ describe('ValidatorRulesMakeSense', () => {
         };
         if (!extensionExceptions.hasOwnProperty(attrSpec.value)) {
           it('extensions require an additional tag', () => {
-            expect(tagSpec.alsoRequiresTag.length +
-                   tagSpec.alsoRequiresTagWarning.length).toBeGreaterThan(0);
+            expect(
+                tagSpec.alsoRequiresTag.length +
+                tagSpec.extensionUnusedUnlessTagPresent.length)
+                .toBeGreaterThan(0);
           });
         }
       }

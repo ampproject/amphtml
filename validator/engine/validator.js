@@ -752,6 +752,20 @@ class ParsedTagSpec {
   }
 
   /**
+   * TagSpecs for javascript extensions can also specify TagSpecs which,
+   * if not present on the page, indicate that the extension is unused.
+   * This accessor returns the IDs for the tagspecs that 'use' this extension.
+   * @return {!Array<number>}
+   */
+  getExtensionUnusedUnlessTagPresent() {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      return this.spec_.extensionUnusedUnlessTagPresent;
+    } else {
+      return [];
+    }
+  }
+
+  /**
    * A TagSpec may specify generic conditions which are required if the
    * tag is present. This accessor returns the list of those conditions.
    * @return {!Array<string>}
@@ -3683,20 +3697,27 @@ class ParsedValidatorRules {
 
     /** @type {!Object<number, boolean>} */
     const tagSpecIdsToTrack = {};
+    const extensionUnusedUnlessTagPresent = {};
     for (const tag of this.rules_.tags) {
       const tagSpecName = getTagSpecName(tag);
       if (tag.alsoRequiresTag.length > 0) {
         tagSpecIdsToTrack[tag.tagSpecId] = true;
       }
-      for (const alsoRequiresTag of tag.alsoRequiresTag) {
-        tagSpecIdsToTrack[alsoRequiresTag] = true;
+      for (const otherTag of tag.alsoRequiresTag) {
+        tagSpecIdsToTrack[otherTag] = true;
       }
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         if (tag.alsoRequiresTagWarning.length > 0) {
           tagSpecIdsToTrack[tag.tagSpecId] = true;
         }
-        for (const alsoRequiresTagWarning of tag.alsoRequiresTagWarning) {
-          tagSpecIdsToTrack[alsoRequiresTagWarning] = true;
+        for (const otherTag of tag.alsoRequiresTagWarning) {
+          tagSpecIdsToTrack[otherTag] = true;
+        }
+        if (tag.extensionUnusedUnlessTagPresent.length > 0) {
+          tagSpecIdsToTrack[tag.tagSpecId] = true;
+        }
+        for (const otherTag of tag.extensionUnusedUnlessTagPresent) {
+          tagSpecIdsToTrack[otherTag] = true;
         }
       }
     }
@@ -3898,9 +3919,9 @@ class ParsedValidatorRules {
           }
         }
       }
-      for (const tagspecId of spec.getAlsoRequiresTagWarning()) {
-        if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        for (const tagspecId of spec.getAlsoRequiresTagWarning()) {
+          if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
             const alsoRequiresTagspec = this.getTagSpec(tagspecId);
             context.addError(
                 amp.validator.ValidationError.Severity.WARNING,
@@ -3914,6 +3935,27 @@ class ParsedValidatorRules {
                 ],
                 spec.getSpec().specUrl, validationResult);
           }
+        }
+        var isUsed = false;
+        var exampleOfUsed = -1;
+        for (const tagspecId of spec.getExtensionUnusedUnlessTagPresent()) {
+          exampleOfUsed = tagspecId;
+          if (context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
+            isUsed = true;
+          }
+        }
+        if (!isUsed && exampleOfUsed !== -1) {
+          const exampleTagspec = this.getTagSpec(exampleOfUsed);
+          context.addError(
+              amp.validator.ValidationError.Severity.WARNING,
+              amp.validator.ValidationError.Code.WARNING_EXTENSION_UNUSED,
+              context.getDocLocator(),
+              /* params */
+              [
+                getTagSpecName(spec.getSpec()),
+                getTagSpecName(exampleTagspec.getSpec())
+              ],
+              spec.getSpec().specUrl, validationResult);
         }
       }
     }
@@ -4820,6 +4862,8 @@ amp.validator.categorizeError = function(error) {
   // use 'data-shortcode' instead."
   if (error.code === amp.validator.ValidationError.Code.DEPRECATED_ATTR ||
       error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG ||
+      error.code ===
+          amp.validator.ValidationError.Code.WARNING_EXTENSION_UNUSED ||
       error.code ===
           amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING) {
     return amp.validator.ErrorCategory.Code.DEPRECATION;
