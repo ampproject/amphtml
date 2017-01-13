@@ -265,7 +265,7 @@ var doctype = '<!doctype html>\n';
 // Only handle min/max
 app.use('/examples/live-list-update.amp.(min|max).html', function(req, res) {
   var filePath = req.baseUrl;
-  var mode = getMode(filePath);
+  var mode = getPathMode(filePath);
   // When we already have state in memory and user refreshes page, we flush
   // the dom we maintain on the server.
   if (!('amp_latest_update_time' in req.query) && liveListDoc) {
@@ -517,7 +517,7 @@ app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
 
 app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   var filePath = req.path;
-  var mode = getMode(filePath);
+  var mode = getPathMode(filePath);
   if (!mode) {
     return next();
   }
@@ -621,7 +621,7 @@ app.get('/dist/rtv/99*/*.js', function(req, res, next) {
 });
 
 app.get('/rtv/*/v0/*.js', function(req, res, next) {
-  var mode = getMode(req.headers.referer);
+  var mode = getPathMode(req.headers.referer);
   var filePath = req.path;
   filePath = replaceUrls(mode, filePath);
   req.url = filePath;
@@ -677,7 +677,7 @@ function extractFilePathSuffix(path) {
  * @param {string} path
  * @return {?string}
  */
-function getMode(path) {
+function getPathMode(path) {
   // If is in test mode. Determine mode by  --compiled argv input
   if (process.argv.includes('test', 2)) {
     return 'max';
