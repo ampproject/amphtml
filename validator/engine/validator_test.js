@@ -557,6 +557,9 @@ describe('ValidatorRulesMakeSense', () => {
           // these extensions match up to more than one matching
           // tagspec, a mechanism we don't currently have in place.
           'amp-ad': 0,
+          // This can be present based on 'amp-access', which isn't allowed in
+          // AMP4ADS, which makes checking tricky.
+          'amp-analytics': 0,
           'amp-form': 0,
           'amp-audio': 0,
           // amp-dynamic-css-classes corresponds to no specific tag.
