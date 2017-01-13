@@ -115,15 +115,15 @@ export class InstrumentationService {
     /** @const {!../../../src/service/viewport-impl.Viewport} */
     this.viewport_ = viewportForDoc(this.ampdoc);
 
-    /** @private {!Observable<!Event>} */
-    this.clickObservable_ = new Observable();
+    /** @private {?Observable<!Event>} */
+    this.clickObservable_ = null;
 
     /** @private {boolean} */
     this.scrollHandlerRegistered_ = false;
 
-    /** @private {!Observable<
+    /** @private {?Observable<
         !../../../src/service/viewport-impl.ViewportChangedEventDef>} */
-    this.scrollObservable_ = new Observable();
+    this.scrollObservable_ = null;
 
     /** @private {!Object<string, !Observable<!AnalyticsEvent>>} */
     this.customEventObservers_ = {};
@@ -169,6 +169,9 @@ export class InstrumentationService {
       }
 
       this.ensureClickListener_();
+      if (!this.clickObservable_) {
+        this.clickObservable_ = new Observable();
+      }
       this.clickObservable_.add(
           this.createSelectiveListener_(listener, config['selector']));
     } else if (eventType === AnalyticsEventType.SCROLL) {
@@ -317,7 +320,9 @@ export class InstrumentationService {
    * @private
    */
   onClick_(e) {
-    this.clickObservable_.fire(e);
+    if (this.clickObservable_) {
+      this.clickObservable_.fire(e);
+    }
   }
 
   /**
@@ -325,7 +330,9 @@ export class InstrumentationService {
    * @private
    */
   onScroll_(e) {
-    this.scrollObservable_.fire(e);
+    if (this.scrollObservable_) {
+      this.scrollObservable_.fire(e);
+    }
   }
 
   /**
@@ -424,6 +431,9 @@ export class InstrumentationService {
 
     const boundsV = this.normalizeBoundaries_(config['verticalBoundaries']);
     const boundsH = this.normalizeBoundaries_(config['horizontalBoundaries']);
+    if (!this.scrollObservable_) {
+      this.scrollObservable_ = new Observable();
+    }
     this.scrollObservable_.add(e => {
       // Calculates percentage scrolled by adding screen height/width to
       // top/left and dividing by the total scroll height/width.

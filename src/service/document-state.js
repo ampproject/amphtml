@@ -46,8 +46,8 @@ export class DocumentState {
       this.visibilityStateProp_ = null;
     }
 
-    /** @private @const {!Observable} */
-    this.visibilityObservable_ = new Observable();
+    /** @private {?Observable} */
+    this.visibilityObservable_ = null;
 
     /** @private {string|null} */
     this.visibilityChangeEvent_ = null;
@@ -109,12 +109,17 @@ export class DocumentState {
    * @return {!UnlistenDef}
    */
   onVisibilityChanged(handler) {
+    if (!this.visibilityObservable_) {
+      this.visibilityObservable_ = new Observable();
+    }
     return this.visibilityObservable_.add(handler);
   }
 
   /** @private */
   onVisibilityChanged_() {
-    this.visibilityObservable_.fire();
+    if (this.visibilityObservable_) {
+      this.visibilityObservable_.fire();
+    }
   }
 
   /**
@@ -139,9 +144,11 @@ export class DocumentState {
 
   /** @private */
   onBodyAvailable_() {
-    this.bodyAvailableObservable_.fire();
-    this.bodyAvailableObservable_.removeAll();
-    this.bodyAvailableObservable_ = null;
+    if (this.bodyAvailableObservable_) {
+      this.bodyAvailableObservable_.fire();
+      this.bodyAvailableObservable_.removeAll();
+      this.bodyAvailableObservable_ = null;
+    }
   }
 }
 
