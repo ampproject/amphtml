@@ -27,6 +27,12 @@ import {timerFor} from '../../src/timer';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {
+  installCryptoPolyfill,
+} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
+import {
+  installExtensionsService,
+} from '../../src/service/extensions-impl';
 import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
@@ -89,6 +95,15 @@ describe('cid', () => {
     ampdoc = ampdocService.getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
+
+    // stub extensions service to provide crypto-polyfill
+    const extensions = installExtensionsService(fakeWin);
+    sandbox.stub(extensions, 'loadExtension', extensionId => {
+      expect(extensionId).to.equal('amp-crypto-polyfill');
+      installCryptoPolyfill(fakeWin);
+      return Promise.resolve();
+    });
+
     const viewer = installViewerServiceForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
