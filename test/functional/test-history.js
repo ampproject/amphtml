@@ -182,7 +182,7 @@ describes.sandboxed('History install', {}, () => {
   beforeEach(() => {
     viewer = {
       isOvertakeHistory: () => false,
-      onHistoryPoppedEvent: () => function() {},
+      onMessage: () => function() {},
     };
 
     win = {
@@ -374,7 +374,7 @@ describe('HistoryBindingVirtual', () => {
     onStackIndexUpdated = sandbox.spy();
     viewerHistoryPoppedHandler = undefined;
     const viewer = {
-      onHistoryPoppedEvent: handler => {
+      onMessage: (eventType, handler) => {
         viewerHistoryPoppedHandler = handler;
         return () => {};
       },
@@ -484,7 +484,7 @@ describes.fakeWin('Local Hash Navigation', {
 
   it('should push a new state and replace it for target on Virtual', () => {
     const viewer = {
-      onHistoryPoppedEvent: () => {
+      onMessage: () => {
         return () => {};
       },
       postPushHistory: unusedStackIndex => {},
@@ -524,7 +524,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
     installTimerService(env.win);
     sandbox = env.sandbox;
     viewer = {
-      onHistoryPoppedEvent: () => {
+      onMessage: () => {
         return () => {};
       },
       hasCapability: () => {},

@@ -16,6 +16,7 @@
 
 import {Observable} from '../observable';
 import {findIndex} from '../utils/array';
+import {map} from '../utils/object';
 import {documentStateFor} from './document-state';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
@@ -70,7 +71,6 @@ const TRUSTED_VIEWER_HOSTS = [
   /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
 ];
 
-
 /**
  * An AMP representation of the Viewer. This class doesn't do any work itself
  * but instead delegates everything to the actual viewer. This class and the
@@ -112,20 +112,14 @@ export class Viewer {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {number} */
-    this.paddingTop_ = 0;
+    /** @private {!Object<string, !Observable<!JSONType>>} */
+    this.messageObservables_ = map();
 
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
 
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
-
-    /** @private {!Observable<!JSONType>} */
-    this.viewportObservable_ = new Observable();
-
-    /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
-    this.historyPoppedObservable_ = new Observable();
 
     /** @private {!Observable<!JSONType>} */
     this.broadcastObservable_ = new Observable();
@@ -203,10 +197,6 @@ export class Viewer {
     this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
         this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
-
-    this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
-        this.paddingTop_;
-    dev().fine(TAG_, '- padding-top:', this.paddingTop_);
 
     /**
      * Whether the AMP document is embedded in a webview.
@@ -597,14 +587,6 @@ export class Viewer {
   }
 
   /**
-   * Returns the top padding requested by the viewer.
-   * @return {number}
-   */
-  getPaddingTop() {
-    return this.paddingTop_;
-  }
-
-  /**
    * Returns the resolved viewer URL value. It's by default the current page's
    * URL. The trusted viewers are allowed to override this value.
    * @return {string}
@@ -704,21 +686,18 @@ export class Viewer {
   }
 
   /**
-   * Adds a "viewport" event listener for viewer events.
+   * Adds a eventType listener for viewer events.
+   * @param {string} eventType
    * @param {function(!JSONType)} handler
    * @return {!UnlistenDef}
    */
-  onViewportEvent(handler) {
-    return this.viewportObservable_.add(handler);
-  }
-
-  /**
-   * Adds a "history popped" event listener for viewer events.
-   * @param {function(ViewerHistoryPoppedEventDef)} handler
-   * @return {!UnlistenDef}
-   */
-  onHistoryPoppedEvent(handler) {
-    return this.historyPoppedObservable_.add(handler);
+  onMessage(eventType, handler) {
+    let observable = this.messageObservables_[eventType];
+    if (!observable) {
+      observable = new Observable();
+      this.messageObservables_[eventType] = observable;
+    }
+    return observable.add(handler);
   }
 
   /**
@@ -763,21 +742,6 @@ export class Viewer {
    * @export
    */
   receiveMessage(eventType, data, unusedAwaitResponse) {
-    if (eventType == 'viewport') {
-      if (data['paddingTop'] !== undefined) {
-        this.paddingTop_ = data['paddingTop'];
-        this.viewportObservable_.fire(
-          /** @type {!JSONType} */ (data));
-        return Promise.resolve();
-      }
-      return undefined;
-    }
-    if (eventType == 'historyPopped') {
-      this.historyPoppedObservable_.fire({
-        newStackIndex: data['newStackIndex'],
-      });
-      return Promise.resolve();
-    }
     if (eventType == 'visibilitychange') {
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
@@ -789,6 +753,11 @@ export class Viewer {
     if (eventType == 'broadcast') {
       this.broadcastObservable_.fire(
           /** @type {!JSONType|undefined} */ (data));
+      return Promise.resolve();
+    }
+    const observable = this.messageObservables_[eventType];
+    if (observable) {
+      observable.fire(data);
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
@@ -990,14 +959,6 @@ function getChannelError(opt_reason) {
   }
   return new Error('No messaging channel: ' + opt_reason);
 }
-
-/**
- * @typedef {{
- *   newStackIndex: number
- * }}
- */
-export let ViewerHistoryPoppedEventDef;
-
 
 /**
  * Sets the viewer visibility state. This calls is restricted to runtime only.

@@ -94,15 +94,10 @@ describe('Viewer', () => {
     sandbox.restore();
   });
 
-  it('should configure as 0 padding top by default', () => {
-    expect(viewer.getPaddingTop()).to.equal(0);
-  });
-
   it('should configure correctly based on window name and hash', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.location.hash = '#paddingTop=17&other=something';
     const viewer = new Viewer(ampdoc);
-    expect(viewer.getPaddingTop()).to.equal(17);
 
     // All of the startup params are also available via getParam.
     expect(viewer.getParam('paddingTop')).to.equal('17');
@@ -116,7 +111,6 @@ describe('Viewer', () => {
     windowApi.name = '__AMP__other=something';
     windowApi.location.hash = '#paddingTop=17';
     const viewer = new Viewer(ampdoc, params);
-    expect(viewer.getPaddingTop()).to.equal(171);
 
     // All of the startup params are also available via getParam.
     expect(viewer.getParam('paddingTop')).to.equal('171');
@@ -200,14 +194,13 @@ describe('Viewer', () => {
 
   it('should receive viewport event', () => {
     let viewportEvent = null;
-    viewer.onViewportEvent(event => {
+    viewer.onMessage('viewport', event => {
       viewportEvent = event;
     });
     viewer.receiveMessage('viewport', {
       paddingTop: 19,
     });
     expect(viewportEvent).to.not.equal(null);
-    expect(viewer.getPaddingTop()).to.equal(19);
   });
 
   describe('should receive the visibilitychange event', () => {
