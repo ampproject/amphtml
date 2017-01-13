@@ -21,7 +21,7 @@ tags: {  # amp-video
    spec_name: "amp-video extension .js script"
    mandatory_parent: "HEAD"
    unique: true
-   also_requires_tag_warning: "amp-video"
+   extension_unused_unless_tag_present: "amp-video"
    attrs: {
      name: "async"
      mandatory: true

@@ -1,2 +1,1 @@
 PASS
-amp-access/0.1/test/validator-amp-access.html:69:7 The tag 'amp-analytics' is missing or incorrect, but required by 'amp-analytics extension .js script'. This will soon be an error. (see https://www.ampproject.org/docs/reference/extended/amp-analytics.html) [DEPRECATION]

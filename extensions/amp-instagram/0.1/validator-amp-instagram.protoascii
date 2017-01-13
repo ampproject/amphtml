@@ -21,7 +21,7 @@ tags: {  # amp-instagram
   spec_name: "amp-instagram extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-instagram"
+  extension_unused_unless_tag_present: "amp-instagram"
   attrs: {
     name: "async"
     mandatory: true
