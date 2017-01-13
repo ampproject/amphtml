@@ -19,7 +19,6 @@ java -jar $1 \
     --js "$2/goog/array/array.js" \
     --js "$2/goog/asserts/asserts.js" \
     --js "$2/goog/crypt/crypt.js" \
-    --js "base64.js" \
     --js "$2/goog/crypt/hash.js" \
     --js "$2/goog/crypt/sha2_64bit.js" \
     --js "$2/goog/crypt/sha384.js" \

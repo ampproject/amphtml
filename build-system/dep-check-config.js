@@ -44,7 +44,7 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'third_party/**/*.js',
     whitelist: [
-      'extensions/amp-analytics/**/*.js->' +
+      'extensions/amp-crypto-polyfill/**/*.js->' +
           'third_party/closure-library/sha384-generated.js',
       'extensions/amp-mustache/0.1/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
