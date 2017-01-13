@@ -25,7 +25,7 @@ min_validator_revision_required: 189
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 342
+spec_file_revision: 344
 
 # Validator extensions.
 # =====================
@@ -2371,6 +2371,8 @@ attr_lists: {
         "tabIndex|"
         "tagName|"
         "textContent|"
+        "toString|"
+        "valueOf|"
         "(webkit|ms|moz|o)dropzone|"
         "(webkit|moz|ms|o)MatchesSelector|"
         "(webkit|moz|ms|o)RequestFullScreen|"
@@ -2385,13 +2387,14 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.5 The input element
-attr_lists: {
-  name: "input-attributes"
+tags: {
+  tag_name: "INPUT"
   attrs: { name: "accept" }
   attrs: { name: "accesskey" }
   attrs: { name: "autocomplete" }
   attrs: { name: "autofocus" }
   attrs: { name: "checked" }
+  attrs: { name: "default-value" }
   attrs: { name: "disabled" }
   attrs: { name: "height" }
   attrs: { name: "inputmode" }
@@ -2410,36 +2413,17 @@ attr_lists: {
   attrs: { name: "spellcheck" }
   attrs: { name: "step" }
   attrs: { name: "tabindex" }
-  attrs: { name: "value" }
-  attrs: { name: "width" }
-}
-tags: {
-  tag_name: "INPUT"
   attrs: {
     name: "type"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
         "button|"
         "file|"
-        "hidden|"  # Handled separately below.
         "image|"
         "password|"
         ")(\\s|$)"
   }
-  attr_lists: "input-attributes"
-  attr_lists: "input-name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
-}
-tags: {
-  tag_name: "INPUT"
-  spec_name: "input [type=hidden]"
-  attrs: { name: "data-amp-replace" }
-  attrs: {
-    name: "type"
-    mandatory: true
-    value: "hidden"
-    dispatch_key: true
-  }
-  attr_lists: "input-attributes"
+  attrs: { name: "value" }
+  attrs: { name: "width" }
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
@@ -2876,6 +2860,7 @@ attr_lists: {
         "appendChild|"
         "assignedSlot|"
         "attachShadow|"
+        "AMP|"
         "baseURI|"
         "childElementCount|"
         "childNodes|"
@@ -2958,6 +2943,8 @@ attr_lists: {
         "tabIndex|"
         "tagName|"
         "textContent|"
+        "toString|"
+        "valueOf|"
         "(webkit|ms|moz|o)dropzone|"
         "(webkit|moz|ms|o)MatchesSelector|"
         "(webkit|moz|ms|o)RequestFullScreen|"
