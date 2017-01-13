@@ -272,23 +272,31 @@ export class AmpForm {
         xhrUrl = this.xhrAction_;
         body = new FormData(this.form_);
       }
-      return this.xhr_.fetchJson(dev().assertString(xhrUrl), {
+      return this.xhr_.fetch(dev().assertString(xhrUrl), {
         body,
         method: this.method_,
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).then(response => {
-        this.triggerAction_(/* success */ true, response);
-        // TODO(mkhatib, #6032): Update docs to reflect analytics events.
-        this.analyticsEvent_('amp-form-submit-success');
-        this.setState_(FormState_.SUBMIT_SUCCESS);
-        this.renderTemplate_(response || {});
-      }).catch(error => {
+        return response.json().then(json => {
+          this.triggerAction_(/* success */ true, json);
+          this.analyticsEvent_('amp-form-submit-success');
+          this.setState_(FormState_.SUBMIT_SUCCESS);
+          this.renderTemplate_(json || {});
+          this.maybeHandleRedirect_(
+              /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
+                  response));
+        }, error => {
+          rethrowAsync('Failed to parse response JSON:', error);
+        });
+      }, error => {
         this.triggerAction_(
             /* success */ false, error ? error.responseJson : null);
         this.analyticsEvent_('amp-form-submit-error');
         this.setState_(FormState_.SUBMIT_ERROR);
         this.renderTemplate_(error.responseJson || {});
+        this.maybeHandleRedirect_(
+            /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
+                error));
         rethrowAsync('Form submission failed:', error);
       });
     });

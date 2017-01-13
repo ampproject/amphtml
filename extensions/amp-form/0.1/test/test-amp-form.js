@@ -358,7 +358,6 @@ describe('amp-form', () => {
         expect(config.body).to.not.be.null;
         expect(config.method).to.equal('POST');
         expect(config.credentials).to.equal('include');
-        expect(config.requireAmpResponseSourceOrigin).to.be.true;
       });
     });
   });
@@ -612,7 +611,6 @@ describe('amp-form', () => {
           expect(config.body).to.be.undefined;
           expect(config.method).to.equal('GET');
           expect(config.credentials).to.equal('include');
-          expect(config.requireAmpResponseSourceOrigin).to.be.true;
         });
       });
     });
@@ -1109,7 +1107,7 @@ describe('amp-form', () => {
       it('should redirect users if header is set', () => {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
         redirectToValue = 'https://google.com/';
-        ampForm.handleSubmit_();
+        ampForm.handleSubmitAction_();
         return timer.promise(10).then(() => {
           expect(env.win.top.location.href).to.be.equal(redirectToValue);
         });
@@ -1118,7 +1116,7 @@ describe('amp-form', () => {
       it('should fail to redirect to non-secure urls', () => {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
         redirectToValue = 'http://google.com/';
-        ampForm.handleSubmit_();
+        ampForm.handleSubmitAction_();
         return timer.promise(10).then(() => {
           expect(env.win.top.location.href).to.be.equal(
               'https://example-top.com/');
@@ -1128,7 +1126,7 @@ describe('amp-form', () => {
       it('should fail to redirect to non-absolute urls', () => {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
         redirectToValue = '/hello';
-        ampForm.handleSubmit_();
+        ampForm.handleSubmitAction_();
         return timer.promise(10).then(() => {
           expect(env.win.top.location.href).to.be.equal(
               'https://example-top.com/');
@@ -1139,7 +1137,7 @@ describe('amp-form', () => {
         ampForm.target_ = '_blank';
         sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
         redirectToValue = 'http://google.com/';
-        ampForm.handleSubmit_();
+        ampForm.handleSubmitAction_();
         return timer.promise(10).then(() => {
           expect(env.win.top.location.href).to.be.equal(
               'https://example-top.com/');
@@ -1160,7 +1158,7 @@ describe('amp-form', () => {
             }
           }, delay);
         });
-        ampForm.handleSubmit_();
+        ampForm.handleSubmitAction_();
         return timer.promise(10).then(() => {
           expect(errors.length).to.equal(1);
           expect(errors[0]).to.match(/Form submission failed/);
@@ -1178,7 +1176,7 @@ describe('amp-form', () => {
         ampForm.xhrAction_ = null;
         sandbox.stub(form, 'submit');
         sandbox.stub(form, 'checkValidity').returns(true);
-        sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         ampForm.handleSubmitAction_();
         expect(form.submit).to.have.been.called;
       });
@@ -1191,7 +1189,7 @@ describe('amp-form', () => {
         ampForm.xhrAction_ = null;
         sandbox.stub(form, 'submit');
         sandbox.stub(form, 'checkValidity').returns(true);
-        sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         const event = {
           stopImmediatePropagation: sandbox.spy(),
           target: form,
