@@ -309,9 +309,10 @@ export class Resource {
    * awaiting the measure and possibly layout.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
+   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    */
-  changeSize(newHeight, newWidth) {
-    this.element./*OK*/changeSize(newHeight, newWidth);
+  changeSize(newHeight, newWidth, opt_newMargins) {
+    this.element./*OK*/changeSize(newHeight, newWidth, opt_newMargins);
     // Schedule for re-layout.
     if (this.state_ != ResourceState.NOT_BUILT) {
       this.state_ = ResourceState.NOT_LAID_OUT;
@@ -323,15 +324,20 @@ export class Resource {
    * @param {boolean} overflown
    * @param {number|undefined} requestedHeight
    * @param {number|undefined} requestedWidth
+   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined}
+   *     requestedMargins
    */
-  overflowCallback(overflown, requestedHeight, requestedWidth) {
+  overflowCallback(overflown, requestedHeight, requestedWidth,
+      requestedMargins) {
     if (overflown) {
       this.pendingChangeSize_ = {
         height: requestedHeight,
         width: requestedWidth,
+        margins: requestedMargins,
       };
     }
-    this.element.overflowCallback(overflown, requestedHeight, requestedWidth);
+    this.element.overflowCallback(overflown, requestedHeight, requestedWidth,
+        requestedMargins);
   }
 
   resetPendingChangeSize() {

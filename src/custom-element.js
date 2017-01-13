@@ -846,10 +846,11 @@ function createBaseCustomElementClass(win) {
      *
      * @param {number|undefined} newHeight
      * @param {number|undefined} newWidth
+     * @param {!./layout-rect.LayoutMarginsDef=} opt_newMargins
      * @final
      * @package @this {!Element}
      */
-    changeSize(newHeight, newWidth) {
+    changeSize(newHeight, newWidth, opt_newMargins) {
       const sizer = this.getSizer_();
       if (sizer) {
         // From the moment height is changed the element becomes fully
@@ -868,6 +869,20 @@ function createBaseCustomElementClass(win) {
       }
       if (newWidth !== undefined) {
         setStyle(this, 'width', newWidth, 'px');
+      }
+      if (opt_newMargins) {
+        if (opt_newMargins.top != null) {
+          setStyle(this, 'marginTop', opt_newMargins.top, 'px');
+        }
+        if (opt_newMargins.right != null) {
+          setStyle(this, 'marginRight', opt_newMargins.right, 'px');
+        }
+        if (opt_newMargins.bottom != null) {
+          setStyle(this, 'marginBottom', opt_newMargins.bottom, 'px');
+        }
+        if (opt_newMargins.left != null) {
+          setStyle(this, 'marginLeft', opt_newMargins.left, 'px');
+        }
       }
     }
 
