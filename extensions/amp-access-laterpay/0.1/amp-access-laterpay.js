@@ -111,7 +111,7 @@ export class LaterpayVendor {
     /** @private {?Function} */
     this.alreadyPurchasedListener_ = null;
 
-    /** @const @private {!Array<Event>} */
+    /** @const @private {!Array<function(!Event)>} */
     this.purchaseOptionListeners_ = [];
 
     /** @private {!boolean} */
@@ -133,14 +133,15 @@ export class LaterpayVendor {
     this.currentLocale_ = this.laterpayConfig_.locale || 'en';
 
     /** @private {Object} */
-    this.i18n_ = Object.assign(DEFAULT_MESSAGES,
+    this.i18n_ = Object.assign({}, DEFAULT_MESSAGES,
                   this.laterpayConfig_.localeMessages || {});
 
     /** @private {string} */
     this.purchaseConfigBaseUrl_ = configUrl + CONFIG_BASE_PATH;
     const articleId = this.laterpayConfig_.articleId;
     if (articleId) {
-      this.purchaseConfigBaseUrl_ += '&article_id=' + encodeURIComponent(articleId);
+      this.purchaseConfigBaseUrl_ +=
+        '&article_id=' + encodeURIComponent(articleId);
     }
 
     /** @const @private {!Timer} */
@@ -185,7 +186,7 @@ export class LaterpayVendor {
       } else {
         throw err;
       }
-      return {access: err.responseJson.access};
+      return {access: false};
     });
   }
 
@@ -229,16 +230,15 @@ export class LaterpayVendor {
   getContainer_() {
     const id = TAG + '-dialog';
     const dialogContainer = this.doc_.getElementById(id);
-    user().assert(
+    return user().assert(
       dialogContainer,
       'No element found with id %s', id
     );
-    return dialogContainer;
   }
 
   /**
    * @private
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   emptyContainer_() {
     // no need to do all of this if the container is already empty
@@ -251,9 +251,11 @@ export class LaterpayVendor {
     }
     if (this.purchaseButtonListener_) {
       this.purchaseButtonListener_();
+      this.purchaseButtonListener_ = null;
     }
     if (this.alreadyPurchasedListener_) {
       this.alreadyPurchasedListener_();
+      this.alreadyPurchasedListener_ = null;
     }
     return this.vsync_.mutatePromise(() => {
       this.containerEmpty_ = true;
@@ -393,7 +395,7 @@ export class LaterpayVendor {
 
   /**
    * @param {!string} href
-   * @returns {!Node}
+   * @return {!Node}
   */
   createAlreadyPurchasedLink_(href) {
     const p = this.doc_.createElement('p');
@@ -449,7 +451,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @returns {!Promise}
+   * @return{!Promise}
    */
   pingback() {
     return Promise.resolve();

@@ -409,7 +409,7 @@ function createXhrRequest(method, url) {
 
 /**
  * If 415 or in the 5xx range.
- * @param {string} status
+ * @param {number} status
  */
 function isRetriable(status) {
   return status == 415 || (status >= 500 && status < 600);
