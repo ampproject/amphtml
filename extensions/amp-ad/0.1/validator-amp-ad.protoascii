@@ -24,8 +24,8 @@ tags: {  # amp-ad
   unique_warning: true
   # This should also require either amp-ad or amp-embed, but we don't have
   # a mechanism for requiring A or B currently, so this is not checked.
-  # also_requires_tag_warning: "amp-ad"
-  # also_requires_tag_warning: "amp-embed"
+  # extension_unused_unless_tag_present: "amp-ad"
+  # extension_unused_unless_tag_present: "amp-embed"
   attrs: {
     name: "async"
     mandatory: true

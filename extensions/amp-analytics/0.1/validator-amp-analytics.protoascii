@@ -22,7 +22,14 @@ tags: {  # amp-analytics
   spec_name: "amp-analytics extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-analytics"
+  # amp-analytics is required for amp access, so the presence of either of
+  # these should satisfy the requirement. However, amp-access is not
+  # a part of AMP4ADS, so currently we cannot match against it in all contexts
+  # as the reference is missing. For now, we will disable this unused warning
+  # for the amp-analytics extension.
+  #extension_unused_unless_tag_present: "amp-analytics"
+  #extension_unused_unless_tag_present: "amp-access extension .json script"
+  #extension_unused_unless_tag_present: "amp-user-notificatin"
   attrs: {
     name: "async"
     mandatory: true

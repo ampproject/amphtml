@@ -20,7 +20,7 @@ tags: {  # amp-user-notification
   spec_name: "amp-user-notification extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-user-notification"
+  extension_unused_unless_tag_present: "amp-user-notification"
   attrs: {
     name: "async"
     mandatory: true

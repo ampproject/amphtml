@@ -21,7 +21,7 @@ tags: {  # amp-reach-player
   mandatory_parent: "HEAD"
   spec_name: "amp-reach-player extension .js script"
   unique_warning: true
-  also_requires_tag_warning: "amp-reach-player"
+  extension_unused_unless_tag_present: "amp-reach-player"
   attrs: {
     name: "async"
     mandatory: true

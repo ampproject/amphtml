@@ -20,7 +20,7 @@ tags: {  # amp-iframe
   spec_name: "amp-iframe extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-iframe"
+  extension_unused_unless_tag_present: "amp-iframe"
   attrs: {
     name: "async"
     mandatory: true
