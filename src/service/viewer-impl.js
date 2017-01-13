@@ -112,9 +112,6 @@ export class Viewer {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {number} */
-    this.initPaddingTop_ = 0;
-
     /** @private {!Object<string, !Observable<!JSONType>>} */
     this.messageObservables_ = map();
 
@@ -200,10 +197,6 @@ export class Viewer {
     this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
         this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
-
-    this.initPaddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
-        this.initPaddingTop_;
-    dev().fine(TAG_, '- initial padding-top:', this.initPaddingTop_);
 
     /**
      * Whether the AMP document is embedded in a webview.
@@ -594,14 +587,6 @@ export class Viewer {
   }
 
   /**
-   * Returns the top padding requested by the viewer.
-   * @return {number}
-   */
-  getInitPaddingTop() {
-    return this.initPaddingTop_;
-  }
-
-  /**
    * Returns the resolved viewer URL value. It's by default the current page's
    * URL. The trusted viewers are allowed to override this value.
    * @return {string}
@@ -703,7 +688,7 @@ export class Viewer {
   /**
    * Adds a eventType listener for viewer events.
    * @param {string} eventType
-   * @param {!function(!JSONType)} handler
+   * @param {function(!JSONType)} handler
    * @return {!UnlistenDef}
    */
   onMessage(eventType, handler) {
@@ -772,7 +757,7 @@ export class Viewer {
     }
     const observable = this.messageObservables_[eventType];
     if (observable) {
-      observable.fire(/** @type {!JSONType} */ (data));
+      observable.fire(data);
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);

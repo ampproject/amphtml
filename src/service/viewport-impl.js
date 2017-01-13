@@ -108,7 +108,7 @@ export class Viewport {
     this./*OK*/scrollLeft_ = null;
 
     /** @private {number} */
-    this.paddingTop_ = viewer.getInitPaddingTop();
+    this.paddingTop_ = Number(viewer.getParam('paddingTop') || 0);
 
     /** @private {number} */
     this.lastPaddingTop_ = 0;
@@ -594,18 +594,21 @@ export class Viewport {
     /** @const {boolean} */
     const transient = data['transient'];
 
-    if (paddingTop != this.paddingTop_) {
-      this.lastPaddingTop_ = this.paddingTop_;
-      this.paddingTop_ = paddingTop;
-      if (this.paddingTop_ < this.lastPaddingTop_) {
-        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-        this.animateFixedElements_(duration, curve, transient);
-      } else {
-        this.animateFixedElements_(duration, curve, transient).then(() => {
-          this.binding_.showViewerHeader(transient, this.paddingTop_);
-        });
-      }
+    if (paddingTop == undefined || paddingTop == this.paddingTop_) {
+      return;
     }
+
+    this.lastPaddingTop_ = this.paddingTop_;
+    this.paddingTop_ = paddingTop;
+    if (this.paddingTop_ < this.lastPaddingTop_) {
+      this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+      this.animateFixedElements_(duration, curve, transient);
+    } else {
+      this.animateFixedElements_(duration, curve, transient).then(() => {
+        this.binding_.showViewerHeader(transient, this.paddingTop_);
+      });
+    }
+
   }
 
   /**

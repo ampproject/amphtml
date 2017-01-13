@@ -59,7 +59,12 @@ describes.fakeWin('Viewport', {}, env => {
     viewerViewportHandler = undefined;
     viewer = {
       isEmbedded: () => false,
-      getInitPaddingTop: () => 19,
+      getParam: param => {
+        if (param == 'paddingTop') {
+          return 19;
+        }
+        return undefined;
+      },
       onMessage: (eventType, handler) => {
         viewerViewportHandler = handler;
       },
@@ -845,7 +850,12 @@ describe('Viewport META', () => {
       clock = sandbox.useFakeTimers();
       viewer = {
         isEmbedded: () => false,
-        getInitPaddingTop: () => 0,
+        getParam: param => {
+          if (param == 'paddingTop') {
+            return 0;
+          }
+          return undefined;
+        },
         onMessage: () => {},
         isVisible: () => true,
         onVisibilityChanged: () => {},
@@ -1009,7 +1019,12 @@ describe('ViewportBindingNatural', () => {
     installPlatformService(windowApi);
     viewer = {
       isEmbedded: () => false,
-      getInitPaddingTop: () => 19,
+      getParam: param => {
+        if (param == 'paddingTop') {
+          return 19;
+        }
+        return undefined;
+      },
       onMessage: () => {},
     };
     viewerMock = sandbox.mock(viewer);
