@@ -784,9 +784,11 @@ export class Resources {
 
     if (this.documentReady_ && this.firstPassAfterDocumentReady_) {
       this.firstPassAfterDocumentReady_ = false;
+      const doc = this.win.document;
       this.viewer_.sendMessage('documentLoaded', {
-        title: this.win.document.title,
+        title: doc.title,
         sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
+        serverLayout: doc.documentElement.hasAttribute('i-amphtml-element'),
       }, /* cancelUnsent */true);
     }
 
