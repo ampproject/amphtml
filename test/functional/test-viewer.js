@@ -95,14 +95,14 @@ describe('Viewer', () => {
   });
 
   it('should configure as 0 padding top by default', () => {
-    expect(viewer.getPaddingTop()).to.equal(0);
+    expect(viewer.getInitPaddingTop()).to.equal(0);
   });
 
   it('should configure correctly based on window name and hash', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.location.hash = '#paddingTop=17&other=something';
     const viewer = new Viewer(ampdoc);
-    expect(viewer.getPaddingTop()).to.equal(17);
+    expect(viewer.getInitPaddingTop()).to.equal(17);
 
     // All of the startup params are also available via getParam.
     expect(viewer.getParam('paddingTop')).to.equal('17');
@@ -116,7 +116,7 @@ describe('Viewer', () => {
     windowApi.name = '__AMP__other=something';
     windowApi.location.hash = '#paddingTop=17';
     const viewer = new Viewer(ampdoc, params);
-    expect(viewer.getPaddingTop()).to.equal(171);
+    expect(viewer.getInitPaddingTop()).to.equal(171);
 
     // All of the startup params are also available via getParam.
     expect(viewer.getParam('paddingTop')).to.equal('171');
@@ -207,7 +207,6 @@ describe('Viewer', () => {
       paddingTop: 19,
     });
     expect(viewportEvent).to.not.equal(null);
-    expect(viewer.getPaddingTop()).to.equal(19);
   });
 
   describe('should receive the visibilitychange event', () => {
@@ -500,7 +499,7 @@ describe('Viewer', () => {
 
     it('should receive broadcast event', () => {
       let broadcastMessage = null;
-      viewer.onMessage('broadcast', message => {
+      viewer.onBroadcast(message => {
         broadcastMessage = message;
       });
       viewer.receiveMessage('broadcast', {type: 'type1'});

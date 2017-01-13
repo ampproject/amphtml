@@ -136,7 +136,7 @@ export class Storage {
 
   /** @private */
   listenToBroadcasts_() {
-    this.viewer_.onMessage('broadcast', message => {
+    this.viewer_.onBroadcast(message => {
       if (message['type'] == 'amp-storage-reset' &&
               message['origin'] == this.origin_) {
         dev().fine(TAG, 'Received reset message');

@@ -909,7 +909,7 @@ describes.realWin('runtime multidoc', {
       const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       const viewer = getServiceForDoc(ampdoc, 'viewer');
       const broadcastReceived = sandbox.spy();
-      viewer.onMessage('broadcast', broadcastReceived);
+      viewer.onBroadcast(broadcastReceived);
       const onMessage = sandbox.stub();
       amp.onMessage(function(eventType, data) {
         if (eventType == 'ignore' || eventType == 'documentLoaded') {

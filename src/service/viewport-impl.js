@@ -108,7 +108,7 @@ export class Viewport {
     this./*OK*/scrollLeft_ = null;
 
     /** @private {number} */
-    this.paddingTop_ = viewer.getPaddingTop();
+    this.paddingTop_ = viewer.getInitPaddingTop();
 
     /** @private {number} */
     this.lastPaddingTop_ = 0;
@@ -584,15 +584,15 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} event
+   * @param {!JSONType} data
    * @private
    */
-  updateOnViewportEvent_(event) {
-    const paddingTop = event['paddingTop'];
-    const duration = event['duration'] || 0;
-    const curve = event['curve'];
+  updateOnViewportEvent_(data) {
+    const paddingTop = data['paddingTop'];
+    const duration = data['duration'] || 0;
+    const curve = data['curve'];
     /** @const {boolean} */
-    const transient = event['transient'];
+    const transient = data['transient'];
 
     if (paddingTop != this.paddingTop_) {
       this.lastPaddingTop_ = this.paddingTop_;

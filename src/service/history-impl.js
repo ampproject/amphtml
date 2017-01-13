@@ -764,11 +764,11 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * @param {!./viewer-impl.ViewerHistoryPoppedEventDef} event
+   * @param {!JSONType} data
    * @private
    */
-  onHistoryPopped_(event) {
-    this.updateStackIndex_(event.newStackIndex);
+  onHistoryPopped_(data) {
+    this.updateStackIndex_(data['newStackIndex']);
   }
 
   /**

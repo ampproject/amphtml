@@ -71,7 +71,6 @@ const TRUSTED_VIEWER_HOSTS = [
   /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
 ];
 
-
 /**
  * An AMP representation of the Viewer. This class doesn't do any work itself
  * but instead delegates everything to the actual viewer. This class and the
@@ -114,7 +113,7 @@ export class Viewer {
     this.prerenderSize_ = 1;
 
     /** @private {number} */
-    this.paddingTop_ = 0;
+    this.initPaddingTop_ = 0;
 
     /** @private {!Object<string, !Observable<!JSONType>>} */
     this.messageObservables_ = map();
@@ -124,6 +123,9 @@ export class Viewer {
 
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
+
+    /** @private {!Observable<!JSONType>} */
+    this.broadcastObservable_ = new Observable();
 
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
     this.messageDeliverer_ = null;
@@ -199,9 +201,9 @@ export class Viewer {
         this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
-    this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
-        this.paddingTop_;
-    dev().fine(TAG_, '- padding-top:', this.paddingTop_);
+    this.initPaddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
+        this.initPaddingTop_;
+    dev().fine(TAG_, '- initial padding-top:', this.initPaddingTop_);
 
     /**
      * Whether the AMP document is embedded in a webview.
@@ -595,8 +597,8 @@ export class Viewer {
    * Returns the top padding requested by the viewer.
    * @return {number}
    */
-  getPaddingTop() {
-    return this.paddingTop_;
+  getInitPaddingTop() {
+    return this.initPaddingTop_;
   }
 
   /**
@@ -701,9 +703,8 @@ export class Viewer {
   /**
    * Adds a eventType listener for viewer events.
    * @param {string} eventType
-   * @param {function(T)} handler
+   * @param {!function(!JSONType)} handler
    * @return {!UnlistenDef}
-   * @template T
    */
   onMessage(eventType, handler) {
     let observable = this.messageObservables_[eventType];
@@ -711,7 +712,7 @@ export class Viewer {
       observable = new Observable();
       this.messageObservables_[eventType] = observable;
     }
-    return this.messageObservables_[eventType].add(handler);
+    return observable.add(handler);
   }
 
   /**
@@ -756,20 +757,6 @@ export class Viewer {
    * @export
    */
   receiveMessage(eventType, data, unusedAwaitResponse) {
-    if (eventType == 'viewport') {
-      if (data['paddingTop'] !== undefined) {
-        this.paddingTop_ = data['paddingTop'];
-        this.messageObservables_[eventType].fire(
-            /** @type {!JSONType} */ (data));
-        return Promise.resolve();
-      }
-      return undefined;
-    }
-    if (eventType == 'historyPopped') {
-      this.messageObservables_[eventType].fire(
-          /** @type {!JSONType} */ (data));
-      return Promise.resolve();
-    }
     if (eventType == 'visibilitychange') {
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
@@ -779,8 +766,13 @@ export class Viewer {
       return Promise.resolve();
     }
     if (eventType == 'broadcast') {
-      this.messageObservables_[eventType].fire(
+      this.broadcastObservable_.fire(
           /** @type {!JSONType|undefined} */ (data));
+      return Promise.resolve();
+    }
+    const observable = this.messageObservables_[eventType];
+    if (observable) {
+      observable.fire(/** @type {!JSONType} */ (data));
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
@@ -934,6 +926,15 @@ export class Viewer {
   }
 
   /**
+   * Registers receiver for the broadcast events.
+   * @param {function(!JSONType)} handler
+   * @return {!UnlistenDef}
+   */
+  onBroadcast(handler) {
+    return this.broadcastObservable_.add(handler);
+  }
+
+  /**
    * Resolves when there is a messaging channel established with the viewer.
    * Will be null if no messaging is needed like in an non-embedded document.
    * @return {?Promise}
@@ -973,14 +974,6 @@ function getChannelError(opt_reason) {
   }
   return new Error('No messaging channel: ' + opt_reason);
 }
-
-/**
- * @typedef {{
- *   newStackIndex: number
- * }}
- */
-export let ViewerHistoryPoppedEventDef;
-
 
 /**
  * Sets the viewer visibility state. This calls is restricted to runtime only.

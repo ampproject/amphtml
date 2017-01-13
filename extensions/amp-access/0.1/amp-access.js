@@ -339,7 +339,7 @@ export class AccessService {
 
   /** @private */
   listenToBroadcasts_() {
-    this.viewer_.onMessage('broadcast', message => {
+    this.viewer_.onBroadcast(message => {
       if (message['type'] == 'amp-access-reauthorize' &&
               message['origin'] == this.pubOrigin_) {
         this.runAuthorization_();
