@@ -116,7 +116,15 @@ app.use('/form/html/post', function(req, res) {
   });
 });
 
-function assertCors(req, res, opt_validMethods) {
+
+app.use('/form/redirect-to/post', function(req, res) {
+  assertCors(req, res, ['POST'], ['AMP-Redirect-To']);
+  res.setHeader('AMP-Redirect-To', 'https://google.com');
+  res.end('{}');
+});
+
+
+function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
   const invalidMethod = req.method + ' method is not allowed. Use POST.';
   const invalidOrigin = 'Origin header is invalid.';
@@ -154,7 +162,8 @@ function assertCors(req, res, opt_validMethods) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Expose-Headers',
-      'AMP-Access-Control-Allow-Source-Origin');
+      ['AMP-Access-Control-Allow-Source-Origin']
+          .concat(opt_exposeHeaders || []).join(', '));
   res.setHeader('AMP-Access-Control-Allow-Source-Origin',
       req.query.__amp_source_origin);
 }
@@ -462,6 +471,13 @@ app.use('/a4a(|-3p)/', function(req, res) {
   var force3p = req.baseUrl.indexOf('/a4a-3p') == 0;
   var adUrl = req.url;
   var templatePath = '/build-system/server-a4a-template.html';
+  var urlPrefix = getUrlPrefix(req);
+  if (force3p && !adUrl.startsWith('/m') &&
+      urlPrefix.indexOf('//localhost') != -1) {
+    // This is a special case for testing. `localhost` URLs are transformed to
+    // `ads.localhost` to ensure that the iframe is fully x-origin.
+    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
+  }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/FORCE3P/g, force3p)

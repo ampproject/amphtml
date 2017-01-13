@@ -535,5 +535,18 @@
 </form>
 
 
+<h4 id="header1">Redirect After POST (works only if running on localhost)</h4>
+<form method="post"
+      action-xhr="http://iframe.localhost:8000/form/redirect-to/post"
+      target="_top">
+    <fieldset>
+        <label>
+            <span>Send us a message</span>
+            <input type="text" name="message" id="message1" required>
+        </label>
+        <input type="submit" value="Send">
+    </fieldset>
+</form>
+
 </body>
 </html>

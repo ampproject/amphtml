@@ -20,6 +20,7 @@ var closureCompiler = require('gulp-closure-compiler');
 var gulp = require('gulp');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
+var util = require('gulp-util');
 var internalRuntimeVersion = require('../internal-version').VERSION;
 var internalRuntimeToken = require('../internal-version').TOKEN;
 var rimraf = require('rimraf');
@@ -41,16 +42,26 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
       inProgress++;
       compile(entryModuleFilename, outputDir, outputFilename, options)
           .then(function() {
+            if (process.env.TRAVIS) {
+              // When printing simplified log in travis, use dot for each task.
+              process.stdout.write('.');
+            }
             inProgress--;
             next();
             resolve();
           }, function(e) {
-            console./*OK*/error('Compilation error', e.message);
+            console./*OK*/error(util.colors.red('Compilation error',
+                e.message));
             process.exit(1);
           });
     }
     function next() {
       if (!queue.length) {
+        // When printing simplified log in travis, print EOF after
+        // all closure compiling task are done.
+        if (process.env.TRAVIS) {
+          process.stdout.write('\n');
+        }
         return;
       }
       if (inProgress < MAX_PARALLEL_CLOSURE_INVOCATIONS) {
@@ -86,7 +97,7 @@ function compile(entryModuleFilenames, outputDir,
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     if (!process.env.TRAVIS) {
-      console./*OK*/log('Starting closure compiler for', entryModuleFilenames);
+      util.log('Starting closure compiler for', entryModuleFilenames);
     }
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
@@ -305,8 +316,9 @@ function compile(entryModuleFilenames, outputDir,
     var stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./*OK*/error('Error compiling', entryModuleFilenames);
-          console./*OK*/error(err.message);
+          console./*OK*/error(util.colors.red('Error compiling',
+              entryModuleFilenames));
+          console./*OK*/error(util.colors.red(err.message));
           process.exit(1);
         });
 
@@ -319,7 +331,7 @@ function compile(entryModuleFilenames, outputDir,
         .pipe(gulp.dest(outputDir))
         .on('end', function() {
           if (!process.env.TRAVIS) {
-            console./*OK*/log('Compiled', entryModuleFilename, 'to',
+            util.log('Compiled', entryModuleFilename, 'to',
                 outputDir + '/' + outputFilename, 'via', intermediateFilename);
           }
           gulp.src(intermediateFilename + '.map')
