@@ -400,6 +400,28 @@ describe('Layout', () => {
     expect(div.children.length).to.equal(0);
   });
 
+  it('should read sizer for responsive layout', () => {
+    div.setAttribute('i-amphtml-layout', 'responsive');
+    const sizer = document.createElement('i-amphtml-sizer');
+    div.appendChild(sizer);
+    expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
+    expect(div.sizerElement_).to.equal(sizer);
+  });
+
+  it('should allow sizer to be missing', () => {
+    div.setAttribute('i-amphtml-layout', 'responsive');
+    expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
+    expect(div.sizerElement_).to.be.undefined;
+  });
+
+  it('should allow sizer to be missing even if other children there', () => {
+    div.setAttribute('i-amphtml-layout', 'responsive');
+    const other = document.createElement('div');
+    div.appendChild(other);
+    expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
+    expect(div.sizerElement_).to.be.undefined;
+  });
+
   it('should fail when server generates invalid layout', () => {
     div.setAttribute('i-amphtml-layout', 'invalid');
     expect(() => applyLayout_(div)).to.throw(/failed/);
