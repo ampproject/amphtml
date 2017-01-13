@@ -25,7 +25,7 @@ min_validator_revision_required: 210
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 347
+spec_file_revision: 348
 
 # Validator extensions.
 # =====================
@@ -2405,7 +2405,6 @@ tags: {
   attrs: { name: "autocomplete" }
   attrs: { name: "autofocus" }
   attrs: { name: "checked" }
-  attrs: { name: "default-value" }
   attrs: { name: "disabled" }
   attrs: { name: "height" }
   attrs: { name: "inputmode" }
