@@ -3786,20 +3786,6 @@ class ParsedValidatorRules {
   }
 
   /**
-   * @return {boolean}
-   */
-  isManufacturedBodyTagError() {
-    return this.rules_.manufacturedBodyTagIsError;
-  }
-
-  /**
-   * @return {null|string}
-   */
-  manufacturedBodySpecUrl() {
-    return this.rules_.manufacturedBodySpecUrl;
-  }
-
-  /**
    * @param {amp.validator.ValidationError.Code} errorCode
    * @return {!string}
    */
@@ -4132,25 +4118,15 @@ amp.validator.ValidationHandler =
    * @override
    */
   markManufacturedBody() {
-    if (this.rules_.isManufacturedBodyTagError()) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        this.context_.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY,
-            this.context_.getDocLocator(),
-            /* params */[], this.rules_.manufacturedBodySpecUrl(),
-            this.validationResult_);
-      } else {
-        this.validationResult_.status =
-            amp.validator.ValidationResult.Status.FAIL;
-      }
-    } else if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
       this.context_.addError(
-          amp.validator.ValidationError.Severity.WARNING,
-          amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY,
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY,
           this.context_.getDocLocator(),
-          /* params */[], this.rules_.manufacturedBodySpecUrl(),
-          this.validationResult_);
+          /* params */[], /* url */"", this.validationResult_);
+    } else {
+      this.validationResult_.status =
+          amp.validator.ValidationResult.Status.FAIL;
     }
   }
 
@@ -4838,8 +4814,6 @@ amp.validator.categorizeError = function(error) {
   // use 'data-shortcode' instead."
   if (error.code === amp.validator.ValidationError.Code.DEPRECATED_ATTR ||
       error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG ||
-      error.code ===
-          amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY ||
       error.code ===
           amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING) {
     return amp.validator.ErrorCategory.Code.DEPRECATION;

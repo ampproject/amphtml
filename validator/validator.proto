@@ -396,13 +396,6 @@ message ValidatorRules {
 
   // Spec URL for information about mustache templates.
   optional string template_spec_url = 8;
-  // If we encounter a manufactured body tag, this flag determines if
-  // it is treated as an error or a warning.
-  // TODO(gregable): Eventually change this to true and remove the code
-  // for it, making the error permanent.
-  optional bool manufactured_body_tag_is_error = 11 [default = false];
-  // Spec URL for information about manufactured body tags.
-  optional string manufactured_body_spec_url = 12;
 
   // If enabled, reference points can define additinal reference points
   // for child elements.
@@ -414,7 +407,7 @@ message ValidatorRules {
   repeated ErrorSpecificity error_specificity = 13;
 
   // Deprecated fields, do not reuse.
-  extensions 5, 2;
+  extensions 2, 5, 11, 12;
 }
 
 // We categorize error messages into higher-level groups. This makes it
@@ -520,7 +513,6 @@ message ValidationError {
     DISALLOWED_CHILD_TAG_NAME = 57;
     DISALLOWED_FIRST_CHILD_TAG_NAME = 58;
     DISALLOWED_MANUFACTURED_BODY = 64;
-    DEPRECATED_MANUFACTURED_BODY = 65;
     CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT = 66;
     MANDATORY_REFERENCE_POINT_MISSING = 67;
     DUPLICATE_REFERENCE_POINT = 68;

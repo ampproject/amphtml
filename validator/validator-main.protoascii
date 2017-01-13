@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 189
+min_validator_revision_required: 208
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 345
+spec_file_revision: 346
 
 # Validator extensions.
 # =====================
@@ -3070,9 +3070,6 @@ attr_lists: {
   }
 }
 
-manufactured_body_tag_is_error: true
-manufactured_body_spec_url: ""  # TODO(gregable)
-
 # Error Specificity: Used in the verbose validator to select between multiple
 # generated error types for a failing error. A higher number means that the
 # error is more specific, ie: more helpful, preferred.
@@ -3180,7 +3177,6 @@ error_specificity {
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
 error_specificity { code: DEPRECATED_ATTR specificity: 101 }
 error_specificity { code: DEPRECATED_TAG specificity: 102 }
-error_specificity { code: DEPRECATED_MANUFACTURED_BODY specificity: 103 }
 error_specificity { code: DISALLOWED_MANUFACTURED_BODY specificity: 104 }
 
 
@@ -3392,11 +3388,6 @@ error_formats {
   code: DISALLOWED_MANUFACTURED_BODY
   format: "Tag or text which is only allowed inside the body section found "
           "outside of the body section."
-}
-error_formats {
-  code: DEPRECATED_MANUFACTURED_BODY
-  format: "Tag or text which is only allowed inside the body section found "
-          "outside of the body section. This will soon be an error."
 }
 error_formats {
   code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT
