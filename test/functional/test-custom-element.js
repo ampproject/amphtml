@@ -879,6 +879,42 @@ describe('CustomElement', () => {
     expect(element2.sizerElement_.style.paddingTop).to.equal('1%');
   });
 
+  it('should rediscover sizer to apply heights', () => {
+    const element1 = new ElementClass();
+    element1.setAttribute('i-amphtml-layout', 'responsive');
+    element1.setAttribute('layout', 'responsive');
+    element1.setAttribute('width', '200px');
+    element1.setAttribute('height', '200px');
+    element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+    container.appendChild(element1);
+
+    const sizer = document.createElement('i-amphtml-sizer');
+    element1.appendChild(sizer);
+    expect(element1.sizerElement_).to.be.undefined;
+    element1.attachedCallback();
+    element1.applySizesAndMediaQuery();
+    expect(element1.sizerElement_).to.equal(sizer);
+    expect(sizer.style.paddingTop).to.equal('99%');
+  });
+
+  it('should NOT rediscover sizer after reset', () => {
+    const element1 = new ElementClass();
+    element1.setAttribute('i-amphtml-layout', 'responsive');
+    element1.setAttribute('layout', 'responsive');
+    element1.setAttribute('width', '200px');
+    element1.setAttribute('height', '200px');
+    element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+    container.appendChild(element1);
+
+    const sizer = document.createElement('i-amphtml-sizer');
+    element1.appendChild(sizer);
+    element1.attachedCallback();
+    element1.sizerElement_ = null;
+    element1.applySizesAndMediaQuery();
+    expect(element1.sizerElement_).to.be.null;
+    expect(sizer.style.paddingTop).to.equal('');
+  });
+
   it('should change size without sizer', () => {
     const element = new ElementClass();
     element.changeSize(111, 222);

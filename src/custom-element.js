@@ -221,8 +221,23 @@ export function upgradeElementInChildWindow(parentWin, childWin, name) {
 /**
  * Applies layout to the element. Visible for testing only.
  * @param {!Element} element
+ * @return {!Layout}
  */
 export function applyLayout_(element) {
+  // Check if the layout has already been done by the server.
+  const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
+  if (completedLayoutAttr) {
+    const layout = /** @type {!Layout} */ (dev().assert(
+        parseLayout(completedLayoutAttr)));
+    if (layout == Layout.RESPONSIVE && element.firstElementChild) {
+      // Find sizer, but assume that it might not have been parsed yet.
+      element.sizerElement_ =
+          element.querySelector('i-amphtml-sizer') || undefined;
+    }
+    return layout;
+  }
+
+  // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
   const widthAttr = element.getAttribute('width');
   const heightAttr = element.getAttribute('height');
@@ -478,9 +493,9 @@ function createBaseCustomElementClass(win) {
       /**
        * This element can be assigned by the {@link applyLayout_} to a child
        * element that will be used to size this element.
-       * @private {?Element}
+       * @private {?Element|undefined}
        */
-      this.sizerElement_ = null;
+      this.sizerElement_ = undefined;
 
       /** @private {boolean|undefined} */
       this.loadingDisabled_ = undefined;
@@ -761,6 +776,19 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {?Element}
+     * @private
+     */
+    getSizer_() {
+      if (this.sizerElement_ === undefined &&
+          this.layout_ === Layout.RESPONSIVE) {
+        // Expect sizer to exist, just not yet discovered.
+        this.sizerElement_ = this.querySelector('i-amphtml-sizer');
+      }
+      return this.sizerElement_ || null;
+    }
+
+    /**
      * If the element has a media attribute, evaluates the value as a media
      * query and based on the result adds or removes the class
      * `i-amphtml-hidden-by-media-query`. The class adds display:none to the element
@@ -795,16 +823,18 @@ function createBaseCustomElementClass(win) {
             this.ownerDocument.defaultView));
       }
       // Heights.
-      if (this.heightsList_ === undefined) {
+      if (this.heightsList_ === undefined &&
+          this.layout_ === Layout.RESPONSIVE) {
         const heightsAttr = this.getAttribute('heights');
         this.heightsList_ = heightsAttr ?
-          parseSizeList(heightsAttr, /* allowPercent */ true) : null;
+            parseSizeList(heightsAttr, /* allowPercent */ true) : null;
       }
-
-      if (this.heightsList_ && this.layout_ ===
-        Layout.RESPONSIVE && this.sizerElement_) {
-        setStyle(this.sizerElement_, 'paddingTop', this.heightsList_.select(
-            this.ownerDocument.defaultView));
+      if (this.heightsList_) {
+        const sizer = this.getSizer_();
+        if (sizer) {
+          setStyle(sizer, 'paddingTop',
+              this.heightsList_.select(this.ownerDocument.defaultView));
+        }
       }
     }
 
@@ -820,11 +850,11 @@ function createBaseCustomElementClass(win) {
      * @package @this {!Element}
      */
     changeSize(newHeight, newWidth) {
-      if (this.sizerElement_) {
+      const sizer = this.getSizer_();
+      if (sizer) {
         // From the moment height is changed the element becomes fully
         // responsible for managing its height. Aspect ratio is no longer
         // preserved.
-        const sizer = this.sizerElement_;
         this.sizerElement_ = null;
         setStyle(sizer, 'paddingTop', '0');
         if (this.resources_) {
