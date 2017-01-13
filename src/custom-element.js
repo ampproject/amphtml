@@ -228,7 +228,7 @@ export function applyLayout_(element) {
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
     const layout = /** @type {!Layout} */ (dev().assert(
-        parseLayout(completedLayoutAttr)))
+        parseLayout(completedLayoutAttr)));
     if (layout == Layout.RESPONSIVE && element.firstElementChild) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement_ =
