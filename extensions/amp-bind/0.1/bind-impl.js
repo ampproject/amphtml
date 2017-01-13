@@ -93,7 +93,7 @@ export class Bind {
 
     /**
      * True if a digest is triggered before scan for bindings completes.
-     * {boolean}
+     * @private {boolean}
      */
     this.digestQueuedAfterScan_ = false;
 
@@ -167,12 +167,11 @@ export class Bind {
 
     // Helper function for scanning a slice of elements.
     const scanFromTo = (start, end) => {
-      for (let i = start; i < Math.min(end, elements.length); i++) {
+      for (let i = start; i < end && elements[i]; i++) {
         const el = elements[i];
         const attrs = el.attributes;
-
         const bindings = [];
-        for (let j = 0; j < attrs.length; j++) {
+        for (let j = 0; attrs[j]; j++) {
           const binding = this.bindingForAttribute_(attrs[j], el);
           if (binding) {
             bindings.push(binding);
@@ -189,19 +188,41 @@ export class Bind {
       }
     };
 
-    // Divide elements into buckets to be scanned, one bucket per chunk.
-    const bucketSize = 10;
-    const promises = [];
-    for (let i = 0; i < elements.length; i += bucketSize) {
-      const promise = chunk(this.ampdoc, () => {
-        scanFromTo(i, i + bucketSize);
-      }, ChunkPriority.LOW);
-      promises.push(promise);
-    }
+    // Current scan position in `elements` array.
+    let position = 0;
 
-    return Promise.all(promises)
-        .then(() => Promise.resolve({boundElements, evaluatees}))
-        .catch(e => user().error(TAG, `Scan failed: ${e}`));
+    return new Promise(resolve => {
+      const chunktion = idleDeadline => {
+        // If `requestIdleCallback` is available, scan elements until
+        // idle time runs out.
+        if (idleDeadline) {
+          if (idleDeadline.didTimeout) {
+            // On timeout, scan the remaining elements immediately.
+            scanFromTo(position, Number.POSITIVE_INFINITY);
+            position = Number.POSITIVE_INFINITY;
+          } else {
+            while (idleDeadline.timeRemaining() > 1 && elements[position]) {
+              scanFromTo(position, position + 1);
+              position++;
+            }
+          }
+        } else {
+          // If `requestIdleCallback` isn't available, scan elements in buckets.
+          // Bucket size is a magic number that fits within a single frame.
+          const bucketSize = 250;
+          scanFromTo(position, position + bucketSize);
+          position += bucketSize;
+        }
+
+        // If we scanned all elements, resolve. Otherwise, continue chunking.
+        if (elements[position] === undefined) {
+          resolve({boundElements, evaluatees});
+        } else {
+          chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+        }
+      };
+      chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+    });
   }
 
   /**

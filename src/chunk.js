@@ -44,14 +44,15 @@ const resolved = Promise.resolve();
  * there is time.
  *
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
- * @param {function()} fn Function that will be called as a "chunk".
+ * @param {function(?IdleDeadline)} fn
  */
 export function startupChunk(nodeOrAmpDoc, fn) {
   if (deactivated) {
-    return resolved.then(fn);
+    resolved.then(fn);
+    return;
   }
   const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  return service.runForStartup_(fn);
+  service.runForStartup_(fn);
 };
 
 /**
@@ -60,14 +61,17 @@ export function startupChunk(nodeOrAmpDoc, fn) {
  * Higher priority tasks are executed before lower priority tasks.
  * Tasks with the same priority are executed in FIFO order.
  *
+ * Uses `requestIdleCallback` if available and passes the `IdleDeadline`
+ * object to the function, which can be used to perform a variable amount
+ * of work depending on the remaining amount of idle time.
+ *
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
- * @param {function()} fn Function that will be called as a "chunk".
+ * @param {function(?IdleDeadline)} fn
  * @param {ChunkPriority} priority
- * @return {!Promise} Resolved when the task is executed.
  */
 export function chunk(nodeOrAmpDoc, fn, priority) {
   const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  return service.run_(fn, priority);
+  service.run_(fn, priority);
 }
 
 /**
@@ -103,7 +107,7 @@ export function runChunksForTesting(nodeOrAmpDoc) {
   const errors = [];
   while (true) {
     try {
-      if (!service.execute_()) {
+      if (!service.execute_(/* idleDeadline */ null)) {
         break;
       }
     } catch (e) {
@@ -136,40 +140,27 @@ const TaskState = {
  */
 class Task {
   /**
-   * @param {!Function} fn
+   * @param {!function(?IdleDeadline)} fn
    */
   constructor(fn) {
     /** @public {TaskState} */
     this.state = TaskState.NOT_RUN;
 
-    /** @private @const {!Function} */
+    /** @private @const {!function(?IdleDeadline)} */
     this.fn_ = fn;
-
-    /** @private {?Function} */
-    this.resolve_ = null;
-
-    /** @private {?Function} */
-    this.reject_ = null;
-
-    /** @public @const */
-    this.promise = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
   }
 
   /**
    * Executes the wrapped function.
+   * @param {?IdleDeadline} idleDeadline
    * @throws {Error}
    */
-  runTask() {
+  runTask(idleDeadline) {
     this.state = TaskState.RUN;
     try {
-      const result = this.fn_();
-      this.resolve_(result);
+      this.fn_(idleDeadline);
     } catch (e) {
       this.onTaskError_(e);
-      this.reject_(e);
       throw e;
     }
   }
@@ -183,7 +174,7 @@ class Task {
 
   /**
    * Optional handling when a task run throws an error.
-   * @protected
+   * @private
    * @param {Error} unusedError
    */
   onTaskError_(unusedError) {
@@ -192,7 +183,7 @@ class Task {
 
   /**
    * Returns true if this task should be run without delay.
-   * @protected
+   * @private
    * @return {boolean}
    */
   immediateTriggerCondition_() {
@@ -203,7 +194,7 @@ class Task {
   /**
    * Returns true if this task should be scheduled using `requestIdleCallback`.
    * Otherwise, task is scheduled as macro-task on next event loop.
-   * @protected
+   * @private
    * @return {boolean}
    */
   useRequestIdleCallback_() {
@@ -217,7 +208,7 @@ class Task {
  */
 class StartupTask extends Task {
   /**
-   * @param {!Function} fn
+   * @param {!function(?IdleDeadline)} fn
    * @param {!Window} win
    * @param {!./service/viewer-impl.Viewer|!Promise} viewerOrPromise
    */
@@ -253,11 +244,11 @@ class StartupTask extends Task {
 
     this.viewer_.onVisibilityChanged(() => {
       if (this.viewer_.isVisible()) {
-        this.runTask();
+        this.runTask(/* idleDeadline */ null);
       }
     });
     if (this.viewer_.isVisible()) {
-      this.runTask();
+      this.runTask(/* idleDeadline */ null);
     }
   }
 
@@ -310,14 +301,14 @@ class Chunks {
    * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
    */
   constructor(ampDoc) {
-    /** @protected @const */
+    /** @private @const */
     this.ampDoc_ = ampDoc;
-    /** @protected @const {!Window} */
+    /** @private @const {!Window} */
     this.win_ = ampDoc.win;
-    /** @protected @const {!PriorityQueue<Task>} */
+    /** @private @const {!PriorityQueue<Task>} */
     this.tasks_ = new PriorityQueue();
-    /** @protected @const {function()} */
-    this.boundExecute_ = () => this.execute_();
+    /** @private @const {function(?IdleDeadline)} */
+    this.boundExecute_ = this.execute_.bind(this);
 
     /** @private {?./service/viewer-impl.Viewer} */
     this.viewer_ = null;
@@ -330,92 +321,99 @@ class Chunks {
 
     this.win_.addEventListener('message', e => {
       if (e.data = 'amp-macro-task') {
-        this.execute_();
+        this.execute_(/* idleDeadline */ null);
       }
     });
   }
 
   /**
    * Run fn as a "chunk".
-   * @param {function()} fn
+   * @param {function(?IdleDeadline)} fn
    * @param {number} priority
-   * @return {!Promise} promise
    * @private
    */
   run_(fn, priority) {
     const t = new Task(fn);
-    this.scheduleTask_(t, priority);
-    return t.promise;
+    this.enqueueTask_(t, priority);
   }
 
   /**
-   * @param {function()} fn
-   * @return {!Promise} promise
+   * Run a fn that's part of AMP's startup sequence as a "chunk".
+   * @param {function(?IdleDeadline)} fn
    * @private
    */
   runForStartup_(fn) {
     const viewerOrPromise = this.viewer_ || this.viewerPromise_;
     const t = new StartupTask(fn, this.win_, viewerOrPromise);
-    this.scheduleTask_(t, Number.POSITIVE_INFINITY);
-    return t.promise;
+    this.enqueueTask_(t, Number.POSITIVE_INFINITY);
   }
 
   /**
+   * Queues a task to be executed later with given priority.
    * @param {!Task} task
    * @param {number} priority
    * @private
    */
-  scheduleTask_(task, priority) {
+  enqueueTask_(task, priority) {
     this.tasks_.enqueue(task, priority);
     this.schedule_();
   }
 
   /**
-   * Run a task.
-   * Schedule the next round if there are more tasks.
-   * @return {boolean} Whether anything was executed.
-   * @private
+   * Returns the next task that hasn't been run yet (some tasks may
+   * execute themselves before reaching the front of the queue).
+   * @return {?Task}
    */
-  execute_() {
+  dequeueTask_() {
     let t = null;
     do {
       t = this.tasks_.dequeue();
     } while (t && t.state !== TaskState.NOT_RUN);
+    return t;
+  }
+
+  /**
+   * Run a task.
+   * Schedule the next round if there are more tasks.
+   * @param {?IdleDeadline} idleDeadline
+   * @return {boolean} Whether anything was executed.
+   * @private
+   */
+  execute_(idleDeadline) {
+    const t = this.dequeueTask_();
     if (!t) {
       return false;
     }
     const before = Date.now();
     try {
-      t.runTask();
+      t.runTask(idleDeadline);
     } catch (e) {
       throw e;
     } finally {
-      if (this.tasks_.length) {
-        this.schedule_();
-      }
+      this.schedule_();
       dev().fine(TAG, t.name, 'Chunk duration', Date.now() - before);
     }
     return true;
   }
 
   /**
-   * Schedule running a task.
-   * @protected
+   * Schedule running the next queued task.
+   * @private
    */
   schedule_() {
-    let nextTask = null;
-    if (this.tasks_.length) {
-      nextTask = this.tasks_.peek();
-      if (nextTask.immediateTriggerCondition_()) {
-        resolved.then(this.boundExecute_);
-        return;
-      }
+    const nextTask = this.tasks_.peek();
+    if (!nextTask) {
+      return;
     }
-
+    if (nextTask.immediateTriggerCondition_()) {
+      resolved.then(() => {
+        this.boundExecute_(/* idleDeadline */ null);
+      });
+      return;
+    }
     // If requestIdleCallback exists, schedule a task with it, but
-    // do not wait longer than one second.
-    const useRIC = !nextTask || nextTask.useRequestIdleCallback_();
-    if (useRIC && this.win_.requestIdleCallback) {
+    // do not wait longer than two seconds.
+    if (nextTask.useRequestIdleCallback_() && this.win_.requestIdleCallback) {
       onIdle(this.win_,
           // Wait until we have a budget of at least 15ms.
           // 15ms is a magic number. Budgets are higher when the user
@@ -440,7 +438,7 @@ class Chunks {
  * @param {number} minimumTimeRemaining Minimum number of millis idle
  *     budget for callback to fire.
  * @param {number} timeout in millis for callback to fire.
- * @param {function()} fn Callback.
+ * @param {function(?IdleDeadline)} fn Callback.
  * @visibleForTesting
  */
 export function onIdle(win, minimumTimeRemaining, timeout, fn) {
@@ -450,7 +448,7 @@ export function onIdle(win, minimumTimeRemaining, timeout, fn) {
       const remainingTimeout = timeout - (Date.now() - startTime);
       if (remainingTimeout <= 0 || info.didTimeout) {
         dev().fine(TAG, 'Timed out', timeout, info.didTimeout);
-        fn();
+        fn(info);
       } else {
         dev().fine(TAG, 'Rescheduling with', remainingTimeout,
             info.timeRemaining());
@@ -458,7 +456,7 @@ export function onIdle(win, minimumTimeRemaining, timeout, fn) {
       }
     } else {
       dev().fine(TAG, 'Running idle callback with ', minimumTimeRemaining);
-      fn();
+      fn(info);
     }
   }
   win.requestIdleCallback(rIC, {timeout});
