@@ -501,6 +501,20 @@ app.use(['/examples/*', '/extensions/*'], function (req, res, next) {
   next();
 });
 
+/**
+ * Append ?sleep=5 to any included JS file in examples to emulate delay in loading that
+ * file. This allows you to test issues with your extension being late to load
+ * and testing user interaction with your element before your code loads.
+ *
+ * Example delay loading amp-form script by 5 seconds:
+ * <script async custom-element="amp-form"
+ *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
+ */
+app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
+  var sleep = parseInt(req.query.sleep || 0) * 1000;
+  setTimeout(next, sleep);
+});
+
 app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   var filePath = req.path;
   var mode = getPathMode(filePath);
