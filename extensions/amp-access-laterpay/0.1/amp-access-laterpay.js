@@ -49,6 +49,8 @@ const DEFAULT_MESSAGES = {
  *   configUrl: string=,
  *   articleId: string=,
  *   scrollTopAfterAuth: boolean=,
+ *   locale: string=,
+ *   localeMessages: object=,
  * }}
  */
 let LaterpayConfigDef;
