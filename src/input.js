@@ -183,7 +183,9 @@ export class Input {
     }
 
     this.keyboardActive_ = true;
-    this.keyboardStateObservable_.fire(true);
+    if (this.keyboardStateObservable_) {
+      this.keyboardStateObservable_.fire(true);
+    }
     dev().fine(TAG_, 'keyboard activated');
   }
 
@@ -193,7 +195,9 @@ export class Input {
       return;
     }
     this.keyboardActive_ = false;
-    this.keyboardStateObservable_.fire(false);
+    if (this.keyboardStateObservable_) {
+      this.keyboardStateObservable_.fire(false);
+    }
     dev().fine(TAG_, 'keyboard deactivated');
   }
 
