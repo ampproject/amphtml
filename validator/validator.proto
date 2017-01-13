@@ -400,17 +400,11 @@ message ValidatorRules {
   // Spec URL for information about mustache templates.
   optional string template_spec_url = 8;
 
-  // If enabled, reference points can define additinal reference points
-  // for child elements.
-  // TODO(powdercloud): Flip to true and remove this flag.
-  optional bool reference_points_can_define_reference_points = 14
-      [default = false];
-
   repeated ErrorFormat error_formats = 9;
   repeated ErrorSpecificity error_specificity = 13;
 
   // Deprecated fields, do not reuse.
-  extensions 2, 5, 11, 12;
+  extensions 2, 5, 11, 12, 14;
 }
 
 // We categorize error messages into higher-level groups. This makes it
