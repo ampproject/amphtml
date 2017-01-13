@@ -15,9 +15,10 @@
  */
 
 import * as lib from '../../../third_party/closure-library/sha384-generated';
+import {getService} from '../../../src/service';
 
-// Register doc-service factory.
-AMP.registerServiceForDoc(
-    'crypto-polyfill',
-    /* ctor */ undefined,
-    ampdoc => lib);
+export function installCryptoPolyfill(win) {
+  getService(win, 'crypto-polyfill', () => lib);
+}
+
+installCryptoPolyfill(window);

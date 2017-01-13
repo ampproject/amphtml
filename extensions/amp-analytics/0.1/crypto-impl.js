@@ -27,12 +27,18 @@ const FALLBACK_MSG = 'SubtleCrypto failed, fallback to closure lib.';
 
 export class Crypto {
 
+  /**
+   * @param {!Window} win
+   */
   constructor(win) {
+    /** @private {!Window} */
+    this.win_ = win;
+
     /** @private @const {?webCrypto.SubtleCrypto} */
     this.subtle_ = getSubtle(win);
 
-    /** @private {!Window} */
-    this.win_ = win;
+    /** @private {?Promise<{sha384: function((string|Uint8Array))}>} */
+    this.polyfillPromise_ = null;
 
     if (!this.subtle_) {
       this.loadPolyfill_();
@@ -43,21 +49,23 @@ export class Crypto {
    * Returns the SHA-384 hash of the input string in a number array.
    * Input string cannot contain chars out of range [0,255].
    * @param {string|!Uint8Array} input
-   * @returns {!Promise<!Array<number>>}
+   * @returns {!Promise<!Uint8Array>}
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384(input) {
+    if (!(input instanceof Uint8Array)) {
+      input = stringToBytes(input);
+    }
+
     // polyfill is (being) loaded,
     // means native Crypto API is not available or failed before.
     if (this.polyfillPromise_) {
       return this.polyfillPromise_.then(polyfill => polyfill.sha384(input));
     }
     try {
-      return this.subtle_.digest({name: 'SHA-384'},
-              input instanceof Uint8Array ? input : stringToBytes(input))
-          // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
+      return this.subtle_.digest({name: 'SHA-384'}, input)
           /** @param {?} buffer */
-          .then(buffer => [].slice.call(new Uint8Array(buffer)),
+          .then(buffer => new Uint8Array(buffer),
               e => {
                 // Chrome doesn't allow the usage of Crypto API under
                 // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
