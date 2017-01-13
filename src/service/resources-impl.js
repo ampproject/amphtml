@@ -860,7 +860,7 @@ export class Resources {
       this.requestsChangeSize_ = [];
 
       // Find minimum top position and run all mutates.
-      let minTop = -1;
+      let minTop = Infinity;
       const scrollAdjSet = [];
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
@@ -905,18 +905,21 @@ export class Resources {
           // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
-        } else if (diff < 0) {
-          // 7. The new height is smaller than the current one.
         } else {
-          // 8. Element is in viewport don't resize and try overflow callback
-          // instead.
-          request.resource.overflowCallback(/* overflown */ true,
-              request.newHeight, request.newWidth);
+          // 7. Element is in viewport don't resize.
+          if (diff < 0) {
+            // The new height is smaller than the current one, and there's
+            // not an underflow callback.
+          } else {
+            // try overflow callback instead.
+            request.resource.overflowCallback(/* overflown */ true,
+                request.newHeight, request.newWidth);
+          }
         }
 
         if (resize) {
           if (box.top >= 0) {
-            minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
+            minTop = Math.min(minTop, box.top);
           }
           request.resource./*OK*/changeSize(
               request.newHeight, request.newWidth);
@@ -929,7 +932,7 @@ export class Resources {
         }
       }
 
-      if (minTop != -1) {
+      if (minTop < Infinity) {
         this.setRelayoutTop_(minTop);
       }
 
@@ -941,17 +944,21 @@ export class Resources {
             state./*OK*/scrollTop = this.viewport_./*OK*/getScrollTop();
           },
           mutate: state => {
-            let minTop = -1;
+            let minTop = Infinity;
             scrollAdjSet.forEach(request => {
               const box = request.resource.getLayoutBox();
-              minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
+              minTop = Math.min(minTop, box.top);
+
               request.resource./*OK*/changeSize(
+                  request.newHeight, request.newWidth);
+              request.resource.overflowCallback(/* overflown */ false,
                   request.newHeight, request.newWidth);
               if (request.callback) {
                 request.callback(/* hasSizeChanged */true);
               }
             });
-            if (minTop != -1) {
+
+            if (minTop < Infinity) {
               this.setRelayoutTop_(minTop);
             }
             // Sync is necessary here to avoid UI jump in the next frame.
@@ -961,7 +968,10 @@ export class Resources {
                   (newScrollHeight - state./*OK*/scrollHeight));
             }
           },
-        }, {});
+        }, {
+          scrollHeight: 0,
+          scrollTop: 0,
+        });
       }
     }
   }
