@@ -45,6 +45,11 @@
     "base": "https://scomcluster.cxense.com/Repo/rep.gif" ,
     "pageview": "https://scomcluster.cxense.com/Repo/rep.gif?ver=1&typ=pgv&sid=$siteId&ckp=_client_id_&loc=_source_url_&rnd=_random_&ref=_document_referrer_&ltm=_timestamp_&wsz=_screen_width_x_screen_height_&bln=_browser_language_&chs=_document_charset_&col=_screen_color_depth_&tzo=_timezone_&cp_cx_channel=amp"
   },
+  "gemius": {
+    "base": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams",
+    "pageview": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams&et=view&hsrc=1",
+    "event": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams&et=action&hsrc=3"
+  },
   "googleanalytics": {
     "host": "https://www.google-analytics.com",
     "basePrefix": "v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
