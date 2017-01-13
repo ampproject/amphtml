@@ -239,3 +239,7 @@ The following message keys can be translated or customized, but be aware that th
 * [LaterPay](https://www.laterpay.net)
 * [LaterPay: How we do MicroPayments](http://docs.laterpay.net/how_we_do_micropayments/)
 * [LaterPay Connector](https://connectormwi.laterpay.net/docs/index.html) - Similar to AMP Access LaterPay but for non AMP pages.
+
+## Validation
+
+See [amp-access-laterpay rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-laterpay/0.1/validator-amp-access-laterpay.protoascii) in the AMP validator specification.
