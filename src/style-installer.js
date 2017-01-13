@@ -86,7 +86,8 @@ export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
   }
 
   // Check if the style has already been added by the server layout.
-  if ((cssRoot.parentElement || cssRoot).hasAttribute('i-amphtml-layout') &&
+  if (cssRoot.parentElement &&
+      cssRoot.parentElement.hasAttribute('i-amphtml-layout') &&
       (isRuntimeCss || ext && ext != 'amp-custom')) {
     const existing =
         isRuntimeCss ?
