@@ -86,3 +86,11 @@ attributes.
 - Each amp-ad tag contains one adblock.  Only one **data-afs-adblock-options**
 and/or one **data-afsh-adblock-options** attribute can be specified in the tag.
 - Above the fold ads are required to have a minimum height of 300 pixels.
+- When requesting ads above the fold:
+ - You must use the maxTop parameter instead of the number parameter to specify the number of ads.
+ - You can only request one ad ("maxTop": 1) in an ad unit that is above the fold.
+ - You must use a fallback div to show alternate content when no ads are returned. If no ads are returned the ad will not be collapsed because it is above the fold.
+
+## Demos
+
+Please visit [google-ads-amp-demos.com](http://google-ads-amp-demos.com/) for demos and additional requirements when implementing these ads.
