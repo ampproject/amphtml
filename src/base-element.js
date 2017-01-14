@@ -447,6 +447,16 @@ export class BaseElement {
   }
 
   /**
+   * Whether the element needs to be reconstructed after it has been
+   * re-parented. Many elements cannot survive fully the reparenting and
+   * are better to be reconstructed from scratch.
+   * @return {boolean}
+   */
+  reconstructWhenReparented() {
+    return true;
+  }
+
+  /**
    * Instructs the element that its activation is requested based on some
    * user event. Intended to be implemented by actual components.
    * @param {!./service/action-impl.ActionInvocation} unusedInvocation
@@ -468,6 +478,7 @@ export class BaseElement {
     return loadPromise(element, opt_timeout);
   }
 
+  /** @private */
   initActionMap_() {
     if (!this.actionMap_) {
       this.actionMap_ = this.win.Object.create(null);
