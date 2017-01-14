@@ -65,22 +65,30 @@ export class AmpViewerIntegration {
     const messaging = new Messaging(
       this.win, this.win.parent, this.unconfirmedViewerOrigin_);
 
+    if (messaging.isWebView) {
+      this.setup(messaging, viewer);
+      return new Promise().resolve();
+    }
+
     dev().fine(TAG, 'Send a handshake request');
     return this.openChannel(messaging)
         .then(() => {
           dev().fine(TAG, 'Channel has been opened!');
-
-          messaging.setRequestProcessor((type, payload, awaitResponse) => {
-            return viewer.receiveMessage(
-              type, /** @type {!JSONType} */ (payload), awaitResponse);
-          });
-
-          viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
-            dev().assertString(this.unconfirmedViewerOrigin_));
-
-          listenOnce(
-            this.win, 'unload', this.handleUnload_.bind(this, messaging));
+          this.setup(messaging, viewer);
         });
+  }
+
+  setup(messaging, viewer) {
+    messaging.setRequestProcessor((type, payload, awaitResponse) => {
+      return viewer.receiveMessage(
+        type, /** @type {!JSONType} */ (payload), awaitResponse);
+    });
+
+    viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
+      dev().assertString(this.unconfirmedViewerOrigin_));
+
+    listenOnce(
+      this.win, 'unload', this.handleUnload_.bind(this, messaging));
   }
 
   /**
