@@ -26,9 +26,9 @@ amp-ad tag. The values you pass should be set to a stringified version of the
 Javascript object you would pass in the ad request of a standard CSA request.
 
 ```html
-<amp-ad width=auto height=300
+<amp-ad 
+    height=300
     type='csa'
-    layout='fixed-height'
     data-afs-page-options='{"pubId": "partner-pub-id", "query": "flowers"}'
     data-afs-adblock-options='{"width": "auto", "number": 2}'>
 </amp-ad>
@@ -45,11 +45,10 @@ amp-ad tag.  The values you pass should be set to a stringified version of the
 Javascript object you would pass in the ad request of a standard CSA request.
 
 ```html
-<amp-ad width=auto height=300
+<amp-ad 
+    height=300
     type='csa'
-    layout='fixed-height'
-    data-afsh-page-options='{"pubId": "partner-vert-pla-pubid-pdp",
-    "query": "flowers"}'
+    data-afsh-page-options='{"pubId": "partner-vert-pla-pubid-pdp", "query": "flowers"}'
     data-afsh-adblock-options='{"width": "auto", "height": 300}'>
 </amp-ad>
 ```
@@ -69,14 +68,12 @@ not return ads, AMP will request AFS ads with the values from the **data-afs-***
 attributes.
 
 ```html
-<amp-ad width=auto height=400
+<amp-ad 
+    height=400
     type='csa'
-    layout='fixed-height'
-    data-afsh-page-options='{"pubId": "partner-vert-pla-pubid-pdp",
-    "query": "flowers"}'
+    data-afsh-page-options='{"pubId": "partner-vert-pla-pubid-pdp", "query": "flowers"}'
     data-afsh-adblock-options='{"width": "auto", "height": 400}'
-    data-afs-page-options='{"pubId": "partner-pub-id", "query": "flowers",
-    "channel": "backfill"}'
+    data-afs-page-options='{"pubId": "partner-pub-id", "query": "flowers", "channel": "backfill"}'
     data-afs-adblock-options='{"width": "auto"}'>
 </amp-ad>
 ```
