@@ -67,7 +67,7 @@ export class AmpViewerIntegration {
 
     if (messaging.isWebView) {
       this.setup(messaging, viewer);
-      return new Promise().resolve();
+      return Promise.resolve();
     }
 
     dev().fine(TAG, 'Send a handshake request');
