@@ -44,6 +44,15 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       viewer.confirmHandshake();
       return viewer.waitForDocumentLoaded();
     });
+
+    it('should handle unload correctly', () => {
+      viewer.confirmHandshake();
+      viewer.waitForDocumentLoaded().then(() => {
+        const stub = sandbox.stub(viewer, 'handleUnload_');
+        window.eventListeners.fire({type: 'unload'});
+        expect(stub).to.be.calledOnce;
+      });
+    });
   });
 
   describe('Unit Tests for messaging.js', () => {

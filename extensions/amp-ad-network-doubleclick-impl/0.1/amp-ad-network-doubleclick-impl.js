@@ -28,7 +28,6 @@ import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
-  getCorrelator,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -67,11 +66,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
+    // TODO: Check for required and allowed parameters. Probably use
+    // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
     const global = this.win;
-    const slotId = this.element.getAttribute('data-amp-slot-index');
-    const slotIdNumber = Number(slotId);
-    const correlator = getCorrelator(global, slotId);
     const slotRect = this.getIntersectionElementLayoutBox();
     let size = `${slotRect.width}x${slotRect.height}`;
     const rawJson = this.element.getAttribute('json');
@@ -94,7 +92,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       size += '|' + dimensions.map(dimension => dimension.join('x')).join('|');
     }
 
-    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotIdNumber, [
+    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
       {name: 'adk', value: this.adKey_(size)},
@@ -105,8 +103,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
       {name: 'u_sd', value: global.devicePixelRatio},
       {name: 'adtest', value: adTestOn},
-      {name: 'ifi', value: slotIdNumber},
-      {name: 'c', value: correlator},
     ], [
       {
         name: 'scp',

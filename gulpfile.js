@@ -64,6 +64,7 @@ declareExtension('amp-brid-player', '0.1', false);
 declareExtension('amp-brightcove', '0.1', false);
 declareExtension('amp-kaltura-player', '0.1', false);
 declareExtension('amp-carousel', '0.1', true);
+declareExtension('amp-crypto-polyfill', '0.1', false);
 declareExtension('amp-dailymotion', '0.1', false);
 declareExtension('amp-dynamic-css-classes', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-experiment', '0.1', false, 'NO_TYPE_CHECK');
@@ -105,6 +106,7 @@ declareExtension('amp-selector', '0.1', true);
  */
 declareExtension('amp-slides', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-social-share', '0.1', true);
+declareExtension('amp-tabs', '0.1', true);
 declareExtension('amp-twitter', '0.1', false);
 declareExtension('amp-user-notification', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-vimeo', '0.1', false, 'NO_TYPE_CHECK');

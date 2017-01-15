@@ -20,7 +20,7 @@ tags: {  # amp-dailymotion
   spec_name: "amp-dailymotion extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-dailymotion"
+  extension_unused_unless_tag_present: "amp-dailymotion"
   attrs: {
     name: "async"
     mandatory: true
