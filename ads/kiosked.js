@@ -23,7 +23,7 @@ import {validateData, writeScript} from '../3p/3p';
 export function kiosked(global, data) {
   let scriptId;
   validateData(data, ['scriptid'], []);
-  if(data.hasOwnProperty('scriptid')) {
+  if (data.hasOwnProperty('scriptid')) {
     scriptId = data["scriptid"];
   }
 
