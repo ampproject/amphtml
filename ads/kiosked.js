@@ -21,7 +21,7 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function kiosked(global, data) {
-    validateData(data, ['scriptid'], []);
+  validateData(data, ['scriptid'], []);
 
-    writeScript(global, 'https://scripts.kiosked.com/loader/kiosked-ad.js?staticTagId='+data.scriptid);
+  writeScript(global, 'https://scripts.kiosked.com/loader/kiosked-ad.js?staticTagId=' + data.scriptid);
 }
