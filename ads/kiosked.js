@@ -21,7 +21,11 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function kiosked(global, data) {
+  let scriptId;
   validateData(data, ['scriptid'], []);
+  if(data.hasOwnProperty('scriptid')) {
+    scriptId = data["scriptid"];
+  }
 
-  writeScript(global, 'https://scripts.kiosked.com/loader/kiosked-ad.js?staticTagId=' + data.scriptid);
+  writeScript(global, 'https://scripts.kiosked.com/loader/kiosked-ad.js?staticTagId=' + scriptId);
 }
