@@ -24,7 +24,7 @@ export function kiosked(global, data) {
   let scriptId;
   validateData(data, ['scriptid'], []);
   if (data.hasOwnProperty('scriptid')) {
-    scriptId = data["scriptid"];
+    scriptId = data['scriptid'];
   }
 
   writeScript(global, 'https://scripts.kiosked.com/loader/kiosked-ad.js?staticTagId=' + scriptId);
