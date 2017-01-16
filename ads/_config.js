@@ -169,6 +169,9 @@ export const adConfig = {
 
   contentad: {},
 
+  capirs: {
+  },
+
   criteo: {
     prefetch: 'https://static.criteo.net/js/ld/publishertag.js',
     preconnect: 'https://cas.criteo.com',

@@ -104,6 +104,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AppNexus](../../ads/appnexus.md)
 - [Atomx](../../ads/atomx.md)
 - [CA A.J.A. Infeed](../../ads/caajainfeed.md)
+- [SSP / capirs](../../ads/capirs.md)
 - [CA-ProFit-X](../../ads/caprofitx.md)
 - [Chargeads](../../ads/chargeads.md)
 - [Colombia](../../ads/colombia.md)
