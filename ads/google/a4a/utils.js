@@ -119,7 +119,6 @@ export function googleAdUrl(
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
     const frm = generateFrmAdParamValue(window, window.document);
-    debugger;
     if (frm) {
       queryParams.push({name: 'frm', value: frm});
     }
