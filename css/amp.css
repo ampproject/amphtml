@@ -423,6 +423,9 @@ i-amp-scroll-container.amp-active {
  */
 .i-amphtml-element > [overflow] {
   cursor: pointer;
+  /* position:relative is critical to ensure that [overflow] is displayed
+     above an iframe; z-index is not enough. */
+  position: relative;
   z-index: 2;
   visibility: hidden;
 }
