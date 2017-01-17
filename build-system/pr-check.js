@@ -207,6 +207,12 @@ function main(argv) {
     return 0;
   }
 
+  if (!(files.some(x => x === 'package.json') &&
+        files.some(x => x === 'yarn.lock'))) {
+      console.error(`\npr-check.js - please update through yarn.\n`);
+      process.exit(1);
+    }
+
   const sortedBuildTargets = [];
   for (const t of buildTargets) {
     sortedBuildTargets.push(t);
