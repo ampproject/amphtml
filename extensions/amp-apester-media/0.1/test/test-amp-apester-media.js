@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {
-    createIframePromise,
-    doNotLoadExternalResourcesInTest,
+  createIframePromise,
+  doNotLoadExternalResourcesInTest
 } from '../../../../testing/iframe';
 import '../amp-apester-media';
 import {adopt} from '../../../../src/runtime';
-import {toggleExperiment} from '../../../../src/experiments';
 import {xhrFor} from '../../../../src/xhr';
 import * as sinon from 'sinon';
 
