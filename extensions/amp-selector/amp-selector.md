@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty" width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td class="col-fourty" width="40%"><strong>Required Script</strong></td>
@@ -100,3 +100,7 @@ Indicates that the option is selectable.  If a value is specified, the contents 
 **disabled, selected**
 
 The attributes above behave the same way as they do on a standard HTML [`<option>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option) element.
+
+## Validation
+
+See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/0.1/validator-amp-selector.protoascii) in the AMP validator specification.
