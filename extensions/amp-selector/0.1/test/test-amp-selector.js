@@ -534,7 +534,13 @@ describes.realWin('amp-selector', {
       expect(impl.options_[0].hasAttribute('selected')).to.be.false;
       expect(impl.options_[3].hasAttribute('selected')).to.be.true;
 
-      expect(setInputsSpy).calledOnce;
+      // Integers should be converted to strings.
+      impl.mutatedAttributesCallback({selected: 0});
+
+      expect(impl.options_[0].hasAttribute('selected')).to.be.true;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.false;
+
+      expect(setInputsSpy).calledTwice;
     });
 
     it('should trigger `select` action when user selects an option', () => {

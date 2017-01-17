@@ -311,6 +311,8 @@ export class Bind {
           element.className = ampClasses.concat(newValue).join(' ');
         } else if (typeof newValue === 'string') {
           element.className = ampClasses.join(' ') + ' ' + newValue;
+        } else if (newValue === null) {
+          element.className = ampClasses.join(' ');
         } else {
           user().error(TAG, 'Invalid result for [class]', newValue);
         }

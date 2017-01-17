@@ -30,6 +30,10 @@ const GLOBAL_PROPERTY_RULES = {
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
+  // ARIA accessibility attributes.
+  'aria-describedby': null,
+  'aria-label': null,
+  'aria-labelledby': null,
 };
 
 /**
@@ -153,11 +157,11 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
+    'AMP-CAROUSEL': {
+      slide: null,
+    },
     'AMP-IMG': {
       alt: null,
-      'aria-describedby': null,
-      'aria-label': null,
-      'aria-labelledby': null,
       referrerpolicy: null,
       src: {
         allowedProtocols: {
@@ -167,14 +171,28 @@ function createElementRules_() {
         },
         blockedURLs: ['__amp_source_origin'],
       },
-      srcset: {
+      // TODO: Support `srcset`.
+    },
+    'AMP-SELECTOR': {
+      selected: null,
+    },
+    'AMP-VIDEO': {
+      alt: null,
+      attribution: null,
+      autoplay: null,
+      controls: null,
+      loop: null,
+      muted: null,
+      placeholder: null,
+      poster: null,
+      preload: null,
+      src: {
         allowedProtocols: {
-          data: true,
-          http: true,
           https: true,
         },
         blockedURLs: ['__amp_source_origin'],
       },
+      // TODO: Support `srcset`.
     },
     A: {
       href: {

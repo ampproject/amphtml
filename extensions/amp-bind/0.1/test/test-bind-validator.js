@@ -177,22 +177,40 @@ describe('BindValidator', () => {
   });
 
   describe('AMP extensions', () => {
+    it('should support <amp-carousel>', () => {
+      expect(val.canBind('AMP-CAROUSEL', 'slide')).to.be.true;
+    });
+
     it('should support <amp-img>', () => {
       expect(val.canBind('AMP-IMG', 'src')).to.be.true;
-      expect(val.canBind('AMP-IMG', 'srcset')).to.be.true;
       expect(val.canBind('AMP-IMG', 'width')).to.be.true;
       expect(val.canBind('AMP-IMG', 'height')).to.be.true;
 
       expect(val.isResultValid(
           'AMP-IMG', 'src', 'http://foo.com/bar.jpg')).to.be.true;
       expect(val.isResultValid('AMP-IMG', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
       expect(val.isResultValid(
           'AMP-IMG', 'src', '__amp_source_origin')).to.be.false;
-      expect(val.isResultValid('AMP-IMG', 'srcset',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
+    });
+
+    it('should support <amp-selector>', () => {
+      expect(val.canBind('AMP-SELECTOR', 'selected')).to.be.true;
+    });
+
+    it('should support <amp-video>', () => {
+      expect(val.canBind('AMP-VIDEO', 'loop')).to.be.true;
+      expect(val.canBind('AMP-VIDEO', 'poster')).to.be.true;
+      expect(val.canBind('AMP-VIDEO', 'src')).to.be.true;
+
       expect(val.isResultValid(
-          'AMP-IMG', 'srcset', '__amp_source_origin')).to.be.false;
+          'AMP-VIDEO', 'src', 'https://foo.com/bar.mp4')).to.be.true;
+      expect(val.isResultValid(
+          'AMP-VIDEO', 'src', 'http://foo.com/bar.mp4')).to.be.false;
+      expect(val.isResultValid('AMP-VIDEO', 'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+      expect(val.isResultValid(
+          'AMP-VIDEO', 'src', '__amp_source_origin')).to.be.false;
     });
   });
 });

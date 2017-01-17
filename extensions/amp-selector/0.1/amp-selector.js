@@ -82,11 +82,11 @@ export class AmpSelector extends AMP.BaseElement {
 
   /**
    * Handles mutation of the `selected` attribute.
-   * @param {string|Array|null} newValue
+   * @param {null|boolean|string|number|Array|Object} newValue
    * @private
    */
   selectedAttributeMutated_(newValue) {
-    if (!newValue) {
+    if (newValue === null) {
       this.clearAllSelections_();
       return;
     }
@@ -95,11 +95,16 @@ export class AmpSelector extends AMP.BaseElement {
     if (!this.isMultiple_) {
       selectedArray = selectedArray.slice(0, 1);
     }
+    // Convert array values to strings and create map for fast lookup.
+    const selectedMap = selectedArray.reduce((map, value) => {
+      map[value] = true;
+      return map;
+    }, Object.create(null));
     // Iterate through elements and toggle selection as necessary.
     for (let i = 0; i < this.options_.length; i++) {
       const element = this.options_[i];
       const option = element.getAttribute('option');
-      if (selectedArray.indexOf(option) >= 0) {
+      if (selectedMap[option]) {
         this.setSelection_(element);
       } else {
         this.clearSelection_(element);
