@@ -372,7 +372,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
     'requests': {
       'base': 'https://${analyticsHost}',
-      'prefix': '-/${random}?euid-amp=${clientId(etuix)}&'+
+      'prefix': '-/${random}?euid-amp=${clientId(etuix)}&' +
         'url=${documentLocation}&',
       'pageview': '${base}/col2/${prefix}' +
         'rf=${documentReferrer}&' +
