@@ -191,6 +191,18 @@ describe('AccessService', () => {
         .instanceOf(AccessVendorAdapter);
   });
 
+  it('should return adapter config', () => {
+    const config = {
+      type: 'vendor',
+      vendor: 'vendor1',
+    };
+    element.textContent = JSON.stringify(config);
+    const accessService = new AccessService(window);
+    sandbox.stub(accessService.adapter_, 'getConfig');
+    accessService.getAdapterConfig();
+    expect(accessService.adapter_.getConfig.called).to.be.true;
+  });
+
   it('should parse type for JWT w/o experiment', () => {
     const config = {
       'authorization': 'https://acme.com/a',
@@ -1304,7 +1316,7 @@ describe('AccessService login', () => {
   });
 
   it('should intercept global action to login', () => {
-    serviceMock.expects('login')
+    serviceMock.expects('loginWithType_')
         .withExactArgs('')
         .once();
     const event = {preventDefault: sandbox.spy()};
@@ -1313,7 +1325,7 @@ describe('AccessService login', () => {
   });
 
   it('should intercept global action to login-other', () => {
-    serviceMock.expects('login')
+    serviceMock.expects('loginWithType_')
         .withExactArgs('other')
         .once();
     const event = {preventDefault: sandbox.spy()};
@@ -1390,7 +1402,7 @@ describe('AccessService login', () => {
   it('should open dialog in the same microtask', () => {
     service.openLoginDialog_ = sandbox.stub();
     service.openLoginDialog_.returns(new Promise(() => {}));
-    service.login('');
+    service.loginWithType_('');
     expect(service.openLoginDialog_.callCount).to.equal(1);
     expect(service.openLoginDialog_.firstCall.args[0])
         .to.equal('https://acme.com/l?rid=R');
@@ -1400,7 +1412,7 @@ describe('AccessService login', () => {
 
   it('should fail to open dialog if loginUrl is not built yet', () => {
     service.loginUrlMap_[''] = null;
-    expect(() => service.login('')).to.throw(/Login URL is not ready/);
+    expect(() => service.loginWithType_('')).to.throw(/Login URL is not ready/);
   });
 
   it('should succeed login with success=true', () => {
@@ -1412,7 +1424,7 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=true'))
         .once();
-    return service.login('').then(() => {
+    return service.loginWithType_('').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(authorizationStub.callCount).to.equal(1);
       expect(authorizationStub.calledWithExactly(
@@ -1438,7 +1450,7 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=no'))
         .once();
-    return service.login('').then(() => {
+    return service.loginWithType_('').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(0);
       expect(service.analyticsEvent_).to.have.been.calledWith(
@@ -1457,7 +1469,7 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve(''))
         .once();
-    return service.login('').then(() => {
+    return service.loginWithType_('').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(authorizationStub.callCount).to.equal(1);
       expect(authorizationStub.calledWithExactly(
@@ -1482,7 +1494,8 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.reject('abort'))
         .once();
-    return service.login('').then(() => 'S', () => 'ERROR').then(result => {
+    return service.loginWithType_('')
+    .then(() => 'S', () => 'ERROR').then(result => {
       expect(result).to.equal('ERROR');
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(0);
@@ -1509,7 +1522,7 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l2?rid=R')
         .returns(Promise.resolve('#success=true'))
         .once();
-    return service.login('login2').then(() => {
+    return service.loginWithType_('login2').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(authorizationStub.callCount).to.equal(1);
       expect(broadcastStub.callCount).to.equal(1);
@@ -1538,16 +1551,16 @@ describe('AccessService login', () => {
     openLoginDialogStub.onCall(0).returns(p1Promise);
     openLoginDialogStub.onCall(1).returns(new Promise(() => {}));
     openLoginDialogStub.onCall(2).throws();
-    const p1 = service.login('');
+    const p1 = service.loginWithType_('');
 
     // The immediate second attempt is blocked.
-    const p2 = service.login('');
+    const p2 = service.loginWithType_('');
     expect(service.loginPromise_).to.equal(p1);
     expect(p2).to.equal(p1);
 
     // The delayed third attempt succeeds after 1 second.
     clock.tick(1001);
-    const p3 = service.login('');
+    const p3 = service.loginWithType_('');
     expect(service.loginPromise_).to.equal(p3);
     expect(p3).to.not.equal(p1);
 
@@ -1559,12 +1572,19 @@ describe('AccessService login', () => {
     });
   });
 
+  it('should login with url only', () => {
+    serviceMock.expects('login_')
+        .withExactArgs('https://url', '')
+        .once();
+    service.loginWithUrl('https://url');
+  });
+
   it('should request sign-in when configured', () => {
     service.signIn_.requestSignIn = sandbox.stub();
     service.signIn_.requestSignIn.returns(Promise.resolve('#signin'));
     service.openLoginDialog_ = sandbox.stub();
     service.openLoginDialog_.returns(Promise.resolve('#login'));
-    service.login('');
+    service.loginWithType_('');
     expect(service.signIn_.requestSignIn.callCount).to.equal(1);
     expect(service.signIn_.requestSignIn.firstCall.args[0])
         .to.equal('https://acme.com/l?rid=R');
@@ -1582,7 +1602,7 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=true'))
         .once();
-    return service.login('').then(() => {
+    return service.loginWithType_('').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(service.signIn_.postLoginResult.callCount).to.equal(1);
       expect(service.signIn_.postLoginResult.firstCall.args[0]).to.deep.equal({

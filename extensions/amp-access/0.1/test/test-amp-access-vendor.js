@@ -24,6 +24,9 @@ describes.sandboxed('AccessVendorAdapter', {}, () => {
   beforeEach(() => {
     validConfig = {
       'vendor': 'vendor1',
+      'vendor1': {
+        'vendorConfigParam': 'vendorConfigValue',
+      },
     };
   });
 
@@ -32,7 +35,7 @@ describes.sandboxed('AccessVendorAdapter', {}, () => {
       const adapter = new AccessVendorAdapter(window, validConfig);
       expect(adapter.vendorName_).to.equal('vendor1');
       expect(adapter.getConfig()).to.deep.equal({
-        vendor: 'vendor1',
+        vendorConfigParam: 'vendorConfigValue',
       });
       expect(adapter.isAuthorizationEnabled()).to.be.true;
       expect(adapter.isPingbackEnabled()).to.be.true;
