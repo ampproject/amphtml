@@ -82,11 +82,11 @@ export class AmpSelector extends AMP.BaseElement {
 
   /**
    * Handles mutation of the `selected` attribute.
-   * @param {string|Array|null} newValue
+   * @param {null|boolean|string|number|Array|Object} newValue
    * @private
    */
   selectedAttributeMutated_(newValue) {
-    if (!newValue) {
+    if (newValue === null) {
       this.clearAllSelections_();
       return;
     }
