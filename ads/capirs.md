@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# SSP / capirs
+# Rambler SSP
 
 ## Example
 
@@ -25,12 +25,13 @@ limitations under the License.
     type="capirs"
     data-begun-auto-pad="1212332"
     data-begun-block-id="5665768"
+    json=""
 >
 ```
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For semantics of configuration, please see Rambler SSP documentation.
 
 Supported parameters:
 
