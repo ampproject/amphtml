@@ -193,7 +193,6 @@ class AmpApesterMedia extends AMP.BaseElement {
 </svg>`;
   }
 
-
   /**
    * @return {!Element}
    */
