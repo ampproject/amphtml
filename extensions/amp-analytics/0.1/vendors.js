@@ -364,6 +364,32 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'image': true,
     },
   },
+  
+  'euleriananalytics': {
+    'vars': {
+      'analyticsHost': '',
+      'documentLocation': 'SOURCE_URL',
+    },
+    'requests': {
+      'base': 'https://${analyticsHost}',
+      'prefix': '-/${random}?euid-amp=${clientId(etuix)}&url=${documentLocation}&',
+      'pageview': '${base}/col2/${prefix}' +
+        'rf=${documentReferrer}&' +
+        'sd=${screenWidth}x${screenHeight}&' +
+        'sd=${screenColorDepth}&' +
+        'elg=${browserLanguage}',
+      'action': '${base}/action/${prefix}' +
+        'eact=${actionCode}&' +
+        'actr=${actionRef}',
+      'user': '${base}/uparam/${prefix}' +
+        'euk${userParamKey}=${userParamVal}'
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
 
   'gemius': {
     'requests': {
