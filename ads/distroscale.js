@@ -33,7 +33,7 @@ export function distroscale(global, data) {
   } else {
     src += '&z=amp';
   }
-  
+
   global.dsAMPCallbacks = {
     renderStart: global.context.renderStart,
     noContentAvailable: global.context.noContentAvailable,
