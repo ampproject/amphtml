@@ -53,7 +53,7 @@ function appendToResult(node, attrs, result) {
       result.push(node);
     } else if (node.nodeType === Node.TEXT_NODE) {
       result.push(node.textContent);
-    } else if (isApplicableNode(node)) {
+    } else if (node.nodeType === Node.ELEMENT_NODE && isApplicableNode(node)) {
       appendOpenTag(node, attrs, result);
       stack.push(`</${node.tagName.toLowerCase()}>`);
 
