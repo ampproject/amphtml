@@ -450,6 +450,14 @@ export class BaseElement {
    * Whether the element needs to be reconstructed after it has been
    * re-parented. Many elements cannot survive fully the reparenting and
    * are better to be reconstructed from scratch.
+   *
+   * An example of an element that should be reconstructed in a iframe-based
+   * element. Reparenting such an element will cause the iframe to reload and
+   * will lost the previously established connection. It's safer to reconstruct
+   * such an element. An image or the other hand does not need to be
+   * reconstructed since image itself is not reloaded by the browser and thus
+   * there's no need to use additional resources for reconstruction.
+   *
    * @return {boolean}
    */
   reconstructWhenReparented() {
