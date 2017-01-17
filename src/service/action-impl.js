@@ -199,8 +199,10 @@ export class ActionService {
    * @param {function(!ActionInvocation)} handler
    */
   installActionHandler(target, handler) {
-    const debugid = target.tagName + '#' + target.id;
-    dev().assert((target.id && target.id.substring(0, 4) == 'amp-') ||
+    // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
+    const targetId = target.getAttribute('id') || '';
+    const debugid = target.tagName + '#' + targetId;
+    dev().assert((targetId && targetId.substring(0, 4) == 'amp-') ||
         target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
         'AMP element or a whitelisted target element is expected: %s', debugid);
 
@@ -320,7 +322,9 @@ export class ActionService {
 
     // Special elements with AMP ID or known supported actions.
     const supportedActions = ELEMENTS_ACTIONS_MAP_[lowerTagName];
-    if ((target.id && target.id.substring(0, 4) == 'amp-') ||
+    // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
+    const targetId = target.getAttribute('id') || '';
+    if ((targetId && targetId.substring(0, 4) == 'amp-') ||
         (supportedActions && supportedActions.indexOf(method) != -1)) {
       if (!target[ACTION_QUEUE_]) {
         target[ACTION_QUEUE_] = [];
