@@ -164,7 +164,8 @@
   <script src="./viewer-integr-messaging.js"></script>
 
   <script>
-    var allViewers = []; 
+    var allViewers = [];
+    var currentContainerId = null;
 
     function Viewer(containerId, id, url, visible) {
       this.id = id;
@@ -415,6 +416,10 @@
       });
     };
 
+    Viewer.prototype.scrollAmpDoc = function(scrollTop) {
+      log('viewer scroll amp doc: ', scrollTop);
+      this.sendRequest_('scroll', {scrollTop}, true);
+    };
 
     Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
       log('Viewer.prototype.processRequest_');
@@ -574,6 +579,17 @@
       allViewers.forEach(function(viewer) {
         viewer.toggleVisibility(viewer.id == id, viewer.id == id);
       });
+      currentContainerId = id;
+    }
+
+    function getContainer(id) {
+      return allViewers[id - 1];
+    }
+
+    function viewerScrollCurrentAmpDoc(scrollTop) {
+      if (currentContainerId) {
+        getContainer(currentContainerId).scrollAmpDoc(scrollTop);
+      }
     }
 
     window.onload = loadAmpDoc;
