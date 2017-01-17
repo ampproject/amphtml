@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {user, dev} from '../../../src/log';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {isExperimentOn} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
@@ -58,9 +55,6 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
-    // EXPERIMENT
-    user().assert(isExperimentOn(this.win, TAG), `Enable ${TAG} experiment`);
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
 
@@ -180,6 +174,29 @@ class AmpApesterMedia extends AMP.BaseElement {
   /**
    * @return {!Element}
    */
+  constructLoaderInnerHTML_() {
+    return `<div class="amp-apester-loader-blobs">
+    <div class="amp-apester-loader-blob"></div>
+    <div class="amp-apester-loader-blob"></div>
+    <div class="amp-apester-loader-logo"></div>
+</div>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <filter id="amp-apester-goo">
+            <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10"/>
+            <feColorMatrix in="blur" mode="matrix"
+                           values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"
+                           result="amp-apester-goo"/>
+            <feBlend in2="amp-apester-goo" in="SourceGraphic" result="mix"/>
+        </filter>
+    </defs>
+</svg>`;
+  }
+
+
+  /**
+   * @return {!Element}
+   */
   constructOverflow_() {
     const overflow = this.element.ownerDocument.createElement('div');
     overflow.setAttribute('overflow', '');
@@ -233,16 +250,14 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const img = this.element.ownerDocument.createElement('amp-img');
     const placeholder = this.element.ownerDocument.createElement('div');
     placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('layout', 'fill');
     placeholder.className = 'amp-apester-loader';
-    img.setAttribute('src', this.loaderUrl_);
-    img.setAttribute('layout', 'fill');
-    img.setAttribute('noloading', '');
-    placeholder.appendChild(img);
+    placeholder.innerHTML = this.constructLoaderInnerHTML_();
     return placeholder;
   }
+
 
   /** @override */
   unlayoutOnPause() {

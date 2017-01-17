@@ -33,7 +33,6 @@ describe('amp-apester-media', () => {
   let attemptChangeSizeSpy;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-apester-media', true);
     sandbox = sinon.sandbox.create();
 
   });
@@ -55,7 +54,7 @@ describe('amp-apester-media', () => {
         'payload': {
           'interactionId': '57a336dba187a2ca3005e826',
           'data': {
-            'size': {'width': '600', 'height': '444'},
+            'size': {'width': '600', 'height': '404'},
           },
           'layout': {
             'id': '557d52c059081084b94845c3',
@@ -94,7 +93,7 @@ describe('amp-apester-media', () => {
       expect(iframe.src).to.equal(
           'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
       expect(changeSizeSpy.callCount).to.equal(1);
-      expect(changeSizeSpy.args[0][0]).to.equal('444');
+      expect(changeSizeSpy.args[0][0]).to.equal('404');
     });
   });
 
@@ -107,7 +106,7 @@ describe('amp-apester-media', () => {
       expect(iframe.src).to.equal(
           'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
       expect(attemptChangeSizeSpy.callCount).to.equal(1);
-      expect(attemptChangeSizeSpy.args[0][0]).to.equal('444');
+      expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
     });
   });
 
