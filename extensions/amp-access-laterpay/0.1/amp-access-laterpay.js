@@ -49,7 +49,7 @@ const DEFAULT_MESSAGES = {
  *   articleTitleSelector: !string,
  *   configUrl: string=,
  *   articleId: string=,
- *   scrollTopAfterAuth: boolean=,
+ *   scrollToTopAfterAuth: boolean=,
  *   locale: string=,
  *   localeMessages: object=,
  *   sandbox: boolean=,
@@ -185,7 +185,7 @@ export class LaterpayVendor {
             'article, or no paid content configurations are setup.');
       }
 
-      if (this.laterpayConfig_.scrollTopAfterAuth) {
+      if (this.laterpayConfig_.scrollToTopAfterAuth) {
         this.vsync_.mutate(() => this.viewport_.setScrollTop(0));
       }
       this.emptyContainer_();

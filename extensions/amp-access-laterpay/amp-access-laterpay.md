@@ -102,7 +102,7 @@ The following values can be set in the `laterpay` config object:
     <td>Allows the publisher to customize or localize the text present in the generated list of purchase options. See the [#localization](Localization) section for more information.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><code>scrollTopAfterAuth</code></td>
+    <td class="col-fourty"><code>scrollToTopAfterAuth</code></td>
     <td>&lt;boolean&gt;</td>
     <td>If true, scrolls the page to the top after the authorization process is sucessful. This can be helpful if the place where you show the dialog is further below in the page and the user could be confused by their current scroll position after returning to the page.</td>
   </tr>
