@@ -296,9 +296,16 @@ describe('XHR', function() {
         it('should reject if error', () => {
           mockXhr.status = 500;
           return assertSuccess(createResponseInstance('', mockXhr))
-              .then(response => {
-                expect(response.status).to.equal(500);
-              }).should.be.rejectedWith(/HTTP error 500/);
+              .should.be.rejectedWith(/HTTP error 500/);
+        });
+
+        it('should include response in error', () => {
+          mockXhr.status = 500;
+          return assertSuccess(createResponseInstance('', mockXhr))
+              .catch(error => {
+                expect(error.response).to.be.defined;
+                expect(error.response.status).to.equal(500);
+              });
         });
 
         it('should parse json content when error', () => {
