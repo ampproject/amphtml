@@ -681,76 +681,93 @@ class MultidocManager {
         const tagName = n.tagName;
         const name = n.getAttribute('name');
         const rel = n.getAttribute('rel');
-        if (n.tagName == 'TITLE') {
-          shadowRoot.AMP.title = n.textContent;
-          dev().fine(TAG, '- set title: ', shadowRoot.AMP.title);
-        } else if (tagName == 'META' && n.hasAttribute('charset')) {
-          // Ignore.
-        } else if (tagName == 'META' && name == 'viewport') {
-          // Ignore.
-        } else if (tagName == 'META') {
-          // TODO(dvoytenko): copy other meta tags.
-          dev().warn(TAG, 'meta ignored: ', n);
-        } else if (tagName == 'LINK' && rel == 'canonical') {
-          shadowRoot.AMP.canonicalUrl = n.getAttribute('href');
-          dev().fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
-        } else if (tagName == 'LINK' && rel == 'stylesheet') {
-          // This must be a font definition: no other stylesheets are allowed.
-          /** @const {string} */
-          const href = n.getAttribute('href');
-          if (parentLinks[href]) {
-            dev().fine(TAG, '- stylesheet already included: ', href);
-          } else {
-            parentLinks[href] = true;
-            const el = this.win.document.createElement('link');
-            el.setAttribute('rel', 'stylesheet');
-            el.setAttribute('type', 'text/css');
-            el.setAttribute('href', href);
-            this.win.document.head.appendChild(el);
-            dev().fine(TAG, '- import font to parent: ', href, el);
-          }
-        } else if (n.tagName == 'STYLE') {
-          if (n.hasAttribute('amp-boilerplate')) {
-            // Ignore.
-            dev().fine(TAG, '- ignore boilerplate style: ', n);
-          } else {
-            installStylesForShadowRoot(shadowRoot, n.textContent,
-                /* isRuntimeCss */ false, 'amp-custom');
-            dev().fine(TAG, '- import style: ', n);
-          }
-        } else if (n.tagName == 'SCRIPT' && n.hasAttribute('src')) {
-          dev().fine(TAG, '- src script: ', n);
-          const src = n.getAttribute('src');
-          const isRuntime = src.indexOf('/amp.js') != -1 ||
-              src.indexOf('/v0.js') != -1;
-          const customElement = n.getAttribute('custom-element');
-          const customTemplate = n.getAttribute('custom-template');
-          if (isRuntime) {
-            dev().fine(TAG, '- ignore runtime script: ', src);
-          } else if (customElement || customTemplate) {
-            // This is an extension.
-            this.extensions_.loadExtension(customElement || customTemplate);
-            dev().fine(
-                TAG, '- load extension: ', customElement || customTemplate);
-            if (customElement) {
-              extensionIds.push(customElement);
+        switch (tagName) {
+          case 'TITLE':
+            shadowRoot.AMP.title = n.textContent;
+            dev().fine(TAG, '- set title: ', shadowRoot.AMP.title);
+            break;
+          case 'META':
+            if (n.hasAttribute('charset')) {
+              // Ignore.
+            } else if (name == 'viewport') {
+              // Ignore.
+            } else {
+              // TODO(dvoytenko): copy other meta tags.
+              dev().warn(TAG, 'meta ignored: ', n);
             }
-          } else if (!n.hasAttribute('data-amp-report-test')) {
-            user().error(TAG, '- unknown script: ', n, src);
-          }
-        } else if (n.tagName == 'SCRIPT') {
-          // Non-src version of script.
-          const type = n.getAttribute('type') || 'application/javascript';
-          if (type.indexOf('javascript') == -1) {
-            shadowRoot.appendChild(this.win.document.importNode(n, true));
-            dev().fine(TAG, '- non-src script: ', n);
-          } else {
-            user().error(TAG, '- unallowed inline javascript: ', n);
-          }
-        } else if (n.tagName == 'NOSCRIPT') {
-          // Ignore.
-        } else {
-          user().error(TAG, '- UNKNOWN head element:', n);
+            break;
+          case 'LINK':
+            /** @const {string} */
+            const href = n.getAttribute('href');
+            if (rel == 'canonical') {
+              shadowRoot.AMP.canonicalUrl = href;
+              dev().fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
+            } else if (rel == 'stylesheet') {
+              // Must be a font definition: no other stylesheets are allowed.
+              if (parentLinks[href]) {
+                dev().fine(TAG, '- stylesheet already included: ', href);
+              } else {
+                parentLinks[href] = true;
+                const el = this.win.document.createElement('link');
+                el.setAttribute('rel', 'stylesheet');
+                el.setAttribute('type', 'text/css');
+                el.setAttribute('href', href);
+                this.win.document.head.appendChild(el);
+                dev().fine(TAG, '- import font to parent: ', href, el);
+              }
+            } else {
+              dev().fine(TAG, '- ignore link rel=', rel);
+            }
+            break;
+          case 'STYLE':
+            if (n.hasAttribute('amp-boilerplate')) {
+              // Ignore.
+              dev().fine(TAG, '- ignore boilerplate style: ', n);
+            } else {
+              installStylesForShadowRoot(shadowRoot, n.textContent,
+                  /* isRuntimeCss */ false, 'amp-custom');
+              dev().fine(TAG, '- import style: ', n);
+            }
+            break;
+          case 'SCRIPT':
+            if (n.hasAttribute('src')) {
+              dev().fine(TAG, '- src script: ', n);
+              const src = n.getAttribute('src');
+              const isRuntime = src.indexOf('/amp.js') != -1 ||
+                  src.indexOf('/v0.js') != -1;
+              const customElement = n.getAttribute('custom-element');
+              const customTemplate = n.getAttribute('custom-template');
+              if (isRuntime) {
+                dev().fine(TAG, '- ignore runtime script: ', src);
+              } else if (customElement || customTemplate) {
+                // This is an extension.
+                this.extensions_.loadExtension(customElement || customTemplate);
+                dev().fine(
+                    TAG, '- load extension: ', customElement || customTemplate);
+                if (customElement) {
+                  extensionIds.push(customElement);
+                }
+              } else if (!n.hasAttribute('data-amp-report-test')) {
+                user().error(TAG, '- unknown script: ', n, src);
+              }
+            } else {
+              // Non-src version of script.
+              const type = n.getAttribute('type') || 'application/javascript';
+              if (type.indexOf('javascript') == -1) {
+                shadowRoot.appendChild(this.win.document.importNode(n, true));
+                dev().fine(TAG, '- non-src script: ', n);
+              } else {
+                user().error(TAG, '- unallowed inline javascript: ', n);
+              }
+            }
+            break;
+          case 'NOSCRIPT':
+            // Ignore.
+            break;
+          default:
+            user().error(TAG, '- UNKNOWN head element:', n);
+            break;
+
         }
       }
     }
