@@ -152,6 +152,7 @@ export class Viewport {
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
+    this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
     this.binding_.updatePaddingTop(this.paddingTop_);
 
     this.binding_.onScroll(this.scroll_.bind(this));
@@ -581,6 +582,15 @@ export class Viewport {
       }
     }
     return this.viewportMeta_;
+  }
+
+  /**
+   * @param {!JSONType} data
+   * @private
+   */
+  viewerSetScrollTop_(data) {
+    const targetScrollTop = data['scrollTop'];
+    this.setScrollTop(targetScrollTop);
   }
 
   /**
