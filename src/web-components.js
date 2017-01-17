@@ -59,7 +59,7 @@ export function setShadowDomMethodForTesting(val) {
  */
 export function isShadowDomSupported() {
   if (shadowDomSupported === undefined) {
-    shadowDomSupported = !!getShadowDomMethod();// && areNativeCustomElementsSupported();
+    shadowDomSupported = !!getShadowDomMethod() && areNativeCustomElementsSupported();
   }
 
   return shadowDomSupported;
