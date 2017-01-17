@@ -372,17 +372,18 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
     'requests': {
       'base': 'https://${analyticsHost}',
-      'prefix': '-/${random}?euid-amp=${clientId(etuix)}&' +
+      'basePrefix': '-/${random}?' +
+        'euid-amp=${clientId(etuix)}&' +
         'url=${documentLocation}&',
-      'pageview': '${base}/col2/${prefix}' +
+      'pageview': '${base}/col2/${basePrefix}' +
         'rf=${documentReferrer}&' +
         'sd=${screenWidth}x${screenHeight}&' +
         'sd=${screenColorDepth}&' +
         'elg=${browserLanguage}',
-      'action': '${base}/action/${prefix}' +
+      'action': '${base}/action/${basePrefix}' +
         'eact=${actionCode}&' +
         'actr=${actionRef}',
-      'user': '${base}/uparam/${prefix}' +
+      'user': '${base}/uparam/${basePrefix}' +
         'euk${userParamKey}=${userParamVal}',
     },
     'transport': {
