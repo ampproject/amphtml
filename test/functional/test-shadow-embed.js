@@ -23,11 +23,13 @@ import {
   getShadowRootNode,
   importShadowBody,
   installStylesForShadowRoot,
-  isShadowDomSupported,
   isShadowRoot,
   scopeShadowCss,
-  setShadowDomSupportedForTesting,
 } from '../../src/shadow-embed';
+import {
+  setShadowDomSupportedForTesting,
+  setShadowDomMethodForTesting
+} from '../../src/web-components';
 import {extensionsFor} from '../../src/extensions';
 import * as sinon from 'sinon';
 
@@ -41,12 +43,8 @@ describe('shadow-embed', () => {
 
   afterEach(() => {
     setShadowDomSupportedForTesting(undefined);
+    setShadowDomMethodForTesting(undefined);
     sandbox.restore();
-  });
-
-  it('should report whether native shadow dom supported', () => {
-    expect(isShadowDomSupported()).to.equal(
-        !!Element.prototype.createShadowRoot);
   });
 
   it('should copy runtime styles from ampdoc', () => {
@@ -67,7 +65,7 @@ describe('shadow-embed', () => {
     expect(copy).to.not.equal(style);
   });
 
-  ['native', 'polyfill'].forEach(scenario => {
+  ['nativeV0', 'nativeV1', 'polyfill'].forEach(scenario => {
     describe('shadow APIs ' + scenario, () => {
       let hostElement;
 
@@ -76,8 +74,21 @@ describe('shadow-embed', () => {
         if (scenario == 'polyfill') {
           setShadowDomSupportedForTesting(false);
         }
-        if (scenario == 'native' && !isShadowDomSupported()) {
-          this.skip();
+
+        if (scenario == 'nativeV0') {
+          if (!!Element.prototype.createShadowRoot) {
+            setShadowDomMethodForTesting(Element.prototype.createShadowRoot);
+          }  else {
+            this.skip();
+          }
+        }
+
+        if (scenario == 'nativeV1') {
+            if (!!Element.prototype.attachShadow) {
+                setShadowDomMethodForTesting(Element.prototype.attachShadow);
+            }  else {
+                this.skip();
+            }
         }
       });
 
@@ -143,7 +154,7 @@ describe('shadow-embed', () => {
 
           const body = importShadowBody(shadowRoot, source);
           expect(body.tagName).to.equal(
-              scenario == 'native' ? 'BODY' : 'AMP-BODY');
+              scenario == 'nativeV0' || scenario == 'nativeV1' ? 'BODY' : 'AMP-BODY');
           expect(body.style.position).to.equal('relative');
           if (scenario == 'polyfill') {
             expect(body.style.display).to.equal('block');
