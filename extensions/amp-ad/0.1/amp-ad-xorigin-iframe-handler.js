@@ -40,6 +40,8 @@ export class AmpAdXOriginIframeHandler {
    * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
    */
   constructor(baseInstance) {
+    /** {!Window}*/
+    this.win = window;
 
     /** @private */
     this.baseInstance_ = baseInstance;
@@ -101,7 +103,7 @@ export class AmpAdXOriginIframeHandler {
       }
 
       const {selector, attributes} = info;
-      const content = getHtml(window, selector, attributes);
+      const content = getHtml(this.win, selector, attributes);
 
       postMessageToWindows(
           this.iframe, [{win: source, origin}],

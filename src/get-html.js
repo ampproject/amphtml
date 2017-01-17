@@ -15,7 +15,10 @@
  */
 
 /** @type {Array<string>} */
-const excludedTags = ['amp-analytics', 'amp-experiment', 'amp-bind-state'];
+const excludedTags = ['script', 'style'];
+
+const allowedAmpTags = ['amp-accordion', 'amp-app-banner', 'amp-carousel',
+  'amp-fit-text', 'amp-form', 'amp-selector', 'amp-sidebar'];
 
 /**
  * Returns content of HTML node
@@ -70,8 +73,13 @@ function appendToResult(node, attrs, result) {
  * @return {!boolean}
  */
 function isApplicableNode(node) {
-  return !!(excludedTags.indexOf(node.tagName.toLowerCase()) === -1 &&
-      node.textContent);
+  const tagName = node.tagName.toLowerCase();
+
+  if (tagName.indexOf('amp-') === 0) {
+    return !!(allowedAmpTags.indexOf(tagName) === 1 && node.textContent);
+  } else {
+    return !!(excludedTags.indexOf(tagName) === -1 && node.textContent);
+  }
 }
 
 
