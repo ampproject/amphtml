@@ -47,10 +47,10 @@
   },
   "euleriananalytics": {
     "base": "https://$analyticsHost",
-    "basePrefix": "-/$random?euid-amp=_client_id_&url=$documentLocation&",
-    "pageview": "https://$analyticsHost/col2/-/$random?euid-amp=_client_id_&url=$documentLocation&rf=$documentReferrer&sd=$screenWidthx$screenHeight&sd=$screenColorDepth&elg=$browserLanguage",
-    "action": "https://$analyticsHost/action/-/$random?euid-amp=_client_id_&url=$documentLocation&eact=$actionCode&actr=$actionRef",
-    "user": "https://$analyticsHost/user/-/$random?euid-amp=_client_id_&url=$documentLocation&euk$userParamKey=$userParamVal"
+    "basePrefix": "-/_random_?euid-amp=_client_id_&url=_source_url_&",
+    "pageview": "https://$analyticsHost/col2/-/_random_?euid-amp=_client_id_&url=_source_url_&rf=_document_referrer_&sd=_screen_width_x_screen_height_&sd=_screen_color_depth_&elg=_browser_language_",
+    "action": "https://$analyticsHost/action/-/_random_?euid-amp=_client_id_&url=_source_url_&eact=$actionCode&actr=$actionRef",
+    "user": "https://$analyticsHost/uparam/-/_random_?euid-amp=_client_id_&url=_source_url_&euk$userParamKey=$userParamVal"
   },
   "gemius": {
     "base": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams",
