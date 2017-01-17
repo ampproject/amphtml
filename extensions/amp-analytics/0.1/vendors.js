@@ -364,7 +364,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'image': true,
     },
   },
-  
+
   'euleriananalytics': {
     'vars': {
       'analyticsHost': '',
@@ -372,7 +372,8 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
     'requests': {
       'base': 'https://${analyticsHost}',
-      'prefix': '-/${random}?euid-amp=${clientId(etuix)}&url=${documentLocation}&',
+      'prefix': '-/${random}?euid-amp=${clientId(etuix)}&'+
+        'url=${documentLocation}&',
       'pageview': '${base}/col2/${prefix}' +
         'rf=${documentReferrer}&' +
         'sd=${screenWidth}x${screenHeight}&' +
@@ -382,7 +383,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'eact=${actionCode}&' +
         'actr=${actionRef}',
       'user': '${base}/uparam/${prefix}' +
-        'euk${userParamKey}=${userParamVal}'
+        'euk${userParamKey}=${userParamVal}',
     },
     'transport': {
       'beacon': false,
