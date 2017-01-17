@@ -135,6 +135,23 @@ export function experimentToggles(win) {
     }
   }
 
+  // Read document level override from meta tag.
+  if (win.AMP_CONFIG
+      && Array.isArray(win.AMP_CONFIG['allow-doc-opt-in'])
+      && win.AMP_CONFIG['allow-doc-opt-in'].length > 0) {
+    const allowed = win.AMP_CONFIG['allow-doc-opt-in'];
+    const meta =
+        win.document.head.querySelector('meta[name="amp-experiments-opt-in"]');
+    if (meta) {
+      const optedInExperiments = meta.getAttribute('content').split(',');
+      for (let i = 0; i < optedInExperiments.length; i++) {
+        if (allowed.indexOf(optedInExperiments[i]) != -1) {
+          toggles_[optedInExperiments[i]] = true;
+        }
+      }
+    }
+  }
+
   Object.assign(toggles_, getExperimentTogglesFromCookie(win));
   return toggles_;
 }

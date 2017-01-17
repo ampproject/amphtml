@@ -32,7 +32,7 @@ import {user} from './log';
  * The base class implements a set of lifecycle methods that are called by
  * the runtime as appropriate. These are mostly based on the custom element
  * lifecycle (See
- * http://www.html5rocks.com/en/tutorials/webcomponents/customelements/)
+ * https://developers.google.com/web/fundamentals/getting-started/primers/customelements)
  * and adding AMP style late loading to the mix.
  *
  * The complete lifecycle of custom DOM element is:
@@ -827,14 +827,15 @@ export class BaseElement {
   }
 
   /**
-   * Called when an attribute's value changes.
-   * Boolean attributes have a value of empty string and `null` when
-   * present and missing, respectively.
-   * @param {string} unusedName
-   * @param {?string} unusedOldValue
-   * @param {?string} unusedNewValue
+   * Called when one or more attributes are mutated.
+   * @note Must be called inside a mutate context.
+   * @note Boolean attributes have a value of `true` and `false` when
+   *       present and missing, respectively.
+   * @param {
+   *   !Object<string, (null|boolean|string|number|Array|Object)>
+   * } unusedMutations
    */
-  attributeChangedCallback(unusedName, unusedOldValue, unusedNewValue) {
+  mutatedAttributesCallback(unusedMutations) {
     // Subclasses may override.
   }
 

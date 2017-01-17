@@ -24,7 +24,6 @@ describe('SlideScroll', () => {
   let sandbox;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-slidescroll', true);
     sandbox = sinon.sandbox.create();
   });
 
@@ -931,6 +930,63 @@ describe('SlideScroll', () => {
         impl.goCallback(1);
         expect(showSlideSpy).to.have.been.calledWith(1);
         expect(showSlideSpy.callCount).to.equal(3);
+      });
+    });
+
+    it('should update slide when `slide` attribute is mutated', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+
+        impl.mutatedAttributesCallback({slide: 2});
+        expect(showSlideSpy).to.have.been.calledWith(2);
+
+        // Don't call showSlide_() if slide is not finite.
+        showSlideSpy.reset();
+        impl.mutatedAttributesCallback({slide: Number.POSITIVE_INFINITY});
+        expect(showSlideSpy.called).to.be.false;
+      });
+    });
+
+    it('should trigger `slide` action when user changes slides', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+
+        impl.goCallback(-1, /* animate */ false);
+        expect(triggerSpy).to.have.been.calledWith(
+            ampSlideScroll,
+            'goToSlide',
+            /* CustomEvent */ sinon.match.has('detail', {index: 4}));
+
+        impl.goCallback(1, /* animate */ false);
+        expect(triggerSpy).to.have.been.calledWith(
+            ampSlideScroll,
+            'goToSlide',
+            /* CustomEvent */ sinon.match.has('detail', {index: 0}));
+      });
+    });
+
+    it('should goToSlide on action', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        let args = {'index': '123'};
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+
+
+        impl.executeAction({method: 'goToSlide', args});
+        expect(showSlideSpy).to.have.been.calledWith(123);
+
+        args = {'index': 'ssds11'};
+        impl.executeAction({method: 'goToSlide', args});
+        expect(showSlideSpy.callCount).to.equal(1);
+
+        args = {'index': '0'};
+        impl.executeAction({method: 'goToSlide', args});
+        expect(showSlideSpy).to.have.been.calledWith(0);
       });
     });
   });

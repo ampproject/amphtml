@@ -19,7 +19,7 @@ tags: {  # amp-access
   spec_name: "amp-access extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-access extension .json script"
+  extension_unused_unless_tag_present: "amp-access extension .json script"
   attrs: {
     name: "async"
     mandatory: true

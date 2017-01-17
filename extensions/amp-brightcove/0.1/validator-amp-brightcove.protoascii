@@ -21,7 +21,7 @@ tags: {  # amp-brightcove
   spec_name: "amp-brightcove extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-brightcove"
+  extension_unused_unless_tag_present: "amp-brightcove"
   attrs: {
     name: "async"
     mandatory: true

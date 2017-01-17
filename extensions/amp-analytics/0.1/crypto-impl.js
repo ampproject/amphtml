@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import * as lib from '../../../third_party/closure-library/sha384-generated';
 import {fromClass} from '../../../src/service';
 import {dev} from '../../../src/log';
+import {getExistingServiceForWindow} from '../../../src/service';
+import {extensionsFor} from '../../../src/extensions';
 import {stringToBytes} from '../../../src/utils/bytes';
+import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
 
 /** @const {string} */
 const TAG = 'Crypto';
@@ -25,40 +27,58 @@ const FALLBACK_MSG = 'SubtleCrypto failed, fallback to closure lib.';
 
 export class Crypto {
 
+  /**
+   * @param {!Window} win
+   */
   constructor(win) {
+    /** @private {!Window} */
+    this.win_ = win;
+
     /** @private @const {?webCrypto.SubtleCrypto} */
     this.subtle_ = getSubtle(win);
+
+    /** @private {?Promise<{sha384: function((string|Uint8Array))}>} */
+    this.polyfillPromise_ = null;
+
+    if (!this.subtle_) {
+      this.loadPolyfill_();
+    }
   }
 
   /**
    * Returns the SHA-384 hash of the input string in a number array.
    * Input string cannot contain chars out of range [0,255].
    * @param {string|!Uint8Array} input
-   * @returns {!Promise<!Array<number>>}
+   * @return {!Promise<!Uint8Array>}
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384(input) {
-    if (this.subtle_) {
-      try {
-        return this.subtle_.digest({name: 'SHA-384'},
-                input instanceof Uint8Array ? input : stringToBytes(input))
-            // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
-            /** @param {?} buffer */
-            .then(buffer => [].slice.call(new Uint8Array(buffer)),
-                e => {
-                  // Chrome doesn't allow the usage of Crypto API under
-                  // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
-                  if (e.message && e.message.indexOf('secure origin') < 0) {
-                    // Log unexpected fallback.
-                    dev().error(TAG, FALLBACK_MSG, e);
-                  }
-                  return lib.sha384(input);
-                });
-      } catch (e) {
-        dev().error(TAG, FALLBACK_MSG, e);
-      }
+    if (typeof input === 'string') {
+      input = stringToBytes(input);
     }
-    return Promise.resolve(lib.sha384(input));
+
+    // polyfill is (being) loaded,
+    // means native Crypto API is not available or failed before.
+    if (this.polyfillPromise_) {
+      return this.polyfillPromise_.then(polyfill => polyfill.sha384(input));
+    }
+    try {
+      return this.subtle_.digest({name: 'SHA-384'}, input)
+          /** @param {?} buffer */
+          .then(buffer => new Uint8Array(buffer),
+              e => {
+                // Chrome doesn't allow the usage of Crypto API under
+                // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
+                if (e.message && e.message.indexOf('secure origin') < 0) {
+                  // Log unexpected fallback.
+                  dev().error(TAG, FALLBACK_MSG, e);
+                }
+                return this.loadPolyfill_().then(() => this.sha384(input));
+              });
+    } catch (e) {
+      dev().error(TAG, FALLBACK_MSG, e);
+      return this.loadPolyfill_().then(() => this.sha384(input));
+    }
   }
 
   /**
@@ -66,13 +86,11 @@ export class Crypto {
    * base64 (using -_. instead of +/=).
    * Input string cannot contain chars out of range [0,255].
    * @param {string|!Uint8Array} input
-   * @returns {!Promise<string>}
+   * @return {!Promise<string>}
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384Base64(input) {
-    return this.sha384(input).then(buffer => {
-      return lib.base64(buffer);
-    });
+    return this.sha384(input).then(buffer => base64UrlEncodeFromBytes(buffer));
   }
 
   /**
@@ -80,7 +98,7 @@ export class Crypto {
    * of [0, 1).
    * Input string cannot contain chars out of range [0,255].
    * @param {string|!Uint8Array} input
-   * @returns {!Promise<number>}
+   * @return {!Promise<number>}
    */
   uniform(input) {
     return this.sha384(input).then(buffer => {
@@ -92,6 +110,20 @@ export class Crypto {
       }
       return result;
     });
+  }
+
+  /**
+   * Loads Crypto polyfill library.
+   * @return {!Promise<{sha384: function((string|Uint8Array))}>}
+   * @private
+   */
+  loadPolyfill_() {
+    if (this.polyfillPromise_) {
+      return this.polyfillPromise_;
+    }
+    return this.polyfillPromise_ = extensionsFor(this.win_)
+        .loadExtension('amp-crypto-polyfill')
+        .then(() => getExistingServiceForWindow(this.win_, 'crypto-polyfill'));
   }
 }
 

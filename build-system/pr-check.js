@@ -146,6 +146,7 @@ const command = {
     execOrDie('npm run ava');
   },
   buildRuntime: function() {
+    execOrDie(`${gulp} clean`);
     execOrDie(`${gulp} lint`);
     execOrDie(`${gulp} build`);
     execOrDie(`${gulp} check-types`);

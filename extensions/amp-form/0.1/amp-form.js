@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 import {
+  assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
   addParamsToUrl,
   SOURCE_ORIGIN_PARAM,
@@ -69,6 +71,10 @@ const UserValidityState = {
 let FormFieldDef;
 
 
+/** @private @const {string} */
+const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
+
+
 export class AmpForm {
 
   /**
@@ -77,6 +83,8 @@ export class AmpForm {
    * @param {string} id
    */
   constructor(element, id) {
+    installFormProxy(element);
+
     /** @private @const {string} */
     this.id_ = id;
 
@@ -147,6 +155,8 @@ export class AmpForm {
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
+    // TODO(mkhatib, #6927): Wait for amp-selector to finish loading if the current form
+    // is using it.
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this));
     this.installEventHandlers_();
@@ -158,13 +168,14 @@ export class AmpForm {
    */
   actionHandler_(invocation) {
     if (invocation.method == 'submit') {
-      this.handleSubmit_();
+      this.handleSubmitAction_();
     }
   }
 
   /** @private */
   installEventHandlers_() {
-    this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
+    this.form_.addEventListener(
+        'submit', this.handleSubmitEvent_.bind(this), true);
     this.form_.addEventListener('blur', e => {
       onInputInteraction_(e);
       this.validator_.onBlur(e);
@@ -176,35 +187,152 @@ export class AmpForm {
   }
 
   /**
+   * Handles submissions through action service invocations.
+   *   e.g. <img on=tap:form.submit>
+   * @private
+   */
+  handleSubmitAction_() {
+    if (this.state_ == FormState_.SUBMITTING || !this.checkValidity_()) {
+      return;
+    }
+    this.submit_();
+    if (this.method_ == 'GET' && !this.xhrAction_) {
+      // Trigger the actual submit of GET non-XHR.
+      this.form_.submit();
+    }
+  }
+
+  /**
    * Note on stopImmediatePropagation usage here, it is important to emulate native
    * browser submit event blocking. Otherwise any other submit listeners would get the
    * event.
    *
    * For example, action service shouldn't trigger 'submit' event if form is actually
-   * invalid. stopImmediatePropagation allows us to make sure we don't trigger it
+   * invalid. stopImmediatePropagation allows us to make sure we don't trigger it.
    *
+   * This prevents the default submission event in any of following cases:
+   *   - The form is still finishing a previous submission.
+   *   - The form is invalid.
+   *   - Handling an XHR submission.
+   *   - It's a non-XHR POST submission (unsupported).
    *
-   * @param {?Event=} opt_event
+   * @param {!Event} event
    * @private
    */
-  handleSubmit_(opt_event) {
-    if (this.state_ == FormState_.SUBMITTING) {
-      if (opt_event) {
-        opt_event.stopImmediatePropagation();
-        opt_event.preventDefault();
-      }
+  handleSubmitEvent_(event) {
+    if (this.state_ == FormState_.SUBMITTING || !this.checkValidity_()) {
+      event.stopImmediatePropagation();
+      event.preventDefault();
       return;
     }
+    if (this.xhrAction_ || this.method_ == 'POST') {
+      event.preventDefault();
+    }
+    this.submit_();
+  }
 
+  /**
+   * A helper method that actual handles the for different cases (post, get, xhr...).
+   * @private
+   */
+  submit_() {
+    const isVarSubExpOn = isExperimentOn(this.win_, 'amp-form-var-sub');
+    // Fields that support var substitutions.
+    const varSubsFields = isVarSubExpOn ? this.form_.querySelectorAll(
+        '[type="hidden"][data-amp-replace]') : [];
+    if (this.xhrAction_) {
+      this.handleXhrSubmit_(varSubsFields);
+    } else if (this.method_ == 'POST') {
+      this.handleNonXhrPost_();
+    } else if (this.method_ == 'GET') {
+      this.handleNonXhrGet_(varSubsFields);
+    }
+  }
+
+  /**
+   * @param {IArrayLike<!HTMLInputElement>} varSubsFields
+   * @private
+   */
+  handleXhrSubmit_(varSubsFields) {
+    this.cleanupRenderedTemplate_();
+    this.setState_(FormState_.SUBMITTING);
+    const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
+    const varSubPromises = [];
+    for (let i = 0; i < varSubsFields.length; i++) {
+      varSubPromises.push(
+          this.urlReplacement_.expandInputValueAsync(varSubsFields[i]));
+    }
+    // Wait until all variables have been substituted or 100ms timeout.
+    this.waitOnPromisesOrTimeout_(varSubPromises, 100).then(() => {
+      let xhrUrl, body;
+      if (isHeadOrGet) {
+        xhrUrl = addParamsToUrl(
+            dev().assertString(this.xhrAction_), this.getFormAsObject_());
+      } else {
+        xhrUrl = this.xhrAction_;
+        body = new FormData(this.form_);
+      }
+      return this.xhr_.fetch(dev().assertString(xhrUrl), {
+        body,
+        method: this.method_,
+        credentials: 'include',
+      }).then(response => {
+        return response.json().then(json => {
+          this.triggerAction_(/* success */ true, json);
+          this.analyticsEvent_('amp-form-submit-success');
+          this.setState_(FormState_.SUBMIT_SUCCESS);
+          this.renderTemplate_(json || {});
+          this.maybeHandleRedirect_(
+              /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
+                  response));
+        }, error => {
+          rethrowAsync('Failed to parse response JSON:', error);
+        });
+      }, error => {
+        this.triggerAction_(
+            /* success */ false, error ? error.responseJson : null);
+        this.analyticsEvent_('amp-form-submit-error');
+        this.setState_(FormState_.SUBMIT_ERROR);
+        this.renderTemplate_(error.responseJson || {});
+        this.maybeHandleRedirect_(
+            /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
+                error));
+        rethrowAsync('Form submission failed:', error);
+      });
+    });
+  }
+
+  /** @private */
+  handleNonXhrPost_() {
+    // non-XHR POST requests are not supported.
+    user().assert(false,
+        'Only XHR based (via action-xhr attribute) submissions are support ' +
+        'for POST requests. %s',
+        this.form_);
+  }
+
+  /**
+   * Executes variable substitutions on the passed fields.
+   * @param {IArrayLike<!HTMLInputElement>} varSubsFields
+   * @private
+   */
+  handleNonXhrGet_(varSubsFields) {
+    // Non-xhr GET requests replacement should happen synchronously.
+    for (let i = 0; i < varSubsFields.length; i++) {
+      this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
+    }
+  }
+
+  /**
+   * @private
+   * @return {boolean} False if the form is invalid.
+   */
+  checkValidity_() {
     if (isCheckValiditySupported(this.win_.document)) {
       // Validity checking should always occur, novalidate only circumvent
       // reporting and blocking submission on non-valid forms.
       const isValid = checkUserValidityOnSubmission(this.form_);
       if (this.shouldValidate_ && !isValid) {
-        if (opt_event) {
-          opt_event.stopImmediatePropagation();
-          opt_event.preventDefault();
-        }
         // TODO(#3776): Use .mutate method when it supports passing state.
         this.vsync_.run({
           measure: undefined,
@@ -212,70 +340,34 @@ export class AmpForm {
         }, {
           validator: this.validator_,
         });
-        return;
+        return false;
       }
     }
+    return true;
+  }
 
-    const isVarSubExpOn = isExperimentOn(this.win_, 'amp-form-var-sub');
-    // Fields that support var substitutions.
-    const varSubsFields = isVarSubExpOn ? this.form_.querySelectorAll(
-        '[type="hidden"][data-amp-replace]') : [];
-    if (this.xhrAction_) {
-      if (opt_event) {
-        opt_event.preventDefault();
+  /**
+   * Handles response redirect throught the AMP-Redirect-To response header.
+   * @param {../../../src/service/xhr-impl.FetchResponse} response
+   * @private
+   */
+  maybeHandleRedirect_(response) {
+    if (!response.headers) {
+      return;
+    }
+    const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
+    if (redirectTo) {
+      user().assert(this.target_ != '_blank',
+          'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
+          'not supported, use target=_top instead. %s', this.form_);
+      try {
+        assertAbsoluteHttpOrHttpsUrl(redirectTo);
+        assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
+      } catch (e) {
+        user().assert(false, 'The `AMP-Redirect-To` header value must be an ' +
+            'absolute URL starting with https://. Found %s', redirectTo);
       }
-      this.cleanupRenderedTemplate_();
-      this.setState_(FormState_.SUBMITTING);
-      const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
-      const varSubPromises = [];
-      for (let i = 0; i < varSubsFields.length; i++) {
-        varSubPromises.push(
-            this.urlReplacement_.expandInputValueAsync(varSubsFields[i]));
-      }
-      // Wait until all variables have been substituted or 100ms timeout.
-      this.waitOnPromisesOrTimeout_(varSubPromises, 100).then(() => {
-        let xhrUrl, body;
-        if (isHeadOrGet) {
-          xhrUrl = addParamsToUrl(
-              dev().assertString(this.xhrAction_), this.getFormAsObject_());
-        } else {
-          xhrUrl = this.xhrAction_;
-          body = new FormData(this.form_);
-        }
-        return this.xhr_.fetchJson(dev().assertString(xhrUrl), {
-          body,
-          method: this.method_,
-          credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
-        }).then(response => {
-          this.triggerAction_(/* success */ true, response);
-          // TODO(mkhatib, #6032): Update docs to reflect analytics events.
-          this.analyticsEvent_('amp-form-submit-success');
-          this.setState_(FormState_.SUBMIT_SUCCESS);
-          this.renderTemplate_(response || {});
-        }).catch(error => {
-          this.triggerAction_(
-              /* success */ false, error ? error.responseJson : null);
-          this.analyticsEvent_('amp-form-submit-error');
-          this.setState_(FormState_.SUBMIT_ERROR);
-          this.renderTemplate_(error.responseJson || {});
-          rethrowAsync('Form submission failed:', error);
-        });
-      });
-    } else if (this.method_ == 'POST') {
-      // non-XHR POST requests are not supported.
-      if (opt_event) {
-        opt_event.preventDefault();
-      }
-      user().assert(false,
-          'Only XHR based (via action-xhr attribute) submissions are support ' +
-          'for POST requests. %s',
-          this.form_);
-    } else if (this.method_ == 'GET') {
-      // Non-xhr GET requests replacement should happen synchronously.
-      for (let i = 0; i < varSubsFields.length; i++) {
-        this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
-      }
+      this.win_.top.location.href = redirectTo;
     }
   }
 

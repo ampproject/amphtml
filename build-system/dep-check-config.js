@@ -44,7 +44,7 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'third_party/**/*.js',
     whitelist: [
-      'extensions/amp-analytics/**/*.js->' +
+      'extensions/amp-crypto-polyfill/**/*.js->' +
           'third_party/closure-library/sha384-generated.js',
       'extensions/amp-mustache/0.1/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
@@ -120,6 +120,8 @@ exports.rules = [
           'doubleclick-a4a-config.js',
       'ads/_a4a-config.js->' +
           'extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config.js',
+      'ads/_a4a-config.js->' +
+          'extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config.js',
       'ads/google/a4a/google-data-reporter.js->' +
           'extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
       'ads/google/a4a/google-data-reporter.js->' +

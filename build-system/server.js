@@ -22,7 +22,6 @@ var BBPromise = require('bluebird');
 var app = require('express')();
 var bacon = require('baconipsum');
 var bodyParser = require('body-parser');
-var morgan = require('morgan');
 var fs = BBPromise.promisifyAll(require('fs'));
 var formidable = require('formidable');
 var jsdom = require('jsdom');
@@ -31,7 +30,6 @@ var request = require('request');
 var url = require('url');
 
 app.use(bodyParser.json());
-app.use(morgan('dev'));
 
 app.use('/pwa', function(req, res, next) {
   var file;
@@ -118,7 +116,15 @@ app.use('/form/html/post', function(req, res) {
   });
 });
 
-function assertCors(req, res, opt_validMethods) {
+
+app.use('/form/redirect-to/post', function(req, res) {
+  assertCors(req, res, ['POST'], ['AMP-Redirect-To']);
+  res.setHeader('AMP-Redirect-To', 'https://google.com');
+  res.end('{}');
+});
+
+
+function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
   const invalidMethod = req.method + ' method is not allowed. Use POST.';
   const invalidOrigin = 'Origin header is invalid.';
@@ -156,7 +162,8 @@ function assertCors(req, res, opt_validMethods) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Expose-Headers',
-      'AMP-Access-Control-Allow-Source-Origin');
+      ['AMP-Access-Control-Allow-Source-Origin']
+          .concat(opt_exposeHeaders || []).join(', '));
   res.setHeader('AMP-Access-Control-Allow-Source-Origin',
       req.query.__amp_source_origin);
 }
@@ -464,6 +471,13 @@ app.use('/a4a(|-3p)/', function(req, res) {
   var force3p = req.baseUrl.indexOf('/a4a-3p') == 0;
   var adUrl = req.url;
   var templatePath = '/build-system/server-a4a-template.html';
+  var urlPrefix = getUrlPrefix(req);
+  if (force3p && !adUrl.startsWith('/m') &&
+      urlPrefix.indexOf('//localhost') != -1) {
+    // This is a special case for testing. `localhost` URLs are transformed to
+    // `ads.localhost` to ensure that the iframe is fully x-origin.
+    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
+  }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/FORCE3P/g, force3p)
@@ -485,6 +499,20 @@ app.use(['/examples/*', '/extensions/*'], function (req, res, next) {
     res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
   }
   next();
+});
+
+/**
+ * Append ?sleep=5 to any included JS file in examples to emulate delay in loading that
+ * file. This allows you to test issues with your extension being late to load
+ * and testing user interaction with your element before your code loads.
+ *
+ * Example delay loading amp-form script by 5 seconds:
+ * <script async custom-element="amp-form"
+ *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
+ */
+app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
+  var sleep = parseInt(req.query.sleep || 0) * 1000;
+  setTimeout(next, sleep);
 });
 
 app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
