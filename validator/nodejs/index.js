@@ -19,7 +19,9 @@
 'use strict';
 
 var Promise = require('promise');
+var SimpleCrawler = require('simplecrawler');
 var colors = require('colors');
+var cheerio = require('cheerio');
 var fs = require('fs');
 var http = require('http');
 var https = require('https');
@@ -29,8 +31,11 @@ var querystring = require('querystring');
 var url = require('url');
 var util = require('util');
 var vm = require('vm');
+var flatten = require('array-flatten');
 
 var DEFAULT_USER_AGENT = 'amphtml-validator';
+var DEFAULT_MAX_DEPTH = 1;
+var DEFAULT_MAX_CONCURRENCY = 5;
 
 /**
  * Determines if str begins with prefix.
@@ -139,6 +144,100 @@ function readFromUrl(url, userAgent) {
            req.end();
          })
       .then(readFromReadable.bind(null, url));
+}
+
+/**
+ * Creates a promise returning a list of crawled URLs beginning at the given
+ * start URL. Supported options are:
+ *
+ * <pre><code>
+ * {
+ *   crawlMaxDepth: 1,
+ *   crawlMaxConcurrency: 5,
+ *   userAgent: 'amphtml-validator'
+ * }
+ * </code></pre>
+ * @param {!string} startUrl
+ * @param {!Object} program
+ * @returns {!Promise<!string[]>}
+ */
+function crawlUrl(startUrl, program) {
+  return new Promise(function(resolve, reject) {
+    // Create and configure the crawler.
+    var crawler = new SimpleCrawler(startUrl);
+    crawler.maxDepth = program.crawlMaxDepth;
+    crawler.userAgent = program.userAgent;
+    crawler.maxConcurrency = program.crawlMaxConcurrency;
+
+    var discoveredAmpDocs = [];
+
+    // Queue AMPs for validation and discover outgoing links
+    crawler.discoverResources = function(buffer, queueItem) {
+      var body = buffer.toString('utf8');
+      var $ = cheerio.load(body);
+      // Discover any AMP doc
+      var ampDoc = null;
+      if (isAmp($.root())) {
+        // Doc itself is AMP
+        ampDoc = Promise.resolve(body);
+      } else {
+        // Doc references an AMP
+        var ampHref = $('link[rel=amphtml]').attr('href');
+        if (ampHref) {
+          ampDoc = readFromUrl(ampHref);
+        }
+      }
+      // Queue AMP doc for validation
+      if (ampDoc) {
+        discoveredAmpDocs.push(ampDoc);
+        // TODO remove hack to show URL in console
+        program.args.push(queueItem.url);
+      }
+      // Discover outgoing links
+      return $('a[href]').map(function() {
+        return $(this).attr('href');
+      }).get();
+    };
+
+    // Log client errors
+    crawler.on('fetchclienterror', function(queueItem, error) {
+      var message = 'Unable to fetch: ' + queueItem.url + ' - ' + error;
+      console.error(program.format == 'color' ? colors.red(message) :
+                                              message);
+    });
+    // Log fetch errors
+    var handleFetchError = function(queueItem, response) {
+      var message = 'Unable to fetch: ' + queueItem.url + ' - ' + response.statusCode;
+      console.error(program.format == 'color' ? colors.red(message) :
+                                              message);
+    };
+    crawler.on('fetch404', handleFetchError);
+    crawler.on('fetch410', handleFetchError);
+    crawler.on('fetcherror', handleFetchError);
+
+    // Resolve all AMP docs and the crawler promise
+    crawler.on('complete', function() {
+      Promise.all(discoveredAmpDocs).then(function(doc) {
+        resolve(doc);
+      });
+    });
+
+    // Go!
+    crawler.start();
+  });
+}
+
+
+/**
+ * isAmp returns true if the given document is AMPHTML.
+ *
+ * @param {!Object} root - a cheerio document
+ * @returns {boolean}
+ */
+function isAmp(root) {
+  return ['html[⚡]', 'html[amp]'].some(function(selector) {
+    return root.find(selector).length > 0;
+  });
 }
 
 /**
@@ -409,6 +508,18 @@ function main() {
               '  "json"  emits json corresponding to the ValidationResult\n' +
               '          message in validator.proto.',
           'color')
+      .option(
+          '--crawl-max-depth <int>', 'Defines a maximum distance from the\n' +
+              '  original request at which pages will be downloaded.\n' +
+              '  Downloads only pages on the same host as the original URL.\n' +
+              '  "1"  only the first page is fetched [default].\n' +
+              '  "2"  first page and discovered links from it are fetched.\n' +
+              '  "3"  etc.',
+          DEFAULT_MAX_DEPTH)
+      .option(
+          '--crawl-max-concurrency <int>', ' The maximum number of requests\n' +
+              '  the crawler will run simultaneously. Defaults to ' + DEFAULT_MAX_CONCURRENCY + '.\n' +
+          DEFAULT_MAX_CONCURRENCY)
       .parse(process.argv);
   if (program.args.length === 0) {
     program.outputHelp();
@@ -429,7 +540,7 @@ function main() {
     if (item === '-') {
       inputs.push(readFromStdin());
     } else if (isHttpOrHttpsUrl(item)) {
-      inputs.push(readFromUrl(item, program.userAgent));
+      inputs.push(crawlUrl(item, program));
     } else {
       inputs.push(readFromFile(item));
     }
@@ -438,6 +549,7 @@ function main() {
       .then(function(validator) {
         Promise.all(inputs)
             .then(function(resolvedInputs) {
+              resolvedInputs = flatten(resolvedInputs);
               var jsonOut = {};
               for (var ii = 0; ii < resolvedInputs.length; ii++) {
                 var validationResult = validator.validateString(

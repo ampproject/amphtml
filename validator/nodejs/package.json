@@ -2,7 +2,13 @@
   "name": "amphtml-validator",
   "version": "1.0.18",
   "description": "Official validator for AMP HTML (www.ampproject.org)",
-  "keywords": ["AMP", "validator", "validate", "AMP HTML", "Accelerated Mobile Pages"],
+  "keywords": [
+    "AMP",
+    "validator",
+    "validate",
+    "AMP HTML",
+    "Accelerated Mobile Pages"
+  ],
   "engines": {
     "node": ">=0.10.25"
   },
@@ -16,9 +22,12 @@
     "amphtml-validator": "index.sh"
   },
   "dependencies": {
+    "array-flatten": "^2.1.1",
+    "cheerio": "^0.22.0",
     "colors": "1.1.2",
     "commander": "2.9.0",
-    "promise" : "7.1.1"
+    "promise": "7.1.1",
+    "simplecrawler": "^1.0.3"
   },
   "devDependencies": {
     "jasmine": "2.3.2"
