@@ -21,13 +21,19 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function distroscale(global, data) {
-  validateData(data, ['pid', 'zid'], ['tid']);
+  validateData(data, ['pid'], ['zid', 'tid']);
   let src = '//c.jsrdn.com/s/cs.js?p=' + encodeURIComponent(data.pid) +
-      '&z=' + encodeURIComponent(data.zid) +
       '&f=' + encodeURIComponent(global.context.location.href);
   if (data.tid) {
     src += '&t=' + encodeURIComponent(data.tid);
   }
+
+  if (data.zid) {
+    src += '&z=' + encodeURIComponent(data.zid);
+  } else {
+    src += '&z=amp';
+  }
+
   global.dsAMPCallbacks = {
     renderStart: global.context.renderStart,
     noContentAvailable: global.context.noContentAvailable,
