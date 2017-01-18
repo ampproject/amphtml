@@ -15,8 +15,6 @@ limitations under the License.
 -->
 
 [![Build Status](https://travis-ci.org/ampproject/amphtml.svg?branch=master)](https://travis-ci.org/ampproject/amphtml)
-[![Pull Requests](https://img.shields.io/github/issues-pr/ampproject/amphtml.svg?style=flat)](https://github.com/ampproject/amphtml/pulls)
-[![Issues](https://img.shields.io/github/issues/ampproject/amphtml.svg?style=flat)](https://github.com/ampproject/amphtml/issues)
 
 # AMP HTML ⚡
 
