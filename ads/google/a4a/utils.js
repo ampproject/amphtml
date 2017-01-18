@@ -68,20 +68,18 @@ export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
- * @param {!Element} element Ad tag Element.
  * @returns {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
-export function isGoogleAdsA4AValidEnvironment(win, element) {
+export function isGoogleAdsA4AValidEnvironment(win) {
   const supportsNativeCrypto = win.crypto &&
       (win.crypto.subtle || win.crypto.webkitSubtle);
-  const multiSizeRequest = element.dataset && element.dataset.multiSize;
   // Note: Theoretically, isProxyOrigin is the right way to do this, b/c it
   // will be kept up to date with known proxies.  However, it doesn't seem to
   // be compatible with loading the example files from localhost.  To hack
   // around that, just say that we're A4A eligible if we're in local dev
   // mode, regardless of origin path.
-  return supportsNativeCrypto && !multiSizeRequest &&
+  return supportsNativeCrypto &&
       (isProxyOrigin(win.location) || getMode().localDev || getMode().test);
 }
 
