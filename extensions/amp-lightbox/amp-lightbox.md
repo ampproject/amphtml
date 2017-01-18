@@ -100,6 +100,11 @@ A unique identifer for the lightbox.
 
 Must be set to `nodisplay`.
 
+**scrollable**
+
+When `scrollable` attribute is present, the content of the lightbox can scroll
+when overflowing the height of the lightbox.
+
 ## Validation
 
 See [amp-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/0.1/validator-amp-lightbox.protoascii) in the AMP validator specification.
