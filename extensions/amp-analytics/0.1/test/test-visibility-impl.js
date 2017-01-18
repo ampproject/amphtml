@@ -53,6 +53,7 @@ describe('amp-analytics.visibility', () => {
   let ampElement;
   let ampdoc;
   let resourceLoadedResolver;
+  let scrollTop;
 
   const INTERSECTION_0P = makeIntersectionEntry([100, 100, 100, 100],
       [0, 0, 100, 100]);
@@ -89,15 +90,18 @@ describe('amp-analytics.visibility', () => {
     viewerForDoc(ampdoc).setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new Visibility(ampdoc);
 
+    scrollTop = 10;
     const resourceLoadedPromise =
         new Promise(resolve => resourceLoadedResolver = resolve);
     const resource = {
-      getLayoutBox: () => {},
+      getLayoutBox: () => layoutRectLtwh(0, scrollTop, 100, 100),
       element: {getIntersectionChangeEntry: getIntersectionStub},
       getId: getIdStub,
       hasLoadedOnce: () => true,
       loadedOnce: () => resourceLoadedPromise,
     };
+    sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
+        .returns(resource);
     sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
         .returns(resource);
     // no way to stub performance API so stub a private method instead
@@ -163,9 +167,8 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires for non-trivial on=visible config', () => {
-    viewportScrollTopStub.returns(13);
-    viewportScrollLeftStub.returns(5);
-    listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
+    scrollTop = 51;
+    listen(makeIntersectionEntry([0, scrollTop, 100, 100], [0, 0, 100, 100]),
           {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0);
 
     const intersection =
@@ -173,8 +176,8 @@ describe('amp-analytics.visibility', () => {
     verifyChange(intersection, 1, [sinon.match({
       backgrounded: '0',
       backgroundedAtStart: '0',
-      elementX: '35', // 5 + 30
-      elementY: '23', // 13 + 10
+      elementX: '0',
+      elementY: '51',
       elementWidth: '100',
       elementHeight: '100',
       loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100,
@@ -187,7 +190,8 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires for non-trivial on=hidden config', () => {
-    listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
+    scrollTop = 51;
+    listen(makeIntersectionEntry([0, scrollTop, 100, 100], [0, 0, 100, 100]),
           {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0, undefined,
           false);
 
@@ -196,8 +200,8 @@ describe('amp-analytics.visibility', () => {
     verifyExpectedVars(1, [sinon.match({
       backgrounded: '1',
       backgroundedAtStart: '0',
-      elementX: '50',
-      elementY: '0',
+      elementX: '0',
+      elementY: '51',
       elementWidth: '100',
       elementHeight: '100',
       loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100
@@ -710,8 +714,9 @@ describe('amp-analytics.visibility', () => {
     });
 
     function fireIntersect(intersectPercent) {
+      scrollTop = 100 - intersectPercent;
       const entry = makeIntersectionEntry(
-          [0, 100 - intersectPercent, 100, 100], [0, 0, 100, 100]);
+          [0, scrollTop, 100, 100], [0, 0, 100, 100]);
       inObCallback([entry]);
     }
   });
