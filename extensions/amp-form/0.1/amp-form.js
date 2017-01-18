@@ -87,7 +87,7 @@ export class AmpForm {
     try {
       installFormProxy(element);
     } catch (e) {
-      dev().error('form proxy failed to install', e);
+      dev().error(TAG, 'form proxy failed to install', e);
     }
 
     /** @private @const {string} */
