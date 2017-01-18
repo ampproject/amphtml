@@ -362,11 +362,21 @@ export class Resources {
       this.viewport_.ensureReadyForElements();
     }
 
-    // Create and add the resource.
-    const resource = new Resource((++this.resourceIdCounter_), element, this);
+    // First check if the resource is being reparented and if it requires
+    // reconstruction. Only already built elements are eligible.
+    let resource = Resource.forElementOptional(element);
+    if (resource &&
+        resource.getState() != ResourceState.NOT_BUILT &&
+        !element.reconstructWhenReparented()) {
+      resource.requestMeasure();
+      dev().fine(TAG_, 'resource reused:', resource.debugid);
+    } else {
+      // Create and add a new resource.
+      resource = new Resource((++this.resourceIdCounter_), element, this);
+      this.buildOrScheduleBuildForResource_(resource);
+      dev().fine(TAG_, 'resource added:', resource.debugid);
+    }
     this.resources_.push(resource);
-    this.buildOrScheduleBuildForResource_(resource);
-    dev().fine(TAG_, 'element added:', resource.debugid);
   }
 
   /**
