@@ -34,6 +34,7 @@ import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
+import {documentInfoForDoc} from '../document-info';
 
 
 const TAG_ = 'Resources';
@@ -811,6 +812,7 @@ export class Resources {
       this.viewer_.sendMessage('documentLoaded', {
         title: doc.title,
         sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
+        canonicalUrl: documentInfoForDoc(this.ampdoc).canonicalUrl,
         serverLayout: doc.documentElement.hasAttribute('i-amphtml-element'),
       }, /* cancelUnsent */true);
     }
