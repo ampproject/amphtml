@@ -32,7 +32,7 @@ npm install
 gulp clean
 # We only need to build the css files, no need to generate `max` files
 gulp build --css-only
-gulp dist --version 123456789 --type prod
+gulp dist --version 123456789 --type prod --hostname cdn.myowncdn.org --hostname3p 3p.myowncdn.net
 mkdir -p /path/to/cdn/production/
 mkdir -p /path/to/cdn/3p/
 # this would be the files hosted on www.ampproject.org/
