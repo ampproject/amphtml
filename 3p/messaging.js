@@ -25,7 +25,7 @@ export function nonSensitiveDataPostMessage(type, opt_object) {
   }
   const object = opt_object || {};
   object.type = type;
-  object.sentinel = window.context.amp3pSentinel;
+  object.sentinel = window.context.sentinel || window.context.amp3pSentinel;
   window.parent./*OK*/postMessage(object,
       window.context.location.origin);
 }
@@ -67,6 +67,8 @@ function startListening(win) {
   if (win.AMP_LISTENING) {
     return;
   }
+  win.context.sentinel = win.context.sentinel ||
+      win.context.amp3pSentinel;
   win.AMP_LISTENING = true;
   win.addEventListener('message', function(event) {
     // Cheap operations first, so we don't parse JSON unless we have to.
@@ -79,7 +81,7 @@ function startListening(win) {
     // Parse JSON only once per message.
     const data = /** @type {!Object} */ (
         JSON.parse(event.data.substr(4)));
-    if (data.sentinel != win.context.amp3pSentinel) {
+    if (win.context.sentinel && data.sentinel != win.context.sentinel) {
       return;
     }
     // Don't let other message handlers interpret our events.

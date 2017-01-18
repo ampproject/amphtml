@@ -21,6 +21,7 @@ process.end.NODE_ENV;
 
 // Exposed to ads.
 window.context = {};
+window.context.sentinel;
 window.context.amp3pSentinel;
 window.context.clientId;
 window.context.initialIntersection;
