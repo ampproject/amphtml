@@ -447,6 +447,24 @@ export class BaseElement {
   }
 
   /**
+   * Whether the element needs to be reconstructed after it has been
+   * re-parented. Many elements cannot survive fully the reparenting and
+   * are better to be reconstructed from scratch.
+   *
+   * An example of an element that should be reconstructed in a iframe-based
+   * element. Reparenting such an element will cause the iframe to reload and
+   * will lost the previously established connection. It's safer to reconstruct
+   * such an element. An image or the other hand does not need to be
+   * reconstructed since image itself is not reloaded by the browser and thus
+   * there's no need to use additional resources for reconstruction.
+   *
+   * @return {boolean}
+   */
+  reconstructWhenReparented() {
+    return true;
+  }
+
+  /**
    * Instructs the element that its activation is requested based on some
    * user event. Intended to be implemented by actual components.
    * @param {!./service/action-impl.ActionInvocation} unusedInvocation
@@ -468,6 +486,7 @@ export class BaseElement {
     return loadPromise(element, opt_timeout);
   }
 
+  /** @private */
   initActionMap_() {
     if (!this.actionMap_) {
       this.actionMap_ = this.win.Object.create(null);

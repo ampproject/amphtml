@@ -48,6 +48,12 @@ export class ElementStub extends BaseElement {
     // element.
     return true;
   }
+
+  /** @override */
+  reconstructWhenReparented() {
+    // No real state so no reason to reconstruct.
+    return false;
+  }
 }
 
 
