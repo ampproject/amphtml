@@ -17,8 +17,14 @@
 /** @type {Array<string>} */
 const excludedTags = ['script', 'style'];
 
+/** @type {Array<string>} */
 const allowedAmpTags = ['amp-accordion', 'amp-app-banner', 'amp-carousel',
   'amp-fit-text', 'amp-form', 'amp-selector', 'amp-sidebar'];
+
+/** @type {Array<string>} */
+const allowedAttributes = ['action', 'alt', 'class', 'disabled', 'height',
+  'href', 'id', 'name', 'placeholder', 'readonly', 'src', 'tabindex',
+  'title', 'type', 'value', 'width'];
 
 /**
  * Returns content of HTML node
@@ -45,6 +51,9 @@ export function getHtml(win, selector, attrs) {
  */
 function appendToResult(node, attrs, result) {
   const stack = [node];
+  const allowedAttrs = attrs.filter(attr => {
+    return allowedAttributes.indexOf(attr) !== -1;
+  });
 
   while (stack.length > 0) {
     node = stack.pop();
@@ -54,7 +63,7 @@ function appendToResult(node, attrs, result) {
     } else if (node.nodeType === Node.TEXT_NODE) {
       result.push(node.textContent);
     } else if (node.nodeType === Node.ELEMENT_NODE && isApplicableNode(node)) {
-      appendOpenTag(node, attrs, result);
+      appendOpenTag(node, allowedAttrs, result);
       stack.push(`</${node.tagName.toLowerCase()}>`);
 
       if (node.childNodes && node.childNodes.length > 0) {

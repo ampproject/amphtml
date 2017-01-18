@@ -454,6 +454,7 @@ function triggerRenderStart(opt_data) {
 }
 
 /**
+ * See readme for window.context.getHtml
  * @param {!string} selector - CSS selector of the node to take content from
  * @param {!Array<string>} attributes - tag attributes to be left in the stringified HTML
  * @param {!Function} callback
