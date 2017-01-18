@@ -91,6 +91,7 @@ exports.rules = [
       'ads/**->src/types.js',
       'ads/**->src/string.js',
       'ads/**->src/style.js',
+      'ads/**->src/dom.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
