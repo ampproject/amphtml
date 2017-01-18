@@ -146,6 +146,9 @@ describe('amp-image-lightbox component', () => {
     return getImageLightbox().then(lightbox => {
       const impl = lightbox.implementation_;
       const setupCloseSpy = sandbox.spy(impl, 'close');
+      const nullAddEventListenerSpy = sandbox.spy(
+          impl.win.document.documentElement, 'addEventListener')
+          .withArgs('keydown', null);
       const viewportOnChanged = sandbox.spy();
       const enterLightboxMode = sandbox.spy();
       const leaveLightboxMode = sandbox.spy();
@@ -171,6 +174,11 @@ describe('amp-image-lightbox component', () => {
       impl.activate({source: ampImage});
       impl.closeOnEscape_({keyCode: 27});
       expect(setupCloseSpy.callCount).to.equal(1);
+
+      // Regression test: ensure escape event listener is bound properly
+      expect(nullAddEventListenerSpy.callCount).to.equal(0);
+      impl.activate({source: ampImage});
+      expect(nullAddEventListenerSpy.callCount).to.equal(0);
     });
   });
 });
