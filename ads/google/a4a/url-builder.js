@@ -144,8 +144,8 @@ function getTopLocation(topAvailableWindow) {
   let isTopUrl = false;
   const doc = topAvailableWindow.document;
   // We are not on the top level, but we have a referrer - use it as an URL.
-  if (doc && doc.referrer) {
-    topUrl = doc.referrer;
+  if (doc && doc./*REVIEW*/referrer) {
+    topUrl = doc./*REVIEW*/referrer;
     // Besides, if we know that parent (referrer is its URL) is a top level
     // page - we have the top level URL.
     if (topAvailableWindow.parent == topAvailableWindow.top) {
@@ -212,15 +212,15 @@ function isInAdFrame(w, d, adWidth, adHeight) {
   if (adWidth && adHeight) {
     let wd = 1;
     let ht = 1;
-    if (w.innerHeight) {
-      wd = w.innerWidth;
-      ht = w.innerHeight;
-    } else if (documentElement && documentElement.clientHeight) {
-      wd = documentElement.clientWidth;
-      ht = documentElement.clientHeight;
+    if (w./*REVIEW*/innerHeight) {
+      wd = w./*REVIEW*/innerWidth;
+      ht = w./*REVIEW*/innerHeight;
+    } else if (documentElement && documentElement./*REVIEW*/clientHeight) {
+      wd = documentElement./*REVIEW*/clientWidth;
+      ht = documentElement./*REVIEW*/clientHeight;
     } else if (d.body) {
-      wd = d.body.clientWidth;
-      ht = d.body.clientHeight;
+      wd = d.body./*REVIEW*/clientWidth;
+      ht = d.body./*REVIEW*/clientHeight;
     }
 
     if (ht > 2 * adHeight || wd > 2 * adWidth) {
