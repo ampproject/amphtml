@@ -61,7 +61,7 @@ const MANUAL_EXPERIMENT_ID = '117152632';
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
     externalBranches, internalBranches) {
-  if (isGoogleAdsA4AValidEnvironment(win, element)) {
+  if (isGoogleAdsA4AValidEnvironment(win)) {
     maybeSetExperimentFromUrl(win, element,
         experimentName, externalBranches.control,
         externalBranches.experiment, MANUAL_EXPERIMENT_ID);
