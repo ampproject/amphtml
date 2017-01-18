@@ -15,7 +15,7 @@
  */
 import {
   createIframePromise,
-  doNotLoadExternalResourcesInTest
+  doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
 import '../amp-apester-media';
 import {adopt} from '../../../../src/runtime';

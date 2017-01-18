@@ -174,23 +174,53 @@ class AmpApesterMedia extends AMP.BaseElement {
   /**
    * @return {!Element}
    */
-  constructLoaderInnerHTML_() {
-    return `<div class="amp-apester-loader-blobs">
-    <div class="amp-apester-loader-blob"></div>
-    <div class="amp-apester-loader-blob"></div>
-    <div class="amp-apester-loader-logo"></div>
-</div>
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-        <filter id="amp-apester-goo">
-            <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10"/>
-            <feColorMatrix in="blur" mode="matrix"
-                           values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"
-                           result="amp-apester-goo"/>
-            <feBlend in2="amp-apester-goo" in="SourceGraphic" result="mix"/>
-        </filter>
-    </defs>
-</svg>`;
+  constructLoaderStructure_() {
+    const blobs = this.element.ownerDocument.createElement('div');
+    const blobLeft = this.element.ownerDocument.createElement('div');
+    const blobRight = this.element.ownerDocument.createElement('div');
+    const logo = this.element.ownerDocument.createElement('div');
+    blobs.classList.add('amp-apester-loader-blobs');
+    blobLeft.classList.add('amp-apester-loader-blob');
+    blobRight.classList.add('amp-apester-loader-blob');
+    logo.classList.add('amp-apester-loader-logo');
+    blobs.appendChild(blobLeft);
+    blobs.appendChild(blobRight);
+    blobs.appendChild(logo);
+    return blobs;
+  }
+
+  /**
+   * @return {!Element}
+   */
+  constructLoaderSVG_() {
+    const svg = this.element.ownerDocument.createElement('svg');
+    const defs = this.element.ownerDocument.createElement('defs');
+    const filter = this.element.ownerDocument.createElement('filter');
+    const feGaussianBlur = this.element.ownerDocument
+        .createElement('feGaussianBlur');
+    const feColorMatrix = this.element.ownerDocument
+        .createElement('feColorMatrix');
+    const feBlend = this.element.ownerDocument.createElement('feBlend');
+    svg.setAttribute('version', '1.1');
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    filter.setAttribute('id', 'amp-apester-goo');
+    feGaussianBlur.setAttribute('in', 'SourceGraphic');
+    feGaussianBlur.setAttribute('results', 'blur');
+    feGaussianBlur.setAttribute('stdDeviation', '10');
+    feColorMatrix.setAttribute('in', 'blur');
+    feColorMatrix.setAttribute('mode', 'matrix');
+    feColorMatrix.setAttribute('values',
+        '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7');
+    feColorMatrix.setAttribute('result', 'amp-apester-goo');
+    feBlend.setAttribute('in2', 'amp-apester-goo');
+    feBlend.setAttribute('in', 'SourceGraphic');
+    feBlend.setAttribute('result', 'mix');
+    svg.appendChild(defs);
+    defs.appendChild(filter);
+    filter.appendChild(feGaussianBlur);
+    filter.appendChild(feColorMatrix);
+    filter.appendChild(feBlend);
+    return svg;
   }
 
   /**
@@ -253,7 +283,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('layout', 'fill');
     placeholder.className = 'amp-apester-loader';
-    placeholder.innerHTML = this.constructLoaderInnerHTML_();
+    placeholder.appendChild(this.constructLoaderStructure_());
+    placeholder.appendChild(this.constructLoaderSVG_());
     return placeholder;
   }
 
