@@ -1778,6 +1778,9 @@ describe('Resources.add/remove', () => {
       isUpgraded() {
         return true;
       },
+      reconstructWhenReparented() {
+        return true;
+      },
       pauseCallback() {},
       dispatchCustomEvent() {},
     };
@@ -1987,6 +1990,61 @@ describe('Resources.add/remove', () => {
       expect(resources.resources_.indexOf(resource)).to.equal(-1);
       expect(pauseOnRemoveStub).to.be.calledOnce;
       expect(disconnectStub).to.be.called;
+    });
+  });
+
+  describe('reparent', () => {
+    let scheduleBuildStub;
+    let resource;
+
+    beforeEach(() => {
+      scheduleBuildStub = sandbox.stub(
+          resources, 'buildOrScheduleBuildForResource_');
+      child1.isBuilt = () => true;
+      resources.add(child1);
+      resource = Resource.forElementOptional(child1);
+      resources.remove(child1);
+    });
+
+    it('should keep reference to the resource', () => {
+      expect(resource).to.not.be.null;
+      expect(Resource.forElementOptional(child1)).to.equal(resource);
+      expect(resources.resources_).to.not.contain(resource);
+      expect(scheduleBuildStub).to.be.calledOnce;
+      expect(resource.isMeasureRequested()).to.be.false;
+    });
+
+    it('should reconstruct w/reconstructWhenReparented=true', () => {
+      resources.add(child1);
+      const resource2 = Resource.forElementOptional(child1);
+      expect(resource2).to.not.equal(resource);
+      expect(scheduleBuildStub).to.be.calledTwice;  // +1 call
+      expect(resources.resources_).to.contain(resource2);
+      expect(resources.resources_).to.not.contain(resource);
+      expect(resource.isMeasureRequested()).to.be.false;
+    });
+
+    it('should reconstruct unbuilt w/reconstructWhenReparented=false', () => {
+      child1.reconstructWhenReparented = () => false;
+      resource.state_ = ResourceState.NOT_BUILT;  // Not built.
+      resources.add(child1);
+      const resource2 = Resource.forElementOptional(child1);
+      expect(resource2).to.not.equal(resource);
+      expect(scheduleBuildStub).to.be.calledTwice;  // +1 call
+      expect(resources.resources_).to.contain(resource2);
+      expect(resources.resources_).to.not.contain(resource);
+      expect(resource.isMeasureRequested()).to.be.false;
+    });
+
+    it('should NOT reconstruct built w/reconstructWhenReparented=false', () => {
+      child1.reconstructWhenReparented = () => false;
+      resource.state_ = ResourceState.NOT_LAID_OUT;  // Built.
+      resources.add(child1);
+      const resource2 = Resource.forElementOptional(child1);
+      expect(resource2).to.equal(resource);
+      expect(scheduleBuildStub).to.be.calledOnce;  // No new calls.
+      expect(resources.resources_).to.contain(resource);
+      expect(resource.isMeasureRequested()).to.be.true;
     });
   });
 });

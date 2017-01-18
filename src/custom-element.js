@@ -1250,6 +1250,18 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Whether the element needs to be reconstructed after it has been
+     * re-parented. Many elements cannot survive fully the reparenting and
+     * are better to be reconstructed from scratch.
+     *
+     * @return {boolean}
+     * @package @final @this {!Element}
+     */
+    reconstructWhenReparented() {
+      return this.implementation_.reconstructWhenReparented();
+    }
+
+    /**
      * Collapses the element, and notifies its owner (if there is one) that the
      * element is no longer present.
      * @suppress {missingProperties}

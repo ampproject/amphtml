@@ -430,7 +430,7 @@ The templates are declared in the document as following:
 </template>
 ```
 
-The `type` attribute is required and must reference a declared `custom-element` script.
+The `type` attribute is required and must reference a declared `custom-template` script.
 
 The `id` attribute is optional. Individual AMP elements discover their own templates. Typical scenarios would involve an AMP element looking for a `<template>` either among its children or referenced by ID.
 
