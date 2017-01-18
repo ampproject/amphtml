@@ -83,7 +83,12 @@ export class AmpForm {
    * @param {string} id
    */
   constructor(element, id) {
-    installFormProxy(element);
+    //TODO(dvoytenko, #7063): Remove the try catch.
+    try {
+      installFormProxy(element);
+    } catch (e) {
+      dev().error(TAG, 'form proxy failed to install', e);
+    }
 
     /** @private @const {string} */
     this.id_ = id;
