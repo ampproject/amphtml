@@ -122,6 +122,11 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
+  reconstructWhenReparented() {
+    return false;
+  }
+
+  /** @override */
   layoutCallback() {
     this.initialize_();
     let promise = this.updateImageSrc_();

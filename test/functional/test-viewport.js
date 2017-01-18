@@ -46,6 +46,7 @@ describes.fakeWin('Viewport', {}, env => {
   let windowApi;
   let ampdoc;
   let viewerViewportHandler;
+  let viewerScrollDocHandler;
   let updatedPaddingTop;
   let viewportSize;
   let vsyncTasks;
@@ -57,6 +58,7 @@ describes.fakeWin('Viewport', {}, env => {
     windowApi.requestAnimationFrame = fn => window.setTimeout(fn, 16);
 
     viewerViewportHandler = undefined;
+    viewerScrollDocHandler = undefined;
     viewer = {
       isEmbedded: () => false,
       getParam: param => {
@@ -66,7 +68,11 @@ describes.fakeWin('Viewport', {}, env => {
         return undefined;
       },
       onMessage: (eventType, handler) => {
-        viewerViewportHandler = handler;
+        if (eventType == 'viewport') {
+          viewerViewportHandler = handler;
+        } else if (eventType == 'scroll') {
+          viewerScrollDocHandler = handler;
+        }
       },
       sendMessage: sandbox.spy(),
       isVisible: () => true,
@@ -592,6 +598,13 @@ describes.fakeWin('Viewport', {}, env => {
     const addStub = sandbox.stub(docElement.classList, 'add');
     viewport = new Viewport(ampdoc, binding, viewer);
     expect(addStub).to.be.calledWith('i-amphtml-make-body-block');
+  });
+
+  it('should scroll to target position when the viewer sets scrollTop', () => {
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('setScrollTop').withArgs(117).once();
+    viewerScrollDocHandler({scrollTop: 117});
+    bindingMock.verify();
   });
 
   describes.realWin('top-level styles', {amp: 1}, env => {
