@@ -70,6 +70,9 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
         noContentAvailable() {},
         referrer: null,
       };
+      const div = win.document.createElement('div');
+      div.id = 'c';
+      win.document.body.appendChild(div);
     });
   });
 
