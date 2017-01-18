@@ -29,6 +29,7 @@ describes.repeated('installFormProxy', {
   'modern w/inputs': {inputs: true},
   'legacy w/o inputs': {blacklist: true},
   'legacy w/ inputs': {blacklist: true, inputs: true},
+  'no EventTarget': {eventTarget: true},
 }, (name, variant) => {
   let form;
   let inputs;
@@ -60,8 +61,17 @@ describes.repeated('installFormProxy', {
       setBlacklistedPropertiesForTesting(PROPS);
     }
 
+    const eventTarget = window.EventTarget;
+    if (variant.eventTarget) {
+      window.EventTarget = null;
+    }
+
     // Install proxy.
     installFormProxy(form);
+
+    if (eventTarget) {
+      window.EventTarget = eventTarget;
+    }
   });
 
   afterEach(() => {

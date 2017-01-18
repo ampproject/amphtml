@@ -91,14 +91,15 @@ function createFormProxyConstr(win) {
   // Hierarchy:
   //   Node  <==  Element <== HTMLElement <== HTMLFormElement
   //   EventTarget  <==  HTMLFormElement
-  const prototypes = [
-    win.HTMLFormElement.prototype,
-    win.HTMLElement.prototype,
-    win.Element.prototype,
-    win.Node.prototype,
-    win.EventTarget.prototype,
+  const inheritance = [
+    win.HTMLFormElement,
+    win.HTMLElement,
+    win.Element,
+    win.Node,
+    win.EventTarget,
   ];
-  prototypes.forEach(function(prototype) {
+  inheritance.forEach(function(klass) {
+    const prototype = klass && klass.prototype;
     for (const name in prototype) {
       const property = win.Object.getOwnPropertyDescriptor(prototype, name);
       if (!property ||
