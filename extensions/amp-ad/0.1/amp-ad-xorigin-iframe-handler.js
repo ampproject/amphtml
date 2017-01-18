@@ -99,6 +99,13 @@ export class AmpAdXOriginIframeHandler {
       if (!this.iframe) {
         return;
       }
+      if (!this.element_.hasAttribute('data-html-access-allowed')) {
+        postMessageToWindows(
+          this.iframe, [{win: source, origin}],
+          'get-html-result', {content: ''}, true
+        );
+        return;
+      }
 
       const {selector, attributes} = info;
       const content = getHtml(this.baseInstance_.win, selector, attributes);
