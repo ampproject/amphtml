@@ -70,6 +70,10 @@ export function startupChunk(nodeOrAmpDoc, fn) {
  * @param {ChunkPriority} priority
  */
 export function chunk(nodeOrAmpDoc, fn, priority) {
+  if (deactivated) {
+    resolved.then(fn);
+    return;
+  }
   const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
   service.run_(fn, priority);
 }
@@ -168,7 +172,7 @@ class Task {
   /**
    * @return {string}
    */
-  get name() {
+  getName() {
     return this.fn_.displayName || this.fn_.name;
   }
 
@@ -385,14 +389,9 @@ class Chunks {
       return false;
     }
     const before = Date.now();
-    try {
-      t.runTask(idleDeadline);
-    } catch (e) {
-      throw e;
-    } finally {
-      this.schedule_();
-      dev().fine(TAG, t.name, 'Chunk duration', Date.now() - before);
-    }
+    t.runTask(idleDeadline);
+    this.schedule_();
+    dev().fine(TAG, t.getName(), 'Chunk duration', Date.now() - before);
     return true;
   }
 
