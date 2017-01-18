@@ -236,7 +236,7 @@ Please consider having the example consistently load a fake ad (with ad targetin
 
 It's encouraged to have multiple examples to cover different use cases.
 
-Please verify your ad is fully functioning, for example, you will want to click your ad. We do see bugs reported for ad not clickable.
+Please verify your ad is fully functioning, for example, by clicking on an ad. We have seen bugs reported for ads not being clickable, which was due to incorrectly appended content divs.
 
 ### Tests
 
