@@ -15,6 +15,8 @@
  */
 
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
+import {documentInfoForDoc} from '../../../src/document-info';
+import {parseUrl} from '../../../src/url';
 
 /**
  * An interface intended to be implemented by any ad-networks wishing to support
@@ -65,6 +67,8 @@ class AdSenseNetworkConfig {
 
   /** @override */
   getConfigUrl() {
+    const docInfo = documentInfoForDoc(this.autoAmpAdsElement_);
+    const canonicalHostname = parseUrl(docInfo.canonicalUrl).hostname;
     return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', [
       {
         name: 'client',
@@ -72,9 +76,7 @@ class AdSenseNetworkConfig {
       },
       {
         name: 'plah',
-        // TODO: Make sure original hostname is used if page served from
-        // cache.
-        value: this.autoAmpAdsElement_.ownerDocument.location.hostname},
+        value: canonicalHostname},
       {name: 'ama_t', value: 'amp'},
     ], 4096);
   }

@@ -106,10 +106,9 @@ describe('amp-auto-ads', () => {
     ampAutoAds.buildCallback();
 
     return ampAutoAds.layoutCallback().then(() => {
-      const hostname = window.location.hostname;
       expect(xhr.fetchJson).to.have.been.calledWith(
           '//pagead2.googlesyndication.com/getconfig/ama?client=' +
-          AD_CLIENT + '&plah=' + hostname + '&ama_t=amp', {
+          AD_CLIENT + '&plah=foo.bar&ama_t=amp', {
             mode: 'cors',
             method: 'GET',
             credentials: 'omit',
