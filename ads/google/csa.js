@@ -61,7 +61,7 @@ export function csa(global, data) {
   const containerDiv = global.document.createElement('div');
   const containerId = 'csacontainer';
   containerDiv.id = containerId;
-  global.document.body.appendChild(containerDiv);
+  global.document.getElementById('c').appendChild(containerDiv);
 
   const pageOptions = {source: 'amp', referer: global.context.referrer};
   const adblockOptions = {container: containerId};
@@ -293,7 +293,7 @@ function createOverflow(global, container, height) {
   const overflow = getOverflowElement(global);
   // When overflow is clicked, resize to full height
   overflow.onclick = global.context.requestResize.bind(null, undefined, height);
-  global.document.body.appendChild(overflow);
+  global.document.getElementById('c').appendChild(overflow);
   // Resize the CSA container to not conflict with overflow
   resizeCsa(container, currentAmpHeight - overflowHeight);
 }
