@@ -96,13 +96,8 @@ function createFormProxyConstr(win) {
     win.HTMLElement.prototype,
     win.Element.prototype,
     win.Node.prototype,
+    win.EventTarget.prototype,
   ];
-
-  // Safari does not have EventTarget interface
-  if (typeof win.EventTarget != 'undefined') {
-    prototypes.push(win.EventTarget.prototype);
-  }
-
   prototypes.forEach(function(prototype) {
     for (const name in prototype) {
       const property = win.Object.getOwnPropertyDescriptor(prototype, name);
