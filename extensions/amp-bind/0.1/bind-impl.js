@@ -116,7 +116,7 @@ export class Bind {
 
     if (!opt_skipDigest) {
       // If scan hasn't completed yet, set `digestQueuedAfterScan_`.
-      if (this.boundElements_) {
+      if (this.evaluator_) {
         this.digest_();
       } else {
         this.digestQueuedAfterScan_ = true;
@@ -137,9 +137,8 @@ export class Bind {
       this.evaluator_ = new BindEvaluator(evaluatees);
 
       // Trigger verify-only digest in development.
-      const development = getMode().development;
-      if (development || this.digestQueuedAfterScan_) {
-        this.digest_(/* opt_verifyOnly */ development);
+      if (getMode().development || this.digestQueuedAfterScan_) {
+        this.digest_(/* opt_verifyOnly */ !this.digestQueuedAfterScan_);
       }
     });
   }
