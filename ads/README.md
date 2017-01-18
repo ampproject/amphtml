@@ -39,7 +39,7 @@ Reasons include:
 
 ## The iframe sandbox
 
-The ad itself is hosted within a document that has an origin different from the primary page.
+The ad itself is hosted within a document that has an origin different from the primary page. The iframe by default loads a [bootstrap HTML](../3p/frame.max.html), which provides a container `div` to hold your content together with a set of APIs. Note that the container `div` (with `id="c"`) is absolute positioned and takes the whole space of the iframe, so you will want to append your content as a child of the container (don't append to `body`).  
 
 ### Available information
 We will provide the following information to the ad:
@@ -235,6 +235,8 @@ To verify the examples that you have put in `/examples/ads.amp.html`, you will n
 Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only it will be a more confident example for publishers to follow, but also for us to catch any regression bug during our releases.
 
 It's encouraged to have multiple examples to cover different use cases.
+
+Please verify your ad is fully functioning, for example, by clicking on an ad. We have seen bugs reported for ads not being clickable, which was due to incorrectly appended content divs.
 
 ### Tests
 
