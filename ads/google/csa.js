@@ -61,6 +61,7 @@ export function csa(global, data) {
   const containerDiv = global.document.createElement('div');
   const containerId = 'csacontainer';
   containerDiv.id = containerId;
+  setStyle(containerDiv, 'position', 'absolute');
   global.document.body.appendChild(containerDiv);
 
   const pageOptions = {source: 'amp', referer: global.context.referrer};
@@ -309,6 +310,7 @@ function getOverflowElement(global) {
   setStyles(overflow, {
     position: 'absolute',
     height: overflowHeight + 'px',
+    top: (currentAmpHeight - overflowHeight) + 'px',
     width: '100%',
   });
   overflow.appendChild(getOverflowLine(global));
