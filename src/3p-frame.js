@@ -57,6 +57,8 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
+  const sentinelNameChange = isExperimentOn(
+      parentWindow, 'sentinel-name-change');
   user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
   const attributes = {};
   // Do these first, as the other attributes have precedence.
@@ -85,12 +87,13 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     mode: getModeObject(),
     canary: isCanary(parentWindow),
     hidden: !viewer.isVisible(),
-    amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
     startTime,
     experimentToggles: experimentToggles(parentWindow),
   };
+  attributes._context[sentinelNameChange ? 'sentinel' : 'amp3pSentinel'] =
+      generateSentinel(parentWindow);
   Object.assign(attributes._context, opt_context);
   const adSrc = element.getAttribute('src');
   if (adSrc) {
@@ -118,6 +121,9 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   const attributes =
       getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
   const iframe = parentWindow.document.createElement('iframe');
+  const sentinelNameChange = isExperimentOn(
+      parentWindow, 'sentinel-name-change');
+
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
   }
@@ -157,8 +163,8 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  iframe.setAttribute(
-      'data-amp-3p-sentinel', attributes._context.amp3pSentinel);
+  iframe.setAttribute('data-amp-3p-sentinel', attributes._context[
+    sentinelNameChange ? 'sentinel' : 'amp3pSentinel']);
   return iframe;
 }
 
