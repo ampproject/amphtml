@@ -28,7 +28,7 @@ import {
 } from '../../src/shadow-embed';
 import {
   setShadowDomSupportedVersionForTesting,
-  ShadowDomVersion
+  ShadowDomVersion,
 } from '../../src/web-components';
 import {extensionsFor} from '../../src/extensions';
 import * as sinon from 'sinon';
@@ -64,98 +64,102 @@ describe('shadow-embed', () => {
     expect(copy).to.not.equal(style);
   });
 
-  [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1].forEach(scenario => {
-    describe('shadow APIs ' + scenario, () => {
-      let hostElement;
+  [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1]
+      .forEach(scenario => {
+        describe('shadow APIs ' + scenario, () => {
+          let hostElement;
 
-      beforeEach(function() {
-        hostElement = document.createElement('div');
-        setShadowDomSupportedVersionForTesting(scenario);
+          beforeEach(() => {
+            hostElement = document.createElement('div');
+            setShadowDomSupportedVersionForTesting(scenario);
 
-        if (scenario == ShadowDomVersion.V0 && !Element.prototype.createShadowRoot) {
-          this.skip();
-        }
+            if (scenario == ShadowDomVersion.V0 &&
+                !Element.prototype.createShadowRoot) {
+              this.skip();
+            }
 
-        if (scenario == ShadowDomVersion.V1 && !Element.prototype.attachShadow) {
-          this.skip();
-        }
-      });
-
-      it('should transform CSS installStylesForShadowRoot', () => {
-        const shadowRoot = createShadowRoot(hostElement);
-        const style = installStylesForShadowRoot(shadowRoot, 'body {}', true);
-        expect(shadowRoot.contains(style)).to.be.true;
-        const css = style.textContent.replace(/\s/g, '');
-        if (scenario == ShadowDomVersion.NONE) {
-          expect(css).to.match(/amp-body/);
-        } else {
-          expect(css).to.equal('body{}');
-        }
-      });
-
-      describe('createShadowRoot', () => {
-        it('should clear duplicate root', () => {
-          const shadowRoot1 = createShadowRoot(hostElement);
-          const span = document.createElement('span');
-          shadowRoot1.appendChild(span);
-          expect(shadowRoot1.contains(span)).to.be.true;
-
-          const shadowRoot2 = createShadowRoot(hostElement);
-          expect(shadowRoot2).to.equal(shadowRoot1);
-          expect(shadowRoot2.contains(span)).to.be.false;
-        });
-
-        it('should have host', () => {
-          const shadowRoot = createShadowRoot(hostElement);
-          expect(shadowRoot.host).to.equal(hostElement);
-        });
-
-        it('should have getElementById', () => {
-          const shadowRoot = createShadowRoot(hostElement);
-          expect(shadowRoot.getElementById).to.be.ok;
-
-          const spanId = 'test' + Math.floor(Math.random() * 10000);
-          const span = document.createElement('span');
-          span.id = spanId;
-          shadowRoot.appendChild(span);
-          expect(shadowRoot.getElementById(spanId)).to.equal(span);
-        });
-
-        if (scenario == ShadowDomVersion.NONE) {
-          it('should add id for polyfill', () => {
-            const shadowRoot = createShadowRoot(hostElement);
-            expect(shadowRoot.tagName).to.equal('I-AMP-SHADOW-ROOT');
-            expect(shadowRoot.id).to.match(/i-amp-sd-\d+/);
+            if (scenario == ShadowDomVersion.V1 &&
+                !Element.prototype.attachShadow) {
+              this.skip();
+            }
           });
-        }
-      });
 
-      describe('importShadowBody', () => {
-        it('should import body with all children', () => {
-          const shadowRoot = createShadowRoot(hostElement);
-          const source = document.createElement('body');
-          const child1 = document.createElement('div');
-          child1.id = 'child1';
-          const child2 = document.createElement('div');
-          child2.id = 'child2';
-          source.appendChild(child1);
-          source.appendChild(child2);
+          it('should transform CSS installStylesForShadowRoot', () => {
+            const shadowRoot = createShadowRoot(hostElement);
+            const style = installStylesForShadowRoot(
+                shadowRoot, 'body {}', true);
+            expect(shadowRoot.contains(style)).to.be.true;
+            const css = style.textContent.replace(/\s/g, '');
+            if (scenario == ShadowDomVersion.NONE) {
+              expect(css).to.match(/amp-body/);
+            } else {
+              expect(css).to.equal('body{}');
+            }
+          });
 
-          const body = importShadowBody(shadowRoot, source);
-          expect(body.tagName).to.equal(
-              scenario == ShadowDomVersion.NONE ? 'AMP-BODY' : 'BODY');
-          expect(body.style.position).to.equal('relative');
-          if (scenario == ShadowDomVersion.NONE) {
-            expect(body.style.display).to.equal('block');
-          }
-          expect(shadowRoot.contains(body)).to.be.true;
-          expect(body.children).to.have.length(2);
-          expect(body.children[0].id).to.equal('child1');
-          expect(body.children[1].id).to.equal('child2');
+          describe('createShadowRoot', () => {
+            it('should clear duplicate root', () => {
+              const shadowRoot1 = createShadowRoot(hostElement);
+              const span = document.createElement('span');
+              shadowRoot1.appendChild(span);
+              expect(shadowRoot1.contains(span)).to.be.true;
+
+              const shadowRoot2 = createShadowRoot(hostElement);
+              expect(shadowRoot2).to.equal(shadowRoot1);
+              expect(shadowRoot2.contains(span)).to.be.false;
+            });
+
+            it('should have host', () => {
+              const shadowRoot = createShadowRoot(hostElement);
+              expect(shadowRoot.host).to.equal(hostElement);
+            });
+
+            it('should have getElementById', () => {
+              const shadowRoot = createShadowRoot(hostElement);
+              expect(shadowRoot.getElementById).to.be.ok;
+
+              const spanId = 'test' + Math.floor(Math.random() * 10000);
+              const span = document.createElement('span');
+              span.id = spanId;
+              shadowRoot.appendChild(span);
+              expect(shadowRoot.getElementById(spanId)).to.equal(span);
+            });
+
+            if (scenario == ShadowDomVersion.NONE) {
+              it('should add id for polyfill', () => {
+                const shadowRoot = createShadowRoot(hostElement);
+                expect(shadowRoot.tagName).to.equal('I-AMP-SHADOW-ROOT');
+                expect(shadowRoot.id).to.match(/i-amp-sd-\d+/);
+              });
+            }
+          });
+
+          describe('importShadowBody', () => {
+            it('should import body with all children', () => {
+              const shadowRoot = createShadowRoot(hostElement);
+              const source = document.createElement('body');
+              const child1 = document.createElement('div');
+              child1.id = 'child1';
+              const child2 = document.createElement('div');
+              child2.id = 'child2';
+              source.appendChild(child1);
+              source.appendChild(child2);
+
+              const body = importShadowBody(shadowRoot, source);
+              expect(body.tagName).to.equal(
+                  scenario == ShadowDomVersion.NONE ? 'AMP-BODY' : 'BODY');
+              expect(body.style.position).to.equal('relative');
+              if (scenario == ShadowDomVersion.NONE) {
+                expect(body.style.display).to.equal('block');
+              }
+              expect(shadowRoot.contains(body)).to.be.true;
+              expect(body.children).to.have.length(2);
+              expect(body.children[0].id).to.equal('child1');
+              expect(body.children[1].id).to.equal('child2');
+            });
+          });
         });
       });
-    });
-  });
 
   describe('isShadowRoot', () => {
 

@@ -22,7 +22,7 @@
 export const ShadowDomVersion = {
   NONE: 'none',
   V0: 'v0',
-  V1: 'v1'
+  V1: 'v1',
 };
 
 /**
@@ -69,7 +69,7 @@ export function getShadowDomSupportedVersion(opt_element) {
 function getShadowDomVersion(element) {
   if (!!element.prototype.attachShadow) {
     return ShadowDomVersion.V1;
-  } else if(!!element.prototype.createShadowRoot) {
+  } else if (!!element.prototype.createShadowRoot) {
     return ShadowDomVersion.V0;
   }
 
@@ -77,7 +77,7 @@ function getShadowDomVersion(element) {
 }
 
 function areNativeCustomElementsSupported() {
-  return isNative(document.registerElement);
+  return isNative(self.document.registerElement);
 }
 
 /**

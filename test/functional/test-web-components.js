@@ -29,7 +29,7 @@ describe('web components', () => {
     setShadowDomSupportedVersionForTesting(undefined);
   });
 
-  it("reports when a method is browser native", () => {
+  it('reports when a method is browser native', () => {
     expect(isNative(document.getElementById)).to.be.true;
     expect(isNative(() => {})).to.be.false;
   });
@@ -45,7 +45,7 @@ describe('web components', () => {
   });
 });
 
-describes.realWin("Web Components spec", {}, env => {
+describes.realWin('Web Components spec', {}, env => {
   let win;
 
   beforeEach(() => {
@@ -55,26 +55,29 @@ describes.realWin("Web Components spec", {}, env => {
 
   //TODO: Remove native CE check once WebReflection/document-register-element#96 is fixed.
   if (isNative(document.registerElement)) {
-    describe("Shadow DOM", () => {
-      it("reports NONE when no spec is available", () => {
+    describe('Shadow DOM', () => {
+      it('reports NONE when no spec is available', () => {
         win.Element.prototype.createShadowRoot = undefined;
         win.Element.prototype.attachShadow = undefined;
 
-        expect(getShadowDomSupportedVersion(win.Element)).to.equal(ShadowDomVersion.NONE);
+        expect(getShadowDomSupportedVersion(win.Element))
+            .to.equal(ShadowDomVersion.NONE);
       });
 
-      it("gives preference to v1 over v0 when both specs are available", () => {
+      it('gives preference to v1 over v0 when both specs are available', () => {
         if (!!win.Element.prototype.createShadowRoot &&
             !!win.Element.prototype.attachShadow) {
-          expect(getShadowDomSupportedVersion(win.Element)).to.equal(ShadowDomVersion.V1);
+          expect(getShadowDomSupportedVersion(win.Element))
+              .to.equal(ShadowDomVersion.V1);
         }
       });
 
-      it("reports v0 when available but v1 is not", () => {
+      it('reports v0 when available but v1 is not', () => {
         if (!!win.Element.prototype.createShadowRoot) {
           win.Element.prototype.attachShadow = undefined;
 
-          expect(getShadowDomSupportedVersion(win.Element)).to.equal(ShadowDomVersion.V0);
+          expect(getShadowDomSupportedVersion(win.Element))
+              .to.equal(ShadowDomVersion.V0);
         }
       });
     });

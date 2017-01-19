@@ -24,7 +24,7 @@ import {setStyle} from './style';
 import {
   isShadowDomSupported,
   getShadowDomSupportedVersion,
-  ShadowDomVersion
+  ShadowDomVersion,
 } from './web-components';
 
 /**
