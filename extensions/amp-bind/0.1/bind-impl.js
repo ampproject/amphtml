@@ -100,6 +100,11 @@ export class Bind {
     this.ampdoc.whenReady().then(() => {
       this.initialize_();
     });
+
+    // Expose for testing on dev.
+    if (getMode().localDev) {
+      AMP.reinitializeBind = this.initialize_.bind(this);
+    }
   }
 
   /**
