@@ -454,17 +454,26 @@ function triggerRenderStart(opt_data) {
 }
 
 /**
+ * Id for getHtml postMessage.
+ * @type {!number}
+ */
+let currentMessageId = 0;
+
+/**
  * See readme for window.context.getHtml
  * @param {!string} selector - CSS selector of the node to take content from
  * @param {!Array<string>} attributes - tag attributes to be left in the stringified HTML
  * @param {!Function} callback
  */
 function getHtml(selector, attributes, callback) {
-  nonSensitiveDataPostMessage('get-html', {selector, attributes});
+  const messageId = currentMessageId++;
+  nonSensitiveDataPostMessage('get-html', {selector, attributes, messageId});
 
   const unlisten = listenParent(window, 'get-html-result', data => {
-    callback(data.content);
-    unlisten();
+    if (data.messageId === messageId) {
+      callback(data.content);
+      unlisten();
+    }
   });
 }
 

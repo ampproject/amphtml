@@ -95,26 +95,25 @@ export class AmpAdXOriginIframeHandler {
         .then(info => {
           this.element_.creativeId = info.data.id;
         });
-    listenFor(this.iframe, 'get-html', (info, source, origin) => {
-      if (!this.iframe) {
-        return;
-      }
-      if (!this.element_.hasAttribute('data-html-access-allowed')) {
+
+    this.unlisteners_.push(listenFor(this.iframe, 'get-html',
+      (info, source, origin) => {
+        if (!this.iframe) {
+          return;
+        }
+
+        const {selector, attributes, messageId} = info;
+        let content = '';
+
+        if (this.element_.hasAttribute('data-html-access-allowed')) {
+          content = getHtml(this.baseInstance_.win, selector, attributes);
+        }
+
         postMessageToWindows(
-          this.iframe, [{win: source, origin}],
-          'get-html-result', {content: ''}, true
-        );
-        return;
-      }
-
-      const {selector, attributes} = info;
-      const content = getHtml(this.baseInstance_.win, selector, attributes);
-
-      postMessageToWindows(
-          this.iframe, [{win: source, origin}],
-          'get-html-result', {content}, true
-        );
-    }, true, false);
+            this.iframe, [{win: source, origin}],
+            'get-html-result', {content, messageId}, true
+          );
+      }, true, false));
 
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',

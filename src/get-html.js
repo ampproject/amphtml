@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-/** @type {Array<string>} */
+import {startsWith} from './string';
+
+/** @type {!Array<string>} */
 const excludedTags = ['script', 'style'];
 
-/** @type {Array<string>} */
+/** @type {!Array<string>} */
 const allowedAmpTags = ['amp-accordion', 'amp-app-banner', 'amp-carousel',
   'amp-fit-text', 'amp-form', 'amp-selector', 'amp-sidebar'];
 
-/** @type {Array<string>} */
+/** @type {!Array<string>} */
 const allowedAttributes = ['action', 'alt', 'class', 'disabled', 'height',
   'href', 'id', 'name', 'placeholder', 'readonly', 'src', 'tabindex',
   'title', 'type', 'value', 'width'];
@@ -29,7 +31,7 @@ const allowedAttributes = ['action', 'alt', 'class', 'disabled', 'height',
 /**
  * Returns content of HTML node
  * @param {!Window} win
- * @param {!string} selector - CSS selector of the node to take content from
+ * @param {string} selector - CSS selector of the node to take content from
  * @param {!Array<string>} attrs - tag attributes to be left in the stringified HTML
  * @return {string}
  */
@@ -52,7 +54,7 @@ export function getHtml(win, selector, attrs) {
 function appendToResult(node, attrs, result) {
   const stack = [node];
   const allowedAttrs = attrs.filter(attr => {
-    return allowedAttributes.indexOf(attr) !== -1;
+    return allowedAttributes.indexOf(attr) > -1;
   });
 
   while (stack.length > 0) {
@@ -67,8 +69,8 @@ function appendToResult(node, attrs, result) {
       stack.push(`</${node.tagName.toLowerCase()}>`);
 
       if (node.childNodes && node.childNodes.length > 0) {
-        for (let i = node.childNodes.length - 1; i >= 0; i--) {
-          stack.push(node.childNodes[i]);
+        for (let child = node.lastChild; child; child = child.previousSibling) {
+          stack.push(child);
         }
       }
     }
@@ -84,8 +86,8 @@ function appendToResult(node, attrs, result) {
 function isApplicableNode(node) {
   const tagName = node.tagName.toLowerCase();
 
-  if (tagName.indexOf('amp-') === 0) {
-    return !!(allowedAmpTags.indexOf(tagName) === 1 && node.textContent);
+  if (startsWith(tagName, 'amp-')) {
+    return !!(allowedAmpTags.indexOf(tagName) > -1 && node.textContent);
   } else {
     return !!(excludedTags.indexOf(tagName) === -1 && node.textContent);
   }
