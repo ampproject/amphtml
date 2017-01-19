@@ -125,11 +125,19 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		errorType += "-origin"
 	}
 	is3p := false
-	if r.URL.Query().Get("3p") == "1" {
-		is3p = true
-		errorType += "-3p"
+	runtime := r.URL.Query().Get("rt")
+	if runtime != "" {
+		errorType += "-" + runtime;
+		if runtime == "3p" {
+			is3p = true
+		}
 	} else {
-		errorType += "-1p"
+		if r.URL.Query().Get("3p") == "1" {
+			is3p = true
+			errorType += "-3p"
+		} else {
+			errorType += "-1p"
+		}
 	}
 	isCanary := false;
 	if r.URL.Query().Get("ca") == "1" {
