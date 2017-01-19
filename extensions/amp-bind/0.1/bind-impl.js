@@ -166,8 +166,7 @@ export class Bind {
 
     // Helper function for scanning a slice of elements.
     const scanFromTo = (start, end) => {
-      for (let i = start; i < end && elements[i]; i++) {
-        const el = elements[i];
+      for (let i = start, el = elements[i]; i < end && el; i++) {
         const attrs = el.attributes;
         const bindings = [];
         for (let j = 0; attrs[j]; j++) {
@@ -194,16 +193,10 @@ export class Bind {
       const chunktion = idleDeadline => {
         // If `requestIdleCallback` is available, scan elements until
         // idle time runs out.
-        if (idleDeadline) {
-          if (idleDeadline.didTimeout) {
-            // On timeout, scan the remaining elements immediately.
-            scanFromTo(position, Number.POSITIVE_INFINITY);
-            position = Number.POSITIVE_INFINITY;
-          } else {
-            while (idleDeadline.timeRemaining() > 1 && elements[position]) {
-              scanFromTo(position, position + 1);
-              position++;
-            }
+        if (idleDeadline && !idleDeadline.didTimeout) {
+          while (idleDeadline.timeRemaining() > 1 && elements[position]) {
+            scanFromTo(position, position + 1);
+            position++;
           }
         } else {
           // If `requestIdleCallback` isn't available, scan elements in buckets.

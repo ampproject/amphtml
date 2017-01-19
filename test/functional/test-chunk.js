@@ -19,7 +19,6 @@ import {
   chunkInstanceForTesting,
   deactivateChunking,
   onIdle,
-  resolvedObjectforTesting,
   startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -33,7 +32,6 @@ describe('chunk', () => {
   let resolved;
   let experimentOn;
   beforeEach(() => {
-    resolved = resolvedObjectforTesting();
     experimentOn = true;
     activateChunkingForTesting();
   });
@@ -62,14 +60,16 @@ describe('chunk', () => {
     });
 
     it('should execute a chunk', done => {
-      startupChunk(fakeWin.document, done);
+      startupChunk(fakeWin.document, unusedIdleDeadline => {
+        done();
+      });
     });
 
     it('should execute chunks', done => {
       let count = 0;
       let progress = '';
       function complete(str) {
-        return function() {
+        return function(unusedIdleDeadline) {
           progress += str;
           if (++count == 6) {
             expect(progress).to.equal('abcdef');
@@ -205,8 +205,9 @@ describe('chunk', () => {
         });
         env.win.requestIdleCallback =
             resolvingIdleCallbackWithTimeRemaining(15);
-        env.sandbox.stub(resolved, 'then', () => {
-          throw new Error('No calls expected .then');
+        const chunks = chunkInstanceForTesting(env.win.document);
+        env.sandbox.stub(chunks, 'executeASAP_', () => {
+          throw new Error('No calls expected: executeASAP_');
         });
         env.win.location.resetHref('test#visibilityState=hidden');
       });
@@ -238,8 +239,9 @@ describe('chunk', () => {
         });
         env.win.requestIdleCallback =
             resolvingIdleCallbackWithTimeRemaining(15);
-        env.sandbox.stub(resolved, 'then', () => {
-          throw new Error('No calls expected');
+        const chunks = chunkInstanceForTesting(env.win.document);
+        env.sandbox.stub(chunks, 'executeASAP_', () => {
+          throw new Error('No calls expected: executeASAP_');
         });
         env.win.document.hidden = true;
       });

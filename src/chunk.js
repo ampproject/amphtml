@@ -141,6 +141,7 @@ const TaskState = {
 
 /**
  * A default chunkable task.
+ * @private
  */
 class Task {
   /**
@@ -158,8 +159,9 @@ class Task {
    * Executes the wrapped function.
    * @param {?IdleDeadline} idleDeadline
    * @throws {Error}
+   * @private
    */
-  runTask(idleDeadline) {
+  runTask_(idleDeadline) {
     this.state = TaskState.RUN;
     try {
       this.fn_(idleDeadline);
@@ -171,15 +173,16 @@ class Task {
 
   /**
    * @return {string}
+   * @private
    */
-  getName() {
+  getName_() {
     return this.fn_.displayName || this.fn_.name;
   }
 
   /**
    * Optional handling when a task run throws an error.
-   * @private
    * @param {Error} unusedError
+   * @private
    */
   onTaskError_(unusedError) {
     // By default, no-op.
@@ -187,8 +190,8 @@ class Task {
 
   /**
    * Returns true if this task should be run without delay.
-   * @private
    * @return {boolean}
+   * @private
    */
   immediateTriggerCondition_() {
     // By default, there are no immediate trigger conditions.
@@ -198,8 +201,8 @@ class Task {
   /**
    * Returns true if this task should be scheduled using `requestIdleCallback`.
    * Otherwise, task is scheduled as macro-task on next event loop.
-   * @private
    * @return {boolean}
+   * @private
    */
   useRequestIdleCallback_() {
     // By default, always use requestIdleCallback.
@@ -214,7 +217,7 @@ class StartupTask extends Task {
   /**
    * @param {!function(?IdleDeadline)} fn
    * @param {!Window} win
-   * @param {!./service/viewer-impl.Viewer|!Promise} viewerOrPromise
+   * @param {!Promise<./service/viewer-impl.Viewer>} viewerPromise
    */
   constructor(fn, win, viewerOrPromise) {
     super(fn);
@@ -231,29 +234,18 @@ class StartupTask extends Task {
     /** @private {?./service/viewer-impl.Viewer} */
     this.viewer_ = null;
 
-    if (viewerOrPromise instanceof Promise) {
-      viewerOrPromise.then(viewer => {
-        this.setViewer(viewer);
+    viewerOrPromise.then(viewer => {
+      this.viewer_ = viewer;
+
+      this.viewer_.onVisibilityChanged(() => {
+        if (this.viewer_.isVisible()) {
+          this.runTask_(/* idleDeadline */ null);
+        }
       });
-    } else {
-      this.setViewer(viewerOrPromise);
-    }
-  }
-
-  /**
-   * @param {!./service/viewer-impl.Viewer} viewer
-   */
-  setViewer(viewer) {
-    this.viewer_ = viewer;
-
-    this.viewer_.onVisibilityChanged(() => {
       if (this.viewer_.isVisible()) {
-        this.runTask(/* idleDeadline */ null);
+        this.runTask_(/* idleDeadline */ null);
       }
     });
-    if (this.viewer_.isVisible()) {
-      this.runTask(/* idleDeadline */ null);
-    }
   }
 
   /** @override */
@@ -314,14 +306,8 @@ class Chunks {
     /** @private @const {function(?IdleDeadline)} */
     this.boundExecute_ = this.execute_.bind(this);
 
-    /** @private {?./service/viewer-impl.Viewer} */
-    this.viewer_ = null;
-
     /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
     this.viewerPromise_ = viewerPromiseForDoc(ampDoc);
-    this.viewerPromise_.then(viewer => {
-      this.viewer_ = viewer;
-    });
 
     this.win_.addEventListener('message', e => {
       if (e.data = 'amp-macro-task') {
@@ -347,8 +333,7 @@ class Chunks {
    * @private
    */
   runForStartup_(fn) {
-    const viewerOrPromise = this.viewer_ || this.viewerPromise_;
-    const t = new StartupTask(fn, this.win_, viewerOrPromise);
+    const t = new StartupTask(fn, this.win_, this.viewerPromise_);
     this.enqueueTask_(t, Number.POSITIVE_INFINITY);
   }
 
@@ -360,7 +345,9 @@ class Chunks {
    */
   enqueueTask_(task, priority) {
     this.tasks_.enqueue(task, priority);
-    this.schedule_();
+    resolved.then(() => {
+      this.schedule_();
+    });
   }
 
   /**
@@ -389,10 +376,23 @@ class Chunks {
       return false;
     }
     const before = Date.now();
-    t.runTask(idleDeadline);
-    this.schedule_();
-    dev().fine(TAG, t.getName(), 'Chunk duration', Date.now() - before);
+    t.runTask_(idleDeadline);
+    resolved.then(() => {
+      this.schedule_();
+    });
+    dev().fine(TAG, t.getName_(), 'Chunk duration', Date.now() - before);
     return true;
+  }
+
+  /**
+   * Calls `execute_()` asynchronously.
+   * @param {?IdleDeadline} idleDeadline
+   * @private
+   */
+  executeASAP_(idleDeadline) {
+    resolved.then(() => {
+      this.boundExecute_(idleDeadline);
+    });
   }
 
   /**
@@ -405,9 +405,7 @@ class Chunks {
       return;
     }
     if (nextTask.immediateTriggerCondition_()) {
-      resolved.then(() => {
-        this.boundExecute_(/* idleDeadline */ null);
-      });
+      this.executeASAP_(/* idleDeadline */ null);
       return;
     }
     // If requestIdleCallback exists, schedule a task with it, but
@@ -459,11 +457,4 @@ export function onIdle(win, minimumTimeRemaining, timeout, fn) {
     }
   }
   win.requestIdleCallback(rIC, {timeout});
-}
-
-/**
- * @return {!Promise}
- */
-export function resolvedObjectforTesting() {
-  return resolved;
 }
