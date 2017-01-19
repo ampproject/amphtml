@@ -416,6 +416,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.addContextToIframe = iframe => {
       iframe.name = iframeName;
     };
+    window.context.getHTML = getHTML;
     delete data._context;
     manageWin(window);
     installEmbedStateListener();
@@ -450,6 +451,20 @@ function triggerResizeRequest(width, height) {
  */
 function triggerRenderStart(opt_data) {
   nonSensitiveDataPostMessage('render-start', opt_data);
+}
+
+/**
+ * @param {!String} selector
+ * @param {!Array<String>} attrs
+ * @param {!Function} callback
+ */
+function getHTML(selector, attrs, callback) {
+  nonSensitiveDataPostMessage('get-html', {selector, attrs});
+
+  const unlisten = listenParent(window, 'get-html-result', data => {
+    callback(data.content);
+    unlisten();
+  });
 }
 
 /**
