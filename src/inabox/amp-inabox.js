@@ -42,6 +42,9 @@ import {maybeTrackImpression} from '../impression';
 import {isExperimentOn} from '../experiments';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {installInaboxViewportService} from './inabox-viewport';
+import {getMode} from '../mode';
+
+getMode(self).runtime = 'inabox';
 
 // TODO(lannka): only install the necessary services.
 
