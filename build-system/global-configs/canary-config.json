@@ -19,5 +19,6 @@
   "3p-frame-context-in-name": 1,
   "amp-accordion-session-state-optout": 1,
   "amp-playbuzz": 1,
-  "amp-selector": 1
+  "amp-selector": 1,
+  "sentinel-name-change": 1,
 }
