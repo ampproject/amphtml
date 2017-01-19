@@ -84,7 +84,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'vars': {
       'decisionApiUrl': 'us-east-decisionapi.lift.acquia.com',
       'accountId': 'xxxxxxxx',
-      'siteId': 'xxxxxxx',
+      'siteId': 'xxxxxxxx',
     },
     'transport': {'beacon': true, 'xhrpost': true, 'image': false},
     'requests': {
