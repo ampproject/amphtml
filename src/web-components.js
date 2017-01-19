@@ -14,43 +14,29 @@
  * limitations under the License.
  */
 
+/**
+ * Possible versions of Shadow DOM spec
+ * @const
+ * @enum {string}
+ */
+export const ShadowDomVersion = {
+  NONE: 'none',
+  V0: 'v0',
+  V1: 'v1'
+};
 
 /**
- * @type {boolean|undefined}
+ * @type {string|undefined}
  * @visibleForTesting
  */
-let shadowDomSupported;
+let shadowDomSupportedVersion;
 
 /**
- * @type {Function|undefined}
+ * @param {string|undefined} val
  * @visibleForTesting
  */
-let shadowDomMethod;
-
-let win = window;
-
-/**
- * @param {boolean|undefined} val
- * @visibleForTesting
- */
-export function setWindowForTesting(val) {
-  win = val;
-}
-
-/**
- * @param {boolean|undefined} val
- * @visibleForTesting
- */
-export function setShadowDomSupportedForTesting(val) {
-  shadowDomSupported = val;
-}
-
-/**
- * @param {function|undefined} val
- * @visibleForTesting
- */
-export function setShadowDomMethodForTesting(val) {
-  shadowDomMethod = val;
+export function setShadowDomSupportedVersionForTesting(val) {
+  shadowDomSupportedVersion = val;
 }
 
 /**
@@ -58,29 +44,48 @@ export function setShadowDomMethodForTesting(val) {
  * @return {boolean}
  */
 export function isShadowDomSupported() {
-  if (shadowDomSupported === undefined) {
-    shadowDomSupported = !!getShadowDomMethod() && areNativeCustomElementsSupported();
-  }
-
-  return shadowDomSupported;
+  return getShadowDomSupportedVersion() != ShadowDomVersion.NONE;
 }
 
 /**
- * Shadow DOM version method
- * @return {function}
+ * Returns the supported version of Shadow DOM spec.
+ * @param {function=} optional for testing
+ * @return {string}
  */
-export function getShadowDomMethod() {
-  if (shadowDomMethod === undefined) {
-    shadowDomMethod = win.Element.prototype.createShadowRoot || win.Element.prototype.attachShadow;
+export function getShadowDomSupportedVersion(opt_element) {
+  if (shadowDomSupportedVersion === undefined) {
+
+    //TODO: Remove native CE check once WebReflection/document-register-element#96 is fixed.
+    if (!areNativeCustomElementsSupported()) {
+      shadowDomSupportedVersion = ShadowDomVersion.NONE;
+    } else {
+      shadowDomSupportedVersion = getShadowDomVersion(opt_element || Element);
+    }
   }
 
-  return shadowDomMethod;
+  return shadowDomSupportedVersion;
+}
+
+function getShadowDomVersion(element) {
+  if (!!element.prototype.attachShadow) {
+    return ShadowDomVersion.V1;
+  } else if(!!element.prototype.createShadowRoot) {
+    return ShadowDomVersion.V0;
+  }
+
+  return ShadowDomVersion.NONE;
 }
 
 function areNativeCustomElementsSupported() {
-  return isNative(win.document.registerElement) || isNative(win.customElements && win.customElements.define);
+  return isNative(document.registerElement);
 }
 
+/**
+ * Returns `true` if the method is natively implemented by the browser
+ * @visibleForTesting
+ * @param {Function} method
+ * @return {boolean}
+ */
 export function isNative(method) {
   return !!method && method.toString().indexOf('[native code]') !== -1;
 }

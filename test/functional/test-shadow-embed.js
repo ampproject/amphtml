@@ -27,8 +27,8 @@ import {
   scopeShadowCss,
 } from '../../src/shadow-embed';
 import {
-  setShadowDomSupportedForTesting,
-  setShadowDomMethodForTesting
+  setShadowDomSupportedVersionForTesting,
+  ShadowDomVersion
 } from '../../src/web-components';
 import {extensionsFor} from '../../src/extensions';
 import * as sinon from 'sinon';
@@ -42,8 +42,7 @@ describe('shadow-embed', () => {
   });
 
   afterEach(() => {
-    setShadowDomSupportedForTesting(undefined);
-    setShadowDomMethodForTesting(undefined);
+    setShadowDomSupportedVersionForTesting(undefined);
     sandbox.restore();
   });
 
@@ -65,30 +64,20 @@ describe('shadow-embed', () => {
     expect(copy).to.not.equal(style);
   });
 
-  ['nativeV0', 'nativeV1', 'polyfill'].forEach(scenario => {
+  [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1].forEach(scenario => {
     describe('shadow APIs ' + scenario, () => {
       let hostElement;
 
       beforeEach(function() {
         hostElement = document.createElement('div');
-        if (scenario == 'polyfill') {
-          setShadowDomSupportedForTesting(false);
+        setShadowDomSupportedVersionForTesting(scenario);
+
+        if (scenario == ShadowDomVersion.V0 && !Element.prototype.createShadowRoot) {
+          this.skip();
         }
 
-        if (scenario == 'nativeV0') {
-          if (!!Element.prototype.createShadowRoot) {
-            setShadowDomMethodForTesting(Element.prototype.createShadowRoot);
-          }  else {
-            this.skip();
-          }
-        }
-
-        if (scenario == 'nativeV1') {
-            if (!!Element.prototype.attachShadow) {
-                setShadowDomMethodForTesting(Element.prototype.attachShadow);
-            }  else {
-                this.skip();
-            }
+        if (scenario == ShadowDomVersion.V1 && !Element.prototype.attachShadow) {
+          this.skip();
         }
       });
 
@@ -97,7 +86,7 @@ describe('shadow-embed', () => {
         const style = installStylesForShadowRoot(shadowRoot, 'body {}', true);
         expect(shadowRoot.contains(style)).to.be.true;
         const css = style.textContent.replace(/\s/g, '');
-        if (scenario == 'polyfill') {
+        if (scenario == ShadowDomVersion.NONE) {
           expect(css).to.match(/amp-body/);
         } else {
           expect(css).to.equal('body{}');
@@ -132,7 +121,7 @@ describe('shadow-embed', () => {
           expect(shadowRoot.getElementById(spanId)).to.equal(span);
         });
 
-        if (scenario == 'polyfill') {
+        if (scenario == ShadowDomVersion.NONE) {
           it('should add id for polyfill', () => {
             const shadowRoot = createShadowRoot(hostElement);
             expect(shadowRoot.tagName).to.equal('I-AMP-SHADOW-ROOT');
@@ -154,9 +143,9 @@ describe('shadow-embed', () => {
 
           const body = importShadowBody(shadowRoot, source);
           expect(body.tagName).to.equal(
-              scenario == 'nativeV0' || scenario == 'nativeV1' ? 'BODY' : 'AMP-BODY');
+              scenario == ShadowDomVersion.NONE ? 'AMP-BODY' : 'BODY');
           expect(body.style.position).to.equal('relative');
-          if (scenario == 'polyfill') {
+          if (scenario == ShadowDomVersion.NONE) {
             expect(body.style.display).to.equal('block');
           }
           expect(shadowRoot.contains(body)).to.be.true;
@@ -186,6 +175,14 @@ describe('shadow-embed', () => {
       const element = document.createElement('div');
       if (element.createShadowRoot) {
         const shadowRoot = element.createShadowRoot();
+        expect(isShadowRoot(shadowRoot)).to.be.true;
+      }
+    });
+
+    it('should yield true for natively-supported attachShadow API', () => {
+      const element = document.createElement('div');
+      if (element.attachShadow) {
+        const shadowRoot = element.attachShadow({mode: 'open'});
         expect(isShadowRoot(shadowRoot)).to.be.true;
       }
     });
@@ -220,7 +217,7 @@ describe('shadow-embed', () => {
     });
 
     it('should find the root node via polyfill', () => {
-      setShadowDomSupportedForTesting(false);
+      setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
       expect(getShadowRootNode(content)).to.equal(shadowRoot);
     });
   });

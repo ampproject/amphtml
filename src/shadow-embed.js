@@ -21,7 +21,11 @@ import {closestNode, escapeCssSelectorIdent} from './dom';
 import {extensionsFor} from './extensions';
 import {insertStyleElement} from './style-installer';
 import {setStyle} from './style';
-import {isShadowDomSupported, getShadowDomMethod} from './web-components';
+import {
+  isShadowDomSupported,
+  getShadowDomSupportedVersion,
+  ShadowDomVersion
+} from './web-components';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.
@@ -50,8 +54,11 @@ export function createShadowRoot(hostElement) {
   }
 
   // Native support.
-  if (isShadowDomSupported()) {
-    return getShadowDomMethod().call(hostElement, {mode: 'open'});
+  const shadowDomSupported = getShadowDomSupportedVersion();
+  if (shadowDomSupported == ShadowDomVersion.V1) {
+    return hostElement.attachShadow({mode: 'open'});
+  } else if (shadowDomSupported == ShadowDomVersion.V0) {
+    return hostElement.createShadowRoot();
   }
 
   // Polyfill.
