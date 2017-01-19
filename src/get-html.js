@@ -68,10 +68,8 @@ function appendToResult(node, attrs, result) {
       appendOpenTag(node, allowedAttrs, result);
       stack.push(`</${node.tagName.toLowerCase()}>`);
 
-      if (node.childNodes && node.childNodes.length > 0) {
-        for (let child = node.lastChild; child; child = child.previousSibling) {
-          stack.push(child);
-        }
+      for (let child = node.lastChild; child; child = child.previousSibling) {
+        stack.push(child);
       }
     }
   }
