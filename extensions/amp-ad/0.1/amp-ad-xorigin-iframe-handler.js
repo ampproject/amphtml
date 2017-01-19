@@ -30,6 +30,7 @@ import {timerFor} from '../../../src/timer';
 import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
 import {AdDisplayState} from './amp-ad-ui';
+import {getHtml} from '../../../src/get-html';
 
 const TIMEOUT_VALUE = 10000;
 
@@ -94,6 +95,25 @@ export class AmpAdXOriginIframeHandler {
         .then(info => {
           this.element_.creativeId = info.data.id;
         });
+
+    this.unlisteners_.push(listenFor(this.iframe, 'get-html',
+      (info, source, origin) => {
+        if (!this.iframe) {
+          return;
+        }
+
+        const {selector, attributes, messageId} = info;
+        let content = '';
+
+        if (this.element_.hasAttribute('data-html-access-allowed')) {
+          content = getHtml(this.baseInstance_.win, selector, attributes);
+        }
+
+        postMessageToWindows(
+            this.iframe, [{win: source, origin}],
+            'get-html-result', {content, messageId}, true
+          );
+      }, true, false));
 
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
