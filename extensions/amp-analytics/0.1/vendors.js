@@ -97,9 +97,9 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         '&rurl=${documentReferrer}' +
         '&cttl=${title}',
       'pageview': '${basicCapture}' +
-        '&en=Content View' +
+        '&en=Content View',
       'click': '${basicCapture}' +
-        '&en=Click-Through' +
+        '&en=Click-Through'
     },
     'triggers': {
       'defaultPageview': {
