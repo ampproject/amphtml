@@ -416,6 +416,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.addContextToIframe = iframe => {
       iframe.name = iframeName;
     };
+    window.context.getHtml = getHtml;
     delete data._context;
     manageWin(window);
     installEmbedStateListener();
@@ -450,6 +451,30 @@ function triggerResizeRequest(width, height) {
  */
 function triggerRenderStart(opt_data) {
   nonSensitiveDataPostMessage('render-start', opt_data);
+}
+
+/**
+ * Id for getHtml postMessage.
+ * @type {!number}
+ */
+let currentMessageId = 0;
+
+/**
+ * See readme for window.context.getHtml
+ * @param {!string} selector - CSS selector of the node to take content from
+ * @param {!Array<string>} attributes - tag attributes to be left in the stringified HTML
+ * @param {!Function} callback
+ */
+function getHtml(selector, attributes, callback) {
+  const messageId = currentMessageId++;
+  nonSensitiveDataPostMessage('get-html', {selector, attributes, messageId});
+
+  const unlisten = listenParent(window, 'get-html-result', data => {
+    if (data.messageId === messageId) {
+      callback(data.content);
+      unlisten();
+    }
+  });
 }
 
 /**
