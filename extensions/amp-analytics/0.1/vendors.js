@@ -84,7 +84,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'vars': {
       'decisionApiUrl': 'us-east-decisionapi.lift.acquia.com',
       'accountId': 'xxxxxxxx',
-      'siteId': 'xxxxxxx'
+      'siteId': 'xxxxxxx',
     },
     'transport': {'beacon': true, 'xhrpost': true, 'image': false},
     'requests': {
@@ -99,7 +99,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'pageview': '${basicCapture}' +
         '&en=Content View',
       'click': '${basicCapture}' +
-        '&en=Click-Through'
+        '&en=Click-Through',
     },
     'triggers': {
       'defaultPageview': {
