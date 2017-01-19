@@ -31,9 +31,9 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
   it.configure().retryOnSaucelabs()
   .run('should override the video interface methods', function() {
     this.timeout(TIMEOUT);
-    return getVideoPlayer(/* opt_outsideView */ false)
-    .then(v => {
-      const impl = v.implementation_;
+    return getVideoPlayer({outsideView: false, autoplay: true})
+    .then(r => {
+      const impl = r.video.implementation_;
       const methods = Object.getOwnPropertyNames(
           Object.getPrototypeOf(new VideoInterface()));
 
@@ -45,20 +45,62 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     });
   });
 
-  describe.configure().retryOnSaucelabs().skipSafari()
+  describe.configure().retryOnSaucelabs()
+  .run('Actions', function() {
+    this.timeout(TIMEOUT);
+    it('should support mute and play action', function() {
+      return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
+        // Create a play button
+        const playButton = r.fixture.doc.createElement('button');
+        playButton.setAttribute('on', 'tap:myVideo.play');
+        r.fixture.doc.body.appendChild(playButton);
+
+        const muteButton = r.fixture.doc.createElement('button');
+        muteButton.setAttribute('on', 'tap:myVideo.mute');
+        r.fixture.doc.body.appendChild(muteButton);
+
+        // We have to mute the video first for testing. This is because we
+        // trigger a synthetic click which is not considered a user-action.
+        // There is no way to create a true user-initiated action in scripted
+        // testing environment.
+
+        Promise.resolve()
+        .then(() => muteButton.click())
+        .then(() => playButton.click());
+        return listenOncePromise(r.video, VideoEvents.PLAY);
+      });
+    });
+    // Although these tests are not about autoplay, we can ony run them in
+    // browsers that do support autoplay, this is because a synthetic click
+    // event will not be considered a user-action and mobile browsers that
+    // don't support muted autoplay will block it. In real life, the click
+    // would be considered a user-initiated action, but no way to do that in a
+    // scripted test environment.
+    before(function() {
+      this.timeout(TIMEOUT);
+      // Skip autoplay tests if browser does not support autoplay.
+      return supportsAutoplay(window, false).then(supportsAutoplay => {
+        if (!supportsAutoplay) {
+          this.skip();
+        }
+      });
+    });
+  });
+
+  describe.configure().retryOnSaucelabs()
   .run('Autoplay', function() {
     this.timeout(TIMEOUT);
     describe('play/pause', () => {
       it('should play when in view port initially', () => {
-        return getVideoPlayer(/* opt_outsideView */ false).then(v => {
-          return listenOncePromise(v, VideoEvents.PLAY);
+        return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
+          return listenOncePromise(r.video, VideoEvents.PLAY);
         });
       });
 
       it('should not play when not in view port initially', () => {
-        return getVideoPlayer(/* opt_outsideView */ true).then(v => {
-          const timer = timerFor(v.implementation_.win);
-          const p = listenOncePromise(v, VideoEvents.PLAY).then(() => {
+        return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
+          const timer = timerFor(r.video.implementation_.win);
+          const p = listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
             return Promise.reject('should not have autoplayed');
           });
           // we have to wait to ensure play is NOT called.
@@ -69,8 +111,8 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
       it('should play/pause when video enters/exists viewport', () => {
         let video;
         let viewport;
-        return getVideoPlayer(/* opt_outsideView */ true).then(v => {
-          video = v;
+        return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
+          video = r.video;
           viewport = viewportForDoc(video);
 
           // scroll to the bottom, make video fully visible
@@ -91,8 +133,8 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
         let video;
         let viewport;
         let icon;
-        return getVideoPlayer(/* opt_outsideView */ true).then(v => {
-          video = v;
+        return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
+          video = r.video;
           return poll('animation icon', () => {
             return !!video.querySelector('i-amp-video-eq');
           });
@@ -143,8 +185,9 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     });
   });
 
-  function getVideoPlayer(opt_outsideView) {
-    const top = opt_outsideView ? '100vh' : '0';
+  function getVideoPlayer(options) {
+    options = options || {};
+    const top = options.outsideView ? '100vh' : '0';
     let fixture;
     return createFixtureIframe('test/fixtures/video-players.html', 1000)
     .then(f => {
@@ -153,7 +196,10 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     })
     .then(() => {
       const video = createVideoElementFunc(fixture);
-      video.setAttribute('autoplay', '');
+      if (options.autoplay) {
+        video.setAttribute('autoplay', '');
+      }
+      video.setAttribute('id', 'myVideo');
       video.setAttribute('controls', '');
       video.setAttribute('layout', 'fixed');
       video.setAttribute('width', '100');
@@ -172,7 +218,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
       return poll('video built', () => {
         return video.isBuilt();
       },undefined, 5000).then(() => {
-        return video;
+        return {video, fixture};
       });
     });
   }

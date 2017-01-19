@@ -115,6 +115,10 @@ class AmpYoutube extends AMP.BaseElement {
         'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
 
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     // TODO(#3216): amp-youtube has a special case where 404s are not easily caught
     // hence the following hacky-solution.
     // Please don't follow this behavior in other extensions, instead
@@ -125,6 +129,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
     installVideoManagerForDoc(ampdoc);
+    videoManagerForDoc(this.win.document).register(this);
   }
 
   /** @return {string} */
@@ -184,14 +189,10 @@ class AmpYoutube extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+
 
     this.win.addEventListener(
         'message', event => this.handleYoutubeMessages_(event));
-
-    videoManagerForDoc(this.win.document).register(this);
 
     return this.loadPromise(iframe)
         .then(() => this.listenToFrame_())
