@@ -3678,6 +3678,18 @@ function validateTagAgainstSpec(
 }
 
 /**
+ * True iff tagspec's html_format matches the AMP html_format.
+ * @param {amp.validator.TagSpec} tagSpec
+ * @param {amp.validator.TagSpec.HtmlFormat<string>} htmlFormat
+ * @return {boolean}
+ */
+function isTagSpecCorrectHtmlFormat(tagSpec, htmlFormat) {
+  // Empty html_format field implies tagspec applies to all docs.
+  return tagSpec.htmlFormat.length === 0 ||
+      tagSpec.htmlFormat.indexOf(htmlFormat) !== -1;
+}
+
+/**
  * This wrapper class provides access to the validation rules.
  * @private
  */
@@ -3708,11 +3720,12 @@ class ParsedValidatorRules {
      */
     this.mandatoryTagSpecs_ = [];
 
-    /**
-     * @type {!amp.validator.ValidatorRules}
-     * @private
-     */
-    this.rules_ = this.filterRules(amp.validator.createRules(), htmlFormat);
+    /** @private @type {!amp.validator.ValidatorRules} */
+    this.rules_ = amp.validator.createRules();
+
+    /** @private @type {amp.validator.TagSpec.HtmlFormat<string>} */
+    this.htmlFormat_ =
+        /** @type {amp.validator.TagSpec.HtmlFormat<string>} */ (htmlFormat);
 
     /**
      * @type {!ParsedAttrSpecs}
@@ -3720,49 +3733,51 @@ class ParsedValidatorRules {
      */
     this.parsedAttrSpecs_ = new ParsedAttrSpecs(this.rules_.attrLists);
 
-    /** @type {!Array<boolean>} */
-    const tagSpecIdsToTrack = [];
+    /** @private @type {!Array<boolean>} */
+    this.tagSpecIdsToTrack_ = [];
     for (const tag of this.rules_.tags) {
+      if (!isTagSpecCorrectHtmlFormat(tag, this.htmlFormat_)) {
+        continue;
+      }
       const tagSpecName = getTagSpecName(tag);
       if (tag.alsoRequiresTag.length > 0) {
-        tagSpecIdsToTrack[tag.tagSpecId] = true;
+        this.tagSpecIdsToTrack_[tag.tagSpecId] = true;
       }
       for (const otherTag of tag.alsoRequiresTag) {
-        tagSpecIdsToTrack[otherTag] = true;
+        this.tagSpecIdsToTrack_[otherTag] = true;
       }
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         if (tag.alsoRequiresTagWarning.length > 0) {
-          tagSpecIdsToTrack[tag.tagSpecId] = true;
+          this.tagSpecIdsToTrack_[tag.tagSpecId] = true;
         }
         for (const otherTag of tag.alsoRequiresTagWarning) {
-          tagSpecIdsToTrack[otherTag] = true;
+          this.tagSpecIdsToTrack_[otherTag] = true;
         }
         if (tag.extensionUnusedUnlessTagPresent.length > 0) {
-          tagSpecIdsToTrack[tag.tagSpecId] = true;
+          this.tagSpecIdsToTrack_[tag.tagSpecId] = true;
         }
         for (const otherTag of tag.extensionUnusedUnlessTagPresent) {
-          tagSpecIdsToTrack[otherTag] = true;
+          this.tagSpecIdsToTrack_[otherTag] = true;
         }
       }
     }
     for (const tag of this.rules_.tags) {
+      if (!isTagSpecCorrectHtmlFormat(tag, this.htmlFormat_)) {
+        continue;
+      }
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         goog.asserts.assert(this.rules_.templateSpecUrl !== null);
       }
-      const parsedTagSpec = new ParsedTagSpec(
-          this.parsedAttrSpecs_,
-          shouldRecordTagspecValidated(tag, tagSpecIdsToTrack), tag);
-      this.tagSpecById_[tag.tagSpecId] = parsedTagSpec;
-      if (!parsedTagSpec.isReferencePoint()) {
+      if (tag.tagName !== '$REFERENCE_POINT') {
         if (!this.tagSpecByTagName_.hasOwnProperty(tag.tagName)) {
           this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
         }
         const tagnameDispatch = this.tagSpecByTagName_[tag.tagName];
-        if (parsedTagSpec.hasDispatchKey()) {
-          tagnameDispatch.registerDispatchKey(
-              parsedTagSpec.getDispatchKey(), tag.tagSpecId);
-        } else {
+        const dispatchKey = this.rules_.dispatchKeyByTagSpecId[tag.tagSpecId];
+        if (dispatchKey === undefined) {
           tagnameDispatch.registerTagSpec(tag.tagSpecId);
+        } else {
+          tagnameDispatch.registerDispatchKey(dispatchKey, tag.tagSpecId);
         }
       }
       if (tag.mandatory) {
@@ -3799,41 +3814,6 @@ class ParsedValidatorRules {
   /** @return {!amp.validator.ValidatorRules} */
   getRules() {
     return this.rules_;
-  }
-
-  /**
-   * Filters the input rules so that only TagSpecs this validator needs are
-   * returned.
-   * @param {!amp.validator.ValidatorRules} allRules
-   * @param {string} htmlFormat
-   * @return {!amp.validator.ValidatorRules}
-   */
-  filterRules(allRules, htmlFormat) {
-    let newRules = allRules;
-    let filteredTags = [];
-    for (let i = 0; i < allRules.tags.length; ++i) {
-      if (this.isTagSpecCorrectHtmlFormat(allRules.tags[i], htmlFormat))
-        filteredTags.push(allRules.tags[i]);
-    }
-    newRules.tags = filteredTags;
-    return newRules;
-  }
-
-  /**
-   * True iff tagspec's html_format matches the AMP html_format.
-   * @param {amp.validator.TagSpec} tagSpec
-   * @param {string} htmlFormat
-   * @return {boolean}
-   */
-  isTagSpecCorrectHtmlFormat(tagSpec, htmlFormat) {
-    // Empty html_format field implies tagspec applies to all docs.
-    if (tagSpec.htmlFormat.length === 0) return true;
-
-    for (let i = 0; i < tagSpec.htmlFormat.length; ++i) {
-      if (tagSpec.htmlFormat[i] === htmlFormat) return true;
-    }
-
-    return false;
   }
 
   /**
@@ -3997,17 +3977,18 @@ class ParsedValidatorRules {
     let missing = [];
     const specUrlsByMissing = {};
     for (const tagSpec of this.rules_.tags) {
-      if (tagSpec.mandatoryAlternatives !== null) {
-        const alternative = tagSpec.mandatoryAlternatives;
-        if (!satisfied.hasOwnProperty(alternative)) {
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            missing.push(alternative);
-            specUrlsByMissing[alternative] = tagSpec.specUrl;
-          } else {
-            validationResult.status =
-                amp.validator.ValidationResult.Status.FAIL;
-            return;
-          }
+      if (tagSpec.mandatoryAlternatives === null ||
+          !isTagSpecCorrectHtmlFormat(tagSpec, this.htmlFormat_)) {
+        continue;
+      }
+      const alternative = tagSpec.mandatoryAlternatives;
+      if (!satisfied.hasOwnProperty(alternative)) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          missing.push(alternative);
+          specUrlsByMissing[alternative] = tagSpec.specUrl;
+        } else {
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
         }
       }
     }
@@ -4041,7 +4022,17 @@ class ParsedValidatorRules {
    * @return {!ParsedTagSpec}
    */
   getTagSpec(id) {
-    return this.tagSpecById_[id];
+    let parsed = this.tagSpecById_[id];
+    if (parsed !== undefined) {
+      return parsed;
+    }
+    const tag = this.rules_.tags[id];
+    goog.asserts.assert(tag !== undefined);
+    parsed = new ParsedTagSpec(
+        this.parsedAttrSpecs_,
+        shouldRecordTagspecValidated(tag, this.tagSpecIdsToTrack_), tag);
+    this.tagSpecById_[id] = parsed;
+    return parsed;
   }
 
   /**
