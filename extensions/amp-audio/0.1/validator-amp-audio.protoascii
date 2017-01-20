@@ -51,7 +51,6 @@ tags: {  # amp-audio
 }
 attr_lists: { # amp-audio attributes that are common to both AMP and A4A format.
   name: "amp-audio-common"
-
   attrs: { name: "controls" }
   attrs: { name: "loop"  value: "" }
   attrs: { name: "muted" value: "" }

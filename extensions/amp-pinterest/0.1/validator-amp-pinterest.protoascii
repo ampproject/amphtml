@@ -61,7 +61,10 @@ tags: {  # <amp-pinterest>
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-pinterest extension .js script"
   # data-* is generally allowed, but it's not generally mandatory.
-  attrs: { name: "data-do" mandatory: true }
+  attrs: {
+    name: "data-do"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-pinterest.html"
   amp_layout: {
