@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+
+    <title>Channel messaging demo</title>
+
+    <link rel="stylesheet" href="">
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <h1>Channel messaging demo</h1>
+    <p>My body</p>
+
+    <iframe src="page2.html" width='480' height='320'>
+    </iframe>
+  </body>
+  <script>
+    var channel = new MessageChannel();
+    var para = document.querySelector('p');
+    
+    var ifr = document.querySelector('iframe');
+    var otherWindow = ifr.contentWindow;
+    ifr.addEventListener("load", iframeLoaded, false);
+    
+    function iframeLoaded() {
+      otherWindow.postMessage('Hello from the main page!', '*', [channel.port2]);
+    }
+    channel.port1.onmessage = handleMessage;
+    function handleMessage(e) {
+      	para.innerHTML = e.data;
+    }
+  </script>
+</html>
