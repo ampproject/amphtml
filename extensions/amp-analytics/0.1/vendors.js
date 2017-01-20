@@ -79,7 +79,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
-
   'acquialift': {
     'vars': {
       'decisionApiUrl': 'us-east-1-decisionapi.lift.acquia.com',
