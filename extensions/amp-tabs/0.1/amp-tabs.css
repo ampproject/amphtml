@@ -13,3 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
+/* TODO: put this in core b/c CSS won't load until js loads and we don't want the page to jump */
+
+/* Non-overridable properties */
+amp-tabs {
+  display: block !important;
+}
+
+
+/* tab header container */
+amp-tabs > ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* tab header elements */
+amp-tabs > ul > li {
+  padding-right: 20px;
+  float: left;
+}
+
+/* Hide content by default. */
+amp-tabs > section {
+  display: none !important;
+}
+
+/* Show content when needed. */
+amp-tabs > section[selected] {
+  display: block !important;
+}
