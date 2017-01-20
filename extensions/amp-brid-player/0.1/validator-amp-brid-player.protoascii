@@ -33,6 +33,7 @@ tags: {  # amp-brid-player
     value: "amp-brid-player"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

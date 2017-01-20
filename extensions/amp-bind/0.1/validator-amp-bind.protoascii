@@ -31,6 +31,7 @@ tags: {  # amp-bind
     value: "amp-bind"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -65,6 +66,7 @@ tags: {  # <amp-state> (json)
   tag_name: "SCRIPT"
   spec_name: "amp-bind extension .json script"
   mandatory_parent: "AMP-STATE"
+  attrs: { name: "nonce" }
   attrs: {
     name: "type"
     mandatory: true

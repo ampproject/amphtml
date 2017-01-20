@@ -33,6 +33,7 @@ tags: {  # amp-playbuzz
     value: "amp-playbuzz"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -56,8 +57,8 @@ tags: {  # <amp-playbuzz>
   tag_name: "AMP-PLAYBUZZ"
   also_requires_tag: "amp-playbuzz extension .js script"
   attrs: {
-    name: "src"
-    mandatory: true
+    name: "data-comments"
+    value_regex_casei: "(false|true)"
   }
   attrs: {
     name: "data-item-info"
@@ -68,8 +69,8 @@ tags: {  # <amp-playbuzz>
     value_regex_casei: "(false|true)"
   }
   attrs: {
-    name: "data-comments"
-    value_regex_casei: "(false|true)"
+    name: "src"
+    mandatory: true
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-playbuzz"

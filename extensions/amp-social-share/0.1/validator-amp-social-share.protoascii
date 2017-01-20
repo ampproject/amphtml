@@ -33,6 +33,7 @@ tags: {  # amp-social-share
     value: "amp-social-share"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -55,10 +56,6 @@ tags: {  # <amp-social-share>
   html_format: AMP4ADS
   tag_name: "AMP-SOCIAL-SHARE"
   also_requires_tag: "amp-social-share extension .js script"
-  attrs: {
-    name: "type"
-    mandatory: true
-  }
   attrs: {
     name: "data-share-endpoint"
     value_url: {
@@ -86,6 +83,10 @@ tags: {  # <amp-social-share>
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"

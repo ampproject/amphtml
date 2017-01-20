@@ -37,6 +37,7 @@ tags: {  # amp-ad
     value: "amp-ad"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

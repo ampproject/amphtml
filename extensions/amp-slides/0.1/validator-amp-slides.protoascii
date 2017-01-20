@@ -32,6 +32,7 @@ tags: {  # amp-slides
     value: "amp-slides"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

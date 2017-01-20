@@ -36,6 +36,7 @@ tags: {  # amp-mustache
     value: "amp-mustache"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

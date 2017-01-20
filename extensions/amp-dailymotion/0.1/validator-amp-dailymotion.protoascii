@@ -32,6 +32,7 @@ tags: {  # amp-dailymotion
     value: "amp-dailymotion"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -55,13 +56,34 @@ tags: {  # <amp-dailymotion>
   tag_name: "AMP-DAILYMOTION"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-dailymotion extension .js script"
-  attrs: { name: "data-endscreen-enable" value_regex: "true|false" }
-  attrs: { name: "data-info" value_regex: "true|false" }
-  attrs: { name: "data-mute" value_regex: "true|false" }
-  attrs: { name: "data-sharing-enable" value_regex: "true|false" }
-  attrs: { name: "data-start" value_regex: "[0-9]+" }
-  attrs: { name: "data-ui-highlight" value_regex_casei: "([0-9a-f]{3}){1,2}" }
-  attrs: { name: "data-ui-logo" value_regex: "true|false" }
+  attrs: {
+    name: "data-endscreen-enable"
+    value_regex: "true|false"
+  }
+  attrs: {
+    name: "data-info"
+    value_regex: "true|false"
+  }
+  attrs: {
+    name: "data-mute"
+    value_regex: "true|false"
+  }
+  attrs: {
+    name: "data-sharing-enable"
+    value_regex: "true|false"
+  }
+  attrs: {
+    name: "data-start"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-ui-highlight"
+    value_regex_casei: "([0-9a-f]{3}){1,2}"
+  }
+  attrs: {
+    name: "data-ui-logo"
+    value_regex: "true|false"
+  }
   attrs: {
     name: "data-videoid"
     mandatory: true

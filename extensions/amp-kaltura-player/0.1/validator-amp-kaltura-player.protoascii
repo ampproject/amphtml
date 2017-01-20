@@ -33,6 +33,7 @@ tags: {  # amp-kaltura-player
     value: "amp-kaltura-player"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -58,9 +59,10 @@ tags: {  # <amp-kaltura-player>
   tag_name: "AMP-KALTURA-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-kaltura-player extension .js script"
-
-  attrs: { name: "data-partner" mandatory: true }
-
+  attrs: {
+    name: "data-partner"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-kaltura-player.html"
   amp_layout: {
