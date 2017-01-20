@@ -25,7 +25,7 @@ min_validator_revision_required: 210
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 351
+spec_file_revision: 352
 
 # Validator extensions.
 # =====================
@@ -2279,7 +2279,7 @@ attr_lists: {
   attrs: {
     name: "name"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
-        "__amp_source_origin|"
+        "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
         "__defineSetter__|"
@@ -2288,6 +2288,7 @@ attr_lists: {
         "__noSuchMethod__|"
         "__parent__|"
         "__proto__|"
+        "__AMP_\\S*|"
         "\\$p|"
         "\\$proxy|"
         "acceptCharset|"
@@ -2310,6 +2311,7 @@ attr_lists: {
         "computedRole|"
         "contentEditable|"
         "createShadowRoot|"
+        "enqueAction|"
         "firstChild|"
         "firstElementChild|"
         "getAnimations|"
@@ -2860,6 +2862,7 @@ attr_lists: {
   attrs: {
     name: "id"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+        "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
         "__defineSetter__|"
@@ -2868,6 +2871,7 @@ attr_lists: {
         "__noSuchMethod__|"
         "__parent__|"
         "__proto__|"
+        "__AMP_\\S*|"
         "\\$p|"
         "\\$proxy|"
         "acceptCharset|"
@@ -2891,6 +2895,7 @@ attr_lists: {
         "computedRole|"
         "contentEditable|"
         "createShadowRoot|"
+        "enqueAction|"
         "firstChild|"
         "firstElementChild|"
         "getAnimations|"
