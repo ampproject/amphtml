@@ -22,6 +22,7 @@ import {
   parseUrl,
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
+import {startsWith} from '../string';
 
 
 /**
@@ -419,35 +420,31 @@ function isRetriable(status) {
 /**
  * Returns the response if successful or otherwise throws an error.
  * @param {!FetchResponse} response
- * @return {!Promise<!FetchResponse>}
+ * @return {!FetchResponse|!Promise<!FetchResponse>}
  * @private Visible for testing
  */
 export function assertSuccess(response) {
-  return new Promise((resolve, reject) => {
-    if (response.status < 200 || response.status >= 300) {
-      /** @const {!Error} */
-      const err = user().createError(`HTTP error ${response.status}`);
-      err.response = response;
-      if (isRetriable(response.status)) {
-        err.retriable = true;
-      }
-      const contentType = response.headers.get('Content-Type') || '';
-      if (contentType.split(';')[0] == 'application/json') {
-        response.json().then(json => {
-          err.responseJson = json;
-          reject(err);
-        }, () => {
-          // Ignore a failed json parsing and just throw the error without
-          // setting responseJson.
-          reject(err);
-        });
-      } else {
-        reject(err);
-      }
-    } else {
-      resolve(response);
+  if (response.status < 200 || response.status >= 300) {
+    const err = user().createError(`HTTP error ${response.status}`);
+    err.response = response;
+    if (isRetriable(response.status)) {
+      err.retriable = true;
     }
-  });
+
+    const contentType = response.headers.get('Content-Type') || '';
+    if (!startsWith(contentType, 'application/json;')) {
+      throw err;
+    }
+    return response.json().then(json => {
+      err.responseJson = json;
+      throw err;
+    }, () => {
+      // Ignore a failed json parsing and just throw the error without
+      // setting responseJson.
+      throw err;
+    });
+  }
+  return response;
 }
 
 
