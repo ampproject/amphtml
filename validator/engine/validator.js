@@ -3665,11 +3665,12 @@ class ParsedValidatorRules {
    */
   constructor(htmlFormat) {
     /**
-     * ParsedTagSpecs in id order.
-     * @type {!Object<number, !ParsedTagSpec>}
+     * ParsedTagSpecs in id order, that is, the order in which the tagspecs
+     * appear in ValidatorRules::tags.
+     * @type {!Array<!ParsedTagSpec>}
      * @private
      */
-    this.tagSpecById_ = {};
+    this.tagSpecById_ = [];
     /**
      * ParsedTagSpecs keyed by name
      * @type {!Object<string, !TagSpecDispatch>}

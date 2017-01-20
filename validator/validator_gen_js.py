@@ -605,6 +605,3 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   out.PopIndent()
   out.Line('}')
   out.Line('')
-  out.Line('/**')
-  out.Line(' * @type {!%s}' % rules.DESCRIPTOR.full_name)
-  out.Line(' */')
