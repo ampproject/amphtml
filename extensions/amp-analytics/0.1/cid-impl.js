@@ -306,7 +306,7 @@ function store(win, persistenceConsent, cidString) {
  * @param {string=} opt_data Stringified JSON object {cid, time}.
  * @return {!Promise<string|undefined>}
  */
-function viewerBaseCid(win, opt_data) {
+export function viewerBaseCid(win, opt_data) {
   const viewer = viewerForDoc(win.document);
   return viewer.isTrustedViewer().then(trusted => {
     if (!trusted) {

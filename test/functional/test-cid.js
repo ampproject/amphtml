@@ -18,6 +18,7 @@ import {cidFor} from '../../src/cid';
 import {
   installCidService,
   getProxySourceOrigin,
+  viewerBaseCid,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService, Crypto,}
     from '../../extensions/amp-analytics/0.1/crypto-impl';
@@ -51,6 +52,7 @@ describe('cid', () => {
   let viewerSendMessageStub;
   let whenFirstVisible;
   let trustedViewer;
+  let shouldSendMessageTimeout;
 
   const hasConsent = Promise.resolve();
   const timer = timerFor(window);
@@ -61,6 +63,7 @@ describe('cid', () => {
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
     trustedViewer = true;
+    shouldSendMessageTimeout = false;
     storage = {};
     viewerStorage = null;
     fakeWin = {
@@ -117,6 +120,9 @@ describe('cid', () => {
         (eventType, opt_data) => {
           if (eventType != 'cid') {
             return Promise.reject();
+          }
+          if (shouldSendMessageTimeout) {
+            return timer.promise(15000);
           }
           if (opt_data) {
             viewerStorage = opt_data;
@@ -274,6 +280,17 @@ describe('cid', () => {
       compare('e2', 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)'),
     ]).then(() => {
       expect(viewerSendMessageStub).to.not.be.called;
+    });
+  });
+
+  it('should time out reading from viewer', () => {
+    shouldSendMessageTimeout = true;
+    const promise = viewerBaseCid(fakeWin);
+    return Promise.resolve().then(() => {
+      clock.tick(10001);
+      return promise;
+    }).then(cid => {
+      expect(cid).to.be.undefined;
     });
   });
 
