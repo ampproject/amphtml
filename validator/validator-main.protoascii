@@ -25,7 +25,7 @@ min_validator_revision_required: 210
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 355
+spec_file_revision: 356
 
 # Validator extensions.
 # =====================
@@ -497,6 +497,22 @@ tags: {
     name: "content"
     mandatory: true
     value_casei: "text/javascript"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+# http-equiv origin-trial tag
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=origin-trial"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value_casei: "origin-trial"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
