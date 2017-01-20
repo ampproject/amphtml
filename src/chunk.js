@@ -162,6 +162,9 @@ class Task {
    * @private
    */
   runTask_(idleDeadline) {
+    if (this.state == TaskState.RUN) {
+      return;
+    }
     this.state = TaskState.RUN;
     try {
       this.fn_(idleDeadline);
@@ -237,14 +240,14 @@ class StartupTask extends Task {
     viewerPromise.then(viewer => {
       this.viewer_ = viewer;
 
+      if (this.viewer_.isVisible()) {
+        this.runTask_(/* idleDeadline */ null);
+      }
       this.viewer_.onVisibilityChanged(() => {
         if (this.viewer_.isVisible()) {
           this.runTask_(/* idleDeadline */ null);
         }
       });
-      if (this.viewer_.isVisible()) {
-        this.runTask_(/* idleDeadline */ null);
-      }
     });
   }
 
@@ -351,15 +354,22 @@ class Chunks {
   }
 
   /**
-   * Returns the next task that hasn't been run yet (some tasks may
-   * execute themselves before reaching the front of the queue).
+   * Returns the next task that hasn't been run yet.
+   * If `opt_dequeue` is true, remove the returned task from the queue.
+   * @param {boolean=} opt_dequeue
    * @return {?Task}
    */
-  dequeueTask_() {
-    let t = null;
-    do {
-      t = this.tasks_.dequeue();
-    } while (t && t.state !== TaskState.NOT_RUN);
+  nextTask_(opt_dequeue) {
+    let t = this.tasks_.peek();
+    // Dequeue tasks until we find one that hasn't been run yet.
+    while (t && t.state !== TaskState.NOT_RUN) {
+      this.tasks_.dequeue();
+      t = this.tasks_.peek();
+    }
+    // If `opt_dequeue` is true, remove this task from the queue.
+    if (t && opt_dequeue) {
+      this.tasks_.dequeue();
+    }
     return t;
   }
 
@@ -371,7 +381,7 @@ class Chunks {
    * @private
    */
   execute_(idleDeadline) {
-    const t = this.dequeueTask_();
+    const t = this.nextTask_(/* opt_dequeue */ true);
     if (!t) {
       return false;
     }
@@ -400,7 +410,7 @@ class Chunks {
    * @private
    */
   schedule_() {
-    const nextTask = this.tasks_.peek();
+    const nextTask = this.nextTask_();
     if (!nextTask) {
       return;
     }
