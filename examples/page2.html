@@ -19,7 +19,8 @@
   <script>
   var para = document.querySelector('p');
   onmessage = function(e) {
-  	para.innerHTML = e.data;
+      console.log(e.data, e.ports[0]);
+  	para.innerHTML += e.data + '\n';
   	// e.ports[0] is channel.port2, sent from the main frame
   	e.ports[0].postMessage('Message back from the IFrame');
   }
