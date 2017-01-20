@@ -212,15 +212,24 @@ function requestCsaAds(global, data, afsP, afsA, afshP, afshA) {
  */
 function getAdType(data) {
   if (data['afsPageOptions'] != null && data['afshPageOptions'] == null) {
+    validateData(data, ['afsPageOptions', 'afsAdblockOptions'], []);
     return AD_TYPE.AFS;
   }
   if (data['afsPageOptions'] == null && data['afshPageOptions'] != null) {
+    validateData(data, ['afshPageOptions', 'afshAdblockOptions'], []);
     return AD_TYPE.AFSH;
   }
   if (data['afsPageOptions'] != null && data['afshPageOptions'] != null) {
+    validateData(data, [
+      'afsPageOptions',
+      'afsAdblockOptions',
+      'afshPageOptions',
+      'afshAdblockOptions',
+    ], []);
     return AD_TYPE.AFSH_BACKFILL;
   }
   else {
+    validateData(data, ['afsPageOptions'], []);
     return AD_TYPE.UNSUPPORTED;
   }
 }
