@@ -25,7 +25,7 @@ min_validator_revision_required: 210
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 349
+spec_file_revision: 350
 
 # Validator extensions.
 # =====================
@@ -244,6 +244,10 @@ tags: {
     value_casei: "text/css"
   }
   attrs: { name: "media" }
+  # SRI attributes (https://www.w3.org/TR/SRI/)
+  attrs: { name: "crossorigin" }
+  attrs: { name: "integrity" }
+
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#custom-fonts"
 }
 # itemprop=sameAs is allowed per schema.org, needs not be in head
