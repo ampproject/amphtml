@@ -30,6 +30,7 @@ goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
 goog.require('amp.validator.AttrList');
 goog.require('amp.validator.CssSpec');
+goog.require('amp.validator.ErrorCategory');
 goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
 goog.require('amp.validator.ReferencePoint');
 goog.require('amp.validator.TagSpec');
@@ -473,23 +474,44 @@ class ParsedAttrSpecs {
    * @param {!Array<!amp.validator.AttrList>} attrLists
    */
   constructor(attrLists) {
-    /** @type {!Object<string, !Array<!ParsedAttrSpec>>} */
-    this.attrListsByName = {};
+    /** @private @type {!Object<string, !Array<!ParsedAttrSpec>>} */
+    this.parsedAttrListsByName_ = {};
+
+    /** @private  @type {!Object<string, !amp.validator.AttrList>} */
+    this.attrListsByName_ = {};
+    for (const attrList of attrLists) {
+      this.attrListsByName_[attrList.name] = attrList;
+    }
 
     /** @private @type {!Array<!ParsedAttrSpec>} */
     this.parsedAttrSpecs_ = [];
+  }
 
-    for (const attrList of attrLists) {
-      /** @type {!Array<!ParsedAttrSpec>} */
-      const parsedAttrList = [];
-      for (const attrSpec of attrList.attrs) {
-        const parsed =
-            new ParsedAttrSpec(attrSpec, this.parsedAttrSpecs_.length);
-        this.parsedAttrSpecs_.push(parsed);
-        parsedAttrList.push(parsed);
-      }
-      this.attrListsByName[attrList.name] = parsedAttrList;
+  /**
+   * Constructs ParsedAttrSpecs for the list with the provided |name| or
+   * returns a list from the cache.
+   * @param {!string} name
+   * @return {Array<!ParsedAttrSpec>}
+   * @private
+   */
+  getParsedAttrListByNameOrNull_(name) {
+    if (this.parsedAttrListsByName_.hasOwnProperty(name)) {
+      return this.parsedAttrListsByName_[name];
     }
+    if (!this.attrListsByName_.hasOwnProperty(name)) {
+      return null;
+    }
+    /** @type {!Array<!amp.validator.AttrSpec>} */
+    const attrSpecs = this.attrListsByName_[name].attrs;
+    /** @type {!Array<!ParsedAttrSpec>} */
+    const parsedAttrList = [];
+    for (const attrSpec of attrSpecs) {
+      const parsed = new ParsedAttrSpec(attrSpec, this.parsedAttrSpecs_.length);
+      this.parsedAttrSpecs_.push(parsed);
+      parsedAttrList.push(parsed);
+    }
+    this.parsedAttrListsByName_[name] = parsedAttrList;
+    return parsedAttrList;
   }
 
   /**
@@ -513,8 +535,9 @@ class ParsedAttrSpecs {
     const namesSeen = {};
     // (1) layout attrs.
     if (tagSpec.ampLayout !== null && tagSpec.tagName !== '$REFERENCE_POINT') {
-      const layoutSpecs = this.attrListsByName['$AMP_LAYOUT_ATTRS'];
-      if (layoutSpecs !== undefined) {
+      const layoutSpecs =
+          this.getParsedAttrListByNameOrNull_('$AMP_LAYOUT_ATTRS');
+      if (layoutSpecs !== null) {
         for (const spec of layoutSpecs) {
           const name = spec.getSpec().name;
           if (!namesSeen.hasOwnProperty(name)) {
@@ -536,8 +559,8 @@ class ParsedAttrSpecs {
     }
     // (3) attributes specified via reference to an attr_list.
     for (const tagSpecKey of tagSpec.attrLists) {
-      const specs = this.attrListsByName[tagSpecKey];
-      goog.asserts.assert(specs !== undefined);
+      const specs = this.getParsedAttrListByNameOrNull_(tagSpecKey);
+      goog.asserts.assert(specs !== null);
       for (const spec of specs) {
         const name = spec.getSpec().name;
         if (!namesSeen.hasOwnProperty(name)) {
@@ -548,8 +571,8 @@ class ParsedAttrSpecs {
     }
     // (4) attributes specified in the global_attr list.
     if (tagSpec.tagName !== '$REFERENCE_POINT') {
-      const globalSpecs = this.attrListsByName['$GLOBAL_ATTRS'];
-      if (globalSpecs === undefined) {
+      const globalSpecs = this.getParsedAttrListByNameOrNull_('$GLOBAL_ATTRS');
+      if (globalSpecs === null) {
         return attrs;
       }
       for (const spec of globalSpecs) {
@@ -2643,7 +2666,7 @@ amp.validator.CssLength = class {
       this.unit = match[2] || 'px';
     }
   }
-}
+};
 
 /**
  * Calculates the effective width from the input layout and width.
@@ -3200,7 +3223,8 @@ function validateAttributes(
     }
   }
   const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
-  let mandatoryAttrsSeen = [];
+  /** @type {!Array<boolean>} */
+  let mandatoryAttrsSeen = [];  // This is a set of attr ids.
   /** @type {!Object<string, ?>} */
   const mandatoryOneofsSeen = {};
   let parsedTriggerSpecs = [];
@@ -3296,7 +3320,7 @@ function validateAttributes(
       }
     }
     if (parsedAttrSpec.getSpec().mandatory) {
-      mandatoryAttrsSeen.push(parsedAttrSpec.getId());
+      mandatoryAttrsSeen[parsedAttrSpec.getId()] = true;
     }
     if (parsedSpec.getSpec().tagName === 'BASE' && attrName === 'href' &&
         context.hasSeenUrl()) {
@@ -3386,22 +3410,21 @@ function validateAttributes(
       }
     }
   }
-  mandatoryAttrsSeen = sortAndUniquify(mandatoryAttrsSeen);
-  const diffs =
-      subtractDiff(parsedTagSpec.getMandatoryAttrIds(), mandatoryAttrsSeen);
-  if (amp.validator.GENERATE_DETAILED_ERRORS) {
-    for (const diff of diffs) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-          context.getDocLocator(),
-          /* params */
-          [parsedAttrSpecs.getById(diff).getSpec().name, getTagSpecName(spec)],
-          spec.specUrl, result);
-    }
-  } else {
-    if (diffs.length > 0) {
-      result.status = amp.validator.ValidationResult.Status.FAIL;
+  for (const mandatory of parsedTagSpec.getMandatoryAttrIds()) {
+    if (!mandatoryAttrsSeen.hasOwnProperty(mandatory)) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        const parsedAttrSpec = parsedAttrSpecs.getById(mandatory);
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+            context.getDocLocator(),
+            /* params */
+            [parsedAttrSpec.getSpec().name, getTagSpecName(spec)], spec.specUrl,
+            result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+        break;
+      }
     }
   }
 }
@@ -4345,6 +4368,7 @@ amp.validator.ValidationHandler =
  * Convenience function which informs caller if given ValidationError is
  * severity warning.
  * @param {!amp.validator.ValidationError} error
+ * @return {boolean}
  * @export
  */
 amp.validator.isSeverityWarning = function(error) {
@@ -4380,7 +4404,6 @@ if (amp.validator.GENERATE_DETAILED_ERRORS) {
    * a convenient way to capture what's being emitted to the terminal
    * in a unittest. Pass the optional parameter to the constructor
    * to observe the calls that would have gone to window.console otherwise.
-   * @constructor
    */
   amp.validator.Terminal = class {
     /**
