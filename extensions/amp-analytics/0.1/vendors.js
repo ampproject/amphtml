@@ -90,7 +90,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'base': 'https://${decisionApiUrl}/capture?account_id=${accountId}&site_id=${siteId}',
       'basicCapture': '${base}' +
         '&ident=${clientId(tc_ptid)}' +
-        '&identsrc=amp' +
+        '&identsrc=tracking' +
         '&es=Amp' +
         '&url=${canonicalUrl}' +
         '&rurl=${documentReferrer}' +
