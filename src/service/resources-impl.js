@@ -248,6 +248,14 @@ export class Resources {
   }
 
   /**
+   * @return {!Promise}
+   */
+  whenRenderStarted() {
+    // QQQ
+    return null;
+  }
+
+  /**
    * Returns a subset of resources which is identified as being in the current
    * viewport.
    * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.

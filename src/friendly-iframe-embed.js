@@ -332,6 +332,14 @@ export class FriendlyIframeEmbed {
   }
 
   /**
+   * @return {!Promise}
+   */
+  whenRenderStarted() {
+    // QQQ
+    return null;
+  }
+
+  /**
    * Returns promise that will resolve when the child window has fully been
    * loaded.
    * @return {!Promise}

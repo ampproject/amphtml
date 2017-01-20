@@ -669,6 +669,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {?Promise}
+     */
+    whenRenderStarted() {
+      // QQQ
+      return null;
+    }
+
+    /**
      * Requests or requires the element to be built. The build is done by
      * invoking {@link BaseElement.buildCallback} method.
      *
