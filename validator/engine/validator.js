@@ -1202,8 +1202,8 @@ class ReferencePointMatcher {
    * @param {!amp.validator.ValidationResult} result
    */
   exitParentTag(context, result) {
-    /** @type {!Object<number, number>} */
-    const referencePointByCount = {};
+    /** @type {!Array<number>} */
+    const referencePointByCount = [];
     for (const r of this.referencePointsMatched_) {
       referencePointByCount[r] = referencePointByCount.hasOwnProperty(r) ?
           (referencePointByCount[r] + 1) :
@@ -1883,10 +1883,10 @@ class Context {
 
     /**
      * Maps from the tagspec id to the tagspec id.
-     * @type {!Object<number, ?>}
+     * @type {!Array<?>}
      * @private
      */
-    this.tagspecsValidated_ = {};
+    this.tagspecsValidated_ = [];
 
     /**
      * Set of conditions that we've satisfied.
@@ -1965,7 +1965,7 @@ class Context {
   }
 
   /**
-   * @return {!Object<number, ?>}
+   * @return {!Object<string, ?>}
    */
   conditionsSatisfied() {
     return this.conditionsSatisfied_;
@@ -2013,7 +2013,7 @@ class Context {
   }
 
   /**
-   * @return {!Object<number, ?>}
+   * @return {!Array<?>}
    */
   getTagspecsValidated() {
     return this.tagspecsValidated_;
@@ -2716,7 +2716,7 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  * - Unique tags
  * - Tags (identified by their TagSpecName() that are required by other tags.
  * @param {!amp.validator.TagSpec} tag
- * @param {!Object<number, boolean>} tagSpecIdsToTrack
+ * @param {!Array<boolean>} tagSpecIdsToTrack
  * @return {boolean}
  */
 function shouldRecordTagspecValidated(tag, tagSpecIdsToTrack) {
@@ -3204,11 +3204,12 @@ function validateAttributes(
   /** @type {!Object<string, ?>} */
   const mandatoryOneofsSeen = {};
   let parsedTriggerSpecs = [];
-  /** If a tag has implicit attributes, we then add these attributes as
+  /**
+   * If a tag has implicit attributes, we then add these attributes as
    * validated. E.g. tag 'a' has implicit attributes 'role' and 'tabindex'.
-   * @type {!Object<number, ?>}
+   * @type {!Array<?>}
    */
-  const attrspecsValidated = {};
+  const attrspecsValidated = [];
   for (const implicit of parsedTagSpec.getImplicitAttrspecs()) {
     attrspecsValidated[implicit] = 0;
   }
@@ -3696,9 +3697,8 @@ class ParsedValidatorRules {
      */
     this.parsedAttrSpecs_ = new ParsedAttrSpecs(this.rules_.attrLists);
 
-    /** @type {!Object<number, boolean>} */
-    const tagSpecIdsToTrack = {};
-    const extensionUnusedUnlessTagPresent = {};
+    /** @type {!Array<boolean>} */
+    const tagSpecIdsToTrack = [];
     for (const tag of this.rules_.tags) {
       const tagSpecName = getTagSpecName(tag);
       if (tag.alsoRequiresTag.length > 0) {
