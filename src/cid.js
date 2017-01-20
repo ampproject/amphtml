@@ -19,26 +19,27 @@
  */
 
 import {
-  getElementService,
-  getElementServiceIfAvailable,
+  getElementServiceForDoc,
+  getElementServiceIfAvailableForDoc,
 } from './element-service';
 
+
 /**
- * @param {!Window} window
- * @return {!Promise<!Cid>}
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!Promise<!../extensions/amp-analytics/0.1/cid-impl.Cid>}
  */
-export function cidFor(window) {
-  return /** @type {!Promise<!Cid>} */ (
-      getElementService(window, 'cid', 'amp-analytics'));
+export function cidForDoc(nodeOrDoc) {
+  return /** @type {!Promise<!../extensions/amp-analytics/0.1/cid-impl.Cid>} */ ( // eslint-disable-line max-len
+      getElementServiceForDoc(nodeOrDoc, 'cid', 'amp-analytics'));
 };
 
 /**
  * Returns a promise for the CID service or a promise for null if the service
  * is not available on the current page.
- * @param {!Window} window
- * @return {!Promise<?Cid>}
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!Promise<?../extensions/amp-analytics/0.1/cid-impl.Cid>}
  */
-export function cidForOrNull(window) {
-  return /** @type {!Promise<?Cid>} */ (
-      getElementServiceIfAvailable(window, 'cid', 'amp-analytics'));
+export function cidForDocOrNull(nodeOrDoc) {
+  return /** @type {!Promise<?../extensions/amp-analytics/0.1/cid-impl.Cid>} */ ( // eslint-disable-line max-len
+      getElementServiceIfAvailableForDoc(nodeOrDoc, 'cid', 'amp-analytics'));
 };

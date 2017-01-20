@@ -31,7 +31,7 @@ import {
 } from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';
-import {installCidService,} from
+import {installCidServiceForDoc,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import * as sinon from 'sinon';
@@ -72,9 +72,6 @@ describe('amp-analytics', function() {
       iframe.doc.title = 'Test Title';
       markElementScheduledForTesting(iframe.win, 'amp-analytics');
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
-      installCidService(iframe.win);
-      uidService = installUserNotificationManager(iframe.win);
-
       resetServiceForTesting(iframe.win, 'xhr');
       getService(iframe.win, 'xhr', () => {
         return {fetchJson: (url, init) => {
@@ -89,6 +86,7 @@ describe('amp-analytics', function() {
       });
 
 
+
       resetServiceForTesting(iframe.win, 'crypto');
       crypto = new Crypto(iframe.win);
       getService(iframe.win, 'crypto', () => crypto);
@@ -98,6 +96,8 @@ describe('amp-analytics', function() {
       iframe.win.document.head.appendChild(link);
       windowApi = iframe.win;
       ampdoc = new AmpDocSingle(windowApi);
+      installCidServiceForDoc(ampdoc);
+      uidService = installUserNotificationManager(iframe.win);
 
       ins = fromClassForDoc(
           ampdoc, 'amp-analytics-instrumentation', InstrumentationService);
@@ -197,8 +197,7 @@ describe('amp-analytics', function() {
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             analytics.createdCallback();
             analytics.buildCallback();
-            const urlReplacements = urlReplacementsForDoc(
-                analytics.win.document);
+            const urlReplacements = urlReplacementsForDoc(analytics.element);
             sandbox.stub(urlReplacements.getVariableSource(), 'get',
               function(name) {
                 expect(this.replacements_).to.have.property(name);
@@ -607,7 +606,7 @@ describe('amp-analytics', function() {
           'qp_foo': '${queryParam(foo)}',
         },
       }]});
-    const urlReplacements = urlReplacementsForDoc(analytics.win.document);
+    const urlReplacements = urlReplacementsForDoc(analytics.element);
     sandbox.stub(urlReplacements.getVariableSource(), 'get',
       function(name) {
         return {sync: param => {
@@ -866,7 +865,7 @@ describe('amp-analytics', function() {
       config.triggers.sampled.sampleSpec.sampleOn = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.win.document);
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));
