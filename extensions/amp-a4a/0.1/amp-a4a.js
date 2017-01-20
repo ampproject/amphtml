@@ -61,6 +61,8 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {rethrowAsync} from '../../../src/log';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
+import {generateSentinel} from '../../../src/3p-frame';
+import {getContextMetadata} from '../../../src/attributes';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -1126,6 +1128,9 @@ export class AmpA4A extends AMP.BaseElement {
           // modified url.
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
+    const sentinel = generateSentinel(window);
+    const metadata = getContextMetadata(window, iframe, sentinel);
+    iframe.setAttribute('name', encodeURIComponent(JSON.stringify(metadata)));
     return this.iframeRenderHelper_(iframe);
   }
 
