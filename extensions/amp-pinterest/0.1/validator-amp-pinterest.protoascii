@@ -33,6 +33,7 @@ tags: {  # amp-pinterest
     value: "amp-pinterest"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

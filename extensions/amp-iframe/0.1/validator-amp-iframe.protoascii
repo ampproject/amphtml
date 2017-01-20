@@ -32,6 +32,7 @@ tags: {  # amp-iframe
     value: "amp-iframe"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

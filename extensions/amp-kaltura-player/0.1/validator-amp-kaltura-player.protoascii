@@ -33,6 +33,7 @@ tags: {  # amp-kaltura-player
     value: "amp-kaltura-player"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

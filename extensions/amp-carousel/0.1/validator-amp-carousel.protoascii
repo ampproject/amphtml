@@ -33,6 +33,7 @@ tags: {  # amp-carousel
     value: "amp-carousel"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

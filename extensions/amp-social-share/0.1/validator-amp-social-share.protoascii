@@ -33,6 +33,7 @@ tags: {  # amp-social-share
     value: "amp-social-share"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

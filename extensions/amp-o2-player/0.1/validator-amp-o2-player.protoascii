@@ -33,6 +33,7 @@ tags: {  # amp-o2-player
     value: "amp-o2-player"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

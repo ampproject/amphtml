@@ -41,6 +41,7 @@ tags: {  # amp-analytics
     value: "amp-analytics"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -64,6 +65,7 @@ tags: {  # amp-analytics (json)
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .json script"
   mandatory_parent: "AMP-ANALYTICS"
+  attrs: { name: "nonce" }
   attrs: {
     name: "type"
     mandatory: true
