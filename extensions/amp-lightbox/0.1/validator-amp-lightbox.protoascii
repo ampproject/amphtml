@@ -33,6 +33,7 @@ tags: {  # amp-lightbox
     value: "amp-lightbox"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

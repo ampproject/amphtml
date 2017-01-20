@@ -31,6 +31,7 @@ tags: {  # <script custom-element="amp-sticky-ad">
     value: "amp-sticky-ad"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

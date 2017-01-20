@@ -33,6 +33,7 @@ tags: {  # amp-vine
     value: "amp-vine"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -57,7 +58,10 @@ tags: {  # <amp-vine>
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-vine extension .js script"
   # data-* is generally allowed, but it's not generally mandatory.
-  attrs: { name: "data-vineid" mandatory: true }
+  attrs: {
+    name: "data-vineid"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vine.html"
   amp_layout: {

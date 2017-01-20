@@ -356,6 +356,9 @@ def PrintClassFor(descriptor, msg_desc, out):
         out.Line('/**%s @type {%s} */' % (export_or_empty, type_name))
         out.Line('this.%s = %s;' % (UnderscoreToCamelCase(field.name),
                                     assigned_value))
+    if msg_desc.full_name == 'amp.validator.ValidatorRules':
+      out.Line('/** @type {Array<!string>} */')
+      out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
     out.PopIndent()
     out.Line('};')
   out.Line('')
@@ -538,6 +541,25 @@ def PrintObject(descriptor, msg, out):
   return this_id
 
 
+def DispatchKeyForTagSpecOrNone(tag_spec):
+  """For a provided tag_spec, generates its dispatch key.
+
+  Args:
+    tag_spec: an instance of type validator_pb2.TagSpec.
+
+  Returns:
+    a string indicating the dispatch key, or None.
+  """
+  for attr in tag_spec.attrs:
+    if attr.dispatch_key:
+      mandatory_parent = tag_spec.mandatory_parent or ''
+      attr_name = attr.name
+      attr_value = attr.value_casei or attr.value.lower()
+      assert attr_value is not None
+      return '%s\\0%s\\0%s' % (attr_name, attr_value, mandatory_parent)
+  return None
+
+
 def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
                                  descriptor, out):
   """Main method for the code generator.
@@ -601,10 +623,14 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   out.Line('amp.validator.createRules = function() {')
   out.PushIndent(2)
   PrintObject(descriptor, rules, out)
+  for tag_spec in rules.tags:
+    tag_spec_id = out.TagIdForTagName(TagSpecName(tag_spec))
+    dispatch_key = DispatchKeyForTagSpecOrNone(tag_spec)
+    if dispatch_key:
+      out.Line('obj_0.dispatchKeyByTagSpecId[%d]="%s"' % (
+          tag_spec_id, dispatch_key))
+
   out.Line('return obj_0;')
   out.PopIndent()
   out.Line('}')
   out.Line('')
-  out.Line('/**')
-  out.Line(' * @type {!%s}' % rules.DESCRIPTOR.full_name)
-  out.Line(' */')

@@ -32,6 +32,7 @@ tags: {  # amp-live-list
     value: "amp-live-list"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -55,19 +56,22 @@ tags: {  # <amp-live-list>
   tag_name: "AMP-LIVE-LIST"
   also_requires_tag: "amp-live-list extension .js script"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-live-list.html"
-  attrs: { name: "id" mandatory: true }
-  attrs: {
-    name: "data-poll-interval"
-    value_regex: "\\d{5,}"
-  }
   attrs: {
     name: "data-max-items-per-page"
     mandatory: true
     value_regex: "\\d+"
   }
   attrs: {
+    name: "data-poll-interval"
+    value_regex: "\\d{5,}"
+  }
+  attrs: {
     name: "disabled"
     value: ""
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
   }
   reference_points: {
     tag_spec_name: "AMP-LIVE-LIST [update]"

@@ -32,6 +32,7 @@ tags: {  # amp-sidebar
     value: "amp-sidebar"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-sidebar-(latest|0\\.1).js"

@@ -33,6 +33,7 @@ tags: {  # amp-list
     value: "amp-list"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

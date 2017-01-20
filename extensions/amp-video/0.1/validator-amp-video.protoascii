@@ -33,6 +33,7 @@ tags: {  # amp-video
      value: "amp-video"
      dispatch_key: true
    }
+   attrs: { name: "nonce" }
    attrs: {
      name: "src"
      mandatory: true
@@ -58,13 +59,28 @@ tags: {  # <amp-video>
   also_requires_tag_warning: "amp-video extension .js script"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "autoplay" value: "" }
-  attrs: { name: "controls" value: "" }
-  attrs: { name: "loop"     value: "" }
-  attrs: { name: "muted"    value: "" }
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
+    name: "controls"
+    value: ""
+  }
+  attrs: {
+    name: "loop"
+    value: ""
+  }
+  attrs: {
+    name: "muted"
+    value: ""
+  }
   attrs: { name: "placeholder" }
   attrs: { name: "poster" }
-  attrs: { name: "preload" value_regex: "(none|metadata|auto|)" }
+  attrs: {
+    name: "preload"
+    value_regex: "(none|metadata|auto|)"
+  }
   attrs: {
     name: "src"
     value_url: {

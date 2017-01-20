@@ -32,6 +32,7 @@ tags: {  # <script custom-element="amp-fx-flying-carpet">
     value: "amp-fx-flying-carpet"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
