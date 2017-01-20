@@ -18,6 +18,7 @@ import {cidFor} from '../../src/cid';
 import {
   installCidService,
   getProxySourceOrigin,
+  viewerBaseCid,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService, Crypto,}
     from '../../extensions/amp-analytics/0.1/crypto-impl';
@@ -43,12 +44,15 @@ describe('cid', () => {
   let clock;
   let fakeWin;
   let ampdoc;
+  let viewer;
   let storage;
   let viewerStorage;
   let cid;
   let crypto;
-  let viewerBaseCidStub;
+  let viewerSendMessageStub;
   let whenFirstVisible;
+  let trustedViewer;
+  let shouldSendMessageTimeout;
 
   const hasConsent = Promise.resolve();
   const timer = timerFor(window);
@@ -58,6 +62,8 @@ describe('cid', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
+    trustedViewer = true;
+    shouldSendMessageTimeout = false;
     storage = {};
     viewerStorage = null;
     fakeWin = {
@@ -104,16 +110,25 @@ describe('cid', () => {
       return Promise.resolve();
     });
 
-    const viewer = installViewerServiceForDoc(ampdoc);
+    viewer = installViewerServiceForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
-    viewerBaseCidStub = sandbox.stub(viewer, 'baseCid', function(opt_data) {
-      if (opt_data) {
-        viewerStorage = opt_data;
-      }
-      return Promise.resolve(viewerStorage || undefined);
-    });
+    sandbox.stub(viewer, 'isTrustedViewer',
+        () => Promise.resolve(trustedViewer));
+    viewerSendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
+        (eventType, opt_data) => {
+          if (eventType != 'cid') {
+            return Promise.reject();
+          }
+          if (shouldSendMessageTimeout) {
+            return timer.promise(15000);
+          }
+          if (opt_data) {
+            viewerStorage = opt_data;
+          }
+          return Promise.resolve(viewerStorage || undefined);
+        });
 
     return Promise
         .all([installCidService(fakeWin), installCryptoService(fakeWin)])
@@ -226,15 +241,56 @@ describe('cid', () => {
       compare('e1', `sha384(${expectedBaseCid}http://www.origin.come1)`),
       compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`),
     ]).then(() => {
-      expect(viewerBaseCidStub).to.be.calledOnce;
-      expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
+      expect(viewerSendMessageStub).to.be.calledOnce;
+      expect(viewerSendMessageStub).to.be.calledWith('cid');
 
       // Ensure it's called only once since we cache it in memory.
       return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
     }).then(() => {
-      expect(viewerBaseCidStub).to.be.calledOnce;
-      expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
+      expect(viewerSendMessageStub).to.be.calledOnce;
       return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
+    });
+  });
+
+  it('should read from viewer storage if embedded and convert cid to ' +
+      'new format', () => {
+    fakeWin.parent = {};
+    const expectedBaseCid = 'from-viewer';
+    // baseCid returned by legacy API
+    viewerStorage = expectedBaseCid;
+    return Promise.all([
+      compare('e1', `sha384(${expectedBaseCid}http://www.origin.come1)`),
+      compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`),
+    ]).then(() => {
+      expect(viewerSendMessageStub).to.be.calledOnce;
+      expect(viewerSendMessageStub).to.be.calledWith('cid');
+    });
+  });
+
+  it('should not read from untrusted viewer', () => {
+    fakeWin.parent = {};
+    trustedViewer = false;
+    const viewerBaseCid = 'from-viewer';
+    viewerStorage = JSON.stringify({
+      time: 0,
+      cid: viewerBaseCid,
+    });
+    return Promise.all([
+      compare('e1', 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come1)'),
+      compare('e2', 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)'),
+    ]).then(() => {
+      expect(viewerSendMessageStub).to.not.be.called;
+    });
+  });
+
+  it('should time out reading from viewer', () => {
+    shouldSendMessageTimeout = true;
+    const promise = viewerBaseCid(fakeWin);
+    return Promise.resolve().then(() => {
+      clock.tick(10001);
+      return promise;
+    }).then(cid => {
+      expect(cid).to.be.undefined;
     });
   });
 
@@ -243,7 +299,7 @@ describe('cid', () => {
     const expectedBaseCid = 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])';
     return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
         .then(() => {
-          expect(viewerBaseCidStub).to.be.calledWith(JSON.stringify({
+          expect(viewerSendMessageStub).to.be.calledWith('cid', JSON.stringify({
             time: 0,
             cid: expectedBaseCid,
           }));
@@ -252,7 +308,7 @@ describe('cid', () => {
           return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
         })
         .then(() => {
-          expect(viewerBaseCidStub).to.be.calledWith(sinon.match.string);
+          expect(viewerSendMessageStub).to.be.calledWith(sinon.match.string);
           return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
         });
   });
