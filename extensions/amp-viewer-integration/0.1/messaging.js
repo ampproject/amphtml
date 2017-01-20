@@ -71,7 +71,7 @@ export class Messaging {
     /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
     this.requestProcessor_ = null;
     /** @const {boolean} is a Native app. */
-    this.isWebView = !this.target_ && this.targetOrigin_ == '';
+    this.isWebView = !this.targetOrigin_;
     // what type is this??
     this.webViewPort_ = null;
 
@@ -89,6 +89,8 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
+    console.log('message came in from the Viewer!', event.ports, event.data, event);
+
     if (this.isWebView && !this.webViewPort_) {
       this.webViewPort_ = event.ports[0];
     }

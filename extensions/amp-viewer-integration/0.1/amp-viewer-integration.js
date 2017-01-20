@@ -29,6 +29,11 @@ const RequestNames = {
   UNLOADED: 'unloaded',
 };
 
+// onmessage = function(e) {
+//   console.log('message from the viewer!', e.data, e);
+//       // window.addEventListener('popstate', this.onPopState_.bind(this));
+// };
+
 /**
  * @fileoverview This is the communication protocol between AMP and the viewer.
  * This should be included in an AMP html file to communicate with the viewer.
@@ -56,20 +61,13 @@ export class AmpViewerIntegration {
     dev().fine(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
-    if (!this.unconfirmedViewerOrigin_) {
-      dev().fine(TAG, 'Viewer origin not specified.');
-      return null;
-    }
-
-    dev().fine(TAG, 'listening for messages', this.unconfirmedViewerOrigin_);
+    this.unconfirmedViewerOrigin_ = '';
     const messaging = new Messaging(
       this.win, this.win.parent, this.unconfirmedViewerOrigin_);
-
-    if (messaging.isWebView) {
+    if (!this.unconfirmedViewerOrigin_) {
       this.setup(messaging, viewer);
       return Promise.resolve();
     }
-
     dev().fine(TAG, 'Send a handshake request');
     return this.openChannel(messaging)
         .then(() => {
@@ -84,8 +82,10 @@ export class AmpViewerIntegration {
         type, /** @type {!JSONType} */ (payload), awaitResponse);
     });
 
-    viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
-      dev().assertString(this.unconfirmedViewerOrigin_));
+    if (!!this.unconfirmedViewerOrigin_) {
+      viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
+        dev().assertString(this.unconfirmedViewerOrigin_));
+    }
 
     listenOnce(
       this.win, 'unload', this.handleUnload_.bind(this, messaging));
