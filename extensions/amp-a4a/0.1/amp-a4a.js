@@ -1179,6 +1179,12 @@ export class AmpA4A extends AMP.BaseElement {
             'src': srcPath,
             'name': nameData,
           }, SHARED_IFRAME_PROPERTIES));
+      if (method == XORIGIN_MODE.NAMEFRAME){
+        const sentinel = generateSentinel(window);
+        const metadata = getContextMetadata(window, iframe, sentinel);
+        let name = JSON.stringify({creative, _context: metadata._context});
+        iframe.setAttribute('name', name);
+      }
       return this.iframeRenderHelper_(iframe);
     });
   }
