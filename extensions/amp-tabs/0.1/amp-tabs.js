@@ -41,7 +41,6 @@ export class AmpTabs extends AMP.BaseElement {
     let selectedTabHeaderIndex = -1;
     let selectedTabContentIndex = -1;
     this.sections_ = this.getRealChildren();
-    console.log(this);
     this.sections_.forEach((section, index) => {
       /** The first section should be the tab headers */
       if (!index) {
