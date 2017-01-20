@@ -88,6 +88,8 @@ export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 /** @type {string} */
 const TAG = 'AMP-A4A';
 
+const NO_CONTENT_RESPONSE = 'No content in response.';
+
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
@@ -115,7 +117,8 @@ export let AdResponseDef;
 /** @typedef {{
       minifiedCreative: string,
       customElementExtensions: Array<string>,
-      customStylesheets: Array<!{href: string}>
+      customStylesheets: Array<!{href: string}>,
+      collapse: boolean
     }} */
 let CreativeMetaDataDef;
 
@@ -463,6 +466,13 @@ export class AmpA4A extends AMP.BaseElement {
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
             return null;
           }
+          // If the response has response code 204, collapse it.
+          if (fetchResponse.status == 200) {
+            // Necessary, as uiHandler will ignore the request to display no
+            // content otherwise.
+            this.uiHandler.forceNoContentUI();
+            return Promise.reject(NO_CONTENT_RESPONSE);
+          }
           this.protectedEmitLifecycleEvent_('adRequestEnd');
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
@@ -575,9 +585,19 @@ export class AmpA4A extends AMP.BaseElement {
           const extensions = extensionsFor(this.win);
           creativeMetaDataDef.customElementExtensions.forEach(
             extensionId => extensions.loadExtension(extensionId));
+          // Make sure we don't collapse this slot.
+          creativeMetaDataDef.collapse = false;
           return creativeMetaDataDef;
         })
         .catch(error => {
+          if (error == NO_CONTENT_RESPONSE) {
+            return {
+              minifiedCreative: null,
+              customElementExtensions: null,
+              customStylesheets: null,
+              collapse: true,
+            };
+          }
           // If error in chain occurs, report it and return null so that
           // layoutCallback can render via cross domain iframe assuming ad
           // url or creative exist.
@@ -714,7 +734,11 @@ export class AmpA4A extends AMP.BaseElement {
         layoutAdPromiseDelay: Math.round(delta),
         isAmpCreative: !!creativeMetaData,
       });
-      if (creativeMetaData) {
+      if (!creativeMetaData) {
+        // Non-AMP creative case, will verify ad url existence.
+        return this.renderNonAmpCreative_();
+      }
+      if (!creativeMetaData.collapse) {
         // Must be an AMP creative.
         return this.renderAmpCreative_(creativeMetaData).catch(err => {
           // Failed to render via AMP creative path so fallback to non-AMP
@@ -725,8 +749,6 @@ export class AmpA4A extends AMP.BaseElement {
           return this.renderNonAmpCreative_();
         });
       }
-      // Non-AMP creative case, will verify ad url existence.
-      return this.renderNonAmpCreative_();
     }).catch(error => this.promiseErrorHandler_(error));
   }
 
@@ -1216,6 +1238,7 @@ export class AmpA4A extends AMP.BaseElement {
         creative.slice(0, ampRuntimeUtf16CharOffsets[0]) +
         creative.slice(ampRuntimeUtf16CharOffsets[1], metadataStart) +
         creative.slice(metadataEnd + '</script>'.length);
+      metaData.collapse = false;
       return metaData;
     } catch (err) {
       dev().warn(
