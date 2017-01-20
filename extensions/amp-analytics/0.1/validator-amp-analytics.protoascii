@@ -41,6 +41,7 @@ tags: {  # amp-analytics
     value: "amp-analytics"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -64,6 +65,7 @@ tags: {  # amp-analytics (json)
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .json script"
   mandatory_parent: "AMP-ANALYTICS"
+  attrs: { name: "nonce" }
   attrs: {
     name: "type"
     mandatory: true
@@ -87,15 +89,16 @@ tags: {  # amp-ad-metadata (json)
   spec_name: "amp-ad-metadata .json script"
   mandatory_parent: "BODY"
   attrs: {
-    name: "type"
-    mandatory: true
-    value_casei: "application/json"
-  }
-  attrs: {
     name: "amp-ad-metadata"
     mandatory: true
     value: ""
     dispatch_key: true
+  }
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
   }
   cdata: {
     blacklisted_cdata_regex: {

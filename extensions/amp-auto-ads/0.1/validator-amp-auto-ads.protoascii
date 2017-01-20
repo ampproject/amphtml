@@ -31,6 +31,7 @@ tags: {  # amp-auto-ads
     value: "amp-auto-ads"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -54,8 +55,10 @@ tags: {  # <amp-auto-ads>
   disallowed_ancestor: "AMP-AUTO-ADS"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-auto-ads extension .js script"
-  attrs: { name: "type" mandatory: true }
+  attrs: {
+    name: "type"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
-
   spec_url: "https://github.com/ampproject/amphtml/issues/6196"
 }

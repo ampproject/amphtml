@@ -25,7 +25,7 @@ min_validator_revision_required: 210
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 349
+spec_file_revision: 356
 
 # Validator extensions.
 # =====================
@@ -222,6 +222,7 @@ tags: {
   tag_name: "LINK"
   spec_name: "link rel=stylesheet for fonts"
   mandatory_parent: "HEAD"
+  attrs: { name: "async" }
   attrs: {
     name: "href"
     mandatory: true
@@ -244,6 +245,10 @@ tags: {
     value_casei: "text/css"
   }
   attrs: { name: "media" }
+  # SRI attributes (https://www.w3.org/TR/SRI/)
+  attrs: { name: "crossorigin" }
+  attrs: { name: "integrity" }
+
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#custom-fonts"
 }
 # itemprop=sameAs is allowed per schema.org, needs not be in head
@@ -495,6 +500,22 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
+# http-equiv origin-trial tag
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=origin-trial"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value_casei: "origin-trial"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
 # http-equiv resource-type
 # http://www.metatags.info/meta_http_equiv_resource_type
 tags: {
@@ -531,6 +552,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     # attribute and thus can't have a dispatch_key.
     # dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
     name: "type"
     value_casei: "text/css"
@@ -620,6 +642,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
     # attribute and thus can't have a dispatch_key.
     # dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
     name: "type"
     value_casei: "text/css"
@@ -703,6 +726,7 @@ tags: {
   mandatory_parent: "HEAD"
   deprecation: "head > style[amp-boilerplate]"
   deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+  attrs: { name: "nonce" }
   cdata: {
     cdata_regex: "body ?{opacity: ?0}"
   }
@@ -717,6 +741,7 @@ tags: {
   mandatory_parent: "NOSCRIPT"
   deprecation: "noscript > style[amp-boilerplate]"
   deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+  attrs: { name: "nonce" }
   cdata {
     cdata_regex: "body ?{opacity: ?1}"
   }
@@ -736,6 +761,7 @@ tags: {
     value: ""
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
@@ -755,6 +781,7 @@ tags: {
     value: ""
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   cdata: {
     # This regex allows arbitrary whitespace around the body statement, but
     # not inside it. This is a compromise to keep things simple, but allow
@@ -777,6 +804,7 @@ tags: {
     value: ""
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   cdata {
     cdata_regex: "\\s*body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\\s*"
   }
@@ -2275,7 +2303,7 @@ attr_lists: {
   attrs: {
     name: "name"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
-        "__amp_source_origin|"
+        "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
         "__defineSetter__|"
@@ -2284,6 +2312,7 @@ attr_lists: {
         "__noSuchMethod__|"
         "__parent__|"
         "__proto__|"
+        "__AMP_\\S*|"
         "\\$p|"
         "\\$proxy|"
         "acceptCharset|"
@@ -2306,6 +2335,7 @@ attr_lists: {
         "computedRole|"
         "contentEditable|"
         "createShadowRoot|"
+        "enqueAction|"
         "firstChild|"
         "firstElementChild|"
         "getAnimations|"
@@ -2591,6 +2621,7 @@ tags: {
     mandatory: true
     value: ""
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -2621,6 +2652,7 @@ tags: {
     mandatory: true
     value: ""
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -2644,6 +2676,7 @@ tags: {
 tags: {
   tag_name: "SCRIPT"
   spec_name: "script type=application/ld+json"
+  attrs: { name: "nonce" }
   attrs: {
     name: "type"
     mandatory: true
@@ -2856,6 +2889,7 @@ attr_lists: {
   attrs: {
     name: "id"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+        "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
         "__defineSetter__|"
@@ -2864,6 +2898,7 @@ attr_lists: {
         "__noSuchMethod__|"
         "__parent__|"
         "__proto__|"
+        "__AMP_\\S*|"
         "\\$p|"
         "\\$proxy|"
         "acceptCharset|"
@@ -2887,6 +2922,7 @@ attr_lists: {
         "computedRole|"
         "contentEditable|"
         "createShadowRoot|"
+        "enqueAction|"
         "firstChild|"
         "firstElementChild|"
         "getAnimations|"
@@ -2906,7 +2942,7 @@ attr_lists: {
         "hasAttributes|"
         "hasChildNodes|"
         "hasPointerCapture|"
-        "i-amphtml-.*|"
+        "i-amphtml-\\S*|"
         "innerHTML|"
         "innerText|"
         "inputMode|"

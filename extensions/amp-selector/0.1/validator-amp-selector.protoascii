@@ -33,6 +33,7 @@ tags: {
     value: "amp-selector"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -57,9 +58,15 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   disallowed_ancestor: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-selector extension .js script"
-  attrs: { name: "disabled" value: "" }
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
   attrs: { name: "form" }
-  attrs: { name: "multiple" value: "" }
+  attrs: {
+    name: "multiple"
+    value: ""
+  }
   reference_points: {
     tag_spec_name: "AMP-SELECTOR option"
   }
