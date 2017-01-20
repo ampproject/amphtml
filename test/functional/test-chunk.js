@@ -29,7 +29,6 @@ import * as sinon from 'sinon';
 
 describe('chunk', () => {
 
-  let resolved;
   let experimentOn;
   beforeEach(() => {
     experimentOn = true;
@@ -206,8 +205,8 @@ describe('chunk', () => {
         env.win.requestIdleCallback =
             resolvingIdleCallbackWithTimeRemaining(15);
         const chunks = chunkInstanceForTesting(env.win.document);
-        env.sandbox.stub(chunks, 'executeASAP_', () => {
-          throw new Error('No calls expected: executeASAP_');
+        env.sandbox.stub(chunks, 'executeAsap_', () => {
+          throw new Error('No calls expected: executeAsap_');
         });
         env.win.location.resetHref('test#visibilityState=hidden');
       });
@@ -240,8 +239,8 @@ describe('chunk', () => {
         env.win.requestIdleCallback =
             resolvingIdleCallbackWithTimeRemaining(15);
         const chunks = chunkInstanceForTesting(env.win.document);
-        env.sandbox.stub(chunks, 'executeASAP_', () => {
-          throw new Error('No calls expected: executeASAP_');
+        env.sandbox.stub(chunks, 'executeAsap_', () => {
+          throw new Error('No calls expected: executeAsap_');
         });
         env.win.document.hidden = true;
       });

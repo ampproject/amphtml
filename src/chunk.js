@@ -217,9 +217,9 @@ class StartupTask extends Task {
   /**
    * @param {!function(?IdleDeadline)} fn
    * @param {!Window} win
-   * @param {!Promise<./service/viewer-impl.Viewer>} viewerPromise
+   * @param {!Promise<!./service/viewer-impl.Viewer>} viewerPromise
    */
-  constructor(fn, win, viewerOrPromise) {
+  constructor(fn, win, viewerPromise) {
     super(fn);
 
     /** @private {!Window} */
@@ -234,7 +234,7 @@ class StartupTask extends Task {
     /** @private {?./service/viewer-impl.Viewer} */
     this.viewer_ = null;
 
-    viewerOrPromise.then(viewer => {
+    viewerPromise.then(viewer => {
       this.viewer_ = viewer;
 
       this.viewer_.onVisibilityChanged(() => {
@@ -389,7 +389,7 @@ class Chunks {
    * @param {?IdleDeadline} idleDeadline
    * @private
    */
-  executeASAP_(idleDeadline) {
+  executeAsap_(idleDeadline) {
     resolved.then(() => {
       this.boundExecute_(idleDeadline);
     });
@@ -405,7 +405,7 @@ class Chunks {
       return;
     }
     if (nextTask.immediateTriggerCondition_()) {
-      this.executeASAP_(/* idleDeadline */ null);
+      this.executeAsap_(/* idleDeadline */ null);
       return;
     }
     // If requestIdleCallback exists, schedule a task with it, but
