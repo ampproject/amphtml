@@ -33,8 +33,11 @@ import {isIframed} from '../../../src/dom';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {cryptoFor} from '../../../src/crypto';
-import {user} from '../../../src/log';
+import {tryParseJson} from '../../../src/json';
+import {timerFor} from '../../../src/timer';
+import {user, dev} from '../../../src/log';
 
+const TAG_ = 'Cid';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -278,12 +281,11 @@ function getBaseCid(cid, persistenceConsent) {
  * @param {string} cidString Actual cid string to store.
  */
 function store(win, persistenceConsent, cidString) {
-  const viewer = viewerForDoc(win.document);
   // TODO(lannka, #4457): ideally, we should check if viewer has the capability
   // of CID storage, rather than if it is iframed.
   if (isIframed(win)) {
     // If we are being embedded, try to save the base cid to the viewer.
-    viewer.baseCid(createCidData(cidString));
+    viewerBaseCid(win, createCidData(cidString));
   } else {
     // To use local storage, we need user's consent.
     persistenceConsent.then(() => {
@@ -297,6 +299,39 @@ function store(win, persistenceConsent, cidString) {
       }
     });
   }
+}
+
+/**
+ * Get/set the Base CID from/to the viewer.
+ * @param {string=} opt_data Stringified JSON object {cid, time}.
+ * @return {!Promise<string|undefined>}
+ */
+export function viewerBaseCid(win, opt_data) {
+  const viewer = viewerForDoc(win.document);
+  return viewer.isTrustedViewer().then(trusted => {
+    if (!trusted) {
+      return undefined;
+    }
+    const cidPromise = viewer.sendMessageAwaitResponse('cid', opt_data)
+        .then(data => {
+          // For backward compatibility: #4029
+          if (data && !tryParseJson(data)) {
+            return JSON.stringify({
+              time: Date.now(), // CID returned from old API is always fresh
+              cid: data,
+            });
+          }
+          return data;
+        });
+    // Getting the CID may take some time (waits for JS file to
+    // load, might hit GC), but we do not wait indefinitely. Typically
+    // it should resolve in milli seconds.
+    return timerFor(win).timeoutPromise(10000, cidPromise, 'base cid')
+        .catch(error => {
+          dev().error(TAG_, error);
+          return undefined;
+        });
+  });
 }
 
 /**
@@ -326,11 +361,10 @@ function read(win) {
   } catch (ignore) {
     // If reading from localStorage fails, we assume it is empty.
   }
-  const viewer = viewerForDoc(win.document);
   let dataPromise = Promise.resolve(data);
   if (!data && isIframed(win)) {
     // If we are being embedded, try to get the base cid from the viewer.
-    dataPromise = viewer.baseCid();
+    dataPromise = viewerBaseCid(win);
   }
   return dataPromise.then(data => {
     if (!data) {
