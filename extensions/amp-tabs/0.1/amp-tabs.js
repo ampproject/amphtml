@@ -47,7 +47,7 @@ export class AmpTabs extends AMP.BaseElement {
       if (!index) {
         user().assert(
             section.tagName.toLowerCase() == 'ul',
-            'Sections should be enclosed in a <section> tag, ' +
+            'Tab headers should be enclosed in a <ul> tag, ' +
             'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
             'amp-tabs/amp-tabs.md. Found in: %s', this.element);
         for (let i = 0; i < section.children.length; ++i) {
