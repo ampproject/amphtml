@@ -172,6 +172,24 @@ export const VideoEvents = {
   PAUSE: 'pause',
 
   /**
+   * muted
+   *
+   * Fired when the video is muted.
+   *
+   * @event play
+   */
+  MUTED: 'muted',
+
+  /**
+   * unmuted
+   *
+   * Fired when the video is unmuted.
+   *
+   * @event pause
+   */
+  UNMUTED: 'unmuted',
+
+  /**
    * amp:video:visibility
    *
    * Fired when the video's visibility changes. Normally fired

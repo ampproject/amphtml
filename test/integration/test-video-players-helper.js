@@ -48,28 +48,41 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
   describe.configure().retryOnSaucelabs()
   .run('Actions', function() {
     this.timeout(TIMEOUT);
-    it('should support mute and play action', function() {
+    it('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
-        // Create a play button
-        const playButton = r.fixture.doc.createElement('button');
-        playButton.setAttribute('on', 'tap:myVideo.play');
-        r.fixture.doc.body.appendChild(playButton);
+        // Create a action buttons
+        const playButton = createButton(r, 'play');
+        const pauseButton = createButton(r, 'pause');
+        const muteButton = createButton(r, 'mute');
+        const unmuteButton = createButton(r, 'unmute');
 
-        const muteButton = r.fixture.doc.createElement('button');
-        muteButton.setAttribute('on', 'tap:myVideo.mute');
-        r.fixture.doc.body.appendChild(muteButton);
-
-        // We have to mute the video first for testing. This is because we
-        // trigger a synthetic click which is not considered a user-action.
-        // There is no way to create a true user-initiated action in scripted
-        // testing environment.
-
-        Promise.resolve()
-        .then(() => muteButton.click())
-        .then(() => playButton.click());
-        return listenOncePromise(r.video, VideoEvents.PLAY);
+        return Promise.resolve()
+        .then(() => {
+          muteButton.click();
+          return listenOncePromise(r.video, VideoEvents.MUTED);
+        })
+        .then(() => {
+          playButton.click();
+          return listenOncePromise(r.video, VideoEvents.PLAY);
+        })
+        .then(() => {
+          pauseButton.click();
+          return listenOncePromise(r.video, VideoEvents.PAUSE);
+        })
+        .then(() => {
+          unmuteButton.click();
+          return listenOncePromise(r.video, VideoEvents.UNMUTED);
+        });
       });
     });
+
+    function createButton(r, action) {
+      const button = r.fixture.doc.createElement('button');
+      button.setAttribute('on', 'tap:myVideo.' + action);
+      r.fixture.doc.body.appendChild(button);
+      return button;
+    }
+
     // Although these tests are not about autoplay, we can ony run them in
     // browsers that do support autoplay, this is because a synthetic click
     // event will not be considered a user-action and mobile browsers that

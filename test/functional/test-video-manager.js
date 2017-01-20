@@ -250,12 +250,18 @@ function createFakeVideoPlayerClass(win) {
      * @override
      */
     mute() {
+      Promise.resolve().then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.MUTED);
+      });
     }
 
     /**
      * @override
      */
     unmute() {
+      Promise.resolve().then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+      });
     }
 
     /**
