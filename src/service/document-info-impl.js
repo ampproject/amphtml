@@ -16,6 +16,7 @@
 
 import {fromClassForDoc} from '../service';
 import {parseUrl, getSourceUrl} from '../url';
+import {map} from '../utils/object';
 
 
 /**
@@ -25,11 +26,14 @@ import {parseUrl, getSourceUrl} from '../url';
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
  *       for concurrent page views of a user().
+ *     - linkRels: A map object of link tag's rel (key) and corresponding
+ *       href (value). rel could be 'canonical', 'icon', etc.
  *
  * @typedef {{
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
+ *   linkRels: !Object<string, string>,
  * }}
  */
 export let DocumentInfoDef;
@@ -63,6 +67,7 @@ export class DocInfo {
     const ampdoc = this.ampdoc_;
     const url = ampdoc.getUrl();
     const sourceUrl = getSourceUrl(url);
+    const linkRels = map();
     const rootNode = ampdoc.getRootNode();
     let canonicalUrl = rootNode && rootNode.AMP
         && rootNode.AMP.canonicalUrl;
@@ -73,6 +78,23 @@ export class DocInfo {
           : sourceUrl;
     }
     const pageViewId = getPageViewId(ampdoc.win);
+
+    const doc = ampdoc.win.document;
+    if (doc.head) {
+      for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
+        if (n.tagName != 'LINK') {
+          continue;
+        }
+        const rel = n.getAttribute('rel');
+        const href = n.getAttribute('href');
+        if (!rel || !href || rel == 'prefetch' || rel == 'preload' ||
+            rel == 'preconnect') {
+          continue;
+        }
+        linkRels[rel] = parseUrl(href).href;
+      }
+    }
+
     return this.info_ = {
       /** @return {string} */
       get sourceUrl() {
@@ -80,6 +102,7 @@ export class DocInfo {
       },
       canonicalUrl,
       pageViewId,
+      linkRels,
     };
   }
 }
