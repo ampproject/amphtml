@@ -81,24 +81,23 @@ export class Xhr {
    * be either the native fetch or our polyfill.
    *
    * @param {string} input
-   * @param {!FetchInitDef=} opt_init
+   * @param {!FetchInitDef} init
    * @return {!Promise<!FetchResponse>|!Promise<!Response>}
    * @private
    */
-  fetch_(input, opt_init) {
+  fetch_(input, init) {
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
-    if (opt_init && opt_init.credentials !== undefined) {
-      // In particular, Firefox does not tolerate `null` values for
-      // `credentials`.
-      dev().assert(
-          opt_init.credentials == 'include' || opt_init.credentials == 'omit',
-          'Only credentials=include|omit support: %s', opt_init.credentials);
-    }
+    // In particular, Firefox does not tolerate `null` values for
+    // `credentials`.
+    const creds = init.credentials;
+    dev().assert(
+        creds === undefined || creds == 'include' || creds == 'omit',
+        'Only credentials=include|omit support: %s', creds);
     // Fallback to xhr polyfill since `fetch` api does not support
     // responseType = 'document'. We do this so we don't have to do any parsing
     // and document construction on the UI thread which would be expensive.
-    if (opt_init && opt_init.responseType == 'document') {
-      return fetchPolyfill(input, opt_init);
+    if (init.responseType == 'document') {
+      return fetchPolyfill(input, init);
     }
     return (this.win.fetch || fetchPolyfill).apply(null, arguments);
   }
@@ -228,7 +227,7 @@ export class Xhr {
 
   /**
    * @param {string} input URL
-   * @param {FetchInitDef} opt_init Fetch options object.
+   * @param {?FetchInitDef=} opt_init Fetch options object.
    * @return {!Promise<!FetchResponse>}
    */
   fetch(input, opt_init) {
@@ -292,8 +291,8 @@ export function normalizeMethod_(method) {
 /**
  * Sets up and normalizes the FetchInitDef
  *
- * @param {FetchInitDef} opt_init Fetch options object.
- * @param {string} opt_accept The HTTP Accept header value.
+ * @param {?FetchInitDef=} opt_init Fetch options object.
+ * @param {string=} opt_accept The HTTP Accept header value.
  * @return {!FetchInitDef}
  */
 function setupInit(opt_init, opt_accept) {
@@ -316,13 +315,11 @@ function setupInit(opt_init, opt_accept) {
  * us to immediately support a much wide API.
  *
  * @param {string} input
- * @param {!FetchInitDef=} opt_init
+ * @param {!FetchInitDef} init
  * @return {!Promise<!FetchResponse>}
  * @private Visible for testing
  */
-export function fetchPolyfill(input, opt_init) {
-  /** @type {!FetchInitDef} */
-  const init = opt_init || {};
+export function fetchPolyfill(input, init) {
   return new Promise(function(resolve, reject) {
     const xhr = createXhrRequest(init.method || 'GET', input);
 
