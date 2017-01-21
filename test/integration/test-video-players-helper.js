@@ -28,24 +28,33 @@ import {
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
 
   const TIMEOUT = 20000;
-  it.configure().retryOnSaucelabs()
-  .run('should override the video interface methods', function() {
-    this.timeout(TIMEOUT);
-    return getVideoPlayer({outsideView: false, autoplay: true})
-    .then(r => {
-      const impl = r.video.implementation_;
-      const methods = Object.getOwnPropertyNames(
-          Object.getPrototypeOf(new VideoInterface()));
-
-      expect(methods.length).to.be.above(1);
-      for (let i = 0; i < methods.length; i++) {
-        const methodName = methods[i];
-        expect(impl[methodName]).to.exist;
-      }
-    });
-  });
+  let fixtureGlobal;
+  let videoGlobal;
 
   describe.configure().retryOnSaucelabs()
+  .run('Video Interface', function() {
+    this.timeout(TIMEOUT);
+
+    it('should override the video interface methods', function() {
+      this.timeout(TIMEOUT);
+      return getVideoPlayer({outsideView: false, autoplay: true})
+      .then(r => {
+        const impl = r.video.implementation_;
+        const methods = Object.getOwnPropertyNames(
+            Object.getPrototypeOf(new VideoInterface()));
+
+        expect(methods.length).to.be.above(1);
+        for (let i = 0; i < methods.length; i++) {
+          const methodName = methods[i];
+          expect(impl[methodName]).to.exist;
+        }
+      });
+    });
+
+    afterEach(cleanUp);
+  });
+
+  describe.configure().skipSafari().retryOnSaucelabs()
   .run('Actions', function() {
     this.timeout(TIMEOUT);
     it('should support mute, play, pause, unmute actions', function() {
@@ -55,7 +64,6 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
         const pauseButton = createButton(r, 'pause');
         const muteButton = createButton(r, 'mute');
         const unmuteButton = createButton(r, 'unmute');
-
         return Promise.resolve()
         .then(() => {
           muteButton.click();
@@ -98,6 +106,8 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
         }
       });
     });
+
+    afterEach(cleanUp);
   });
 
   describe.configure().retryOnSaucelabs()
@@ -187,6 +197,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
         }
       });
     });
+
     before(function() {
       this.timeout(TIMEOUT);
       // Skip autoplay tests if browser does not support autoplay.
@@ -196,6 +207,8 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
         }
       });
     });
+
+    afterEach(cleanUp);
   });
 
   function getVideoPlayer(options) {
@@ -227,12 +240,20 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
 
       fixture.doc.body.appendChild(sizer);
       fixture.doc.body.appendChild(video);
-
+      fixtureGlobal = fixture;
+      videoGlobal = video;
       return poll('video built', () => {
-        return video.isBuilt();
+        return video.implementation_ && video.implementation_.play;
       },undefined, 5000).then(() => {
         return {video, fixture};
       });
     });
+  }
+
+  function cleanUp() {
+    if (fixtureGlobal) {
+      fixtureGlobal.doc.body.removeChild(videoGlobal);
+      fixtureGlobal.iframe.remove();
+    }
   }
 }
