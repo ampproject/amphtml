@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 import '../amp-hulu';
 import {adopt} from '../../../../src/runtime';
 
@@ -23,7 +26,8 @@ adopt(window);
 describe('amp-hulu', () => {
 
   function getHulu(eid, opt_responsive) {
-    return createIframePromise().then(iframe => {
+    return createIframePromise(/*opt_runtimeOff*/ true).then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const hulu = iframe.doc.createElement('amp-hulu');
       hulu.setAttribute('data-eid', eid);
       hulu.setAttribute('width', '111');
