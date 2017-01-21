@@ -687,7 +687,6 @@ describe('amp-a4a', () => {
           sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
             Promise.resolve({creative: mockResponse.arrayBuffer()}));
         }
-
         if (opt_failAmpRender) {
           sandbox.stub(a4a, 'renderAmpCreative_').returns(
             Promise.reject('amp render failure'));
