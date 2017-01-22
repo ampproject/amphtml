@@ -909,6 +909,7 @@ describe('amp-a4a', () => {
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
         ],
+        collapse: false,
       };
       expect(actual).to.deep.equal(expected);
     });
@@ -931,6 +932,7 @@ describe('amp-a4a', () => {
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
         ],
+        collapse: false,
       };
       expect(actual).to.deep.equal(expected);
     });
