@@ -88,7 +88,8 @@ export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 /** @type {string} */
 const TAG = 'AMP-A4A';
 
-const NO_CONTENT_RESPONSE = 'No content in response.';
+/** @type {string} */
+const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 
 /** @enum {string} */
 export const XORIGIN_MODE = {
@@ -116,8 +117,8 @@ export let AdResponseDef;
 
 /** @typedef {{
       minifiedCreative: string,
-      customElementExtensions: Array<string>,
-      customStylesheets: Array<!{href: string}>,
+      customElementExtensions: !Array<string>,
+      customStylesheets: !Array<{href: string}>,
       collapse: boolean
     }} */
 let CreativeMetaDataDef;
@@ -463,17 +464,15 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
           checkStillCurrent(promiseId);
-          if (!fetchResponse || !fetchResponse.arrayBuffer) {
-            return null;
-          }
-          // If the response has response code 204, collapse it.
-          if (fetchResponse.status == 200) {
-            // Necessary, as uiHandler will ignore the request to display no
-            // content otherwise.
+          this.protectedEmitLifecycleEvent_('adRequestEnd');
+          // If the response has response code 204, or is null, collapse it.
+          if (!fetchResponse
+              || !fetchResponse.arrayBuffer
+              || fetchResponse.status == 204) {
+            dev().assert(this.uiHandler);
             this.uiHandler.forceNoContentUI();
             return Promise.reject(NO_CONTENT_RESPONSE);
           }
-          this.protectedEmitLifecycleEvent_('adRequestEnd');
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
@@ -592,9 +591,9 @@ export class AmpA4A extends AMP.BaseElement {
         .catch(error => {
           if (error == NO_CONTENT_RESPONSE) {
             return {
-              minifiedCreative: null,
-              customElementExtensions: null,
-              customStylesheets: null,
+              minifiedCreative: '',
+              customElementExtensions: [],
+              customStylesheets: [],
               collapse: true,
             };
           }
@@ -748,6 +747,8 @@ export class AmpA4A extends AMP.BaseElement {
           rethrowAsync(this.promiseErrorHandler_(err));
           return this.renderNonAmpCreative_();
         });
+      } else {
+        return Promise.resolve();
       }
     }).catch(error => this.promiseErrorHandler_(error));
   }
