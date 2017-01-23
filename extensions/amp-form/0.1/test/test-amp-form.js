@@ -164,7 +164,8 @@ describe('amp-form', () => {
       preventDefault: sandbox.spy(),
     };
 
-    sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+    sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+        .returns(Promise.resolve());
     sandbox.spy(form, 'checkValidity');
     ampForm.handleSubmitEvent_(event);
     expect(event.stopImmediatePropagation).to.be.called;
@@ -181,7 +182,8 @@ describe('amp-form', () => {
       target: form,
       preventDefault: sandbox.spy(),
     };
-    sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+    sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+        .returns(Promise.resolve());
     sandbox.spy(form, 'checkValidity');
     expect(() => ampForm.handleSubmitEvent_(event)).to.throw(
         /Only XHR based \(via action-xhr attribute\) submissions are support/);
@@ -198,7 +200,8 @@ describe('amp-form', () => {
     emailInput.setAttribute('required', '');
     form.appendChild(emailInput);
     const ampForm = new AmpForm(form);
-    sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+    sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+        .returns(Promise.resolve());
     const event = {
       stopImmediatePropagation: sandbox.spy(),
       target: form,
@@ -236,7 +239,8 @@ describe('amp-form', () => {
       emailInput.setAttribute('required', '');
       form.appendChild(emailInput);
       sandbox.spy(form, 'checkValidity');
-      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+          .returns(Promise.resolve());
 
       const event = {
         stopImmediatePropagation: sandbox.spy(),
@@ -311,7 +315,8 @@ describe('amp-form', () => {
       emailInput.setAttribute('required', '');
       form.appendChild(emailInput);
       sandbox.spy(form, 'checkValidity');
-      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+          .returns(Promise.resolve());
 
       const event = {
         stopImmediatePropagation: sandbox.spy(),
@@ -341,7 +346,8 @@ describe('amp-form', () => {
 
   it('should call fetch with the xhr action and form data', () => {
     return getAmpForm().then(ampForm => {
-      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+          .returns(Promise.resolve());
       const event = {
         stopImmediatePropagation: sandbox.spy(),
         target: ampForm.form_,
@@ -351,7 +357,8 @@ describe('amp-form', () => {
       expect(event.preventDefault).to.be.calledOnce;
       return timer.promise(1).then(() => {
         expect(ampForm.xhr_.fetchJsonResponse).to.be.calledOnce;
-        expect(ampForm.xhr_.fetchJsonResponse).to.be.calledWith('https://example.com');
+        expect(ampForm.xhr_.fetchJsonResponse)
+            .to.be.calledWith('https://example.com');
 
         const xhrCall = ampForm.xhr_.fetchJsonResponse.getCall(0);
         const config = xhrCall.args[1];
@@ -365,9 +372,10 @@ describe('amp-form', () => {
   it('should block multiple submissions and disable buttons', () => {
     return getAmpForm(true, true, true).then(ampForm => {
       let fetchResolver;
-      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(new Promise(resolve => {
-        fetchResolver = resolve;
-      }));
+      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+          .returns(new Promise(resolve => {
+            fetchResolver = resolve;
+          }));
       const form = ampForm.form_;
       const event = {
         stopImmediatePropagation: sandbox.spy(),
@@ -411,9 +419,10 @@ describe('amp-form', () => {
   it('should manage form state classes (submitting, success)', () => {
     return getAmpForm().then(ampForm => {
       let fetchResolver;
-      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(new Promise(resolve => {
-        fetchResolver = resolve;
-      }));
+      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+          .returns(new Promise(resolve => {
+            fetchResolver = resolve;
+          }));
       sandbox.stub(ampForm, 'analyticsEvent_');
       sandbox.stub(ampForm.actions_, 'trigger');
       const form = ampForm.form_;
@@ -593,7 +602,8 @@ describe('amp-form', () => {
       return getAmpForm().then(ampForm => {
         ampForm.method_ = 'GET';
         ampForm.form_.setAttribute('method', 'GET');
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(Promise.resolve());
         const event = {
           stopImmediatePropagation: sandbox.spy(),
           target: ampForm.form_,
@@ -620,7 +630,8 @@ describe('amp-form', () => {
         const form = ampForm.form_;
         ampForm.method_ = 'GET';
         form.setAttribute('method', 'GET');
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(Promise.resolve());
         const fieldset = document.createElement('fieldset');
         const emailInput = document.createElement('input');
         emailInput.setAttribute('name', 'email');
@@ -694,7 +705,8 @@ describe('amp-form', () => {
         const form = ampForm.form_;
         ampForm.method_ = 'GET';
         form.setAttribute('method', 'GET');
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(Promise.resolve());
 
         const otherNamesFS = document.createElement('fieldset');
         const otherName1Input = document.createElement('input');
@@ -810,7 +822,8 @@ describe('amp-form', () => {
         sandbox.spy(form, 'checkValidity');
         sandbox.spy(emailInput, 'checkValidity');
         sandbox.spy(fieldset, 'checkValidity');
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(Promise.resolve());
 
         const event = {
           target: ampForm.form_,
@@ -852,7 +865,8 @@ describe('amp-form', () => {
         sandbox.spy(form, 'checkValidity');
         sandbox.spy(emailInput, 'checkValidity');
         sandbox.spy(fieldset, 'checkValidity');
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(Promise.resolve());
 
         onInputInteraction_({target: emailInput});
         expect(form.checkValidity).to.be.called;
@@ -916,7 +930,8 @@ describe('amp-form', () => {
         sandbox.spy(form, 'checkValidity');
         sandbox.spy(emailInput, 'checkValidity');
         sandbox.spy(fieldset, 'checkValidity');
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(Promise.resolve());
 
         emailInput.value = 'cool@bea.ns';
         const event = {target: emailInput};
@@ -936,7 +951,8 @@ describe('amp-form', () => {
     const actions = actionServiceForDoc(form.ownerDocument);
     sandbox.stub(actions, 'installActionHandler');
     const ampForm = new AmpForm(form);
-    sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+    sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+        .returns(Promise.resolve());
     expect(actions.installActionHandler).to.be.calledWith(form);
     sandbox.spy(ampForm, 'handleSubmitAction_');
     ampForm.actionHandler_({method: 'anything'});
@@ -963,7 +979,8 @@ describe('amp-form', () => {
         canonicalUrlField.setAttribute('data-amp-replace', 'CANONICAL_URL');
         form.appendChild(canonicalUrlField);
         sandbox.stub(form, 'checkValidity').returns(true);
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(Promise.resolve());
         sandbox.spy(ampForm.urlReplacement_, 'expandInputValueAsync');
         sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
         ampForm.submit_();
@@ -1001,7 +1018,8 @@ describe('amp-form', () => {
         canonicalUrlField.value = 'CANONICAL_URL';
         form.appendChild(canonicalUrlField);
         sandbox.stub(form, 'checkValidity').returns(true);
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(Promise.resolve());
         sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync')
             .returns(new Promise(resolve => {
               expandAsyncStringResolvers.push(resolve);
@@ -1044,7 +1062,8 @@ describe('amp-form', () => {
         form.appendChild(canonicalUrlField);
         sandbox.stub(form, 'submit');
         sandbox.stub(form, 'checkValidity').returns(true);
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(Promise.resolve());
         sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
         sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
         ampForm.handleSubmitAction_();
@@ -1105,7 +1124,8 @@ describe('amp-form', () => {
 
     describe('AMP-Redirect-To', () => {
       it('should redirect users if header is set', () => {
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(fetchResolvePromise);
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(fetchResolvePromise);
         redirectToValue = 'https://google.com/';
         ampForm.handleSubmitAction_();
         return timer.promise(10).then(() => {
@@ -1114,7 +1134,8 @@ describe('amp-form', () => {
       });
 
       it('should fail to redirect to non-secure urls', () => {
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(fetchResolvePromise);
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(fetchResolvePromise);
         redirectToValue = 'http://google.com/';
         ampForm.handleSubmitAction_();
         return timer.promise(10).then(() => {
@@ -1124,7 +1145,8 @@ describe('amp-form', () => {
       });
 
       it('should fail to redirect to non-absolute urls', () => {
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(fetchResolvePromise);
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(fetchResolvePromise);
         redirectToValue = '/hello';
         ampForm.handleSubmitAction_();
         return timer.promise(10).then(() => {
@@ -1135,7 +1157,8 @@ describe('amp-form', () => {
 
       it('should fail to redirect to when target != _top', () => {
         ampForm.target_ = '_blank';
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(fetchResolvePromise);
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(fetchResolvePromise);
         redirectToValue = 'http://google.com/';
         ampForm.handleSubmitAction_();
         return timer.promise(10).then(() => {
@@ -1145,7 +1168,8 @@ describe('amp-form', () => {
       });
 
       it('should redirect on error and header is set', () => {
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(fetchRejectPromise);
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(fetchRejectPromise);
         redirectToValue = 'https://example2.com/hello';
         const errors = [];
         const realSetTimeout = window.setTimeout;
@@ -1176,7 +1200,8 @@ describe('amp-form', () => {
         ampForm.xhrAction_ = null;
         sandbox.stub(form, 'submit');
         sandbox.stub(form, 'checkValidity').returns(true);
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(Promise.resolve());
         ampForm.handleSubmitAction_();
         expect(form.submit).to.have.been.called;
       });
@@ -1189,7 +1214,8 @@ describe('amp-form', () => {
         ampForm.xhrAction_ = null;
         sandbox.stub(form, 'submit');
         sandbox.stub(form, 'checkValidity').returns(true);
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse').returns(Promise.resolve());
+        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+            .returns(Promise.resolve());
         const event = {
           stopImmediatePropagation: sandbox.spy(),
           target: form,
