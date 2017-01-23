@@ -153,19 +153,22 @@ describe('amp-analytics', function() {
   }
 
   /**
-   * Clears the property in the config that indicates that the requests
-   * should be sent via an iframe ping. This is needed because we pass
-   * in all the vendor requests as inline config and iframePings are not
-   * allowed to be used without AMP team's approval.
+   * Clears the properties in the config that should only be used in vendor
+   * configs. This is needed because we pass in all the vendor requests as
+   * inline config and iframePings/optout are not allowed to be used without
+   * AMP team's approval.
    *
    * @param {!JSONObject} config The inline config to update.
    * @return {!JSONObject}
    */
-  function clearIframePing(config) {
+  function clearVendorOnlyConfig(config) {
     for (const t in config.triggers) {
       if (config.triggers[t].iframePing) {
         config.triggers[t].iframePing = undefined;
       }
+    }
+    if (config.optout) {
+      config.optout = undefined;
     }
     return config;
   }
@@ -191,7 +194,7 @@ describe('amp-analytics', function() {
         for (const name in config.requests) {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', () => {
-            const analytics = getAnalyticsTag(clearIframePing(config));
+            const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             analytics.createdCallback();
             analytics.buildCallback();
             const urlReplacements = urlReplacementsForDoc(
@@ -666,29 +669,42 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('respects optout', function() {
-    const config = {
-      'requests': {'foo': 'https://example.com/bar'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-      'optout': 'foo.bar',
-    };
-    let analytics = getAnalyticsTag(config);
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
-          .to.be.true;
-      sendRequestSpy.reset();
-      windowApi['foo'] = {'bar': function() { return true; }};
-      analytics = getAnalyticsTag(config);
-      return waitForNoSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.be.equal(0);
-        sendRequestSpy.reset();
-        windowApi['foo'] = {'bar': function() { return false; }};
-        analytics = getAnalyticsTag(config);
-        waitForSendRequest(analytics).then(() => {
-          expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
-              .to.be.true;
-        });
+  describe('optout', () => {
+    it('works for vendor config when optout returns false', function() {
+      windowApi['foo'] = {'bar': function() { return false; }};
+      const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
+      analytics.predefinedConfig_.testVendor = {'optout': 'foo.bar'};
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
+            .to.be.true;
       });
+    });
+
+    it('works for vendor config when optout returns false', function() {
+      windowApi['foo'] = {'bar': function() { return true; }};
+      const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
+      analytics.predefinedConfig_.testVendor = {'optout': 'foo.bar'};
+      return waitForNoSendRequest(analytics);
+    });
+
+    it('works for vendor config when optout is not defined', function() {
+      const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
+      analytics.predefinedConfig_.testVendor = {'optout': 'foo.bar'};
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
+                .to.be.true;
+      });
+    });
+
+    it('fails for inline config', function() {
+      const config = {
+        'requests': {'foo': 'https://example.com/bar'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'optout': 'foo.bar',
+      };
+      const analytics = getAnalyticsTag(config);
+      return expect(waitForNoSendRequest(analytics)).to.be
+          .rejectedWith(/optout property is only available to vendor config/);
     });
   });
 

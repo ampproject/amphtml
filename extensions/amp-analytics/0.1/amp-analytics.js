@@ -579,6 +579,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       to = {};
     }
 
+    user().assert(opt_predefinedConfig || !from || !from['optout'],
+        'optout property is only available to vendor config.');
+
     for (const property in from) {
       user().assert(opt_predefinedConfig || property != 'iframePing',
           'iframePing config is only available to vendor config.');
