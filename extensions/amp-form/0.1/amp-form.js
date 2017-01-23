@@ -15,6 +15,7 @@
  */
 
 import {installFormProxy} from './form-proxy';
+import {extensionsFor} from '../../../src/extensions';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
@@ -49,6 +50,15 @@ import {
 
 /** @type {string} */
 const TAG = 'amp-form';
+
+
+/**
+ * A list of external dependencies that can be included in forms.
+ * @type {Array<string>}
+ */
+const EXTERNAL_DEPS = [
+  'amp-selector',
+];
 
 
 /** @const @enum {string} */
@@ -98,6 +108,9 @@ export class AmpForm {
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(this.win_);
+
+    /** @const @private {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = extensionsFor(this.win_);
 
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacement_ = urlReplacementsForDoc(this.win_.document);
@@ -160,11 +173,37 @@ export class AmpForm {
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
-    // TODO(mkhatib, #6927): Wait for amp-selector to finish loading if the current form
-    // is using it.
-    this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this));
+    // Wait for amp-selector to finish loading if the current form is using it.
+    this.whenDependenciesReady_().then(() => {
+      this.actions_.installActionHandler(
+          this.form_, this.actionHandler_.bind(this));
+    });
     this.installEventHandlers_();
+  }
+
+  /**
+   * Returns a promise that will be resolved when all dependencies used inside the form
+   * tag are loaded (e.g. amp-selector) or 500ms timeout - whichever is first.
+   * @return {!Promise}
+   * @private
+   */
+  whenDependenciesReady_() {
+    const depsDict = {};
+    const depsPromises = [];
+    for (let i = EXTERNAL_DEPS.length - 1; i >= 0; i--) {
+      const tagName = EXTERNAL_DEPS[i];
+      const depIsUsed = this.form_.getElementsByTagName(tagName).length !== 0;
+      if (depIsUsed && depsDict[tagName] === undefined) {
+        // TODO(mkhatib, #7032): Implement a way to wait for an element to be built to
+        // make sure it is really "ready" and has been built.
+        // This currently still have a small chance of race condition if the
+        // submission went through before the build callback has been called.
+        depsPromises.push(this.extensions_.waitForExtension(tagName));
+        depsDict[tagName] = true;
+      }
+    }
+    return Promise.race(
+        [Promise.all(depsPromises), this.timer_.promise(500)]);
   }
 
   /**
@@ -568,6 +607,10 @@ function updateInvalidTypesClasses(element) {
  * @return {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
+  // If this is not a field type with checkValidity don't do anything.
+  if (!element.checkValidity) {
+    return true;
+  }
   let shouldPropagate = false;
   const previousValidityState = getUserValidityStateFor(element);
   const isCurrentlyValid = element.checkValidity();
