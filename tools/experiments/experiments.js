@@ -242,6 +242,13 @@ const EXPERIMENTS = [
     name: 'Format to apply filters to analytics variables',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
+  {
+    id: 'amp-bind',
+    name: 'AMP extension for dynamic content',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-bind/amp-bind.md',
+  },
 ];
 
 if (getMode().localDev) {

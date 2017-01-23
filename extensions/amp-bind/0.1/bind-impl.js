@@ -23,7 +23,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {resourcesForDoc} from '../../../src/resources';
 
-const TAG = 'AMP-BIND';
+const TAG = 'amp-bind';
 
 /**
  * Regular expression that identifies AMP CSS classes.
