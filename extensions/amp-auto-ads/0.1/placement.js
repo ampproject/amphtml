@@ -85,8 +85,9 @@ export class Placement {
    * @param {!Element} anchorElement
    * @param {!Position} position
    * @param {!function(!Element, !Element)} injector
+   * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
-  constructor(win, resources, anchorElement, position, injector) {
+  constructor(win, resources, anchorElement, position, injector, opt_margins) {
     /** @const @private {!Window} */
     this.win_ = win;
 
@@ -101,6 +102,12 @@ export class Placement {
 
     /** @const @private {!function(!Element, !Element)} */
     this.injector_ = injector;
+
+    /**
+     * @const
+     * @private {!../../../src/layout-rect.LayoutMarginsChangeDef|undefined}
+     */
+    this.margins_ = opt_margins;
 
     /** @private {?Element} */
     this.adElement_ = null;
@@ -163,8 +170,8 @@ export class Placement {
         }
         this.adElement_ = this.createAdElement_(type, dataAttributes);
         this.injector_(this.anchorElement_, this.adElement_);
-        return this.resources_.attemptChangeSize(
-            this.adElement_, TARGET_AD_HEIGHT_PX, TARGET_AD_WIDTH_PX)
+        return this.resources_.attemptChangeSize(this.adElement_,
+            TARGET_AD_HEIGHT_PX, TARGET_AD_WIDTH_PX, this.margins_)
                 .then(() => {
                   this.state_ = PlacementState.PLACED;
                   return this.state_;
@@ -247,8 +254,19 @@ function getPlacementFromObject(win, placementObj) {
     dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
     return null;
   }
+  let margins = undefined;
+  if (placementObj['style']) {
+    const marginTop = parseInt(placementObj['style']['top_m'], 10);
+    const marginBottom = parseInt(placementObj['style']['bot_m'], 10);
+    if (marginTop || marginBottom) {
+      margins = {
+        top: marginTop || undefined,
+        bottom: marginBottom || undefined,
+      };
+    }
+  }
   return new Placement(win, resourcesForDoc(anchorElement), anchorElement,
-      placementObj['pos'], injector);
+      placementObj['pos'], injector, margins);
 }
 
 /**
