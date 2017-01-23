@@ -568,6 +568,12 @@ function updateInvalidTypesClasses(element) {
  * @return {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
+  // TODO(mkhatib, #6930): Implement basic validation for custom inputs like
+  // amp-selector.
+  // If this is not a field type with checkValidity don't do anything.
+  if (!element.checkValidity) {
+    return true;
+  }
   let shouldPropagate = false;
   const previousValidityState = getUserValidityStateFor(element);
   const isCurrentlyValid = element.checkValidity();
