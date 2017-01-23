@@ -42,11 +42,11 @@ let VsyncTaskSpecDef;
 
 
 /**
- * Abstraction over requestAnimationFrame that align DOM read (measure)
- * and write (mutate) tasks in a single frame.
+ * Abstraction over requestAnimationFrame that batches DOM read (measure)
+ * and write (mutate) tasks in a single frame, to eliminate layout thrashing.
  *
  * NOTE: If the document is invisible due to prerendering (this includes
- * application level prerendering where the doc is rendered in a hidden
+ * application-level prerendering where the doc is rendered in a hidden
  * iframe or webview), then no frame will be scheduled.
  * @package Visible for type.
  */
