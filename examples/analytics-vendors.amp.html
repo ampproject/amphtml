@@ -27,6 +27,41 @@
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
 
+<!-- Acquia Lift example -->
+<amp-analytics type="acquialift" id="acquialift">
+<script type="application/json">
+{
+  "requests":
+    "customEvent": "${basicCapture}&en=${eventName}"
+  },
+  "vars": {
+    "siteId":"my-acquia-lift-site-id",
+    "accountId": "MYACCOUNTID",
+    "decisionApiUrl": "us-east-1-decisionapi.lift.acquia.com"
+  },
+  "triggers": {
+    "pageLoad": {
+      "on": "visible",
+      "request": "pageview"
+    },
+    "click": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "click",
+    },
+    "clickCustomEvent": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "customEvent",
+      "vars": {
+        "eventName": "MyCustomEventId"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+
 <!-- Adobe Analytics example -->
 <!--
 For complete documentation and additional examples please see: https://marketing.adobe.com/resources/help/en_US/sc/implement/accelerated-mobile-pages.html
