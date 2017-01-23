@@ -166,11 +166,14 @@ export class Bind {
 
     // Helper function for scanning a slice of elements.
     const scanFromTo = (start, end) => {
-      for (let i = start, el = elements[i]; i < end && el; i++) {
-        const attrs = el.attributes;
+      for (let i = start; i < end; i++) {
+        const el = elements[i];
+        if (!el) {
+          break;
+        }
         const bindings = [];
-        for (let j = 0; attrs[j]; j++) {
-          const binding = this.bindingForAttribute_(attrs[j], el);
+        for (const attr of el.attributes) {
+          const binding = this.bindingForAttribute_(attr, el);
           if (binding) {
             bindings.push(binding);
             evaluatees.push({
