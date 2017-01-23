@@ -161,7 +161,7 @@
     }
   </style>
 
-  <!-- <script src="./viewer-integr-messaging.js"></script> -->
+  <script src="./viewer-integr-messaging.js"></script>
 
   <script>
     var allViewers = [];
@@ -228,7 +228,7 @@
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
 
-      this.pollAMPDoc_();
+      // setInterval(this.pollAMPDoc_ ,10000);
 
       setTimeout(function() {
         this.iframe.style.visibility = 'hidden';
@@ -240,15 +240,14 @@
 
     Viewer.prototype.pollAMPDoc_ = function() {
       log('Viewer.prototype.pollAMPDoc_');
-      for (var i = 0; i < 20; ++i) {
-        if (this.iframe) {
-          var channel = new MessageChannel();
-          console.log('post message');
-          this.iframe.contentWindow./*OK*/postMessage('Hello AMP Doc! I\'m a Viewer!', '*', [channel.port2]);
-          channel.port1.onmessage = function(e) {
-              console.log('Im the viewer and I received a message!', e.data, e);
-          };
-        }
+      if (this.iframe) {
+        log('here');
+        var channel = new MessageChannel();
+        console.log('post message to ', this.iframe.contentWindow);
+        this.iframe.contentWindow./*OK*/postMessage('Hello AMP Doc! I\'m a Viewer!', '*', [channel.port2]);
+        channel.port1.onmessage = function(e) {
+            console.log('Im the Viewer and I received a message from an AMP Doc!', e.data, e);
+        };
       }
     };
 

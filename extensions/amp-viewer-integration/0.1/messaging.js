@@ -89,7 +89,7 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    console.log('message came in from the Viewer!', event.ports, event.data, event);
+    console.log('~~~~~I\'m an AMP doc and I just got a message!', event.data, event.ports);
 
     if (this.isWebView && !this.webViewPort_) {
       this.webViewPort_ = event.ports[0];

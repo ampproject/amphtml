@@ -78,6 +78,7 @@ export class AmpViewerIntegration {
 
   setup(messaging, viewer) {
     messaging.setRequestProcessor((type, payload, awaitResponse) => {
+      console.log('!!!called request processor!!!');
       return viewer.receiveMessage(
         type, /** @type {!JSONType} */ (payload), awaitResponse);
     });
