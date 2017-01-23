@@ -32,7 +32,7 @@ describes.realWin('amp-bind', {
   let canBindStub;
 
   beforeEach(() => {
-    toggleExperiment(env.win, 'AMP-BIND', true);
+    toggleExperiment(env.win, 'amp-bind', true);
 
     // Stub validator methods to return true for ease of testing.
     canBindStub = env.sandbox.stub(
@@ -44,7 +44,7 @@ describes.realWin('amp-bind', {
   });
 
   afterEach(() => {
-    toggleExperiment(env.win, 'AMP-BIND', false);
+    toggleExperiment(env.win, 'amp-bind', false);
   });
 
   /**
@@ -105,10 +105,10 @@ describes.realWin('amp-bind', {
   }
 
   it('should throw error if experiment is not enabled', () => {
-    toggleExperiment(env.win, 'AMP-BIND', false);
+    toggleExperiment(env.win, 'amp-bind', false);
     expect(() => {
       new Bind(env.ampdoc);
-    }).to.throw('Experiment "AMP-BIND" is disabled.');
+    }).to.throw('Experiment "amp-bind" is disabled.');
   });
 
   it('should scan for bindings when ampdoc is ready', () => {
@@ -131,7 +131,7 @@ describes.realWin('amp-bind', {
     env.sandbox.stub(window, 'AMP_MODE', {development: true});
     // Only the initial value for [a] binding does not match.
     createElementWithBinding('[a]="a" [b]="b" b="b"');
-    const errorStub = env.sandbox.stub(user(), 'error').withArgs('AMP-BIND');
+    const errorStub = env.sandbox.stub(user(), 'error').withArgs('amp-bind');
     return onBindReady(() => {
       expect(errorStub.callCount).to.equal(1);
     });
@@ -141,7 +141,7 @@ describes.realWin('amp-bind', {
     env.sandbox.stub(window, 'AMP_MODE', {development: true});
     // Only the initial value for [c] binding does not match.
     createElementWithBinding(`a [a]="true" [b]="false" c="false" [c]="false"`);
-    const errorStub = env.sandbox.stub(user(), 'error').withArgs('AMP-BIND');
+    const errorStub = env.sandbox.stub(user(), 'error').withArgs('amp-bind');
     return onBindReady(() => {
       expect(errorStub.callCount).to.equal(1);
     });
