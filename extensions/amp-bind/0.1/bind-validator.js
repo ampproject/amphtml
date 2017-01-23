@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
+import {parseSrcset} from '../../../src/srcset';
+
+const TAG = 'amp-bind';
+
 /**
  * @typedef {{
  *   allowedProtocols: (!Object<string,boolean>|undefined),
+ *   alternativeName: (string|undefined),
  *   blockedURLs: (Array<string>|undefined),
  * }}
  */
@@ -43,6 +48,16 @@ const GLOBAL_PROPERTY_RULES = {
  * @private {Object<string, Object<string, ?PropertyRulesDef>>}}
  */
 const ELEMENT_RULES = createElementRules_();
+
+/**
+ * Map whose keys comprise all properties that contain URLs.
+ * @private {Object<string, boolean>}
+ */
+const URL_PROPERTIES = {
+  'src': true,
+  'srcset': true,
+  'href': true,
+}
 
 /**
  * BindValidator performs runtime validation of Bind expression results.
@@ -72,20 +87,67 @@ export class BindValidator {
    * @return {boolean}
    */
   isResultValid(tag, property, value) {
-    const attrRules = this.rulesForTagAndProperty_(tag, property);
+    let rules = this.rulesForTagAndProperty_(tag, property);
 
     // If binding to (tag, property) is not allowed, return false.
-    if (attrRules === undefined) {
+    if (rules === undefined) {
       return false;
     }
 
     // If binding is allowed but have no specific rules, return true.
-    if (attrRules === null) {
+    if (rules === null) {
       return true;
     }
 
+    // `alternativeName` is a reference to another property's rules.
+    if (rules.alternativeName) {
+      rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
+    }
+
+    // Validate URL(s) if applicable.
+    if (URL_PROPERTIES.hasOwnProperty(property)) {
+      let urls;
+      if (property === 'srcset') {
+        let srcset;
+        try {
+          srcset = parseSrcset(attrValue);
+        } catch (e) {
+          user().error(TAG, 'Failed to parse srcset: ', e);
+          return false;
+        }
+        const sources = srcset.getSources();
+        urls = sources.map(source => source.url);
+      } else {
+        urls = [value];
+      }
+
+      for (let i = 0; i < urls.length; i++) {
+        if (!this.isUrlValid_(url, rules)) {
+          return false;
+        }
+      }
+    }
+
+    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
+    const blacklistedValueRegex = rules.blacklistedValueRegex;
+    if (blacklistedValueRegex && value) {
+      const re = new RegExp(blacklistedValueRegex, 'i');
+      if (re.test(value)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * @param {string} url
+   * @param {!PropertyRulesDef} rules
+   * @private
+   */
+  isUrlValid_(url, rules) {
     // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
-    const allowedProtocols = attrRules.allowedProtocols;
+    const allowedProtocols = rules.allowedProtocols;
     if (allowedProtocols && value) {
       const re = /^([^:\/?#.]+):[\s\S]*$/;
       const match = re.exec(value);
@@ -99,7 +161,7 @@ export class BindValidator {
     }
 
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blockedURLs = attrRules.blockedURLs;
+    const blockedURLs = rules.blockedURLs;
     if (blockedURLs && value) {
       for (let i = 0; i < blockedURLs.length; i++) {
         let decodedURL;
@@ -111,15 +173,6 @@ export class BindValidator {
         if (decodedURL.trim() === blockedURLs[i]) {
           return false;
         }
-      }
-    }
-
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blacklistedValueRegex = attrRules.blacklistedValueRegex;
-    if (blacklistedValueRegex && value) {
-      const re = new RegExp(blacklistedValueRegex, 'i');
-      if (re.test(value)) {
-        return false;
       }
     }
 
@@ -171,7 +224,9 @@ function createElementRules_() {
         },
         blockedURLs: ['__amp_source_origin'],
       },
-      // TODO: Support `srcset`.
+      srcset: {
+        alternativeName: 'src',
+      },
     },
     'AMP-SELECTOR': {
       selected: null,
@@ -192,7 +247,9 @@ function createElementRules_() {
         },
         blockedURLs: ['__amp_source_origin'],
       },
-      // TODO: Support `srcset`.
+      srcset: {
+        alternativeName: 'src',
+      },
     },
     A: {
       href: {
