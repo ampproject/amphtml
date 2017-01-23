@@ -21,10 +21,7 @@ import {UX_EXPERIMENT} from '../../../src/layout';
 const TAG = 'AmpAdUIHandler';
 
 /** @const */
-const HOLDER_HTML =
-    `<div class='-amp-ad-default-holder'>
-    <div class='-amp-ad-tag'>Ad</div>
-    </div>`;
+const HOLDER_HTML = `<div class='-amp-ad-default-holder'></div>`;
 
 /**
  * Ad display state.
@@ -90,7 +87,6 @@ export class AmpAdUIHandler {
     // Apply default fallback div when there's no default one
     const fallback = this.doc_.createElement('div');
     fallback.setAttribute('fallback', '');
-    fallback.classList.add('amp-ad-default-display');
     fallback./*OK*/innerHTML = HOLDER_HTML;
 
     this.baseInstance_.element.appendChild(fallback);
