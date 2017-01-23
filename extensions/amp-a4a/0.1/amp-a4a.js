@@ -469,8 +469,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!fetchResponse
               || !fetchResponse.arrayBuffer
               || fetchResponse.status == 204) {
-            dev().assert(this.uiHandler);
-            this.uiHandler.forceNoContentUI();
+            this.forceCollapse();
             return Promise.reject(NO_CONTENT_RESPONSE);
           }
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
@@ -849,6 +848,15 @@ export class AmpA4A extends AMP.BaseElement {
    * */
   handleResize(width, height) {
     user().info('A4A', `Received creative with size ${width}x${height}.`);
+  }
+
+  /**
+   * Forces the UI Handler to collapse this slot.
+   * @visibleForTesting
+   */
+  forceCollapse() {
+    dev().assert(this.uiHandler);
+    this.uiHandler.forceNoContentUI();
   }
 
   /**
