@@ -177,12 +177,28 @@ export class Xhr {
    * @return {!Promise<!JSONType>}
    */
   fetchJson(input, opt_init) {
+    return this.fetchJsonResponse(input, opt_init)
+        .then(response => response.json());
+  }
+
+  /**
+   * Makes a request to fetch JSON response, based on the fetch polyfill.
+   *
+   * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+   *
+   * See `fetchAmpCors_` for more detail.
+   *
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
+   * @return {!Promise<!FetchResponse>}
+   */
+  fetchJsonResponse(input, opt_init) {
     const init = opt_init || {};
     init.method = normalizeMethod_(init.method);
     setupJson_(init);
     return this.fetchAmpCors_(input, init).then(response => {
       return assertSuccess(response);
-    }).then(response => response.json());
+    });
   }
 
   /**
