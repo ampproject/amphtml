@@ -735,20 +735,18 @@ export class AmpA4A extends AMP.BaseElement {
       if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_();
-      }
-      if (!creativeMetaData.collapse) {
-        // Must be an AMP creative.
-        return this.renderAmpCreative_(creativeMetaData).catch(err => {
-          // Failed to render via AMP creative path so fallback to non-AMP
-          // rendering within cross domain iframe.
-          user().error(TAG, this.element.getAttribute('type'),
-            'Error injecting creative in friendly frame', err);
-          rethrowAsync(this.promiseErrorHandler_(err));
-          return this.renderNonAmpCreative_();
-        });
-      } else {
+      } else if (creativeMetaData.collapse) {
         return Promise.resolve();
       }
+      // Must be an AMP creative.
+      return this.renderAmpCreative_(creativeMetaData).catch(err => {
+        // Failed to render via AMP creative path so fallback to non-AMP
+        // rendering within cross domain iframe.
+        user().error(TAG, this.element.getAttribute('type'),
+          'Error injecting creative in friendly frame', err);
+        rethrowAsync(this.promiseErrorHandler_(err));
+        return this.renderNonAmpCreative_();
+      });
     }).catch(error => this.promiseErrorHandler_(error));
   }
 
