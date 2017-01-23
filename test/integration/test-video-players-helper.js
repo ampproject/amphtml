@@ -54,7 +54,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     afterEach(cleanUp);
   });
 
-  describe.configure().skipSafari().retryOnSaucelabs()
+  describe.configure().retryOnSaucelabs()
   .run('Actions', function() {
     this.timeout(TIMEOUT);
     it('should support mute, play, pause, unmute actions', function() {

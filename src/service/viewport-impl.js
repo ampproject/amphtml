@@ -1768,7 +1768,7 @@ function getViewportType(win, viewer) {
   }
   // Enable iOS Embedded mode so that it's easy to test against a more
   // realistic iOS environment w/o an iframe.
-  if (!isIframed(win) && (getMode(win).localDev || getMode(win).development)) {
+  if (getMode(win).test || getMode(win).localDev || getMode(win).development) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
   // Override to ios-embed for iframe-viewer mode.
