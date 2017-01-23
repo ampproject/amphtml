@@ -215,6 +215,7 @@ class Task {
 
 /**
  * A task that's run as part of AMP's startup sequence.
+ * @private
  */
 class StartupTask extends Task {
   /**
@@ -358,6 +359,7 @@ class Chunks {
    * If `opt_dequeue` is true, remove the returned task from the queue.
    * @param {boolean=} opt_dequeue
    * @return {?Task}
+   * @private
    */
   nextTask_(opt_dequeue) {
     let t = this.tasks_.peek();
