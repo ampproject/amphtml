@@ -30,18 +30,22 @@ describe('web components', () => {
   });
 
   it('reports when a method is browser native', () => {
-    expect(isNative(document.getElementById)).to.be.true;
+    expect(isNative(self.document.getElementById)).to.be.true;
     expect(isNative(() => {})).to.be.false;
   });
 
   it('should report whether native shadow dom supported', () => {
     const shadowDomV0 = !!Element.prototype.createShadowRoot;
     const shadowDomV1 = !!Element.prototype.attachShadow;
-    const nativeCEV0 = isNative(document.registerElement);
+    const nativeCEV0 = isNative(self.document.registerElement);
+    const nativeCEV1 = isNative(self
+        .Object
+        .getOwnPropertyDescriptor(self, 'customElements')
+        .get);
 
     //TODO: Remove native CE check once WebReflection/document-register-element#96 is fixed.
     expect(isShadowDomSupported()).to.equal(
-        (shadowDomV0 || shadowDomV1) && nativeCEV0);
+        (shadowDomV0 || shadowDomV1) && (nativeCEV0 || nativeCEV1));
   });
 });
 
@@ -54,7 +58,7 @@ describes.realWin('Web Components spec', {}, env => {
   });
 
   //TODO: Remove native CE check once WebReflection/document-register-element#96 is fixed.
-  if (isNative(document.registerElement)) {
+  if (isNative(self.document.registerElement)) {
     describe('Shadow DOM', () => {
       it('reports NONE when no spec is available', () => {
         win.Element.prototype.createShadowRoot = undefined;

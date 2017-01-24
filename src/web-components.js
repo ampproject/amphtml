@@ -26,13 +26,13 @@ export const ShadowDomVersion = {
 };
 
 /**
- * @type {string|undefined}
+ * @type {ShadowDomVersion|undefined}
  * @visibleForTesting
  */
 let shadowDomSupportedVersion;
 
 /**
- * @param {string|undefined} val
+ * @param {ShadowDomVersion|undefined} val
  * @visibleForTesting
  */
 export function setShadowDomSupportedVersionForTesting(val) {
@@ -49,17 +49,18 @@ export function isShadowDomSupported() {
 
 /**
  * Returns the supported version of Shadow DOM spec.
- * @param {function=} optional for testing
- * @return {string}
+ * @param {Function=} opt_elementClass optional for testing
+ * @return {ShadowDomVersion}
  */
-export function getShadowDomSupportedVersion(opt_element) {
+export function getShadowDomSupportedVersion(opt_elementClass) {
   if (shadowDomSupportedVersion === undefined) {
 
     //TODO: Remove native CE check once WebReflection/document-register-element#96 is fixed.
     if (!areNativeCustomElementsSupported()) {
       shadowDomSupportedVersion = ShadowDomVersion.NONE;
     } else {
-      shadowDomSupportedVersion = getShadowDomVersion(opt_element || Element);
+      shadowDomSupportedVersion =
+          getShadowDomVersion(opt_elementClass || Element);
     }
   }
 
@@ -77,7 +78,11 @@ function getShadowDomVersion(element) {
 }
 
 function areNativeCustomElementsSupported() {
-  return isNative(self.document.registerElement);
+  return isNative(self.document.registerElement) ||
+         isNative(self
+             .Object
+             .getOwnPropertyDescriptor(self, 'customElements')
+             .get);
 }
 
 /**
