@@ -86,7 +86,7 @@ Here's an example of usage of `type` for a provider called XYZ:
 
 Type attribute value: `acquialift`
 
-Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` must be specified. More information about Acquia Lift can be found at [https://docs.acquia.com/lift](docs.acquia.com/lift).
+Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` must be specified. More information about Acquia Lift can be found at [https://docs.acquia.com/lift](https://docs.acquia.com/lift).
 
 ### Adobe Analytics
 
