@@ -26,7 +26,7 @@ export function capirs(global, data) {
 
   global['begun_callbacks'] = {
     lib: {
-      init: function () {
+      init: () => {
         const block = global.document.createElement('div');
         block.id = 'x-' + Math.round(Math.random() * 1e8).toString(36);
         document.body.appendChild(block);
