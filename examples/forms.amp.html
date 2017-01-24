@@ -157,6 +157,8 @@
 <h4>Search (GET non-xhr cross origin - current host > httpbin.org)</h4>
 <form method="get" action="https://httpbin.org/html" target="_blank">
     <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
         <label>
             <span>Search for</span>
             <input type="search" name="term" required>
@@ -191,6 +193,8 @@
       action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
       target="_blank">
     <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
         <label>
             <span>Search for</span>
             <input type="search" name="term" required>
@@ -210,6 +214,8 @@
       action-xhr="/form/echo-json/post"
       target="_blank">
     <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
         <label>
             <span>Your name</span>
             <input type="text" name="name" id="name1" required>
@@ -240,6 +246,8 @@
       action-xhr="http://amp.localhost:8000/form/echo-json/post"
       target="_blank">
     <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
         <label>
             <span>Your name</span>
             <input type="text" name="name" id="name2" required>

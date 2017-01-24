@@ -59,6 +59,8 @@ export class FakeWindow {
     this.EventTarget = window.EventTarget;
     /** @const */
     this.DOMTokenList = window.DOMTokenList;
+    /** @const */
+    this.Math = window.Math;
 
     // Top Window points to itself if spec.top was not passed.
     /** @const */
