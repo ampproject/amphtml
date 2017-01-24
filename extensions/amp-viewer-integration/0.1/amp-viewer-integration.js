@@ -81,6 +81,7 @@ export class AmpViewerIntegration {
     // port/webivew case
     const preHandshake = new Promise(resolve => {
       this.win.addEventListener('message', e => {
+        console.log('+++++++ampdoc got a message:', e.type, e.data);
         // Viewer says: "I'm ready for you"
         if (
           // e.origin === '' && !e.source && //commenting out for now but need to uncomment before submit
@@ -95,6 +96,7 @@ export class AmpViewerIntegration {
       class WindowPortEmulator {
         addEventListener(eventType, handler) {
           listen(win, 'message', e => {
+            console.log('+++++++ampdoc got a message2:', e.type, e.data);
             if (
               // e.origin === '' && !e.source && //commenting out for now but need to uncomment before submit
               e.data.app == APP &&
