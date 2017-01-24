@@ -33,12 +33,12 @@ amp-ad iframe {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(200, 200, 200, 0.3);
+  background-color: rgba(200, 200, 200, 0.5);
 }
 
 .-amp-ad-default-holder:after {
   content: "Ad";
-  background-color: #696969;
+  background-color: rgba(50, 50, 50, 0.7);
   border-radius: 2px;
   color: #fff;
   font-size: 16px;
