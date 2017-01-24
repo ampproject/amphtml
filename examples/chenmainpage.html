@@ -21,19 +21,50 @@
     </iframe>
   </body>
   <script>
+    var intervalId;
+
     var channel = new MessageChannel();
     var para = document.querySelector('p');
     
-    var ifr = document.querySelector('iframe');
-    var otherWindow = ifr.contentWindow;
-    ifr.addEventListener("load", iframeLoaded, false);
+    var iframe = document.querySelector('iframe');
+    var otherWindow = iframe.contentWindow;
     
     function iframeLoaded() {
       otherWindow.postMessage('Hello from the main page!', '*', [channel.port2]);
     }
-    channel.port1.onmessage = handleMessage;
+
+    function start() {
+      channel.port1.onmessage = handleMessage;
+      intervalId = setInterval(pollAMPDoc.bind(this) , 1000); //poll every second
+    };
+
+    function pollAMPDoc() {
+      console.log('Viewer.prototype.pollAMPDoc_');
+      if (iframe) {
+        var handshakeChannel = new MessageChannel();
+        var message = {
+            app: '__AMPHTML__',
+            name: 'handshake-poll',
+          };
+        otherWindow./*OK*/postMessage(message, '*', [handshakeChannel.port2]);
+        handshakeChannel.port1.onmessage = function(e) {
+          if (e.type == 'message' && isChannelOpen(e.data)){
+            window.clearInterval(intervalId); //stop polling
+          }
+          this.handleMessage(e, intervalId, handshakeChannel);
+        }.bind(this);
+      }
+    };
+    function isChannelOpen(eventData) {
+      return eventData.app == '__AMPHTML__' && eventData.name == 'channelOpen';
+    };
+
     function handleMessage(e) {
-      	para.innerHTML = e.data;
+      console.log('viewer got message: ', e.type, e.data);
+      	para.innerHTML += '  --->  ' + e.data.name;
     }
+
+    start();
+
   </script>
 </html>

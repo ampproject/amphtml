@@ -18,12 +18,22 @@
   </body>
   <script>
   var para = document.querySelector('p');
-  onmessage = function(e) {
-      console.log(e.data, e.ports[0]);
-  	para.innerHTML += e.data + '\n';
+  // onmessage = function(e) {
+  var eventHandler = function(e) {
+    console.log('ampdoc received message: ',e.data, e.ports[0]);
+  	para.innerHTML += '  --->  ' + e.data.name;
   	// e.ports[0] is channel.port2, sent from the main frame
-  	e.ports[0].postMessage('Message back from the IFrame');
+    if (e.ports && e.ports.length == 1) {
+      var port = e.ports[0];
+      var message = {
+          app: '__AMPHTML__',
+          name: 'channelOpen',
+      };
+  	  port.postMessage(message);
+    }
   }
-  
+
+  window.addEventListener('message', eventHandler);
+
   </script>
 </html>
