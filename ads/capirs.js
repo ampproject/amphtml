@@ -22,22 +22,22 @@ import {writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function capirs(global, data) {
-    validateData(data, ['begunAutoPad', 'begunBlockId']);
+  validateData(data, ['begunAutoPad', 'begunBlockId']);
 
-    global.begun_callbacks = {
-        lib: {
-            init: function () {
-                var block = global.document.createElement('div');
-                block.id = "x-" + Math.round(Math.random() * 1e8).toString(36);
-                document.body.appendChild(block);
+  global['begun_callbacks'] = {
+    lib: {
+      init: function() {
+        const block = global.document.createElement('div');
+        block.id = 'x-' + Math.round(Math.random() * 1e8).toString(36);
+        document.body.appendChild(block);
 
-                Adf.banner.ssp(block.id, data.params, {
-                    'begun-auto-pad': data.begunAutoPad,
-                    'begun-block-id': data.begunBlockId
-                });
-            }
-        }
-    };
+        global.Adf.banner.ssp(block.id, data.params, {
+          'begun-auto-pad': data.begunAutoPad,
+          'begun-block-id': data.begunBlockId,
+        });
+      },
+    },
+  };
 
-    writeScript(global, '//ssp.rambler.ru/capirs_async.js');
+  writeScript(global, '//ssp.rambler.ru/capirs_async.js');
 }
