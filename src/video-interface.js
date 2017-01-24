@@ -106,7 +106,7 @@ export class VideoInterface {
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @public
    */
-  registerAction(method, handler) {}
+  registerAction(unusedMethod, unusedHandler) {}
 }
 
 
