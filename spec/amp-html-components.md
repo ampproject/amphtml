@@ -159,7 +159,7 @@ AMP-conforming content may not have any JavaScript. Some components, like embedd
 
 **Service-specific JavaScript built-in to a component**
 
-Specific services may contribute their own components to the expanded set of AMP components, which can then be loaded by an AMP file at runtime. These components may execute JavaScript in the context of the main page. They must conform to the specification provided in the “Third-Party Components” section in order to be included.
+Specific services may contribute their own components to the expanded set of AMP components, which can then be loaded by an AMP file at runtime. These components may execute JavaScript in the context of the main page. They must conform to the specification provided in the “[Extended Components](#extended-components)” section in order to be included.
 
 These types of components will be prioritized behind components that are more generalized, to work with a variety of services and endpoints.
 
