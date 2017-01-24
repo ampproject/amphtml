@@ -163,21 +163,16 @@ export class Bind {
 
     // TODO(choumx): Use TreeWalker if this is too slow.
     const elements = body.getElementsByTagName('*');
+    const numElements = elements.length;
 
     // Helper function for scanning a slice of elements.
     const scanFromTo = (start, end) => {
-      for (let i = start; i < end; i++) {
-        const el = elements[i];
-        if (!el) {
-          break;
-        }
+      for (let i = start; i < end && i < numElements; i++) {
         const bindings = [];
+        const el = elements[i];
         const attrs = el.attributes;
-        for (let j = 0;; j++) {
+        for (let j = 0, numAttrs = attrs.length; j < numAttrs; j++) {
           const attr = attrs[j];
-          if (!attr) {
-            break;
-          }
           const binding = this.bindingForAttribute_(attr, el);
           if (binding) {
             bindings.push(binding);
