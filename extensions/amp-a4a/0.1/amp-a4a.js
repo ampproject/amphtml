@@ -62,7 +62,7 @@ import {rethrowAsync} from '../../../src/log';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {generateSentinel} from '../../../src/3p-frame';
-import {getContextMetadata} from '../../../src/attributes';
+import {getContextMetadata} from '../../../src/iframe-attributes';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';

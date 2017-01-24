@@ -191,6 +191,10 @@ describe('amp-a4a', () => {
     expect(child.src).to.match(/^https?:[^?#]+nameframe(\.max)?\.html/);
     const nameData = child.getAttribute('name');
     expect(JSON.parse.bind(null, nameData), nameData).not.to.throw(Error);
+    const attributes = JSON.parse(nameData);
+    expect(attributes).to.be.ok;
+    expect(attributes._context).to.be.ok;
+    expect(attributes._context.sentinel).to.be.ok;
     expect(child).to.be.visible;
   }
 
@@ -201,7 +205,13 @@ describe('amp-a4a', () => {
     const child = element.querySelector('iframe[src]');
     expect(child).to.be.ok;
     expect(child.src).to.have.string(srcUrl);
-    expect(child.getAttribute('name')).not.to.be.ok;
+    const nameData = child.getAttribute('name');
+    expect(nameData).to.be.ok;
+    expect(JSON.parse.bind(null, nameData), nameData).not.to.throw(Error);
+    const attributes = JSON.parse(nameData);
+    expect(attributes).to.be.ok;
+    expect(attributes._context).to.be.ok;
+    expect(attributes._context.sentinel).to.be.ok;
     expect(child).to.be.visible;
   }
 
