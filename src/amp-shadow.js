@@ -29,6 +29,7 @@ import {
 } from './runtime';
 import {deactivateChunking} from './chunk';
 import {stubElements} from './custom-element';
+import {maybeTrackImpression} from './impression';
 
 // This feature doesn't make sense in shadow mode as it only applies to
 // background rendered iframes;
@@ -39,6 +40,8 @@ installDocService(self, /* isSingleDoc */ false);
 
 // Core services.
 installRuntimeServices(self);
+
+maybeTrackImpression(self);
 
 // Builtins.
 installBuiltins(self);

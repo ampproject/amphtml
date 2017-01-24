@@ -27,7 +27,7 @@ import {cryptoFor} from '../../../src/crypto';
 import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
 import {Activity} from './activity-impl';
-import {installCidService} from './cid-impl';
+import {Cid} from './cid-impl';
 import {installCryptoService} from './crypto-impl';
 import {
     InstrumentationService,
@@ -40,8 +40,8 @@ import {ANALYTICS_CONFIG} from './vendors';
 AMP.registerServiceForDoc(
     'amp-analytics-instrumentation', InstrumentationService);
 AMP.registerServiceForDoc('activity', Activity);
+AMP.registerServiceForDoc('cid', Cid);
 
-installCidService(AMP.win);
 installCryptoService(AMP.win);
 variableServiceFor(AMP.win);
 

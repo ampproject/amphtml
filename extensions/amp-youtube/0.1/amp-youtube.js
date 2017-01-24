@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../../src/ampdoc';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -123,8 +122,7 @@ class AmpYoutube extends AMP.BaseElement {
       this.buildImagePlaceholder_();
     }
 
-    const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
-    installVideoManagerForDoc(ampdoc);
+    installVideoManagerForDoc(this.getAmpDoc());
   }
 
   /** @return {string} */
@@ -183,15 +181,14 @@ class AmpYoutube extends AMP.BaseElement {
     this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
-
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
 
-    this.win.addEventListener(
+    const ampdoc = this.getAmpDoc();
+    ampdoc.win.addEventListener(
         'message', event => this.handleYoutubeMessages_(event));
-
-    videoManagerForDoc(this.win.document).register(this);
+    videoManagerForDoc(ampdoc).register(this);
 
     return this.loadPromise(iframe)
         .then(() => this.listenToFrame_())

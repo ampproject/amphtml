@@ -16,7 +16,7 @@
 
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
-import {cidFor} from '../../../src/cid';
+import {cidForDoc} from '../../../src/cid';
 import {viewerForDoc} from '../../../src/viewer';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
@@ -124,7 +124,7 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
     return Promise.resolve(ampdoc.win.Math.random() * 100);
   }
 
-  const cidPromise = cidFor(ampdoc.win).then(cidService => cidService.get(
+  const cidPromise = cidForDoc(ampdoc).then(cidService => cidService.get(
         {scope: opt_cidScope, createCookieIfNotPresent: true},
         Promise.resolve()));
 
