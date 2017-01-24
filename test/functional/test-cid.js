@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {cidFor} from '../../src/cid';
+import {cidForDoc} from '../../src/cid';
 import {
-  installCidService,
+  installCidServiceForDoc,
   getProxySourceOrigin,
   viewerBaseCid,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
@@ -131,7 +131,7 @@ describe('cid', () => {
         });
 
     return Promise
-        .all([installCidService(fakeWin), installCryptoService(fakeWin)])
+        .all([installCidServiceForDoc(ampdoc), installCryptoService(fakeWin)])
         .then(results => {
           cid = results[0];
           crypto = results[1];
@@ -285,7 +285,7 @@ describe('cid', () => {
 
   it('should time out reading from viewer', () => {
     shouldSendMessageTimeout = true;
-    const promise = viewerBaseCid(fakeWin);
+    const promise = viewerBaseCid(ampdoc);
     return Promise.resolve().then(() => {
       clock.tick(10001);
       return promise;
@@ -328,17 +328,23 @@ describe('cid', () => {
     const win = {
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/',
+        search: '',
       },
       services: {},
+      document: {
+        body: {},
+      },
     };
+    const ampdocService = installDocService(win, /* isSingleDoc */ true);
+    const ampdoc2 = ampdocService.getAmpDoc();
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
     installPlatformService(win);
-    installViewerServiceForDoc(ampdoc);
-    installCidService(win);
+    installViewerServiceForDoc(ampdoc2);
+    installCidServiceForDoc(ampdoc2);
     installCryptoService(win);
-    return cidFor(win).then(cid => {
+    return cidForDoc(ampdoc2).then(cid => {
       return cid.get('foo', hasConsent).then(c1 => {
         return cid.get('foo', hasConsent).then(c2 => {
           expect(c1).to.equal(c2);
