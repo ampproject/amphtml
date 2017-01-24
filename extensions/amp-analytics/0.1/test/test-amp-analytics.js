@@ -16,6 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
+import {ClickEventTracker} from '../events';
 import {Crypto} from '../crypto-impl';
 import {InstrumentationService} from '../instrumentation';
 import {variableServiceFor} from '../variables';
@@ -328,6 +329,16 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('should tolerate invalid triggers', function() {
+    const clock = sandbox.useFakeTimers();
+    const analytics = getAnalyticsTag();
+    // An incomplete click request.
+    analytics.addTriggerNoInline_({'on': 'click'});
+    expect(() => {
+      clock.tick(1);
+    }).to.throw(/Failed to process trigger/);
+  });
+
   it('expands recursive requests', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': '/bar&${foobar}&baz', 'foobar': '${foo}'},
@@ -502,16 +513,23 @@ describe('amp-analytics', function() {
   it('expands element level vars with higher precedence than trigger vars',
     () => {
       const analytics = getAnalyticsTag();
-      sandbox.stub(ins, 'isTriggerAllowed_').returns(true);
+      const analyticsGroup = ins.createAnalyticsGroup(analytics.element);
+
       const el1 = windowApi.document.createElement('div');
       el1.className = 'x';
       el1.dataset.varsTest = 'foo';
-      ins.addListener(
-        {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
-        function(arg) {
-          expect(arg.vars.test).to.equal('foo');
-        }, analytics.element);
-      ins.onClick_({target: el1});
+      analyticsGroup.root_.getRootElement().appendChild(el1);
+
+      const handlerSpy = sandbox.spy();
+      analyticsGroup.addTrigger(
+          {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
+          handlerSpy);
+      analyticsGroup.root_.getTrackerOptional('click')
+          .clickObservable_.fire({target: el1});
+
+      expect(handlerSpy).to.be.calledOnce;
+      const event = handlerSpy.args[0][0];
+      expect(event.vars.test).to.equal('foo');
     });
 
   it('expands config vars with higher precedence than platform vars', () => {
@@ -621,31 +639,49 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('expands selector with config variable', () => {
-    const addListenerSpy = sandbox.spy(ins, 'addListener');
+  it('should create and destroy analytics group', () => {
     const analytics = getAnalyticsTag({
       requests: {foo: 'https://example.com/bar'},
       triggers: [{on: 'click', selector: '${foo}', request: 'foo'}],
       vars: {foo: 'bar'},
     });
     return waitForNoSendRequest(analytics).then(() => {
-      expect(addListenerSpy.callCount).to.equal(1);
-      expect(addListenerSpy.args[0][0]['selector']).to.equal('bar');
+      expect(analytics.analyticsGroup_).to.be.ok;
+      const disposeStub = sandbox.stub(analytics.analyticsGroup_, 'dispose');
+      analytics.detachedCallback();
+      expect(analytics.analyticsGroup_).to.be.null;
+      expect(disposeStub).to.be.calledOnce;
+    });
+  });
+
+  it('expands selector with config variable', () => {
+    const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+    const addStub = sandbox.stub(tracker, 'add');
+    const analytics = getAnalyticsTag({
+      requests: {foo: 'https://example.com/bar'},
+      triggers: [{on: 'click', selector: '${foo}', request: 'foo'}],
+      vars: {foo: 'bar'},
+    });
+    return waitForNoSendRequest(analytics).then(() => {
+      expect(addStub).to.be.calledOnce;
+      const config = addStub.args[0][2];
+      expect(config['selector']).to.equal('bar');
     });
   });
 
   function selectorExpansionTest(selector) {
     it('expand selector value: ' + selector, () => {
-      const addListenerSpy = sandbox.spy(ins, 'addListener');
+      const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+      const addStub = sandbox.stub(tracker, 'add');
       const analytics = getAnalyticsTag({
         requests: {foo: 'https://example.com/bar'},
         triggers: [{on: 'click', selector: '${foo}, ${bar}', request: 'foo'}],
         vars: {foo: selector, bar: '123'},
       });
       return waitForNoSendRequest(analytics).then(() => {
-        expect(addListenerSpy.callCount).to.equal(1);
-        expect(addListenerSpy.args[0][0]['selector']).to
-            .equal(selector + ', 123');
+        expect(addStub).to.be.calledOnce;
+        const config = addStub.args[0][2];
+        expect(config['selector']).to.equal(selector + ', 123');
       });
     });
   }
@@ -657,14 +693,16 @@ describe('amp-analytics', function() {
         .map(selectorExpansionTest);
 
   it('does not expands selector with platform variable', () => {
-    const addListenerSpy = sandbox.spy(ins, 'addListener');
+    const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+    const addStub = sandbox.stub(tracker, 'add');
     const analytics = getAnalyticsTag({
       requests: {foo: 'https://example.com/bar'},
       triggers: [{on: 'click', selector: '${title}', request: 'foo'}],
     });
     return waitForNoSendRequest(analytics).then(() => {
-      expect(addListenerSpy.callCount).to.equal(1);
-      expect(addListenerSpy.args[0][0]['selector']).to.equal('TITLE');
+      expect(addStub).to.be.calledOnce;
+      const config = addStub.args[0][2];
+      expect(config['selector']).to.equal('TITLE');
     });
   });
 
