@@ -24,12 +24,6 @@ import {writeScript} from '../3p/3p';
 export function capirs(global, data) {
     validateData(data, ['begunAutoPad', 'begunBlockId']);
 
-    window.context.observeIntersection(function (changes) {
-        changes.forEach(function (c) {
-            console.info('Height of intersection', c.intersectionRect.height);
-        });
-    });
-
     global.begun_callbacks = {
         lib: {
             init: function () {
@@ -39,15 +33,7 @@ export function capirs(global, data) {
 
                 Adf.banner.ssp(block.id, data.params, {
                     'begun-auto-pad': data.begunAutoPad,
-                    'begun-block-id': data.begunBlockId,
-                });
-
-                window.context.onResizeSuccess(function (requestedHeight, requestedWidth) {
-                    console.log("onResizeSuccess", requestedHeight, requestedWidth);
-                });
-
-                window.context.onResizeDenied(function (requestedHeight, requestedWidth) {
-                    console.log("onResizeDenied", requestedHeight, requestedWidth);
+                    'begun-block-id': data.begunBlockId
                 });
             }
         }
