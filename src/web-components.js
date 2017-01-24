@@ -88,7 +88,7 @@ function areNativeCustomElementsSupported() {
 /**
  * Returns `true` if the method is natively implemented by the browser
  * @visibleForTesting
- * @param {Function} method
+ * @param {Function=} method
  * @return {boolean}
  */
 export function isNative(method) {
