@@ -79,7 +79,7 @@ For example, the following is possible in AMP.
   </tr>
   <tr>
     <td>submit</td>
-    <td>Fired when the form is submitted</td>
+    <td>Fired when the form is submitted.</td>
   </tr>
   <tr>
     <td>submit-success</td>
@@ -101,23 +101,19 @@ For example, the following is possible in AMP.
   </tr>
   <tr>
     <td>hide</td>
-    <td>Hides the target element</td>
+    <td>Hides the target element.</td>
   </tr>
 </table>
 
-### amp-sidebar
+### amp-image-lightbox
 <table>
   <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
     <td>open (default)</td>
-    <td>Opens the sidebar</td>
-  </tr>
-  <tr>
-    <td>close</td>
-    <td>Closes the sidebar</td>
-  </tr>
-  <tr>
-    <td>toggle</td>
-    <td>Toggles the state of the sidebar</td>
+    <td>Opens the image lightbox with the source image being the one that triggered the action.</td>
   </tr>
 </table>
 
@@ -129,15 +125,11 @@ For example, the following is possible in AMP.
   </tr>
   <tr>
     <td>open (default)</td>
-    <td>Opens the lightbox</td>
+    <td>Opens the lightbox.</td>
   </tr>
   <tr>
     <td>close</td>
-    <td>Closes the lightbox</td>
-  </tr>
-  <tr>
-    <td>(default)</td>
-    <td>Opens the image lightbox with the source image being the one that triggered the action.</td>
+    <td>Closes the lightbox.</td>
   </tr>
 </table>
 
@@ -153,6 +145,26 @@ For example, the following is possible in AMP.
   </tr>
 </table>
 
+### amp-sidebar
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>open (default)</td>
+    <td>Opens the sidebar.</td>
+  </tr>
+  <tr>
+    <td>close</td>
+    <td>Closes the sidebar.</td>
+  </tr>
+  <tr>
+    <td>toggle</td>
+    <td>Toggles the state of the sidebar.</td>
+  </tr>
+</table>
+
 ### amp-user-notification
 <table>
   <tr>
@@ -161,7 +173,7 @@ For example, the following is possible in AMP.
   </tr>
   <tr>
     <td>dismiss (default)</td>
-    <td>Hides the referenced user notification element</td>
+    <td>Hides the referenced user notification element.</td>
   </tr>
 </table>
 
@@ -173,19 +185,19 @@ For example, the following is possible in AMP.
   </tr>
   <tr>
     <td>play</td>
-    <td>Plays the video</td>
+    <td>Plays the video.</td>
   </tr>
   <tr>
     <td>pause</td>
-    <td>Pauses the video</td>
+    <td>Pauses the video.</td>
   </tr>
   <tr>
     <td>mute</td>
-    <td>Mutes the video</td>
+    <td>Mutes the video.</td>
   </tr>
   <tr>
     <td>unmute</td>
-    <td>Unmutes the video</td>
+    <td>Unmutes the video.</td>
   </tr>
 </table>
 
@@ -196,7 +208,7 @@ actions that apply to the whole document.
 
 <table>
   <tr>
-    <th width="30%">Action</th>
+    <th>Action</th>
     <th>Description</th>
   </tr>
   <tr>
