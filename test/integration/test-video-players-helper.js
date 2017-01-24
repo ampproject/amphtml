@@ -26,7 +26,6 @@ import {
 } from '../../testing/iframe';
 
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
-
   const TIMEOUT = 20000;
   let fixtureGlobal;
   let videoGlobal;
@@ -228,7 +227,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
       video.setAttribute('id', 'myVideo');
       video.setAttribute('controls', '');
       video.setAttribute('layout', 'fixed');
-      video.setAttribute('width', '100');
+      video.setAttribute('width', '300px');
       video.setAttribute('height', '50vh');
 
       video.style.position = 'absolute';
