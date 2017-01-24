@@ -15,7 +15,6 @@
  */
 
 
-import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
@@ -53,49 +52,30 @@ export class Messaging {
 
   /**
    * Conversation (messaging protocol) between me and Bob.
-   * @param {!Window} source
-   * @param {!Window} target
-   * @param {string} targetOrigin
+   * @param {!MessagePort} pipe
    */
-  constructor(source, target, targetOrigin) {
-    /** @private {!Window} */
-    this.source_ = source;
+  constructor(port) {
+    this.port_ = port;
     /** @private {!number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};
-    /** @const @private {!Window} */
-    this.target_ = target;
-    /** @const @private {string} */
-    this.targetOrigin_ = targetOrigin;
     /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
     this.requestProcessor_ = null;
 
-    dev().assert(this.targetOrigin_, 'Target origin must be specified!');
-
-    listen(source, 'message', this.handleMessage_.bind(this));
+    this.port_.addEventListener('message', this.handleMessage_.bind(this)); //listen on port switch
   }
 
   /**
    * Bob sent me a message. I need to decide if it's a new request or
    * a response to a previous 'conversation' we were having.
-   * @param {?Event} event
+   * @param {!Event} event
    * @private
    */
   handleMessage_(event) {
-    if (!event || event.source != this.target_ ||
-      event.origin != this.targetOrigin_) {
-      dev().fine(TAG +
-        ': handleMessage_, This message is not for us: ', event);
-      return;
-    }
+    console.log('~~~~~I\'m an AMP doc and I just got a message!', event.ports, event.data);
     /** @type {Message} */
     const message = event.data;
-    if (message.app != APP) {
-      dev().fine(
-        TAG + ': handleMessage_, wrong APP: ', event);
-      return;
-    }
     if (message.type == MessageType.REQUEST) {
       this.handleRequest_(message);
     } else if (message.type == MessageType.RESPONSE) {
@@ -173,7 +153,7 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
-    this.target_./*OK*/postMessage(message, this.targetOrigin_);
+    this.port_.postMessage(message);
   }
 
   /**
@@ -193,6 +173,7 @@ export class Messaging {
     if (message.rsvp) {
       const promise =
         this.requestProcessor_(message.name, message.data, message.rsvp);
+
       if (!promise) {
         this.sendResponseError_(
           requestId, message.name, new Error('no response'));

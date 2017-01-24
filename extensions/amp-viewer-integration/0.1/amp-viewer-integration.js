@@ -16,10 +16,11 @@
 
 import {Messaging} from './messaging.js';
 import {viewerForDoc} from '../../../src/viewer';
-import {listenOnce} from '../../../src/event-helper';
+import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-integration';
+const APP = '__AMPHTML__';
 
 /**
  * @enum {string}
@@ -56,31 +57,85 @@ export class AmpViewerIntegration {
     dev().fine(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
-    if (!this.unconfirmedViewerOrigin_) {
-      dev().fine(TAG, 'Viewer origin not specified.');
-      return null;
+    this.unconfirmedViewerOrigin_ = ''; // mocking what would happen with a native app.
+
+    const win = this.win;
+    const unconfirmedViewerOrigin = this.unconfirmedViewerOrigin_;
+    if (this.unconfirmedViewerOrigin_) {
+      class WindowPortEmulator {
+        addEventListener(eventType, handler) {
+          listen(win, 'message', e => {
+            if (e.origin == unconfirmedViewerOrigin &&
+                e.source == win.parent && e.data.app == APP) {
+              handler(e);
+            }
+          });
+        }
+        postMessage(data) {
+          win.parent./*OK*/postMessage(data, unconfirmedViewerOrigin);
+        }
+      }
+      return this.openAndStart_(viewer, new WindowPortEmulator());
     }
 
-    dev().fine(TAG, 'listening for messages', this.unconfirmedViewerOrigin_);
-    const messaging = new Messaging(
-      this.win, this.win.parent, this.unconfirmedViewerOrigin_);
+    // port/webivew case
+    const preHandshake = new Promise(resolve => {
+      this.win.addEventListener('message', e => {
+        // Viewer says: "I'm ready for you"
+        if (
+          // e.origin === '' && !e.source && //commenting out for now but need to uncomment before submit
+            e.data.app == APP &&
+            e.data.name == 'handshake-poll' &&
+            e.ports && e.ports.length == 1) {
+          resolve(e.ports[0]);
+        }
+      });
+    });
+    return preHandshake.then(port => {
+      class WindowPortEmulator {
+        addEventListener(eventType, handler) {
+          listen(win, 'message', e => {
+            if (
+              // e.origin === '' && !e.source && //commenting out for now but need to uncomment before submit
+              e.data.app == APP &&
+              e.ports && e.ports.length == 1) {
+              this.port_ = e.ports[0];
+              handler(e);
+            }
+          });
+        }
+        postMessage(data) {
+          console.log('___________________', this.port_, port);
+          const myPort = this.port_ ? this.port_ : port;
+          myPort./*OK*/postMessage(data);
+        }
+      }
+      return this.openAndStart_(viewer, new WindowPortEmulator());
+    });
+  }
 
+  openAndStart_(viewer, pipe) {
+    const messaging = new Messaging(pipe);
     dev().fine(TAG, 'Send a handshake request');
     return this.openChannel(messaging)
         .then(() => {
+          console.log('@@@@@@@@@@@ channel opened! @@@@@@@@@@@@@');
           dev().fine(TAG, 'Channel has been opened!');
-
-          messaging.setRequestProcessor((type, payload, awaitResponse) => {
-            return viewer.receiveMessage(
-              type, /** @type {!JSONType} */ (payload), awaitResponse);
-          });
-
-          viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
-            dev().assertString(this.unconfirmedViewerOrigin_));
-
-          listenOnce(
-            this.win, 'unload', this.handleUnload_.bind(this, messaging));
+          this.setup(messaging, viewer);
         });
+  }
+
+  setup(messaging, viewer) {
+    messaging.setRequestProcessor((type, payload, awaitResponse) => {
+      return viewer.receiveMessage(
+        type, /** @type {!JSONType} */ (payload), awaitResponse);
+    });
+
+    viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
+      dev().assertString(this.unconfirmedViewerOrigin_));
+
+    listenOnce(
+      this.win, 'unload', this.handleUnload_.bind(this, messaging));
   }
 
   /**

@@ -34,7 +34,7 @@ var APP = '__AMPHTML__';
  * @param {string=} opt_targetId
  * @constructor
  */
-function ViewerMessaging(target, targetOrigin, requestProcessor, opt_targetId) {
+function ViewerMessaging(target, targetOrigin, requestProcessor, opt_targetId, opt_pipe) {
   this.requestIdCounter_ = 0;
   this.waitingForResponse_ = {};
 
@@ -47,11 +47,14 @@ function ViewerMessaging(target, targetOrigin, requestProcessor, opt_targetId) {
   /** @private {function(string, *, boolean):(!Promise<*>|undefined)} */
   this.requestProcessor_ = requestProcessor;
 
-  if (!this.targetOrigin_) {
-    throw new Error('Target origin must be specified');
+  this.pipe_ = opt_pipe;
+
+  if (opt_pipe) {
+    opt_pipe.addEventListener(this.onMessage_.bind(this));
+  } else {
+    window.addEventListener('message', this.onMessage_.bind(this), false);
   }
 
-  window.addEventListener('message', this.onMessage_.bind(this), false);
 }
 
 
@@ -96,10 +99,10 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
  * @private
  */
 ViewerMessaging.prototype.onMessage_ = function(event) {
-  if (event.source != this.target_ || event.origin != this.targetOrigin_) {
+  var message = event.data;
+  if (event.type != 'message' || !message || message.app != APP) {
     return;
   }
-  var message = event.data;
   if (message.type == MessageType.REQUEST) {
     this.onRequest_(message);
   }
@@ -154,7 +157,11 @@ ViewerMessaging.prototype.onResponse_ = function(message) {
  * @private
  */
 ViewerMessaging.prototype.sendMessage_ = function(message) {
-  this.target_./*OK*/postMessage(message, this.targetOrigin_);
+  if (!!this.targetOrigin_) {
+    this.target_./*OK*/postMessage(message, this.targetOrigin_);
+  } else {
+    this.pipe_./*OK*/postMessage(message);
+  }
 };
 
 
