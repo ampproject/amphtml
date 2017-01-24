@@ -73,7 +73,7 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    console.log('~~~~~I\'m an AMP doc and I just got a message!', event.ports, event.data);
+    console.log('+++++++ampdoc got a message2:', event.type, event.data);
     /** @type {Message} */
     const message = event.data;
     if (message.type == MessageType.REQUEST) {

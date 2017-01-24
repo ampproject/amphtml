@@ -179,6 +179,7 @@
       this.requestIdCounter_ = 0;
       this.pollingIntervalIds_ = [];
       this.intervalCtr = 0;
+      this.messageHandlers_ = [];
 
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
@@ -255,64 +256,65 @@
     Viewer.prototype.pollAMPDoc_ = function(intervalCtr) {
        log('Viewer.prototype.pollAMPDoc_');
        if (this.iframe) {
-        var handshakeChannel = new MessageChannel();
+        var channel = new MessageChannel();
         var message = {
             app: APP,
             name: 'handshake-poll',
           };
-         this.iframe.contentWindow./*OK*/postMessage(message, '*', [handshakeChannel.port2]);
-         handshakeChannel.port1.onmessage = function(e) {
-          this.handleMessage_(e, intervalCtr, handshakeChannel);
+         this.iframe.contentWindow./*OK*/postMessage(message, '*', [channel.port2]);
+         channel.port1.onmessage = function(e) {
+           if (this.isChannelOpen_(e)) {
+            window.clearInterval(this.pollingIntervalIds_[intervalCtr]); //stop polling
+            this.completeHandshake_(channel, e.data.requestid);
+           }
+           this.handleMessage_(e, channel);
          }.bind(this);
        }
      };
 
-    Viewer.prototype.isChannelOpen_ = function(eventData) {
-      return eventData.app == APP &&
-        eventData.name == 'channelOpen';
+    Viewer.prototype.isChannelOpen_ = function(e) {
+      return e.type == 'message' && e.data.app == APP && e.data.name == 'channelOpen';
     };
 
-    Viewer.prototype.handleMessage_ = function(e, intervalCtr, handshakeChannel) {
-      if (e.type == 'message') {
-        if (this.isChannelOpen_(e.data)) {
-          log('Viewer ' + this.id + ' messaging established!');
+    Viewer.prototype.completeHandshake_ = function(channel, requestId) {
+      log('Viewer ' + this.id + ' messaging established!');
+      var message = {
+          app: APP,
+          requestid: requestId,
+          type: MessageType.RESPONSE,
+      };
+      console.log('############## viewer posting Message', message);
+      channel.port1./*OK*/postMessage(message);
 
-          window.clearInterval(this.pollingIntervalIds_[intervalCtr]); //stop polling
-          var message = {
-              app: APP,
-              requestid: e.data.requestid,
-              type: MessageType.RESPONSE,
-          };
-            console.log('############## viewer posting Message', message);
-          handshakeChannel.port1./*OK*/postMessage(message);
-
-          var messagingChannel = new MessageChannel();
-
-          class WindowPortEmulator {
-            addEventListener(handler) {
-              console.log('$$$ viewer handler:', handler);
-              // messagingChannel.port1.onmessage = function(e) {
-              // handshakeChannel.port1.onmessage = function(e) {
-    // console.log('$$$$$$got a message!!!!', e);
-              // };
-            }
-            postMessage(data) {
-              console.log('############## viewer posting Message', data);
-              handshakeChannel.port1./*OK*/postMessage(data);
-            }
-          }
-
-          this.messaging_ = new ViewerMessaging(e.target, '',
-              this.processRequest_.bind(this), this.iframe.id, new WindowPortEmulator());
-
-          this.sendRequest_('visibilitychange', {
-              state: this.visibilityState_,
-              prerenderSize: this.prerenderSize
-          }, true);
-       } else {
-         console.log('************** viewer got a message,', e.data, e);
-       }
+      class WindowPortEmulator {
+        constructor(messageHandlers, id) {
+          this.messageHandlers_ = messageHandlers;
+          this.id_ = id;
+        }
+        addEventListener(messageType, messageHandler) {
+          console.log('messageHandler', messageHandler);
+          this.messageHandlers_[this.id_] = messageHandler;
+        }
+        postMessage(data) {
+          console.log('############## viewer posting Message', data);
+          channel.port1./*OK*/postMessage(data);
+        }
       }
+
+      this.messaging_ = new ViewerMessaging('', '',
+          this.processRequest_.bind(this), this.iframe.id, new WindowPortEmulator(this.messageHandlers_, this.id));
+
+      this.sendRequest_('visibilitychange', {
+          state: this.visibilityState_,
+          prerenderSize: this.prerenderSize
+      }, true);
+    };
+
+    Viewer.prototype.handleMessage_ = function(e, channel) {
+      if (this.messageHandlers_[this.id]) {
+        this.messageHandlers_[this.id]();
+      }
+      console.log('************** viewer got a message,', e.data);
     };
 
 

@@ -95,21 +95,10 @@ export class AmpViewerIntegration {
     return preHandshake.then(port => {
       class WindowPortEmulator {
         addEventListener(eventType, handler) {
-          listen(win, 'message', e => {
-            console.log('+++++++ampdoc got a message2:', e.type, e.data);
-            if (
-              // e.origin === '' && !e.source && //commenting out for now but need to uncomment before submit
-              e.data.app == APP &&
-              e.ports && e.ports.length == 1) {
-              this.port_ = e.ports[0];
-              handler(e);
-            }
-          });
+          port.onmessage = handler;
         }
         postMessage(data) {
-          console.log('___________________', this.port_, port);
-          const myPort = this.port_ ? this.port_ : port;
-          myPort./*OK*/postMessage(data);
+          port./*OK*/postMessage(data);
         }
       }
       return this.openAndStart_(viewer, new WindowPortEmulator());
