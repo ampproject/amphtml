@@ -16,7 +16,7 @@
 
 import {ampdocServiceFor} from '../../../src/ampdoc';
 import {elementByTag} from '../../../src/dom';
-import {listen} from '../../../src/event-helper'
+import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
 import {dev} from '../../../src/log';
@@ -58,7 +58,7 @@ class AmpVideo extends AMP.BaseElement {
       /** @private {?Element} */
       this.video_ = null;
 
-      /** @private {?bool}  */
+      /** @private {?boolean}  */
       this.muted_ = false;
     }
 
@@ -179,9 +179,9 @@ class AmpVideo extends AMP.BaseElement {
      * @private
      */
     installEventHandlers_() {
-      dev().assertElement(this.video_);
-      this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], this.video_);
-      listen(this.video_, 'volumechange', () => {
+      const video = dev().assertElement(this.video_);
+      this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], video);
+      listen(dev().assertElement(video), 'volumechange', () => {
         if (this.muted_ != this.video_.muted) {
           this.muted_ = this.video_.muted;
           const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;

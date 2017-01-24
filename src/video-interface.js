@@ -98,6 +98,15 @@ export class VideoInterface {
    * @return {boolean}
    */
   isInViewport() {}
+
+  /**
+   * Automatically comes from {@link ./base-element.BaseElement}
+   *
+   * @param {string} method
+   * @param {function(!./service/action-impl.ActionInvocation)} handler
+   * @public
+   */
+  registerAction(method, handler) {}
 }
 
 

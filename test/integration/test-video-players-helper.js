@@ -16,7 +16,6 @@
 
 import {listenOncePromise} from '../../src/event-helper';
 import {timerFor} from '../../src/timer';
-import {viewportForDoc} from '../../src/viewport';
 import {VideoInterface, VideoEvents} from '../../src/video-interface';
 import {supportsAutoplay} from '../../src/service/video-manager-impl';
 import {
@@ -135,7 +134,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
         let viewport;
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
           video = r.video;
-          viewport = viewportForDoc(video);
+          viewport = video.implementation_.getViewport();
 
           // scroll to the bottom, make video fully visible
           const p = listenOncePromise(video, VideoEvents.PLAY);
@@ -166,7 +165,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
           // animation should be paused since video is not played yet
           expect(isAnimationPaused(icon)).to.be.true;
 
-          viewport = viewportForDoc(video);
+          viewport = video.implementation_.getViewport();
           // scroll to the bottom, make video fully visible so it autoplays
           viewport.scrollIntoView(video);
 

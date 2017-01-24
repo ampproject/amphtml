@@ -60,7 +60,7 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?string}  */
     this.videoid_ = null;
 
-    /** @private {?bool}  */
+    /** @private {?boolean}  */
     this.muted_ = false;
 
     /** @private {?Element} */
@@ -241,7 +241,6 @@ class AmpYoutube extends AMP.BaseElement {
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    console.log(data);
     if (data.event == 'onReady') {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
       this.playerReadyResolver_(this.iframe_);

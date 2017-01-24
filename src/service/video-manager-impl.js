@@ -91,7 +91,7 @@ export class VideoManager {
    * @private
    */
   registerCommonActions_(video) {
-    video.registerAction('play', video.play.bind(video));
+    video.registerAction('play', video.play.bind(video, /*isAutoplay*/ false));
     video.registerAction('pause', video.pause.bind(video));
     video.registerAction('mute', video.mute.bind(video));
     video.registerAction('unmute', video.unmute.bind(video));
