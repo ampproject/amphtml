@@ -363,7 +363,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
       k = k[props[i]];
     }
-    return k();  // QQQ: arbitrary code execution?
+    return k();
   }
 
   /**

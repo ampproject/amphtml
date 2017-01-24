@@ -87,9 +87,9 @@ class AnalyticsEvent {
    * @param {!Object<string, string>=} opt_vars A map of vars and their values.
    */
   constructor(type, opt_vars) {
-    /** @const */
+    /** @const  */
     this.type = type;
-    /** @const */
+    /** @const  */
     this.vars = opt_vars || Object.create(null);
   }
 }
@@ -152,11 +152,6 @@ export class InstrumentationService {
     this.timer_.delay(() => {
       this.customEventBuffer_ = undefined;
     }, 10000);
-  }
-
-  /** @override */
-  dispose() {
-    // QQQ
   }
 
   /**
@@ -592,14 +587,6 @@ export class InstrumentationService {
     }
     return true;
   }
-}
-
-/**
- * @param {string} selector
- * @return {boolean}
- */
-function isRootSelector(selector) {
-  return (selector == ':host' || selector == ':root');
 }
 
 /**

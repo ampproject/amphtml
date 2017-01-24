@@ -458,7 +458,7 @@ export function childElementsByTag(parent, tagName) {
  * @return {!Object<string, string>}
  */
 export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
-    opt_paramPattern) {
+  opt_paramPattern) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const dataset = element.dataset;
   const params = Object.create(null);
