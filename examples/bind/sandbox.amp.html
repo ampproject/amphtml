@@ -19,14 +19,6 @@
     }
   </style>
 
-  <amp-state id="myState">
-    <script type="application/json">
-      {
-        "imageSrc": "https://ampbyexample.com/img/Shetland_Sheepdog.jpg"
-      }
-    </script>
-  </amp-state>
-
   <script type="text/javascript">
     function parse() {
       const input = document.getElementById('input');
@@ -43,6 +35,14 @@
 </head>
 
 <body>
+  <amp-state id="myState">
+    <script type="application/json">
+      {
+        "imageSrc": "https://ampbyexample.com/img/Shetland_Sheepdog.jpg"
+      }
+    </script>
+  </amp-state>
+
   <button onclick="AMP.toggleExperiment('AMP-BIND');window.location.href=window.location.href;">Toggle &lt;AMP-BIND&gt; experiment</button>
 
   <h2>Sandbox</h2>
