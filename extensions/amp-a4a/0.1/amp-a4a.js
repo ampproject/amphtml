@@ -1130,7 +1130,7 @@ export class AmpA4A extends AMP.BaseElement {
         }, SHARED_IFRAME_PROPERTIES));
     const sentinel = generateSentinel(window);
     const metadata = getContextMetadata(window, iframe, sentinel);
-    iframe.setAttribute('name', encodeURIComponent(JSON.stringify(metadata)));
+    iframe.setAttribute('name', JSON.stringify(metadata));
     return this.iframeRenderHelper_(iframe);
   }
 
