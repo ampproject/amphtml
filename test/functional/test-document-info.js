@@ -36,10 +36,13 @@ describe('document-info', () => {
     return createIframePromise().then(iframe => {
       if (links) {
         for (const rel in links) {
-          const link = iframe.doc.createElement('link');
-          link.setAttribute('rel', rel);
-          link.setAttribute('href', links[rel]);
-          iframe.doc.head.appendChild(link);
+          const hrefs = links[rel];
+          for (let i = 0; i < hrefs.length; i++) {
+            const link = iframe.doc.createElement('link');
+            link.setAttribute('rel', rel);
+            link.setAttribute('href', hrefs[i]);
+            iframe.doc.head.appendChild(link);
+          }
         }
       }
       const win = iframe.win;
@@ -51,7 +54,7 @@ describe('document-info', () => {
   }
 
   it('should provide the canonicalUrl', () => {
-    return getWin({'canonical': 'https://twitter.com/'}).then(win => {
+    return getWin({'canonical': ['https://twitter.com/']}).then(win => {
       expect(documentInfoForDoc(win.document).canonicalUrl).to.equal(
           'https://twitter.com/');
     });
@@ -97,14 +100,14 @@ describe('document-info', () => {
   });
 
   it('should provide the pageViewId', () => {
-    return getWin({'canonical': 'https://twitter.com/'}).then(win => {
+    return getWin({'canonical': ['https://twitter.com/']}).then(win => {
       expect(documentInfoForDoc(win.document).pageViewId).to.equal('1234');
       expect(documentInfoForDoc(win.document).pageViewId).to.equal('1234');
     });
   });
 
   it('should provide the relative canonicalUrl as absolute', () => {
-    return getWin({'canonical': './foo.html'}).then(win => {
+    return getWin({'canonical': ['./foo.html']}).then(win => {
       expect(documentInfoForDoc(win.document).canonicalUrl).to.equal(
           'http://localhost:' + location.port + '/foo.html');
     });
@@ -112,40 +115,79 @@ describe('document-info', () => {
 
   it('should provide the linkRels containing link tag rels', () => {
     return getWin({
-      'canonical': 'https://twitter.com/',
-      'icon': 'https://foo.html/bar.gif',
+      'canonical': ['https://twitter.com/'],
+      'icon': ['https://foo.html/bar.gif'],
     }).then(win => {
-      expect(documentInfoForDoc(win.document).linkRels['canonical'])
+      expect(documentInfoForDoc(win.document).linkRels['canonical'].length)
+          .to.equal(1);
+      expect(documentInfoForDoc(win.document).linkRels['canonical'][0])
           .to.equal('https://twitter.com/');
-      expect(documentInfoForDoc(win.document).linkRels['icon'])
+      expect(documentInfoForDoc(win.document).linkRels['icon'].length)
+          .to.equal(1);
+      expect(documentInfoForDoc(win.document).linkRels['icon'][0])
           .to.equal('https://foo.html/bar.gif');
     });
   });
 
   it('should provide the linkRels containing link tag rels as absolute', () => {
     return getWin({
-      'canonical': './foo.html',
-      'icon': './bar.gif',
+      'canonical': ['./foo.html'],
+      'icon': ['./bar.gif'],
     }).then(win => {
-      expect(documentInfoForDoc(win.document).linkRels['canonical'])
+      expect(documentInfoForDoc(win.document).linkRels['canonical'].length)
+          .to.equal(1);
+      expect(documentInfoForDoc(win.document).linkRels['canonical'][0])
           .to.equal('http://localhost:' + location.port + '/foo.html');
-      expect(documentInfoForDoc(win.document).linkRels['icon'])
+      expect(documentInfoForDoc(win.document).linkRels['icon'].length)
+          .to.equal(1);
+      expect(documentInfoForDoc(win.document).linkRels['icon'][0])
           .to.equal('http://localhost:' + location.port + '/bar.gif');
+    });
+  });
+
+  it('should provide the linkRels containing link tag rels with multiple ' +
+      'hrefs', () => {
+    return getWin({
+      'canonical': ['https://twitter.com/'],
+      'icon': ['https://foo.html/bar.gif'],
+      'stylesheet': [
+        'https://foo.html/style1.css',
+        'https://foo.html/style2.css',
+      ],
+    }).then(win => {
+      expect(documentInfoForDoc(win.document).linkRels['canonical'].length)
+          .to.equal(1);
+      expect(documentInfoForDoc(win.document).linkRels['canonical'][0])
+          .to.equal('https://twitter.com/');
+      expect(documentInfoForDoc(win.document).linkRels['icon'].length)
+          .to.equal(1);
+      expect(documentInfoForDoc(win.document).linkRels['icon'][0])
+          .to.equal('https://foo.html/bar.gif');
+      expect(documentInfoForDoc(win.document).linkRels['stylesheet'].length)
+          .to.equal(2);
+      expect(documentInfoForDoc(win.document).linkRels['stylesheet'][0])
+          .to.equal('https://foo.html/style1.css');
+      expect(documentInfoForDoc(win.document).linkRels['stylesheet'][1])
+          .to.equal('https://foo.html/style2.css');
     });
   });
 
   it('should provide the linkRels containing link tag rels but drop ' +
       'prefetch/preload/preconnect rels', () => {
     return getWin({
-      'canonical': 'https://twitter.com/',
-      'icon': 'https://foo.html/bar.gif',
-      'prefetch': 'https://foo1.com',
-      'preload': 'https://foo2.com',
-      'preconnect': 'https://foo3.com',
+      'canonical': ['https://twitter.com/'],
+      'icon': ['https://foo.html/bar.gif'],
+      'prefetch': ['https://foo1.com'],
+      'preload': ['https://foo2.com'],
+      'preconnect': ['https://foo3.com'],
     }).then(win => {
-      expect(documentInfoForDoc(win.document).linkRels['canonical'])
+      expect(documentInfoForDoc(win.document).linkRels['canonical'].length)
+          .to.equal(1);
+      expect(documentInfoForDoc(win.document).linkRels['canonical'][0])
           .to.equal('https://twitter.com/');
-      expect(documentInfoForDoc(win.document).linkRels['icon'])
+      expect(documentInfoForDoc(win.document).linkRels['icon'].length)
+          .to.equal(1);
+      expect(documentInfoForDoc(win.document).linkRels['icon'][0])
           .to.equal('https://foo.html/bar.gif');
       expect(documentInfoForDoc(win.document).linkRels['prefetch'])
           .to.be.undefined;

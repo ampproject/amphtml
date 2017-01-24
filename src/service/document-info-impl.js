@@ -27,13 +27,13 @@ import {map} from '../utils/object';
  *     - pageViewId: Id for this page view. Low entropy but should be unique
  *       for concurrent page views of a user().
  *     - linkRels: A map object of link tag's rel (key) and corresponding
- *       href (value). rel could be 'canonical', 'icon', etc.
+ *       hrefs (value). rel could be 'canonical', 'icon', etc.
  *
  * @typedef {{
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
- *   linkRels: !Object<string, string>,
+ *   linkRels: !Object<string, !Array<string>>,
  * }}
  */
 export let DocumentInfoDef;
@@ -67,7 +67,6 @@ export class DocInfo {
     const ampdoc = this.ampdoc_;
     const url = ampdoc.getUrl();
     const sourceUrl = getSourceUrl(url);
-    const linkRels = map();
     const rootNode = ampdoc.getRootNode();
     let canonicalUrl = rootNode && rootNode.AMP
         && rootNode.AMP.canonicalUrl;
@@ -78,22 +77,7 @@ export class DocInfo {
           : sourceUrl;
     }
     const pageViewId = getPageViewId(ampdoc.win);
-
-    const doc = ampdoc.win.document;
-    if (doc.head) {
-      for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
-        if (n.tagName != 'LINK') {
-          continue;
-        }
-        const rel = n.getAttribute('rel');
-        const href = n.getAttribute('href');
-        if (!rel || !href || rel == 'prefetch' || rel == 'preload' ||
-            rel == 'preconnect') {
-          continue;
-        }
-        linkRels[rel] = parseUrl(href).href;
-      }
-    }
+    const linkRels = getLinkRels(ampdoc.win.document);
 
     return this.info_ = {
       /** @return {string} */
@@ -117,4 +101,34 @@ export class DocInfo {
  */
 function getPageViewId(win) {
   return String(Math.floor(win.Math.random() * 10000));
+}
+
+/**
+ * Returns a map object of link tag relations in document head.
+ * Key is the link rel, value is a list of corresponding hrefs.
+ * @param {!Document} doc
+ * @return {!Object<string, !Array<string>>}
+ */
+function getLinkRels(doc) {
+  const linkRels = map();
+  if (doc.head) {
+    const links = doc.head.querySelectorAll('link');
+    for (let i = 0; i < links.length; i++) {
+      const link = links[i];
+      const rel = link.getAttribute('rel');
+      const href = link.href;
+
+      if (!rel || !href || rel == 'prefetch' || rel == 'preload' ||
+          rel == 'preconnect' || rel == 'dns-prefetch') {
+        continue;
+      }
+
+      if (!linkRels[rel]) {
+        linkRels[rel] = [];
+      }
+
+      linkRels[rel].push(href);
+    }
+  }
+  return linkRels;
 }
