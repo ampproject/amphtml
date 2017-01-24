@@ -14,7 +14,6 @@
   * limitations under the License.
   */
 
-import {ampdocServiceFor} from '../../../src/ampdoc';
 import {elementByTag} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -115,9 +114,9 @@ class AmpVideo extends AMP.BaseElement {
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
-      const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+      const ampdoc = this.getAmpDoc();
       installVideoManagerForDoc(ampdoc);
-      videoManagerForDoc(this.win.document).register(this);
+      videoManagerForDoc(ampdoc).register(this);
     }
 
     /** @override */

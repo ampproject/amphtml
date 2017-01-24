@@ -100,7 +100,7 @@ export class AmpForm {
     this.timer_ = timerFor(this.win_);
 
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacement_ = urlReplacementsForDoc(this.win_.document);
+    this.urlReplacement_ = urlReplacementsForDoc(element);
 
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
@@ -115,7 +115,7 @@ export class AmpForm {
     this.xhr_ = xhrFor(this.win_);
 
     /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
+    this.actions_ = actionServiceForDoc(this.form_);
 
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
@@ -277,7 +277,7 @@ export class AmpForm {
         xhrUrl = this.xhrAction_;
         body = new FormData(this.form_);
       }
-      return this.xhr_.fetch(dev().assertString(xhrUrl), {
+      return this.xhr_.fetchJsonResponse(dev().assertString(xhrUrl), {
         body,
         method: this.method_,
         credentials: 'include',
@@ -568,6 +568,12 @@ function updateInvalidTypesClasses(element) {
  * @return {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
+  // TODO(mkhatib, #6930): Implement basic validation for custom inputs like
+  // amp-selector.
+  // If this is not a field type with checkValidity don't do anything.
+  if (!element.checkValidity) {
+    return true;
+  }
   let shouldPropagate = false;
   const previousValidityState = getUserValidityStateFor(element);
   const isCurrentlyValid = element.checkValidity();
