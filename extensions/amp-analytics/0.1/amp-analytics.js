@@ -365,8 +365,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     // The actual property being called is controlled by vendor configs only
     // that are approved in code reviews. User customization of the `optout`
-    // property is not allowed. Thus this does not constitue an attack
-    // vector for XSS.
+    // property is not allowed.
     return k();
   }
 
