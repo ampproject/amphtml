@@ -283,16 +283,8 @@ export class AmpForm {
 
     const docInfo = documentInfoForDoc(this.form_);
     const canonicalOrigin = parseUrl(docInfo.canonicalUrl).origin;
-    if (this.xhrAction_) {
-      const url = parseUrl(this.xhrAction_);
-      this.isCanonicalAction_ = url.origin == canonicalOrigin;
-    } else {
-      const action = this.form_.getAttribute('action');
-      const url = parseUrl(action);
-      this.isCanonicalAction_ = url.origin == canonicalOrigin;
-    }
-
-    return this.isCanonicalAction_;
+    const url = this.xhrAction_ || this.form_.getAttribute('action');
+    return this.isCanonicalAction_ = parseUrl(url).origin == canonicalOrigin;
   }
 
   /**
