@@ -240,7 +240,6 @@
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
 
-    //   this.awaitHandshake_();
       this.pollingIntervalIds_[this.intervalCtr] = setInterval(this.pollAMPDoc_.bind(this, this.intervalCtr) , 1000); //poll every second
       this.intervalCtr++;
 
@@ -264,45 +263,7 @@
          this.iframe.contentWindow./*OK*/postMessage(message, '*', [handshakeChannel.port2]);
          var processRequest = this.processRequest_;
          handshakeChannel.port1.onmessage = function(e) {
-             if (e.type == 'message' && this.isChannelOpen_(e.data)) {
-                log('Viewer ' + this.id + ' messaging established!');
-          
-                window.clearInterval(this.pollingIntervalIds_[intervalCtr]); //stop polling
-
-                var message = {
-                    app: APP,
-                    requestid: e.data.requestid,
-                    data: {},
-                    type: MessageType.RESPONSE,
-                };
-                e.target./*OK*/postMessage(message);
-
-                var messagingChannel = new MessageChannel();
-
-                var iframeContentWindow = this.iframe.contentWindow;
-                class WindowPortEmulator {
-                  addEventListener(handler) {
-                    // messagingChannel.port1.onmessage = function(e) {
-                    handshakeChannel.port1.onmessage = function(e) {
-console.log('$$$$$$got a message!!!!', e);
-                    };
-                  }
-                  postMessage(data) {
-                    // console.log('############## postMessage', iframeContentWindow, messagingChannel.port2, data);
-                    // iframeContentWindow./*OK*/postMessage(data, '*', [messagingChannel.port2]);
-                    console.log('############## postMessage', iframeContentWindow, handshakeChannel.port2, data);
-                    iframeContentWindow./*OK*/postMessage(data, '*', [handshakeChannel.port2]);
-                  }
-                }
-
-                this.messaging_ = new ViewerMessaging(e.target, '',
-                    this.processRequest_.bind(this), this.iframe.id, new WindowPortEmulator());
-
-                this.sendRequest_('visibilitychange', {
-                    state: this.visibilityState_,
-                    prerenderSize: this.prerenderSize
-                }, true);
-             }
+          this.handleMessage_(e, intervalCtr, handshakeChannel);
          }.bind(this);
        }
      };
@@ -310,6 +271,49 @@ console.log('$$$$$$got a message!!!!', e);
     Viewer.prototype.isChannelOpen_ = function(eventData) {
       return eventData.app == APP &&
         eventData.name == 'channelOpen';
+    };
+
+    Viewer.prototype.handleMessage_ = function(e, intervalCtr, handshakeChannel) {
+      if (e.type == 'message') {
+        if (this.isChannelOpen_(e.data)) {
+          log('Viewer ' + this.id + ' messaging established!');
+
+          window.clearInterval(this.pollingIntervalIds_[intervalCtr]); //stop polling
+          var message = {
+              app: APP,
+              requestid: e.data.requestid,
+              data: {},
+              type: MessageType.RESPONSE,
+          };
+          e.target./*OK*/postMessage(message);
+
+          var messagingChannel = new MessageChannel();
+
+          class WindowPortEmulator {
+            addEventListener(handler) {
+              console.log('$$$ handler:',handler);
+              // messagingChannel.port1.onmessage = function(e) {
+              // handshakeChannel.port1.onmessage = function(e) {
+    // console.log('$$$$$$got a message!!!!', e);
+              // };
+            }
+            postMessage(data) {
+              console.log('############## postMessage', data);
+              handshakeChannel.port1./*OK*/postMessage(data);
+            }
+          }
+
+          this.messaging_ = new ViewerMessaging(e.target, '',
+              this.processRequest_.bind(this), this.iframe.id, new WindowPortEmulator());
+
+          this.sendRequest_('visibilitychange', {
+              state: this.visibilityState_,
+              prerenderSize: this.prerenderSize
+          }, true);
+       } else {
+         console.log('************** got a message,', e.data, e);
+       }
+      }
     };
 
 
