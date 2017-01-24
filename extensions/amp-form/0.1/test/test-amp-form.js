@@ -35,7 +35,7 @@ import {installActionServiceForDoc,} from
     '../../../../src/service/action-impl';
 import {actionServiceForDoc} from '../../../../src/action';
 import {
-    installCidService,
+    installCidServiceForDoc,
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {
     installCryptoService,
@@ -52,7 +52,7 @@ describe('amp-form', () => {
       installActionServiceForDoc(docService.getAmpDoc());
       installTemplatesService(iframe.win);
       installAmpForm(iframe.win);
-      installCidService(iframe.win);
+      installCidServiceForDoc(docService.getAmpDoc());
       installCryptoService(iframe.win);
       toggleExperiment(iframe.win, 'amp-form-var-sub', true);
       const form = getForm(iframe.doc, button1, button2, button3);
@@ -113,18 +113,20 @@ describe('amp-form', () => {
 
   it('should assert valid action-xhr when provided', () => {
     const form = getForm();
+    document.body.appendChild(form);
     form.setAttribute('action-xhr', 'http://example.com');
-    expect(() => new AmpForm(form)).to.throw(
-        /form action-xhr must start with/);
+    expect(() => new AmpForm(form)).to.throw(/form action-xhr must start with/);
     form.setAttribute('action-xhr', 'https://cdn.ampproject.org/example.com');
     expect(() => new AmpForm(form)).to.throw(
         /form action-xhr should not be on AMP CDN/);
     form.setAttribute('action-xhr', 'https://example.com');
     expect(() => new AmpForm(form)).to.not.throw;
+    document.body.removeChild(form);
   });
 
   it('should assert none of the inputs named __amp_source_origin', () => {
     const form = getForm(document, true, false);
+    document.body.appendChild(form);
     const illegalInput = document.createElement('input');
     illegalInput.setAttribute('type', 'hidden');
     illegalInput.setAttribute('name', '__amp_source_origin');
@@ -132,10 +134,12 @@ describe('amp-form', () => {
     form.appendChild(illegalInput);
     expect(() => new AmpForm(form)).to.throw(
         /Illegal input name, __amp_source_origin found/);
+    document.body.removeChild(form);
   });
 
   it('should listen to submit, blur and input events', () => {
     const form = getForm();
+    document.body.appendChild(form);
     form.addEventListener = sandbox.spy();
     form.setAttribute('action-xhr', 'https://example.com');
     new AmpForm(form);
@@ -144,18 +148,22 @@ describe('amp-form', () => {
     expect(form.addEventListener).to.be.calledWith('blur');
     expect(form.addEventListener).to.be.calledWith('input');
     expect(form.className).to.contain('-amp-form');
+    document.body.removeChild(form);
   });
 
   it('should install proxy', () => {
     const form = getForm();
+    document.body.appendChild(form);
     form.setAttribute('action-xhr', 'https://example.com');
     new AmpForm(form);
     expect(form.$p).to.be.ok;
     expect(form.$p.getAttribute('action-xhr')).to.equal('https://example.com');
+    document.body.removeChild(form);
   });
 
   it('should do nothing if already submitted', () => {
     const form = getForm();
+    document.body.appendChild(form);
     const ampForm = new AmpForm(form);
     ampForm.state_ = 'submitting';
     const event = {
@@ -171,10 +179,12 @@ describe('amp-form', () => {
     expect(event.stopImmediatePropagation).to.be.called;
     expect(form.checkValidity).to.not.be.called;
     expect(ampForm.xhr_.fetchJsonResponse).to.not.be.called;
+    document.body.removeChild(form);
   });
 
   it('should throw error if POST non-xhr', () => {
     const form = getForm();
+    document.body.appendChild(form);
     form.removeAttribute('action-xhr');
     const ampForm = new AmpForm(form);
     const event = {
@@ -188,11 +198,13 @@ describe('amp-form', () => {
     expect(() => ampForm.handleSubmitEvent_(event)).to.throw(
         /Only XHR based \(via action-xhr attribute\) submissions are support/);
     expect(event.preventDefault).to.be.called;
+    document.body.removeChild(form);
   });
 
   it('should respect novalidate on a form', () => {
     setReportValiditySupportedForTesting(true);
     const form = getForm();
+    document.body.appendChild(form);
     form.setAttribute('novalidate', '');
     const emailInput = document.createElement('input');
     emailInput.setAttribute('name', 'email');
@@ -227,6 +239,7 @@ describe('amp-form', () => {
     // However reporting validity shouldn't happen when novalidate.
     expect(emailInput.reportValidity).to.not.be.called;
     expect(form.hasAttribute('amp-novalidate')).to.be.true;
+    document.body.removeChild(form);
   });
 
   it('should check validity and report when invalid', () => {
@@ -948,6 +961,7 @@ describe('amp-form', () => {
 
   it('should install action handler and handle submit action', () => {
     const form = getForm();
+    document.body.appendChild(form);
     const actions = actionServiceForDoc(form.ownerDocument);
     sandbox.stub(actions, 'installActionHandler');
     const ampForm = new AmpForm(form);
@@ -959,6 +973,7 @@ describe('amp-form', () => {
     expect(ampForm.handleSubmitAction_).to.have.not.been.called;
     ampForm.actionHandler_({method: 'submit'});
     expect(ampForm.handleSubmitAction_).to.have.been.called;
+    document.body.removeChild(form);
   });
 
   describe('Var Substitution', () => {

@@ -25,7 +25,7 @@ import {actionServiceForDoc} from '../../../src/action';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
-import {cidFor} from '../../../src/cid';
+import {cidForDoc} from '../../../src/cid';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
@@ -126,8 +126,10 @@ export class AccessService {
     /** @const @private {!UrlReplacements} */
     this.urlReplacements_ = urlReplacementsForDoc(win.document);
 
+    // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
+    // is migrated to ampdoc as well.
     /** @private @const {!Cid} */
-    this.cid_ = cidFor(win);
+    this.cid_ = cidForDoc(win.document.documentElement);
 
     /** @private @const {!Viewer} */
     this.viewer_ = viewerForDoc(win.document);

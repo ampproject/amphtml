@@ -100,7 +100,7 @@ export class AmpForm {
     this.timer_ = timerFor(this.win_);
 
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacement_ = urlReplacementsForDoc(this.win_.document);
+    this.urlReplacement_ = urlReplacementsForDoc(element);
 
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
@@ -115,7 +115,7 @@ export class AmpForm {
     this.xhr_ = xhrFor(this.win_);
 
     /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
+    this.actions_ = actionServiceForDoc(this.form_);
 
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
