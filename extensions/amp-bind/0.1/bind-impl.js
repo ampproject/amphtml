@@ -168,23 +168,11 @@ export class Bind {
     // Helper function for scanning a slice of elements.
     const scanFromTo = (start, end) => {
       for (let i = start; i < end && i < numElements; i++) {
-        const bindings = [];
-        const el = elements[i];
-        const attrs = el.attributes;
-        for (let j = 0, numAttrs = attrs.length; j < numAttrs; j++) {
-          const attr = attrs[j];
-          const binding = this.bindingForAttribute_(attr, el);
-          if (binding) {
-            bindings.push(binding);
-            evaluatees.push({
-              tagName: el.tagName,
-              property: binding.property,
-              expressionString: binding.expressionString,
-            });
-          }
-        }
+        const element = elements[i];
+        // Note: bindingsForElement_() mutates `evaluatees`.
+        const bindings = this.bindingsForElement_(element, evaluatees);
         if (bindings.length > 0) {
-          boundElements.push({element: el, bindings});
+          boundElements.push({element, bindings});
         }
       }
     };
@@ -218,6 +206,32 @@ export class Bind {
       };
       chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
     });
+  }
+
+  /**
+   * Returns array of bindings for given element. Also, creates an EvaluateeDef
+   * for each binding and appends it to `evaluatees` param.
+   * @param {!Element} element
+   * @param {!Array<./bind-evaluator.EvaluateeDef>} evaluatees
+   * @return {!Array<{property: string, expressionString: string}>}
+   * @private
+   */
+  bindingsForElement_(element, evaluatees) {
+    const bindings = [];
+    const attrs = element.attributes;
+    for (let i = 0, numberOfAttrs = attrs.length; i < numberOfAttrs; i++) {
+      const attr = attrs[i];
+      const binding = this.bindingForAttribute_(attr, element);
+      if (binding) {
+        bindings.push(binding);
+        evaluatees.push({
+          tagName: element.tagName,
+          property: binding.property,
+          expressionString: binding.expressionString,
+        });
+      }
+    }
+    return bindings;
   }
 
   /**
