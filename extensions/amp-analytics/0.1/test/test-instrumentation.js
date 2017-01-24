@@ -92,12 +92,10 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
 
   describe('AnalyticsGroup', () => {
     let group;
-    let clock;
     let insStub;
 
     beforeEach(() => {
       group = service.createAnalyticsGroup(analyticsElement);
-      clock = sandbox.useFakeTimers();
       insStub = sandbox.stub(service, 'addListenerDepr_');
     });
 
@@ -107,9 +105,8 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
 
     it('should reject trigger in a disallowed environment', () => {
       sandbox.stub(root, 'getType', () => 'other');
-      group.addTrigger({on: 'click', selector: '*'});
       expect(() => {
-        clock.tick(1);
+        group.addTrigger({on: 'click', selector: '*'});
       }).to.throw(/Trigger type "click" is not allowed in the other/);
     });
 
@@ -117,10 +114,9 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       sandbox.stub(root, 'getTracker', () => {
         throw new Error('intentional');
       });
-      group.addTrigger({on: 'click', selector: '*'});
       expect(() => {
-        clock.tick(1);
-      }).to.throw(/Failed to process trigger "click": intentional/);
+        group.addTrigger({on: 'click', selector: '*'});
+      }).to.throw(/intentional/);
     });
 
     it('should delegate to deprecated addListener', () => {
