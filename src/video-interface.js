@@ -102,8 +102,8 @@ export class VideoInterface {
   /**
    * Automatically comes from {@link ./base-element.BaseElement}
    *
-   * @param {string} method
-   * @param {function(!./service/action-impl.ActionInvocation)} handler
+   * @param {string} unusedMethod
+   * @param {function(!./service/action-impl.ActionInvocation)} unusedHandler
    * @public
    */
   registerAction(unusedMethod, unusedHandler) {}
