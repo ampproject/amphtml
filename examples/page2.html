@@ -17,20 +17,25 @@
     <p>iFrame body</p>
   </body>
   <script>
+  var port;
   var para = document.querySelector('p');
-  // onmessage = function(e) {
-  var eventHandler = function(e) {
+  function eventHandler(e) {
     console.log('ampdoc received message: ',e.data, e.ports[0]);
   	para.innerHTML += '  --->  ' + e.data.name;
   	// e.ports[0] is channel.port2, sent from the main frame
     if (e.ports && e.ports.length == 1) {
-      var port = e.ports[0];
+      port = e.ports[0];
       var message = {
           app: '__AMPHTML__',
           name: 'channelOpen',
       };
+      port.onmessage = onMessage;
   	  port.postMessage(message);
     }
+  }
+  function onMessage(e) {
+    console.log('AMPDOC got message: ', e.data);
+    // port.postMessage('hello from the AMPDOC!');
   }
 
   window.addEventListener('message', eventHandler);

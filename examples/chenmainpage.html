@@ -34,25 +34,25 @@
     }
 
     function start() {
-      channel.port1.onmessage = handleMessage;
+      var channel = new MessageChannel();
       intervalId = setInterval(pollAMPDoc.bind(this) , 1000); //poll every second
     };
 
     function pollAMPDoc() {
-      console.log('Viewer.prototype.pollAMPDoc_');
+      console.log('Viewer polling ampdoc');
       if (iframe) {
-        var handshakeChannel = new MessageChannel();
+        channel.port1.onmessage = function(e) {
+          if (e.type == 'message' && isChannelOpen(e.data)){
+            window.clearInterval(intervalId); //stop polling
+          }
+          this.handleMessage(e, channel);
+        }.bind(this);
+
         var message = {
             app: '__AMPHTML__',
             name: 'handshake-poll',
           };
-        otherWindow./*OK*/postMessage(message, '*', [handshakeChannel.port2]);
-        handshakeChannel.port1.onmessage = function(e) {
-          if (e.type == 'message' && isChannelOpen(e.data)){
-            window.clearInterval(intervalId); //stop polling
-          }
-          this.handleMessage(e, intervalId, handshakeChannel);
-        }.bind(this);
+        otherWindow./*OK*/postMessage(message, '*', [channel.port2]);
       }
     };
     function isChannelOpen(eventData) {
@@ -60,8 +60,9 @@
     };
 
     function handleMessage(e) {
-      console.log('viewer got message: ', e.type, e.data);
-      	para.innerHTML += '  --->  ' + e.data.name;
+      console.log('viewer got message: ', e.data);
+      para.innerHTML += '  --->  ' + e.data.name;
+      channel.port1.postMessage('Hello from the viewer!');
     }
 
     start();
