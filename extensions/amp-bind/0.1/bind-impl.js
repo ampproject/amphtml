@@ -172,7 +172,12 @@ export class Bind {
           break;
         }
         const bindings = [];
-        for (const attr of el.attributes) {
+        const attrs = el.attributes;
+        for (let j = 0;; j++) {
+          const attr = attrs[j];
+          if (!attr) {
+            break;
+          }
           const binding = this.bindingForAttribute_(attr, el);
           if (binding) {
             bindings.push(binding);
