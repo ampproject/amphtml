@@ -154,7 +154,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         });
       });
     });
-    it('should contain a_ct', () => {
+    it('should contain act', () => {
       return createIframePromise().then(fixture => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
@@ -172,6 +172,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
 =======
         return adsenseImpl.getAdUrl().then(adUrl => {
 <<<<<<< HEAD
+<<<<<<< HEAD
           expect(adUrl.indexOf('a_ct=AMP-STICKY-AD') >= 0).to.be.true;
 >>>>>>> Updated tests.
 =======
@@ -180,6 +181,9 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
 >>>>>>> Update test-amp-ad-network-adsense-impl.js
           expect(adUrl.indexOf('a_ct=sa') >= 0).to.be.true;
 >>>>>>> Updated URL parameter value aliases to match those expected by GPT.
+=======
+          expect(adUrl.indexOf('act=sa') >= 0).to.be.true;
+>>>>>>> Addressed PR feedback, and added ,  and  URL parameters.
         });
       });
     });

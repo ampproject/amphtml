@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {buildUrl} from './url-builder';
+import {
+  buildUrl,
+  getDetectedPublisherFontFace,
+} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/document-info';
@@ -227,14 +230,27 @@ function buildAdUrl(
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
   const adElement = a4a.element;
+
+  // Detect container types.
   let parentElement = adElement.parentElement;
-  const containerTypes = [];
-  while (parentElement && ValidAdContainerTypes[parentElement.tagName]) {
-    containerTypes.push(ValidAdContainerTypes[parentElement.tagName]);
+  let tagName = parentElement.tagName.toUpperCase();
+  const containerTypeSet = {};
+  while (parentElement && ValidAdContainerTypes[tagName]) {
+    containerTypeSet[ValidAdContainerTypes[tagName]] = true;
     parentElement = parentElement.parentElement;
+    tagName = parentElement.tagName.toUpperCase();
   }
-  if (containerTypes.length > 0) {
-    queryParams.push({name: 'a_ct', value: containerTypes.join()});
+  const containerTypeList = [];
+  for (const type in containerTypeSet) {
+    containerTypeList.push(type);
+  }
+  if (containerTypeList.length > 0) {
+    queryParams.push({name: 'act', value: containerTypeList.join()});
+  }
+
+  const fontFace = getDetectedPublisherFontFace(a4a.element);
+  if (fontFace) {
+    queryParams.push({name: 'dff', value: fontFace});
   }
   const allQueryParams = queryParams.concat(
     [
@@ -256,6 +272,9 @@ function buildAdUrl(
       {name: 'ady', value: slotRect.top},
       {name: 'u_hist', value: getHistoryLength(global)},
       {name: 'oid', value: '2'},
+      {name: 'ea', value: '0'},
+      {name: 'pfx', value: 'fc' in containerTypeSet
+        || 'sa' in containerTypeSet},
       dtdParam,
     ],
     unboundedQueryParams,
