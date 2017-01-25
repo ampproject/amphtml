@@ -28,9 +28,6 @@ export class AmpViewerHost {
   constructor(ampIframe) {
     /** @const {!HTMLIFrameElement} */
     this.ampIframe_ = ampIframe;
-
-    const messaging = new Messaging(
-      null, null, '');
   }
 
   /**
@@ -38,6 +35,8 @@ export class AmpViewerHost {
    * @return {?Promise}
    */
   waitForHandshake(startPolling) {
+    const messaging = new Messaging(
+      null, null, '');
     return new Promise().resolve(startPolling);
   }
 }
