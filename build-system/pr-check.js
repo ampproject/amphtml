@@ -207,6 +207,13 @@ function main(argv) {
     return 0;
   }
 
+  if (files.includes('package.json') ?
+        !files.includes('yarn.lock') : files.includes('yarn.lock')) {
+    console.error('pr-check.js - any update to package.json or yarn.lock ' +
+        'must include the other file. Please update through yarn.');
+    process.exit(1);
+  }
+
   const sortedBuildTargets = [];
   for (const t of buildTargets) {
     sortedBuildTargets.push(t);
