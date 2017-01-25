@@ -46,6 +46,7 @@ export const PlacementState = {
   UNUSED: 0,
   RESIZE_FAILED: 1,
   PLACED: 2,
+  TOO_NEAR_EXISTING_AD: 3,
 };
 
 /**
@@ -80,15 +81,23 @@ INJECTORS[Position.LAST_CHILD] = (anchorElement, elementToInject) => {
 export class Placement {
   /**
    * @param {!Window} win
+   * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
+   * @param {!Position} position
    * @param {!function(!Element, !Element)} injector
    */
-  constructor(win, anchorElement, injector) {
+  constructor(win, resources, anchorElement, position, injector) {
     /** @const @private {!Window} */
     this.win_ = win;
 
+    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = resources;
+
     /** @const @private {!Element} */
     this.anchorElement_ = anchorElement;
+
+    /** @const @private {!Position} */
+    this.position_ = position;
 
     /** @const @private {!function(!Element, !Element)} */
     this.injector_ = injector;
@@ -101,21 +110,70 @@ export class Placement {
   }
 
   /**
+   * @return {!Element}
+   */
+  getAdElement() {
+    return dev().assertElement(this.adElement_, 'No ad element');
+  }
+
+  /**
+   * An estimate of the y-position of the placement based on the position of its
+   * anchor. This is known to not be completely reliable, since the position
+   * of the anchor does not necessarily indicate the position of a sibling.
+   * @return {!Promise<number>}
+   */
+  getEstimatedPosition() {
+    return this.resources_.getElementLayoutBox(this.anchorElement_).then(
+        layoutBox => {
+          return this.getEstimatedPositionFromAchorLayout_(layoutBox);
+        });
+  }
+
+  /**
+   * @param {!../../../src/layout-rect.LayoutRectDef} anchorLayout
+   * @return {number}
+   * @private
+   */
+  getEstimatedPositionFromAchorLayout_(anchorLayout) {
+    // TODO: This should really take account of margins and padding too.
+    switch (this.position_) {
+      case Position.BEFORE:
+      case Position.FIRST_CHILD:
+        return anchorLayout.top;
+      case Position.LAST_CHILD:
+      case Position.AFTER:
+        return anchorLayout.bottom;
+      default:
+        throw new Error('Unknown position');
+    }
+  }
+
+  /**
    * @param {string} type
    * @param {!Array<!DataAttributeDef>} dataAttributes
+   * @param {!./ad-tracker.AdTracker} adTracker
    * @return {!Promise<!PlacementState>}
    */
-  placeAd(type, dataAttributes) {
-    this.adElement_ = this.createAdElement_(type, dataAttributes);
-    this.injector_(this.anchorElement_, this.adElement_);
-    return resourcesForDoc(this.adElement_).attemptChangeSize(
-        this.adElement_, TARGET_AD_HEIGHT_PX, TARGET_AD_WIDTH_PX).then(() => {
-          this.state_ = PlacementState.PLACED;
+  placeAd(type, dataAttributes, adTracker) {
+    return this.getEstimatedPosition().then(yPosition => {
+      return adTracker.isTooNearAnAd(yPosition).then(tooNear => {
+        if (tooNear) {
+          this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
-        }, () => {
-          this.state_ = PlacementState.RESIZE_FAILED;
-          return this.state_;
-        });
+        }
+        this.adElement_ = this.createAdElement_(type, dataAttributes);
+        this.injector_(this.anchorElement_, this.adElement_);
+        return this.resources_.attemptChangeSize(
+            this.adElement_, TARGET_AD_HEIGHT_PX, TARGET_AD_WIDTH_PX)
+                .then(() => {
+                  this.state_ = PlacementState.PLACED;
+                  return this.state_;
+                }, () => {
+                  this.state_ = PlacementState.RESIZE_FAILED;
+                  return this.state_;
+                });
+      });
+    });
   }
 
   /**
@@ -189,7 +247,8 @@ function getPlacementFromObject(win, placementObj) {
     dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
     return null;
   }
-  return new Placement(win, anchorElement, injector);
+  return new Placement(win, resourcesForDoc(anchorElement), anchorElement,
+      placementObj['pos'], injector);
 }
 
 /**

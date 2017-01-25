@@ -332,6 +332,27 @@ export class Resources {
   }
 
   /**
+   * Returns a promise to the layoutBox for the element. If the element is
+   * resource-backed then makes use of the resource layoutBox, otherwise
+   * measures the element directly.
+   * @param {!Element} element
+   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   */
+  getElementLayoutBox(element) {
+    const resource = this.getResourceForElementOptional(element);
+    if (resource && resource.hasBeenMeasured()) {
+      return Promise.resolve(resource.getLayoutBox());
+    }
+    return this.vsync_.measurePromise(() => {
+      if (resource) {
+        resource.measure();
+        return resource.getLayoutBox();
+      }
+      return this.getViewport().getLayoutRect(element);
+    });
+  }
+
+  /**
    * Returns the viewport instance
    * @return {!./viewport-impl.Viewport}
    */
