@@ -215,6 +215,70 @@ describe('integration test: a4a', () => {
         });
       });
 
+  it('should collapse slot when creative response has code 204', () => {
+    headers = {};
+    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+    mockResponse = {
+      arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
+      bodyUsed: false,
+      headers: new FetchResponseHeaders({
+        getResponseHeader(name) {
+          return headers[name];
+        },
+      }),
+      status: 204,
+    };
+    xhrMock.withArgs(TEST_URL, {
+      mode: 'cors',
+      method: 'GET',
+      credentials: 'include',
+    }).onFirstCall().returns(Promise.resolve(mockResponse));
+    const forceCollapseStub =
+        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+    return fixture.addElement(a4aElement).then(unusedElement => {
+      expect(forceCollapseStub).to.be.calledOnce;
+    });
+  });
+
+  it('should collapse slot when creative response is null', () => {
+    xhrMock.withArgs(TEST_URL, {
+      mode: 'cors',
+      method: 'GET',
+      credentials: 'include',
+    }).onFirstCall().returns(Promise.resolve(null));
+    const forceCollapseStub =
+        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+    return fixture.addElement(a4aElement).then(unusedElement => {
+      expect(forceCollapseStub).to.be.calledOnce;
+    });
+  });
+
+  it('should collapse slot when creative response.arrayBuffer is null', () => {
+    headers = {};
+    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+    mockResponse = {
+      arrayBuffer: () => null,
+      bodyUsed: false,
+      headers: new FetchResponseHeaders({
+        getResponseHeader(name) {
+          return headers[name];
+        },
+      }),
+      status: 204,
+    };
+    xhrMock.withArgs(TEST_URL, {
+      mode: 'cors',
+      method: 'GET',
+      credentials: 'include',
+    }).onFirstCall().returns(Promise.resolve(mockResponse));
+    const forceCollapseStub =
+        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+    return fixture.addElement(a4aElement).then(unusedElement => {
+      expect(forceCollapseStub).to.be.calledOnce;
+    });
+  });
+
+
   // TODO(@ampproject/a4a): Need a test that double-checks that thrown errors
   // are propagated out and printed to console and/or sent upstream to error
   // logging systems.  This is a bit tricky, because it's handled by the AMP
