@@ -349,7 +349,7 @@ i-amp-scroll-container.amp-active {
   position: absolute;
   width: 100%;
   height: 100% !important;
-  background-color: #979797;
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 2;
 }
 
