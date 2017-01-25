@@ -19,6 +19,8 @@ import {parseUrl, getSourceUrl} from '../url';
 import {map} from '../utils/object';
 import {isArray} from '../types';
 
+/** @private @const {Array<string>} */
+const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
 
 /**
  * Properties:
@@ -113,7 +115,7 @@ function getPageViewId(win) {
 function getLinkRels(doc) {
   const linkRels = map();
   if (doc.head) {
-    const links = doc.head.querySelectorAll('link');
+    const links = doc.head.querySelectorAll('link[rel]');
     for (let i = 0; i < links.length; i++) {
       const link = links[i];
       const href = link.href;
@@ -123,18 +125,18 @@ function getLinkRels(doc) {
       }
 
       rels.split(/\s+/).forEach(rel => {
-        if (rel == 'prefetch' || rel == 'preload' || rel == 'preconnect' ||
-            rel == 'dns-prefetch') {
-          return;
+        for (let i = 0; i < filteredLinkRels.length; i++) {
+          if (rel.indexOf(filteredLinkRels[i]) != -1) {
+            return;
+          }
         }
+
         if (!linkRels[rel]) {
           linkRels[rel] = href;
         } else {
           // Change to array if more than one href for the same rel
           if (!isArray(linkRels[rel])) {
-            const firstHref = linkRels[rel];
-            linkRels[rel] = [];
-            linkRels[rel].push(firstHref);
+            linkRels[rel] = [linkRels[rel]];
           }
           linkRels[rel].push(href);
         }
