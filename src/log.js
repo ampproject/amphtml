@@ -328,14 +328,15 @@ export class Log {
   }
 
   /**
-   * Throws an error if the first argument isn't a number. The number can
-   * be `0`.
+   * Throws an error if the first argument isn't a number. The allowed values
+   * include `0` and `NaN`.
    *
    * For more details see `assert`.
    *
    * @param {*} shouldBeNumber
    * @param {string=} opt_message The assertion message
-   * @return {number} The number value. Can be `0`.
+   * @return {number} The number value. The allowed values include `0`
+   *   and `NaN`.
    */
   assertNumber(shouldBeNumber, opt_message) {
     this.assert(typeof shouldBeNumber == 'number',
