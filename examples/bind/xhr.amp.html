@@ -19,13 +19,6 @@
 </head>
 
 <body>
-  <amp-state id="myState">
-    <script type="application/json">
-      {
-      }
-    </script>
-  </amp-state>
-
   <button onclick="AMP.toggleExperiment('AMP-BIND');window.location.href=window.location.href;">Toggle &lt;AMP-BIND&gt; experiment</button>
 
   <h2>XHR</h2>
@@ -34,5 +27,13 @@
       on="submit-success:myState">
     <input type="submit" value="Submit">
   </form>
+
+  <amp-state id="myState">
+    <script type="application/json">
+      {
+        bindXhrResult: 'Not fetched yet...'
+      }
+    </script>
+  </amp-state>
 </body>
 </html>

@@ -21,14 +21,6 @@
 </head>
 
 <body>
-  <amp-state id="myState">
-    <script type="application/json">
-      {
-        "myStateKey1": "myStateValue1"
-      }
-    </script>
-  </amp-state>
-
   <button onclick="AMP.toggleExperiment('AMP-BIND');window.location.href=window.location.href;">Toggle &lt;AMP-BIND&gt; experiment</button>
 
   <h2>Basic example</h2>
@@ -43,5 +35,13 @@
   <div>
     <button on="tap:AMP.setState(foo='foo', isButtonDisabled=true, textClass='redBackground', imgSrc='https://ampbyexample.com/img/Shetland_Sheepdog.jpg', imgSize=200, imgAlt='Sheepdog', videoSrc='https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', videoControls=true)">Click me</button>
   </div>
+
+  <amp-state id="myState">
+    <script type="application/json">
+      {
+        "myStateKey1": "myStateValue1"
+      }
+    </script>
+  </amp-state>
 </body>
 </html>
