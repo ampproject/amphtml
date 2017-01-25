@@ -32,10 +32,10 @@ export function ix(global, data) {
     let calledDoubleclick = false;
     data.ixTimeout = isNaN(data.ixTimeout) ? DEFAULT_TIMEOUT : data.ixTimeout;
     const timer = setTimeout(() => {
-      callDoubleclick(global, data);
+      callDoubleclick();
     }, data.ixTimeout);
 
-    function callDoubleclick(global, data) {
+    const callDoubleclick = function() {
       if (calledDoubleclick) { return; }
       calledDoubleclick = true;
       clearTimeout(timer);
@@ -44,11 +44,11 @@ export function ix(global, data) {
       delete data['ixTimeout'];
       data.targeting['IX_AMP'] = '1';
       doubleclick(global, data);
-    }
+    };
 
     data.targeting = data.targeting || {};
     if (typeof data.ixId === 'undefined' || isNaN(data.ixId)) {
-      callDoubleclick(global, data);
+      callDoubleclick();
       return;
     } else {
       data.ixId = parseInt(data.ixId, 10);
@@ -79,7 +79,7 @@ export function ix(global, data) {
           const target = bids[0].target.substring(0,2) === 'O_' ? 'IOM' : 'IPM';
           data.targeting[target] = bids[0].target.substring(2);
         }
-        callDoubleclick(global, data);
+        callDoubleclick();
       },
     };
 
@@ -92,7 +92,7 @@ export function ix(global, data) {
     });
 
     loadScript(global, 'https://js-sec.indexww.com/apl/apl6.js', undefined, () => {
-      callDoubleclick(global, data);
+      callDoubleclick();
     });
   }
 }
