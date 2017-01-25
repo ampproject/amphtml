@@ -235,7 +235,7 @@ export function closestBySelector(element, selector) {
  * Checks if the given element matches the selector
  * @param  {!Element} el The element to verify
  * @param  {!string} selector The selector to check against
-y * @return {boolean} True if the element matched the selector. False otherwise
+ * @return {boolean} True if the element matched the selector. False otherwise.
  */
 export function matches(el, selector) {
   const matcher = el.matches ||

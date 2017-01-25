@@ -179,6 +179,7 @@ export function importShadowBody(shadowRoot, body) {
   }
   setStyle(resultBody, 'position', 'relative');
   shadowRoot.appendChild(resultBody);
+  Object.defineProperty(shadowRoot, 'body', {value: resultBody});
   return resultBody;
 }
 
