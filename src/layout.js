@@ -220,7 +220,7 @@ export function getLengthUnits(length) {
  */
 export function getLengthNumeral(length) {
   const res = parseFloat(length);
-  return !isFiniteNumber(res) ? undefined : res;
+  return isFiniteNumber(res) ? res : undefined;
 }
 
 
