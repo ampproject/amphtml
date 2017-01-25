@@ -26,7 +26,7 @@ limitations under the License.
     data-begun-auto-pad="1212332"
     data-begun-block-id="5665768"
     json=""
->
+></amp-ad>
 ```
 
 ## Configuration
