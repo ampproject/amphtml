@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Messaging} from './messaging.js';
 
 /**
  * @fileoverview This is an example of how the viewer host can be implemented
@@ -22,11 +23,14 @@
 export class AmpViewerHost {
 
   /**
-   * @param {!Window} ampIframe
+   * @param {!HTMLIFrameElement} ampIframe
    */
   constructor(ampIframe) {
-    /** @const {!Window} */
+    /** @const {!HTMLIFrameElement} */
     this.ampIframe_ = ampIframe;
+
+    const messaging = new Messaging(
+      null, null, '');
   }
 
   /**
