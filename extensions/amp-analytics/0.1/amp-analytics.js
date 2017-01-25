@@ -225,6 +225,9 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
+   * Calls `AnalyticsGroup.addTrigger` and reports any errors. "NoInline" is
+   * to avoid inlining this method so that `try/catch` does it veto
+   * optimizations.
    * @param {!JSONType} config
    * @private
    */
