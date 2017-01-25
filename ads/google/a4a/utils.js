@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  buildUrl,
-  getDetectedPublisherFontFace,
-} from './url-builder';
+import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/document-info';
@@ -142,7 +139,7 @@ export function googleAdUrl(
       queryParams.push({name: 'act', value: containerTypeList.join()});
     }
 
-    const fontFace = getDetectedPublisherFontFace(a4a.element);
+    const fontFace = a4a.getDetectedFont();
     if (fontFace) {
       queryParams.push({name: 'dff', value: fontFace});
     }

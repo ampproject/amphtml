@@ -70,12 +70,3 @@ export function buildUrl(
   }
   return baseUrl + '?' + encodedParams.join('&');
 }
-
-/**
- * Returns the name of the font face detected for the given element.
- * @param {!Element} element The element.
- * @return {string} The name of the font face.
- */
-export function getDetectedPublisherFontFace(element) {
-  return window.getComputedStyle(element).getPropertyValue('font-face');
-}

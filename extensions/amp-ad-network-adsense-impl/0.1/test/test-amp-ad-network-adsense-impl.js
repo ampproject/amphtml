@@ -461,6 +461,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
           '(&asnt=[0-9]+-[0-9]+)?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
+          '(&dff=%22.*?%22)?' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           // Depending on how the test is run, it can get different
           // results.
@@ -470,6 +471,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +
           '&isw=[0-9]+&ish=[0-9]+' +
+          '&ea=[0-9]+&pfx=(true|false)' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
