@@ -17,6 +17,7 @@
 import {fromClassForDoc} from '../service';
 import {parseUrl, getSourceUrl} from '../url';
 import {map} from '../utils/object';
+import {isArray} from '../types';
 
 
 /**
@@ -33,7 +34,7 @@ import {map} from '../utils/object';
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
- *   linkRels: !Object<string, !Array<string>>,
+ *   linkRels: !Object<string, string|!Array<string>>,
  * }}
  */
 export let DocumentInfoDef;
@@ -107,7 +108,7 @@ function getPageViewId(win) {
  * Returns a map object of link tag relations in document head.
  * Key is the link rel, value is a list of corresponding hrefs.
  * @param {!Document} doc
- * @return {!Object<string, !Array<string>>}
+ * @return {!Object<string, string|!Array<string>>}
  */
 function getLinkRels(doc) {
   const linkRels = map();
@@ -124,10 +125,16 @@ function getLinkRels(doc) {
       }
 
       if (!linkRels[rel]) {
-        linkRels[rel] = [];
+        linkRels[rel] = href;
+      } else {
+        // Change to array if more than one href for the same rel
+        if (!isArray(linkRels[rel])) {
+          const firstHref = linkRels[rel];
+          linkRels[rel] = [];
+          linkRels[rel].push(firstHref);
+        }
+        linkRels[rel].push(href);
       }
-
-      linkRels[rel].push(href);
     }
   }
   return linkRels;

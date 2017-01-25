@@ -118,14 +118,16 @@ describe('document-info', () => {
       'canonical': ['https://twitter.com/'],
       'icon': ['https://foo.html/bar.gif'],
     }).then(win => {
-      expect(documentInfoForDoc(win.document).linkRels['canonical'].length)
-          .to.equal(1);
-      expect(documentInfoForDoc(win.document).linkRels['canonical'][0])
+      expect(documentInfoForDoc(win.document).linkRels['canonical'])
           .to.equal('https://twitter.com/');
-      expect(documentInfoForDoc(win.document).linkRels['icon'].length)
-          .to.equal(1);
-      expect(documentInfoForDoc(win.document).linkRels['icon'][0])
+      expect(documentInfoForDoc(win.document).linkRels['icon'])
           .to.equal('https://foo.html/bar.gif');
+    });
+  });
+
+  it('should provide empty linkRels if there are no link tags', () => {
+    return getWin().then(win => {
+      expect(documentInfoForDoc(win.document).linkRels).to.be.empty;
     });
   });
 
@@ -134,13 +136,9 @@ describe('document-info', () => {
       'canonical': ['./foo.html'],
       'icon': ['./bar.gif'],
     }).then(win => {
-      expect(documentInfoForDoc(win.document).linkRels['canonical'].length)
-          .to.equal(1);
-      expect(documentInfoForDoc(win.document).linkRels['canonical'][0])
+      expect(documentInfoForDoc(win.document).linkRels['canonical'])
           .to.equal('http://localhost:' + location.port + '/foo.html');
-      expect(documentInfoForDoc(win.document).linkRels['icon'].length)
-          .to.equal(1);
-      expect(documentInfoForDoc(win.document).linkRels['icon'][0])
+      expect(documentInfoForDoc(win.document).linkRels['icon'])
           .to.equal('http://localhost:' + location.port + '/bar.gif');
     });
   });
@@ -155,13 +153,9 @@ describe('document-info', () => {
         'https://foo.html/style2.css',
       ],
     }).then(win => {
-      expect(documentInfoForDoc(win.document).linkRels['canonical'].length)
-          .to.equal(1);
-      expect(documentInfoForDoc(win.document).linkRels['canonical'][0])
+      expect(documentInfoForDoc(win.document).linkRels['canonical'])
           .to.equal('https://twitter.com/');
-      expect(documentInfoForDoc(win.document).linkRels['icon'].length)
-          .to.equal(1);
-      expect(documentInfoForDoc(win.document).linkRels['icon'][0])
+      expect(documentInfoForDoc(win.document).linkRels['icon'])
           .to.equal('https://foo.html/bar.gif');
       expect(documentInfoForDoc(win.document).linkRels['stylesheet'].length)
           .to.equal(2);
@@ -181,13 +175,9 @@ describe('document-info', () => {
       'preload': ['https://foo2.com'],
       'preconnect': ['https://foo3.com'],
     }).then(win => {
-      expect(documentInfoForDoc(win.document).linkRels['canonical'].length)
-          .to.equal(1);
-      expect(documentInfoForDoc(win.document).linkRels['canonical'][0])
+      expect(documentInfoForDoc(win.document).linkRels['canonical'])
           .to.equal('https://twitter.com/');
-      expect(documentInfoForDoc(win.document).linkRels['icon'].length)
-          .to.equal(1);
-      expect(documentInfoForDoc(win.document).linkRels['icon'][0])
+      expect(documentInfoForDoc(win.document).linkRels['icon'])
           .to.equal('https://foo.html/bar.gif');
       expect(documentInfoForDoc(win.document).linkRels['prefetch'])
           .to.be.undefined;
