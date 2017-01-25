@@ -129,15 +129,15 @@ function getLinkRels(doc) {
           return;
         }
 
-        const value = linkRels[rel];
-        if (!value) {
-          linkRels[rel] = href;
-        } else {
+        let value = linkRels[rel];
+        if (value) {
           // Change to array if more than one href for the same rel
           if (!isArray(value)) {
-            linkRels[rel] = [value];
+            value = linkRels[rel] = [value];
           }
-          linkRels[rel].push(href);
+          value.push(href);
+        } else {
+          linkRels[rel] = href;
         }
       });
     }
