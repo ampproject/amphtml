@@ -741,7 +741,7 @@ export class AmpA4A extends AMP.BaseElement {
         return this.renderNonAmpCreative_();
       }
       if (this.collapse_) {
-        return Promise.resolve();
+        return Promise.resolve(); 
       }
       // Must be an AMP creative.
       return this.renderAmpCreative_(creativeMetaData).catch(err => {
