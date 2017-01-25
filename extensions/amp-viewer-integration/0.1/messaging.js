@@ -52,10 +52,13 @@ export class Messaging {
 
   /**
    * Conversation (messaging protocol) between me and Bob.
-   * @param {!MessagePort} pipe
+   * @param {!MessagePort} port
+   * @param {!Window} source for error logging
    */
-  constructor(port) {
+  constructor(port, source) {
     this.port_ = port;
+    /** @private {!Window} */
+    this.source_ = source;
     /** @private {!number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */

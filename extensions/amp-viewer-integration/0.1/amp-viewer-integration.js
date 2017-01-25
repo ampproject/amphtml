@@ -45,23 +45,27 @@ export class AmpViewerIntegration {
 
     /** @private {?string|undefined} */
     this.unconfirmedViewerOrigin_ = null;
+
+    /** @const @private {boolean} */
+    this.isWebView_;
   }
 
   /**
    * Initiate the handshake. If handshake confirmed, start listening for
    * messages. The service is disabled if the viewerorigin parameter is
    * absent.
-   * @return {?Promise}
+   * @return {!Promise<undefined>}
    */
   init() {
     dev().fine(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
+    this.isWebView_ = viewer.getParam('webview') == 1;
+    this.isWebView_ = true; //delete this before submitting
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
-    this.unconfirmedViewerOrigin_ = ''; // mocking what would happen with a native app.
 
     const win = this.win;
     const unconfirmedViewerOrigin = this.unconfirmedViewerOrigin_;
-    if (this.unconfirmedViewerOrigin_) {
+    if (!this.isWebView_) {
       class WindowPortEmulator {
         addEventListener(eventType, handler) {
           listen(win, 'message', e => {
@@ -75,11 +79,28 @@ export class AmpViewerIntegration {
           win.parent./*OK*/postMessage(data, unconfirmedViewerOrigin);
         }
       }
-      return this.openAndStart_(viewer, new WindowPortEmulator());
+      return this.openChannelAndStart_(viewer, new WindowPortEmulator());
     }
 
-    // port/webivew case
-    const preHandshake = new Promise(resolve => {
+    // port/webview case
+    return this.webviewPreHandshakePromise_().then(port => {
+      class WindowPortEmulator {
+        addEventListener(eventType, handler) {
+          port.onmessage = handler;
+        }
+        postMessage(data) {
+          port./*OK*/postMessage(data);
+        }
+      }
+      return this.openChannelAndStart_(viewer, new WindowPortEmulator());
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  webviewPreHandshakePromise_() {
+    return new Promise(resolve => {
       this.win.addEventListener('message', e => {
         console.log('+++++++ampdoc got a message:', e.type, e.data);
         // Viewer says: "I'm ready for you"
@@ -92,23 +113,17 @@ export class AmpViewerIntegration {
         }
       });
     });
-    return preHandshake.then(port => {
-      class WindowPortEmulator {
-        addEventListener(eventType, handler) {
-          port.onmessage = handler;
-        }
-        postMessage(data) {
-          port./*OK*/postMessage(data);
-        }
-      }
-      return this.openAndStart_(viewer, new WindowPortEmulator());
-    });
   }
 
-  openAndStart_(viewer, pipe) {
-    const messaging = new Messaging(pipe);
+  /**
+   * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @param {!MessagePort} pipe
+   * @return {!Promise<undefined>}
+   */
+  openChannelAndStart_(viewer, pipe) {
+    const messaging = new Messaging(pipe, this.win);
     dev().fine(TAG, 'Send a handshake request');
-    return this.openChannel(messaging)
+    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {}, true)
         .then(() => {
           console.log('@@@@@@@@@@@ channel opened! @@@@@@@@@@@@@');
           dev().fine(TAG, 'Channel has been opened!');
@@ -116,6 +131,11 @@ export class AmpViewerIntegration {
         });
   }
 
+  /**
+   * @param {!Messaging} messaging
+   * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @return {Promise<*>|undefined}
+   */
   setup(messaging, viewer) {
     messaging.setRequestProcessor((type, payload, awaitResponse) => {
       return viewer.receiveMessage(
@@ -128,16 +148,6 @@ export class AmpViewerIntegration {
     listenOnce(
       this.win, 'unload', this.handleUnload_.bind(this, messaging));
   }
-
-  /**
-   * Opens the channel to initiate the handshake.
-   * @param {!Messaging} messaging
-   * @return {Promise<*>|undefined}
-   */
-  openChannel(messaging) {
-    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {}, true);
-  }
-
 
   /**
    * Notifies the viewer when this document is unloaded.
