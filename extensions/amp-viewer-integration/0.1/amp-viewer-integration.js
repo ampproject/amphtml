@@ -46,7 +46,7 @@ export class AmpViewerIntegration {
     /** @private {?string|undefined} */
     this.unconfirmedViewerOrigin_ = null;
 
-    /** @const @private {boolean} */
+    /** @private {boolean} */
     this.isWebView_;
   }
 
@@ -116,7 +116,7 @@ export class AmpViewerIntegration {
 
   /**
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
-   * @param {!MessagePort} pipe
+   * @param {!WindowPortEmulator} pipe
    * @return {!Promise<undefined>}
    * @private
    */

@@ -44,13 +44,17 @@ export let Message;
 export class WindowPortEmulator {
   /**
    * @param {string} eventType
-   * @param {function(*)} handler
+   * @param {function(!Event):undefined} handler
    */
-  addEventListener(eventType, handler) {}
+  addEventListener(eventType, handler) {
+    dev().fine(TAG, 'addEventListener', eventType, handler);
+  }
   /**
    * @param {Object} data
    */
-  postMessage(data) {}
+  postMessage(data) {
+    dev().fine(TAG, 'postMessage', data);
+  }
 }
 
 /**
