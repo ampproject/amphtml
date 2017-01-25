@@ -19,7 +19,7 @@ import {parseUrl, getSourceUrl} from '../url';
 import {map} from '../utils/object';
 import {isArray} from '../types';
 
-/** @private @const {Array<string>} */
+/** @private @const {!Array<string>} */
 const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
 
 /**
@@ -125,18 +125,17 @@ function getLinkRels(doc) {
       }
 
       rels.split(/\s+/).forEach(rel => {
-        for (let i = 0; i < filteredLinkRels.length; i++) {
-          if (rel.indexOf(filteredLinkRels[i]) != -1) {
-            return;
-          }
+        if (filteredLinkRels.indexOf(rel) != -1) {
+          return;
         }
 
-        if (!linkRels[rel]) {
+        const value = linkRels[rel];
+        if (!value) {
           linkRels[rel] = href;
         } else {
           // Change to array if more than one href for the same rel
-          if (!isArray(linkRels[rel])) {
-            linkRels[rel] = [linkRels[rel]];
+          if (!isArray(value)) {
+            linkRels[rel] = [value];
           }
           linkRels[rel].push(href);
         }
