@@ -116,25 +116,29 @@ function getLinkRels(doc) {
     const links = doc.head.querySelectorAll('link');
     for (let i = 0; i < links.length; i++) {
       const link = links[i];
-      const rel = link.getAttribute('rel');
       const href = link.href;
-
-      if (!rel || !href || rel == 'prefetch' || rel == 'preload' ||
-          rel == 'preconnect' || rel == 'dns-prefetch') {
+      const rels = link.getAttribute('rel');
+      if (!rels || !href) {
         continue;
       }
 
-      if (!linkRels[rel]) {
-        linkRels[rel] = href;
-      } else {
-        // Change to array if more than one href for the same rel
-        if (!isArray(linkRels[rel])) {
-          const firstHref = linkRels[rel];
-          linkRels[rel] = [];
-          linkRels[rel].push(firstHref);
+      rels.split(/\s+/).forEach(rel => {
+        if (rel == 'prefetch' || rel == 'preload' || rel == 'preconnect' ||
+            rel == 'dns-prefetch') {
+          return;
         }
-        linkRels[rel].push(href);
-      }
+        if (!linkRels[rel]) {
+          linkRels[rel] = href;
+        } else {
+          // Change to array if more than one href for the same rel
+          if (!isArray(linkRels[rel])) {
+            const firstHref = linkRels[rel];
+            linkRels[rel] = [];
+            linkRels[rel].push(firstHref);
+          }
+          linkRels[rel].push(href);
+        }
+      });
     }
   }
   return linkRels;

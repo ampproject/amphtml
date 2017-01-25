@@ -143,6 +143,21 @@ describe('document-info', () => {
     });
   });
 
+  it('should provide the linkRels containing link tag rels with ' +
+      'space in rel', () => {
+    return getWin({
+      'sharelink canonical': ['https://twitter.com/'],
+      'icon': ['https://foo.html/bar.gif'],
+    }).then(win => {
+      expect(documentInfoForDoc(win.document).linkRels['sharelink'])
+          .to.equal('https://twitter.com/');
+      expect(documentInfoForDoc(win.document).linkRels['canonical'])
+          .to.equal('https://twitter.com/');
+      expect(documentInfoForDoc(win.document).linkRels['icon'])
+          .to.equal('https://foo.html/bar.gif');
+    });
+  });
+
   it('should provide the linkRels containing link tag rels with multiple ' +
       'hrefs', () => {
     return getWin({
