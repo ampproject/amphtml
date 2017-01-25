@@ -190,15 +190,6 @@ export class AmpAdUIHandler {
   }
 
   /**
-   * Public method for forcing the collapse of a slot.
-   */
-  forceNoContentUI() {
-    // To ensure that this.state != AdDisplayState.NOT_LAID_OUT
-    this.state = AdDisplayState.LOADED_NO_CONTENT;
-    this.displayNoContentUI_();
-  }
-
-  /**
    * Apply UI for unlaid out ad
    * Hide fallback and show placeholder if exists
    * Once unlayout UI applied, only another layout will change the UI again

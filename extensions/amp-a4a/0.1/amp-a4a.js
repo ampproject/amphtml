@@ -118,8 +118,7 @@ export let AdResponseDef;
 /** @typedef {{
       minifiedCreative: string,
       customElementExtensions: !Array<string>,
-      customStylesheets: !Array<{href: string}>,
-      collapse: boolean
+      customStylesheets: !Array<{href: string}>
     }} */
 let CreativeMetaDataDef;
 
@@ -297,6 +296,14 @@ export class AmpA4A extends AMP.BaseElement {
         dev().error(TAG, this.element.getAttribute('type'),
             'Error on emitLifecycleEvent', err, varArgs) ;
       });
+
+    /**
+     * Used to indicate whether this slot should be collapsed or not. Marked
+     * true if the ad response has status 204, is null, or has a null
+     * arrayBuffer.
+     * @private {boolean}
+     */
+    this.collapse_ = false;
   }
 
   /** @override */
@@ -583,8 +590,6 @@ export class AmpA4A extends AMP.BaseElement {
           const extensions = extensionsFor(this.win);
           creativeMetaDataDef.customElementExtensions.forEach(
             extensionId => extensions.loadExtension(extensionId));
-          // Make sure we don't collapse this slot.
-          creativeMetaDataDef.collapse = false;
           return creativeMetaDataDef;
         })
         .catch(error => {
@@ -593,7 +598,6 @@ export class AmpA4A extends AMP.BaseElement {
               minifiedCreative: '',
               customElementExtensions: [],
               customStylesheets: [],
-              collapse: true,
             };
           }
           // If error in chain occurs, report it and return null so that
@@ -735,7 +739,8 @@ export class AmpA4A extends AMP.BaseElement {
       if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_();
-      } else if (creativeMetaData.collapse) {
+      }
+      if (this.collapse_) {
         return Promise.resolve();
       }
       // Must be an AMP creative.
@@ -854,7 +859,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   forceCollapse() {
     dev().assert(this.uiHandler);
-    this.uiHandler.forceNoContentUI();
+    this.uiHandler.setDisplayState(AdDisplayState.LOADING);
+    this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
   }
 
   /**
@@ -1245,7 +1251,6 @@ export class AmpA4A extends AMP.BaseElement {
         creative.slice(0, ampRuntimeUtf16CharOffsets[0]) +
         creative.slice(ampRuntimeUtf16CharOffsets[1], metadataStart) +
         creative.slice(metadataEnd + '</script>'.length);
-      metaData.collapse = false;
       return metaData;
     } catch (err) {
       dev().warn(
