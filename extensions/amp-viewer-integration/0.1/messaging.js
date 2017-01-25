@@ -41,6 +41,18 @@ const MessageType = {
  */
 export let Message;
 
+export class WindowPortEmulator {
+  /**
+   * @param {string} eventType
+   * @param {function(*)} handler
+   */
+  addEventListener(eventType, handler) {}
+  /**
+   * @param {Object} data
+   */
+  postMessage(data) {}
+}
+
 /**
  * @fileoverview This is used in amp-viewer-integration.js for the
  * communication protocol between AMP and the viewer. In the comments, I will
@@ -52,10 +64,11 @@ export class Messaging {
 
   /**
    * Conversation (messaging protocol) between me and Bob.
-   * @param {!MessagePort} port
+   * @param {!WindowPortEmulator} port
    * @param {!Window} source for error logging
    */
   constructor(port, source) {
+    /** @private {!WindowPortEmulator} */
     this.port_ = port;
     /** @private {!Window} */
     this.source_ = source;
@@ -66,7 +79,7 @@ export class Messaging {
     /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
     this.requestProcessor_ = null;
 
-    this.port_.addEventListener('message', this.handleMessage_.bind(this)); //listen on port switch
+    this.port_.addEventListener('message', this.handleMessage_.bind(this));
   }
 
   /**

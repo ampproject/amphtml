@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Messaging} from './messaging.js';
+import {Messaging, WindowPortEmulator} from './messaging.js';
 import {viewerForDoc} from '../../../src/viewer';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
@@ -66,38 +66,37 @@ export class AmpViewerIntegration {
     const win = this.win;
     const unconfirmedViewerOrigin = this.unconfirmedViewerOrigin_;
     if (!this.isWebView_) {
-      class WindowPortEmulator {
-        addEventListener(eventType, handler) {
-          listen(win, 'message', e => {
-            if (e.origin == unconfirmedViewerOrigin &&
-                e.source == win.parent && e.data.app == APP) {
-              handler(e);
-            }
-          });
-        }
-        postMessage(data) {
-          win.parent./*OK*/postMessage(data, unconfirmedViewerOrigin);
-        }
-      }
-      return this.openChannelAndStart_(viewer, new WindowPortEmulator());
+      const port = new WindowPortEmulator();
+      port.addEventListener = function(eventType, handler) {
+        listen(win, 'message', e => {
+          if (e.origin == unconfirmedViewerOrigin &&
+              e.source == win.parent && e.data.app == APP) {
+            handler(e);
+          }
+        });
+      };
+      port.postMessage = function(data) {
+        win.parent./*OK*/postMessage(data, unconfirmedViewerOrigin);
+      };
+      return this.openChannelAndStart_(viewer, port);
     }
 
     // port/webview case
-    return this.webviewPreHandshakePromise_().then(port => {
-      class WindowPortEmulator {
-        addEventListener(eventType, handler) {
-          port.onmessage = handler;
-        }
-        postMessage(data) {
-          port./*OK*/postMessage(data);
-        }
-      }
-      return this.openChannelAndStart_(viewer, new WindowPortEmulator());
+    return this.webviewPreHandshakePromise_().then(receivedPort => {
+      const port = new WindowPortEmulator();
+      port.addEventListener = function(eventType, handler) {
+        receivedPort.onmessage = handler;
+      };
+      port.postMessage = function(data) {
+        receivedPort./*OK*/postMessage(data);
+      };
+      return this.openChannelAndStart_(viewer, port);
     });
   }
 
   /**
    * @return {!Promise}
+   * @private
    */
   webviewPreHandshakePromise_() {
     return new Promise(resolve => {
@@ -119,6 +118,7 @@ export class AmpViewerIntegration {
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
    * @param {!MessagePort} pipe
    * @return {!Promise<undefined>}
+   * @private
    */
   openChannelAndStart_(viewer, pipe) {
     const messaging = new Messaging(pipe, this.win);
@@ -127,7 +127,7 @@ export class AmpViewerIntegration {
         .then(() => {
           console.log('@@@@@@@@@@@ channel opened! @@@@@@@@@@@@@');
           dev().fine(TAG, 'Channel has been opened!');
-          this.setup(messaging, viewer);
+          this.setup_(messaging, viewer);
         });
   }
 
@@ -135,8 +135,9 @@ export class AmpViewerIntegration {
    * @param {!Messaging} messaging
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
    * @return {Promise<*>|undefined}
+   * @private
    */
-  setup(messaging, viewer) {
+  setup_(messaging, viewer) {
     messaging.setRequestProcessor((type, payload, awaitResponse) => {
       return viewer.receiveMessage(
         type, /** @type {!JSONType} */ (payload), awaitResponse);
