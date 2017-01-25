@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {generateSentinel} from './3p-frame';
 import {documentInfoForDoc} from './document-info.js';
-import {viewerForDoc} from '../src/viewer';
-import {getLengthNumeral} from '../src/layout';
+import {isExperimentOn} from './experiments';
+import {viewerForDoc} from './viewer';
+import {getLengthNumeral} from './layout';
 import {getMode} from './mode';
 
 /**
@@ -48,6 +50,8 @@ export function getContextMetadata(
   const referrer = viewerForDoc(parentWindow.document)
       .getUnconfirmedReferrerUrl();
 
+  const sentinelNameChange = isExperimentOn(
+      parentWindow, 'sentinel-name-change');
   attributes._context = {
     ampcontextVersion: (getMode().localDev ? 'LOCAL' :
         '$internalRuntimeVersion$'),
@@ -58,10 +62,10 @@ export function getContextMetadata(
     location: {
       href: locationHref,
     },
-    sentinel,
     startTime,
   };
-
+  attributes._context[sentinelNameChange ? 'sentinel' : 'amp3pSentinel'] =
+      sentinel;
   const adSrc = element.getAttribute('src');
   if (adSrc) {
     attributes.src = adSrc;
@@ -73,4 +77,10 @@ export function getContextMetadata(
 export function getNameAttribute(parentWindow, element, sentinel) {
   const attributes = getContextMetadata(parentWindow, element, sentinel);
   return encodeURIComponent(JSON.stringify(attributes));
+}
+
+export function generateSentinelAndContext(iframe, window) {
+  const sentinel = generateSentinel(window);
+  const context = getContextMetadata(window, iframe, sentinel)._context;
+  return context;
 }
