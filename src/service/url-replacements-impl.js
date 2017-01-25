@@ -142,6 +142,8 @@ export class GlobalVariableSource extends VariableSource {
       return url && url.pathname;
     }));
 
+
+
     // Returns the referrer URL.
     this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
       return viewerForDoc(this.ampdoc).getReferrerUrl();
