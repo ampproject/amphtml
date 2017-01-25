@@ -15,6 +15,7 @@
  */
 
 import {parseSrcset} from '../../../src/srcset';
+import {user} from '../../../src/log';
 
 const TAG = 'amp-bind';
 
@@ -57,7 +58,7 @@ const URL_PROPERTIES = {
   'src': true,
   'srcset': true,
   'href': true,
-}
+};
 
 /**
  * BindValidator performs runtime validation of Bind expression results.
@@ -89,6 +90,11 @@ export class BindValidator {
   isResultValid(tag, property, value) {
     let rules = this.rulesForTagAndProperty_(tag, property);
 
+    // `alternativeName` is a reference to another property's rules.
+    if (rules && rules.alternativeName) {
+      rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
+    }
+
     // If binding to (tag, property) is not allowed, return false.
     if (rules === undefined) {
       return false;
@@ -99,18 +105,13 @@ export class BindValidator {
       return true;
     }
 
-    // `alternativeName` is a reference to another property's rules.
-    if (rules.alternativeName) {
-      rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
-    }
-
     // Validate URL(s) if applicable.
-    if (URL_PROPERTIES.hasOwnProperty(property)) {
+    if (value && URL_PROPERTIES.hasOwnProperty(property)) {
       let urls;
       if (property === 'srcset') {
         let srcset;
         try {
-          srcset = parseSrcset(attrValue);
+          srcset = parseSrcset(value);
         } catch (e) {
           user().error(TAG, 'Failed to parse srcset: ', e);
           return false;
@@ -122,7 +123,7 @@ export class BindValidator {
       }
 
       for (let i = 0; i < urls.length; i++) {
-        if (!this.isUrlValid_(url, rules)) {
+        if (!this.isUrlValid_(urls[i], rules)) {
           return false;
         }
       }
@@ -130,7 +131,7 @@ export class BindValidator {
 
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
     const blacklistedValueRegex = rules.blacklistedValueRegex;
-    if (blacklistedValueRegex && value) {
+    if (value && blacklistedValueRegex) {
       const re = new RegExp(blacklistedValueRegex, 'i');
       if (re.test(value)) {
         return false;
@@ -141,16 +142,18 @@ export class BindValidator {
   }
 
   /**
+   * Returns true if a url's value is valid within a property rules spec.
    * @param {string} url
    * @param {!PropertyRulesDef} rules
+   * @return {boolean}
    * @private
    */
   isUrlValid_(url, rules) {
     // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
     const allowedProtocols = rules.allowedProtocols;
-    if (allowedProtocols && value) {
+    if (allowedProtocols && url) {
       const re = /^([^:\/?#.]+):[\s\S]*$/;
-      const match = re.exec(value);
+      const match = re.exec(url);
 
       if (match !== null) {
         const protocol = match[1].toLowerCase().trimLeft();
@@ -162,13 +165,13 @@ export class BindValidator {
 
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
     const blockedURLs = rules.blockedURLs;
-    if (blockedURLs && value) {
+    if (blockedURLs && url) {
       for (let i = 0; i < blockedURLs.length; i++) {
         let decodedURL;
         try {
-          decodedURL = decodeURIComponent(value);
+          decodedURL = decodeURIComponent(url);
         } catch (e) {
-          decodedURL = unescape(value);
+          decodedURL = unescape(url);
         }
         if (decodedURL.trim() === blockedURLs[i]) {
           return false;
