@@ -402,8 +402,7 @@ export const adConfig = {
     preconnect: [
       'https://img.polymorphicads.jp',
       'https://ad.polymorphicads.jp'
-    ],
-    renderStartImplemented: true
+    ]
   },
 
   popin: {
