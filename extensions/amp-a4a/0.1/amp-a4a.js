@@ -88,6 +88,9 @@ export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 /** @type {string} */
 const TAG = 'AMP-A4A';
 
+/** @type {string} */
+const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
+
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
@@ -114,8 +117,8 @@ export let AdResponseDef;
 
 /** @typedef {{
       minifiedCreative: string,
-      customElementExtensions: Array<string>,
-      customStylesheets: Array<!{href: string}>
+      customElementExtensions: !Array<string>,
+      customStylesheets: !Array<{href: string}>
     }} */
 let CreativeMetaDataDef;
 
@@ -293,6 +296,14 @@ export class AmpA4A extends AMP.BaseElement {
         dev().error(TAG, this.element.getAttribute('type'),
             'Error on emitLifecycleEvent', err, varArgs) ;
       });
+
+    /**
+     * Used to indicate whether this slot should be collapsed or not. Marked
+     * true if the ad response has status 204, is null, or has a null
+     * arrayBuffer.
+     * @private {boolean}
+     */
+    this.collapse_ = false;
   }
 
   /** @override */
@@ -460,10 +471,14 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
           checkStillCurrent(promiseId);
-          if (!fetchResponse || !fetchResponse.arrayBuffer) {
-            return null;
-          }
           this.protectedEmitLifecycleEvent_('adRequestEnd');
+          // If the response has response code 204, or is null, collapse it.
+          if (!fetchResponse
+              || !fetchResponse.arrayBuffer
+              || fetchResponse.status == 204) {
+            this.forceCollapse();
+            return Promise.reject(NO_CONTENT_RESPONSE);
+          }
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
@@ -578,6 +593,13 @@ export class AmpA4A extends AMP.BaseElement {
           return creativeMetaDataDef;
         })
         .catch(error => {
+          if (error == NO_CONTENT_RESPONSE) {
+            return {
+              minifiedCreative: '',
+              customElementExtensions: [],
+              customStylesheets: [],
+            };
+          }
           // If error in chain occurs, report it and return null so that
           // layoutCallback can render via cross domain iframe assuming ad
           // url or creative exist.
@@ -714,19 +736,22 @@ export class AmpA4A extends AMP.BaseElement {
         layoutAdPromiseDelay: Math.round(delta),
         isAmpCreative: !!creativeMetaData,
       });
-      if (creativeMetaData) {
-        // Must be an AMP creative.
-        return this.renderAmpCreative_(creativeMetaData).catch(err => {
-          // Failed to render via AMP creative path so fallback to non-AMP
-          // rendering within cross domain iframe.
-          user().error(TAG, this.element.getAttribute('type'),
-            'Error injecting creative in friendly frame', err);
-          rethrowAsync(this.promiseErrorHandler_(err));
-          return this.renderNonAmpCreative_();
-        });
+      if (!creativeMetaData) {
+        // Non-AMP creative case, will verify ad url existence.
+        return this.renderNonAmpCreative_();
       }
-      // Non-AMP creative case, will verify ad url existence.
-      return this.renderNonAmpCreative_();
+      if (this.collapse_) {
+        return Promise.resolve();
+      }
+      // Must be an AMP creative.
+      return this.renderAmpCreative_(creativeMetaData).catch(err => {
+        // Failed to render via AMP creative path so fallback to non-AMP
+        // rendering within cross domain iframe.
+        user().error(TAG, this.element.getAttribute('type'),
+          'Error injecting creative in friendly frame', err);
+        rethrowAsync(this.promiseErrorHandler_(err));
+        return this.renderNonAmpCreative_();
+      });
     }).catch(error => this.promiseErrorHandler_(error));
   }
 
@@ -826,6 +851,16 @@ export class AmpA4A extends AMP.BaseElement {
    * */
   handleResize(width, height) {
     user().info('A4A', `Received creative with size ${width}x${height}.`);
+  }
+
+  /**
+   * Forces the UI Handler to collapse this slot.
+   * @visibleForTesting
+   */
+  forceCollapse() {
+    dev().assert(this.uiHandler);
+    this.uiHandler.setDisplayState(AdDisplayState.LOADING);
+    this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
   }
 
   /**
