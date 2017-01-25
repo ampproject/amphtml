@@ -29,7 +29,7 @@ tags: {  # amp-analytics
   # for the amp-analytics extension.
   #extension_unused_unless_tag_present: "amp-analytics"
   #extension_unused_unless_tag_present: "amp-access extension .json script"
-  #extension_unused_unless_tag_present: "amp-user-notificatin"
+  #extension_unused_unless_tag_present: "amp-user-notification"
   attrs: {
     name: "async"
     mandatory: true
