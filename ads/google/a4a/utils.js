@@ -96,6 +96,111 @@ export function isGoogleAdsA4AValidEnvironment(win) {
 }
 
 /**
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
+ * @param {string} baseUrl
+ * @param {number} startTime
+ * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
+ *     Parameters that will be put at the end of the URL, where they may be
+ *     elided for length reasons. Intended for parameters with potentially
+ *     long values, like URLs.
+ * @return {!Promise<string>}
+ */
+export function googleAdUrl(
+    a4a, baseUrl, startTime, queryParams, unboundedQueryParams) {
+  // TODO: Maybe add checks in case these promises fail.
+  /** @const {!Promise<string>} */
+  const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
+  return getAdCid(a4a).then(clientId => referrerPromise.then(referrer => {
+    const adElement = a4a.element;
+    const slotNumber = adElement.getAttribute('data-amp-slot-index');
+    const win = a4a.win;
+    const documentInfo = documentInfoForDoc(adElement);
+      // Read by GPT for GA/GPT integration.
+    win.gaGlobal = win.gaGlobal ||
+      {cid: clientId, hid: documentInfo.pageViewId};
+    const slotRect = a4a.getIntersectionElementLayoutBox();
+    const screen = win.screen;
+    const viewport = a4a.getViewport();
+    const viewportRect = viewport.getRect();
+    const iframeDepth = iframeNestingDepth(win);
+    const viewportSize = viewport.getSize();
+    // Detect container types.
+    let parentElement = adElement.parentElement;
+    let tagName = parentElement.tagName.toUpperCase();
+    const containerTypeSet = {};
+    while (parentElement && ValidAdContainerTypes[tagName]) {
+      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+      parentElement = parentElement.parentElement;
+      tagName = parentElement.tagName.toUpperCase();
+    }
+    const containerTypeList = [];
+    for (const type in containerTypeSet) {
+      containerTypeList.push(type);
+    }
+    if (containerTypeList.length > 0) {
+      queryParams.push({name: 'act', value: containerTypeList.join()});
+    }
+
+    const fontFace = getDetectedPublisherFontFace(a4a.element);
+    if (fontFace) {
+      queryParams.push({name: 'dff', value: fontFace});
+    }
+    const allQueryParams = queryParams.concat(
+      [
+        {
+          name: 'is_amp',
+          value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+        },
+        {name: 'amp_v', value: '$internalRuntimeVersion$'},
+        {name: 'd_imp', value: '1'},
+        {name: 'dt', value: startTime},
+        {name: 'ifi', value: slotNumber},
+        {name: 'adf', value: domFingerprint(adElement)},
+        {name: 'c', value: getCorrelator(win, clientId)},
+        {name: 'output', value: 'html'},
+        {name: 'nhd', value: iframeDepth},
+        {name: 'iu', value: adElement.getAttribute('data-ad-slot')},
+        {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
+        {name: 'biw', value: viewportRect.width},
+        {name: 'bih', value: viewportRect.height},
+        {name: 'adx', value: slotRect.left},
+        {name: 'ady', value: slotRect.top},
+        {name: 'u_aw', value: screen ? screen.availWidth : null},
+        {name: 'u_ah', value: screen ? screen.availHeight : null},
+        {name: 'u_cd', value: screen ? screen.colorDepth : null},
+        {name: 'u_w', value: screen ? screen.width : null},
+        {name: 'u_h', value: screen ? screen.height : null},
+        {name: 'u_tz', value: -new Date().getTimezoneOffset()},
+        {name: 'u_his', value: getHistoryLength(win)},
+        {name: 'oid', value: '2'},
+        {name: 'brdim', value: additionalDimensions(win, viewportSize)},
+        {name: 'isw', value: viewportSize.width},
+        {name: 'ish', value: viewportSize.height},
+        {name: 'ea', value: '0'},
+        {name: 'pfx', value: 'fc' in containerTypeSet
+          || 'sa' in containerTypeSet},
+      ],
+      unboundedQueryParams,
+      [
+        {name: 'url', value: documentInfo.canonicalUrl},
+        {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
+        {
+          name: 'loc',
+          value: win.location.href == documentInfo.canonicalUrl ?
+            null : win.location.href,
+        },
+        {name: 'ref', value: referrer},
+      ]
+    );
+    const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
+                         {name: 'trunc', value: '1'});
+    return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
+  }));
+}
+
+
+/**
  * @param {!ArrayBuffer} creative
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
@@ -121,98 +226,6 @@ export function extractGoogleAdCreativeAndSignature(
           !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
           {creative, signature, size}));
   }
-}
-
-/**
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {string} baseUrl
- * @param {number} startTime
- * @param {number} slotNumber
- * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
- * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
- * @param {(string|undefined)} clientId
- * @param {string} referrer
- * @return {string}
- */
-function buildAdUrl(
-    a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams,
-    clientId, referrer) {
-  const global = a4a.win;
-  const documentInfo = documentInfoForDoc(a4a.element);
-  if (!global.gaGlobal) {
-    // Read by GPT for GA/GPT integration.
-    global.gaGlobal = {
-      vid: clientId,
-      hid: documentInfo.pageViewId,
-    };
-  }
-  const slotRect = a4a.getIntersectionElementLayoutBox();
-  const viewportRect = a4a.getViewport().getRect();
-  const iframeDepth = iframeNestingDepth(global);
-  const dtdParam = {name: 'dtd'};
-  const adElement = a4a.element;
-
-  // Detect container types.
-  let parentElement = adElement.parentElement;
-  let tagName = parentElement.tagName.toUpperCase();
-  const containerTypeSet = {};
-  while (parentElement && ValidAdContainerTypes[tagName]) {
-    containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-    parentElement = parentElement.parentElement;
-    tagName = parentElement.tagName.toUpperCase();
-  }
-  const containerTypeList = [];
-  for (const type in containerTypeSet) {
-    containerTypeList.push(type);
-  }
-  if (containerTypeList.length > 0) {
-    queryParams.push({name: 'act', value: containerTypeList.join()});
-  }
-
-  const fontFace = getDetectedPublisherFontFace(a4a.element);
-  if (fontFace) {
-    queryParams.push({name: 'dff', value: fontFace});
-  }
-  const allQueryParams = queryParams.concat(
-    [
-      {
-        name: 'is_amp',
-        value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
-      },
-      {name: 'amp_v', value: '$internalRuntimeVersion$'},
-      {name: 'd_imp', value: '1'},
-      {name: 'dt', value: startTime},
-      {name: 'adf', value: domFingerprint(adElement)},
-      {name: 'c', value: makeCorrelator(clientId, documentInfo.pageViewId)},
-      {name: 'output', value: 'html'},
-      {name: 'nhd', value: iframeDepth},
-      {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
-      {name: 'biw', value: viewportRect.width},
-      {name: 'bih', value: viewportRect.height},
-      {name: 'adx', value: slotRect.left},
-      {name: 'ady', value: slotRect.top},
-      {name: 'u_hist', value: getHistoryLength(global)},
-      {name: 'oid', value: '2'},
-      {name: 'ea', value: '0'},
-      {name: 'pfx', value: 'fc' in containerTypeSet
-        || 'sa' in containerTypeSet},
-      dtdParam,
-    ],
-    unboundedQueryParams,
-    [
-      {name: 'url', value: documentInfo.canonicalUrl},
-      {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(global) : null},
-      {
-        name: 'loc',
-        value: global.location.href == documentInfo.canonicalUrl ?
-            null : global.location.href,
-      },
-      {name: 'ref', value: referrer},
-    ]
-  );
-  dtdParam.value = elapsedTimeWithCeiling(Date.now(), startTime);
-  return buildUrl(
-      baseUrl, allQueryParams, MAX_URL_LENGTH, {name: 'trunc', value: '1'});
 }
 
 /**
