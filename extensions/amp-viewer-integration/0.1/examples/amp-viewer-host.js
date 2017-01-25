@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Messaging} from './messaging.js';
+import {Messaging} from './messaging';
 
 /**
  * @fileoverview This is an example of how the viewer host can be implemented
@@ -32,7 +32,7 @@ export class AmpViewerHost {
 
   /**
    * @param {boolean} startPolling
-   * @return {?Promise}
+   * @return {!Promise}
    */
   waitForHandshake(startPolling) {
     const messaging = new Messaging(
