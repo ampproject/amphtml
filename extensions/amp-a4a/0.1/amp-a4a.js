@@ -304,6 +304,12 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {boolean}
      */
     this.collapse_ = false;
+
+    /**
+     * The detected font family of the publisher page.
+     * @priavate {?string}
+     */
+    this.detectedFont_ = null;
   }
 
   /** @override */
@@ -438,6 +444,10 @@ export class AmpA4A extends AMP.BaseElement {
         return;
       }
     }
+
+    debugger;
+    this.detectedFont_ =
+        this.win.getComputedStyle(this.element)['font-family'];
 
     // Return value from this chain: True iff rendering was "successful"
     // (i.e., shouldn't try to render later via iframe); false iff should
@@ -1350,4 +1360,14 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Object<string, string|number>=} opt_extraVariables
    */
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
+
+  /**
+   * Returns the detected font family of the publisher page.
+   *
+   * @return {?string} The name of the font family if it was detected; null
+   * otherwise.
+   */
+  getDetectedFont() {
+    return this.detectedFont_
+  }
 }
