@@ -988,7 +988,8 @@ describe('amp-form', () => {
     });
   });
 
-  it('should submit after timeout of waiting for amp-selector', () => {
+  it('should submit after timeout of waiting for amp-selector', function() {
+    this.timeout(3000);
     return getAmpForm().then(ampForm => {
       const form = ampForm.form_;
       const selector = document.createElement('amp-selector');
@@ -1003,7 +1004,7 @@ describe('amp-form', () => {
       expect(ampForm.handleSubmitAction_).to.have.not.been.called;
       return timer.promise(1).then(() => {
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-        return timer.promise(500);
+        return timer.promise(2000);
       }).then(() => {
         expect(ampForm.handleSubmitAction_).to.have.been.called;
       });

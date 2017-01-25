@@ -55,7 +55,7 @@ const TAG = 'amp-form';
 
 /**
  * A list of external dependencies that can be included in forms.
- * @type {Array<string>}
+ * @type {!Array<string>}
  */
 const EXTERNAL_DEPS = [
   'amp-selector',
@@ -203,7 +203,7 @@ export class AmpForm {
     // Wait for an element to be built to make sure it is ready.
     const depPromises = toArray(depElements).map(el => el.whenBuilt());
     return Promise.race(
-        [Promise.all(depPromises), this.timer_.promise(500)]);
+        [Promise.all(depPromises), this.timer_.promise(2000)]);
   }
 
   /** @private */
