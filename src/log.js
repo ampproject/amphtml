@@ -318,7 +318,7 @@ export class Log {
    *
    * @param {*} shouldBeString
    * @param {string=} opt_message The assertion message
-   * @return {string} The string value. Can be empty.
+   * @return {string} The string value. Can be an empty string.
    */
   /*eslint "google-camelcase/google-camelcase": 2*/
   assertString(shouldBeString, opt_message) {
