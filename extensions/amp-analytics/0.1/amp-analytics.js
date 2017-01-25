@@ -363,6 +363,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
       k = k[props[i]];
     }
+    // The actual property being called is controlled by vendor configs only
+    // that are approved in code reviews. User customization of the `optout`
+    // property is not allowed.
     return k();
   }
 
