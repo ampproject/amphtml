@@ -375,6 +375,101 @@ describe('Resources', () => {
   });
 });
 
+describes.realWin('getElementLayoutBox', {}, env => {
+  let win;
+  let sandbox;
+  let resources;
+  let vsyncSpy;
+
+  function addResourceForElement(id, element) {
+    element.isBuilt = () => { return true; };
+    element.isUpgraded = () => { return true; };
+    element.isRelayoutNeeded = () => { return true; };
+    element.updateLayoutBox = () => {};
+    const resource = new Resource(id, element, resources);
+    resource.state_ = ResourceState.LAYOUT_COMPLETE;
+    resource.element['__AMP__RESOURCE'] = resource;
+    return resource;
+  }
+
+  beforeEach(() => {
+    win = env.win;
+    sandbox = sinon.sandbox.create();
+    resources = new Resources(new AmpDocSingle(window));
+    resources.isRuntimeOn_ = false;
+    vsyncSpy = sandbox.stub(resources.vsync_, 'run', task => {
+      task.measure({});
+    });
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should measure the element in a vsync measure', () => {
+    const element = document.createElement('div');
+    element.style.position = 'absolute';
+    element.style.top = '5px';
+    element.style.left = '10px';
+    element.style.width = '50px';
+    element.style.height = '80px';
+    win.document.body.appendChild(element);
+
+    return resources.getElementLayoutBox(element).then(box => {
+      expect(vsyncSpy).to.have.been.called;
+      expect(box.top).to.equal(5);
+      expect(box.left).to.equal(10);
+      expect(box.width).to.equal(50);
+      expect(box.height).to.equal(80);
+    });
+  });
+
+  it('should measure the element via its resource in a vsync measure', () => {
+    const element = document.createElement('div');
+    element.style.position = 'absolute';
+    element.style.top = '5px';
+    element.style.left = '10px';
+    element.style.width = '50px';
+    element.style.height = '80px';
+    win.document.body.appendChild(element);
+
+    const resource = addResourceForElement(1, element);
+    expect(resource.hasBeenMeasured()).to.be.false;
+
+    return resources.getElementLayoutBox(element).then(box => {
+      expect(vsyncSpy).to.have.been.called;
+      expect(box.top).to.equal(5);
+      expect(box.left).to.equal(10);
+      expect(box.width).to.equal(50);
+      expect(box.height).to.equal(80);
+      expect(resource.hasBeenMeasured()).to.be.true;
+    });
+  });
+
+  it('should use the already measured value from the resource', () => {
+    const element = document.createElement('div');
+    element.style.position = 'absolute';
+    element.style.top = '5px';
+    element.style.left = '10px';
+    element.style.width = '50px';
+    element.style.height = '80px';
+    win.document.body.appendChild(element);
+
+    const resource = addResourceForElement(1, element);
+    resource.measure();
+    expect(resource.hasBeenMeasured()).to.be.true;
+
+    return resources.getElementLayoutBox(element).then(box => {
+      expect(vsyncSpy).not.to.have.been.called;
+      expect(box.top).to.equal(5);
+      expect(box.left).to.equal(10);
+      expect(box.width).to.equal(50);
+      expect(box.height).to.equal(80);
+      expect(resource.hasBeenMeasured()).to.be.true;
+    });
+  });
+});
+
 describe('Resources pause/resume/unlayout scheduling', () => {
 
   let sandbox;
