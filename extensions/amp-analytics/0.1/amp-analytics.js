@@ -16,7 +16,7 @@
 
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, rethrowAsync, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {hasOwn, map} from '../../../src/utils/object';
@@ -94,6 +94,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
 
+    /** @private {?./instrumentation.AnalyticsGroup} */
+    this.analyticsGroup_ = null;
+
     /** @private {!./variables.VariableService} */
     this.variableService_ = variableServiceFor(this.win);
   }
@@ -144,8 +147,10 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   detachedCallback() {
-    // TODO(avimehta, #6543): Release all listeners and resources installed by
-    // this element.
+    if (this.analyticsGroup_) {
+      this.analyticsGroup_.dispose();
+      this.analyticsGroup_ = null;
+    }
   }
 
   /**
@@ -174,6 +179,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     this.processExtraUrlParams_(this.config_['extraUrlParams'],
         this.config_['extraUrlParamsReplaceMap']);
+
+    this.analyticsGroup_ =
+        this.instrumentation_.createAnalyticsGroup(this.element);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -205,18 +213,33 @@ export class AmpAnalytics extends AMP.BaseElement {
                 trigger['selector'], expansionOptions)
               .then(selector => {
                 trigger['selector'] = selector;
-                this.instrumentation_.addListener(
-                    trigger, this.handleEvent_.bind(this, trigger),
-                    this.element);
+                this.addTriggerNoInline_(trigger);
               });
           } else {
-            this.instrumentation_.addListener(
-                trigger, this.handleEvent_.bind(this, trigger), this.element);
+            this.addTriggerNoInline_(trigger);
           }
         }));
       }
     }
     return Promise.all(promises);
+  }
+
+  /**
+   * Calls `AnalyticsGroup.addTrigger` and reports any errors. "NoInline" is
+   * to avoid inlining this method so that `try/catch` does it veto
+   * optimizations.
+   * @param {!JSONType} config
+   * @private
+   */
+  addTriggerNoInline_(config) {
+    try {
+      this.analyticsGroup_.addTrigger(
+          config, this.handleEvent_.bind(this, config));
+    } catch (e) {
+      const TAG = this.getName_();
+      const eventType = config['on'];
+      rethrowAsync(TAG, 'Failed to process trigger "' + eventType + '"', e);
+    }
   }
 
   /**
