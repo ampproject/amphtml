@@ -76,10 +76,7 @@ export function calculateEntryPointScriptUrl(location, entryPoint, isLocalDev,
  */
 function isMax(location) {
   const path = location.pathname;
-  //TODO(zhouyx, #6826): Remove as part of PR #6826
-  return path.indexOf('.max') >= 0 ||
-      path.substr(0, 5) == '/max/' ||
-      path.substr(0, 6) == '/test/'; // All test fixtures use max versions.
+  return path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/';
 }
 
 /**
