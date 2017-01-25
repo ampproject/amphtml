@@ -466,6 +466,35 @@ describe('Logging', () => {
     });
   });
 
+  describe('assertString', () => {
+    let log;
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('should return non-empty string', () => {
+      expect(log.assertString('a')).to.equal('a');
+    });
+
+    it('should return empty string', () => {
+      expect(log.assertString('')).to.equal('');
+    });
+
+    it('should fail with on non string', () => {
+      expect(() => log.assertString({}))
+          .to.throw('String expected: ');
+      expect(() => log.assertString(3))
+          .to.throw('String expected: ');
+      expect(() => log.assertString(null))
+          .to.throw('String expected: ');
+      expect(() => log.assertString(undefined))
+          .to.throw('String expected: ');
+      expect(() => log.assertString([]))
+          .to.throw('String expected: ');
+    });
+  });
+
   describe('assertNumber', () => {
     let log;
 
@@ -475,12 +504,20 @@ describe('Logging', () => {
 
     it('should return the number value', () => {
       expect(log.assertNumber(3)).to.equal(3);
-      const nan = log.assertNumber(NaN);
-      expect(nan).to.not.equal(nan);
+    });
+
+    it('should return zero', () => {
+      expect(log.assertNumber(0)).to.equal(0);
+    });
+
+    it('should return NaN', () => {
+      expect(log.assertNumber(NaN)).to.be.NaN;
     });
 
     it('should fail with on non number', () => {
       expect(() => log.assertNumber({}))
+          .to.throw('Number expected: ');
+      expect(() => log.assertNumber('a'))
           .to.throw('Number expected: ');
       expect(() => log.assertNumber(null))
           .to.throw('Number expected: ');
