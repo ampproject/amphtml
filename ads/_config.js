@@ -479,6 +479,11 @@ export const adConfig = {
 
   triplelift: {},
 
+  valuecommerce: {
+    prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
+    renderStartImplemented: true,
+  },
+
   webediads: {
     prefetch: 'https://eu1.wbdds.com/amp.min.js',
     preconnect: [
