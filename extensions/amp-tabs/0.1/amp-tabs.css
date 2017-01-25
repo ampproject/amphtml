@@ -25,16 +25,36 @@ amp-tabs {
 
 /* tab header container */
 amp-tabs > ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+  display: inline-flex;
+  flex-direction: row;
+  list-style-type: none;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
 }
 
 /* tab header elements */
 amp-tabs > ul > li {
-  padding-right: 20px;
-  float: left;
+  align-items: flex-start;
+  align-self: strech;
+  border-width: 1px;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 1;
+  justify-content: center;
+  margin: 0px 5px;
+  padding: 5px 0px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+amp-tabs > ul > li[selected] {
+  border-bottom: 1px solid black;
+}
+
+amp-tabs > ul > li:hover, 
+amp-tabs > ul > li:focus {
+  border-bottom-style: solid;
 }
 
 /* Hide content by default. */
