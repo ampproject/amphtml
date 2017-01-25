@@ -144,8 +144,10 @@ describe('shadow-embed', () => {
               child2.id = 'child2';
               source.appendChild(child1);
               source.appendChild(child2);
+              expect(shadowRoot.body).to.be.undefined;
 
               const body = importShadowBody(shadowRoot, source);
+              expect(shadowRoot.body).to.equal(body);
               expect(body.tagName).to.equal(
                   scenario == ShadowDomVersion.NONE ? 'AMP-BODY' : 'BODY');
               expect(body.style.position).to.equal('relative');
