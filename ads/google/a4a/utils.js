@@ -117,9 +117,26 @@ export function googleAdUrl(
     const viewportRect = viewport.getRect();
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
-    if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
-      queryParams.push({name: 'amp_ct',
-                        value: adElement.parentElement.tagName});
+    // Detect container types.
+    let parentElement = adElement.parentElement;
+    let tagName = parentElement.tagName.toUpperCase();
+    const containerTypeSet = {};
+    while (parentElement && ValidAdContainerTypes[tagName]) {
+      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+      parentElement = parentElement.parentElement;
+      tagName = parentElement.tagName.toUpperCase();
+    }
+    const containerTypeList = [];
+    for (const type in containerTypeSet) {
+      containerTypeList.push(type);
+    }
+    if (containerTypeList.length > 0) {
+      queryParams.push({name: 'act', value: containerTypeList.join()});
+    }
+
+    const fontFace = getDetectedPublisherFontFace(a4a.element);
+    if (fontFace) {
+      queryParams.push({name: 'dff', value: fontFace});
     }
     const allQueryParams = queryParams.concat(
       [
@@ -152,6 +169,9 @@ export function googleAdUrl(
         {name: 'brdim', value: additionalDimensions(win, viewportSize)},
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
+        {name: 'ea', value: '0'},
+        {name: 'pfx', value: 'fc' in containerTypeSet
+          || 'sa' in containerTypeSet},
       ],
       unboundedQueryParams,
       [
@@ -201,101 +221,6 @@ export function extractGoogleAdCreativeAndSignature(
 }
 
 /**
-<<<<<<< HEAD
-=======
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {string} baseUrl
- * @param {number} startTime
- * @param {number} slotNumber
- * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
- * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
- * @param {(string|undefined)} clientId
- * @param {string} referrer
- * @return {string}
- */
-function buildAdUrl(
-    a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams,
-    clientId, referrer) {
-  const global = a4a.win;
-  const documentInfo = documentInfoForDoc(a4a.element);
-  if (!global.gaGlobal) {
-    // Read by GPT for GA/GPT integration.
-    global.gaGlobal = {
-      vid: clientId,
-      hid: documentInfo.pageViewId,
-    };
-  }
-  const slotRect = a4a.getIntersectionElementLayoutBox();
-  const viewportRect = a4a.getViewport().getRect();
-  const iframeDepth = iframeNestingDepth(global);
-  const dtdParam = {name: 'dtd'};
-  const adElement = a4a.element;
-
-  // Detect container types.
-  let parentElement = adElement.parentElement;
-  let tagName = parentElement.tagName.toUpperCase();
-  const containerTypeSet = {};
-  while (parentElement && ValidAdContainerTypes[tagName]) {
-    containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-    parentElement = parentElement.parentElement;
-    tagName = parentElement.tagName.toUpperCase();
-  }
-  const containerTypeList = [];
-  for (const type in containerTypeSet) {
-    containerTypeList.push(type);
-  }
-  if (containerTypeList.length > 0) {
-    queryParams.push({name: 'act', value: containerTypeList.join()});
-  }
-
-  const fontFace = getDetectedPublisherFontFace(a4a.element);
-  if (fontFace) {
-    queryParams.push({name: 'dff', value: fontFace});
-  }
-  const allQueryParams = queryParams.concat(
-    [
-      {
-        name: 'is_amp',
-        value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
-      },
-      {name: 'amp_v', value: '$internalRuntimeVersion$'},
-      {name: 'd_imp', value: '1'},
-      {name: 'dt', value: startTime},
-      {name: 'adf', value: domFingerprint(adElement)},
-      {name: 'c', value: makeCorrelator(clientId, documentInfo.pageViewId)},
-      {name: 'output', value: 'html'},
-      {name: 'nhd', value: iframeDepth},
-      {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
-      {name: 'biw', value: viewportRect.width},
-      {name: 'bih', value: viewportRect.height},
-      {name: 'adx', value: slotRect.left},
-      {name: 'ady', value: slotRect.top},
-      {name: 'u_hist', value: getHistoryLength(global)},
-      {name: 'oid', value: '2'},
-      {name: 'ea', value: '0'},
-      {name: 'pfx', value: 'fc' in containerTypeSet
-        || 'sa' in containerTypeSet},
-      dtdParam,
-    ],
-    unboundedQueryParams,
-    [
-      {name: 'url', value: documentInfo.canonicalUrl},
-      {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(global) : null},
-      {
-        name: 'loc',
-        value: global.location.href == documentInfo.canonicalUrl ?
-            null : global.location.href,
-      },
-      {name: 'ref', value: referrer},
-    ]
-  );
-  dtdParam.value = elapsedTimeWithCeiling(Date.now(), startTime);
-  return buildUrl(
-      baseUrl, allQueryParams, MAX_URL_LENGTH, {name: 'trunc', value: '1'});
-}
-
-/**
->>>>>>> Updated AMP ad container type URL parameter name, and made modifications such that all enclosing container types are added to the URL parameter value.
  * @param {!Window} win
  * @return {number}
  */
