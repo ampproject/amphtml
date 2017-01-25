@@ -311,14 +311,14 @@ export class Log {
   }
 
   /**
-   * Throws an error if the first argument isn't a string.
+   * Throws an error if the first argument isn't a string. The string can
+   * be empty.
    *
-   * Otherwise see `assert` for usage
+   * For more details see `assert`.
    *
    * @param {*} shouldBeString
    * @param {string=} opt_message The assertion message
-   * @return {string} The value of shouldBeTrueish.
-   * @template T
+   * @return {string} The string value. Can be empty.
    */
   /*eslint "google-camelcase/google-camelcase": 2*/
   assertString(shouldBeString, opt_message) {
@@ -328,13 +328,14 @@ export class Log {
   }
 
   /**
-   * Throws an error if the first argument isn't a number.
+   * Throws an error if the first argument isn't a number. The number can
+   * be `0`.
    *
-   * Otherwise see `assert` for usage
+   * For more details see `assert`.
    *
    * @param {*} shouldBeNumber
    * @param {string=} opt_message The assertion message
-   * @return {number} The value of shouldBeTrueish.
+   * @return {number} The number value. Can be `0`.
    */
   assertNumber(shouldBeNumber, opt_message) {
     this.assert(typeof shouldBeNumber == 'number',
