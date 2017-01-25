@@ -755,18 +755,13 @@ export class Viewer {
     if (this.messageDeliverer_) {
       throw new Error('message channel can only be initialized once');
     }
-    if (!origin) {
-      throw new Error('message channel must have an origin');
-    }
-    dev().fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
     this.messagingOrigin_ = origin;
     if (this.messagingReadyResolver_) {
       this.messagingReadyResolver_();
     }
     if (this.trustedViewerResolver_) {
-      this.trustedViewerResolver_(
-          origin ? this.isTrustedViewerOrigin_(origin) : false);
+      this.trustedViewerResolver_(true);
     }
     if (this.viewerOriginResolver_) {
       this.viewerOriginResolver_(origin || '');

@@ -312,7 +312,7 @@
 
     Viewer.prototype.handleMessage_ = function(e, channel) {
       if (this.messageHandlers_[this.id]) {
-        this.messageHandlers_[this.id]();
+        this.messageHandlers_[this.id](e);
       }
       console.log('************** viewer got a message,', e.data);
     };
@@ -565,33 +565,33 @@
           true).start();
       addShowContainer('1');
 
-      // new Viewer(
-      //     'container2',
-      //     '2',
-      //     './article.amp.max.html',
-      //     false).start();
-      // addShowContainer('2');
+      new Viewer(
+          'container2',
+          '2',
+          './article.amp.max.html',
+          false).start();
+      addShowContainer('2');
 
-    //   new Viewer(
-    //       'container3',
-    //       '3',
-    //       './article-access.amp.max.html',
-    //       false).start();
-    //   addShowContainer('3');
+      new Viewer(
+          'container3',
+          '3',
+          './article-access.amp.max.html',
+          false).start();
+      addShowContainer('3');
 
-    //   new Viewer(
-    //       'container4',
-    //       '4',
-    //       './alp.amp.max.html',
-    //       false).start();
-    //   addShowContainer('4');
+      new Viewer(
+          'container4',
+          '4',
+          './alp.amp.max.html',
+          false).start();
+      addShowContainer('4');
 
-    //   new Viewer(
-    //       'container5',
-    //       '5',
-    //       './article-fixed-header.amp.max.html',
-    //       false).start();
-    //   addShowContainer('5');
+      new Viewer(
+          'container5',
+          '5',
+          './article-fixed-header.amp.max.html',
+          false).start();
+      addShowContainer('5');
 
       showContainer('1');
     }
@@ -631,10 +631,10 @@
     <header>
       <h1>Viewer</h1>
       <a class="show-container-anchor" id="show-container1-anchor">One</a>
-      <!--<a class="show-container-anchor" id="show-container2-anchor">Two</a>-->
-      <!--<a class="show-container-anchor" id="show-container3-anchor">Three</a>
+      <a class="show-container-anchor" id="show-container2-anchor">Two</a>
+      <a class="show-container-anchor" id="show-container3-anchor">Three</a>
       <a class="show-container-anchor" id="show-container4-anchor">ALP</a>
-      <a class="show-container-anchor" id="show-container5-anchor">Five</a>-->
+      <a class="show-container-anchor" id="show-container5-anchor">Five</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
