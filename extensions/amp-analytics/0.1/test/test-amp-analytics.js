@@ -32,7 +32,7 @@ import {
 } from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';
-import {installCidServiceForDoc,} from
+import {installCidServiceForDocForTesting,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import * as sinon from 'sinon';
@@ -97,7 +97,7 @@ describe('amp-analytics', function() {
       iframe.win.document.head.appendChild(link);
       windowApi = iframe.win;
       ampdoc = new AmpDocSingle(windowApi);
-      installCidServiceForDoc(ampdoc);
+      installCidServiceForDocForTesting(ampdoc);
       uidService = installUserNotificationManager(iframe.win);
 
       ins = fromClassForDoc(
