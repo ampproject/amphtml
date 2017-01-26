@@ -228,6 +228,149 @@ describe('placement', () => {
       });
     });
 
+    it('should place an ad with the correct margins', () => {
+      const anchor = document.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+            },
+            pos: 2,
+            type: 1,
+            style: {
+              'top_m': 5,
+              'bot_m': 6,
+            },
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+
+      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+          .then(() => {
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement).to.have.attribute('type', 'ad-network-type');
+            expect(adElement).to.have.attribute('layout', 'responsive');
+            expect(adElement).to.have.attribute('width', '320');
+            expect(adElement).to.have.attribute('height', '0');
+            expect(adElement.style.marginTop).to.equal('5px');
+            expect(adElement.style.marginBottom).to.equal('6px');
+            expect(adElement.style.marginLeft).to.equal('');
+            expect(adElement.style.marginRight).to.equal('');
+          });
+    });
+
+    it('should place an ad with top margin only', () => {
+      const anchor = document.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+            },
+            pos: 2,
+            type: 1,
+            style: {
+              'top_m': 5,
+            },
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+
+      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+          .then(() => {
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement).to.have.attribute('type', 'ad-network-type');
+            expect(adElement).to.have.attribute('layout', 'responsive');
+            expect(adElement).to.have.attribute('width', '320');
+            expect(adElement).to.have.attribute('height', '0');
+            expect(adElement.style.marginTop).to.equal('5px');
+            expect(adElement.style.marginBottom).to.equal('');
+            expect(adElement.style.marginLeft).to.equal('');
+            expect(adElement.style.marginRight).to.equal('');
+          });
+    });
+
+    it('should place an ad with bottom margin only', () => {
+      const anchor = document.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+            },
+            pos: 2,
+            type: 1,
+            style: {
+              'bot_m': 6,
+            },
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+
+      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+          .then(() => {
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement).to.have.attribute('type', 'ad-network-type');
+            expect(adElement).to.have.attribute('layout', 'responsive');
+            expect(adElement).to.have.attribute('width', '320');
+            expect(adElement).to.have.attribute('height', '0');
+            expect(adElement.style.marginTop).to.equal('');
+            expect(adElement.style.marginBottom).to.equal('6px');
+            expect(adElement.style.marginLeft).to.equal('');
+            expect(adElement.style.marginRight).to.equal('');
+          });
+    });
+
+    it('should place an ad with no margins', () => {
+      const anchor = document.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+            },
+            pos: 2,
+            type: 1,
+            style: {},
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+
+      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+          .then(() => {
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement).to.have.attribute('type', 'ad-network-type');
+            expect(adElement).to.have.attribute('layout', 'responsive');
+            expect(adElement).to.have.attribute('width', '320');
+            expect(adElement).to.have.attribute('height', '0');
+            expect(adElement.style.marginTop).to.equal('');
+            expect(adElement.style.marginBottom).to.equal('');
+            expect(adElement.style.marginLeft).to.equal('');
+            expect(adElement.style.marginRight).to.equal('');
+          });
+    });
+
     it('should report placement placed when resize allowed', () => {
       const anchor = document.createElement('div');
       anchor.id = 'anId';
