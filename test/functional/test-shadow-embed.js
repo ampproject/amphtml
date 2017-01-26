@@ -69,7 +69,7 @@ describe('shadow-embed', () => {
         describe('shadow APIs ' + scenario, () => {
           let hostElement;
 
-          beforeEach(() => {
+          beforeEach(function() {
             hostElement = document.createElement('div');
             setShadowDomSupportedVersionForTesting(scenario);
 
