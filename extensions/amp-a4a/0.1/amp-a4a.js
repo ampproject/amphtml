@@ -1406,3 +1406,4 @@ export class AmpA4A extends AMP.BaseElement {
     return this.detectedFont_
   }
 }
+

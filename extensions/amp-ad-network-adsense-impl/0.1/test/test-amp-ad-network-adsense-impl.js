@@ -481,5 +481,3 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
   });
 });
-
-
