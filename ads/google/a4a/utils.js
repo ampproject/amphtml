@@ -119,23 +119,16 @@ export function googleAdUrl(
     let parentElement = adElement.parentElement;
     let tagName = parentElement.tagName.toUpperCase();
     const containerTypeSet = {};
-    while (parentElement && ValidAdContainerTypes[tagName]) {
-      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+    while (parentElement) {
+      if (ValidAdContainerTypes[tagName]) {
+        containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+      }
       parentElement = parentElement.parentElement;
       tagName = parentElement.tagName.toUpperCase();
     }
-    const containerTypeList = [];
-    for (const type in containerTypeSet) {
-      containerTypeList.push(type);
-    }
-    if (containerTypeList.length > 0) {
-      queryParams.push({name: 'act', value: containerTypeList.join()});
-    }
-
-    const fontFace = a4a.getDetectedFont();
-    if (fontFace) {
-      queryParams.push({name: 'dff', value: fontFace});
-    }
+    queryParams.push({name: 'act', value:
+      Object.keys(containerTypeSet).join()});
+    queryParams.push({name: 'dff', value: a4a.getDetectedFont()});
     const allQueryParams = queryParams.concat(
       [
         {
@@ -167,9 +160,11 @@ export function googleAdUrl(
         {name: 'brdim', value: additionalDimensions(win, viewportSize)},
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
+        // TODO(levitzky) Look into expandable support.
         {name: 'ea', value: '0'},
-        {name: 'pfx', value: 'fc' in containerTypeSet
-          || 'sa' in containerTypeSet},
+        {name: 'pfx', value:
+          containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
+              || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']]},
       ],
       unboundedQueryParams,
       [
