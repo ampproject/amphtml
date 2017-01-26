@@ -16,7 +16,7 @@
 
 import {cidForDoc} from '../../src/cid';
 import {
-  installCidServiceForDoc,
+  installCidServiceForDocForTesting,
   getProxySourceOrigin,
   viewerBaseCid,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
@@ -131,7 +131,8 @@ describe('cid', () => {
         });
 
     return Promise
-        .all([installCidServiceForDoc(ampdoc), installCryptoService(fakeWin)])
+        .all([installCidServiceForDocForTesting(ampdoc),
+              installCryptoService(fakeWin)])
         .then(results => {
           cid = results[0];
           crypto = results[1];
@@ -342,7 +343,7 @@ describe('cid', () => {
     installTimerService(win);
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc2);
-    installCidServiceForDoc(ampdoc2);
+    installCidServiceForDocForTesting(ampdoc2);
     installCryptoService(win);
     return cidForDoc(ampdoc2).then(cid => {
       return cid.get('foo', hasConsent).then(c1 => {
