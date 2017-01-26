@@ -803,8 +803,10 @@ function createBaseCustomElementClass(win) {
      * @param {time=} opt_time
      */
     signal(name, opt_time) {
-      dev().assert(this.signalMap_[name] == null,
-          'Duplicate signal: %s', name);
+      if (this.signalMap_[name] != null) {
+        // Do not duplicate signals.
+        return;
+      }
       const time = opt_time || Date.now();
       this.signalMap_[name] = time;
       const promiseStruct = this.signalPromiseMap_ &&
@@ -823,8 +825,10 @@ function createBaseCustomElementClass(win) {
      * @param {!Error} error
      */
     rejectSignal(name, error) {
-      dev().assert(this.signalMap_[name] == null,
-          'Duplicate signal: %s', name);
+      if (this.signalMap_[name] != null) {
+        // Do not duplicate signals.
+        return;
+      }
       this.signalMap_[name] = error;
       const promiseStruct = this.signalPromiseMap_ &&
           this.signalPromiseMap_[name];

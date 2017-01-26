@@ -1275,14 +1275,15 @@ describe('CustomElement', () => {
       expect(element.signalPromiseMap_).to.be.null;
     });
 
-    it('should disallow duplicate signal', () => {
-      element.signal('sig');
-      expect(() => {
-        element.signal('sig');
-      }).to.throw(/Duplicate/);
-      expect(() => {
-        element.rejectSignal('sig', new Error());
-      }).to.throw(/Duplicate/);
+    it('should not duplicate signal', () => {
+      element.signal('sig', 11);
+      expect(element.signalMap_['sig']).to.equal(11);
+
+      element.signal('sig', 12);
+      expect(element.signalMap_['sig']).to.equal(11);  // Did not change.
+
+      element.rejectSignal('sig', new Error());
+      expect(element.signalMap_['sig']).to.equal(11);  // Did not change.
     });
 
     it('should override signal time', () => {
