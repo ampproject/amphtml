@@ -31,6 +31,7 @@ tags: {  # amp-dynamic-css-classes
     value: "amp-dynamic-css-classes"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

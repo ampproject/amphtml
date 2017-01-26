@@ -349,7 +349,7 @@ i-amp-scroll-container.amp-active {
   position: absolute;
   width: 100%;
   height: 100% !important;
-  background-color: #979797;
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 2;
 }
 
@@ -423,6 +423,9 @@ i-amp-scroll-container.amp-active {
  */
 .i-amphtml-element > [overflow] {
   cursor: pointer;
+  /* position:relative is critical to ensure that [overflow] is displayed
+     above an iframe; z-index is not enough. */
+  position: relative;
   z-index: 2;
   visibility: hidden;
 }
@@ -432,7 +435,7 @@ i-amp-scroll-container.amp-active {
 }
 
 
-/* Polyfill for IE and any other browser that don't understand templates . */
+/* Polyfill for IE and any other browser that don't understand templates. */
 template {
   display: none !important;
 }
@@ -448,14 +451,9 @@ template {
   box-sizing: border-box;
 }
 
+/* amp-pixel is always non-displayed. */
 amp-pixel {
-  /* Fixed to make position independent of page other elements. */
-  position: fixed !important;
-  top: 0 !important;
-  width: 1px !important;
-  height: 1px !important; /* Only things with height are ever loaded. */
-  overflow: hidden !important;
-  visibility: hidden;
+  display: none !important;
 }
 
 /**

@@ -103,7 +103,7 @@ Note that the set of bindable attributes will grow over time as development prog
 
 #### BNF-like grammar
 
-```
+```text
 expr:
     operation
   | invocation
@@ -182,7 +182,7 @@ key_value:
 
 #### Whitelisted functions
 
-```
+```text
 Array.concat
 Array.indexOf
 Array.join

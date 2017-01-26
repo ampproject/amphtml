@@ -15,7 +15,7 @@
  */
 
 import {accessServiceForOrNull} from '../access-service';
-import {cidFor} from '../cid';
+import {cidForDoc} from '../cid';
 import {variantForOrNull} from '../variant-service';
 import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
@@ -237,7 +237,7 @@ export class GlobalVariableSource extends VariableSource {
                 return service.get(opt_userNotificationId);
               });
       }
-      return cidFor(this.ampdoc.win).then(cid => {
+      return cidForDoc(this.ampdoc).then(cid => {
         return cid.get({
           scope: dev().assertString(scope),
           createCookieIfNotPresent: true,

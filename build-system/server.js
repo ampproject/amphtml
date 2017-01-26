@@ -116,7 +116,15 @@ app.use('/form/html/post', function(req, res) {
   });
 });
 
-function assertCors(req, res, opt_validMethods) {
+
+app.use('/form/redirect-to/post', function(req, res) {
+  assertCors(req, res, ['POST'], ['AMP-Redirect-To']);
+  res.setHeader('AMP-Redirect-To', 'https://google.com');
+  res.end('{}');
+});
+
+
+function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
   const invalidMethod = req.method + ' method is not allowed. Use POST.';
   const invalidOrigin = 'Origin header is invalid.';
@@ -154,7 +162,8 @@ function assertCors(req, res, opt_validMethods) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Expose-Headers',
-      'AMP-Access-Control-Allow-Source-Origin');
+      ['AMP-Access-Control-Allow-Source-Origin']
+          .concat(opt_exposeHeaders || []).join(', '));
   res.setHeader('AMP-Access-Control-Allow-Source-Origin',
       req.query.__amp_source_origin);
 }
@@ -462,6 +471,13 @@ app.use('/a4a(|-3p)/', function(req, res) {
   var force3p = req.baseUrl.indexOf('/a4a-3p') == 0;
   var adUrl = req.url;
   var templatePath = '/build-system/server-a4a-template.html';
+  var urlPrefix = getUrlPrefix(req);
+  if (force3p && !adUrl.startsWith('/m') &&
+      urlPrefix.indexOf('//localhost') != -1) {
+    // This is a special case for testing. `localhost` URLs are transformed to
+    // `ads.localhost` to ensure that the iframe is fully x-origin.
+    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
+  }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/FORCE3P/g, force3p)
@@ -483,6 +499,20 @@ app.use(['/examples/*', '/extensions/*'], function (req, res, next) {
     res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
   }
   next();
+});
+
+/**
+ * Append ?sleep=5 to any included JS file in examples to emulate delay in loading that
+ * file. This allows you to test issues with your extension being late to load
+ * and testing user interaction with your element before your code loads.
+ *
+ * Example delay loading amp-form script by 5 seconds:
+ * <script async custom-element="amp-form"
+ *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
+ */
+app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
+  var sleep = parseInt(req.query.sleep || 0) * 1000;
+  setTimeout(next, sleep);
 });
 
 app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
@@ -509,20 +539,54 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   });
 });
 
-// "fake" a4a creative.
-app.get('/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json.html', function(req, res) {
-  var filePath = '/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json';
-  fs.readFileAsync(process.cwd() + filePath).then(file => {
-    const metadata = JSON.parse(file);
-    res.setHeader('Content-Type', 'text/html');
-    res.end(metadata.creative);
-  });
-});
-
 app.use('/bind/form/get', function(req, res, next) {
   assertCors(req, res, ['GET']);
   res.json({
     bindXhrResult: 'I was fetched from the server!'
+  });
+});
+
+// Simulated Cloudflare signed Ad server
+
+const cloudflareDataDir = '/extensions/amp-ad-network-cloudflare-impl/0.1/data';
+const fakeAdNetworkDataDir = '/extensions/amp-ad-network-fake-impl/0.1/data'
+
+/**
+ * Handle CORS headers
+ */
+app.use([cloudflareDataDir], function fakeCors(req, res, next) {
+  assertCors(req, res, ['GET', 'OPTIONS'], ['X-AmpAdSignature']);
+
+  if (req.method=='OPTIONS') {
+    res.status(204).end();
+  } else {
+    next();
+  }
+});
+
+/**
+ * Handle fake a4a data
+ */
+app.get([ fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], function(req, res) {
+  var filePath = req.path;
+  var unwrap = false;
+  if (req.path.endsWith('.html')) {
+    filePath = req.path.slice(0,-5)
+    unwrap = true
+  }
+  filePath = process.cwd() + filePath
+  fs.readFileAsync(filePath).then(file => {
+    if (!unwrap) {
+      res.end(file)
+      return
+    }
+    const metadata = JSON.parse(file);
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('X-AmpAdSignature', metadata.signature);
+    res.end(metadata.creative);
+  }).error( () => {
+    res.status(404);
+    res.end("Not found: " + filePath);
   });
 });
 

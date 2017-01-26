@@ -111,6 +111,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adverticum: {},
+
   advertserve: {
     renderStartImplemented: true,
   },

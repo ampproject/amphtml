@@ -153,12 +153,10 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
-  'installCidService': {
+  'installCidServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
-      'extensions/amp-access/0.1/amp-access.js',
-      'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
   'installCryptoService': {
@@ -288,12 +286,13 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
       'src/service/storage-impl.js',
       'src/service/history-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
     ],
   },
   // Privacy sensitive
-  'cidFor': {
+  'cidForDoc|cidForDocOrNull': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/ad-cid.js',
@@ -343,6 +342,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/viewer-impl.js',
       'src/inabox/inabox-viewer.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
     ],
   },
   'eval\\(': {
@@ -576,6 +576,7 @@ var forbiddenTermsSrcInclusive = {
       'src/service/lightbox-manager-discovery.js',
       'src/shadow-embed.js',
       'extensions/amp-ad/0.1/amp-ad.js',
+      'extensions/amp-analytics/0.1/crypto-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
     ],
   },

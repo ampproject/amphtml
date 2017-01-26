@@ -21,6 +21,9 @@ import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 export const SIGNATURE_HEADER = 'X-TestSignatureHeader';
 
 /** @type {string} @private */
+export const SIZE_HEADER = 'X-CreativeSize';
+
+/** @type {string} @private */
 export const TEST_URL = 'http://iframe.localhost:' + location.port +
     '/test/fixtures/served/iframe.html?args';
 
@@ -38,7 +41,14 @@ export class MockA4AImpl extends AmpA4A {
       creative: responseArrayBuffer,
       signature: responseHeaders.has(SIGNATURE_HEADER) ?
           base64UrlDecodeToBytes(responseHeaders.get(SIGNATURE_HEADER)) : null,
+      size: responseHeaders.has(SIZE_HEADER) ?
+          responseHeaders.get(SIZE_HEADER).split('x') : null,
     });
+  }
+
+  /** @override */
+  handleResize() {
+    return;
   }
 
   getFallback() {

@@ -46,6 +46,7 @@ describes.fakeWin('Viewport', {}, env => {
   let windowApi;
   let ampdoc;
   let viewerViewportHandler;
+  let viewerScrollDocHandler;
   let updatedPaddingTop;
   let viewportSize;
   let vsyncTasks;
@@ -57,11 +58,21 @@ describes.fakeWin('Viewport', {}, env => {
     windowApi.requestAnimationFrame = fn => window.setTimeout(fn, 16);
 
     viewerViewportHandler = undefined;
+    viewerScrollDocHandler = undefined;
     viewer = {
       isEmbedded: () => false,
-      getPaddingTop: () => 19,
-      onViewportEvent: handler => {
-        viewerViewportHandler = handler;
+      getParam: param => {
+        if (param == 'paddingTop') {
+          return 19;
+        }
+        return undefined;
+      },
+      onMessage: (eventType, handler) => {
+        if (eventType == 'viewport') {
+          viewerViewportHandler = handler;
+        } else if (eventType == 'scroll') {
+          viewerScrollDocHandler = handler;
+        }
       },
       sendMessage: sandbox.spy(),
       isVisible: () => true,
@@ -589,6 +600,13 @@ describes.fakeWin('Viewport', {}, env => {
     expect(addStub).to.be.calledWith('i-amphtml-make-body-block');
   });
 
+  it('should scroll to target position when the viewer sets scrollTop', () => {
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('setScrollTop').withArgs(117).once();
+    viewerScrollDocHandler({scrollTop: 117});
+    bindingMock.verify();
+  });
+
   describes.realWin('top-level styles', {amp: 1}, env => {
     let win;
     let root;
@@ -845,8 +863,13 @@ describe('Viewport META', () => {
       clock = sandbox.useFakeTimers();
       viewer = {
         isEmbedded: () => false,
-        getPaddingTop: () => 0,
-        onViewportEvent: () => {},
+        getParam: param => {
+          if (param == 'paddingTop') {
+            return 0;
+          }
+          return undefined;
+        },
+        onMessage: () => {},
         isVisible: () => true,
         onVisibilityChanged: () => {},
       };
@@ -1009,8 +1032,13 @@ describe('ViewportBindingNatural', () => {
     installPlatformService(windowApi);
     viewer = {
       isEmbedded: () => false,
-      getPaddingTop: () => 19,
-      onViewportEvent: () => {},
+      getParam: param => {
+        if (param == 'paddingTop') {
+          return 19;
+        }
+        return undefined;
+      },
+      onMessage: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     binding = new ViewportBindingNatural_(windowApi, viewer);
