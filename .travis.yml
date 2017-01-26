@@ -40,4 +40,3 @@ cache:
   yarn: true
   directories:
   - node_modules
-group: deprecated # https://github.com/travis-ci/travis-ci/issues/6928
