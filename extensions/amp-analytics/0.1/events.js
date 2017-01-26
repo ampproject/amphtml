@@ -239,7 +239,7 @@ export class RenderStartTracker extends EventTracker {
               (context.parentElement || context),
               selector,
               selectionMethod),
-          'Element "%s" not found', selector);
+          `Element "${selector}" not found`);
       renderStartPromise = Promise.race([
         element.whenSignal('render-start'),
         element.whenSignal('load-end'),

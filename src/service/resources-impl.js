@@ -35,6 +35,7 @@ import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
 import {documentInfoForDoc} from '../document-info';
+import {startDocRender} from './ampdoc-impl';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';
@@ -245,6 +246,14 @@ export class Resources {
    */
   isRuntimeOn() {
     return this.isRuntimeOn_;
+  }
+
+  /**
+   * Signals that the document has been started rendering.
+   * @restricted
+   */
+  renderStarted() {
+    startDocRender(this.ampdoc);
   }
 
   /**

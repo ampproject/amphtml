@@ -306,9 +306,10 @@ export class FriendlyIframeEmbed {
     /** @private {boolean} */
     this.isRenderStarted_ = false;
 
+    /** @private {function()|undefined} */
+    this.renderStartedResolve_ = undefined;
     /** @private @const {!Promise} */
     this.renderStartedPromise_ = new Promise(resolve => {
-      /** @private @const {function()|undefined} */
       this.renderStartedResolve_ = resolve;
     });
 
