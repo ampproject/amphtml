@@ -16,10 +16,12 @@
 
 import {dev, rethrowAsync} from './log';
 import {documentStateFor} from './service/document-state';
+import {getAmpDoc} from './ampdoc';
 import {performanceFor} from './performance';
-import {setStyles} from './style';
-import {waitForServices} from './render-delaying-services';
 import {resourcesForDoc} from './resources';
+import {setStyles} from './style';
+import {startDocRender} from './service/ampdoc-impl';
+import {waitForServices} from './render-delaying-services';
 
 
 const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
@@ -132,6 +134,7 @@ export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
  */
 export function makeBodyVisible(doc, opt_waitForServices) {
   const set = () => {
+    startDocRender(getAmpDoc(doc));
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',

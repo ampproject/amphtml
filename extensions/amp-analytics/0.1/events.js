@@ -19,6 +19,7 @@ import {getDataParamsFromAttributes} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
+const NO_UNLISTEN = function() {};
 
 
 /**
@@ -202,5 +203,52 @@ export class ClickEventTracker extends EventTracker {
         /* computeParamNameFunc */ undefined,
         VARIABLE_DATA_ATTRIBUTE_KEY);
     listener(new AnalyticsEvent(target, 'click', params));
+  }
+}
+
+
+/**
+ * Tracks render-start events.
+ */
+export class RenderStartTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+  }
+
+  /** @override */
+  dispose() {
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const selector = config['selector'] || ':root';
+    let renderStartPromise;
+    let target;
+    if (selector == ':root' || selector == ':host') {
+      // Root selectors are delegated to analytics roots.
+      renderStartPromise = this.root.whenRenderStarted();
+      target = this.root.getRootElement();
+    } else {
+      // Look for the AMP-element.
+      const selectionMethod = config['selectionMethod'];
+      const element = user().assertElement(
+          this.root.getAmpElement(
+              (context.parentElement || context),
+              selector,
+              selectionMethod),
+          'Element "%s" not found', selector);
+      renderStartPromise = Promise.race([
+        element.whenSignal('render-start'),
+        element.whenSignal('load-end'),
+      ]);
+      target = element;
+    }
+    renderStartPromise.then(() => {
+      listener(new AnalyticsEvent(target, eventType));
+    });
+    return NO_UNLISTEN;
   }
 }

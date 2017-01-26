@@ -170,6 +170,29 @@ export class AnalyticsRoot {
   }
 
   /**
+   * Searches the AMP element that matches the selector within the scope of the
+   * analytics root in relationship to the specified context node.
+   *
+   * @param {!Element} context
+   * @param {string} selector DOM query selector.
+   * @param {?string=} selectionMethod Allowed values are `null`,
+   *   `'closest'` and `'scope'`.
+   * @return {?AmpElement} AMP element corresponding to the selector if found.
+   */
+  getAmpElement(context, selector, selectionMethod) {
+    const element = this.getElement(context, selector, selectionMethod);
+    if (element) {
+      // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
+      // form is in PROD for 1-2 weeks.
+      user().assert(
+          (element.classList.contains('-amp-element')
+            || element.classList.contains('i-amphtml-element')),
+          'Element "%s" is required to be an AMP element', selector);
+    }
+    return element;
+  }
+
+  /**
    * Creates listener-filter for DOM events to check against the specified
    * selector. If the node (or its ancestors) match the selector the listener
    * will be called.
@@ -228,6 +251,12 @@ export class AnalyticsRoot {
       }
     };
   }
+
+  /**
+   * @return {!Promise}
+   * @abstract
+   */
+  whenRenderStarted() {}
 }
 
 
@@ -261,6 +290,11 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
   /** @override */
   getElementById(id) {
     return this.ampdoc.getElementById(id);
+  }
+
+  /** @override */
+  whenRenderStarted() {
+    return this.ampdoc.whenRenderStarted();
   }
 }
 
@@ -298,6 +332,11 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
   /** @override */
   getElementById(id) {
     return this.embed.win.document.getElementById(id);
+  }
+
+  /** @override */
+  whenRenderStarted() {
+    return this.embed.whenRenderStarted();
   }
 }
 
