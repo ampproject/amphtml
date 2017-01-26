@@ -16,6 +16,7 @@
 
 import {CSS} from '../../../build/amp-tabs-0.1.css';
 import {isExperimentOn} from '../../../src/experiments';
+import {childElementByTag, childElementsByTag} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 /** @const */
@@ -35,51 +36,49 @@ export class AmpTabs extends AMP.BaseElement {
   buildCallback() {
     //TODO: handle case where there are > 1 <amp-tabs> on a page.
 
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment "${TAG}" is disabled.`);
+    // user().assert(isExperimentOn(this.win, TAG),
+    //     `Experiment "${TAG}" is disabled.`);
 
-    let selectedTabHeaderIndex = -1;
-    let selectedTabContentIndex = -1;
-    this.sections_ = this.getRealChildren();
-    this.sections_.forEach((section, index) => {
-      /** The first section should be the tab headers */
-      if (!index) {
-        user().assert(
-            section.tagName.toLowerCase() == 'ul',
-            'Tab headers should be enclosed in a <ul> tag, ' +
-            'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
-            'amp-tabs/amp-tabs.md. Found in: %s', this.element);
-        for (let i = 0; i < section.children.length; ++i) {
-          const tab = section.children[i];
-          tab.addEventListener('click',
-            this.onHeaderClick_.bind(this, i + 1 /* tab content index */));
+    const tabsParent = childElementByTag(this.element, 'ul');
+    user().assert(tabsParent != null,
+      'Tab headers should be enclosed in a <ul> tag');
 
-          if (tab.hasAttribute('selected')) {
-            selectedTabHeaderIndex = i;
-          }
-        }
-      } else {
-        /** The tab content */
-        user().assert(
-            section.tagName.toLowerCase() == 'section',
-            'Sections should be enclosed in a <section> tag, ' +
-            'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
-            'amp-tabs/amp-tabs.md. Found in: %s', this.element);
+    const tabs = childElementsByTag(tabsParent, 'li');
+    user().assert(tabs.length > 0,
+      'There should be at least one tab items enclosed in a <li> tag...');
 
-        if (section.hasAttribute('selected')) {
-          selectedTabContentIndex = index - 1;
-        }
+    const sections = childElementsByTag(this.element, 'section');
+    user().assert(sections.length == tabs.length,
+      'There should same number of sections as tabs...');
+
+    let selectedTab = null;
+    tabs.forEach(tab => {
+      if (!!tab.attributes['selected']) {
+        selectedTab = tab;
       }
     });
 
-    user().assert(selectedTabHeaderIndex >= 0, 'You need to specify which ' +
-      'Tab Header will be selected by default. Add the "selected" attribute ' +
-      'to the <li> tag.');
-    user().assert(selectedTabContentIndex >= 0, 'You need to specify which ' +
-      'Tab Content will be displayed by default. Add the "selected" ' +
-      'attribute to the <section> tag.');
-    user().assert(selectedTabHeaderIndex == selectedTabContentIndex,
+    let selectedSection = null;
+    sections.forEach(section => {
+      if (!!section.attributes['selected']) {
+        selectedSection = section;
+      }
+    });
+
+    user().assert(selectedTab != null,
+      'You need to specify a tab to be selected!');
+    user().assert(selectedSection != null,
+      'You need to specify a section to be selected!');
+    user().assert(
+      tabs.indexOf(selectedTab) == sections.indexOf(selectedSection),
       'Selected Tab Header and Selected Tab content indices do not match!');
+
+    this.sections_ = sections;
+    this.tabs_ = tabs;
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', this.onHeaderClick_.bind(this, index));
+    });
   }
 
   /**
@@ -91,6 +90,7 @@ export class AmpTabs extends AMP.BaseElement {
     event.preventDefault();
     for (let i = 1; i < this.sections_.length; ++i) {
       this.sections_[i].removeAttribute('selected');
+      this.tabs_[i].removeAttribute('selected');
     }
     const tabContentElement = this.sections_[index];
     this.mutateElement(() => {
