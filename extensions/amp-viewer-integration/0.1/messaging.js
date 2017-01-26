@@ -93,7 +93,7 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    console.log('+++++++ampdoc got a message2:', event.type, event.data);
+    dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
     /** @type {Message} */
     const message = event.data;
     if (message.type == MessageType.REQUEST) {
@@ -173,7 +173,7 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
-    this.port_.postMessage(message);
+    this.port_./*OK*/postMessage(message);
   }
 
   /**

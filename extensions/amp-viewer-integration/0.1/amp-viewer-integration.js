@@ -100,8 +100,8 @@ export class AmpViewerIntegration {
    */
   webviewPreHandshakePromise_() {
     return new Promise(resolve => {
-      this.win.addEventListener('message', e => {
-        console.log('+++++++ampdoc got a message:', e.type, e.data);
+      listen(this.win, 'message', e => {
+        dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type, e.data);
         // Viewer says: "I'm ready for you"
         if (
           // e.origin === '' && !e.source && //commenting out for now but need to uncomment before submit
@@ -125,7 +125,6 @@ export class AmpViewerIntegration {
     dev().fine(TAG, 'Send a handshake request');
     return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {}, true)
         .then(() => {
-          console.log('@@@@@@@@@@@ channel opened! @@@@@@@@@@@@@');
           dev().fine(TAG, 'Channel has been opened!');
           this.setup_(messaging, viewer);
         });
