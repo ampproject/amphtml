@@ -396,7 +396,7 @@ export const adConfig = {
   },
 
   plista: {},
-  
+
   polymorphicads: {
     prefetch: 'https://www.polymorphicads.jp/js/amp.js',
     preconnect: [
