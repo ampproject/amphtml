@@ -432,6 +432,6 @@ function getEntropy(win) {
  * @return {!Cid}
  * @private visible for testing
  */
-export function installCidServiceForDoc(ampdoc) {
+export function installCidServiceForDocForTesting(ampdoc) {
   return fromClassForDoc(ampdoc, 'cid', Cid);
 }

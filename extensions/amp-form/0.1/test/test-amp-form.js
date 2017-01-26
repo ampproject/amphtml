@@ -35,7 +35,7 @@ import {installActionServiceForDoc,} from
     '../../../../src/service/action-impl';
 import {actionServiceForDoc} from '../../../../src/action';
 import {
-    installCidServiceForDoc,
+    installCidServiceForDocForTesting,
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {
     installCryptoService,
@@ -60,7 +60,7 @@ describe('amp-form', () => {
       installActionServiceForDoc(docService.getAmpDoc());
       installTemplatesService(iframe.win);
       installAmpForm(iframe.win);
-      installCidServiceForDoc(docService.getAmpDoc());
+      installCidServiceForDocForTesting(docService.getAmpDoc());
       installCryptoService(iframe.win);
       toggleExperiment(iframe.win, 'amp-form-var-sub', true);
       const form = getForm(iframe.doc, button1, button2, button3);
