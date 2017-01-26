@@ -154,6 +154,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Revcontent](../../ads/revcontent.md)
 - [Rubicon Project](../../ads/rubicon.md)
 - [Sharethrough](../../ads/sharethrough.md)
+- [Sklik](../../ads/sklik.md)
 - [Smart AdServer](../../ads/smartadserver.md)
 - [smartclip](../../ads/smartclip.md)
 - [Sortable](../../ads/sortable.md)
