@@ -114,6 +114,7 @@ export function googleAdUrl(
     const viewportRect = viewport.getRect();
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
+
     // Detect container types.
     let parentElement = adElement.parentElement;
     let tagName = parentElement.tagName.toUpperCase();

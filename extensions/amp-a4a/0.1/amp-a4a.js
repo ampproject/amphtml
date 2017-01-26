@@ -445,9 +445,8 @@ export class AmpA4A extends AMP.BaseElement {
       }
     }
 
-    debugger;
     this.detectedFont_ =
-        this.win.getComputedStyle(this.element)['font-family'];
+        this.win./*OK*/getComputedStyle(this.element)['font-family'];
 
     // Return value from this chain: True iff rendering was "successful"
     // (i.e., shouldn't try to render later via iframe); false iff should
@@ -1368,6 +1367,6 @@ export class AmpA4A extends AMP.BaseElement {
    * otherwise.
    */
   getDetectedFont() {
-    return this.detectedFont_
+    return this.detectedFont_;
   }
 }
