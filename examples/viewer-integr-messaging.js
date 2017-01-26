@@ -54,7 +54,6 @@ function ViewerMessaging(target, targetOrigin, requestProcessor, opt_targetId, o
   } else {
     window.addEventListener('message', this.onMessage_.bind(this), false);
   }
-
 }
 
 
@@ -99,7 +98,6 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
  * @private
  */
 ViewerMessaging.prototype.onMessage_ = function(event) {
-  console.log('~~~~~~~Viewer got a message: ', event);
   var message = event.data;
   if (event.type != 'message' || !message || message.app != APP) {
     return;

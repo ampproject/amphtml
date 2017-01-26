@@ -193,7 +193,6 @@ export class Messaging {
     if (message.rsvp) {
       const promise =
         this.requestProcessor_(message.name, message.data, message.rsvp);
-
       if (!promise) {
         this.sendResponseError_(
           requestId, message.name, new Error('no response'));
