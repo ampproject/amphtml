@@ -113,6 +113,9 @@ export class AmpForm {
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacement_ = urlReplacementsForDoc(element);
 
+    /** @private {?Promise} */
+    this.dependenciesPromise_ = null;
+
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
@@ -199,11 +202,14 @@ export class AmpForm {
    * @private
    */
   whenDependenciesReady_() {
+    if (this.dependenciesPromise_) {
+      return this.dependenciesPromise_;
+    }
     const depElements = this.form_.querySelectorAll(EXTERNAL_DEPS.join(','));
     // Wait for an element to be built to make sure it is ready.
     const depPromises = toArray(depElements).map(el => el.whenBuilt());
-    return Promise.race(
-        [Promise.all(depPromises), this.timer_.promise(2000)]);
+    return this.dependenciesPromise_ = Promise.race(
+        [Promise.all(depPromises), this.timer_.promise(15000)]);
   }
 
   /** @private */
