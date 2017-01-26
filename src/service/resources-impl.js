@@ -34,7 +34,7 @@ import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
-
+import {documentInfoForDoc} from '../document-info';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';
@@ -833,6 +833,7 @@ export class Resources {
         title: doc.title,
         sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
         serverLayout: doc.documentElement.hasAttribute('i-amphtml-element'),
+        linkRels: documentInfoForDoc(this.ampdoc).linkRels,
       }, /* cancelUnsent */true);
     }
 
