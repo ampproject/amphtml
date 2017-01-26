@@ -21,9 +21,9 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function adspeed(global, data) {
-  validateData(data, [], ['zid', 'oid']);
+  validateData(data, ['zone', 'client']);
 
-  const url = 'https://g.adspeed.net/ad.php?do=amphtml&zid=' + data.zid + '&oid=' + data.oid + '&cb=' + Math.random();
+  const url = 'https://g.adspeed.net/ad.php?do=amphtml&zid=' + data.zone + '&oid=' + data.client + '&cb=' + Math.random();
 
   writeScript(global, url);
 }

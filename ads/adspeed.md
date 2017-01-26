@@ -21,8 +21,8 @@ limitations under the License.
 ```html
 <amp-ad width="300" height="250"
       type="adspeed"
-      data-zid="82441"
-      data-oid="3">
+      data-zone="82441"
+      data-client="3">
   <div placeholder>Loading ad.</div>
   <div fallback>Ad could not be loaded.</div>
 </amp-ad>
@@ -34,6 +34,6 @@ For semantics of configuration, please see [AdSpeed documentation](https://www.a
 
 Supported parameters:
 
-- data-zid: zone id
-- data-oid: publisher/owner id
+- data-zone: the zone ID
+- data-client: the publisher ID
 
