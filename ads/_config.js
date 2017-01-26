@@ -84,6 +84,10 @@ export const adConfig = {
     preconnect: 'https://api.adsnative.com',
   },
 
+  adspeed: {
+    preconnect: 'https://g.adspeed.net',
+  },
+
   adspirit: {},
 
   adstir: {
