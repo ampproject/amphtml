@@ -514,7 +514,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  xrostssp: {},
+  brainy: {},
 
   yahoo: {
     prefetch: 'https://s.yimg.com/os/ampad/display.js',
