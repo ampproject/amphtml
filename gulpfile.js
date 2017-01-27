@@ -69,6 +69,7 @@ declareExtension('amp-brightcove', '0.1', false);
 declareExtension('amp-kaltura-player', '0.1', false);
 declareExtension('amp-carousel', '0.1', true);
 declareExtension('amp-crypto-polyfill', '0.1', false);
+declareExtension('amp-copy', '0.1', false);
 declareExtension('amp-dailymotion', '0.1', false);
 declareExtension('amp-dynamic-css-classes', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-experiment', '0.1', false, 'NO_TYPE_CHECK');
