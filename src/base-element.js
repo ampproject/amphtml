@@ -35,7 +35,7 @@ import {user} from './log';
  * https://developers.google.com/web/fundamentals/getting-started/primers/customelements)
  * and adding AMP style late loading to the mix.
  *
- * The complete lifecycle of custom DOM element is:
+ * The complete lifecycle of a custom DOM element is:
  *
  *           ||
  *           || createdCallback
