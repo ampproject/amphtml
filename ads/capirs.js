@@ -37,6 +37,18 @@ export function capirs(global, data) {
         });
       },
     },
+    block: {
+      draw: (feed) => {
+        window.context.renderStart({
+          width: feed['banners']['graph'][0]['width'],
+          height: feed['banners']['graph'][0]['height'],
+        });
+        window.context.reportRenderedEntityIdentifier('capirs-' + feed['banners']['graph'][0]['banner_id']);
+      },
+      unexist: () => {
+        window.context.noContentAvailable();
+      }
+    }
   };
 
   writeScript(global, '//ssp.rambler.ru/capirs_async.js');

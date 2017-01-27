@@ -153,7 +153,9 @@ export const adConfig = {
     ],
   },
 
-  capirs: {},
+  capirs: {
+    renderStartImplemented: true,
+  },
 
   caprofitx: {
     prefetch: [
