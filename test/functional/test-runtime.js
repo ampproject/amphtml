@@ -187,7 +187,7 @@ describes.fakeWin('runtime', {
     expect(progress).to.equal('');
     adopt(win);
     expect(queueExtensions).to.have.length(0);
-    return Promise.resolve().then(() => {
+    return setTimeout(() => {
       expect(progress).to.equal('1HIGH');
       win.AMP.push({
         n: 'ext1',
@@ -211,7 +211,7 @@ describes.fakeWin('runtime', {
           progress += 'B';
         },
       });
-      return Promise.resolve().then(() => {
+      return setTimeout(() => {
         expect(queueExtensions).to.have.length(0);
 
         expect(progress).to.equal('1HIGHAB2');
@@ -220,8 +220,8 @@ describes.fakeWin('runtime', {
         const ext1 = extensions.waitForExtension('ext1');
         const ext2 = extensions.waitForExtension('ext2');
         return Promise.all([ext1, ext2]);
-      });
-    });
+      }, 0);
+    }, 0);
   });
 
   it('should wait for body before processing extensions', () => {

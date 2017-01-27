@@ -16,11 +16,10 @@
 
 import {
   activateChunkingForTesting,
-  chunk,
   chunkInstanceForTesting,
   deactivateChunking,
   onIdle,
-  resolvedObjectforTesting,
+  startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {toggleExperiment} from '../../src/experiments';
@@ -30,10 +29,8 @@ import * as sinon from 'sinon';
 
 describe('chunk', () => {
 
-  let resolved;
   let experimentOn;
   beforeEach(() => {
-    resolved = resolvedObjectforTesting();
     experimentOn = true;
     activateChunkingForTesting();
   });
@@ -62,16 +59,16 @@ describe('chunk', () => {
     });
 
     it('should execute a chunk', done => {
-      expect(chunkInstanceForTesting(env.win.document).active_).to.equal(
-          experimentOn);
-      chunk(fakeWin.document, done);
+      startupChunk(fakeWin.document, unusedIdleDeadline => {
+        done();
+      });
     });
 
     it('should execute chunks', done => {
       let count = 0;
       let progress = '';
       function complete(str) {
-        return function() {
+        return function(unusedIdleDeadline) {
           progress += str;
           if (++count == 6) {
             expect(progress).to.equal('abcdef');
@@ -79,14 +76,14 @@ describe('chunk', () => {
           }
         };
       }
-      chunk(fakeWin.document, complete('a'));
-      chunk(fakeWin.document, complete('b'));
-      chunk(fakeWin.document, function() {
+      startupChunk(fakeWin.document, complete('a'));
+      startupChunk(fakeWin.document, complete('b'));
+      startupChunk(fakeWin.document, function() {
         complete('c')();
-        chunk(fakeWin.document, function() {
+        startupChunk(fakeWin.document, function() {
           complete('d')();
-          chunk(fakeWin.document, complete('e'));
-          chunk(fakeWin.document, complete('f'));
+          startupChunk(fakeWin.document, complete('e'));
+          startupChunk(fakeWin.document, complete('f'));
         });
       });
     });
@@ -175,10 +172,10 @@ describe('chunk', () => {
       });
 
       it('should proceed on error and rethrowAsync', d => {
-        chunk(fakeWin.document, () => {
+        startupChunk(fakeWin.document, () => {
           throw new Error('test async');
         });
-        chunk(fakeWin.document, () => {
+        startupChunk(fakeWin.document, () => {
           done = d;
         });
       });
@@ -207,8 +204,9 @@ describe('chunk', () => {
         });
         env.win.requestIdleCallback =
             resolvingIdleCallbackWithTimeRemaining(15);
-        env.sandbox.stub(resolved, 'then', () => {
-          throw new Error('No calls expected .then');
+        const chunks = chunkInstanceForTesting(env.win.document);
+        env.sandbox.stub(chunks, 'executeAsap_', () => {
+          throw new Error('No calls expected: executeAsap_');
         });
         env.win.location.resetHref('test#visibilityState=hidden');
       });
@@ -240,8 +238,9 @@ describe('chunk', () => {
         });
         env.win.requestIdleCallback =
             resolvingIdleCallbackWithTimeRemaining(15);
-        env.sandbox.stub(resolved, 'then', () => {
-          throw new Error('No calls expected');
+        const chunks = chunkInstanceForTesting(env.win.document);
+        env.sandbox.stub(chunks, 'executeAsap_', () => {
+          throw new Error('No calls expected: executeAsap_');
         });
         env.win.document.hidden = true;
       });
