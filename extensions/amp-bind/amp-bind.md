@@ -46,7 +46,7 @@ limitations under the License.
 `amp-bind` allows you to add custom interactivity to your pages beyond using AMP's pre-built components.
 It works by mutating elements in response to user actions via data binding and JS-like expressions.
 
-A data binding is a special attribute that links an element to a custom [expression](#expressions). Expressions may reference implicit mutable JSON state. When that state is changed, expressions
+A data binding is a special attribute that links an element to a custom [expression](#expressions). Expressions may reference an implicit mutable JSON state. When that state is changed, expressions
 are re-evaluated and elements with bindings are updated with the new results.
 
 A simple example:
@@ -109,7 +109,7 @@ elements and attributes.
 
 `amp-bind` expressions are JS-like with some important differences:
 
-- Expressions may only access JSON state in `<amp-state>` and that set by the `AMP.setState` action
+- Expressions may only access the implicit JSON state
 - Expressions do not have access to globals like `window` or `document`
 - Only whitelisted functions are allowed
 - Custom functions and control flow statements (e.g. `for`, `if`) are disallowed
