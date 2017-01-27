@@ -250,9 +250,6 @@ function createElementRules_() {
         },
         blockedURLs: ['__amp_source_origin'],
       },
-      srcset: {
-        alternativeName: 'src',
-      },
     },
     A: {
       href: {

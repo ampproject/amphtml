@@ -227,24 +227,6 @@ describe('BindValidator', () => {
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
       expect(val.isResultValid(
           'AMP-VIDEO', 'src', '__amp_source_origin')).to.be.false;
-
-      // srcset
-      expect(val.isResultValid(
-          'AMP-VIDEO',
-          'srcset',
-          'https://a.com/b.mp4 1x, https://c.com/d.mp4 2x')).to.be.true;
-      expect(val.isResultValid(
-          'AMP-VIDEO',
-          'srcset',
-          'https://a.com/b.mp4 1x, http://c.com/d.mp4 2x')).to.be.false;
-      expect(val.isResultValid(
-          'AMP-VIDEO',
-          'srcset',
-          'https://a.com/b.mp4 1x, __amp_source_origin 2x')).to.be.false;
-      expect(val.isResultValid(
-          'AMP-VIDEO',
-          'srcset',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
     });
   });
 });
