@@ -27,17 +27,18 @@ export class AmpTabs extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
     /** @private {?NodeList} */
     this.sections_ = null;
+    /** @private {?NodeList} */
+    this.tabs_ = null;
   }
 
   /** @override */
   buildCallback() {
     //TODO: handle case where there are > 1 <amp-tabs> on a page.
 
-    // user().assert(isExperimentOn(this.win, TAG),
-    //     `Experiment "${TAG}" is disabled.`);
+    user().assert(isExperimentOn(this.win, TAG),
+        `Experiment "${TAG}" is disabled.`);
 
     const tabsParent = childElementByTag(this.element, 'ul');
     user().assert(tabsParent != null,
@@ -87,10 +88,13 @@ export class AmpTabs extends AMP.BaseElement {
    * @private
    */
   onHeaderClick_(index) {
-    event.preventDefault();
     for (let i = 1; i < this.sections_.length; ++i) {
-      this.sections_[i].removeAttribute('selected');
-      this.tabs_[i].removeAttribute('selected');
+      this.mutateElement(() => {
+        this.sections_[i].removeAttribute('selected');
+      }, this.sections_[i]);
+      this.mutateElement(() => {
+        this.tabs_[i].removeAttribute('selected');
+      }, this.tabs_[i]);
     }
     const tabContentElement = this.sections_[index];
     this.mutateElement(() => {
