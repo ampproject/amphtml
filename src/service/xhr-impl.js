@@ -104,14 +104,15 @@ export class Xhr {
   }
 
   /**
-   * Performs the final initialization and requests the fetch. It does three
-   * main things: (1) It adds "__amp_source_origin" URL parameter with source
-   * origin; (2) It verifies "AMP-Access-Control-Allow-Source-Origin" if it's
-   * returned in the response; and (3) It requires
-   * "AMP-Access-Control-Allow-Source-Origin" to be present in the response
-   * if the `init.requireAmpResponseSourceOrigin = true`.
-   * USE WITH CAUTION: setting ampCors false disables AMP source origin check
+   * Performs the final initialization and requests the fetch. It does two
+   * main things:
+   * - It adds "__amp_source_origin" URL parameter with source origin
+   * - It verifies "AMP-Access-Control-Allow-Source-Origin" in the response
+   * USE WITH CAUTION: setting ampCors to false disables AMP source origin check
    * but allows for caching resources cross pages.
+   *
+   * Note: requireAmpResponseSourceOrigin is deprecated. It defaults to
+   *   true. Use "ampCors: false" to disable AMP source origin check.
    *
    * @param {string} input
    * @param {!FetchInitDef=} init
@@ -125,12 +126,12 @@ export class Xhr {
     } else {
       init.requireAmpResponseSourceOrigin = false;
     }
+    if (init.requireAmpResponseSourceOrigin === true) {
+      dev().error('XHR',
+          'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
+    }
     if (init.requireAmpResponseSourceOrigin === undefined) {
-      // TODO: this is an intermediate step of migrating
-      // requireAmpResponseSourceOrigin to ampCors. Once deployed to production,
-      // we can default requireAmpResponseSourceOrigin to true.
-      dev().error(
-          'XHR', 'Please explicitly specify requireAmpResponseSourceOrigin');
+      init.requireAmpResponseSourceOrigin = true;
     }
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
@@ -176,12 +177,28 @@ export class Xhr {
    * @return {!Promise<!JSONType>}
    */
   fetchJson(input, opt_init) {
+    return this.fetchJsonResponse(input, opt_init)
+        .then(response => response.json());
+  }
+
+  /**
+   * Makes a request to fetch JSON response, based on the fetch polyfill.
+   *
+   * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+   *
+   * See `fetchAmpCors_` for more detail.
+   *
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
+   * @return {!Promise<!FetchResponse>}
+   */
+  fetchJsonResponse(input, opt_init) {
     const init = opt_init || {};
     init.method = normalizeMethod_(init.method);
     setupJson_(init);
     return this.fetchAmpCors_(input, init).then(response => {
       return assertSuccess(response);
-    }).then(response => response.json());
+    });
   }
 
   /**
@@ -408,7 +425,7 @@ function createXhrRequest(method, url) {
 
 /**
  * If 415 or in the 5xx range.
- * @param {string} status
+ * @param {number} status
  */
 function isRetriable(status) {
   return status == 415 || (status >= 500 && status < 600);
@@ -417,7 +434,7 @@ function isRetriable(status) {
 
 /**
  * Returns the response if successful or otherwise throws an error.
- * @paran {!FetchResponse} response
+ * @param {!FetchResponse} response
  * @return {!Promise<!FetchResponse>}
  * @private Visible for testing
  */
@@ -426,6 +443,7 @@ export function assertSuccess(response) {
     if (response.status < 200 || response.status >= 300) {
       /** @const {!Error} */
       const err = user().createError(`HTTP error ${response.status}`);
+      err.response = response;
       if (isRetriable(response.status)) {
         err.retriable = true;
       }
@@ -548,7 +566,7 @@ export class FetchResponseHeaders {
 
   /**
    * @param {string} name
-   * @return {*}
+   * @return {string}
    */
   get(name) {
     return this.xhr_.getResponseHeader(name);

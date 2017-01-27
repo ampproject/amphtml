@@ -834,7 +834,6 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
-    this.boundCloseOnEscape_ = null;
   }
 
   /**

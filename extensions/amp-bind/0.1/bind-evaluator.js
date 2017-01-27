@@ -15,39 +15,130 @@
  */
 
 import {BindExpression} from './bind-expression';
+import {BindValidator} from './bind-validator';
+import {user} from '../../../src/log';
+
+const TAG = 'AMP-BIND';
+
+/**
+ * @typedef {{
+ *   tagName: string,
+ *   property: string,
+ *   expressionString: string,
+ * }}
+ */
+export let EvaluateeDef;
+
+/**
+ * @typedef {{
+ *   tagName: string,
+ *   property: string,
+ *   expression: !BindExpression,
+ * }}
+ */
+let ParsedEvaluateeDef;
 
 /**
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
   /**
-   * @param {!Array<string>} expressionStrings
+   * @param {!Array<EvaluateeDef>} evaluatees
    */
-  constructor(expressionStrings) {
-    /** @const {!Array<!BindExpression>} */
-    this.expressions_ = [];
-    for (let i = 0; i < expressionStrings.length; i++) {
-      this.expressions_[i] = new BindExpression(expressionStrings[i]);
+  constructor(evaluatees) {
+    /** @const {!Array<ParsedEvaluateeDef>} */
+    this.parsedEvaluatees_ = [];
+
+    /** @const {!./bind-validator.BindValidator} */
+    this.validator_ = new BindValidator();
+
+    // Create BindExpression objects from expression strings.
+    for (let i = 0; i < evaluatees.length; i++) {
+      const e = evaluatees[i];
+
+      let expression;
+      try {
+        expression = new BindExpression(e.expressionString);
+      } catch (error) {
+        user().error(TAG, 'Malformed expression:', error);
+        continue;
+      }
+
+      this.parsedEvaluatees_.push({
+        tagName: e.tagName,
+        property: e.property,
+        expression,
+      });
     }
   }
 
   /**
    * Evaluates all expressions with the given `scope` data and resolves
-   * the returned Promise with the results.
+   * the returned Promise with a map of expression strings to results.
    * @param {!Object} scope
-   * @return {!Promise<!Object<string,*>>} Maps expression strings to results.
+   * @return {
+   *   !Promise<!Object<string, ./bind-expression.BindExpressionResultDef>>
+   * }
    */
   evaluate(scope) {
     return new Promise(resolve => {
-      /** @type {!Object<string,*>} */
+      /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
       const cache = {};
-      this.expressions_.forEach(expression => {
-        const string = expression.expressionString;
-        if (cache[string] === undefined) {
-          cache[string] = expression.evaluate(scope);
+      /** @type {!Object<string, boolean>} */
+      const invalid = {};
+
+      this.parsedEvaluatees_.forEach(evaluatee => {
+        const {tagName, property, expression} = evaluatee;
+        const expr = expression.expressionString;
+
+        // Skip if we've already evaluated this expression string.
+        if (cache[expr] !== undefined || invalid[expr]) {
+          return;
+        }
+
+        let result;
+        try {
+          result = evaluatee.expression.evaluate(scope);
+        } catch (error) {
+          user().error(TAG, error);
+          return;
+        }
+
+        const resultString = this.stringValueOf_(property, result);
+        if (this.validator_.isResultValid(tagName, property, resultString)) {
+          cache[expr] = result;
+        } else {
+          invalid[expr] = true;
         }
       });
       resolve(cache);
     });
+  }
+
+  /**
+   * Returns the expression result string for a binding to `property`.
+   * @param {./bind-expression.BindExpressionResultDef} result
+   * @return {?string}
+   * @private
+   */
+  stringValueOf_(property, result) {
+    if (result === null) {
+      return null;
+    }
+    switch (property) {
+      case 'text':
+        break;
+      case 'class':
+        if (Array.isArray(result)) {
+          return result.join(' ');
+        }
+        break;
+      default:
+        if (typeof result === 'boolean') {
+          return result ? '' : null;
+        }
+        break;
+    }
+    return String(result);
   }
 }

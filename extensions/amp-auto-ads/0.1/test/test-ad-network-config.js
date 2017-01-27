@@ -22,6 +22,11 @@ describe('ad-network-config', () => {
 
   beforeEach(() => {
     ampAutoAdsElem = document.createElement('amp-auto-ads');
+    document.body.appendChild(ampAutoAdsElem);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(ampAutoAdsElem);
   });
 
   describe('AdSense', () => {
@@ -29,16 +34,14 @@ describe('ad-network-config', () => {
     const AD_CLIENT = 'ca-pub-1234';
 
     beforeEach(() => {
-      ampAutoAdsElem.setAttribute('data-ad-client', 'ca-pub-1234');
+      ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
     });
 
     it('should generate the config fetch URL', () => {
-      const hostname = window.location.hostname;
-
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
       expect(adNetwork.getConfigUrl()).to.equal(
           '//pagead2.googlesyndication.com/getconfig/ama?client=' +
-          AD_CLIENT + '&plah=' + hostname + '&ama_t=amp');
+          AD_CLIENT + '&plah=foo.bar&ama_t=amp');
     });
 
     it('should generate the data attributes', () => {

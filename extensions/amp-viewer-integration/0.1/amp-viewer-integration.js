@@ -15,11 +15,19 @@
  */
 
 import {Messaging} from './messaging.js';
-import {listen} from '../../../src/event-helper';
 import {viewerForDoc} from '../../../src/viewer';
+import {listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-integration';
+
+/**
+ * @enum {string}
+ */
+const RequestNames = {
+  CHANNEL_OPEN: 'channelOpen',
+  UNLOADED: 'unloaded',
+};
 
 /**
  * @fileoverview This is the communication protocol between AMP and the viewer.
@@ -34,7 +42,7 @@ export class AmpViewerIntegration {
     /** @const {!Window} win */
     this.win = win;
 
-    /** @private {?string} */
+    /** @private {?string|undefined} */
     this.unconfirmedViewerOrigin_ = null;
   }
 
@@ -45,55 +53,54 @@ export class AmpViewerIntegration {
    * @return {?Promise}
    */
   init() {
-    dev().info(TAG, 'handshake init()');
+    dev().fine(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
-    this.unconfirmedViewerOrigin_ = viewer.getParam('viewerorigin') || null;
+    this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
     if (!this.unconfirmedViewerOrigin_) {
-      dev().info(TAG, 'Viewer origin not specified.');
+      dev().fine(TAG, 'Viewer origin not specified.');
       return null;
     }
-    return this.getHandshakePromise_()
-      .then(viewerOrigin => {
-        dev().info(TAG, 'listening for messages');
-        const messaging =
-          new Messaging(this.win, this.win.parent, viewerOrigin,
-            (type, payload, awaitResponse) => {
-              return viewer.receiveMessage(
-                type, /** @type {!JSONType} */ (payload), awaitResponse);
-            });
-        viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
-          viewerOrigin);
-      });
+
+    dev().fine(TAG, 'listening for messages', this.unconfirmedViewerOrigin_);
+    const messaging = new Messaging(
+      this.win, this.win.parent, this.unconfirmedViewerOrigin_);
+
+    dev().fine(TAG, 'Send a handshake request');
+    return this.openChannel(messaging)
+        .then(() => {
+          dev().fine(TAG, 'Channel has been opened!');
+
+          messaging.setRequestProcessor((type, payload, awaitResponse) => {
+            return viewer.receiveMessage(
+              type, /** @type {!JSONType} */ (payload), awaitResponse);
+          });
+
+          viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
+            dev().assertString(this.unconfirmedViewerOrigin_));
+
+          listenOnce(
+            this.win, 'unload', this.handleUnload_.bind(this, messaging));
+        });
   }
 
   /**
-   * Send a handshake request, and listen for a handshake response to
-   * confirm the handshake.
-   * @return {!Promise}
+   * Opens the channel to initiate the handshake.
+   * @param {!Messaging} messaging
+   * @return {Promise<*>|undefined}
+   */
+  openChannel(messaging) {
+    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {}, true);
+  }
+
+
+  /**
+   * Notifies the viewer when this document is unloaded.
+   * @param {!Messaging} messaging
+   * @return {Promise<*>|undefined}
    * @private
    */
-  getHandshakePromise_() {
-    const win = this.win;
-    const unconfirmedViewerOrigin =
-      dev().assertString(this.unconfirmedViewerOrigin_);
-    return new Promise(resolve => {
-      const unlisten = listen(win, 'message', event => {
-        if (event.origin == unconfirmedViewerOrigin &&
-            event.data == 'amp-handshake-response' &&
-            event.source == win.parent) {
-          dev().info(TAG, 'received handshake confirmation');
-          // TODO: Viewer may immediately start sending messages after issuing
-          // handshake response, but we will miss these messages in the time
-          // between unlisten and the next listen later.
-          unlisten();
-          resolve(event.origin);
-        }
-      });
-
-      // Confirmed origin will come in the response.
-      win.parent./*OK*/postMessage('amp-handshake-request',
-          unconfirmedViewerOrigin);
-    });
+  handleUnload_(messaging) {
+    return messaging.sendRequest(RequestNames.UNLOADED, {}, true);
   }
 }
 

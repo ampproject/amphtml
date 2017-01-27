@@ -82,6 +82,11 @@ Here's an example of usage of `type` for a provider called XYZ:
 ```html
 <amp-analytics type="XYZ"> ... </amp-analytics>
 ```
+### Acquia Lift
+
+Type attribute value: `acquialift`
+
+Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` must be specified. More information about Acquia Lift can be found at [https://docs.acquia.com/lift](https://docs.acquia.com/lift).
 
 ### Adobe Analytics
 
@@ -136,6 +141,12 @@ Adds support for comScore Unified Digital Measurement™ pageview analytics. Req
 Type attribute value: `cxense`
 
 Adds support for Cxense Insight analytics. Requires defining *var* `siteId` with Cxense-provided *siteId*. More details can be found at [wiki.cxense.com](https://wiki.cxense.com/display/cust/Accelerated+Mobile+Pages+%28AMP%29+integration).
+
+### Gemius
+
+Type attribute value: `gemius`
+
+Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provided `prefix` and `identifier` variables must be specified. It's also possible to specify the optional variable `extraparams` (key1=value1|key2=value2).
 
 ### Google Analytics
 

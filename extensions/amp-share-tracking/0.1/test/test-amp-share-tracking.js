@@ -194,7 +194,6 @@ describes.fakeWin('amp-share-tracking', {
     expect(xhrCall.args[1]).to.jsonEqual({
       method: 'POST',
       credentials: 'include',
-      requireAmpResponseSourceOrigin: true,
       body: {},
     });
     return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {

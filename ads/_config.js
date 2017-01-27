@@ -111,6 +111,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adverticum: {},
+
   advertserve: {
     renderStartImplemented: true,
   },
@@ -438,6 +440,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  sklik: {
+    prefetch: 'https://c.imedia.cz/js/amp.js',
+  },
+
   smartadserver: {
     prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
     preconnect: 'https://static.sascdn.com',
@@ -476,6 +482,14 @@ export const adConfig = {
   },
 
   triplelift: {},
+
+  valuecommerce: {
+    prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
+    preconnect: [
+      'https://ad.jp.ap.valuecommerce.com',
+    ],
+    renderStartImplemented: true,
+  },
 
   webediads: {
     prefetch: 'https://eu1.wbdds.com/amp.min.js',

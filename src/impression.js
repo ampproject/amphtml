@@ -110,7 +110,6 @@ function invoke(win, clickUrl) {
   }
   return xhrFor(win).fetchJson(clickUrl, {
     credentials: 'include',
-    requireAmpResponseSourceOrigin: true,
   });
 }
 
