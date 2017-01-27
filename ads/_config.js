@@ -144,6 +144,8 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  brainy: {},
+
   caajainfeed: {
     prefetch: [
       'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js',
@@ -513,8 +515,6 @@ export const adConfig = {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     renderStartImplemented: true,
   },
-
-  brainy: {},
 
   yahoo: {
     prefetch: 'https://s.yimg.com/os/ampad/display.js',
