@@ -57,7 +57,7 @@ The carousel advances between items if the user swipes, uses arrow keys, or clic
 </amp-carousel>
 ```
 
-### Advancing the carousel to a specific slide
+### Advancing `amp-carousel[type="slides"]` to a specific slide
 Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a carousel with the ID "carousel-id" to the slide at index=N (the first slide is at index=0, the second slide is at index=1, and so on)
 
 Example:
