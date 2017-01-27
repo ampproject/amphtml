@@ -161,6 +161,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [SOVRN](../../ads/sovrn.md)
 - [Teads](../../ads/teads.md)
 - [TripleLift](../../ads/triplelift.md)
+- [ValueCommerce](../../ads/valuecommerce.md)
 - [Webediads](../../ads/webediads.md)
 - [Weborama](../../ads/weborama.md)
 - [Widespace](../../ads/widespace.md)
