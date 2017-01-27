@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {generateSentinel} from './3p-frame';
-import {documentInfoForDoc} from './document-info.js';
+import {documentInfoForDoc} from './document-info';
 import {isExperimentOn} from './experiments';
 import {viewerForDoc} from './viewer';
 import {getLengthNumeral} from './layout';
 import {getMode} from './mode';
+import {generateSentinel} from './3p-frame';
 
 /**
  * Produces the attributes for the ad template.
@@ -53,8 +53,7 @@ export function getContextMetadata(
   const sentinelNameChange = isExperimentOn(
       parentWindow, 'sentinel-name-change');
   attributes._context = {
-    ampcontextVersion: (getMode().localDev ? 'LOCAL' :
-        '$internalRuntimeVersion$'),
+    ampcontextVersion: '$internalRuntimeVersion$',
     sourceUrl: docInfo.sourceUrl,
     referrer,
     canonicalUrl: docInfo.canonicalUrl,
