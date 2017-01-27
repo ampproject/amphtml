@@ -53,6 +53,7 @@ export class BindEvaluator {
     this.validator_ = new BindValidator();
 
     // Create BindExpression objects from expression strings.
+    // TODO(choumx): Chunk creation of BindExpression or change to web worker.
     for (let i = 0; i < evaluatees.length; i++) {
       const e = evaluatees[i];
 

@@ -28,7 +28,7 @@ import {
   stubLegacyElements,
 } from './service/extensions-impl';
 import {ampdocServiceFor} from './ampdoc';
-import {chunk} from './chunk';
+import {startupChunk} from './chunk';
 import {cssText} from '../build/css';
 import {dev, user, initLogConstructor} from './log';
 import {
@@ -285,7 +285,7 @@ function adoptShared(global, opts, callback) {
       Promise.resolve().then(register);
     } else {
       register.displayName = fnOrStruct.n;
-      chunk(global.document, register);
+      startupChunk(global.document, register);
     }
   }
 

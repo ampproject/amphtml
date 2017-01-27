@@ -77,14 +77,16 @@ describes.realWin('amp-bind', {
    */
   function onBindReady(callback) {
     return env.ampdoc.whenReady().then(() => {
+      return bind.scanPromise_;
+    }).then(() => {
       if (bind.evaluatePromise_) {
-        return bind.evaluatePromise_.then(() => {
-          env.flushVsync();
-          callback();
-        });
+        return bind.evaluatePromise_;
       } else {
         callback();
       }
+    }).then(() => {
+      env.flushVsync();
+      callback();
     });
   }
 
@@ -96,11 +98,13 @@ describes.realWin('amp-bind', {
    */
   function onBindReadyAndSetState(state, callback) {
     return env.ampdoc.whenReady().then(() => {
+      return bind.scanPromise_;
+    }).then(() => {
       bind.setState(state);
-      return bind.evaluatePromise_.then(() => {
-        env.flushVsync();
-        callback();
-      });
+      return bind.evaluatePromise_;
+    }).then(() => {
+      env.flushVsync();
+      callback();
     });
   }
 
