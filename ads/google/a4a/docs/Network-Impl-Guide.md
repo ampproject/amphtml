@@ -13,7 +13,7 @@ Outline requirements and steps for ad network to implement Fast Fetch for early 
 
 # Background
 
-Relevant design documents:  [A4A Format Guide](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) & [intent to implement](https://github.com/ampproject/amphtml/issues/3133).
+Relevant design documents:  [A4A Readme](./a4a-readme.md), [A4A Format Guide](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) & [intent to implement](https://github.com/ampproject/amphtml/issues/3133).
 
 If you haven’t already, please read the A4A Readme to learn about why all networks should implement Fast Fetch. 
 
