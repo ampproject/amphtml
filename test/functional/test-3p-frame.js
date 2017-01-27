@@ -172,7 +172,7 @@ describe('3p-frame', () => {
           '"type":"_ping_",' +
           '"_context":{"referrer":"http://acme.org/",' +
           '"ampcontextVersion": "$internalRuntimeVersion$",' +
-          '"canonicalUrl":"https://foo.bar/baz",' +
+          '"canonicalUrl":"' + docInfo.canonicalUrl + '",' +
           '"sourceUrl":"' + locationHref + '",' +
           '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
           '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
@@ -211,7 +211,7 @@ describe('3p-frame', () => {
       document.body.appendChild(iframe);
       return loadPromise(iframe).then(() => {
         const win = iframe.contentWindow;
-        expect(win.context.canonicalUrl).to.equal('https://foo.bar/baz');
+        expect(win.context.canonicalUrl).to.equal(docInfo.canonicalUrl);
         expect(win.context.sourceUrl).to.equal(locationHref);
         expect(win.context.location.href).to.equal(locationHref);
         expect(win.context.location.origin).to.equal('http://localhost:9876');

@@ -33,6 +33,7 @@ tags: {  # amp-youtube
     value: "amp-youtube"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
