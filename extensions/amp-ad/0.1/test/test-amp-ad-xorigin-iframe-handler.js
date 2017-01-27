@@ -28,6 +28,7 @@ import * as sinon from 'sinon';
 describe('amp-ad-xorigin-iframe-handler', () => {
   let sandbox;
   let adImpl;
+  let signals;
   let iframeHandler;
   let iframe;
   let testIndex = 0;
@@ -40,6 +41,10 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     adElement.getAmpDoc = () => ampdoc;
     adElement.isBuilt = () => {
       return true;
+    };
+    signals = {};
+    adElement.signal = name => {
+      signals[name] = Date.now();
     };
     adImpl = new BaseElement(adElement);
     adImpl.getFallback = () => {
@@ -88,6 +93,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         });
         return initPromise.then(() => {
           expect(iframe.style.visibility).to.equal('');
+          expect(signals['render-start']).to.be.ok;
         }).then(() => {
           iframe.postMessageToParent({
             sentinel: 'amp3ptest' + testIndex,

@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpDocShadow} from '../../../../src/service/ampdoc-impl';
+import {
+  AmpDocSingle,
+  AmpDocShadow,
+  startDocRender,
+} from '../../../../src/service/ampdoc-impl';
 import {
   AmpdocAnalyticsRoot,
   EmbedAnalyticsRoot,
@@ -76,6 +80,16 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     root.dispose();
     expect(stub).to.be.calledOnce;
     expect(root.getTrackerOptional('custom')).to.be.null;
+  });
+
+  it('should block on whenRenderStarted for ampdoc', () => {
+    ampdoc = new AmpDocSingle(win);
+    root = new AmpdocAnalyticsRoot(ampdoc);
+    expect(ampdoc.isRenderStarted()).to.be.false;
+    startDocRender(ampdoc);
+    return root.whenRenderStarted().then(() => {
+      expect(ampdoc.isRenderStarted()).to.be.true;
+    });
   });
 
 
@@ -199,6 +213,22 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
       expect(root3.getElement(other, '#other', 'closest')).to.equal(other);
       expect(root3.getElement(child, 'target', 'closest')).to.be.null;
       expect(root3.getElement(body, '#target')).to.be.null;
+    });
+
+    it('should find an AMP element for AMP search', () => {
+      child.classList.add('i-amphtml-element');
+      expect(root.getAmpElement(body, '#child')).to.equal(child);
+    });
+
+    it('should fail if the found element is not AMP for AMP search', () => {
+      child.classList.remove('i-amphtml-element');
+      expect(() => {
+        root.getAmpElement(body, '#child');
+      }).to.throw(/required to be an AMP element/);
+    });
+
+    it('should allow not-found element for AMP search', () => {
+      expect(root.getAmpElement(body, '#unknown')).to.be.null;
     });
   });
 
@@ -359,6 +389,15 @@ describes.realWin('EmbedAnalyticsRoot', {
     root.dispose();
     expect(stub).to.be.calledOnce;
     expect(root.getTrackerOptional('custom')).to.be.null;
+  });
+
+  it('should block on whenRenderStarted for ampdoc', () => {
+    const renderStartedStub = sandbox.stub(embed, 'whenRenderStarted',
+        () => Promise.resolve(11));
+    return root.whenRenderStarted().then(value => {
+      expect(value).to.equal(11);
+      expect(renderStartedStub).to.be.calledOnce;
+    });
   });
 
 
