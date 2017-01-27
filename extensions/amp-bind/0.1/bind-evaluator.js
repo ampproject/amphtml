@@ -16,6 +16,7 @@
 
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
+import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {user} from '../../../src/log';
 
 const TAG = 'AMP-BIND';
@@ -107,7 +108,10 @@ export class BindEvaluator {
 
         const resultString = this.stringValueOf_(property, result);
         if (this.validator_.isResultValid(tagName, property, resultString)) {
-          cache[expr] = result;
+          // Rewrite URL attributes for CDN if necessary.
+          cache[expr] = typeof result === 'string'
+              ? rewriteAttributeValue(tagName, property, result)
+              : result;
         } else {
           invalid[expr] = true;
         }

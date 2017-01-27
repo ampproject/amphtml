@@ -254,7 +254,7 @@ export function sanitizeHtml(html) {
         emit(attrName);
         emit('="');
         if (attrValue) {
-          emit(htmlSanitizer.escapeAttrib(resolveAttrValue(
+          emit(htmlSanitizer.escapeAttrib(rewriteAttributeValue(
               tagName, attrName, attrValue)));
         }
         emit('"');
@@ -350,14 +350,15 @@ export function isValidAttr(tagName, attrName, attrValue) {
 }
 
 /**
- * Resolves the attribute value. The main purpose is to rewrite URLs as
- * described in `resolveUrlAttr`.
+ * If (tagName, attrName) is a CDN-rewritable URL attribute, returns the
+ * rewritten URL value. Otherwise, returns the unchanged `attrValue`.
+ * @see resolveUrlAttr for rewriting rules.
  * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
  * @return {string}
  */
-function resolveAttrValue(tagName, attrName, attrValue) {
+export function rewriteAttributeValue(tagName, attrName, attrValue) {
   if (attrName == 'src' || attrName == 'href' || attrName == 'srcset') {
     return resolveUrlAttr(tagName, attrName, attrValue, self.location);
   }

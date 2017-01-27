@@ -37,8 +37,10 @@ exports.rules = [
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/sanitizer.js',
-    whitelist: 'extensions/amp-mustache/0.1/amp-mustache.js->' +
-        'src/sanitizer.js',
+    whitelist: [
+      'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
+      'extensions/amp-bind/0.1/bind-evaluator.js->src/sanitizer.js',
+    ],
   },
   {
     filesMatching: '**/*.js',
