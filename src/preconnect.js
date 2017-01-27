@@ -249,10 +249,20 @@ class PreconnectService {
       // Don't attempt to preconnect for ACTIVE_CONNECTION_TIMEOUT_MS since
       // we effectively create an active connection.
       // TODO(@cramforce): Confirm actual http2 timeout in Safari.
-      this.origins_[origin] = Date.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
+      const now = Date.now();
+      this.origins_[origin] = now + ACTIVE_CONNECTION_TIMEOUT_MS;
+      // Make the URL change whenever we want to make a new request,
+      // but make it stay stable in between. While a given page
+      // would not actually make a new request, another page might
+      // and with this it has the same URL. If (and that is a big if)
+      // the server responds with a cacheable response, this reduces
+      // requests we make. More importantly, though, it reduces URL
+      // entropy as seen by servers and thus allows reverse proxies
+      // (read CDNs) to respond more efficiently.
+      const cacheBust = now - (now % ACTIVE_CONNECTION_TIMEOUT_MS);
       const url = origin +
           '/amp_preconnect_polyfill_404_or_other_error_expected.' +
-          '_Do_not_worry_about_it?' + Math.random();
+          '_Do_not_worry_about_it?' + cacheBust;
       // We use an XHR without withCredentials(true), so we do not send cookies
       // to the host and the host cannot set cookies.
       const xhr = new XMLHttpRequest();
