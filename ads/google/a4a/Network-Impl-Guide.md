@@ -29,13 +29,8 @@ In order to support Fast Fetch, ad networks will be required to implement the fo
 
 # Detailed Design
 
-<table>
-  <tr>
-    <td>
     ![Image of Rendering Flow](https://github.com/google/amphtml/blob/frizz-add-a4a-docs/ads/google/a4a/1.png)
-Figure 1: Fast Fetch Rendering Flow</td>
-  </tr>
-</table>
+    Figure 1: Fast Fetch Rendering Flow</td>
 
 
 ## Ad server requirements
@@ -72,13 +67,8 @@ To create an ad network implementation, the following steps must be taken:
 
 Create a new extension within the extensions section in the AMP HTML Github [repository](https://github.com/ampproject/amphtml) whose path and name match the type attribute given for amp ad element as follows: 
 
-<table>
-  <tr>
-    <td>
     ![Image of File Hierarchy](https://github.com/google/amphtml/blob/frizz-add-a4a-docs/ads/google/a4a/2.png)
-Figure 2: A4A Extension File Hierarchy</td>
-  </tr>
-</table>
+    Figure 2: A4A Extension File Hierarchy</td>
 
 
 Ad networks that want to add support for Fast Fetch within AMP must add the file hierarchy as seen in Figure 2 to the AMP repository, with <TYPE> replaced by their own network. Files must implement all requirements as specified below. Anything not specified, i.e. helper functions etc are at the discretion of the ad network, but must be approved by AMP project members just as any other contributions.
@@ -89,7 +79,8 @@ Ad networks that want to add support for Fast Fetch within AMP must add the file
 
 Implement class AmpAdNetwork<TYPE>Impl. This class must extend [AmpA4A](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js). This class must overwrite the super class methods **getAdUrl()** and **extractCreativeAndSignature(). **
 
-'''javascript
+
+``` javascript
 **getAdUrl() - must construct and return the ad url for ad request.**
 
 **@return {string} - the ad url**
@@ -101,7 +92,8 @@ Implement class AmpAdNetwork<TYPE>Impl. This class must extend [AmpA4A](https://
 **@param {!Headers} responseHeaders Response headers from the ad request**
 
 **@return {Object} creativeParts Object must have a .creative and a .signature.**
-'''
+``` 
+
 
 Examples of network implementations can be seen for [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js) and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js). 
 
@@ -113,7 +105,7 @@ Usage of getAdUrl and extractCreativeAndSignature can be seen within the this.ad
 
 Must implement and export following function. 
 
-'''javascript
+``` javascript
 **<TYPE>IsA4AEnabled(win, element)**
 
 **@param (Window) win Window where AMP runtime is running.**
@@ -121,13 +113,12 @@ Must implement and export following function.
 **@param (HTML Element) element ****The amp-ad element.**
 
 **@return (boolean) Whether or not A4A should be used in this context. **
-'''
+```
 
 Once this file is implemented, [amphtml/ads/_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js) must also be updated. Specifically, <TYPE>IsA4AEnabled() must be imported, and it must be mapped to the ad network type in the a4aRegistry mapping. 
 
-<table>
-  <tr>
-    <td>/**amphtml/ads/_a4a-config.js */
+``` html
+/**amphtml/ads/_a4a-config.js */
 …
 import {
   <TYPE>IsA4AEnabled
@@ -138,10 +129,7 @@ export const a4aRegistry = map({
   ‘<TYPE>’: <TYPE>IsA4AEnabled,
   …
 });
-</td>
-  </tr>
-</table>
-
+```
 
 Example configs for [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js#L80) and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js#L68)
 
