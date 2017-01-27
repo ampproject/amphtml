@@ -310,6 +310,18 @@ export function generateSentinel(parentWindow) {
 }
 
 /**
+ * Generates sentinel, and context, and returns context
+ * @param {!Element} iframe
+ * @param {!Window} window The parent window of the iframe.
+ * @return {Object}
+ */
+export function generateSentinelAndContext(iframe, window) {
+  const sentinel = generateSentinel(window);
+  const context = getContextMetadata(window, iframe, sentinel)._context;
+  return context;
+}
+
+/**
  * Resets the count of each 3p frame type
  * @visibleForTesting
  */

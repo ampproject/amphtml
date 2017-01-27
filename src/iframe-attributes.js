@@ -17,23 +17,21 @@ import {documentInfoForDoc} from './document-info';
 import {isExperimentOn} from './experiments';
 import {viewerForDoc} from './viewer';
 import {getLengthNumeral} from './layout';
-import {generateSentinel} from './3p-frame';
 
 /**
  * Produces the attributes for the ad template.
  * @param {!Window} parentWindow
  * @param {!Element} element
- * @return {!Object} Contains
- *       precedence over the data- attributes.
- *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
- *     - A _context object for internal use.
+ * @param {!string} sentinel
+ * @param {!Object<string, string>=} attributes
+ * @return {!Object}
  */
 export function getContextMetadata(
-    parentWindow, element, sentinel, opt_attributes) {
+    parentWindow, element, sentinel, attributes) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
-  const attributes = opt_attributes ? opt_attributes : {};
+  attributes = attributes ? attributes : {};
   attributes.width = getLengthNumeral(width);
   attributes.height = getLengthNumeral(height);
   let locationHref = parentWindow.location.href;
@@ -74,10 +72,4 @@ export function getContextMetadata(
 export function getNameAttribute(parentWindow, element, sentinel) {
   const attributes = getContextMetadata(parentWindow, element, sentinel);
   return encodeURIComponent(JSON.stringify(attributes));
-}
-
-export function generateSentinelAndContext(iframe, window) {
-  const sentinel = generateSentinel(window);
-  const context = getContextMetadata(window, iframe, sentinel)._context;
-  return context;
 }
