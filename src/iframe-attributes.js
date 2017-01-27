@@ -70,7 +70,6 @@ export function getContextMetadata(
     attributes.src = adSrc;
   }
   return attributes;
-
 }
 
 export function getNameAttribute(parentWindow, element, sentinel) {
