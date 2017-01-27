@@ -189,7 +189,7 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   mutatedAttributesCallback(mutations) {
     const slide = mutations['slide'];
-    if (slide) {
+    if (slide !== undefined) {
       const index = parseInt(slide, 10);
       if (isFinite(index)) {
         this.showSlide_(index);

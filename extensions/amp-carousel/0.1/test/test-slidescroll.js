@@ -942,6 +942,9 @@ describe('SlideScroll', () => {
         impl.mutatedAttributesCallback({slide: 2});
         expect(showSlideSpy).to.have.been.calledWith(2);
 
+        impl.mutatedAttributesCallback({slide: 0});
+        expect(showSlideSpy).to.have.been.calledWith(0);
+
         // Don't call showSlide_() if slide is not finite.
         showSlideSpy.reset();
         impl.mutatedAttributesCallback({slide: Number.POSITIVE_INFINITY});
