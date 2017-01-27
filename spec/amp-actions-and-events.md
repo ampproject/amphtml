@@ -147,6 +147,11 @@ For example, the following is possible in AMP.
     <td>dismiss (default)</td>
     <td>Hides the referenced user notification element</td>
   </tr>
+  <tr>
+    <td width="30%">amp-carousel[type="slides"]</td>
+    <td>goToSlide</td>
+    <td>Advances the carousel to a specified slide index</td>
+  </tr>
 </table>
 
 
