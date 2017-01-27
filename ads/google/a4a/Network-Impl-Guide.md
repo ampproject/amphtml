@@ -71,13 +71,13 @@ Create a new extension within the extensions section in the AMP HTML Github [rep
 Figure 2: A4A Extension File Hierarchy</td>
 
 
-Ad networks that want to add support for Fast Fetch within AMP must add the file hierarchy as seen in Figure 2 to the AMP repository, with <TYPE> replaced by their own network. Files must implement all requirements as specified below. Anything not specified, i.e. helper functions etc are at the discretion of the ad network, but must be approved by AMP project members just as any other contributions.
+Ad networks that want to add support for Fast Fetch within AMP must add the file hierarchy as seen in Figure 2 to the AMP repository, with `<TYPE>` replaced by their own network. Files must implement all requirements as specified below. Anything not specified, i.e. helper functions etc are at the discretion of the ad network, but must be approved by AMP project members just as any other contributions.
 
-### amp-ad-network-<TYPE>-impl.js
+### `amp-ad-network-<TYPE>-impl.js`
 
 *See Figure 1 Parts B and D*
 
-Implement class AmpAdNetwork<TYPE>Impl. This class must extend [AmpA4A](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js). This class must overwrite the super class methods **getAdUrl()** and **extractCreativeAndSignature()**.
+Implement class `AmpAdNetwork<TYPE>Impl`. This class must extend [AmpA4A](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js). This class must overwrite the super class methods **getAdUrl()** and **extractCreativeAndSignature()**.
 
 
 ``` javascript
@@ -97,23 +97,20 @@ Examples of network implementations can be seen for [DoubleClick](https://github
 
 Usage of getAdUrl and extractCreativeAndSignature can be seen within the this.adPromise_ promise chain in [amp-a4a.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js)
 
-### <TYPE>-a4a-config.js
+### `<TYPE>-a4a-config.js`
 
 *See Figure 1: Part A*
 
 Must implement and export following function. 
 
 ``` javascript
-**<TYPE>IsA4AEnabled(win, element)**
-
-**@param (Window) win Window where AMP runtime is running.**
-
-**@param (HTML Element) element ****The amp-ad element.**
-
-**@return (boolean) Whether or not A4A should be used in this context. **
+<TYPE>IsA4AEnabled(win, element)
+@param (Window) win Window where AMP runtime is running.
+@param (HTML Element) element ****The amp-ad element.
+@return (boolean) Whether or not A4A should be used in this context. 
 ```
 
-Once this file is implemented, [amphtml/ads/_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js) must also be updated. Specifically, <TYPE>IsA4AEnabled() must be imported, and it must be mapped to the ad network type in the a4aRegistry mapping. 
+Once this file is implemented, [amphtml/ads/_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js) must also be updated. Specifically, `<TYPE>IsA4AEnabled()` must be imported, and it must be mapped to the ad network type in the a4aRegistry mapping. 
 
 ``` javascript
 /**amphtml/ads/_a4a-config.js */
@@ -133,13 +130,13 @@ Example configs for [DoubleClick](https://github.com/ampproject/amphtml/blob/mas
 
 Usage of DoubleClick and AdSense configs can be seen in [_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js)
 
-### amp-ad-network-<TYPE>-impl-internal.md
+### `amp-ad-network-<TYPE>-impl-internal.md`
 
 Documentation for ad network amp-ad type. Please thoroughly document the usage of your implementation. 
 
 Examples can be seen for [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md) and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/amp-ad-network-adsense-impl-internal.md).
 
-### test-amp-ad-network-<TYPE>-impl.js
+### `test-amp-ad-network-<TYPE>-impl.js`
 
 Please write thorough testing for your AMP ad network implementation. 
 
@@ -155,16 +152,16 @@ Please write thorough testing for your AMP ad network implementation.
 
 * File hierarchy created within amphtml/extensions
 
-* Custom amp-ad-network-<TYPE>-impl.js overwrites getAdUrl()
+* Custom `amp-ad-network-<TYPE>-impl.js` overwrites getAdUrl()
 
-* Custom amp-ad-network-<TYPE>-impl.js overwrites extractCreativeAndSignature()
+* Custom `amp-ad-network-<TYPE>-impl.js` overwrites extractCreativeAndSignature()
 
-* <TYPE>-a4a-config.js implements <TYPE>IsA4AEnabled()
+* `<TYPE>-a4a-config.js` implements <TYPE>IsA4AEnabled()
 
 * Mapping added for ad network to a4aRegistry map within _a4a-config.js
 
-* Documentation written in amp-ad-network-<TYPE>-impl-internal.md
+* Documentation written in `amp-ad-network-<TYPE>-impl-internal.md`
 
-* Tests written in test-amp-ad-network-<TYPE>-impl.js
+* Tests written in `test-amp-ad-network-<TYPE>-impl.js`
 
 * Pull request merged to master 
