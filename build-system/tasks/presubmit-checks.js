@@ -153,7 +153,7 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
-  'installCidServiceForDoc': {
+  'installCidServiceForDocForTesting': {
     message: privateServiceFactory,
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
@@ -463,8 +463,8 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',  // Includes the previous.
     ],
   },
-  'chunk\\(': {
-    message: 'chunk( should only be used during startup',
+  'startupChunk\\(': {
+    message: 'startupChunk( should only be used during startup',
     whitelist: [
       'src/amp.js',
       'src/chunk.js',

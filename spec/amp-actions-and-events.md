@@ -47,10 +47,11 @@ AMP has a concept of a default action that elements can implement. So when omitt
 **arg=value**
 __optional__
 Some actions, if documented, may accept arguments. The arguments are defined between parentheses in `key=value` notation. The accepted values are:
- - simple unquoted strings: `simple-value`;
- - quoted strings: `"string value"` or `'string value'`;
- - boolean values: `true` or `false`;
- - numbers: `11` or `1.1`.
+ - simple unquoted strings: `simple-value`
+ - quoted strings: `"string value"` or `'string value'`
+ - boolean values: `true` or `false`
+ - numbers: `11` or `1.1`
+ - dot-syntax reference to event data: `event.someDataVariableName`
 
 ## Handling Multiple Events
 You can listen to multiple events on an element by separating the two events with a semicolon `;`.
@@ -76,18 +77,28 @@ For example, the following is possible in AMP.
   <tr>
     <th>Event</th>
     <th>Description</th>
+    <th>Data</th>
+  </tr>
+  <tr>
+    <td width="30%">amp-carousel</td>
+    <td>goToSlide</td>
+    <td>Fired when the user changes the carousel's current slide.</td>
+    <td><code>index</code> : slide number</td>
   </tr>
   <tr>
     <td>submit</td>
     <td>Fired when the form is submitted.</td>
+    <td></td>
   </tr>
   <tr>
     <td>submit-success</td>
     <td>Fired when the form submission response is success.</td>
+    <td><code>response</code> : JSON response</td>
   </tr>
   <tr>
     <td>submit-error</td>
     <td>Fired when the form submission response is an error.</td>
+    <td><code>response</code> : JSON response</td>
   </tr>
 </table>
 
@@ -172,8 +183,18 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
+    <td width="30%">amp-state</td>
+    <td>(default)</td>
+    <td>Updates the amp-state's data with the data contained in the event. Requires <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>.</td>
+  </tr>
+  <tr>
     <td>dismiss (default)</td>
     <td>Hides the referenced user notification element.</td>
+  </tr>
+  <tr>
+    <td width="30%">amp-carousel[type="slides"]</td>
+    <td>goToSlide</td>
+    <td>Advances the carousel to a specified slide index</td>
   </tr>
 </table>
 
@@ -214,5 +235,9 @@ actions that apply to the whole document.
   <tr>
     <td>goBack</td>
     <td>Navigates back in history.</td>
+  </tr>
+  <tr>
+    <td>setState</td>
+    <td>Updates local bindable state. Requires <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>.</td>
   </tr>
 </table>

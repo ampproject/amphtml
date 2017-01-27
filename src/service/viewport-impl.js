@@ -98,9 +98,6 @@ export class Viewport {
     /** @private {?number} */
     this./*OK*/scrollTop_ = null;
 
-    /** @private {?number} */
-    this.lastMeasureScrollTop_ = null;
-
     /** @private {boolean} */
     this.scrollAnimationFrameThrottled_ = false;
 
@@ -112,9 +109,6 @@ export class Viewport {
 
     /** @private {number} */
     this.lastPaddingTop_ = 0;
-
-    /** @private {number} */
-    this.scrollMeasureTime_ = 0;
 
     /** @private {!./timer-impl.Timer} */
     this.timer_ = timerFor(this.ampdoc.win);
