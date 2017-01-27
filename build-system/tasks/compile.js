@@ -261,6 +261,7 @@ function compile(entryModuleFilenames, outputDir,
         jscomp_off: ['unknownDefines'],
         define: [],
         hide_warnings_for: [
+          'third_party/caja/',
           'third_party/closure-library/sha384-generated.js',
           'third_party/d3/',
           'third_party/vega/',
