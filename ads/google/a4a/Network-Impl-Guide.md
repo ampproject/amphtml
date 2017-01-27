@@ -82,14 +82,14 @@ Implement class `AmpAdNetwork<TYPE>Impl`. This class must extend [AmpA4A](https:
 
 ``` javascript
 getAdUrl() - must construct and return the ad url for ad request.
-@return {string} - the ad url
+  // @return {string} - the ad url
 ```
 
 ``` javascript
 extractCreativeAndSignature(responseText, responseHeaders)
-@param {!ArrayBuffer} responseText Response body from the ad request.
-@param {!Headers} responseHeaders Response headers from the ad request
-@return {Object} creativeParts Object must have a .creative and a .signature.
+  // @param {!ArrayBuffer} responseText Response body from the ad request.
+  // @param {!Headers} responseHeaders Response headers from the ad request
+  // @return {Object} creativeParts Object must have a .creative and a .signature.
 ``` 
 
 
@@ -105,9 +105,9 @@ Must implement and export following function.
 
 ``` javascript
 <TYPE>IsA4AEnabled(win, element)
-@param (Window) win Window where AMP runtime is running.
-@param (HTML Element) element ****The amp-ad element.
-@return (boolean) Whether or not A4A should be used in this context. 
+  // @param (Window) win Window where AMP runtime is running.
+  // @param (HTML Element) element ****The amp-ad element.
+  // @return (boolean) Whether or not A4A should be used in this context. 
 ```
 
 Once this file is implemented, [amphtml/ads/_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js) must also be updated. Specifically, `<TYPE>IsA4AEnabled()` must be imported, and it must be mapped to the ad network type in the a4aRegistry mapping. 
