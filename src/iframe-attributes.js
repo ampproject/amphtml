@@ -17,7 +17,6 @@ import {documentInfoForDoc} from './document-info';
 import {isExperimentOn} from './experiments';
 import {viewerForDoc} from './viewer';
 import {getLengthNumeral} from './layout';
-import {getMode} from './mode';
 import {generateSentinel} from './3p-frame';
 
 /**
