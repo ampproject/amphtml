@@ -304,12 +304,18 @@ function adoptShared(global, opts, callback) {
    * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
    */
   global.AMP.push = function(fnOrStruct) {
+    if (maybeLoadCorrectVersion(global, fnOrStruct)) {
+      return;
+    }
     installExtension(fnOrStruct);
   };
 
   // Execute asynchronously scheduled elements.
   for (let i = 0; i < preregisteredExtensions.length; i++) {
     const fnOrStruct = preregisteredExtensions[i];
+    if (maybeLoadCorrectVersion(global, fnOrStruct)) {
+      continue;
+    }
     try {
       installExtension(fnOrStruct);
     } catch (e) {
@@ -888,4 +894,49 @@ export function registerElementForTesting(win, elementName) {
   }
   win.AMP.registerElement(element.name, element.implementationClass,
       element.css);
+}
+
+/**
+ * For a given extension, checks that its version is the same
+ * as the version of the main AMP binary.
+ * If yes, returns false and does nothing else.
+ * If they are different, returns false, and initiates a load
+ * of the respective extension via a versioned URL.
+ *
+ * This is currently guarded by the 'version-locking' experiment.
+ * With this active, all scripts in a given page are guaranteed
+ * to have the same AMP release version.
+ *
+ * @param {!Window} win
+ * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+ * @return {boolean}
+ */
+function maybeLoadCorrectVersion(win, fnOrStruct) {
+  if (!isExperimentOn(win, 'version-locking')) {
+    return false;
+  }
+  if (typeof fnOrStruct == 'function') {
+    return false;
+  }
+  const version = fnOrStruct.v;
+  // This is non-obvious, but we only care about the release version,
+  // not about the full rtv version, because these only differ
+  // in the config that is fully determined by the primary binary.
+  if ('$internalRuntimeVersion$' == version) {
+    return false;
+  }
+  const scriptInHead = win.document.head.querySelector(
+          `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
+  dev().assert(scriptInHead, 'Expected to find script for extension: %s',
+      fnOrStruct.n);
+  if (!scriptInHead) {
+    return false;
+  }
+  // Mark the element as being replace, so that the loadExtension code
+  // assumes it as not-present.
+  scriptInHead.removeAttribute('custom-element');
+  scriptInHead.setAttribute('i-amphtml-replaced-with-version', fnOrStruct.n);
+  extensionsFor(win).loadExtension(fnOrStruct.n,
+      /* stubbing not needed, should have already happened. */ false);
+  return true;
 }
