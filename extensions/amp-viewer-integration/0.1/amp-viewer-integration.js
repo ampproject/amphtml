@@ -47,7 +47,7 @@ export class AmpViewerIntegration {
     this.unconfirmedViewerOrigin_ = null;
 
     /** @private {boolean} */
-    this.isWebView_;
+    this.isWebView_ = false;
   }
 
   /**
@@ -63,51 +63,38 @@ export class AmpViewerIntegration {
     this.isWebView_ = true; //delete this before submitting
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
 
-    const win = this.win;
-    const unconfirmedViewerOrigin = this.unconfirmedViewerOrigin_;
-    if (!this.isWebView_) {
-      const port = new WindowPortEmulator();
-      port.addEventListener = function(eventType, handler) {
-        listen(win, 'message', e => {
-          if (e.origin == unconfirmedViewerOrigin &&
-              e.source == win.parent && e.data.app == APP) {
-            handler(e);
-          }
-        });
-      };
-      port.postMessage = function(data) {
-        win.parent./*OK*/postMessage(data, unconfirmedViewerOrigin);
-      };
-      return this.openChannelAndStart_(viewer, port);
+    if (this.isWebView_) {
+      return this.webviewPreHandshakePromise_(null, dev().assertString(''))
+      .then(receivedPort => {
+        return this.openChannelAndStart_(viewer, receivedPort);
+      });
     }
 
-    // port/webview case
-    return this.webviewPreHandshakePromise_().then(receivedPort => {
-      const port = new WindowPortEmulator();
-      port.addEventListener = function(eventType, handler) {
-        receivedPort.onmessage = handler;
-      };
-      port.postMessage = function(data) {
-        receivedPort./*OK*/postMessage(data);
-      };
-      return this.openChannelAndStart_(viewer, port);
-    });
+    const port = new WindowPortEmulator(
+      this.win, dev().assertString(this.unconfirmedViewerOrigin_));
+    return this.openChannelAndStart_(viewer, port);
   }
 
   /**
    * @return {!Promise}
+   * @param {?Window} source
+   * @param {string} origin
    * @private
    */
-  webviewPreHandshakePromise_() {
+  webviewPreHandshakePromise_(source, origin) {
     return new Promise(resolve => {
       listen(this.win, 'message', e => {
         dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type, e.data);
         // Viewer says: "I'm ready for you"
         if (
-          // e.origin === '' && !e.source && //commenting out for now but need to uncomment before submit
+            // e.origin === origin && //uncomment before submit
+            // e.source === source && //undomment before submit
             e.data.app == APP &&
-            e.data.name == 'handshake-poll' &&
-            e.ports && e.ports.length == 1) {
+            e.data.name == 'handshake-poll') {
+          if (!e.ports || !e.ports.length) {
+            throw new Error(
+              'Did not receive communication port from the Viewer!');
+          }
           resolve(e.ports[0]);
         }
       });
@@ -121,7 +108,7 @@ export class AmpViewerIntegration {
    * @private
    */
   openChannelAndStart_(viewer, pipe) {
-    const messaging = new Messaging(pipe, this.win);
+    const messaging = new Messaging(this.win, pipe);
     dev().fine(TAG, 'Send a handshake request');
     return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {}, true)
         .then(() => {

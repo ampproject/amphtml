@@ -15,6 +15,7 @@
  */
 
 
+import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
@@ -43,18 +44,34 @@ export let Message;
 
 export class WindowPortEmulator {
   /**
+   * @param {!Window} win
+   * @param {string} origin
+   */
+  constructor(win, origin) {
+    /** @const {!Window} */
+    this.win = win;
+    /** @private {string} */
+    this.origin_ = dev().assertString(origin);
+  }
+  /**
    * @param {string} eventType
    * @param {function(!Event):undefined} handler
    */
   addEventListener(eventType, handler) {
-    dev().fine(TAG, 'addEventListener', eventType, handler);
+    listen(this.win, 'message', e => {
+      if (e.origin == this.origin_ &&
+          e.source == this.win.parent && e.data.app == APP) {
+        handler(e);
+      }
+    });
   }
   /**
    * @param {Object} data
    */
   postMessage(data) {
-    dev().fine(TAG, 'postMessage', data);
+    this.win.parent./*OK*/postMessage(data, this.origin_);
   }
+  start() {}
 }
 
 /**
@@ -68,14 +85,14 @@ export class Messaging {
 
   /**
    * Conversation (messaging protocol) between me and Bob.
+   * @param {!Window} win
    * @param {!WindowPortEmulator} port
-   * @param {!Window} source for error logging
    */
-  constructor(port, source) {
+  constructor(win, port) {
+    /** @const {!Window} */
+    this.win = win;
     /** @private {!WindowPortEmulator} */
     this.port_ = port;
-    /** @private {!Window} */
-    this.source_ = source;
     /** @private {!number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
@@ -84,6 +101,7 @@ export class Messaging {
     this.requestProcessor_ = null;
 
     this.port_.addEventListener('message', this.handleMessage_.bind(this));
+    this.port_.start();
   }
 
   /**
@@ -245,7 +263,7 @@ export class Messaging {
     let stateStr = 'amp-messaging-error-logger: ' + state;
     const dataStr = ' data: ' + this.errorToString_(opt_data);
     stateStr += dataStr;
-    this.source_['viewerState'] = stateStr;
+    this.win['viewerState'] = stateStr;
   };
 
   /**
