@@ -53,7 +53,6 @@ tags: {  # <amp-state>
   html_format: AMP
   disallowed_ancestor: "AMP-SIDEBAR"
   tag_name: "AMP-STATE"
-  mandatory_parent: "HEAD"
   also_requires_tag: "amp-bind extension .js script"
   attrs: {
     name: "id"
