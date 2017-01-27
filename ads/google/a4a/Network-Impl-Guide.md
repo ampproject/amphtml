@@ -2,7 +2,7 @@
 
 *Status: Draft*
 
-*Authors: [kjwright@google.com](mailto:kjwright@google.com), [bradfrizzell@google.com](mailto:bradfrizzell@google.com) *
+*Authors: [kjwright@google.com](mailto:kjwright@google.com), [bradfrizzell@google.com](mailto:bradfrizzell@google.com)*
 
 *Last Updated: 1-27-2016*
 
@@ -77,21 +77,19 @@ Ad networks that want to add support for Fast Fetch within AMP must add the file
 
 *See Figure 1 Parts B and D*
 
-Implement class AmpAdNetwork<TYPE>Impl. This class must extend [AmpA4A](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js). This class must overwrite the super class methods **getAdUrl()** and **extractCreativeAndSignature(). **
+Implement class AmpAdNetwork<TYPE>Impl. This class must extend [AmpA4A](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js). This class must overwrite the super class methods **getAdUrl()** and **extractCreativeAndSignature()**.
 
 
 ``` javascript
-**getAdUrl() - must construct and return the ad url for ad request.**
+getAdUrl() - must construct and return the ad url for ad request.
+@return {string} - the ad url
+```
 
-**@return {string} - the ad url**
-
-**extractCreativeAndSignature(responseText, responseHeaders)**
-
-**@param {!ArrayBuffer} responseText Response body from the ad request.**
-
-**@param {!Headers} responseHeaders Response headers from the ad request**
-
-**@return {Object} creativeParts Object must have a .creative and a .signature.**
+``` javascript
+extractCreativeAndSignature(responseText, responseHeaders)
+@param {!ArrayBuffer} responseText Response body from the ad request.
+@param {!Headers} responseHeaders Response headers from the ad request
+@return {Object} creativeParts Object must have a .creative and a .signature.
 ``` 
 
 
@@ -117,7 +115,7 @@ Must implement and export following function.
 
 Once this file is implemented, [amphtml/ads/_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js) must also be updated. Specifically, <TYPE>IsA4AEnabled() must be imported, and it must be mapped to the ad network type in the a4aRegistry mapping. 
 
-``` html
+``` javascript
 /**amphtml/ads/_a4a-config.js */
 …
 import {
@@ -170,14 +168,3 @@ Please write thorough testing for your AMP ad network implementation.
 * Tests written in test-amp-ad-network-<TYPE>-impl.js
 
 * Pull request merged to master 
-
-# Caveats
-
-* Signing service is available for consumption by 3rd party ad networks.  Do we have a timeline?  Expected SLA?  Non-google implementers (e.g. CloudFlare?)?
-
-* Do we allow implementation without signing service support to allow early ad request?  
-
-* When signing service is easily available, do enforce that some percentage of requests be AMP creatives?  I believe this was a request by Malte...
-
-* Documentation on how tos for moving creatives to AMP?
-
