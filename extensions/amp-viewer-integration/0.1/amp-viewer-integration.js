@@ -60,7 +60,7 @@ export class AmpViewerIntegration {
     dev().fine(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
     this.isWebView_ = viewer.getParam('webview') == 1;
-    this.isWebView_ = true; //delete this before submitting
+    // this.isWebView_ = true; //delete this before submitting
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
 
     if (this.isWebView_) {
