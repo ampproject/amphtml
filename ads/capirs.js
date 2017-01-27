@@ -38,17 +38,19 @@ export function capirs(global, data) {
       },
     },
     block: {
-      draw: (feed) => {
+      draw: feed => {
+        const banner = feed['banners']['graph'][0];
         window.context.renderStart({
-          width: feed['banners']['graph'][0]['width'],
-          height: feed['banners']['graph'][0]['height'],
+          width: banner['width'],
+          height: banner['height'],
         });
-        window.context.reportRenderedEntityIdentifier('capirs-' + feed['banners']['graph'][0]['banner_id']);
+        const reportId = 'capirs-' + banner['banner_id'];
+        window.context.reportRenderedEntityIdentifier(reportId);
       },
       unexist: () => {
         window.context.noContentAvailable();
-      }
-    }
+      },
+    },
   };
 
   writeScript(global, '//ssp.rambler.ru/capirs_async.js');
