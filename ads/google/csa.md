@@ -57,7 +57,7 @@ To request an AFSh ad with a width equal to the screen width, use "auto" for
 the CSA width parameter. Please note that "auto" width is not supported in
 non-AMP implementations.
 
-Note that only the [multiple-format](https://developers.google.com/adsense-for-shopping/docs/multiplereference) AdSense for Shopping ads are support under this integration. 
+Note that only the [multiple-format](https://developers.google.com/adsense-for-shopping/docs/multiplereference) AdSense for Shopping ads are supported under this integration. 
 
 Please see documentation for [AdSense for Shopping](https://developers.google.com/adsense-for-shopping/docs/implementation-guide)
 for more information.
