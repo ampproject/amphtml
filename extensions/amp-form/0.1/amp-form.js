@@ -209,7 +209,7 @@ export class AmpForm {
     // Wait for an element to be built to make sure it is ready.
     const depPromises = toArray(depElements).map(el => el.whenBuilt());
     return this.dependenciesPromise_ = Promise.race(
-        [Promise.all(depPromises), this.timer_.promise(15000)]);
+        [Promise.all(depPromises), this.timer_.promise(2000)]);
   }
 
   /** @private */
