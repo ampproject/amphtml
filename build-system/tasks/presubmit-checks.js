@@ -463,8 +463,8 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',  // Includes the previous.
     ],
   },
-  'chunk\\(': {
-    message: 'chunk( should only be used during startup',
+  'startupChunk\\(': {
+    message: 'startupChunk( should only be used during startup',
     whitelist: [
       'src/amp.js',
       'src/chunk.js',
