@@ -124,14 +124,13 @@ export function googleAdUrl(
     const viewportSize = viewport.getSize();
     // Detect container types.
     let parentElement = adElement.parentElement;
-    let tagName = parentElement.tagName.toUpperCase();
     const containerTypeSet = {};
     while (parentElement) {
+      const tagName = parentElement.tagName.toUpperCase();
       if (ValidAdContainerTypes[tagName]) {
         containerTypeSet[ValidAdContainerTypes[tagName]] = true;
       }
       parentElement = parentElement.parentElement;
-      tagName = parentElement.tagName.toUpperCase();
     }
     queryParams.push({name: 'act', value:
       Object.keys(containerTypeSet).join()});
@@ -171,7 +170,8 @@ export function googleAdUrl(
         {name: 'ea', value: '0'},
         {name: 'pfx', value:
           containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
-              || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']]},
+              || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']]
+              || false},
       ],
       unboundedQueryParams,
       [
