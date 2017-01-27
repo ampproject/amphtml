@@ -72,7 +72,7 @@ For example, the following is possible in AMP.
 ```
 
 ## Element Specific Events
-### form
+### amp-carousel
 <table>
   <tr>
     <th>Event</th>
@@ -80,10 +80,18 @@ For example, the following is possible in AMP.
     <th>Data</th>
   </tr>
   <tr>
-    <td width="30%">amp-carousel</td>
     <td>goToSlide</td>
     <td>Fired when the user changes the carousel's current slide.</td>
     <td><code>index</code> : slide number</td>
+  </tr>
+</table>
+
+### form
+<table>
+  <tr>
+    <th>Event</th>
+    <th>Description</th>
+    <th>Data</th>
   </tr>
   <tr>
     <td>submit</td>
@@ -173,6 +181,20 @@ For example, the following is possible in AMP.
   <tr>
     <td>toggle</td>
     <td>Toggles the state of the sidebar.</td>
+  </tr>
+</table>
+
+### amp-state
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>(default)</td>
+    <td>Updates the amp-state's data with the data contained in the event. Requires
+      <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>.
+    </td>
   </tr>
 </table>
 
