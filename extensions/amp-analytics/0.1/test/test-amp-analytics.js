@@ -16,6 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
+import {ClickEventTracker} from '../events';
 import {Crypto} from '../crypto-impl';
 import {InstrumentationService} from '../instrumentation';
 import {variableServiceFor} from '../variables';
@@ -31,7 +32,7 @@ import {
 } from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';
-import {installCidService,} from
+import {installCidServiceForDocForTesting,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import * as sinon from 'sinon';
@@ -72,9 +73,6 @@ describe('amp-analytics', function() {
       iframe.doc.title = 'Test Title';
       markElementScheduledForTesting(iframe.win, 'amp-analytics');
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
-      installCidService(iframe.win);
-      uidService = installUserNotificationManager(iframe.win);
-
       resetServiceForTesting(iframe.win, 'xhr');
       getService(iframe.win, 'xhr', () => {
         return {fetchJson: (url, init) => {
@@ -89,6 +87,7 @@ describe('amp-analytics', function() {
       });
 
 
+
       resetServiceForTesting(iframe.win, 'crypto');
       crypto = new Crypto(iframe.win);
       getService(iframe.win, 'crypto', () => crypto);
@@ -98,6 +97,8 @@ describe('amp-analytics', function() {
       iframe.win.document.head.appendChild(link);
       windowApi = iframe.win;
       ampdoc = new AmpDocSingle(windowApi);
+      installCidServiceForDocForTesting(ampdoc);
+      uidService = installUserNotificationManager(iframe.win);
 
       ins = fromClassForDoc(
           ampdoc, 'amp-analytics-instrumentation', InstrumentationService);
@@ -153,19 +154,22 @@ describe('amp-analytics', function() {
   }
 
   /**
-   * Clears the property in the config that indicates that the requests
-   * should be sent via an iframe ping. This is needed because we pass
-   * in all the vendor requests as inline config and iframePings are not
-   * allowed to be used without AMP team's approval.
+   * Clears the properties in the config that should only be used in vendor
+   * configs. This is needed because we pass in all the vendor requests as
+   * inline config and iframePings/optout are not allowed to be used without
+   * AMP team's approval.
    *
    * @param {!JSONObject} config The inline config to update.
    * @return {!JSONObject}
    */
-  function clearIframePing(config) {
+  function clearVendorOnlyConfig(config) {
     for (const t in config.triggers) {
       if (config.triggers[t].iframePing) {
         config.triggers[t].iframePing = undefined;
       }
+    }
+    if (config.optout) {
+      config.optout = undefined;
     }
     return config;
   }
@@ -191,11 +195,10 @@ describe('amp-analytics', function() {
         for (const name in config.requests) {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', () => {
-            const analytics = getAnalyticsTag(clearIframePing(config));
+            const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             analytics.createdCallback();
             analytics.buildCallback();
-            const urlReplacements = urlReplacementsForDoc(
-                analytics.win.document);
+            const urlReplacements = urlReplacementsForDoc(analytics.element);
             sandbox.stub(urlReplacements.getVariableSource(), 'get',
               function(name) {
                 expect(this.replacements_).to.have.property(name);
@@ -324,6 +327,16 @@ describe('amp-analytics', function() {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar&b1');
     });
+  });
+
+  it('should tolerate invalid triggers', function() {
+    const clock = sandbox.useFakeTimers();
+    const analytics = getAnalyticsTag();
+    // An incomplete click request.
+    analytics.addTriggerNoInline_({'on': 'click'});
+    expect(() => {
+      clock.tick(1);
+    }).to.throw(/Failed to process trigger/);
   });
 
   it('expands recursive requests', function() {
@@ -500,16 +513,23 @@ describe('amp-analytics', function() {
   it('expands element level vars with higher precedence than trigger vars',
     () => {
       const analytics = getAnalyticsTag();
-      sandbox.stub(ins, 'isTriggerAllowed_').returns(true);
+      const analyticsGroup = ins.createAnalyticsGroup(analytics.element);
+
       const el1 = windowApi.document.createElement('div');
       el1.className = 'x';
       el1.dataset.varsTest = 'foo';
-      ins.addListener(
-        {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
-        function(arg) {
-          expect(arg.vars.test).to.equal('foo');
-        }, analytics.element);
-      ins.onClick_({target: el1});
+      analyticsGroup.root_.getRootElement().appendChild(el1);
+
+      const handlerSpy = sandbox.spy();
+      analyticsGroup.addTrigger(
+          {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
+          handlerSpy);
+      analyticsGroup.root_.getTrackerOptional('click')
+          .clickObservable_.fire({target: el1});
+
+      expect(handlerSpy).to.be.calledOnce;
+      const event = handlerSpy.args[0][0];
+      expect(event.vars.test).to.equal('foo');
     });
 
   it('expands config vars with higher precedence than platform vars', () => {
@@ -604,7 +624,7 @@ describe('amp-analytics', function() {
           'qp_foo': '${queryParam(foo)}',
         },
       }]});
-    const urlReplacements = urlReplacementsForDoc(analytics.win.document);
+    const urlReplacements = urlReplacementsForDoc(analytics.element);
     sandbox.stub(urlReplacements.getVariableSource(), 'get',
       function(name) {
         return {sync: param => {
@@ -619,31 +639,49 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('expands selector with config variable', () => {
-    const addListenerSpy = sandbox.spy(ins, 'addListener');
+  it('should create and destroy analytics group', () => {
     const analytics = getAnalyticsTag({
       requests: {foo: 'https://example.com/bar'},
       triggers: [{on: 'click', selector: '${foo}', request: 'foo'}],
       vars: {foo: 'bar'},
     });
     return waitForNoSendRequest(analytics).then(() => {
-      expect(addListenerSpy.callCount).to.equal(1);
-      expect(addListenerSpy.args[0][0]['selector']).to.equal('bar');
+      expect(analytics.analyticsGroup_).to.be.ok;
+      const disposeStub = sandbox.stub(analytics.analyticsGroup_, 'dispose');
+      analytics.detachedCallback();
+      expect(analytics.analyticsGroup_).to.be.null;
+      expect(disposeStub).to.be.calledOnce;
+    });
+  });
+
+  it('expands selector with config variable', () => {
+    const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+    const addStub = sandbox.stub(tracker, 'add');
+    const analytics = getAnalyticsTag({
+      requests: {foo: 'https://example.com/bar'},
+      triggers: [{on: 'click', selector: '${foo}', request: 'foo'}],
+      vars: {foo: 'bar'},
+    });
+    return waitForNoSendRequest(analytics).then(() => {
+      expect(addStub).to.be.calledOnce;
+      const config = addStub.args[0][2];
+      expect(config['selector']).to.equal('bar');
     });
   });
 
   function selectorExpansionTest(selector) {
     it('expand selector value: ' + selector, () => {
-      const addListenerSpy = sandbox.spy(ins, 'addListener');
+      const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+      const addStub = sandbox.stub(tracker, 'add');
       const analytics = getAnalyticsTag({
         requests: {foo: 'https://example.com/bar'},
         triggers: [{on: 'click', selector: '${foo}, ${bar}', request: 'foo'}],
         vars: {foo: selector, bar: '123'},
       });
       return waitForNoSendRequest(analytics).then(() => {
-        expect(addListenerSpy.callCount).to.equal(1);
-        expect(addListenerSpy.args[0][0]['selector']).to
-            .equal(selector + ', 123');
+        expect(addStub).to.be.calledOnce;
+        const config = addStub.args[0][2];
+        expect(config['selector']).to.equal(selector + ', 123');
       });
     });
   }
@@ -655,40 +693,55 @@ describe('amp-analytics', function() {
         .map(selectorExpansionTest);
 
   it('does not expands selector with platform variable', () => {
-    const addListenerSpy = sandbox.spy(ins, 'addListener');
+    const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+    const addStub = sandbox.stub(tracker, 'add');
     const analytics = getAnalyticsTag({
       requests: {foo: 'https://example.com/bar'},
       triggers: [{on: 'click', selector: '${title}', request: 'foo'}],
     });
     return waitForNoSendRequest(analytics).then(() => {
-      expect(addListenerSpy.callCount).to.equal(1);
-      expect(addListenerSpy.args[0][0]['selector']).to.equal('TITLE');
+      expect(addStub).to.be.calledOnce;
+      const config = addStub.args[0][2];
+      expect(config['selector']).to.equal('TITLE');
     });
   });
 
-  it('respects optout', function() {
-    const config = {
-      'requests': {'foo': 'https://example.com/bar'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-      'optout': 'foo.bar',
-    };
-    let analytics = getAnalyticsTag(config);
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
-          .to.be.true;
-      sendRequestSpy.reset();
-      windowApi['foo'] = {'bar': function() { return true; }};
-      analytics = getAnalyticsTag(config);
-      return waitForNoSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.be.equal(0);
-        sendRequestSpy.reset();
-        windowApi['foo'] = {'bar': function() { return false; }};
-        analytics = getAnalyticsTag(config);
-        waitForSendRequest(analytics).then(() => {
-          expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
-              .to.be.true;
-        });
+  describe('optout', () => {
+    it('works for vendor config when optout returns false', function() {
+      windowApi['foo'] = {'bar': function() { return false; }};
+      const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
+      analytics.predefinedConfig_.testVendor = {'optout': 'foo.bar'};
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
+            .to.be.true;
       });
+    });
+
+    it('works for vendor config when optout returns false', function() {
+      windowApi['foo'] = {'bar': function() { return true; }};
+      const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
+      analytics.predefinedConfig_.testVendor = {'optout': 'foo.bar'};
+      return waitForNoSendRequest(analytics);
+    });
+
+    it('works for vendor config when optout is not defined', function() {
+      const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
+      analytics.predefinedConfig_.testVendor = {'optout': 'foo.bar'};
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
+                .to.be.true;
+      });
+    });
+
+    it('fails for inline config', function() {
+      const config = {
+        'requests': {'foo': 'https://example.com/bar'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'optout': 'foo.bar',
+      };
+      const analytics = getAnalyticsTag(config);
+      return expect(waitForNoSendRequest(analytics)).to.be
+          .rejectedWith(/optout property is only available to vendor config/);
     });
   });
 
@@ -850,7 +903,7 @@ describe('amp-analytics', function() {
       config.triggers.sampled.sampleSpec.sampleOn = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.win.document);
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));

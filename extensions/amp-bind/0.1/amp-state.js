@@ -15,6 +15,7 @@
  */
 
 import {bindForDoc} from '../../../src/bind';
+import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -47,6 +48,9 @@ export class AmpState extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    user().assert(isExperimentOn(this.win, 'amp-bind'),
+        `Experiment "amp-bind" is disabled.`);
+
     const TAG = this.getName_();
 
     toggle(this.element, false);

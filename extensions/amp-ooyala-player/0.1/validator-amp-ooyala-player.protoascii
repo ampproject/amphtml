@@ -31,6 +31,7 @@ tags: {  # amp-ooyala-player
     value: "amp-ooyala-player"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -53,6 +54,7 @@ tags: {  # <amp-ooyala-player>
   html_format: AMP
   html_format: AMP4ADS
   also_requires_tag: "amp-ooyala-player extension .js script"
+  attrs: { name: "data-config" }
   attrs: {
     name: "data-embedcode"
     mandatory: true
@@ -65,12 +67,7 @@ tags: {  # <amp-ooyala-player>
     name: "data-playerid"
     mandatory: true
   }
-  attrs: {
-    name: "data-playerversion"
-  }
-  attrs: {
-    name: "data-config"
-  }
+  attrs: { name: "data-playerversion" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-ooyala-player.html"
   amp_layout: {

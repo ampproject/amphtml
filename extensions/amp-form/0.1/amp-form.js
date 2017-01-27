@@ -16,6 +16,7 @@
 
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {documentInfoForDoc} from '../../../src/document-info';
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 import {
@@ -24,6 +25,7 @@ import {
   addParamsToUrl,
   SOURCE_ORIGIN_PARAM,
   isProxyOrigin,
+  parseUrl,
 } from '../../../src/url';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
@@ -100,7 +102,7 @@ export class AmpForm {
     this.timer_ = timerFor(this.win_);
 
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacement_ = urlReplacementsForDoc(this.win_.document);
+    this.urlReplacement_ = urlReplacementsForDoc(element);
 
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
@@ -115,7 +117,7 @@ export class AmpForm {
     this.xhr_ = xhrFor(this.win_);
 
     /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
+    this.actions_ = actionServiceForDoc(this.form_);
 
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
@@ -131,6 +133,12 @@ export class AmpForm {
           'form action-xhr should not be on AMP CDN: %s',
           this.form_);
     }
+
+    /**
+     * Indicates that the action will submit to canonical or not.
+     * @private {boolean|undefined}
+     */
+    this.isCanonicalAction_ = undefined;
 
     /** @const @private {boolean} */
     this.shouldValidate_ = !this.form_.hasAttribute('novalidate');
@@ -242,9 +250,18 @@ export class AmpForm {
    */
   submit_() {
     const isVarSubExpOn = isExperimentOn(this.win_, 'amp-form-var-sub');
-    // Fields that support var substitutions.
-    const varSubsFields = isVarSubExpOn ? this.form_.querySelectorAll(
-        '[type="hidden"][data-amp-replace]') : [];
+    let varSubsFields = [];
+    // Only allow variable substitutions for inputs if the form action origin
+    // is the canonical origin.
+    // TODO(mkhatib, #7168): Consider relaxing this.
+    if (this.isSubmittingToCanonical_()) {
+      // Fields that support var substitutions.
+      varSubsFields = isVarSubExpOn ? this.form_.querySelectorAll(
+          '[type="hidden"][data-amp-replace]') : [];
+    } else {
+      user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
+          'origin submit action: %s', this.form_);
+    }
     if (this.xhrAction_) {
       this.handleXhrSubmit_(varSubsFields);
     } else if (this.method_ == 'POST') {
@@ -252,6 +269,22 @@ export class AmpForm {
     } else if (this.method_ == 'GET') {
       this.handleNonXhrGet_(varSubsFields);
     }
+  }
+
+  /**
+   * Checks whether the submissions are going to go through to the canonical origin
+   * or not.
+   * @private
+   */
+  isSubmittingToCanonical_() {
+    if (this.isCanonicalAction_ !== undefined) {
+      return this.isCanonicalAction_;
+    }
+
+    const docInfo = documentInfoForDoc(this.form_);
+    const canonicalOrigin = parseUrl(docInfo.canonicalUrl).origin;
+    const url = this.xhrAction_ || this.form_.getAttribute('action');
+    return this.isCanonicalAction_ = parseUrl(url).origin == canonicalOrigin;
   }
 
   /**
@@ -277,7 +310,7 @@ export class AmpForm {
         xhrUrl = this.xhrAction_;
         body = new FormData(this.form_);
       }
-      return this.xhr_.fetch(dev().assertString(xhrUrl), {
+      return this.xhr_.fetchJsonResponse(dev().assertString(xhrUrl), {
         body,
         method: this.method_,
         credentials: 'include',
@@ -568,6 +601,12 @@ function updateInvalidTypesClasses(element) {
  * @return {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
+  // TODO(mkhatib, #6930): Implement basic validation for custom inputs like
+  // amp-selector.
+  // If this is not a field type with checkValidity don't do anything.
+  if (!element.checkValidity) {
+    return true;
+  }
   let shouldPropagate = false;
   const previousValidityState = getUserValidityStateFor(element);
   const isCurrentlyValid = element.checkValidity();

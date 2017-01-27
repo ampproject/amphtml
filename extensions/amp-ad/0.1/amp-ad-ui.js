@@ -20,12 +20,6 @@ import {UX_EXPERIMENT} from '../../../src/layout';
 
 const TAG = 'AmpAdUIHandler';
 
-/** @const */
-const HOLDER_HTML =
-    `<div class='-amp-ad-default-holder'>
-    <div class='-amp-ad-tag'>Ad</div>
-    </div>`;
-
 /**
  * Ad display state.
  * @enum {number}
@@ -69,7 +63,7 @@ export class AmpAdUIHandler {
     this.doc_ = baseInstance.win.document;
 
     /** {number} */
-    this.state = AdDisplayState.NOT_LAID_OUT;;
+    this.state = AdDisplayState.NOT_LAID_OUT;
 
     /** {!boolean} */
     this.hasPageProvidedFallback_ = !!baseInstance.getFallback();
@@ -88,12 +82,7 @@ export class AmpAdUIHandler {
     }
 
     // Apply default fallback div when there's no default one
-    const fallback = this.doc_.createElement('div');
-    fallback.setAttribute('fallback', '');
-    fallback.classList.add('amp-ad-default-display');
-    fallback./*OK*/innerHTML = HOLDER_HTML;
-
-    this.baseInstance_.element.appendChild(fallback);
+    this.addDefaultUiComponent_('fallback');
   }
 
   /**
@@ -132,11 +121,7 @@ export class AmpAdUIHandler {
     if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
       return null;
     }
-    const placeholder = this.doc_.createElement('div');
-    placeholder.setAttribute('placeholder', '');
-    placeholder./*OK*/innerHTML = HOLDER_HTML;
-    this.baseInstance_.element.appendChild(placeholder);
-    return placeholder;
+    return this.addDefaultUiComponent_('placeholder');
   }
 
   /**
@@ -205,6 +190,23 @@ export class AmpAdUIHandler {
       this.baseInstance_.togglePlaceholder(true);
       this.baseInstance_.toggleFallback(false);
     });
+  }
+
+  /**
+   * @param {string} name
+   * @return {!Element}
+   * @private
+   */
+  addDefaultUiComponent_(name) {
+    const uiComponent = this.doc_.createElement('div');
+    uiComponent.setAttribute(name, '');
+
+    const content = this.doc_.createElement('div');
+    content.classList.add('-amp-ad-default-holder');
+    uiComponent.appendChild(content);
+
+    this.baseInstance_.element.appendChild(uiComponent);
+    return uiComponent;
   }
 }
 
