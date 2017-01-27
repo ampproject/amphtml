@@ -29,8 +29,8 @@ In order to support Fast Fetch, ad networks will be required to implement the fo
 
 # Detailed Design
 
-    ![Image of Rendering Flow](https://github.com/google/amphtml/blob/frizz-add-a4a-docs/ads/google/a4a/1.png)
-    Figure 1: Fast Fetch Rendering Flow</td>
+![Image of Rendering Flow](https://github.com/google/amphtml/blob/frizz-add-a4a-docs/ads/google/a4a/1.png)
+Figure 1: Fast Fetch Rendering Flow</td>
 
 
 ## Ad server requirements
@@ -67,8 +67,8 @@ To create an ad network implementation, the following steps must be taken:
 
 Create a new extension within the extensions section in the AMP HTML Github [repository](https://github.com/ampproject/amphtml) whose path and name match the type attribute given for amp ad element as follows: 
 
-    ![Image of File Hierarchy](https://github.com/google/amphtml/blob/frizz-add-a4a-docs/ads/google/a4a/2.png)
-    Figure 2: A4A Extension File Hierarchy</td>
+![Image of File Hierarchy](https://github.com/google/amphtml/blob/frizz-add-a4a-docs/ads/google/a4a/2.png)
+Figure 2: A4A Extension File Hierarchy</td>
 
 
 Ad networks that want to add support for Fast Fetch within AMP must add the file hierarchy as seen in Figure 2 to the AMP repository, with <TYPE> replaced by their own network. Files must implement all requirements as specified below. Anything not specified, i.e. helper functions etc are at the discretion of the ad network, but must be approved by AMP project members just as any other contributions.
