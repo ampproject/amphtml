@@ -272,7 +272,7 @@ Adds support for Webtrekk. Configuration details can be found at [supportcenter.
 
 Type attribute value: `metrika`
 
-Adds support for Yandex Metrica.
+Adds support for Yandex Metrica.  Configuration details can be found at [Yandex Support](https://yandex.com/support/metrica/code/install-counter-amp.xml).
 
 ## Attributes
 
