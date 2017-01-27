@@ -132,6 +132,7 @@ oxRequest.setAdSizes;
 oxRequest.getOrCreateAdUnit;
 data.host;
 data.nc;
+data.dfpSlot;
 data.zone;
 data.sitepage;
 data.auid;
