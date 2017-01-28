@@ -399,9 +399,10 @@ As an example, the following configuration can be used to sample 50% of the requ
 ```
 
 #### Embed render start trigger (`"on": "render-start"`)
-Use this configuration to fire a request when this document's or a specified embed's receive render-start signal. This
-signal is emited the earliest when the runtime can confirm that a document or an embed have started rendering. Typically
-this happens as soon as the main JavaScript of the document gets a callback.
+Use this configuration to fire a request when the document or a specified embed emit `render-start` signal. This
+signal is emited as soon as it's possible to confirm that the rendering has been started. Typically
+this happens as soon as the main JavaScript of the document gets a callback. Notice, that not all embed types emit
+`render-start` signal.
 
 For a document, the trigger is specified as:
 ```javascript
