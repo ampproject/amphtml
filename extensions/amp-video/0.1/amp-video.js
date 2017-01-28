@@ -114,9 +114,8 @@ class AmpVideo extends AMP.BaseElement {
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
-      const ampdoc = this.getAmpDoc();
-      installVideoManagerForDoc(ampdoc);
-      videoManagerForDoc(ampdoc).register(this);
+      installVideoManagerForDoc(this.element);
+      videoManagerForDoc(this.element).register(this);
     }
 
     /** @override */

@@ -129,9 +129,8 @@ class AmpYoutube extends AMP.BaseElement {
       this.buildImagePlaceholder_();
     }
 
-    const ampdoc = this.getAmpDoc();
-    installVideoManagerForDoc(ampdoc);
-    videoManagerForDoc(this.win.document).register(this);
+    installVideoManagerForDoc(this.element);
+    videoManagerForDoc(this.element).register(this);
   }
 
   /** @return {string} */
