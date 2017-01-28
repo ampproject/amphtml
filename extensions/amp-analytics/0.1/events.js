@@ -15,8 +15,8 @@
  */
 
 import {Observable} from '../../../src/observable';
+import {dev, user} from '../../../src/log';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {user} from '../../../src/log';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
@@ -225,27 +225,30 @@ export class RenderStartTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const selector = config['selector'] || ':root';
-    let renderStartPromise;
-    let target;
     if (selector == ':root' || selector == ':host') {
       // Root selectors are delegated to analytics roots.
-      renderStartPromise = this.root.whenRenderStarted();
-      target = this.root.getRootElement();
+      this.root.whenRenderStarted().then(() => {
+        const target = this.root.getRootElement();
+        listener(new AnalyticsEvent(target, eventType));
+      });
     } else {
-      // Look for the AMP-element.
-      const selectionMethod = config['selectionMethod'];
-      const element = user().assertElement(
-          this.root.getAmpElement(
-              (context.parentElement || context),
-              selector,
-              selectionMethod),
-          `Element "${selector}" not found`);
-      renderStartPromise = element.whenSignal('render-start');
-      target = element;
+      // Look for the AMP-element. Wait for DOM to be fully parsed to avoid
+      // false missed searches.
+      let target;
+      this.root.ampdoc.whenReady().then(() => {
+        const selectionMethod = config['selectionMethod'];
+        const element = user().assertElement(
+            this.root.getAmpElement(
+                (context.parentElement || context),
+                selector,
+                selectionMethod),
+            `Element "${selector}" not found`);
+        target = element;
+        return element.whenSignal('render-start');
+      }).then(() => {
+        listener(new AnalyticsEvent(dev().assertElement(target), eventType));
+      });
     }
-    renderStartPromise.then(() => {
-      listener(new AnalyticsEvent(target, eventType));
-    });
     return NO_UNLISTEN;
   }
 }
