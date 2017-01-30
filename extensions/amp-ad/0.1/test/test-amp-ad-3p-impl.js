@@ -206,7 +206,6 @@ describe('amp-ad-3p-impl', () => {
 
   describe('renderOutsideViewport', () => {
     it('should allow rendering within 3 viewports by default', () => {
-      console.log(ad3p.renderOutsideViewport());
       expect(ad3p.renderOutsideViewport()).to.equal(3);
     });
 

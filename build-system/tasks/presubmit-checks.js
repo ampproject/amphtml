@@ -79,6 +79,7 @@ var forbiddenTerms = {
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
     ],
+    checkInTestFolder: true,
   },
   // Match `getMode` that is not followed by a "()." and is assigned
   // as a variable.
@@ -699,10 +700,11 @@ function matchTerms(file, terms) {
   return Object.keys(terms).map(function(term) {
     var fix;
     var whitelist = terms[term].whitelist;
+    var checkInTestFolder = terms[term].checkInTestFolder;
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
     if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||
-        isInTestFolder(relative))) {
+        isInTestFolder(relative) && !checkInTestFolder)) {
       return false;
     }
     // we can't optimize building the `RegExp` objects early unless we build
