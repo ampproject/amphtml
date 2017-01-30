@@ -24,7 +24,7 @@ import {user} from '../src/log';
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
-const ATTRIBUTES_TO_PROPAGATE = ['alt', 'referrerpolicy', 'aria-label',
+const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
       'aria-describedby', 'aria-labelledby'];
 
 export class AmpImg extends BaseElement {
