@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -118,11 +118,12 @@ See the [Custom Validation](#custom-validations) section for more details.
 
 **Allowed**:
 
-*  Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, and `<label>`.
+* Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, and `<label>`.
+* [`amp-selector`](https://www.ampproject.org/docs/reference/components/amp-selector)
 
 **Not Allowed**:
 
-*  `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>`
+* `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>`
 * Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
 
 (Relaxing some of these rules might be reconsidered in the future - please let us know if you require these and provide use cases).
