@@ -398,6 +398,52 @@ describe('DOM', () => {
         .to.be.equal(0);
   });
 
+  function testScopedQuerySelector() {
+    const grandparent = document.createElement('div');
+
+    const parent = document.createElement('div');
+    grandparent.appendChild('div');
+
+    const element1 = document.createElement('div');
+    parent.appendChild(element1);
+
+    expect(dom.scopedQuerySelector(parent, 'div')).to.equal(parent);
+    expect(dom.scopedQuerySelector(parent, 'div div')).to.equal(element1);
+  }
+
+  it('scopedQuerySelector should find first match', testScopedQuerySelector);
+
+  it('scopedQuerySelector should find first match (polyfill)', () => {
+    dom.setScopeSelectorSupportedForTesting(false);
+    testScopedQuerySelector();
+  });
+
+  function testScopedQuerySelectorAll() {
+    const grandparent = document.createElement('div');
+
+    const parent = document.createElement('div');
+    grandparent.appendChild('div');
+
+    const element1 = document.createElement('div');
+    parent.appendChild(element1);
+
+    const element2 = document.createElement('div');
+    parent.appendChild(element2);
+
+
+    expect(dom.scopedQuerySelectorAll(parent, 'div')).to.deep.equal(
+        [parent, element1, element2]);
+    expect(dom.scopedQuerySelectorAll(parent, 'div div')).to.deep.equal(
+        [element1, element2]);
+  }
+
+  it('scopedQuerySelectorAll should find first match', testScopedQuerySelectorAll);
+
+  it('scopedQuerySelectorAll should find first match (polyfill)', () => {
+    dom.setScopeSelectorSupportedForTesting(false);
+    testScopedQuerySelectorAll();
+  });
+
   describe('waitFor', () => {
     let parent;
     let child;
