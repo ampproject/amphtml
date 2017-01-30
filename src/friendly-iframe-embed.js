@@ -15,6 +15,7 @@
  */
 
 import {Observable} from './observable';
+import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
@@ -321,6 +322,9 @@ export class FriendlyIframeEmbed {
 
     /** @private {!Observable<boolean>} */
     this.visibilityObservable_ = new Observable();
+
+    /** @private @const */
+    this.signals_ = new Signals();
   }
 
   /**
@@ -329,6 +333,11 @@ export class FriendlyIframeEmbed {
   destroy() {
     resourcesForDoc(this.iframe).removeForChildWindow(this.win);
     disposeServicesForEmbed(this.win);
+  }
+
+  /** @return {!Signals} */
+  signals() {
+    return this.signals_;
   }
 
   /**
