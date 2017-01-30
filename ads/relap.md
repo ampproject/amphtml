@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=auto height=750
+<amp-ad width="auto" height="750"
     type="relap"
     layout="fixed-height"
     data-token="D3UMgQWBqleq1tPW"
