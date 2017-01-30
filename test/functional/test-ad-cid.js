@@ -16,7 +16,7 @@
 
 import {adConfig} from '../../ads/_config';
 import {createIframePromise} from '../../testing/iframe';
-import {installCidServiceForDoc,} from
+import {installCidServiceForDocForTesting,} from
     '../../extensions/amp-analytics/0.1/cid-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {getAdCid} from '../../src/ad-cid';
@@ -41,7 +41,7 @@ describe('ad-cid', () => {
     element.setAttribute('type', '_ping_');
     const ampdocService = installDocService(window, /* isSingleDoc */ true);
     const ampdoc = ampdocService.getAmpDoc();
-    cidService = installCidServiceForDoc(ampdoc);
+    cidService = installCidServiceForDocForTesting(ampdoc);
     adElement = {
       getAmpDoc: () => ampdoc,
       element,
