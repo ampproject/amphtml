@@ -22,6 +22,15 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function relap(global, data) {
   validateData(data, [], ['token', 'url', 'anchorid']);
+
+  window.relapV6WidgetReady = function() {
+    window.context.renderStart();
+  };
+
+  window.relapV6WidgetNoSimilarPages = function() {
+    window.context.noContentAvailable();
+  };
+
   const url = `https://relap.io/api/v6/head.js?token=${encodeURIComponent(data['token'])}&url=${encodeURIComponent(data['url'])}`;
   loadScript(global, url);
 
