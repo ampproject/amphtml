@@ -495,6 +495,10 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',
     ],
   },
+  'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
+    message: 'SVG data images must use charset=utf-8: ' +
+        '"data:image/svg+xml;charset=utf-8,..."',
+  }
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
