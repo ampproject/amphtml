@@ -424,6 +424,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  relap: {
+    renderStartImplemented: true,
+  },
+
   revcontent: {
     prefetch: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
     preconnect: [
