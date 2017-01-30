@@ -524,7 +524,7 @@ export class AmpForm {
    * @private
    */
   renderTemplate_(data) {
-    const container = this.form_.querySelector(`[${this.state_}]`);
+    const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
       container.setAttribute('role', 'alert');
@@ -543,7 +543,7 @@ export class AmpForm {
    * @private
    */
   cleanupRenderedTemplate_() {
-    const container = this.form_.querySelector(`[${this.state_}]`);
+    const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
     if (!container) {
       return;
     }
