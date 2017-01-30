@@ -241,3 +241,6 @@ data.adServer;
 data.mediaZone;
 data.layout;
 data.space;
+
+var Swoop
+Swoop.announcePlace
