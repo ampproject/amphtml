@@ -19,6 +19,7 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     parseLayout, parseLength, getNaturalDimensions,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
+import {Signals} from './utils/signals';
 import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
@@ -27,7 +28,6 @@ import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
-import {map} from './utils/object';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {resourcesForDoc} from './resources';
@@ -543,23 +543,8 @@ function createBaseCustomElementClass(win) {
        */
       this.isInTemplate_ = undefined;
 
-      /**
-       * A mapping from a signal name to the signal response: either time or
-       * an error.
-       * @private @const {!Object<string, (time|!Error)>}
-       */
-      this.signalMap_ = map();
-
-      /**
-       * A mapping from a signal name to the signal promise, resolve and reject.
-       * Only allocated when promise has been requested.
-       * @private {?Object<string, {
-       *   promise: !Promise,
-       *   resolve: (function(time)|undefined),
-       *   reject: (function(!Error)|undefined)
-       * }>}
-       */
-      this.signalPromiseMap_ = null;
+      /** @private @const */
+      this.signals_ = new Signals();
     }
 
     /**
@@ -568,6 +553,11 @@ function createBaseCustomElementClass(win) {
      * @return {string}
      */
     elementName() {
+    }
+
+    /** @return {!Signals} */
+    signals() {
+      return this.signals_;
     }
 
     /**
@@ -683,7 +673,7 @@ function createBaseCustomElementClass(win) {
      * @return {!Promise}
      */
     whenBuilt() {
-      return this.whenSignal('built');
+      return this.signals_.whenSignal('built');
     }
 
     /**
@@ -716,9 +706,9 @@ function createBaseCustomElementClass(win) {
         this.built_ = true;
         this.classList.remove('i-amphtml-notbuilt');
         this.classList.remove('amp-notbuilt');
-        this.signal('built');
+        this.signals_.signal('built');
       } catch (e) {
-        this.rejectSignal('built', e);
+        this.signals_.rejectSignal('built', e);
         reportError(e, this);
         throw e;
       }
@@ -740,102 +730,6 @@ function createBaseCustomElementClass(win) {
         if (placeholder) {
           this.appendChild(placeholder);
         }
-      }
-    }
-
-    /**
-     * Returns the promise that's resolved when the signal is triggered. The
-     * resolved value is the time of the signal.
-     * @param {string} name
-     * @return {!Promise<time>}
-     */
-    whenSignal(name) {
-      let promiseStruct = this.signalPromiseMap_ &&
-          this.signalPromiseMap_[name];
-      if (!promiseStruct) {
-        const result = this.signalMap_[name];
-        if (result != null) {
-          // Immediately resolve signal.
-          const promise = typeof result == 'number' ?
-              Promise.resolve(result) :
-              Promise.reject(result);
-          promiseStruct = {promise};
-        } else {
-          // Allocate the promise/resolver for when the signal arrives in the
-          // future.
-          let resolve, reject;
-          const promise = new Promise((aResolve, aReject) => {
-            resolve = aResolve;
-            reject = aReject;
-          });
-          promiseStruct = {promise, resolve, reject};
-        }
-        if (!this.signalPromiseMap_) {
-          this.signalPromiseMap_ = map();
-        }
-        this.signalPromiseMap_[name] = promiseStruct;
-      }
-      return promiseStruct.promise;
-    }
-
-    /**
-     * Returns a promise that's resolved when both signals are triggered with
-     * the delta of time between them.
-     * @param {string} fromSignal
-     * @param {string} toSignal
-     * @return {!Promise<number>}
-     */
-    signalDelta(fromSignal, toSignal) {
-      const fromPromise = this.whenSignal(fromSignal);
-      const toPromise = this.whenSignal(toSignal);
-      return Promise.all([fromPromise, toPromise]).then(times => {
-        const fromValue = times[0];
-        const toValue = times[1];
-        return toValue - fromValue;
-      });
-    }
-
-    /**
-     * Triggers the signal with the specified name on the element. The time is
-     * optional; if not provided, the current time is used. The associated
-     * promise is resolved with the resulting time.
-     * @param {string} name
-     * @param {time=} opt_time
-     */
-    signal(name, opt_time) {
-      if (this.signalMap_[name] != null) {
-        // Do not duplicate signals.
-        return;
-      }
-      const time = opt_time || Date.now();
-      this.signalMap_[name] = time;
-      const promiseStruct = this.signalPromiseMap_ &&
-          this.signalPromiseMap_[name];
-      if (promiseStruct && promiseStruct.resolve) {
-        promiseStruct.resolve(time);
-        promiseStruct.resolve = undefined;
-        promiseStruct.reject = undefined;
-      }
-    }
-
-    /**
-     * Rejects the signal. Indicates that the signal will never succeed. The
-     * associated signal is rejected.
-     * @param {string} name
-     * @param {!Error} error
-     */
-    rejectSignal(name, error) {
-      if (this.signalMap_[name] != null) {
-        // Do not duplicate signals.
-        return;
-      }
-      this.signalMap_[name] = error;
-      const promiseStruct = this.signalPromiseMap_ &&
-          this.signalPromiseMap_[name];
-      if (promiseStruct && promiseStruct.reject) {
-        promiseStruct.reject(error);
-        promiseStruct.resolve = undefined;
-        promiseStruct.reject = undefined;
       }
     }
 
@@ -1252,14 +1146,14 @@ function createBaseCustomElementClass(win) {
       this.dispatchCustomEventForTesting('amp:load:start');
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
       if (isLoadEvent) {
-        this.signal('load-start');
+        this.signals_.signal('load-start');
       }
       const promise = this.implementation_.layoutCallback();
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
       return promise.then(() => {
         if (isLoadEvent) {
-          this.signal('load-end');
+          this.signals_.signal('load-end');
         }
         this.readyState = 'complete';
         this.layoutCount_++;
@@ -1274,7 +1168,8 @@ function createBaseCustomElementClass(win) {
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
         if (isLoadEvent) {
-          this.rejectSignal('load-end', reason);
+          this.signals_.rejectSignal(
+              'load-end', /** @type {!Error} */ (reason));
         }
         this.layoutCount_++;
         this.toggleLoading_(false, /* cleanup */ true);

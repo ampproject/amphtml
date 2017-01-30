@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Signals} from '../utils/signals';
 import {dev} from '../log';
 import {
   getParentWindowFrameElement,
@@ -183,6 +184,9 @@ export class AmpDoc {
   constructor(win) {
     /** @public @const {!Window} */
     this.win = win;
+
+    /** @private @const */
+    this.signals_ = new Signals();
   }
 
   /**
@@ -201,6 +205,11 @@ export class AmpDoc {
    */
   getWin() {
     return this.win;
+  }
+
+  /** @return {!Signals} */
+  signals() {
+    return this.signals_;
   }
 
   /**
