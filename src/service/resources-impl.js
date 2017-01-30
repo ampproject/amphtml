@@ -35,7 +35,6 @@ import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
 import {documentInfoForDoc} from '../document-info';
-import {startDocRender} from './ampdoc-impl';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';
@@ -253,7 +252,7 @@ export class Resources {
    * @restricted
    */
   renderStarted() {
-    startDocRender(this.ampdoc);
+    this.ampdoc.signals().signal('render-start');
   }
 
   /**

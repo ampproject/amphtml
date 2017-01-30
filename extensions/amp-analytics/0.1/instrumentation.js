@@ -22,7 +22,7 @@ import {
   AnalyticsEvent,
   ClickEventTracker,
   CustomEventTracker,
-  RenderStartTracker,
+  SignalTracker,
 } from './events';
 import {Observable} from '../../../src/observable';
 import {Visibility} from './visibility-impl';
@@ -89,7 +89,7 @@ const EVENT_TRACKERS = {
   'render-start': {
     name: 'render-start',
     allowedFor: ALLOWED_FOR_ALL,
-    klass: RenderStartTracker,
+    klass: SignalTracker,
   },
 };
 

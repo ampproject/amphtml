@@ -63,16 +63,6 @@ export function shadowDocHasBody(ampdoc, body) {
 
 
 /**
- * Signals that the ampdoc has started rendering.
- * @param {!AmpDoc} ampdoc
- * @restricted
- */
-export function startDocRender(ampdoc) {
-  ampdoc.startRender_();
-}
-
-
-/**
  * This service helps locate an ampdoc (`AmpDoc` instance) for any node,
  * either in the single-doc or shadow-doc environments.
  *
@@ -280,27 +270,6 @@ export class AmpDoc {
    */
   whenReady() {
     return /** @type {?} */ (dev().assert(null, 'not implemented'));
-  }
-
-  /** @private */
-  startRender_() {
-    this.signals_.signal('render-start');
-  }
-
-  /**
-   * Returns `true` if the rendering has been started for this ampdoc.
-   * @return {boolean}
-   */
-  isRenderStarted() {
-    return !!this.signals_.get('render-start');
-  }
-
-  /**
-   * Returns promise that will resolve when the ampdoc has started rendering.
-   * @return {!Promise}
-   */
-  whenRenderStarted() {
-    return this.signals_.whenSignal('render-start');
   }
 
   /**

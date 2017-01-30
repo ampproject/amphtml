@@ -55,7 +55,6 @@ import {
   installShadowDoc,
   shadowDocHasBody,
   shadowDocReady,
-  startDocRender,
 } from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStorageServiceForDoc} from './service/storage-impl';
@@ -647,7 +646,7 @@ class MultidocManager {
     // E.g. integrate with dynamic classes. In shadow case specifically, we have
     // to wait for stubbing to complete, which may take awhile due to importNode.
     setTimeout(() => {
-      startDocRender(ampdoc);
+      ampdoc.signals().signal('render-start');
       setStyle(hostElement, 'visibility', 'visible');
     }, 50);
 

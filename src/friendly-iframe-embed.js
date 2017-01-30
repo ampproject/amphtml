@@ -303,16 +303,6 @@ export class FriendlyIframeEmbed {
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;
 
-    /** @private {boolean} */
-    this.isRenderStarted_ = false;
-
-    /** @private {function()|undefined} */
-    this.renderStartedResolve_ = undefined;
-    /** @private @const {!Promise} */
-    this.renderStartedPromise_ = new Promise(resolve => {
-      this.renderStartedResolve_ = resolve;
-    });
-
     /** @private @const {!Promise} */
     this.loadedPromise_ = loadedPromise;
 
@@ -354,11 +344,7 @@ export class FriendlyIframeEmbed {
 
   /** @private */
   startRender_() {
-    if (this.renderStartedResolve_) {
-      this.isRenderStarted_ = true;
-      this.renderStartedResolve_();
-      this.renderStartedResolve_ = undefined;
-    }
+    this.signals_.signal('render-start');
     setStyle(this.iframe, 'visibility', '');
     if (this.win.document && this.win.document.body) {
       setStyles(dev().assertElement(this.win.document.body), {
@@ -367,22 +353,6 @@ export class FriendlyIframeEmbed {
         animation: 'none',
       });
     }
-  }
-
-  /**
-   * Returns `true` if the rendering has been started for this embed.
-   * @return {boolean}
-   */
-  isRenderStarted() {
-    return this.isRenderStarted_;
-  }
-
-  /**
-   * Returns promise that will resolve when the embed has started rendering.
-   * @return {!Promise}
-   */
-  whenRenderStarted() {
-    return this.renderStartedPromise_;
   }
 
   /**

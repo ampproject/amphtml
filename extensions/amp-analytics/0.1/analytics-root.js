@@ -89,6 +89,14 @@ export class AnalyticsRoot {
   getHostElement() {}
 
   /**
+   * The signals for the root.
+   *
+   * @return {!../../../src/utils/signals.Signals}
+   * @abstract
+   */
+  signals() {}
+
+  /**
    * Whether this analytics root contains the specified node.
    *
    * @param {!Node} node
@@ -251,12 +259,6 @@ export class AnalyticsRoot {
       }
     };
   }
-
-  /**
-   * @return {!Promise}
-   * @abstract
-   */
-  whenRenderStarted() {}
 }
 
 
@@ -288,13 +290,13 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
   }
 
   /** @override */
-  getElementById(id) {
-    return this.ampdoc.getElementById(id);
+  signals() {
+    return this.ampdoc.signals();
   }
 
   /** @override */
-  whenRenderStarted() {
-    return this.ampdoc.whenRenderStarted();
+  getElementById(id) {
+    return this.ampdoc.getElementById(id);
   }
 }
 
@@ -330,13 +332,13 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
   }
 
   /** @override */
-  getElementById(id) {
-    return this.embed.win.document.getElementById(id);
+  signals() {
+    return this.embed.signals();
   }
 
   /** @override */
-  whenRenderStarted() {
-    return this.embed.whenRenderStarted();
+  getElementById(id) {
+    return this.embed.win.document.getElementById(id);
   }
 }
 

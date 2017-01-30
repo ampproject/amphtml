@@ -17,7 +17,6 @@
 import {
   AmpDocSingle,
   AmpDocShadow,
-  startDocRender,
 } from '../../../../src/service/ampdoc-impl';
 import {
   AmpdocAnalyticsRoot,
@@ -82,14 +81,8 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     expect(root.getTrackerOptional('custom')).to.be.null;
   });
 
-  it('should block on whenRenderStarted for ampdoc', () => {
-    ampdoc = new AmpDocSingle(win);
-    root = new AmpdocAnalyticsRoot(ampdoc);
-    expect(ampdoc.isRenderStarted()).to.be.false;
-    startDocRender(ampdoc);
-    return root.whenRenderStarted().then(() => {
-      expect(ampdoc.isRenderStarted()).to.be.true;
-    });
+  it('should init with ampdoc signals', () => {
+    expect(root.signals()).to.equal(ampdoc.signals());
   });
 
 
@@ -391,13 +384,8 @@ describes.realWin('EmbedAnalyticsRoot', {
     expect(root.getTrackerOptional('custom')).to.be.null;
   });
 
-  it('should block on whenRenderStarted for ampdoc', () => {
-    const renderStartedStub = sandbox.stub(embed, 'whenRenderStarted',
-        () => Promise.resolve(11));
-    return root.whenRenderStarted().then(value => {
-      expect(value).to.equal(11);
-      expect(renderStartedStub).to.be.calledOnce;
-    });
+  it('should init with embed signals', () => {
+    expect(root.signals()).to.equal(embed.signals());
   });
 
 

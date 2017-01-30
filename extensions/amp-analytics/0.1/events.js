@@ -208,9 +208,9 @@ export class ClickEventTracker extends EventTracker {
 
 
 /**
- * Tracks render-start events.
+ * Tracks events based on signals.
  */
-export class RenderStartTracker extends EventTracker {
+export class SignalTracker extends EventTracker {
   /**
    * @param {!./analytics-root.AnalyticsRoot} root
    */
@@ -225,17 +225,23 @@ export class RenderStartTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const selector = config['selector'] || ':root';
+    /**
+     * @type {!Promise<{
+     *     target: !Element,
+     *     signals: !../../../src/utils/signals.Signals}>
+     *   }
+     */
+    let signalsPromise;
     if (selector == ':root' || selector == ':host') {
       // Root selectors are delegated to analytics roots.
-      this.root.whenRenderStarted().then(() => {
-        const target = this.root.getRootElement();
-        listener(new AnalyticsEvent(target, eventType));
+      signalsPromise = Promise.resolve({
+        target: this.root.getRootElement(),
+        signals: this.root.signals(),
       });
     } else {
       // Look for the AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
-      let target;
-      this.root.ampdoc.whenReady().then(() => {
+      signalsPromise = this.root.ampdoc.whenReady().then(() => {
         const selectionMethod = config['selectionMethod'];
         const element = user().assertElement(
             this.root.getAmpElement(
@@ -243,12 +249,21 @@ export class RenderStartTracker extends EventTracker {
                 selector,
                 selectionMethod),
             `Element "${selector}" not found`);
-        target = element;
-        return element.whenSignal('render-start');
-      }).then(() => {
-        listener(new AnalyticsEvent(dev().assertElement(target), eventType));
+        return {
+          target: element,
+          signals: element.signals(),
+        };
       });
     }
+
+    // Wait for the target and the event signal.
+    let target;
+    signalsPromise.then(obj => {
+      target = obj.target;
+      return obj.signals.whenSignal(eventType);
+    }).then(() => {
+      listener(new AnalyticsEvent(target, eventType));
+    });
     return NO_UNLISTEN;
   }
 }
