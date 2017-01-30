@@ -464,7 +464,7 @@ describe('CustomElement', () => {
 
     expect(element.isBuilt()).to.equal(false);
     expect(testElementBuildCallback.callCount).to.equal(0);
-    expect(element.signalMap_['built']).to.not.be.ok;
+    expect(element.signals().get('built')).to.not.be.ok;
 
     clock.tick(1);
     element.build();
@@ -472,7 +472,7 @@ describe('CustomElement', () => {
     expect(element).to.not.have.class('i-amphtml-notbuilt');
     expect(element).to.not.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(1);
-    expect(element.signalMap_['built']).to.equal(1);
+    expect(element.signals().get('built')).to.equal(1);
     return element.whenBuilt();  // Should eventually resolve.
   });
 
@@ -714,11 +714,11 @@ describe('CustomElement', () => {
     expect(testElementLayoutCallback.callCount).to.equal(1);
     expect(testElementPreconnectCallback.callCount).to.equal(2);
     expect(testElementPreconnectCallback.getCall(1).args[0]).to.be.true;
-    expect(element.signalMap_['load-start']).to.equal(1);
-    expect(element.signalMap_['load-end']).to.be.undefined;
+    expect(element.signals().get('load-start')).to.equal(1);
+    expect(element.signals().get('load-end')).to.be.null;
     return p.then(() => {
       expect(element.readyState).to.equal('complete');
-      expect(element.signalMap_['load-end']).to.equal(1);
+      expect(element.signals().get('load-end')).to.equal(1);
     });
   });
 
@@ -1250,125 +1250,6 @@ describe('CustomElement', () => {
       expect(() => {
         element.viewportCallback(true);
       }).to.throw(/Must never be called in template/);
-    });
-  });
-
-
-  describe('signals', () => {
-    let element;
-
-    beforeEach(() => {
-      element = new ElementClass();
-      clock.tick(1);
-    });
-
-    it('should register signal without promise', () => {
-      element.signal('sig');
-      expect(element.signalMap_['sig']).to.equal(1);
-      expect(element.signalPromiseMap_).to.be.null;
-    });
-
-    it('should reject signal without promise', () => {
-      const error = new Error();
-      element.rejectSignal('sig', error);
-      expect(element.signalMap_['sig']).to.equal(error);
-      expect(element.signalPromiseMap_).to.be.null;
-    });
-
-    it('should not duplicate signal', () => {
-      element.signal('sig', 11);
-      expect(element.signalMap_['sig']).to.equal(11);
-
-      element.signal('sig', 12);
-      expect(element.signalMap_['sig']).to.equal(11);  // Did not change.
-
-      element.rejectSignal('sig', new Error());
-      expect(element.signalMap_['sig']).to.equal(11);  // Did not change.
-    });
-
-    it('should override signal time', () => {
-      element.signal('sig', 11);
-      expect(element.signalMap_['sig']).to.equal(11);
-      expect(element.signalPromiseMap_).to.be.null;
-    });
-
-    it('should resolve signal after it was requested', () => {
-      const promise = element.whenSignal('sig');
-      expect(element.signalPromiseMap_['sig'].promise).to.equal(promise);
-      expect(element.signalPromiseMap_['sig'].resolve).to.be.ok;
-      expect(element.signalPromiseMap_['sig'].reject).to.be.ok;
-      expect(element.whenSignal('sig')).to.equal(promise);  // Reuse promise.
-      element.signal('sig', 11);
-      return promise.then(time => {
-        expect(time).to.equal(11);
-        expect(element.signalPromiseMap_['sig'].promise).to.equal(promise);
-        expect(element.signalPromiseMap_['sig'].resolve).to.be.undefined;
-        expect(element.signalPromiseMap_['sig'].reject).to.be.undefined;
-        expect(element.whenSignal('sig')).to.equal(promise);  // Reuse promise.
-      });
-    });
-
-    it('should resolve signal before it was requested', () => {
-      element.signal('sig', 11);
-      const promise = element.whenSignal('sig');
-      expect(element.signalPromiseMap_['sig'].promise).to.equal(promise);
-      expect(element.signalPromiseMap_['sig'].resolve).to.be.undefined;
-      expect(element.signalPromiseMap_['sig'].reject).to.be.undefined;
-      expect(element.whenSignal('sig')).to.equal(promise);  // Reuse promise.
-      return promise.then(time => {
-        expect(time).to.equal(11);
-        expect(element.signalPromiseMap_['sig'].promise).to.equal(promise);
-        expect(element.signalPromiseMap_['sig'].resolve).to.be.undefined;
-        expect(element.signalPromiseMap_['sig'].reject).to.be.undefined;
-        expect(element.whenSignal('sig')).to.equal(promise);  // Reuse promise.
-      });
-    });
-
-    it('should reject signal after it was requested', () => {
-      const promise = element.whenSignal('sig');
-      expect(element.signalPromiseMap_['sig'].promise).to.equal(promise);
-      const error = new Error();
-      element.rejectSignal('sig', error);
-      return promise.then(() => {
-        throw new Error('should have failed');
-      }, reason => {
-        expect(reason).to.equal(error);
-        expect(element.signalPromiseMap_['sig'].promise).to.equal(promise);
-        expect(element.signalPromiseMap_['sig'].resolve).to.be.undefined;
-        expect(element.signalPromiseMap_['sig'].reject).to.be.undefined;
-        expect(element.whenSignal('sig')).to.equal(promise);  // Reuse promise.
-      });
-    });
-
-    it('should reject signal before it was requested', () => {
-      const error = new Error();
-      element.rejectSignal('sig', error);
-      const promise = element.whenSignal('sig');
-      expect(element.signalPromiseMap_['sig'].promise).to.equal(promise);
-      return promise.then(() => {
-        throw new Error('should have failed');
-      }, reason => {
-        expect(reason).to.equal(error);
-        expect(element.signalPromiseMap_['sig'].promise).to.equal(promise);
-        expect(element.signalPromiseMap_['sig'].resolve).to.be.undefined;
-        expect(element.signalPromiseMap_['sig'].reject).to.be.undefined;
-        expect(element.whenSignal('sig')).to.equal(promise);  // Reuse promise.
-      });
-    });
-
-    it('should wait for two signal to calculate delta', () => {
-      const promise = element.signalDelta('sig1', 'sig2');
-      element.signal('sig1', 11);
-      element.signal('sig2', 21);
-      return expect(promise).to.eventually.equal(10);
-    });
-
-    it('should fail to calculate delta if one signal fails', () => {
-      const error = new Error();
-      const promise = element.signalDelta('sig1', 'sig2');
-      element.signal('sig1', 11);
-      element.rejectSignal('sig2', error);
-      return expect(promise).to.eventually.be.rejectedWith(error);
     });
   });
 });

@@ -153,6 +153,14 @@ export class BaseElement {
   }
 
   /**
+   * The element's signal tracker.
+   * @return {!./utils/signals.Signals}
+   */
+  signals() {
+    return this.element.signals();
+  }
+
+  /**
   * This is the priority of loading elements (layoutCallback).
   * The lower the number, the higher the priority.
   * The default priority for base elements is 0.
@@ -866,25 +874,4 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
-
-  /**
-   * Triggers the signal with the specified name on the element. The time is
-   * optional; if not provided, the current time is used. The associated
-   * promise is resolved with the resulting time.
-   * @param {string} name
-   * @param {time=} opt_time
-   */
-  signal(name, opt_time) {
-    this.element.signal(name, opt_time);
-  }
-
-  /**
-   * Rejects the signal. Indicates that the signal will never succeed. The
-   * associated signal is rejected.
-   * @param {string} name
-   * @param {!Error} error
-   */
-  rejectSignal(name, error) {
-    this.element.rejectSignal(name, error);
-  }
-};
+}
