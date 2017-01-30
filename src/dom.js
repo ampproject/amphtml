@@ -364,15 +364,7 @@ function isScopeSelectorSupported(parent) {
  * @return {?Element}
  */
 export function childElementByAttr(parent, attr) {
-  if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
-  }
-  if (scopeSelectorSupported) {
-    return parent.querySelector(':scope > [' + attr + ']');
-  }
-  return childElement(parent, el => {
-    return el.hasAttribute(attr);
-  });
+  return scopedQuerySelector(parent, `> [${attr}]`);
 }
 
 
@@ -396,15 +388,7 @@ export function lastChildElementByAttr(parent, attr) {
  * @return {!Array<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
-  if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
-  }
-  if (scopeSelectorSupported) {
-    return toArray(parent.querySelectorAll(':scope > [' + attr + ']'));
-  }
-  return childElements(parent, el => {
-    return el.hasAttribute(attr);
-  });
+  return scopedQuerySelectorAll(parent, `> [${attr}]`);
 }
 
 
@@ -415,16 +399,7 @@ export function childElementsByAttr(parent, attr) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
-  if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
-  }
-  if (scopeSelectorSupported) {
-    return parent.querySelector(':scope > ' + tagName);
-  }
-  tagName = tagName.toUpperCase();
-  return childElement(parent, el => {
-    return el.tagName == tagName;
-  });
+  return scopedQuerySelector(parent, `> ${tagName}`);
 }
 
 
@@ -435,16 +410,55 @@ export function childElementByTag(parent, tagName) {
  * @return {!Array<!Element>}
  */
 export function childElementsByTag(parent, tagName) {
+  return scopedQuerySelectorAll(parent, `> ${tagName}`);
+}
+
+
+/**
+ * Finds the first element that matches `selector`, scoped inside `root`.
+ * Note: in IE, this causes a quick mutation of the element's class list.
+ * @param {!Element} root
+ * @param {string} selector
+ * @return {?Element}
+ */
+export function scopedQuerySelector(root, selector) {
   if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
+    scopeSelectorSupported = isScopeSelectorSupported(root);
   }
   if (scopeSelectorSupported) {
-    return toArray(parent.querySelectorAll(':scope > ' + tagName));
+    return root./*OK*/querySelector(`:scope ${selector}`);
   }
-  tagName = tagName.toUpperCase();
-  return childElements(parent, el => {
-    return el.tagName == tagName;
-  });
+
+  // Only IE.
+  const unique = `i-amphtml-scoped-${Math.random()}`;
+  root.classList.add(unique);
+  const elements = root./*OK*/querySelector(`.${unique} ${selector}`);
+  root.classList.remove(unique);
+  return elements;
+}
+
+
+/**
+ * Finds the every element that matches `selector`, scoped inside `root`.
+ * Note: in IE, this causes a quick mutation of the element's class list.
+ * @param {!Element} root
+ * @param {string} selector
+ * @return {!Array<!Element>}
+ */
+export function scopedQuerySelectorAll(root, selector) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(root);
+  }
+  if (scopeSelectorSupported) {
+    return toArray(root./*OK*/querySelectorAll(`:scope ${selector}`));
+  }
+
+  // Only IE.
+  const unique = `i-amphtml-scoped-${Math.random()}`;
+  root.classList.add(unique);
+  const elements = toArray(root./*OK*/querySelectorAll(`.${unique} ${selector}`));
+  root.classList.remove(unique);
+  return elements;
 }
 
 

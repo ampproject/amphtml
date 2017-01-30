@@ -170,12 +170,9 @@ describe('A4A loader', () => {
           ampAd = new AmpAd(ampAdElement);
           ampAd.upgradeCallback().then(element => {
             expect(element).to.not.be.null;
-            expect(childElement(fixture.doc.head,
-                c => {
-                  return c.tagName == 'SCRIPT' &&
-                      c.getAttribute('custom-element') ===
-                      'amp-ad-network-zort-impl';
-                })).to.not.be.null;
+            expect(fixture.doc.head.querySelector(
+                'script[custom-element="amp-ad-network-zort-impl"]'))
+                .to.not.be.null;
           });
         });
       });
