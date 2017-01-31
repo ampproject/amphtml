@@ -193,6 +193,12 @@ Type attribute value: `mediametrie`
 
 Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`. Vars `level1` to `level4` are optional.
 
+### Mobify
+
+Type attribute value: `mobify`
+
+Adds support for Mobify. The `projectSlug` must be specified. It's also possible to specify the optional variable `templateName`. More details can be found at [docs.mobify.com/engagement-engine/1.0](http://docs.mobify.com/engagement-engine/1.0/).
+
 ### mParticle
 
 Type attribute value: `mparticle`

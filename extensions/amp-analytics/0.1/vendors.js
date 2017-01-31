@@ -648,6 +648,43 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'mobify': {
+    'vars': {
+      'projectSlug': '',
+      'templateName': ''
+    },
+    'requests': {
+      '_host': 'https://engagement-collector.mobify.net',
+      '_dimensions': [
+        '%22platform%22%3a%22AMP%22',
+        '%22client_id%22%3a%22${clientId(sandy-client-id)}}%22',
+        '%22title%22%3a%22${title}%22',
+        '%22location%22%3a%22${sourceUrl}%22',
+        '%22path%22%3a%22${sourcePath}%22',
+        '%22amp_location%22%3a%22${ampdocUrl}%22',
+        '%22referrer%22%3a%22${documentReferrer}%22',
+        '%22templatename%22%3a%22${templateName}%22'
+      ].join('%2c'),
+      '_basePrefix': '${_host}/s.gif?' +
+        'slug=${projectSlug}&' +
+        'timestamp_local=${timestamp}&' +
+        'channel=web&' +
+        'dimensions=%7b${_dimensions}%7d',
+      'pageview': '${_basePrefix}&data=%7b%22action%22%3a%22pageview%22%7d'
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
+  },  
+  
   'mparticle': {
     'vars': {
       'eventType': 'Unknown',
