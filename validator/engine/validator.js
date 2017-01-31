@@ -34,6 +34,7 @@ goog.require('amp.validator.ErrorCategory');
 goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
 goog.require('amp.validator.ReferencePoint');
 goog.require('amp.validator.TagSpec');
+goog.require('amp.validator.VALIDATE_CSS');
 goog.require('amp.validator.ValidationError');
 goog.require('amp.validator.ValidationError.Code');
 goog.require('amp.validator.ValidationError.Severity');
@@ -1731,76 +1732,16 @@ class CdataMatcher {
         return;
       }
     } else if (cdataSpec.cssSpec !== null) {
-      /** @type {!Array<!parse_css.ErrorToken>} */
-      const cssErrors = [];
-      /** @type {!Array<!parse_css.Token>} */
-      const tokenList = parse_css.tokenize(
-          cdata,
-          amp.validator.GENERATE_DETAILED_ERRORS ? this.getLineCol().getLine() :
-                                                   undefined,
-          amp.validator.GENERATE_DETAILED_ERRORS ? this.getLineCol().getCol() :
-                                                   undefined,
-          cssErrors);
-      if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
-        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-        return;
-      }
-      /** @type {!CssParsingConfig} */
-      const cssParsingConfig = computeCssParsingConfig(cdataSpec.cssSpec);
-      /** @type {!parse_css.Stylesheet} */
-      const sheet = parse_css.parseAStylesheet(
-          tokenList, cssParsingConfig.atRuleSpec, cssParsingConfig.defaultSpec,
-          cssErrors);
-      if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
-        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-        return;
-      }
-
-      // We extract the urls from the stylesheet. As a side-effect, this can
-      // generate errors for url(…) functions with invalid parameters.
-      /** @type {!Array<!parse_css.ParsedCssUrl>} */
-      const parsedUrls = [];
-      parse_css.extractUrls(sheet, parsedUrls, cssErrors);
-      if (cdataSpec.cssSpec.validateAmp4Ads) {
-        parse_css.validateAmp4AdsCss(sheet, cssErrors);
-      }
-
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        for (const errorToken of cssErrors) {
-          // Override the first parameter with the name of this style tag.
-          let params = errorToken.params;
-          // Override the first parameter with the name of this style tag.
-          params[0] = getTagSpecName(this.tagSpec_);
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR, errorToken.code,
-              new LineCol(errorToken.line, errorToken.col), params,
-              /* url */ '', validationResult);
+      if (amp.validator.VALIDATE_CSS) {
+        const reportAdditionalErrors =
+            this.matchCss_(cdata, cdataSpec.cssSpec, context, validationResult);
+        if (!reportAdditionalErrors ||
+            (!amp.validator.GENERATE_DETAILED_ERRORS &&
+             validationResult.status ==
+                 amp.validator.ValidationResult.Status.FAIL)) {
+          return;
         }
-      } else if (cssErrors.length > 0) {
-        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-        return;
       }
-      const parsedFontUrlSpec =
-          new ParsedUrlSpec(cdataSpec.cssSpec.fontUrlSpec);
-      const parsedImageUrlSpec =
-          new ParsedUrlSpec(cdataSpec.cssSpec.imageUrlSpec);
-      for (const url of parsedUrls) {
-        const adapter = amp.validator.GENERATE_DETAILED_ERRORS ?
-            new UrlErrorInStylesheetAdapter(url.line, url.col) :
-            null;
-        validateUrlAndProtocol(
-            ((url.atRuleScope === 'font-face') ? parsedFontUrlSpec :
-                                                 parsedImageUrlSpec),
-            adapter, context, url.utf8Url, this.tagSpec_, validationResult);
-      }
-      const visitor = new InvalidAtRuleVisitor(
-          this.tagSpec_, cdataSpec.cssSpec, context, validationResult);
-      sheet.accept(visitor);
-
-      // As a hack to not report some errors twice, both via the css parser
-      // and via the regular expressions below, we return early if there
-      // are parser errors and skip the regular expression errors.
-      if (visitor.errorsSeen || cssErrors.length > 0) return;
     }
     // } end oneof
 
@@ -1829,6 +1770,87 @@ class CdataMatcher {
         }
       }
     }
+  }
+
+  /**
+   * Matches the provided cdata against a CSS specification. Helper
+   * routine for match (see above).
+   * @param {string} cdata
+   * @param {!amp.validator.CssSpec} cssSpec
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} validationResult
+   * @return {boolean} True iff the calling method (match) should report
+   *   additional errors. We use this flag as a slight hack to avoid reporting
+   *   errors twice, both via the CSS parser (this method) and via regular
+   *   expressions in the caller (match).
+   * @private
+   */
+  matchCss_(cdata, cssSpec, context, validationResult) {
+    /** @type {!Array<!parse_css.ErrorToken>} */
+    const cssErrors = [];
+    /** @type {!Array<!parse_css.Token>} */
+    const tokenList = parse_css.tokenize(
+        cdata,
+        amp.validator.GENERATE_DETAILED_ERRORS ? this.getLineCol().getLine() :
+                                                 undefined,
+        amp.validator.GENERATE_DETAILED_ERRORS ? this.getLineCol().getCol() :
+                                                 undefined,
+        cssErrors);
+    if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return false;
+    }
+    /** @type {!CssParsingConfig} */
+    const cssParsingConfig = computeCssParsingConfig(cssSpec);
+    /** @type {!parse_css.Stylesheet} */
+    const sheet = parse_css.parseAStylesheet(
+        tokenList, cssParsingConfig.atRuleSpec, cssParsingConfig.defaultSpec,
+        cssErrors);
+    if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return false;
+    }
+
+    // We extract the urls from the stylesheet. As a side-effect, this can
+    // generate errors for url(…) functions with invalid parameters.
+    /** @type {!Array<!parse_css.ParsedCssUrl>} */
+    const parsedUrls = [];
+    parse_css.extractUrls(sheet, parsedUrls, cssErrors);
+    if (cssSpec.validateAmp4Ads) {
+      parse_css.validateAmp4AdsCss(sheet, cssErrors);
+    }
+
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      for (const errorToken of cssErrors) {
+        // Override the first parameter with the name of this style tag.
+        let params = errorToken.params;
+        // Override the first parameter with the name of this style tag.
+        params[0] = getTagSpecName(this.tagSpec_);
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR, errorToken.code,
+            new LineCol(errorToken.line, errorToken.col), params,
+            /* url */ '', validationResult);
+      }
+    } else if (cssErrors.length > 0) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return false;
+    }
+    const parsedFontUrlSpec = new ParsedUrlSpec(cssSpec.fontUrlSpec);
+    const parsedImageUrlSpec = new ParsedUrlSpec(cssSpec.imageUrlSpec);
+    for (const url of parsedUrls) {
+      const adapter = amp.validator.GENERATE_DETAILED_ERRORS ?
+          new UrlErrorInStylesheetAdapter(url.line, url.col) :
+          null;
+      validateUrlAndProtocol(
+          ((url.atRuleScope === 'font-face') ? parsedFontUrlSpec :
+                                               parsedImageUrlSpec),
+          adapter, context, url.utf8Url, this.tagSpec_, validationResult);
+    }
+    const visitor = new InvalidAtRuleVisitor(
+        this.tagSpec_, cssSpec, context, validationResult);
+    sheet.accept(visitor);
+
+    return !visitor.errorsSeen && cssErrors.length === 0;
   }
 
   /** @param {!LineCol} lineCol */

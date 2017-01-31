@@ -629,11 +629,15 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   for name in all_names:
     out.Line("goog.provide('%s');" % name)
   out.Line("goog.provide('amp.validator.GENERATE_DETAILED_ERRORS');")
+  out.Line("goog.provide('amp.validator.VALIDATE_CSS');")
   out.Line("goog.provide('amp.validator.createRules');")
 
   out.Line('')
   out.Line('/** @define {boolean} */')
   out.Line('amp.validator.GENERATE_DETAILED_ERRORS = true;')
+  out.Line('')
+  out.Line('/** @define {boolean} */')
+  out.Line('amp.validator.VALIDATE_CSS = true;')
   out.Line('')
 
   for name in all_names:
