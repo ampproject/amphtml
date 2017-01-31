@@ -17,7 +17,6 @@
     "test": "gulp test && ava",
     "ava": "ava",
     "lint": "gulp lint",
-    "check-types": "gulp check-types",
     "build": "gulp build",
     "dist": "gulp dist",
     "heroku-postbuild": "npm run test-env-var && gulp clean && gulp build --fortesting && gulp dist --fortesting && npm run prepend-amp && npm run prepend-v0",
@@ -25,13 +24,8 @@
     "prepend-amp": "gulp prepend-global --prod node_modules/AMP_CONFIG.json --local --target dist/amp.js && gulp prepend-global --prod node_modules/AMP_CONFIG.json --local --target dist.3p/current/integration.js",
     "prepend-v0": "gulp prepend-global --prod node_modules/AMP_CONFIG.json --local --target dist/v0.js && gulp prepend-global --prod node_modules/AMP_CONFIG.json --local --target dist.3p/current-min/f.js"
   },
-  "pre-commit": [
-    "lint",
-    "check-types"
-  ],
   "dependencies": {
     "document-register-element": "1.1.1",
-    "pre-commit": "^1.2.2",
     "promise-pjs": "1.1.2",
     "web-animations-js": "2.2.2"
   },
