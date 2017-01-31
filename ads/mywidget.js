@@ -36,7 +36,6 @@ export function mywidget(global, data) {
       container: 'c',
     },
 
-    // from ./distroscale.js
     renderStart: global.context.renderStart,
     noContentAvailable: global.context.noContentAvailable,
 
