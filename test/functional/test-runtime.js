@@ -329,9 +329,9 @@ describes.fakeWin('runtime', {
     expect(queueExtensions).to.have.length(0);
     expect(s1.getAttribute('custom-element')).to.be.null;
     expect(s2.getAttribute('custom-element')).to.be.null;
-    expect(s1.getAttribute('i-amphtml-replaced-with-version'))
+    expect(s1.getAttribute('i-amphtml-loaded-new-version'))
         .to.equal('amp-test-element1');
-    expect(s2.getAttribute('i-amphtml-replaced-with-version'))
+    expect(s2.getAttribute('i-amphtml-loaded-new-version'))
         .to.equal('amp-test-element4');
     const inserted = win.document.head.querySelectorAll(
         '[i-amphtml-inserted]');

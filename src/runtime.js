@@ -925,6 +925,8 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if ('$internalRuntimeVersion$' == version) {
     return false;
   }
+  // The :not is an extra prevention of recursion because it will be
+  // added to script tags that go into the code path below.
   const scriptInHead = win.document.head.querySelector(
           `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
   dev().assert(scriptInHead, 'Expected to find script for extension: %s',
@@ -935,7 +937,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   // Mark the element as being replace, so that the loadExtension code
   // assumes it as not-present.
   scriptInHead.removeAttribute('custom-element');
-  scriptInHead.setAttribute('i-amphtml-replaced-with-version', fnOrStruct.n);
+  scriptInHead.setAttribute('i-amphtml-loaded-new-version', fnOrStruct.n);
   extensionsFor(win).loadExtension(fnOrStruct.n,
       /* stubbing not needed, should have already happened. */ false);
   return true;
