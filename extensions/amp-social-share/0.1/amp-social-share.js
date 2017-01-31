@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {addParamsToUrl, parseUrl} from '../../../src/url';
+import {addParamsToUrl, parseUrl, parseQueryString} from '../../../src/url';
+import {setStyle} from '../../../src/style';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -58,6 +59,22 @@ class AmpSocialShare extends AMP.BaseElement {
     user().assert(!/\s/.test(typeAttr),
         'Space characters are not allowed in type attribute value. %s',
         this.element);
+    if (typeAttr === 'system') {
+      // Hide/ignore system component if navigator.share unavailable
+      if (!('share' in navigator)) {
+        setStyle(this.element, 'display', 'none');
+        return;
+      }
+    } else {
+      // Hide/ignore non-system component if system share wants to be unique
+      const systemOnly = ('share' in navigator) &&
+        !!this.win.document.querySelectorAll(
+          'amp-social-share[type=system][data-mode=replace]').length;
+      if (systemOnly) {
+        setStyle(this.element, 'display', 'none');
+        return;
+      }
+    }
     const typeConfig = getSocialConfig(typeAttr) || {};
     this.shareEndpoint_ = user().assert(
         this.element.getAttribute('data-share-endpoint') ||
@@ -85,10 +102,17 @@ class AmpSocialShare extends AMP.BaseElement {
   /** @private */
   handleClick_() {
     user().assert(this.href_ && this.target_, 'Clicked before href is set.');
-    const windowFeatures = 'resizable,scrollbars,width=640,height=480';
     const href = dev().assertString(this.href_);
     const target = dev().assertString(this.target_);
-    openWindowDialog(this.win, href, target, windowFeatures);
+    if (this.shareEndpoint_ === 'navigator-share:') {
+      dev().assert(navigator.share !== undefined,
+          'navigator.share disappeared.');
+      // navigator.share() fails 'gulp check-types' validation on Travis
+      navigator['share'](parseQueryString(href.substr(href.indexOf('?'))));
+    } else {
+      const windowFeatures = 'resizable,scrollbars,width=640,height=480';
+      openWindowDialog(this.win, href, target, windowFeatures);
+    }
   }
 
 };

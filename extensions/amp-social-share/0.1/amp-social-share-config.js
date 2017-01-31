@@ -80,4 +80,11 @@ const BUILTINS = {
       text: 'TITLE - CANONICAL_URL',
     },
   },
+  system: {
+    shareEndpoint: 'navigator-share:',
+    defaultParams: {
+      text: 'TITLE',
+      url: 'CANONICAL_URL',
+    },
+  },
 };
