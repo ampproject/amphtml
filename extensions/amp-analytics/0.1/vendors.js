@@ -670,12 +670,22 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'timestamp_local=${timestamp}&' +
         'channel=web&' +
         'dimensions=%7b${_dimensions}%7d',
-      'pageview': '${_basePrefix}&data=%7b%22action%22%3a%22pageview%22%7d'
+      'pageview': '${_basePrefix}&data=%7b%22action%22%3a%22pageview%22%7d',
+      'pageload': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c%22action%22%3a%22load%22%2c%22value%22%3a${pageLoadTime}%7d',
+      'pagedcl': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c%22action%22%3a%22DOMContentLoaded%22%2c%22value%22%3a${contentLoadTime}%7d'
     },
     'triggers': {
-      'defaultPageview': {
+      'pageview': {
         'on': 'visible',
         'request': 'pageview'
+      },
+      'pageload': {
+        'on': 'visible',
+        'request': 'pageload'
+      },
+      'pagedcl': {
+        'on': 'visible',
+        'request': 'pagedcl'
       }
     },
     'transport': {
