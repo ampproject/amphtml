@@ -160,6 +160,10 @@ export function googleLifecycleReporterFactory(a4aElement) {
         'AD_SLOT_EVENT_NAME.AD_SLOT_TIME_TO_EVENT',
     'e.AD_SLOT_ID': a4aElement.element.getAttribute(EXPERIMENT_ATTRIBUTE),
     'adt.AD_SLOT_ID': a4aElement.element.getAttribute('type'),
+    // Page-level visibility times: `firstVisibleTime.T,.lastVisibleTime.T`.
+    'met.AD_SLOT_NAMESPACE':
+        'firstVisibleTime.AD_PAGE_FIRST_VISIBLE_TIME' +
+        ',lastVisibleTime.AD_PAGE_LAST_VISIBLE_TIME',
   });
   return reporter;
 }

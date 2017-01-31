@@ -160,6 +160,7 @@ describe('Viewer', () => {
     expect(viewer.isVisible()).to.equal(true);
     expect(viewer.getPrerenderSize()).to.equal(1);
     expect(viewer.getFirstVisibleTime()).to.equal(0);
+    expect(viewer.getLastVisibleTime()).to.equal(0);
   });
 
   it('should initialize firstVisibleTime for initially visible doc', () => {
@@ -167,6 +168,7 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.isVisible()).to.be.true;
     expect(viewer.getFirstVisibleTime()).to.equal(1);
+    expect(viewer.getLastVisibleTime()).to.equal(1);
   });
 
   it('should initialize firstVisibleTime when doc becomes visible', () => {
@@ -175,12 +177,33 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.isVisible()).to.be.false;
     expect(viewer.getFirstVisibleTime()).to.be.null;
+    expect(viewer.getLastVisibleTime()).to.be.null;
 
+    // Becomes visible.
     viewer.receiveMessage('visibilitychange', {
       state: 'visible',
     });
     expect(viewer.isVisible()).to.be.true;
     expect(viewer.getFirstVisibleTime()).to.equal(1);
+    expect(viewer.getLastVisibleTime()).to.equal(1);
+
+    // Back to invisible.
+    clock.tick(1);
+    viewer.receiveMessage('visibilitychange', {
+      state: 'hidden',
+    });
+    expect(viewer.isVisible()).to.be.false;
+    expect(viewer.getFirstVisibleTime()).to.equal(1);
+    expect(viewer.getLastVisibleTime()).to.equal(1);
+
+    // Back to visible again.
+    clock.tick(1);
+    viewer.receiveMessage('visibilitychange', {
+      state: 'visible',
+    });
+    expect(viewer.isVisible()).to.be.true;
+    expect(viewer.getFirstVisibleTime()).to.equal(1);
+    expect(viewer.getLastVisibleTime()).to.equal(3);
   });
 
   it('should configure visibilityState and prerender', () => {

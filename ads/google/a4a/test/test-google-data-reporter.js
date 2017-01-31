@@ -205,6 +205,8 @@ describe('#getLifecycleReporter', () => {
       });
 
       it('should generate a ping with known parameters', () => {
+        const viewer = env.win.services.viewer.obj;
+        viewer.firstVisibleTime_ = viewer.lastVisibleTime_ = Date.now();
         mockReporter.sendPing('renderFriendlyStart');
         const pingElements = env.win.document.querySelectorAll('img');
         expect(pingElements.length).to.equal(1);
@@ -222,6 +224,7 @@ describe('#getLifecycleReporter', () => {
           'met.a4a.22=renderFriendlyStart.[0-9]+',
           `e.22=${DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment}`,
           'adt.22=doubleclick',
+          'met.a4a=firstVisibleTime.[0-9]+%2ClastVisibleTime.[0-9]+',
         ];
         expectedParams.forEach(p => {
           expect(pingUrl, p).to.match(new RegExp(`[?&]${p}(&|$)`));
