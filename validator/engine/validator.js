@@ -1615,9 +1615,7 @@ class CdataMatcher {
     /** @type {string} */
     var blacklistedCdataRegexStr = '';
     if (tagSpec.cdata !== null) {
-      for (const blacklist of tagSpec.cdata.blacklistedCdataRegex) {
-        blacklistedCdataRegexStr += blacklist + '|';
-      }
+      blacklistedCdataRegexStr = tagSpec.cdata.blacklistedCdataRegex.join('|');
     }
     /**
      * @type {RegExp} blacklistedCdataRegex
