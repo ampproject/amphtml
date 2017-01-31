@@ -178,8 +178,8 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.registerAction('goToSlide', invocation => {
       const args = invocation.args;
-      if (args && args.index !== undefined) {
-        this.showSlideWhenReady_(args.index);
+      if (args) {
+        this.showSlideWhenReady_(args['index']);
       }
     });
   }
@@ -475,7 +475,7 @@ export class AmpSlideScroll extends BaseSlides {
         this.showSlide_(index);
       }
     } else {
-      user().warn(TAG, 'Invalid [slide] value: %s', slide);
+      user().warn(TAG, 'Invalid [slide] value: %s', value);
     }
   }
 
