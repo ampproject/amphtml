@@ -209,7 +209,7 @@ Iframes are identified as tracking/analytics iframes if they appear to serve no 
 
 See [amp-iframe rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/0.1/validator-amp-iframe.protoascii) in the AMP validator specification.
 
-## Guideline: prefer existing AMP components to `amp-iframe`
+## Guideline: prefer [specific AMP components](https://github.com/ampproject/amphtml/tree/master/extensions) to `amp-iframe`
 
 `amp-iframe` should be considered a fallback if the required user experience is not possible by other means in AMP. This is because there are many benefits to using a component tailored for a specific use-case instead, such as
 
