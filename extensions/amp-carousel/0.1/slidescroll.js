@@ -84,8 +84,17 @@ export class AmpSlideScroll extends BaseSlides {
      */
     this.elasticScrollState_ = 0;
 
-    /** @private {?number} */
+    /**
+     * If not laid out yet, null. Otherwise, index of current displayed slide.
+     * @private {?number}
+     */
     this.slideIndex_ = null;
+
+    /**
+     * The slide index that should be shown on first layout.
+     * @private {number}
+     */
+    this.initialSlideIndex_ = 0;
 
     /** @private {number} */
     this.slideWidth_ = 0;
@@ -169,14 +178,8 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.registerAction('goToSlide', invocation => {
       const args = invocation.args;
-      if (!args) {
-        return;
-      }
-      const newIndex = Number(args['index']);
-      if (isFinite(newIndex)) {
-        this.showSlide_(newIndex);
-      } else {
-        user().warn(TAG, 'Invalid [slide] value: %s', newIndex);
+      if (args) {
+        this.showSlideWhenReady_(args['index']);
       }
     });
   }
@@ -190,12 +193,7 @@ export class AmpSlideScroll extends BaseSlides {
   mutatedAttributesCallback(mutations) {
     const slide = mutations['slide'];
     if (slide !== undefined) {
-      const index = parseInt(slide, 10);
-      if (isFinite(index)) {
-        this.showSlide_(index);
-      } else {
-        user().warn(TAG, 'Invalid [slide] value: %s', slide);
-      }
+      this.showSlideWhenReady_(slide);
     }
   }
 
@@ -251,7 +249,7 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   layoutCallback() {
     if (this.slideIndex_ === null) {
-      this.showSlide_(0);
+      this.showSlide_(this.initialSlideIndex_);
     }
     return Promise.resolve();
   }
@@ -462,8 +460,29 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
+   * Parses given value as integer and shows the slide with that index value
+   * when element has been laid out.
+   * @param {*} value
+   * @private
+   */
+  showSlideWhenReady_(value) {
+    const index = parseInt(value, 10);
+    if (isFinite(index)) {
+      // If we haven't been laid out yet, set `initialSlideIndex_` instead.
+      if (this.slideIndex_ === null) {
+        this.initialSlideIndex_ = index;
+      } else {
+        this.showSlide_(index);
+      }
+    } else {
+      user().warn(TAG, 'Invalid [slide] value: %s', value);
+    }
+  }
+
+  /**
    * Makes the slide corresponding to the given index and the slides surrounding
-   *    it available for display.
+   *     it available for display.
+   * @note Element must be laid out.
    * @param {number} newIndex Index of the slide to be displayed.
    * @private
    */
