@@ -541,6 +541,7 @@ export class Extensions {
     scriptElement.async = true;
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
+    scriptElement.setAttribute('i-amphtml-inserted', '');
     let loc = this.win.location;
     if (getMode().test && this.win.testLocation) {
       loc = this.win.testLocation;

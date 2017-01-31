@@ -243,6 +243,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
+    id: 'version-locking',
+    name: 'Force all extensions to have the same release ' +
+        'as the main JS binary',
+    cleanupIssue: 'DO_NOT_SUBMIT',
+  },
+  {
     id: 'amp-bind',
     name: 'AMP extension for dynamic content',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',

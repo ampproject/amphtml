@@ -17,7 +17,11 @@
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {ElementStub} from '../../src/element-stub';
 import {Observable} from '../../src/observable';
-import {adopt, adoptShadowMode, installAmpdocServices} from '../../src/runtime';
+import {
+  adopt,
+  adoptShadowMode,
+  installAmpdocServices,
+} from '../../src/runtime';
 import {deactivateChunking} from '../../src/chunk';
 import {
   getServiceForDoc,
@@ -29,6 +33,7 @@ import {installTimerService} from '../../src/service/timer-impl';
 import {platformFor} from '../../src/platform';
 import {runChunksForTesting} from '../../src/chunk';
 import {timerFor} from '../../src/timer';
+import {toggleExperiment} from '../../src/experiments';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
@@ -42,9 +47,11 @@ describes.fakeWin('runtime', {
   let win;
   let ampdocService;
   let ampdocServiceMock;
+  let extensionElementIndex;
 
   beforeEach(() => {
     win = env.win;
+    extensionElementIndex = 0;
     ampdocService = {
       isSingleDoc: () => true,
       getAmpDoc: () => null,
@@ -62,10 +69,13 @@ describes.fakeWin('runtime', {
     installAmpdocServices(ampdoc);
   });
 
-  function regularExtension(fn) {
+
+  function regularExtension(fn, opt_version) {
     return {
-      n: 'extension for testing',
+      n: 'amp-test-element' + extensionElementIndex++,
       f: fn,
+      // Default version of uncompiled sources.
+      v: opt_version || '$internalRuntimeVersion$',
     };
   }
 
@@ -262,6 +272,76 @@ describes.fakeWin('runtime', {
     runChunksForTesting(win.document);
     expect(progress).to.equal('1234');
     expect(queueExtensions).to.have.length(0);
+  });
+
+  it('should load correct extension version', () => {
+    self.AMP_MODE = {
+      rtvVersion: 'test-version',
+    };
+    toggleExperiment(win, 'version-locking', true);
+    function addExisting(index) {
+      const s = document.createElement('script');
+      s.setAttribute('custom-element', 'amp-test-element' + index);
+      win.document.head.appendChild(s);
+      return s;
+    }
+    const s1 = addExisting(1);
+    const s2 = addExisting(4);
+    const bodyCallbacks = new Observable();
+    sandbox.stub(dom, 'waitForBody', (unusedDoc, callback) => {
+      bodyCallbacks.add(callback);
+    });
+    let progress = '';
+    const queueExtensions = win.AMP;
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '1';
+    }));
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += 'not expected 1';
+    }, 'version123'));
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '3';
+    }));
+    adopt(win);
+    runChunksForTesting(win.document);
+    // Extensions are still unprocessed
+    expect(progress).to.equal('');
+
+    // Add one more
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '4';
+    }));
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += 'not expected 2';
+    }, 'version123'));
+    runChunksForTesting(win.document);
+    expect(progress).to.equal('');
+
+    // Body is available now.
+    bodyCallbacks.fire();
+    runChunksForTesting(win.document);
+    expect(progress).to.equal('134');
+    expect(queueExtensions).to.have.length(0);
+    expect(s1.getAttribute('custom-element')).to.be.null;
+    expect(s2.getAttribute('custom-element')).to.be.null;
+    expect(s1.getAttribute('i-amphtml-loaded-new-version'))
+        .to.equal('amp-test-element1');
+    expect(s2.getAttribute('i-amphtml-loaded-new-version'))
+        .to.equal('amp-test-element4');
+    const inserted = win.document.head.querySelectorAll(
+        '[i-amphtml-inserted]');
+    expect(inserted).to.have.length(2);
+    expect(inserted[0].getAttribute('src')).to.equal(
+        'https://cdn.ampproject.org/rtv/test-version' +
+            '/v0/amp-test-element1-0.1.js');
+    expect(inserted[1].getAttribute('src')).to.equal(
+        'https://cdn.ampproject.org/rtv/test-version' +
+            '/v0/amp-test-element4-0.1.js');
   });
 
   it('should be robust against errors in early extensions', () => {
