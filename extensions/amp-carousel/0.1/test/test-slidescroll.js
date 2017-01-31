@@ -999,7 +999,11 @@ describe('SlideScroll', () => {
       const promise = getAmpSlideScroll(true, 5, /* opt_attachToDom */ false);
       return promise.then(obj => {
         const {iframe, ampSlideScroll} = obj;
+
+        // Layout happens asynchronously after attaching to DOM, so we can
+        // test pre-layoutCallback logic now.
         iframe.addElement(ampSlideScroll);
+
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
 
@@ -1012,7 +1016,9 @@ describe('SlideScroll', () => {
 
         ampSlideScroll.layoutCallback();
 
+        // Should show the last slide index requested before layout.
         expect(showSlideSpy).to.have.been.calledWith(321);
+        expect(showSlideSpy.callCount).to.equal(1);
       });
     });
   });
