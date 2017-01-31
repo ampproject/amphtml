@@ -441,6 +441,7 @@ function buildExtensionJs(path, name, version, options) {
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? '' : ('(self.AMP=self.AMP||[])' +
         '.push({n:"' + name + '",' + priority +
+        'v:"' + internalRuntimeVersion + '",' +
         'f:(function(AMP){<%= contents %>\n})});'),
   });
 }
