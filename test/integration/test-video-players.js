@@ -37,10 +37,12 @@ describe('amp-video', () => {
   });
 });
 
-describe('amp-youtube', () => {
+//TODO(aghassemi,#7160): We have to skip iOS for YouTube tests since YouTube
+//player does not work at all (not AMP related) on SauceLab's iOS simulator.
+describe.configure().skipIos().run('amp-youtube', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-youtube');
-    video.setAttribute('data-videoid', 'mGENRKrdoGY');
+    video.setAttribute('data-videoid', 'lBTCB7yLs8Y');
     return video;
   });
 });
