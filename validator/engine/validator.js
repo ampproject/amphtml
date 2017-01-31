@@ -650,11 +650,6 @@ class ParsedTagSpec {
      */
     this.requires_ = [];
     /**
-     * @type {ParsedAttrSpec}
-     * @private
-     */
-    this.dispatchKeyAttrSpec_ = null;
-    /**
      * @type {!Array<number>}
      * @private
      */
@@ -678,9 +673,6 @@ class ParsedTagSpec {
       const altNames = parsedAttrSpec.getSpec().alternativeNames;
       for (const altName of altNames) {
         this.attrsByName_[altName] = parsedAttrSpec;
-      }
-      if (parsedAttrSpec.getSpec().dispatchKey) {
-        this.dispatchKeyAttrSpec_ = parsedAttrSpec;
       }
       if (parsedAttrSpec.getSpec().implicit) {
         this.implicitAttrspecs_.push(parsedAttrSpec.getId());
@@ -718,35 +710,6 @@ class ParsedTagSpec {
    */
   containsUrl() {
     return this.containsUrl_;
-  }
-
-  /**
-   * A dispatch key is a mandatory attribute name/value unique to this
-   * TagSpec. If an encountered tag matches this dispatch key, it is
-   * validated first against this TagSpec in order to improve validation
-   * performance and error message selection. Not all TagSpecs have a
-   * dispatch key.
-   * @return {boolean}
-   */
-  hasDispatchKey() {
-    return this.dispatchKeyAttrSpec_ !== null;
-  }
-
-  /**
-   * You must check hasDispatchKey before accessing
-   * @return {string}
-   */
-  getDispatchKey() {
-    goog.asserts.assert(this.hasDispatchKey());
-    const parsedSpec = this.dispatchKeyAttrSpec_;
-    var mandatoryParent =
-        this.spec_.mandatoryParent === null ? '' : this.spec_.mandatoryParent;
-    const attrName = parsedSpec.getSpec().name;
-    const attrValue = parsedSpec.getSpec().value !== null ?
-        parsedSpec.getSpec().value.toLowerCase() :
-        parsedSpec.getSpec().valueCasei;
-    goog.asserts.assert(attrValue !== null);
-    return makeDispatchKey(attrName, attrValue, mandatoryParent);
   }
 
   /**
