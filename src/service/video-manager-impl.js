@@ -63,6 +63,8 @@ export class VideoManager {
   register(video) {
     dev().assert(video);
 
+    this.registerCommonActions_(video);
+
     // TODO(aghassemi): Remove this later. For now, VideoManager only matters
     // for autoplay videos so no point in registering arbitrary videos yet.
     if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
@@ -77,6 +79,22 @@ export class VideoManager {
     const entry = new VideoEntry(this.ampdoc_, video);
     this.maybeInstallVisibilityObserver_(entry);
     this.entries_.push(entry);
+  }
+
+  /**
+   * Register common actions such as play, pause, etc... on the video element
+   * so they can be called using AMP Actions.
+   * For example: <button on="tap:myVideo.play">
+   *
+   *
+   * @param {!../video-interface.VideoInterface} video
+   * @private
+   */
+  registerCommonActions_(video) {
+    video.registerAction('play', video.play.bind(video, /*isAutoplay*/ false));
+    video.registerAction('pause', video.pause.bind(video));
+    video.registerAction('mute', video.mute.bind(video));
+    video.registerAction('unmute', video.unmute.bind(video));
   }
 
   /**
@@ -465,9 +483,9 @@ export function clearSupportsAutoplayCacheForTesting() {
 }
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!VideoManager}
  */
-export function installVideoManagerForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'video-manager', VideoManager);
+export function installVideoManagerForDoc(nodeOrDoc) {
+  return fromClassForDoc(nodeOrDoc, 'video-manager', VideoManager);
 };
