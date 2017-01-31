@@ -20,6 +20,7 @@ import {
 } from '../performance';
 import {childElements} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
+import {viewerForDoc} from '../../../../src/viewer';
 import * as sinon from 'sinon';
 
 /**
@@ -108,6 +109,7 @@ describe('GoogleAdLifecycleReporter', () => {
     iframe = createIframePromise(false).then(iframeFixture => {
       const win = iframeFixture.win;
       const doc = iframeFixture.doc;
+      const viewer = viewerForDoc(doc);
       const elem = doc.createElement('div');
       doc.body.appendChild(elem);
       const reporter = new GoogleAdLifecycleReporter(
@@ -119,8 +121,11 @@ describe('GoogleAdLifecycleReporter', () => {
         'c': 'AD_PAGE_CORRELATOR',
         'it.AD_SLOT_ID': 'AD_SLOT_TIME_TO_EVENT',
         's_n_id': 'AD_SLOT_EVENT_NAME.AD_SLOT_EVENT_ID',
+        'p_v': 'AD_PAGE_VISIBLE',
+        'p_v1': 'AD_PAGE_FIRST_VISIBLE_TIME',
+        'p_v2': 'AD_PAGE_LAST_VISIBLE_TIME',
       });
-      return {win, doc, elem, reporter};
+      return {win, doc, viewer, elem, reporter};
     });
   });
   afterEach(() => {
@@ -129,7 +134,10 @@ describe('GoogleAdLifecycleReporter', () => {
 
   describe('#sendPing', () => {
     it('should request a single ping and insert into DOM', () => {
-      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+      return iframe.then(({viewer, elem, reporter}) => {
+        const iniTime = reporter.initTime_;
+        sandbox.stub(viewer, 'getFirstVisibleTime', () => iniTime + 11);
+        sandbox.stub(viewer, 'getLastVisibleTime', () => iniTime + 12);
         expect(emitPingSpy).to.not.be.called;
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
@@ -142,6 +150,9 @@ describe('GoogleAdLifecycleReporter', () => {
           /[&?]c=[0-9]+(&|$)/,
           /[&?]it.42=[0-9]+(&|$)/,
           /[&?]s_n_id=adRequestStart.2(&|$)/,
+          /[&?]p_v=1(&|$)/,
+          /[&?]p_v1=11(&|$)/,
+          /[&?]p_v2=12(&|$)/,
         ];
         expectMatchesAll(arg, expectations);
         expectHasSiblingImgMatchingAll(elem, expectations);

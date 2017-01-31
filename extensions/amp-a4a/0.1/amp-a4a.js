@@ -728,6 +728,9 @@ export class AmpA4A extends AMP.BaseElement {
     if (!this.adPromise_) {
       return Promise.resolve();
     }
+    // There's no real throttling with A4A, but this is the signal that is
+    // most comparable with the layout callback for 3p ads.
+    this.protectedEmitLifecycleEvent_('preAdThrottle');
     const layoutCallbackStart = this.getNow_();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
