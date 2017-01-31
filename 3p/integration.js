@@ -116,8 +116,10 @@ import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {revcontent} from '../ads/revcontent';
+import {relap} from '../ads/relap';
 import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
+import {sklik} from '../ads/sklik';
 import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
 import {sortable} from '../ads/sortable';
@@ -125,6 +127,7 @@ import {sovrn} from '../ads/sovrn';
 import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
+import {valuecommerce} from '../ads/valuecommerce';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
@@ -155,21 +158,16 @@ const AMP_EMBED_ALLOWED = {
 // Need to cache iframeName as it will be potentially overwritten by
 // masterSelection, as per below.
 const iframeName = window.name;
-
-let data = parseFragment(location.hash);
-if (data && data._context) {
+let data = {};
+try {
+  // TODO(bradfrizzell@): Change the data structure of the attributes
+  //    to make it less terrible.
+  data = JSON.parse(iframeName).attributes;
   window.context = data._context;
-} else {
-  try {
-    // TODO(bradfrizzell@): Change the data structure of the attributes
-    //    to make it less terrible.
-    data = JSON.parse(iframeName).attributes;
-    window.context = data._context;
-  } catch (err) {
-    window.context = {};
-    dev().info(
-        'INTEGRATION', 'Could not parse context from:', iframeName);
-  }
+} catch (err) {
+  window.context = {};
+  dev().info(
+      'INTEGRATION', 'Could not parse context from:', iframeName);
 }
 
 // This should only be invoked after window.context is set
@@ -258,9 +256,11 @@ register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('reddit', reddit);
+register('relap', relap);
 register('revcontent', revcontent);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);
+register('sklik', sklik);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
 register('sortable', sortable);
@@ -269,6 +269,7 @@ register('taboola', taboola);
 register('teads', teads);
 register('triplelift', triplelift);
 register('twitter', twitter);
+register('valuecommerce', valuecommerce);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
@@ -418,6 +419,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.addContextToIframe = iframe => {
       iframe.name = iframeName;
     };
+    window.context.getHtml = getHtml;
     delete data._context;
     manageWin(window);
     installEmbedStateListener();
@@ -452,6 +454,30 @@ function triggerResizeRequest(width, height) {
  */
 function triggerRenderStart(opt_data) {
   nonSensitiveDataPostMessage('render-start', opt_data);
+}
+
+/**
+ * Id for getHtml postMessage.
+ * @type {!number}
+ */
+let currentMessageId = 0;
+
+/**
+ * See readme for window.context.getHtml
+ * @param {!string} selector - CSS selector of the node to take content from
+ * @param {!Array<string>} attributes - tag attributes to be left in the stringified HTML
+ * @param {!Function} callback
+ */
+function getHtml(selector, attributes, callback) {
+  const messageId = currentMessageId++;
+  nonSensitiveDataPostMessage('get-html', {selector, attributes, messageId});
+
+  const unlisten = listenParent(window, 'get-html-result', data => {
+    if (data.messageId === messageId) {
+      callback(data.content);
+      unlisten();
+    }
+  });
 }
 
 /**

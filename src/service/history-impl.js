@@ -721,7 +721,7 @@ export class HistoryBindingVirtual_ {
     this.onStackIndexUpdated_ = null;
 
     /** @private {!UnlistenDef} */
-    this.unlistenOnHistoryPopped_ = this.viewer_.onHistoryPoppedEvent(
+    this.unlistenOnHistoryPopped_ = this.viewer_.onMessage('historyPopped',
         this.onHistoryPopped_.bind(this));
   }
 
@@ -764,11 +764,11 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * @param {!./viewer-impl.ViewerHistoryPoppedEventDef} event
+   * @param {!JSONType} data
    * @private
    */
-  onHistoryPopped_(event) {
-    this.updateStackIndex_(event.newStackIndex);
+  onHistoryPopped_(data) {
+    this.updateStackIndex_(data['newStackIndex']);
   }
 
   /**

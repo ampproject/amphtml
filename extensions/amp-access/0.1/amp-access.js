@@ -25,7 +25,7 @@ import {actionServiceForDoc} from '../../../src/action';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
-import {cidFor} from '../../../src/cid';
+import {cidForDoc} from '../../../src/cid';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
@@ -126,8 +126,10 @@ export class AccessService {
     /** @const @private {!UrlReplacements} */
     this.urlReplacements_ = urlReplacementsForDoc(win.document);
 
+    // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
+    // is migrated to ampdoc as well.
     /** @private @const {!Cid} */
-    this.cid_ = cidFor(win);
+    this.cid_ = cidForDoc(win.document.documentElement);
 
     /** @private @const {!Viewer} */
     this.viewer_ = viewerForDoc(win.document);
@@ -204,7 +206,7 @@ export class AccessService {
    */
   createAdapter_(configJson) {
     const context = /** @type {!AccessTypeAdapterContextDef} */ ({
-      buildUrl: this.buildUrl_.bind(this),
+      buildUrl: this.buildUrl.bind(this),
       collectUrlVars: this.collectUrlVars_.bind(this),
     });
     const isJwt = (this.isJwtEnabled_ && configJson['jwt'] === true);
@@ -225,6 +227,13 @@ export class AccessService {
         return new AccessOtherAdapter(this.win, configJson, context);
     }
     throw dev().createError('Unsupported access type: ', this.type_);
+  }
+
+  /**
+   * @return {!JSONType}
+   */
+  getAdapterConfig() {
+    return this.adapter_.getConfig();
   }
 
   /**
@@ -375,9 +384,8 @@ export class AccessService {
    * @param {string} url
    * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
    * @return {!Promise<string>}
-   * @private
    */
-  buildUrl_(url, useAuthData) {
+  buildUrl(url, useAuthData) {
     return this.prepareUrlVars_(useAuthData).then(vars => {
       return this.urlReplacements_.expandAsync(url, vars);
     });
@@ -762,13 +770,40 @@ export class AccessService {
       if (invocation.event) {
         invocation.event.preventDefault();
       }
-      this.login('');
+      this.loginWithType_('');
     } else if (invocation.method.indexOf('login-') == 0) {
       if (invocation.event) {
         invocation.event.preventDefault();
       }
-      this.login(invocation.method.substring('login-'.length));
+      this.loginWithType_(invocation.method.substring('login-'.length));
     }
+  }
+
+  /**
+   * Runs the login flow using one of the predefined urls in the amp-access config
+   *
+   * @private
+   * @param {string} type Type of login defined in the config
+   * @return {!Promise}
+   */
+  loginWithType_(type) {
+    user().assert(this.loginConfig_[type],
+        'Login URL is not configured: %s', type);
+    // Login URL should always be available at this time.
+    const loginUrl = user().assert(this.loginUrlMap_[type],
+        'Login URL is not ready: %s', type);
+    return this.login_(loginUrl, type);
+  }
+
+  /**
+   * Runs the login flow opening the given url in the login window.
+   *
+   * @param {string} url
+   * @param {string} eventLabel A label used for the analytics event for this action
+   * @return {!Promise}
+   */
+  loginWithUrl(url, eventLabel = '') {
+    return this.login_(url, eventLabel);
   }
 
   /**
@@ -779,10 +814,12 @@ export class AccessService {
    * Type can be either an empty string for a default login or a name of the
    * login URL.
    *
-   * @param {string} type
+   * @private
+   * @param {string} loginUrl
+   * @param {string} eventLabel A label used for the analytics event for this action
    * @return {!Promise}
    */
-  login(type) {
+  login_(loginUrl, eventLabel) {
     const now = Date.now();
 
     // If login is pending, block a new one from starting for 1 second. After
@@ -793,26 +830,21 @@ export class AccessService {
       return this.loginPromise_;
     }
 
-    dev().fine(TAG, 'Start login: ', type);
-    user().assert(this.loginConfig_[type],
-        'Login URL is not configured: %s', type);
-    // Login URL should always be available at this time.
-    const loginUrl = user().assert(this.loginUrlMap_[type],
-        'Login URL is not ready: %s', type);
+    dev().fine(TAG, 'Start login: ', loginUrl, eventLabel);
 
-    this.loginAnalyticsEvent_(type, 'started');
+    this.loginAnalyticsEvent_(eventLabel, 'started');
     const dialogPromise = this.signIn_.requestSignIn(loginUrl) ||
         this.openLoginDialog_(loginUrl);
     const loginPromise = dialogPromise.then(result => {
-      dev().fine(TAG, 'Login dialog completed: ', type, result);
+      dev().fine(TAG, 'Login dialog completed: ', eventLabel, result);
       this.loginPromise_ = null;
       const query = parseQueryString(result);
       const s = query['success'];
       const success = (s == 'true' || s == 'yes' || s == '1');
       if (success) {
-        this.loginAnalyticsEvent_(type, 'success');
+        this.loginAnalyticsEvent_(eventLabel, 'success');
       } else {
-        this.loginAnalyticsEvent_(type, 'rejected');
+        this.loginAnalyticsEvent_(eventLabel, 'rejected');
       }
       const exchangePromise = this.signIn_.postLoginResult(query) ||
           Promise.resolve();
@@ -830,8 +862,8 @@ export class AccessService {
         });
       }
     }).catch(reason => {
-      dev().fine(TAG, 'Login dialog failed: ', type, reason);
-      this.loginAnalyticsEvent_(type, 'failed');
+      dev().fine(TAG, 'Login dialog failed: ', eventLabel, reason);
+      this.loginAnalyticsEvent_(eventLabel, 'failed');
       if (this.loginPromise_ == loginPromise) {
         this.loginPromise_ = null;
       }
@@ -865,7 +897,7 @@ export class AccessService {
     const promises = [];
     for (const k in this.loginConfig_) {
       promises.push(
-          this.buildUrl_(this.loginConfig_[k], /* useAuthData */ true)
+          this.buildUrl(this.loginConfig_[k], /* useAuthData */ true)
               .then(url => {
                 this.loginUrlMap_[k] = url;
                 return {type: k, url};

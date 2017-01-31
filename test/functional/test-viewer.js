@@ -18,7 +18,6 @@ import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {timerFor} from '../../src/timer';
 import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
@@ -94,15 +93,10 @@ describe('Viewer', () => {
     sandbox.restore();
   });
 
-  it('should configure as 0 padding top by default', () => {
-    expect(viewer.getPaddingTop()).to.equal(0);
-  });
-
   it('should configure correctly based on window name and hash', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.location.hash = '#paddingTop=17&other=something';
     const viewer = new Viewer(ampdoc);
-    expect(viewer.getPaddingTop()).to.equal(17);
 
     // All of the startup params are also available via getParam.
     expect(viewer.getParam('paddingTop')).to.equal('17');
@@ -116,7 +110,6 @@ describe('Viewer', () => {
     windowApi.name = '__AMP__other=something';
     windowApi.location.hash = '#paddingTop=17';
     const viewer = new Viewer(ampdoc, params);
-    expect(viewer.getPaddingTop()).to.equal(171);
 
     // All of the startup params are also available via getParam.
     expect(viewer.getParam('paddingTop')).to.equal('171');
@@ -200,14 +193,13 @@ describe('Viewer', () => {
 
   it('should receive viewport event', () => {
     let viewportEvent = null;
-    viewer.onViewportEvent(event => {
+    viewer.onMessage('viewport', event => {
       viewportEvent = event;
     });
     viewer.receiveMessage('viewport', {
       paddingTop: 19,
     });
     expect(viewportEvent).to.not.equal(null);
-    expect(viewer.getPaddingTop()).to.equal(19);
   });
 
   describe('should receive the visibilitychange event', () => {
@@ -391,77 +383,6 @@ describe('Viewer', () => {
       changeVisibility('visible');
       expect(viewer.getVisibilityState()).to.equal('visible');
       expect(viewer.isVisible()).to.equal(true);
-    });
-  });
-
-  describe('baseCid', () => {
-    const cidData = JSON.stringify({
-      time: 100,
-      cid: 'cid-123',
-    });
-    let trustedViewer;
-    let persistedCidData;
-    let shouldTimeout;
-
-    beforeEach(() => {
-      shouldTimeout = false;
-      clock.tick(100);
-      trustedViewer = true;
-      persistedCidData = cidData;
-      sandbox.stub(viewer, 'isTrustedViewer',
-          () => Promise.resolve(trustedViewer));
-      sandbox.stub(viewer, 'sendMessageAwaitResponse', (message, payload) => {
-        if (message != 'cid') {
-          return Promise.reject();
-        }
-        if (shouldTimeout) {
-          return timerFor(window).promise(15000);
-        }
-        if (payload) {
-          persistedCidData = payload;
-        }
-        return Promise.resolve(persistedCidData);
-      });
-    });
-
-    it('should return CID', () => {
-      const p = expect(viewer.baseCid()).to.eventually.equal(cidData);
-      p.then(() => {
-        // This should not trigger a timeout.
-        clock.tick(100000);
-      });
-      return p;
-    });
-
-    it('should not request cid for untrusted viewer', () => {
-      trustedViewer = false;
-      return expect(viewer.baseCid()).to.eventually.be.undefined;
-    });
-
-    it('should convert CID returned by legacy API to new format', () => {
-      persistedCidData = 'cid-123';
-      return expect(viewer.baseCid()).to.eventually.equal(cidData);
-    });
-
-    it('should send message to store cid', () => {
-      const newCidData = JSON.stringify({time: 101, cid: 'cid-456'});
-      return expect(viewer.baseCid(newCidData))
-          .to.eventually.equal(newCidData);
-    });
-
-    it('should time out', () => {
-      shouldTimeout = true;
-      const p = expect(viewer.baseCid()).to.eventually.be.undefined;
-      Promise.resolve().then(() => {
-        clock.tick(9999);
-        Promise.resolve().then(() => {
-          clock.tick(1);
-        });
-      });
-      return p.then(() => {
-        // Ticked 100 at start.
-        expect(Date.now()).to.equal(10100);
-      });
     });
   });
 

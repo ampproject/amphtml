@@ -16,6 +16,7 @@
 
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
+import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {user} from '../../../src/log';
 
 const TAG = 'AMP-BIND';
@@ -53,6 +54,7 @@ export class BindEvaluator {
     this.validator_ = new BindValidator();
 
     // Create BindExpression objects from expression strings.
+    // TODO(choumx): Chunk creation of BindExpression or change to web worker.
     for (let i = 0; i < evaluatees.length; i++) {
       const e = evaluatees[i];
 
@@ -106,7 +108,10 @@ export class BindEvaluator {
 
         const resultString = this.stringValueOf_(property, result);
         if (this.validator_.isResultValid(tagName, property, resultString)) {
-          cache[expr] = result;
+          // Rewrite URL attributes for CDN if necessary.
+          cache[expr] = typeof result === 'string'
+              ? rewriteAttributeValue(tagName, property, result)
+              : result;
         } else {
           invalid[expr] = true;
         }

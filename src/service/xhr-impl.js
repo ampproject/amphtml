@@ -177,12 +177,28 @@ export class Xhr {
    * @return {!Promise<!JSONType>}
    */
   fetchJson(input, opt_init) {
+    return this.fetchJsonResponse(input, opt_init)
+        .then(response => response.json());
+  }
+
+  /**
+   * Makes a request to fetch JSON response, based on the fetch polyfill.
+   *
+   * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+   *
+   * See `fetchAmpCors_` for more detail.
+   *
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
+   * @return {!Promise<!FetchResponse>}
+   */
+  fetchJsonResponse(input, opt_init) {
     const init = opt_init || {};
     init.method = normalizeMethod_(init.method);
     setupJson_(init);
     return this.fetchAmpCors_(input, init).then(response => {
       return assertSuccess(response);
-    }).then(response => response.json());
+    });
   }
 
   /**
@@ -409,7 +425,7 @@ function createXhrRequest(method, url) {
 
 /**
  * If 415 or in the 5xx range.
- * @param {string} status
+ * @param {number} status
  */
 function isRetriable(status) {
   return status == 415 || (status >= 500 && status < 600);
@@ -418,7 +434,7 @@ function isRetriable(status) {
 
 /**
  * Returns the response if successful or otherwise throws an error.
- * @paran {!FetchResponse} response
+ * @param {!FetchResponse} response
  * @return {!Promise<!FetchResponse>}
  * @private Visible for testing
  */
@@ -427,6 +443,7 @@ export function assertSuccess(response) {
     if (response.status < 200 || response.status >= 300) {
       /** @const {!Error} */
       const err = user().createError(`HTTP error ${response.status}`);
+      err.response = response;
       if (isRetriable(response.status)) {
         err.retriable = true;
       }

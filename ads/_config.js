@@ -397,6 +397,7 @@ export const adConfig = {
       'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
     ],
+    renderStartImplemented: true,
   },
 
   plista: {},
@@ -428,6 +429,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  relap: {
+    renderStartImplemented: true,
+  },
+
   revcontent: {
     prefetch: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
     preconnect: [
@@ -442,6 +447,10 @@ export const adConfig = {
 
   sharethrough: {
     renderStartImplemented: true,
+  },
+
+  sklik: {
+    prefetch: 'https://c.imedia.cz/js/amp.js',
   },
 
   smartadserver: {
@@ -482,6 +491,14 @@ export const adConfig = {
   },
 
   triplelift: {},
+
+  valuecommerce: {
+    prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
+    preconnect: [
+      'https://ad.jp.ap.valuecommerce.com',
+    ],
+    renderStartImplemented: true,
+  },
 
   webediads: {
     prefetch: 'https://eu1.wbdds.com/amp.min.js',

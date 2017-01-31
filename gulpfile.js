@@ -39,19 +39,23 @@ var cssOnly = argv['css-only'];
 
 require('./build-system/tasks');
 
+var hostname = argv.hostname || 'cdn.ampproject.org';
+var hostname3p = argv.hostname3p || '3p.ampproject.net';
+
 // All declared extensions.
 var extensions = {};
 
 // Each extension and version must be listed individually here.
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-access-laterpay', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-access-laterpay', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-accordion', '0.1', true);
 declareExtension('amp-ad', '0.1', true);
 declareExtension('amp-ad-network-adsense-impl', 0.1, false);
 declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
 declareExtension('amp-ad-network-fake-impl', 0.1, false);
 declareExtension('amp-ad-network-triplelift-impl', 0.1, false);
+declareExtension('amp-ad-network-cloudflare-impl', 0.1, false);
 declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-animation', '0.1', false);
@@ -64,6 +68,7 @@ declareExtension('amp-brid-player', '0.1', false);
 declareExtension('amp-brightcove', '0.1', false);
 declareExtension('amp-kaltura-player', '0.1', false);
 declareExtension('amp-carousel', '0.1', true);
+declareExtension('amp-crypto-polyfill', '0.1', false);
 declareExtension('amp-dailymotion', '0.1', false);
 declareExtension('amp-dynamic-css-classes', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-experiment', '0.1', false, 'NO_TYPE_CHECK');
@@ -727,7 +732,7 @@ function buildExperiments(options) {
   $$.util.log('Processing ' + htmlPath);
   var html = fs.readFileSync(htmlPath, 'utf8');
   var minHtml = html.replace('/dist.tools/experiments/experiments.js',
-      'https://cdn.ampproject.org/v0/experiments.js');
+      `https://${hostname}/v0/experiments.js`);
   gulp.src(htmlPath)
       .pipe($$.file('experiments.cdn.html', minHtml))
       .pipe(gulp.dest('dist.tools/experiments/'));
@@ -795,7 +800,7 @@ function buildLoginDoneVersion(version, options) {
   var html = fs.readFileSync(htmlPath, 'utf8');
   var minHtml = html.replace(
       '../../../dist/v0/amp-login-done-' + version + '.max.js',
-      'https://cdn.ampproject.org/v0/amp-login-done-' + version + '.js');
+      `https://${hostname}/v0/amp-login-done-` + version + '.js');
 
   mkdirSync('dist');
   mkdirSync('dist/v0');

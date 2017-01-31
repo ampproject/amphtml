@@ -79,6 +79,35 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'acquialift': {
+    'vars': {
+      'decisionApiUrl': 'us-east-1-decisionapi.lift.acquia.com',
+      'accountId': 'xxxxxxxx',
+      'siteId': 'xxxxxxxx',
+    },
+    'transport': {'beacon': true, 'xhrpost': true, 'image': false},
+    'requests': {
+      'base': 'https://${decisionApiUrl}/capture?account_id=${accountId}&site_id=${siteId}',
+      'basicCapture': '${base}' +
+        '&ident=${clientId(tc_ptid)}' +
+        '&identsrc=amp' +
+        '&es=Amp' +
+        '&url=${canonicalUrl}' +
+        '&rurl=${documentReferrer}' +
+        '&cttl=${title}',
+      'pageview': '${basicCapture}' +
+        '&en=Content View',
+      'click': '${basicCapture}' +
+        '&en=Click-Through',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
   'afsanalytics': {
     'vars': {
       'server': 'www',
@@ -351,6 +380,25 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
           'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
           'bln=${browserLanguage}&chs=${documentCharset}&' +
           'col=${screenColorDepth}&tzo=${timezone}&cp_cx_channel=amp',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'gemius': {
+    'requests': {
+      'base': 'https://${prefix}.hit.gemius.pl/_${timestamp}/redot.gif?l=91&id=${identifier}&screen=${screenWidth}x${screenHeight}&window=${viewportWidth}x${viewportHeight}&fr=1&href=${sourceUrl}&ref=${documentReferrer}&extra=gemamp%3D1%7Campid%3D${clientId(gemius)}%7C${extraparams}',
+      'pageview': '${base}&et=view&hsrc=1',
+      'event': '${base}&et=action&hsrc=3',
     },
     'triggers': {
       'defaultPageview': {

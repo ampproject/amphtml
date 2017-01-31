@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+import {parseSrcset} from '../../../src/srcset';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-bind';
+
 /**
  * @typedef {{
  *   allowedProtocols: (!Object<string,boolean>|undefined),
+ *   alternativeName: (string|undefined),
  *   blockedURLs: (Array<string>|undefined),
  * }}
  */
@@ -30,6 +36,10 @@ const GLOBAL_PROPERTY_RULES = {
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
+  // ARIA accessibility attributes.
+  'aria-describedby': null,
+  'aria-label': null,
+  'aria-labelledby': null,
 };
 
 /**
@@ -39,6 +49,16 @@ const GLOBAL_PROPERTY_RULES = {
  * @private {Object<string, Object<string, ?PropertyRulesDef>>}}
  */
 const ELEMENT_RULES = createElementRules_();
+
+/**
+ * Map whose keys comprise all properties that contain URLs.
+ * @private {Object<string, boolean>}
+ */
+const URL_PROPERTIES = {
+  'src': true,
+  'srcset': true,
+  'href': true,
+};
 
 /**
  * BindValidator performs runtime validation of Bind expression results.
@@ -68,23 +88,72 @@ export class BindValidator {
    * @return {boolean}
    */
   isResultValid(tag, property, value) {
-    const attrRules = this.rulesForTagAndProperty_(tag, property);
+    let rules = this.rulesForTagAndProperty_(tag, property);
+
+    // `alternativeName` is a reference to another property's rules.
+    if (rules && rules.alternativeName) {
+      rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
+    }
 
     // If binding to (tag, property) is not allowed, return false.
-    if (attrRules === undefined) {
+    if (rules === undefined) {
       return false;
     }
 
     // If binding is allowed but have no specific rules, return true.
-    if (attrRules === null) {
+    if (rules === null) {
       return true;
     }
 
+    // Validate URL(s) if applicable.
+    if (value && URL_PROPERTIES.hasOwnProperty(property)) {
+      let urls;
+      if (property === 'srcset') {
+        let srcset;
+        try {
+          srcset = parseSrcset(value);
+        } catch (e) {
+          user().error(TAG, 'Failed to parse srcset: ', e);
+          return false;
+        }
+        const sources = srcset.getSources();
+        urls = sources.map(source => source.url);
+      } else {
+        urls = [value];
+      }
+
+      for (let i = 0; i < urls.length; i++) {
+        if (!this.isUrlValid_(urls[i], rules)) {
+          return false;
+        }
+      }
+    }
+
+    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
+    const blacklistedValueRegex = rules.blacklistedValueRegex;
+    if (value && blacklistedValueRegex) {
+      const re = new RegExp(blacklistedValueRegex, 'i');
+      if (re.test(value)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Returns true if a url's value is valid within a property rules spec.
+   * @param {string} url
+   * @param {!PropertyRulesDef} rules
+   * @return {boolean}
+   * @private
+   */
+  isUrlValid_(url, rules) {
     // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
-    const allowedProtocols = attrRules.allowedProtocols;
-    if (allowedProtocols && value) {
+    const allowedProtocols = rules.allowedProtocols;
+    if (allowedProtocols && url) {
       const re = /^([^:\/?#.]+):[\s\S]*$/;
-      const match = re.exec(value);
+      const match = re.exec(url);
 
       if (match !== null) {
         const protocol = match[1].toLowerCase().trimLeft();
@@ -95,27 +164,18 @@ export class BindValidator {
     }
 
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blockedURLs = attrRules.blockedURLs;
-    if (blockedURLs && value) {
+    const blockedURLs = rules.blockedURLs;
+    if (blockedURLs && url) {
       for (let i = 0; i < blockedURLs.length; i++) {
         let decodedURL;
         try {
-          decodedURL = decodeURIComponent(value);
+          decodedURL = decodeURIComponent(url);
         } catch (e) {
-          decodedURL = unescape(value);
+          decodedURL = unescape(url);
         }
         if (decodedURL.trim() === blockedURLs[i]) {
           return false;
         }
-      }
-    }
-
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blacklistedValueRegex = attrRules.blacklistedValueRegex;
-    if (blacklistedValueRegex && value) {
-      const re = new RegExp(blacklistedValueRegex, 'i');
-      if (re.test(value)) {
-        return false;
       }
     }
 
@@ -153,11 +213,11 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
+    'AMP-CAROUSEL': {
+      slide: null,
+    },
     'AMP-IMG': {
       alt: null,
-      'aria-describedby': null,
-      'aria-label': null,
-      'aria-labelledby': null,
       referrerpolicy: null,
       src: {
         allowedProtocols: {
@@ -168,9 +228,24 @@ function createElementRules_() {
         blockedURLs: ['__amp_source_origin'],
       },
       srcset: {
+        alternativeName: 'src',
+      },
+    },
+    'AMP-SELECTOR': {
+      selected: null,
+    },
+    'AMP-VIDEO': {
+      alt: null,
+      attribution: null,
+      autoplay: null,
+      controls: null,
+      loop: null,
+      muted: null,
+      placeholder: null,
+      poster: null,
+      preload: null,
+      src: {
         allowedProtocols: {
-          data: true,
-          http: true,
           https: true,
         },
         blockedURLs: ['__amp_source_origin'],

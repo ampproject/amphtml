@@ -472,7 +472,7 @@ describe('amp-a4a', () => {
                     // DOM mutations are actually completed before testing.
                     a4a.vsync_.runScheduledTasks_();
                     const safeChild = a4aElement.querySelector(
-                        `iframe[src^="${SAFEFRAME_IMPL_PATH}]"`);
+                        `iframe[src^="${SAFEFRAME_IMPL_PATH}"]`);
                     expect(safeChild).to.not.be.ok;
                     if (headerVal != 'nameframe') {
                       const unsafeChild = a4aElement.querySelector('iframe');
