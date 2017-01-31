@@ -31,6 +31,7 @@ makes it much easier to keep otherwise likely divergent behavior in
 sync.
 """
 
+import hashlib
 import os
 
 
@@ -72,9 +73,6 @@ class OutputFormatter(object):
     """Initializes the indenter with indent 0."""
     self.lines = lines
     self.indent_by_ = [0]
-    self.next_tagspec_id_ = 0
-    self.tag_spec_id_by_tag_name_ = {}
-    self.object_id_ = 0
 
   def PushIndent(self, indent):
     """Pushes a particular indent onto the stack."""
@@ -88,34 +86,115 @@ class OutputFormatter(object):
     """Adds a line to self.lines, applying the indent."""
     self.lines.append('%s%s' % (' ' * self.indent_by_[-1], line))
 
-  def TagIdForTagName(self, tag_name):
-    """Returns the TagId allocated for tag_name or allocates a new one.
 
-    If the input is a repeated field, returns an array of integers.
+class MessageKey(object):
+  """A hashable key for a proto message capturing its type and content.
+
+  Messages of the same type (we use the short type name here, e.g. AttrSpec)
+  that serialize to the same byte string are considered the same.
+  """
+
+  def __init__(self, proto_message):
+    self.type_name = proto_message.DESCRIPTOR.name
+    # While it's not strictly necessary to use a digest here, we do so
+    # to avoid carrying around the whole serialized string all the time.
+    self.digest = hashlib.sha1(proto_message.SerializeToString()).hexdigest()
+
+  def __hash__(self):
+    return hash((self.type_name, self.digest))
+
+  def __eq__(self, other):
+    return (self.type_name, self.digest) == (other.type_name, other.digest)
+
+  def __ne__(self, other):
+    return not self == other
+
+
+class MessageRegistry(object):
+  """Maps from messages to ids, used for de-duplication."""
+
+  def __init__(self):
+    # We maintain seperate message ids for each type name, e.g. for AttrList,
+    # TagSpec, AttrSpec, etc., there are ids 0 - # unique message instances.
+    self.next_message_id_by_type_name_ = {}
+    # The key for this map is an instance of MessageKey.
+    self.message_id_by_message_key_ = {}
+
+    # A bit that keeps track whether a message has been emitted or
+    # not.  Strictly speaking, this bit gets flipped when the message
+    # is about to be printed - it being true will prevent that
+    # something gets printed twice.
+    self.is_printed_by_message_key_ = {}
+
+    # References between tag specs in the .protoascii are expressed as
+    # tag spec names (see also TagSpecName), so we maintain this special
+    # case mapping to resolve them to message ids.
+    self.message_id_by_tag_spec_name_ = {}
+
+  def MessageIdForKey(self, message_key):
+    """Yields the message id for a key, registering a new one if needed.
 
     Args:
-      tag_name: string or iterable containing strings of tag names
-
+      message_key: an instance of MessageKey
     Returns:
-      tag spec id number or array of tag spec id numbers.
+      The message id - a number.
     """
-    # This lets us handle repeated fields of strings as well.
-    if not isinstance(tag_name, str) and not isinstance(tag_name, unicode):
-      return [self.TagIdForTagName(el) for el in tag_name]
+    message_id = self.message_id_by_message_key_.get(message_key, -1)
+    if message_id != -1:
+      return message_id
+    message_id = self.next_message_id_by_type_name_.get(
+        message_key.type_name, 0)
+    self.next_message_id_by_type_name_[message_key.type_name] = message_id + 1
+    self.message_id_by_message_key_[message_key] = message_id
+    return message_id
 
-    if tag_name not in self.tag_spec_id_by_tag_name_:
-      self.tag_spec_id_by_tag_name_[tag_name] = self.next_tagspec_id_
-      self.next_tagspec_id_ += 1
+  def MessageReferenceForKey(self, message_key):
+    """A message reference is the variable name used in validator-generated.js.
 
-    return self.tag_spec_id_by_tag_name_[tag_name]
+    Args:
+      message_key: an instance of MessageKey
+    Returns:
+      The message reference - a string.
+    """
+    return '%s_%d' % (message_key.type_name.lower(),
+                      self.MessageIdForKey(message_key))
 
-  def NextObjectId(self):
-    """Returns the next unallocated object id. Does not increment."""
-    return self.object_id_
+  def MarkPrinted(self, message_key):
+    """Marks a message as printed.
 
-  def IncrementObjectId(self):
-    """Increments the next unallocated object id. Does not increment."""
-    self.object_id_ += 1
+    Args:
+      message_key: an instance of MessageKey to indentify the message
+    """
+    self.is_printed_by_message_key_[message_key] = True
+
+  def IsPrinted(self, message_key):
+    """Whether a message was printed.
+
+    Args:
+      message_key: an instance of MessageKey to identify the message.
+    Returns:
+      a boolean indicating whether the message was printed.
+    """
+    return message_key in self.is_printed_by_message_key_
+
+  def RegisterTagSpec(self, tag_spec):
+    """Registers a tag spec, including for lookups by TagSpecName.
+
+    Args:
+      tag_spec: an instance of validator_pb2.TagSpec
+    """
+    message_id = self.MessageIdForKey(MessageKey(tag_spec))
+    self.message_id_by_tag_spec_name_[TagSpecName(tag_spec)] = message_id
+
+  def MessageIdForTagSpecName(self, tag_spec_name):
+    """Looks up a message id for a tag spec by TagSpecName.
+
+    Args:
+      tag_spec_name: a string - see TagSpecName for computing it.
+    Returns:
+      The message id - a number.
+    """
+    return self.message_id_by_tag_spec_name_[tag_spec_name]
 
 
 def FieldTypeFor(descriptor, field_desc, nullable):
@@ -139,9 +218,12 @@ def FieldTypeFor(descriptor, field_desc, nullable):
       descriptor.FieldDescriptor.TYPE_MESSAGE: (
           lambda: field_desc.message_type.full_name),
   }[field_desc.type]()
-  # However, if the field is actually a reference to a tagspec name (string),
-  # make it a number instead as we'll be replacing this with the tagspec id.
-  if field_desc.full_name in TAG_NAME_REFERENCE_FIELD:
+  # However, if the field is actually a reference to a tagspec name
+  # (string) or if it's holding a message that we're deduplicating and
+  # replacing with a synthetic reference field, make it a number
+  # instead as we'll be replacing this with the message id.
+  if (field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD) or (
+      field_desc.full_name in SYNTHETIC_REFERENCE_FIELD):
     element_type = 'number'
   if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
     if nullable:
@@ -152,10 +234,8 @@ def FieldTypeFor(descriptor, field_desc, nullable):
   return '%s' % element_type
 
 
-def NonRepeatedValueToString(descriptor, field_desc, value):
+def ValueToString(descriptor, field_desc, value):
   """For a non-repeated field, renders the value as a Javascript literal.
-
-  Helper function for ValueToString.
 
   Args:
     descriptor: The descriptor module from the protobuf package, e.g.
@@ -178,26 +258,6 @@ def NonRepeatedValueToString(descriptor, field_desc, value):
   if value is None:
     return 'null'
   return str(value)
-
-
-def ValueToString(descriptor, field_desc, value):
-  """Renders a field value as a Javascript literal.
-
-  Args:
-    descriptor: The descriptor module from the protobuf package, e.g.
-        google.protobuf.descriptor.
-    field_desc: The type descriptor for the field value to be rendered.
-    value: The value of the field to be rendered.
-  Returns:
-    A Javascript literal for the provided value.
-  """
-  if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
-    if value:
-      return '[%s]' % ', '.join([NonRepeatedValueToString(descriptor,
-                                                          field_desc, s)
-                                 for s in value])
-    return '[]'
-  return NonRepeatedValueToString(descriptor, field_desc, value)
 
 
 # For the validator-light version, skip these fields. This works by
@@ -233,11 +293,22 @@ CONSTRUCTOR_ARG_FIELDS = [
     'amp.validator.ValidatorRules.tags',
 ]
 
-TAG_NAME_REFERENCE_FIELD = [
+# In the .protoascii, some fields reference other tags by tag spec name.
+# See TagSpecName for how it's computed. This is a string, and this
+# code generator replaces these fields with tag ids, which are numbers.
+TAG_SPEC_NAME_REFERENCE_FIELD = [
     'amp.validator.ReferencePoint.tag_spec_name',
     'amp.validator.TagSpec.also_requires_tag',
     'amp.validator.TagSpec.also_requires_tag_warning',
     'amp.validator.TagSpec.extension_unused_unless_tag_present',
+]
+
+# These fields contain messages in the .protoascii, but we replace
+# them with message ids, which are numbers. Thus far we do this for
+# the AttrSpecs.
+SYNTHETIC_REFERENCE_FIELD = [
+    'amp.validator.TagSpec.attrs',
+    'amp.validator.AttrList.attrs',
 ]
 
 
@@ -246,7 +317,7 @@ class GenerateDetailedErrorsIf(object):
 
      For example, the code:
      ----------------------
-     with GenerateDetailedErrorsIf(true, out):
+     with GenerateDetailedErrorsIf(true, registry, out):
        out.Line('DoStuff()')
      ----------------------
 
@@ -357,8 +428,10 @@ def PrintClassFor(descriptor, msg_desc, out):
         out.Line('this.%s = %s;' % (UnderscoreToCamelCase(field.name),
                                     assigned_value))
     if msg_desc.full_name == 'amp.validator.ValidatorRules':
-      out.Line('/** @type {Array<!string>} */')
+      out.Line('/** @type {!Array<!string>} */')
       out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
+      out.Line('/** @type {!Array<!amp.validator.AttrSpec>} */')
+      out.Line('this.attrs = [];')
     out.PopIndent()
     out.Line('};')
   out.Line('')
@@ -391,48 +464,6 @@ def PrintEnumFor(enum_desc, out):
   out.Line('')
 
 
-def FieldAndAssignedValues(descriptor, msg, out):
-  """Prints an Object's message fields, and builds an array of those fields.
-
-  This routine emits Javascript which will construct an object's complex
-  message fields (recursively) and then returns all of the fields in that
-  object.
-
-  Args:
-    descriptor: The descriptor module from the protobuf package, e.g.
-        google.protobuf.descriptor.
-    msg: A protocol message instance.
-    out: a list of lines to output (without the newline characters) wrapped as
-        an OutputFormatter instance, to which this function will append.
-
-  Returns:
-    The returned array contains tuples of
-    (field descriptor, field variable name).
-  """
-  field_and_assigned_values = []
-  for (field_desc, field_val) in msg.ListFields():
-    if field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
-      if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
-        elements = []
-        for val in field_val:
-          if field_desc.message_type.full_name == 'amp.validator.TagSpec':
-            tag_id = PrintTagSpec(descriptor, val, out)
-            elements.append('tag_%d' % tag_id)
-          else:
-            field_id = PrintObject(descriptor, val, out)
-            elements.append('obj_%d' % field_id)
-        field_and_assigned_values.append(
-            (field_desc, '[%s]' % ','.join(elements)))
-      else:  # TYPE_MESSAGE && !LABEL_REPEATED
-        field_id = PrintObject(descriptor, field_val, out)
-        field_and_assigned_values.append((field_desc, 'obj_%d' % field_id))
-    else:  # !TYPE_MESSAGE
-      field_and_assigned_values.append(
-          (field_desc, ValueToString(descriptor, field_desc, field_val)))
-
-  return field_and_assigned_values
-
-
 def TagSpecName(tag_spec):
   """Generates a name for a given TagSpec. This should be unique.
 
@@ -450,50 +481,28 @@ def TagSpecName(tag_spec):
   return tag_spec.tag_name.lower()
 
 
-def PrintTagSpec(descriptor, tag_spec, out):
-  """Prints an TagSpec, by recursively constructing it.
-
-  This routine emits Javascript which will construct an object modeling
-  the provided message (in practice the ValidatorRules message).
-  It references the classes and enums enitted by PrintClassFor and PrintEnumFor.
+def MaybePrintMessageValue(descriptor, field_val, registry, out):
+  """Print field_val if necessary, and return its message reference.
 
   Args:
     descriptor: The descriptor module from the protobuf package, e.g.
         google.protobuf.descriptor.
-    tag_spec: A TagSpec protocol message instance.
+    field_val: The value of a field, a proto message.
+    registry: an instance of MessageRegistry, used for mapping from
+        messages to message keys.
     out: a list of lines to output (without the newline characters) wrapped as
         an OutputFormatter instance, to which this function will append.
   Returns:
-    This TagSpec's tagspec id, that is, the consumed variable for creating
-    TagSpec objects.
+    This object's message reference, e.g. typically the variable name in
+    validator-generated.js.
   """
-  this_id = out.TagIdForTagName(TagSpecName(tag_spec))
-
-  field_and_assigned_values = FieldAndAssignedValues(descriptor, tag_spec, out)
-
-  tag_name = tag_spec.tag_name
-  out.Line("var tag_%d = new amp.validator.TagSpec(%d, '%s');" %
-           (this_id, this_id, tag_name))
-
-  for (field, value) in field_and_assigned_values:
-    if field.full_name not in ['amp.validator.TagSpec.tag_name']:
-      with GenerateDetailedErrorsIf(field.name in SKIP_FIELDS_FOR_LIGHT, out):
-        if field.full_name in TAG_NAME_REFERENCE_FIELD:
-          # For fields which refer to a tag name of a different tagspec,
-          # replace the unique tag name with a unique tag spec id. This
-          # is more efficient for the javascript code, whereas the tag name
-          # is more readable for the author of the TagSpec.
-          out.Line('tag_%d.%s = %s;' %
-                   (this_id, UnderscoreToCamelCase(field.name),
-                    out.TagIdForTagName(getattr(tag_spec, field.name))))
-        else:
-          out.Line('tag_%d.%s = %s;' %
-                   (this_id, UnderscoreToCamelCase(field.name), value))
-
-  return this_id
+  message_key = MessageKey(field_val)
+  if not registry.IsPrinted(message_key):
+    PrintObject(descriptor, field_val, registry, out)
+  return registry.MessageReferenceForKey(message_key)
 
 
-def PrintObject(descriptor, msg, out):
+def PrintObject(descriptor, msg, registry, out):
   """Prints an object, by recursively constructing it.
 
   This routine emits Javascript which will construct an object modeling
@@ -504,41 +513,66 @@ def PrintObject(descriptor, msg, out):
     descriptor: The descriptor module from the protobuf package, e.g.
         google.protobuf.descriptor.
     msg: A protocol message instance.
+    registry: an instance of MessageRegistry, used for mapping from
+        messages to message keys.
     out: a list of lines to output (without the newline characters) wrapped as
         an OutputFormatter instance, to which this function will append.
   Returns:
     This object's object id, that is, the consumed variable for creating
     objects.
   """
-  this_id = out.NextObjectId()
-  out.IncrementObjectId()
+  this_message_key = MessageKey(msg)
+  registry.MarkPrinted(this_message_key)
 
-  field_and_assigned_values = FieldAndAssignedValues(descriptor, msg, out)
+  field_and_assigned_values = []
+  for (field_desc, field_val) in msg.ListFields():
+    # First we establish how an individual value for this field is going
+    # to be rendered, that is, converted into a string.
+    render_value = lambda: None
+    if field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD:
+      render_value = lambda v: str(registry.MessageIdForTagSpecName(v))
+    elif field_desc.full_name in SYNTHETIC_REFERENCE_FIELD:
+      render_value = lambda v: str(registry.MessageIdForKey(MessageKey(v)))
+    elif field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
+      render_value = (
+          lambda v: MaybePrintMessageValue(descriptor, v, registry, out))
+    else:
+      render_value = (
+          lambda v: ValueToString(descriptor, field_desc, v))  # pylint: disable=cell-var-from-loop
 
+    # Then we iterate over the field if it's repeated, or else just
+    # call the render function once.
+    if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
+      elements = [render_value(v) for v in field_val]
+      field_and_assigned_values.append((field_desc,
+                                        '[%s]' % ','.join(elements)))
+    else:
+      field_and_assigned_values.append((field_desc, render_value(field_val)))
+
+  # First we emit the constructor call, with the appropriate arguments.
   constructor_arg_values = []
+  if msg.DESCRIPTOR.full_name == 'amp.validator.TagSpec':
+    # TagSpecs get their messsage ids as the first constructor parameter.
+    constructor_arg_values.append(
+        str(registry.MessageIdForKey(this_message_key)))
+
   for (field, value) in field_and_assigned_values:
     if field.full_name in CONSTRUCTOR_ARG_FIELDS:
       constructor_arg_values.append(value)
 
-  out.Line('var obj_%d = new %s(%s);' % (
-      this_id, msg.DESCRIPTOR.full_name, ','.join(constructor_arg_values)))
+  this_message_reference = registry.MessageReferenceForKey(
+      this_message_key)
+  out.Line('var %s = new %s(%s);' % (
+      this_message_reference, msg.DESCRIPTOR.full_name,
+      ','.join(constructor_arg_values)))
 
+  # Then we emit the remaining field values as assignments.
   for (field, value) in field_and_assigned_values:
     if field.full_name not in CONSTRUCTOR_ARG_FIELDS:
       with GenerateDetailedErrorsIf(field.name in SKIP_FIELDS_FOR_LIGHT, out):
-        if field.full_name in TAG_NAME_REFERENCE_FIELD:
-          # For fields which refer to a tag name of a different tagspec,
-          # replace the unique tag name with a unique tag spec id. This
-          # is more efficient for the javascript code, whereas the tag name
-          # is more readable for the author of the TagSpec.
-          out.Line('obj_%d.%s = %d;' %
-                   (this_id, UnderscoreToCamelCase(field.name),
-                    out.TagIdForTagName(getattr(msg, field.name))))
-        else:
-          out.Line('obj_%d.%s = %s;' %
-                   (this_id, UnderscoreToCamelCase(field.name), value))
-
-  return this_id
+        out.Line('%s.%s = %s;' %
+                 (this_message_reference, UnderscoreToCamelCase(field.name),
+                  value))
 
 
 def DispatchKeyForTagSpecOrNone(tag_spec):
@@ -595,10 +629,15 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   for name in all_names:
     out.Line("goog.provide('%s');" % name)
   out.Line("goog.provide('amp.validator.GENERATE_DETAILED_ERRORS');")
+  out.Line("goog.provide('amp.validator.VALIDATE_CSS');")
   out.Line("goog.provide('amp.validator.createRules');")
+
   out.Line('')
   out.Line('/** @define {boolean} */')
   out.Line('amp.validator.GENERATE_DETAILED_ERRORS = true;')
+  out.Line('')
+  out.Line('/** @define {boolean} */')
+  out.Line('amp.validator.VALIDATE_CSS = true;')
   out.Line('')
 
   for name in all_names:
@@ -612,25 +651,50 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   rules = validator_pb2.ValidatorRules()
   text_format.Merge(open(specfile).read(), rules)
 
-  # Build a mapping from TagSpec name (unique string) to a TagSpec Id
-  # (shorter, unique integer).
-  for tag_spec in rules.tags:
-    out.TagIdForTagName(TagSpecName(tag_spec))
+  registry = MessageRegistry()
+
+  # Register the tagspecs so they have ids 0 - rules.tags.length. This means
+  # that rules.tags[tagspec_id] works.
+  for t in rules.tags:
+    registry.RegisterTagSpec(t)
 
   out.Line('/**')
   out.Line(' * @return {!%s}' % rules.DESCRIPTOR.full_name)
   out.Line(' */')
   out.Line('amp.validator.createRules = function() {')
   out.PushIndent(2)
-  PrintObject(descriptor, rules, out)
+  PrintObject(descriptor, rules, registry, out)
+
+  # We use this below to reference the variable holding the rules instance.
+  rules_reference = registry.MessageReferenceForKey(MessageKey(rules))
+
+  # Add the dispatchKeyByTagSpecId array, for those tag specs that have
+  # a dispatch key.
   for tag_spec in rules.tags:
-    tag_spec_id = out.TagIdForTagName(TagSpecName(tag_spec))
+    tag_spec_id = registry.MessageIdForTagSpecName(TagSpecName(tag_spec))
     dispatch_key = DispatchKeyForTagSpecOrNone(tag_spec)
     if dispatch_key:
-      out.Line('obj_0.dispatchKeyByTagSpecId[%d]="%s"' % (
-          tag_spec_id, dispatch_key))
+      out.Line('%s.dispatchKeyByTagSpecId[%d]="%s"' % (
+          rules_reference, tag_spec_id, dispatch_key))
 
-  out.Line('return obj_0;')
+  # Create a mapping from attr spec ids to AttrSpec instances, deduping the
+  # AttrSpecs. Then sort by these ids, so now we get a dense array starting
+  # with the attr that has attr spec id 0 - number of attr specs.
+  attrs_by_id = {}
+  for attr_container in list(rules.attr_lists) + list(rules.tags):
+    for attr in attr_container.attrs:
+      attrs_by_id[registry.MessageIdForKey(MessageKey(attr))] = attr
+  sorted_attrs = [attr for (_, attr) in sorted(attrs_by_id.items())]
+
+  # Emit the attr specs, then assign a list of references to them to
+  # Rules.attrs.
+  for attr in sorted_attrs:
+    PrintObject(descriptor, attr, registry, out)
+  out.Line('%s.attrs = [%s];' % (rules_reference, ','.join([
+      registry.MessageReferenceForKey(MessageKey(a))
+      for a in sorted_attrs])))
+
+  out.Line('return %s;' % rules_reference)
   out.PopIndent()
   out.Line('}')
   out.Line('')

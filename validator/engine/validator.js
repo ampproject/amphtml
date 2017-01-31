@@ -34,6 +34,7 @@ goog.require('amp.validator.ErrorCategory');
 goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
 goog.require('amp.validator.ReferencePoint');
 goog.require('amp.validator.TagSpec');
+goog.require('amp.validator.VALIDATE_CSS');
 goog.require('amp.validator.ValidationError');
 goog.require('amp.validator.ValidationError.Code');
 goog.require('amp.validator.ValidationError.Severity');
@@ -466,25 +467,36 @@ class ParsedReferencePoints {
  * sharing those definitions. This abstraction instantiates
  * ParsedAttrSpec for each AttrSpec (from validator-*.protoascii, our
  * specification file) exactly once. To accomplish that, it keeps
- * around the attr lists with ParsedAttrSpec instances.
+ * around the attr lists with ParsedAttrSpec instances, and all
+ * ParsedAttrSpec instances indexed by their id.
  * @private
  */
 class ParsedAttrSpecs {
   /**
-   * @param {!Array<!amp.validator.AttrList>} attrLists
+   * @param {!amp.validator.ValidatorRules} rules
    */
-  constructor(attrLists) {
-    /** @private @type {!Object<string, !Array<!ParsedAttrSpec>>} */
-    this.parsedAttrListsByName_ = {};
-
+  constructor(rules) {
     /** @private  @type {!Object<string, !amp.validator.AttrList>} */
     this.attrListsByName_ = {};
-    for (const attrList of attrLists) {
+    for (const attrList of rules.attrLists) {
       this.attrListsByName_[attrList.name] = attrList;
     }
 
-    /** @private @type {!Array<!ParsedAttrSpec>} */
-    this.parsedAttrSpecs_ = [];
+    /** @private @type {!Object<string, !Array<!ParsedAttrSpec>>} */
+    this.parsedAttrListsByName_ = {};
+
+    /**
+     * The AttrSpec instances, indexed by attr spec ids.
+     * @private @type {!Array<!amp.validator.AttrSpec>}
+     */
+    this.attrSpecs_ = rules.attrs;
+
+    /**
+     * The already instantiated ParsedAttrSpec instances, indexed by
+     * attr spec ids.
+     * @private @type {!Array<!ParsedAttrSpec>}
+     */
+    this.parsedAttrSpecs_ = new Array(rules.attrs.length);
   }
 
   /**
@@ -501,14 +513,12 @@ class ParsedAttrSpecs {
     if (!this.attrListsByName_.hasOwnProperty(name)) {
       return null;
     }
-    /** @type {!Array<!amp.validator.AttrSpec>} */
+    /** @type {!Array<number>} */
     const attrSpecs = this.attrListsByName_[name].attrs;
     /** @type {!Array<!ParsedAttrSpec>} */
     const parsedAttrList = [];
-    for (const attrSpec of attrSpecs) {
-      const parsed = new ParsedAttrSpec(attrSpec, this.parsedAttrSpecs_.length);
-      this.parsedAttrSpecs_.push(parsed);
-      parsedAttrList.push(parsed);
+    for (const attrSpecId of attrSpecs) {
+      parsedAttrList.push(this.getByAttrSpecId(attrSpecId));
     }
     this.parsedAttrListsByName_[name] = parsedAttrList;
     return parsedAttrList;
@@ -548,13 +558,12 @@ class ParsedAttrSpecs {
       }
     }
     // (2) attributes specified within |tagSpec|.
-    for (const spec of tagSpec.attrs) {
-      const name = spec.name;
+    for (const attrSpecId of tagSpec.attrs) {
+      const parsedAttrSpec = this.getByAttrSpecId(attrSpecId);
+      const name = parsedAttrSpec.getSpec().name;
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
-        const parsed = new ParsedAttrSpec(spec, this.parsedAttrSpecs_.length);
-        this.parsedAttrSpecs_.push(parsed);
-        attrs.push(parsed);
+        attrs.push(parsedAttrSpec);
       }
     }
     // (3) attributes specified via reference to an attr_list.
@@ -590,8 +599,13 @@ class ParsedAttrSpecs {
    * @param {number} id
    * @return {!ParsedAttrSpec}
    */
-  getById(id) {
-    return this.parsedAttrSpecs_[id];
+  getByAttrSpecId(id) {
+    if (this.parsedAttrSpecs_.hasOwnProperty(id)) {
+      return this.parsedAttrSpecs_[id];
+    }
+    const parsed = new ParsedAttrSpec(this.attrSpecs_[id], id);
+    this.parsedAttrSpecs_[id] = parsed;
+    return parsed;
   }
 }
 
@@ -650,11 +664,6 @@ class ParsedTagSpec {
      */
     this.requires_ = [];
     /**
-     * @type {ParsedAttrSpec}
-     * @private
-     */
-    this.dispatchKeyAttrSpec_ = null;
-    /**
      * @type {!Array<number>}
      * @private
      */
@@ -678,9 +687,6 @@ class ParsedTagSpec {
       const altNames = parsedAttrSpec.getSpec().alternativeNames;
       for (const altName of altNames) {
         this.attrsByName_[altName] = parsedAttrSpec;
-      }
-      if (parsedAttrSpec.getSpec().dispatchKey) {
-        this.dispatchKeyAttrSpec_ = parsedAttrSpec;
       }
       if (parsedAttrSpec.getSpec().implicit) {
         this.implicitAttrspecs_.push(parsedAttrSpec.getId());
@@ -718,35 +724,6 @@ class ParsedTagSpec {
    */
   containsUrl() {
     return this.containsUrl_;
-  }
-
-  /**
-   * A dispatch key is a mandatory attribute name/value unique to this
-   * TagSpec. If an encountered tag matches this dispatch key, it is
-   * validated first against this TagSpec in order to improve validation
-   * performance and error message selection. Not all TagSpecs have a
-   * dispatch key.
-   * @return {boolean}
-   */
-  hasDispatchKey() {
-    return this.dispatchKeyAttrSpec_ !== null;
-  }
-
-  /**
-   * You must check hasDispatchKey before accessing
-   * @return {string}
-   */
-  getDispatchKey() {
-    goog.asserts.assert(this.hasDispatchKey());
-    const parsedSpec = this.dispatchKeyAttrSpec_;
-    var mandatoryParent =
-        this.spec_.mandatoryParent === null ? '' : this.spec_.mandatoryParent;
-    const attrName = parsedSpec.getSpec().name;
-    const attrValue = parsedSpec.getSpec().value !== null ?
-        parsedSpec.getSpec().value.toLowerCase() :
-        parsedSpec.getSpec().valueCasei;
-    goog.asserts.assert(attrValue !== null);
-    return makeDispatchKey(attrName, attrValue, mandatoryParent);
   }
 
   /**
@@ -1143,7 +1120,7 @@ class ReferencePointMatcher {
       // p.tagSpecName here is actually a number, which was replaced in
       // validator_gen_js.py from the name string, so this works.
       const tagSpecId = /** @type {!number} */ (p.tagSpecName);
-      const parsedSpec = this.parsedValidatorRules_.getTagSpec(tagSpecId);
+      const parsedSpec = this.parsedValidatorRules_.getByTagSpecId(tagSpecId);
       validateTagAgainstSpec(
           this.parsedValidatorRules_, parsedSpec, context, attrs,
           resultForBestAttempt);
@@ -1213,7 +1190,7 @@ class ReferencePointMatcher {
     const tagSpecId = matched[matched.length - 1];
     if (tagSpecId == -1) return false;
 
-    const tagSpec = this.parsedValidatorRules_.getTagSpec(tagSpecId);
+    const tagSpec = this.parsedValidatorRules_.getByTagSpecId(tagSpecId);
     return tagSpec.hasAttrWithName(attrName);
   }
 
@@ -1639,9 +1616,7 @@ class CdataMatcher {
     /** @type {string} */
     var blacklistedCdataRegexStr = '';
     if (tagSpec.cdata !== null) {
-      for (const blacklist of tagSpec.cdata.blacklistedCdataRegex) {
-        blacklistedCdataRegexStr += blacklist + '|';
-      }
+      blacklistedCdataRegexStr = tagSpec.cdata.blacklistedCdataRegex.join('|');
     }
     /**
      * @type {RegExp} blacklistedCdataRegex
@@ -1757,76 +1732,16 @@ class CdataMatcher {
         return;
       }
     } else if (cdataSpec.cssSpec !== null) {
-      /** @type {!Array<!parse_css.ErrorToken>} */
-      const cssErrors = [];
-      /** @type {!Array<!parse_css.Token>} */
-      const tokenList = parse_css.tokenize(
-          cdata,
-          amp.validator.GENERATE_DETAILED_ERRORS ? this.getLineCol().getLine() :
-                                                   undefined,
-          amp.validator.GENERATE_DETAILED_ERRORS ? this.getLineCol().getCol() :
-                                                   undefined,
-          cssErrors);
-      if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
-        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-        return;
-      }
-      /** @type {!CssParsingConfig} */
-      const cssParsingConfig = computeCssParsingConfig(cdataSpec.cssSpec);
-      /** @type {!parse_css.Stylesheet} */
-      const sheet = parse_css.parseAStylesheet(
-          tokenList, cssParsingConfig.atRuleSpec, cssParsingConfig.defaultSpec,
-          cssErrors);
-      if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
-        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-        return;
-      }
-
-      // We extract the urls from the stylesheet. As a side-effect, this can
-      // generate errors for url(…) functions with invalid parameters.
-      /** @type {!Array<!parse_css.ParsedCssUrl>} */
-      const parsedUrls = [];
-      parse_css.extractUrls(sheet, parsedUrls, cssErrors);
-      if (cdataSpec.cssSpec.validateAmp4Ads) {
-        parse_css.validateAmp4AdsCss(sheet, cssErrors);
-      }
-
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        for (const errorToken of cssErrors) {
-          // Override the first parameter with the name of this style tag.
-          let params = errorToken.params;
-          // Override the first parameter with the name of this style tag.
-          params[0] = getTagSpecName(this.tagSpec_);
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR, errorToken.code,
-              new LineCol(errorToken.line, errorToken.col), params,
-              /* url */ '', validationResult);
+      if (amp.validator.VALIDATE_CSS) {
+        const reportAdditionalErrors =
+            this.matchCss_(cdata, cdataSpec.cssSpec, context, validationResult);
+        if (!reportAdditionalErrors ||
+            (!amp.validator.GENERATE_DETAILED_ERRORS &&
+             validationResult.status ==
+                 amp.validator.ValidationResult.Status.FAIL)) {
+          return;
         }
-      } else if (cssErrors.length > 0) {
-        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-        return;
       }
-      const parsedFontUrlSpec =
-          new ParsedUrlSpec(cdataSpec.cssSpec.fontUrlSpec);
-      const parsedImageUrlSpec =
-          new ParsedUrlSpec(cdataSpec.cssSpec.imageUrlSpec);
-      for (const url of parsedUrls) {
-        const adapter = amp.validator.GENERATE_DETAILED_ERRORS ?
-            new UrlErrorInStylesheetAdapter(url.line, url.col) :
-            null;
-        validateUrlAndProtocol(
-            ((url.atRuleScope === 'font-face') ? parsedFontUrlSpec :
-                                                 parsedImageUrlSpec),
-            adapter, context, url.utf8Url, this.tagSpec_, validationResult);
-      }
-      const visitor = new InvalidAtRuleVisitor(
-          this.tagSpec_, cdataSpec.cssSpec, context, validationResult);
-      sheet.accept(visitor);
-
-      // As a hack to not report some errors twice, both via the css parser
-      // and via the regular expressions below, we return early if there
-      // are parser errors and skip the regular expression errors.
-      if (visitor.errorsSeen || cssErrors.length > 0) return;
     }
     // } end oneof
 
@@ -1855,6 +1770,87 @@ class CdataMatcher {
         }
       }
     }
+  }
+
+  /**
+   * Matches the provided cdata against a CSS specification. Helper
+   * routine for match (see above).
+   * @param {string} cdata
+   * @param {!amp.validator.CssSpec} cssSpec
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} validationResult
+   * @return {boolean} True iff the calling method (match) should report
+   *   additional errors. We use this flag as a slight hack to avoid reporting
+   *   errors twice, both via the CSS parser (this method) and via regular
+   *   expressions in the caller (match).
+   * @private
+   */
+  matchCss_(cdata, cssSpec, context, validationResult) {
+    /** @type {!Array<!parse_css.ErrorToken>} */
+    const cssErrors = [];
+    /** @type {!Array<!parse_css.Token>} */
+    const tokenList = parse_css.tokenize(
+        cdata,
+        amp.validator.GENERATE_DETAILED_ERRORS ? this.getLineCol().getLine() :
+                                                 undefined,
+        amp.validator.GENERATE_DETAILED_ERRORS ? this.getLineCol().getCol() :
+                                                 undefined,
+        cssErrors);
+    if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return false;
+    }
+    /** @type {!CssParsingConfig} */
+    const cssParsingConfig = computeCssParsingConfig(cssSpec);
+    /** @type {!parse_css.Stylesheet} */
+    const sheet = parse_css.parseAStylesheet(
+        tokenList, cssParsingConfig.atRuleSpec, cssParsingConfig.defaultSpec,
+        cssErrors);
+    if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return false;
+    }
+
+    // We extract the urls from the stylesheet. As a side-effect, this can
+    // generate errors for url(…) functions with invalid parameters.
+    /** @type {!Array<!parse_css.ParsedCssUrl>} */
+    const parsedUrls = [];
+    parse_css.extractUrls(sheet, parsedUrls, cssErrors);
+    if (cssSpec.validateAmp4Ads) {
+      parse_css.validateAmp4AdsCss(sheet, cssErrors);
+    }
+
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      for (const errorToken of cssErrors) {
+        // Override the first parameter with the name of this style tag.
+        let params = errorToken.params;
+        // Override the first parameter with the name of this style tag.
+        params[0] = getTagSpecName(this.tagSpec_);
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR, errorToken.code,
+            new LineCol(errorToken.line, errorToken.col), params,
+            /* url */ '', validationResult);
+      }
+    } else if (cssErrors.length > 0) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return false;
+    }
+    const parsedFontUrlSpec = new ParsedUrlSpec(cssSpec.fontUrlSpec);
+    const parsedImageUrlSpec = new ParsedUrlSpec(cssSpec.imageUrlSpec);
+    for (const url of parsedUrls) {
+      const adapter = amp.validator.GENERATE_DETAILED_ERRORS ?
+          new UrlErrorInStylesheetAdapter(url.line, url.col) :
+          null;
+      validateUrlAndProtocol(
+          ((url.atRuleScope === 'font-face') ? parsedFontUrlSpec :
+                                               parsedImageUrlSpec),
+          adapter, context, url.utf8Url, this.tagSpec_, validationResult);
+    }
+    const visitor = new InvalidAtRuleVisitor(
+        this.tagSpec_, cssSpec, context, validationResult);
+    sheet.accept(visitor);
+
+    return !visitor.errorsSeen && cssErrors.length === 0;
   }
 
   /** @param {!LineCol} lineCol */
@@ -3413,7 +3409,7 @@ function validateAttributes(
   for (const mandatory of parsedTagSpec.getMandatoryAttrIds()) {
     if (!mandatoryAttrsSeen.hasOwnProperty(mandatory)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        const parsedAttrSpec = parsedAttrSpecs.getById(mandatory);
+        const parsedAttrSpec = parsedAttrSpecs.getByAttrSpecId(mandatory);
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
@@ -3700,13 +3696,15 @@ class ParsedValidatorRules {
    * @param {string} htmlFormat
    */
   constructor(htmlFormat) {
+    /** @private @type {!amp.validator.ValidatorRules} */
+    this.rules_ = amp.validator.createRules();
+
     /**
-     * ParsedTagSpecs in id order, that is, the order in which the tagspecs
-     * appear in ValidatorRules::tags.
+     * ParsedTagSpecs in id order.
      * @type {!Array<!ParsedTagSpec>}
      * @private
      */
-    this.tagSpecById_ = [];
+    this.parsedTagSpecById_ = new Array(this.rules_.tags.length);
     /**
      * ParsedTagSpecs keyed by name
      * @type {!Object<string, !TagSpecDispatch>}
@@ -3720,9 +3718,6 @@ class ParsedValidatorRules {
      */
     this.mandatoryTagSpecs_ = [];
 
-    /** @private @type {!amp.validator.ValidatorRules} */
-    this.rules_ = amp.validator.createRules();
-
     /** @private @type {amp.validator.TagSpec.HtmlFormat<string>} */
     this.htmlFormat_ =
         /** @type {amp.validator.TagSpec.HtmlFormat<string>} */ (htmlFormat);
@@ -3731,7 +3726,7 @@ class ParsedValidatorRules {
      * @type {!ParsedAttrSpecs}
      * @private
      */
-    this.parsedAttrSpecs_ = new ParsedAttrSpecs(this.rules_.attrLists);
+    this.parsedAttrSpecs_ = new ParsedAttrSpecs(this.rules_);
 
     /** @private @type {!Array<boolean>} */
     this.tagSpecIdsToTrack_ = [];
@@ -3856,7 +3851,7 @@ class ParsedValidatorRules {
     for (const tagSpecId of this.mandatoryTagSpecs_) {
       if (!context.getTagspecsValidated().hasOwnProperty(tagSpecId)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          const spec = this.getTagSpec(tagSpecId).getSpec();
+          const spec = this.getByTagSpecId(tagSpecId).getSpec();
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
@@ -3884,7 +3879,7 @@ class ParsedValidatorRules {
         Object.keys(context.getTagspecsValidated()).map(Number);
     goog.array.sort(tagspecsValidated);
     for (const tagSpecId of tagspecsValidated) {
-      const spec = this.getTagSpec(tagSpecId);
+      const spec = this.getByTagSpecId(tagSpecId);
       for (const condition of spec.requires()) {
         if (!context.conditionsSatisfied().hasOwnProperty(condition)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -3905,7 +3900,7 @@ class ParsedValidatorRules {
       for (const tagspecId of spec.getAlsoRequiresTag()) {
         if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            const alsoRequiresTagspec = this.getTagSpec(tagspecId);
+            const alsoRequiresTagspec = this.getByTagSpecId(tagspecId);
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
                 amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
@@ -3926,7 +3921,7 @@ class ParsedValidatorRules {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         for (const tagspecId of spec.getAlsoRequiresTagWarning()) {
           if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
-            const alsoRequiresTagspec = this.getTagSpec(tagspecId);
+            const alsoRequiresTagspec = this.getByTagSpecId(tagspecId);
             context.addError(
                 amp.validator.ValidationError.Severity.WARNING,
                 amp.validator.ValidationError.Code
@@ -3949,7 +3944,7 @@ class ParsedValidatorRules {
           }
         }
         if (!isUsed && exampleOfUsed !== -1) {
-          const exampleTagspec = this.getTagSpec(exampleOfUsed);
+          const exampleTagspec = this.getByTagSpecId(exampleOfUsed);
           context.addError(
               amp.validator.ValidationError.Severity.WARNING,
               amp.validator.ValidationError.Code.WARNING_EXTENSION_UNUSED,
@@ -4021,8 +4016,8 @@ class ParsedValidatorRules {
    * @param {number} id
    * @return {!ParsedTagSpec}
    */
-  getTagSpec(id) {
-    let parsed = this.tagSpecById_[id];
+  getByTagSpecId(id) {
+    let parsed = this.parsedTagSpecById_[id];
     if (parsed !== undefined) {
       return parsed;
     }
@@ -4031,7 +4026,7 @@ class ParsedValidatorRules {
     parsed = new ParsedTagSpec(
         this.parsedAttrSpecs_,
         shouldRecordTagspecValidated(tag, this.tagSpecIdsToTrack_), tag);
-    this.tagSpecById_[id] = parsed;
+    this.parsedTagSpecById_[id] = parsed;
     return parsed;
   }
 
@@ -4061,7 +4056,7 @@ class ParsedValidatorRules {
     // tagSpecName here is actually a number, which was replaced in
     // validator_gen_js.py from the name string, so this works.
     const tagSpecId = /** @type {!number} */ (referencePoint.tagSpecName);
-    const refPointSpec = this.getTagSpec(tagSpecId);
+    const refPointSpec = this.getByTagSpecId(tagSpecId);
     return getTagSpecName(refPointSpec.getSpec());
   }
 }
@@ -4309,7 +4304,7 @@ amp.validator.ValidationHandler =
             // validate using whatever the tagspec requests.
             attrValue.toLowerCase(), this.context_.getTagStack().getParent());
         if (maybeTagSpecId !== -1) {
-          const parsedSpec = this.rules_.getTagSpec(maybeTagSpecId);
+          const parsedSpec = this.rules_.getByTagSpecId(maybeTagSpecId);
           goog.asserts.assert(parsedSpec !== undefined, '1');
           validateTagAgainstSpec(
               this.rules_, parsedSpec, this.context_, encounteredAttrs,
@@ -4342,7 +4337,7 @@ amp.validator.ValidationHandler =
     }
     // Validate against all tagspecs.
     for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
-      const parsedSpec = this.rules_.getTagSpec(tagSpecId);
+      const parsedSpec = this.rules_.getByTagSpecId(tagSpecId);
       validateTagAgainstSpec(
           this.rules_, parsedSpec, this.context_, encounteredAttrs,
           resultForBestAttempt);
