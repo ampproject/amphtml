@@ -16,6 +16,7 @@
 
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
+import {Signals} from '../../../../src/utils/signals';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
   createIframeWithMessageStub,
@@ -42,10 +43,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     adElement.isBuilt = () => {
       return true;
     };
-    signals = {};
-    adElement.signal = name => {
-      signals[name] = Date.now();
-    };
+    signals = new Signals();
+    adElement.signals = () => signals;
     adImpl = new BaseElement(adElement);
     adImpl.getFallback = () => {
       return null;
@@ -93,7 +92,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         });
         return initPromise.then(() => {
           expect(iframe.style.visibility).to.equal('');
-          expect(signals['render-start']).to.be.ok;
+          expect(signals.get('render-start')).to.be.ok;
         }).then(() => {
           iframe.postMessageToParent({
             sentinel: 'amp3ptest' + testIndex,
