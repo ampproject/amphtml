@@ -79,11 +79,11 @@ Some popular providers have pre-configured share endpoints. For details, see the
 
 **data-param-***
 
-All `data-param-*` prefixed attributes are turned into URL parameters and passed to the share endpoint.  
+All `data-param-*` prefixed attributes are turned into URL parameters and passed to the share endpoint.
 
 
 ## Pre-configured Providers
-The `amp-social-share` component provides [some pre-configured providers](0.1/amp-social-share-config.js) that know their sharing endpoints as well as some default parameters. 
+The `amp-social-share` component provides [some pre-configured providers](0.1/amp-social-share-config.js) that know their sharing endpoints as well as some default parameters.
 
 <table>
   <tr>
@@ -159,6 +159,15 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
       </ul>
     </td>
   </tr>
+  <tr>
+    <td><a href="https://developers.google.com/web/updates/2016/10/navigator-share">Web Share API</a> (available in Chrome as an <a href="https://github.com/jpchase/OriginTrials/blob/gh-pages/developer-guide.md">origin trial</a>)</td>
+    <td>
+      <ul>
+        <li><code>text</code>: optional, defaults to: "Current page title"</li>
+        <li><code>data-mode</code>: optional, if set to <code>override</code>, all other share options are removed.</li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
 
@@ -187,7 +196,7 @@ By default, `amp-social-share` includes some popular pre-configured providers. B
 
 ### Custom Styles
 
-Sometimes you want to provide your own style. You can simply override the provided styles like the following: 
+Sometimes you want to provide your own style. You can simply override the provided styles like the following:
 ```css
 amp-social-share[type="twitter"] {
   background: red;
