@@ -72,33 +72,38 @@ For example, the following is possible in AMP.
 ```
 
 ## Element Specific Events
+### amp-carousel
 <table>
   <tr>
-    <th width="30%">Tag</th>
     <th>Event</th>
     <th>Description</th>
     <th>Data</th>
   </tr>
   <tr>
-    <td width="30%">amp-carousel</td>
     <td>goToSlide</td>
     <td>Fired when the user changes the carousel's current slide.</td>
     <td><code>index</code> : slide number</td>
   </tr>
+</table>
+
+### form
+<table>
   <tr>
-    <td width="30%">form</td>
+    <th>Event</th>
+    <th>Description</th>
+    <th>Data</th>
+  </tr>
+  <tr>
     <td>submit</td>
-    <td>Fired when the form is submitted</td>
+    <td>Fired when the form is submitted.</td>
     <td></td>
   </tr>
   <tr>
-    <td width="30%">form</td>
     <td>submit-success</td>
     <td>Fired when the form submission response is success.</td>
     <td><code>response</code> : JSON response</td>
   </tr>
   <tr>
-    <td width="30%">form</td>
     <td>submit-error</td>
     <td>Fired when the form submission response is an error.</td>
     <td><code>response</code> : JSON response</td>
@@ -107,51 +112,97 @@ For example, the following is possible in AMP.
 
 
 ## Element Specific Actions
+### * (all elements)
 <table>
   <tr>
-    <th width="30%">Tag</th>
     <th>Action</th>
     <th>Description</th>
   </tr>
   <tr>
-    <td width="30%">*</td>
     <td>hide</td>
-    <td>Hides the target element</td>
+    <td>Hides the target element.</td>
+  </tr>
+</table>
+
+### amp-image-lightbox
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
   </tr>
   <tr>
-    <td width="30%">amp-sidebar</td>
     <td>open (default)</td>
-    <td>Opens the sidebar</td>
-  </tr>
-  <tr>
-    <td width="30%">amp-sidebar</td>
-    <td>close</td>
-    <td>Closes the sidebar</td>
-  </tr>
-  <tr>
-    <td width="30%">amp-sidebar</td>
-    <td>toggle</td>
-    <td>Toggles the state of the sidebar</td>
-  </tr>
-  <tr>
-    <td width="30%">amp-lightbox</td>
-    <td>open (default)</td>
-    <td>Opens the lightbox</td>
-  </tr>
-  <tr>
-    <td width="30%">amp-lightbox</td>
-    <td>close</td>
-    <td>Closes the lightbox</td>
-  </tr>
-  <tr>
-    <td width="30%">amp-image-lightbox</td>
-    <td>(default)</td>
     <td>Opens the image lightbox with the source image being the one that triggered the action.</td>
   </tr>
+</table>
+
+### amp-lightbox
+<table>
   <tr>
-    <td width="30%">amp-live-list</td>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>open (default)</td>
+    <td>Opens the lightbox.</td>
+  </tr>
+  <tr>
+    <td>close</td>
+    <td>Closes the lightbox.</td>
+  </tr>
+</table>
+
+### amp-live-list
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
     <td>update (default)</td>
     <td>Updates the DOM items to show updated content.</td>
+  </tr>
+</table>
+
+### amp-sidebar
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>open (default)</td>
+    <td>Opens the sidebar.</td>
+  </tr>
+  <tr>
+    <td>close</td>
+    <td>Closes the sidebar.</td>
+  </tr>
+  <tr>
+    <td>toggle</td>
+    <td>Toggles the state of the sidebar.</td>
+  </tr>
+</table>
+
+### amp-state
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>(default)</td>
+    <td>Updates the amp-state's data with the data contained in the event. Requires
+      <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>.
+    </td>
+  </tr>
+</table>
+
+### amp-user-notification
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
   </tr>
   <tr>
     <td width="30%">amp-state</td>
@@ -159,9 +210,8 @@ For example, the following is possible in AMP.
     <td>Updates the amp-state's data with the data contained in the event. Requires <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>.</td>
   </tr>
   <tr>
-    <td width="30%">amp-user-notification</td>
     <td>dismiss (default)</td>
-    <td>Hides the referenced user notification element</td>
+    <td>Hides the referenced user notification element.</td>
   </tr>
   <tr>
     <td width="30%">amp-carousel[type="slides"]</td>
@@ -170,6 +220,29 @@ For example, the following is possible in AMP.
   </tr>
 </table>
 
+### amp-video, amp-youtube
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>play</td>
+    <td>Plays the video.</td>
+  </tr>
+  <tr>
+    <td>pause</td>
+    <td>Pauses the video.</td>
+  </tr>
+  <tr>
+    <td>mute</td>
+    <td>Mutes the video.</td>
+  </tr>
+  <tr>
+    <td>unmute</td>
+    <td>Unmutes the video.</td>
+  </tr>
+</table>
 
 ## `AMP` target
 
@@ -178,7 +251,7 @@ actions that apply to the whole document.
 
 <table>
   <tr>
-    <th width="30%">Action</th>
+    <th>Action</th>
     <th>Description</th>
   </tr>
   <tr>

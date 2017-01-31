@@ -59,6 +59,9 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?string}  */
     this.videoid_ = null;
 
+    /** @private {?boolean}  */
+    this.muted_ = false;
+
     /** @private {?Element} */
     this.iframe_ = null;
 
@@ -114,6 +117,10 @@ class AmpYoutube extends AMP.BaseElement {
         'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
 
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     // TODO(#3216): amp-youtube has a special case where 404s are not easily caught
     // hence the following hacky-solution.
     // Please don't follow this behavior in other extensions, instead
@@ -122,7 +129,8 @@ class AmpYoutube extends AMP.BaseElement {
       this.buildImagePlaceholder_();
     }
 
-    installVideoManagerForDoc(this.getAmpDoc());
+    installVideoManagerForDoc(this.element);
+    videoManagerForDoc(this.element).register(this);
   }
 
   /** @return {string} */
@@ -181,14 +189,11 @@ class AmpYoutube extends AMP.BaseElement {
     this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
 
-    const ampdoc = this.getAmpDoc();
-    ampdoc.win.addEventListener(
+
+
+    this.win.addEventListener(
         'message', event => this.handleYoutubeMessages_(event));
-    videoManagerForDoc(ampdoc).register(this);
 
     return this.loadPromise(iframe)
         .then(() => this.listenToFrame_())
@@ -244,6 +249,13 @@ class AmpYoutube extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
         this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      }
+    } else if (data.event == 'infoDelivery' &&
+        data.info && data.info.muted !== undefined) {
+      if (this.muted_ != data.info.muted) {
+        this.muted_ = data.info.muted;
+        const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
+        this.element.dispatchCustomEvent(evt);
       }
     }
   }

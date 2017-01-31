@@ -1737,6 +1737,17 @@ describe('createViewport', () => {
           .be.instanceof(ViewportBindingNaturalIosEmbed_);
     });
 
+    it('should bind to "iOS embed" when iframed but in test mode', () => {
+      win.parent = {};
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      getMode(win).test = true;
+      const viewer = installViewerServiceForDoc(ampDoc);
+      sandbox.stub(viewer, 'isEmbedded', () => false);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingNaturalIosEmbed_);
+    });
+
     it('should NOT bind to "iOS embed" when in dev mode, but iframed', () => {
       win.parent = {};
       const ampDoc = installDocService(win, true).getAmpDoc();
