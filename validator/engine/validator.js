@@ -466,25 +466,36 @@ class ParsedReferencePoints {
  * sharing those definitions. This abstraction instantiates
  * ParsedAttrSpec for each AttrSpec (from validator-*.protoascii, our
  * specification file) exactly once. To accomplish that, it keeps
- * around the attr lists with ParsedAttrSpec instances.
+ * around the attr lists with ParsedAttrSpec instances, and all
+ * ParsedAttrSpec instances indexed by their id.
  * @private
  */
 class ParsedAttrSpecs {
   /**
-   * @param {!Array<!amp.validator.AttrList>} attrLists
+   * @param {!amp.validator.ValidatorRules} rules
    */
-  constructor(attrLists) {
-    /** @private @type {!Object<string, !Array<!ParsedAttrSpec>>} */
-    this.parsedAttrListsByName_ = {};
-
+  constructor(rules) {
     /** @private  @type {!Object<string, !amp.validator.AttrList>} */
     this.attrListsByName_ = {};
-    for (const attrList of attrLists) {
+    for (const attrList of rules.attrLists) {
       this.attrListsByName_[attrList.name] = attrList;
     }
 
-    /** @private @type {!Array<!ParsedAttrSpec>} */
-    this.parsedAttrSpecs_ = [];
+    /** @private @type {!Object<string, !Array<!ParsedAttrSpec>>} */
+    this.parsedAttrListsByName_ = {};
+
+    /**
+     * The AttrSpec instances, indexed by attr spec ids.
+     * @private @type {!Array<!amp.validator.AttrSpec>}
+     */
+    this.attrSpecs_ = rules.attrs;
+
+    /**
+     * The already instantiated ParsedAttrSpec instances, indexed by
+     * attr spec ids.
+     * @private @type {!Array<!ParsedAttrSpec>}
+     */
+    this.parsedAttrSpecs_ = new Array(rules.attrs.length);
   }
 
   /**
@@ -501,14 +512,12 @@ class ParsedAttrSpecs {
     if (!this.attrListsByName_.hasOwnProperty(name)) {
       return null;
     }
-    /** @type {!Array<!amp.validator.AttrSpec>} */
+    /** @type {!Array<number>} */
     const attrSpecs = this.attrListsByName_[name].attrs;
     /** @type {!Array<!ParsedAttrSpec>} */
     const parsedAttrList = [];
-    for (const attrSpec of attrSpecs) {
-      const parsed = new ParsedAttrSpec(attrSpec, this.parsedAttrSpecs_.length);
-      this.parsedAttrSpecs_.push(parsed);
-      parsedAttrList.push(parsed);
+    for (const attrSpecId of attrSpecs) {
+      parsedAttrList.push(this.getByAttrSpecId(attrSpecId));
     }
     this.parsedAttrListsByName_[name] = parsedAttrList;
     return parsedAttrList;
@@ -548,13 +557,12 @@ class ParsedAttrSpecs {
       }
     }
     // (2) attributes specified within |tagSpec|.
-    for (const spec of tagSpec.attrs) {
-      const name = spec.name;
+    for (const attrSpecId of tagSpec.attrs) {
+      const parsedAttrSpec = this.getByAttrSpecId(attrSpecId);
+      const name = parsedAttrSpec.getSpec().name;
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
-        const parsed = new ParsedAttrSpec(spec, this.parsedAttrSpecs_.length);
-        this.parsedAttrSpecs_.push(parsed);
-        attrs.push(parsed);
+        attrs.push(parsedAttrSpec);
       }
     }
     // (3) attributes specified via reference to an attr_list.
@@ -590,8 +598,13 @@ class ParsedAttrSpecs {
    * @param {number} id
    * @return {!ParsedAttrSpec}
    */
-  getById(id) {
-    return this.parsedAttrSpecs_[id];
+  getByAttrSpecId(id) {
+    if (this.parsedAttrSpecs_.hasOwnProperty(id)) {
+      return this.parsedAttrSpecs_[id];
+    }
+    const parsed = new ParsedAttrSpec(this.attrSpecs_[id], id);
+    this.parsedAttrSpecs_[id] = parsed;
+    return parsed;
   }
 }
 
@@ -1106,7 +1119,7 @@ class ReferencePointMatcher {
       // p.tagSpecName here is actually a number, which was replaced in
       // validator_gen_js.py from the name string, so this works.
       const tagSpecId = /** @type {!number} */ (p.tagSpecName);
-      const parsedSpec = this.parsedValidatorRules_.getTagSpec(tagSpecId);
+      const parsedSpec = this.parsedValidatorRules_.getByTagSpecId(tagSpecId);
       validateTagAgainstSpec(
           this.parsedValidatorRules_, parsedSpec, context, attrs,
           resultForBestAttempt);
@@ -1176,7 +1189,7 @@ class ReferencePointMatcher {
     const tagSpecId = matched[matched.length - 1];
     if (tagSpecId == -1) return false;
 
-    const tagSpec = this.parsedValidatorRules_.getTagSpec(tagSpecId);
+    const tagSpec = this.parsedValidatorRules_.getByTagSpecId(tagSpecId);
     return tagSpec.hasAttrWithName(attrName);
   }
 
@@ -3376,7 +3389,7 @@ function validateAttributes(
   for (const mandatory of parsedTagSpec.getMandatoryAttrIds()) {
     if (!mandatoryAttrsSeen.hasOwnProperty(mandatory)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        const parsedAttrSpec = parsedAttrSpecs.getById(mandatory);
+        const parsedAttrSpec = parsedAttrSpecs.getByAttrSpecId(mandatory);
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
@@ -3663,13 +3676,15 @@ class ParsedValidatorRules {
    * @param {string} htmlFormat
    */
   constructor(htmlFormat) {
+    /** @private @type {!amp.validator.ValidatorRules} */
+    this.rules_ = amp.validator.createRules();
+
     /**
-     * ParsedTagSpecs in id order, that is, the order in which the tagspecs
-     * appear in ValidatorRules::tags.
+     * ParsedTagSpecs in id order.
      * @type {!Array<!ParsedTagSpec>}
      * @private
      */
-    this.tagSpecById_ = [];
+    this.parsedTagSpecById_ = new Array(this.rules_.tags.length);
     /**
      * ParsedTagSpecs keyed by name
      * @type {!Object<string, !TagSpecDispatch>}
@@ -3683,9 +3698,6 @@ class ParsedValidatorRules {
      */
     this.mandatoryTagSpecs_ = [];
 
-    /** @private @type {!amp.validator.ValidatorRules} */
-    this.rules_ = amp.validator.createRules();
-
     /** @private @type {amp.validator.TagSpec.HtmlFormat<string>} */
     this.htmlFormat_ =
         /** @type {amp.validator.TagSpec.HtmlFormat<string>} */ (htmlFormat);
@@ -3694,7 +3706,7 @@ class ParsedValidatorRules {
      * @type {!ParsedAttrSpecs}
      * @private
      */
-    this.parsedAttrSpecs_ = new ParsedAttrSpecs(this.rules_.attrLists);
+    this.parsedAttrSpecs_ = new ParsedAttrSpecs(this.rules_);
 
     /** @private @type {!Array<boolean>} */
     this.tagSpecIdsToTrack_ = [];
@@ -3819,7 +3831,7 @@ class ParsedValidatorRules {
     for (const tagSpecId of this.mandatoryTagSpecs_) {
       if (!context.getTagspecsValidated().hasOwnProperty(tagSpecId)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          const spec = this.getTagSpec(tagSpecId).getSpec();
+          const spec = this.getByTagSpecId(tagSpecId).getSpec();
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
@@ -3847,7 +3859,7 @@ class ParsedValidatorRules {
         Object.keys(context.getTagspecsValidated()).map(Number);
     goog.array.sort(tagspecsValidated);
     for (const tagSpecId of tagspecsValidated) {
-      const spec = this.getTagSpec(tagSpecId);
+      const spec = this.getByTagSpecId(tagSpecId);
       for (const condition of spec.requires()) {
         if (!context.conditionsSatisfied().hasOwnProperty(condition)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -3868,7 +3880,7 @@ class ParsedValidatorRules {
       for (const tagspecId of spec.getAlsoRequiresTag()) {
         if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            const alsoRequiresTagspec = this.getTagSpec(tagspecId);
+            const alsoRequiresTagspec = this.getByTagSpecId(tagspecId);
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
                 amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
@@ -3889,7 +3901,7 @@ class ParsedValidatorRules {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         for (const tagspecId of spec.getAlsoRequiresTagWarning()) {
           if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
-            const alsoRequiresTagspec = this.getTagSpec(tagspecId);
+            const alsoRequiresTagspec = this.getByTagSpecId(tagspecId);
             context.addError(
                 amp.validator.ValidationError.Severity.WARNING,
                 amp.validator.ValidationError.Code
@@ -3912,7 +3924,7 @@ class ParsedValidatorRules {
           }
         }
         if (!isUsed && exampleOfUsed !== -1) {
-          const exampleTagspec = this.getTagSpec(exampleOfUsed);
+          const exampleTagspec = this.getByTagSpecId(exampleOfUsed);
           context.addError(
               amp.validator.ValidationError.Severity.WARNING,
               amp.validator.ValidationError.Code.WARNING_EXTENSION_UNUSED,
@@ -3984,8 +3996,8 @@ class ParsedValidatorRules {
    * @param {number} id
    * @return {!ParsedTagSpec}
    */
-  getTagSpec(id) {
-    let parsed = this.tagSpecById_[id];
+  getByTagSpecId(id) {
+    let parsed = this.parsedTagSpecById_[id];
     if (parsed !== undefined) {
       return parsed;
     }
@@ -3994,7 +4006,7 @@ class ParsedValidatorRules {
     parsed = new ParsedTagSpec(
         this.parsedAttrSpecs_,
         shouldRecordTagspecValidated(tag, this.tagSpecIdsToTrack_), tag);
-    this.tagSpecById_[id] = parsed;
+    this.parsedTagSpecById_[id] = parsed;
     return parsed;
   }
 
@@ -4024,7 +4036,7 @@ class ParsedValidatorRules {
     // tagSpecName here is actually a number, which was replaced in
     // validator_gen_js.py from the name string, so this works.
     const tagSpecId = /** @type {!number} */ (referencePoint.tagSpecName);
-    const refPointSpec = this.getTagSpec(tagSpecId);
+    const refPointSpec = this.getByTagSpecId(tagSpecId);
     return getTagSpecName(refPointSpec.getSpec());
   }
 }
@@ -4272,7 +4284,7 @@ amp.validator.ValidationHandler =
             // validate using whatever the tagspec requests.
             attrValue.toLowerCase(), this.context_.getTagStack().getParent());
         if (maybeTagSpecId !== -1) {
-          const parsedSpec = this.rules_.getTagSpec(maybeTagSpecId);
+          const parsedSpec = this.rules_.getByTagSpecId(maybeTagSpecId);
           goog.asserts.assert(parsedSpec !== undefined, '1');
           validateTagAgainstSpec(
               this.rules_, parsedSpec, this.context_, encounteredAttrs,
@@ -4305,7 +4317,7 @@ amp.validator.ValidationHandler =
     }
     // Validate against all tagspecs.
     for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
-      const parsedSpec = this.rules_.getTagSpec(tagSpecId);
+      const parsedSpec = this.rules_.getByTagSpecId(tagSpecId);
       validateTagAgainstSpec(
           this.rules_, parsedSpec, this.context_, encounteredAttrs,
           resultForBestAttempt);
