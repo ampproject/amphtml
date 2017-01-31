@@ -31,7 +31,8 @@ describe('SlideScroll', () => {
     sandbox.restore();
   });
 
-  function getAmpSlideScroll(opt_hasLooping, opt_slideCount = 5) {
+  function getAmpSlideScroll(
+      opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true) {
     return createIframePromise().then(iframe => {
       toggleExperiment(iframe.win, 'amp-slidescroll', true);
       iframe.width = '1000';
@@ -62,12 +63,13 @@ describe('SlideScroll', () => {
         }
         ampSlideScroll.appendChild(img);
       }
-      return iframe.addElement(ampSlideScroll).then(() => {
-        return Promise.resolve({
-          iframe,
-          ampSlideScroll,
-        });
-      });
+
+      const returnPromise = Promise.resolve({iframe, ampSlideScroll});
+      if (opt_attachToDom) {
+        return iframe.addElement(ampSlideScroll).then(() => returnPromise);
+      } else {
+        return returnPromise;
+      }
     });
   }
 
@@ -990,6 +992,33 @@ describe('SlideScroll', () => {
         args = {'index': '0'};
         impl.executeAction({method: 'goToSlide', args});
         expect(showSlideSpy).to.have.been.calledWith(0);
+      });
+    });
+
+    it('should NOT call showSlide_ before layout', () => {
+      const promise = getAmpSlideScroll(true, 5, /* opt_attachToDom */ false);
+      return promise.then(obj => {
+        const {iframe, ampSlideScroll} = obj;
+
+        // Layout happens asynchronously after attaching to DOM, so we can
+        // test pre-layoutCallback logic now.
+        iframe.addElement(ampSlideScroll);
+
+        const impl = ampSlideScroll.implementation_;
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+
+        const args = {'index': '123'};
+        impl.executeAction({method: 'goToSlide', args});
+        expect(showSlideSpy.called).to.be.false;
+
+        impl.mutatedAttributesCallback({slide: 321});
+        expect(showSlideSpy.called).to.be.false;
+
+        ampSlideScroll.layoutCallback();
+
+        // Should show the last slide index requested before layout.
+        expect(showSlideSpy).to.have.been.calledWith(321);
+        expect(showSlideSpy.callCount).to.equal(1);
       });
     });
   });
