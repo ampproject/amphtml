@@ -205,7 +205,8 @@ export class AmpForm {
     if (this.dependenciesPromise_) {
       return this.dependenciesPromise_;
     }
-    const depElements = this.form_.querySelectorAll(EXTERNAL_DEPS.join(','));
+    const depElements = this.form_./*OK*/querySelectorAll(
+        EXTERNAL_DEPS.join(','));
     // Wait for an element to be built to make sure it is ready.
     const depPromises = toArray(depElements).map(el => el.whenBuilt());
     return this.dependenciesPromise_ = Promise.race(
