@@ -479,11 +479,9 @@ describe('CustomElement', () => {
   it('should anticipate build errors', () => {
     const element = new ElementClass();
     element.tryUpgrade_();
-
     sandbox.stub(element.implementation_, 'buildCallback', () => {
       throw new Error('intentional');
     });
-
     expect(() => {
       element.build();
     }).to.throw(/intentional/);
