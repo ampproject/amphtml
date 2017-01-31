@@ -18,7 +18,6 @@ import {
   GoogleAdLifecycleReporter,
   BaseLifecycleReporter,
 } from '../performance';
-import {childElements} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {viewerForDoc} from '../../../../src/viewer';
 import * as sinon from 'sinon';
@@ -43,7 +42,7 @@ function expectMatchesAll(address, matchList) {
  * @param {!Array<!RegExp>} matchList
  */
 function expectHasSiblingImgMatchingAll(element, matchList) {
-  const imgSiblings = scopedQuerySelectorAll(element.parentElement, 'img');
+  const imgSiblings = element.parentElement.querySelectorAll('img');
   expect(imgSiblings).to.not.be.empty;
   const result = imgSiblings.some(e => {
     const src = e.getAttribute('src');

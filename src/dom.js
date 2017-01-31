@@ -456,9 +456,9 @@ export function scopedQuerySelectorAll(root, selector) {
   // Only IE.
   const unique = `i-amphtml-scoped-${Date.now()}`;
   root.classList.add(unique);
-  const elements = toArray(root./*OK*/querySelectorAll(`.${unique} ${selector}`));
+  const elements = root./*OK*/querySelectorAll(`.${unique} ${selector}`);
   root.classList.remove(unique);
-  return elements;
+  return toArray(elements);
 }
 
 

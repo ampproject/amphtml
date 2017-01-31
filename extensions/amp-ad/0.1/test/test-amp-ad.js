@@ -18,7 +18,6 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {childElement} from '../../../../src/dom';
 import {extensionsFor} from '../../../../src/extensions';
 import {stubService} from '../../../../testing/test-helper';
 import * as sinon from 'sinon';

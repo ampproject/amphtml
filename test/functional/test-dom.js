@@ -437,9 +437,10 @@ describe('DOM', () => {
         [element1, element2]);
   }
 
-  it('scopedQuerySelectorAll should find first match', testScopedQuerySelectorAll);
+  it('scopedQuerySelectorAll should find all matches',
+      testScopedQuerySelectorAll);
 
-  it('scopedQuerySelectorAll should find first match (polyfill)', () => {
+  it('scopedQuerySelectorAll should find all matches (polyfill)', () => {
     dom.setScopeSelectorSupportedForTesting(false);
     testScopedQuerySelectorAll();
   });

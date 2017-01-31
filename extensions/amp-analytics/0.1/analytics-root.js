@@ -17,7 +17,7 @@
 import {
   closestBySelector,
   matches,
-  scopedQuerySelector
+  scopedQuerySelector,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {map} from '../../../src/utils/object';

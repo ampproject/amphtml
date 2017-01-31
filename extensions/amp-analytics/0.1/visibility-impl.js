@@ -17,7 +17,7 @@
 import {
   closestByTag,
   closestBySelector,
-  scopedQuerySelector
+  scopedQuerySelector,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {resourcesForDoc} from '../../../src/resources';
