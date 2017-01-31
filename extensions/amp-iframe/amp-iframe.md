@@ -208,3 +208,13 @@ Iframes are identified as tracking/analytics iframes if they appear to serve no 
 ## Validation
 
 See [amp-iframe rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/0.1/validator-amp-iframe.protoascii) in the AMP validator specification.
+
+## Guideline: prefer existing AMP components to `amp-iframe`
+
+`amp-iframe` should be considered a fallback if the required user experience is not possible by other means in AMP. This is because there are many benefits to using a component tailored for a specific use-case instead, such as
+
+- Better resource management and performance
+- Increased loading priority (`amp-iframe` loads last, because AMP doesn't know what's inside of it)
+- Custom components can provide built-in placeholder images in some cases. This means getting, say, the right video thumbnail before a video loads, and reduces the coding effort to add a placeholder manually.
+- Built-in resize requests. This means that iframe content with unpredictable size can more often appear to the user as if it were native to the page, rather than in a scrollable frame
+- Other additional features  can be built in (for instance, auto-play for video players)
