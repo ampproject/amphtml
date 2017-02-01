@@ -927,7 +927,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   }
   // The :not is an extra prevention of recursion because it will be
   // added to script tags that go into the code path below.
-  const scriptInHead = win.document.head.querySelector(
+  const scriptInHead = win.document.head./*OK*/querySelector(
           `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
   dev().assert(scriptInHead, 'Expected to find script for extension: %s',
       fnOrStruct.n);
