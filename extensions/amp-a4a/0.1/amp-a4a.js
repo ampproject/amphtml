@@ -42,7 +42,7 @@ import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/platform';
-import {PublicKeyInfoDef, cryptoFor} from '../../../src/crypto';
+import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
@@ -123,7 +123,7 @@ let CreativeMetaDataDef;
  * (promises to) keys, in the order given by the return value from the
  * signing service.
  *
- * @typedef {{serviceName: string, keys: !Array<!Promise<?PublicKeyInfoDef>>}}
+ * @typedef {{serviceName: string, keys: !Array<!Promise<!../../../src/crypto.PublicKeyInfoDef>>}}
  */
 let CryptoKeysDef;
 
@@ -630,7 +630,7 @@ export class AmpA4A extends AMP.BaseElement {
     // signature, then the creative is valid AMP.
     /** @type {!AllServicesCryptoKeysDef} */
     const keyInfoSetPromises = this.win.ampA4aValidationKeys;
-    // Track if verification found as it will ensure that promises yet to
+    // Track if verification found, as it will ensure that promises yet to
     // resolve will "cancel" as soon as possible saving unnecessary resource
     // allocation.
     let verified = false;
@@ -698,7 +698,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(returnedArray => returnedArray[0], () => {
           // Rejection occurs if all keys for this provider fail to validate.
           return Promise.reject(
-              `All keys ${keyInfoSet.serviceName} failed to verify`);
+              `All keys for ${keyInfoSet.serviceName} failed to verify`);
         });
       });
     }))
@@ -708,7 +708,7 @@ export class AmpA4A extends AMP.BaseElement {
     }, () => {
       // rejection occurs if all providers fail to verify.
       this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
-      return null;
+      return Promise.reject('No validation service could verify this key');
     });
   }
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as lib from '../../third_party/closure-library/sha384-generated';
 import {PublicKeyInfoDef} from '../crypto';
 import {fromClass} from '../service';
 import {dev} from '../log';

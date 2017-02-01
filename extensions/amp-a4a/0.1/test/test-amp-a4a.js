@@ -1191,7 +1191,7 @@ describe('amp-a4a', () => {
         });
       });
 
-      it('properly handles multiple providers that all fail', () => {
+      it('properly handles later provider success', () => {
         // Single provider with first key fails but second key passes validation
         a4a.win.ampA4aValidationKeys = (() => {
           const providers = [];
