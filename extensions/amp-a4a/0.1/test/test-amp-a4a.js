@@ -379,6 +379,15 @@ describe('amp-a4a', () => {
           expect(xhrMock).to.be.calledOnce;
         });
       });
+
+      it('should be able to create AmpContext', () => {
+        return a4a.layoutCallback().then(() => {
+          const window_ = a4aElement.childNodes[0].contentWindow;
+          const ac = new AmpContext(window_);
+          expect(ac).to.be.ok;
+          expect(ac.sentinel).to.be.ok;
+        });
+      });
     });
 
     describe('#renderViaNameFrame', () => {
