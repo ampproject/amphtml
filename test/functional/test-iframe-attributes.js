@@ -26,7 +26,7 @@ import {validateData} from '../../3p/3p';
 import {viewerForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
 
-describe('iframe-attributes', () => {
+describe('3p-frame', () => {
 
   let clock;
   let sandbox;
@@ -55,7 +55,7 @@ describe('iframe-attributes', () => {
   });
 
   sentinelNames.forEach(sentinelName => {
-    it('should generate correctly for 3p-frames', () => {
+    it('should create an iframe', () => {
       window.AMP_MODE = {
         localDev: true,
         development: false,
