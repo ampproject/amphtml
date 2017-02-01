@@ -18,7 +18,7 @@ limitations under the License.
 
 ## Overview
 
-Some components such as [`amp-pixel`](../builtins/amp-pixel.md),
+Some components such as [`amp-pixel`](../builtins/amp-pixel.md), 
 [`amp-list`](../extensions/amp-list/amp-list.md) and [`amp-analytics`](../extensions/amp-analytics/amp-analytics.md) allow variables to be substituted in the relevant URLs. AMP provides a number of standard variable substitutions and allows each component to add their own. The rest of this document talks about the variables supported by the platform.
 
 Anchor href's that are the target (or have a child who is the target) of a click
@@ -29,7 +29,7 @@ will still update to the most current values of the variables.  Note that some
 variables will not allow for expansion for A4A creatives.  Specifics will be
 addressed at a later time.
 
-## Variables
+## Variables 
 
 The tables below list the available URL variables grouped by type of usage. Further down in this document, are [descriptions](#variable-descriptions) of each of the variables, along with example usages.
 
@@ -61,7 +61,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Title](#title)                     | `TITLE`           | `${title}` |
 | [Viewer](#viewer)                   | `VIEWER`          | `${viewer}` |
 
-### Performance
+### Performance 
 
 | Variable Name  | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
@@ -126,7 +126,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Total Time](#total-time) | N/A | `${totalTime}` |
 | [Total Visible Time](#total-visible-time) | N/A | `${totalVisibleTime}` |
 
-### Miscellaneous
+### Miscellaneous 
 
 |  Variable Name | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
@@ -204,7 +204,7 @@ Provides the screen height in pixels available for the page rendering. This valu
   ```
 * **amp-analytics variable**: `${availableScreenHeight}`
   * Example value: `1480`
-
+  
 #### Available Screen Width
 
 Provides the screen width in pixels available for the page rendering. This value can be slightly more or less than the actual viewport height due to various browser quirks.
@@ -366,7 +366,7 @@ Provides the time the page takes to fire the `DOMContentLoaded` event from the t
 * **amp-analytics variable**: `${contentLoadTime}`
   * Example value: `40`
 
-#### Counter
+#### Counter 
 
 Use `COUNTER(name)` to generate an index for the given request. Counts start at 1 and are per given `name`.
 
@@ -569,20 +569,6 @@ Provides the type of the last non-redirect navigation in the current browsing co
 * **amp-analytics variable**: `${navType}`
   * Example value: `1`
 
-
-#### Time since created
-
-Provides the time elapsed since the creation of this document or embed.
-
-* **platform variable**: `TIME_SINCE_CREATED`
-  *  Example: <br>
-  ```html
-  <amp-pixel src="https://foo.com/pixel?timeSinceCreated=TIME_SINCE_CREATED"></amp-pixel>
-  ```
-* **amp-analytics variable**: `${timeSinceCreated}`
-  * Example value: `100`
-
-
 #### Page Download Time
 
 Provides the time between receiving the first and the last byte of response. The value is in milliseconds.
@@ -696,7 +682,7 @@ Provides the screen height in pixels. The value is retrieved from `window.screen
   ```
 * **amp-analytics variable**: `${screenHeight}`
   * Example value: `1600`
-
+  
 #### Screen Width
 
 Provides the screen height in pixels. The value is retrieved from `window.screen.width`.
@@ -744,7 +730,7 @@ Provides the number of pixels that the user has scrolled from top.
   ```
 * **amp-analytics variable**: `${scrollTop}`
   * Example value: `0`
-
+  
 #### Scroll Width
 
 Provides the total width of the page in pixels.
@@ -923,7 +909,7 @@ Provides the viewport height in pixels available for the page rendering. In cont
   <amp-pixel src="https://foo.com/pixel?viewportHeight=VIEWPORT_HEIGHT"></amp-pixel>
   ```
 * **amp-analytics variable**: `${viewportHeight}`
-  * Example value: `1600`
+  * Example value: `1600` 
 
 #### Viewport Width
 
@@ -935,4 +921,4 @@ Provides the viewport width in pixels available for the page rendering. In contr
   <amp-pixel src="https://foo.com/pixel?viewportHeight=VIEWPORT_HEIGHT"></amp-pixel>
   ```
 * **amp-analytics variable**: `${viewportWidth}`
-  * Example value: `2560`
+  * Example value: `2560` 
