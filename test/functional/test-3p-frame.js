@@ -94,6 +94,7 @@ describe('3p-frame', () => {
   });
 
   sentinelNames.forEach(sentinelName => {
+    // TODO(bradfrizzell) break this out into a test-iframe-attributes
     it('should create an iframe', () => {
       window.AMP_MODE = {
         localDev: true,
