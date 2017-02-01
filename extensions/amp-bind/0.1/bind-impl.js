@@ -17,12 +17,12 @@
 import {BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {resourcesForDoc} from '../../../src/resources';
-import {user} from '../../../src/log';
 
 const TAG = 'amp-bind';
 
@@ -166,8 +166,7 @@ export class Bind {
     /** @type {!Array<./bind-evaluator.BindingDef>} */
     const bindings = [];
 
-    // TODO(choumx): Use TreeWalker if this is too slow.
-    const elements = body.getElementsByTagName('*');
+    const elements = this.elementsInNode_(body);
     const numElements = elements.length;
 
     // Helper function for scanning a slice of elements.
@@ -259,6 +258,24 @@ export class Bind {
       }
     }
     return null;
+  }
+
+  /**
+   * Returns all descendant elements in a given node.
+   * @param {!Node} node
+   * @return {!Array<Element>}
+   * @private
+   */
+  elementsInNode_(node) {
+    const doc = dev().assert(node.ownerDocument, 'ownerDocument is null.');
+    const treeWalker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
+
+    const elements = [];
+    let currentElement;
+    while (currentElement = treeWalker.nextNode()) {
+      elements.push(currentElement);
+    }
+    return elements;
   }
 
   /**
