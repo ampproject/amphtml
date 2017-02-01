@@ -22,6 +22,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
+import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
 
 const TAG = 'amp-bind';
@@ -138,9 +139,18 @@ export class Bind {
     this.scanPromise_ = this.scanBody_(this.ampdoc.getBody());
     this.scanPromise_.then(results => {
       const {boundElements, bindings} = results;
-
       this.boundElements_ = boundElements;
-      this.evaluator_ = new BindEvaluator(bindings);
+      this.evaluator_ = new BindEvaluator();
+      const parseErrors = this.evaluator_.setBindings(bindings);
+
+      // For each parse error, find elements that the malformed expressions
+      // belong to and report them.
+      Object.keys(parseErrors).forEach(expressionString => {
+        const element = this.elementBoundToExpressionString_(expressionString);
+        if (element) {
+          reportError(parseErrors[expressionString], element);
+        }
+      });
 
       // Trigger verify-only digest in development.
       if (getMode().development || this.digestQueuedAfterScan_) {
@@ -159,7 +169,7 @@ export class Bind {
    * @return {
    *   !Promise<{
    *     boundElements: !Array<BoundElementDef>,
-   *     bindings: !Array<./bind-evaluator.BindingDef>
+   *     bindings: !Array<./bind-evaluator.BindingDef>,
    *   }>
    * }
    * @private
@@ -256,8 +266,25 @@ export class Bind {
       if (this.validator_.canBind(element.tagName, property)) {
         return {property, expressionString: attribute.value};
       } else {
-        user().error(TAG,
-            `<${element.tagName} [${property}]> binding is not allowed.`);
+        const err = user().createError(`Binding to [${property}] not allowed.`);
+        reportError(err, element);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Returns the first element with a property bound to given expression string.
+   * If no such element exists, returns null.
+   * @param {string} string
+   * @return {Element>}
+   */
+  elementBoundToExpressionString_(string) {
+    for (let i = 0; i < this.boundElements_.length; i++) {
+      const {element, boundProperties} = this.boundElements_[i];
+      const find = boundProperties.find(bp => (bp.expressionString === string));
+      if (find !== undefined) {
+        return element;
       }
     }
     return null;
@@ -437,7 +464,7 @@ export class Bind {
     switch (property) {
       case 'text':
         initialValue = element.textContent;
-        expectedValue = Object.prototype.toString.call(expectedValue);
+        expectedValue = String(expectedValue);
         match = (initialValue.trim() === expectedValue.trim());
         break;
 
@@ -478,10 +505,11 @@ export class Bind {
     }
 
     if (!match) {
-      user().error(TAG,
-        `<${element.tagName}> element [${property}] binding ` +
-        `default value (${initialValue}) does not match first expression ` +
-        `result (${expectedValue}).`);
+      const err = user().createError(
+        `Default value for [${property}] does not match first expression ` +
+        `result (${expectedValue}). This can result in unexpected behavior ` +
+        `after the next state change.`);
+      reportError(err, element);
     }
   }
 

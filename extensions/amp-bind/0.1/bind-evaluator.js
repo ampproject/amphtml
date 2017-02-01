@@ -43,26 +43,34 @@ let ParsedBindingDef;
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
-  /**
-   * @param {!Array<BindingDef>} bindings
-   */
-  constructor(bindings) {
+  constructor() {
     /** @const {!Array<ParsedBindingDef>} */
     this.parsedBindings_ = [];
 
     /** @const {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
+  }
+
+  /**
+   * Parses and stores given bindings into expression objects and returns map
+   * of expression string to parse errors.
+   * @param {!Array<BindingDef>} bindings
+   * @return {Object<string,Error>}
+   */
+  setBindings(bindings) {
+    const errors = Object.create(null);
 
     // Create BindExpression objects from expression strings.
     // TODO(choumx): Chunk creation of BindExpression or change to web worker.
     for (let i = 0; i < bindings.length; i++) {
       const e = bindings[i];
+      const string = e.expressionString;
 
       let expression;
       try {
         expression = new BindExpression(e.expressionString);
       } catch (error) {
-        user().error(TAG, 'Malformed expression:', error);
+        errors[string] = user().createError('Malformed expression', error);
         continue;
       }
 
@@ -72,6 +80,8 @@ export class BindEvaluator {
         expression,
       });
     }
+
+    return errors;
   }
 
   /**
