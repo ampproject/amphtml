@@ -17,6 +17,7 @@
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 import {loadPromise} from '../../src/event-helper';
+import {toArray} from '../../src/types';
 
 
 
@@ -268,11 +269,11 @@ describe('DOM', () => {
     const element3 = document.createElement('element23');
     parent.appendChild(element3);
 
-    expect(dom.childElementsByTag(parent, 'element1'))
+    expect(toArray(dom.childElementsByTag(parent, 'element1')))
         .to.deep.equal([element1]);
-    expect(dom.childElementsByTag(parent, 'element23'))
+    expect(toArray(dom.childElementsByTag(parent, 'element23')))
         .to.deep.equal([element2, element3]);
-    expect(dom.childElementsByTag(parent, 'element3'))
+    expect(toArray(dom.childElementsByTag(parent, 'element3')))
         .to.deep.equal([]);
   }
 
@@ -402,13 +403,13 @@ describe('DOM', () => {
     const grandparent = document.createElement('div');
 
     const parent = document.createElement('div');
-    grandparent.appendChild('div');
+    grandparent.appendChild(parent);
 
     const element1 = document.createElement('div');
     parent.appendChild(element1);
 
-    expect(dom.scopedQuerySelector(parent, 'div')).to.equal(parent);
-    expect(dom.scopedQuerySelector(parent, 'div div')).to.equal(element1);
+    expect(dom.scopedQuerySelector(parent, 'div')).to.equal(element1);
+    expect(dom.scopedQuerySelector(grandparent, 'div div')).to.equal(element1);
   }
 
   it('scopedQuerySelector should find first match', testScopedQuerySelector);
@@ -422,7 +423,7 @@ describe('DOM', () => {
     const grandparent = document.createElement('div');
 
     const parent = document.createElement('div');
-    grandparent.appendChild('div');
+    grandparent.appendChild(parent);
 
     const element1 = document.createElement('div');
     parent.appendChild(element1);
@@ -431,10 +432,10 @@ describe('DOM', () => {
     parent.appendChild(element2);
 
 
-    expect(dom.scopedQuerySelectorAll(parent, 'div')).to.deep.equal(
-        [parent, element1, element2]);
-    expect(dom.scopedQuerySelectorAll(parent, 'div div')).to.deep.equal(
-        [element1, element2]);
+    expect(toArray(dom.scopedQuerySelectorAll(parent, 'div')))
+      .to.deep.equal([element1, element2]);
+    expect(toArray(dom.scopedQuerySelectorAll(grandparent, 'div div')))
+      .to.deep.equal([element1, element2]);
   }
 
   it('scopedQuerySelectorAll should find all matches',

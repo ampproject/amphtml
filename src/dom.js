@@ -429,7 +429,7 @@ export function scopedQuerySelector(root, selector) {
   }
 
   // Only IE.
-  const unique = `i-amphtml-scoped-${Date.now()}`;
+  const unique = `i-amphtml-scoped`;
   root.classList.add(unique);
   const element = root./*OK*/querySelector(`.${unique} ${selector}`);
   root.classList.remove(unique);
@@ -453,7 +453,7 @@ export function scopedQuerySelectorAll(root, selector) {
   }
 
   // Only IE.
-  const unique = `i-amphtml-scoped-${Date.now()}`;
+  const unique = `i-amphtml-scoped`;
   root.classList.add(unique);
   const elements = root./*OK*/querySelectorAll(`.${unique} ${selector}`);
   root.classList.remove(unique);
