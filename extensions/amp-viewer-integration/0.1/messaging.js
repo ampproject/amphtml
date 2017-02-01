@@ -70,8 +70,14 @@ export class Messaging {
     this.targetOrigin_ = targetOrigin;
     /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
     this.requestProcessor_ = null;
+    /** @const {boolean} is a Native app. */
+    this.isWebView = !this.targetOrigin_;
+    // what type is this??
+    this.webViewPort_ = null;
 
-    dev().assert(this.targetOrigin_, 'Target origin must be specified!');
+    if (!this.isWebView) {
+      dev().assert(this.targetOrigin_, 'Target origin must be specified!');
+    }
 
     listen(source, 'message', this.handleMessage_.bind(this));
   }
@@ -83,12 +89,12 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    if (!event || event.source != this.target_ ||
-      event.origin != this.targetOrigin_) {
-      dev().fine(TAG +
-        ': handleMessage_, This message is not for us: ', event);
-      return;
+    console.log('~~~~~I\'m an AMP doc and I just got a message!', event.data, event.ports);
+
+    if (this.isWebView && !this.webViewPort_) {
+      this.webViewPort_ = event.ports[0];
     }
+
     /** @type {Message} */
     const message = event.data;
     if (message.app != APP) {
@@ -173,7 +179,13 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
-    this.target_./*OK*/postMessage(message, this.targetOrigin_);
+    if (this.isWebView) {
+      dev().assert(this.webViewPort_, 'Cannot send message with no port!');
+      this.webViewPort_./*OK*/postMessage(message, this.targetOrigin_);
+    } else {
+      dev().assert(this.target_, 'Cannot send message with no target!');
+      this.target_./*OK*/postMessage(message, this.targetOrigin_);
+    }
   }
 
   /**
