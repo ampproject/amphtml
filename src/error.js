@@ -109,19 +109,16 @@ export function reportError(error, opt_associatedElement) {
 
   // Report to console.
   if (self.console) {
+    const output = (console.error || console.log);
     if (error.messageArray) {
-      (console.error || console.log).apply(console,
-          error.messageArray);
+      output.apply(console, error.messageArray);
     } else {
       if (element) {
-        (console.error || console.log).call(console,
-            element.tagName.toLowerCase() +
-                (element.id ? ' with id ' + element.id : '') + ':',
-            error.message);
+        output.call(console, error.message, element);
       } else if (!getMode().minified) {
-        (console.error || console.log).call(console, error.stack);
+        output.call(console, error.stack);
       } else {
-        (console.error || console.log).call(console, error.message);
+        output.call(console, error.message);
       }
     }
   }
