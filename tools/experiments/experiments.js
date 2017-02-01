@@ -251,7 +251,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'measure-jank',
-    name: 'Measure page scroll jank',
+    name: 'Measure page jank',
   },
 ];
 
