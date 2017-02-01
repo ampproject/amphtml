@@ -249,6 +249,10 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-bind/amp-bind.md',
   },
+  {
+    id: 'measure-jank',
+    name: 'Measure page scroll jank',
+  },
 ];
 
 if (getMode().localDev) {
