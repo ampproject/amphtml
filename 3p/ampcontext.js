@@ -25,6 +25,10 @@ export class AmpContext {
    */
   constructor(win) {
     this.win_ = win;
+
+    // if the window sentinel is set directly, that means we are running
+    // in a situation where we couldn't attach the name attribute before
+    // creating the iframe, so don't try to parse the metadata
     if (!this.getWindowSentinel_()) {
       this.setupMetadata_();
     }
