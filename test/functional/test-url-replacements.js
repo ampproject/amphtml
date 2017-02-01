@@ -22,7 +22,9 @@ import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
 } from '../../src/custom-element';
-import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
+import {installCidServiceForDocForTesting,} from
+    '../../extensions/amp-analytics/0.1/cid-impl';
+import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
@@ -65,7 +67,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
       if (opt_options) {
         if (opt_options.withCid) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
-          installCidService(iframe.win);
+          installCidServiceForDocForTesting(iframe.ampdoc);
+          installCryptoService(iframe.win);
         }
         if (opt_options.withActivity) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
