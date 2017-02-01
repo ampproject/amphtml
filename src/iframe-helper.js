@@ -199,6 +199,8 @@ function registerGlobalListenerIfNeeded(parentWin) {
     if (!event.data) {
       return;
     }
+    // TODO(bradfrizzell): just directly use deserialize function
+    //    and update all affected tests
     const data = parseIfNeeded(event.data);
     if (!data.sentinel) {
       return;
@@ -380,7 +382,7 @@ function getSentinel_(iframe, opt_is3P) {
 
 /**
  * Json parses event.data if it needs to be
- * @returns {!Object} object message
+ * @returns {!Object|!String} object message
  * @private
  */
 function parseIfNeeded(data) {
