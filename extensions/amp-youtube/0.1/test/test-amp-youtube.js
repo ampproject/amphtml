@@ -266,12 +266,12 @@ describe('amp-youtube', function() {
         return p;
       })
       .then(() => {
-        const p = listenOncePromise(yt, VideoEvents.PLAY);
+        const p = listenOncePromise(yt, VideoEvents.PLAYING);
         sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
         return p;
       })
       .then(() => {
-        const p = listenOncePromise(yt, VideoEvents.PAUSE);
+        const p = listenOncePromise(yt, VideoEvents.PAUSED);
         sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
         return p;
       })

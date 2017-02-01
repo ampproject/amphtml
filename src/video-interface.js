@@ -165,20 +165,20 @@ export const VideoEvents = {
   /**
    * play
    *
-   * Fired when the video plays.
+   * Fired when the video start playing.
    *
-   * @event play
+   * @event playing
    */
-  PLAY: 'play',
+  PLAYING: 'playing',
 
   /**
    * pause
    *
-   * Fired when the video pauses.
+   * Fired when the video is paused.
    *
-   * @event pause
+   * @event paused
    */
-  PAUSE: 'pause',
+  PAUSED: 'paused',
 
   /**
    * muted
