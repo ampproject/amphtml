@@ -126,12 +126,6 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
     const contentWindow = we.frame.contentWindow;
     if (!contentWindow) {
       setTimeout(dropListenSentinel, 0, listenSentinel);
-    } else if (sentinel === 'amp') {
-      // A non-3P code path, origin must match.
-      if (we.origin === origin && contentWindow == triggerWin) {
-        windowEvents = we;
-        break;
-      }
     } else if (triggerWin == contentWindow ||
                isDescendantWindow(contentWindow, triggerWin)) {
       // 3P code path, we may accept messages from nested frames.
@@ -199,7 +193,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
     if (!event.data) {
       return;
     }
-    const data = parseIfNeeded(event.data);
+    const data = deserializeMessage(event.data);
     if (!data.sentinel) {
       return;
     }
@@ -377,30 +371,6 @@ export function postMessageToWindows(iframe, targets, type, object, opt_is3P) {
 function getSentinel_(iframe, opt_is3P) {
   return opt_is3P ? iframe.getAttribute('data-amp-3p-sentinel') : 'amp';
 }
-
-/**
- * Json parses event.data if it needs to be
- * @returns {!Object} object message
- * @private
- */
-function parseIfNeeded(data) {
-  const shouldBeParsed = typeof data === 'string'
-      && data.charAt(0) === '{';
-  let msg;
-  if (shouldBeParsed) {
-    try {
-      data = JSON.parse(data);
-    } catch (e) {
-      dev().warn('IFRAME-HELPER', 'Postmessage could not be parsed. ' +
-          'Is it in a valid JSON format?', e);
-    }
-  } else {
-    msg = deserializeMessage(data);
-  }
-  return msg ? msg : /** @type {!Object} */ (data) ;
-}
-
-
 
 /**
  * Manages a postMessage API for an iframe with a subscription message and
