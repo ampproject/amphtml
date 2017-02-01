@@ -131,13 +131,19 @@ export class Vsync {
       this.docState_.onVisibilityChanged(boundOnVisibilityChanged);
     }
 
+    /** @private {?Element} */
+    this.jankRateDisplay_ = null;
     if (isExperimentOn(this.win, 'measure-jank') && this.win.performance) {
       this.jankRateDisplay_ = this.win.document.createElement('div');
       this.jankRateDisplay_.classList.add('i-amphtml-pjr');
+      /** @private {number} */
       this.jankCounter_ = 0;
+      /** @private {number} */
       this.bigJankCounter_ = 0;
       this.win.document.body.appendChild(this.jankRateDisplay_);
       this.jankRateDisplay_.innerText = '0|0|0ms';
+      /** @private {number} */
+      this.scheduledTime_ = 0;
     }
   }
 
