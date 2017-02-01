@@ -133,8 +133,6 @@ export class AmpAdXOriginIframeHandler {
       });
     }
 
-
-
     // Install API that listens to ad response
     if (this.baseInstance_.config
         && this.baseInstance_.config.renderStartImplemented) {
@@ -159,8 +157,6 @@ export class AmpAdXOriginIframeHandler {
 
     if (opt_isA4A) {
       this.element_.appendChild(this.iframe);
-      // A4A writes creative frame directly to page therefore does not expect
-      // post message to unset visibility hidden
       return Promise.resolve();
     } else {
       // Set iframe initially hidden which will be removed on load event +

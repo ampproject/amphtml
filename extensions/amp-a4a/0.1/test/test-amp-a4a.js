@@ -46,6 +46,7 @@ import {platformFor} from '../../../../src/platform';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {AmpContext} from '../../../../3p/ampcontext.js';
 import * as sinon from 'sinon';
 
 /**
@@ -210,10 +211,11 @@ describe('amp-a4a', () => {
     const nameData = child.getAttribute('name');
     expect(nameData).to.be.ok;
     expect(JSON.parse.bind(null, nameData), nameData).not.to.throw(Error);
-    const context = JSON.parse(nameData);
-    expect(context).to.be.ok;
-    if (!context.amp3pSentinel) {
-      expect(context.sentinel).to.be.ok;
+    const attributes = JSON.parse(nameData);
+    expect(attributes).to.be.ok;
+    expect(attributes._context).to.be.ok;
+    if (!attributes._context.amp3pSentinel) {
+      expect(attributes._context.sentinel).to.be.ok;
     }
     expect(child).to.be.visible;
   }
@@ -393,6 +395,15 @@ describe('amp-a4a', () => {
           a4a.vsync_.runScheduledTasks_();
           verifyNameFrameRender(a4aElement);
           expect(xhrMock).to.be.calledOnce;
+        });
+      });
+
+      it('should be able to create AmpContext', () => {
+        return a4a.layoutCallback().then(() => {
+          const window_ = a4aElement.childNodes[0].contentWindow;
+          const ac = new AmpContext(window_);
+          expect(ac).to.be.ok;
+          expect(ac.sentinel).to.be.ok;
         });
       });
 

@@ -24,7 +24,10 @@ export class AmpContext {
    *  @param {Window} win The window that the instance is built inside.
    */
   constructor(win) {
-    this.setupMetadata_();
+    this.win_ = win;
+    if (!this.getWindowSentinel_()) {
+      this.setupMetadata_();
+    }
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.getHostWindow_());
     this.client_.setSentinel(this.sentinel);
@@ -114,7 +117,7 @@ export class AmpContext {
       this.location = context.location;
       this.canonicalUrl = context.canonicalUrl;
       this.pageViewId = context.pageViewId;
-      this.sentinel = context.sentinel;
+      this.sentinel = context.sentinel || context.amp3pSentinel;
       this.startTime = context.startTime;
       this.referrer = context.referrer;
     } catch (err) {
@@ -137,5 +140,15 @@ export class AmpContext {
       ancestors.push(win.parent);
     }
     return ancestors[(ancestors.length - 1) - depth];
+  }
+
+  /**
+   *  Checks to see if there is a window variable assigned with the
+   *  sentinel value, sets it, and returns true if so.
+   *  @private
+   */
+  getWindowSentinel_() {
+    this.sentinel = this.win_.AMP_SENTINEL || null;
+    return !!this.sentinel;
   }
 }
