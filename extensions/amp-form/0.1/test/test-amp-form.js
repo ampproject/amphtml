@@ -42,6 +42,7 @@ import {
 } from '../../../../extensions/amp-analytics/0.1/crypto-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../../../src/service/document-info-impl';
+import '../../../amp-selector/0.1/amp-selector';
 
 describe('amp-form', () => {
 
@@ -981,8 +982,61 @@ describe('amp-form', () => {
     ampForm.actionHandler_({method: 'anything'});
     expect(ampForm.handleSubmitAction_).to.have.not.been.called;
     ampForm.actionHandler_({method: 'submit'});
-    expect(ampForm.handleSubmitAction_).to.have.been.called;
-    document.body.removeChild(form);
+    return timer.promise(1).then(() => {
+      expect(ampForm.handleSubmitAction_).to.have.been.called;
+      document.body.removeChild(form);
+    });
+  });
+
+  it('should submit after timeout of waiting for amp-selector', function() {
+    this.timeout(3000);
+    return getAmpForm().then(ampForm => {
+      const form = ampForm.form_;
+      const selector = document.createElement('amp-selector');
+      selector.setAttribute('name', 'color');
+      form.appendChild(selector);
+      sandbox.stub(selector, 'whenBuilt')
+          .returns(new Promise(unusedResolve => {}));
+      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+          .returns(Promise.resolve());
+      sandbox.spy(ampForm, 'handleSubmitAction_');
+      ampForm.actionHandler_({method: 'submit'});
+      expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+      return timer.promise(1).then(() => {
+        expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+        return timer.promise(2000);
+      }).then(() => {
+        expect(ampForm.handleSubmitAction_).to.have.been.called;
+      });
+    });
+  });
+
+  it('should wait for amp-selector to build before submitting', () => {
+    return getAmpForm().then(ampForm => {
+      let builtPromiseResolver_;
+      const form = ampForm.form_;
+      const selector = document.createElement('amp-selector');
+      selector.setAttribute('name', 'color');
+      form.appendChild(selector);
+      sandbox.stub(selector, 'whenBuilt').returns(new Promise(resolve => {
+        builtPromiseResolver_ = resolve;
+      }));
+      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+          .returns(Promise.resolve());
+      sandbox.spy(ampForm, 'handleSubmitAction_');
+      ampForm.actionHandler_({method: 'submit'});
+      expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+      return timer.promise(1).then(() => {
+        expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+        return timer.promise(100);
+      }).then(() => {
+        expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+        builtPromiseResolver_();
+        return timer.promise(1);
+      }).then(() => {
+        expect(ampForm.handleSubmitAction_).to.have.been.called;
+      });
+    });
   });
 
   describe('Var Substitution', () => {

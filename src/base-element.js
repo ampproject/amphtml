@@ -35,7 +35,7 @@ import {user} from './log';
  * https://developers.google.com/web/fundamentals/getting-started/primers/customelements)
  * and adding AMP style late loading to the mix.
  *
- * The complete lifecycle of custom DOM element is:
+ * The complete lifecycle of a custom DOM element is:
  *
  *           ||
  *           || createdCallback
@@ -150,6 +150,14 @@ export class BaseElement {
 
     /** @public {?Object} For use by sub classes */
     this.config = null;
+  }
+
+  /**
+   * The element's signal tracker.
+   * @return {!./utils/signals.Signals}
+   */
+  signals() {
+    return this.element.signals();
   }
 
   /**
@@ -866,25 +874,4 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
-
-  /**
-   * Triggers the signal with the specified name on the element. The time is
-   * optional; if not provided, the current time is used. The associated
-   * promise is resolved with the resulting time.
-   * @param {string} name
-   * @param {time=} opt_time
-   */
-  signal(name, opt_time) {
-    this.element.signal(name, opt_time);
-  }
-
-  /**
-   * Rejects the signal. Indicates that the signal will never succeed. The
-   * associated signal is rejected.
-   * @param {string} name
-   * @param {!Error} error
-   */
-  rejectSignal(name, error) {
-    this.element.rejectSignal(name, error);
-  }
-};
+}

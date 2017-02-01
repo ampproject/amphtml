@@ -85,7 +85,6 @@ describe('amp-fit-text calculateFontSize', () => {
 
   it('should always fit on one line w/ enough width', () => {
     element./*OK*/innerHTML = 'A';
-    console.log(element.offsetWidth);
     expect(calculateFontSize_(element, 20, 200, 6, 72)).to.equal(20);
     expect(calculateFontSize_(element, 10, 200, 6, 72)).to.equal(10);
     expect(calculateFontSize_(element, 40, 200, 6, 72)).to.equal(40);
@@ -93,7 +92,6 @@ describe('amp-fit-text calculateFontSize', () => {
 
   it('should always fit the width w/ enough height', () => {
     element./*OK*/innerHTML = 'A';
-    console.log(element.offsetWidth);
     expect(calculateFontSize_(element, 200, 10, 6, 72)).to.equal(15);
     expect(calculateFontSize_(element, 200, 20, 6, 72)).to.equal(30);
     expect(calculateFontSize_(element, 200, 40, 6, 72)).to.equal(60);
