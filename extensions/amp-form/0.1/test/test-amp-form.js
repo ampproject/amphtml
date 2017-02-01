@@ -453,15 +453,16 @@ describe('amp-form', () => {
       expect(form.className).to.not.contain('amp-form-submit-success');
       fetchResolver({json: () => Promise.resolve()});
       return timer.promise(5).then(() => {
+        expect(ampForm.actions_.trigger).to.be.called;
+        expect(ampForm.actions_.trigger).to.be.calledWith(form, 'submit');
         expect(ampForm.state_).to.equal('submit-success');
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');
         expect(form.className).to.contain('amp-form-submit-success');
         expect(ampForm.actions_.trigger).to.be.called;
-        expect(ampForm.actions_.trigger.calledWith(
-            form,
-            'submit-success',
-            /** CustomEvent */ sinon.match.has('detail'))).to.be.true;
+        expect(ampForm.actions_.trigger).to.be.calledWith(
+            form, 'submit-success',
+            /** CustomEvent */ sinon.match.has('detail'));
         expect(ampForm.analyticsEvent_).to.be.calledWith(
             'amp-form-submit-success');
       });

@@ -283,11 +283,11 @@
 </form>
 
 <h4>Subscribe to our weekly Newsletter (xhr + submit events)</h4>
-
+<div id="msg">This message will hide when the form is submitted</div>
 <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank"
-      on="submit-success:success-lightbox;submit-error:error-lightbox">
+      on="submit:msg.hide;submit-success:success-lightbox;submit-error:error-lightbox">
     <fieldset>
         <label>
             <span>Your name</span>
