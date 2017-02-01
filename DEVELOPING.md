@@ -24,9 +24,9 @@ We discuss implementation issues on [amphtml-discuss@googlegroups.com](https://g
 
 For more immediate feedback, [sign up for our Slack](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877).
 
-### Starter issues
+### Great First Issues
 
-We're curating a [list of GitHub "starter issues"](https://github.com/ampproject/amphtml/issues?q=is%3Aopen+is%3Aissue+label%3Astarter) of small to medium complexity that are great to jump into development on AMP.
+We're curating a [list of GitHub "great first issues"](https://github.com/ampproject/amphtml/labels/Great%20First%20Issues) of small to medium complexity that are great to jump into development on AMP.
 
 If you have any questions, feel free to ask on the issue or join us on [Slack](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877)!
 
