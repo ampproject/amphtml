@@ -341,8 +341,8 @@ class VideoEntry {
       anim.appendChild(column);
     }
     const platform = platformFor(this.ampdoc_.win);
-    if (platform.isSafari() && platform.isIos()) {
-      // iOS Safari can not pause hardware accelerated animations.
+    if (platform.isIos()) {
+      // iOS can not pause hardware accelerated animations.
       anim.setAttribute('unpausable', '');
     }
     return anim;
