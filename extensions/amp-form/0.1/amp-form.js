@@ -341,6 +341,9 @@ export class AmpForm {
         body,
         method: this.method_,
         credentials: 'include',
+        headers: {
+          Accept: 'application/json',
+        },
       }).then(response => {
         return response.json().then(json => {
           this.triggerAction_(/* success */ true, json);
