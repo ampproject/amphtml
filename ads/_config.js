@@ -153,6 +153,10 @@ export const adConfig = {
     ],
   },
 
+  capirs: {
+    renderStartImplemented: true,
+  },
+
   caprofitx: {
     prefetch: [
       'https://cdn.caprofitx.com/pfx.min.js',
