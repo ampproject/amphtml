@@ -65,8 +65,13 @@
     "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&jid=&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
     "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
   },
-  "googleconversion": {
-    "conversion": "https://www.googleadservices.com/pagead/conversion/$google_conversion_id/?cv=amp1&value=$google_conversion_value&currency_code=$google_conversion_currency&label=$google_conversion_label&random=_random_&url=_source_url_&fst=_page_view_id_&num=_counter_&fmt=3&async=3&bg=$google_conversion_color&u_h=_screen_height_&u_w=_screen_width_&u_ah=_viewport_height_&u_aw=_viewport_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0"
+  "googleadwords": {
+    "conversion_prefix": "<ignore for test>",
+    "remarketing_prefix": "<ignore for test>",
+    "common_params": "<ignore for test>",
+    "conversion_params": "<ignore for test>",
+    "conversion": "https://www.googleadservices.com/pagead/conversion/$googleConversionId/?cv=amp2&label=$googleConversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0&value=$googleConversionValue&currency_code=$googleConversionCurrency&bg=$googleConversionColor&hl=$googleConversionLanguage",
+    "remarketing": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/$googleConversionId/?cv=amp2&label=$googleConversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0"
   },
   "lotame": {
     "pageview": "https://bcp.crwdcntrl.net/amp?c=$account&pv=y"
