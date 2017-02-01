@@ -399,28 +399,27 @@ As an example, the following configuration can be used to sample 50% of the requ
 ```
 
 #### Embed render start trigger (`"on": "render-start"`)
-Use this configuration to fire a request when the document or a specified embed emit `render-start` signal. This
-signal is emited as soon as it's possible to confirm that the rendering has been started. Typically
-this happens as soon as the main JavaScript of the document gets a callback. Notice, that not all embed types emit
-`render-start` signal.
+AMP elements that embed other documents in iframes (e.g. ads) may report `render-start` event. This event
+is typically emitted as soon as it's possible to confirm that rendering of the embedded document has been
+started. Consult the documentation of a particular AMP element to see whether it emits this event.
 
-For a document, the trigger is specified as:
-```javascript
-"triggers": {
-  "renderStart": {
-    "on": "render-start",
-    "request": "render-start"
-  }
-}
-```
-
-For an embed within a document, the trigger includes a selector to specify the embed element:
+The trigger for the embed element has to include `selector` that points to the embedding element:
 ```javascript
 "triggers": {
   "renderStart": {
     "on": "render-start",
     "request": "render-start",
     "selector": "#embed1"
+  }
+}
+```
+
+This event is also emitted by the document itself and can be configured as:
+```javascript
+"triggers": {
+  "renderStart": {
+    "on": "render-start",
+    "request": "render-start"
   }
 }
 ```
