@@ -16,7 +16,7 @@ limitations under the License.
 
 ## Contributing to AMP HTML
 
-The AMP HTML project strongly encourages technical contributions!
+The AMP HTML project strongly encourages technical [contributions](https://www.ampproject.org/contribute/)!
 
 We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
 
@@ -42,8 +42,8 @@ We actively encourage ongoing participation by community members.
   * We use GitHub issues labeled [Type: Design Review](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Design+Review%22) to track design reviews.  The Design Review issue for a given week will have a link to the design docs being discussed that week as well as a link to the Hangout.
   * When you attend a design review please read through the design docs before the review starts.
   * If you have an engineering design you would like to discuss at a design review:
-    * Document your design in a shared Google Document open to public comments. Take a look at [Design docs - A design doc](https://medium.com/@cramforce/design-docs-a-design-doc-a152f4484c6b) for tips on putting together a good design doc.
-    * Perform a design pre-review with at least one [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md); you can request a pre-review in the [#design-review Slack channel](https://amphtml.slack.com/messages/design-review/).
+    * Document your design in a shared Google Document open to public comments.  A short design doc is fine as long as it covers your design in sufficient detail to allow for a review by other members of the community.  Take a look at [Design docs - A design doc](https://medium.com/@cramforce/design-docs-a-design-doc-a152f4484c6b) for tips on putting together a good design doc.
+    * Perform a design pre-review with at least one [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md); you can request a pre-review in the [#design-review Slack channel](https://amphtml.slack.com/messages/design-review/).  It is fine to request a pre-review before your design doc is complete.
     * When your design is ready to be discussed at a design review add a comment on the appropriate Design Review GitHub issue.  Post a link to the design doc and a brief summary by **1pm Pacific Monday** on the week of your design review.
 
 ### Contributing Code
