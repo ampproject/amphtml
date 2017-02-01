@@ -337,7 +337,7 @@ export class AmpForm {
         xhrUrl = this.xhrAction_;
         body = new FormData(this.form_);
       }
-      return this.xhr_.fetchJsonResponse(dev().assertString(xhrUrl), {
+      return this.xhr_.fetch(dev().assertString(xhrUrl), {
         body,
         method: this.method_,
         credentials: 'include',

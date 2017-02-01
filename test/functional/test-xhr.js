@@ -529,7 +529,7 @@ describe('XHR', function() {
     });
 
     describe('#fetch ' + test.desc, () => {
-      const creative = '<html><body>This is a creative</body></html>';
+      const creative = '<html><body>This is a creative简</body></html>';
 
       // Using the Native fetch, we can't mock the XHR request, so an actual
       // HTTP request would be sent to the server.  Only execute this test
