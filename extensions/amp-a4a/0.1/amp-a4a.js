@@ -1182,6 +1182,7 @@ export class AmpA4A extends AMP.BaseElement {
             'name': nameData,
           }, SHARED_IFRAME_PROPERTIES));
       if (method == XORIGIN_MODE.NAMEFRAME) {
+        // TODO(bradfrizzell): change name of function and var
         const attributes = this.generateSentinelAndContext(iframe);
         attributes['creative'] = creative;
         const name = JSON.stringify(attributes);
