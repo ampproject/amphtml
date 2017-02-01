@@ -981,7 +981,7 @@ describe('amp-form', () => {
       form.appendChild(selector);
       sandbox.stub(selector, 'whenBuilt')
           .returns(new Promise(unusedResolve => {}));
-      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+      sandbox.stub(ampForm.xhr_, 'fetch')
           .returns(Promise.resolve());
       sandbox.spy(ampForm, 'handleSubmitAction_');
       ampForm.actionHandler_({method: 'submit'});
@@ -1005,7 +1005,7 @@ describe('amp-form', () => {
       sandbox.stub(selector, 'whenBuilt').returns(new Promise(resolve => {
         builtPromiseResolver_ = resolve;
       }));
-      sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+      sandbox.stub(ampForm.xhr_, 'fetch')
           .returns(Promise.resolve());
       sandbox.spy(ampForm, 'handleSubmitAction_');
       ampForm.actionHandler_({method: 'submit'});
@@ -1161,7 +1161,7 @@ describe('amp-form', () => {
         form.appendChild(canonicalUrlField);
         sandbox.stub(form, 'submit');
         sandbox.stub(form, 'checkValidity').returns(true);
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+        sandbox.stub(ampForm.xhr_, 'fetch')
             .returns(Promise.resolve());
         sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
         sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
@@ -1196,7 +1196,7 @@ describe('amp-form', () => {
         form.appendChild(canonicalUrlField);
         sandbox.stub(form, 'submit');
         sandbox.stub(form, 'checkValidity').returns(true);
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+        sandbox.stub(ampForm.xhr_, 'fetch')
             .returns(Promise.resolve());
         sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
         sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
@@ -1233,7 +1233,7 @@ describe('amp-form', () => {
         form.appendChild(canonicalUrlField);
         sandbox.stub(form, 'submit');
         sandbox.stub(form, 'checkValidity').returns(true);
-        sandbox.stub(ampForm.xhr_, 'fetchJsonResponse')
+        sandbox.stub(ampForm.xhr_, 'fetch')
             .returns(Promise.resolve());
         sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
         sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
