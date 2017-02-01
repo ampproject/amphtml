@@ -479,6 +479,15 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
+  swoop: {
+    prefetch: 'https://www.swoop-amp.com/amp.js',
+    preconnect: [
+      'https://www.swpsvc.com',
+      'https://client.swpcld.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   taboola: {},
 
   teads: {
