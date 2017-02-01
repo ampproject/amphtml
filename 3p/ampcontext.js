@@ -29,7 +29,7 @@ export class AmpContext {
     // if the window sentinel is set directly, that means we are running
     // in a situation where we couldn't attach the name attribute before
     // creating the iframe, so don't try to parse the metadata
-    if (!this.getWindowSentinel_()) {
+    if (!this.hasSafeframeSentinel_()) {
       this.setupMetadata_();
     }
     this.client_ = new IframeMessagingClient(win);
@@ -151,7 +151,7 @@ export class AmpContext {
    *  sentinel value, sets it, and returns true if so.
    *  @private
    */
-  getWindowSentinel_() {
+  hasSafeframeSentinel_() {
     this.sentinel = this.win_.SAFEFRAME_SENTINEL || null;
     return !!this.sentinel;
   }
