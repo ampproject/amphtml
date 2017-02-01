@@ -152,7 +152,7 @@ export class AmpContext {
    *  @private
    */
   getWindowSentinel_() {
-    this.sentinel = this.win_.AMP_SENTINEL || null;
+    this.sentinel = this.win_.SAFEFRAME_SENTINEL || null;
     return !!this.sentinel;
   }
 }

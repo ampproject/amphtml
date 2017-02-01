@@ -158,27 +158,25 @@ export class AmpAdXOriginIframeHandler {
     if (opt_isA4A) {
       this.element_.appendChild(this.iframe);
       return Promise.resolve();
-    } else {
-      // Set iframe initially hidden which will be removed on load event +
-      // post message.
-      setStyle(this.iframe, 'visibility', 'hidden');
-      this.element_.appendChild(this.iframe);
-
-
-      return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
-          this.adResponsePromise_,
-          'timeout waiting for ad response').catch(e => {
-            this.noContent_();
-            user().warn('AMP-AD', e);
-          }).then(() => {
-            if (this.iframe) {
-              setStyle(this.iframe, 'visibility', '');
-              if (this.baseInstance_.emitLifecycleEvent) {
-                this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
-              }
-            }
-          });
     }
+    // Set iframe initially hidden which will be removed on load event +
+    // post message.
+    setStyle(this.iframe, 'visibility', 'hidden');
+    this.element_.appendChild(this.iframe);
+
+    return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
+        this.adResponsePromise_,
+        'timeout waiting for ad response').catch(e => {
+          this.noContent_();
+          user().warn('AMP-AD', e);
+        }).then(() => {
+          if (this.iframe) {
+            setStyle(this.iframe, 'visibility', '');
+            if (this.baseInstance_.emitLifecycleEvent) {
+              this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
+            }
+          }
+        });
   }
 
   /**
