@@ -54,10 +54,10 @@ function getConfig() {
             'SL_Chrome_latest',
             'SL_Chrome_45',
             'SL_Firefox_latest',
-            'SL_Safari_8',
+            //'SL_Safari_8' // Disabled due to flakiness and low market share
             'SL_Safari_9',
             'SL_Edge_latest',
-            'SL_iOS_8_4',
+            //'SL_iOS_8_4', // Disabled due to flakiness and low market share
             'SL_iOS_9_1',
             'SL_iOS_10_0',
             //'SL_IE_11',
