@@ -178,13 +178,12 @@ export class Bind {
         const boundProperties = this.scanElement_(element, bindings);
         if (boundProperties.length > 0) {
           boundElements.push({element, boundProperties});
-
-          // Append (element, property, expressionString) tuples to `bindings`.
-          boundProperties.forEach(boundProperty => {
-            const {property, expressionString} = boundProperty;
-            bindings.push({tagName, property, expressionString});
-          });
         }
+        // Append (element, property, expressionString) tuples to `bindings`.
+        boundProperties.forEach(boundProperty => {
+          const {property, expressionString} = boundProperty;
+          bindings.push({tagName, property, expressionString});
+        });
       }
     };
 
