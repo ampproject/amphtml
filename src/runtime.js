@@ -675,13 +675,14 @@ class MultidocManager {
     const extensionIds = [];
     if (doc.head) {
       const parentLinks = {};
-      childElementsByTag(dev().assertElement(this.win.document.head), 'link')
-          .forEach(link => {
-            const href = link.getAttribute('href');
-            if (href) {
-              parentLinks[href] = true;
-            }
-          });
+      const links = childElementsByTag(
+          dev().assertElement(this.win.document.head), 'link');
+      for (let i = 0; i < links.length; i++) {
+        const href = links[i].getAttribute('href');
+        if (href) {
+          parentLinks[href] = true;
+        }
+      }
 
       for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
         const tagName = n.tagName;

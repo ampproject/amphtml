@@ -16,7 +16,6 @@
 
 import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
-import {toArray} from './types';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -385,7 +384,7 @@ export function lastChildElementByAttr(parent, attr) {
  * Finds all child elements that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
- * @return {!Array<!Element>}
+ * @return {!NodeList<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
   return scopedQuerySelectorAll(parent, `> [${attr}]`);
@@ -407,7 +406,7 @@ export function childElementByTag(parent, tagName) {
  * Finds all child elements with the specified tag name.
  * @param {!Element} parent
  * @param {string} tagName
- * @return {!Array<!Element>}
+ * @return {!NodeList<!Element>}
  */
 export function childElementsByTag(parent, tagName) {
   return scopedQuerySelectorAll(parent, `> ${tagName}`);
@@ -443,14 +442,14 @@ export function scopedQuerySelector(root, selector) {
  * Note: in IE, this causes a quick mutation of the element's class list.
  * @param {!Element} root
  * @param {string} selector
- * @return {!Array<!Element>}
+ * @return {!NodeList<!Element>}
  */
 export function scopedQuerySelectorAll(root, selector) {
   if (scopeSelectorSupported == null) {
     scopeSelectorSupported = isScopeSelectorSupported(root);
   }
   if (scopeSelectorSupported) {
-    return toArray(root./*OK*/querySelectorAll(`:scope ${selector}`));
+    return root./*OK*/querySelectorAll(`:scope ${selector}`);
   }
 
   // Only IE.
@@ -458,7 +457,7 @@ export function scopedQuerySelectorAll(root, selector) {
   root.classList.add(unique);
   const elements = root./*OK*/querySelectorAll(`.${unique} ${selector}`);
   root.classList.remove(unique);
-  return toArray(elements);
+  return elements;
 }
 
 
