@@ -67,7 +67,7 @@ export class Bind {
     this.enabled_ = isExperimentOn(ampdoc.win, TAG);
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
-    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private {!Array<BoundElementDef>} */
@@ -166,16 +166,25 @@ export class Bind {
     /** @type {!Array<./bind-evaluator.BindingDef>} */
     const bindings = [];
 
-    const elements = this.elementsInNode_(body);
-    const numElements = elements.length;
+    const doc = dev().assert(body.ownerDocument, 'ownerDocument is null.');
+    const walker = doc.createTreeWalker(body, NodeFilter.SHOW_ELEMENT);
 
-    // Helper function for scanning a slice of elements.
+    /**
+     * Helper function for scanning a slice of elements.
+     * Returns true if there are no more elements to scan.
+     * @param {number} start
+     * @param {number} end
+     * @return {boolean}
+     */
     const scanFromTo = (start, end) => {
-      for (let i = start; i < end && i < numElements; i++) {
-        const element = elements[i];
+      for (let i = start; i < end; i++) {
+        const element = walker.nextNode();
+        if (!element) {
+          return true;
+        }
         const tagName = element.tagName;
 
-        const boundProperties = this.scanElement_(element, bindings);
+        const boundProperties = this.scanElement_(element);
         if (boundProperties.length > 0) {
           boundElements.push({element, boundProperties});
         }
@@ -185,6 +194,7 @@ export class Bind {
           bindings.push({tagName, property, expressionString});
         });
       }
+      return false;
     };
 
     // Current scan position in `elements` array.
@@ -192,23 +202,24 @@ export class Bind {
 
     return new Promise(resolve => {
       const chunktion = idleDeadline => {
+        let completed = false;
         // If `requestIdleCallback` is available, scan elements until
         // idle time runs out.
         if (idleDeadline && !idleDeadline.didTimeout) {
-          while (idleDeadline.timeRemaining() > 1 && elements[position]) {
-            scanFromTo(position, position + 1);
+          while (idleDeadline.timeRemaining() > 1 && !completed) {
+            completed = scanFromTo(position, position + 1);
             position++;
           }
         } else {
           // If `requestIdleCallback` isn't available, scan elements in buckets.
           // Bucket size is a magic number that fits within a single frame.
           const bucketSize = 250;
-          scanFromTo(position, position + bucketSize);
+          completed = scanFromTo(position, position + bucketSize);
           position += bucketSize;
         }
 
         // If we scanned all elements, resolve. Otherwise, continue chunking.
-        if (elements[position] === undefined) {
+        if (completed) {
           resolve({boundElements, bindings});
         } else {
           chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
@@ -257,24 +268,6 @@ export class Bind {
       }
     }
     return null;
-  }
-
-  /**
-   * Returns all descendant elements in a given node.
-   * @param {!Node} node
-   * @return {!Array<Element>}
-   * @private
-   */
-  elementsInNode_(node) {
-    const doc = dev().assert(node.ownerDocument, 'ownerDocument is null.');
-    const treeWalker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
-
-    const elements = [];
-    let currentElement;
-    while (currentElement = treeWalker.nextNode()) {
-      elements.push(currentElement);
-    }
-    return elements;
   }
 
   /**
