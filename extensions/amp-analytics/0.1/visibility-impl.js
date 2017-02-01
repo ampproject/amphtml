@@ -181,7 +181,8 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);
   } else if (selectionMethod == 'scope') {
-    foundEl = scopedQuerySelector(analyticsEl.parentElement, selector);
+    foundEl = scopedQuerySelector(
+        dev().assertElement(analyticsEl.parentElement), selector);
   } else if (selector[0] == '#') {
     const containerDoc = friendlyFrame ? analyticsEl.ownerDocument : ampdoc;
     foundEl = containerDoc.getElementById(selector.slice(1));
