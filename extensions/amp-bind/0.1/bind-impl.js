@@ -136,10 +136,10 @@ export class Bind {
   initialize_() {
     this.scanPromise_ = this.scanBody_(this.ampdoc.getBody());
     this.scanPromise_.then(results => {
-      const {boundElements, evaluatees} = results;
+      const {boundElements, bindings} = results;
 
       this.boundElements_ = boundElements;
-      this.evaluator_ = new BindEvaluator(evaluatees);
+      this.evaluator_ = new BindEvaluator(bindings);
 
       // Trigger verify-only digest in development.
       if (getMode().development || this.digestQueuedAfterScan_) {
@@ -155,7 +155,7 @@ export class Bind {
    * @return {
    *   !Promise<{
    *     boundElements: !Array<BoundElementDef>,
-   *     evaluatees: !Array<./bind-evaluator.EvaluateeDef>
+   *     bindings: !Array<./bind-evaluator.BindingDef>
    *   }>
    * }
    * @private
@@ -163,8 +163,8 @@ export class Bind {
   scanBody_(body) {
     /** @type {!Array<BoundElementDef>} */
     const boundElements = [];
-    /** @type {!Array<./bind-evaluator.EvaluateeDef>} */
-    const evaluatees = [];
+    /** @type {!Array<./bind-evaluator.BindingDef>} */
+    const bindings = [];
 
     // TODO(choumx): Use TreeWalker if this is too slow.
     const elements = body.getElementsByTagName('*');
@@ -174,10 +174,17 @@ export class Bind {
     const scanFromTo = (start, end) => {
       for (let i = start; i < end && i < numElements; i++) {
         const element = elements[i];
-        // Note: scanElement_() mutates `evaluatees`.
-        const boundProperties = this.scanElement_(element, evaluatees);
+        const tagName = element.tagName;
+
+        const boundProperties = this.scanElement_(element, bindings);
         if (boundProperties.length > 0) {
           boundElements.push({element, boundProperties});
+
+          // Append (element, property, expressionString) tuples to `bindings`.
+          boundProperties.forEach(boundProperty => {
+            const {property, expressionString} = boundProperty;
+            bindings.push({tagName, property, expressionString});
+          });
         }
       }
     };
@@ -204,7 +211,7 @@ export class Bind {
 
         // If we scanned all elements, resolve. Otherwise, continue chunking.
         if (elements[position] === undefined) {
-          resolve({boundElements, evaluatees});
+          resolve({boundElements, bindings});
         } else {
           chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
         }
@@ -214,14 +221,12 @@ export class Bind {
   }
 
   /**
-   * Returns bound properties for an element.  Also, creates an EvaluateeDef
-   * for each bound property and appends it to `evaluatees` param.
+   * Returns bound properties for an element.
    * @param {!Element} element
-   * @param {!Array<./bind-evaluator.EvaluateeDef>} evaluatees
    * @return {!Array<{property: string, expressionString: string}>}
    * @private
    */
-  scanElement_(element, evaluatees) {
+  scanElement_(element) {
     const boundProperties = [];
     const attrs = element.attributes;
     for (let i = 0, numberOfAttrs = attrs.length; i < numberOfAttrs; i++) {
@@ -229,11 +234,6 @@ export class Bind {
       const boundProperty = this.scanAttribute_(attr, element);
       if (boundProperty) {
         boundProperties.push(boundProperty);
-        evaluatees.push({
-          tagName: element.tagName,
-          property: boundProperty.property,
-          expressionString: boundProperty.expressionString,
-        });
       }
     }
     return boundProperties;
