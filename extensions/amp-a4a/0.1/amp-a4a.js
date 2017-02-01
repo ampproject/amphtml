@@ -1130,6 +1130,9 @@ export class AmpA4A extends AMP.BaseElement {
         }, SHARED_IFRAME_PROPERTIES));
     const attributes = this.generateSentinelAndContext(iframe);
     iframe.setAttribute('name', JSON.stringify(attributes));
+    const sentinel = attributes._context.sentinel ||
+        attributes._context.amp3pSentinel;
+    iframe.setAttribute('data-amp-3p-sentinel', sentinel);
     return this.iframeRenderHelper_(iframe);
   }
 
@@ -1183,6 +1186,9 @@ export class AmpA4A extends AMP.BaseElement {
         attributes['creative'] = creative;
         const name = JSON.stringify(attributes);
         iframe.setAttribute('name', name);
+        const sentinel = attributes._context.sentinel ||
+            attributes._context.amp3pSentinel;
+        iframe.setAttribute('data-amp-3p-sentinel', sentinel);
       }
       return this.iframeRenderHelper_(iframe);
     });
