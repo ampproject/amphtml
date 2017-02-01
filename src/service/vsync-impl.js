@@ -389,7 +389,7 @@ export class Vsync {
         }
         this.jankRateDisplay_.innerText =
             `${this.jankCounter_}|${this.bigJankCounter_}|${paintLatency}ms`;
-        dev().warn('JANK', 'Paint latency: ' + paintLatency + 'ms');
+        dev().info('JANK', 'Paint latency: ' + paintLatency + 'ms');
       }
     }
 
