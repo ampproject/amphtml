@@ -439,7 +439,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
           'bg=${googleConversionColor}&' +
           'hl=${googleConversionLanguage}',
       'conversion': '${conversion_prefix}${common_params}&${conversion_params}',
-      'remarketing': '${remarketing_prefix}${common_params}'
+      'remarketing': '${remarketing_prefix}${common_params}',
     },
     'transport': {
       'beacon': false,
