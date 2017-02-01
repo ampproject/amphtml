@@ -126,12 +126,9 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
     const contentWindow = we.frame.contentWindow;
     if (!contentWindow) {
       setTimeout(dropListenSentinel, 0, listenSentinel);
-    } else if (we.origin === origin && contentWindow == triggerWin) {
-      windowEvents = we;
-      break;
     } else if (triggerWin == contentWindow ||
-               isDescendantWindow(contentWindow, triggerWin)) {
-      // 3P code path, we may accept messages from nested frames.
+        isDescendantWindow(contentWindow, triggerWin)) {
+      // We may accept messages from nested frames.
       windowEvents = we;
       break;
     }
