@@ -54,8 +54,8 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
 
   describe.configure().retryOnSaucelabs()
   .run('Actions', function() {
-    this.timeout(900000);
-    it.only('should support mute, play, pause, unmute actions', function() {
+    this.timeout(TIMEOUT);
+    it('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
         // Create a action buttons
         const playButton = createButton(r, 'play');
