@@ -194,7 +194,9 @@ describe('amp-a4a', () => {
     const attributes = JSON.parse(nameData);
     expect(attributes).to.be.ok;
     expect(attributes._context).to.be.ok;
-    expect(attributes._context.sentinel).to.be.ok;
+    if (!attributes._context.amp3pSentinel) {
+      expect(attributes._context.sentinel).to.be.ok;
+    }
     expect(child).to.be.visible;
   }
 
@@ -208,10 +210,11 @@ describe('amp-a4a', () => {
     const nameData = child.getAttribute('name');
     expect(nameData).to.be.ok;
     expect(JSON.parse.bind(null, nameData), nameData).not.to.throw(Error);
-    const attributes = JSON.parse(nameData);
-    expect(attributes).to.be.ok;
-    expect(attributes._context).to.be.ok;
-    expect(attributes._context.sentinel).to.be.ok;
+    const context = JSON.parse(nameData);
+    expect(context).to.be.ok;
+    if (!context.amp3pSentinel) {
+      expect(context.sentinel).to.be.ok;
+    }
     expect(child).to.be.visible;
   }
 

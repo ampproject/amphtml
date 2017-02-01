@@ -1128,7 +1128,7 @@ export class AmpA4A extends AMP.BaseElement {
           // modified url.
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
-    const metadata = generateSentinelAndContext(iframe);
+    const metadata = this.generateSentinelAndContext(iframe);
     iframe.setAttribute('name', JSON.stringify(metadata));
     return this.iframeRenderHelper_(iframe);
   }
@@ -1179,7 +1179,7 @@ export class AmpA4A extends AMP.BaseElement {
             'name': nameData,
           }, SHARED_IFRAME_PROPERTIES));
       if (method == XORIGIN_MODE.NAMEFRAME) {
-        const _context = generateSentinelAndContext(iframe);
+        const _context = this.generateSentinelAndContext(iframe);
         const name = JSON.stringify({creative, _context});
         iframe.setAttribute('name', name);
       }

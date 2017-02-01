@@ -157,30 +157,32 @@ export class AmpAdXOriginIframeHandler {
           .then(() => this.noContent_());
     }
 
-    // Set iframe initially hidden which will be removed on load event +
-    // post message.
-    setStyle(this.iframe, 'visibility', 'hidden');
-    this.element_.appendChild(this.iframe);
-
     if (opt_isA4A) {
+      this.element_.appendChild(this.iframe);
       // A4A writes creative frame directly to page therefore does not expect
       // post message to unset visibility hidden
       return Promise.resolve();
-    }
+    } else {
+      // Set iframe initially hidden which will be removed on load event +
+      // post message.
+      setStyle(this.iframe, 'visibility', 'hidden');
+      this.element_.appendChild(this.iframe);
 
-    return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
-        this.adResponsePromise_,
-        'timeout waiting for ad response').catch(e => {
-          this.noContent_();
-          user().warn('AMP-AD', e);
-        }).then(() => {
-          if (this.iframe) {
-            setStyle(this.iframe, 'visibility', '');
-            if (this.baseInstance_.emitLifecycleEvent) {
-              this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
+
+      return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
+          this.adResponsePromise_,
+          'timeout waiting for ad response').catch(e => {
+            this.noContent_();
+            user().warn('AMP-AD', e);
+          }).then(() => {
+            if (this.iframe) {
+              setStyle(this.iframe, 'visibility', '');
+              if (this.baseInstance_.emitLifecycleEvent) {
+                this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
+              }
             }
-          }
-        });
+          });
+    }
   }
 
   /**
