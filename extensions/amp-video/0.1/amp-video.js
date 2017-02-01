@@ -59,6 +59,9 @@ class AmpVideo extends AMP.BaseElement {
 
       /** @private {?boolean}  */
       this.muted_ = false;
+
+      /** @private @const {!Promise} */
+      this.loadPromise_ = null;
     }
 
     /**
@@ -168,7 +171,8 @@ class AmpVideo extends AMP.BaseElement {
       });
 
       // loadPromise for media elements listens to `loadstart`
-      return this.loadPromise(this.video_).then(() => {
+      this.loadPromise_ = this.loadPromise(this.video_);
+      return this.loadPromise_.then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
       });
     }
@@ -220,24 +224,24 @@ class AmpVideo extends AMP.BaseElement {
      * @override
      */
     play(unusedIsAutoplay) {
-      const ret = this.video_.play();
-
-      if (ret && ret.catch) {
-        ret.catch(() => {
-          // Empty catch to prevent useless unhandled promise rejection logging.
-          // Play can fail for many reasons such as video getting paused before
-          // play() is finished.
-          // We use events to know the state of the video and do not care about
-          // the success or failure of the play()'s returned promise.
-        });
-      }
+      this.loadPromise_.then(() => {
+        return this.video_.play();
+      }).catch(() => {
+        // Empty catch to prevent useless unhandled promise rejection logging.
+        // Play can fail for many reasons such as video getting paused before
+        // play() is finished.
+        // We use events to know the state of the video and do not care about
+        // the success or failure of the play()'s returned promise.
+      });
     }
 
     /**
      * @override
      */
     pause() {
-      this.video_.pause();
+      this.loadPromise_.then(() => {
+        this.video_.pause();
+      });
     }
 
     /**
