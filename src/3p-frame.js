@@ -15,9 +15,8 @@
  */
 
 import {dev, user} from './log';
-import {documentInfoForDoc} from './document-info';
 import {isExperimentOn, experimentToggles, isCanary} from './experiments';
-import {getLengthNumeral} from '../src/layout';
+import {getContextMetadata} from '../src/iframe-attributes';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
@@ -47,52 +46,27 @@ let overrideBootstrapBaseUrl;
  *     - A _context object for internal use.
  */
 function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
-  const startTime = Date.now();
-  const width = element.getAttribute('width');
-  const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
-  const sentinelNameChange = isExperimentOn(
-      parentWindow, 'sentinel-name-change');
   user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
-  const attributes = {};
+  const sentinel = generateSentinel(parentWindow);
+  let attributes = {};
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
-  attributes.width = getLengthNumeral(width);
-  attributes.height = getLengthNumeral(height);
+  attributes = getContextMetadata(parentWindow, element, sentinel,
+      attributes);
   attributes.type = type;
-  const docInfo = documentInfoForDoc(element);
   const viewer = viewerForDoc(element);
-  let locationHref = parentWindow.location.href;
-  // This is really only needed for tests, but whatever. Children
-  // see us as the logical origin, so telling them we are about:srcdoc
-  // will fail ancestor checks.
-  if (locationHref == 'about:srcdoc') {
-    locationHref = parentWindow.parent.location.href;
-  }
-  attributes._context = {
-    referrer: viewer.getUnconfirmedReferrerUrl(),
-    canonicalUrl: docInfo.canonicalUrl,
-    sourceUrl: docInfo.sourceUrl,
-    pageViewId: docInfo.pageViewId,
-    location: {
-      href: locationHref,
-    },
+  const additionalContext = {
     tagName: element.tagName,
     mode: getModeObject(),
     canary: isCanary(parentWindow),
     hidden: !viewer.isVisible(),
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
-    startTime,
     experimentToggles: experimentToggles(parentWindow),
   };
-  attributes._context[sentinelNameChange ? 'sentinel' : 'amp3pSentinel'] =
-      generateSentinel(parentWindow);
   Object.assign(attributes._context, opt_context);
-  const adSrc = element.getAttribute('src');
-  if (adSrc) {
-    attributes.src = adSrc;
-  }
+  Object.assign(attributes._context, additionalContext);
   return attributes;
 }
 
@@ -333,6 +307,18 @@ export function generateSentinel(parentWindow) {
     windowDepth++;
   }
   return String(windowDepth) + '-' + getRandom(parentWindow);
+}
+
+/**
+ * Generates sentinel, and context, and returns context
+ * @param {!Element} iframe
+ * @param {!Window} window The parent window of the iframe.
+ * @return {Object}
+ */
+export function generateSentinelAndContext(iframe, window) {
+  const sentinel = generateSentinel(window);
+  const context = getContextMetadata(window, iframe, sentinel)._context;
+  return context;
 }
 
 /**

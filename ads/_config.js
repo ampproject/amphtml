@@ -153,6 +153,10 @@ export const adConfig = {
     ],
   },
 
+  capirs: {
+    renderStartImplemented: true,
+  },
+
   caprofitx: {
     prefetch: [
       'https://cdn.caprofitx.com/pfx.min.js',
@@ -393,6 +397,7 @@ export const adConfig = {
       'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
     ],
+    renderStartImplemented: true,
   },
 
   plista: {},
@@ -421,6 +426,10 @@ export const adConfig = {
 
   purch: {
     prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
+    renderStartImplemented: true,
+  },
+
+  relap: {
     renderStartImplemented: true,
   },
 

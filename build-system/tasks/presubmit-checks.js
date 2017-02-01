@@ -79,6 +79,7 @@ var forbiddenTerms = {
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
     ],
+    checkInTestFolder: true,
   },
   // Match `getMode` that is not followed by a "()." and is assigned
   // as a variable.
@@ -417,6 +418,7 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
       'src/3p-frame.js',
+      'src/iframe-attributes.js',
       'src/service/viewer-impl.js',
       'src/inabox/inabox-viewer.js',
     ],
@@ -494,6 +496,10 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',
     ],
   },
+  'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
+    message: 'SVG data images must use charset=utf-8: ' +
+        '"data:image/svg+xml;charset=utf-8,..."',
+  }
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
@@ -699,10 +705,11 @@ function matchTerms(file, terms) {
   return Object.keys(terms).map(function(term) {
     var fix;
     var whitelist = terms[term].whitelist;
+    var checkInTestFolder = terms[term].checkInTestFolder;
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
     if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||
-        isInTestFolder(relative))) {
+        isInTestFolder(relative) && !checkInTestFolder)) {
       return false;
     }
     // we can't optimize building the `RegExp` objects early unless we build

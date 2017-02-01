@@ -53,6 +53,15 @@ import {
 const TAG = 'amp-form';
 
 
+/**
+ * A list of external dependencies that can be included in forms.
+ * @type {!Array<string>}
+ */
+const EXTERNAL_DEPS = [
+  'amp-selector',
+];
+
+
 /** @const @enum {string} */
 const FormState_ = {
   SUBMITTING: 'submitting',
@@ -103,6 +112,9 @@ export class AmpForm {
 
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacement_ = urlReplacementsForDoc(element);
+
+    /** @private {?Promise} */
+    this.dependenciesPromise_ = null;
 
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
@@ -168,8 +180,6 @@ export class AmpForm {
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
-    // TODO(mkhatib, #6927): Wait for amp-selector to finish loading if the current form
-    // is using it.
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this));
     this.installEventHandlers_();
@@ -181,8 +191,25 @@ export class AmpForm {
    */
   actionHandler_(invocation) {
     if (invocation.method == 'submit') {
-      this.handleSubmitAction_();
+      this.whenDependenciesReady_().then(this.handleSubmitAction_.bind(this));
     }
+  }
+
+  /**
+   * Returns a promise that will be resolved when all dependencies used inside the form
+   * tag are loaded and built (e.g. amp-selector) or 2 seconds timeout - whichever is first.
+   * @return {!Promise}
+   * @private
+   */
+  whenDependenciesReady_() {
+    if (this.dependenciesPromise_) {
+      return this.dependenciesPromise_;
+    }
+    const depElements = this.form_.querySelectorAll(EXTERNAL_DEPS.join(','));
+    // Wait for an element to be built to make sure it is ready.
+    const depPromises = toArray(depElements).map(el => el.whenBuilt());
+    return this.dependenciesPromise_ = Promise.race(
+        [Promise.all(depPromises), this.timer_.promise(2000)]);
   }
 
   /** @private */
@@ -310,10 +337,13 @@ export class AmpForm {
         xhrUrl = this.xhrAction_;
         body = new FormData(this.form_);
       }
-      return this.xhr_.fetchJsonResponse(dev().assertString(xhrUrl), {
+      return this.xhr_.fetch(dev().assertString(xhrUrl), {
         body,
         method: this.method_,
         credentials: 'include',
+        headers: {
+          Accept: 'application/json',
+        },
       }).then(response => {
         return response.json().then(json => {
           this.triggerAction_(/* success */ true, json);
