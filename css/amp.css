@@ -545,6 +545,7 @@ amp-fresh {
   position: absolute;
   right: 7px;
   width: 20px;
+  z-index: 1;
 }
 .amp-video-eq .amp-video-eq-col {
   flex: 1;
