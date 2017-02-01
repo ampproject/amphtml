@@ -165,7 +165,7 @@ export const VideoEvents = {
   /**
    * play
    *
-   * Fired when the video start playing.
+   * Fired when the video starts playing.
    *
    * @event playing
    */
