@@ -1055,7 +1055,7 @@ describe('amp-form', () => {
             .to.have.been.calledWith(canonicalUrlField);
         return timer.promise(10).then(() => {
           expect(ampForm.xhr_.fetch).to.be.called;
-          expect(clientIdField.value).to.match(/amp-\w+/);
+          expect(clientIdField.value).to.match(/amp-.+/);
           expect(canonicalUrlField.value).to.equal(
               'https%3A%2F%2Fexample.com%2Famps.html');
         });
