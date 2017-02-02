@@ -88,7 +88,7 @@ export function ix(global, data) {
         event.data.substring(0,11) !== 'ix-message-') {
         return;
       }
-      indexAmpRender(document, event.data.substring(11));
+      indexAmpRender(document, event.data.substring(11), global);
     });
 
     loadScript(global, 'https://js-sec.indexww.com/apl/apl6.js', undefined, () => {
@@ -97,7 +97,7 @@ export function ix(global, data) {
   }
 }
 
-function indexAmpRender(doc, targetID) {
+function indexAmpRender(doc, targetID, global) {
   try {
     const ad = global._IndexRequestData.targetIDToBid[targetID].pop();
     if (ad != null) {
