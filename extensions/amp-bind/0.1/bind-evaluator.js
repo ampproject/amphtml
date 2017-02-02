@@ -19,7 +19,7 @@ import {BindValidator} from './bind-validator';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {user} from '../../../src/log';
 
-const TAG = 'AMP-BIND';
+const TAG = 'amp-bind';
 
 /**
  * @typedef {{
