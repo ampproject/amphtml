@@ -33,7 +33,7 @@ export class JankMeter {
     /** @private {number} */
     this.bigJankCounter_ = 0;
     this.win_.document.body.appendChild(this.jankMeterDisplay_);
-    this.jankMeterDisplay_.textContent = '0|0|0ms';
+    this.updateMeterDisplay_(0);
     /** @private {number} */
     this.scheduledTime_ = -1;
   }
@@ -54,10 +54,18 @@ export class JankMeter {
       if (paintLatency > 100) {
         this.bigJankCounter_++;
       }
-      this.jankMeterDisplay_.textContent =
-          `${this.jankCounter_}|${this.bigJankCounter_}|${paintLatency}ms`;
+      this.updateMeterDisplay_(paintLatency);
       dev().info('JANK', 'Paint latency: ' + paintLatency + 'ms');
     }
+  }
+
+  /**
+   * @param {number} paintLatency
+   * @private
+   */
+  updateMeterDisplay_(paintLatency) {
+    this.jankMeterDisplay_.textContent =
+        `${this.jankCounter_}|${this.bigJankCounter_}|${paintLatency}ms`;
   }
 }
 
