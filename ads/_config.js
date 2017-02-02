@@ -86,6 +86,7 @@ export const adConfig = {
 
   adspeed: {
     preconnect: 'https://g.adspeed.net',
+    renderStartImplemented: true,
   },
 
   adspirit: {},
