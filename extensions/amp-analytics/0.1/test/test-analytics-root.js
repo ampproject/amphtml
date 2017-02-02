@@ -15,7 +15,6 @@
  */
 
 import {
-  AmpDocSingle,
   AmpDocShadow,
 } from '../../../../src/service/ampdoc-impl';
 import {

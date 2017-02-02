@@ -15,8 +15,8 @@
  */
 
 import {Observable} from '../../../src/observable';
-import {dev, user} from '../../../src/log';
 import {getDataParamsFromAttributes} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
@@ -224,20 +224,13 @@ export class SignalTracker extends EventTracker {
 
   /** @override */
   add(context, eventType, config, listener) {
-    const selector = config['selector'] || ':root';
-    /**
-     * @type {!Promise<{
-     *     target: !Element,
-     *     signals: !../../../src/utils/signals.Signals}>
-     *   }
-     */
+    let target;
     let signalsPromise;
+    const selector = config['selector'] || ':root';
     if (selector == ':root' || selector == ':host') {
       // Root selectors are delegated to analytics roots.
-      signalsPromise = Promise.resolve({
-        target: this.root.getRootElement(),
-        signals: this.root.signals(),
-      });
+      target = this.root.getRootElement();
+      signalsPromise = Promise.resolve(this.root.signals());
     } else {
       // Look for the AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
@@ -249,19 +242,13 @@ export class SignalTracker extends EventTracker {
                 selector,
                 selectionMethod),
             `Element "${selector}" not found`);
-        return {
-          target: element,
-          signals: element.signals(),
-        };
+        target = element;
+        return element.signals();
       });
     }
 
     // Wait for the target and the event signal.
-    let target;
-    signalsPromise.then(obj => {
-      target = obj.target;
-      return obj.signals.whenSignal(eventType);
-    }).then(() => {
+    signalsPromise.then(signals => signals.whenSignal(eventType)).then(() => {
       listener(new AnalyticsEvent(target, eventType));
     });
     return NO_UNLISTEN;
