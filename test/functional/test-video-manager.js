@@ -270,7 +270,7 @@ function createFakeVideoPlayerClass(win) {
      */
     pause() {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.PAUSED);
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       });
     }
 

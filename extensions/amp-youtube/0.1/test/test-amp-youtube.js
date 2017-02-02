@@ -271,7 +271,7 @@ describe('amp-youtube', function() {
         return p;
       })
       .then(() => {
-        const p = listenOncePromise(yt, VideoEvents.PAUSED);
+        const p = listenOncePromise(yt, VideoEvents.PAUSE);
         sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
         return p;
       })

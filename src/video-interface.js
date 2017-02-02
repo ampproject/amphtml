@@ -176,9 +176,9 @@ export const VideoEvents = {
    *
    * Fired when the video is paused.
    *
-   * @event paused
+   * @event pause
    */
-  PAUSED: 'paused',
+  PAUSE: 'pause',
 
   /**
    * muted

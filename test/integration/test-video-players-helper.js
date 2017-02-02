@@ -73,7 +73,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
         })
         .then(() => {
           pauseButton.click();
-          return listenOncePromise(r.video, VideoEvents.PAUSED);
+          return listenOncePromise(r.video, VideoEvents.PAUSE);
         })
         .then(() => {
           unmuteButton.click();
@@ -142,7 +142,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
           return p;
         }).then(() => {
           // scroll back to top, make video not visible
-          const p = listenOncePromise(video, VideoEvents.PAUSED);
+          const p = listenOncePromise(video, VideoEvents.PAUSE);
           viewport.setScrollTop(0);
           return p;
         });

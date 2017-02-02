@@ -277,7 +277,7 @@ class VideoEntry {
     // Listen to pause, play and user interaction events.
     const unlistenInteraction = listen(mask, 'click', onInteraction.bind(this));
 
-    const unlistenPause = listen(this.video.element, VideoEvents.PAUSED,
+    const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
         toggleAnimation.bind(this, /*playing*/ false));
 
     const unlistenPlay = listen(this.video.element, VideoEvents.PLAYING,
