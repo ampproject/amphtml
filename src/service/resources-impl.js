@@ -248,6 +248,14 @@ export class Resources {
   }
 
   /**
+   * Signals that the document has been started rendering.
+   * @restricted
+   */
+  renderStarted() {
+    this.ampdoc.signals().signal('render-start');
+  }
+
+  /**
    * Returns a subset of resources which is identified as being in the current
    * viewport.
    * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.

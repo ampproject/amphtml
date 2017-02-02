@@ -398,6 +398,32 @@ As an example, the following configuration can be used to sample 50% of the requ
 },
 ```
 
+#### Embed render start trigger (`"on": "render-start"`)
+AMP elements that embed other documents in iframes (e.g. ads) may report `render-start` event. This event
+is typically emitted as soon as it's possible to confirm that rendering of the embedded document has been
+started. Consult the documentation of a particular AMP element to see whether it emits this event.
+
+The trigger for the embed element has to include `selector` that points to the embedding element:
+```javascript
+"triggers": {
+  "renderStart": {
+    "on": "render-start",
+    "request": "render-start",
+    "selector": "#embed1"
+  }
+}
+```
+
+This event is also emitted by the document itself and can be configured as:
+```javascript
+"triggers": {
+  "renderStart": {
+    "on": "render-start",
+    "request": "render-start"
+  }
+}
+```
+
 #### Page visible trigger (`"on": "visible"`)
 Use this configuration to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`.
 

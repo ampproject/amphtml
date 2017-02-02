@@ -16,6 +16,7 @@
 
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
+import {Signals} from '../../../../src/utils/signals';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
   createIframeWithMessageStub,
@@ -28,6 +29,7 @@ import * as sinon from 'sinon';
 describe('amp-ad-xorigin-iframe-handler', () => {
   let sandbox;
   let adImpl;
+  let signals;
   let iframeHandler;
   let iframe;
   let testIndex = 0;
@@ -41,6 +43,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     adElement.isBuilt = () => {
       return true;
     };
+    signals = new Signals();
+    adElement.signals = () => signals;
     adImpl = new BaseElement(adElement);
     adImpl.getFallback = () => {
       return null;
@@ -88,6 +92,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         });
         return initPromise.then(() => {
           expect(iframe.style.visibility).to.equal('');
+          expect(signals.get('render-start')).to.be.ok;
         }).then(() => {
           iframe.postMessageToParent({
             sentinel: 'amp3ptest' + testIndex,
