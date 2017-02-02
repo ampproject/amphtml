@@ -376,7 +376,7 @@ export function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
  * @returns {?JSONType}
  */
 export function deserializeMessage(message) {
-  if (typeof message !== 'string' || message.indexOf(AMP_MESSAGE_PREFIX) != 0) {
+  if (!isAmpMessage(message)) {
     return null;
   }
   const startPos = message.indexOf('{');
@@ -390,4 +390,14 @@ export function deserializeMessage(message) {
     dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
     return null;
   }
+}
+
+/**
+ *  Returns true if message looks like it is an AMP postMessage
+ *  @param message {*}
+ *  @return {!boolean}
+ */
+export function isAmpMessage(message) {
+  return (typeof message == 'string' &&
+      message.indexOf(AMP_MESSAGE_PREFIX) == 0);
 }
