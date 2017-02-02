@@ -675,13 +675,14 @@ class MultidocManager {
     const extensionIds = [];
     if (doc.head) {
       const parentLinks = {};
-      childElementsByTag(dev().assertElement(this.win.document.head), 'link')
-          .forEach(link => {
-            const href = link.getAttribute('href');
-            if (href) {
-              parentLinks[href] = true;
-            }
-          });
+      const links = childElementsByTag(
+          dev().assertElement(this.win.document.head), 'link');
+      for (let i = 0; i < links.length; i++) {
+        const href = links[i].getAttribute('href');
+        if (href) {
+          parentLinks[href] = true;
+        }
+      }
 
       for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
         const tagName = n.tagName;
@@ -927,7 +928,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   }
   // The :not is an extra prevention of recursion because it will be
   // added to script tags that go into the code path below.
-  const scriptInHead = win.document.head.querySelector(
+  const scriptInHead = win.document.head./*OK*/querySelector(
           `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
   dev().assert(scriptInHead, 'Expected to find script for extension: %s',
       fnOrStruct.n);
