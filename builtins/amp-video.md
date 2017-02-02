@@ -19,7 +19,7 @@ limitations under the License.
 <table>
    <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>A replacement for the HTML5 <code>video</code> tag; only to be used for direct HTML5 video file embeds.</td>
+    <td>A replacement for the HTML5 <code>video</code> tag; solely to be used for direct HTML5 video file embeds.</td>
   </tr>
    <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
