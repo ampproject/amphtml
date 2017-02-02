@@ -28,7 +28,7 @@ import {
   stubLegacyElements,
 } from './service/extensions-impl';
 import {ampdocServiceFor} from './ampdoc';
-import {chunk} from './chunk';
+import {startupChunk} from './chunk';
 import {cssText} from '../build/css';
 import {dev, user, initLogConstructor} from './log';
 import {
@@ -285,7 +285,7 @@ function adoptShared(global, opts, callback) {
       Promise.resolve().then(register);
     } else {
       register.displayName = fnOrStruct.n;
-      chunk(global.document, register);
+      startupChunk(global.document, register);
     }
   }
 
@@ -304,12 +304,18 @@ function adoptShared(global, opts, callback) {
    * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
    */
   global.AMP.push = function(fnOrStruct) {
+    if (maybeLoadCorrectVersion(global, fnOrStruct)) {
+      return;
+    }
     installExtension(fnOrStruct);
   };
 
   // Execute asynchronously scheduled elements.
   for (let i = 0; i < preregisteredExtensions.length; i++) {
     const fnOrStruct = preregisteredExtensions[i];
+    if (maybeLoadCorrectVersion(global, fnOrStruct)) {
+      continue;
+    }
     try {
       installExtension(fnOrStruct);
     } catch (e) {
@@ -646,6 +652,7 @@ class MultidocManager {
     // E.g. integrate with dynamic classes. In shadow case specifically, we have
     // to wait for stubbing to complete, which may take awhile due to importNode.
     setTimeout(() => {
+      ampdoc.signals().signal('render-start');
       setStyle(hostElement, 'visibility', 'visible');
     }, 50);
 
@@ -669,88 +676,106 @@ class MultidocManager {
     const extensionIds = [];
     if (doc.head) {
       const parentLinks = {};
-      childElementsByTag(dev().assertElement(this.win.document.head), 'link')
-          .forEach(link => {
-            const href = link.getAttribute('href');
-            if (href) {
-              parentLinks[href] = true;
-            }
-          });
+      const links = childElementsByTag(
+          dev().assertElement(this.win.document.head), 'link');
+      for (let i = 0; i < links.length; i++) {
+        const href = links[i].getAttribute('href');
+        if (href) {
+          parentLinks[href] = true;
+        }
+      }
 
       for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
         const tagName = n.tagName;
         const name = n.getAttribute('name');
         const rel = n.getAttribute('rel');
-        if (n.tagName == 'TITLE') {
-          shadowRoot.AMP.title = n.textContent;
-          dev().fine(TAG, '- set title: ', shadowRoot.AMP.title);
-        } else if (tagName == 'META' && n.hasAttribute('charset')) {
-          // Ignore.
-        } else if (tagName == 'META' && name == 'viewport') {
-          // Ignore.
-        } else if (tagName == 'META') {
-          // TODO(dvoytenko): copy other meta tags.
-          dev().warn(TAG, 'meta ignored: ', n);
-        } else if (tagName == 'LINK' && rel == 'canonical') {
-          shadowRoot.AMP.canonicalUrl = n.getAttribute('href');
-          dev().fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
-        } else if (tagName == 'LINK' && rel == 'stylesheet') {
-          // This must be a font definition: no other stylesheets are allowed.
-          /** @const {string} */
-          const href = n.getAttribute('href');
-          if (parentLinks[href]) {
-            dev().fine(TAG, '- stylesheet already included: ', href);
-          } else {
-            parentLinks[href] = true;
-            const el = this.win.document.createElement('link');
-            el.setAttribute('rel', 'stylesheet');
-            el.setAttribute('type', 'text/css');
-            el.setAttribute('href', href);
-            this.win.document.head.appendChild(el);
-            dev().fine(TAG, '- import font to parent: ', href, el);
-          }
-        } else if (n.tagName == 'STYLE') {
-          if (n.hasAttribute('amp-boilerplate')) {
-            // Ignore.
-            dev().fine(TAG, '- ignore boilerplate style: ', n);
-          } else {
-            installStylesForShadowRoot(shadowRoot, n.textContent,
-                /* isRuntimeCss */ false, 'amp-custom');
-            dev().fine(TAG, '- import style: ', n);
-          }
-        } else if (n.tagName == 'SCRIPT' && n.hasAttribute('src')) {
-          dev().fine(TAG, '- src script: ', n);
-          const src = n.getAttribute('src');
-          const isRuntime = src.indexOf('/amp.js') != -1 ||
-              src.indexOf('/v0.js') != -1;
-          const customElement = n.getAttribute('custom-element');
-          const customTemplate = n.getAttribute('custom-template');
-          if (isRuntime) {
-            dev().fine(TAG, '- ignore runtime script: ', src);
-          } else if (customElement || customTemplate) {
-            // This is an extension.
-            this.extensions_.loadExtension(customElement || customTemplate);
-            dev().fine(
-                TAG, '- load extension: ', customElement || customTemplate);
-            if (customElement) {
-              extensionIds.push(customElement);
+        switch (tagName) {
+          case 'TITLE':
+            shadowRoot.AMP.title = n.textContent;
+            dev().fine(TAG, '- set title: ', shadowRoot.AMP.title);
+            break;
+          case 'META':
+            if (n.hasAttribute('charset')) {
+              // Ignore.
+            } else if (name == 'viewport') {
+              // Ignore.
+            } else {
+              // TODO(dvoytenko): copy other meta tags.
+              dev().warn(TAG, 'meta ignored: ', n);
             }
-          } else if (!n.hasAttribute('data-amp-report-test')) {
-            user().error(TAG, '- unknown script: ', n, src);
-          }
-        } else if (n.tagName == 'SCRIPT') {
-          // Non-src version of script.
-          const type = n.getAttribute('type') || 'application/javascript';
-          if (type.indexOf('javascript') == -1) {
-            shadowRoot.appendChild(this.win.document.importNode(n, true));
-            dev().fine(TAG, '- non-src script: ', n);
-          } else {
-            user().error(TAG, '- unallowed inline javascript: ', n);
-          }
-        } else if (n.tagName == 'NOSCRIPT') {
-          // Ignore.
-        } else {
-          user().error(TAG, '- UNKNOWN head element:', n);
+            break;
+          case 'LINK':
+            /** @const {string} */
+            const href = n.getAttribute('href');
+            if (rel == 'canonical') {
+              shadowRoot.AMP.canonicalUrl = href;
+              dev().fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
+            } else if (rel == 'stylesheet') {
+              // Must be a font definition: no other stylesheets are allowed.
+              if (parentLinks[href]) {
+                dev().fine(TAG, '- stylesheet already included: ', href);
+              } else {
+                parentLinks[href] = true;
+                const el = this.win.document.createElement('link');
+                el.setAttribute('rel', 'stylesheet');
+                el.setAttribute('type', 'text/css');
+                el.setAttribute('href', href);
+                this.win.document.head.appendChild(el);
+                dev().fine(TAG, '- import font to parent: ', href, el);
+              }
+            } else {
+              dev().fine(TAG, '- ignore link rel=', rel);
+            }
+            break;
+          case 'STYLE':
+            if (n.hasAttribute('amp-boilerplate')) {
+              // Ignore.
+              dev().fine(TAG, '- ignore boilerplate style: ', n);
+            } else {
+              installStylesForShadowRoot(shadowRoot, n.textContent,
+                  /* isRuntimeCss */ false, 'amp-custom');
+              dev().fine(TAG, '- import style: ', n);
+            }
+            break;
+          case 'SCRIPT':
+            if (n.hasAttribute('src')) {
+              dev().fine(TAG, '- src script: ', n);
+              const src = n.getAttribute('src');
+              const isRuntime = src.indexOf('/amp.js') != -1 ||
+                  src.indexOf('/v0.js') != -1;
+              const customElement = n.getAttribute('custom-element');
+              const customTemplate = n.getAttribute('custom-template');
+              if (isRuntime) {
+                dev().fine(TAG, '- ignore runtime script: ', src);
+              } else if (customElement || customTemplate) {
+                // This is an extension.
+                this.extensions_.loadExtension(customElement || customTemplate);
+                dev().fine(
+                    TAG, '- load extension: ', customElement || customTemplate);
+                if (customElement) {
+                  extensionIds.push(customElement);
+                }
+              } else if (!n.hasAttribute('data-amp-report-test')) {
+                user().error(TAG, '- unknown script: ', n, src);
+              }
+            } else {
+              // Non-src version of script.
+              const type = n.getAttribute('type') || 'application/javascript';
+              if (type.indexOf('javascript') == -1) {
+                shadowRoot.appendChild(this.win.document.importNode(n, true));
+                dev().fine(TAG, '- non-src script: ', n);
+              } else {
+                user().error(TAG, '- unallowed inline javascript: ', n);
+              }
+            }
+            break;
+          case 'NOSCRIPT':
+            // Ignore.
+            break;
+          default:
+            user().error(TAG, '- UNKNOWN head element:', n);
+            break;
+
         }
       }
     }
@@ -871,4 +896,51 @@ export function registerElementForTesting(win, elementName) {
   }
   win.AMP.registerElement(element.name, element.implementationClass,
       element.css);
+}
+
+/**
+ * For a given extension, checks that its version is the same
+ * as the version of the main AMP binary.
+ * If yes, returns false and does nothing else.
+ * If they are different, returns false, and initiates a load
+ * of the respective extension via a versioned URL.
+ *
+ * This is currently guarded by the 'version-locking' experiment.
+ * With this active, all scripts in a given page are guaranteed
+ * to have the same AMP release version.
+ *
+ * @param {!Window} win
+ * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+ * @return {boolean}
+ */
+function maybeLoadCorrectVersion(win, fnOrStruct) {
+  if (!isExperimentOn(win, 'version-locking')) {
+    return false;
+  }
+  if (typeof fnOrStruct == 'function') {
+    return false;
+  }
+  const version = fnOrStruct.v;
+  // This is non-obvious, but we only care about the release version,
+  // not about the full rtv version, because these only differ
+  // in the config that is fully determined by the primary binary.
+  if ('$internalRuntimeVersion$' == version) {
+    return false;
+  }
+  // The :not is an extra prevention of recursion because it will be
+  // added to script tags that go into the code path below.
+  const scriptInHead = win.document.head./*OK*/querySelector(
+          `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
+  dev().assert(scriptInHead, 'Expected to find script for extension: %s',
+      fnOrStruct.n);
+  if (!scriptInHead) {
+    return false;
+  }
+  // Mark the element as being replace, so that the loadExtension code
+  // assumes it as not-present.
+  scriptInHead.removeAttribute('custom-element');
+  scriptInHead.setAttribute('i-amphtml-loaded-new-version', fnOrStruct.n);
+  extensionsFor(win).loadExtension(fnOrStruct.n,
+      /* stubbing not needed, should have already happened. */ false);
+  return true;
 }

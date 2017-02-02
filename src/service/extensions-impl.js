@@ -523,7 +523,7 @@ export class Extensions {
       return false;
     }
     if (holder.scriptPresent === undefined) {
-      const scriptInHead = this.win.document.head.querySelector(
+      const scriptInHead = this.win.document.head./*OK*/querySelector(
           `[custom-element="${extensionId}"]`);
       holder.scriptPresent = !!scriptInHead;
     }
@@ -541,6 +541,7 @@ export class Extensions {
     scriptElement.async = true;
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
+    scriptElement.setAttribute('i-amphtml-inserted', '');
     let loc = this.win.location;
     if (getMode().test && this.win.testLocation) {
       loc = this.win.testLocation;

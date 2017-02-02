@@ -98,6 +98,15 @@ export class VideoInterface {
    * @return {boolean}
    */
   isInViewport() {}
+
+  /**
+   * Automatically comes from {@link ./base-element.BaseElement}
+   *
+   * @param {string} unusedMethod
+   * @param {function(!./service/action-impl.ActionInvocation)} unusedHandler
+   * @public
+   */
+  registerAction(unusedMethod, unusedHandler) {}
 }
 
 
@@ -156,20 +165,38 @@ export const VideoEvents = {
   /**
    * play
    *
-   * Fired when the video plays.
+   * Fired when the video starts playing.
    *
-   * @event play
+   * @event playing
    */
-  PLAY: 'play',
+  PLAYING: 'playing',
 
   /**
    * pause
    *
-   * Fired when the video pauses.
+   * Fired when the video is paused.
    *
    * @event pause
    */
   PAUSE: 'pause',
+
+  /**
+   * muted
+   *
+   * Fired when the video is muted.
+   *
+   * @event play
+   */
+  MUTED: 'muted',
+
+  /**
+   * unmuted
+   *
+   * Fired when the video is unmuted.
+   *
+   * @event pause
+   */
+  UNMUTED: 'unmuted',
 
   /**
    * amp:video:visibility

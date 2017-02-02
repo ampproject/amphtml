@@ -33,6 +33,7 @@ tags: {  # amp-form
     value: "amp-form"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

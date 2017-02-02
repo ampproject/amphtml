@@ -24,7 +24,7 @@ tags: {  # amp-mustache
   spec_name: "amp-mustache extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "template"
+  extension_unused_unless_tag_present: "template"
   attrs: {
     name: "async"
     mandatory: true
@@ -36,6 +36,7 @@ tags: {  # amp-mustache
     value: "amp-mustache"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

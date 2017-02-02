@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,12 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable with the following Experimental features:
-       <ul>
-          <li><a href="#custom-validations">Custom Validation</a></li>
-          <li><a href="#variable-substitutions">Variable Substitutions</a></li>
-       </ul>
-    </td>
+    <td>Stable with the following Experimental feature: <a href="#variable-substitutions">Variable Substitutions</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -108,7 +103,7 @@ See [Security Considerations](#security-considerations) for notes on how to secu
 
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
 
-**custom-validation-reporting** (optional) (experimental)
+**custom-validation-reporting** (optional) 
 
 Enables and selects a custom validation reporting strategy, valid values are one of: `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
 
@@ -118,11 +113,12 @@ See the [Custom Validation](#custom-validations) section for more details.
 
 **Allowed**:
 
-*  Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, and `<label>`.
+* Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, and `<label>`.
+* [`amp-selector`](https://www.ampproject.org/docs/reference/components/amp-selector)
 
 **Not Allowed**:
 
-*  `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>`
+* `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>`
 * Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
 
 (Relaxing some of these rules might be reconsidered in the future - please let us know if you require these and provide use cases).
@@ -226,6 +222,20 @@ Publishers can render these in a template inside their forms as follows.
 
 See the [full example here](../../examples/forms.amp.html).
 
+### Redirecting after a submission
+`amp-form` also allows publishers to redirect users to a new page after a submission happens through `AMP-Redirect-To` response header.
+
+Note that you'd also have to update your `Access-Control-Expose-Headers` response header to include `AMP-Redirect-To` to the list of allowed headers.
+
+The redirect URL must be absolute HTTPS URL otherwise AMP will throw an error and redirection won't happen. 
+
+**Known Issue**: Due to an [issue in Safari iOS](https://bugs.webkit.org/show_bug.cgi?id=165627) redirecting to deep linked URLs (URLs that would actually end up opening a native app) might fail when the AMP document is embedded. This is [tracked in this issue](https://github.com/ampproject/amphtml/issues/6953). 
+
+```
+AMP-Redirect-To: https://example.com/forms/thank-you
+Access-Control-Expose-Headers: AMP-Redirect-To, Another-Header, And-Some-More
+```
+
 ## Polyfills
 `amp-form` provide polyfills for behaviors and functionality missing from some browsers or being implemented in the next version of CSS.
 
@@ -253,13 +263,14 @@ See the [full example here](../../examples/forms.amp.html) on using these.
 
 ## Custom Validations
 
-**<a href="https://www.ampproject.org/docs/reference/experimental.html">experimental</a>**
+The `amp-form` extension allows you to build your own custom validation UI by using the `custom-validation-reporting` attribute along with one the following reporting strategies: `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
 
-`amp-form` provides a way for you to build your own custom validation UI with few validation reporting strategies available to choose from `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
+To specify custom validation on your form:
 
-The general usage of this is you first set `custom-validation-reporting` attribute on your `form` to one of the validation reporting strategies and then provide your own validation UI marked up with special attributes, AMP will discover these and report them at the right time depending on the strategy selected.
+1. Set the `custom-validation-reporting` attribute on your `form` to one of the [validation reporting strategies](#reporting-strategies).
+2. Provide your own validation UI marked up with special attributes. AMP will discover the special attributes and report them at the right time depending on the reporting strategy you specified.
 
-Here's an example (for more examples, see [examples/forms.amp.html](../../examples/forms.amp.html)):
+Here's an example:
 ```html
 <h4>Show All Invalid Messages On Submit</h4>
 <form method="post"
@@ -285,18 +296,22 @@ Here's an example (for more examples, see [examples/forms.amp.html](../../exampl
   </fieldset>
 </form>
 ```
+For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
 
-For validation messages, if your element contains no text content inside, AMP will fill it out with the browser's default validation message. In the example above, when `name5` input is empty and validation kicked off (i.e. user tried to submit the form) AMP will fill `<span visible-when-invalid="valueMissing" validation-for="name5"></span>` with the browser validation message and show that `span` to the user.
+For validation messages, if your element contains no text content inside, AMP will fill it out with the browser's default validation message. In the example above, when the `name5` input is empty and validation is kicked off (i.e., user tried to submit the form) AMP will fill `<span visible-when-invalid="valueMissing" validation-for="name5"></span>` with the browser's validation message and show that `span` to the user.
 
 ### Reporting Strategies
+
+Specify one of the following reporting options for the `custom-validation-reporting` attribute: 
+
 #### Show First on Submit
-This mimics the browser default behavior when default validation kicks in. It shows the first validation error it finds and stops there.
+The `show-first-on-submit` reporting option mimics the browser's default behavior when default validation kicks in. It shows the first validation error it finds and stops there.
 
 #### Show All on Submit
-This shows all validation errors on all invalid inputs when the form is submitted. This is useful if you'd like to show a summary of validations for example.
+The `show-all-on-submit` reporting option shows all validation errors on all invalid inputs when the form is submitted. This is useful if you'd like to show a summary of validations.
 
 #### As You Go
-This allows your user to see validation messages as they're interacting with the input, if the email they typed is invalid they'll see the error right away and once fixed the error goes away.
+The `as-you-go` reporting option allows your user to see validation messages as they're interacting with the input. For example, if the user types an invalid email address, the user will see the error right away.  Once they correct the value, the error goes away.
 
 ## Variable Substitutions
 __(<a href="https://www.ampproject.org/docs/reference/experimental.html">experimental</a>)__

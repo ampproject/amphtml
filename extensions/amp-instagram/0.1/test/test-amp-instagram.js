@@ -72,7 +72,6 @@ describe('amp-instagram', () => {
 
   it('builds a placeholder image without inserting iframe', () => {
     return getIns('fBwFP', true, ins => {
-      console.log(ins);
       const placeholder = ins.querySelector('[placeholder]');
       const iframe = ins.querySelector('iframe');
       expect(iframe).to.be.null;

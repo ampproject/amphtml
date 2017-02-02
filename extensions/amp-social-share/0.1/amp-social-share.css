@@ -66,7 +66,12 @@ amp-social-share {
   background-color: #000000;
 }
 
-/** Whatsapp Styling */
+/* Whatsapp Styling */
 .amp-social-share-whatsapp {
   background-color: #25d366;
+}
+
+/* "system" styling */
+.amp-social-share-system {
+  background-color: #000000;
 }

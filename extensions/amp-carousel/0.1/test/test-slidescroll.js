@@ -24,7 +24,6 @@ describe('SlideScroll', () => {
   let sandbox;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-slidescroll', true);
     sandbox = sinon.sandbox.create();
   });
 
@@ -32,7 +31,8 @@ describe('SlideScroll', () => {
     sandbox.restore();
   });
 
-  function getAmpSlideScroll(opt_hasLooping, opt_slideCount = 5) {
+  function getAmpSlideScroll(
+      opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true) {
     return createIframePromise().then(iframe => {
       toggleExperiment(iframe.win, 'amp-slidescroll', true);
       iframe.width = '1000';
@@ -63,12 +63,13 @@ describe('SlideScroll', () => {
         }
         ampSlideScroll.appendChild(img);
       }
-      return iframe.addElement(ampSlideScroll).then(() => {
-        return Promise.resolve({
-          iframe,
-          ampSlideScroll,
-        });
-      });
+
+      const returnPromise = Promise.resolve({iframe, ampSlideScroll});
+      if (opt_attachToDom) {
+        return iframe.addElement(ampSlideScroll).then(() => returnPromise);
+      } else {
+        return returnPromise;
+      }
     });
   }
 
@@ -931,6 +932,93 @@ describe('SlideScroll', () => {
         impl.goCallback(1);
         expect(showSlideSpy).to.have.been.calledWith(1);
         expect(showSlideSpy.callCount).to.equal(3);
+      });
+    });
+
+    it('should update slide when `slide` attribute is mutated', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+
+        impl.mutatedAttributesCallback({slide: 2});
+        expect(showSlideSpy).to.have.been.calledWith(2);
+
+        impl.mutatedAttributesCallback({slide: 0});
+        expect(showSlideSpy).to.have.been.calledWith(0);
+
+        // Don't call showSlide_() if slide is not finite.
+        showSlideSpy.reset();
+        impl.mutatedAttributesCallback({slide: Number.POSITIVE_INFINITY});
+        expect(showSlideSpy.called).to.be.false;
+      });
+    });
+
+    it('should trigger `slide` action when user changes slides', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+
+        impl.goCallback(-1, /* animate */ false);
+        expect(triggerSpy).to.have.been.calledWith(
+            ampSlideScroll,
+            'goToSlide',
+            /* CustomEvent */ sinon.match.has('detail', {index: 4}));
+
+        impl.goCallback(1, /* animate */ false);
+        expect(triggerSpy).to.have.been.calledWith(
+            ampSlideScroll,
+            'goToSlide',
+            /* CustomEvent */ sinon.match.has('detail', {index: 0}));
+      });
+    });
+
+    it('should goToSlide on action', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        let args = {'index': '123'};
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+
+
+        impl.executeAction({method: 'goToSlide', args});
+        expect(showSlideSpy).to.have.been.calledWith(123);
+
+        args = {'index': 'ssds11'};
+        impl.executeAction({method: 'goToSlide', args});
+        expect(showSlideSpy.callCount).to.equal(1);
+
+        args = {'index': '0'};
+        impl.executeAction({method: 'goToSlide', args});
+        expect(showSlideSpy).to.have.been.calledWith(0);
+      });
+    });
+
+    it('should NOT call showSlide_ before layout', () => {
+      const promise = getAmpSlideScroll(true, 5, /* opt_attachToDom */ false);
+      return promise.then(obj => {
+        const {iframe, ampSlideScroll} = obj;
+
+        // Layout happens asynchronously after attaching to DOM, so we can
+        // test pre-layoutCallback logic now.
+        iframe.addElement(ampSlideScroll);
+
+        const impl = ampSlideScroll.implementation_;
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+
+        const args = {'index': '123'};
+        impl.executeAction({method: 'goToSlide', args});
+        expect(showSlideSpy.called).to.be.false;
+
+        impl.mutatedAttributesCallback({slide: 321});
+        expect(showSlideSpy.called).to.be.false;
+
+        ampSlideScroll.layoutCallback();
+
+        // Should show the last slide index requested before layout.
+        expect(showSlideSpy).to.have.been.calledWith(321);
+        expect(showSlideSpy.callCount).to.equal(1);
       });
     });
   });
