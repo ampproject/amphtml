@@ -156,6 +156,8 @@ export class AmpAdXOriginIframeHandler {
     }
 
     if (opt_isA4A) {
+      // A4A writes creative frame directly to page therefore does not expect
+      // post message to unset visibility hidden
       this.element_.appendChild(this.iframe);
       return Promise.resolve();
     }

@@ -53,7 +53,10 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
 import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
-import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {
+  getDefaultBootstrapBaseUrl,
+  generateSentinel,
+} from '../../../src/3p-frame';
 import {installUrlReplacementsForEmbed,}
     from '../../../src/service/url-replacements-impl';
 import {extensionsFor} from '../../../src/extensions';
@@ -61,7 +64,6 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {rethrowAsync} from '../../../src/log';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
-import {generateSentinel} from '../../../src/3p-frame';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 
 /** @private @const {string} */

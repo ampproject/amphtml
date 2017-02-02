@@ -191,13 +191,8 @@ describe('amp-a4a', () => {
     expect(child).to.be.ok;
     expect(child.src).to.match(/^https?:[^?#]+nameframe(\.max)?\.html/);
     const nameData = child.getAttribute('name');
-    expect(JSON.parse.bind(null, nameData), nameData).not.to.throw(Error);
-    const attributes = JSON.parse(nameData);
-    expect(attributes).to.be.ok;
-    expect(attributes._context).to.be.ok;
-    if (!attributes._context.amp3pSentinel) {
-      expect(attributes._context.sentinel).to.be.ok;
-    }
+    expect(nameData).to.be.ok;
+    verifyNameData(nameData);
     expect(child).to.be.visible;
   }
 
@@ -210,14 +205,21 @@ describe('amp-a4a', () => {
     expect(child.src).to.have.string(srcUrl);
     const nameData = child.getAttribute('name');
     expect(nameData).to.be.ok;
-    expect(JSON.parse.bind(null, nameData), nameData).not.to.throw(Error);
-    const attributes = JSON.parse(nameData);
+    verifyNameData(nameData);
+    expect(child).to.be.visible;
+  }
+
+  function verifyNameData(nameData) {
+    let attributes;
+    expect(() => {attributes = JSON.parse(nameData);}).not.to.throw(Error);
     expect(attributes).to.be.ok;
     expect(attributes._context).to.be.ok;
-    if (!attributes._context.amp3pSentinel) {
-      expect(attributes._context.sentinel).to.be.ok;
-    }
-    expect(child).to.be.visible;
+    expect(attributes._context).not.to.contain.all.keys(
+        'sentinel', 'amp3pSentinel');
+    const sentinel = attributes._context.amp3pSentinel ||
+        attributes._context.sentinel;
+    expect(sentinel).to.be.ok;
+    expect(sentinel).to.match(/((\d+)-\d+)/);
   }
 
   describe('ads are visible', () => {
@@ -382,7 +384,8 @@ describe('amp-a4a', () => {
 
       it('should be able to create AmpContext', () => {
         return a4a.layoutCallback().then(() => {
-          const window_ = a4aElement.childNodes[0].contentWindow;
+          const window_ = a4aElement.querySelector(
+              'iframe[data-amp-3p-sentinel]');
           const ac = new AmpContext(window_);
           expect(ac).to.be.ok;
           expect(ac.sentinel).to.be.ok;
@@ -409,7 +412,8 @@ describe('amp-a4a', () => {
 
       it('should be able to create AmpContext', () => {
         return a4a.layoutCallback().then(() => {
-          const window_ = a4aElement.childNodes[0].contentWindow;
+          const window_ = a4aElement.querySelector(
+              'iframe[data-amp-3p-sentinel]');
           const ac = new AmpContext(window_);
           expect(ac).to.be.ok;
           expect(ac.sentinel).to.be.ok;

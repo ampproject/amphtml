@@ -147,9 +147,8 @@ export class AmpContext {
    *  @private
    */
   findAndSetMetadata_() {
-    // if the context data is set on window, that means we are running
-    // in a situation where we couldn't attach the name attribute before
-    // creating the iframe, so don't try to parse the metadata
+    // If the context data is set on window, that means we don't need
+    // to check the name attribute as it has been bypassed.
     if (!this.win_.AMP_CONTEXT_DATA) {
       this.setupMetadata_(this.win_.name);
     } else if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
@@ -157,6 +156,5 @@ export class AmpContext {
     } else {
       this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
     }
-    return !!this.sentinel;
   }
 }
