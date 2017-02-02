@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {closestBySelector, matches} from '../../../src/dom';
+import {
+  closestBySelector,
+  matches,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
 
@@ -155,7 +159,7 @@ export class AnalyticsRoot {
     // Query search based on the selection method.
     let found;
     if (selectionMethod == 'scope') {
-      found = context.querySelector(selector);
+      found = scopedQuerySelector(context, selector);
     } else if (selectionMethod == 'closest') {
       found = closestBySelector(context, selector);
     } else {

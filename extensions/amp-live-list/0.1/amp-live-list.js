@@ -392,7 +392,7 @@ export class AmpLiveList extends AMP.BaseElement {
     let count = 0;
     orphans.forEach(orphan => {
       const orphanId = orphan.getAttribute('id');
-      const liveElement = parent.querySelector(`#${orphanId}`);
+      const liveElement = parent./*OK*/querySelector(`#${orphanId}`);
       // Don't bother updating if live element is tombstoned or
       // if we can't find it.
       if (!liveElement) {
@@ -419,7 +419,7 @@ export class AmpLiveList extends AMP.BaseElement {
     let count = 0;
     orphans.forEach(orphan => {
       const orphanId = orphan.getAttribute('id');
-      const liveElement = parent.querySelector(`#${orphanId}`);
+      const liveElement = parent./*OK*/querySelector(`#${orphanId}`);
       if (!liveElement) {
         return;
       }
