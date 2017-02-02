@@ -155,10 +155,10 @@ export class AmpContext {
    *  @private
    */
   hasContextDataOnWindow_() {
-    if (!this.win_.AMP_CONTEXT_DATA){
+    if (!this.win_.AMP_CONTEXT_DATA) {
       return false;
     }
-    if (typeof this.win_.AMP_CONTEXT_DATA == 'string'){
+    if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
       this.sentinel = this.win_.AMP_CONTEXT_DATA;
     } else {
       this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
