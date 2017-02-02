@@ -1130,6 +1130,7 @@ export class AmpA4A extends AMP.BaseElement {
           // modified url.
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
+    // Can't get the attributes until we have the iframe, then set it.
     const attributes = this.generateSentinelAndContext(iframe);
     iframe.setAttribute('name', JSON.stringify(attributes));
     const sentinel = attributes._context.sentinel ||
@@ -1163,7 +1164,8 @@ export class AmpA4A extends AMP.BaseElement {
           break;
         case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
-          nameData = JSON.stringify({creative});
+          nameData = '';
+          // Name will be set for real below in nameframe case.
           break;
         default:
           // Shouldn't be able to get here, but...  Because of the assert, above,
@@ -1188,6 +1190,8 @@ export class AmpA4A extends AMP.BaseElement {
         const attributes = this.generateSentinelAndContext(iframe);
         attributes['creative'] = creative;
         const name = JSON.stringify(attributes);
+        // Need to reassign the name once we've generated the context
+        // attributes off of the iframe. Need the iframe to generate.
         iframe.setAttribute('name', name);
         const sentinel = attributes._context.sentinel ||
             attributes._context.amp3pSentinel;
