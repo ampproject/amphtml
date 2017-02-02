@@ -464,12 +464,32 @@ describe('CustomElement', () => {
 
     expect(element.isBuilt()).to.equal(false);
     expect(testElementBuildCallback.callCount).to.equal(0);
+    expect(element.signals().get('built')).to.not.be.ok;
 
+    clock.tick(1);
     element.build();
     expect(element.isBuilt()).to.equal(true);
     expect(element).to.not.have.class('i-amphtml-notbuilt');
     expect(element).to.not.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(1);
+    expect(element.signals().get('built')).to.equal(1);
+    return element.whenBuilt();  // Should eventually resolve.
+  });
+
+  it('should anticipate build errors', () => {
+    const element = new ElementClass();
+    element.tryUpgrade_();
+    sandbox.stub(element.implementation_, 'buildCallback', () => {
+      throw new Error('intentional');
+    });
+    expect(() => {
+      element.build();
+    }).to.throw(/intentional/);
+    expect(element.isBuilt()).to.be.false;
+    expect(element).to.not.have.class('i-amphtml-notbuilt');
+    expect(element).to.not.have.class('amp-notbuilt');
+    return expect(element.whenBuilt())
+        .to.be.eventually.rejectedWith(/intentional/);
   });
 
   it('Element - build creates a placeholder if one does not exist' , () => {
@@ -692,8 +712,11 @@ describe('CustomElement', () => {
     expect(testElementLayoutCallback.callCount).to.equal(1);
     expect(testElementPreconnectCallback.callCount).to.equal(2);
     expect(testElementPreconnectCallback.getCall(1).args[0]).to.be.true;
+    expect(element.signals().get('load-start')).to.equal(1);
+    expect(element.signals().get('load-end')).to.be.null;
     return p.then(() => {
       expect(element.readyState).to.equal('complete');
+      expect(element.signals().get('load-end')).to.equal(1);
     });
   });
 
@@ -879,11 +902,51 @@ describe('CustomElement', () => {
     expect(element2.sizerElement_.style.paddingTop).to.equal('1%');
   });
 
+  it('should rediscover sizer to apply heights', () => {
+    const element1 = new ElementClass();
+    element1.setAttribute('i-amphtml-layout', 'responsive');
+    element1.setAttribute('layout', 'responsive');
+    element1.setAttribute('width', '200px');
+    element1.setAttribute('height', '200px');
+    element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+    container.appendChild(element1);
+
+    const sizer = document.createElement('i-amphtml-sizer');
+    element1.appendChild(sizer);
+    expect(element1.sizerElement_).to.be.undefined;
+    element1.attachedCallback();
+    element1.applySizesAndMediaQuery();
+    expect(element1.sizerElement_).to.equal(sizer);
+    expect(sizer.style.paddingTop).to.equal('99%');
+  });
+
+  it('should NOT rediscover sizer after reset', () => {
+    const element1 = new ElementClass();
+    element1.setAttribute('i-amphtml-layout', 'responsive');
+    element1.setAttribute('layout', 'responsive');
+    element1.setAttribute('width', '200px');
+    element1.setAttribute('height', '200px');
+    element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+    container.appendChild(element1);
+
+    const sizer = document.createElement('i-amphtml-sizer');
+    element1.appendChild(sizer);
+    element1.attachedCallback();
+    element1.sizerElement_ = null;
+    element1.applySizesAndMediaQuery();
+    expect(element1.sizerElement_).to.be.null;
+    expect(sizer.style.paddingTop).to.equal('');
+  });
+
   it('should change size without sizer', () => {
     const element = new ElementClass();
-    element.changeSize(111, 222);
+    element.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
     expect(element.style.height).to.equal('111px');
     expect(element.style.width).to.equal('222px');
+    expect(element.style.marginTop).to.equal('1px');
+    expect(element.style.marginRight).to.equal('2px');
+    expect(element.style.marginBottom).to.equal('3px');
+    expect(element.style.marginLeft).to.equal('4px');
   });
 
   it('should change size - height only without sizer', () => {
@@ -898,15 +961,49 @@ describe('CustomElement', () => {
     expect(element.style.width).to.equal('111px');
   });
 
+  it('should change size - margins only without sizer', () => {
+    const element = new ElementClass();
+    element.changeSize(undefined, undefined,
+        {top: 1, right: 2, bottom: 3, left: 4});
+    expect(element.style.marginTop).to.equal('1px');
+    expect(element.style.marginRight).to.equal('2px');
+    expect(element.style.marginBottom).to.equal('3px');
+    expect(element.style.marginLeft).to.equal('4px');
+  });
+
+  it('should change size - some margins only without sizer', () => {
+    const element = new ElementClass();
+    element.style.margin = '1px 2px 3px 4px';
+    element.changeSize(undefined, undefined, {top: 5, left: 6});
+    expect(element.style.marginTop).to.equal('5px');
+    expect(element.style.marginRight).to.equal('2px');
+    expect(element.style.marginBottom).to.equal('3px');
+    expect(element.style.marginLeft).to.equal('6px');
+  });
+
+  it('should change size - some margins only without sizer', () => {
+    const element = new ElementClass();
+    element.style.margin = '1px 2px 3px 4px';
+    element.changeSize(undefined, undefined, {top: 5, left: 6});
+    expect(element.style.marginTop).to.equal('5px');
+    expect(element.style.marginRight).to.equal('2px');
+    expect(element.style.marginBottom).to.equal('3px');
+    expect(element.style.marginLeft).to.equal('6px');
+  });
+
   it('should change size with sizer', () => {
     const element = new ElementClass();
     const sizer = document.createElement('div');
     element.sizerElement_ = sizer;
-    element.changeSize(111, 222);
+    element.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
     expect(parseInt(sizer.style.paddingTop, 10)).to.equal(0);
     expect(element.sizerElement_).to.be.null;
     expect(element.style.height).to.equal('111px');
     expect(element.style.width).to.equal('222px');
+    expect(element.style.marginTop).to.equal('1px');
+    expect(element.style.marginRight).to.equal('2px');
+    expect(element.style.marginBottom).to.equal('3px');
+    expect(element.style.marginLeft).to.equal('4px');
   });
 
   it('should NOT apply media condition in template', () => {
@@ -1663,15 +1760,17 @@ describe('CustomElement Overflow Element', () => {
       elements = [];
 
       doc = {
-        querySelectorAll: selector => {
-          if (selector == '[custom-element]') {
-            return elements;
-          }
-          return [];
-        },
         registerElement: sandbox.spy(),
         documentElement: {
           ownerDocument: doc,
+        },
+        head: {
+          querySelectorAll: selector => {
+            if (selector == 'script[custom-element]') {
+              return elements;
+            }
+            return [];
+          },
         },
         body: {},
       };

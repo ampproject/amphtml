@@ -21,7 +21,7 @@ tags: {  # amp-twitter
   spec_name: "amp-twitter extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-twitter"
+  extension_unused_unless_tag_present: "amp-twitter"
   attrs: {
     name: "async"
     mandatory: true
@@ -33,6 +33,7 @@ tags: {  # amp-twitter
     value: "amp-twitter"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

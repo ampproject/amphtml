@@ -24,7 +24,7 @@ import {user} from '../src/log';
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
-const ATTRIBUTES_TO_PROPAGATE = ['alt', 'referrerpolicy', 'aria-label',
+const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
       'aria-describedby', 'aria-labelledby'];
 
 export class AmpImg extends BaseElement {
@@ -47,13 +47,20 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  attributeChangedCallback(name, unusedOldValue, unusedNewValue) {
-    if (name === 'src') {
+  mutatedAttributesCallback(mutations) {
+    if (mutations['src'] !== undefined || mutations['srcset'] !== undefined) {
       this.srcset_ = srcsetFromElement(this.element);
-      this.updateImageSrc_();
-    } else if (this.img_ && ATTRIBUTES_TO_PROPAGATE.indexOf(name) >= 0) {
-      this.propagateAttributes(name, this.img_,
-          /* opt_removeMissingAttrs */ true);
+      // This element may not have been laid out yet.
+      if (this.img_) {
+        this.updateImageSrc_();
+      }
+    }
+
+    if (this.img_) {
+      const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
+          value => mutations[value] !== undefined);
+      this.propagateAttributes(
+          attrs, this.img_, /* opt_removeMissingAttrs */ true);
     }
   }
 
@@ -112,6 +119,11 @@ export class AmpImg extends BaseElement {
   /** @override */
   isRelayoutNeeded() {
     return true;
+  }
+
+  /** @override */
+  reconstructWhenReparented() {
+    return false;
   }
 
   /** @override */

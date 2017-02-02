@@ -146,6 +146,7 @@ const command = {
     execOrDie('npm run ava');
   },
   buildRuntime: function() {
+    execOrDie(`${gulp} clean`);
     execOrDie(`${gulp} lint`);
     execOrDie(`${gulp} build`);
     execOrDie(`${gulp} check-types`);
@@ -204,6 +205,13 @@ function main(argv) {
   if (buildTargets.length == 1 && buildTargets.has('DOCS')) {
     console.log('Only docs were updated, stopping build process.');
     return 0;
+  }
+
+  if (files.includes('package.json') ?
+        !files.includes('yarn.lock') : files.includes('yarn.lock')) {
+    console.error('pr-check.js - any update to package.json or yarn.lock ' +
+        'must include the other file. Please update through yarn.');
+    process.exit(1);
   }
 
   const sortedBuildTargets = [];

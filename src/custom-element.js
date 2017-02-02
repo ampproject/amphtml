@@ -19,6 +19,7 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     parseLayout, parseLength, getNaturalDimensions,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
+import {Signals} from './utils/signals';
 import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
@@ -58,6 +59,17 @@ const PREPARE_LOADING_THRESHOLD_ = 1000;
 
 
 /**
+ * @enum {number}
+ */
+const UpgradeState = {
+  NOT_UPGRADED: 1,
+  UPGRADED: 2,
+  UPGRADE_FAILED: 3,
+  UPGRADE_IN_PROGRESS: 4,
+};
+
+
+/**
  * Caches whether the template tag is supported to avoid memory allocations.
  * @type {boolean|undefined}
  */
@@ -74,17 +86,6 @@ function isTemplateTagSupported() {
   }
   return templateTagSupported;
 }
-
-
-/**
- * @enum {number}
- */
-const UpgradeState = {
-  NOT_UPGRADED: 1,
-  UPGRADED: 2,
-  UPGRADE_FAILED: 3,
-  UPGRADE_IN_PROGRESS: 4,
-};
 
 
 /**
@@ -155,7 +156,7 @@ function tryUpgradeElementNoInline(element, toClass) {
  */
 export function stubElements(win) {
   const knownElements = getExtendedElements(win);
-  const list = win.document.querySelectorAll('[custom-element]');
+  const list = win.document.head.querySelectorAll('script[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
     if (knownElements[name]) {
@@ -221,8 +222,23 @@ export function upgradeElementInChildWindow(parentWin, childWin, name) {
 /**
  * Applies layout to the element. Visible for testing only.
  * @param {!Element} element
+ * @return {!Layout}
  */
 export function applyLayout_(element) {
+  // Check if the layout has already been done by the server.
+  const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
+  if (completedLayoutAttr) {
+    const layout = /** @type {!Layout} */ (dev().assert(
+        parseLayout(completedLayoutAttr)));
+    if (layout == Layout.RESPONSIVE && element.firstElementChild) {
+      // Find sizer, but assume that it might not have been parsed yet.
+      element.sizerElement_ =
+          element.querySelector('i-amphtml-sizer') || undefined;
+    }
+    return layout;
+  }
+
+  // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
   const widthAttr = element.getAttribute('width');
   const heightAttr = element.getAttribute('height');
@@ -478,9 +494,9 @@ function createBaseCustomElementClass(win) {
       /**
        * This element can be assigned by the {@link applyLayout_} to a child
        * element that will be used to size this element.
-       * @private {?Element}
+       * @private {?Element|undefined}
        */
-      this.sizerElement_ = null;
+      this.sizerElement_ = undefined;
 
       /** @private {boolean|undefined} */
       this.loadingDisabled_ = undefined;
@@ -526,6 +542,9 @@ function createBaseCustomElementClass(win) {
        * @private {boolean|undefined}
        */
       this.isInTemplate_ = undefined;
+
+      /** @private @const */
+      this.signals_ = new Signals();
     }
 
     /**
@@ -534,6 +553,11 @@ function createBaseCustomElementClass(win) {
      * @return {string}
      */
     elementName() {
+    }
+
+    /** @return {!Signals} */
+    signals() {
+      return this.signals_;
     }
 
     /**
@@ -644,6 +668,15 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns the promise that's resolved when the element has been built. If
+     * the build fails, the resulting promise is rejected.
+     * @return {!Promise}
+     */
+    whenBuilt() {
+      return this.signals_.whenSignal('built');
+    }
+
+    /**
      * Get the priority to load the element.
      * @return {number} @this {!Element}
      */
@@ -673,7 +706,9 @@ function createBaseCustomElementClass(win) {
         this.built_ = true;
         this.classList.remove('i-amphtml-notbuilt');
         this.classList.remove('amp-notbuilt');
+        this.signals_.signal('built');
       } catch (e) {
+        this.signals_.rejectSignal('built', e);
         reportError(e, this);
         throw e;
       }
@@ -761,6 +796,19 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {?Element}
+     * @private
+     */
+    getSizer_() {
+      if (this.sizerElement_ === undefined &&
+          this.layout_ === Layout.RESPONSIVE) {
+        // Expect sizer to exist, just not yet discovered.
+        this.sizerElement_ = this.querySelector('i-amphtml-sizer');
+      }
+      return this.sizerElement_ || null;
+    }
+
+    /**
      * If the element has a media attribute, evaluates the value as a media
      * query and based on the result adds or removes the class
      * `i-amphtml-hidden-by-media-query`. The class adds display:none to the element
@@ -795,16 +843,18 @@ function createBaseCustomElementClass(win) {
             this.ownerDocument.defaultView));
       }
       // Heights.
-      if (this.heightsList_ === undefined) {
+      if (this.heightsList_ === undefined &&
+          this.layout_ === Layout.RESPONSIVE) {
         const heightsAttr = this.getAttribute('heights');
         this.heightsList_ = heightsAttr ?
-          parseSizeList(heightsAttr, /* allowPercent */ true) : null;
+            parseSizeList(heightsAttr, /* allowPercent */ true) : null;
       }
-
-      if (this.heightsList_ && this.layout_ ===
-        Layout.RESPONSIVE && this.sizerElement_) {
-        setStyle(this.sizerElement_, 'paddingTop', this.heightsList_.select(
-            this.ownerDocument.defaultView));
+      if (this.heightsList_) {
+        const sizer = this.getSizer_();
+        if (sizer) {
+          setStyle(sizer, 'paddingTop',
+              this.heightsList_.select(this.ownerDocument.defaultView));
+        }
       }
     }
 
@@ -816,15 +866,16 @@ function createBaseCustomElementClass(win) {
      *
      * @param {number|undefined} newHeight
      * @param {number|undefined} newWidth
+     * @param {!./layout-rect.LayoutMarginsDef=} opt_newMargins
      * @final
      * @package @this {!Element}
      */
-    changeSize(newHeight, newWidth) {
-      if (this.sizerElement_) {
+    changeSize(newHeight, newWidth, opt_newMargins) {
+      const sizer = this.getSizer_();
+      if (sizer) {
         // From the moment height is changed the element becomes fully
         // responsible for managing its height. Aspect ratio is no longer
         // preserved.
-        const sizer = this.sizerElement_;
         this.sizerElement_ = null;
         setStyle(sizer, 'paddingTop', '0');
         if (this.resources_) {
@@ -838,6 +889,20 @@ function createBaseCustomElementClass(win) {
       }
       if (newWidth !== undefined) {
         setStyle(this, 'width', newWidth, 'px');
+      }
+      if (opt_newMargins) {
+        if (opt_newMargins.top != null) {
+          setStyle(this, 'marginTop', opt_newMargins.top, 'px');
+        }
+        if (opt_newMargins.right != null) {
+          setStyle(this, 'marginRight', opt_newMargins.right, 'px');
+        }
+        if (opt_newMargins.bottom != null) {
+          setStyle(this, 'marginBottom', opt_newMargins.bottom, 'px');
+        }
+        if (opt_newMargins.left != null) {
+          setStyle(this, 'marginLeft', opt_newMargins.left, 'px');
+        }
       }
     }
 
@@ -1079,10 +1144,17 @@ function createBaseCustomElementClass(win) {
       dev().assert(this.isBuilt(),
         'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting('amp:load:start');
+      const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
+      if (isLoadEvent) {
+        this.signals_.signal('load-start');
+      }
       const promise = this.implementation_.layoutCallback();
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
       return promise.then(() => {
+        if (isLoadEvent) {
+          this.signals_.signal('load-end');
+        }
         this.readyState = 'complete';
         this.layoutCount_++;
         this.toggleLoading_(false, /* cleanup */ true);
@@ -1095,6 +1167,10 @@ function createBaseCustomElementClass(win) {
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
+        if (isLoadEvent) {
+          this.signals_.rejectSignal(
+              'load-end', /** @type {!Error} */ (reason));
+        }
         this.layoutCount_++;
         this.toggleLoading_(false, /* cleanup */ true);
         throw reason;
@@ -1205,6 +1281,18 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Whether the element needs to be reconstructed after it has been
+     * re-parented. Many elements cannot survive fully the reparenting and
+     * are better to be reconstructed from scratch.
+     *
+     * @return {boolean}
+     * @package @final @this {!Element}
+     */
+    reconstructWhenReparented() {
+      return this.implementation_.reconstructWhenReparented();
+    }
+
+    /**
      * Collapses the element, and notifies its owner (if there is one) that the
      * element is no longer present.
      * @suppress {missingProperties}
@@ -1223,14 +1311,16 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Called when an attribute's value changes.
-     * Only called for observedAttributes or from amp-bind.
-     * @param {!string} name
-     * @param {?string} oldValue
-     * @param {?string} newValue
+     * Called when one or more attributes are mutated.
+     * @note Must be called inside a mutate context.
+     * @note Boolean attributes have a value of `true` and `false` when
+     *       present and missing, respectively.
+     * @param {
+     *   !Object<string, (null|boolean|string|number|Array|Object)>
+     * } mutations
      */
-    attributeChangedCallback(name, oldValue, newValue) {
-      this.implementation_.attributeChangedCallback(name, oldValue, newValue);
+    mutatedAttributesCallback(mutations) {
+      this.implementation_.mutatedAttributesCallback(mutations);
     }
 
     /**

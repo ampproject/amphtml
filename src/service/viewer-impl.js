@@ -16,6 +16,7 @@
 
 import {Observable} from '../observable';
 import {findIndex} from '../utils/array';
+import {map} from '../utils/object';
 import {documentStateFor} from './document-state';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
@@ -29,7 +30,6 @@ import {
 import {timerFor} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
-import {tryParseJson} from '../json';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -69,7 +69,6 @@ const TRUSTED_VIEWER_HOSTS = [
    */
   /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
 ];
-
 
 /**
  * An AMP representation of the Viewer. This class doesn't do any work itself
@@ -112,20 +111,14 @@ export class Viewer {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {number} */
-    this.paddingTop_ = 0;
+    /** @private {!Object<string, !Observable<!JSONType>>} */
+    this.messageObservables_ = map();
 
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
 
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
-
-    /** @private {!Observable<!JSONType>} */
-    this.viewportObservable_ = new Observable();
-
-    /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
-    this.historyPoppedObservable_ = new Observable();
 
     /** @private {!Observable<!JSONType>} */
     this.broadcastObservable_ = new Observable();
@@ -155,6 +148,9 @@ export class Viewer {
 
     /** @private {?time} */
     this.firstVisibleTime_ = null;
+
+    /** @private {?time} */
+    this.lastVisibleTime_ = null;
 
     /** @private {?Function} */
     this.messagingReadyResolver_ = null;
@@ -204,10 +200,6 @@ export class Viewer {
         this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
-    this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
-        this.paddingTop_;
-    dev().fine(TAG_, '- padding-top:', this.paddingTop_);
-
     /**
      * Whether the AMP document is embedded in a webview.
      * @private @const {boolean}
@@ -231,7 +223,6 @@ export class Viewer {
         // After https://github.com/ampproject/amphtml/issues/6070
         // is fixed we should probably only keep the amp_js_v check here.
         && (this.params_['origin']
-            || this.params_['viewerorigin']
             || this.params_['visibilityState']
             // Parent asked for viewer JS. We must be embedded.
             || (this.win.location.search.indexOf('amp_js_v') != -1))
@@ -398,9 +389,11 @@ export class Viewer {
    */
   onVisibilityChange_() {
     if (this.isVisible()) {
+      const now = Date.now();
       if (!this.firstVisibleTime_) {
-        this.firstVisibleTime_ = Date.now();
+        this.firstVisibleTime_ = now;
       }
+      this.lastVisibleTime_ = now;
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
     }
@@ -589,20 +582,21 @@ export class Viewer {
   }
 
   /**
+   * Returns the time when the document has become visible for the last time.
+   * If document has not yet become visible, the returned value is `null`.
+   * @return {?time}
+   */
+  getLastVisibleTime() {
+    return this.lastVisibleTime_;
+  }
+
+  /**
    * How much the viewer has requested the runtime to prerender the document.
    * The values are in number of screens.
    * @return {number}
    */
   getPrerenderSize() {
     return this.prerenderSize_;
-  }
-
-  /**
-   * Returns the top padding requested by the viewer.
-   * @return {number}
-   */
-  getPaddingTop() {
-    return this.paddingTop_;
   }
 
   /**
@@ -705,54 +699,18 @@ export class Viewer {
   }
 
   /**
-   * Adds a "viewport" event listener for viewer events.
+   * Adds a eventType listener for viewer events.
+   * @param {string} eventType
    * @param {function(!JSONType)} handler
    * @return {!UnlistenDef}
    */
-  onViewportEvent(handler) {
-    return this.viewportObservable_.add(handler);
-  }
-
-  /**
-   * Adds a "history popped" event listener for viewer events.
-   * @param {function(ViewerHistoryPoppedEventDef)} handler
-   * @return {!UnlistenDef}
-   */
-  onHistoryPoppedEvent(handler) {
-    return this.historyPoppedObservable_.add(handler);
-  }
-
-  /**
-   * Get/set the Base CID from/to the viewer.
-   * @param {string=} opt_data Stringified JSON object {cid, time}.
-   * @return {!Promise<string|undefined>}
-   * TODO: move this to cid-impl
-   */
-  baseCid(opt_data) {
-    return this.isTrustedViewer().then(trusted => {
-      if (!trusted) {
-        return undefined;
-      }
-      const cidPromise = this.sendMessageAwaitResponse('cid', opt_data)
-          .then(data => {
-            // For backward compatibility: #4029
-            if (data && !tryParseJson(data)) {
-              return JSON.stringify({
-                time: Date.now(), // CID returned from old API is always fresh
-                cid: data,
-              });
-            }
-            return data;
-          });
-      // Getting the CID may take some time (waits for JS file to
-      // load, might hit GC), but we do not wait indefinitely. Typically
-      // it should resolve in milli seconds.
-      return timerFor(this.win).timeoutPromise(10000, cidPromise, 'base cid')
-          .catch(error => {
-            dev().error(TAG_, error);
-            return undefined;
-          });
-    });
+  onMessage(eventType, handler) {
+    let observable = this.messageObservables_[eventType];
+    if (!observable) {
+      observable = new Observable();
+      this.messageObservables_[eventType] = observable;
+    }
+    return observable.add(handler);
   }
 
   /**
@@ -764,21 +722,6 @@ export class Viewer {
    * @export
    */
   receiveMessage(eventType, data, unusedAwaitResponse) {
-    if (eventType == 'viewport') {
-      if (data['paddingTop'] !== undefined) {
-        this.paddingTop_ = data['paddingTop'];
-        this.viewportObservable_.fire(
-          /** @type {!JSONType} */ (data));
-        return Promise.resolve();
-      }
-      return undefined;
-    }
-    if (eventType == 'historyPopped') {
-      this.historyPoppedObservable_.fire({
-        newStackIndex: data['newStackIndex'],
-      });
-      return Promise.resolve();
-    }
     if (eventType == 'visibilitychange') {
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
@@ -790,6 +733,11 @@ export class Viewer {
     if (eventType == 'broadcast') {
       this.broadcastObservable_.fire(
           /** @type {!JSONType|undefined} */ (data));
+      return Promise.resolve();
+    }
+    const observable = this.messageObservables_[eventType];
+    if (observable) {
+      observable.fire(data);
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
@@ -991,14 +939,6 @@ function getChannelError(opt_reason) {
   }
   return new Error('No messaging channel: ' + opt_reason);
 }
-
-/**
- * @typedef {{
- *   newStackIndex: number
- * }}
- */
-export let ViewerHistoryPoppedEventDef;
-
 
 /**
  * Sets the viewer visibility state. This calls is restricted to runtime only.

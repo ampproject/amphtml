@@ -33,6 +33,7 @@ tags: {  # amp-hulu
     value: "amp-hulu"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

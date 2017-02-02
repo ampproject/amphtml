@@ -57,6 +57,46 @@ The carousel advances between items if the user swipes, uses arrow keys, or clic
 </amp-carousel>
 ```
 
+### Advancing `amp-carousel[type="slides"]` to a specific slide
+Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a carousel with the ID "carousel-id" to the slide at index=N (the first slide is at index=0, the second slide is at index=1, and so on)
+
+Example:
+```html
+<amp-carousel id="carousel-with-preview"
+    width="400"
+    height="300"
+    layout="responsive"
+    type="slides">
+  <amp-img src="https://example.com/path/to?image=10"
+      width="400"
+      height="300"
+      layout="responsive"
+      alt="a sample image"></amp-img>
+  <amp-img src="https://example.com/path/to?image=11"
+      width="400"
+      height="300"
+      layout="responsive"
+      alt="a sample image"></amp-img>
+</amp-carousel>
+<div class="carousel-preview">
+  <button on="tap:carousel-with-preview.goToSlide(index=0)">
+    <amp-img src="https://example.com/path/to?image=10"
+        width="60"
+        height="40"
+        layout="responsive"
+        alt="a sample image"></amp-img>
+  </button>
+  <button on="tap:carousel-with-preview.goToSlide(index=1)">
+    <amp-img src="https://example.com/path/to?image=11"
+        width="60"
+        height="40"
+        layout="responsive"
+        alt="a sample image"></amp-img>
+  </button>
+</div>
+```
+
+
 ## Attributes
 
 **controls**
@@ -116,7 +156,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 ```css
 .amp-carousel-button-prev {
   left: 16px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
 }
 ```
 
@@ -125,7 +165,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 ```css
 .amp-carousel-button-prev {
   left: 5%;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
 }
 ```
 

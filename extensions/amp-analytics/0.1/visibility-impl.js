@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {closestByTag, closestBySelector} from '../../../src/dom';
+import {
+  closestByTag,
+  closestBySelector,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {resourcesForDoc} from '../../../src/resources';
 import {getParentWindowFrameElement} from '../../../src/service';
@@ -177,7 +181,8 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);
   } else if (selectionMethod == 'scope') {
-    foundEl = analyticsEl.parentElement.querySelector(selector);
+    foundEl = scopedQuerySelector(
+        dev().assertElement(analyticsEl.parentElement), selector);
   } else if (selector[0] == '#') {
     const containerDoc = friendlyFrame ? analyticsEl.ownerDocument : ampdoc;
     foundEl = containerDoc.getElementById(selector.slice(1));
@@ -383,7 +388,9 @@ export class Visibility {
 
   /** @private */
   onIntersectionChange_(change) {
-    const listeners = this.listeners_[change.target.getResourceId()];
+    const resource =
+        this.resourcesService_.getResourceForElement(change.target);
+    const listeners = this.listeners_[resource.getId()];
 
     const visible = change.intersectionRatio * 100;
     for (let c = listeners.length - 1; c >= 0; c--) {
@@ -406,7 +413,7 @@ export class Visibility {
           this.timer_.cancel(state[SCHEDULED_RUN_ID]);
           state[SCHEDULED_RUN_ID] = null;
         }
-        this.prepareStateForCallback_(state, change.boundingClientRect);
+        this.prepareStateForCallback_(state, resource.getLayoutBox());
         listener.callback(state);
         listeners.splice(c, 1);
       } else if (state[IN_VIEWPORT] && !state[SCHEDULED_RUN_ID]) {
@@ -422,7 +429,7 @@ export class Visibility {
           if (this.updateCounters_(
               lastChange.intersectionRatio * 100,
               listener, /* shouldBeVisible */ true)) {
-            this.prepareStateForCallback_(state, lastChange.boundingClientRect);
+            this.prepareStateForCallback_(state, resource.getLayoutBox());
             listener.callback(state);
             listeners.splice(listeners.indexOf(listener), 1);
           }
@@ -459,7 +466,7 @@ export class Visibility {
         const lastVisible = lastChange ? lastChange.intersectionRatio * 100 : 0;
         if (this.updateCounters_(
                 lastVisible, listener, /* shouldBeVisible */ false)) {
-          this.prepareStateForCallback_(state, lastChange.boundingClientRect);
+          this.prepareStateForCallback_(state, resource.getLayoutBox());
           listener.callback(state);
           listeners.splice(j, 1);
         }
@@ -494,7 +501,6 @@ export class Visibility {
       }
 
       const change = res.element.getIntersectionChangeEntry();
-      const br = change.boundingClientRect;
       const visible = !isFiniteNumber(change.intersectionRatio) ? 0
           : change.intersectionRatio * 100;
 
@@ -503,7 +509,8 @@ export class Visibility {
         const shouldBeVisible = !!listeners[c]['shouldBeVisible'];
         if (this.updateCounters_(visible, listeners[c], shouldBeVisible) &&
             this.viewer_.isVisible() == shouldBeVisible) {
-          this.prepareStateForCallback_(listeners[c]['state'], br);
+          this.prepareStateForCallback_(
+              listeners[c]['state'], res.getLayoutBox());
           listeners[c].callback(listeners[c]['state']);
           listeners.splice(c, 1);
         } else {
@@ -667,17 +674,15 @@ export class Visibility {
   /**
    * Sets variable values for callback. Cleans up existing values.
    * @param {Object<string, *>} state The state object to populate
-   * @param {!../../../src/layout-rect.LayoutRectDef} br The bounding rectangle
+   * @param {!../../../src/layout-rect.LayoutRectDef} layoutBox The bounding rectangle
    *     for the element
    * @private
    */
-  prepareStateForCallback_(state, br) {
-    const viewport = viewportForDoc(this.ampdoc);
-
-    state[ELEMENT_X] = viewport.getScrollLeft() + br.left;
-    state[ELEMENT_Y] = viewport.getScrollTop() + br.top;
-    state[ELEMENT_WIDTH] = br.width;
-    state[ELEMENT_HEIGHT] = br.height;
+  prepareStateForCallback_(state, layoutBox) {
+    state[ELEMENT_X] = layoutBox.left;
+    state[ELEMENT_Y] = layoutBox.top;
+    state[ELEMENT_WIDTH] = layoutBox.width;
+    state[ELEMENT_HEIGHT] = layoutBox.height;
     state[TOTAL_TIME] = this.getTotalTime_() || '';
 
     state[LOAD_TIME_VISIBILITY] = state[LOAD_TIME_VISIBILITY] || 0;

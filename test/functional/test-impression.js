@@ -83,7 +83,6 @@ describe('impression', () => {
       expect(url).to.equal('https://www.example.com');
       expect(params).to.jsonEqual({
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       });
     });
   });
@@ -155,9 +154,7 @@ describe('impression', () => {
       });
     };
     const prevHref = window.location.href;
-    console.log(prevHref);
     window.history.replaceState(null, '', prevHref + '?bar=foo&test=4321');
-    console.log(window.location.href);
     maybeTrackImpression(window);
     return Promise.resolve().then(() => {
       return Promise.resolve().then(() => {
