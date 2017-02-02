@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 import './polyfills';
-import {dev, user} from '../src/log';
+import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame';
+import {tryParseJson} from '../src/json';
 
 export class AmpContext {
 
@@ -26,12 +27,7 @@ export class AmpContext {
   constructor(win) {
     this.win_ = win;
 
-    // if the context data is set on window, that means we are running
-    // in a situation where we couldn't attach the name attribute before
-    // creating the iframe, so don't try to parse the metadata
-    if (!this.hasContextDataOnWindow_()) {
-      this.setupMetadata_(this.win_.name);
-    }
+    this.findAndSetMetadata_();
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.getHostWindow_());
     this.client_.setSentinel(this.sentinel);
@@ -112,16 +108,12 @@ export class AmpContext {
   /**
    *  Parse the metadata attributes from the name and add them to
    *  the class instance.
-   *  @param {!Object|!String} contextData
+   *  @param {!Object|string} contextData
    *  @private
    */
   setupMetadata_(data) {
-    try {
-      data = JSON.parse(decodeURI(data));
-    } catch (err) {}
-
-    if (!data || typeof data != 'object') {
-      user().error('AMPCONTEXT', '- Could not parse metadata.');
+    data = tryParseJson(data);
+    if (!data) {
       throw new Error('Could not setup metadata.');
     }
     const context = data._context;
@@ -154,11 +146,13 @@ export class AmpContext {
    *  sentinel value, sets it, and returns true if so.
    *  @private
    */
-  hasContextDataOnWindow_() {
+  findAndSetMetadata_() {
+    // if the context data is set on window, that means we are running
+    // in a situation where we couldn't attach the name attribute before
+    // creating the iframe, so don't try to parse the metadata
     if (!this.win_.AMP_CONTEXT_DATA) {
-      return false;
-    }
-    if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
+      this.setupMetadata_(this.win_.name);
+    } else if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
       this.sentinel = this.win_.AMP_CONTEXT_DATA;
     } else {
       this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
