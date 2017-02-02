@@ -249,8 +249,8 @@ const EXPERIMENTS = [
         'amp-bind/amp-bind.md',
   },
   {
-    id: 'measure-jank',
-    name: 'Measure page jank',
+    id: 'jank-meter',
+    name: 'Display jank meter',
   },
 ];
 
