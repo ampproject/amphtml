@@ -46,6 +46,7 @@ import {platformFor} from '../../../../src/platform';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {AmpContext} from '../../../../3p/ampcontext.js';
 import * as sinon from 'sinon';
 
 /**
@@ -190,7 +191,8 @@ describe('amp-a4a', () => {
     expect(child).to.be.ok;
     expect(child.src).to.match(/^https?:[^?#]+nameframe(\.max)?\.html/);
     const nameData = child.getAttribute('name');
-    expect(JSON.parse.bind(null, nameData), nameData).not.to.throw(Error);
+    expect(nameData).to.be.ok;
+    verifyNameData(nameData);
     expect(child).to.be.visible;
   }
 
@@ -201,8 +203,23 @@ describe('amp-a4a', () => {
     const child = element.querySelector('iframe[src]');
     expect(child).to.be.ok;
     expect(child.src).to.have.string(srcUrl);
-    expect(child.getAttribute('name')).not.to.be.ok;
+    const nameData = child.getAttribute('name');
+    expect(nameData).to.be.ok;
+    verifyNameData(nameData);
     expect(child).to.be.visible;
+  }
+
+  function verifyNameData(nameData) {
+    let attributes;
+    expect(() => {attributes = JSON.parse(nameData);}).not.to.throw(Error);
+    expect(attributes).to.be.ok;
+    expect(attributes._context).to.be.ok;
+    expect(attributes._context).not.to.contain.all.keys(
+        'sentinel', 'amp3pSentinel');
+    const sentinel = attributes._context.amp3pSentinel ||
+        attributes._context.sentinel;
+    expect(sentinel).to.be.ok;
+    expect(sentinel).to.match(/((\d+)-\d+)/);
   }
 
   describe('ads are visible', () => {
@@ -364,6 +381,16 @@ describe('amp-a4a', () => {
           expect(xhrMock).to.be.calledOnce;
         });
       });
+
+      it('should be able to create AmpContext', () => {
+        return a4a.layoutCallback().then(() => {
+          const window_ = a4aElement.querySelector(
+              'iframe[data-amp-3p-sentinel]');
+          const ac = new AmpContext(window_);
+          expect(ac).to.be.ok;
+          expect(ac.sentinel).to.be.ok;
+        });
+      });
     });
 
     describe('#renderViaNameFrame', () => {
@@ -380,6 +407,16 @@ describe('amp-a4a', () => {
           a4a.vsync_.runScheduledTasks_();
           verifyNameFrameRender(a4aElement);
           expect(xhrMock).to.be.calledOnce;
+        });
+      });
+
+      it('should be able to create AmpContext', () => {
+        return a4a.layoutCallback().then(() => {
+          const window_ = a4aElement.querySelector(
+              'iframe[data-amp-3p-sentinel]');
+          const ac = new AmpContext(window_);
+          expect(ac).to.be.ok;
+          expect(ac.sentinel).to.be.ok;
         });
       });
 

@@ -53,7 +53,10 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
 import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
-import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {
+  getDefaultBootstrapBaseUrl,
+  generateSentinel,
+} from '../../../src/3p-frame';
 import {installUrlReplacementsForEmbed,}
     from '../../../src/service/url-replacements-impl';
 import {extensionsFor} from '../../../src/extensions';
@@ -61,6 +64,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {rethrowAsync} from '../../../src/log';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
+import {getContextMetadata} from '../../../src/iframe-attributes';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -1126,6 +1130,12 @@ export class AmpA4A extends AMP.BaseElement {
           // modified url.
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
+    // Can't get the attributes until we have the iframe, then set it.
+    const attributes = this.generateSentinelAndContext(iframe);
+    iframe.setAttribute('name', JSON.stringify(attributes));
+    const sentinel = attributes._context.sentinel ||
+        attributes._context.amp3pSentinel;
+    iframe.setAttribute('data-amp-3p-sentinel', sentinel);
     return this.iframeRenderHelper_(iframe);
   }
 
@@ -1154,7 +1164,8 @@ export class AmpA4A extends AMP.BaseElement {
           break;
         case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
-          nameData = JSON.stringify({creative});
+          nameData = '';
+          // Name will be set for real below in nameframe case.
           break;
         default:
           // Shouldn't be able to get here, but...  Because of the assert, above,
@@ -1174,8 +1185,30 @@ export class AmpA4A extends AMP.BaseElement {
             'src': srcPath,
             'name': nameData,
           }, SHARED_IFRAME_PROPERTIES));
+      if (method == XORIGIN_MODE.NAMEFRAME) {
+        // TODO(bradfrizzell): change name of function and var
+        const attributes = this.generateSentinelAndContext(iframe);
+        attributes['creative'] = creative;
+        const name = JSON.stringify(attributes);
+        // Need to reassign the name once we've generated the context
+        // attributes off of the iframe. Need the iframe to generate.
+        iframe.setAttribute('name', name);
+        const sentinel = attributes._context.sentinel ||
+            attributes._context.amp3pSentinel;
+        iframe.setAttribute('data-amp-3p-sentinel', sentinel);
+      }
       return this.iframeRenderHelper_(iframe);
     });
+  }
+
+  /**
+   * Generates sentinel for iframe and gets the context metadata.
+   * @param {!Element} iframe
+   * @return {!Object} context
+   */
+  generateSentinelAndContext(iframe) {
+    const sentinel = generateSentinel(window);
+    return getContextMetadata(window, iframe, sentinel);
   }
 
   /**
