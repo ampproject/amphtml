@@ -141,7 +141,7 @@ export class Vsync {
       /** @private {number} */
       this.bigJankCounter_ = 0;
       this.win.document.body.appendChild(this.jankRateDisplay_);
-      this.jankRateDisplay_.innerText = '0|0|0ms';
+      this.jankRateDisplay_./*OK*/innerText = '0|0|0ms';
       /** @private {number} */
       this.scheduledTime_ = 0;
     }
@@ -393,7 +393,7 @@ export class Vsync {
         if (paintLatency > 100) {
           this.bigJankCounter_++;
         }
-        this.jankRateDisplay_.innerText =
+        this.jankRateDisplay_./*OK*/innerText =
             `${this.jankCounter_}|${this.bigJankCounter_}|${paintLatency}ms`;
         dev().info('JANK', 'Paint latency: ' + paintLatency + 'ms');
       }
