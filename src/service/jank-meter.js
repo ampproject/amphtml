@@ -23,17 +23,16 @@ export class JankMeter {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @const {!Window} */
-    this.win = win;
-
+    /** @private {!Window} */
+    this.win_ = win;
     /** @private {!Element} */
-    this.jankMeterDisplay_ = this.win.document.createElement('div');
+    this.jankMeterDisplay_ = this.win_.document.createElement('div');
     this.jankMeterDisplay_.classList.add('i-amphtml-jank-meter');
     /** @private {number} */
     this.jankCounter_ = 0;
     /** @private {number} */
     this.bigJankCounter_ = 0;
-    this.win.document.body.appendChild(this.jankMeterDisplay_);
+    this.win_.document.body.appendChild(this.jankMeterDisplay_);
     this.jankMeterDisplay_.textContent = '0|0|0ms';
     /** @private {number} */
     this.scheduledTime_ = -1;
@@ -42,13 +41,14 @@ export class JankMeter {
   onScheduled() {
     // only take the first schedule for the current frame.
     if (this.scheduledTime_ == -1) {
-      this.scheduledTime_ = this.win.performance.now();
+      this.scheduledTime_ = this.win_.performance.now();
     }
   }
 
   onRun() {
     const paintLatency =
-        Math.floor(this.win.performance.now() - this.scheduledTime_);
+        Math.floor(this.win_.performance.now() - this.scheduledTime_);
+    this.scheduledTime_ = -1;
     if (paintLatency > 16) {
       this.jankCounter_++;
       if (paintLatency > 100) {
@@ -58,10 +58,9 @@ export class JankMeter {
           `${this.jankCounter_}|${this.bigJankCounter_}|${paintLatency}ms`;
       dev().info('JANK', 'Paint latency: ' + paintLatency + 'ms');
     }
-    this.scheduledTime_ = -1;
   }
 }
 
-export function isJankMeterSupported(win) {
+export function isJankMeterEnabled(win) {
   return isExperimentOn(win, 'jank-meter') && win.performance;
 }
