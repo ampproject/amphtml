@@ -82,7 +82,8 @@ describe('friendly-iframe-embed', () => {
       expect(embed.spec.url).to.equal('https://acme.org/url1');
       expect(getFriendlyIframeEmbedOptional(embed.iframe)).to.equal(embed);
 
-      // Iframe is made visible again.
+      // Iframe is rendered.
+      expect(embed.signals().get('render-start')).to.be.ok;
       expect(iframe.style.visibility).to.equal('');
       expect(embed.win.document.body.style.visibility).to.equal('visible');
       expect(String(embed.win.document.body.style.opacity)).to.equal('1');

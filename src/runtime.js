@@ -652,6 +652,7 @@ class MultidocManager {
     // E.g. integrate with dynamic classes. In shadow case specifically, we have
     // to wait for stubbing to complete, which may take awhile due to importNode.
     setTimeout(() => {
+      ampdoc.signals().signal('render-start');
       setStyle(hostElement, 'visibility', 'visible');
     }, 50);
 

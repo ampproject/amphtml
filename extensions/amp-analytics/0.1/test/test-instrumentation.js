@@ -21,6 +21,7 @@ import {
 import {
   ClickEventTracker,
   CustomEventTracker,
+  SignalTracker,
 } from '../events';
 import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
@@ -180,6 +181,21 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(group.listeners_).to.have.length(1);
       expect(group.listeners_[0]).to.equal(unlisten);
       expect(insStub).to.not.be.called;
+    });
+
+    it('should add "render-start" trigger', () => {
+      const config = {on: 'render-start'};
+      group.addTrigger(config, handler);
+      const tracker = root.getTrackerOptional('render-start');
+      expect(tracker).to.be.instanceOf(SignalTracker);
+
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const handler = function() {};
+      group.addTrigger(config, handler);
+      expect(stub).to.be.calledOnce;
+      expect(stub).to.be.calledWith(
+          analyticsElement, 'render-start', config, handler);
     });
   });
 });
