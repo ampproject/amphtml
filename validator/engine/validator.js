@@ -1616,7 +1616,8 @@ class CdataMatcher {
     /** @type {string} */
     var blacklistedCdataRegexStr = '';
     if (tagSpec.cdata !== null) {
-      blacklistedCdataRegexStr = tagSpec.cdata.blacklistedCdataRegex.join('|');
+      blacklistedCdataRegexStr = tagSpec.cdata.blacklistedCdataRegex
+          .map(function(b) { return b.regex; }).join('|');
     }
     /**
      * @type {RegExp} blacklistedCdataRegex
@@ -1733,12 +1734,10 @@ class CdataMatcher {
       }
     } else if (cdataSpec.cssSpec !== null) {
       if (amp.validator.VALIDATE_CSS) {
-        const reportAdditionalErrors =
-            this.matchCss_(cdata, cdataSpec.cssSpec, context, validationResult);
-        if (!reportAdditionalErrors ||
-            (!amp.validator.GENERATE_DETAILED_ERRORS &&
+        this.matchCss_(cdata, cdataSpec.cssSpec, context, validationResult);
+        if (!amp.validator.GENERATE_DETAILED_ERRORS &&
              validationResult.status ==
-                 amp.validator.ValidationResult.Status.FAIL)) {
+                 amp.validator.ValidationResult.Status.FAIL) {
           return;
         }
       }
@@ -1779,10 +1778,6 @@ class CdataMatcher {
    * @param {!amp.validator.CssSpec} cssSpec
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} validationResult
-   * @return {boolean} True iff the calling method (match) should report
-   *   additional errors. We use this flag as a slight hack to avoid reporting
-   *   errors twice, both via the CSS parser (this method) and via regular
-   *   expressions in the caller (match).
    * @private
    */
   matchCss_(cdata, cssSpec, context, validationResult) {
@@ -1798,7 +1793,7 @@ class CdataMatcher {
         cssErrors);
     if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
       validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-      return false;
+      return;
     }
     /** @type {!CssParsingConfig} */
     const cssParsingConfig = computeCssParsingConfig(cssSpec);
@@ -1808,7 +1803,7 @@ class CdataMatcher {
         cssErrors);
     if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
       validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-      return false;
+      return;
     }
 
     // We extract the urls from the stylesheet. As a side-effect, this can
@@ -1833,7 +1828,7 @@ class CdataMatcher {
       }
     } else if (cssErrors.length > 0) {
       validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-      return false;
+      return;
     }
     const parsedFontUrlSpec = new ParsedUrlSpec(cssSpec.fontUrlSpec);
     const parsedImageUrlSpec = new ParsedUrlSpec(cssSpec.imageUrlSpec);
@@ -1849,8 +1844,6 @@ class CdataMatcher {
     const visitor = new InvalidAtRuleVisitor(
         this.tagSpec_, cssSpec, context, validationResult);
     sheet.accept(visitor);
-
-    return !visitor.errorsSeen && cssErrors.length === 0;
   }
 
   /** @param {!LineCol} lineCol */
