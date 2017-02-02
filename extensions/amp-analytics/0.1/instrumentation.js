@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
 import {getElement, isVisibilitySpecValid} from './visibility-impl';
-import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
-import {getParentWindowFrameElement} from '../../../src/service';
+import {Observable} from '../../../src/observable';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {resourcesForDoc} from '../../../src/resources';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
@@ -57,7 +54,6 @@ export const AnalyticsEventType = {
   TIMER: 'timer',
   SCROLL: 'scroll',
   HIDDEN: 'hidden',
-  RENDER_START: 'render-start',
 };
 
 /** @const {string} */
@@ -73,7 +69,6 @@ const ALLOWED_IN_EMBED = [
   AnalyticsEventType.CLICK,
   AnalyticsEventType.TIMER,
   AnalyticsEventType.HIDDEN,
-  AnalyticsEventType.RENDER_START,
 ];
 
 /**
@@ -94,11 +89,7 @@ class AnalyticsEvent {
   }
 }
 
-/**
- * @implements {../../../src/service/service.Disposable}
- * @private
- * @visibleForTesting
- */
+/** @private Visible for testing. */
 export class InstrumentationService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -170,9 +161,6 @@ export class InstrumentationService {
     }
     if (eventType === AnalyticsEventType.VISIBLE) {
       this.createVisibilityListener_(listener, config,
-          AnalyticsEventType.VISIBLE, analyticsElement);
-    } else if (eventType === AnalyticsEventType.RENDER_START) {
-      this.createRenderStartListener_(listener, config,
           AnalyticsEventType.VISIBLE, analyticsElement);
     } else if (eventType === AnalyticsEventType.CLICK) {
       if (!config['selector']) {
@@ -308,52 +296,6 @@ export class InstrumentationService {
           }
         });
       }
-    }
-  }
-
-  /**
-   * Creates listeners for render-start conditions or calls the callback if all
-   * the conditions are met.
-   * @param {!AnalyticsEventListenerDef} callback The callback to call when the
-   *   event occurs.
-   * @param {!JSONType} config Configuration for instrumentation.
-   * @param {AnalyticsEventType} eventType Event type for which the callback is triggered.
-   * @param {!Element} analyticsElement The element assoicated with the
-   *   config.
-   * @private
-   */
-  createRenderStartListener_(callback, config, eventType, analyticsElement) {
-    const selector = config['selector'] || ':root';
-    let renderStartPromise;
-    if (isRootSelector(selector)) {
-      // Root selector: this is either a top-level document or a friendly embed.
-      const friendlyFrame = getParentWindowFrameElement(
-          analyticsElement, this.ampdoc.win);
-      if (friendlyFrame) {
-        // This is a friendly embed: it has its own render-start signal.
-        const embed = getFriendlyIframeEmbedOptional(friendlyFrame);
-        if (embed) {
-          renderStartPromise = embed.whenRenderStarted();
-        }
-      } else {
-        // Top level document: resources has render-start signal.
-        const resources = resourcesForDoc(this.ampdoc);
-        renderStartPromise = resources.whenRenderStarted();
-      }
-    } else {
-      // This is an AMP-element signal.
-      const selectionMethod = config['selectionMethod'];
-      const element = user().assertElement(
-          getElement(this.ampdoc, selector, analyticsElement, selectionMethod),  // QQQ: refactor from visibility-impl
-          'Element not found for render-start selectionMethod: ' + selector);
-      renderStartPromise = element.whenRenderStarted();
-    }
-    if (renderStartPromise) {
-      renderStartPromise.then(() => {
-        callback(new AnalyticsEvent(AnalyticsEventType.RENDER_START));
-      });
-    } else {
-      user().error(TAG, 'render-start signal cannot be found: ' + selector);
     }
   }
 
