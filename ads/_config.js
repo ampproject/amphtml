@@ -101,6 +101,11 @@ export const adConfig = {
 
   aduptech: {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
+    preconnect: [
+      'https://d.adup-tech.com',
+      'https://m.adup-tech.com',
+    ],
+    renderStartImplemented: true,
   },
 
   adverline: {
