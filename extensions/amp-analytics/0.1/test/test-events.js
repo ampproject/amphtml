@@ -19,7 +19,9 @@ import {
   AnalyticsEvent,
   ClickEventTracker,
   CustomEventTracker,
+  SignalTracker,
 } from '../events';
+import {Signals} from '../../../../src/utils/signals';
 
 
 describes.realWin('Events', {amp: 1}, env => {
@@ -231,6 +233,75 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(handler2.callCount).to.equal(4);
       expect(handler3.callCount).to.equal(2);
       expect(tracker.buffer_).to.be.undefined;
+    });
+  });
+
+
+  describe('SignalTracker', () => {
+    let tracker;
+    let targetSignals;
+
+    beforeEach(() => {
+      tracker = new SignalTracker(root);
+      target.classList.add('i-amphtml-element');
+      targetSignals = new Signals();
+      target.signals = () => targetSignals;
+    });
+
+    it('should initalize, add listeners and dispose', () => {
+      expect(tracker.root).to.equal(root);
+    });
+
+    it('should add doc listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'sig1', {}, resolver);
+      root.signals().signal('sig1');
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('sig1');
+      });
+    });
+
+    it('should add root listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'sig1', {selector: ':root'}, resolver);
+      root.signals().signal('sig1');
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('sig1');
+      });
+    });
+
+    it('should add host listener equal to root', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'sig1', {selector: ':host'}, resolver);
+      root.signals().signal('sig1');
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('sig1');
+      });
+    });
+
+    it('should add target listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'sig1', {selector: '.target'}, resolver);
+      targetSignals.signal('sig1');
+      return promise.then(event => {
+        expect(event.target).to.equal(target);
+        expect(event.type).to.equal('sig1');
+      });
     });
   });
 });

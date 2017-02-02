@@ -22,6 +22,7 @@ import {
   AnalyticsEvent,
   ClickEventTracker,
   CustomEventTracker,
+  SignalTracker,
 } from './events';
 import {Observable} from '../../../src/observable';
 import {Visibility} from './visibility-impl';
@@ -64,6 +65,8 @@ export const AnalyticsEventType = {
   HIDDEN: 'hidden',
 };
 
+const ALLOWED_FOR_ALL = ['ampdoc', 'embed'];
+
 /**
  * Events that can result in analytics data to be sent.
  * @const {!Object<string, {
@@ -75,13 +78,18 @@ export const AnalyticsEventType = {
 const EVENT_TRACKERS = {
   'click': {
     name: 'click',
-    allowedFor: ['ampdoc', 'embed'],
+    allowedFor: ALLOWED_FOR_ALL,
     klass: ClickEventTracker,
   },
   'custom': {
     name: 'custom',
-    allowedFor: ['ampdoc', 'embed'],
+    allowedFor: ALLOWED_FOR_ALL,
     klass: CustomEventTracker,
+  },
+  'render-start': {
+    name: 'render-start',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: SignalTracker,
   },
 };
 
