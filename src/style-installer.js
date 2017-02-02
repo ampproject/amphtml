@@ -92,7 +92,7 @@ export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
     const existing =
         isRuntimeCss ?
         cssRoot.querySelector('style[amp-runtime]') :
-        cssRoot.querySelector(`style[amp-extension=${ext}]`);
+        cssRoot./*OK*/querySelector(`style[amp-extension=${ext}]`);
     if (existing) {
       if (isRuntimeCss) {
         cssRoot.runtimeStyleElement = existing;

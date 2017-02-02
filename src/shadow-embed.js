@@ -90,7 +90,7 @@ function createShadowRootPolyfill(hostElement) {
   shadowRoot.getElementById = function(id) {
     const escapedId = escapeCssSelectorIdent(win, id);
     return /** @type {HTMLElement|null} */ (
-        shadowRoot.querySelector(`#${escapedId}`));
+        shadowRoot./*OK*/querySelector(`#${escapedId}`));
   };
 
   return shadowRoot;

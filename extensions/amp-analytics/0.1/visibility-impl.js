@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {closestByTag, closestBySelector} from '../../../src/dom';
+import {
+  closestByTag,
+  closestBySelector,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {resourcesForDoc} from '../../../src/resources';
 import {getParentWindowFrameElement} from '../../../src/service';
@@ -177,7 +181,8 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);
   } else if (selectionMethod == 'scope') {
-    foundEl = analyticsEl.parentElement.querySelector(selector);
+    foundEl = scopedQuerySelector(
+        dev().assertElement(analyticsEl.parentElement), selector);
   } else if (selector[0] == '#') {
     const containerDoc = friendlyFrame ? analyticsEl.ownerDocument : ampdoc;
     foundEl = containerDoc.getElementById(selector.slice(1));

@@ -18,9 +18,9 @@ import {
   GoogleAdLifecycleReporter,
   BaseLifecycleReporter,
 } from '../performance';
-import {childElements} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {viewerForDoc} from '../../../../src/viewer';
+import {toArray} from '../../../../src/types';
 import * as sinon from 'sinon';
 
 /**
@@ -36,15 +36,6 @@ function expectMatchesAll(address, matchList) {
 }
 
 /**
- * Whether `element` is an `img` DOM node.
- * @param {!Element} element
- * @returns {boolean}
- */
-function isImgNode(element) {
-  return element.tagName == 'IMG';
-}
-
-/**
  * Verify that `element` has at least one sibling DOM node that is an
  * `img` tag whose `src` matches all of the patterns in `matchList`.
  *
@@ -52,8 +43,7 @@ function isImgNode(element) {
  * @param {!Array<!RegExp>} matchList
  */
 function expectHasSiblingImgMatchingAll(element, matchList) {
-  const imgSiblings = childElements(
-      element.parentElement, e => isImgNode(e));
+  const imgSiblings = toArray(element.parentElement.querySelectorAll('img'));
   expect(imgSiblings).to.not.be.empty;
   const result = imgSiblings.some(e => {
     const src = e.getAttribute('src');
@@ -229,7 +219,7 @@ describe('GoogleAdLifecycleReporter', () => {
           }
         });
         expect(emitPingSpy.callCount).to.equal(nSlots * nStages);
-        const allImgNodes = childElements(doc.body, x => isImgNode(x));
+        const allImgNodes = doc.querySelectorAll('img');
         expect(allImgNodes.length).to.equal(nSlots * nStages);
         let commonCorrelator;
         const slotCounts = {};

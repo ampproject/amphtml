@@ -572,6 +572,15 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
   '\\.scheduleUnlayout\\(': bannedTermsHelpString,
+  // Super complicated regex that says "find any querySelector method call that
+  // is passed as a variable anything that is not a string, or a string that
+  // contains a space.
+  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': {
+    message: 'querySelector is not scoped to the element, but globally and ' +
+      'filtered to just the elements inside the element. This leads to ' +
+      'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
+      '"div div"). Instead, use the scopedQuerySelector helper in dom.js',
+  },
   'loadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
