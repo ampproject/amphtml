@@ -169,36 +169,25 @@ export class Bind {
     const doc = dev().assert(body.ownerDocument, 'ownerDocument is null.');
     const walker = doc.createTreeWalker(body, NodeFilter.SHOW_ELEMENT);
 
-    /**
-     * Helper function for scanning a slice of elements.
-     * Returns true if there are no more elements to scan.
-     * @param {number} start
-     * @param {number} end
-     * @return {boolean}
-     */
-    const scanFromTo = (start, end) => {
-      for (let i = start; i < end; i++) {
-        const element = walker.nextNode();
-        if (!element) {
-          return true;
-        }
-        const tagName = element.tagName;
-
-        const boundProperties = this.scanElement_(element);
-        if (boundProperties.length > 0) {
-          boundElements.push({element, boundProperties});
-        }
-        // Append (element, property, expressionString) tuples to `bindings`.
-        boundProperties.forEach(boundProperty => {
-          const {property, expressionString} = boundProperty;
-          bindings.push({tagName, property, expressionString});
-        });
+    // Helper function for scanning the tree walker's next node.
+    // Returns true if the walker has no more nodes.
+    const scanNextNode_ = () => {
+      const element = walker.nextNode();
+      if (!element) {
+        return true;
       }
+      const tagName = element.tagName;
+      const boundProperties = this.scanElement_(element);
+      if (boundProperties.length > 0) {
+        boundElements.push({element, boundProperties});
+      }
+      // Append (element, property, expressionString) tuples to `bindings`.
+      boundProperties.forEach(boundProperty => {
+        const {property, expressionString} = boundProperty;
+        bindings.push({tagName, property, expressionString});
+      });
       return false;
     };
-
-    // Current scan position in `elements` array.
-    let position = 0;
 
     return new Promise(resolve => {
       const chunktion = idleDeadline => {
@@ -207,15 +196,15 @@ export class Bind {
         // idle time runs out.
         if (idleDeadline && !idleDeadline.didTimeout) {
           while (idleDeadline.timeRemaining() > 1 && !completed) {
-            completed = scanFromTo(position, position + 1);
-            position++;
+            completed = scanNextNode_();
           }
         } else {
           // If `requestIdleCallback` isn't available, scan elements in buckets.
           // Bucket size is a magic number that fits within a single frame.
           const bucketSize = 250;
-          completed = scanFromTo(position, position + bucketSize);
-          position += bucketSize;
+          for (let i = 0; i < bucketSize && !completed; i++) {
+            completed = scanNextNode_();
+          }
         }
 
         // If we scanned all elements, resolve. Otherwise, continue chunking.
