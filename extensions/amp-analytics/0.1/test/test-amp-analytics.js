@@ -220,10 +220,18 @@ describe('amp-analytics', function() {
                 vars: Object.create(null),
               }).then(urls => {
                 const url = urls[0];
-                const val = VENDOR_REQUESTS[vendor][name];
+                const vendorData = VENDOR_REQUESTS[vendor];
+                if (!vendorData) {
+                  throw new Error('Add vendor ' + vendor +
+                      ' to vendor-requests.json');
+                }
+                const val = vendorData[name];
+                if (val == '<ignore for test>') {
+                  return;
+                }
                 if (val == null) {
                   throw new Error('Define ' + vendor + '.' + name +
-                      'in vendor-requests.json. Expected value: ' + url);
+                      ' in vendor-requests.json. Expected value: ' + url);
                 }
                 actualResults[vendor][name] = url;
                 // Write this out for easy copy pasting.

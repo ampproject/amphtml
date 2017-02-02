@@ -205,7 +205,8 @@ export class AmpForm {
     if (this.dependenciesPromise_) {
       return this.dependenciesPromise_;
     }
-    const depElements = this.form_.querySelectorAll(EXTERNAL_DEPS.join(','));
+    const depElements = this.form_./*OK*/querySelectorAll(
+        EXTERNAL_DEPS.join(','));
     // Wait for an element to be built to make sure it is ready.
     const depPromises = toArray(depElements).map(el => el.whenBuilt());
     return this.dependenciesPromise_ = Promise.race(
@@ -337,7 +338,7 @@ export class AmpForm {
         xhrUrl = this.xhrAction_;
         body = new FormData(this.form_);
       }
-      return this.xhr_.fetchJsonResponse(dev().assertString(xhrUrl), {
+      return this.xhr_.fetch(dev().assertString(xhrUrl), {
         body,
         method: this.method_,
         credentials: 'include',
@@ -524,7 +525,7 @@ export class AmpForm {
    * @private
    */
   renderTemplate_(data) {
-    const container = this.form_.querySelector(`[${this.state_}]`);
+    const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
       container.setAttribute('role', 'alert');
@@ -543,7 +544,7 @@ export class AmpForm {
    * @private
    */
   cleanupRenderedTemplate_() {
-    const container = this.form_.querySelector(`[${this.state_}]`);
+    const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
     if (!container) {
       return;
     }

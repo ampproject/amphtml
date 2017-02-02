@@ -155,6 +155,10 @@ export const adConfig = {
     ],
   },
 
+  capirs: {
+    renderStartImplemented: true,
+  },
+
   caprofitx: {
     prefetch: [
       'https://cdn.caprofitx.com/pfx.min.js',
@@ -475,6 +479,15 @@ export const adConfig = {
 
   sovrn: {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
+  },
+
+  swoop: {
+    prefetch: 'https://www.swoop-amp.com/amp.js',
+    preconnect: [
+      'https://www.swpsvc.com',
+      'https://client.swpcld.com',
+    ],
+    renderStartImplemented: true,
   },
 
   taboola: {},

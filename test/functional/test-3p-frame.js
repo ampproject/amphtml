@@ -94,6 +94,7 @@ describe('3p-frame', () => {
   });
 
   sentinelNames.forEach(sentinelName => {
+    // TODO(bradfrizzell) break this out into a test-iframe-attributes
     it('should create an iframe', () => {
       window.AMP_MODE = {
         localDev: true,
@@ -171,6 +172,7 @@ describe('3p-frame', () => {
           '{"testAttr":"value","ping":"pong","width":50,"height":100,' +
           '"type":"_ping_",' +
           '"_context":{"referrer":"http://acme.org/",' +
+          '"ampcontextVersion": "$internalRuntimeVersion$",' +
           '"canonicalUrl":"' + docInfo.canonicalUrl + '",' +
           '"sourceUrl":"' + locationHref + '",' +
           '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +

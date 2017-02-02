@@ -344,7 +344,7 @@ function liveListTombstone(liveList) {
   // We can tombstone any list item except item-1 since we always do a
   // replace example on item-1.
   if (tombstoneId != 1) {
-    var item = liveList.querySelector(`#list-item-${tombstoneId}`);
+    var item = liveList./*OK*/querySelector(`#list-item-${tombstoneId}`);
     if (item) {
       item.setAttribute('data-tombstone', '');
     }
