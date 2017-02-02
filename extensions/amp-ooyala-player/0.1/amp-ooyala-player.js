@@ -61,7 +61,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
 
-    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
     this.applyFillContent(iframe, true);
     this.element.appendChild(iframe);
 
@@ -148,7 +147,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       return; // We only process valid JSON.
     }
     if (data.data == 'playing') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
     } else if (data.data == 'paused') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     } else if (data.data == 'muted') {
