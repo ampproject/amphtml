@@ -35,9 +35,10 @@ export function contentad(global, data) {
   /* Pass Source URL */
   let sourceUrl = window.context.sourceUrl;
   if (data.url) {
-    const host = window.context.location.host;
+    let s = document.createElement('a');
+    s.href = sourceUrl;
     const domain = data.url || window.atob(data.d);
-    sourceUrl = sourceUrl.replace(host, domain);
+    sourceUrl = sourceUrl.replace(s.host, domain);
   }
 
   /* Build API URL */
