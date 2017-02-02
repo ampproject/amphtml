@@ -25,6 +25,7 @@ import {
   removeChildren,
   createElementWithAttributes,
 } from '../../../src/dom';
+import {listen} from '../../../src/event-helper';
 import {cancellation} from '../../../src/error';
 import {
   installFriendlyIframeEmbed,
@@ -39,6 +40,7 @@ import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
+import {parseUrl} from '../../../src/url';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/platform';
@@ -235,6 +237,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
     this.friendlyIframeEmbed_ = null;
+
+    /** @private {!Array<!UnlistenDef>}} */
+    this.unlisteners_ = [];
 
     /** {?AMP.AmpAdUIHandler} */
     this.uiHandler = null;
@@ -791,6 +796,8 @@ export class AmpA4A extends AMP.BaseElement {
         this.xOriginIframeHandler_ = null;
       }
       this.layoutMeasureExecuted_ = false;
+      this.unlisteners_.forEach(unlistener => unlistener);
+      this.unlisteners_ = [];
     });
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
@@ -1049,7 +1056,7 @@ export class AmpA4A extends AMP.BaseElement {
         iframe, this.element, {
           url: this.adUrl_,
           html: creativeMetaData.minifiedCreative,
-          extensionIds: creativeMetaData.customElementExtensions || [],
+          extensionIds: creativeMetaData.customElementExtensions,
           fonts: fontsArray,
         }, embedWin => {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
@@ -1272,11 +1279,12 @@ export class AmpA4A extends AMP.BaseElement {
     if (!isExperimentOn(this.win, 'alp-for-a4a')) {
       return;
     }
-    iframeWin.document.documentElement.addEventListener('click', event => {
-      handleClick(event, url => {
-        viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
-      });
-    });
+    this.unlisteners_.push(
+      listen(iframeWin.document.documentElement, 'click', event => {
+        handleClick(event, url => {
+          viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
+        });
+      }));
   }
 
   /**
@@ -1285,8 +1293,40 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Window} iframeWin
    */
   registerExpandUrlParams_(iframeWin) {
-    iframeWin.document.documentElement.addEventListener('click',
-        this.maybeExpandUrlParams_.bind(this), /* capture */ true);
+    // Mapping of message origin to parameters allowing for replacement.
+    // Multiple messages from same origin result in last value being
+    // overwritten.
+    /** @type {Object<string, Object<string, string>>} */
+    const messages = {};
+    // Listen for messages to creative friendly frame.
+    this.unlisteners_.push(listen(iframeWin, 'message', evt => {
+      if (!evt || !evt.source || !evt.origin) {
+        return;
+      }
+      // Only allow messages from child iframe whose parent is an
+      // amp-signal-collection-frame element.
+      const frames = iframeWin.document
+          .querySelectorAll('amp-signal-collection-frame > iframe');
+      for (let i = 0; i < frames.length; i++) {
+        const frame = frames[i];
+        try {
+          if (frame.contentWindow == evt.source) {
+            const originUrl = parseUrl(evt.origin);
+            messages[originUrl.hostname.toUpperCase()] =
+                /** @type {Object<string,string>} */(JSON.parse(evt.data));
+          }
+        } catch (err) {
+          const type = frame.getAttribute('type');
+          dev().error(TAG,
+              `Invalid ${frame.parentElement.tagName}:${type} msg`,
+              evt, err);
+        }
+      }
+    }));
+    this.unlisteners_.push(
+      listen(iframeWin.document.documentElement, 'click', evt => {
+        this.maybeExpandUrlParams_(evt, messages);
+      }, /* capture */ true));
   }
 
   /**
@@ -1294,8 +1334,9 @@ export class AmpA4A extends AMP.BaseElement {
    * The function changes the actual href value and stores the
    * template in the ORIGINAL_HREF_ATTRIBUTE attribute
    * @param {!Event} e
+   * @param {Object<string, Object<string, string>>} messages
    */
-  maybeExpandUrlParams_(e) {
+  maybeExpandUrlParams_(e, messages) {
     const target = closestByTag(dev().assertElement(e.target), 'A');
     if (!target || !target.href) {
       // Not a click on a link.
@@ -1313,15 +1354,23 @@ export class AmpA4A extends AMP.BaseElement {
       'CLICK_Y': () => {
         return e.pageY;
       },
+      'POSTMESSAGE': (origin, varName) => {
+        let data, param;
+        if (!origin || !varName || !(data = messages[origin.toUpperCase()]) ||
+            !(param = data[varName])) {
+          return '';
+        }
+        return param;
+      },
     };
+    // For now we only allow to replace the vars defined items and nothing else.
+    // NOTE: Addition to this whitelist requires additional review.
+    const whitelist = {};
+    Object.keys(vars).forEach(key => { whitelist[key] = true; });
+    // Note url replacement service calls encodeValue on the value to prevent
+    // XSS.
     const newHref = urlReplacementsForDoc(this.getAmpDoc()).expandSync(
-        hrefToExpand, vars, undefined, /* opt_whitelist */ {
-          // For now we only allow to replace the click location vars
-          // and nothing else.
-          // NOTE: Addition to this whitelist requires additional review.
-          'CLICK_X': true,
-          'CLICK_Y': true,
-        });
+        hrefToExpand, vars, undefined, whitelist);
     if (newHref != hrefToExpand) {
       // Store original value so that later clicks can be processed with
       // freshest values.

@@ -9,14 +9,11 @@ export const data = {
       opacity: 0;
     }
   </style><style amp4ads-boilerplate>body{visibility:hidden}</style><meta name=viewport content=width=device-width,minimum-scale=1></head>
-<body>Hello, world.
+<body>Hello, world.<a href=http://foo.com?a=b&amp;nx=CLICK_X&amp;ny=CLICK_Y>Click me</a>
 
-<script type="application/json" amp-ad-metadata>
+<script type=application/json amp-ad-metadata>
 {
    "ampRuntimeUtf16CharOffsets" : [ 55, 212 ],
-   "bodyAttributes" : "",
-   "bodyUtf16CharOffsets" : [ 529, 544 ],
-   "cssUtf16CharOffsets" : [ 320, 386 ],
    "customElementExtensions" : [ "amp-font" ],
    "customStylesheets" : [
       {
@@ -60,10 +57,10 @@ export const data = {
     }
   </style>
 </head>
-<body>Hello, world.</body>
+<body>Hello, world.<a href="http://foo.com?a=b&nx=CLICK_X&ny=CLICK_Y">Click me</a></body>
 </html>`,
 
-  signature: `ACWMjZEOeJKFek0b9LAGVFDsXPuGI8c1lFSUf+yVgVyswH0gBCoY9jaeNZnyWrKbSn2fNGp7F/tu5XGqkazkPatPRsUIRAII0aIbouiiRK/KUd+fX+gMiOssJH5yLBEukAMY5Te4pNSSOO27s0tzf/fhx9okOW2/23NkhazV9cGKAX6jxlMKSKgTQuZ3phynC3zyy1Tzn2r3jj1G9wvZXWqnexesOcbcX9BQYGvk5wGTjLUElA1QXqvhdzSQgyyX+ajvWBUNwVFHDQaQsV+2WGx0DhHaXmtgEBVnFSjzahELBPwH2SxrHzIfEZC4TP86VquNuAwetXulhwn5VjkbTOQoAeuw`,
+  signature: `ACWMjZEmObfjRjd+Sre48xcnowQqCC6odbcBQn7JYNWltjjOhTLqOWB0YBjFsfG2RAfrfalESbCgWGaaCmabUIecT/q7rTOWGekQKrO+W+J5C+IDGzqsWAbJf5S5DtBuccCwXLDDbHR67S0/q6LfKWsd7iETEXyH45JRPwM/ZzpB8kDY/h+lN6+F8DKkcnwG8J2dyYUqwwtuvFAsi400mgnq9jTl0TtqHmQNkrsKLmUcZmSl72uyFmSQhpYYQdgdj/EpFMre8f0IhKuxX/JOEWSrvUO1q3Kp5JmK5r8BYnXapFLWefLJuoMsTb/d7dqi+lgGWYVukRkI/7j61lueDEJXXpHC`,
 
   publicKey: `{
     "kty": "RSA",

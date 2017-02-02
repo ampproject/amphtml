@@ -1,0 +1,14 @@
+<html>
+  <head>
+    <script>
+      window.addEventListener('message', e => {
+        // Send message back to sender, cannot user source as that is likely
+        // the test window.  As a result, send to immediate parent as this is
+        // simulating the content of a amp-signal-collection-frame xdomain
+        // iframe child and post message listener is registered within the
+        // AMP creative friendly frame.
+        window.parent.postMessage(`${e.data}`, '*');
+      });
+    </script>
+  </head>
+</html>
