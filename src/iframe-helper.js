@@ -17,7 +17,10 @@
 import {dev} from './log';
 import {parseUrl} from './url';
 import {filterSplice} from './utils/array';
-import {deserializeMessage} from './3p-frame';
+import {
+  deserializeMessage,
+  isAmpMessage,
+} from './3p-frame';
 
 /**
  * Sentinel used to force unlistening after a iframe is detached.
@@ -383,20 +386,17 @@ function getSentinel_(iframe, opt_is3P) {
  * @private
  */
 function parseIfNeeded(data) {
-  const shouldBeParsed = typeof data === 'string'
-      && data.charAt(0) === '{';
-  let msg;
-  if (shouldBeParsed) {
+  if (typeof data === 'string' && data.charAt(0) === '{') {
     try {
       data = JSON.parse(data);
     } catch (e) {
       dev().warn('IFRAME-HELPER', 'Postmessage could not be parsed. ' +
           'Is it in a valid JSON format?', e);
     }
-  } else {
-    msg = deserializeMessage(data);
+  } else if (isAmpMessage(data)) {
+    data = deserializeMessage(data);
   }
-  return msg ? msg : /** @type {!Object} */ (data) ;
+  return /** @type {!Object} */ (data) ;
 }
 
 
