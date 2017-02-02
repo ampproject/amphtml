@@ -25,13 +25,11 @@ limitations under the License.
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>Stable</td>
   </tr>
-  <!--
-  Uncomment the script after validator changes are pushed to production.
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js">&lt;/script></code></td>
   </tr>
-  -->
+
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-video/">Annotated code example for amp-video</a></td>
@@ -86,7 +84,7 @@ If this attribute is present, and the browser supports autoplay:
 * when the video is scrolled out of view, the video is paused
 * when the video is scrolled into view, the video resumes playback
 * when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
+* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
 **controls**
 
