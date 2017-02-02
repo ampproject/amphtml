@@ -35,7 +35,7 @@ export function contentad(global, data) {
   /* Pass Source URL */
   let sourceUrl = window.context.sourceUrl;
   if (data.url) {
-    let s = document.createElement('a');
+    const s = document.createElement('a');
     s.href = sourceUrl;
     const domain = data.url || window.atob(data.d);
     sourceUrl = sourceUrl.replace(s.host, domain);
