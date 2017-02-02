@@ -62,6 +62,6 @@ export class JankMeter {
   }
 }
 
-export function isJankRateSupported(win) {
+export function isJankMeterSupported(win) {
   return isExperimentOn(win, 'jank-meter') && win.performance;
 }

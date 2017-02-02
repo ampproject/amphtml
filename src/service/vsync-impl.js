@@ -23,7 +23,7 @@ import {documentStateFor} from './document-state';
 import {getService} from '../service';
 import {installTimerService} from './timer-impl';
 import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
-import {JankMeter, isJankRateSupported} from './jank-rate';
+import {JankMeter, isJankMeterSupported} from './jank-meter';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -132,7 +132,7 @@ export class Vsync {
 
     /** @private {?JankMeter} */
     this.jankMeter_ =
-        isJankRateSupported(this.win) ? new JankMeter(this.win) : null;
+        isJankMeterSupported(this.win) ? new JankMeter(this.win) : null;
   }
 
   /** @private */
