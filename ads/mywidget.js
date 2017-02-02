@@ -23,10 +23,11 @@ import {loadScript, validateData} from '../3p/3p';
 export function mywidget(global, data) {
   validateData(data, ['cid']);
 
-  const height = data.height;
   let isReady = false;
 
-  if (!(height >= 0)) {
+  // `data.height` can be not a number (`undefined`, if attribute is not set,
+  // for example), that's why condition is not `data.height < 0`
+  if (!(data.height >= 0)) {
     return;
   }
 
@@ -42,8 +43,11 @@ export function mywidget(global, data) {
 
     ready: function(opts) {
       // Make sure ready() is called only once.
-      if (isReady) { return; }
-      else { isReady = true; }
+      if (isReady) {
+        return;
+      } else {
+        isReady = true;
+      }
 
       if (!opts || !opts.firstIntersectionCallback) {
         return;
@@ -63,7 +67,6 @@ export function mywidget(global, data) {
   };
 
   // load the myWidget initializer asynchronously
-  loadScript(global, 'https://likemore-go.imgsmail.ru/widget.amp.js', () => {}, () => {
-    global.context.noContentAvailable();
-  });
+  loadScript(global, 'https://likemore-go.imgsmail.ru/widget.amp.js', () => {},
+    global.context.noContentAvailable);
 }
