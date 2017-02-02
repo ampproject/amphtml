@@ -126,6 +126,7 @@ export class Bind {
       } else {
         this.digestQueuedAfterScan_ = true;
       }
+      user().fine(TAG, 'State updated; re-evaluating expressions...');
     }
   }
 
@@ -145,6 +146,9 @@ export class Bind {
       if (getMode().development || this.digestQueuedAfterScan_) {
         this.digest_(/* opt_verifyOnly */ !this.digestQueuedAfterScan_);
       }
+
+      dev().fine(TAG, `Initialized ${bindings.length} bindings from ` +
+          `${boundElements.length} elements.`);
     });
   }
 
@@ -311,15 +315,20 @@ export class Bind {
         let width, height;
 
         boundProperties.forEach(boundProperty => {
-          const newValue = results[boundProperty.expressionString];
+          const expressionString = boundProperty.expressionString;
+          const newValue = results[expressionString];
 
           // Don't apply if the result hasn't changed or is missing.
           if (newValue === undefined ||
               this.shallowEquals_(newValue, boundProperty.previousResult)) {
+            user().fine(TAG, `Expression result unchanged or missing: ` +
+                `"${expressionString}"`);
             return;
           } else {
             boundProperty.previousResult = newValue;
           }
+          user().fine(TAG, `New expression result: ` +
+              `"${expressionString}" -> ${newValue}`);
 
           const mutation = this.applyBinding_(boundProperty, element, newValue);
           if (mutation) {
