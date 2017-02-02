@@ -219,7 +219,7 @@ describe('GoogleAdLifecycleReporter', () => {
           }
         });
         expect(emitPingSpy.callCount).to.equal(nSlots * nStages);
-        const allImgNodes = doc.querySelectorAll('img');
+        const allImgNodes = toArray(doc.querySelectorAll('img'));
         expect(allImgNodes.length).to.equal(nSlots * nStages);
         let commonCorrelator;
         const slotCounts = {};
