@@ -126,9 +126,15 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
     const contentWindow = we.frame.contentWindow;
     if (!contentWindow) {
       setTimeout(dropListenSentinel, 0, listenSentinel);
+    } else if (sentinel === 'amp') {
+      // A non-3P code path, origin must match.
+      if (we.origin === origin && contentWindow == triggerWin) {
+        windowEvents = we;
+        break;
+      }
     } else if (triggerWin == contentWindow ||
         isDescendantWindow(contentWindow, triggerWin)) {
-      // We may accept messages from nested frames.
+      // 3p code path, we may accept messages from nested frames.
       windowEvents = we;
       break;
     }
