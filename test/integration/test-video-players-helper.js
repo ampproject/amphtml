@@ -69,7 +69,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
         })
         .then(() => {
           playButton.click();
-          return listenOncePromise(r.video, VideoEvents.PLAY);
+          return listenOncePromise(r.video, VideoEvents.PLAYING);
         })
         .then(() => {
           pauseButton.click();
@@ -114,14 +114,14 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     describe('play/pause', () => {
       it('should play when in view port initially', () => {
         return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          return listenOncePromise(r.video, VideoEvents.PLAY);
+          return listenOncePromise(r.video, VideoEvents.PLAYING);
         });
       });
 
       it('should not play when not in view port initially', () => {
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
           const timer = timerFor(r.video.implementation_.win);
-          const p = listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
+          const p = listenOncePromise(r.video, VideoEvents.PLAYING).then(() => {
             return Promise.reject('should not have autoplayed');
           });
           // we have to wait to ensure play is NOT called.
@@ -137,7 +137,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
           viewport = video.implementation_.getViewport();
 
           // scroll to the bottom, make video fully visible
-          const p = listenOncePromise(video, VideoEvents.PLAY);
+          const p = listenOncePromise(video, VideoEvents.PLAYING);
           viewport.scrollIntoView(video);
           return p;
         }).then(() => {

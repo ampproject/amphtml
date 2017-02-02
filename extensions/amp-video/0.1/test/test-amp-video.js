@@ -361,7 +361,7 @@ describe(TAG, () => {
 
   it('should forward certain events from video to the amp element', () => {
     return getVideo({
-      src: 'foo.mp4',
+      src: '/examples/av/ForBiggerJoyrides.mp4',
       width: 160,
       height: 90,
     }).then(v => {
@@ -373,7 +373,7 @@ describe(TAG, () => {
       })
       .then(() => {
         impl.play();
-        return listenOncePromise(v, VideoEvents.PLAY);
+        return listenOncePromise(v, VideoEvents.PLAYING);
       })
       .then(() => {
         impl.pause();
