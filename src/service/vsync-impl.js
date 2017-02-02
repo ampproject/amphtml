@@ -19,6 +19,8 @@ import {ampdocServiceFor} from '../ampdoc';
 import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
 import {documentStateFor} from './document-state';
+import {isExperimentOn} from '../experiments';
+
 import {getService} from '../service';
 import {installTimerService} from './timer-impl';
 import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
@@ -127,6 +129,21 @@ export class Vsync {
       // In multi-doc mode, we track separately the global visibility and
       // per-doc visibility when necessary.
       this.docState_.onVisibilityChanged(boundOnVisibilityChanged);
+    }
+
+    /** @private {?Element} */
+    this.jankRateDisplay_ = null;
+    if (isExperimentOn(this.win, 'measure-jank') && this.win.performance) {
+      this.jankRateDisplay_ = this.win.document.createElement('div');
+      this.jankRateDisplay_.classList.add('i-amphtml-pjr');
+      /** @private {number} */
+      this.jankCounter_ = 0;
+      /** @private {number} */
+      this.bigJankCounter_ = 0;
+      this.win.document.body.appendChild(this.jankRateDisplay_);
+      this.jankRateDisplay_.textContent = '0|0|0ms';
+      /** @private {number} */
+      this.scheduledTime_ = 0;
     }
   }
 
@@ -345,6 +362,9 @@ export class Vsync {
     }
     // Schedule actual animation frame and then run tasks.
     this.scheduled_ = true;
+    if (this.jankRateDisplay_) {
+      this.scheduledTime_ = this.win.performance.now();
+    }
     this.forceSchedule_();
   }
 
@@ -365,6 +385,20 @@ export class Vsync {
    */
   runScheduledTasks_() {
     this.scheduled_ = false;
+    if (this.jankRateDisplay_) {
+      const paintLatency =
+          Math.floor(this.win.performance.now() - this.scheduledTime_);
+      if (paintLatency > FRAME_TIME) {
+        this.jankCounter_++;
+        if (paintLatency > 100) {
+          this.bigJankCounter_++;
+        }
+        this.jankRateDisplay_.textContent =
+            `${this.jankCounter_}|${this.bigJankCounter_}|${paintLatency}ms`;
+        dev().info('JANK', 'Paint latency: ' + paintLatency + 'ms');
+      }
+    }
+
     const tasks = this.tasks_;
     const states = this.states_;
     const resolver = this.nextFrameResolver_;
