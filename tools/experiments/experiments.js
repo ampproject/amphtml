@@ -220,13 +220,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
   },
   {
-    id: 'amp-selector',
-    name: 'Amp selector extension',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-selector/amp-selector.md',
-  },
-  {
     id: 'amp-accordion-session-state-optout',
     name: 'AMP Accordion attribute to opt out of preserved state.',
     Spec: 'https://github.com/ampproject/amphtml/issues/3813',
