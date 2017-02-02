@@ -752,9 +752,10 @@ describes.realWin('runtime multidoc', {
       // Document is invisible at first.
       expect(hostElement.style.visibility).to.equal('hidden');
 
-      // After timeout, it becomes visible again.
+      // After timeout the doc rendered is started.
       clock.tick(3000);
       expect(hostElement.style.visibility).to.equal('visible');
+      expect(ampdoc.signals().get('render-start')).to.be.ok;
 
       return ampdoc.whenReady().then(() => {
         expect(ampdoc.isReady()).to.be.true;
