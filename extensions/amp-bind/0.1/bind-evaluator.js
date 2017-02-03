@@ -18,8 +18,6 @@ import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 
-const TAG = 'amp-bind';
-
 /**
  * @typedef {{
  *   tagName: string,
@@ -54,11 +52,10 @@ export class BindEvaluator {
    * Parses and stores given bindings into expression objects and returns map
    * of expression string to parse errors.
    * @param {!Array<BindingDef>} bindings
-   * @return {Object<string,Error>}
+   * @return {!Object<string,!Error>}
    */
   setBindings(bindings) {
     const errors = Object.create(null);
-
     // Create BindExpression objects from expression strings.
     // TODO(choumx): Chunk creation of BindExpression or change to web worker.
     for (let i = 0; i < bindings.length; i++) {
@@ -79,7 +76,6 @@ export class BindEvaluator {
         expression,
       });
     }
-
     return errors;
   }
 
@@ -96,9 +92,9 @@ export class BindEvaluator {
    */
   evaluate(scope) {
     return new Promise(resolve => {
-      /** @type {!Object<string, BindEvaluationResultDef} */
+      /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
       const cache = {};
-      /** @type {!Object<string, Error>} */
+      /** @type {!Object<string, !Error>} */
       const errors = {};
 
       this.parsedBindings_.forEach(binding => {

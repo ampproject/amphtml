@@ -86,6 +86,12 @@ export class Bind {
     /** @visibleForTesting {?Promise<!Object<string,*>>} */
     this.evaluatePromise_ = null;
 
+    /**
+     * Maps expression string to the element(s) that contain it.
+     * @private @const {!Object<string, !Array<!Element>>}
+     */
+    this.expressionToElements_ = Object.create(null);
+
     /** @visibleForTesting {?Promise} */
     this.scanPromise_ = null;
 
@@ -138,9 +144,11 @@ export class Bind {
   initialize_() {
     this.scanPromise_ = this.scanBody_(this.ampdoc.getBody());
     this.scanPromise_.then(results => {
-      const {boundElements, bindings} = results;
+      const {boundElements, bindings, expressionToElements} = results;
 
       this.boundElements_ = boundElements;
+
+      Object.assign(this.expressionToElements_, expressionToElements);
 
       this.evaluator_ = new BindEvaluator();
       const parseErrors = this.evaluator_.setBindings(bindings);
@@ -148,10 +156,10 @@ export class Bind {
       // For each parse error, find elements that the malformed expressions
       // belong to and report them.
       Object.keys(parseErrors).forEach(expressionString => {
-        const element = this.elementBoundToExpressionString_(expressionString);
-        if (element) {
+        const elements = this.expressionToElements_[expressionString];
+        if (elements.length > 0) {
           const err = user().createError(parseErrors[expressionString]);
-          reportError(err, element);
+          reportError(err, elements[0]);
         }
       });
 
@@ -173,6 +181,7 @@ export class Bind {
    *   !Promise<{
    *     boundElements: !Array<BoundElementDef>,
    *     bindings: !Array<./bind-evaluator.BindingDef>,
+   *     expressionToElements: !Object<string, !Array<!Element>>,
    *   }>
    * }
    * @private
@@ -182,6 +191,8 @@ export class Bind {
     const boundElements = [];
     /** @type {!Array<./bind-evaluator.BindingDef>} */
     const bindings = [];
+    /** @type {!Object<string, !Array<!Element>>} */
+    const expressionToElements = Object.create(null);
 
     const doc = dev().assert(body.ownerDocument, 'ownerDocument is null.');
     const walker = doc.createTreeWalker(body, NodeFilter.SHOW_ELEMENT);
@@ -198,10 +209,14 @@ export class Bind {
       if (boundProperties.length > 0) {
         boundElements.push({element, boundProperties});
       }
-      // Append (element, property, expressionString) tuples to `bindings`.
       boundProperties.forEach(boundProperty => {
         const {property, expressionString} = boundProperty;
         bindings.push({tagName, property, expressionString});
+
+        if (!expressionToElements[expressionString]) {
+          expressionToElements[expressionString] = [];
+        }
+        expressionToElements[expressionString].push(element);
       });
       return false;
     };
@@ -226,7 +241,7 @@ export class Bind {
 
         // If we scanned all elements, resolve. Otherwise, continue chunking.
         if (completed) {
-          resolve({boundElements, bindings});
+          resolve({boundElements, bindings, expressionToElements});
         } else {
           chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
         }
@@ -277,23 +292,6 @@ export class Bind {
   }
 
   /**
-   * Returns the first element with a property bound to given expression string.
-   * If no such element exists, returns null.
-   * @param {string} string
-   * @return {Element>}
-   */
-  elementBoundToExpressionString_(string) {
-    for (let i = 0; i < this.boundElements_.length; i++) {
-      const {element, boundProperties} = this.boundElements_[i];
-      const find = boundProperties.find(bp => (bp.expressionString === string));
-      if (find !== undefined) {
-        return element;
-      }
-    }
-    return null;
-  }
-
-  /**
    * Asynchronously reevaluates all expressions and applies results to DOM.
    * If `opt_verifyOnly` is true, does not apply results but verifies them
    * against current element values instead.
@@ -313,8 +311,10 @@ export class Bind {
 
       Object.keys(errors).forEach(expressionString => {
         const err = user().createError(errors[expressionString]);
-        const element = this.elementBoundToExpressionString_(expressionString);
-        reportError(err, element);
+        const elements = this.expressionToElements_[expressionString];
+        if (elements.length > 0) {
+          reportError(err, elements[0]);
+        }
       });
     });
   }
