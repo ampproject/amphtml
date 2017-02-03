@@ -135,7 +135,7 @@ describes.realWin('amp-bind', {
     env.sandbox.stub(window, 'AMP_MODE', {development: true});
     // Only the initial value for [a] binding does not match.
     createElementWithBinding('[a]="a" [b]="b" b="b"');
-    const errorStub = env.sandbox.stub(user(), 'error').withArgs('amp-bind');
+    const errorStub = env.sandbox.stub(user(), 'createError');
     return onBindReady(() => {
       expect(errorStub.callCount).to.equal(1);
     });
@@ -145,7 +145,7 @@ describes.realWin('amp-bind', {
     env.sandbox.stub(window, 'AMP_MODE', {development: true});
     // Only the initial value for [c] binding does not match.
     createElementWithBinding(`a [a]="true" [b]="false" c="false" [c]="false"`);
-    const errorStub = env.sandbox.stub(user(), 'error').withArgs('amp-bind');
+    const errorStub = env.sandbox.stub(user(), 'createError');
     return onBindReady(() => {
       expect(errorStub.callCount).to.equal(1);
     });
