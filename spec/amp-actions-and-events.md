@@ -72,6 +72,35 @@ For example, the following is possible in AMP.
 ```
 
 ## Element Specific Events
+### * - all elements
+<table>
+  <tr>
+    <th>Event</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>tap</td>
+    <td>Fired when the element is clicked/tapped.</td>
+  </tr>
+</table>
+
+
+### Input Elements (any that fires `change` event)
+
+Including: `input[type=radio]`, `input[type=checkbox]` and `select`.
+
+<table>
+  <tr>
+    <th>Event</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>change</td>
+    <td>Fired when the value of the element is changed.</td>
+  </tr>
+</table>
+
+
 ### amp-carousel
 <table>
   <tr>
@@ -205,17 +234,19 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td width="30%">amp-state</td>
-    <td>(default)</td>
-    <td>Updates the amp-state's data with the data contained in the event. Requires <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>.</td>
-  </tr>
-  <tr>
     <td>dismiss (default)</td>
     <td>Hides the referenced user notification element.</td>
   </tr>
+</table>
+
+### amp-carousel[type="slides"]
+<table>
   <tr>
-    <td width="30%">amp-carousel[type="slides"]</td>
-    <td>goToSlide</td>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>goToSlide(index=INTEGER)</td>
     <td>Advances the carousel to a specified slide index</td>
   </tr>
 </table>
