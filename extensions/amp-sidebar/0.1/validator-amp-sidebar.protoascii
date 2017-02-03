@@ -20,7 +20,7 @@ tags: {  # amp-sidebar
   mandatory_parent: "HEAD"
   spec_name: "amp-sidebar extension .js script"
   unique_warning: true
-  also_requires_tag_warning: "amp-sidebar"
+  extension_unused_unless_tag_present: "amp-sidebar"
   attrs: {
     name: "async"
     mandatory: true
@@ -32,6 +32,7 @@ tags: {  # amp-sidebar
     value: "amp-sidebar"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-sidebar-(latest|0\\.1).js"

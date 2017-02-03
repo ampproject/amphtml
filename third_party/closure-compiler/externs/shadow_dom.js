@@ -32,3 +32,18 @@ var GetRootNodeOptions;
  * @return {?Node}
  */
 Node.prototype.getRootNode = function(opt_options) {};
+
+/**
+ * @see https://www.w3.org/TR/shadow-dom/#idl-def-ShadowRootInit
+ * @typedef {{
+ *   mode: string
+ * }}
+ */
+var ShadowRootInit;
+
+/**
+ * @see https://www.w3.org/TR/shadow-dom/#h-extensions-to-element-interface
+ * @param {ShadowRootInit=} opt_init
+ * @return {!ShadowRoot}
+ */
+Element.prototype.attachShadow = function(opt_init) {};

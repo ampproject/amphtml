@@ -49,6 +49,11 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /** @override */
+  reconstructWhenReparented() {
+    return false;
+  }
+
+  /** @override */
   layoutCallback() {
     return this.urlReplacements_.expandAsync(assertHttpsUrl(
         this.element.getAttribute('src'), this.element)).then(src => {
@@ -56,7 +61,9 @@ export class AmpList extends AMP.BaseElement {
           if (this.element.hasAttribute('credentials')) {
             opts.credentials = this.element.getAttribute('credentials');
           }
-          opts.requireAmpResponseSourceOrigin = !!opts.credentials;
+          if (!opts.credentials) {
+            opts.requireAmpResponseSourceOrigin = false;
+          }
           return xhrFor(this.win).fetchJson(src, opts);
         }).then(data => {
           user().assert(data != null, 'Response is undefined %s', this.element);

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../../src/ampdoc';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -24,7 +23,6 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
-import {timerFor} from '../../../src/timer';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/video-manager';
@@ -60,6 +58,9 @@ class AmpYoutube extends AMP.BaseElement {
 
     /** @private {?string}  */
     this.videoid_ = null;
+
+    /** @private {?boolean}  */
+    this.muted_ = false;
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -116,6 +117,10 @@ class AmpYoutube extends AMP.BaseElement {
         'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
 
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     // TODO(#3216): amp-youtube has a special case where 404s are not easily caught
     // hence the following hacky-solution.
     // Please don't follow this behavior in other extensions, instead
@@ -124,8 +129,8 @@ class AmpYoutube extends AMP.BaseElement {
       this.buildImagePlaceholder_();
     }
 
-    const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
-    installVideoManagerForDoc(ampdoc);
+    installVideoManagerForDoc(this.element);
+    videoManagerForDoc(this.element).register(this);
   }
 
   /** @return {string} */
@@ -185,23 +190,12 @@ class AmpYoutube extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+
 
     this.win.addEventListener(
         'message', event => this.handleYoutubeMessages_(event));
 
-    videoManagerForDoc(this.win.document).register(this);
-
     return this.loadPromise(iframe)
-        .then(() => {
-          // Make sure the YT player is ready for this. For some reason YT player
-          // would send couple of messages but then stop. Waiting for a bit before
-          // sending the 'listening' event seems to fix that and allow YT
-          // Player to send messages continuously.
-          return timerFor(this.win).promise(300);
-        })
         .then(() => this.listenToFrame_())
         .then(() => this.playerReadyPromise_);
   }
@@ -255,6 +249,13 @@ class AmpYoutube extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
         this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      }
+    } else if (data.event == 'infoDelivery' &&
+        data.info && data.info.muted !== undefined) {
+      if (this.muted_ != data.info.muted) {
+        this.muted_ = data.info.muted;
+        const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
+        this.element.dispatchCustomEvent(evt);
       }
     }
   }

@@ -24,17 +24,21 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+// import {dev} from '../../../src/log';
 import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
-  getCorrelator,
 } from '../../../ads/google/a4a/utils';
-import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
+import {
+  googleLifecycleReporterFactory,
+  setGoogleLifecycleVarsFromHeaders,
+} from '../../../ads/google/a4a/google-data-reporter';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {viewerForDoc} from '../../../src/viewer';
+import {AdsenseSharedState} from './adsense-shared-state';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -50,6 +54,18 @@ const visibilityStateCodes = {
   'unloaded': '5',
 };
 
+/**
+ * Shared state for AdSense ad slots. This is used primarily for ad request url
+ * parameters that depend on previous slots.
+ * @const {!AdsenseSharedState}
+ */
+const sharedState = new AdsenseSharedState();
+
+/** @visibleForTesting */
+export function resetSharedState() {
+  sharedState.reset();
+}
+
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /**
@@ -63,35 +79,51 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      */
     this.lifecycleReporter_ = this.lifecycleReporter_ ||
         this.initLifecycleReporter();
+
+    /**
+     * A unique identifier for this slot.
+     * Not initialized until getAdUrl() is called; updated upon each invocation
+     * of getAdUrl().
+     * @private {?string}
+     */
+    this.uniqueSlotId_ = null;
   }
 
   /** @override */
   isValidElement() {
-    return isGoogleAdsA4AValidEnvironment(this.win, this.element) &&
-        this.isAmpAdElement();
+    return isGoogleAdsA4AValidEnvironment(this.win) && this.isAmpAdElement();
   }
 
   /** @override */
   getAdUrl() {
+    // TODO: Check for required and allowed parameters. Probably use
+    // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
     const global = this.win;
-    const slotId = this.element.getAttribute('data-amp-slot-index');
-    const slotIdNumber = Number(slotId);
-    const correlator = getCorrelator(this.win, slotId);
-    const screen = global.screen;
+    const adClientId = this.element.getAttribute('data-ad-client');
     const slotRect = this.getIntersectionElementLayoutBox();
-    const visibilityState = viewerForDoc(this.getAmpDoc()).getVisibilityState();
+    const visibilityState = viewerForDoc(this.getAmpDoc())
+        .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
-    return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotIdNumber, [
-      {name: 'client', value: this.element.getAttribute('data-ad-client')},
+    const slotId = this.element.getAttribute('data-amp-slot-index');
+    // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
+    // TODO(bcassels): Uncomment the assertion, fixing the tests.
+    // But not all tests arrange to call upgradeCallback.
+    // dev().assert(slotId != undefined);
+    const adk = this.adKey_(format);
+    this.uniqueSlotId_ = slotId + adk;
+    const sharedStateParams = sharedState.addNewSlot(
+        format, this.uniqueSlotId_, adClientId);
+
+    const paramList = [
+      {name: 'client', value: adClientId},
       {name: 'format', value: format},
       {name: 'w', value: slotRect.width},
       {name: 'h', value: slotRect.height},
-      {name: 'iu', value: this.element.getAttribute('data-ad-slot')},
       {name: 'adtest', value: adTestOn},
-      {name: 'adk', value: this.adKey_(format)},
+      {name: 'adk', value: adk},
       {
         name: 'bc',
         value: global.SVGElement && global.document.createElementNS ?
@@ -99,22 +131,24 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       },
       {name: 'ctypes', value: this.getCtypes_()},
       {name: 'host', value: this.element.getAttribute('data-ad-host')},
-      {name: 'ifi', value: slotIdNumber},
-      {name: 'c', value: correlator},
       {name: 'to', value: this.element.getAttribute('data-tag-origin')},
-      {name: 'u_ah', value: screen ? screen.availHeight : null},
-      {name: 'u_aw', value: screen ? screen.availWidth : null},
-      {name: 'u_cd', value: screen ? screen.colorDepth : null},
-      {name: 'u_h', value: screen ? screen.height : null},
-      {name: 'u_tz', value: -new Date().getTimezoneOffset()},
-      {name: 'u_w', value: screen ? screen.width : null},
+      {name: 'pv', value: sharedStateParams.pv},
+      {name: 'channel', value: this.element.getAttribute('data-ad-channel')},
       {name: 'vis', value: visibilityStateCodes[visibilityState] || '0'},
       {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
-    ], []);
+    ];
+
+    if (sharedStateParams.prevFmts) {
+      paramList.push({name: 'prev_fmts', value: sharedStateParams.prevFmts});
+    }
+
+    return googleAdUrl(
+        this, ADSENSE_BASE_URL, startTime, paramList, []);
   }
 
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
+    setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
@@ -148,50 +182,30 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  emitLifecycleEvent(eventName, opt_associatedEventData) {
-    this.lifecycleReporter_ = this.lifecycleReporter_ ||
-        this.initLifecycleReporter();
-    switch (eventName) {
-      case 'adRequestEnd':
-        const fetchResponse = opt_associatedEventData;
-        const qqid = fetchResponse.headers.get(
-            this.lifecycleReporter_.QQID_HEADER);
-        this.lifecycleReporter_.setQqid(qqid);
-        break;
-      case 'adSlotCleared':
-        this.lifecycleReporter_.sendPing(eventName);
-        this.lifecycleReporter_.reset();
-        this.element.setAttribute('data-amp-slot-index',
-            this.win.ampAdSlotIdCounter++);
-        this.lifecycleReporter_ = this.initLifecycleReporter();
-        return;
-      case 'adSlotBuilt':
-      case 'urlBuilt':
-      case 'adRequestStart':
-      case 'extractCreativeAndSignature':
-      case 'adResponseValidateStart':
-      case 'renderFriendlyStart':
-      case 'renderCrossDomainStart':
-      case 'renderFriendlyEnd':
-      case 'renderCrossDomainEnd':
-      case 'preAdThrottle':
-      case 'renderSafeFrameStart':
-        break;
-      default:
+  emitLifecycleEvent(eventName, opt_extraVariables) {
+    if (opt_extraVariables) {
+      this.lifecycleReporter_.setPingParameters(opt_extraVariables);
     }
     this.lifecycleReporter_.sendPing(eventName);
   }
+
+  /** @override */
+  unlayoutCallback() {
+    super.unlayoutCallback();
+    this.element.setAttribute('data-amp-slot-index',
+        this.win.ampAdSlotIdCounter++);
+    this.lifecycleReporter_ = this.initLifecycleReporter();
+    if (this.uniqueSlotId_) {
+      sharedState.removeSlot(this.uniqueSlotId_);
+    }
+  }
+
 
   /**
    * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
    */
   initLifecycleReporter() {
-    const reporter =
-        /** @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter} */
-        (getLifecycleReporter(this, 'a4a', undefined,
-                              this.element.getAttribute(
-                                  'data-amp-slot-index')));
-    return reporter;
+    return googleLifecycleReporterFactory(this);
   }
 }
 

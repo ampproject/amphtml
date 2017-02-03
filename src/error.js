@@ -22,6 +22,7 @@ import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
 import {isProxyOrigin} from './url';
+import {isCanary} from './experiments';
 
 
 /**
@@ -108,19 +109,16 @@ export function reportError(error, opt_associatedElement) {
 
   // Report to console.
   if (self.console) {
+    const output = (console.error || console.log);
     if (error.messageArray) {
-      (console.error || console.log).apply(console,
-          error.messageArray);
+      output.apply(console, error.messageArray);
     } else {
       if (element) {
-        (console.error || console.log).call(console,
-            element.tagName.toLowerCase() +
-                (element.id ? ' with id ' + element.id : '') + ':',
-            error.message);
+        output.call(console, error.message, element);
       } else if (!getMode().minified) {
-        (console.error || console.log).call(console, error.stack);
+        output.call(console, error.stack);
       } else {
-        (console.error || console.log).call(console, error.message);
+        output.call(console, error.message);
       }
     }
   }
@@ -261,10 +259,17 @@ export function getErrorReportUrl(message, filename, line, col, error,
     // classify these errors as benchmarks and not exceptions.
     url += '&ex=1';
   }
+
+  let runtime = '1p';
   if (self.context && self.context.location) {
     url += '&3p=1';
+    runtime = '3p';
+  } else if (getMode().runtime) {
+    runtime = getMode().runtime;
   }
-  if (self.AMP_CONFIG && self.AMP_CONFIG.canary) {
+  url += '&rt=' + runtime;
+
+  if (isCanary(self)) {
     url += '&ca=1';
   }
   if (self.location.ancestorOrigins && self.location.ancestorOrigins[0]) {

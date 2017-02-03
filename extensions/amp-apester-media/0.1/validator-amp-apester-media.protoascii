@@ -20,7 +20,7 @@ tags: {  # amp-apester-media
   spec_name: "amp-apester-media extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-apester-media"
+  extension_unused_unless_tag_present: "amp-apester-media"
   attrs: {
     name: "async"
     mandatory: true
@@ -32,6 +32,7 @@ tags: {  # amp-apester-media
     value: "amp-apester-media"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

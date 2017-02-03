@@ -520,11 +520,12 @@ describe('ValidatorRulesMakeSense', () => {
       expect(tagSpec.unique && tagSpec.uniqueWarning).toBe(false);
     });
 
-    // attr_specs
+    // attr_specs within tag.
     let seenDispatchKey = false;
     const attrNameIsUnique = {};
-    for (const attrSpec of tagSpec.attrs) {
-      attrRuleShouldMakeSense(attrSpec);
+    for (const attrSpecId of tagSpec.attrs) {
+      const attrSpec = rules.attrs[attrSpecId];
+
       // attr_name must be unique within tag_spec (no duplicates).
       it('unique attr_spec within tag_spec', () => {
         expect(attrSpec.name).toBeDefined();
@@ -557,6 +558,9 @@ describe('ValidatorRulesMakeSense', () => {
           // these extensions match up to more than one matching
           // tagspec, a mechanism we don't currently have in place.
           'amp-ad': 0,
+          // This can be present based on 'amp-access', which isn't allowed in
+          // AMP4ADS, which makes checking tricky.
+          'amp-analytics': 0,
           'amp-form': 0,
           'amp-audio': 0,
           // amp-dynamic-css-classes corresponds to no specific tag.
@@ -566,8 +570,10 @@ describe('ValidatorRulesMakeSense', () => {
         };
         if (!extensionExceptions.hasOwnProperty(attrSpec.value)) {
           it('extensions require an additional tag', () => {
-            expect(tagSpec.alsoRequiresTag.length +
-                   tagSpec.alsoRequiresTagWarning.length).toBeGreaterThan(0);
+            expect(
+                tagSpec.alsoRequiresTag.length +
+                tagSpec.extensionUnusedUnlessTagPresent.length)
+                .toBeGreaterThan(0);
           });
         }
       }
@@ -678,9 +684,11 @@ describe('ValidatorRulesMakeSense', () => {
     it('attr_list has attrs', () => {
       expect(attrList.attrs.length).toBeGreaterThan(0);
     });
-    for (const attrSpec of attrList.attrs) {
-      attrRuleShouldMakeSense(attrSpec);
-    }
+  }
+
+  // attr_specs within rules.
+  for (const attrSpec of rules.attrs) {
+    attrRuleShouldMakeSense(attrSpec);
   }
 
   // Verify that for every error code in our enum, we have exactly one format
