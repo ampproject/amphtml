@@ -131,6 +131,7 @@ describe('integration test: a4a', () => {
       a4aElement.setAttribute('width', 200);
       a4aElement.setAttribute('height', 50);
       a4aElement.setAttribute('type', 'mock');
+      a4aElement.sentinel_ = '';
     });
   });
 
