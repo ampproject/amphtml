@@ -605,7 +605,11 @@ export class AmpAnalytics extends AMP.BaseElement {
       to = {};
     }
 
-    user().assert(opt_predefinedConfig || !from || !from['optout'],
+    // Assert that optouts are allowed only in predefined configs.
+    // The last expression adds an exception of known, safe optout function
+    // that is already being used in the wild.
+    user().assert(opt_predefinedConfig || !from || !from['optout'] ||
+        from['optout'] == '_gaUserPrefs.ioo',
         'optout property is only available to vendor config.');
 
     for (const property in from) {
