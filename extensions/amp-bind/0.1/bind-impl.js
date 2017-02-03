@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {getWebWorker} from '../../../src/web-worker/install';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
@@ -80,9 +80,6 @@ export class Bind {
     /** @const @private {!Object} */
     this.scope_ = Object.create(null);
 
-    /** @private {?./bind-evaluator.BindEvaluator} */
-    this.evaluator_ = null;
-
     /** @visibleForTesting {?Promise<!Object<string,*>>} */
     this.evaluatePromise_ = null;
 
@@ -97,6 +94,13 @@ export class Bind {
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
+
+    /** @private {Worker} */
+    this.worker_ = getWebWorker(this.ampdoc.win);
+    this.worker_.onmessage = this.onWorkerMessage_.bind(this);
+
+    /** @private {boolean} */
+    this.isEvaluatorReady_ = false;
 
     /**
      * True if a digest is triggered before scan for bindings completes.
@@ -114,6 +118,52 @@ export class Bind {
     }
   }
 
+  onWorkerMessage_(event) {
+    const data = event.data;
+    switch (data.method) {
+      case 'initialize':
+        const parseErrors = data.parseErrors;
+        this.isEvaluatorReady_ = true;
+
+        // Report each parse error.
+        let numberOfParseErrors = 0;
+        Object.keys(parseErrors).forEach(expressionString => {
+          const elements = this.expressionToElements_[expressionString];
+          if (elements.length > 0) {
+            const err = user().createError(parseErrors[expressionString]);
+            reportError(err, elements[0]);
+            numberOfParseErrors++;
+          }
+        });
+        // Trigger verify-only digest in development.
+        if (getMode().development || this.digestQueuedAfterScan_) {
+          this.digest_(/* opt_verifyOnly */ !this.digestQueuedAfterScan_);
+        }
+        dev().fine(TAG, `Worker finished parsing expressions with ` +
+            `${numberOfParseErrors} errors.`);
+        break;
+
+      case 'evaluate':
+        const results = data.results;
+        const errors = data.errors;
+        // TODO(willchou)
+        // if (opt_verifyOnly) {
+        //   this.verify_(results);
+        // } else {
+          this.apply_(results);
+        // }
+        // Report evaluation errors.
+        Object.keys(errors).forEach(expressionString => {
+          const err = user().createError(errors[expressionString]);
+          const elements = this.expressionToElements_[expressionString];
+          if (elements.length > 0) {
+            reportError(err, elements[0]);
+          }
+        });
+        break;
+    }
+  }
+
   /**
    * Merges `state` into the current scope and immediately triggers a digest
    * unless `opt_skipDigest` is false.
@@ -128,7 +178,7 @@ export class Bind {
 
     if (!opt_skipDigest) {
       // If scan hasn't completed yet, set `digestQueuedAfterScan_`.
-      if (this.evaluator_) {
+      if (this.isEvaluatorReady_) {
         this.digest_();
       } else {
         this.digestQueuedAfterScan_ = true;
@@ -142,33 +192,17 @@ export class Bind {
    * @private
    */
   initialize_() {
+    dev().fine(TAG, 'Scanning DOM for bindings...');
     this.scanPromise_ = this.scanBody_(this.ampdoc.getBody());
     this.scanPromise_.then(results => {
       const {boundElements, bindings, expressionToElements} = results;
-
       this.boundElements_ = boundElements;
-
       Object.assign(this.expressionToElements_, expressionToElements);
-
-      this.evaluator_ = new BindEvaluator();
-      const parseErrors = this.evaluator_.setBindings(bindings);
-
-      // Report each parse error.
-      Object.keys(parseErrors).forEach(expressionString => {
-        const elements = this.expressionToElements_[expressionString];
-        if (elements.length > 0) {
-          const err = user().createError(parseErrors[expressionString]);
-          reportError(err, elements[0]);
-        }
-      });
-
-      // Trigger verify-only digest in development.
-      if (getMode().development || this.digestQueuedAfterScan_) {
-        this.digest_(/* opt_verifyOnly */ !this.digestQueuedAfterScan_);
-      }
-
-      dev().fine(TAG, `Initialized ${bindings.length} bindings from ` +
+      dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
           `${boundElements.length} elements.`);
+
+      dev().fine(TAG, `Asking worker to parse expressions...`);
+      this.worker_.postMessage({method: 'initialize', args: bindings});
     });
   }
 
@@ -221,7 +255,7 @@ export class Bind {
     };
 
     return new Promise(resolve => {
-      const chunktion = idleDeadline => {
+      const bindScanChunk = idleDeadline => {
         let completed = false;
         // If `requestIdleCallback` is available, scan elements until
         // idle time runs out.
@@ -242,10 +276,10 @@ export class Bind {
         if (completed) {
           resolve({boundElements, bindings, expressionToElements});
         } else {
-          chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+          chunk(this.ampdoc, bindScanChunk, ChunkPriority.LOW);
         }
       };
-      chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+      chunk(this.ampdoc, bindScanChunk, ChunkPriority.LOW);
     });
   }
 
@@ -298,25 +332,8 @@ export class Bind {
    * @private
    */
   digest_(opt_verifyOnly) {
-    this.evaluatePromise_ = this.evaluator_.evaluate(this.scope_);
-    this.evaluatePromise_.then(returnValue => {
-      const {results, errors} = returnValue;
-
-      if (opt_verifyOnly) {
-        this.verify_(results);
-      } else {
-        this.apply_(results);
-      }
-
-      // Report evaluation errors.
-      Object.keys(errors).forEach(expressionString => {
-        const err = user().createError(errors[expressionString]);
-        const elements = this.expressionToElements_[expressionString];
-        if (elements.length > 0) {
-          reportError(err, elements[0]);
-        }
-      });
-    });
+    user().fine(TAG, 'Asking worker to re-evaluate expressions...');
+    this.worker_.postMessage({method: 'evaluate', args: this.scope_});
   }
 
   /**
