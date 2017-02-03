@@ -41,13 +41,12 @@ export class JankMeter {
   onScheduled() {
     // only take the first schedule for the current frame.
     if (this.scheduledTime_ == -1) {
-      this.scheduledTime_ = this.win_.performance.now();
+      this.scheduledTime_ = Date.now();
     }
   }
 
   onRun() {
-    const paintLatency =
-        Math.floor(this.win_.performance.now() - this.scheduledTime_);
+    const paintLatency = Date.now() - this.scheduledTime_;
     this.scheduledTime_ = -1;
     if (paintLatency > 16) {
       this.jankCounter_++;
@@ -70,5 +69,5 @@ export class JankMeter {
 }
 
 export function isJankMeterEnabled(win) {
-  return isExperimentOn(win, 'jank-meter') && win.performance;
+  return isExperimentOn(win, 'jank-meter');
 }
