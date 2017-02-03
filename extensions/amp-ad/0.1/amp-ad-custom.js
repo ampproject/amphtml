@@ -85,7 +85,7 @@ export class AmpAdCustom extends AMP.BaseElement {
     if (!(fullUrl in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
       ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl, {
-        requireAmpResponseSourceOrigin: false,
+        requireAmpResponseSourceOrigin: true,
       });
     }
     return ampCustomadXhrPromises[fullUrl].then(data => {
