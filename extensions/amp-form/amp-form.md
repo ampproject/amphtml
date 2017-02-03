@@ -123,6 +123,9 @@ See the [Custom Validation](#custom-validations) section for more details.
 
 (Relaxing some of these rules might be reconsidered in the future - please let us know if you require these and provide use cases).
 
+## Actions
+`amp-form` exposes one action: `submit`. This allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events). You can [read more about Actions and Events in AMP in the spec](../../spec/amp-actions-and-events.md).
+
 ## Events
 `amp-form` exposes the following events:
 
@@ -135,6 +138,24 @@ For example, the following listens to both `submit-success` and `submit-error` a
 
 ```html
 <form ... on="submit-success:success-lightbox;submit-error:error-lightbox" ...>
+</form>
+```
+
+See the [full example here](../../examples/forms.amp.html).
+
+#### Input Events
+AMP exposes `change` events on inputs. This allows you to use the [`on` attribute](../../spec/amp-html-format.md#on) to execute an action on any element when an input value changes.
+
+For example, a common use case is to submit a form on input change (selecting a radio button to answer a poll, choosing a language from a `select` input to translate a page...etc).
+
+```html
+<form id="myform">
+  <label>
+    <input name="answer1" value="Value 1" type="radio" on="change:myform.submit"> Value 1
+  </label>
+  <label>
+    <input name="answer1" value="Value 2" type="radio" on="change:myform.submit"> Value 2
+  </label>
 </form>
 ```
 
