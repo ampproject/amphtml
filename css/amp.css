@@ -84,10 +84,13 @@ html.i-amphtml-ios-embed {
 }
 
 #i-amphtml-wrapper > body {
+  /* Make sure position:absolute elements are positioned relative to the body,
+     not i-amp-html-wrapper */
   position: relative !important;
-  /* Border is necessary to avoid margins collapsing outside body.
-     Alternatively we can also set overflow to hidden. */
-  border-top: 1px solid transparent !important;
+  /* Use overflow hidden to avoid margin collapsing outside body.
+     This will also give the correct value for body's scrollHeight including
+     margins of body's first and last child */
+  overflow: hidden;
 }
 
 

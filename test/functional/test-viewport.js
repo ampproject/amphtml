@@ -1537,8 +1537,8 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(htmlCss.overflowX).to.equal('hidden');
     expect(wrapperCss.overflowY).to.equal('auto');
     expect(wrapperCss.overflowX).to.equal('hidden');
-    expect(bodyCss.overflowY).to.equal('visible');
-    expect(bodyCss.overflowX).to.equal('visible');
+    expect(bodyCss.overflowY).to.equal('hidden');
+    expect(bodyCss.overflowX).to.equal('hidden');
 
     // Wrapper must be a block and positioned absolute at 0/0/0/0.
     expect(wrapperCss.display).to.equal('block');
@@ -1554,11 +1554,6 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     // Preserve the customized `display` value.
     expect(bodyCss.display).to.equal('table');
 
-    // `body` must have a 1px transparent body for two purposes:
-    // (1) to cancel out margin collapse in body's children;
-    // (2) to offset scroll adjustment to 1 to avoid scroll freeze problem.
-    expect(bodyCss.borderTop.replace('rgba(0, 0, 0, 0)', 'transparent'))
-        .to.equal('1px solid transparent');
     expect(bodyCss.margin).to.equal('0px');
   });
 
@@ -1596,20 +1591,20 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(size.height).to.equal(100);
   });
 
-  it('should calculate scrollTop from scrollElement', () => {
+  it('should calculate scrollTop from wrapper', () => {
     binding.wrapper_.scrollTop = 17;
     expect(binding.getScrollTop()).to.equal(17);
   });
 
-  it('should calculate scrollWidth from scrollElement', () => {
-    expect(binding.getScrollWidth()).to.equal(200);
+  it('should calculate scrollWidth from wrapper', () => {
+    expect(binding.getScrollWidth()).to.equal(100);
   });
 
-  it('should calculate scrollHeight from scrollElement', () => {
-    expect(binding.getScrollHeight()).to.equal(301); // +1px for border-top.
+  it('should calculate scrollHeight from wrapper', () => {
+    expect(binding.getScrollHeight()).to.equal(300);
   });
 
-  it('should update scrollTop on scrollElement', () => {
+  it('should update scrollTop on wrapper', () => {
     binding.setScrollTop(21);
     expect(binding.wrapper_.scrollTop).to.equal(21);
   });

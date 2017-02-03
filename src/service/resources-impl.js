@@ -175,7 +175,7 @@ export class Resources {
     this.vsyncScheduled_ = false;
 
     /** @private {number} */
-    this.scrollHeight_ = 0;
+    this.contentHeight_ = 0;
 
     /** @private {boolean} */
     this.maybeChangeHeight_ = false;
@@ -908,10 +908,10 @@ export class Resources {
         linkRels: documentInfoForDoc(this.ampdoc).linkRels,
       }, /* cancelUnsent */true);
 
-      this.scrollHeight_ = this.viewport_.getScrollHeight();
+      this.contentHeight_ = this.viewport_.getContentHeight();
       this.viewer_.sendMessage('documentHeight',
-          {height: this.scrollHeight_}, /* cancelUnsent */true);
-      dev().fine(TAG_, 'document height on load: ' + this.scrollHeight_);
+          {height: this.contentHeight_}, /* cancelUnsent */true);
+      dev().fine(TAG_, 'document height on load: ' + this.contentHeight_);
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -934,18 +934,18 @@ export class Resources {
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL_);
     }
 
-    this.vsync_.measure(() => {
-      if (this.maybeChangeHeight_) {
-        const measuredScrollHeight = this.viewport_.getScrollHeight();
-        if (measuredScrollHeight != this.scrollHeight_) {
+    if (this.maybeChangeHeight_) {
+      this.vsync_.measure(() => {
+        const measuredContentHeight = this.viewport_.getContentHeight();
+        if (measuredContentHeight != this.contentHeight_) {
           this.viewer_.sendMessage('documentHeight',
-              {height: measuredScrollHeight}, /* cancelUnsent */true);
-          this.scrollHeight_ = measuredScrollHeight;
-          dev().fine(TAG_, 'document height changed: ' + this.scrollHeight_);
+              {height: measuredContentHeight}, /* cancelUnsent */true);
+          this.contentHeight_ = measuredContentHeight;
+          dev().fine(TAG_, 'document height changed: ' + this.contentHeight_);
         }
         this.maybeChangeHeight_ = false;
-      }
-    });
+      });
+    }
   }
 
   /**

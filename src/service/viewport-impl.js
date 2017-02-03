@@ -308,12 +308,27 @@ export class Viewport {
   }
 
   /**
-   * Returns the scroll height of the content of the document. Note that this
-   * method is not cached since we there's no indication when it might change.
+   * Returns the scroll height of the content of the document.
+   * The scrollHeight will be the viewport height if there's not enough content
+   * to fill up the viewport.
+   * Note that this method is not cached since we there's no indication when
+   * it might change.
    * @return {number}
    */
   getScrollHeight() {
     return this.binding_.getScrollHeight();
+  }
+
+  /**
+   * Returns the scroll height of the content of the document.
+   * The scrollHeight will be the exact content height if there's not enough
+   * content to fill up the viewport.
+   * Note that this method is not cached since we there's no indication when
+   * it might change.
+   * @return {number}
+   */
+  getContentHeight() {
+    return this.binding_.getContentHeight();
   }
 
   /**
@@ -847,9 +862,19 @@ export class ViewportBindingDef {
 
   /**
    * Returns the scroll height of the content of the document.
+   * The scrollHeight will be the viewport height if there's not enough content
+   * to fill up the viewport.
    * @return {number}
    */
   getScrollHeight() {}
+
+  /**
+   * Returns the scroll height of the content of the document.
+   * The scrollHeight will be the exact content height if there's not enough
+   * content to fill up the viewport.
+   * @return {number}
+   */
+  getContentHeight() {}
 
   /**
    * Returns the rect of the element within the document.
@@ -1027,6 +1052,11 @@ export class ViewportBindingNatural_ {
   /** @override */
   getScrollHeight() {
     return this.getScrollingElement_()./*OK*/scrollHeight;
+  }
+
+  /** @override */
+  getContentHeight() {
+    return this.win.document.documentElement./*OK*/scrollHeight;
   }
 
   /** @override */
@@ -1315,6 +1345,11 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   getScrollHeight() {
+    return this.getContentHeight();
+  }
+
+  /** @override */
+  getContentHeight() {
     // We have to use a special "tail" element on iOS due to the issues outlined
     // in the {@link onScrolled_} method. Because we are forced to layout BODY
     // with position:absolute, we can no longer use BODY's scrollHeight to
@@ -1482,6 +1517,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     // - https://bugs.webkit.org/show_bug.cgi?id=149264
     const doc = this.win.document;
     const body = dev().assertElement(doc.body, 'body is not available');
+
     doc.documentElement.appendChild(this.wrapper_);
     this.wrapper_.appendChild(body);
     // Redefine `document.body`, otherwise it'd be `null`.
@@ -1573,7 +1609,21 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getScrollHeight() {
+    // The scroll height include the padding top for the viewer header.
     return this.wrapper_./*OK*/scrollHeight;
+  }
+
+  /** @override */
+  getContentHeight() {
+    const body = this.win.document.body;
+    if (!body) {
+      return 0;
+    }
+    // The reparented body inside wrapper will have the correct content height.
+    // Body is overflow: hidden so that the scrollHeight include the margins of
+    // body's first and last child.
+    // This height does not include the padding top for the viewer header.
+    return body./*OK*/scrollHeight;
   }
 
   /** @override */
