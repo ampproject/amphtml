@@ -60,7 +60,6 @@ export class AmpViewerIntegration {
     dev().fine(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
     this.isWebView_ = viewer.getParam('webview') == 1;
-    // this.isWebView_ = true; //delete this before submitting
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
 
     if (this.isWebView_) {
@@ -82,6 +81,7 @@ export class AmpViewerIntegration {
    * @private
    */
   webviewPreHandshakePromise_(source, origin) {
+    dev().fine(TAG, origin); //delete this line before merging.
     return new Promise(resolve => {
       listen(this.win, 'message', e => {
         dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type, e.data);
