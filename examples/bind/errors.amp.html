@@ -33,10 +33,15 @@
   <h3>2. Malformed expressions</h3>
   <p [text]="(">This expression is missing a closing parens.</p>
 
-  <h3>3. Mismatched initial state</h3>
+  <h3>3. Invalid function invocation</h3>
+  <p [text]="123.substring(2)">This expression calls `substring` on a number.</p>
+
+  <h3>4. Invalid expression result</h3>
+  <a [href]="'javascript:alert(1)'">This expression contains an invalid URL protocol.</a>
+
+  <h3>5. Mismatched initial state</h3>
   <h4>(Only with '#development=1')</h4>
   <p [text]="myState.foo">This paragraph's initial `text` state doesn't match the evaluated expression result.</p>
-  <p [text]="myState.foo">bar</p>
 
   <amp-state id="myState">
     <script type="application/json">

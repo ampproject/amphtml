@@ -139,7 +139,9 @@ export class Bind {
     this.scanPromise_ = this.scanBody_(this.ampdoc.getBody());
     this.scanPromise_.then(results => {
       const {boundElements, bindings} = results;
+
       this.boundElements_ = boundElements;
+
       this.evaluator_ = new BindEvaluator();
       const parseErrors = this.evaluator_.setBindings(bindings);
 
@@ -148,7 +150,8 @@ export class Bind {
       Object.keys(parseErrors).forEach(expressionString => {
         const element = this.elementBoundToExpressionString_(expressionString);
         if (element) {
-          reportError(parseErrors[expressionString], element);
+          const err = user().createError(parseErrors[expressionString]);
+          reportError(err, element);
         }
       });
 
@@ -299,14 +302,20 @@ export class Bind {
    */
   digest_(opt_verifyOnly) {
     this.evaluatePromise_ = this.evaluator_.evaluate(this.scope_);
-    this.evaluatePromise_.then(results => {
+    this.evaluatePromise_.then(returnValue => {
+      const {results, errors} = returnValue;
+
       if (opt_verifyOnly) {
         this.verify_(results);
       } else {
         this.apply_(results);
       }
-    }).catch(error => {
-      user().error(TAG, error);
+
+      Object.keys(errors).forEach(expressionString => {
+        const err = user().createError(errors[expressionString]);
+        const element = this.elementBoundToExpressionString_(expressionString);
+        reportError(err, element);
+      });
     });
   }
 
@@ -418,7 +427,9 @@ export class Bind {
         } else if (newValue === null) {
           element.className = ampClasses.join(' ');
         } else {
-          user().error(TAG, 'Invalid result for [class]', newValue);
+          const err = user().createError(
+              `"${newValue} is not a valid result for [class]."`);
+          reportError(err, element);
         }
         break;
 
@@ -484,8 +495,9 @@ export class Bind {
         } else if (typeof expectedValue === 'string') {
           classes = expectedValue.split(' ');
         } else {
-          user().error(TAG,
-              'Unsupported result for class binding', expectedValue);
+          const err = user().createError(
+              `"${expectedValue} is not a valid result for [class]."`);
+          reportError(err, element);
         }
         match = this.compareStringArrays_(initialValue, classes);
         break;

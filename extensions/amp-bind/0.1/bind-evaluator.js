@@ -17,7 +17,6 @@
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {user} from '../../../src/log';
 
 const TAG = 'amp-bind';
 
@@ -70,7 +69,7 @@ export class BindEvaluator {
       try {
         expression = new BindExpression(e.expressionString);
       } catch (error) {
-        errors[string] = user().createError('Malformed expression', error);
+        errors[string] = error;
         continue;
       }
 
@@ -89,22 +88,25 @@ export class BindEvaluator {
    * the returned Promise with a map of expression strings to results.
    * @param {!Object} scope
    * @return {
-   *   !Promise<!Object<string, ./bind-expression.BindExpressionResultDef>>
+   *   !Promise<{
+   *     results: !Object<string, ./bind-expression.BindExpressionResultDef>,
+   *     errors: !Object<string, !Error>,
+   *   }>
    * }
    */
   evaluate(scope) {
     return new Promise(resolve => {
-      /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
+      /** @type {!Object<string, BindEvaluationResultDef} */
       const cache = {};
-      /** @type {!Object<string, boolean>} */
-      const invalid = {};
+      /** @type {!Object<string, Error>} */
+      const errors = {};
 
       this.parsedBindings_.forEach(binding => {
         const {tagName, property, expression} = binding;
         const expr = expression.expressionString;
 
         // Skip if we've already evaluated this expression string.
-        if (cache[expr] !== undefined || invalid[expr]) {
+        if (cache[expr] !== undefined || errors[expr]) {
           return;
         }
 
@@ -112,7 +114,7 @@ export class BindEvaluator {
         try {
           result = binding.expression.evaluate(scope);
         } catch (error) {
-          user().error(TAG, error);
+          errors[expr] = error;
           return;
         }
 
@@ -123,10 +125,11 @@ export class BindEvaluator {
               ? rewriteAttributeValue(tagName, property, result)
               : result;
         } else {
-          invalid[expr] = true;
+          errors[expr] = new Error(
+              `"${result}" is not a valid result for [${property}].`);
         }
       });
-      resolve(cache);
+      resolve({results: cache, errors});
     });
   }
 
