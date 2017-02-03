@@ -16,6 +16,10 @@ limitations under the License.
 
 ## Contributing to AMP HTML
 
+The AMP HTML project strongly encourages technical [contributions](https://www.ampproject.org/contribute/)!
+
+We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
+
 ### Filing Issues
 
 **Suggestions**
@@ -27,6 +31,20 @@ The AMP HTML project is meant to evolve with feedback - the project and its user
 As with all pieces of software, you may end up running into bugs. Please submit bugs as regular issues on GitHub - AMP HTML developers are regularly monitoring issues and will try to fix open bugs quickly.
 
 The best bug reports include a detailed way to predictably reproduce the issue, and possibly even a working example that demonstrates the issue.
+
+### Ongoing Participation
+
+We actively encourage ongoing participation by community members.
+
+* **Discussions** for implementations, designs, etc. often happen in the [amphtml-discuss Google Group](https://groups.google.com/forum/#!forum/amphtml-discuss) and the [amphtml Slack](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877).
+* **Weekly status updates** from individual community members are posted as GitHub issues labeled [Meeting Notes](https://github.com/ampproject/amphtml/issues?q=label%3A%22Meeting+Notes%22).  If you have a weekly status update related to your work on AMP that you'd like to share with the community please add it as a comment on the relevant Meeting Notes issue.
+* **Weekly design reviews** are held as video conferences via Google Hangouts on Wednesdays at [1pm Pacific](https://www.google.com/?#q=1pm+pacific+in+local+time).  Design reviews are used to discuss/refine engineering designs after an initial draft of the design has been created and shared with the community.
+  * We use GitHub issues labeled [Type: Design Review](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Design+Review%22) to track design reviews.  The Design Review issue for a given week will have a link to the design docs being discussed that week as well as a link to the Hangout.
+  * When you attend a design review please read through the design docs before the review starts.
+  * If you have an engineering design you would like to discuss at a design review:
+    * Document your design in a shared Google Document open to public comments.  A short design doc is fine as long as it covers your design in sufficient detail to allow for a review by other members of the community.  Take a look at [Design docs - A design doc](https://medium.com/@cramforce/design-docs-a-design-doc-a152f4484c6b) for tips on putting together a good design doc.
+    * Perform a design pre-review with at least one [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md); you can request a pre-review in the [#design-review Slack channel](https://amphtml.slack.com/messages/design-review/).  It is fine to request a pre-review before your design doc is complete.
+    * When your design is ready to be discussed at a design review add a comment on the appropriate Design Review GitHub issue.  Post a link to the design doc and a brief summary by **1pm Pacific Monday** on the week of your design review.
 
 ### Contributing Code
 
