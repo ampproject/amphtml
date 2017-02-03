@@ -257,7 +257,7 @@ describe('integration test: a4a', () => {
     headers = {};
     headers[SIGNATURE_HEADER] = validCSSAmp.signature;
     mockResponse = {
-      arrayBuffer: () => Promise.resolve(new ArrayBuffer(64)),
+      arrayBuffer: () => null,
       bodyUsed: false,
       headers: new FetchResponseHeaders({
         getResponseHeader(name) {
