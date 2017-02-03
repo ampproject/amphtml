@@ -610,7 +610,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     // that is already being used in the wild.
     user().assert(opt_predefinedConfig || !from || !from['optout'] ||
         from['optout'] == '_gaUserPrefs.ioo',
-        'optout property is only available in vendor config.');
+        'optout property is only available to vendor config.');
 
     for (const property in from) {
       user().assert(opt_predefinedConfig || property != 'iframePing',
