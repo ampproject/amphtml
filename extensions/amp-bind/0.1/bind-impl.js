@@ -153,8 +153,7 @@ export class Bind {
       this.evaluator_ = new BindEvaluator();
       const parseErrors = this.evaluator_.setBindings(bindings);
 
-      // For each parse error, find elements that the malformed expressions
-      // belong to and report them.
+      // Report each parse error.
       Object.keys(parseErrors).forEach(expressionString => {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
@@ -309,6 +308,7 @@ export class Bind {
         this.apply_(results);
       }
 
+      // Report evaluation errors.
       Object.keys(errors).forEach(expressionString => {
         const err = user().createError(errors[expressionString]);
         const elements = this.expressionToElements_[expressionString];
