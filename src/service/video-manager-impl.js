@@ -280,7 +280,7 @@ class VideoEntry {
     const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
         toggleAnimation.bind(this, /*playing*/ false));
 
-    const unlistenPlay = listen(this.video.element, VideoEvents.PLAYING,
+    const unlistenPlay = listen(this.video.element, VideoEvents.PLAY,
         toggleAnimation.bind(this, /*playing*/ true));
 
     function onInteraction() {
