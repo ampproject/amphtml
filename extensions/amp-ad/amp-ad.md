@@ -114,6 +114,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Dot and Media](../../ads/dotandads.md)
 - [Doubleclick](../../ads/google/doubleclick.md)
 - [E-Planning](../../ads/eplanning.md)
+- [CxenseDisplay](../../ads/eas.md)
 - [Ezoic](../../ads/ezoic.md)
 - [FlexOneELEPHANT](../../ads/f1e.md)
 - [Felmat](../../ads/felmat.md)
