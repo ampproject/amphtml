@@ -25,8 +25,10 @@ export function mywidget(global, data) {
 
   let isReady = false;
 
-  // `data.height` can be not a number (`undefined`, if attribute is not set,
-  // for example), that's why condition is not `data.height < 0`
+  /**
+   * `data.height` can be not a number (`undefined`, if attribute is not set,
+   * for example), that's why condition is not `data.height < 0`
+   */
   if (!(data.height >= 0)) {
     return;
   }
@@ -40,7 +42,7 @@ export function mywidget(global, data) {
     renderStart: global.context.renderStart,
     noContentAvailable: global.context.noContentAvailable,
 
-    ready: function(opts) {
+    ready(opts) {
       // Make sure ready() is called only once.
       if (isReady) {
         return;
@@ -52,8 +54,10 @@ export function mywidget(global, data) {
         return;
       }
 
-      // Widget want to be informed, when it gets into viewport, so we start
-      // to listen when it happens for the first time.
+      /**
+       * Widget want to be informed, when it gets into viewport, so we start
+       * to listen when it happens for the first time.
+       */
       const unlisten = global.context.observeIntersection(changes => {
         changes.forEach(c => {
           if (c.intersectionRect.height) {
