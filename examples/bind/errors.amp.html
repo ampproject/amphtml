@@ -36,10 +36,10 @@
   <h3>3. Invalid function invocation</h3>
   <p [text]="123.substring(2)">This expression calls `substring` on a number.</p>
 
-  <h3>4. Invalid expression result (validator)</h3>
+  <h3>4.a Invalid expression result (validator)</h3>
   <a [href]="'javascript:alert(1)'">This expression contains an invalid URL protocol.</a>
 
-  <h3>4. Invalid expression result (css)</h3>
+  <h3>4.b Invalid expression result (css)</h3>
   <a [class]="123">This expression contains an invalid [class] result (only string/array/null supported).</a>
 
   <h3>5. Mismatched initial state</h3>
