@@ -308,6 +308,9 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {boolean}
      */
     this.collapse_ = false;
+
+    /** @private {string} */
+    this.sentinel_ = generateSentinel(window);
   }
 
   /** @override */
@@ -466,6 +469,9 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?Response>} */
         .then(adUrl => {
           checkStillCurrent(promiseId);
+          // Append sentinel to ad request URL, so that it may be available to the
+          // creative immediately upon rendering within the x-domain iframe.
+          adUrl = this.sentinel_ ? adUrl + '&asnt=' + this.sentinel_ : adUrl;
           this.adUrl_ = adUrl;
           this.protectedEmitLifecycleEvent_('urlBuilt');
           return adUrl && this.sendXhrRequest_(adUrl);
@@ -1131,11 +1137,9 @@ export class AmpA4A extends AMP.BaseElement {
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
     // Can't get the attributes until we have the iframe, then set it.
-    const attributes = this.generateSentinelAndContext(iframe);
+    const attributes = getContextMetadata(window, iframe, this.sentinel_);
     iframe.setAttribute('name', JSON.stringify(attributes));
-    const sentinel = attributes._context.sentinel ||
-        attributes._context.amp3pSentinel;
-    iframe.setAttribute('data-amp-3p-sentinel', sentinel);
+    iframe.setAttribute('data-amp-3p-sentinel', this.sentinel_);
     return this.iframeRenderHelper_(iframe);
   }
 
@@ -1187,28 +1191,16 @@ export class AmpA4A extends AMP.BaseElement {
           }, SHARED_IFRAME_PROPERTIES));
       if (method == XORIGIN_MODE.NAMEFRAME) {
         // TODO(bradfrizzell): change name of function and var
-        const attributes = this.generateSentinelAndContext(iframe);
+        const attributes = getContextMetadata(window, iframe, this.sentinel_);
         attributes['creative'] = creative;
         const name = JSON.stringify(attributes);
         // Need to reassign the name once we've generated the context
         // attributes off of the iframe. Need the iframe to generate.
         iframe.setAttribute('name', name);
-        const sentinel = attributes._context.sentinel ||
-            attributes._context.amp3pSentinel;
-        iframe.setAttribute('data-amp-3p-sentinel', sentinel);
+        iframe.setAttribute('data-amp-3p-sentinel', this.sentinel_);
       }
       return this.iframeRenderHelper_(iframe);
     });
-  }
-
-  /**
-   * Generates sentinel for iframe and gets the context metadata.
-   * @param {!Element} iframe
-   * @return {!Object} context
-   */
-  generateSentinelAndContext(iframe) {
-    const sentinel = generateSentinel(window);
-    return getContextMetadata(window, iframe, sentinel);
   }
 
   /**
