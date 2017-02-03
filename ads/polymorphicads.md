@@ -24,8 +24,7 @@ limitations under the License.
   height="50"
   type="polymorphicads"
   data-adunit="7c0b3ae742beccf94f7726ea832277a2"
-  data-params='{"testMode": true}'
->
+  data-params='{"testMode": true}'>
 </amp-ad>
 ```
 
