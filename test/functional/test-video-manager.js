@@ -261,7 +261,7 @@ function createFakeVideoPlayerClass(win) {
      */
     play(unusedIsAutoplay) {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+        this.element.dispatchCustomEvent(VideoEvents.PLAY);
       });
     }
 
