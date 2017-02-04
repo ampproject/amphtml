@@ -67,7 +67,7 @@ describes.realWin('XHR', {
       const ampForm = new AmpForm(form);
       sandbox.spy(ampForm, 'handleXhrSubmit_');
       sandbox.spy(ampForm, 'handleSubmitAction_');
-      sandbox.spy(ampForm.xhr_, 'fetchJsonResponse');
+      sandbox.spy(ampForm.xhr_, 'fetch');
       form.dispatchEvent(new Event('submit'));
       return timer.promise(10).then(() => {
         // Due to recursive nature of 'on=submit:sameform.submit' we expect
@@ -80,7 +80,7 @@ describes.realWin('XHR', {
         // However, only the first invocation should be handled completely.
         // and any subsequent calls should be stopped early-on.
         expect(ampForm.handleXhrSubmit_).to.have.been.calledOnce;
-        expect(ampForm.xhr_.fetchJsonResponse).to.have.been.calledOnce;
+        expect(ampForm.xhr_.fetch).to.have.been.calledOnce;
       });
     });
   });
