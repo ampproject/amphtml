@@ -123,7 +123,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         querySelector: selector => {
           if (selector.startsWith('meta')) {
             return {
-              getAttribute: () => {return 'https://whitelisted.com';},
+              getAttribute: () => {return 'https://whitelisted.com https://greylisted.com';},
               hasAttribute: () => {return true;},
             };
           } else {
