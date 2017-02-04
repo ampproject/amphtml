@@ -21,7 +21,7 @@ import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoForDoc} from '../document-info';
 import {getServiceForDoc, installServiceInEmbedScope} from '../service';
-import {parseUrl, removeFragment, parseQueryString} from '../url';
+import {isSecureUrl, parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
@@ -757,6 +757,11 @@ export class UrlReplacements {
       user().warn('URL', 'Ignoring link replacement', href,
           ' because the link does not go to the document\'s' +
           ' source or canonical origin.');
+      return;
+    }
+    if (!isSecureUrl(href)) {
+      user().warn('URL', 'Ignoring link replacement', href,
+          ' because it is only supported for secure links.');
       return;
     }
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
