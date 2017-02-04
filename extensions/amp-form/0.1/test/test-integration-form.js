@@ -17,7 +17,7 @@
 import {AmpForm} from '../amp-form';
 import {timerFor} from '../../../../src/timer';
 
-describes.realWin('XHR', {
+describes.realWin('AmpForm Integration', {
   amp: {
     runtimeOn: true,
     ampdoc: 'single',
