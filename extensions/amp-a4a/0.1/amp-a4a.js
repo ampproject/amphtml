@@ -646,7 +646,7 @@ export class AmpA4A extends AMP.BaseElement {
         // service, keyInfoPromise, can verify the signature, then the
         // creative is valid AMP.
         if (verified) {
-          return Promise.reject('noop');
+          return Promise.reject();
         }
         return some(keyInfoSet.keys.map(keyInfoPromise => {
           // Resolve Promise into signing key.
@@ -692,7 +692,7 @@ export class AmpA4A extends AMP.BaseElement {
                       `${keyInfo.serviceName} key failed to verify`);
                 },
                 err => {
-                  user().error(
+                  dev().error(
                     TAG, this.element.getAttribute('type'), keyInfo.serviceName,
                     err, this.element);
                 });
