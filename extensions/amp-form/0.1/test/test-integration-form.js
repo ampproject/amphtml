@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpForm,} from '../amp-form';
-import {timerFor,} from '../../../../src/timer';
+import {AmpForm} from '../amp-form';
+import {timerFor} from '../../../../src/timer';
 
 describes.realWin('XHR', {
   amp: {
@@ -26,13 +26,11 @@ describes.realWin('XHR', {
   const baseUrl = 'http://localhost:31862';
   let doc;
   let sandbox;
-  let clock;
   let timer;
 
   beforeEach(() => {
     sandbox = env.sandbox;
     doc = env.win.document;
-    clock = sandbox.useFakeTimers();
     timer = timerFor(env.win);
   });
 
