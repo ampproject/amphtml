@@ -283,11 +283,11 @@
 </form>
 
 <h4>Subscribe to our weekly Newsletter (xhr + submit events)</h4>
-
+<div id="msg">This message will hide when the form is submitted</div>
 <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank"
-      on="submit-success:success-lightbox;submit-error:error-lightbox">
+      on="submit:msg.hide;submit-success:success-lightbox;submit-error:error-lightbox">
     <fieldset>
         <label>
             <span>Your name</span>
@@ -579,6 +579,46 @@
         </label>
         <input type="submit" value="Send">
     </fieldset>
+</form>
+
+<h4>Recursive Event-Action-Event-Action Test - Should only submit once</h4>
+<form method="post"
+      id="myform"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      on="submit:myform.submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name3" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email3" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+
+    <div class="form-message invalid-message">
+        There are some input that needs fixing. Please fix them.
+    </div>
+    <div class="form-message valid-message">
+        Everything looks good, you can submit now!
+    </div>
+    <div class="form-message submitting-message">
+        Please hold on while we submit your answer!
+    </div>
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
+            to confirm!
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
+    </div>
 </form>
 
 </body>

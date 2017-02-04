@@ -83,4 +83,11 @@ app.use('/post', function(req, res) {
   })
 });
 
+app.use('/form/post', function(req, res) {
+  delete req.query.__amp_source_origin;
+  res.json({
+    json: req.body,
+  })
+});
+
 exports.app = app;

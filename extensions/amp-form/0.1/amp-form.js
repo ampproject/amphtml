@@ -338,6 +338,7 @@ export class AmpForm {
         xhrUrl = this.xhrAction_;
         body = new FormData(this.form_);
       }
+      this.actions_.trigger(this.form_, 'submit', /*event*/ null);
       return this.xhr_.fetch(dev().assertString(xhrUrl), {
         body,
         method: this.method_,
