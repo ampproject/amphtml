@@ -1041,6 +1041,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(a.href).to.equal('https://example.com/link?out=RANDOM');
     });
 
+    it('should not replace in http (non-secure)', () => {
+      canonical = 'http://example.com/link';
+      a.href = 'http://example.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('http://example.com/link?out=QUERY_PARAM(foo)');
+    });
+
     it('should replace with canonical origin', () => {
       a.href = 'https://canonical.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
