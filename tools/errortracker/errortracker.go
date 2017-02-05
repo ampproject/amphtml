@@ -116,6 +116,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// docs) we log as "ERROR".
 	isCdn := false
 	if strings.HasPrefix(r.Referer(), "https://cdn.ampproject.org/") ||
+			strings.Contains(r.Referer(), ".cdn.ampproject.org/") ||
 			strings.Contains(r.Referer(), ".ampproject.net/") {
 		severity = "ERROR"
 		level = logging.Error
