@@ -55,14 +55,14 @@ export const LogLevel = {
 };
 
 /**
- * @type {function(*,!Element=)|undefined}
+ * @type {function(*, !Element=)|undefined}
  */
 let reportError;
 
 /**
  * Sets reportError function. Called from error.js to break cyclic
  * dependency.
- * @param {function(*,!Element=)|undefined}
+ * @param {function(*, !Element=)|undefined} fn
  */
 export function setReportError(fn) {
   reportError = fn;
