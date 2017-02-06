@@ -1228,7 +1228,7 @@ describe('amp-a4a', () => {
         });
       });
 
-      it('properly handles later provider success', () => {
+      it('properly handles all failures', () => {
         // Single provider with first key fails but second key passes validation
         a4a.win.ampA4aValidationKeys = (() => {
           const providers = [];
@@ -1243,9 +1243,12 @@ describe('amp-a4a', () => {
         })();
         stubVerifySignature.returns(Promise.resolve(false));
         return a4a.verifyCreativeSignature_('some_creative', 'some_sig')
-          .then(creative => {
+          .then(() => {
+            fail('should have triggered rejection')
+          })
+          .catch(err => {
             expect(stubVerifySignature).to.be.callCount(20);
-            expect(creative).to.be.null;
+            expect(err).to.equal('No validation service could verify this key');
           });
       });
 

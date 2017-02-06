@@ -98,7 +98,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {!./variables.VariableService} */
     this.variableService_ = variableServiceFor(this.win);
 
-    /** @private {!./crypto-impl.Crypto} */
+    /** @private {!../../../src/service/crypto-impl.Crypto} */
     this.cryptoService_ = cryptoFor(this.win);
   }
 
