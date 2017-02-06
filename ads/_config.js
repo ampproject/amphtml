@@ -497,7 +497,7 @@ export const adConfig = {
     prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
     preconnect: 'https://static.addevweb.com',
   },
-  
+
   taboola: {},
 
   teads: {
