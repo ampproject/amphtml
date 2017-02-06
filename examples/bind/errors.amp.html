@@ -49,7 +49,8 @@
   <h3>6. (WARN) Invalid member access</h3>
   <p [text]="myState[true]">null</p><p>Expression above tries to access a boolean member.</p>
   <p [text]="true[3]">null</p><p>Expression above tries to access a member of a boolean.</p>
-  <p [text]="true[3]">null</p><p>Expression above tries to access a member of null.</p>
+  <p [text]="myState[null]">null</p><p>Expression above tries to access a null member.</p>
+  <p [text]="null[3]">null</p><p>Expression above tries to access a member of null.</p>
 
   <h3>7. Mismatched initial state</h3>
   <h4>(Only with '#development=1')</h4>
