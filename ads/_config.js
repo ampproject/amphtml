@@ -280,7 +280,9 @@ export const adConfig = {
 
   kargo: {},
 
-  kiosked: {},
+  kiosked: {
+    renderStartImplemented: true,
+  },
 
   kixer: {
     prefetch: 'https://cdn.kixer.com/ad/load.js',
