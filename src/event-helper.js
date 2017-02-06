@@ -16,10 +16,23 @@
 
 import {timerFor} from './timer';
 import {user} from './log';
-import {reportError} from './error';
 
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
+
+/**
+ * @type {function(*, !Element=)|undefined}
+ */
+let reportError;
+
+/**
+ * Sets reportError function. Called from error.js to break cyclic
+ * dependency.
+ * @param {function(*, !Element=)|undefined} fn
+ */
+export function setReportError(fn) {
+  reportError = fn;
+}
 
 
 /**
@@ -33,6 +46,7 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
 export function listen(element, eventType, listener, opt_capture) {
   let localElement = element;
   let localListener = listener;
+  /** @type {?Function}  */
   let wrapped = event => {
     try {
       return localListener.call(this, event);
