@@ -37,7 +37,26 @@ let deactivated = /nochunking=1/.test(self.location.hash);
 const resolved = Promise.resolve();
 
 /**
- * Run the given function. For visible documents the function will be
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Chunks}
+ */
+export function installChunkServiceForDoc(ampdoc) {
+  return fromClassForDoc(ampdoc, 'chunk', Chunks);
+}
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @return {!Chunks}
+ */
+export function chunksForDoc(nodeOrAmpDoc) {
+  return /** @type {!Chunks} */ (
+      getExistingServiceForDoc(nodeOrAmpDoc, 'chunk'));
+}
+
+/**
+ * Installs the chunk service if necessary and runs the given function.
+ *
+ * For visible documents the function will be
  * called in a micro task (Essentially ASAP). If the document is
  * not visible, tasks will yield to the event loop (to give the browser
  * time to do other things) and may even be further delayed until
@@ -54,15 +73,6 @@ export function startupChunk(nodeOrAmpDoc, fn) {
   const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
   service.runForStartup_(fn);
 };
-
-/**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
- * @return {!Chunks}
- */
-export function chunksForDoc(nodeOrAmpDoc) {
-  return /** @type {!Chunks} */ (
-      getExistingServiceForDoc(nodeOrAmpDoc, 'chunk'));
-}
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
