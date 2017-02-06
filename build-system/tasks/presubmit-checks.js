@@ -164,6 +164,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/chunk.js',
+      'src/runtime.js',
     ],
   },
   'installCryptoService': {
