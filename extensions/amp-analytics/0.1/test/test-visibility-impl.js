@@ -23,6 +23,7 @@ import {
   Visibility,
 } from '../visibility-impl';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+import * as inob from '../../../../src/intersection-observer-polyfill';
 import {isFiniteNumber} from '../../../../src/types';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {viewerForDoc} from '../../../../src/viewer';
@@ -491,10 +492,7 @@ describe('amp-analytics.visibility', () => {
     });
   });
 
-  describe
-  .configure()
-  .skip(() => typeof IntersectionObserver == 'undefined')
-  .run('listenOnceV2', () => {
+  describe('listenOnceV2', () => {
 
     let inObCallback;
     let observeSpy;
@@ -507,13 +505,24 @@ describe('amp-analytics.visibility', () => {
       unobserveSpy = sandbox.stub();
       callbackSpy1 = sandbox.stub();
       callbackSpy2 = sandbox.stub();
-      sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
-        inObCallback = callback;
-        return {
-          observe: observeSpy,
-          unobserve: unobserveSpy,
-        };
-      });
+
+      if (inob.nativeIntersectionObserverSupported(ampdoc.win)) {
+        sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
+          inObCallback = callback;
+          return {
+            observe: observeSpy,
+            unobserve: unobserveSpy,
+          };
+        });
+      } else {
+        sandbox.stub(inob, 'IntersectionObserverPolyfill', callback => {
+          inObCallback = callback;
+          return {
+            observe: observeSpy,
+            unobserve: unobserveSpy,
+          };
+        });
+      }
     });
 
     afterEach(() => {
