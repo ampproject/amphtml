@@ -271,8 +271,8 @@ export class BindExpression {
    * @param {*} member
    */
   memberAccessWarning_(target, member) {
-    user().warn(TAG, `Cannot read property ${member} of ${target}; ` +
-        `returning null.`);
+    user().warn(TAG, `Cannot read property ${JSON.stringify(member)} of ` +
+        `${JSON.stringify(target)}; returning null.`);
   }
 
   /**
