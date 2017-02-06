@@ -593,6 +593,7 @@ var forbiddenTermsSrcInclusive = {
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-analytics/0.1/crypto-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
+      'ads/google/a4a/utils.js',
     ],
   },
   'loadElementClass': {

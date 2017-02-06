@@ -480,6 +480,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!fetchResponse
               || !fetchResponse.arrayBuffer
               || fetchResponse.status == 204) {
+            this.collapse_ = true;
             this.forceCollapse();
             return Promise.reject(NO_CONTENT_RESPONSE);
           }
@@ -743,22 +744,40 @@ export class AmpA4A extends AMP.BaseElement {
         layoutAdPromiseDelay: Math.round(delta),
         isAmpCreative: !!creativeMetaData,
       });
-      if (!creativeMetaData) {
-        // Non-AMP creative case, will verify ad url existence.
-        return this.renderNonAmpCreative_();
-      }
       if (this.collapse_) {
         return Promise.resolve();
       }
+      const protectedOnCreativeRender =
+        protectFunctionWrapper(this.onCreativeRender, this, err => {
+          dev().error(TAG, this.element.getAttribute('type'),
+              'Error executing onCreativeRender', err);
+        });
+      if (!creativeMetaData) {
+        // Non-AMP creative case, will verify ad url existence.
+        return this.renderNonAmpCreative_()
+          .then(() => {
+            protectedOnCreativeRender(false);
+            return true;
+          });
+      }
       // Must be an AMP creative.
-      return this.renderAmpCreative_(creativeMetaData).catch(err => {
-        // Failed to render via AMP creative path so fallback to non-AMP
-        // rendering within cross domain iframe.
-        user().error(TAG, this.element.getAttribute('type'),
-          'Error injecting creative in friendly frame', err);
-        rethrowAsync(this.promiseErrorHandler_(err));
-        return this.renderNonAmpCreative_();
-      });
+      return this.renderAmpCreative_(creativeMetaData)
+        .then(() => {
+          protectedOnCreativeRender(true);
+          return true;
+        })
+        .catch(err => {
+          // Failed to render via AMP creative path so fallback to non-AMP
+          // rendering within cross domain iframe.
+          user().error(TAG, this.element.getAttribute('type'),
+            'Error injecting creative in friendly frame', err);
+          rethrowAsync(this.promiseErrorHandler_(err));
+          return this.renderNonAmpCreative_()
+            .then(() => {
+              protectedOnCreativeRender(false);
+              return true;
+            });
+        });
     }).catch(error => this.promiseErrorHandler_(error));
   }
 
@@ -778,24 +797,19 @@ export class AmpA4A extends AMP.BaseElement {
       return true;
     }
 
-    // TODO(keithwrightbos): is mutate necessary?  Could this lead to a race
-    // condition where unlayoutCallback fires and during/after subsequent
-    // layoutCallback execution, the mutate operation executes causing our
-    // state to be destroyed?
-    this.vsync_.mutate(() => {
-      removeChildren(this.element);
-      this.adPromise_ = null;
-      this.adUrl_ = null;
-      this.creativeBody_ = null;
-      this.isVerifiedAmpCreative_ = false;
-      this.experimentalNonAmpCreativeRenderMethod_ =
-          platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
-      if (this.xOriginIframeHandler_) {
-        this.xOriginIframeHandler_.freeXOriginIframe();
-        this.xOriginIframeHandler_ = null;
-      }
-      this.layoutMeasureExecuted_ = false;
-    });
+    removeChildren(this.element);
+    this.adPromise_ = null;
+    this.adUrl_ = null;
+    this.creativeBody_ = null;
+    this.isVerifiedAmpCreative_ = false;
+    this.experimentalNonAmpCreativeRenderMethod_ =
+        platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.freeXOriginIframe();
+      this.xOriginIframeHandler_ = null;
+    }
+    this.layoutMeasureExecuted_ = false;
+    this.collapse_ = false;
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
     return true;
@@ -871,11 +885,15 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Callback executed when AMP creative has successfully rendered within the
+   * Callback executed when creative has successfully rendered within the
    * publisher page.  To be overridden by network implementations as needed.
+   * @param {boolean} isVerifiedAmpCreative whether or not the creative was
+   *    verified as AMP and therefore given preferential treatment.
    */
-  onAmpCreativeRender() {
-    this.protectedEmitLifecycleEvent_('renderFriendlyEnd');
+  onCreativeRender(isVerifiedAmpCreative) {
+    if (isVerifiedAmpCreative) {
+      this.protectedEmitLifecycleEvent_('renderFriendlyEnd');
+    }
   }
 
   /**
@@ -990,7 +1008,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Render non-AMP creative within cross domain iframe.
-   * @return {Promise} awaiting ad completed insertion.
+   * @return {Promise<boolean>} awaiting ad completed insertion indicating if
+   *    successful.
    * @private
    */
   renderNonAmpCreative_() {
@@ -1014,7 +1033,7 @@ export class AmpA4A extends AMP.BaseElement {
       // report to user in case of empty.
       user().warn(TAG, this.element.getAttribute('type'),
         'No creative or URL available -- A4A can\'t render any ad');
-      return Promise.resolve();
+      return Promise.resolve(false);
     }
   }
 
@@ -1022,8 +1041,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Render a validated AMP creative directly in the parent page.
    * @param {!CreativeMetaDataDef} creativeMetaData Metadata required to render
    *     AMP creative.
-   * @return {Promise} Whether the creative was successfully
-   *     rendered.
+   * @return {Promise} Whether the creative was successfully rendered.
    * @private
    */
   renderAmpCreative_(creativeMetaData) {
@@ -1070,10 +1088,6 @@ export class AmpA4A extends AMP.BaseElement {
           this.registerExpandUrlParams_(friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
-          protectFunctionWrapper(this.onAmpCreativeRender, this, err => {
-            dev().error(TAG, this.element.getAttribute('type'),
-                'Error executing onAmpCreativeRender', err);
-          })();
           // Capture timing info for friendly iframe load completion.
           getTimingDataAsync(friendlyIframeEmbed.win,
               'navigationStart', 'loadEventEnd').then(delta => {

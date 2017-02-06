@@ -31,6 +31,9 @@ const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 /** @const {string} */
 const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
 
+/** @type {string}  */
+export const AMP_ANALYTICS_URLS_HEADER = 'X-AmpAnalytics';
+
 /** @const {number} */
 const MAX_URL_LENGTH = 4096;
 
@@ -331,3 +334,46 @@ export function additionalDimensions(win, viewportSize) {
           innerWidth,
           innerHeight].join();
 };
+
+/**
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
+ * @param {!./service/extensions-impl.Extensions} extensions
+ * @param {!Array<string>} urls
+ */
+export function injectActiveViewAmpAnalyticsElement(
+    a4aElement, extensions, urls) {
+  dev().assert(urls.length);
+  extensions.loadExtension('amp-analytics');
+  const ampAnalyticsElem =
+    a4a.element.ownerDocument.createElement('amp-analytics');
+  const config = {
+    'transport': {'beacon': false, 'xhrpost': false},
+    'triggers': {
+      'continuousVisible': {
+        'on': 'visible',
+        'visibilitySpec': {
+          // TODO(keithwrightbos): update to nearest amp-ad
+          'selector': 'amp-ad',
+          'selectionMethod': 'closest',
+          'visiblePercentageMin': 50,
+          'continuousTimeMin': 1000
+        }
+      }
+    }
+  };
+  const requests = {};
+  for (let idx = 1; idx <= urls.length; idx++) {
+    // TODO: Ensure url is valid and not freeform JS?
+    requests[`visibility${idx}`] = `${urls[idx - 1]}`;
+  }
+  // Security review needed here.
+  config['requests'] = requests;
+  config['triggers']['continuousVisible']['request'] = Object.keys(requests);
+  const scriptElem = createElementWithAttributes(
+      /** @type {!Document} */(a4a.element.ownerDocument), 'script', {
+      'type': 'application/json'
+    });
+  scriptElem.textContent = JSON.stringify(config);
+  ampAnalyticsElem.appendChild(textContent);
+  a4a.element.appendChild(ampAnalyticsElem);
+}

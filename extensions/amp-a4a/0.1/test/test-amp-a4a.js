@@ -83,7 +83,7 @@ describe('amp-a4a', () => {
   let getSigningServiceNamesMock;
   let viewerWhenVisibleMock;
   let mockResponse;
-  let onAmpCreativeRenderSpy;
+  let onCreativeRenderSpy;
   let headers;
 
   beforeEach(() => {
@@ -92,8 +92,8 @@ describe('amp-a4a', () => {
     xhrMockJson = sandbox.stub(Xhr.prototype, 'fetchJson');
     getSigningServiceNamesMock = sandbox.stub(AmpA4A.prototype,
         'getSigningServiceNames');
-    onAmpCreativeRenderSpy =
-        sandbox.spy(AmpA4A.prototype, 'onAmpCreativeRender');
+    onCreativeRenderSpy =
+        sandbox.spy(AmpA4A.prototype, 'onCreativeRender');
     getSigningServiceNamesMock.returns(['google']);
     xhrMockJson.withArgs(
       'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
@@ -250,7 +250,7 @@ describe('amp-a4a', () => {
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
-        expect(onAmpCreativeRenderSpy.called).to.be.false;
+        expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
       });
     });
 
@@ -272,7 +272,7 @@ describe('amp-a4a', () => {
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
-        expect(onAmpCreativeRenderSpy.called).to.be.false;
+        expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
       });
     });
 
@@ -284,7 +284,7 @@ describe('amp-a4a', () => {
         const child = a4aElement.querySelector('iframe[src]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
-        expect(onAmpCreativeRenderSpy.called).to.be.false;
+        expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
       });
     });
 
@@ -357,7 +357,7 @@ describe('amp-a4a', () => {
         a4a.createdCallback();
         a4a.firstAttachedCallback();
         a4a.buildCallback();
-        expect(onAmpCreativeRenderSpy.called).to.be.false;
+        expect(onCreativeRenderSpy.called).to.be.false;
       });
     });
 
@@ -688,7 +688,7 @@ describe('amp-a4a', () => {
               'link[href="https://fonts.googleapis.com/css?family=Questrial"]'))
               .to.be.ok;
             expect(doc.querySelector('script[src*="amp-font-0.1"]')).to.be.ok;
-            expect(onAmpCreativeRenderSpy.calledOnce).to.be.true;
+            expect(onCreativeRenderSpy.calledOnce).to.be.true;
             expect(updatePriorityStub).to.be.calledOnce;
             expect(updatePriorityStub.args[0][0]).to.equal(0);
           });
@@ -748,7 +748,7 @@ describe('amp-a4a', () => {
             const iframe = a4aElement.getElementsByTagName('iframe')[0];
             if (isValidCreative && !opt_failAmpRender) {
               expect(iframe.getAttribute('src')).to.be.null;
-              expect(onAmpCreativeRenderSpy.calledOnce).to.be.true;
+              expect(onCreativeRenderSpy.withArgs(true).calledOnce).to.be.true;
               expect(updatePriorityStub).to.be.calledOnce;
               expect(updatePriorityStub.args[0][0]).to.equal(0);
             } else {
@@ -756,7 +756,7 @@ describe('amp-a4a', () => {
               expect(iframe.src, 'verify iframe src w/ origin').to
                   .equal(TEST_URL +
                          '&__amp_source_origin=about%3Asrcdoc');
-              expect(onAmpCreativeRenderSpy.called).to.be.false;
+              expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
               if (!opt_failAmpRender) {
                 expect(updatePriorityStub).to.not.be.called;
               }
@@ -827,7 +827,7 @@ describe('amp-a4a', () => {
           expect(frameDoc.querySelector('style[amp-custom]')).to.be.ok;
           expect(frameDoc.body.innerHTML, 'body content')
               .to.contain('Hello, world.');
-          expect(onAmpCreativeRenderSpy.calledOnce).to.be.true;
+          expect(onCreativeRenderSpy.withArgs(true).calledOnce).to.be.true;
         });
       });
     });
@@ -849,7 +849,7 @@ describe('amp-a4a', () => {
           expect(iframe).to.be.ok;
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe).to.be.visible;
-          expect(onAmpCreativeRenderSpy.called).to.be.false;
+          expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
         });
       });
     });
@@ -867,7 +867,7 @@ describe('amp-a4a', () => {
           expect(iframe.tagName).to.equal('IFRAME');
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe).to.be.visible;
-          expect(onAmpCreativeRenderSpy.called).to.be.false;
+          expect(onCreativeRenderSpy.called).to.be.false;
         }));
       });
     });
@@ -890,7 +890,7 @@ describe('amp-a4a', () => {
           expect(iframe.tagName).to.equal('IFRAME');
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe.style.visibility).to.equal('');
-          expect(onAmpCreativeRenderSpy.called).to.be.false;
+          expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
         });
       });
     });
@@ -1078,7 +1078,6 @@ describe('amp-a4a', () => {
         expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
         expect(urlReplacementsForDoc(frameDoc))
             .to.not.equal(urlReplacementsForDoc(a4aElement));
-        expect(onAmpCreativeRenderSpy.calledOnce).to.be.true;
       });
     });
 

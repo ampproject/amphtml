@@ -28,6 +28,8 @@ import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
+  injectActiveViewAmpAnalyticsElement,
+  AMP_ANALYTICS_URLS_HEADER,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -35,6 +37,7 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
+import {extensionsFor} from '../../../src/extensions';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
 /** @const {string} */
@@ -54,6 +57,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      */
     this.lifecycleReporter_ = this.lifecycleReporter_ ||
         this.initLifecycleReporter();
+
+    /**
+     * URLs used to generate amp-analytics element for active view reporting.
+     * @private {!Array<string>}
+     */
+    this.ampAnalyticsUrls_ = [];
   }
 
   /** @override */
@@ -128,6 +137,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
+    if (responseHeaders.has(AMP_ANALYTICS_URLS_HEADER)) {
+      this.ampAnalyticsUrls_ =
+          responseHeaders.get(AMP_ANALYTICS_URLS_HEADER).split(',');
+    }
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
@@ -152,6 +165,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   initLifecycleReporter() {
     return googleLifecycleReporterFactory(this);
+  }
+
+  /** @override */
+  onCreativeRender(isVerifiedAmpCreative) {
+    super.onCreativeRender(isVerifiedAmpCreative);
+    if (this.ampAnalyticsUrls_.length) {
+      injectActiveViewAmpAnalyticsElement(
+        this,
+        extensionsFor(this.win).loadExtension('amp-analytics'),
+        this.ampAnalyticsUrls_);
+    }
   }
 
   /**
