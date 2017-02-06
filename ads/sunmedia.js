@@ -26,5 +26,5 @@ export function sunmedia(global, data) {
 		data: a
 	};
 	validateData(data, global._sunmedia_amp.mandatory_data, global._sunmedia_amp.allowed_data);
-	loadScript(global, "https://vod.addevweb.com/sunmedia/amp/ads/SMIntextAMP.js?");
-};
+	loadScript(global, 'https://vod.addevweb.com/sunmedia/amp/ads/SMIntextAMP.js');
+}
