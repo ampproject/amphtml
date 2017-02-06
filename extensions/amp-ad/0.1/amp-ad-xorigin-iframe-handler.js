@@ -30,6 +30,7 @@ import {timerFor} from '../../../src/timer';
 import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
 import {AdDisplayState} from './amp-ad-ui';
+import {getHtml} from '../../../src/get-html';
 
 const TIMEOUT_VALUE = 10000;
 
@@ -95,6 +96,25 @@ export class AmpAdXOriginIframeHandler {
           this.element_.creativeId = info.data.id;
         });
 
+    this.unlisteners_.push(listenFor(this.iframe, 'get-html',
+      (info, source, origin) => {
+        if (!this.iframe) {
+          return;
+        }
+
+        const {selector, attributes, messageId} = info;
+        let content = '';
+
+        if (this.element_.hasAttribute('data-html-access-allowed')) {
+          content = getHtml(this.baseInstance_.win, selector, attributes);
+        }
+
+        postMessageToWindows(
+            this.iframe, [{win: source, origin}],
+            'get-html-result', {content, messageId}, true
+          );
+      }, true, false));
+
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
         (data, source, origin) => {
@@ -111,13 +131,6 @@ export class AmpAdXOriginIframeHandler {
       loadPromise(this.iframe).then(() => {
         this.baseInstance_.emitLifecycleEvent('xDomIframeLoaded');
       });
-    }
-
-    if (opt_isA4A) {
-      // A4A writes creative frame directly to page therefore does not expect
-      // post message to unset visibility hidden
-      this.element_.appendChild(this.iframe);
-      return Promise.resolve();
     }
 
     // Install API that listens to ad response
@@ -142,11 +155,17 @@ export class AmpAdXOriginIframeHandler {
           .then(() => this.noContent_());
     }
 
+    if (opt_isA4A) {
+      // A4A writes creative frame directly to page therefore does not expect
+      // post message to unset visibility hidden
+      this.element_.appendChild(this.iframe);
+      return Promise.resolve();
+    }
     // Set iframe initially hidden which will be removed on load event +
     // post message.
     setStyle(this.iframe, 'visibility', 'hidden');
-
     this.element_.appendChild(this.iframe);
+
     return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
         this.adResponsePromise_,
         'timeout waiting for ad response').catch(e => {
@@ -172,6 +191,7 @@ export class AmpAdXOriginIframeHandler {
     this.uiHandler_.setDisplayState(AdDisplayState.LOADED_RENDER_START);
     this.updateSize_(data.height, data.width,
                 info.source, info.origin);
+    this.baseInstance_.signals().signal('render-start');
     if (this.baseInstance_.emitLifecycleEvent) {
       this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
     }

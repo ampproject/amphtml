@@ -53,7 +53,10 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
 import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
-import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {
+  getDefaultBootstrapBaseUrl,
+  generateSentinel,
+} from '../../../src/3p-frame';
 import {installUrlReplacementsForEmbed,}
     from '../../../src/service/url-replacements-impl';
 import {extensionsFor} from '../../../src/extensions';
@@ -61,6 +64,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {rethrowAsync} from '../../../src/log';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
+import {getContextMetadata} from '../../../src/iframe-attributes';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -88,6 +92,9 @@ export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 /** @type {string} */
 const TAG = 'AMP-A4A';
 
+/** @type {string} */
+const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
+
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
@@ -114,8 +121,8 @@ export let AdResponseDef;
 
 /** @typedef {{
       minifiedCreative: string,
-      customElementExtensions: Array<string>,
-      customStylesheets: Array<!{href: string}>
+      customElementExtensions: !Array<string>,
+      customStylesheets: !Array<{href: string}>
     }} */
 let CreativeMetaDataDef;
 
@@ -293,6 +300,14 @@ export class AmpA4A extends AMP.BaseElement {
         dev().error(TAG, this.element.getAttribute('type'),
             'Error on emitLifecycleEvent', err, varArgs) ;
       });
+
+    /**
+     * Used to indicate whether this slot should be collapsed or not. Marked
+     * true if the ad response has status 204, is null, or has a null
+     * arrayBuffer.
+     * @private {boolean}
+     */
+    this.collapse_ = false;
   }
 
   /** @override */
@@ -460,10 +475,14 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
           checkStillCurrent(promiseId);
-          if (!fetchResponse || !fetchResponse.arrayBuffer) {
-            return null;
-          }
           this.protectedEmitLifecycleEvent_('adRequestEnd');
+          // If the response has response code 204, or is null, collapse it.
+          if (!fetchResponse
+              || !fetchResponse.arrayBuffer
+              || fetchResponse.status == 204) {
+            this.forceCollapse();
+            return Promise.reject(NO_CONTENT_RESPONSE);
+          }
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
@@ -578,6 +597,13 @@ export class AmpA4A extends AMP.BaseElement {
           return creativeMetaDataDef;
         })
         .catch(error => {
+          if (error == NO_CONTENT_RESPONSE) {
+            return {
+              minifiedCreative: '',
+              customElementExtensions: [],
+              customStylesheets: [],
+            };
+          }
           // If error in chain occurs, report it and return null so that
           // layoutCallback can render via cross domain iframe assuming ad
           // url or creative exist.
@@ -706,6 +732,9 @@ export class AmpA4A extends AMP.BaseElement {
     if (!this.adPromise_) {
       return Promise.resolve();
     }
+    // There's no real throttling with A4A, but this is the signal that is
+    // most comparable with the layout callback for 3p ads.
+    this.protectedEmitLifecycleEvent_('preAdThrottle');
     const layoutCallbackStart = this.getNow_();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
@@ -714,19 +743,22 @@ export class AmpA4A extends AMP.BaseElement {
         layoutAdPromiseDelay: Math.round(delta),
         isAmpCreative: !!creativeMetaData,
       });
-      if (creativeMetaData) {
-        // Must be an AMP creative.
-        return this.renderAmpCreative_(creativeMetaData).catch(err => {
-          // Failed to render via AMP creative path so fallback to non-AMP
-          // rendering within cross domain iframe.
-          user().error(TAG, this.element.getAttribute('type'),
-            'Error injecting creative in friendly frame', err);
-          rethrowAsync(this.promiseErrorHandler_(err));
-          return this.renderNonAmpCreative_();
-        });
+      if (!creativeMetaData) {
+        // Non-AMP creative case, will verify ad url existence.
+        return this.renderNonAmpCreative_();
       }
-      // Non-AMP creative case, will verify ad url existence.
-      return this.renderNonAmpCreative_();
+      if (this.collapse_) {
+        return Promise.resolve();
+      }
+      // Must be an AMP creative.
+      return this.renderAmpCreative_(creativeMetaData).catch(err => {
+        // Failed to render via AMP creative path so fallback to non-AMP
+        // rendering within cross domain iframe.
+        user().error(TAG, this.element.getAttribute('type'),
+          'Error injecting creative in friendly frame', err);
+        rethrowAsync(this.promiseErrorHandler_(err));
+        return this.renderNonAmpCreative_();
+      });
     }).catch(error => this.promiseErrorHandler_(error));
   }
 
@@ -826,6 +858,16 @@ export class AmpA4A extends AMP.BaseElement {
    * */
   handleResize(width, height) {
     user().info('A4A', `Received creative with size ${width}x${height}.`);
+  }
+
+  /**
+   * Forces the UI Handler to collapse this slot.
+   * @visibleForTesting
+   */
+  forceCollapse() {
+    dev().assert(this.uiHandler);
+    this.uiHandler.setDisplayState(AdDisplayState.LOADING);
+    this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
   }
 
   /**
@@ -1088,6 +1130,12 @@ export class AmpA4A extends AMP.BaseElement {
           // modified url.
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
+    // Can't get the attributes until we have the iframe, then set it.
+    const attributes = this.generateSentinelAndContext(iframe);
+    iframe.setAttribute('name', JSON.stringify(attributes));
+    const sentinel = attributes._context.sentinel ||
+        attributes._context.amp3pSentinel;
+    iframe.setAttribute('data-amp-3p-sentinel', sentinel);
     return this.iframeRenderHelper_(iframe);
   }
 
@@ -1116,7 +1164,8 @@ export class AmpA4A extends AMP.BaseElement {
           break;
         case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
-          nameData = JSON.stringify({creative});
+          nameData = '';
+          // Name will be set for real below in nameframe case.
           break;
         default:
           // Shouldn't be able to get here, but...  Because of the assert, above,
@@ -1136,8 +1185,30 @@ export class AmpA4A extends AMP.BaseElement {
             'src': srcPath,
             'name': nameData,
           }, SHARED_IFRAME_PROPERTIES));
+      if (method == XORIGIN_MODE.NAMEFRAME) {
+        // TODO(bradfrizzell): change name of function and var
+        const attributes = this.generateSentinelAndContext(iframe);
+        attributes['creative'] = creative;
+        const name = JSON.stringify(attributes);
+        // Need to reassign the name once we've generated the context
+        // attributes off of the iframe. Need the iframe to generate.
+        iframe.setAttribute('name', name);
+        const sentinel = attributes._context.sentinel ||
+            attributes._context.amp3pSentinel;
+        iframe.setAttribute('data-amp-3p-sentinel', sentinel);
+      }
       return this.iframeRenderHelper_(iframe);
     });
+  }
+
+  /**
+   * Generates sentinel for iframe and gets the context metadata.
+   * @param {!Element} iframe
+   * @return {!Object} context
+   */
+  generateSentinelAndContext(iframe) {
+    const sentinel = generateSentinel(window);
+    return getContextMetadata(window, iframe, sentinel);
   }
 
   /**

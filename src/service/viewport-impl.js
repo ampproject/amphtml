@@ -98,9 +98,6 @@ export class Viewport {
     /** @private {?number} */
     this./*OK*/scrollTop_ = null;
 
-    /** @private {?number} */
-    this.lastMeasureScrollTop_ = null;
-
     /** @private {boolean} */
     this.scrollAnimationFrameThrottled_ = false;
 
@@ -112,9 +109,6 @@ export class Viewport {
 
     /** @private {number} */
     this.lastPaddingTop_ = 0;
-
-    /** @private {number} */
-    this.scrollMeasureTime_ = 0;
 
     /** @private {!./timer-impl.Timer} */
     this.timer_ = timerFor(this.ampdoc.win);
@@ -1771,6 +1765,12 @@ function getViewportType(win, viewer) {
   if (!isIframed(win) && (getMode(win).localDev || getMode(win).development)) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
+
+  // Enable iOS Embedded mode for iframed tests (e.g. integration tests).
+  if (isIframed(win) && getMode(win).test) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
+
   // Override to ios-embed for iframe-viewer mode.
   // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
   if (isIframed(win) && viewer.isEmbedded()) {

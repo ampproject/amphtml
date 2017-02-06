@@ -30,7 +30,6 @@ import {
 import {timerFor} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
-import {tryParseJson} from '../json';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -149,6 +148,9 @@ export class Viewer {
 
     /** @private {?time} */
     this.firstVisibleTime_ = null;
+
+    /** @private {?time} */
+    this.lastVisibleTime_ = null;
 
     /** @private {?Function} */
     this.messagingReadyResolver_ = null;
@@ -387,9 +389,11 @@ export class Viewer {
    */
   onVisibilityChange_() {
     if (this.isVisible()) {
+      const now = Date.now();
       if (!this.firstVisibleTime_) {
-        this.firstVisibleTime_ = Date.now();
+        this.firstVisibleTime_ = now;
       }
+      this.lastVisibleTime_ = now;
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
     }
@@ -578,6 +582,15 @@ export class Viewer {
   }
 
   /**
+   * Returns the time when the document has become visible for the last time.
+   * If document has not yet become visible, the returned value is `null`.
+   * @return {?time}
+   */
+  getLastVisibleTime() {
+    return this.lastVisibleTime_;
+  }
+
+  /**
    * How much the viewer has requested the runtime to prerender the document.
    * The values are in number of screens.
    * @return {number}
@@ -698,39 +711,6 @@ export class Viewer {
       this.messageObservables_[eventType] = observable;
     }
     return observable.add(handler);
-  }
-
-  /**
-   * Get/set the Base CID from/to the viewer.
-   * @param {string=} opt_data Stringified JSON object {cid, time}.
-   * @return {!Promise<string|undefined>}
-   * TODO: move this to cid-impl
-   */
-  baseCid(opt_data) {
-    return this.isTrustedViewer().then(trusted => {
-      if (!trusted) {
-        return undefined;
-      }
-      const cidPromise = this.sendMessageAwaitResponse('cid', opt_data)
-          .then(data => {
-            // For backward compatibility: #4029
-            if (data && !tryParseJson(data)) {
-              return JSON.stringify({
-                time: Date.now(), // CID returned from old API is always fresh
-                cid: data,
-              });
-            }
-            return data;
-          });
-      // Getting the CID may take some time (waits for JS file to
-      // load, might hit GC), but we do not wait indefinitely. Typically
-      // it should resolve in milli seconds.
-      return timerFor(this.win).timeoutPromise(10000, cidPromise, 'base cid')
-          .catch(error => {
-            dev().error(TAG_, error);
-            return undefined;
-          });
-    });
   }
 
   /**

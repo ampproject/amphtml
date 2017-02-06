@@ -18,8 +18,9 @@ import {getCorrelator} from './utils';
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {dev} from '../../../src/log';
 import {serializeQueryString} from '../../../src/url';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {getTimingDataSync} from '../../../src/service/variable-source';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {viewerForDoc} from '../../../src/viewer';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -138,7 +139,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     } else {
       initTime = Number(scratch);
     }
-    /** @private {number} @const */
+    /** @private {time} @const */
     this.initTime_ = initTime;
 
     /** @private {!function():number} @const */
@@ -153,6 +154,9 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
      * @const
      */
     this.urlReplacer_ = urlReplacementsForDoc(element);
+
+    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerForDoc(element);
   }
 
   /**
@@ -213,6 +217,11 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
         AD_SLOT_EVENT_NAME: name,
         AD_SLOT_EVENT_ID: stageId,
         AD_PAGE_CORRELATOR: this.correlator_,
+        AD_PAGE_VISIBLE: this.viewer_.isVisible() ? 1 : 0,
+        AD_PAGE_FIRST_VISIBLE_TIME:
+            Math.round(this.viewer_.getFirstVisibleTime() - this.initTime_),
+        AD_PAGE_LAST_VISIBLE_TIME:
+            Math.round(this.viewer_.getLastVisibleTime() - this.initTime_),
       });
     }
     return extraParams ? `${this.pingbackAddress_}?${extraParams}` : '';

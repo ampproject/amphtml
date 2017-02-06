@@ -135,7 +135,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-apester-media',
-    name: 'AMP extension for Apester media',
+    name: 'AMP extension for Apester media (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/3233',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
   },
@@ -220,27 +220,37 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
   },
   {
-    id: 'amp-selector',
-    name: 'Amp selector extension',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-selector/amp-selector.md',
-  },
-  {
     id: 'amp-accordion-session-state-optout',
     name: 'AMP Accordion attribute to opt out of preserved state.',
     Spec: 'https://github.com/ampproject/amphtml/issues/3813',
   },
   {
-    id: '3p-frame-context-in-name',
-    name: 'Move passing context metadata from url hash to name attribute',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6760',
+    id: 'sentinel-name-change',
+    name: 'Changed sentinel name from amp3pSentinel to sentinel',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6990',
     Spec: '',
   },
   {
     id: 'variable-filters',
     name: 'Format to apply filters to analytics variables',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
+  },
+  {
+    id: 'version-locking',
+    name: 'Force all extensions to have the same release ' +
+        'as the main JS binary',
+    cleanupIssue: 'DO_NOT_SUBMIT',
+  },
+  {
+    id: 'amp-bind',
+    name: 'AMP extension for dynamic content',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-bind/amp-bind.md',
+  },
+  {
+    id: 'jank-meter',
+    name: 'Display jank meter',
   },
 ];
 

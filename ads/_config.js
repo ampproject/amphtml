@@ -101,6 +101,11 @@ export const adConfig = {
 
   aduptech: {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
+    preconnect: [
+      'https://d.adup-tech.com',
+      'https://m.adup-tech.com',
+    ],
+    renderStartImplemented: true,
   },
 
   adverline: {
@@ -151,6 +156,10 @@ export const adConfig = {
     preconnect: [
       'https://ad.amanad.adtdp.com',
     ],
+  },
+
+  capirs: {
+    renderStartImplemented: true,
   },
 
   caprofitx: {
@@ -397,6 +406,7 @@ export const adConfig = {
       'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
     ],
+    renderStartImplemented: true,
   },
 
   plista: {},
@@ -428,6 +438,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  relap: {
+    renderStartImplemented: true,
+  },
+
   revcontent: {
     prefetch: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
     preconnect: [
@@ -442,6 +456,10 @@ export const adConfig = {
 
   sharethrough: {
     renderStartImplemented: true,
+  },
+
+  sklik: {
+    prefetch: 'https://c.imedia.cz/js/amp.js',
   },
 
   smartadserver: {
@@ -470,6 +488,15 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
+  swoop: {
+    prefetch: 'https://www.swoop-amp.com/amp.js',
+    preconnect: [
+      'https://www.swpsvc.com',
+      'https://client.swpcld.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   taboola: {},
 
   teads: {
@@ -482,6 +509,14 @@ export const adConfig = {
   },
 
   triplelift: {},
+
+  valuecommerce: {
+    prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
+    preconnect: [
+      'https://ad.jp.ap.valuecommerce.com',
+    ],
+    renderStartImplemented: true,
+  },
 
   webediads: {
     prefetch: 'https://eu1.wbdds.com/amp.min.js',

@@ -34,7 +34,7 @@ import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
-
+import {documentInfoForDoc} from '../document-info';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';
@@ -248,6 +248,14 @@ export class Resources {
   }
 
   /**
+   * Signals that the document has been started rendering.
+   * @restricted
+   */
+  renderStarted() {
+    this.ampdoc.signals().signal('render-start');
+  }
+
+  /**
    * Returns a subset of resources which is identified as being in the current
    * viewport.
    * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
@@ -329,6 +337,27 @@ export class Resources {
    */
   getResourceForElementOptional(element) {
     return Resource.forElementOptional(element);
+  }
+
+  /**
+   * Returns a promise to the layoutBox for the element. If the element is
+   * resource-backed then makes use of the resource layoutBox, otherwise
+   * measures the element directly.
+   * @param {!Element} element
+   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   */
+  getElementLayoutBox(element) {
+    const resource = this.getResourceForElementOptional(element);
+    if (resource && resource.hasBeenMeasured()) {
+      return Promise.resolve(resource.getLayoutBox());
+    }
+    return this.vsync_.measurePromise(() => {
+      if (resource) {
+        resource.measure();
+        return resource.getLayoutBox();
+      }
+      return this.getViewport().getLayoutRect(element);
+    });
   }
 
   /**
@@ -812,6 +841,7 @@ export class Resources {
         title: doc.title,
         sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
         serverLayout: doc.documentElement.hasAttribute('i-amphtml-element'),
+        linkRels: documentInfoForDoc(this.ampdoc).linkRels,
       }, /* cancelUnsent */true);
     }
 

@@ -16,9 +16,7 @@
 
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
-import {user} from '../../../src/log';
-
-const TAG = 'AMP-BIND';
+import {rewriteAttributeValue} from '../../../src/sanitizer';
 
 /**
  * @typedef {{
@@ -27,7 +25,7 @@ const TAG = 'AMP-BIND';
  *   expressionString: string,
  * }}
  */
-export let EvaluateeDef;
+export let BindingDef;
 
 /**
  * @typedef {{
@@ -36,40 +34,49 @@ export let EvaluateeDef;
  *   expression: !BindExpression,
  * }}
  */
-let ParsedEvaluateeDef;
+let ParsedBindingDef;
 
 /**
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
-  /**
-   * @param {!Array<EvaluateeDef>} evaluatees
-   */
-  constructor(evaluatees) {
-    /** @const {!Array<ParsedEvaluateeDef>} */
-    this.parsedEvaluatees_ = [];
+  constructor() {
+    /** @const {!Array<ParsedBindingDef>} */
+    this.parsedBindings_ = [];
 
     /** @const {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
+  }
 
+  /**
+   * Parses and stores given bindings into expression objects and returns map
+   * of expression string to parse errors.
+   * @param {!Array<BindingDef>} bindings
+   * @return {!Object<string,!Error>}
+   */
+  setBindings(bindings) {
+    const errors = Object.create(null);
     // Create BindExpression objects from expression strings.
-    for (let i = 0; i < evaluatees.length; i++) {
-      const e = evaluatees[i];
+    // TODO(choumx): Chunk creation of BindExpression or change to web worker.
+    for (let i = 0; i < bindings.length; i++) {
+      const e = bindings[i];
+      const string = e.expressionString;
 
       let expression;
       try {
         expression = new BindExpression(e.expressionString);
       } catch (error) {
-        user().error(TAG, 'Malformed expression:', error);
+        errors[string] = error;
         continue;
       }
 
-      this.parsedEvaluatees_.push({
+      this.parsedBindings_.push({
         tagName: e.tagName,
         property: e.property,
         expression,
       });
     }
+    return errors;
   }
 
   /**
@@ -77,41 +84,48 @@ export class BindEvaluator {
    * the returned Promise with a map of expression strings to results.
    * @param {!Object} scope
    * @return {
-   *   !Promise<!Object<string, ./bind-expression.BindExpressionResultDef>>
+   *   !Promise<{
+   *     results: !Object<string, ./bind-expression.BindExpressionResultDef>,
+   *     errors: !Object<string, !Error>,
+   *   }>
    * }
    */
   evaluate(scope) {
     return new Promise(resolve => {
       /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
       const cache = {};
-      /** @type {!Object<string, boolean>} */
-      const invalid = {};
+      /** @type {!Object<string, !Error>} */
+      const errors = {};
 
-      this.parsedEvaluatees_.forEach(evaluatee => {
-        const {tagName, property, expression} = evaluatee;
+      this.parsedBindings_.forEach(binding => {
+        const {tagName, property, expression} = binding;
         const expr = expression.expressionString;
 
         // Skip if we've already evaluated this expression string.
-        if (cache[expr] !== undefined || invalid[expr]) {
+        if (cache[expr] !== undefined || errors[expr]) {
           return;
         }
 
         let result;
         try {
-          result = evaluatee.expression.evaluate(scope);
+          result = binding.expression.evaluate(scope);
         } catch (error) {
-          user().error(TAG, error);
+          errors[expr] = error;
           return;
         }
 
         const resultString = this.stringValueOf_(property, result);
         if (this.validator_.isResultValid(tagName, property, resultString)) {
-          cache[expr] = result;
+          // Rewrite URL attributes for CDN if necessary.
+          cache[expr] = typeof result === 'string'
+              ? rewriteAttributeValue(tagName, property, result)
+              : result;
         } else {
-          invalid[expr] = true;
+          errors[expr] = new Error(
+              `"${result}" is not a valid result for [${property}].`);
         }
       });
-      resolve(cache);
+      resolve({results: cache, errors});
     });
   }
 

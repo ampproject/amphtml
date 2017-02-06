@@ -520,11 +520,12 @@ describe('ValidatorRulesMakeSense', () => {
       expect(tagSpec.unique && tagSpec.uniqueWarning).toBe(false);
     });
 
-    // attr_specs
+    // attr_specs within tag.
     let seenDispatchKey = false;
     const attrNameIsUnique = {};
-    for (const attrSpec of tagSpec.attrs) {
-      attrRuleShouldMakeSense(attrSpec);
+    for (const attrSpecId of tagSpec.attrs) {
+      const attrSpec = rules.attrs[attrSpecId];
+
       // attr_name must be unique within tag_spec (no duplicates).
       it('unique attr_spec within tag_spec', () => {
         expect(attrSpec.name).toBeDefined();
@@ -683,9 +684,11 @@ describe('ValidatorRulesMakeSense', () => {
     it('attr_list has attrs', () => {
       expect(attrList.attrs.length).toBeGreaterThan(0);
     });
-    for (const attrSpec of attrList.attrs) {
-      attrRuleShouldMakeSense(attrSpec);
-    }
+  }
+
+  // attr_specs within rules.
+  for (const attrSpec of rules.attrs) {
+    attrRuleShouldMakeSense(attrSpec);
   }
 
   // Verify that for every error code in our enum, we have exactly one format

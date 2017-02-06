@@ -55,6 +55,7 @@ declareExtension('amp-ad-network-adsense-impl', 0.1, false);
 declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
 declareExtension('amp-ad-network-fake-impl', 0.1, false);
 declareExtension('amp-ad-network-triplelift-impl', 0.1, false);
+declareExtension('amp-ad-network-cloudflare-impl', 0.1, false);
 declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-animation', '0.1', false);
@@ -440,6 +441,7 @@ function buildExtensionJs(path, name, version, options) {
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? '' : ('(self.AMP=self.AMP||[])' +
         '.push({n:"' + name + '",' + priority +
+        'v:"' + internalRuntimeVersion + '",' +
         'f:(function(AMP){<%= contents %>\n})});'),
   });
 }
@@ -564,7 +566,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
   // version is not available on the absolute path.
   var integrationJs = argv.fortesting
       ? './f.js'
-      : `https://3p.ampproject.net/${internalRuntimeVersion}/f.js`;
+      : `https://${hostname3p}/${internalRuntimeVersion}/f.js`;
   // Convert default relative URL to absolute min URL.
   var html = fs.readFileSync(input, 'utf8')
       .replace(/\.\/integration\.js/g, integrationJs);

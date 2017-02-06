@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../../src/ampdoc';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -69,9 +68,8 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
 
-    const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
-    installVideoManagerForDoc(ampdoc);
-    videoManagerForDoc(this.win.document).register(this);
+    installVideoManagerForDoc(this.element);
+    videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */

@@ -186,12 +186,27 @@ describe('BindValidator', () => {
       expect(val.canBind('AMP-IMG', 'width')).to.be.true;
       expect(val.canBind('AMP-IMG', 'height')).to.be.true;
 
+      // src
       expect(val.isResultValid(
           'AMP-IMG', 'src', 'http://foo.com/bar.jpg')).to.be.true;
       expect(val.isResultValid('AMP-IMG', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
       expect(val.isResultValid(
           'AMP-IMG', 'src', '__amp_source_origin')).to.be.false;
+
+      // srcset
+      expect(val.isResultValid(
+          'AMP-IMG',
+          'srcset',
+          'http://a.com/b.jpg 1x, http://c.com/d.jpg 2x')).to.be.true;
+      expect(val.isResultValid(
+          'AMP-IMG',
+          'srcset',
+          'http://a.com/b.jpg 1x, __amp_source_origin 2x')).to.be.false;
+      expect(val.isResultValid(
+          'AMP-IMG',
+          'srcset',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
     });
 
     it('should support <amp-selector>', () => {
@@ -203,6 +218,7 @@ describe('BindValidator', () => {
       expect(val.canBind('AMP-VIDEO', 'poster')).to.be.true;
       expect(val.canBind('AMP-VIDEO', 'src')).to.be.true;
 
+      // src
       expect(val.isResultValid(
           'AMP-VIDEO', 'src', 'https://foo.com/bar.mp4')).to.be.true;
       expect(val.isResultValid(

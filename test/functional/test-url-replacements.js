@@ -22,7 +22,8 @@ import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
 } from '../../src/custom-element';
-import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
+import {installCidServiceForDocForTesting,} from
+    '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService,} from
     '../../extensions/amp-analytics/0.1/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -67,7 +68,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       if (opt_options) {
         if (opt_options.withCid) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
-          installCidService(iframe.win);
+          installCidServiceForDocForTesting(iframe.ampdoc);
           installCryptoService(iframe.win);
         }
         if (opt_options.withActivity) {
@@ -1038,6 +1039,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.setAttribute('data-amp-replace', 'RANDOM');
       urlReplacements.maybeExpandLink(a);
       expect(a.href).to.equal('https://example.com/link?out=RANDOM');
+    });
+
+    it('should not replace in http (non-secure)', () => {
+      canonical = 'http://example.com/link';
+      a.href = 'http://example.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('http://example.com/link?out=QUERY_PARAM(foo)');
     });
 
     it('should replace with canonical origin', () => {
