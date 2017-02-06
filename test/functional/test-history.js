@@ -580,7 +580,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
         new HistoryBindingVirtual_(env.win, viewer));
     viewerMock.expects('hasCapability').withExactArgs('fragment').once()
         .returns(true);
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs('fragment',
+    viewerMock.expects('sendMessageAwaitResponse').withExactArgs('getFragment',
         undefined, true).once().returns(Promise.resolve('#from-viewer'));
     return history.getFragment().then(fragment => {
       expect(fragment).to.equal('from-viewer');
@@ -594,7 +594,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
         new HistoryBindingVirtual_(env.win, viewer));
     viewerMock.expects('hasCapability').withExactArgs('fragment').once()
         .returns(true);
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs('fragment',
+    viewerMock.expects('sendMessageAwaitResponse').withExactArgs('getFragment',
         undefined, true).once().returns(Promise.resolve('from-viewer'));
     return history.getFragment().then(() => {
       throw new Error('should not happen');
@@ -620,7 +620,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
         new HistoryBindingVirtual_(env.win, viewer));
     viewerMock.expects('hasCapability').withExactArgs('fragment').once()
         .returns(true);
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs('fragment',
+    viewerMock.expects('sendMessageAwaitResponse').withExactArgs('getFragment',
         undefined, true).once().returns(Promise.resolve());
     return history.getFragment().then(fragment => {
       expect(fragment).to.equal('');
@@ -633,8 +633,9 @@ describes.fakeWin('Get and update fragment', {}, env => {
         new HistoryBindingVirtual_(env.win, viewer));
     viewerMock.expects('hasCapability').withExactArgs('fragment').once()
         .returns(true);
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs('fragment',
-        {fragment: '#fragment'}, true).once().returns(Promise.resolve());
+    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
+        'replaceHistory', {fragment: '#fragment'}, true).once()
+        .returns(Promise.resolve());
     return history.updateFragment('#fragment').then(() => {});
   });
 
@@ -644,8 +645,8 @@ describes.fakeWin('Get and update fragment', {}, env => {
         new HistoryBindingVirtual_(env.win, viewer));
     viewerMock.expects('hasCapability').withExactArgs('fragment').once()
         .returns(false);
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs('fragment',
-        {fragment: '#fragment'}, true).never();
+    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
+        'replaceHistory', {fragment: '#fragment'}, true).never();
     return history.updateFragment('#fragment').then(() => {});
   });
 });

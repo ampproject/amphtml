@@ -791,7 +791,7 @@ export class HistoryBindingVirtual_ {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve('');
     }
-    return this.viewer_.sendMessageAwaitResponse('fragment', undefined,
+    return this.viewer_.sendMessageAwaitResponse('getFragment', undefined,
         /* cancelUnsent */true).then(
         hash => {
           if (!hash) {
@@ -810,7 +810,7 @@ export class HistoryBindingVirtual_ {
       return Promise.resolve();
     }
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-        'fragment', {fragment}, /* cancelUnsent */true));
+        'replaceHistory', {fragment}, /* cancelUnsent */true));
   }
 }
 
