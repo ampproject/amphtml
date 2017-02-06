@@ -32,10 +32,10 @@ const CANCELLED = 'CANCELLED';
 
 
 /**
- * The threshold for throttling load errors. Currently at 0.1%.
+ * The threshold for throttled errors. Currently at 0.1%.
  * @const {number}
  */
-const LOAD_ERROR_THRESHOLD = 1e-3;
+const THROTTLED_ERROR_THRESHOLD = 1e-3;
 
 
 /**
@@ -235,12 +235,16 @@ export function getErrorReportUrl(message, filename, line, col, error,
     return;
   }
 
-  // Load errors are always "expected".
-  if (isLoadErrorMessage(message)) {
+  // We throttle load errors and generic "Script error." errors
+  // that have no information and thus cannot be acted upon.
+  if (isLoadErrorMessage(message) ||
+    // See https://github.com/ampproject/amphtml/issues/7353
+    // for context.
+    message == 'Script error.') {
     expected = true;
 
     // Throttle load errors.
-    if (Math.random() > LOAD_ERROR_THRESHOLD) {
+    if (Math.random() > THROTTLED_ERROR_THRESHOLD) {
       return;
     }
   }
