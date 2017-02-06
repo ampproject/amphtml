@@ -493,6 +493,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  sunmedia: {
+    prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
+    preconnect: "https://static.addevweb.com",
+  },
+  
   taboola: {},
 
   teads: {
