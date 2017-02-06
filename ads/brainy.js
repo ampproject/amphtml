@@ -20,7 +20,7 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function xrostssp(global, data) {
+export function brainy(global, data) {
 
   validateData(data, [], ['aid', 'slotId']);
 
