@@ -16,7 +16,7 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
-import {fromClassForDoc} from './service';
+import {fromClassForDoc, getExistingServiceForDoc} from './service';
 import {isExperimentOnAllowUrlOverride} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
@@ -56,26 +56,12 @@ export function startupChunk(nodeOrAmpDoc, fn) {
 };
 
 /**
- * Run the given function sometime in the future without blocking UI.
- *
- * Higher priority tasks are executed before lower priority tasks.
- * Tasks with the same priority are executed in FIFO order.
- *
- * Uses `requestIdleCallback` if available and passes the `IdleDeadline`
- * object to the function, which can be used to perform a variable amount
- * of work depending on the remaining amount of idle time.
- *
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
- * @param {function(?IdleDeadline)} fn
- * @param {ChunkPriority} priority
+ * @return {!Chunks}
  */
-export function chunk(nodeOrAmpDoc, fn, priority) {
-  if (deactivated) {
-    resolved.then(fn);
-    return;
-  }
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  service.run_(fn, priority);
+export function chunksForDoc(nodeOrAmpDoc) {
+  return /** @type {!Chunks} */ (
+      getExistingServiceForDoc(nodeOrAmpDoc, 'chunk'));
 }
 
 /**
@@ -296,7 +282,7 @@ class StartupTask extends Task {
 /**
  * Handles queueing, scheduling and executing tasks.
  */
-class Chunks {
+export class Chunks {
   /**
    * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
    */
@@ -321,12 +307,19 @@ class Chunks {
   }
 
   /**
-   * Run fn as a "chunk".
+   * Run the given function sometime in the future without blocking UI.
+   *
+   * Higher priority tasks are executed before lower priority tasks.
+   * Tasks with the same priority are executed in FIFO order.
+   *
+   * Uses `requestIdleCallback` if available and passes the `IdleDeadline`
+   * object to the function, which can be used to perform a variable amount
+   * of work depending on the remaining amount of idle time.
+   *
    * @param {function(?IdleDeadline)} fn
-   * @param {number} priority
-   * @private
+   * @param {ChunkPriority} priority
    */
-  run_(fn, priority) {
+  run(fn, priority) {
     const t = new Task(fn);
     this.enqueueTask_(t, priority);
   }

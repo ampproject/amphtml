@@ -16,7 +16,7 @@
 
 import {BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
-import {chunk, ChunkPriority} from '../../../src/chunk';
+import {chunksForDoc, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
@@ -73,6 +73,9 @@ export class Bind {
 
     /** @private {!Array<BoundElementDef>} */
     this.boundElements_ = [];
+
+    /** @private {!../../../src/chunk.Chunks} */
+    this.chunks_ = chunksForDoc(this.ampdoc);
 
     /** @const @private {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
@@ -242,10 +245,10 @@ export class Bind {
         if (completed) {
           resolve({boundElements, bindings, expressionToElements});
         } else {
-          chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+          this.chunks_.run(chunktion, ChunkPriority.LOW);
         }
       };
-      chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+      this.chunks_.run(chunktion, ChunkPriority.LOW);
     });
   }
 
