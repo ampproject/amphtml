@@ -16,6 +16,7 @@
 
 import {timerFor} from './timer';
 import {user} from './log';
+import {reportError} from './error';
 
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
@@ -32,14 +33,23 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
 export function listen(element, eventType, listener, opt_capture) {
   let localElement = element;
   let localListener = listener;
+  let wrapped = event => {
+    try {
+      return localListener.call(this, event);
+    } catch (e) {
+      reportError(e);
+      throw e;
+    }
+  };
   const capture = opt_capture || false;
-  localElement.addEventListener(eventType, localListener, capture);
+  localElement.addEventListener(eventType, wrapped, capture);
   return () => {
     if (localElement) {
-      localElement.removeEventListener(eventType, localListener, capture);
+      localElement.removeEventListener(eventType, wrapped, capture);
     }
     localListener = null;
     localElement = null;
+    wrapped = null;
   };
 }
 
@@ -59,8 +69,14 @@ export function listenOnce(element, eventType, listener, opt_capture) {
   const capture = opt_capture || false;
   let unlisten;
   let proxy = event => {
-    localListener(event);
-    unlisten();
+    try {
+      localListener(event);
+    } catch (e) {
+      reportError(e);
+      throw e;
+    } finally {
+      unlisten();
+    }
   };
   unlisten = () => {
     if (localElement) {
