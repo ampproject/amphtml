@@ -240,7 +240,7 @@ describe('integration test: a4a', () => {
     });
   });
 
-  it('should collapse slot when creative response is null', () => {
+  it('should NOT collapse slot when creative response is null', () => {
     xhrMock.withArgs(TEST_URL, {
       mode: 'cors',
       method: 'GET',
@@ -249,7 +249,7 @@ describe('integration test: a4a', () => {
     const forceCollapseStub =
         sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
     return fixture.addElement(a4aElement).then(unusedElement => {
-      expect(forceCollapseStub).to.be.calledOnce;
+      expect(forceCollapseStub).to.be.notCalled;
     });
   });
 

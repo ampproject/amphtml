@@ -476,10 +476,12 @@ export class AmpA4A extends AMP.BaseElement {
         .then(fetchResponse => {
           checkStillCurrent(promiseId);
           this.protectedEmitLifecycleEvent_('adRequestEnd');
-          // If the response has response code 204, or is null, collapse it.
-          if (!fetchResponse
-              || !fetchResponse.arrayBuffer
-              || fetchResponse.status == 204) {
+          if (!fetchResponse) {
+            return null;
+          }
+          // If the response has response code 204, or arrayBuffer is null,
+          // collapse it.
+          if (!fetchResponse.arrayBuffer || fetchResponse.status == 204) {
             this.forceCollapse();
             return Promise.reject(NO_CONTENT_RESPONSE);
           }
@@ -868,6 +870,7 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(this.uiHandler);
     this.uiHandler.setDisplayState(AdDisplayState.LOADING);
     this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+    this.collapse_ = true;
   }
 
   /**
