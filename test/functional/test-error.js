@@ -272,6 +272,24 @@ describe('reportErrorToServer', () => {
     expect(url).to.contain('&ex=1');
   });
 
+  it('should not report Script errors', () => {
+    sandbox.stub(Math, 'random', () => (1e-3 + 1e-4));
+    const e = new Error('Script error.');
+    const url =
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
+    expect(url).to.be.undefined;
+  });
+
+  it('should report throttled Script errors at threshold', () => {
+    sandbox.stub(Math, 'random', () => 1e-3);
+    const e = new Error('Script error.');
+    const url =
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
+    expect(url).to.be.ok;
+    expect(url).to.contain('&ex=1');
+  });
+
+
   it('should report throttled load errors under threshold', () => {
     sandbox.stub(Math, 'random', () => (1e-3 - 1e-4));
     const e = new Error('Failed to load:');
