@@ -21,6 +21,7 @@ import {
   dev,
   isUserErrorMessage,
   rethrowAsync,
+  setReportError,
   user,
 } from '../../src/log';
 import * as sinon from 'sinon';
@@ -161,97 +162,62 @@ describe('Logging', () => {
     it('should report ERROR even when OFF and coallesce messages', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
-      win.setTimeout = () => {};
-      let timeoutCallback;
-      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
-        timeoutCallback = callback;
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
       });
 
       log.error('TAG', 'intended', new Error('test'));
 
-      expect(logSpy.callCount).to.equal(0);
-      expect(timeoutStub.callCount).to.equal(1);
-      expect(timeoutCallback).to.exist;
-      try {
-        timeoutCallback();
-        throw new Error('must not be here');
-      } catch (e) {
-        expect(e).to.be.instanceof(Error);
-        expect(e.message).to.match(/intended\: test/);
-        expect(e.expected).to.be.undefined;
-        expect(isUserErrorMessage(e.message)).to.be.false;
-      }
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/intended\: test/);
+      expect(reportedError.expected).to.be.undefined;
+      expect(isUserErrorMessage(reportedError.message)).to.be.false;
     });
 
     it('should report ERROR and mark with expected flag', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
-      win.setTimeout = () => {};
-      let timeoutCallback;
-      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
-        timeoutCallback = callback;
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
       });
 
       log.expectedError('TAG', 'intended', new Error('test'));
 
-      expect(logSpy.callCount).to.equal(0);
-      expect(timeoutStub.callCount).to.equal(1);
-      expect(timeoutCallback).to.exist;
-      try {
-        timeoutCallback();
-      } catch (e) {
-        expect(e).to.be.instanceof(Error);
-        expect(e.message).to.match(/intended\: test/);
-        expect(e.expected).to.be.true;
-      }
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/intended\: test/);
+      expect(reportedError.expected).to.be.true;
     });
 
     it('should report ERROR when OFF from a single message', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
-      win.setTimeout = () => {};
-      let timeoutCallback;
-      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
-        timeoutCallback = callback;
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
       });
 
       log.error('TAG', 'intended');
 
-      expect(logSpy.callCount).to.equal(0);
-      expect(timeoutStub.callCount).to.equal(1);
-      expect(timeoutCallback).to.exist;
-      try {
-        timeoutCallback();
-        throw new Error('must not be here');
-      } catch (e) {
-        expect(e).to.be.instanceof(Error);
-        expect(e.message).to.match(/intended/);
-        expect(isUserErrorMessage(e.message)).to.be.false;
-      }
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/intended/);
+      expect(isUserErrorMessage(reportedError.message)).to.be.false;
     });
 
     it('should report ERROR when OFF from a single error object', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
-      win.setTimeout = () => {};
-      let timeoutCallback;
-      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
-        timeoutCallback = callback;
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
       });
 
       log.error('TAG', new Error('test'));
 
-      expect(logSpy.callCount).to.equal(0);
-      expect(timeoutStub.callCount).to.equal(1);
-      expect(timeoutCallback).to.exist;
-      try {
-        timeoutCallback();
-        throw new Error('must not be here');
-      } catch (e) {
-        expect(e).to.be.instanceof(Error);
-        expect(e.message).to.match(/test/);
-        expect(isUserErrorMessage(e.message)).to.be.false;
-      }
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/test/);
+      expect(isUserErrorMessage(reportedError.message)).to.be.false;
     });
   });
 
