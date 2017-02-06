@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Xrost SSP
+# brainy
 
 ## Example
 
 ```html
 <amp-ad width="300" height="250"
-    type="xrostssp"
+    type="brainy"
     data-aid="10"
     data-slot-id="3347">
 </amp-ad>
@@ -28,7 +28,7 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact https://www.opt.ne.jp/contact/
+For configuration details and to generate your tags, please contact http://www.opt.ne.jp/contact_detail/id=8
 
 Supported parameters:
 
