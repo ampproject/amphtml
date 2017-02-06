@@ -338,6 +338,14 @@ var forbiddenTerms = {
       'tools/experiments/experiments.js',
     ],
   },
+  'setReportError\\W': {
+    message: 'Should only be used in error.js and tests.',
+    whitelist: [
+      'dist.3p/current/integration.js',
+      'src/error.js',
+      'src/log.js',
+    ],
+  },
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [

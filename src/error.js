@@ -18,7 +18,7 @@
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
 import {isLoadErrorMessage} from './event-helper';
-import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
+import {USER_ERROR_SENTINEL, isUserErrorMessage, setReportError} from './log';
 import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
 import {isProxyOrigin} from './url';
@@ -70,68 +70,75 @@ let reportingBackoff = function(work) {
  * @return {!Error}
  */
 export function reportError(error, opt_associatedElement) {
-  // Convert error to the expected type.
-  let isValidError;
-  if (error) {
-    if (error.message !== undefined) {
-      isValidError = true;
-    } else {
-      const origError = error;
-      error = new Error(String(origError));
-      error.origError = origError;
-    }
-  } else {
-    error = new Error('Unknown error');
-  }
-  // Report if error is not an expected type.
-  if (!isValidError && getMode().localDev) {
-    setTimeout(function() {
-      const rethrow = new Error(
-          '_reported_ Error reported incorrectly: ' + error);
-      throw rethrow;
-    });
-  }
-
-  if (error.reported) {
-    return /** @type {!Error} */ (error);
-  }
-  error.reported = true;
-
-  // Update element.
-  const element = opt_associatedElement || error.associatedElement;
-  if (element && element.classList) {
-    element.classList.add('i-amphtml-error');
-    if (getMode().development) {
-      element.classList.add('i-amphtml-element-error');
-      element.setAttribute('error-message', error.message);
-    }
-  }
-
-  // Report to console.
-  if (self.console) {
-    const output = (console.error || console.log);
-    if (error.messageArray) {
-      output.apply(console, error.messageArray);
-    } else {
-      if (element) {
-        output.call(console, error.message, element);
-      } else if (!getMode().minified) {
-        output.call(console, error.stack);
+  try {
+    // Convert error to the expected type.
+    let isValidError;
+    if (error) {
+      if (error.message !== undefined) {
+        isValidError = true;
       } else {
-        output.call(console, error.message);
+        const origError = error;
+        error = new Error(String(origError));
+        error.origError = origError;
+      }
+    } else {
+      error = new Error('Unknown error');
+    }
+    // Report if error is not an expected type.
+    if (!isValidError && getMode().localDev) {
+      setTimeout(function() {
+        const rethrow = new Error(
+            '_reported_ Error reported incorrectly: ' + error);
+        throw rethrow;
+      });
+    }
+
+    if (error.reported) {
+      return /** @type {!Error} */ (error);
+    }
+    error.reported = true;
+
+    // Update element.
+    const element = opt_associatedElement || error.associatedElement;
+    if (element && element.classList) {
+      element.classList.add('i-amphtml-error');
+      if (getMode().development) {
+        element.classList.add('i-amphtml-element-error');
+        element.setAttribute('error-message', error.message);
       }
     }
-  }
-  if (element && element.dispatchCustomEventForTesting) {
-    element.dispatchCustomEventForTesting('amp:error', error.message);
-  }
 
-  // 'call' to make linter happy. And .call to make compiler happy
-  // that expects some @this.
-  reportErrorToServer['call'](undefined, undefined, undefined, undefined,
-      undefined, error);
+    // Report to console.
+    if (self.console) {
+      const output = (console.error || console.log);
+      if (error.messageArray) {
+        output.apply(console, error.messageArray);
+      } else {
+        if (element) {
+          output.call(console, error.message, element);
+        } else if (!getMode().minified) {
+          output.call(console, error.stack);
+        } else {
+          output.call(console, error.message);
+        }
+      }
+    }
+    if (element && element.dispatchCustomEventForTesting) {
+      element.dispatchCustomEventForTesting('amp:error', error.message);
+    }
+
+    // 'call' to make linter happy. And .call to make compiler happy
+    // that expects some @this.
+    reportErrorToServer['call'](undefined, undefined, undefined, undefined,
+        undefined, error);
+  } catch (errorReportingError) {
+    setTimeout(function() {
+      throw errorReportingError;
+    });
+  }
   return /** @type {!Error} */ (error);
 }
+setReportError(reportError);
 
 /**
  * Returns an error for a cancellation of a promise.

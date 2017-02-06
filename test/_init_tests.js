@@ -18,6 +18,7 @@
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {removeElement} from '../src/dom';
+import {setReportError} from '../src/log';
 import {
   adopt,
   installAmpdocServices,
@@ -27,7 +28,10 @@ import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
-import {resetAccumulatedErrorMessagesForTesting} from '../src/error';
+import {
+  resetAccumulatedErrorMessagesForTesting,
+  reportError,
+} from '../src/error';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import * as describes from '../testing/describes';
 
@@ -233,6 +237,7 @@ afterEach(function() {
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting();
+  setReportError(reportError);
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
