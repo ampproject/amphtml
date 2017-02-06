@@ -27,7 +27,7 @@ import {getMode} from '../mode';
 function calculateScriptBaseUrl(location, isLocalDev, isTest) {
   if (isLocalDev) {
     if (isTest || isMax(location) || isMin(location)) {
-      return `${location.protocol}//${location.host}`;
+      return `${location.protocol}//${location.host}/dist`;
     }
   }
   return urls.cdn;

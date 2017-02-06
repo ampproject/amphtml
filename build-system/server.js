@@ -593,10 +593,8 @@ app.get([ fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], function(req, 
 /*
  * Start Cache SW LOCALDEV section
  */
-app.get(['/sw.js', '/sw.max.js'], function(req, res, next) {
+app.get(['/dist/sw.js', '/dist/sw.max.js'], function(req, res, next) {
   var filePath = req.path;
-  filePath = filePath.replace('/sw.max.js', '/dist/sw.max.js');
-  filePath = filePath.replace('/sw.js', '/dist/sw.js');
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     var n = new Date();
     // Round down to the nearest 5 minutes.
@@ -620,9 +618,10 @@ app.get('/dist/rtv/99*/*.js', function(req, res, next) {
   }).catch(next);
 });
 
-app.get('/rtv/*/v0/*.js', function(req, res, next) {
+app.get('/dist/rtv/*/v0/*.js', function(req, res, next) {
   var mode = getPathMode(req.headers.referer);
   var filePath = req.path;
+  filePath = filePath.replace(/\/rtv\/\d{13}/, '');
   filePath = replaceUrls(mode, filePath);
   req.url = filePath;
   next();
@@ -648,7 +647,6 @@ app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, re
 function replaceUrls(mode, file) {
   if (mode) {
     file = file.replace('https://cdn.ampproject.org/viewer/google/v5.js', 'https://cdn1.ampproject.org/viewer/google/v5.js');
-    file = file.replace(/\/rtv\/\d{13}/, '/dist/');
     file = file.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
     file = file.replace('https://cdn.ampproject.org/v0.max.js', '/dist/amp.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.max.js', '/dist/amp-inabox.js');
@@ -680,10 +678,10 @@ function extractFilePathSuffix(path) {
 function getPathMode(path) {
   // If is in test mode. Determine mode by  --compiled argv input
   if (process.argv.includes('test', 2)) {
-    return 'max';
     if (process.argv.includes('--compiled', 3)) {
       return 'min';
     }
+    return 'max';
   }
 
   var suffix = extractFilePathSuffix(path);
