@@ -595,6 +595,7 @@ describe('amp-analytics.visibility', () => {
     });
 
     it('"visible" trigger should work with duration condition', () => {
+      const viewer = viewerForDoc(ampdoc);
       visibility.listenOnceV2({
         selector: '#abc',
         continuousTimeMin: 1000,
@@ -615,6 +616,15 @@ describe('amp-analytics.visibility', () => {
 
         clock.tick(100);
         fireIntersect(5); // visible again.
+
+        clock.tick(100);
+        // Enters background. this will reset the timer for continuous time
+        viewer.setVisibilityState_(VisibilityState.HIDDEN);
+
+        clock.tick(2000); // this 2s should not be counted in visible time
+        expect(callbackSpy1).to.not.be.called;
+        viewer.setVisibilityState_(VisibilityState.VISIBLE); // now we're back
+
         clock.tick(100);
         fireIntersect(35); // keep being visible
         expect(callbackSpy1).to.not.be.called;
@@ -630,12 +640,12 @@ describe('amp-analytics.visibility', () => {
           elementY: '65',
           firstSeenTime: '100',
           fistVisibleTime: '100',
-          lastSeenTime: '2199',
-          lastVisibleTime: '2199',
+          lastSeenTime: '4299',
+          lastVisibleTime: '4299',
           loadTimeVisibility: '25',
           maxVisiblePercentage: '35',
           minVisiblePercentage: '5',
-          totalVisibleTime: '1999',
+          totalVisibleTime: '2099',
           maxContinuousVisibleTime: '1000',
           totalTime: '1234',
         });
