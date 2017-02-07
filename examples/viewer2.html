@@ -274,7 +274,7 @@
      };
 
     Viewer.prototype.isChannelOpen_ = function(e) {
-      return e.type == 'message' && e.data.app == APP && e.data.name == 'channelOpen';
+      return e.data.app == APP && e.data.name == 'channelOpen';
     };
 
     Viewer.prototype.completeHandshake_ = function(channel, requestId) {
