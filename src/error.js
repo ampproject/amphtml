@@ -17,8 +17,15 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
-import {isLoadErrorMessage} from './event-helper';
-import {USER_ERROR_SENTINEL, isUserErrorMessage, setReportError} from './log';
+import {
+  isLoadErrorMessage,
+  setReportError as setReportErrorEventHelper,
+} from './event-helper';
+import {
+  USER_ERROR_SENTINEL,
+  isUserErrorMessage,
+  setReportError as setReportErrorLog,
+} from './log';
 import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
 import {isProxyOrigin} from './url';
@@ -138,7 +145,8 @@ export function reportError(error, opt_associatedElement) {
   }
   return /** @type {!Error} */ (error);
 }
-setReportError(reportError);
+setReportErrorEventHelper(reportError);
+setReportErrorLog(reportError);
 
 /**
  * Returns an error for a cancellation of a promise.

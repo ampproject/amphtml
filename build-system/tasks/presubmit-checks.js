@@ -343,6 +343,7 @@ var forbiddenTerms = {
     whitelist: [
       'dist.3p/current/integration.js',
       'src/error.js',
+      'src/event-helper.js',
       'src/log.js',
     ],
   },
