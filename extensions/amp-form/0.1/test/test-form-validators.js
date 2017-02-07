@@ -48,7 +48,6 @@ describe('form-validators', () => {
 
   function getTestingIframe() {
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-form-custom-validations', true);
       return iframe;
     });
   }

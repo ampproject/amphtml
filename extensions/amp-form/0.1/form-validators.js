@@ -349,18 +349,15 @@ export class AsYouGoValidator extends AbstractCustomValidator {
  * @return {!FormValidator}
  */
 export function getFormValidator(form) {
-  const win = form.ownerDocument.defaultView;
-  if (isExperimentOn(win, 'amp-form-custom-validations')) {
-    const customValidation = form.getAttribute(
-        'custom-validation-reporting');
-    switch (customValidation) {
-      case CustomValidationTypes.AsYouGo:
-        return new AsYouGoValidator(form);
-      case CustomValidationTypes.ShowAllOnSubmit:
-        return new ShowAllOnSubmitValidator(form);
-      case CustomValidationTypes.ShowFirstOnSubmit:
-        return new ShowFirstOnSubmitValidator(form);
-    }
+  const customValidation = form.getAttribute(
+      'custom-validation-reporting');
+  switch (customValidation) {
+    case CustomValidationTypes.AsYouGo:
+      return new AsYouGoValidator(form);
+    case CustomValidationTypes.ShowAllOnSubmit:
+      return new ShowAllOnSubmitValidator(form);
+    case CustomValidationTypes.ShowFirstOnSubmit:
+      return new ShowFirstOnSubmitValidator(form);
   }
 
   if (isReportValiditySupported(form.ownerDocument)) {
