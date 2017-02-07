@@ -28,7 +28,11 @@ import {viewportForDoc} from '../../../src/viewport';
 import {viewerForDoc} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
 import {startsWith} from '../../../src/string';
-import {DEFAULT_THRESHOLD} from '../../../src/intersection-observer-polyfill';
+import {
+  DEFAULT_THRESHOLD,
+  IntersectionObserverPolyfill,
+  nativeIntersectionObserverSupported,
+} from '../../../src/intersection-observer-polyfill';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
@@ -268,6 +272,9 @@ export class Visibility {
 
     /** @private {boolean} */
     this.backgrounded_ = this.backgroundedAtStart_;
+
+    /** @private {?IntersectionObserver|?IntersectionObserverPolyfill} */
+    this.intersectionObserver_ = null;
   }
 
   /** @private */
@@ -354,13 +361,24 @@ export class Visibility {
         resource, 'Visibility tracking not supported on element: ', element);
 
     if (!this.intersectionObserver_) {
-      const onIntersectionChange = this.onIntersectionChange_.bind(this);
-      /** @private {!IntersectionObserver} */
-      this.intersectionObserver_ =
-          // TODO: polyfill IntersectionObserver
-          new this.ampdoc.win.IntersectionObserver(entries => {
-            entries.forEach(onIntersectionChange);
-          }, {threshold: DEFAULT_THRESHOLD});
+      const onIntersectionChanges = entries => {
+        entries.forEach(this.onIntersectionChange_.bind(this));
+      };
+
+      if (nativeIntersectionObserverSupported(this.ampdoc.win)) {
+        this.intersectionObserver_ = new this.ampdoc.win.IntersectionObserver(
+            onIntersectionChanges, {threshold: DEFAULT_THRESHOLD});
+      } else {
+        this.intersectionObserver_ = new IntersectionObserverPolyfill(
+            onIntersectionChanges, {threshold: DEFAULT_THRESHOLD});
+        //TODO: eventually this is go into the proposed layoutManager.
+        const viewport = viewportForDoc(this.ampdoc);
+        const ticker = () => {
+          this.intersectionObserver_.tick(viewport.getRect());
+        };
+        viewport.onScroll(ticker);
+        viewport.onChanged(ticker);
+      }
     }
 
     // Visible trigger
