@@ -24,8 +24,7 @@ import {
 } from '../../src/custom-element';
 import {installCidServiceForDocForTesting,} from
     '../../extensions/amp-analytics/0.1/cid-impl';
-import {installCryptoService,} from
-    '../../extensions/amp-analytics/0.1/crypto-impl';
+import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
