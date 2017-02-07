@@ -1244,7 +1244,7 @@ describe('amp-a4a', () => {
         stubVerifySignature.returns(Promise.resolve(false));
         return a4a.verifyCreativeSignature_('some_creative', 'some_sig')
           .then(() => {
-            fail('should have triggered rejection')
+            throw new Error('should have triggered rejection');
           })
           .catch(err => {
             expect(stubVerifySignature).to.be.callCount(20);
