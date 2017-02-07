@@ -26,7 +26,6 @@ import {
   ShowFirstOnSubmitValidator,
 } from '../form-validators';
 import {ValidationBubble} from '../validation-bubble';
-import {toggleExperiment} from '../../../../src/experiments';
 
 
 describe('form-validators', () => {
@@ -48,7 +47,6 @@ describe('form-validators', () => {
 
   function getTestingIframe() {
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-form-custom-validations', true);
       return iframe;
     });
   }
