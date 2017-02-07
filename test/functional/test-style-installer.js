@@ -28,6 +28,7 @@ describe('Styles', () => {
   let sandbox;
   let win;
   let doc;
+  let ampdoc;
   let tickSpy;
   let schedulePassSpy;
   let waitForServicesStub;
@@ -41,6 +42,7 @@ describe('Styles', () => {
       tickSpy = sandbox.spy(perf, 'tick');
 
       const resources = installResourcesServiceForDoc(doc);
+      ampdoc = resources.ampdoc;
       schedulePassSpy = sandbox.spy(resources, 'schedulePass');
       waitForServicesStub = sandbox.stub(rds, 'waitForServices');
     });
@@ -56,18 +58,21 @@ describe('Styles', () => {
       expect(getStyle(doc.body, 'opacity')).to.equal('');
       expect(getStyle(doc.body, 'visibility')).to.equal('');
       expect(getStyle(doc.body, 'animation')).to.equal('');
+      expect(ampdoc.signals().get('render-start')).to.be.null;
 
       styles.makeBodyVisible(doc);
       expect(doc.body).to.exist;
       expect(getStyle(doc.body, 'opacity')).to.equal('1');
       expect(getStyle(doc.body, 'visibility')).to.equal('visible');
       expect(getStyle(doc.body, 'animation')).to.equal('none');
+      expect(ampdoc.signals().get('render-start')).to.be.ok;
     });
 
     it('should wait for render delaying services', done => {
       expect(getStyle(doc.body, 'opacity')).to.equal('');
       expect(getStyle(doc.body, 'visibility')).to.equal('');
       expect(getStyle(doc.body, 'animation')).to.equal('');
+      expect(ampdoc.signals().get('render-start')).to.be.null;
 
       waitForServicesStub.withArgs(win)
           .returns(Promise.resolve(['service1', 'service2']));
@@ -79,6 +84,7 @@ describe('Styles', () => {
         expect(getStyle(doc.body, 'animation')).to.equal('none');
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
         expect(schedulePassSpy.withArgs(1, true)).to.be.calledOnce;
+        expect(ampdoc.signals().get('render-start')).to.be.ok;
         done();
       }, 0);
     });
@@ -89,6 +95,7 @@ describe('Styles', () => {
       setTimeout(() => {
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
         expect(schedulePassSpy).to.not.be.calledWith(sinon.match.number, true);
+        expect(ampdoc.signals().get('render-start')).to.be.ok;
         done();
       }, 0);
     });

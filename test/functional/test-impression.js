@@ -154,9 +154,7 @@ describe('impression', () => {
       });
     };
     const prevHref = window.location.href;
-    console.log(prevHref);
     window.history.replaceState(null, '', prevHref + '?bar=foo&test=4321');
-    console.log(window.location.href);
     maybeTrackImpression(window);
     return Promise.resolve().then(() => {
       return Promise.resolve().then(() => {

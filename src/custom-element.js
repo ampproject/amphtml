@@ -19,6 +19,7 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     parseLayout, parseLength, getNaturalDimensions,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
+import {Signals} from './utils/signals';
 import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
@@ -58,6 +59,17 @@ const PREPARE_LOADING_THRESHOLD_ = 1000;
 
 
 /**
+ * @enum {number}
+ */
+const UpgradeState = {
+  NOT_UPGRADED: 1,
+  UPGRADED: 2,
+  UPGRADE_FAILED: 3,
+  UPGRADE_IN_PROGRESS: 4,
+};
+
+
+/**
  * Caches whether the template tag is supported to avoid memory allocations.
  * @type {boolean|undefined}
  */
@@ -74,17 +86,6 @@ function isTemplateTagSupported() {
   }
   return templateTagSupported;
 }
-
-
-/**
- * @enum {number}
- */
-const UpgradeState = {
-  NOT_UPGRADED: 1,
-  UPGRADED: 2,
-  UPGRADE_FAILED: 3,
-  UPGRADE_IN_PROGRESS: 4,
-};
 
 
 /**
@@ -541,6 +542,9 @@ function createBaseCustomElementClass(win) {
        * @private {boolean|undefined}
        */
       this.isInTemplate_ = undefined;
+
+      /** @private @const */
+      this.signals_ = new Signals();
     }
 
     /**
@@ -549,6 +553,11 @@ function createBaseCustomElementClass(win) {
      * @return {string}
      */
     elementName() {
+    }
+
+    /** @return {!Signals} */
+    signals() {
+      return this.signals_;
     }
 
     /**
@@ -659,6 +668,15 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns the promise that's resolved when the element has been built. If
+     * the build fails, the resulting promise is rejected.
+     * @return {!Promise}
+     */
+    whenBuilt() {
+      return this.signals_.whenSignal('built');
+    }
+
+    /**
      * Get the priority to load the element.
      * @return {number} @this {!Element}
      */
@@ -688,7 +706,9 @@ function createBaseCustomElementClass(win) {
         this.built_ = true;
         this.classList.remove('i-amphtml-notbuilt');
         this.classList.remove('amp-notbuilt');
+        this.signals_.signal('built');
       } catch (e) {
+        this.signals_.rejectSignal('built', e);
         reportError(e, this);
         throw e;
       }
@@ -1124,10 +1144,17 @@ function createBaseCustomElementClass(win) {
       dev().assert(this.isBuilt(),
         'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting('amp:load:start');
+      const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
+      if (isLoadEvent) {
+        this.signals_.signal('load-start');
+      }
       const promise = this.implementation_.layoutCallback();
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
       return promise.then(() => {
+        if (isLoadEvent) {
+          this.signals_.signal('load-end');
+        }
         this.readyState = 'complete';
         this.layoutCount_++;
         this.toggleLoading_(false, /* cleanup */ true);
@@ -1140,6 +1167,10 @@ function createBaseCustomElementClass(win) {
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
+        if (isLoadEvent) {
+          this.signals_.rejectSignal(
+              'load-end', /** @type {!Error} */ (reason));
+        }
         this.layoutCount_++;
         this.toggleLoading_(false, /* cleanup */ true);
         throw reason;

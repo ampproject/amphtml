@@ -18,7 +18,6 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {childElement} from '../../../../src/dom';
 import {extensionsFor} from '../../../../src/extensions';
 import {stubService} from '../../../../testing/test-helper';
 import * as sinon from 'sinon';
@@ -170,12 +169,9 @@ describe('A4A loader', () => {
           ampAd = new AmpAd(ampAdElement);
           ampAd.upgradeCallback().then(element => {
             expect(element).to.not.be.null;
-            expect(childElement(fixture.doc.head,
-                c => {
-                  return c.tagName == 'SCRIPT' &&
-                      c.getAttribute('custom-element') ===
-                      'amp-ad-network-zort-impl';
-                })).to.not.be.null;
+            expect(fixture.doc.head.querySelector(
+                'script[custom-element="amp-ad-network-zort-impl"]'))
+                .to.not.be.null;
           });
         });
       });

@@ -17,9 +17,9 @@
 import {dev, rethrowAsync} from './log';
 import {documentStateFor} from './service/document-state';
 import {performanceFor} from './performance';
+import {resourcesForDoc} from './resources';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
-import {resourcesForDoc} from './resources';
 
 
 const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
@@ -92,7 +92,7 @@ export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
     const existing =
         isRuntimeCss ?
         cssRoot.querySelector('style[amp-runtime]') :
-        cssRoot.querySelector(`style[amp-extension=${ext}]`);
+        cssRoot./*OK*/querySelector(`style[amp-extension=${ext}]`);
     if (existing) {
       if (isRuntimeCss) {
         cssRoot.runtimeStyleElement = existing;
@@ -137,6 +137,7 @@ export function makeBodyVisible(doc, opt_waitForServices) {
       visibility: 'visible',
       animation: 'none',
     });
+    resourcesForDoc(doc).renderStarted();
   };
   try {
     /** @const {!Window} */

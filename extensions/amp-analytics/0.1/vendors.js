@@ -413,6 +413,41 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'googleadwords': {
+    'requests': {
+      'conversion_prefix': 'https://www.googleadservices.com/pagead/conversion/',
+      'remarketing_prefix':
+          'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
+      'common_params': '${googleConversionId}/?' +
+          'cv=amp2&' +  // Increment when making changes.
+          'label=${googleConversionLabel}&' +
+          'random=${random}&' +
+          'url=${sourceUrl}&' +
+          'ref=${documentReferrer}&' +
+          'fst=${pageViewId}&' +
+          'num=${counter(googleadwords)}&' +
+          'fmt=3&' +
+          'async=1&' +
+          'u_h=${screenHeight}&u_w=${screenWidth}&' +
+          'u_ah=${availableScreenHeight}&u_aw=${availableScreenWidth}&' +
+          'u_cd=${screenColorDepth}&' +
+          'u_tz=${timezone}&' +
+          'tiba=${title}&' +
+          'guid=ON&script=0',
+      'conversion_params': 'value=${googleConversionValue}&' +
+          'currency_code=${googleConversionCurrency}&' +
+          'bg=${googleConversionColor}&' +
+          'hl=${googleConversionLanguage}',
+      'conversion': '${conversion_prefix}${common_params}&${conversion_params}',
+      'remarketing': '${remarketing_prefix}${common_params}',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
@@ -487,35 +522,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'metric': 'cm',
     },
     'optout': '_gaUserPrefs.ioo',
-  },
-
-  'googleconversion': {
-    'requests': {
-      'conversion': 'https://www.googleadservices.com/pagead/conversion/' +
-          '${google_conversion_id}/?' +
-          'cv=amp1&' +  // Increment when making changes.
-          'value=${google_conversion_value}&' +
-          'currency_code=${google_conversion_currency}&' +
-          'label=${google_conversion_label}&' +
-          'random=${random}&' +
-          'url=${sourceUrl}&' +
-          'fst=${pageViewId}&' +
-          'num=${counter(googleconversion)}&' +
-          'fmt=3&' +
-          'async=3&' +
-          'bg=${google_conversion_color}&' +
-          'u_h=${screenHeight}&u_w=${screenWidth}&' +
-          'u_ah=${viewportHeight}&u_aw=${viewportWidth}&' +
-          'u_cd=${screenColorDepth}&' +
-          'u_tz=${timezone}&' +
-          'tiba=${title}&' +
-          'guid=ON&script=0',
-    },
-    'transport': {
-      'beacon': false,
-      'xhrpost': false,
-      'image': true,
-    },
   },
 
   'krux': {

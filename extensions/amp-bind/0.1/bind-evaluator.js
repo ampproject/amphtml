@@ -16,9 +16,10 @@
 
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
+import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {user} from '../../../src/log';
 
-const TAG = 'AMP-BIND';
+const TAG = 'amp-bind';
 
 /**
  * @typedef {{
@@ -27,7 +28,7 @@ const TAG = 'AMP-BIND';
  *   expressionString: string,
  * }}
  */
-export let EvaluateeDef;
+export let BindingDef;
 
 /**
  * @typedef {{
@@ -36,25 +37,26 @@ export let EvaluateeDef;
  *   expression: !BindExpression,
  * }}
  */
-let ParsedEvaluateeDef;
+let ParsedBindingDef;
 
 /**
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
   /**
-   * @param {!Array<EvaluateeDef>} evaluatees
+   * @param {!Array<BindingDef>} bindings
    */
-  constructor(evaluatees) {
-    /** @const {!Array<ParsedEvaluateeDef>} */
-    this.parsedEvaluatees_ = [];
+  constructor(bindings) {
+    /** @const {!Array<ParsedBindingDef>} */
+    this.parsedBindings_ = [];
 
     /** @const {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
 
     // Create BindExpression objects from expression strings.
-    for (let i = 0; i < evaluatees.length; i++) {
-      const e = evaluatees[i];
+    // TODO(choumx): Chunk creation of BindExpression or change to web worker.
+    for (let i = 0; i < bindings.length; i++) {
+      const e = bindings[i];
 
       let expression;
       try {
@@ -64,7 +66,7 @@ export class BindEvaluator {
         continue;
       }
 
-      this.parsedEvaluatees_.push({
+      this.parsedBindings_.push({
         tagName: e.tagName,
         property: e.property,
         expression,
@@ -87,8 +89,8 @@ export class BindEvaluator {
       /** @type {!Object<string, boolean>} */
       const invalid = {};
 
-      this.parsedEvaluatees_.forEach(evaluatee => {
-        const {tagName, property, expression} = evaluatee;
+      this.parsedBindings_.forEach(binding => {
+        const {tagName, property, expression} = binding;
         const expr = expression.expressionString;
 
         // Skip if we've already evaluated this expression string.
@@ -98,7 +100,7 @@ export class BindEvaluator {
 
         let result;
         try {
-          result = evaluatee.expression.evaluate(scope);
+          result = binding.expression.evaluate(scope);
         } catch (error) {
           user().error(TAG, error);
           return;
@@ -106,7 +108,10 @@ export class BindEvaluator {
 
         const resultString = this.stringValueOf_(property, result);
         if (this.validator_.isResultValid(tagName, property, resultString)) {
-          cache[expr] = result;
+          // Rewrite URL attributes for CDN if necessary.
+          cache[expr] = typeof result === 'string'
+              ? rewriteAttributeValue(tagName, property, result)
+              : result;
         } else {
           invalid[expr] = true;
         }

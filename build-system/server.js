@@ -344,7 +344,7 @@ function liveListTombstone(liveList) {
   // We can tombstone any list item except item-1 since we always do a
   // replace example on item-1.
   if (tombstoneId != 1) {
-    var item = liveList.querySelector(`#list-item-${tombstoneId}`);
+    var item = liveList./*OK*/querySelector(`#list-item-${tombstoneId}`);
     if (item) {
       item.setAttribute('data-tombstone', '');
     }
@@ -527,8 +527,8 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
 
     // Extract amp-ad for the given 'type' specified in URL query.
     if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
-      var ads = file.match(new RegExp('<amp-ad [^>]*[\'"]'
-          + req.query.type + '[\'"][^>]*>([\\s\\S]+?)<\/amp-ad>', 'gm'));
+      var ads = file.match(new RegExp('<(amp-ad|amp-embed) [^>]*[\'"]'
+          + req.query.type + '[\'"][^>]*>([\\s\\S]+?)<\/(amp-ad|amp-embed)>', 'gm'));
       file = file.replace(
           /<body>[\s\S]+<\/body>/m, '<body>' + ads.join('') + '</body>');
     }
@@ -539,20 +539,54 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   });
 });
 
-// "fake" a4a creative.
-app.get('/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json.html', function(req, res) {
-  var filePath = '/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json';
-  fs.readFileAsync(process.cwd() + filePath).then(file => {
-    const metadata = JSON.parse(file);
-    res.setHeader('Content-Type', 'text/html');
-    res.end(metadata.creative);
-  });
-});
-
 app.use('/bind/form/get', function(req, res, next) {
   assertCors(req, res, ['GET']);
   res.json({
     bindXhrResult: 'I was fetched from the server!'
+  });
+});
+
+// Simulated Cloudflare signed Ad server
+
+const cloudflareDataDir = '/extensions/amp-ad-network-cloudflare-impl/0.1/data';
+const fakeAdNetworkDataDir = '/extensions/amp-ad-network-fake-impl/0.1/data'
+
+/**
+ * Handle CORS headers
+ */
+app.use([cloudflareDataDir], function fakeCors(req, res, next) {
+  assertCors(req, res, ['GET', 'OPTIONS'], ['X-AmpAdSignature']);
+
+  if (req.method=='OPTIONS') {
+    res.status(204).end();
+  } else {
+    next();
+  }
+});
+
+/**
+ * Handle fake a4a data
+ */
+app.get([ fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], function(req, res) {
+  var filePath = req.path;
+  var unwrap = false;
+  if (req.path.endsWith('.html')) {
+    filePath = req.path.slice(0,-5)
+    unwrap = true
+  }
+  filePath = process.cwd() + filePath
+  fs.readFileAsync(filePath).then(file => {
+    if (!unwrap) {
+      res.end(file)
+      return
+    }
+    const metadata = JSON.parse(file);
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('X-AmpAdSignature', metadata.signature);
+    res.end(metadata.creative);
+  }).error( () => {
+    res.status(404);
+    res.end("Not found: " + filePath);
   });
 });
 
