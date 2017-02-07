@@ -732,7 +732,7 @@ describe('Viewer', () => {
       }).to.throw(/message channel must have an origin/);
     });
 
-    it.only('should allow channel without origin thats an empty string', () => {
+    it('should allow channel without origin thats an empty string', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = null;
       const viewer = new Viewer(ampdoc);
