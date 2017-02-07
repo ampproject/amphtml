@@ -32,6 +32,8 @@ import {loadPromise} from '../../../src/event-helper';
 import {AdDisplayState} from './amp-ad-ui';
 import {getHtml} from '../../../src/get-html';
 
+const VISIBILITY_TIMEOUT = 10000;
+
 
 export class AmpAdXOriginIframeHandler {
 
@@ -135,8 +137,7 @@ export class AmpAdXOriginIframeHandler {
       });
     }
 
-    // Calculate render-start and no-content signal. These signals are mutually
-    // exclusive. Whichever arrives first wins.
+    // Calculate render-start and no-content signals.
     let renderStartResolve;
     const renderStartPromise = new Promise(resolve => {
       renderStartResolve = resolve;
@@ -145,17 +146,37 @@ export class AmpAdXOriginIframeHandler {
     const noContentPromise = new Promise(resolve => {
       noContentResolve = resolve;
     });
-    listenForOncePromise(this.iframe,
-        ['render-start', 'no-content'], true).then(info => {
-          const data = info.data;
-          if (data.type == 'render-start') {
-            this.renderStart_(info);
-            renderStartResolve();
-          } else {
-            this.noContent_();
-            noContentResolve();
-          }
-        });
+    if (this.baseInstance_.config &&
+            this.baseInstance_.config.renderStartImplemented) {
+      // When `render-start` is supported, these signals are mutually
+      // exclusive. Whichever arrives first wins.
+      listenForOncePromise(this.iframe,
+          ['render-start', 'no-content'], true).then(info => {
+            const data = info.data;
+            if (data.type == 'render-start') {
+              this.renderStart_(info);
+              renderStartResolve();
+            } else {
+              this.noContent_();
+              noContentResolve();
+            }
+          });
+    } else {
+      // If `render-start` is not supported, listen to `bootstrap-loaded`.
+      // This will avoid keeping the Ad empty until it's fully loaded, which
+      // could be a long time.
+      listenForOncePromise(this.iframe, 'bootstrap-loaded', true).then(() => {
+        this.renderStart_();
+        renderStartResolve();
+      });
+      // Likewise, no-content is observed here. However, it's impossible to
+      // assure exclusivity between `no-content` and `bootstrap-loaded` b/c
+      // `bootstrap-loaded` always arrives first.
+      listenForOncePromise(this.iframe, 'no-content', true).then(() => {
+        this.noContent_();
+        noContentResolve();
+      });
+    }
 
     if (opt_isA4A) {
       // A4A writes creative frame directly to page therefore does not expect
@@ -171,6 +192,7 @@ export class AmpAdXOriginIframeHandler {
     const visibilityPromise = Promise.race([
       renderStartPromise,
       iframeLoadPromise,
+      timer.promise(VISIBILITY_TIMEOUT),
     ]).then(() => {
       if (this.iframe) {
         setStyle(this.iframe, 'visibility', '');
@@ -198,17 +220,19 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * callback functon on receiving render-start
-   * @param {!Object} info
+   * @param {!Object=} opt_info
    * @private
    */
-  renderStart_(info) {
-    const data = info.data;
+  renderStart_(opt_info) {
     this.uiHandler_.setDisplayState(AdDisplayState.LOADED_RENDER_START);
-    this.updateSize_(data.height, data.width,
-                info.source, info.origin);
     this.baseInstance_.renderStarted();
-    if (this.baseInstance_.emitLifecycleEvent) {
-      this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
+    if (opt_info) {
+      const data = opt_info.data;
+      this.updateSize_(data.height, data.width,
+                  opt_info.source, opt_info.origin);
+      if (this.baseInstance_.emitLifecycleEvent) {
+        this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
+      }
     }
   }
 

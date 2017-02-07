@@ -195,6 +195,37 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       });
     });
 
+    it('should trigger render-start on message "bootstrap-loaded" if' +
+       ' render-start is NOT implemented', done => {
+      initPromise = iframeHandler.init(iframe);
+      iframe.onload = () => {
+        expect(iframe.style.visibility).to.equal('hidden');
+        iframe.postMessageToParent({
+          sentinel: 'amp3ptest' + testIndex,
+          type: 'bootstrap-loaded',
+        });
+        initPromise.then(() => {
+          expect(iframe.style.visibility).to.equal('');
+          expect(renderStartedSpy).to.be.calledOnce;
+          done();
+        });
+      };
+    });
+
+    it('should trigger render-start on timeout', done => {
+      const clock = sandbox.useFakeTimers();
+      iframe.name = 'test_master';
+      initPromise = iframeHandler.init(iframe);
+      iframe.onload = () => {
+        clock.tick(10000);
+        initPromise.then(() => {
+          expect(iframe.style.visibility).to.equal('');
+          expect(renderStartedSpy).to.not.be.called;
+          done();
+        });
+      };
+    });
+
     it('should resolve directly if it is A4A', () => {
       return iframeHandler.init(iframe, true).then(() => {
         expect(iframe.style.visibility).to.equal('');
