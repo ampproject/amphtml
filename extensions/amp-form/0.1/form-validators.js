@@ -376,7 +376,7 @@ function isReportValiditySupported(doc) {
   if (doc && reportValiditySupported === undefined) {
     reportValiditySupported = !!document.createElement('form').reportValidity;
   }
-  return reportValiditySupported;
+  return !!reportValiditySupported;
 }
 
 
