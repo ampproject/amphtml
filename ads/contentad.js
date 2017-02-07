@@ -15,6 +15,7 @@
  */
 
 import {writeScript, validateData} from '../3p/3p';
+import {parseUrl} from '../src/url';
 
 /**
  * @param {!Window} global
@@ -35,10 +36,8 @@ export function contentad(global, data) {
   /* Pass Source URL */
   let sourceUrl = window.context.sourceUrl;
   if (data.url) {
-    const s = document.createElement('a');
-    s.href = sourceUrl;
     const domain = data.url || window.atob(data.d);
-    sourceUrl = sourceUrl.replace(s.host, domain);
+    sourceUrl = sourceUrl.replace(parseUrl(sourceUrl).host, domain);
   }
 
   /* Build API URL */
