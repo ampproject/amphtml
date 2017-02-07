@@ -97,12 +97,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
   },
   {
-    id: 'amp-form-custom-validations',
-    name: 'AMP Form Custom Validations',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5423',
-  },
-  {
     id: 'amp-form-var-sub',
     name: 'Variable Substitutions in AMP Form inputs for POST/GET submits',
     spec: 'https://github.com/ampproject/amphtml/issues/5654',
