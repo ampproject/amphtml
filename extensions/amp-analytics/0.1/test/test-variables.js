@@ -16,7 +16,6 @@
 
 import {ExpansionOptions, variableServiceFor} from '../variables';
 import {adopt} from '../../../../src/runtime';
-import {cryptoFor} from '../../../../src/crypto';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -26,9 +25,7 @@ describe('amp-analytics.VariableService', function() {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    return cryptoFor(window).then(() => {
-      variables = variableServiceFor(window);
-    });
+    variables = variableServiceFor(window);
   });
 
   afterEach(() => {

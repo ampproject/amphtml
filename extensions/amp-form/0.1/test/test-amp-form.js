@@ -39,7 +39,7 @@ import {
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {
     installCryptoService,
-} from '../../../../extensions/amp-analytics/0.1/crypto-impl';
+} from '../../../../src/service/crypto-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../../../src/service/document-info-impl';
 import '../../../amp-selector/0.1/amp-selector';

@@ -17,7 +17,7 @@
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {ClickEventTracker} from '../events';
-import {Crypto} from '../crypto-impl';
+import {Crypto} from '../../../../src/service/crypto-impl';
 import {InstrumentationService} from '../instrumentation';
 import {variableServiceFor} from '../variables';
 import {
