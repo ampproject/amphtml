@@ -15,7 +15,6 @@
  */
 
 import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {ValidationBubble} from './validation-bubble';
 
 
