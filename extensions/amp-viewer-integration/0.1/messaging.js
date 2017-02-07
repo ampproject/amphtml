@@ -42,6 +42,11 @@ const MessageType = {
  */
 export let Message;
 
+/**
+ * @fileoverview This class is a de-facto implementation of MessagePort
+ * from Channel Messaging API:
+ * https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API
+ */
 export class WindowPortEmulator {
   /**
    * @param {!Window} win
@@ -51,7 +56,7 @@ export class WindowPortEmulator {
     /** @const {!Window} */
     this.win = win;
     /** @private {string} */
-    this.origin_ = dev().assertString(origin);
+    this.origin_ = origin;
   }
   /**
    * @param {string} eventType
@@ -71,7 +76,8 @@ export class WindowPortEmulator {
   postMessage(data) {
     this.win.parent./*OK*/postMessage(data, this.origin_);
   }
-  start() {}
+  start() {
+  }
 }
 
 /**
@@ -86,12 +92,12 @@ export class Messaging {
   /**
    * Conversation (messaging protocol) between me and Bob.
    * @param {!Window} win
-   * @param {!WindowPortEmulator} port
+   * @param {!MessagePort|!WindowPortEmulator} port
    */
   constructor(win, port) {
     /** @const {!Window} */
     this.win = win;
-    /** @private {!WindowPortEmulator} */
+    /** @const @private {!MessagePort|!WindowPortEmulator} */
     this.port_ = port;
     /** @private {!number} */
     this.requestIdCounter_ = 0;

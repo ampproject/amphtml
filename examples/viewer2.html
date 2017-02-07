@@ -227,6 +227,7 @@
         origin: parseUrl(window.location.href).origin,
         csi: this.csi_,
         cap: 'foo,a2a',
+        webview: 1, // mocking a webview
       };
       log('Params:' + JSON.stringify(params));
 
@@ -286,23 +287,11 @@
       console.log('############## viewer posting Message', message);
       channel.port1./*OK*/postMessage(message);
 
-      class WindowPortEmulator {
-        constructor(messageHandlers, id) {
-          this.messageHandlers_ = messageHandlers;
-          this.id_ = id;
-        }
-        addEventListener(messageType, messageHandler) {
-          console.log('messageHandler', messageHandler);
-          this.messageHandlers_[this.id_] = messageHandler;
-        }
-        postMessage(data) {
-          console.log('############## viewer posting Message', data);
-          channel.port1./*OK*/postMessage(data);
-        }
-      }
-
-      this.messaging_ = new ViewerMessaging('', '',
-          this.processRequest_.bind(this), this.iframe.id, new WindowPortEmulator(this.messageHandlers_, this.id));
+      this.messaging_ = new ViewerMessaging('', '', 
+        this.processRequest_.bind(this), 
+        this.iframe.id,
+        new WindowPortEmulator(this.messageHandlers_, this.id, channel.port1)
+      );
 
       this.sendRequest_('visibilitychange', {
           state: this.visibilityState_,

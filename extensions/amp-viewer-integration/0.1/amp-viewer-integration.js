@@ -59,11 +59,12 @@ export class AmpViewerIntegration {
   init() {
     dev().fine(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
-    this.isWebView_ = viewer.getParam('webview') == 1;
+    this.isWebView_ = viewer.getParam('webview') == '1';
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
 
     if (this.isWebView_) {
-      return this.webviewPreHandshakePromise_(null, dev().assertString(''))
+      return this.webviewPreHandshakePromise_(
+        null /* source */, '' /* origin */)
       .then(receivedPort => {
         return this.openChannelAndStart_(viewer, receivedPort);
       });
@@ -75,10 +76,10 @@ export class AmpViewerIntegration {
   }
 
   /**
-   * @return {!Promise}
    * @param {?Window} source
    * @param {string} origin
    * @private
+   * @return {!Promise}
    */
   webviewPreHandshakePromise_(source, origin) {
     dev().fine(TAG, origin); //delete this line before merging.

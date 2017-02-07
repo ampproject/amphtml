@@ -15,7 +15,7 @@
  */
 
 import {parseUrl, serializeQueryString} from '../../../../src/url';
-import {Messaging, WindowPortEmulator} from '../messaging';
+import {Messaging} from '../messaging';
 
 const APP = '__AMPHTML__';
 const MessageType = {
