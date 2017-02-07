@@ -18,19 +18,37 @@
 /**
  * Returns true if the element is in the array and false otherwise.
  *
- * @param {*} element
+ * @param {*} searchElement
+ * @param {number} fromIndex
  * @returns {boolean}
  */
- export function contains(element) {
-  return this.indexOf(element) > -1;
- }
+ export function includes(searchElement, fromIndex) {
+    if (this == null) {
+      throw new TypeError('"this" is null or not defined');
+    }
+    var o = Object(this);
+    var len = o.length >>> 0;
+    if (len === 0) {
+      return false;
+    }
+    var n = fromIndex | 0;
+    var k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+    while (k < len) {
+      if (o[k] === searchElement) {
+        return true;
+      }
+      k++;
+    }
+    return false;
+  }
 
  /**
  * Sets the Array.contains polyfill if it does not exist.
  * @param {!Window} win
  */
 export function install(win) {
-  if (!win.Array.prototype.contains) {
-    Object.defineProperty(Array.prototype, 'contains', {value: contains})
+  if (!win.Array.prototype.includes) {
+    /*eslint "no-extend-native": 0*/
+    Object.defineProperty(Array.prototype, 'includes', {value: includes})
   }
 }
