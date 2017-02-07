@@ -198,9 +198,6 @@ describe('BindExpression', () => {
 
   it('should NOT allow access to array non-whitelisted methods', () => {
     expect(() => {
-      evaluate('["a", "b", "c"].includes("a")');
-    }).to.throw(Error, unsupportedFunctionError);
-    expect(() => {
       evaluate('["a", "b", "c"].find()');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
