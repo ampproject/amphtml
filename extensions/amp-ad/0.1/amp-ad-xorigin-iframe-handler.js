@@ -136,7 +136,7 @@ export class AmpAdXOriginIframeHandler {
     }
 
     // Calculate render-start and no-content signal. These signals are mutually
-    // exlcusive. Whichever arrives first wins.
+    // exclusive. Whichever arrives first wins.
     let renderStartResolve;
     const renderStartPromise = new Promise(resolve => {
       renderStartResolve = resolve;
