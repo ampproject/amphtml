@@ -277,14 +277,22 @@ export class AmpForm {
    * @private
    */
   submit_() {
+    const isVarSubExpOnForPost = isExperimentOn(
+        this.win_, 'amp-form-var-sub-for-post');
     const isVarSubExpOn = isExperimentOn(this.win_, 'amp-form-var-sub');
     let varSubsFields = [];
     // Only allow variable substitutions for inputs if the form action origin
     // is the canonical origin.
     // TODO(mkhatib, #7168): Consider relaxing this.
     if (this.isSubmittingToCanonical_()) {
+      // Var-subs for POST will be launched soon. We're splitting this into
+      // two experiments to launch for POST separately.
+      const isVarSubsEnabled = (
+          (isVarSubExpOnForPost && this.method_ == 'POST') ||
+          isVarSubExpOn);
+
       // Fields that support var substitutions.
-      varSubsFields = isVarSubExpOn ? this.form_.querySelectorAll(
+      varSubsFields = isVarSubsEnabled ? this.form_.querySelectorAll(
           '[type="hidden"][data-amp-replace]') : [];
     } else {
       user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
