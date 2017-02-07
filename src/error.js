@@ -19,7 +19,7 @@ import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
 import {
   isLoadErrorMessage,
-  setReportError as setReportErrorEventHelper
+  setReportError as setReportErrorEventHelper,
 } from './event-helper';
 import {
   USER_ERROR_SENTINEL,
