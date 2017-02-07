@@ -47,8 +47,6 @@
     </amp-carousel>
   </div>
 
-  <p [text]="fooArray"> foobar </p>
-
   <p>Without &lt;amp-selector&gt;</p>
   <amp-carousel controls width=400 height=100>
     <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75
@@ -56,7 +54,7 @@
     <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75
         [class]="selectedSlide == 1 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=1)"></amp-img>
     <amp-img src="https://ampbyexample.com/img/image3.jpg" width=100 height=75
-        [class]="selectedSlide == 2 ? 'selected' : ''" on="tap:AMP.setState(fooArray=[1, 2, 3])"></amp-img>
+        [class]="selectedSlide == 2 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=2)"></amp-img>
     <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75
         [class]="selectedSlide == 3 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=3)"></amp-img>
     <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75

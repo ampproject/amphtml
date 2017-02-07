@@ -18,11 +18,11 @@
 /**
  * Returns true if the element is in the array and false otherwise.
  *
- * @param {*} element 
+ * @param {*} element
  * @returns {boolean}
  */
  export function contains(element) {
- 	return this.indexOf(element) > -1;
+  return this.indexOf(element) > -1;
  }
 
  /**
@@ -31,6 +31,6 @@
  */
 export function install(win) {
   if (!win.Array.prototype.contains) {
-  	Object.defineProperty(Array.prototype, 'contains', {value: contains})
+    Object.defineProperty(Array.prototype, 'contains', {value: contains})
   }
 }
