@@ -27,7 +27,7 @@ export class Signals {
     /**
      * A mapping from a signal name to the signal response: either time or
      * an error.
-     * @private {!Object<string, (time|!Error)>}
+     * @private @const {!Object<string, (time|!Error)>}
      */
     this.map_ = map();
 
