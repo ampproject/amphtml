@@ -281,6 +281,45 @@ describe('CustomElement', () => {
     expect(element).to.not.have.class('amp-notbuilt');
   });
 
+  it('Element - should reset on 2nd attachedCallback when requested', () => {
+    clock.tick(1);
+    const element = new ElementClass();
+    sandbox.stub(element, 'build');
+    container.appendChild(element);
+    element.attachedCallback();
+
+    sandbox.stub(element, 'reconstructWhenReparented', () => true);
+    element.layoutCount_ = 10;
+    element.isFirstLayoutCompleted_ = true;
+    element.signals().signal('render-start');
+    element.signals().signal('load-end');
+    element.attachedCallback();
+    expect(element.layoutCount_).to.equal(0);
+    expect(element.isFirstLayoutCompleted_).to.be.false;
+    expect(element.signals().get('render-start')).to.be.null;
+    expect(element.signals().get('load-end')).to.be.null;
+  });
+
+  it('Element - should NOT reset on 2nd attachedCallback w/o request', () => {
+    clock.tick(1);
+    const element = new ElementClass();
+    sandbox.stub(element, 'build');
+    container.appendChild(element);
+    element.attachedCallback();
+
+    sandbox.stub(element, 'reconstructWhenReparented', () => false);
+    element.layoutCount_ = 10;
+    element.isFirstLayoutCompleted_ = true;
+    element.signals().signal('render-start');
+    expect(element.signals().get('render-start')).to.be.ok;
+    element.signals().signal('load-end');
+    element.attachedCallback();
+    expect(element.layoutCount_).to.equal(10);
+    expect(element.isFirstLayoutCompleted_).to.be.true;
+    expect(element.signals().get('render-start')).to.be.ok;
+    expect(element.signals().get('load-end')).to.be.ok;
+  });
+
   it('Element - getIntersectionChangeEntry', () => {
     const element = new ElementClass();
     container.appendChild(element);
@@ -1457,6 +1496,28 @@ describe('CustomElement Loading Indicator', () => {
     element.setAttribute('noloading', '');
     element.toggleLoading_(true);
     expect(vsyncTasks).to.be.empty;
+  });
+
+  it('should ignore loading-on if already rendered', () => {
+    clock.tick(1);
+    element.signals().signal('render-start');
+    element.toggleLoading_(true);
+    expect(vsyncTasks).to.be.empty;
+  });
+
+  it('should ignore loading-on if already loaded', () => {
+    element.layoutCount_ = 1;
+    element.toggleLoading_(true);
+    expect(vsyncTasks).to.be.empty;
+  });
+
+  it('should cancel loading on render-start', () => {
+    clock.tick(1);
+    const stub = sandbox.stub(element, 'toggleLoading_');
+    element.renderStarted();
+    expect(element.signals().get('render-start')).to.be.ok;
+    expect(stub).to.be.calledOnce;
+    expect(stub.args[0][0]).to.be.false;
   });
 
   it('should create and turn on', () => {

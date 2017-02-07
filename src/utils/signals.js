@@ -27,7 +27,7 @@ export class Signals {
     /**
      * A mapping from a signal name to the signal response: either time or
      * an error.
-     * @private @const {!Object<string, (time|!Error)>}
+     * @private {!Object<string, (time|!Error)>}
      */
     this.map_ = map();
 
@@ -126,6 +126,21 @@ export class Signals {
       promiseStruct.reject(error);
       promiseStruct.resolve = undefined;
       promiseStruct.reject = undefined;
+    }
+  }
+
+  /**
+   * Resets all signals.
+   * @param {string} name
+   */
+  reset(name) {
+    if (this.map_[name]) {
+      delete this.map_[name];
+    }
+    // Reset promise it has already been resolved.
+    const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
+    if (promiseStruct && !promiseStruct.resolve) {
+      delete this.promiseMap_[name];
     }
   }
 }
