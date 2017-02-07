@@ -368,7 +368,10 @@ export class HistoryBindingNatural_ {
           history.replaceState.bind(history);
       pushState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
-        this.origPushState_(state, opt_title, opt_url);
+        this.origPushState_(state, opt_title,
+            // A bug in edge causes paths to become undefined if URL is
+            // undefined, filed here: https://goo.gl/KlImZu
+            opt_url || null);
       };
       replaceState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
