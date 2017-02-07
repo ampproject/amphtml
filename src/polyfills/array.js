@@ -22,33 +22,33 @@
  * @param {number} fromIndex
  * @returns {boolean}
  */
- export function includes(searchElement, fromIndex) {
-    if (this == null) {
-      throw new TypeError('"this" is null or not defined');
-    }
-    var o = Object(this);
-    var len = o.length >>> 0;
-    if (len === 0) {
-      return false;
-    }
-    var n = fromIndex | 0;
-    var k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
-    while (k < len) {
-      if (o[k] === searchElement) {
-        return true;
-      }
-      k++;
-    }
+export function includes(searchElement, fromIndex) {
+  if (this == null) {
+    throw new TypeError('"this" is null or not defined');
+  }
+  const o = Object(this);
+  const len = o.length >>> 0;
+  if (len === 0) {
     return false;
   }
+  const n = fromIndex | 0;
+  let k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+  while (k < len) {
+    if (o[k] === searchElement) {
+      return true;
+    }
+    k++;
+  }
+  return false;
+}
 
- /**
- * Sets the Array.contains polyfill if it does not exist.
- * @param {!Window} win
- */
+/**
+* Sets the Array.contains polyfill if it does not exist.
+* @param {!Window} win
+*/
 export function install(win) {
   if (!win.Array.prototype.includes) {
     /*eslint "no-extend-native": 0*/
-    Object.defineProperty(Array.prototype, 'includes', {value: includes})
+    Object.defineProperty(Array.prototype, 'includes', {value: includes});
   }
 }
