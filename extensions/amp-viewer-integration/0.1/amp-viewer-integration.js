@@ -82,14 +82,13 @@ export class AmpViewerIntegration {
    * @return {!Promise}
    */
   webviewPreHandshakePromise_(source, origin) {
-    dev().fine(TAG, origin); //delete this line before merging.
     return new Promise(resolve => {
-      listen(this.win, 'message', e => {
+      const unlisten = listen(this.win, 'message', e => {
         dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type, e.data);
         // Viewer says: "I'm ready for you"
         if (
-            // e.origin === origin && //uncomment before submit
-            // e.source === source && //undomment before submit
+            e.origin === origin &&
+            e.source === source &&
             e.data.app == APP &&
             e.data.name == 'handshake-poll') {
           if (!e.ports || !e.ports.length) {
@@ -97,6 +96,7 @@ export class AmpViewerIntegration {
               'Did not receive communication port from the Viewer!');
           }
           resolve(e.ports[0]);
+          unlisten();
         }
       });
     });
