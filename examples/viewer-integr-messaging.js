@@ -127,7 +127,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
  */
 ViewerMessaging.prototype.onMessage_ = function(event) {
   var message = event.data;
-  if (!message || message.app != APP) {
+  if (event.type != 'message' || !message || message.app != APP) {
     return;
   }
   if (message.type == MessageType.REQUEST) {
