@@ -34,6 +34,7 @@ describe('amp-facebook', function() {
 
   const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
   const fbVideoHref = 'https://www.facebook.com/zuck/videos/10102509264909801/';
+  const fbCommentsHref = 'https://developers.facebook.com/docs/plugins/comments/';
 
   function getAmpFacebook(href, opt_embedAs, opt_noFakeResources) {
     return createIframePromise(/*opt_runtimeOff*/ true).then(iframe => {
@@ -78,6 +79,15 @@ describe('amp-facebook', function() {
     });
   });
 
+  it('renders iframe in amp-facebook with comments', () => {
+    return getAmpFacebook(fbCommentsHref, 'comments').then(ampFB => {
+      const iframe = ampFB.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    });
+  });
+
   it('adds fb-post element correctly', () => {
     return createIframePromise().then(iframe => {
       const div = document.createElement('div');
@@ -110,6 +120,24 @@ describe('amp-facebook', function() {
       const fbVideo = iframe.doc.body.getElementsByClassName('fb-video')[0];
       expect(fbVideo).not.to.be.undefined;
       expect(fbVideo.getAttribute('data-href')).to.equal(fbVideoHref);
+    });
+  });
+
+  it('adds fb-comments element correctly', () => {
+    return createIframePromise().then(iframe => {
+      const div = document.createElement('div');
+      div.setAttribute('id', 'c');
+      iframe.doc.body.appendChild(div);
+
+      facebook(iframe.win, {
+        href: fbCommentsHref,
+        width: 111,
+        height: 222,
+        embedAs: 'comments',
+      });
+      const fbComments = iframe.doc.body.getElementsByClassName('fb-comments')[0];
+      expect(fbComments).not.to.be.undefined;
+      expect(fbComments.getAttribute('data-href')).to.equal(fbCommentsHref);
     });
   });
 

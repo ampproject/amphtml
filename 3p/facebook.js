@@ -40,12 +40,19 @@ function getFacebookSdk(global, cb) {
  */
 export function facebook(global, data) {
   const embedAs = data.embedAs || 'post';
-  user().assert(['post', 'video'].indexOf(embedAs) !== -1,
+  user().assert(['post', 'video', 'comments'].indexOf(embedAs) !== -1,
       'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
-      ' "post" or "video" was: %s', embedAs);
+      ' "post", "comments" or "video" was: %s', embedAs);
   const fbPost = global.document.createElement('div');
   fbPost.className = 'fb-' + embedAs;
   fbPost.setAttribute('data-href', data.href);
+
+  if (embedAs === 'comments') {
+    fbPost.setAttribute('data-numposts', data.numposts);
+    fbPost.setAttribute('data-order-by', data.orderBy);
+    fbPost.setAttribute('data-width', '100%');
+  }
+
   global.document.getElementById('c').appendChild(fbPost);
   getFacebookSdk(global, FB => {
     // Dimensions are given by the parent frame.
@@ -54,7 +61,7 @@ export function facebook(global, data) {
 
     // Only need to listen to post resizing as FB videos have a fixed ratio
     // and can automatically resize correctly given the initial width/height.
-    if (embedAs === 'post') {
+    if (embedAs === 'post' || embedAs === 'comments') {
       FB.Event.subscribe('xfbml.resize', event => {
         context.updateDimensions(
             parseInt(event.width, 10),
