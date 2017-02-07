@@ -1537,8 +1537,8 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(htmlCss.overflowX).to.equal('hidden');
     expect(wrapperCss.overflowY).to.equal('auto');
     expect(wrapperCss.overflowX).to.equal('hidden');
-    expect(bodyCss.overflowY).to.equal('hidden');
-    expect(bodyCss.overflowX).to.equal('hidden');
+    expect(bodyCss.overflowY).to.equal('visible');
+    expect(bodyCss.overflowX).to.equal('visible');
 
     // Wrapper must be a block and positioned absolute at 0/0/0/0.
     expect(wrapperCss.display).to.equal('block');
@@ -1554,6 +1554,11 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     // Preserve the customized `display` value.
     expect(bodyCss.display).to.equal('table');
 
+    // `body` must have a 1px transparent border for two purposes:
+    // (1) to cancel out margin collapse in body's children;
+    // (2) to offset scroll adjustment to 1 to avoid scroll freeze problem.
+    expect(bodyCss.borderTop.replace('rgba(0, 0, 0, 0)', 'transparent'))
+        .to.equal('1px solid transparent');
     expect(bodyCss.margin).to.equal('0px');
   });
 
@@ -1597,11 +1602,11 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   });
 
   it('should calculate scrollWidth from wrapper', () => {
-    expect(binding.getScrollWidth()).to.equal(100);
+    expect(binding.getScrollWidth()).to.equal(200);
   });
 
   it('should calculate scrollHeight from wrapper', () => {
-    expect(binding.getScrollHeight()).to.equal(300);
+    expect(binding.getScrollHeight()).to.equal(301); // +1px for border-top.
   });
 
   it('should update scrollTop on wrapper', () => {
