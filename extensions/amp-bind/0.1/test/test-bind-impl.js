@@ -17,6 +17,7 @@
 import {Bind} from '../bind-impl';
 import {BindExpression} from '../bind-expression';
 import {BindValidator} from '../bind-validator';
+import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
@@ -39,6 +40,9 @@ describes.realWin('amp-bind', {
         BindValidator.prototype, 'canBind').returns(true);
     env.sandbox.stub(
         BindValidator.prototype, 'isResultValid').returns(true);
+
+    // Make sure we have a chunk instance for testing.
+    chunkInstanceForTesting(env.ampdoc);
 
     bind = new Bind(env.ampdoc);
   });

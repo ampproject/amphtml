@@ -37,26 +37,7 @@ let deactivated = /nochunking=1/.test(self.location.hash);
 const resolved = Promise.resolve();
 
 /**
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!Chunks}
- */
-export function installChunkServiceForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'chunk', Chunks);
-}
-
-/**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
- * @return {!Chunks}
- */
-export function chunksForDoc(nodeOrAmpDoc) {
-  return /** @type {!Chunks} */ (
-      getExistingServiceForDoc(nodeOrAmpDoc, 'chunk'));
-}
-
-/**
- * Installs the chunk service if necessary and runs the given function.
- *
- * For visible documents the function will be
+ * Run the given function. For visible documents the function will be
  * called in a micro task (Essentially ASAP). If the document is
  * not visible, tasks will yield to the event loop (to give the browser
  * time to do other things) and may even be further delayed until
@@ -72,7 +53,30 @@ export function startupChunk(nodeOrAmpDoc, fn) {
   }
   const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
   service.runForStartup_(fn);
-};
+}
+
+/**
+ * Run the given function sometime in the future without blocking UI.
+ *
+ * Higher priority tasks are executed before lower priority tasks.
+ * Tasks with the same priority are executed in FIFO order.
+ *
+ * Uses `requestIdleCallback` if available and passes the `IdleDeadline`
+ * object to the function, which can be used to perform a variable amount
+ * of work depending on the remaining amount of idle time.
+ *
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {function(?IdleDeadline)} fn
+ * @param {ChunkPriority} priority
+ */
+export function chunk(nodeOrAmpDoc, fn, priority) {
+  if (deactivated) {
+    resolved.then(fn);
+    return;
+  }
+  const service = getExistingServiceForDoc(nodeOrAmpDoc, 'chunk');
+  service.run_(fn, priority);
+}
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
@@ -292,7 +296,7 @@ class StartupTask extends Task {
 /**
  * Handles queueing, scheduling and executing tasks.
  */
-export class Chunks {
+class Chunks {
   /**
    * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
    */
@@ -317,19 +321,12 @@ export class Chunks {
   }
 
   /**
-   * Run the given function sometime in the future without blocking UI.
-   *
-   * Higher priority tasks are executed before lower priority tasks.
-   * Tasks with the same priority are executed in FIFO order.
-   *
-   * Uses `requestIdleCallback` if available and passes the `IdleDeadline`
-   * object to the function, which can be used to perform a variable amount
-   * of work depending on the remaining amount of idle time.
-   *
+   * Run fn as a "chunk".
    * @param {function(?IdleDeadline)} fn
-   * @param {ChunkPriority} priority
+   * @param {number} priority
+   * @private
    */
-  run(fn, priority) {
+  run_(fn, priority) {
     const t = new Task(fn);
     this.enqueueTask_(t, priority);
   }

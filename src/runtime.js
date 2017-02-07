@@ -45,7 +45,6 @@ import {
 } from './shadow-embed';
 import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
-import {installChunkServiceForDoc} from './chunk';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {extensionsFor} from './extensions';
@@ -135,7 +134,6 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
-  installChunkServiceForDoc(ampdoc);
 }
 
 

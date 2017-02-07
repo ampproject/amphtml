@@ -160,13 +160,6 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/cid-impl.js',
     ],
   },
-  'installChunkServiceForDoc': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/chunk.js',
-      'src/runtime.js',
-    ],
-  },
   'installCryptoService': {
     message: privateServiceFactory,
     whitelist: [
