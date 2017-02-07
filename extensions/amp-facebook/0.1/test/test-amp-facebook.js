@@ -135,7 +135,8 @@ describe('amp-facebook', function() {
         height: 222,
         embedAs: 'comments',
       });
-      const fbComments = iframe.doc.body.getElementsByClassName('fb-comments')[0];
+      const fbComments = iframe.doc.body
+        .getElementsByClassName('fb-comments')[0];
       expect(fbComments).not.to.be.undefined;
       expect(fbComments.getAttribute('data-href')).to.equal(fbCommentsHref);
     });
