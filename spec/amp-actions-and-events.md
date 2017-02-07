@@ -101,7 +101,7 @@ Including: `input[type=radio]`, `input[type=checkbox]` and `select`.
 </table>
 
 
-### amp-carousel
+### amp-carousel[type="slides"]
 <table>
   <tr>
     <th>Event</th>
@@ -109,9 +109,9 @@ Including: `input[type=radio]`, `input[type=checkbox]` and `select`.
     <th>Data</th>
   </tr>
   <tr>
-    <td>goToSlide</td>
-    <td>Fired when the user changes the carousel's current slide.</td>
-    <td><code>index</code> : slide number</td>
+    <td>slideChange</td>
+    <td>Fired when the user manually changes the carousel's current slide. Does not fire on autoplay or the <code>goToSlide</code> action.</td>
+    <td><code>event.index</code> : slide number</td>
   </tr>
 </table>
 
@@ -130,12 +130,12 @@ Including: `input[type=radio]`, `input[type=checkbox]` and `select`.
   <tr>
     <td>submit-success</td>
     <td>Fired when the form submission response is success.</td>
-    <td><code>response</code> : JSON response</td>
+    <td><code>event.response</code> : JSON response</td>
   </tr>
   <tr>
     <td>submit-error</td>
     <td>Fired when the form submission response is an error.</td>
-    <td><code>response</code> : JSON response</td>
+    <td><code>event.response</code> : JSON response</td>
   </tr>
 </table>
 
@@ -247,7 +247,7 @@ Including: `input[type=radio]`, `input[type=checkbox]` and `select`.
   </tr>
   <tr>
     <td>goToSlide(index=INTEGER)</td>
-    <td>Advances the carousel to a specified slide index</td>
+    <td>Advances the carousel to a specified slide index.</td>
   </tr>
 </table>
 

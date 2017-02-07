@@ -534,14 +534,14 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
-   * Shows the slide at the given index and triggers a `goToSlide` action.
+   * Shows the slide at the given index and triggers a `slideChange` event.
    * @param {number} newIndex
    * @private
    */
   showSlideAndTriggerAction_(newIndex) {
     this.showSlide_(newIndex);
 
-    const name = 'goToSlide';
+    const name = 'slideChange';
     const detail = {index: newIndex};
     const event = new CustomEvent(`slidescroll.${name}`, {detail});
     this.action_.trigger(this.element, name, event);
