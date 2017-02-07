@@ -180,6 +180,15 @@ export class AmpForm {
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
+    // Var-subs for POST will be launched soon. We're splitting this into
+    // two experiments to launch for POST separately.
+    const isVarSubExpOnForPost = isExperimentOn(
+        this.win_, 'amp-form-var-sub-for-post');
+    const isVarSubExpOn = isExperimentOn(this.win_, 'amp-form-var-sub');
+    /** @const @private {boolean} */
+    this.isVarSubsEnabled_ = (
+        (isVarSubExpOnForPost && this.method_ == 'POST') || isVarSubExpOn);
+
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this));
     this.installEventHandlers_();
@@ -277,16 +286,15 @@ export class AmpForm {
    * @private
    */
   submit_() {
-    const isVarSubExpOn = isExperimentOn(this.win_, 'amp-form-var-sub');
     let varSubsFields = [];
     // Only allow variable substitutions for inputs if the form action origin
     // is the canonical origin.
     // TODO(mkhatib, #7168): Consider relaxing this.
-    if (this.isSubmittingToCanonical_()) {
+    if (this.isVarSubsEnabled_ && this.isSubmittingToCanonical_()) {
       // Fields that support var substitutions.
-      varSubsFields = isVarSubExpOn ? this.form_.querySelectorAll(
-          '[type="hidden"][data-amp-replace]') : [];
-    } else {
+      varSubsFields = this.form_.querySelectorAll(
+          '[type="hidden"][data-amp-replace]');
+    } else if (this.isVarSubsEnabled_) {
       user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
           'origin submit action: %s', this.form_);
     }
