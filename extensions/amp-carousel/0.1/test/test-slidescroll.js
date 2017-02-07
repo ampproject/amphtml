@@ -954,7 +954,7 @@ describe('SlideScroll', () => {
       });
     });
 
-    it('should trigger `slide` action when user changes slides', () => {
+    it('should trigger `slideChange` action when user changes slides', () => {
       return getAmpSlideScroll(true).then(obj => {
         const ampSlideScroll = obj.ampSlideScroll;
         const impl = ampSlideScroll.implementation_;
@@ -963,13 +963,13 @@ describe('SlideScroll', () => {
         impl.goCallback(-1, /* animate */ false);
         expect(triggerSpy).to.have.been.calledWith(
             ampSlideScroll,
-            'goToSlide',
+            'slideChange',
             /* CustomEvent */ sinon.match.has('detail', {index: 4}));
 
         impl.goCallback(1, /* animate */ false);
         expect(triggerSpy).to.have.been.calledWith(
             ampSlideScroll,
-            'goToSlide',
+            'slideChange',
             /* CustomEvent */ sinon.match.has('detail', {index: 0}));
       });
     });
@@ -980,7 +980,6 @@ describe('SlideScroll', () => {
         const impl = ampSlideScroll.implementation_;
         let args = {'index': '123'};
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
-
 
         impl.executeAction({method: 'goToSlide', args});
         expect(showSlideSpy).to.have.been.calledWith(123);
