@@ -16,7 +16,7 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
-import {fromClassForDoc} from './service';
+import {fromClassForDoc, getExistingServiceForDoc} from './service';
 import {isExperimentOnAllowUrlOverride} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
@@ -53,7 +53,7 @@ export function startupChunk(nodeOrAmpDoc, fn) {
   }
   const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
   service.runForStartup_(fn);
-};
+}
 
 /**
  * Run the given function sometime in the future without blocking UI.
@@ -74,7 +74,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
     resolved.then(fn);
     return;
   }
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = getExistingServiceForDoc(nodeOrAmpDoc, 'chunk');
   service.run_(fn, priority);
 }
 
