@@ -28,7 +28,6 @@ import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
 import {Activity} from './activity-impl';
 import {Cid} from './cid-impl';
-import {installCryptoService} from './crypto-impl';
 import {
     InstrumentationService,
     instrumentationServiceForDoc,
@@ -42,7 +41,6 @@ AMP.registerServiceForDoc(
 AMP.registerServiceForDoc('activity', Activity);
 AMP.registerServiceForDoc('cid', Cid);
 
-installCryptoService(AMP.win);
 variableServiceFor(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
@@ -99,6 +97,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {!./variables.VariableService} */
     this.variableService_ = variableServiceFor(this.win);
+
+    /** @private {!../../../src/service/crypto-impl.Crypto} */
+    this.cryptoService_ = cryptoFor(this.win);
   }
 
   /** @override */
@@ -524,9 +525,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       const keyPromise = this.variableService_.expandTemplate(
           spec['sampleOn'], this.expansionOptions_({}, trigger))
         .then(key => urlReplacementsForDoc(this.element).expandAsync(key));
-      const cryptoPromise = cryptoFor(this.win);
-      return Promise.all([keyPromise, cryptoPromise])
-          .then(results => results[1].uniform(results[0]))
+      return keyPromise
+          .then(key => this.cryptoService_.uniform(key))
           .then(digest => digest * 100 < spec['threshold']);
     }
     user()./*OK*/error(TAG, 'Invalid threshold for sampling.');
