@@ -179,13 +179,11 @@ export class Bind {
       this.initialized_ = true;
 
       // Report each parse error.
-      let numberOfParseErrors = 0;
       Object.keys(parseErrors).forEach(expressionString => {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
           const err = user().createError(parseErrors[expressionString]);
           reportError(err, elements[0]);
-          numberOfParseErrors++;
         }
       });
 
@@ -195,7 +193,7 @@ export class Bind {
       }
 
       dev().fine(TAG, `Worker finished parsing expressions with ` +
-          `${numberOfParseErrors} errors.`);
+          `${Object.keys(parseErrors).length} errors.`);
     });
   }
 

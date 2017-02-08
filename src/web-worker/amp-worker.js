@@ -93,6 +93,7 @@ class AmpWorker {
   }
 
   /**
+   * Sends a method invocation request to the worker and returns a Promise.
    * @param {string} method
    * @param {!Array} args
    * @return {!Promise}
@@ -114,6 +115,8 @@ class AmpWorker {
   }
 
   /**
+   * Receives the result of a method invocation from the worker and resolves
+   * the Promise returned from the corresponding `sendMessage_()` call.
    * @param {!MessageEvent} event
    * @private
    */

@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Web worker entry point. Currently only used by a single
+ *   extension (amp-bind), so dependencies are directly imported.
+ *   Eventually, each extension that uses this worker will bundle its own
+ *   "lib" JS files and loaded at runtime via `importScripts()`.
+ */
+
 import '../../third_party/babel/custom-babel-helpers';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './amp-worker';
