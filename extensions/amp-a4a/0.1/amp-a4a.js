@@ -498,6 +498,12 @@ export class AmpA4A extends AMP.BaseElement {
           // resolve it to a concrete value, but we'll lose track of
           // fetchResponse.headers.
           return fetchResponse.arrayBuffer().then(bytes => {
+            if (bytes.byteLength == 0) {
+              // The server returned no content. Instead of displaying a blank
+              // rectangle, we collapse the slot instead.
+              this.forceCollapse();
+              return Promise.reject(NO_CONTENT_RESPONSE);
+            }
             return {
               bytes,
               headers: fetchResponse.headers,
