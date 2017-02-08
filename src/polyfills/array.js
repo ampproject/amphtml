@@ -27,6 +27,7 @@ export function includes(value, fromIndex) {
   if (value === value) { // Everything but NaN
     return this.indexOf(value, fromIndex) > -1;
   }
+  fromIndex = fromIndex || 0
   const len = this.length;
   let i = Math.max(fromIndex >= 0 ? fromIndex : len + fromIndex, 0);
   for (; i < len; i++) {
