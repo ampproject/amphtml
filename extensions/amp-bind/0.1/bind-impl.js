@@ -15,7 +15,7 @@
  */
 
 import {BindExpressionResultDef} from './bind-expression';
-import {BindingDef} from './bind-evaluator';
+import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
@@ -86,6 +86,9 @@ export class Bind {
     /** @const @private {!Object} */
     this.scope_ = Object.create(null);
 
+    /** @private {?./bind-evaluator.BindEvaluator} */
+    this.evaluator_ = null;
+
     /** @visibleForTesting {?Promise<!Object<string,*>>} */
     this.evaluatePromise_ = null;
 
@@ -112,6 +115,9 @@ export class Bind {
      * @private {boolean}
      */
     this.digestQueuedAfterScan_ = false;
+
+    /** @const @private {boolean} */
+    this.workerExperimentEnabled_ = isExperimentOn(this.win_, 'web-worker');
 
     this.ampdoc.whenReady().then(() => {
       this.initialize_();
@@ -162,9 +168,15 @@ export class Bind {
       dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
           `${boundElements.length} elements.`);
 
-      dev().fine(TAG, `Asking worker to parse expressions...`);
-
-      return invokeWebWorker(this.win_, 'bind.initialize', [bindings]);
+      // Parse on web worker if experiment is enabled.
+      if (this.workerExperimentEnabled_) {
+        dev().fine(TAG, `Asking worker to parse expressions...`);
+        return invokeWebWorker(this.win_, 'bind.initialize', [bindings]);
+      } else {
+        this.evaluator_ = new BindEvaluator();
+        const parseErrors = this.evaluator_.setBindings(bindings);
+        return Promise.resolve(parseErrors);
+      }
     }).then(parseErrors => {
       this.initialized_ = true;
 
@@ -315,16 +327,22 @@ export class Bind {
    * @private
    */
   digest_(opt_verifyOnly) {
-    user().fine(TAG, 'Asking worker to re-evaluate expressions...');
+    if (this.workerExperimentEnabled_) {
+      user().fine(TAG, 'Asking worker to re-evaluate expressions...');
+      this.evaluatePromise_ =
+          invokeWebWorker(this.win_, 'bind.evaluate', [this.scope_]);
+    } else {
+      this.evaluatePromise_ = this.evaluator_.evaluate(this.scope_);
+    }
 
-    const win = this.ampdoc.win;
-    invokeWebWorker(win, 'bind.evaluate', [this.scope_]).then(returnValue => {
+    this.evaluatePromise_.then(returnValue => {
       const {results, errors} = returnValue;
       if (opt_verifyOnly) {
         this.verify_(results);
       } else {
         this.apply_(results);
       }
+
       // Report evaluation errors.
       Object.keys(errors).forEach(expressionString => {
         const err = user().createError(errors[expressionString]);
