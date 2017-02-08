@@ -280,6 +280,31 @@ describe('integration test: a4a', () => {
     });
   });
 
+  it('should collapse slot when creative response.arrayBuffer() is empty',
+      () => {
+        headers = {};
+        headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+        mockResponse = {
+          arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+          bodyUsed: false,
+          headers: new FetchResponseHeaders({
+            getResponseHeader(name) {
+              return headers[name];
+            },
+          }),
+          status: 200,
+        };
+        xhrMock.withArgs(TEST_URL, {
+          mode: 'cors',
+          method: 'GET',
+          credentials: 'include',
+        }).onFirstCall().returns(Promise.resolve(mockResponse));
+        const forceCollapseStub =
+            sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+        return fixture.addElement(a4aElement).then(unusedElement => {
+          expect(forceCollapseStub).to.be.calledOnce;
+        });
+      });
 
   // TODO(@ampproject/a4a): Need a test that double-checks that thrown errors
   // are propagated out and printed to console and/or sent upstream to error

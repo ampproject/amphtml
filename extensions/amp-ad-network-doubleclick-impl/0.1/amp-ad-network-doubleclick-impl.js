@@ -69,8 +69,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
     const global = this.win;
-    const slotRect = this.getIntersectionElementLayoutBox();
-    let size = `${slotRect.width}x${slotRect.height}`;
+    const tagWidth = this.element.getAttribute('width');
+    const tagHeight = this.element.getAttribute('height');
+    let size;
+    if (tagWidth && tagHeight) {
+      size = `${tagWidth}x${tagHeight}`;
+    } else {
+      const slotRect = this.getIntersectionElementLayoutBox();
+      size = `${slotRect.width}x${slotRect.height}`;
+    }
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tfcd'];
