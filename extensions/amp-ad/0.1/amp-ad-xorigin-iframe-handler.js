@@ -189,7 +189,7 @@ export class AmpAdXOriginIframeHandler {
     // load, whichever is earlier.
     setStyle(this.iframe, 'visibility', 'hidden');
     this.element_.appendChild(this.iframe);
-    const visibilityPromise = Promise.race([
+    Promise.race([
       renderStartPromise,
       iframeLoadPromise,
       timer.promise(VISIBILITY_TIMEOUT),
