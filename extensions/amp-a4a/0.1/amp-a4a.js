@@ -304,7 +304,7 @@ export class AmpA4A extends AMP.BaseElement {
      * arrayBuffer.
      * @private {boolean}
      */
-    this.collapse_ = false;
+    this.isCollapsed_ = false;
   }
 
   /** @override */
@@ -474,10 +474,15 @@ export class AmpA4A extends AMP.BaseElement {
         .then(fetchResponse => {
           checkStillCurrent(promiseId);
           this.protectedEmitLifecycleEvent_('adRequestEnd');
-          // If the response has response code 204, or is null, collapse it.
-          if (!fetchResponse
-              || !fetchResponse.arrayBuffer
-              || fetchResponse.status == 204) {
+          // If the response is null, we want to return null so that
+          // unlayoutCallback will attempt to render via x-domain iframe,
+          // assuming ad url or creative exist.
+          if (!fetchResponse) {
+            return null;
+          }
+          // If the response has response code 204, or arrayBuffer is null,
+          // collapse it.
+          if (!fetchResponse.arrayBuffer || fetchResponse.status == 204) {
             this.forceCollapse();
             return Promise.reject(NO_CONTENT_RESPONSE);
           }
@@ -774,7 +779,7 @@ export class AmpA4A extends AMP.BaseElement {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_();
       }
-      if (this.collapse_) {
+      if (this.isCollapsed_) {
         return Promise.resolve();
       }
       // Must be an AMP creative.
@@ -793,6 +798,7 @@ export class AmpA4A extends AMP.BaseElement {
   unlayoutCallback() {
     this.protectedEmitLifecycleEvent_('adSlotCleared');
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    this.isCollapsed_ = false;
 
     // Allow embed to release its resources.
     if (this.friendlyIframeEmbed_) {
@@ -895,6 +901,7 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(this.uiHandler);
     this.uiHandler.setDisplayState(AdDisplayState.LOADING);
     this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+    this.isCollapsed_ = true;
   }
 
   /**
