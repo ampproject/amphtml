@@ -71,7 +71,7 @@ export class Bind {
     this.enabled_ = isExperimentOn(ampdoc.win, TAG);
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
-    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const @private {!Window} */
