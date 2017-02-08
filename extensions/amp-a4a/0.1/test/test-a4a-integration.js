@@ -162,10 +162,13 @@ describe('integration test: a4a', () => {
     // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
+    const forceCollapseStub =
+        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
       expect(error.message).to.contain.string('AMP-A4A-');
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
+      expect(forceCollapseStub).to.be.notCalled;
     });
   });
 
@@ -242,7 +245,7 @@ describe('integration test: a4a', () => {
     });
   });
 
-  it('should collapse slot when creative response is null', () => {
+  it('should NOT collapse slot when creative response is null', () => {
     xhrMock.withArgs(TEST_URL, {
       mode: 'cors',
       method: 'GET',
@@ -251,7 +254,7 @@ describe('integration test: a4a', () => {
     const forceCollapseStub =
         sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
     return fixture.addElement(a4aElement).then(unusedElement => {
-      expect(forceCollapseStub).to.be.calledOnce;
+      expect(forceCollapseStub).to.be.notCalled;
     });
   });
 
