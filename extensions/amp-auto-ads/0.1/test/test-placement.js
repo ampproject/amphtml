@@ -54,7 +54,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(() => {
             expect(placements[0].getAdElement()).to.equal(anchor.childNodes[0]);
           });
@@ -189,7 +193,7 @@ describes.realWin('placement', {
   });
 
   describe('placeAd', () => {
-    it('should place an ad with the correct attributes', () => {
+    it('should place an ad with the correct base attributes', () => {
       const anchor = document.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
@@ -207,27 +211,73 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [
-        {
-          name: 'custom-att-1',
-          value: 'val-1',
-        },
-        {
-          name: 'custom-att-2',
-          value: 'val-2',
-        },
-      ], new AdTracker([], 0)).then(() => {
-        const adElement = anchor.firstChild;
-        expect(adElement.tagName).to.equal('AMP-AD');
-        expect(adElement.getAttribute('type')).to.equal('ad-network-type');
-        expect(adElement.getAttribute('layout')).to.equal('responsive');
-        expect(adElement.getAttribute('width')).to.equal('0');
-        expect(adElement.getAttribute('height')).to.equal('0');
-        expect(adElement.getAttribute('data-custom-att-1'))
-            .to.equal('val-1');
-        expect(adElement.getAttribute('data-custom-att-2'))
-            .to.equal('val-2');
+      const baseAttributes = {
+        'type': 'ad-network-type',
+        'data-custom-att-1': 'val-1',
+        'data-custom-att-2': 'val-2',
+      };
+
+      return placements[0].placeAd(baseAttributes, new AdTracker([], 0))
+          .then(() => {
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('layout')).to.equal('responsive');
+            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('height')).to.equal('0');
+            expect(adElement.getAttribute('data-custom-att-1'))
+                .to.equal('val-1');
+            expect(adElement.getAttribute('data-custom-att-2'))
+                .to.equal('val-2');
+          });
+    });
+
+    it('should place an ad with the correct placement attributes', () => {
+      const anchor = document.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(env.win, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+            },
+            pos: 2,
+            type: 1,
+            attributes: {
+              'type': 'ad-network-type2',
+              'layout': 'fixed',
+              'data-custom-att-1': 'val-1',
+              'data-custom-att-2': 'val-2',
+            },
+          },
+        ],
       });
+      expect(placements).to.have.lengthOf(1);
+
+      const baseAttributes = {
+        'type': 'ad-network-type',
+        'layout': 'fill',
+        'data-custom-att-2': 'val-3',
+        'data-custom-att-3': 'val-4',
+      };
+
+      return placements[0].placeAd(baseAttributes, new AdTracker([], 0))
+          .then(() => {
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement.getAttribute('type')).to.equal('ad-network-type2');
+            expect(adElement.getAttribute('layout')).to.equal('fixed');
+            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('height')).to.equal('0');
+            expect(adElement.getAttribute('data-custom-att-1'))
+                .to.equal('val-1');
+            expect(adElement.getAttribute('data-custom-att-2'))
+                .to.equal('val-2');
+            expect(adElement.getAttribute('data-custom-att-3'))
+                .to.equal('val-4');
+          });
     });
 
     it('should place an ad with the correct margins', () => {
@@ -252,7 +302,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
@@ -288,7 +342,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
@@ -324,7 +382,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
@@ -358,7 +420,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
@@ -396,7 +462,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
                 anchor.firstChild, 100, 320);
@@ -427,7 +497,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
                 anchor.firstChild, 100, 320);
@@ -458,7 +532,11 @@ describes.realWin('placement', {
 
       const adTracker = new AdTracker([fakeAd], 100);
 
-      return placements[0].placeAd('ad-network-type', [], adTracker)
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(
                 PlacementState.TOO_NEAR_EXISTING_AD);
@@ -485,7 +563,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
@@ -511,7 +593,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
@@ -538,7 +624,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
@@ -565,7 +655,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
@@ -596,7 +690,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      return placements[0].placeAd('ad-network-type', [], new AdTracker([], 0))
+      const attributes = {
+        'type': 'ad-network-type',
+      };
+
+      return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(anchor1.childNodes).to.have.lengthOf(0);
