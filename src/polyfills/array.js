@@ -23,12 +23,15 @@
  * @returns {boolean}
  */
 export function includes(value, fromIndex) {
+  /* eslint no-self-compare: 0 */
   if (value === value) { // Everything but NaN
     return this.indexOf(value, fromIndex) > -1;
   }
-  let i = Math.max(n >= 0 ? n : len + n, 0);
-  for (; i < this.length; i++) {
+  const len = this.length;
+  let i = Math.max(fromIndex >= 0 ? fromIndex : len + fromIndex, 0);
+  for (; i < len; i++) {
     const value = this[i];
+    /* eslint no-self-compare: 0 */
     if (value !== value) {
       return true;
     }
