@@ -207,14 +207,9 @@ export class AmpAdXOriginIframeHandler {
       iframeLoadPromise,
       noContentPromise,
     ]);
-    return adLoadPromise.then(() => {
-      // If ad loading has succeeded, so should either visibilityPromise or
-      // no-content. Return it here to ensure that rendering has been fully
-      // processed when layout promise is complete.
-      return Promise.race([visibilityPromise, noContentPromise]);
-    }, reason => {
+    return adLoadPromise.catch(reason => {
       this.noContent_();
-      user().warn('AMP-AD', reason);
+      user().warn('AMP-AD', 'Ad loading failed', reason);
     });
   }
 
