@@ -148,7 +148,6 @@ export class Bind {
    * @private
    */
   initialize_() {
-    debugger
     this.addBindingsForSubtree(this.ampdoc.getBody());
   }
 
@@ -159,13 +158,14 @@ export class Bind {
    * @param {!Element} rootElement
    */
   addBindingsForSubtree(rootElement) {
+    debugger;
     this.scanPromise_ = this.scanSubtree_(rootElement);
     this.scanPromise_.then(results => {
       const {boundElements, bindings, expressionToElements} = results;
 
-      this.boundElements.concat(boundElements);
+      this.boundElements_ = this.boundElements_.concat(boundElements);
       Object.assign(this.expressionToElements_, expressionToElements);
-      this.bindings_.concat(bindings);
+      this.bindings_ = this.bindings_.concat(bindings);
 
       this.evaluator_ = this.evaluator || new BindEvaluator();
       const parseErrors = this.evaluator_.setBindings(this.bindings_);
