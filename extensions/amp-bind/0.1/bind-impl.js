@@ -24,7 +24,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
-import {filterSplice} from '../../../src/utils/array';
 
 const TAG = 'amp-bind';
 
@@ -195,7 +194,6 @@ export class Bind {
    */
   removeBindingsForSubtree(rootElement) {
     this.scanPromise_ = this.scanSubtree_(rootElement).then(results => {
-      debugger;
       const {boundElements, bindings, expressionToElements} = results;
 
       // TODO(kmh287): Discuss strategies for speedup
@@ -233,8 +231,9 @@ export class Bind {
         for (let p = this.bindings_.length - 1; p >= 0; p--) {
           const existingBinding = this.bindings_[p];
           if (bindingToRemove.tagName === existingBinding.tagName
-              && bindingToRemove.property === existingBinding.property
-              && bindingToRemove.expressionString == existingBinding.expressionString) {
+                && bindingToRemove.property === existingBinding.property
+                && bindingToRemove.expressionString
+                  == existingBinding.expressionString) {
             this.bindings_.splice(p, 1);
             // Don't renove more than one binding from `this.bindings_`
             // for any element in `bindings` as both contain duplicates and

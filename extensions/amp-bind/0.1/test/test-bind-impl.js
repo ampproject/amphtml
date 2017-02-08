@@ -82,7 +82,7 @@ describes.realWin('amp-bind', {
       return bind.scanPromise_;
     }).then(() => {
       if (bind.evaluatePromise_) {
-        return bind.evaluatePromise_.then( () =>{
+        return bind.evaluatePromise_.then(() => {
           env.flushVsync();
         });
       }
@@ -121,23 +121,20 @@ describes.realWin('amp-bind', {
     });
   });
 
-  it('should have the same state after removing and re-adding a subtree', done => {
+  it('should have same state after removing + re-adding a subtree', done => {
     for (let i = 0; i < 5; i++) {
       createElementWithBinding('[onePlusOne]="1+1"');
     }
     expect(bind.boundElements_.length).to.equal(0);
     return onBindReady().then(() => {
-      debugger;
       expect(bind.boundElements_.length).to.equal(5);
       bind.removeBindingsForSubtree(env.win.document.getElementById('parent'));
       return bind.scanPromise_;
     }).then(() => {
-      debugger;
       expect(bind.boundElements_.length).to.equal(0);
       bind.addBindingsForSubtree(env.win.document.getElementById('parent'));
       return bind.scanPromise_;
     }).then(() => {
-      debugger;
       expect(bind.boundElements_.length).to.equal(5);
       done();
     });
