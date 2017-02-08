@@ -18,22 +18,18 @@
 /**
  * Returns true if the element is in the array and false otherwise.
  *
- * @param {*} searchElement
+ * @param {*} value
  * @param {number} fromIndex
  * @returns {boolean}
  */
 export function includes(value, fromIndex) {
   /* eslint no-self-compare: 0 */
-  if (value === value) { // Everything but NaN
-    return this.indexOf(value, fromIndex) > -1;
-  }
   fromIndex = fromIndex || 0;
   const len = this.length;
-  let i = Math.max(fromIndex >= 0 ? fromIndex : len + fromIndex, 0);
+  let i = fromIndex >= 0 ? fromIndex : Math.max(len + fromIndex, 0);
   for (; i < len; i++) {
-    const value = this[i];
-    /* eslint no-self-compare: 0 */
-    if (value !== value) {
+    const other = this[i];
+    if (other === value || (value !== value && other !== other)) {
       return true;
     }
   }
@@ -45,7 +41,7 @@ export function includes(value, fromIndex) {
 * @param {!Window} win
 */
 export function install(win) {
-  if (!win.Array.includes) {
-    win.Array.includes = includes;
+  if (!win.Array.prototype.includes) {
+    win.Array.prototype.includes = includes;
   }
 }

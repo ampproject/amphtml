@@ -25,7 +25,7 @@ import {install as installDocContains} from './polyfills/document-contains';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
-import {install as installArray} from './polyfills/array';
+import {install as installArray} from './polyfills/array-includes';
 import {getMode} from './mode';
 
 /**
