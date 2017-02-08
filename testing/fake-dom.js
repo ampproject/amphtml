@@ -62,9 +62,13 @@ export class FakeWindow {
     /** @const */
     this.Math = window.Math;
 
-    // Top Window points to itself if spec.top was not passed.
+    // Parent Window points to itself if spec.parent was not passed.
+    /** @const @type {!Window} */
+    this.parent = spec.parent ? new FakeWindow(spec.parent) : this;
+
+    // Top Window points to parent if spec.top was not passed.
     /** @const */
-    this.top = spec.top ? new FakeWindow(spec.top) : this;
+    this.top = spec.top ? new FakeWindow(spec.top) : this.parent;
 
     // Events.
     EventListeners.intercept(this);
