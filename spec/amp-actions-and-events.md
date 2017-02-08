@@ -115,6 +115,20 @@ Including: `input[type=radio]`, `input[type=checkbox]` and `select`.
   </tr>
 </table>
 
+### amp-selector
+<table>
+  <tr>
+    <th>Event</th>
+    <th>Description</th>
+    <th>Data</th>
+  </tr>
+  <tr>
+    <td>select</td>
+    <td>Fired when the user manually selects an option.</td>
+    <td><code>event.targetOption</code> : The <code>option</code> attribute value of the selected element</td>
+  </tr>
+</table>
+
 ### form
 <table>
   <tr>
