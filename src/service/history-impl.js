@@ -368,7 +368,10 @@ export class HistoryBindingNatural_ {
           history.replaceState.bind(history);
       pushState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
-        this.origPushState_(state, opt_title, opt_url);
+        this.origPushState_(state, opt_title,
+            // A bug in edge causes paths to become undefined if URL is
+            // undefined, filed here: https://goo.gl/KlImZu
+            opt_url || null);
       };
       replaceState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
@@ -791,7 +794,7 @@ export class HistoryBindingVirtual_ {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve('');
     }
-    return this.viewer_.sendMessageAwaitResponse('fragment', undefined,
+    return this.viewer_.sendMessageAwaitResponse('getFragment', undefined,
         /* cancelUnsent */true).then(
         hash => {
           if (!hash) {
@@ -810,7 +813,7 @@ export class HistoryBindingVirtual_ {
       return Promise.resolve();
     }
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-        'fragment', {fragment}, /* cancelUnsent */true));
+        'replaceHistory', {fragment}, /* cancelUnsent */true));
   }
 }
 

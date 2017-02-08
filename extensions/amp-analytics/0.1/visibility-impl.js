@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {closestByTag, closestBySelector} from '../../../src/dom';
+import {
+  closestByTag,
+  closestBySelector,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
 import {resourcesForDoc} from '../../../src/resources';
@@ -25,7 +29,11 @@ import {viewportForDoc} from '../../../src/viewport';
 import {viewerForDoc} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
 import {startsWith} from '../../../src/string';
-import {DEFAULT_THRESHOLD} from '../../../src/intersection-observer-polyfill';
+import {
+  DEFAULT_THRESHOLD,
+  IntersectionObserverPolyfill,
+  nativeIntersectionObserverSupported,
+} from '../../../src/intersection-observer-polyfill';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
@@ -177,7 +185,8 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);
   } else if (selectionMethod == 'scope') {
-    foundEl = analyticsEl.parentElement.querySelector(selector);
+    foundEl = scopedQuerySelector(
+        dev().assertElement(analyticsEl.parentElement), selector);
   } else if (selector[0] == '#') {
     const containerDoc = friendlyFrame ? analyticsEl.ownerDocument : ampdoc;
     foundEl = containerDoc.getElementById(selector.slice(1));
@@ -266,6 +275,9 @@ export class Visibility {
 
     /** @private {!Object<number, number>} */
     this.lastVisiblePercent_ = map();
+
+    /** @private {?IntersectionObserver|?IntersectionObserverPolyfill} */
+    this.intersectionObserver_ = null;
   }
 
   /** @private */
@@ -352,15 +364,27 @@ export class Visibility {
         resource, 'Visibility tracking not supported on element: ', element);
 
     if (!this.intersectionObserver_) {
-      /** @private {!IntersectionObserver} */
-      this.intersectionObserver_ =
-          // TODO: polyfill IntersectionObserver
-          new this.ampdoc.win.IntersectionObserver(entries => {
-            entries.forEach(change => {
-              this.onIntersectionChange_(
-                  change.target, change.intersectionRatio * 100);
-            });
-          }, {threshold: DEFAULT_THRESHOLD});
+      const onIntersectionChanges = entries => {
+        entries.forEach(change => {
+          this.onIntersectionChange_(
+              change.target, change.intersectionRatio * 100);
+        });
+      };
+
+      if (nativeIntersectionObserverSupported(this.ampdoc.win)) {
+        this.intersectionObserver_ = new this.ampdoc.win.IntersectionObserver(
+            onIntersectionChanges, {threshold: DEFAULT_THRESHOLD});
+      } else {
+        this.intersectionObserver_ = new IntersectionObserverPolyfill(
+            onIntersectionChanges, {threshold: DEFAULT_THRESHOLD});
+        //TODO: eventually this is go into the proposed layoutManager.
+        const viewport = viewportForDoc(this.ampdoc);
+        const ticker = () => {
+          this.intersectionObserver_.tick(viewport.getRect());
+        };
+        viewport.onScroll(ticker);
+        viewport.onChanged(ticker);
+      }
     }
 
     resource.loadedOnce().then(() => {

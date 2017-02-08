@@ -133,13 +133,6 @@ export class AmpAdXOriginIframeHandler {
       });
     }
 
-    if (opt_isA4A) {
-      // A4A writes creative frame directly to page therefore does not expect
-      // post message to unset visibility hidden
-      this.element_.appendChild(this.iframe);
-      return Promise.resolve();
-    }
-
     // Install API that listens to ad response
     if (this.baseInstance_.config
         && this.baseInstance_.config.renderStartImplemented) {
@@ -162,11 +155,17 @@ export class AmpAdXOriginIframeHandler {
           .then(() => this.noContent_());
     }
 
+    if (opt_isA4A) {
+      // A4A writes creative frame directly to page therefore does not expect
+      // post message to unset visibility hidden
+      this.element_.appendChild(this.iframe);
+      return Promise.resolve();
+    }
     // Set iframe initially hidden which will be removed on load event +
     // post message.
     setStyle(this.iframe, 'visibility', 'hidden');
-
     this.element_.appendChild(this.iframe);
+
     return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
         this.adResponsePromise_,
         'timeout waiting for ad response').catch(e => {
@@ -192,6 +191,7 @@ export class AmpAdXOriginIframeHandler {
     this.uiHandler_.setDisplayState(AdDisplayState.LOADED_RENDER_START);
     this.updateSize_(data.height, data.width,
                 info.source, info.origin);
+    this.baseInstance_.signals().signal('render-start');
     if (this.baseInstance_.emitLifecycleEvent) {
       this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
     }

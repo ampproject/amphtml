@@ -61,12 +61,12 @@ describe('amp-fresh-manager', () => {
         .returns(Promise.resolve());
     const service = getOrInsallAmpFreshManager(window.document);
     const updateSpy = sandbox.spy(service, 'update_');
-    expect(updateSpy.callCount).to.equal(0);
+    expect(updateSpy).to.have.not.been.called;
     requests[0].respond(200, {
       'Content-Type': 'text/xml',
     }, '<html></html>');
     return service.docPromise_.then(() => {
-      expect(updateSpy.callCount).to.equal(1);
+      expect(updateSpy).to.be.calledOnce;
     });
   });
 
@@ -93,11 +93,11 @@ describe('amp-fresh-manager', () => {
     }, '<html></html>');
     fresh.buildCallback();
     fresh2.buildCallback();
-    expect(setFreshReadySpy.callCount).to.equal(0);
-    expect(setFreshReadySpy2.callCount).to.equal(0);
+    expect(setFreshReadySpy).to.have.not.been.called;
+    expect(setFreshReadySpy2).to.have.not.been.called;
     return service.docPromise_.then(() => {
-      expect(setFreshReadySpy.callCount).to.equal(1);
-      expect(setFreshReadySpy2.callCount).to.equal(1);
+      expect(setFreshReadySpy).to.be.calledOnce;
+      expect(setFreshReadySpy2).to.be.calledOnce;
     });
   });
 

@@ -15,6 +15,7 @@
   */
 
 import {elementByTag} from '../../../src/dom';
+import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
 import {dev} from '../../../src/log';
@@ -55,6 +56,9 @@ class AmpVideo extends AMP.BaseElement {
 
       /** @private {?Element} */
       this.video_ = null;
+
+      /** @private {?boolean}  */
+      this.muted_ = false;
     }
 
     /**
@@ -106,13 +110,12 @@ class AmpVideo extends AMP.BaseElement {
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_BUILD, this.video_,
           /* opt_removeMissingAttrs */ true);
-      this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], this.video_);
+      this.installEventHandlers_();
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
-      const ampdoc = this.getAmpDoc();
-      installVideoManagerForDoc(ampdoc);
-      videoManagerForDoc(ampdoc).register(this);
+      installVideoManagerForDoc(this.element);
+      videoManagerForDoc(this.element).register(this);
     }
 
     /** @override */
@@ -167,6 +170,21 @@ class AmpVideo extends AMP.BaseElement {
       // loadPromise for media elements listens to `loadstart`
       return this.loadPromise(this.video_).then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
+    }
+
+    /**
+     * @private
+     */
+    installEventHandlers_() {
+      const video = dev().assertElement(this.video_);
+      this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], video);
+      listen(video, 'volumechange', () => {
+        if (this.muted_ != this.video_.muted) {
+          this.muted_ = this.video_.muted;
+          const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
+          this.element.dispatchCustomEvent(evt);
+        }
       });
     }
 

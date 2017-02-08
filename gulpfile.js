@@ -244,44 +244,51 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     return Promise.all(results);
   }
 
+  if (!watch || argv.with_shadow) {
+    results.push(
+      // Entry point for shadow runtime.
+      compileJs('./src/', 'amp-shadow-babel.js', './dist', {
+        toName: 'amp-shadow.js',
+        minifiedName: 'shadow-v0.js',
+        includePolyfills: true,
+        checkTypes: opt_checkTypes,
+        watch: watch,
+        preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+        minify: shouldMinify,
+        wrapper: '<%= contents %>'
+      })
+    );
+  }
+
+  if (!watch || argv.with_inabox) {
+    results.push(
+      // Entry point for inabox runtime.
+      compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+        toName: 'amp-inabox.js',
+        minifiedName: 'amp4ads-v0.js',
+        includePolyfills: true,
+        extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+        checkTypes: opt_checkTypes,
+        watch: watch,
+        preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+        minify: shouldMinify,
+        wrapper: '<%= contents %>',
+      }),
+
+      // inabox-host
+      compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
+        toName: 'amp-inabox-host.js',
+        minifiedName: 'amp4ads-host-v0.js',
+        includePolyfills: false,
+        checkTypes: opt_checkTypes,
+        watch: watch,
+        preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+        minify: shouldMinify,
+        wrapper: '<%= contents %>',
+      })
+    );
+  }
   results.push(
-    // Entry point for shadow runtime.
-    compileJs('./src/', 'amp-shadow-babel.js', './dist', {
-      toName: 'amp-shadow.js',
-      minifiedName: 'shadow-v0.js',
-      includePolyfills: true,
-      checkTypes: opt_checkTypes,
-      watch: watch,
-      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-      minify: shouldMinify,
-      wrapper: '<%= contents %>'
-    }),
-
-    // Entry point for inabox runtime.
-    compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
-      toName: 'amp-inabox.js',
-      minifiedName: 'amp4ads-v0.js',
-      includePolyfills: true,
-      extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-      checkTypes: opt_checkTypes,
-      watch: watch,
-      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-      minify: shouldMinify,
-      wrapper: '<%= contents %>',
-    }),
-
-    // inabox-host
-    compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
-      toName: 'amp-inabox-host.js',
-      minifiedName: 'amp4ads-host-v0.js',
-      includePolyfills: false,
-      checkTypes: opt_checkTypes,
-      watch: watch,
-      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-      minify: shouldMinify,
-      wrapper: '<%= contents %>',
-    }),
-
     thirdPartyBootstrap('3p/frame.max.html', 'frame.html', shouldMinify),
     thirdPartyBootstrap('3p/nameframe.max.html', 'nameframe.html',shouldMinify)
   );
@@ -441,6 +448,7 @@ function buildExtensionJs(path, name, version, options) {
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? '' : ('(self.AMP=self.AMP||[])' +
         '.push({n:"' + name + '",' + priority +
+        'v:"' + internalRuntimeVersion + '",' +
         'f:(function(AMP){<%= contents %>\n})});'),
   });
 }
@@ -565,7 +573,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
   // version is not available on the absolute path.
   var integrationJs = argv.fortesting
       ? './f.js'
-      : `https://3p.ampproject.net/${internalRuntimeVersion}/f.js`;
+      : `https://${hostname3p}/${internalRuntimeVersion}/f.js`;
   // Convert default relative URL to absolute min URL.
   var html = fs.readFileSync(input, 'utf8')
       .replace(/\.\/integration\.js/g, integrationJs);
@@ -945,6 +953,11 @@ gulp.task('dist', 'Build production binaries', dist, {
   }
 });
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
-gulp.task('watch', 'Watches for changes in files, re-build', watch);
+gulp.task('watch', 'Watches for changes in files, re-build', watch, {
+  options: {
+    with_inabox: 'Also watch and build the amp-inabox.js binary.',
+    with_shadow: 'Also watch and build the amp-shadow.js binary.',
+  }
+});
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);

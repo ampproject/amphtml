@@ -19,7 +19,9 @@ import {
   AnalyticsEvent,
   ClickEventTracker,
   CustomEventTracker,
+  SignalTracker,
 } from '../events';
+import {Signals} from '../../../../src/utils/signals';
 
 
 describes.realWin('Events', {amp: 1}, env => {
@@ -174,16 +176,16 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.add(analyticsElement, 'custom-event-2', {}, handler2);
 
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
-      expect(handler.callCount).to.equal(1);
-      expect(handler2.callCount).to.equal(0);
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.have.not.been.called;
 
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
-      expect(handler.callCount).to.equal(1);
-      expect(handler2.callCount).to.equal(1);
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.be.calledOnce;
 
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
-      expect(handler.callCount).to.equal(2);
-      expect(handler2.callCount).to.equal(1);
+      expect(handler).to.have.callCount(2);
+      expect(handler2).to.be.calledOnce;
     });
 
     it('should buffer custom events early on', () => {
@@ -201,9 +203,9 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.add(analyticsElement, 'custom-event-2', {}, handler2);
       tracker.add(analyticsElement, 'custom-event-3', {}, handler3);
       clock.tick(1);
-      expect(handler.callCount).to.equal(1);
-      expect(handler2.callCount).to.equal(2);
-      expect(handler3.callCount).to.equal(0);
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.have.callCount(2);
+      expect(handler3).to.have.not.been.called;
       expect(tracker.buffer_['custom-event-1']).to.have.length(1);
       expect(tracker.buffer_['custom-event-2']).to.have.length(2);
       expect(tracker.buffer_['custom-event-3']).to.be.undefined;
@@ -212,9 +214,9 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-3'));
-      expect(handler.callCount).to.equal(2);
-      expect(handler2.callCount).to.equal(3);
-      expect(handler3.callCount).to.equal(1);
+      expect(handler).to.have.callCount(2);
+      expect(handler2).to.have.callCount(3);
+      expect(handler3).to.be.calledOnce;
       expect(tracker.buffer_['custom-event-1']).to.have.length(2);
       expect(tracker.buffer_['custom-event-2']).to.have.length(3);
       expect(tracker.buffer_['custom-event-3']).to.have.length(1);
@@ -227,10 +229,79 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-3'));
-      expect(handler.callCount).to.equal(3);
-      expect(handler2.callCount).to.equal(4);
-      expect(handler3.callCount).to.equal(2);
+      expect(handler).to.have.callCount(3);
+      expect(handler2).to.have.callCount(4);
+      expect(handler3).to.have.callCount(2);
       expect(tracker.buffer_).to.be.undefined;
+    });
+  });
+
+
+  describe('SignalTracker', () => {
+    let tracker;
+    let targetSignals;
+
+    beforeEach(() => {
+      tracker = new SignalTracker(root);
+      target.classList.add('i-amphtml-element');
+      targetSignals = new Signals();
+      target.signals = () => targetSignals;
+    });
+
+    it('should initalize, add listeners and dispose', () => {
+      expect(tracker.root).to.equal(root);
+    });
+
+    it('should add doc listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'sig1', {}, resolver);
+      root.signals().signal('sig1');
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('sig1');
+      });
+    });
+
+    it('should add root listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'sig1', {selector: ':root'}, resolver);
+      root.signals().signal('sig1');
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('sig1');
+      });
+    });
+
+    it('should add host listener equal to root', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'sig1', {selector: ':host'}, resolver);
+      root.signals().signal('sig1');
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('sig1');
+      });
+    });
+
+    it('should add target listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'sig1', {selector: '.target'}, resolver);
+      targetSignals.signal('sig1');
+      return promise.then(event => {
+        expect(event.target).to.equal(target);
+        expect(event.type).to.equal('sig1');
+      });
     });
   });
 });
