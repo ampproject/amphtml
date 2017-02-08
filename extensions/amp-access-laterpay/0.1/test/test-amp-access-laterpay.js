@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LaterpayVendor} from '../amp-access-laterpay';
+import {LaterpayVendor} from '../laterpay-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
