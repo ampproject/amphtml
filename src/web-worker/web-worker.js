@@ -17,21 +17,23 @@
 import '../../third_party/babel/custom-babel-helpers';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 
-let evaluator;
+let evaluator; // TODO(willchou)
 
 self.addEventListener('message', function(event) {
-  const data = event.data;
-  switch (data.method) {
+  const {method, args, index} = event.data;
+
+  let returnValue;
+
+  switch (method) {
     case 'initialize':
       evaluator = new BindEvaluator();
-      const parseErrors = evaluator.setBindings(data.args);
-      self.postMessage({method: data.method, parseErrors});
+      returnValue = evaluator.setBindings.apply(evaluator, args);
       break;
 
     case 'evaluate':
-      const scope = data.args;
-      const {results, errors} = evaluator.evaluate(scope);
-      self.postMessage({method: data.method, results, errors});
+      returnValue = evaluator.evaluate.apply(evaluator, args);
       break;
   }
+
+  self.postMessage({method, returnValue, index});
 });

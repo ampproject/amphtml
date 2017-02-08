@@ -16,7 +16,6 @@
 
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
-import {rewriteAttributeValue} from '../../../src/sanitizer';
 
 /**
  * @typedef {{
@@ -113,11 +112,6 @@ export class BindEvaluator {
 
       const resultString = this.stringValueOf_(property, result);
       if (this.validator_.isResultValid(tagName, property, resultString)) {
-        // Rewrite URL attributes for CDN if necessary.
-        // TODO(willchou)
-        // cache[expr] = typeof result === 'string'
-        //     ? rewriteAttributeValue(tagName, property, result)
-        //     : result;
         cache[expr] = result;
       } else {
         errors[expr] = new Error(

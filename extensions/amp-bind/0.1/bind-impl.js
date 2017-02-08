@@ -18,12 +18,14 @@ import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {getWebWorker} from '../../../src/web-worker/install';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
+import {rewriteAttributeValue} from '../../../src/sanitizer';
+
+import {callWorkerMethod} from '../../../src/web-worker/install'; // TODO(willchou)
 
 const TAG = 'amp-bind';
 
@@ -95,10 +97,6 @@ export class Bind {
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
 
-    /** @private {Worker} */
-    this.worker_ = getWebWorker(this.ampdoc.win);
-    this.worker_.onmessage = this.onWorkerMessage_.bind(this);
-
     /** @private {boolean} */
     this.isEvaluatorReady_ = false;
 
@@ -115,52 +113,6 @@ export class Bind {
     // Expose for testing on dev.
     if (getMode().localDev) {
       AMP.reinitializeBind = this.initialize_.bind(this);
-    }
-  }
-
-  onWorkerMessage_(event) {
-    const data = event.data;
-    switch (data.method) {
-      case 'initialize':
-        const parseErrors = data.parseErrors;
-        this.isEvaluatorReady_ = true;
-
-        // Report each parse error.
-        let numberOfParseErrors = 0;
-        Object.keys(parseErrors).forEach(expressionString => {
-          const elements = this.expressionToElements_[expressionString];
-          if (elements.length > 0) {
-            const err = user().createError(parseErrors[expressionString]);
-            reportError(err, elements[0]);
-            numberOfParseErrors++;
-          }
-        });
-        // Trigger verify-only digest in development.
-        if (getMode().development || this.digestQueuedAfterScan_) {
-          this.digest_(/* opt_verifyOnly */ !this.digestQueuedAfterScan_);
-        }
-        dev().fine(TAG, `Worker finished parsing expressions with ` +
-            `${numberOfParseErrors} errors.`);
-        break;
-
-      case 'evaluate':
-        const results = data.results;
-        const errors = data.errors;
-        // TODO(willchou)
-        // if (opt_verifyOnly) {
-        //   this.verify_(results);
-        // } else {
-          this.apply_(results);
-        // }
-        // Report evaluation errors.
-        Object.keys(errors).forEach(expressionString => {
-          const err = user().createError(errors[expressionString]);
-          const elements = this.expressionToElements_[expressionString];
-          if (elements.length > 0) {
-            reportError(err, elements[0]);
-          }
-        });
-        break;
     }
   }
 
@@ -202,7 +154,29 @@ export class Bind {
           `${boundElements.length} elements.`);
 
       dev().fine(TAG, `Asking worker to parse expressions...`);
-      this.worker_.postMessage({method: 'initialize', args: bindings});
+
+      const win = this.ampdoc.win;
+      callWorkerMethod(win, 'initialize', [bindings]).then(parseErrors => {
+        this.isEvaluatorReady_ = true;
+
+        // Report each parse error.
+        let numberOfParseErrors = 0;
+        Object.keys(parseErrors).forEach(expressionString => {
+          const elements = this.expressionToElements_[expressionString];
+          if (elements.length > 0) {
+            const err = user().createError(parseErrors[expressionString]);
+            reportError(err, elements[0]);
+            numberOfParseErrors++;
+          }
+        });
+
+        // Trigger verify-only digest in development.
+        if (getMode().development || this.digestQueuedAfterScan_) {
+          this.digest_(/* opt_verifyOnly */ !this.digestQueuedAfterScan_);
+        }
+        dev().fine(TAG, `Worker finished parsing expressions with ` +
+            `${numberOfParseErrors} errors.`);
+      });
     });
   }
 
@@ -333,7 +307,24 @@ export class Bind {
    */
   digest_(opt_verifyOnly) {
     user().fine(TAG, 'Asking worker to re-evaluate expressions...');
-    this.worker_.postMessage({method: 'evaluate', args: this.scope_});
+
+    const win = this.ampdoc.win;
+    callWorkerMethod(win, 'evaluate', [this.scope_]).then(returnValue => {
+      const {results, errors} = returnValue;
+      if (opt_verifyOnly) {
+        this.verify_(results);
+      } else {
+        this.apply_(results);
+      }
+      // Report evaluation errors.
+      Object.keys(errors).forEach(expressionString => {
+        const err = user().createError(errors[expressionString]);
+        const elements = this.expressionToElements_[expressionString];
+        if (elements.length > 0) {
+          reportError(err, elements[0]);
+        }
+      });
+    });
   }
 
   /**
@@ -362,14 +353,23 @@ export class Bind {
   apply_(results) {
     this.boundElements_.forEach(boundElement => {
       const {element, boundProperties} = boundElement;
+      const tagName = element.tagName;
 
       this.resources_.mutateElement(element, () => {
         const mutations = {};
         let width, height;
 
         boundProperties.forEach(boundProperty => {
-          const expressionString = boundProperty.expressionString;
-          const newValue = results[expressionString];
+          const {property, expressionString, previousResult} =
+              boundProperty;
+
+          // Rewrite attribute value if necessary.
+          // This is not done in the worker since it relies on `url#parseUrl`,
+          // which uses DOM APIs.
+          let newValue = results[expressionString];
+          if (typeof newValue === 'string') {
+            newValue = rewriteAttributeValue(tagName, property, newValue);
+          }
 
           // Don't apply if the result hasn't changed or is missing.
           if (newValue === undefined ||
