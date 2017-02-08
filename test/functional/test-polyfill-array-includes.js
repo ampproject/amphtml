@@ -18,6 +18,10 @@ import {install} from '../../src/polyfills/array-includes';
 
 describes.fakeWin('Array.includes', {}, env => {
 
+  beforeEach(() => {
+    install(env.win);
+  });
+
   it('finds primitives when they are present', () => {
     const arrayWithPrimitives = [false, 17, 'hello world'];
     expect(arrayWithPrimitives.includes(17)).to.be.true;

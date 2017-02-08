@@ -22,7 +22,7 @@
  * @param {number} fromIndex
  * @returns {boolean}
  */
-export function includes(value, fromIndex) {
+function includes(value, fromIndex) {
   /* eslint no-self-compare: 0 */
   fromIndex = fromIndex || 0;
   const len = this.length;
