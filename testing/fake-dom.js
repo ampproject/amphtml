@@ -44,11 +44,6 @@ export class FakeWindow {
     /** @type {string} */
     this.readyState = spec.readyState || 'complete';
 
-    /** window.parent == window */
-    Object.defineProperty(this, 'parent', {
-      get: () => this,
-    });
-
     // Passthrough.
     /** @const */
     this.Object = window.Object;
