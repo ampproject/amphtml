@@ -122,45 +122,45 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
   it('should do nothing if already prevented', () => {
     evt.defaultPrevented = true;
     onDocumentFormSubmit_(evt);
-    expect(preventDefaultSpy.callCount).to.equal(0);
-    expect(tgt.checkValidity.callCount).to.equal(0);
+    expect(preventDefaultSpy).to.have.not.been.called;
+    expect(tgt.checkValidity).to.have.not.been.called;
   });
 
   it('should throw if no target', () => {
     evt.target = null;
     expect(() => onDocumentFormSubmit_(evt)).to.throw(/Element expected/);
-    expect(preventDefaultSpy.callCount).to.equal(0);
-    expect(tgt.checkValidity.callCount).to.equal(0);
+    expect(preventDefaultSpy).to.have.not.been.called;
+    expect(tgt.checkValidity).to.have.not.been.called;
   });
 
   it('should prevent submit', () => {
     tgt.checkValidity = sandbox.stub().returns(false);
     onDocumentFormSubmit_(evt);
-    expect(preventDefaultSpy.callCount).to.equal(1);
-    expect(tgt.checkValidity.callCount).to.equal(1);
+    expect(preventDefaultSpy).to.be.calledOnce;
+    expect(tgt.checkValidity).to.be.calledOnce;
     sandbox.restore();
     preventDefaultSpy.reset();
     tgt.checkValidity.reset();
 
     tgt.checkValidity = sandbox.stub().returns(false);
     onDocumentFormSubmit_(evt);
-    expect(preventDefaultSpy.callCount).to.equal(1);
-    expect(tgt.checkValidity.callCount).to.equal(1);
+    expect(preventDefaultSpy).to.be.calledOnce;
+    expect(tgt.checkValidity).to.be.calledOnce;
   });
 
   it('should not check validity if novalidate provided', () => {
     tgt.setAttribute('novalidate', '');
     tgt.checkValidity = sandbox.stub().returns(false);
     onDocumentFormSubmit_(evt);
-    expect(preventDefaultSpy.callCount).to.equal(0);
-    expect(tgt.checkValidity.callCount).to.equal(0);
+    expect(preventDefaultSpy).to.have.not.been.called;
+    expect(tgt.checkValidity).to.have.not.been.called;
   });
 
   it('should not prevent default', () => {
     tgt.checkValidity = sandbox.stub().returns(true);
     onDocumentFormSubmit_(evt);
-    expect(preventDefaultSpy.callCount).to.equal(0);
-    expect(tgt.checkValidity.callCount).to.equal(1);
+    expect(preventDefaultSpy).to.have.not.been.called;
+    expect(tgt.checkValidity).to.be.calledOnce;
   });
 
   it('should delegate xhr submit through action service', () => {

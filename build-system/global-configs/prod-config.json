@@ -9,11 +9,13 @@
   "expDoubleclickA4A": 0.1,
   "a4aProfilingRate": 1,
   "amp-form-custom-validations": 1,
+  "amp-form-var-sub-for-post": 1,
   "ad-type-custom": 1,
   "amp-scrollable-carousel": 1,
   "amp-inabox": 1,
   "ios-embed-wrapper": 1,
   "amp-apester-media": 1,
   "amp-accordion-session-state-optout": 1,
-  "amp-playbuzz": 1
+  "amp-playbuzz": 1,
+  "make-body-relative": 1
 }

@@ -405,11 +405,11 @@ describes.fakeWin('runtime', {
           .to.equal(win.AMP.BaseElement);
 
       // No installStyles calls.
-      expect(installStylesStub.callCount).to.equal(0);
+      expect(installStylesStub).to.have.not.been.called;
 
       // Register is called immediately as well.
-      expect(registerStub.calledWithExactly(win, 'amp-ext', AMP.BaseElement))
-          .to.be.true;
+      expect(registerStub)
+          .to.be.calledWithExactly(win, 'amp-ext', AMP.BaseElement);
 
       // Service and extensions are resolved.
       return Promise.all([
@@ -440,20 +440,20 @@ describes.fakeWin('runtime', {
           .to.equal(win.AMP.BaseElement);
       expect(ext.elements['amp-ext'].css).to.equal('a{}');
 
-      expect(installStylesStub.callCount).to.equal(1);
-      expect(installStylesStub.calledWithExactly(
+      expect(installStylesStub).to.be.calledOnce;
+      expect(installStylesStub).to.be.calledWithExactly(
           win.document,
           'a{}',
           installStylesCallback,
           /* isRuntimeCss */ false,
-          /* ext */ 'amp-ext')).to.be.true;
+          /* ext */ 'amp-ext');
 
       // Element resistration is not done until callback.
-      expect(registerStub.callCount).to.equal(0);
+      expect(registerStub).to.have.not.been.called;
       installStylesCallback();
-      expect(registerStub.callCount).to.equal(1);
-      expect(registerStub.calledWithExactly(win, 'amp-ext',
-          AMP.BaseElement)).to.be.true;
+      expect(registerStub).to.be.calledOnce;
+      expect(registerStub).to.be.calledWithExactly(win, 'amp-ext',
+          AMP.BaseElement);
 
       // Service and extensions are resolved.
       return Promise.all([
@@ -556,13 +556,13 @@ describes.fakeWin('runtime', {
           .to.equal(win.AMP.BaseElement);
 
       // No installStyles calls and no factories.
-      expect(installStylesStub.callCount).to.equal(0);
+      expect(installStylesStub).to.have.not.been.called;
       expect(extHolder.docFactories).to.have.length(0);
       expect(extHolder.shadowRootFactories).to.have.length(0);
 
       // Register is called immediately as well.
-      expect(registerStub.calledWithExactly(win, 'amp-ext', AMP.BaseElement))
-          .to.be.true;
+      expect(registerStub).to.be.calledWithExactly(
+          win, 'amp-ext', AMP.BaseElement);
 
       // Service and extensions are resolved.
       return Promise.all([
@@ -592,22 +592,22 @@ describes.fakeWin('runtime', {
       expect(ext.elements['amp-ext'].css).to.equal('a{}');
 
       // Register is called immediately as well.
-      expect(registerStub.calledWithExactly(win, 'amp-ext', AMP.BaseElement))
-          .to.be.true;
+      expect(registerStub).to.be.calledWithExactly(
+          win, 'amp-ext', AMP.BaseElement);
 
       // No installStyles calls, but there's a factory.
-      expect(installStylesStub.callCount).to.equal(0);
+      expect(installStylesStub).to.have.not.been.called;
       expect(extHolder.shadowRootFactories).to.have.length(1);
 
       // Execute factory to install style.
       const shadowRoot = document.createDocumentFragment();
       extHolder.shadowRootFactories[0](shadowRoot);
-      expect(installStylesStub.callCount).to.equal(1);
-      expect(installStylesStub.calledWithExactly(
+      expect(installStylesStub).to.be.calledOnce;
+      expect(installStylesStub).to.be.calledWithExactly(
           shadowRoot,
           'a{}',
           /* isRuntimeCss */ false,
-          /* ext */ 'amp-ext')).to.be.true;
+          /* ext */ 'amp-ext');
 
       // Service and extensions are resolved.
       return Promise.all([
