@@ -171,7 +171,7 @@ describe('AccessServerJwtAdapter', () => {
         xhrMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
-        expect(stub.callCount).to.equal(1);
+        expect(stub).to.be.calledOnce;
       });
 
       it('should fallback to client auth w/o server state', () => {
@@ -181,7 +181,7 @@ describe('AccessServerJwtAdapter', () => {
         xhrMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
-        expect(stub.callCount).to.equal(1);
+        expect(stub).to.be.calledOnce;
       });
 
       it('should execute via server on proxy and w/server state', () => {
@@ -190,7 +190,7 @@ describe('AccessServerJwtAdapter', () => {
         xhrMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
-        expect(stub.callCount).to.equal(1);
+        expect(stub).to.be.calledOnce;
       });
 
       it('should fetch JWT directly via client', () => {
@@ -232,7 +232,7 @@ describe('AccessServerJwtAdapter', () => {
             });
         return adapter.authorizeOnServer_().then(response => {
           expect(response).to.equal(authdata);
-          expect(replaceSectionsStub.callCount).to.equal(1);
+          expect(replaceSectionsStub).to.be.calledOnce;
         });
       });
 
@@ -267,7 +267,7 @@ describe('AccessServerJwtAdapter', () => {
           throw new Error('must never happen');
         }, error => {
           expect(error).to.match(/intentional/);
-          expect(replaceSectionsStub.callCount).to.equal(0);
+          expect(replaceSectionsStub).to.have.not.been.called;
         });
       });
 
@@ -306,7 +306,7 @@ describe('AccessServerJwtAdapter', () => {
           throw new Error('must never happen');
         }, error => {
           expect(error).to.match(/timeout/);
-          expect(replaceSectionsStub.callCount).to.equal(0);
+          expect(replaceSectionsStub).to.have.not.been.called;
         });
       });
 
@@ -458,7 +458,7 @@ describe('AccessServerJwtAdapter', () => {
         return adapter.fetchJwt_().then(resp => {
           expect(resp.encoded).to.equal(encoded);
           expect(resp.jwt).to.equal(jwt);
-          expect(validateStub.callCount).to.equal(1);
+          expect(validateStub).to.be.calledOnce;
         });
       });
 
@@ -503,7 +503,7 @@ describe('AccessServerJwtAdapter', () => {
         return adapter.fetchJwt_().then(resp => {
           expect(resp.encoded).to.equal(encoded);
           expect(resp.jwt).to.equal(jwt);
-          expect(validateStub.callCount).to.equal(1);
+          expect(validateStub).to.be.calledOnce;
           return pemPromise;
         }).then(pemValue => {
           expect(pemValue).to.equal(pem);
@@ -539,7 +539,7 @@ describe('AccessServerJwtAdapter', () => {
         return adapter.fetchJwt_().then(resp => {
           expect(resp.encoded).to.equal(encoded);
           expect(resp.jwt).to.equal(jwt);
-          expect(validateStub.callCount).to.equal(1);
+          expect(validateStub).to.be.calledOnce;
         });
       });
     });

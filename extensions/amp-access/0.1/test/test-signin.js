@@ -150,7 +150,7 @@ describe('SignInProtocol', () => {
           .once();
       return signin.getAccessTokenPassive().then(token => {
         expect(token).to.equal('access token');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -163,7 +163,7 @@ describe('SignInProtocol', () => {
           .once();
       return signin.getAccessTokenPassive().then(token => {
         expect(token).to.be.null;
-        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub).to.be.calledOnce;
 
         // Second call doesn't call viewer.
         signin.getAccessTokenPassive();
@@ -185,7 +185,7 @@ describe('SignInProtocol', () => {
           .once();
       return signin.postLoginResult({'code': 'X'}).then(token => {
         expect(token).to.equal('access token X');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
         // The previous token is updated as well.
         return signin.getAccessTokenPassive().then(token => {
           expect(token).to.equal('access token X');
@@ -204,7 +204,7 @@ describe('SignInProtocol', () => {
           .once();
       return signin.postLoginResult({'code': 'X'}).then(token => {
         expect(token).to.be.null;
-        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub).to.be.calledOnce;
         // The previous token is left unchanged.
         return signin.getAccessTokenPassive().then(token => {
           expect(token).to.equal('access token');

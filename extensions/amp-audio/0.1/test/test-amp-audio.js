@@ -160,7 +160,7 @@ describe('amp-audio', () => {
     const promise = audio.layoutCallback();
     document.createElement = savedCreateElement;
     return promise.then(() => {
-      expect(element.toggleFallback.callCount).to.equal(1);
+      expect(element.toggleFallback).to.be.calledOnce;
     });
   });
 

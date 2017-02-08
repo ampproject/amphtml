@@ -132,7 +132,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(trackerStub).to.not.be.called;
       expect(group.listeners_).to.be.empty;
 
-      expect(insStub.callCount).to.equal(4);
+      expect(insStub).to.have.callCount(4);
 
       expect(insStub.args[0][0].on).to.equal('visible');
       expect(insStub.args[0][1]).to.equal(handler);
@@ -299,89 +299,89 @@ describe('amp-analytics.instrumentation OLD', function() {
   it('only fires when the timer interval exceeds the minimum', () => {
     const fn1 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 0}}, fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     const fn2 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 1}}, fn2);
-    expect(fn2.callCount).to.equal(1);
+    expect(fn2).to.be.calledOnce;
   });
 
   it('never fires when the timer spec is malformed', () => {
     const fn1 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer'}, fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     const fn2 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': 1}, fn2);
-    expect(fn2.callCount).to.equal(0);
+    expect(fn2).to.have.not.been.called;
 
     const fn3 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'misc': 1}}, fn3);
-    expect(fn3.callCount).to.equal(0);
+    expect(fn3).to.have.not.been.called;
 
     const fn4 = sandbox.stub();
     ins.addListenerDepr_(
         {'on': 'timer', 'timerSpec': {'interval': 'two'}}, fn4);
-    expect(fn4.callCount).to.equal(0);
+    expect(fn4).to.have.not.been.called;
 
     const fn5 = sandbox.stub();
     ins.addListenerDepr_(
         {'on': 'timer', 'timerSpec': {'interval': null}}, fn5);
-    expect(fn5.callCount).to.equal(0);
+    expect(fn5).to.have.not.been.called;
 
     const fn6 = sandbox.stub();
     ins.addListenerDepr_({
       'on': 'timer',
       'timerSpec': {'interval': 2, 'maxTimerLength': 0},
     }, fn6);
-    expect(fn6.callCount).to.equal(0);
+    expect(fn6).to.have.not.been.called;
 
     const fn7 = sandbox.stub();
     ins.addListenerDepr_({
       'on': 'timer',
       'timerSpec': {'interval': 2, 'maxTimerLength': null},
     }, fn7);
-    expect(fn7.callCount).to.equal(0);
+    expect(fn7).to.have.not.been.called;
   });
 
   it('fires on the appropriate interval', () => {
     const fn1 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 10}}, fn1);
-    expect(fn1.callCount).to.equal(1);
+    expect(fn1).to.be.calledOnce;
 
     const fn2 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 15}}, fn2);
-    expect(fn2.callCount).to.equal(1);
+    expect(fn2).to.be.calledOnce;
 
     const fn3 = sandbox.stub();
     ins.addListenerDepr_({
       'on': 'timer', 'timerSpec': {'interval': 10, 'immediate': false},
     }, fn3);
-    expect(fn3.callCount).to.equal(0);
+    expect(fn3).to.have.not.been.called;
 
     const fn4 = sandbox.stub();
     ins.addListenerDepr_({
       'on': 'timer', 'timerSpec': {'interval': 15, 'immediate': false},
     }, fn4);
-    expect(fn4.callCount).to.equal(0);
+    expect(fn4).to.have.not.been.called;
 
     clock.tick(10 * 1000); // 10 seconds
-    expect(fn1.callCount).to.equal(2);
-    expect(fn2.callCount).to.equal(1);
-    expect(fn3.callCount).to.equal(1);
-    expect(fn4.callCount).to.equal(0);
+    expect(fn1).to.have.callCount(2);
+    expect(fn2).to.be.calledOnce;
+    expect(fn3).to.be.calledOnce;
+    expect(fn4).to.have.not.been.called;
 
     clock.tick(10 * 1000); // 20 seconds
-    expect(fn1.callCount).to.equal(3);
-    expect(fn2.callCount).to.equal(2);
-    expect(fn3.callCount).to.equal(2);
-    expect(fn4.callCount).to.equal(1);
+    expect(fn1).to.have.callCount(3);
+    expect(fn2).to.have.callCount(2);
+    expect(fn3).to.have.callCount(2);
+    expect(fn4).to.be.calledOnce;
 
     clock.tick(10 * 1000); // 30 seconds
-    expect(fn1.callCount).to.equal(4);
-    expect(fn2.callCount).to.equal(3);
-    expect(fn3.callCount).to.equal(3);
-    expect(fn4.callCount).to.equal(2);
+    expect(fn1).to.have.callCount(4);
+    expect(fn2).to.have.callCount(3);
+    expect(fn3).to.have.callCount(3);
+    expect(fn4).to.have.callCount(2);
   });
 
   it('stops firing after the maxTimerLength is exceeded', () => {
@@ -389,33 +389,33 @@ describe('amp-analytics.instrumentation OLD', function() {
     ins.addListenerDepr_({
       'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 15},
     }, fn1);
-    expect(fn1.callCount).to.equal(1);
+    expect(fn1).to.be.calledOnce;
 
     const fn2 = sandbox.stub();
     ins.addListenerDepr_({
       'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 20},
     }, fn2);
-    expect(fn2.callCount).to.equal(1);
+    expect(fn2).to.be.calledOnce;
 
     const fn3 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 3600}}, fn3);
-    expect(fn3.callCount).to.equal(1);
+    expect(fn3).to.be.calledOnce;
 
     clock.tick(10 * 1000); // 10 seconds
-    expect(fn1.callCount).to.equal(2);
-    expect(fn2.callCount).to.equal(2);
+    expect(fn1).to.have.callCount(2);
+    expect(fn2).to.have.callCount(2);
 
     clock.tick(10 * 1000); // 20 seconds
-    expect(fn1.callCount).to.equal(2);
-    expect(fn2.callCount).to.equal(3);
+    expect(fn1).to.have.callCount(2);
+    expect(fn2).to.have.callCount(3);
 
     clock.tick(10 * 1000); // 30 seconds
-    expect(fn1.callCount).to.equal(2);
-    expect(fn2.callCount).to.equal(3);
+    expect(fn1).to.have.callCount(2);
+    expect(fn2).to.have.callCount(3);
 
     // Default maxTimerLength is 2 hours
     clock.tick(3 * 3600 * 1000); // 3 hours
-    expect(fn3.callCount).to.equal(3);
+    expect(fn3).to.have.callCount(3);
   });
 
   it('fires on scroll', () => {
@@ -437,22 +437,22 @@ describe('amp-analytics.instrumentation OLD', function() {
           actual.vars.verticalScrollBoundary === String(expected);
       };
     }
-    expect(fn1.callCount).to.equal(2);
+    expect(fn1).to.have.callCount(2);
     expect(fn1.getCall(0).calledWithMatch(sinon.match(matcher(0)))).to.be.true;
     expect(fn1.getCall(1).calledWithMatch(sinon.match(matcher(0)))).to.be.true;
-    expect(fn2.callCount).to.equal(0);
+    expect(fn2).to.have.not.been.called;
 
     // Scroll Down
     fakeViewport.getScrollTop.returns(500);
     fakeViewport.getScrollLeft.returns(500);
     ins.onScroll_({top: 500, left: 500, height: 250, width: 250});
 
-    expect(fn1.callCount).to.equal(4);
+    expect(fn1).to.have.callCount(4);
     expect(fn1.getCall(2).calledWithMatch(sinon.match(matcher(100)))).to.be
         .true;
     expect(fn1.getCall(3).calledWithMatch(sinon.match(matcher(100)))).to.be
         .true;
-    expect(fn2.callCount).to.equal(2);
+    expect(fn2).to.have.callCount(2);
     expect(fn2.getCall(0).calledWithMatch(sinon.match(matcher(90)))).to.be.true;
     expect(fn2.getCall(1).calledWithMatch(sinon.match(matcher(90)))).to.be.true;
   });
@@ -472,17 +472,17 @@ describe('amp-analytics.instrumentation OLD', function() {
     fakeViewport.getScrollLeft.returns(10);
     ins.onScroll_({top: 10, left: 10, height: 250, width: 250});
 
-    expect(fn1.callCount).to.equal(2);
+    expect(fn1).to.have.callCount(2);
   });
 
   it('fails gracefully on bad scroll config', () => {
     const fn1 = sandbox.stub();
 
     ins.addListenerDepr_({'on': 'scroll'}, fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({'on': 'scroll', 'scrollSpec': {}}, fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
       'on': 'scroll',
@@ -490,13 +490,13 @@ describe('amp-analytics.instrumentation OLD', function() {
         'verticalBoundaries': undefined, 'horizontalBoundaries': undefined,
       }},
       fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
       'on': 'scroll',
       'scrollSpec': {'verticalBoundaries': [], 'horizontalBoundaries': []}},
       fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
       'on': 'scroll',
@@ -504,7 +504,7 @@ describe('amp-analytics.instrumentation OLD', function() {
         'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo'],
       }},
       fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
   });
 
   it('normalizes boundaries correctly.', () => {
@@ -529,7 +529,7 @@ describe('amp-analytics.instrumentation OLD', function() {
     ins.addListenerDepr_(
         {'on': 'scroll', 'scrollSpec': {'verticalBoundaries': [4]}},
         fn2);
-    expect(fn2.callCount).to.equal(1);
+    expect(fn2).to.be.calledOnce;
   });
 
 

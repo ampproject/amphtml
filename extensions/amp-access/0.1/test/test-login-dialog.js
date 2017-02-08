@@ -80,7 +80,7 @@ describe('ViewerLoginDialog', () => {
         () => Promise.resolve('#success=yes'));
     return openLoginDialog(windowApi, 'http://acme.com/login').then(res => {
       expect(res).to.equal('#success=yes');
-      expect(stub.callCount).to.equal(1);
+      expect(stub).to.be.calledOnce;
       expect(stub.firstCall.args[0]).to.equal('openDialog');
       expect(stub.firstCall.args[1]).to.deep.equal({
         'url': 'http://acme.com/login?return=RETURN_URL',
@@ -94,7 +94,7 @@ describe('ViewerLoginDialog', () => {
     const urlPromise = Promise.resolve('http://acme.com/login');
     return openLoginDialog(windowApi, urlPromise).then(res => {
       expect(res).to.equal('#success=yes');
-      expect(stub.callCount).to.equal(1);
+      expect(stub).to.be.calledOnce;
       expect(stub.firstCall.args[0]).to.equal('openDialog');
       expect(stub.firstCall.args[1]).to.deep.equal({
         'url': 'http://acme.com/login?return=RETURN_URL',
@@ -231,7 +231,7 @@ describe('WebLoginDialog', () => {
   it('should call window.open in the same microtask with url', () => {
     sandbox.stub(windowApi, 'open', () => dialog);
     openLoginDialog(windowApi, 'http://acme.com/login');
-    expect(windowApi.open.callCount).to.equal(1);
+    expect(windowApi.open).to.be.calledOnce;
     expect(windowApi.open.firstCall.args[0]).to.match(
         /^http\:\/\/acme.com\/login\?return\=/);
   });
@@ -239,7 +239,7 @@ describe('WebLoginDialog', () => {
   it('should call window.open in the same microtask with promise', () => {
     sandbox.stub(windowApi, 'open', () => dialog);
     openLoginDialog(windowApi, Promise.resolve('http://acme.com/login'));
-    expect(windowApi.open.callCount).to.equal(1);
+    expect(windowApi.open).to.be.calledOnce;
     expect(windowApi.open.firstCall.args[0]).to.equal('');
   });
 

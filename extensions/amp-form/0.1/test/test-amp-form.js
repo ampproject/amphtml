@@ -412,8 +412,8 @@ describe('amp-form', () => {
         ampForm.handleSubmitEvent_(event);
         ampForm.handleSubmitEvent_(event);
         expect(event.preventDefault.called).to.be.true;
-        expect(event.preventDefault.callCount).to.equal(3);
-        expect(event.stopImmediatePropagation.callCount).to.equal(2);
+        expect(event.preventDefault).to.have.callCount(3);
+        expect(event.stopImmediatePropagation).to.have.callCount(2);
         expect(ampForm.xhr_.fetch.calledOnce).to.be.true;
         expect(form.className).to.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');

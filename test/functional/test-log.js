@@ -106,12 +106,12 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(4);
+      expect(logSpy).to.have.callCount(4);
       expect(logSpy.args[0][1]).to.equal('[fine]');
       expect(logSpy.args[1][1]).to.equal('[info]');
       expect(logSpy.args[2][1]).to.equal('[warn]');
       expect(logSpy.args[3][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should log correctly for INFO', () => {
@@ -123,11 +123,11 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(3);
+      expect(logSpy).to.have.callCount(3);
       expect(logSpy.args[0][1]).to.equal('[info]');
       expect(logSpy.args[1][1]).to.equal('[warn]');
       expect(logSpy.args[2][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should log correctly for WARN', () => {
@@ -139,10 +139,10 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(2);
+      expect(logSpy).to.have.callCount(2);
       expect(logSpy.args[0][1]).to.equal('[warn]');
       expect(logSpy.args[1][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should log correctly for ERROR', () => {
@@ -154,9 +154,9 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(1);
+      expect(logSpy).to.be.calledOnce;
       expect(logSpy.args[0][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should report ERROR even when OFF and coallesce messages', () => {

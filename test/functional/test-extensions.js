@@ -200,10 +200,10 @@ describes.sandboxed('Extensions', {}, () => {
       const promise = installExtensionsInShadowDoc(
           extensions, ampdoc, ['amp-ext']);
       return promise.then(() => {
-        expect(factory1.callCount).to.equal(1);
+        expect(factory1).to.be.calledOnce;
         expect(factory1.args[0][0]).to.equal(ampdoc);
         // Should survive errors in one factory.
-        expect(factory3.callCount).to.equal(1);
+        expect(factory3).to.be.calledOnce;
         expect(factory3.args[0][0]).to.equal(ampdoc);
       });
     });
@@ -248,10 +248,10 @@ describes.sandboxed('Extensions', {}, () => {
       const promise = installExtensionsInShadowDoc(
           extensions, ampdoc, ['amp-ext']);
       return promise.then(() => {
-        expect(factory1.callCount).to.equal(1);
+        expect(factory1).to.be.calledOnce;
         expect(factory1.args[0][0]).to.equal(shadowRoot);
         // Should survive errors in one factory.
-        expect(factory3.callCount).to.equal(1);
+        expect(factory3).to.be.calledOnce;
         expect(factory3.args[0][0]).to.equal(shadowRoot);
       });
     });
@@ -273,10 +273,10 @@ describes.sandboxed('Extensions', {}, () => {
       const promise = extensions.installFactoriesInShadowRoot(
           shadowRoot, ['amp-ext']);
       return promise.then(() => {
-        expect(factory1.callCount).to.equal(1);
+        expect(factory1).to.be.calledOnce;
         expect(factory1.args[0][0]).to.equal(shadowRoot);
         // Should survive errors in one factory.
-        expect(factory3.callCount).to.equal(1);
+        expect(factory3).to.be.calledOnce;
         expect(factory3.args[0][0]).to.equal(shadowRoot);
       });
     });

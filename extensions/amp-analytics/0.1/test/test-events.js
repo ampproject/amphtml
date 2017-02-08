@@ -176,16 +176,16 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.add(analyticsElement, 'custom-event-2', {}, handler2);
 
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
-      expect(handler.callCount).to.equal(1);
-      expect(handler2.callCount).to.equal(0);
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.have.not.been.called;
 
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
-      expect(handler.callCount).to.equal(1);
-      expect(handler2.callCount).to.equal(1);
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.be.calledOnce;
 
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
-      expect(handler.callCount).to.equal(2);
-      expect(handler2.callCount).to.equal(1);
+      expect(handler).to.have.callCount(2);
+      expect(handler2).to.be.calledOnce;
     });
 
     it('should buffer custom events early on', () => {
@@ -203,9 +203,9 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.add(analyticsElement, 'custom-event-2', {}, handler2);
       tracker.add(analyticsElement, 'custom-event-3', {}, handler3);
       clock.tick(1);
-      expect(handler.callCount).to.equal(1);
-      expect(handler2.callCount).to.equal(2);
-      expect(handler3.callCount).to.equal(0);
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.have.callCount(2);
+      expect(handler3).to.have.not.been.called;
       expect(tracker.buffer_['custom-event-1']).to.have.length(1);
       expect(tracker.buffer_['custom-event-2']).to.have.length(2);
       expect(tracker.buffer_['custom-event-3']).to.be.undefined;
@@ -214,9 +214,9 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-3'));
-      expect(handler.callCount).to.equal(2);
-      expect(handler2.callCount).to.equal(3);
-      expect(handler3.callCount).to.equal(1);
+      expect(handler).to.have.callCount(2);
+      expect(handler2).to.have.callCount(3);
+      expect(handler3).to.be.calledOnce;
       expect(tracker.buffer_['custom-event-1']).to.have.length(2);
       expect(tracker.buffer_['custom-event-2']).to.have.length(3);
       expect(tracker.buffer_['custom-event-3']).to.have.length(1);
@@ -229,9 +229,9 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-3'));
-      expect(handler.callCount).to.equal(3);
-      expect(handler2.callCount).to.equal(4);
-      expect(handler3.callCount).to.equal(2);
+      expect(handler).to.have.callCount(3);
+      expect(handler2).to.have.callCount(4);
+      expect(handler3).to.have.callCount(2);
       expect(tracker.buffer_).to.be.undefined;
     });
   });

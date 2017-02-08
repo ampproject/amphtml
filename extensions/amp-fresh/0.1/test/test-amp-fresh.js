@@ -54,9 +54,9 @@ describe('amp-fresh', () => {
 
   it('should register to manager', () => {
     const registerSpy = sandbox.spy(manager, 'register');
-    expect(registerSpy.callCount).to.equal(0);
+    expect(registerSpy).to.have.not.been.called;
     fresh.buildCallback();
-    expect(registerSpy.callCount).to.equal(1);
+    expect(registerSpy).to.be.calledOnce;
   });
 
   it('should replace its subtree', () => {

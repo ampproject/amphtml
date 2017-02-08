@@ -189,7 +189,7 @@ describe('AccessServerAdapter', () => {
         return adapter.authorize().then(response => {
           expect(response).to.exist;
           expect(response.access).to.equal('A');
-          expect(replaceSectionsStub.callCount).to.equal(1);
+          expect(replaceSectionsStub).to.be.calledOnce;
         });
       });
 

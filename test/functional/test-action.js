@@ -471,7 +471,7 @@ describe('Action method', () => {
   it('should invoke on the AMP element', () => {
     action.invoke_(execElement, 'method1', /* args */ null,
         'source1', 'event1');
-    expect(onEnqueue.callCount).to.equal(1);
+    expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
@@ -483,7 +483,7 @@ describe('Action method', () => {
   it('should invoke on the AMP element with args', () => {
     action.invoke_(execElement, 'method1', {'key1': 11},
         'source1', 'event1');
-    expect(onEnqueue.callCount).to.equal(1);
+    expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
@@ -497,7 +497,7 @@ describe('Action method', () => {
       action.invoke_(document.createElement('img'), 'method1', /* args */ null,
           'source1', 'event1');
     }).to.throw(/Target element does not support provided action/);
-    expect(onEnqueue.callCount).to.equal(0);
+    expect(onEnqueue).to.have.not.been.called;
   });
 
   it('should invoke on non-AMP but whitelisted element', () => {
@@ -520,12 +520,12 @@ describe('Action method', () => {
       action.invoke_({tagName: 'amp-img'}, 'method1', /* args */ null,
           'source1', 'event1');
     }).to.throw(/Unrecognized AMP element/);
-    expect(onEnqueue.callCount).to.equal(0);
+    expect(onEnqueue).to.have.not.been.called;
   });
 
   it('should trigger event', () => {
     action.trigger(child, 'tap', null);
-    expect(onEnqueue.callCount).to.equal(1);
+    expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
@@ -534,7 +534,7 @@ describe('Action method', () => {
 
   it('should execute method', () => {
     action.execute(execElement, 'method1', {'key1': 11}, child, null);
-    expect(onEnqueue.callCount).to.equal(1);
+    expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
@@ -609,10 +609,10 @@ describe('Action interceptor', () => {
     const handler = sandbox.spy();
     action.installActionHandler(target, handler);
     expect(Array.isArray(getQueue())).to.be.false;
-    expect(handler.callCount).to.equal(0);
+    expect(handler).to.have.not.been.called;
 
     clock.tick(10);
-    expect(handler.callCount).to.equal(2);
+    expect(handler).to.have.callCount(2);
 
     const inv0 = handler.getCall(0).args[0];
     expect(inv0.target).to.equal(target);
@@ -628,7 +628,7 @@ describe('Action interceptor', () => {
 
     action.invoke_(target, 'method3', /* args */ null, 'source3', 'event3');
     expect(Array.isArray(getQueue())).to.be.false;
-    expect(handler.callCount).to.equal(3);
+    expect(handler).to.have.callCount(3);
     const inv2 = handler.getCall(2).args[0];
     expect(inv2.target).to.equal(target);
     expect(inv2.method).to.equal('method3');
@@ -670,12 +670,12 @@ describe('Action common handler', () => {
     action.addGlobalMethodHandler('action2', action2);
 
     action.invoke_(target, 'action1', /* args */ null, 'source1', 'event1');
-    expect(action1.callCount).to.equal(1);
-    expect(action2.callCount).to.equal(0);
+    expect(action1).to.be.calledOnce;
+    expect(action2).to.have.not.been.called;
 
     action.invoke_(target, 'action2', /* args */ null, 'source2', 'event2');
-    expect(action2.callCount).to.equal(1);
-    expect(action1.callCount).to.equal(1);
+    expect(action2).to.be.calledOnce;
+    expect(action1).to.be.calledOnce;
 
     expect(target['__AMP_ACTION_QUEUE__']).to.not.exist;
   });

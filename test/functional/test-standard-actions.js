@@ -36,7 +36,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element', () => {
       const element = document.createElement('div');
       standardActions.handleHide({target: element});
-      expect(mutateElementStub.callCount).to.equal(1);
+      expect(mutateElementStub).to.be.calledOnce;
       expect(mutateElementStub.firstCall.args[0]).to.equal(element);
       expect(element.style.display).to.equal('none');
     });
@@ -50,7 +50,7 @@ describes.sandboxed('StandardActions', {}, () => {
       };
 
       standardActions.handleHide({target: element});
-      expect(mutateElementStub.callCount).to.equal(1);
+      expect(mutateElementStub).to.be.calledOnce;
       expect(mutateElementStub.firstCall.args[0]).to.equal(element);
       expect(called).to.equal(true);
     });

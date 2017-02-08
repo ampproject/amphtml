@@ -321,7 +321,7 @@ describe('FixedLayer', () => {
 
       // Add.
       fixedLayer.addElement(element3, '*');
-      expect(updateStub.callCount).to.equal(1);
+      expect(updateStub).to.be.calledOnce;
       expect(fixedLayer.fixedElements_).to.have.length(3);
       const fe = fixedLayer.fixedElements_[2];
       expect(fe.id).to.equal('F2');
@@ -334,7 +334,7 @@ describe('FixedLayer', () => {
 
       //Add with forceTransfer
       fixedLayer.addElement(element3, '*', true);
-      expect(updateStub.callCount).to.equal(2);
+      expect(updateStub).to.have.callCount(2);
       expect(fixedLayer.fixedElements_).to.have.length(3);
       const fe1 = fixedLayer.fixedElements_[2];
       expect(fe1.id).to.equal('F3');
