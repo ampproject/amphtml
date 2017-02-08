@@ -367,7 +367,9 @@ export class Visibility {
       const onIntersectionChanges = entries => {
         entries.forEach(change => {
           this.onIntersectionChange_(
-              change.target, change.intersectionRatio * 100);
+              change.target,
+              change.intersectionRatio * 100,
+              /* docVisible */true);
         });
       };
 
@@ -408,13 +410,13 @@ export class Visibility {
 
   /**
    * @param {!Element} target
-   * @param {?number} visible visible is null when the whole document is hidden
+   * @param {number} visible
+   * @param {boolean} docVisible
    * @private
    **/
-  onIntersectionChange_(target, visible) {
+  onIntersectionChange_(target, visible, docVisible) {
     const resource = this.resourcesService_.getResourceForElement(target);
     const listeners = this.listeners_[resource.getId()];
-    const docVisible = (visible !== null);
     if (docVisible) {
       this.lastVisiblePercent_[resource.getId()] = visible;
     } else {
@@ -479,11 +481,10 @@ export class Visibility {
       if (!resource.hasLoadedOnce()) {
         continue;
       }
-
-      const visible = docVisible
-          ? this.lastVisiblePercent_[resource.getId()] || 0
-          : null;
-      this.onIntersectionChange_(resource.element, visible);
+      this.onIntersectionChange_(
+          resource.element,
+          this.lastVisiblePercent_[resource.getId()] || 0,
+          docVisible);
     }
   }
 
