@@ -158,14 +158,9 @@ describes.realWin('amp-bind', {
     // Only the initial value for [a] binding does not match.
     createElementWithBinding('[a]="a" [b]="b" b="b"');
     const errorStub = env.sandbox.stub(user(), 'createError');
-<<<<<<< HEAD
     return onBindReady().then(() => {
-      expect(errorStub.callCount).to.equal(1);
-      done();
-=======
-    return onBindReady(() => {
       expect(errorStub).to.be.calledOnce;
->>>>>>> b83bdb2a82a0e99ae4763bfe82c93be4b0c4c463
+      done();
     });
   });
 
@@ -174,14 +169,9 @@ describes.realWin('amp-bind', {
     // Only the initial value for [c] binding does not match.
     createElementWithBinding(`a [a]="true" [b]="false" c="false" [c]="false"`);
     const errorStub = env.sandbox.stub(user(), 'createError');
-<<<<<<< HEAD
     return onBindReady().then(() => {
-      expect(errorStub.callCount).to.equal(1);
-      done();
-=======
-    return onBindReady(() => {
       expect(errorStub).to.be.calledOnce;
->>>>>>> b83bdb2a82a0e99ae4763bfe82c93be4b0c4c463
+      done();
     });
   });
 
