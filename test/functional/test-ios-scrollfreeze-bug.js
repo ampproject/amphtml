@@ -90,8 +90,8 @@ describe('ios-scrollfreeze-bug', () => {
     expect(promise).to.exist;
     return promise.then(() => {
       expect(windowApi.document.body.style.bottom).to.equal('0px');
-      expect(mutateStub.callCount).to.equal(2);
-      expect(bodySetSpy.callCount).to.equal(2);
+      expect(mutateStub).to.have.callCount(2);
+      expect(bodySetSpy).to.have.callCount(2);
       expect(bodySetSpy.args[0][0]).to.equal('');
       expect(bodySetSpy.args[1][0]).to.equal('0px');
     });

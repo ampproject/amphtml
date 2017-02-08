@@ -217,7 +217,7 @@ describe('CustomElement', () => {
     expect(element.readyState).to.equal('loading');
     expect(element.everAttached).to.equal(false);
     expect(element.layout_).to.equal(Layout.NODISPLAY);
-    expect(testElementCreatedCallback.callCount).to.equal(0);
+    expect(testElementCreatedCallback).to.have.not.been.called;
 
     container.appendChild(element);
     element.attachedCallback();
@@ -225,7 +225,7 @@ describe('CustomElement', () => {
     expect(element).to.have.class('i-amphtml-notbuilt');
     expect(element).to.have.class('amp-notbuilt');
     expect(element.everAttached).to.equal(true);
-    expect(testElementCreatedCallback.callCount).to.equal(1);
+    expect(testElementCreatedCallback).to.be.calledOnce;
     expect(element.isUpgraded()).to.equal(true);
     expect(build.calledOnce);
 
@@ -243,7 +243,7 @@ describe('CustomElement', () => {
     expect(element.readyState).to.equal('loading');
     expect(element.everAttached).to.equal(false);
     expect(element.layout_).to.equal(Layout.NODISPLAY);
-    expect(testElementCreatedCallback.callCount).to.equal(0);
+    expect(testElementCreatedCallback).to.have.not.been.called;
 
     container.appendChild(element);
     element.attachedCallback();
@@ -251,7 +251,7 @@ describe('CustomElement', () => {
     expect(element).to.have.class('i-amphtml-notbuilt');
     expect(element).to.have.class('amp-notbuilt');
     expect(element.everAttached).to.equal(true);
-    expect(testElementCreatedCallback.callCount).to.equal(0);
+    expect(testElementCreatedCallback).to.have.not.been.called;
     expect(element.isUpgraded()).to.equal(false);
     expect(build.calledOnce);
   });
@@ -287,7 +287,7 @@ describe('CustomElement', () => {
     element.attachedCallback();
     element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
     element.getIntersectionChangeEntry();
-    expect(testElementGetInsersectionElementLayoutBox.callCount).to.equal(1);
+    expect(testElementGetInsersectionElementLayoutBox).to.be.calledOnce;
   });
 
   it('Element - updateLayoutBox', () => {
@@ -305,7 +305,7 @@ describe('CustomElement', () => {
   it('StubElement - upgrade after attached', () => {
     const element = new StubElementClass();
     expect(element.isUpgraded()).to.equal(false);
-    expect(testElementCreatedCallback.callCount).to.equal(0);
+    expect(testElementCreatedCallback).to.have.not.been.called;
 
     element.setAttribute('layout', 'fill');
     element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
@@ -319,15 +319,15 @@ describe('CustomElement', () => {
     expect(element.implementation_).to.be.instanceOf(TestElement);
     expect(element.implementation_.layout_).to.equal(Layout.FILL);
     expect(element.implementation_.layoutWidth_).to.equal(111);
-    expect(testElementCreatedCallback.callCount).to.equal(1);
-    expect(testElementFirstAttachedCallback.callCount).to.equal(1);
+    expect(testElementCreatedCallback).to.be.calledOnce;
+    expect(testElementFirstAttachedCallback).to.be.calledOnce;
     expect(element.isBuilt()).to.equal(false);
   });
 
   it('StubElement - upgrade before attached', () => {
     const element = new StubElementClass();
     expect(element.isUpgraded()).to.equal(false);
-    expect(testElementCreatedCallback.callCount).to.equal(0);
+    expect(testElementCreatedCallback).to.have.not.been.called;
 
     element.setAttribute('layout', 'fill');
     element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
@@ -337,8 +337,8 @@ describe('CustomElement', () => {
 
     expect(element.isUpgraded()).to.equal(false);
     expect(element.implementation_).to.be.instanceOf(TestElement);
-    expect(testElementCreatedCallback.callCount).to.equal(0);
-    expect(testElementFirstAttachedCallback.callCount).to.equal(0);
+    expect(testElementCreatedCallback).to.have.not.been.called;
+    expect(testElementFirstAttachedCallback).to.have.not.been.called;
     expect(element.isBuilt()).to.equal(false);
   });
 
@@ -441,13 +441,13 @@ describe('CustomElement', () => {
   it('StubElement - re-upgrade', () => {
     const element = new StubElementClass();
     expect(element.isUpgraded()).to.equal(false);
-    expect(testElementCreatedCallback.callCount).to.equal(0);
+    expect(testElementCreatedCallback).to.have.not.been.called;
     resourcesMock.expects('upgraded').withExactArgs(element).never();
 
     element.upgrade(TestElementWithReUpgrade);
 
     expect(element.isUpgraded()).to.equal(false);
-    expect(testElementCreatedCallback.callCount).to.equal(0);
+    expect(testElementCreatedCallback).to.have.not.been.called;
   });
 
 
@@ -463,7 +463,7 @@ describe('CustomElement', () => {
     element.tryUpgrade_();
 
     expect(element.isBuilt()).to.equal(false);
-    expect(testElementBuildCallback.callCount).to.equal(0);
+    expect(testElementBuildCallback).to.have.not.been.called;
     expect(element.signals().get('built')).to.not.be.ok;
 
     clock.tick(1);
@@ -471,7 +471,7 @@ describe('CustomElement', () => {
     expect(element.isBuilt()).to.equal(true);
     expect(element).to.not.have.class('i-amphtml-notbuilt');
     expect(element).to.not.have.class('amp-notbuilt');
-    expect(testElementBuildCallback.callCount).to.equal(1);
+    expect(testElementBuildCallback).to.be.calledOnce;
     expect(element.signals().get('built')).to.equal(1);
     return element.whenBuilt();  // Should eventually resolve.
   });
@@ -495,11 +495,11 @@ describe('CustomElement', () => {
   it('Element - build creates a placeholder if one does not exist' , () => {
     const element = new ElementClass();
     element.tryUpgrade_();
-    expect(testElementCreatePlaceholderCallback.callCount).to.equal(0);
+    expect(testElementCreatePlaceholderCallback).to.have.not.been.called;
 
     element.build();
     expect(element.isBuilt()).to.equal(true);
-    expect(testElementCreatePlaceholderCallback.callCount).to.equal(1);
+    expect(testElementCreatePlaceholderCallback).to.be.calledOnce;
   });
 
   it('Element - build does not create a placeholder when one exists' , () => {
@@ -508,37 +508,37 @@ describe('CustomElement', () => {
     const placeholder = document.createElement('div');
     placeholder.setAttribute('placeholder', '');
     element.appendChild(placeholder);
-    expect(testElementCreatePlaceholderCallback.callCount).to.equal(0);
+    expect(testElementCreatePlaceholderCallback).to.have.not.been.called;
 
     element.build();
     expect(element.isBuilt()).to.equal(true);
-    expect(testElementCreatePlaceholderCallback.callCount).to.equal(0);
+    expect(testElementCreatePlaceholderCallback).to.have.not.been.called;
   });
 
   it('Element - buildCallback cannot be called twice', () => {
     const element = new ElementClass();
     element.tryUpgrade_();
     expect(element.isBuilt()).to.equal(false);
-    expect(testElementBuildCallback.callCount).to.equal(0);
+    expect(testElementBuildCallback).to.have.not.been.called;
 
     element.build();
     expect(element.isBuilt()).to.equal(true);
-    expect(testElementBuildCallback.callCount).to.equal(1);
-    expect(testElementPreconnectCallback.callCount).to.equal(0);
+    expect(testElementBuildCallback).to.be.calledOnce;
+    expect(testElementPreconnectCallback).to.have.not.been.called;
 
     // Call again.
     element.build();
     expect(element.isBuilt()).to.equal(true);
-    expect(testElementBuildCallback.callCount).to.equal(1);
-    expect(testElementPreconnectCallback.callCount).to.equal(0);
+    expect(testElementBuildCallback).to.be.calledOnce;
+    expect(testElementPreconnectCallback).to.have.not.been.called;
     clock.tick(1);
-    expect(testElementPreconnectCallback.callCount).to.equal(1);
+    expect(testElementPreconnectCallback).to.be.calledOnce;
   });
 
   it('Element - build NOT allowed when in template', () => {
     const element = new ElementClass();
     expect(element.isBuilt()).to.equal(false);
-    expect(testElementBuildCallback.callCount).to.equal(0);
+    expect(testElementBuildCallback).to.have.not.been.called;
 
     element.isInTemplate_ = true;
     expect(() => {
@@ -546,32 +546,32 @@ describe('CustomElement', () => {
     }).to.throw(/Must never be called in template/);
 
     expect(element.isBuilt()).to.equal(false);
-    expect(testElementBuildCallback.callCount).to.equal(0);
+    expect(testElementBuildCallback).to.have.not.been.called;
   });
 
   it('StubElement - build never allowed', () => {
     const element = new StubElementClass();
     expect(element.isBuilt()).to.equal(false);
-    expect(testElementBuildCallback.callCount).to.equal(0);
+    expect(testElementBuildCallback).to.have.not.been.called;
 
     expect(() => {
       element.build();
     }).to.throw(/Cannot build unupgraded element/);
 
     expect(element.isBuilt()).to.equal(false);
-    expect(testElementBuildCallback.callCount).to.equal(0);
+    expect(testElementBuildCallback).to.have.not.been.called;
   });
 
   it('Element - createPlaceholder', () => {
     const element = new ElementClass();
     element.createPlaceholder();
-    expect(testElementCreatePlaceholderCallback.callCount).to.equal(1);
+    expect(testElementCreatePlaceholderCallback).to.be.calledOnce;
   });
 
   it('Element - attachedCallback', () => {
     const element = new ElementClass();
     element.setAttribute('layout', 'fill');
-    expect(testElementFirstAttachedCallback.callCount).to.equal(0);
+    expect(testElementFirstAttachedCallback).to.have.not.been.called;
     expect(element.everAttached).to.equal(false);
     expect(element.layout_).to.equal(Layout.NODISPLAY);
 
@@ -582,13 +582,13 @@ describe('CustomElement', () => {
     expect(element.everAttached).to.equal(true);
     expect(element.layout_).to.equal(Layout.FILL);
     expect(element.implementation_.layout_).to.equal(Layout.FILL);
-    expect(testElementFirstAttachedCallback.callCount).to.equal(1);
+    expect(testElementFirstAttachedCallback).to.be.calledOnce;
   });
 
   it('StubElement - attachedCallback', () => {
     const element = new StubElementClass();
     element.setAttribute('layout', 'fill');
-    expect(testElementFirstAttachedCallback.callCount).to.equal(0);
+    expect(testElementFirstAttachedCallback).to.have.not.been.called;
     expect(element.everAttached).to.equal(false);
     expect(element.layout_).to.equal(Layout.NODISPLAY);
 
@@ -600,8 +600,8 @@ describe('CustomElement', () => {
     expect(element.layout_).to.equal(Layout.FILL);
     expect(element.implementation_.layout_).to.equal(Layout.FILL);
     // Not upgraded yet!
-    expect(testElementCreatedCallback.callCount).to.equal(0);
-    expect(testElementFirstAttachedCallback.callCount).to.equal(0);
+    expect(testElementCreatedCallback).to.have.not.been.called;
+    expect(testElementFirstAttachedCallback).to.have.not.been.called;
     expect(element).to.have.class('amp-unresolved');
     expect(element).to.have.class('i-amphtml-unresolved');
 
@@ -612,8 +612,8 @@ describe('CustomElement', () => {
     expect(element.layout_).to.equal(Layout.FILL);
     expect(element.implementation_.layout_).to.equal(Layout.FILL);
     // Now it's called.
-    expect(testElementCreatedCallback.callCount).to.equal(1);
-    expect(testElementFirstAttachedCallback.callCount).to.equal(1);
+    expect(testElementCreatedCallback).to.be.calledOnce;
+    expect(testElementFirstAttachedCallback).to.be.calledOnce;
     expect(element).to.not.have.class('amp-unresolved');
     expect(element).to.not.have.class('i-amphtml-unresolved');
   });
@@ -621,7 +621,7 @@ describe('CustomElement', () => {
   it('Element - detachedCallback', () => {
     const element = new ElementClass();
     element.setAttribute('layout', 'fill');
-    expect(testElementFirstAttachedCallback.callCount).to.equal(0);
+    expect(testElementFirstAttachedCallback).to.have.not.been.called;
     expect(element.everAttached).to.equal(false);
     expect(element.layout_).to.equal(Layout.NODISPLAY);
 
@@ -635,7 +635,7 @@ describe('CustomElement', () => {
     expect(element.everAttached).to.equal(true);
     expect(element.layout_).to.equal(Layout.FILL);
     expect(element.implementation_.layout_).to.equal(Layout.FILL);
-    expect(testElementFirstAttachedCallback.callCount).to.equal(1);
+    expect(testElementFirstAttachedCallback).to.be.calledOnce;
   });
 
 
@@ -643,20 +643,20 @@ describe('CustomElement', () => {
     const element = new ElementClass();
     element.setAttribute('layout', 'fill');
     element.tryUpgrade_();
-    expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(testElementLayoutCallback).to.have.not.been.called;
 
     expect(element.isBuilt()).to.equal(false);
     expect(() => {
       element.layoutCallback();
     }).to.throw(/Must be built to receive viewport events/);
 
-    expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(testElementLayoutCallback).to.have.not.been.called;
   });
 
   it('StubElement - layoutCallback before build or upgrade', () => {
     const element = new StubElementClass();
     element.setAttribute('layout', 'fill');
-    expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(testElementLayoutCallback).to.have.not.been.called;
 
     expect(element.isUpgraded()).to.equal(false);
     expect(element.isBuilt()).to.equal(false);
@@ -673,13 +673,13 @@ describe('CustomElement', () => {
       element.layoutCallback();
     }).to.throw(/Must be built to receive viewport events/);
 
-    expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(testElementLayoutCallback).to.have.not.been.called;
   });
 
   it('StubElement - layoutCallback after upgrade but before build', () => {
     const element = new StubElementClass();
     element.setAttribute('layout', 'fill');
-    expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(testElementLayoutCallback).to.have.not.been.called;
     expect(element.isUpgraded()).to.equal(false);
     expect(element.isBuilt()).to.equal(false);
 
@@ -694,7 +694,7 @@ describe('CustomElement', () => {
       element.layoutCallback();
     }).to.throw(/Must be built to receive viewport events/);
 
-    expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(testElementLayoutCallback).to.have.not.been.called;
   });
 
   it('Element - layoutCallback', () => {
@@ -703,14 +703,14 @@ describe('CustomElement', () => {
     element.tryUpgrade_();
     element.build();
     expect(element.isBuilt()).to.equal(true);
-    expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(testElementLayoutCallback).to.have.not.been.called;
     clock.tick(1);
-    expect(testElementPreconnectCallback.callCount).to.equal(1);
+    expect(testElementPreconnectCallback).to.be.calledOnce;
     expect(testElementPreconnectCallback.getCall(0).args[0]).to.be.false;
 
     const p = element.layoutCallback();
-    expect(testElementLayoutCallback.callCount).to.equal(1);
-    expect(testElementPreconnectCallback.callCount).to.equal(2);
+    expect(testElementLayoutCallback).to.be.calledOnce;
+    expect(testElementPreconnectCallback).to.have.callCount(2);
     expect(testElementPreconnectCallback.getCall(1).args[0]).to.be.true;
     expect(element.signals().get('load-start')).to.equal(1);
     expect(element.signals().get('load-end')).to.be.null;
@@ -728,17 +728,17 @@ describe('CustomElement', () => {
         element.build();
 
         const p = element.layoutCallback();
-        expect(testElementLayoutCallback.callCount).to.equal(1);
-        expect(testElementFirstLayoutCompleted.callCount).to.equal(0);
+        expect(testElementLayoutCallback).to.be.calledOnce;
+        expect(testElementFirstLayoutCompleted).to.have.not.been.called;
         return p.then(() => {
-          expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+          expect(testElementFirstLayoutCompleted).to.be.calledOnce;
 
           // But not second time.
           const p2 = element.layoutCallback();
-          expect(testElementLayoutCallback.callCount).to.equal(2);
-          expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+          expect(testElementLayoutCallback).to.have.callCount(2);
+          expect(testElementFirstLayoutCompleted).to.be.calledOnce;
           return p2.then(() => {
-            expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+            expect(testElementFirstLayoutCompleted).to.be.calledOnce;
           });
         });
       });
@@ -749,7 +749,7 @@ describe('CustomElement', () => {
     element.tryUpgrade_();
     element.build();
     expect(element.isBuilt()).to.equal(true);
-    expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(testElementLayoutCallback).to.have.not.been.called;
 
     element.isInTemplate_ = true;
     expect(() => {
@@ -765,7 +765,7 @@ describe('CustomElement', () => {
     expect(() => element.build()).to.throw(/Cannot build unupgraded element/);
     expect(element.isUpgraded()).to.equal(false);
     expect(element.isBuilt()).to.equal(false);
-    expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(testElementLayoutCallback).to.have.not.been.called;
   });
 
   it('StubElement - layoutCallback after attached', () => {
@@ -778,10 +778,10 @@ describe('CustomElement', () => {
     element.build();
     expect(element.isUpgraded()).to.equal(true);
     expect(element.isBuilt()).to.equal(true);
-    expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(testElementLayoutCallback).to.have.not.been.called;
 
     const p = element.layoutCallback();
-    expect(testElementLayoutCallback.callCount).to.equal(1);
+    expect(testElementLayoutCallback).to.be.calledOnce;
     return p.then(() => {
       expect(element.readyState).to.equal('complete');
     });
@@ -798,7 +798,7 @@ describe('CustomElement', () => {
     element.enqueAction(inv);
     expect(element.actionQueue_.length).to.equal(1);
     expect(element.actionQueue_[0]).to.equal(inv);
-    expect(handler.callCount).to.equal(0);
+    expect(handler).to.have.not.been.called;
   });
 
   it('should execute action immediately after built', () => {
@@ -810,7 +810,7 @@ describe('CustomElement', () => {
 
     const inv = {};
     element.enqueAction(inv);
-    expect(handler.callCount).to.equal(1);
+    expect(handler).to.be.calledOnce;
     expect(handler.getCall(0).args[0]).to.equal(inv);
     expect(handler.getCall(0).args[1]).to.equal(false);
   });
@@ -828,11 +828,11 @@ describe('CustomElement', () => {
     expect(element.actionQueue_.length).to.equal(2);
     expect(element.actionQueue_[0]).to.equal(inv1);
     expect(element.actionQueue_[1]).to.equal(inv2);
-    expect(handler.callCount).to.equal(0);
+    expect(handler).to.have.not.been.called;
 
     element.build();
     clock.tick(10);
-    expect(handler.callCount).to.equal(2);
+    expect(handler).to.have.callCount(2);
     expect(handler.getCall(0).args[0]).to.equal(inv1);
     expect(handler.getCall(0).args[1]).to.equal(true);
     expect(handler.getCall(1).args[0]).to.equal(inv2);
@@ -1036,7 +1036,7 @@ describe('CustomElement', () => {
       element.tryUpgrade_();
       // Non-built element doesn't receive unlayoutCallback.
       element.unlayoutCallback();
-      expect(testElementUnlayoutCallback.callCount).to.equal(0);
+      expect(testElementUnlayoutCallback).to.have.not.been.called;
 
       element.implementation_.layoutCallback = () => {
         testElementLayoutCallback();
@@ -1051,7 +1051,7 @@ describe('CustomElement', () => {
       // Built element receives unlayoutCallback.
       element.build();
       element.unlayoutCallback();
-      expect(testElementUnlayoutCallback.callCount).to.equal(1);
+      expect(testElementUnlayoutCallback).to.be.calledOnce;
       expect(element.layoutCount_).to.equal(0);
     });
 
@@ -1071,7 +1071,7 @@ describe('CustomElement', () => {
       };
       element.layoutCallback();
       element.unlayoutCallback();
-      expect(testElementUnlayoutCallback.callCount).to.equal(1);
+      expect(testElementUnlayoutCallback).to.be.calledOnce;
       expect(element.layoutCount_).to.equal(1);
     });
 
@@ -1080,7 +1080,7 @@ describe('CustomElement', () => {
 
       // Unupgraded document doesn't receive unlayoutCallback.
       element.unlayoutCallback();
-      expect(testElementUnlayoutCallback.callCount).to.equal(0);
+      expect(testElementUnlayoutCallback).to.have.not.been.called;
     });
   });
 
@@ -1091,12 +1091,12 @@ describe('CustomElement', () => {
 
       // Non-built element doesn't receive pauseCallback.
       element.pauseCallback();
-      expect(testElementPauseCallback.callCount).to.equal(0);
+      expect(testElementPauseCallback).to.have.not.been.called;
 
       // Built element receives pauseCallback.
       element.build();
       element.pauseCallback();
-      expect(testElementPauseCallback.callCount).to.equal(1);
+      expect(testElementPauseCallback).to.be.calledOnce;
     });
 
     it('StubElement', () => {
@@ -1104,7 +1104,7 @@ describe('CustomElement', () => {
 
       // Unupgraded document doesn't receive pauseCallback.
       element.pauseCallback();
-      expect(testElementPauseCallback.callCount).to.equal(0);
+      expect(testElementPauseCallback).to.have.not.been.called;
     });
   });
 
@@ -1115,12 +1115,12 @@ describe('CustomElement', () => {
 
       // Non-built element doesn't receive resumeCallback.
       element.resumeCallback();
-      expect(testElementResumeCallback.callCount).to.equal(0);
+      expect(testElementResumeCallback).to.have.not.been.called;
 
       // Built element receives resumeCallback.
       element.build();
       element.resumeCallback();
-      expect(testElementResumeCallback.callCount).to.equal(1);
+      expect(testElementResumeCallback).to.be.calledOnce;
     });
 
     it('StubElement', () => {
@@ -1128,7 +1128,7 @@ describe('CustomElement', () => {
 
       // Unupgraded document doesn't receive resumeCallback.
       element.resumeCallback();
-      expect(testElementResumeCallback.callCount).to.equal(0);
+      expect(testElementResumeCallback).to.have.not.been.called;
     });
   });
 
@@ -1136,24 +1136,24 @@ describe('CustomElement', () => {
     it('Element should allow, but not delegate before build', () => {
       const element = new ElementClass();
       element.setAttribute('layout', 'fill');
-      expect(testElementViewportCallback.callCount).to.equal(0);
+      expect(testElementViewportCallback).to.have.not.been.called;
 
       expect(element.isBuilt()).to.equal(false);
       element.viewportCallback(true);
       expect(element.isInViewport_).to.equal(true);
-      expect(testElementViewportCallback.callCount).to.equal(0);
+      expect(testElementViewportCallback).to.have.not.been.called;
     });
 
     it('StubElement - should not delegate before build or upgrade', () => {
       const element = new StubElementClass();
       element.setAttribute('layout', 'fill');
-      expect(testElementViewportCallback.callCount).to.equal(0);
+      expect(testElementViewportCallback).to.have.not.been.called;
 
       expect(element.isUpgraded()).to.equal(false);
       expect(element.isBuilt()).to.equal(false);
       element.viewportCallback(true);
       expect(element.isInViewport_).to.equal(true);
-      expect(testElementViewportCallback.callCount).to.equal(0);
+      expect(testElementViewportCallback).to.have.not.been.called;
 
       resourcesMock.expects('upgraded').withExactArgs(element).never();
       element.upgrade(TestElement);
@@ -1162,7 +1162,7 @@ describe('CustomElement', () => {
       expect(element.isBuilt()).to.equal(false);
       element.viewportCallback(false);
       expect(element.isInViewport_).to.equal(false);
-      expect(testElementViewportCallback.callCount).to.equal(0);
+      expect(testElementViewportCallback).to.have.not.been.called;
     });
 
     it('Element - should be called once built', () => {
@@ -1171,11 +1171,11 @@ describe('CustomElement', () => {
       element.tryUpgrade_();
       element.build();
       expect(element.isBuilt()).to.equal(true);
-      expect(testElementViewportCallback.callCount).to.equal(0);
+      expect(testElementViewportCallback).to.have.not.been.called;
 
       element.viewportCallback(true);
       expect(element.implementation_.inViewport_).to.equal(true);
-      expect(testElementViewportCallback.callCount).to.equal(1);
+      expect(testElementViewportCallback).to.be.calledOnce;
     });
 
     it('StubElement - should be called once upgraded', () => {
@@ -1188,11 +1188,11 @@ describe('CustomElement', () => {
       element.build();
       expect(element.isUpgraded()).to.equal(true);
       expect(element.isBuilt()).to.equal(true);
-      expect(testElementViewportCallback.callCount).to.equal(0);
+      expect(testElementViewportCallback).to.have.not.been.called;
 
       element.viewportCallback(true);
       expect(element.implementation_.inViewport_).to.equal(true);
-      expect(testElementViewportCallback.callCount).to.equal(1);
+      expect(testElementViewportCallback).to.be.calledOnce;
     });
 
     it('StubElement - should not upgrade before attach', () => {
@@ -1203,7 +1203,7 @@ describe('CustomElement', () => {
       expect(element.isUpgraded()).to.equal(false);
       expect(element.isBuilt()).to.equal(false);
       expect(element.implementation_).to.be.instanceOf(TestElement);
-      expect(testElementViewportCallback.callCount).to.equal(0);
+      expect(testElementViewportCallback).to.have.not.been.called;
     });
 
     it('StubElement - should be called once upgraded, attached', () => {
@@ -1216,11 +1216,11 @@ describe('CustomElement', () => {
       element.build();
       expect(element.isUpgraded()).to.equal(true);
       expect(element.isBuilt()).to.equal(true);
-      expect(testElementViewportCallback.callCount).to.equal(0);
+      expect(testElementViewportCallback).to.have.not.been.called;
 
       element.viewportCallback(true);
       expect(element.implementation_.inViewport_).to.equal(true);
-      expect(testElementViewportCallback.callCount).to.equal(1);
+      expect(testElementViewportCallback).to.be.calledOnce;
     });
 
     it('Element - should be called on built if in viewport', () => {
@@ -1229,11 +1229,11 @@ describe('CustomElement', () => {
       element.tryUpgrade_();
       element.viewportCallback(true);
       expect(element.isInViewport_).to.equal(true);
-      expect(testElementViewportCallback.callCount).to.equal(0);
+      expect(testElementViewportCallback).to.have.not.been.called;
 
       element.build();
       expect(element.isBuilt()).to.equal(true);
-      expect(testElementViewportCallback.callCount).to.equal(1);
+      expect(testElementViewportCallback).to.be.calledOnce;
     });
 
     it('Element - should NOT be called in template', () => {
@@ -1242,7 +1242,7 @@ describe('CustomElement', () => {
       element.tryUpgrade_();
       element.build();
       expect(element.isBuilt()).to.equal(true);
-      expect(testElementViewportCallback.callCount).to.equal(0);
+      expect(testElementViewportCallback).to.have.not.been.called;
 
       element.isInTemplate_ = true;
       expect(() => {
@@ -1348,7 +1348,7 @@ describe('CustomElement Service Elements', () => {
     };
     element.toggleFallback(true);
     expect(element).to.have.class('amp-notsupported');
-    expect(resourcesSpy.callCount).to.equal(1);
+    expect(resourcesSpy).to.be.calledOnce;
 
     element.toggleFallback(false);
     expect(element).to.not.have.class('amp-notsupported');
@@ -1521,7 +1521,7 @@ describe('CustomElement Loading Indicator', () => {
   it('should turn off when exits viewport', () => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
     element.viewportCallback(false);
-    expect(toggle.callCount).to.equal(1);
+    expect(toggle).to.be.calledOnce;
     expect(toggle.firstCall.args[0]).to.equal(false);
     expect(toggle.firstCall.args[1]).to.be.undefined;
   });
@@ -1530,14 +1530,14 @@ describe('CustomElement Loading Indicator', () => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
     element.layoutCount_ = 1;
     element.viewportCallback(false);
-    expect(toggle.callCount).to.equal(0);
+    expect(toggle).to.have.not.been.called;
   });
 
   it('should turn on when enters viewport', () => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
     element.viewportCallback(true);
     clock.tick(1000);
-    expect(toggle.callCount).to.equal(1);
+    expect(toggle).to.be.calledOnce;
     expect(toggle.firstCall.args[0]).to.equal(true);
   });
 
@@ -1546,7 +1546,7 @@ describe('CustomElement Loading Indicator', () => {
     element.layoutCount_ = 1;
     element.viewportCallback(true);
     clock.tick(1000);
-    expect(toggle.callCount).to.equal(0);
+    expect(toggle).to.have.not.been.called;
   });
 
 
@@ -1554,14 +1554,14 @@ describe('CustomElement Loading Indicator', () => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
     element.isInViewport_ = true;
     element.updateLayoutBox({top: 0, width: 300});
-    expect(toggle.callCount).to.equal(1);
+    expect(toggle).to.be.calledOnce;
     expect(toggle.firstCall.args[0]).to.equal(true);
   });
 
   it('should create loading when measured if in the top window', () => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
     element.updateLayoutBox({top: 0, width: 300});
-    expect(toggle.callCount).to.equal(0);
+    expect(toggle).to.have.not.been.called;
     expect(vsyncTasks).to.have.length.of(1);
     vsyncTasks.shift()();
     expect(element.loadingContainer_).to.not.be.null;
@@ -1574,7 +1574,7 @@ describe('CustomElement Loading Indicator', () => {
     element.tryUpgrade_();
     element.build();
     return element.layoutCallback().then(() => {
-      expect(toggle.callCount).to.equal(1);
+      expect(toggle).to.be.calledOnce;
       expect(toggle.firstCall.args[0]).to.equal(false);
       expect(toggle.firstCall.args[1]).to.equal(true);
     }, () => {
@@ -1591,7 +1591,7 @@ describe('CustomElement Loading Indicator', () => {
     return element.layoutCallback().then(() => {
       throw new Error('Should never happen.');
     }, () => {
-      expect(toggle.callCount).to.equal(1);
+      expect(toggle).to.be.calledOnce;
       expect(toggle.firstCall.args[0]).to.equal(false);
       expect(toggle.firstCall.args[1]).to.equal(true);
     });
@@ -1816,7 +1816,7 @@ describe('CustomElement Overflow Element', () => {
       expect(win.ampExtendedElements).to.exist;
       expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
       expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
-      expect(doc.registerElement.callCount).to.equal(1);
+      expect(doc.registerElement).to.be.calledOnce;
       expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
       expect(intervalCallback).to.be.undefined;
     });
@@ -1829,7 +1829,7 @@ describe('CustomElement Overflow Element', () => {
       expect(win.ampExtendedElements).to.exist;
       expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
       expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
-      expect(doc.registerElement.callCount).to.equal(1);
+      expect(doc.registerElement).to.be.calledOnce;
       expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
       expect(intervalCallback).to.exist;
 
@@ -1848,7 +1848,7 @@ describe('CustomElement Overflow Element', () => {
 
       expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
       expect(win.ampExtendedElements['amp-test2']).to.equal(ElementStub);
-      expect(doc.registerElement.callCount).to.equal(2);
+      expect(doc.registerElement).to.have.callCount(2);
       expect(doc.registerElement.getCall(1).args[0]).to.equal('amp-test2');
     });
 
@@ -1858,12 +1858,12 @@ describe('CustomElement Overflow Element', () => {
 
       expect(win.ampExtendedElements).to.exist;
       expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      expect(doc.registerElement.callCount).to.equal(1);
+      expect(doc.registerElement).to.be.calledOnce;
       expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
 
       // Second stub is ignored.
       stubElementIfNotKnown(win, 'amp-test1');
-      expect(doc.registerElement.callCount).to.equal(1);
+      expect(doc.registerElement).to.be.calledOnce;
     });
 
     it('should copy or stub element definitions in a child window', () => {

@@ -448,13 +448,13 @@ describe('LocalStorageBinding', () => {
   it('should throw if localStorage is not supported', () => {
     const errorSpy = sandbox.spy(dev(), 'expectedError');
 
-    expect(errorSpy.callCount).to.equal(0);
+    expect(errorSpy).to.have.not.been.called;
     new LocalStorageBinding(windowApi);
-    expect(errorSpy.callCount).to.equal(0);
+    expect(errorSpy).to.have.not.been.called;
 
     delete windowApi.localStorage;
     new LocalStorageBinding(windowApi);
-    expect(errorSpy.callCount).to.equal(1);
+    expect(errorSpy).to.be.calledOnce;
     expect(errorSpy.args[0][1].message).to.match(/localStorage not supported/);
   });
 

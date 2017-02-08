@@ -100,14 +100,14 @@ describe('service', () => {
       const a2 = getService(window, 'a', factory);
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(window);
 
       const b1 = getService(window, 'b', factory);
       const b2 = getService(window, 'b', factory);
       expect(b1).to.equal(b2);
       expect(b1).to.not.equal(a1);
-      expect(factory.callCount).to.equal(2);
+      expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(window);
     });
 
@@ -128,7 +128,7 @@ describe('service', () => {
       const c1 = getService(window, 'c', factory);
       const c2 = getService(window, 'c');
       expect(c1).to.equal(c2);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
     });
 
     it('should return the service when it exists', () => {
@@ -160,7 +160,7 @@ describe('service', () => {
         expect(s1).to.equal('from e1');
         return p2.then(s2 => {
           expect(s2).to.equal(s1);
-          expect(factory.callCount).to.equal(0);
+          expect(factory).to.have.not.been.called;
         });
       });
     });
@@ -266,7 +266,7 @@ describe('service', () => {
       const a2 = getServiceForDoc(node, 'a', factory);
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.exist;
       expect(ampdoc.services).to.not.exist;
@@ -277,7 +277,7 @@ describe('service', () => {
       expect(b1).to.equal(b2);
       expect(b1).to.equal(b3);
       expect(b1).to.not.equal(a1);
-      expect(factory.callCount).to.equal(2);
+      expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
       expect(windowApi.services['b']).to.exist;
       expect(ampdoc.services).to.not.exist;
@@ -292,7 +292,7 @@ describe('service', () => {
       expect(a1).to.equal(a2);
       expect(a1).to.equal(a3);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.exist;
       expect(ampdoc.services).to.not.exist;
@@ -305,7 +305,7 @@ describe('service', () => {
       const a2 = getServiceForDoc(node, 'a', factory);
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.not.exist;
       expect(ampdoc.services['a']).to.exist;
@@ -314,7 +314,7 @@ describe('service', () => {
       const b2 = getServiceForDoc(node, 'b', factory);
       expect(b1).to.equal(b2);
       expect(b1).to.not.equal(a1);
-      expect(factory.callCount).to.equal(2);
+      expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
       expect(windowApi.services['b']).to.not.exist;
       expect(ampdoc.services['b']).to.exist;
@@ -324,7 +324,7 @@ describe('service', () => {
       const c1 = getServiceForDoc(node, 'c', factory);
       const c2 = getServiceForDoc(node, 'c');
       expect(c1).to.equal(c2);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
     });
 
     it('should fail without factory on initial setup', () => {
@@ -343,7 +343,7 @@ describe('service', () => {
         expect(s1).to.equal('from e1');
         return p2.then(s2 => {
           expect(s2).to.equal(s1);
-          expect(factory.callCount).to.equal(0);
+          expect(factory).to.have.not.been.called;
         });
       });
     });

@@ -65,7 +65,7 @@ describe('amp-ad a2a listener', function() {
   });
 
   function expectNavigation() {
-    expect(navigateTo.callCount).to.equal(1);
+    expect(navigateTo).to.be.calledOnce;
     expect(navigateTo.lastCall.args[0]).to.equal(
         'https://cdn.ampproject.org/c/test');
     expect(navigateTo.lastCall.args[1]).to.equal(
@@ -77,7 +77,7 @@ describe('amp-ad a2a listener', function() {
     handleMessageEvent(win, event);
     event.data = '{}';
     handleMessageEvent(win, event);
-    expect(navigateTo.callCount).to.equal(0);
+    expect(navigateTo).to.have.not.been.called;
   });
 
   it('should initiate navigation', () => {

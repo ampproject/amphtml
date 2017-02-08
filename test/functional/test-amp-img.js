@@ -127,14 +127,14 @@ describe('amp-img', () => {
       const toggleSpy = sandbox.spy(impl, 'toggleFallback');
       impl.buildCallback();
 
-      expect(errorSpy.callCount).to.equal(0);
-      expect(toggleSpy.callCount).to.equal(0);
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(errorSpy).to.have.not.been.called;
+      expect(toggleSpy).to.have.not.been.called;
+      expect(toggleElSpy).to.have.not.been.called;
 
       return impl.layoutCallback().then(() => {
-        expect(errorSpy.callCount).to.equal(0);
-        expect(toggleSpy.callCount).to.equal(0);
-        expect(toggleElSpy.callCount).to.equal(0);
+        expect(errorSpy).to.have.not.been.called;
+        expect(toggleSpy).to.have.not.been.called;
+        expect(toggleElSpy).to.have.not.been.called;
       });
     });
 
@@ -143,13 +143,13 @@ describe('amp-img', () => {
       const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
       const toggleSpy = sandbox.spy(impl, 'toggleFallback');
       impl.buildCallback();
-      expect(errorSpy.callCount).to.equal(0);
-      expect(toggleSpy.callCount).to.equal(0);
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(errorSpy).to.have.not.been.called;
+      expect(toggleSpy).to.have.not.been.called;
+      expect(toggleElSpy).to.have.not.been.called;
 
       return impl.layoutCallback().catch(() => {
-        expect(errorSpy.callCount).to.equal(1);
-        expect(toggleSpy.callCount).to.equal(1);
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.be.calledOnce;
         expect(toggleSpy.firstCall.args[0]).to.be.true;
         expect(toggleElSpy.firstCall.args[0]).to.be.true;
       });
@@ -164,27 +164,27 @@ describe('amp-img', () => {
       const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
       const toggleSpy = sandbox.spy(impl, 'toggleFallback');
       impl.buildCallback();
-      expect(errorSpy.callCount).to.equal(0);
-      expect(toggleSpy.callCount).to.equal(0);
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(errorSpy).to.have.not.been.called;
+      expect(toggleSpy).to.have.not.been.called;
+      expect(toggleElSpy).to.have.not.been.called;
 
       return impl.layoutCallback().catch(() => {
-        expect(errorSpy.callCount).to.equal(1);
-        expect(toggleSpy.callCount).to.equal(1);
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.be.calledOnce;
         expect(toggleSpy.firstCall.args[0]).to.be.true;
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.firstCall.args[0]).to.be.true;
-        expect(errorSpy.callCount).to.equal(1);
+        expect(errorSpy).to.be.calledOnce;
         return impl.layoutCallback();
       }).then(() => {
-        expect(errorSpy.callCount).to.equal(1);
-        expect(toggleSpy.callCount).to.equal(1);
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.be.calledOnce;
+        expect(toggleElSpy).to.be.calledOnce;
         return impl.layoutCallback();
       }).then(() => {
-        expect(errorSpy.callCount).to.equal(1);
-        expect(toggleSpy.callCount).to.equal(1);
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.be.calledOnce;
+        expect(toggleElSpy).to.be.calledOnce;
       });
     });
 
@@ -194,15 +194,15 @@ describe('amp-img', () => {
       loadStub.returns(Promise.resolve());
       impl.buildCallback();
 
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(toggleElSpy).to.have.not.been.called;
 
       return impl.layoutCallback().catch(() => {
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.getCall(0).args[0]).to.be.true;
         expect(impl.img_).to.have.class('-amp-ghost');
         impl.img_.setAttribute('src', 'test-1000.jpg');
         return impl.layoutCallback().then(() => {
-          expect(toggleElSpy.callCount).to.equal(2);
+          expect(toggleElSpy).to.have.callCount(2);
           expect(toggleElSpy.getCall(1).args[0]).to.be.false;
           expect(impl.img_).to.not.have.class('-amp-ghost');
         });
@@ -216,13 +216,13 @@ describe('amp-img', () => {
       impl.buildCallback();
 
       expect(el).to.not.have.class('-amp-ghost');
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(toggleElSpy).to.have.not.been.called;
       return impl.layoutCallback().catch(() => {
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.getCall(0).args[0]).to.be.true;
         expect(impl.img_).to.have.class('-amp-ghost');
         return impl.layoutCallback().then(() => {
-          expect(toggleElSpy.callCount).to.equal(1);
+          expect(toggleElSpy).to.be.calledOnce;
           expect(impl.img_).to.have.class('-amp-ghost');
         });
       });
@@ -235,14 +235,14 @@ describe('amp-img', () => {
       impl.buildCallback();
 
       expect(el).to.not.have.class('-amp-ghost');
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(toggleElSpy).to.have.not.been.called;
       return impl.layoutCallback().catch(() => {
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.getCall(0).args[0]).to.be.true;
         expect(impl.img_).to.have.class('-amp-ghost');
         impl.img_.setAttribute('src', 'test-1000.jpg');
         return impl.layoutCallback().catch(() => {
-          expect(toggleElSpy.callCount).to.equal(1);
+          expect(toggleElSpy).to.be.calledOnce;
           expect(impl.img_).to.have.class('-amp-ghost');
         });
       });

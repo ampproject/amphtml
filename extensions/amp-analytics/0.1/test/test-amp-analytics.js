@@ -258,7 +258,7 @@ describe('amp-analytics', function() {
     sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
 
     return waitForNoSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.callCount).to.equal(0);
+      expect(sendRequestSpy).to.have.not.been.called;
     });
   });
 
@@ -268,7 +268,7 @@ describe('amp-analytics', function() {
     script2.setAttribute('type', 'application/json');
     analytics.element.appendChild(script2);
     return waitForNoSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.callCount).to.equal(0);
+      expect(sendRequestSpy).to.have.not.been.called;
     });
   });
 
@@ -286,7 +286,7 @@ describe('amp-analytics', function() {
         sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
 
         return waitForNoSendRequest(analytics).then(() => {
-          expect(sendRequestSpy.callCount).to.equal(0);
+          expect(sendRequestSpy).to.have.not.been.called;
         });
       });
 
@@ -297,7 +297,7 @@ describe('amp-analytics', function() {
     });
 
     return waitForNoSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.callCount).to.equal(0);
+      expect(sendRequestSpy).to.have.not.been.called;
     });
   });
 
@@ -307,7 +307,7 @@ describe('amp-analytics', function() {
     });
 
     return waitForNoSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.callCount).to.equal(0);
+      expect(sendRequestSpy).to.have.not.been.called;
     });
   });
 
@@ -902,7 +902,7 @@ describe('amp-analytics', function() {
 
       sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.equal(1);
+        expect(sendRequestSpy).to.be.calledOnce;
       });
     });
 
@@ -916,7 +916,7 @@ describe('amp-analytics', function() {
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.equal(1);
+        expect(sendRequestSpy).to.be.calledOnce;
       });
     });
 
@@ -925,7 +925,7 @@ describe('amp-analytics', function() {
 
       sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.1));
       return waitForNoSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.equal(0);
+        expect(sendRequestSpy).to.have.not.been.called;
       });
     });
 
@@ -933,7 +933,7 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(getConfig(100));
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.equal(1);
+        expect(sendRequestSpy).to.be.calledOnce;
       });
     });
 
@@ -941,7 +941,7 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(getConfig(0));
 
       return waitForNoSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.equal(0);
+        expect(sendRequestSpy).to.have.not.been.called;
       });
     });
 
@@ -961,7 +961,7 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(incompleteConfig);
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.equal(1);
+        expect(sendRequestSpy).to.be.calledOnce;
       });
     });
 
@@ -969,7 +969,7 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(getConfig(Infinity));
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.equal(1);
+        expect(sendRequestSpy).to.be.calledOnce;
       });
     });
 
@@ -977,7 +977,7 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(getConfig(NaN));
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.equal(1);
+        expect(sendRequestSpy).to.be.calledOnce;
       });
     });
 
@@ -985,7 +985,7 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(getConfig(-1));
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.equal(1);
+        expect(sendRequestSpy).to.be.calledOnce;
       });
     });
   });
@@ -1018,7 +1018,7 @@ describe('amp-analytics', function() {
         },
       };
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.equal(1);
+        expect(sendRequestSpy).to.be.calledOnce;
         expect(sendRequestSpy.args[0][1]['iframePing']).to.be.true;
       });
     });
@@ -1040,7 +1040,7 @@ describe('amp-analytics', function() {
       });
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.callCount).to.equal(1);
+        expect(sendRequestSpy).to.be.calledOnce;
         expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/local');
       });
     });
@@ -1060,7 +1060,7 @@ describe('amp-analytics', function() {
       return analytics.layoutCallback().then(() => {
         throw new Error('Must never be here');
       }, () => {
-        expect(sendRequestSpy.callCount).to.equal(0);
+        expect(sendRequestSpy).to.have.not.been.called;
       });
     });
   });

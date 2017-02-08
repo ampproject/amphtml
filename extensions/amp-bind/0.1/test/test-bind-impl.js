@@ -141,7 +141,7 @@ describes.realWin('amp-bind', {
     createElementWithBinding('[a]="a" [b]="b" b="b"');
     const errorStub = env.sandbox.stub(user(), 'createError');
     return onBindReady(() => {
-      expect(errorStub.callCount).to.equal(1);
+      expect(errorStub).to.be.calledOnce;
     });
   });
 
@@ -151,7 +151,7 @@ describes.realWin('amp-bind', {
     createElementWithBinding(`a [a]="true" [b]="false" c="false" [c]="false"`);
     const errorStub = env.sandbox.stub(user(), 'createError');
     return onBindReady(() => {
-      expect(errorStub.callCount).to.equal(1);
+      expect(errorStub).to.be.calledOnce;
     });
   });
 
