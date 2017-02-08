@@ -15,40 +15,59 @@
  */
 
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
+import {dev} from '../log';
 import {isExperimentOn} from '../experiments';
 import {getMode} from '../mode';
-import {parseUrl} from '../url';
-import {urls} from '../config';
 
 const TAG = 'web-worker';
 
-let worker;
+/**
+ * @typedef {{
+ *   method: string,
+ *   args: !Array,
+ *   id: number,
+ * }}
+ */
+export let ToWorkerMessageDef;
 
 /**
+ * @typedef {{
+ *   method: string,
+ *   returnValue: *,
+ *   id: number,
+ * }}
+ */
+export let FromWorkerMessageDef;
+
+let worker; // TODO(willchou): fromClassForWin
+
+/**
+ * Invokes function named `method` with args `opt_args` on the web worker
+ * and returns a Promise that will be resolved with the function's return value.
  * @param {!Window} win
  * @param {string} method
  * @param {!Array=} opt_args
  * @return {!Promise}
  */
-export function callWorkerMethod(win, method, args) {
+export function invokeWebWorker(win, method, opt_args) {
   if (!worker) {
-    // if (!isExperimentOn(win, TAG)) {
-    //   return;
-    // }
-    if (!('Worker' in win)) {
-      return null;
+    if (!isExperimentOn(win, TAG)) {
+      return Promise.reject(`Experiment "${TAG}" is disabled.`);
     }
-    if (!getMode().localDev &&
-        win.location.hostname !== parseUrl(urls.cdn).hostname) {
-      return;
+    if (!win.Worker) {
+      return Promise.reject('Worker not supported in window: ' + win);
     }
     const url =
         calculateEntryPointScriptUrl(location, 'ww', getMode().localDev);
     worker = new AmpWorker(win, url);
   }
-  return worker.sendMessage_(method, args || []);
+  return worker.sendMessage_(method, opt_args || []);
 }
 
+/**
+ * A Promise-based API wrapper around a single Web Worker.
+ * @private
+ */
 class AmpWorker {
   /**
    * @param {!Window} win
@@ -62,25 +81,37 @@ class AmpWorker {
     this.worker_ = new win.Worker(url);
     this.worker_.onmessage = this.receiveMessage_.bind(this);
 
-    /** @const @private {!Object<string, !Array<!Function>>} */
+    /**
+     * Maps method names to the promise executors for in-flight invocations of
+     * those methods. E.g. messages['foo'][3] contains the {resolve, reject}
+     * functions for the third concurrent invocation of 'foo'.
+     *
+     * @const @private {
+     *   !Object<string,
+     *     !Array<({resolve: !Function, reject: !Function}|undefined)>
+     *   >
+     * }
+     */
     this.messages_ = Object.create(null);
   }
 
   /**
    * @param {string} method
-   * @param {Array} args
+   * @param {!Array} args
    * @return {!Promise}
    * @private
    */
   sendMessage_(method, args) {
-    const promise = new Promise(resolve => {
+    const promise = new Promise((resolve, reject) => {
       if (!this.messages_[method]) {
         this.messages_[method] = [];
       }
       const index = this.messages_[method].length;
-      this.messages_[method][index] = resolve;
+      this.messages_[method][index] = {resolve, reject};
 
-      this.worker_.postMessage({method, args, index});
+      /** @type {ToWorkerMessageDef} */
+      const message = {method, args, id: index};
+      this.worker_.postMessage(message);
     });
     return promise;
   }
@@ -90,16 +121,22 @@ class AmpWorker {
    * @private
    */
   receiveMessage_(event) {
-    const {method, returnValue, index} = event.data;
+    const {method, returnValue, id} =
+        /** @type {FromWorkerMessageDef} */ (event.data);
 
-    // TODO(willchou): Add errors.
+    // Find the stored Promise executor for this message.
     const invocations = this.messages_[method];
     if (invocations) {
-      const resolve = invocations[index];
+      const resolve = invocations[id].resolve;
       if (resolve) {
         resolve(returnValue);
-        invocations[index] = undefined;
+        invocations[id] = undefined;
+      } else {
+        dev().error(TAG, `Received unexpected "${method}" message ` +
+            `from worker with id: ${id}.`);
       }
+    } else {
+      dev().error(TAG, `Received unexpected "${method}" message from worker.`);
     }
 
     // Clean up array if there are no more messages in flight for this method.

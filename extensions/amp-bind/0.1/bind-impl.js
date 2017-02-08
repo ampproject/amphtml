@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
+import {BindExpressionResultDef} from './bind-expression';
+import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
+import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
-
-import {callWorkerMethod} from '../../../src/web-worker/install'; // TODO(willchou)
 
 const TAG = 'amp-bind';
 
@@ -70,8 +71,11 @@ export class Bind {
     this.enabled_ = isExperimentOn(ampdoc.win, TAG);
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
-    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
+
+    /** @const @private {!Window} */
+    this.win_ = ampdoc.win;
 
     /** @private {!Array<BoundElementDef>} */
     this.boundElements_ = [];
@@ -97,8 +101,11 @@ export class Bind {
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
 
-    /** @private {boolean} */
-    this.isEvaluatorReady_ = false;
+    /**
+     * True if all bindings in the document have been scanned and parsed.
+     * @private {boolean}
+     */
+    this.initialized_ = false;
 
     /**
      * True if a digest is triggered before scan for bindings completes.
@@ -129,8 +136,7 @@ export class Bind {
     Object.assign(this.scope_, state);
 
     if (!opt_skipDigest) {
-      // If scan hasn't completed yet, set `digestQueuedAfterScan_`.
-      if (this.isEvaluatorReady_) {
+      if (this.initialized_) {
         this.digest_();
       } else {
         this.digestQueuedAfterScan_ = true;
@@ -145,38 +151,41 @@ export class Bind {
    */
   initialize_() {
     dev().fine(TAG, 'Scanning DOM for bindings...');
+
     this.scanPromise_ = this.scanBody_(this.ampdoc.getBody());
     this.scanPromise_.then(results => {
       const {boundElements, bindings, expressionToElements} = results;
+
       this.boundElements_ = boundElements;
+
       Object.assign(this.expressionToElements_, expressionToElements);
       dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
           `${boundElements.length} elements.`);
 
       dev().fine(TAG, `Asking worker to parse expressions...`);
 
-      const win = this.ampdoc.win;
-      callWorkerMethod(win, 'initialize', [bindings]).then(parseErrors => {
-        this.isEvaluatorReady_ = true;
+      return invokeWebWorker(this.win_, 'bind.initialize', [bindings]);
+    }).then(parseErrors => {
+      this.initialized_ = true;
 
-        // Report each parse error.
-        let numberOfParseErrors = 0;
-        Object.keys(parseErrors).forEach(expressionString => {
-          const elements = this.expressionToElements_[expressionString];
-          if (elements.length > 0) {
-            const err = user().createError(parseErrors[expressionString]);
-            reportError(err, elements[0]);
-            numberOfParseErrors++;
-          }
-        });
-
-        // Trigger verify-only digest in development.
-        if (getMode().development || this.digestQueuedAfterScan_) {
-          this.digest_(/* opt_verifyOnly */ !this.digestQueuedAfterScan_);
+      // Report each parse error.
+      let numberOfParseErrors = 0;
+      Object.keys(parseErrors).forEach(expressionString => {
+        const elements = this.expressionToElements_[expressionString];
+        if (elements.length > 0) {
+          const err = user().createError(parseErrors[expressionString]);
+          reportError(err, elements[0]);
+          numberOfParseErrors++;
         }
-        dev().fine(TAG, `Worker finished parsing expressions with ` +
-            `${numberOfParseErrors} errors.`);
       });
+
+      // Trigger verify-only digest in development.
+      if (getMode().development || this.digestQueuedAfterScan_) {
+        this.digest_(/* opt_verifyOnly */ !this.digestQueuedAfterScan_);
+      }
+
+      dev().fine(TAG, `Worker finished parsing expressions with ` +
+          `${numberOfParseErrors} errors.`);
     });
   }
 
@@ -229,7 +238,7 @@ export class Bind {
     };
 
     return new Promise(resolve => {
-      const bindScanChunk = idleDeadline => {
+      const chunktion = idleDeadline => {
         let completed = false;
         // If `requestIdleCallback` is available, scan elements until
         // idle time runs out.
@@ -250,10 +259,10 @@ export class Bind {
         if (completed) {
           resolve({boundElements, bindings, expressionToElements});
         } else {
-          chunk(this.ampdoc, bindScanChunk, ChunkPriority.LOW);
+          chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
         }
       };
-      chunk(this.ampdoc, bindScanChunk, ChunkPriority.LOW);
+      chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
     });
   }
 
@@ -309,7 +318,7 @@ export class Bind {
     user().fine(TAG, 'Asking worker to re-evaluate expressions...');
 
     const win = this.ampdoc.win;
-    callWorkerMethod(win, 'evaluate', [this.scope_]).then(returnValue => {
+    invokeWebWorker(win, 'bind.evaluate', [this.scope_]).then(returnValue => {
       const {results, errors} = returnValue;
       if (opt_verifyOnly) {
         this.verify_(results);
@@ -373,7 +382,7 @@ export class Bind {
 
           // Don't apply if the result hasn't changed or is missing.
           if (newValue === undefined ||
-              this.shallowEquals_(newValue, boundProperty.previousResult)) {
+              this.shallowEquals_(newValue, previousResult)) {
             user().fine(TAG, `Expression result unchanged or missing: ` +
                 `"${expressionString}"`);
             return;
@@ -547,6 +556,7 @@ export class Bind {
    * @param {!(IArrayLike<string>|Array<string>)} a
    * @param {!(IArrayLike<string>|Array<string>)} b
    * @return {boolean}
+   * @private
    */
   compareStringArrays_(a, b) {
     if (a.length !== b.length) {
@@ -567,6 +577,7 @@ export class Bind {
    * @param {./bind-expression.BindExpressionResultDef|undefined} a
    * @param {./bind-expression.BindExpressionResultDef|undefined} b
    * @return {boolean}
+   * @private
    */
   shallowEquals_(a, b) {
     if (a === b) {

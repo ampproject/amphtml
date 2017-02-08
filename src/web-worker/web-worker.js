@@ -16,24 +16,32 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
+import {FromWorkerMessageDef, ToWorkerMessageDef} from './amp-worker';
 
-let evaluator; // TODO(willchou)
+/** @private {BindEvaluator} */
+let evaluator_;
 
 self.addEventListener('message', function(event) {
-  const {method, args, index} = event.data;
+  const {method, args, id} = /** @type {ToWorkerMessageDef} */ (event.data);
 
   let returnValue;
 
   switch (method) {
-    case 'initialize':
-      evaluator = new BindEvaluator();
-      returnValue = evaluator.setBindings.apply(evaluator, args);
+    case 'bind.initialize':
+      evaluator_ = new BindEvaluator();
+      returnValue = evaluator_.setBindings.apply(evaluator_, args);
       break;
 
-    case 'evaluate':
-      returnValue = evaluator.evaluate.apply(evaluator, args);
+    case 'bind.evaluate':
+      if (evaluator_) {
+        returnValue = evaluator_.evaluate.apply(evaluator_, args);
+      } else {
+        throw new Error(`${method}: BindEvaluator is not initialized.`);
+      }
       break;
   }
 
-  self.postMessage({method, returnValue, index});
+  /** @type {FromWorkerMessageDef} */
+  const message = {method, returnValue, id};
+  self.postMessage(message);
 });
