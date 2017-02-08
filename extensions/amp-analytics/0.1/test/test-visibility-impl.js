@@ -164,7 +164,7 @@ describe('amp-analytics.visibility', () => {
       visiblePercentageMin: 0, visiblePercentageMax: 100}, 0, undefined, false);
 
     visibility.viewer_.setVisibilityState_(VisibilityState.HIDDEN);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
   });
 
   it('fires for non-trivial on=visible config', () => {
@@ -228,7 +228,7 @@ describe('amp-analytics.visibility', () => {
     verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
     sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
       totalVisibleTime: '1000',
     }));
@@ -241,7 +241,7 @@ describe('amp-analytics.visibility', () => {
     verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
   });
 
   it('fires with totalTimeMin=1k and visiblePercentageMin=0', () => {
@@ -252,7 +252,7 @@ describe('amp-analytics.visibility', () => {
     verifyChange(INTERSECTION_50P, 0);
 
     clock.tick(1000);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
     // There is a 20ms offset in some timedurations because of initial
     // timeout in the listenOnce logic.
     sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
@@ -273,7 +273,7 @@ describe('amp-analytics.visibility', () => {
     verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1000);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
   });
 
   it('fires for continuousTimeMin=1k and visiblePercentageMin=50', () => {
@@ -288,9 +288,9 @@ describe('amp-analytics.visibility', () => {
     verifyChange(INTERSECTION_50P, 0);
 
     clock.tick(100);
-    expect(callbackStub.callCount).to.equal(0);
+    expect(callbackStub).to.have.not.been.called;
     clock.tick(900);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
     sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
       maxContinuousVisibleTime: '1000',
       minVisiblePercentage: '50',
