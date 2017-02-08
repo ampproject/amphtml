@@ -178,7 +178,8 @@ export class WebviewViewerForTesting {
 
     // const handleMessage = this.handleMessage_;
     this.messaging_.setRequestProcessor((type, payload, awaitResponse) => {
-      console.log('viewer receiving message: ', type, payload, awaitResponse);
+      console/*OK*/.log(
+        'viewer receiving message: ', type, payload, awaitResponse);
       return Promise.resolve();
     });
 

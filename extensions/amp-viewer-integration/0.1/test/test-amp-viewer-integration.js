@@ -40,6 +40,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
     it('should confirm the handshake', () => {
+      console/*OK*/.log('sending handshake response');
       viewer.confirmHandshake();
       return viewer.waitForDocumentLoaded();
     });
