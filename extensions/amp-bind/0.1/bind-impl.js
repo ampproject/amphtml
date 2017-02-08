@@ -158,9 +158,7 @@ export class Bind {
    * @param {!Element} rootElement
    */
   addBindingsForSubtree(rootElement) {
-    debugger;
-    this.scanPromise_ = this.scanSubtree_(rootElement);
-    this.scanPromise_.then(results => {
+    this.scanPromise_ = this.scanSubtree_(rootElement).then(results => {
       const {boundElements, bindings, expressionToElements} = results;
 
       this.boundElements_ = this.boundElements_.concat(boundElements);
@@ -196,13 +194,13 @@ export class Bind {
    * @param {!Element} rootElement
    */
   removeBindingsForSubtree(rootElement) {
-    this.scanPromise_ = this.scanSubtree_(rootElement);
-    this.scanPromise_.then(results => {
-      const {boundElementsToRemove, bindings, expressionToElements} = results;
+    this.scanPromise_ = this.scanSubtree_(rootElement).then(results => {
+      debugger;
+      const {boundElements, bindings, expressionToElements} = results;
 
       // TODO(kmh287): Discuss strategies for speedup
-      for (let i = 0; i < boundElementsToRemove.length; i++) {
-        const boundElementToRemove = boundElementsToRemove[i];
+      for (let i = 0; i < boundElements.length; i++) {
+        const boundElementToRemove = boundElements[i];
         for (let j = this.boundElements_.length - 1; j >= 0; j--) {
           const currentElement = this.boundElements_[j];
           if (currentElement
@@ -215,10 +213,10 @@ export class Bind {
         // Remove elements from expression -> elements map
         // remove expression if no more bound elements
         for (const expression in expressionToElements) {
-          if (this.expressionToElements_.hasOwnProperty(expression)) {
+          if (expression in this.expressionToElements_) {
             const elements = this.expressionToElements_[expression];
             for (let k = elements.length - 1; k >= 0; k--) {
-              if (elements[k].isEqualNode(boundElementToRemove)) {
+              if (elements[k].isEqualNode(boundElementToRemove.element)) {
                 elements.splice(k, 1);
               }
             }
@@ -229,23 +227,23 @@ export class Bind {
         }
       }
 
-      filterSplice(this.bindings_, binding => {
-        for (let m = 0; m < bindings.length; m++) {
-          const bindingToRemove = bindings[m];
-          if (bindingToRemove.tagName === binding.tagName
-              && bindingToRemove.property === binding.property
-              && bindingToRemove.expressionString == binding.expressionString) {
-            /* this.bindings_ can contain multiple bindings with the same
-             * definitions, for instance multiple p tags with the same expression
-             * for its [text] property, so removing the ones previously added for
-             * this subtree shouldn't interfere with other similar bindings elsewhere
-             * on the page
-             */
-            return false;
+      // TODO(kmh287): remove as many as appear in bindings and no more
+      for (let m = bindings.length - 1; m >= 0; m--) {
+        const bindingToRemove = bindings[m];
+        for (let p = this.bindings_.length - 1; p >= 0; p--) {
+          const existingBinding = this.bindings_[p];
+          if (bindingToRemove.tagName === existingBinding.tagName
+              && bindingToRemove.property === existingBinding.property
+              && bindingToRemove.expressionString == existingBinding.expressionString) {
+            this.bindings_.splice(p, 1);
+            // Don't renove more than one binding from `this.bindings_`
+            // for any element in `bindings` as both contain duplicates and
+            // only exactly the number found in `bindings` should be removed
+            // from `this.bindings_`, the array of existing bindings.
+            break;
           }
-          return true;
         }
-      });
+      }
     });
   }
 
