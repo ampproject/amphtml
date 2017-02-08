@@ -126,7 +126,7 @@ export class AmpAdXOriginIframeHandler {
 
     // Iframe.onload normally called by the Ad after full load.
     const iframeLoadPromise = loadPromise(this.iframe).then(() => {
-      // Wait just a little to allow messages to arrive.
+      // Wait just a little to allow `no-content` message to arrive.
       return timer.promise(10);
     });
     if (this.baseInstance_.emitLifecycleEvent) {
@@ -226,13 +226,14 @@ export class AmpAdXOriginIframeHandler {
   renderStart_(opt_info) {
     this.uiHandler_.setDisplayState(AdDisplayState.LOADED_RENDER_START);
     this.baseInstance_.renderStarted();
-    if (opt_info) {
-      const data = opt_info.data;
-      this.updateSize_(data.height, data.width,
-                  opt_info.source, opt_info.origin);
-      if (this.baseInstance_.emitLifecycleEvent) {
-        this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
-      }
+    if (!opt_info) {
+      return;
+    }
+    const data = opt_info.data;
+    this.updateSize_(data.height, data.width,
+                opt_info.source, opt_info.origin);
+    if (this.baseInstance_.emitLifecycleEvent) {
+      this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
     }
   }
 
