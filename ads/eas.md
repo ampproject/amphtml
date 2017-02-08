@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Cxense Display ad server (formerly Emediate Ad)
+# CxenseDisplay
 
 ## Supported parameters in the amp-ad tag
 
@@ -52,4 +52,4 @@ Note: If any of the required parameters is missing, the ad slot won't be filled.
 
 ## Configuration
 
-For `data-eas-domain=`<YourAdServerDomain>`, use your ad-server domain (e. g. eas3.emediate.se); If you're using a custom domain-name (like eas.somesite.com) you should NOT use that one unless you already have an SSL-certificate installed on our ad servers.
+For `data-eas-domain=<YourAdServerDomain>`, use your ad-server domain (e. g. eas3.emediate.se); If you're using a custom domain-name (like eas.somesite.com) you should NOT use that one unless you already have an SSL-certificate installed on our ad servers.
