@@ -16,6 +16,7 @@
 
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev} from '../log';
+import {fromClass} from '../service';
 import {isExperimentOn} from '../experiments';
 import {getMode} from '../mode';
 
@@ -39,28 +40,23 @@ export let ToWorkerMessageDef;
  */
 export let FromWorkerMessageDef;
 
-let worker; // TODO(willchou): fromClassForWin
-
 /**
  * Invokes function named `method` with args `opt_args` on the web worker
  * and returns a Promise that will be resolved with the function's return value.
+ * @note Currently only works in a single entry point.
  * @param {!Window} win
  * @param {string} method
  * @param {!Array=} opt_args
  * @return {!Promise}
  */
 export function invokeWebWorker(win, method, opt_args) {
-  if (!worker) {
-    if (!isExperimentOn(win, TAG)) {
-      return Promise.reject(`Experiment "${TAG}" is disabled.`);
-    }
-    if (!win.Worker) {
-      return Promise.reject('Worker not supported in window: ' + win);
-    }
-    const url =
-        calculateEntryPointScriptUrl(location, 'ww', getMode().localDev);
-    worker = new AmpWorker(win, url);
+  if (!isExperimentOn(win, TAG)) {
+    return Promise.reject(`Experiment "${TAG}" is disabled.`);
   }
+  if (!win.Worker) {
+    return Promise.reject('Worker not supported in window: ' + win);
+  }
+  const worker = fromClass(win, 'amp-worker', AmpWorker);
   return worker.sendMessage_(method, opt_args || []);
 }
 
@@ -71,12 +67,13 @@ export function invokeWebWorker(win, method, opt_args) {
 class AmpWorker {
   /**
    * @param {!Window} win
-   * @param {string} url
    */
-  constructor(win, url) {
+  constructor(win) {
     /** @const @private {!Window} */
     this.win_ = win;
 
+    const url =
+        calculateEntryPointScriptUrl(location, 'ww', getMode().localDev);
     /** @const @private {!Worker} */
     this.worker_ = new win.Worker(url);
     this.worker_.onmessage = this.receiveMessage_.bind(this);
