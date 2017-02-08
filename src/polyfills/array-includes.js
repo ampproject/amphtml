@@ -19,16 +19,16 @@
  * Returns true if the element is in the array and false otherwise.
  *
  * @param {*} value
- * @param {number} fromIndex
+ * @param {number=} opt_fromIndex
  * @returns {boolean}
  */
-function includes(value, fromIndex) {
-  /* eslint no-self-compare: 0 */
-  fromIndex = fromIndex || 0;
+export function includes(value, fromIndex) {
+  let fromIndex = opt_fromIndex || 0;
   const len = this.length;
   let i = fromIndex >= 0 ? fromIndex : Math.max(len + fromIndex, 0);
   for (; i < len; i++) {
     const other = this[i];
+    // If value has been found OR (value is NaN AND other is NaN)
     if (other === value || (value !== value && other !== other)) {
       return true;
     }
