@@ -39,7 +39,7 @@ import {
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {
     installCryptoService,
-} from '../../../../extensions/amp-analytics/0.1/crypto-impl';
+} from '../../../../src/service/crypto-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../../../src/service/document-info-impl';
 import '../../../amp-selector/0.1/amp-selector';
@@ -412,8 +412,8 @@ describe('amp-form', () => {
         ampForm.handleSubmitEvent_(event);
         ampForm.handleSubmitEvent_(event);
         expect(event.preventDefault.called).to.be.true;
-        expect(event.preventDefault.callCount).to.equal(3);
-        expect(event.stopImmediatePropagation.callCount).to.equal(2);
+        expect(event.preventDefault).to.have.callCount(3);
+        expect(event.stopImmediatePropagation).to.have.callCount(2);
         expect(ampForm.xhr_.fetch.calledOnce).to.be.true;
         expect(form.className).to.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');
@@ -1279,6 +1279,9 @@ describe('amp-form', () => {
     const fetchRejectPromise = Promise.reject({
       responseJson: null,
       headers: headersMock,
+    });
+    fetchRejectPromise.catch(() => {
+      // Just avoiding a global uncaught promise exception.
     });
 
     beforeEach(() => {

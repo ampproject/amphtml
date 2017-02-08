@@ -130,7 +130,7 @@ describe('Viewer', () => {
     windowApi.location.href = 'http://www.example.com#test=1';
     windowApi.location.hash = '#test=1';
     const viewer = new Viewer(ampdoc);
-    expect(windowApi.history.replaceState.callCount).to.equal(0);
+    expect(windowApi.history.replaceState).to.have.not.been.called;
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.hasCapability('foo')).to.be.false;
   });
@@ -934,7 +934,7 @@ describe('Viewer', () => {
           .to.equal('https://acme.org/docref');
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -948,7 +948,7 @@ describe('Viewer', () => {
           .to.equal('https://acme.org/docref');
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -963,7 +963,7 @@ describe('Viewer', () => {
           .to.equal('https://acme.org/docref');
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -978,7 +978,7 @@ describe('Viewer', () => {
           .to.equal('https://acme.org/docref');
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -997,7 +997,7 @@ describe('Viewer', () => {
         // Unconfirmed referrer is reset. Async error is thrown.
         expect(viewer.getUnconfirmedReferrerUrl())
             .to.equal('https://acme.org/docref');
-        expect(expectedErrorStub.callCount).to.equal(1);
+        expect(expectedErrorStub).to.be.calledOnce;
         expect(expectedErrorStub.calledWith('Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer referrer override/);
@@ -1020,7 +1020,7 @@ describe('Viewer', () => {
         // Unconfirmed is confirmed and kept.
         expect(viewer.getUnconfirmedReferrerUrl())
             .to.equal('https://acme.org/viewer');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -1035,7 +1035,7 @@ describe('Viewer', () => {
           .to.equal('https://acme.org/viewer');
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/viewer');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -1049,7 +1049,7 @@ describe('Viewer', () => {
           .to.equal('');
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
   });
@@ -1070,7 +1070,7 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -1084,7 +1084,7 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -1099,7 +1099,7 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub).to.be.calledOnce;
         expect(errorStub.calledWith('Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer url override/);
@@ -1118,7 +1118,7 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub).to.be.calledOnce;
         expect(errorStub.calledWith('Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer url override/);
@@ -1137,7 +1137,7 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub).to.be.calledOnce;
         expect(errorStub.calledWith('Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer url override/);
@@ -1157,7 +1157,7 @@ describe('Viewer', () => {
         expect(viewerUrl).to.equal('https://acme.org/viewer');
         expect(viewer.getResolvedViewerUrl())
             .to.equal('https://acme.org/viewer');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -1173,7 +1173,7 @@ describe('Viewer', () => {
         expect(viewerUrl).to.equal('https://acme.org/viewer');
         expect(viewer.getResolvedViewerUrl())
             .to.equal('https://acme.org/viewer');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -1187,7 +1187,7 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
   });
@@ -1265,7 +1265,7 @@ describe('Viewer', () => {
       const viewer = new Viewer(ampdoc);
       const send = sandbox.stub(viewer, 'sendMessage');
       viewer.navigateTo(ampUrl, 'abc123');
-      expect(send.callCount).to.equal(0);
+      expect(send).to.have.not.been.called;
       expect(windowApi.top.location.href).to.equal(ampUrl);
     });
   });

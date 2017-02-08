@@ -24,8 +24,7 @@ import {
 } from '../../src/custom-element';
 import {installCidServiceForDocForTesting,} from
     '../../extensions/amp-analytics/0.1/cid-impl';
-import {installCryptoService,} from
-    '../../extensions/amp-analytics/0.1/crypto-impl';
+import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
@@ -943,7 +942,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .once();
       return expandAsync('?a=ACCESS_READER_ID') .then(res => {
         expect(res).to.match(/a=reader1/);
-        expect(userErrorStub.callCount).to.equal(0);
+        expect(userErrorStub).to.have.not.been.called;
       });
     });
 
@@ -954,7 +953,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .once();
       return expandAsync('?a=AUTHDATA(field1)').then(res => {
         expect(res).to.match(/a=value1/);
-        expect(userErrorStub.callCount).to.equal(0);
+        expect(userErrorStub).to.have.not.been.called;
       });
     });
 
@@ -964,7 +963,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       return expandAsync('?a=ACCESS_READER_ID;', /* disabled */ true)
           .then(res => {
             expect(res).to.match(/a=;/);
-            expect(userErrorStub.callCount).to.equal(1);
+            expect(userErrorStub).to.be.calledOnce;
           });
     });
   });

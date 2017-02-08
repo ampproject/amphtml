@@ -21,7 +21,7 @@ import {
   viewerBaseCid,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService, Crypto,}
-    from '../../extensions/amp-analytics/0.1/crypto-impl';
+    from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
