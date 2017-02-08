@@ -74,9 +74,9 @@ export class AmpViewerIntegration {
         origin = '';
       }
       return this.webviewPreHandshakePromise_(source, origin)
-      .then(receivedPort => {
-        return this.openChannelAndStart_(viewer, receivedPort);
-      });
+          .then(receivedPort => {
+            return this.openChannelAndStart_(viewer, receivedPort);
+          });
     }
 
     const port = new WindowPortEmulator(

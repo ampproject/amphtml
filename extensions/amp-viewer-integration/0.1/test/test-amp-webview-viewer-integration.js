@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpViewerIntegration} from '../amp-viewer-integration';
 import {WebviewViewerForTesting} from './webview-viewer-for-testing.js';
 
 
@@ -49,6 +50,28 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
         window.eventListeners.fire({type: 'unload'});
         expect(stub).to.be.calledOnce;
       });
+    });
+  });
+
+  describes.fakeWin('webview window init', {
+    amp: {
+      params: {
+        webview: '1',
+        origin: 'doesnt-matter',
+      },
+    },
+  }, env => {
+    let integr;
+
+    beforeEach(() => {
+      integr = new AmpViewerIntegration(env.win);
+    });
+
+    it('should set source and origin for webview', () => {
+      const stub = sandbox.stub(integr, 'webviewPreHandshakePromise_',
+          () => new Promise(() => {}));
+      integr.init();
+      expect(stub).to.be.calledWith(/* source */ null, /* origin */ '');
     });
   });
 });
