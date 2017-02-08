@@ -63,8 +63,17 @@ export class AmpViewerIntegration {
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
 
     if (this.isWebView_) {
-      return this.webviewPreHandshakePromise_(
-        null /* source */, '' /* origin */)
+      const isIframed = this.win.parent != this.win;
+      let source;
+      let origin;
+      if (isIframed) {
+        source = this.win.parent;
+        origin = dev().assertString(this.unconfirmedViewerOrigin_);
+      } else {
+        source = null;
+        origin = '';
+      }
+      return this.webviewPreHandshakePromise_(source, origin)
       .then(receivedPort => {
         return this.openChannelAndStart_(viewer, receivedPort);
       });
@@ -78,8 +87,8 @@ export class AmpViewerIntegration {
   /**
    * @param {?Window} source
    * @param {string} origin
-   * @private
    * @return {!Promise}
+   * @private
    */
   webviewPreHandshakePromise_(source, origin) {
     return new Promise(resolve => {

@@ -95,7 +95,7 @@ export class WebviewViewerForTesting {
       height: this.containerEl./*OK*/offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
-      origin: '',
+      origin: parseUrl(window.location.href).origin,
       csi: 1,
       cap: 'foo,a2a',
       webview: 1,
