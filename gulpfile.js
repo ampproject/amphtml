@@ -526,6 +526,7 @@ function checkTypes() {
     './src/service-worker/shell.js',
     './src/service-worker/core.js',
     './src/service-worker/kill.js',
+    './src/web-worker/web-worker.js',
   ];
   var extensionSrcs = Object.values(extensions).filter(function(extension) {
     return !extension.noTypeCheck;

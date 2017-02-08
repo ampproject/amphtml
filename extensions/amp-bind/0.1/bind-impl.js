@@ -161,9 +161,7 @@ export class Bind {
     this.scanPromise_ = this.scanBody_(this.ampdoc.getBody());
     this.scanPromise_.then(results => {
       const {boundElements, bindings, expressionToElements} = results;
-
       this.boundElements_ = boundElements;
-
       Object.assign(this.expressionToElements_, expressionToElements);
       dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
           `${boundElements.length} elements.`);
