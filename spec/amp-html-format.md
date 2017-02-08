@@ -120,25 +120,29 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
     <td>Prohibited unless the type is <code>application/ld+json</code>. (Other non-executable values may be added as needed.) Exception is the mandatory script tag to load the AMP runtime and the script tags to load extended components.</td>
   </tr>
   <tr>
+    <td width="30%">noscript</td>
+    <td>Allowed. Can be used anywhere in the document. If specified, the content inside the <code>&lt;noscript&gt;</code> element displays if JavaScript is disabled by the user.</td>
+  </tr>
+  <tr>
     <td width="30%">base</td>
-    <td>Prohibited</td>
+    <td>Prohibited.</td>
   </tr>
   <tr>
     <td width="30%">img</td>
-    <td>Replaced with `amp-img`.<br>
+    <td>Replaced with <code>amp-img</code>.<br>
         Please note: <code>&lt;img&gt;</code> is a <a href="https://www.w3.org/TR/html5/syntax.html#void-elements">Void Element according to HTML5</a>, so it does not have an end tag. However, <code>&lt;amp-img&gt;</code> does have an end tag <code>&lt;/amp-img&gt;</code>.</td>
   </tr>
   <tr>
     <td width="30%">video</td>
-    <td>Replaced with `amp-video`.</td>
+    <td>Replaced with <code>amp-video</code>.</td>
   </tr>
   <tr>
     <td width="30%">audio</td>
-    <td>Replaced with `amp-audio`.</td>
+    <td>Replaced with <code>amp-audio</code>.</td>
   </tr>
   <tr>
     <td width="30%">iframe</td>
-    <td>Replaced with `amp-iframe`.</td>
+    <td>Replaced with <code>amp-iframe</code>.</td>
   </tr>
     <tr>
     <td width="30%">frame</td>
@@ -170,7 +174,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">input elements</td>
-    <td>Mostly Allowed with <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#inputs">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
+    <td>Mostly allowed with <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#inputs">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
   </tr>
   <tr>
     <td width="30%">button</td>
