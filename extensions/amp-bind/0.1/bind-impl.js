@@ -328,7 +328,8 @@ export class Bind {
       this.evaluatePromise_ =
           invokeWebWorker(this.win_, 'bind.evaluate', [this.scope_]);
     } else {
-      this.evaluatePromise_ = this.evaluator_.evaluate(this.scope_);
+      const evaluation = this.evaluator_.evaluate(this.scope_);
+      this.evaluatePromise_ = Promise.resolve(evaluation);
     }
 
     this.evaluatePromise_.then(returnValue => {
