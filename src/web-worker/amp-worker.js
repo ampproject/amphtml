@@ -109,7 +109,7 @@ class AmpWorker {
 
       /** @type {ToWorkerMessageDef} */
       const message = {method, args, id: index};
-      this.worker_.postMessage(message);
+      this.worker_./*OK*/postMessage(message);
     });
     return promise;
   }

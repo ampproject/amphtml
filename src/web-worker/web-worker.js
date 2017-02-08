@@ -50,5 +50,5 @@ self.addEventListener('message', function(event) {
 
   /** @type {FromWorkerMessageDef} */
   const message = {method, returnValue, id};
-  self.postMessage(message);
+  self./*OK*/postMessage(message);
 });
