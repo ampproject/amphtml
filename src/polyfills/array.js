@@ -22,22 +22,16 @@
  * @param {number} fromIndex
  * @returns {boolean}
  */
-export function includes(searchElement, fromIndex) {
-  if (this == null) {
-    throw new TypeError('"this" is null or not defined');
+export function includes(value, fromIndex) {
+  if (value === value) { // Everything but NaN
+    return this.indexOf(value, fromIndex) > -1;
   }
-  const o = Object(this);
-  const len = o.length >>> 0;
-  if (len === 0) {
-    return false;
-  }
-  const n = fromIndex | 0;
-  let k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
-  while (k < len) {
-    if (o[k] === searchElement) {
+  let i = Math.max(n >= 0 ? n : len + n, 0);
+  for (; i < this.length; i++) {
+    const value = this[i];
+    if (value !== value) {
       return true;
     }
-    k++;
   }
   return false;
 }
@@ -47,8 +41,7 @@ export function includes(searchElement, fromIndex) {
 * @param {!Window} win
 */
 export function install(win) {
-  if (!win.Array.prototype.includes) {
-    /*eslint "no-extend-native": 0*/
-    Object.defineProperty(Array.prototype, 'includes', {value: includes});
+  if (!win.Array.includes) {
+    win.Array.includes = includes;
   }
 }
