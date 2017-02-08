@@ -41,10 +41,11 @@ const AmpAdImplementation = {
 };
 
 /** @const {!Object} */
-export const ValidAdContainerTypes = [
-  'AMP-STICKY-AD',
-  'AMP-FX-FLYING-CARPET',
-];
+export const ValidAdContainerTypes = {
+  'AMP-STICKY-AD': 'sa',
+  'AMP-FX-FLYING-CARPET': 'fc',
+  'AMP-LIGHTBOX': 'lb',
+};
 
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
@@ -113,9 +114,27 @@ export function googleAdUrl(
     const viewportRect = viewport.getRect();
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
-    if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
-      queryParams.push({name: 'amp_ct',
-                        value: adElement.parentElement.tagName});
+
+    // Detect container types.
+    let parentElement = adElement.parentElement;
+    let tagName = parentElement.tagName.toUpperCase();
+    const containerTypeSet = {};
+    while (parentElement && ValidAdContainerTypes[tagName]) {
+      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+      parentElement = parentElement.parentElement;
+      tagName = parentElement.tagName.toUpperCase();
+    }
+    const containerTypeList = [];
+    for (const type in containerTypeSet) {
+      containerTypeList.push(type);
+    }
+    if (containerTypeList.length > 0) {
+      queryParams.push({name: 'act', value: containerTypeList.join()});
+    }
+
+    const fontFace = a4a.getDetectedFont();
+    if (fontFace) {
+      queryParams.push({name: 'dff', value: fontFace});
     }
     const allQueryParams = queryParams.concat(
       [
@@ -148,6 +167,9 @@ export function googleAdUrl(
         {name: 'brdim', value: additionalDimensions(win, viewportSize)},
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
+        {name: 'ea', value: '0'},
+        {name: 'pfx', value: 'fc' in containerTypeSet
+          || 'sa' in containerTypeSet},
       ],
       unboundedQueryParams,
       [
