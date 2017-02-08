@@ -160,10 +160,13 @@ describe('integration test: a4a', () => {
     // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
+    const forceCollapseStub =
+        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
       expect(error.message).to.contain.string('AMP-A4A-');
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
+      expect(forceCollapseStub).to.be.notCalled;
     });
   });
 
