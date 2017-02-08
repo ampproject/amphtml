@@ -58,6 +58,7 @@ export class WindowPortEmulator {
     /** @private {string} */
     this.origin_ = origin;
   }
+
   /**
    * @param {string} eventType
    * @param {function(!Event):undefined} handler
@@ -70,6 +71,7 @@ export class WindowPortEmulator {
       }
     });
   }
+
   /**
    * @param {Object} data
    */
