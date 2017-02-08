@@ -24,6 +24,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
+import {filterSplice} from '../../../src/utils/array';
 
 const TAG = 'amp-bind';
 
@@ -74,6 +75,17 @@ export class Bind {
     /** @private {!Array<BoundElementDef>} */
     this.boundElements_ = [];
 
+    /**
+     * Maps expression string to the element(s) that contain it.
+     * @private @const {!Object<string, !Array<!Element>>}
+     */
+    this.expressionToElements_ = Object.create(null);
+
+    /**
+     * @private {!Array<BindingDef>}
+     */
+    this.bindings_ = [];
+
     /** @const @private {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
 
@@ -85,12 +97,6 @@ export class Bind {
 
     /** @visibleForTesting {?Promise<!Object<string,*>>} */
     this.evaluatePromise_ = null;
-
-    /**
-     * Maps expression string to the element(s) that contain it.
-     * @private @const {!Object<string, !Array<!Element>>}
-     */
-    this.expressionToElements_ = Object.create(null);
 
     /** @visibleForTesting {?Promise} */
     this.scanPromise_ = null;
@@ -142,16 +148,27 @@ export class Bind {
    * @private
    */
   initialize_() {
-    this.scanPromise_ = this.scanBody_(this.ampdoc.getBody());
+    debugger
+    this.addBindingsForSubtree(this.ampdoc.getBody());
+  }
+
+  /**
+   * Scans the substree rooted at `rootElement` and adds bindings for nodes
+   * that contain bindable elements. This function is not idempotent. To remove
+   * bindings for a subtree, see #removeBindingsForSubtree.
+   * @param {!Element} rootElement
+   */
+  addBindingsForSubtree(rootElement) {
+    this.scanPromise_ = this.scanSubtree_(rootElement);
     this.scanPromise_.then(results => {
       const {boundElements, bindings, expressionToElements} = results;
 
-      this.boundElements_ = boundElements;
-
+      this.boundElements.concat(boundElements);
       Object.assign(this.expressionToElements_, expressionToElements);
+      this.bindings_.concat(bindings);
 
-      this.evaluator_ = new BindEvaluator();
-      const parseErrors = this.evaluator_.setBindings(bindings);
+      this.evaluator_ = this.evaluator || new BindEvaluator();
+      const parseErrors = this.evaluator_.setBindings(this.bindings_);
 
       // Report each parse error.
       Object.keys(parseErrors).forEach(expressionString => {
@@ -173,9 +190,69 @@ export class Bind {
   }
 
   /**
-   * Scans `body` for attributes that conform to bind syntax and returns
+   * Scans the substree rooted at `rootElement` and removes bindings for nodes
+   * that contain bindable elements. This function is not idempotent. To add
+   * bindings for a subtree, see #addBindingsForSubtree.
+   * @param {!Element} rootElement
+   */
+  removeBindingsForSubtree(rootElement) {
+    this.scanPromise_ = this.scanSubtree_(rootElement);
+    this.scanPromise_.then(results => {
+      const {boundElementsToRemove, bindings, expressionToElements} = results;
+
+      // TODO(kmh287): Discuss strategies for speedup
+      for (let i = 0; i < boundElementsToRemove.length; i++) {
+        const boundElementToRemove = boundElementsToRemove[i];
+        for (let j = this.boundElements_.length - 1; j >= 0; j--) {
+          const currentElement = this.boundElements_[j];
+          if (currentElement
+                .element
+                .isEqualNode(boundElementToRemove.element)) {
+            this.boundElements_.splice(j, 1);
+          }
+        }
+
+        // Remove elements from expression -> elements map
+        // remove expression if no more bound elements
+        for (const expression in expressionToElements) {
+          if (this.expressionToElements_.hasOwnProperty(expression)) {
+            const elements = this.expressionToElements_[expression];
+            for (let k = elements.length - 1; k >= 0; k--) {
+              if (elements[k].isEqualNode(boundElementToRemove)) {
+                elements.splice(k, 1);
+              }
+            }
+            if (elements.length == 0) {
+              delete this.expressionToElements_[expression];
+            }
+          }
+        }
+      }
+
+      filterSplice(this.bindings_, binding => {
+        for (let m = 0; m < bindings.length; m++) {
+          const bindingToRemove = bindings[m];
+          if (bindingToRemove.tagName === binding.tagName
+              && bindingToRemove.property === binding.property
+              && bindingToRemove.expressionString == binding.expressionString) {
+            /* this.bindings_ can contain multiple bindings with the same
+             * definitions, for instance multiple p tags with the same expression
+             * for its [text] property, so removing the ones previously added for
+             * this subtree shouldn't interfere with other similar bindings elsewhere
+             * on the page
+             */
+            return false;
+          }
+          return true;
+        }
+      });
+    });
+  }
+
+  /**
+   * Scans `rootElement` for attributes that conform to bind syntax and returns
    * a tuple containing bound elements and binding data for the evaluator.
-   * @param {!Element} body
+   * @param {!Element} rootElement
    * @return {
    *   !Promise<{
    *     boundElements: !Array<BoundElementDef>,
@@ -185,7 +262,7 @@ export class Bind {
    * }
    * @private
    */
-  scanBody_(body) {
+  scanSubtree_(rootElement) {
     /** @type {!Array<BoundElementDef>} */
     const boundElements = [];
     /** @type {!Array<./bind-evaluator.BindingDef>} */
@@ -193,8 +270,9 @@ export class Bind {
     /** @type {!Object<string, !Array<!Element>>} */
     const expressionToElements = Object.create(null);
 
-    const doc = dev().assert(body.ownerDocument, 'ownerDocument is null.');
-    const walker = doc.createTreeWalker(body, NodeFilter.SHOW_ELEMENT);
+    const doc = dev().assert(
+      rootElement.ownerDocument, 'ownerDocument is null.');
+    const walker = doc.createTreeWalker(rootElement, NodeFilter.SHOW_ELEMENT);
 
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
