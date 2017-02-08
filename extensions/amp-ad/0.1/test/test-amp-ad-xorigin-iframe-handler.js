@@ -212,7 +212,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       };
     });
 
-    it('should trigger render-start on timeout', done => {
+    it('should trigger visibility on timeout', done => {
       const clock = sandbox.useFakeTimers();
       iframe.name = 'test_master';
       initPromise = iframeHandler.init(iframe);
