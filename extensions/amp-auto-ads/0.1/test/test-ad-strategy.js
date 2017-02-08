@@ -84,9 +84,9 @@ describe('ad-strategy', () => {
           expect(anchor2.childNodes).to.have.lengthOf(0);
           const adElement = anchor1.childNodes[0];
           expect(adElement.tagName).to.equal('AMP-AD');
-          expect(adElement).to.have.attribute('type', 'adsense');
-          expect(adElement).to.have.attribute('data-custom-att-1', 'val-1');
-          expect(adElement).to.have.attribute('data-custom-att-2', 'val-2');
+          expect(adElement.getAttribute('type')).to.equal('adsense');
+          expect(adElement.getAttribute('data-custom-att-1')).to.equal('val-1');
+          expect(adElement.getAttribute('data-custom-att-2')).to.equal('val-2');
         });
       });
 
@@ -141,9 +141,9 @@ describe('ad-strategy', () => {
       expect(anchor2.childNodes).to.have.lengthOf(1);
       const adElement = anchor2.childNodes[0];
       expect(adElement.tagName).to.equal('AMP-AD');
-      expect(adElement).to.have.attribute('type', 'adsense');
-      expect(adElement).to.have.attribute('data-custom-att-1', 'val-1');
-      expect(adElement).to.have.attribute('data-custom-att-2', 'val-2');
+      expect(adElement.getAttribute('type')).to.equal('adsense');
+      expect(adElement.getAttribute('data-custom-att-1')).to.equal('val-1');
+      expect(adElement.getAttribute('data-custom-att-2')).to.equal('val-2');
     });
   });
 
@@ -203,9 +203,9 @@ describe('ad-strategy', () => {
       expect(anchor2.childNodes).to.have.lengthOf(0);
       const adElement = anchor1.childNodes[0];
       expect(adElement.tagName).to.equal('AMP-AD');
-      expect(adElement).to.have.attribute('type', 'adsense');
-      expect(adElement).to.have.attribute('data-custom-att-1', 'val-1');
-      expect(adElement).to.have.attribute('data-custom-att-2', 'val-2');
+      expect(adElement.getAttribute('type')).to.equal('adsense');
+      expect(adElement.getAttribute('data-custom-att-1')).to.equal('val-1');
+      expect(adElement.getAttribute('data-custom-att-2')).to.equal('val-2');
     });
   });
 
@@ -265,14 +265,14 @@ describe('ad-strategy', () => {
       expect(anchor2.childNodes).to.have.lengthOf(1);
       const adElement1 = anchor1.childNodes[0];
       expect(adElement1.tagName).to.equal('AMP-AD');
-      expect(adElement1).to.have.attribute('type', 'adsense');
-      expect(adElement1).to.have.attribute('data-custom-att-1', 'val-1');
-      expect(adElement1).to.have.attribute('data-custom-att-2', 'val-2');
+      expect(adElement1.getAttribute('type')).to.equal('adsense');
+      expect(adElement1.getAttribute('data-custom-att-1')).to.equal('val-1');
+      expect(adElement1.getAttribute('data-custom-att-2')).to.equal('val-2');
       const adElement2 = anchor2.childNodes[0];
       expect(adElement2.tagName).to.equal('AMP-AD');
-      expect(adElement2).to.have.attribute('type', 'adsense');
-      expect(adElement2).to.have.attribute('data-custom-att-1', 'val-1');
-      expect(adElement2).to.have.attribute('data-custom-att-2', 'val-2');
+      expect(adElement2.getAttribute('type')).to.equal('adsense');
+      expect(adElement2.getAttribute('data-custom-att-1')).to.equal('val-1');
+      expect(adElement2.getAttribute('data-custom-att-2')).to.equal('val-2');
     });
   });
 
@@ -335,9 +335,9 @@ describe('ad-strategy', () => {
       expect(anchor2.childNodes).to.have.lengthOf(0);
       const adElement1 = anchor1.childNodes[0];
       expect(adElement1.tagName).to.equal('AMP-AD');
-      expect(adElement1).to.have.attribute('type', 'adsense');
-      expect(adElement1).to.have.attribute('data-custom-att-1', 'val-1');
-      expect(adElement1).to.have.attribute('data-custom-att-2', 'val-2');
+      expect(adElement1.getAttribute('type')).to.equal('adsense');
+      expect(adElement1.getAttribute('data-custom-att-1')).to.equal('val-1');
+      expect(adElement1.getAttribute('data-custom-att-2')).to.equal('val-2');
     });
   });
 
