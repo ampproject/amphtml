@@ -1280,6 +1280,9 @@ describe('amp-form', () => {
       responseJson: null,
       headers: headersMock,
     });
+    fetchRejectPromise.catch(() => {
+      // Just avoiding a global uncaught promise exception.
+    });
 
     beforeEach(() => {
       form = getForm(env.win.document);

@@ -167,8 +167,10 @@ try {
   window.context = data._context;
 } catch (err) {
   window.context = {};
-  dev().info(
-      'INTEGRATION', 'Could not parse context from:', iframeName);
+  if (!getMode().test) {
+    dev().info(
+        'INTEGRATION', 'Could not parse context from:', iframeName);
+  }
 }
 
 // This should only be invoked after window.context is set
