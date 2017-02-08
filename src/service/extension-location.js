@@ -39,18 +39,11 @@ function calculateScriptBaseUrl(location, isLocalDev, isTest) {
  * @param {string} extensionId
  * @param {boolean=} isLocalDev
  * @param {boolean=} isTest
- * @param {boolean=} isUsingCompiledJs
  * @return {string}
  */
 export function calculateExtensionScriptUrl(location, extensionId, isLocalDev,
-    isTest, isUsingCompiledJs) {
+    isTest) {
   const base = calculateScriptBaseUrl(location, isLocalDev, isTest);
-  if (isLocalDev) {
-    if ((isTest && !isUsingCompiledJs) || isMax(location)) {
-      return `${base}/v0/${extensionId}-0.1.max.js`;
-    }
-    return `${base}/v0/${extensionId}-0.1.js`;
-  }
   return `${base}/rtv/${getMode().rtvVersion}/v0/${extensionId}-0.1.js`;
 }
 
