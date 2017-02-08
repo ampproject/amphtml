@@ -16,8 +16,8 @@ table below.
 
 |Symptom|Issue|Solution|
 |---|---|---|
-|Web fonts do not appear (fallback fonts are used)|Fonts served with incorrect MIME type|Specify an [acceptable MIME type](https://github.com/ampproject/amphtml/blob/master/spec/amp-cache-guidelines.md#mime-types-for-fonts) for fonts|
 |Web fonts do not appear (fallback fonts are used)|Cache not whitelisted by font provider|Contact font provider and ask them to whitelist [all caches](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp)|
-|Assets (e.g. fonts and images) do not appear (**HTTP origins only**)|Document uses protocol-relative URLs|Switch to absolute URLs (that is, `http://www.site.com/doc/amp`, not `//www.site.com/doc/amp`)|
-|Assets (e.g. fonts and images) do not appear|Cache is unable to access assets|Ensure the cache is able to access your assets and is not blocked by IP address, or user agent, etc. (List of user agents used by [Google's crawler](https://support.google.com/webmasters/answer/1061943?hl=en).)|
+|Assets (e.g. fonts and images) do not appear #1 (**HTTP origins only**)|Document uses protocol-relative URLs|Switch to absolute URLs (that is, `http://www.site.com/doc/amp`, not `//www.site.com/doc/amp`)|
+|Assets (e.g. fonts and images) do not appear #2|Assets served with incorrect MIME type|Specify an [acceptable MIME type](https://github.com/ampproject/amphtml/blob/master/spec/amp-cache-guidelines.md#guidelines-accepted-mime-types)|
+|Assets (e.g. fonts and images) do not appear #3|Cache is unable to access assets|Ensure the cache is able to access your assets and is not blocked by IP address, or user agent, etc. (List of user agents used by [Google's crawler](https://support.google.com/webmasters/answer/1061943?hl=en).)|
 |Dynamic elements such as `<amp-form>`, `<amp-list>` do not behave as expected|Broken or non-existent CORS headers|These components cause browsers to make cross-origin requests from the cache to your origin. These requests are blocked by default. To allow these requests, emit [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) that whitelist [all caches](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).|
