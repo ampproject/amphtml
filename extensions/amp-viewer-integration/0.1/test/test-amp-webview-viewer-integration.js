@@ -39,7 +39,7 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
     });
 
     it('should confirm the handshake', () => {
-      console.log('sending handshake response');
+      console/*OK*/.log('sending handshake response');
       return viewer.waitForDocumentLoaded();
     });
 
