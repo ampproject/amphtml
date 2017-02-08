@@ -18,7 +18,7 @@ import {Messaging, WindowPortEmulator} from './messaging.js';
 import {viewerForDoc} from '../../../src/viewer';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
-import {isIframed} from '../../../src/utils/dom';
+import {isIframed} from '../../../src/dom';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -64,10 +64,9 @@ export class AmpViewerIntegration {
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
 
     if (this.isWebView_) {
-      const isIframed = isIframed(this.win);
       let source;
       let origin;
-      if (isIframed) {
+      if (isIframed(this.win)) {
         source = this.win.parent;
         origin = dev().assertString(this.unconfirmedViewerOrigin_);
       } else {
