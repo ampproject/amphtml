@@ -29,8 +29,6 @@ describe('invokeWebWorker', () => {
   let fakeWorker;
 
   beforeEach(() => {
-    toggleExperiment(fakeWin, 'web-worker', true);
-
     sandbox = sinon.sandbox.create();
 
     postMessageStub = sandbox.stub();
@@ -40,6 +38,8 @@ describe('invokeWebWorker', () => {
 
     const fakeWorkerClass = () => fakeWorker;
     fakeWin = {Worker: fakeWorkerClass};
+
+    toggleExperiment(fakeWin, 'web-worker', true);
   });
 
   afterEach(() => {
