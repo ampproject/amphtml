@@ -43,6 +43,46 @@ const MessageType = {
 export let Message;
 
 /**
+ * @fileoverview This class is a de-facto implementation of MessagePort
+ * from Channel Messaging API:
+ * https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API
+ */
+export class WindowPortEmulator {
+  /**
+   * @param {!Window} win
+   * @param {string} origin
+   */
+  constructor(win, origin) {
+    /** @const {!Window} */
+    this.win = win;
+    /** @private {string} */
+    this.origin_ = origin;
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {function(!Event):undefined} handler
+   */
+  addEventListener(eventType, handler) {
+    listen(this.win, 'message', e => {
+      if (e.origin == this.origin_ &&
+          e.source == this.win.parent && e.data.app == APP) {
+        handler(e);
+      }
+    });
+  }
+
+  /**
+   * @param {Object} data
+   */
+  postMessage(data) {
+    this.win.parent./*OK*/postMessage(data, this.origin_);
+  }
+  start() {
+  }
+}
+
+/**
  * @fileoverview This is used in amp-viewer-integration.js for the
  * communication protocol between AMP and the viewer. In the comments, I will
  * refer to the communication as a conversation between me and Bob. The
@@ -53,49 +93,35 @@ export class Messaging {
 
   /**
    * Conversation (messaging protocol) between me and Bob.
-   * @param {!Window} source
-   * @param {!Window} target
-   * @param {string} targetOrigin
+   * @param {!Window} win
+   * @param {!MessagePort|!WindowPortEmulator} port
    */
-  constructor(source, target, targetOrigin) {
-    /** @private {!Window} */
-    this.source_ = source;
+  constructor(win, port) {
+    /** @const {!Window} */
+    this.win = win;
+    /** @const @private {!MessagePort|!WindowPortEmulator} */
+    this.port_ = port;
     /** @private {!number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};
-    /** @const @private {!Window} */
-    this.target_ = target;
-    /** @const @private {string} */
-    this.targetOrigin_ = targetOrigin;
     /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
     this.requestProcessor_ = null;
 
-    dev().assert(this.targetOrigin_, 'Target origin must be specified!');
-
-    listen(source, 'message', this.handleMessage_.bind(this));
+    this.port_.addEventListener('message', this.handleMessage_.bind(this));
+    this.port_.start();
   }
 
   /**
    * Bob sent me a message. I need to decide if it's a new request or
    * a response to a previous 'conversation' we were having.
-   * @param {?Event} event
+   * @param {!Event} event
    * @private
    */
   handleMessage_(event) {
-    if (!event || event.source != this.target_ ||
-      event.origin != this.targetOrigin_) {
-      dev().fine(TAG +
-        ': handleMessage_, This message is not for us: ', event);
-      return;
-    }
+    dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
     /** @type {Message} */
     const message = event.data;
-    if (message.app != APP) {
-      dev().fine(
-        TAG + ': handleMessage_, wrong APP: ', event);
-      return;
-    }
     if (message.type == MessageType.REQUEST) {
       this.handleRequest_(message);
     } else if (message.type == MessageType.RESPONSE) {
@@ -173,7 +199,7 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
-    this.target_./*OK*/postMessage(message, this.targetOrigin_);
+    this.port_./*OK*/postMessage(message);
   }
 
   /**
@@ -245,7 +271,7 @@ export class Messaging {
     let stateStr = 'amp-messaging-error-logger: ' + state;
     const dataStr = ' data: ' + this.errorToString_(opt_data);
     stateStr += dataStr;
-    this.source_['viewerState'] = stateStr;
+    this.win['viewerState'] = stateStr;
   };
 
   /**

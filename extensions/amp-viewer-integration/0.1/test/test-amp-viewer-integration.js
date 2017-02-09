@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Messaging} from '../messaging.js';
+import {Messaging, WindowPortEmulator} from '../messaging.js';
 import {ViewerForTesting} from './viewer-for-testing.js';
 
 
@@ -40,6 +40,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
     it('should confirm the handshake', () => {
+      console/*OK*/.log('sending handshake response');
       viewer.confirmHandshake();
       return viewer.waitForDocumentLoaded();
     });
@@ -68,15 +69,17 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       postMessagePromise = new Promise(resolve => {
         postMessageResolve = resolve;
       });
-      postMessageSpy = sandbox.stub(window, 'postMessage', () => {
+
+      const port = new WindowPortEmulator(
+        this.win, viewerOrigin);
+      port.addEventListener = function() {};
+      port.postMessage = function() {};
+
+      postMessageSpy = sandbox.stub(port, 'postMessage', () => {
         postMessageResolve();
       });
 
-      const source = {
-        postMessage: function() {},
-        addEventListener: function() {},
-      };
-      messaging = new Messaging(source, window, viewerOrigin);
+      messaging = new Messaging(this.win, port);
       messaging.setRequestProcessor(requestProcessor);
     });
 
