@@ -202,7 +202,7 @@ On AMP pages, construct an analytics-analytics ping containing the Client ID:
   </tr>
 </table>
 
-Take note of the fact that the parameter passed into the Client ID substitution, `${clientId(uid)`, is “`uid`”. This was a deliberate choice that matches the same cookie name used on the publisher origin as described in Task 1. For the most seamless integration, you should apply the same technique.
+Take note of the fact that the parameter passed into the Client ID substitution, `${clientId(uid)`, is “`uid`”. This was a deliberate choice that matches the same cookie name used on the publisher origin as described in [Task 1](#task-1-for-non-amp-pages-on-the-publisher-origin-set-up-an-identifier-and-send-analytics-pings). For the most seamless integration, you should apply the same technique.
 
 Concerning the rest of the amp-analytics implementation, see the documentation for [amp-analytics configuration](https://www.ampproject.org/docs/guides/analytics_amp) for more detail on how to set up amp-analytics requests or to modify those of your analytics vendor. The ping can be further modified to transport additional data that you either directly define or by taking advantage of other [AMP substitutions](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md).
 
@@ -210,11 +210,11 @@ Concerning the rest of the amp-analytics implementation, see the documentation f
 > 
 > Why did we use of the name “`uid`” for the parameter passed to the Client ID feature? The parameter that the `clientId(...)` substitution takes is used to define scope. You can actually use the Client ID feature for many use cases and, as a result, generate many client IDs. The parameter differentiates between these use cases and so you use it to specify which use case you would like a Client ID for. For instance, you might want to send different identifiers to third parties like an advertiser and you could use the “scope” parameter to achieve this.
 
-On the publisher origin, it’s easiest to think of “scope” as what you call the cookie. By recommending a value of “`uid`” for the Client ID parameter here in Task 2, we align with the choice to use a cookie called “`uid`” in Task 1.
+On the publisher origin, it’s easiest to think of “scope” as what you call the cookie. By recommending a value of “`uid`” for the Client ID parameter here in [Task 2](#task-2-for-amp-pages-set-up-an-identifier-and-send-analytics-pings-by-including-client-id-replacement-in-amp-analytics-pings), we align with the choice to use a cookie called “`uid`” in [Task 1](#task-1-for-non-amp-pages-on-the-publisher-origin-set-up-an-identifier-and-send-analytics-pings).
 
 ### Task 3: Process analytics pings from pages on the publisher origin
 
-Because of the setup performed in Tasks 1 and 2, when someone accesses the AMP version (from any context) or the non-AMP version on the publisher origin the analytics ping will use the same identifier. By following the guidance in Task 2 to choose a Client ID "scope" that was the same name as the name of the cookie you used in Task 1, AMP reuses the same cookie.
+Because of the setup performed in Tasks 1 and 2, when someone accesses the AMP version (from any context) or the non-AMP version on the publisher origin the analytics ping will use the same identifier. By following the guidance in [Task 2](#task-2-for-amp-pages-set-up-an-identifier-and-send-analytics-pings-by-including-client-id-replacement-in-amp-analytics-pings) to choose a Client ID "scope" that was the same name as the name of the cookie you used in [Task 1](#task-1-for-non-amp-pages-on-the-publisher-origin-set-up-an-identifier-and-send-analytics-pings), AMP reuses the same cookie.
 
 This is illustrated in the table below:
 
@@ -231,7 +231,7 @@ This is illustrated in the table below:
 
 ### Task 4: Process analytics pings from AMP cache or AMP viewer display contexts and establish identifier mappings (if needed)
 
-When we set up analytics pings in Task 2 to transmit data from AMP pages displayed within an AMP cache or AMP viewer, we also created a problem. As discussed previously, AMP cache and AMP viewer contexts are different from the publisher origin context, and along with this comes as different way of maintaining identifiers. To process these pings to avoid problems like overcounting users, we’ll take some [steps](#implementation-steps) to try and reconcile identifiers as often as we can.
+When we set up analytics pings in [Task 2](#task-2-for-amp-pages-set-up-an-identifier-and-send-analytics-pings-by-including-client-id-replacement-in-amp-analytics-pings) to transmit data from AMP pages displayed within an AMP cache or AMP viewer, we also created a problem. As discussed previously, AMP cache and AMP viewer contexts are different from the publisher origin context, and along with this comes as different way of maintaining identifiers. To process these pings to avoid problems like overcounting users, we’ll take some [steps](#implementation-steps) to try and reconcile identifiers as often as we can.
 
 To help explain the steps we’re taking, it’s helpful to first reconsider exactly how the overcounting problem arises.
 
@@ -240,7 +240,7 @@ To help explain the steps we’re taking, it’s helpful to first reconsider exa
 Consider the following flow:
 
 1. A user visits the **AMP page in an AMP viewer display context**, such as `https://google.com/amp/s/example.com/article.amp.html`. Since the AMP viewer does not have access to the `uid` cookie on the publisher origin, a random value of `$amp_client_id` is generated to identify the user.
-2. The same user then visits **a page on the publisher origin `https://example.com`**. As described in Task 3, the user is identified with `$publisher_origin_identifier`.
+2. The same user then visits **a page on the publisher origin `https://example.com`**. As described in [Task 3](#task-3-process-analytics-pings-from-pages-on-the-publisher-origin), the user is identified with `$publisher_origin_identifier`.
 
 Here (1) and (2) happen on different origins (or contexts). Because of this, there’s no shared state and `$amp_client_id` is different from `$publisher_origin_identifier`. So, what’s the impact? (1) is a single pageview session that looks like one user and (2) is another single pageview session that looks like it’s coming from another user. **Basically, even though the user has stayed engaged with `https://example.com` content, we overcount users and the user in (1) looks like a bounce (a single page visit).**
 
@@ -257,7 +257,7 @@ On the server check for an existing publisher origin identifier
 
 Read the cookies sent as part of the analytics request. In our example, this means checking for the “`uid`” cookie from example.com.
 
-- If the “`uid`” value is successfully read, use it to record analytics data (**analytics record identifier**). Because of Task 1, we know this identifier’s value is `$publisher_origin_identifier`. With an analytics record identifier established, we can skip ahead to the “[Data storage](#data-storage)” section.
+- If the “`uid`” value is successfully read, use it to record analytics data (**analytics record identifier**). Because of [Task 1](#task-1-for-non-amp-pages-on-the-publisher-origin-set-up-an-identifier-and-send-analytics-pings), we know this identifier’s value is `$publisher_origin_identifier`. With an analytics record identifier established, we can skip ahead to the “[Data storage](#data-storage)” section.
 - If the “`uid`” value is not successfully read, proceed with the steps below involving the mapping table.
 
 ##### Mapping table
@@ -300,7 +300,7 @@ In the example above, we find a record that already exists. The value we find th
 
 Otherwise, if the AMP Client ID is not found in a mapping, we need to create a mapping:
 
-1. Generate a **prospective publisher origin identifier**. Let’s call this `$prospective_identifier` in the examples to follow. This value should be created in accordance with how you set up the value on the publisher origin, as described in Task 1 above.
+1. Generate a **prospective publisher origin identifier**. Let’s call this `$prospective_identifier` in the examples to follow. This value should be created in accordance with how you set up the value on the publisher origin, as described in [Task 1](#task-1-for-non-amp-pages-on-the-publisher-origin-set-up-an-identifier-and-send-analytics-pings) above.
 2. Next, attempt to [set](https://en.wikipedia.org/wiki/HTTP_cookie#Setting_a_cookie) the prospective publisher origin identifier as a cookie on the publisher origin. This will succeed if third-party cookies can be written, and otherwise it will fail.
 3. Then, store the {prospective publisher origin identifier, AMP Client ID} pair.
 
@@ -434,7 +434,7 @@ We recommend validating the authenticity of query parameter values by using the 
 
 ##### Processing multiple identifiers in an analytics ping
 
-Unlike in Task 4 where we configured the analytics ping to contain just one identifier value, with the steps we’ve taken so far in Task 5 we now have two — `orig_user_id` and `user_id`. We will next cover how to process these two identifiers that are part of the inbound analytics ping.
+Unlike in [Task 4](#task-4-process-analytics-pings-from-amp-cache-or-amp-viewer-display-contexts-and-establish-identifier-mappings-if-needed) where we configured the analytics ping to contain just one identifier value, with the steps we’ve taken so far in Task 5 we now have two — `orig_user_id` and `user_id`. We will next cover how to process these two identifiers that are part of the inbound analytics ping.
 
 Before we proceed, be sure to take note of the steps described in “[Parameter validation](#parameter-validation)” below and ensure that you are willing to trust both of the values indicated by `orig_user_id` and `user_id`.
 
@@ -499,7 +499,7 @@ When you are searching the mapping table, take note of which situation applies a
 If you cannot locate either identifier value being used in your mapping table, establish a new mapping:
 
 - If the analytics request comes from a page on your publisher origin, then you should choose the value corresponding to `uid` to be the analytics record identifier; choose the value of `orig_uid` to be the “alias”.
-- If the analytics request does not come from a page on your publisher origin, then you should choose the value corresponding to `uid` to be an “alias” value in the mapping table. Then, proceed with the remaining instructions in Task 4 to create a prospective publisher origin identifier and attempt to set this value as a cookie on the origin.
+- If the analytics request does not come from a page on your publisher origin, then you should choose the value corresponding to `uid` to be an “alias” value in the mapping table. Then, proceed with the remaining instructions in [Task 4](#task-4-process-analytics-pings-from-amp-cache-or-amp-viewer-display-contexts-and-establish-identifier-mappings-if-needed) to create a prospective publisher origin identifier and attempt to set this value as a cookie on the origin.
 
 ##### Parameter validation
 
