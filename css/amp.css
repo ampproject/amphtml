@@ -311,6 +311,7 @@ i-amp-scroll-container {
  */
 i-amp-scroll-container.amp-active {
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .i-amphtml-loading-container {
