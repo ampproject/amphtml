@@ -467,8 +467,8 @@ If instead the user starts on a page served from the publisher origin and subseq
   </tr>
   <tr>
     <td width="40%"><strong>How it’s expressed in analytics ping</strong></td>
-    <td width="30%"><code>user_id=$publisher_origin_id</code></td>
-    <td width="30%"><code>orig_user_id=$amp_client_id</code></td>
+    <td width="30%"><code>orig_user_id=$publisher_origin_id</code></td>
+    <td width="30%"><code>user_id=$amp_client_id</code></td>
   </tr>
   <tr>
     <td width="40%"><strong>Parameter key</strong></td>
