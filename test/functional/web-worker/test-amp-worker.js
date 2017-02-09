@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import {dev} from '../../../src/log';
 import {
-  invokeWebWorker, ampWorkerForTesting
+  invokeWebWorker,
+  ampWorkerForTesting,
 } from '../../../src/web-worker/amp-worker';
 import {toggleExperiment} from '../../../src/experiments';
 import * as sinon from 'sinon';
@@ -84,12 +86,12 @@ describe('invokeWebWorker', () => {
     fakeWorker.onmessage({data: {
       method: 'bar',
       returnValue: 'bar-retVal',
-      id: 0,
+      id: 1,
     }});
     fakeWorker.onmessage({data: {
       method: 'qux',
       returnValue: 'qux-retVal',
-      id: 0,
+      id: 2,
     }});
     fakeWorker.onmessage({data: {
       method: 'foo',
@@ -144,12 +146,36 @@ describe('invokeWebWorker', () => {
     });
   });
 
+  it('should log error when unexpected message is received', () => {
+    const errorStub = sandbox.stub(dev(), 'error');
+    invokeWebWorker(fakeWin, 'foo');
+    expect(errorStub.callCount).to.equal(0);
+
+    // Unexpected `id` value.
+    fakeWorker.onmessage({data: {
+      method: 'foo',
+      returnValue: undefined,
+      id: 3,
+    }});
+    expect(errorStub.callCount).to.equal(1);
+    expect(errorStub).to.have.been.calledWith('web-worker');
+
+    // Unexpected method at valid `id`.
+    expect(() => {
+      fakeWorker.onmessage({data: {
+        method: 'bar',
+        returnValue: undefined,
+        id: 0,
+      }});
+    }).to.throw('mismatched method');
+  });
+
   it('should clean up storage after message completion', () => {
     const ampWorker = ampWorkerForTesting(fakeWin);
 
-    const foo = invokeWebWorker(fakeWin, 'foo');
+    invokeWebWorker(fakeWin, 'foo');
 
-    expect(ampWorker.hasPendingMessagesFor('foo')).to.be.true;
+    expect(ampWorker.hasPendingMessages()).to.be.true;
 
     fakeWorker.onmessage({data: {
       method: 'foo',
@@ -157,6 +183,6 @@ describe('invokeWebWorker', () => {
       id: 0,
     }});
 
-    expect(ampWorker.hasPendingMessagesFor('foo')).to.be.false;
+    expect(ampWorker.hasPendingMessages()).to.be.false;
   });
 });

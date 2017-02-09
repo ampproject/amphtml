@@ -41,6 +41,11 @@ export let ToWorkerMessageDef;
 export let FromWorkerMessageDef;
 
 /**
+ * @typedef {{method: string, resolve: !Function, reject: !Function}}
+ */
+let PendingMessageDef;
+
+/**
  * Invokes function named `method` with args `opt_args` on the web worker
  * and returns a Promise that will be resolved with the function's return value.
  * @note Currently only works in a single entry point.
@@ -88,17 +93,10 @@ class AmpWorker {
     this.worker_.onmessage = this.receiveMessage_.bind(this);
 
     /**
-     * Maps method names to the promise executors for in-flight invocations of
-     * those methods. E.g. messages['foo'][3] contains the {resolve, reject}
-     * functions for the third concurrent invocation of 'foo'.
-     *
-     * @const @private {
-     *   !Object<string,
-     *     !Array<({resolve: !Function, reject: !Function}|undefined)>
-     *   >
-     * }
+     * Array of in-flight messages pending response from worker.
+     * @const @private {!Array<(PendingMessageDef|undefined)>}
      */
-    this.messages_ = Object.create(null);
+    this.messages_ = [];
   }
 
   /**
@@ -110,11 +108,8 @@ class AmpWorker {
    */
   sendMessage_(method, args) {
     const promise = new Promise((resolve, reject) => {
-      if (!this.messages_[method]) {
-        this.messages_[method] = [];
-      }
-      const index = this.messages_[method].length;
-      this.messages_[method][index] = {resolve, reject};
+      const index = this.messages_.length;
+      this.messages_[index] = {method, resolve, reject};
 
       /** @type {ToWorkerMessageDef} */
       const message = {method, args, id: index};
@@ -133,42 +128,35 @@ class AmpWorker {
     const {method, returnValue, id} =
         /** @type {FromWorkerMessageDef} */ (event.data);
 
-    // Find the stored Promise executor for this message.
-    const invocations = this.messages_[method];
-    if (!invocations) {
-      dev().error(TAG, `Received unexpected "${method}" message from worker.`);
+    const message = this.messages_[id];
+    if (!message) {
+      dev().error(TAG, `Received unexpected message (${method}, ${id}) ` +
+          `from worker.`);
       return;
     }
+    dev().assert(method == message.method, `Received mismatched method ` +
+        `(${method}, ${id}), expected ${message.method}.`);
 
-    const resolve = invocations[id].resolve;
-    if (!resolve) {
-      dev().error(TAG, `Received unexpected "${method}" message ` +
-          `from worker with id: ${id}.`);
-      return;
-    }
+    message.resolve(returnValue);
+    this.messages_[id] = undefined;
 
-    resolve(returnValue);
-    invocations[id] = undefined;
-
-    // Clean up array if there are no more messages in flight for this method.
+    // Clean up array if there are no more pending messages.
     let empty = true;
-    for (let i = 0; i < invocations.length && empty; i++) {
-      if (invocations[i] !== undefined) {
+    for (let i = 0; i < this.messages_.length && empty; i++) {
+      if (this.messages_[i] !== undefined) {
         empty = false;
       }
     }
     if (empty) {
-      delete this.messages_[method];
+      this.messages_ = [];
     }
   }
 
   /**
-   * @param {string} method
    * @return {boolean}
    * @visibleForTesting
    */
-  hasPendingMessagesFor(method) {
-    const invocations = this.messages_[method];
-    return !!invocations && invocations.length > 0;
+  hasPendingMessages() {
+    return this.messages_.length > 0;
   }
 }

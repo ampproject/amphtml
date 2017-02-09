@@ -33,6 +33,7 @@ self.addEventListener('message', function(event) {
 
   let returnValue;
 
+  // TODO(choumx): Add error reporting.
   switch (method) {
     case 'bind.initialize':
       evaluator_ = new BindEvaluator();
@@ -46,6 +47,9 @@ self.addEventListener('message', function(event) {
         throw new Error(`${method}: BindEvaluator is not initialized.`);
       }
       break;
+
+    default:
+      throw new Error(`Unrecognized method: ${method}`);
   }
 
   /** @type {FromWorkerMessageDef} */
