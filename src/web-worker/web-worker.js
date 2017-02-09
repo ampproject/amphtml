@@ -23,7 +23,7 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
-import {FromWorkerMessageDef, ToWorkerMessageDef} from './amp-worker';
+import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
 
 /** @private {BindEvaluator} */
 let evaluator_;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev} from '../log';
 import {fromClass} from '../service';
@@ -21,24 +22,6 @@ import {isExperimentOn} from '../experiments';
 import {getMode} from '../mode';
 
 const TAG = 'web-worker';
-
-/**
- * @typedef {{
- *   method: string,
- *   args: !Array,
- *   id: number,
- * }}
- */
-export let ToWorkerMessageDef;
-
-/**
- * @typedef {{
- *   method: string,
- *   returnValue: *,
- *   id: number,
- * }}
- */
-export let FromWorkerMessageDef;
 
 /**
  * @typedef {{method: string, resolve: !Function, reject: !Function}}
