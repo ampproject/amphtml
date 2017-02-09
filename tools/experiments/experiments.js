@@ -252,6 +252,13 @@ const EXPERIMENTS = [
     id: 'jank-meter',
     name: 'Display jank meter',
   },
+  {
+    id: 'amp-selector',
+    name: 'Amp selector extension- [LAUNCHED]',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+         'amp-selector/amp-selector.md',
+  },
 ];
 
 if (getMode().localDev) {
