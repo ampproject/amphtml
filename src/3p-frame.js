@@ -372,7 +372,7 @@ export function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
  * Deserialize an AMP post message.
  * Returns null if it's not valid AMP message format.
  *
- * @param message {*}
+ * @param {*} message
  * @returns {?JSONType}
  */
 export function deserializeMessage(message) {

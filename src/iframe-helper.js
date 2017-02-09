@@ -378,12 +378,13 @@ function getSentinel_(iframe, opt_is3P) {
 
 /**
  * JSON parses event.data if it needs to be
+ * @param {*} data
  * @returns {?Object} object message
  * @private
  */
 function parseIfNeeded(data) {
-  if (typeof data === 'string') {
-    if (data.charAt(0) === '{') {
+  if (typeof data == 'string') {
+    if (data.charAt(0) == '{') {
       data = tryParseJson(data, e => {
         dev().warn('IFRAME-HELPER',
             'Postmessage could not be parsed. ' +
