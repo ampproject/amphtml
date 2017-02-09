@@ -160,7 +160,6 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   layoutAd_() {
-    // QQQQ: sync up with 0.1 version.
     const ad = dev().assertElement(this.ad_);
     this.updateInViewport(ad, true);
     this.scheduleLayout(ad);
