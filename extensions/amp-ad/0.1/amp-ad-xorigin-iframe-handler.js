@@ -25,7 +25,7 @@ import {
   IntersectionObserver,
 } from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
