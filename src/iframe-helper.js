@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
+import {deserializeMessage, isAmpMessage} from './3p-frame';
 import {dev} from './log';
-import {parseUrl} from './url';
 import {filterSplice} from './utils/array';
-import {
-  deserializeMessage,
-  isAmpMessage,
-} from './3p-frame';
+import {parseUrl} from './url';
+import {tryParseJson} from './json';
 
 /**
  * Sentinel used to force unlistening after a iframe is detached.
@@ -199,10 +197,8 @@ function registerGlobalListenerIfNeeded(parentWin) {
     if (!event.data) {
       return;
     }
-    // TODO(bradfrizzell): just directly use deserialize function
-    //    and update all affected tests
     const data = parseIfNeeded(event.data);
-    if (!data.sentinel) {
+    if (!data || !data.sentinel) {
       return;
     }
 
@@ -381,22 +377,26 @@ function getSentinel_(iframe, opt_is3P) {
 }
 
 /**
- * Json parses event.data if it needs to be
- * @returns {!Object|!String} object message
+ * JSON parses event.data if it needs to be
+ * @param {*} data
+ * @returns {?Object} object message
  * @private
  */
 function parseIfNeeded(data) {
-  if (typeof data === 'string' && data.charAt(0) === '{') {
-    try {
-      data = JSON.parse(data);
-    } catch (e) {
-      dev().warn('IFRAME-HELPER', 'Postmessage could not be parsed. ' +
-          'Is it in a valid JSON format?', e);
+  if (typeof data == 'string') {
+    if (data.charAt(0) == '{') {
+      data = tryParseJson(data, e => {
+        dev().warn('IFRAME-HELPER',
+            'Postmessage could not be parsed. ' +
+            'Is it in a valid JSON format?', e);
+      }) || null;
+    } else if (isAmpMessage(data)) {
+      data = deserializeMessage(data);
+    } else {
+      data = null;
     }
-  } else if (isAmpMessage(data)) {
-    data = deserializeMessage(data);
   }
-  return /** @type {!Object} */ (data) ;
+  return /** @type {?Object} */ (data);
 }
 
 
