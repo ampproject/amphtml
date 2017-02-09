@@ -20,10 +20,10 @@
  *
  * @param {*} value
  * @param {number=} opt_fromIndex
- * @returns {boolean}
+ * @return {boolean}
  * @this {Array}
  */
-export function includes(value, opt_fromIndex) {
+function includes(value, opt_fromIndex) {
   const fromIndex = opt_fromIndex || 0;
   const len = this.length;
   let i = fromIndex >= 0 ? fromIndex : Math.max(len + fromIndex, 0);
