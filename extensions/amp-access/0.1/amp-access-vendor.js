@@ -41,6 +41,12 @@ export class AccessVendorAdapter {
     this.vendorName_ = user().assert(configJson['vendor'],
         '"vendor" name must be specified');
 
+    /** @const @private {JSONType} */
+    this.vendorConfig_ = configJson[this.vendorName_];
+
+    /** @const @private {boolean} */
+    this.isPingbackEnabled_ = !configJson['noPingback'];
+
     /** @const @private {!Promise<!./access-vendor.AccessVendor>} */
     this.vendorPromise_ = new Promise(resolve => {
       /** @private {function(!./access-vendor.AccessVendor)|undefined} */
@@ -50,9 +56,7 @@ export class AccessVendorAdapter {
 
   /** @override */
   getConfig() {
-    return {
-      'vendor': this.vendorName_,
-    };
+    return this.vendorConfig_;
   }
 
   /**
@@ -83,7 +87,7 @@ export class AccessVendorAdapter {
 
   /** @override */
   isPingbackEnabled() {
-    return true;
+    return this.isPingbackEnabled_;
   }
 
   /** @override */

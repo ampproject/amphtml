@@ -17,11 +17,19 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
-import {isLoadErrorMessage} from './event-helper';
-import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
+import {
+  isLoadErrorMessage,
+  setReportError as setReportErrorEventHelper,
+} from './event-helper';
+import {
+  USER_ERROR_SENTINEL,
+  isUserErrorMessage,
+  setReportError as setReportErrorLog,
+} from './log';
 import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
 import {isProxyOrigin} from './url';
+import {isCanary} from './experiments';
 
 
 /**
@@ -31,10 +39,10 @@ const CANCELLED = 'CANCELLED';
 
 
 /**
- * The threshold for throttling load errors. Currently at 0.1%.
+ * The threshold for throttled errors. Currently at 0.1%.
  * @const {number}
  */
-const LOAD_ERROR_THRESHOLD = 1e-3;
+const THROTTLED_ERROR_THRESHOLD = 1e-3;
 
 
 /**
@@ -69,71 +77,76 @@ let reportingBackoff = function(work) {
  * @return {!Error}
  */
 export function reportError(error, opt_associatedElement) {
-  // Convert error to the expected type.
-  let isValidError;
-  if (error) {
-    if (error.message !== undefined) {
-      isValidError = true;
-    } else {
-      const origError = error;
-      error = new Error(String(origError));
-      error.origError = origError;
-    }
-  } else {
-    error = new Error('Unknown error');
-  }
-  // Report if error is not an expected type.
-  if (!isValidError && getMode().localDev) {
-    setTimeout(function() {
-      const rethrow = new Error(
-          '_reported_ Error reported incorrectly: ' + error);
-      throw rethrow;
-    });
-  }
-
-  if (error.reported) {
-    return /** @type {!Error} */ (error);
-  }
-  error.reported = true;
-
-  // Update element.
-  const element = opt_associatedElement || error.associatedElement;
-  if (element && element.classList) {
-    element.classList.add('i-amphtml-error');
-    if (getMode().development) {
-      element.classList.add('i-amphtml-element-error');
-      element.setAttribute('error-message', error.message);
-    }
-  }
-
-  // Report to console.
-  if (self.console) {
-    if (error.messageArray) {
-      (console.error || console.log).apply(console,
-          error.messageArray);
-    } else {
-      if (element) {
-        (console.error || console.log).call(console,
-            element.tagName.toLowerCase() +
-                (element.id ? ' with id ' + element.id : '') + ':',
-            error.message);
-      } else if (!getMode().minified) {
-        (console.error || console.log).call(console, error.stack);
+  try {
+    // Convert error to the expected type.
+    let isValidError;
+    if (error) {
+      if (error.message !== undefined) {
+        isValidError = true;
       } else {
-        (console.error || console.log).call(console, error.message);
+        const origError = error;
+        error = new Error(String(origError));
+        error.origError = origError;
+      }
+    } else {
+      error = new Error('Unknown error');
+    }
+    // Report if error is not an expected type.
+    if (!isValidError && getMode().localDev) {
+      setTimeout(function() {
+        const rethrow = new Error(
+            '_reported_ Error reported incorrectly: ' + error);
+        throw rethrow;
+      });
+    }
+
+    if (error.reported) {
+      return /** @type {!Error} */ (error);
+    }
+    error.reported = true;
+
+    // Update element.
+    const element = opt_associatedElement || error.associatedElement;
+    if (element && element.classList) {
+      element.classList.add('i-amphtml-error');
+      if (getMode().development) {
+        element.classList.add('i-amphtml-element-error');
+        element.setAttribute('error-message', error.message);
       }
     }
-  }
-  if (element && element.dispatchCustomEventForTesting) {
-    element.dispatchCustomEventForTesting('amp:error', error.message);
-  }
 
-  // 'call' to make linter happy. And .call to make compiler happy
-  // that expects some @this.
-  reportErrorToServer['call'](undefined, undefined, undefined, undefined,
-      undefined, error);
+    // Report to console.
+    if (self.console) {
+      const output = (console.error || console.log);
+      if (error.messageArray) {
+        output.apply(console, error.messageArray);
+      } else {
+        if (element) {
+          output.call(console, error.message, element);
+        } else if (!getMode().minified) {
+          output.call(console, error.stack);
+        } else {
+          output.call(console, error.message);
+        }
+      }
+    }
+    if (element && element.dispatchCustomEventForTesting) {
+      element.dispatchCustomEventForTesting('amp:error', error.message);
+    }
+
+    // 'call' to make linter happy. And .call to make compiler happy
+    // that expects some @this.
+    reportErrorToServer['call'](undefined, undefined, undefined, undefined,
+        undefined, error);
+  } catch (errorReportingError) {
+    setTimeout(function() {
+      throw errorReportingError;
+    });
+  }
   return /** @type {!Error} */ (error);
 }
+setReportErrorEventHelper(reportError);
+setReportErrorLog(reportError);
 
 /**
  * Returns an error for a cancellation of a promise.
@@ -237,12 +250,16 @@ export function getErrorReportUrl(message, filename, line, col, error,
     return;
   }
 
-  // Load errors are always "expected".
-  if (isLoadErrorMessage(message)) {
+  // We throttle load errors and generic "Script error." errors
+  // that have no information and thus cannot be acted upon.
+  if (isLoadErrorMessage(message) ||
+    // See https://github.com/ampproject/amphtml/issues/7353
+    // for context.
+    message == 'Script error.') {
     expected = true;
 
     // Throttle load errors.
-    if (Math.random() > LOAD_ERROR_THRESHOLD) {
+    if (Math.random() > THROTTLED_ERROR_THRESHOLD) {
       return;
     }
   }
@@ -261,10 +278,17 @@ export function getErrorReportUrl(message, filename, line, col, error,
     // classify these errors as benchmarks and not exceptions.
     url += '&ex=1';
   }
+
+  let runtime = '1p';
   if (self.context && self.context.location) {
     url += '&3p=1';
+    runtime = '3p';
+  } else if (getMode().runtime) {
+    runtime = getMode().runtime;
   }
-  if (self.AMP_CONFIG && self.AMP_CONFIG.canary) {
+  url += '&rt=' + runtime;
+
+  if (isCanary(self)) {
     url += '&ca=1';
   }
   if (self.location.ancestorOrigins && self.location.ancestorOrigins[0]) {

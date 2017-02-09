@@ -79,6 +79,7 @@ var forbiddenTerms = {
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
     ],
+    checkInTestFolder: true,
   },
   // Match `getMode` that is not followed by a "()." and is assigned
   // as a variable.
@@ -153,19 +154,17 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
-  'installCidService': {
+  'installCidServiceForDocForTesting': {
     message: privateServiceFactory,
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
-      'extensions/amp-access/0.1/amp-access.js',
-      'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
   'installCryptoService': {
     message: privateServiceFactory,
     whitelist: [
-      'extensions/amp-analytics/0.1/amp-analytics.js',
-      'extensions/amp-analytics/0.1/crypto-impl.js',
+      'src/service/crypto-impl.js',
+      'src/runtime.js',
     ],
   },
   'installDocService': {
@@ -288,12 +287,13 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
       'src/service/storage-impl.js',
       'src/service/history-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
     ],
   },
   // Privacy sensitive
-  'cidFor': {
+  'cidForDoc|cidForDocOrNull': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/ad-cid.js',
@@ -338,17 +338,13 @@ var forbiddenTerms = {
       'tools/experiments/experiments.js',
     ],
   },
-  'isDevChannel\\W': {
-    message: requiresReviewPrivacy,
+  'setReportError\\W': {
+    message: 'Should only be used in error.js and tests.',
     whitelist: [
-      'src/experiments.js',
-      'tools/experiments/experiments.js',
-    ],
-  },
-  'isDevChannelVersionDoNotUse_\\W': {
-    message: shouldNeverBeUsed,
-    whitelist: [
-      'src/experiments.js',
+      'dist.3p/current/integration.js',
+      'src/error.js',
+      'src/event-helper.js',
+      'src/log.js',
     ],
   },
   'isTrustedViewer': {
@@ -356,6 +352,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/viewer-impl.js',
       'src/inabox/inabox-viewer.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
     ],
   },
   'eval\\(': {
@@ -430,6 +427,7 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
       'src/3p-frame.js',
+      'src/iframe-attributes.js',
       'src/service/viewer-impl.js',
       'src/inabox/inabox-viewer.js',
     ],
@@ -476,8 +474,8 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',  // Includes the previous.
     ],
   },
-  'chunk\\(': {
-    message: 'chunk( should only be used during startup',
+  'startupChunk\\(': {
+    message: 'startupChunk( should only be used during startup',
     whitelist: [
       'src/amp.js',
       'src/chunk.js',
@@ -491,6 +489,26 @@ var forbiddenTerms = {
       'testing/iframe.js',
     ],
   },
+  'AMP_CONFIG': {
+    message: 'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
+        'and getMode() to access config',
+    whitelist: [
+      'build-system/server.js',
+      'build-system/amp.extern.js',
+      'build-system/tasks/prepend-global/test.js',
+      'build-system/tasks/prepend-global/index.js',
+      'src/service-worker/core.js',
+      'src/service-worker/error-reporting.js',
+      'src/mode.js',
+      'src/experiments.js',
+      'src/config.js',
+      'dist.3p/current/integration.js',
+    ],
+  },
+  'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
+    message: 'SVG data images must use charset=utf-8: ' +
+        '"data:image/svg+xml;charset=utf-8,..."',
+  }
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
@@ -563,6 +581,15 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
   '\\.scheduleUnlayout\\(': bannedTermsHelpString,
+  // Super complicated regex that says "find any querySelector method call that
+  // is passed as a variable anything that is not a string, or a string that
+  // contains a space.
+  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': {
+    message: 'querySelector is not scoped to the element, but globally and ' +
+      'filtered to just the elements inside the element. This leads to ' +
+      'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
+      '"div div"). Instead, use the scopedQuerySelector helper in dom.js',
+  },
   'loadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
@@ -571,6 +598,7 @@ var forbiddenTermsSrcInclusive = {
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
+      'src/service/crypto-impl.js',
       'src/shadow-embed.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
@@ -641,7 +669,7 @@ var forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 var requiredTerms = {
-  'Copyright 20(15|16) The AMP HTML Authors\\.':
+  'Copyright 20(15|16|17) The AMP HTML Authors\\.':
       dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0':
       dedicatedCopyrightNoteSources,
@@ -695,10 +723,11 @@ function matchTerms(file, terms) {
   return Object.keys(terms).map(function(term) {
     var fix;
     var whitelist = terms[term].whitelist;
+    var checkInTestFolder = terms[term].checkInTestFolder;
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
     if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||
-        isInTestFolder(relative))) {
+        isInTestFolder(relative) && !checkInTestFolder)) {
       return false;
     }
     // we can't optimize building the `RegExp` objects early unless we build

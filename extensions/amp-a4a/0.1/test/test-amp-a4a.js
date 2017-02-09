@@ -29,6 +29,7 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {cryptoFor} from '../../../../src/crypto';
 import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
@@ -46,6 +47,7 @@ import {platformFor} from '../../../../src/platform';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {AmpContext} from '../../../../3p/ampcontext.js';
 import * as sinon from 'sinon';
 
 /**
@@ -190,7 +192,8 @@ describe('amp-a4a', () => {
     expect(child).to.be.ok;
     expect(child.src).to.match(/^https?:[^?#]+nameframe(\.max)?\.html/);
     const nameData = child.getAttribute('name');
-    expect(JSON.parse.bind(null, nameData), nameData).not.to.throw(Error);
+    expect(nameData).to.be.ok;
+    verifyNameData(nameData);
     expect(child).to.be.visible;
   }
 
@@ -201,8 +204,23 @@ describe('amp-a4a', () => {
     const child = element.querySelector('iframe[src]');
     expect(child).to.be.ok;
     expect(child.src).to.have.string(srcUrl);
-    expect(child.getAttribute('name')).not.to.be.ok;
+    const nameData = child.getAttribute('name');
+    expect(nameData).to.be.ok;
+    verifyNameData(nameData);
     expect(child).to.be.visible;
+  }
+
+  function verifyNameData(nameData) {
+    let attributes;
+    expect(() => {attributes = JSON.parse(nameData);}).not.to.throw(Error);
+    expect(attributes).to.be.ok;
+    expect(attributes._context).to.be.ok;
+    expect(attributes._context).not.to.contain.all.keys(
+        'sentinel', 'amp3pSentinel');
+    const sentinel = attributes._context.amp3pSentinel ||
+        attributes._context.sentinel;
+    expect(sentinel).to.be.ok;
+    expect(sentinel).to.match(/((\d+)-\d+)/);
   }
 
   describe('ads are visible', () => {
@@ -214,7 +232,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(f => {
         fixture = f;
@@ -333,7 +350,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -366,6 +382,16 @@ describe('amp-a4a', () => {
           expect(xhrMock).to.be.calledOnce;
         });
       });
+
+      it('should be able to create AmpContext', () => {
+        return a4a.layoutCallback().then(() => {
+          const window_ = a4aElement.querySelector(
+              'iframe[data-amp-3p-sentinel]');
+          const ac = new AmpContext(window_);
+          expect(ac).to.be.ok;
+          expect(ac.sentinel).to.be.ok;
+        });
+      });
     });
 
     describe('#renderViaNameFrame', () => {
@@ -382,6 +408,16 @@ describe('amp-a4a', () => {
           a4a.vsync_.runScheduledTasks_();
           verifyNameFrameRender(a4aElement);
           expect(xhrMock).to.be.calledOnce;
+        });
+      });
+
+      it('should be able to create AmpContext', () => {
+        return a4a.layoutCallback().then(() => {
+          const window_ = a4aElement.querySelector(
+              'iframe[data-amp-3p-sentinel]');
+          const ac = new AmpContext(window_);
+          expect(ac).to.be.ok;
+          expect(ac.sentinel).to.be.ok;
         });
       });
 
@@ -474,7 +510,7 @@ describe('amp-a4a', () => {
                     // DOM mutations are actually completed before testing.
                     a4a.vsync_.runScheduledTasks_();
                     const safeChild = a4aElement.querySelector(
-                        `iframe[src^="${SAFEFRAME_IMPL_PATH}]"`);
+                        `iframe[src^="${SAFEFRAME_IMPL_PATH}"]`);
                     expect(safeChild).to.not.be.ok;
                     if (headerVal != 'nameframe') {
                       const unsafeChild = a4aElement.querySelector('iframe');
@@ -514,7 +550,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -557,6 +592,42 @@ describe('amp-a4a', () => {
         });
       });
     });
+
+    it('should call handleResize for multi-size ads', () => {
+      // Make sure there's no signature, so that we go down the 3p iframe path.
+      delete headers[SIGNATURE_HEADER];
+      // If rendering type is safeframe, we SHOULD attach a SafeFrame.
+      headers[RENDERING_TYPE_HEADER] = 'safeframe';
+      headers['X-CreativeSize'] = '320x50';
+      xhrMock.withArgs(TEST_URL, {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        a4aElement.setAttribute('width', 480);
+        a4aElement.setAttribute('height', 75);
+        a4aElement.setAttribute('type', 'doubleclick');
+        const a4a = new MockA4AImpl(a4aElement);
+        const handleResizeMock = sandbox.stub(a4a, 'handleResize');
+        doc.body.appendChild(a4aElement);
+        a4a.onLayoutMeasure();
+        const renderPromise = a4a.layoutCallback();
+        return renderPromise.then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          const child = a4aElement.querySelector('iframe[name]');
+          expect(child).to.be.ok;
+          expect(child.getAttribute('src')).to.have.string('safeframe');
+          expect(child.getAttribute('name')).to.match(/[^;]+;\d+;[\s\S]+/);
+          expect(handleResizeMock).to.be.called.once;
+        });
+      });
+    });
   });
 
   describe('#onLayoutMeasure', () => {
@@ -565,7 +636,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -644,7 +714,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -711,7 +780,6 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -1073,7 +1141,6 @@ describe('amp-a4a', () => {
           mode: 'cors',
           method: 'GET',
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         }).returns(Promise.resolve(mockResponse));
         return a4a.onLayoutMeasure(() => {
           expect(a4a.adPromise_).to.not.be.null;
@@ -1146,6 +1213,321 @@ describe('amp-a4a', () => {
           expect(suffix).to.be.undefined;
           throw new Error('test fail within error fn');
         })('world')).to.be.undefined;
+      });
+    });
+
+    describe('verifyCreativeSignature_', () => {
+      let stubVerifySignature;
+      let a4a;
+      beforeEach(() => {
+        return createAdTestingIframePromise().then(fixture => {
+          stubVerifySignature =
+              sandbox.stub(cryptoFor(fixture.win), 'verifySignature');
+          const a4aElement = createA4aElement(fixture.doc);
+          a4a = new MockA4AImpl(a4aElement);
+        });
+      });
+
+      it('properly handles all failures', () => {
+        // Single provider with first key fails but second key passes validation
+        a4a.win.ampA4aValidationKeys = (() => {
+          const providers = [];
+          for (let i = 0; i < 10; i++) {
+            const serviceName = `test-service${i}`;
+            providers[i] = Promise.resolve({serviceName, keys: [
+              Promise.resolve({serviceName}),
+              Promise.resolve({serviceName}),
+            ]});
+          }
+          return providers;
+        })();
+        stubVerifySignature.returns(Promise.resolve(false));
+        return a4a.verifyCreativeSignature_('some_creative', 'some_sig')
+          .then(() => {
+            throw new Error('should have triggered rejection');
+          })
+          .catch(err => {
+            expect(stubVerifySignature).to.be.callCount(20);
+            expect(err).to.equal('No validation service could verify this key');
+          });
+      });
+
+      it('properly handles multiple keys for one provider', () => {
+        // Single provider with first key fails but second key passes validation
+        const serviceName = 'test-service';
+        a4a.win.ampA4aValidationKeys = [
+          Promise.resolve({serviceName, keys: [
+            Promise.resolve({serviceName: '1'}),
+            Promise.resolve({serviceName: '2'}),
+          ]}),
+        ];
+        const creative = 'some_creative';
+        stubVerifySignature.onCall(0).returns(Promise.resolve(false));
+        stubVerifySignature.onCall(1).returns(Promise.resolve(true));
+        return a4a.verifyCreativeSignature_(creative, 'some_sig')
+          .then(verifiedCreative => {
+            expect(stubVerifySignature).to.be.calledTwice;
+            expect(verifiedCreative).to.equal(creative);
+          });
+      });
+
+      it('properly stops verification at first valid key', done => {
+        // Single provider where first key fails, second passes, and third
+        // never calls verifySignature.
+        const serviceName = 'test-service';
+        let keyInfoResolver;
+        a4a.win.ampA4aValidationKeys = [
+          Promise.resolve({serviceName, keys: [
+            Promise.resolve({}),
+            Promise.resolve({}),
+            new Promise(resolver => {
+              keyInfoResolver = resolver;
+            }),
+          ]}),
+        ];
+        const creative = 'some_creative';
+        const signature = 'some_signature';
+        stubVerifySignature.onCall(0).returns(Promise.resolve(false));
+        stubVerifySignature.onCall(1).returns(Promise.resolve(true));
+        a4a.verifyCreativeSignature_(creative, signature)
+          .then(verifiedCreative => {
+            expect(stubVerifySignature).to.be.calledTwice;
+            expect(verifiedCreative).to.equal(creative);
+            done();
+          });
+        // From testing have found that need to yield prior to calling last
+        // key info resolver to ensure previous keys have had a chance to
+        // execute.
+        setTimeout(() => {keyInfoResolver({}); }, 0);
+      });
+    });
+  });
+
+  describe('#getKeyInfoSets_', () => {
+    let fixture;
+    let win;
+    let a4aElement;
+    beforeEach(() => {
+      return createAdTestingIframePromise().then(f => {
+        fixture = f;
+        win = fixture.win;
+        a4aElement = createA4aElement(fixture.doc);
+        return fixture;
+      });
+    });
+
+    function verifyIsKeyInfo(keyInfo) {
+      expect(keyInfo).to.be.ok;
+      expect(keyInfo).to.have.all.keys(
+          ['serviceName', 'hash', 'cryptoKey']);
+      expect(keyInfo.serviceName).to.be.a('string').and.not.to.equal('');
+      expect(keyInfo.hash).to.be.instanceOf(Uint8Array);
+    }
+
+    it('should fetch a single key', () => {
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).to.be.calledOnce;
+      expect(xhrMockJson).to.be.calledWith(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          });
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);
+      expect(result[0]).to.be.instanceof(Promise);
+      return result[0].then(serviceInfo => {
+        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfo['serviceName']).to.equal('google');
+        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfo['keys']).to.have.lengthOf(1);
+        const keyInfoPromise = serviceInfo['keys'][0];
+        expect(keyInfoPromise).to.be.an.instanceof(Promise);
+        return keyInfoPromise.then(keyInfo => {
+          verifyIsKeyInfo(keyInfo);
+        });
+      });
+    });
+
+    it('should fetch multiple keys', () => {
+      // For our purposes, re-using the same key is fine.
+      const testKey = JSON.parse(validCSSAmp.publicKey);
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(
+          Promise.resolve({keys: [testKey, testKey, testKey]}));
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).to.be.calledOnce;
+      expect(xhrMockJson).to.be.calledWith(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          });
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);  // Only one service.
+      expect(result[0]).to.be.instanceof(Promise);
+      return result[0].then(serviceInfo => {
+        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfo['serviceName']).to.equal('google');
+        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfo['keys']).to.have.lengthOf(3);
+        return Promise.all(serviceInfo['keys'].map(keyInfoPromise =>
+          keyInfoPromise.then(keyInfo => verifyIsKeyInfo(keyInfo))));
+      });
+    });
+
+    it('should fetch from multiple services', () => {
+      getSigningServiceNamesMock.returns(['google', 'google-dev']);
+      // For our purposes, we don't care what the key is, so long as it's valid.
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(
+              Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).to.be.calledTwice;
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(2);  // Two services.
+      return Promise.all(result.map(  // For each service...
+          serviceInfoPromise => serviceInfoPromise.then(serviceInfo => {
+            expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+            expect(serviceInfo['serviceName']).to.have.string('google');
+            expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+            expect(serviceInfo['keys']).to.have.lengthOf(1);
+            const keyInfoPromise = serviceInfo['keys'][0];
+            expect(keyInfoPromise).to.be.an.instanceof(Promise);
+            return keyInfoPromise.then(keyInfo => {
+              verifyIsKeyInfo(keyInfo);
+            });
+          })));
+    });
+
+    it('Should gracefully handle malformed key responses', () => {
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(Promise.resolve({keys: ['invalid key data']}));
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).to.be.calledOnce;
+      expect(xhrMockJson).to.be.calledWith(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          });
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);  // Only one service.
+      return result[0].then(serviceInfo => {
+        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfo['serviceName']).to.equal('google');
+        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfo['keys']).to.be.empty;
+      });
+    });
+
+    it('should gracefully handle network errors in a single service', () => {
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(Promise.reject(
+              new TypeError('some random network error')));
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);  // Only one service.
+      return result[0].then(serviceInfo => {
+        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfo['serviceName']).to.equal('google');
+        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfo['keys']).to.be.empty;
+      });
+    });
+
+    it('should handle success in one service and net error in another', () => {
+      getSigningServiceNamesMock.returns(['google', 'google-dev']);
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json', {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(Promise.reject(
+              new TypeError('some random network error')));
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).to.be.calledTwice;
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(2);  // Two services.
+      return Promise.all(result.map(  // For each service...
+          serviceInfoPromise => serviceInfoPromise.then(serviceInfo => {
+            expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+            const serviceName = serviceInfo.serviceName;
+            expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+            if (serviceName == 'google') {
+              expect(serviceInfo['keys']).to.have.lengthOf(1);
+              const keyInfoPromise = serviceInfo['keys'][0];
+              expect(keyInfoPromise).to.be.an.instanceof(Promise);
+              return keyInfoPromise.then(keyInfo => {
+                verifyIsKeyInfo(keyInfo);
+              });
+            } else if (serviceName == 'google-dev') {
+              expect(serviceInfo['keys']).to.be.empty;
+            } else {
+              throw new Error(
+                  `Unexpected service name: ${serviceName} is neither ` +
+                  'google nor google-dev');
+            }
+          })));
+    });
+
+    it('should return valid object on invalid service name', () => {
+      getSigningServiceNamesMock.returns(['fnord']);
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).not.to.be.called;
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);
+      expect(result[0]).to.be.instanceof(Promise);
+      return result[0].then(serviceInfo => {
+        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfo['serviceName']).to.equal('fnord');
+        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfo['keys']).to.be.empty;
       });
     });
   });

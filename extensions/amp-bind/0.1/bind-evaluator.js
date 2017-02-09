@@ -15,39 +15,144 @@
  */
 
 import {BindExpression} from './bind-expression';
+import {BindValidator} from './bind-validator';
+import {rewriteAttributeValue} from '../../../src/sanitizer';
+
+/**
+ * @typedef {{
+ *   tagName: string,
+ *   property: string,
+ *   expressionString: string,
+ * }}
+ */
+export let BindingDef;
+
+/**
+ * @typedef {{
+ *   tagName: string,
+ *   property: string,
+ *   expression: !BindExpression,
+ * }}
+ */
+let ParsedBindingDef;
 
 /**
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
+  constructor() {
+    /** @const {!Array<ParsedBindingDef>} */
+    this.parsedBindings_ = [];
+
+    /** @const {!./bind-validator.BindValidator} */
+    this.validator_ = new BindValidator();
+  }
+
   /**
-   * @param {!Array<string>} expressionStrings
+   * Parses and stores given bindings into expression objects and returns map
+   * of expression string to parse errors.
+   * @param {!Array<BindingDef>} bindings
+   * @return {!Object<string,!Error>}
    */
-  constructor(expressionStrings) {
-    /** @const {!Array<!BindExpression>} */
-    this.expressions_ = [];
-    for (let i = 0; i < expressionStrings.length; i++) {
-      this.expressions_[i] = new BindExpression(expressionStrings[i]);
+  setBindings(bindings) {
+    const errors = Object.create(null);
+    // Create BindExpression objects from expression strings.
+    // TODO(choumx): Chunk creation of BindExpression or change to web worker.
+    for (let i = 0; i < bindings.length; i++) {
+      const e = bindings[i];
+      const string = e.expressionString;
+
+      let expression;
+      try {
+        expression = new BindExpression(e.expressionString);
+      } catch (error) {
+        errors[string] = error;
+        continue;
+      }
+
+      this.parsedBindings_.push({
+        tagName: e.tagName,
+        property: e.property,
+        expression,
+      });
     }
+    return errors;
   }
 
   /**
    * Evaluates all expressions with the given `scope` data and resolves
-   * the returned Promise with the results.
+   * the returned Promise with a map of expression strings to results.
    * @param {!Object} scope
-   * @return {!Promise<!Object<string,*>>} Maps expression strings to results.
+   * @return {
+   *   !Promise<{
+   *     results: !Object<string, ./bind-expression.BindExpressionResultDef>,
+   *     errors: !Object<string, !Error>,
+   *   }>
+   * }
    */
   evaluate(scope) {
     return new Promise(resolve => {
-      /** @type {!Object<string,*>} */
+      /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
       const cache = {};
-      this.expressions_.forEach(expression => {
-        const string = expression.expressionString;
-        if (cache[string] === undefined) {
-          cache[string] = expression.evaluate(scope);
+      /** @type {!Object<string, !Error>} */
+      const errors = {};
+
+      this.parsedBindings_.forEach(binding => {
+        const {tagName, property, expression} = binding;
+        const expr = expression.expressionString;
+
+        // Skip if we've already evaluated this expression string.
+        if (cache[expr] !== undefined || errors[expr]) {
+          return;
+        }
+
+        let result;
+        try {
+          result = binding.expression.evaluate(scope);
+        } catch (error) {
+          errors[expr] = error;
+          return;
+        }
+
+        const resultString = this.stringValueOf_(property, result);
+        if (this.validator_.isResultValid(tagName, property, resultString)) {
+          // Rewrite URL attributes for CDN if necessary.
+          cache[expr] = typeof result === 'string'
+              ? rewriteAttributeValue(tagName, property, result)
+              : result;
+        } else {
+          errors[expr] = new Error(
+              `"${result}" is not a valid result for [${property}].`);
         }
       });
-      resolve(cache);
+      resolve({results: cache, errors});
     });
+  }
+
+  /**
+   * Returns the expression result string for a binding to `property`.
+   * @param {./bind-expression.BindExpressionResultDef} result
+   * @return {?string}
+   * @private
+   */
+  stringValueOf_(property, result) {
+    if (result === null) {
+      return null;
+    }
+    switch (property) {
+      case 'text':
+        break;
+      case 'class':
+        if (Array.isArray(result)) {
+          return result.join(' ');
+        }
+        break;
+      default:
+        if (typeof result === 'boolean') {
+          return result ? '' : null;
+        }
+        break;
+    }
+    return String(result);
   }
 }

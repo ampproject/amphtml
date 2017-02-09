@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {actionServiceForDoc} from './action';
 import {getServiceForDoc} from './service';
 import {dev, user} from './log';
 import {
@@ -46,7 +47,7 @@ export function onDocumentFormSubmit_(e) {
     return;
   }
 
-  const form = e.target;
+  const form = dev().assertElement(e.target);
   if (!form || form.tagName != 'FORM') {
     return;
   }
@@ -82,7 +83,7 @@ export function onDocumentFormSubmit_(e) {
     // TODO(#5670): Make action optional for method=GET when action-xhr is provided.
     user().assert(action,
         'form action attribute is required for method=GET: %s', form);
-    assertHttpsUrl(action, dev().assertElement(form), 'action');
+    assertHttpsUrl(action, form, 'action');
     user().assert(!isProxyOrigin(action),
         'form action should not be on AMP CDN: %s', form);
     checkCorsUrl(action);
@@ -110,5 +111,19 @@ export function onDocumentFormSubmit_(e) {
       'form target=%s is invalid can only be _blank or _top: %s', target, form);
   if (actionXhr) {
     checkCorsUrl(actionXhr);
+  }
+
+  // For xhr submissions relay the submission event through action service to
+  // allow us to wait for amp-form (and possibly its dependencies) to execute
+  // the actual submission. For non-XHR GET we let the submission go through
+  // to allow _blank target to work.
+  if (actionXhr) {
+    e.preventDefault();
+
+    // It's important to stop propagation of the submission to avoid double
+    // handling of the event in cases were we are delegating to action service
+    // to deliver the submission event.
+    e.stopImmediatePropagation();
+    actionServiceForDoc(form).execute(form, 'submit', /*args*/ null, form, e);
   }
 }

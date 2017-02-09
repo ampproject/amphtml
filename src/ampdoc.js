@@ -16,6 +16,7 @@
 
 import {getExistingServiceForWindow} from './service';
 
+
 /**
  * Returns the global instance of the `AmpDocService` service that can be
  * used to resolve an ampdoc for any node: either in the single-doc or
@@ -26,4 +27,15 @@ import {getExistingServiceForWindow} from './service';
 export function ampdocServiceFor(window) {
   return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
       getExistingServiceForWindow(window, 'ampdoc'));
+}
+
+
+/**
+ * Returns the ampdoc for the specified node..
+ * @param {!Node} node
+ * @return {!./service/ampdoc-impl.AmpDoc}
+ */
+export function getAmpDoc(node) {
+  const win = (node.ownerDocument || node).defaultView;
+  return ampdocServiceFor(win).getAmpDoc(node);
 }

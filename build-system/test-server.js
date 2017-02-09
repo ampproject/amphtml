@@ -22,7 +22,6 @@ var bodyParser = require('body-parser');
 var morgan = require('morgan');
 
 app.use(bodyParser.json());
-app.use(morgan('dev'));
 
 function setCorsHeaders(req, res, next) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -78,6 +77,13 @@ app.use('/response-headers', function(req, res) {
 });
 
 app.use('/post', function(req, res) {
+  delete req.query.__amp_source_origin;
+  res.json({
+    json: req.body,
+  })
+});
+
+app.use('/form/post', function(req, res) {
   delete req.query.__amp_source_origin;
   res.json({
     json: req.body,

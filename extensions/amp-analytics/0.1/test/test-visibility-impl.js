@@ -23,6 +23,7 @@ import {
   Visibility,
 } from '../visibility-impl';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+import * as inob from '../../../../src/intersection-observer-polyfill';
 import {isFiniteNumber} from '../../../../src/types';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {viewerForDoc} from '../../../../src/viewer';
@@ -53,6 +54,7 @@ describe('amp-analytics.visibility', () => {
   let ampElement;
   let ampdoc;
   let resourceLoadedResolver;
+  let scrollTop;
 
   const INTERSECTION_0P = makeIntersectionEntry([100, 100, 100, 100],
       [0, 0, 100, 100]);
@@ -89,15 +91,18 @@ describe('amp-analytics.visibility', () => {
     viewerForDoc(ampdoc).setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new Visibility(ampdoc);
 
+    scrollTop = 10;
     const resourceLoadedPromise =
         new Promise(resolve => resourceLoadedResolver = resolve);
     const resource = {
-      getLayoutBox: () => {},
+      getLayoutBox: () => layoutRectLtwh(0, scrollTop, 100, 100),
       element: {getIntersectionChangeEntry: getIntersectionStub},
       getId: getIdStub,
       hasLoadedOnce: () => true,
       loadedOnce: () => resourceLoadedPromise,
     };
+    sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
+        .returns(resource);
     sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
         .returns(resource);
     // no way to stub performance API so stub a private method instead
@@ -159,13 +164,12 @@ describe('amp-analytics.visibility', () => {
       visiblePercentageMin: 0, visiblePercentageMax: 100}, 0, undefined, false);
 
     visibility.viewer_.setVisibilityState_(VisibilityState.HIDDEN);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
   });
 
   it('fires for non-trivial on=visible config', () => {
-    viewportScrollTopStub.returns(13);
-    viewportScrollLeftStub.returns(5);
-    listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
+    scrollTop = 51;
+    listen(makeIntersectionEntry([0, scrollTop, 100, 100], [0, 0, 100, 100]),
           {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0);
 
     const intersection =
@@ -173,8 +177,8 @@ describe('amp-analytics.visibility', () => {
     verifyChange(intersection, 1, [sinon.match({
       backgrounded: '0',
       backgroundedAtStart: '0',
-      elementX: '35', // 5 + 30
-      elementY: '23', // 13 + 10
+      elementX: '0',
+      elementY: '51',
       elementWidth: '100',
       elementHeight: '100',
       loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100,
@@ -187,7 +191,8 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires for non-trivial on=hidden config', () => {
-    listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
+    scrollTop = 51;
+    listen(makeIntersectionEntry([0, scrollTop, 100, 100], [0, 0, 100, 100]),
           {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0, undefined,
           false);
 
@@ -196,8 +201,8 @@ describe('amp-analytics.visibility', () => {
     verifyExpectedVars(1, [sinon.match({
       backgrounded: '1',
       backgroundedAtStart: '0',
-      elementX: '50',
-      elementY: '0',
+      elementX: '0',
+      elementY: '51',
       elementWidth: '100',
       elementHeight: '100',
       loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100
@@ -217,26 +222,26 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires with just totalTimeMin condition', () => {
-    listen(INTERSECTION_0P, {totalTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {totalTimeMin: 1000}, 0);
 
     clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
     sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
       totalVisibleTime: '1000',
     }));
   });
 
   it('fires with just continuousTimeMin condition', () => {
-    listen(INTERSECTION_0P, {continuousTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {continuousTimeMin: 1000}, 0);
 
     clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
   });
 
   it('fires with totalTimeMin=1k and visiblePercentageMin=0', () => {
@@ -247,7 +252,7 @@ describe('amp-analytics.visibility', () => {
     verifyChange(INTERSECTION_50P, 0);
 
     clock.tick(1000);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
     // There is a 20ms offset in some timedurations because of initial
     // timeout in the listenOnce logic.
     sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
@@ -262,13 +267,13 @@ describe('amp-analytics.visibility', () => {
 
   it('fires for continuousTimeMin=1k and totalTimeMin=2k', () => {
     // This test counts time from when the ad is loaded.
-    listen(INTERSECTION_0P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
 
     clock.tick(1000);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1000);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
   });
 
   it('fires for continuousTimeMin=1k and visiblePercentageMin=50', () => {
@@ -283,9 +288,9 @@ describe('amp-analytics.visibility', () => {
     verifyChange(INTERSECTION_50P, 0);
 
     clock.tick(100);
-    expect(callbackStub.callCount).to.equal(0);
+    expect(callbackStub).to.have.not.been.called;
     clock.tick(900);
-    expect(callbackStub.callCount).to.equal(1);
+    expect(callbackStub).to.be.calledOnce;
     sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
       maxContinuousVisibleTime: '1000',
       minVisiblePercentage: '50',
@@ -487,11 +492,7 @@ describe('amp-analytics.visibility', () => {
     });
   });
 
-  describe
-  .configure()
-  .skip(() => typeof IntersectionObserver == 'undefined')
-  .run('listenOnceV2', () => {
-
+  describe('listenOnceV2', () => {
     let inObCallback;
     let observeSpy;
     let unobserveSpy;
@@ -503,13 +504,23 @@ describe('amp-analytics.visibility', () => {
       unobserveSpy = sandbox.stub();
       callbackSpy1 = sandbox.stub();
       callbackSpy2 = sandbox.stub();
-      sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
-        inObCallback = callback;
-        return {
-          observe: observeSpy,
-          unobserve: unobserveSpy,
-        };
-      });
+      if (inob.nativeIntersectionObserverSupported(ampdoc.win)) {
+        sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
+          inObCallback = callback;
+          return {
+            observe: observeSpy,
+            unobserve: unobserveSpy,
+          };
+        });
+      } else {
+        sandbox.stub(inob, 'IntersectionObserverPolyfill', callback => {
+          inObCallback = callback;
+          return {
+            observe: observeSpy,
+            unobserve: unobserveSpy,
+          };
+        });
+      }
     });
 
     afterEach(() => {
@@ -669,10 +680,13 @@ describe('amp-analytics.visibility', () => {
         clock.tick(1000); // continuous visible
         expect(callbackSpy1).to.not.be.called;
 
-        // TODO(lannka, 6632): fix the issue and uncomment the following check
-        // clock.tick(100);
-        // fireIntersect(5); // invisible
-        // expect(callbackSpy1).to.not.be.called;
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(1); // invisible
+        expect(callbackSpy1).to.not.be.called;
 
         viewer.setVisibilityState_(VisibilityState.HIDDEN);
         expect(callbackSpy1).to.be.called;
@@ -683,16 +697,16 @@ describe('amp-analytics.visibility', () => {
           elementHeight: '100',
           elementWidth: '100',
           elementX: '0',
-          elementY: '85',
+          elementY: '99',
           firstSeenTime: '100',
           fistVisibleTime: '200',
-          lastSeenTime: '2300',
-          lastVisibleTime: '2300',
+          lastSeenTime: '2500',
+          lastVisibleTime: '2400',
           loadTimeVisibility: '5',
           maxVisiblePercentage: '25',
           minVisiblePercentage: '15',
-          totalVisibleTime: '1100',
-          maxContinuousVisibleTime: '1000',
+          totalVisibleTime: '1200',
+          maxContinuousVisibleTime: '1100',
           totalTime: '1234',
         });
 
@@ -707,8 +721,9 @@ describe('amp-analytics.visibility', () => {
     });
 
     function fireIntersect(intersectPercent) {
+      scrollTop = 100 - intersectPercent;
       const entry = makeIntersectionEntry(
-          [0, 100 - intersectPercent, 100, 100], [0, 0, 100, 100]);
+          [0, scrollTop, 100, 100], [0, 0, 100, 100]);
       inObCallback([entry]);
     }
   });

@@ -22,7 +22,7 @@
  * impacts on click-throughs.
  */
 
-import {isGoogleAdsA4AValidEnvironment} from './utils';
+import {isGoogleAdsA4AValidEnvironment, EXPERIMENT_ATTRIBUTE} from './utils';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {viewerForDoc} from '../../../src/viewer';
@@ -61,7 +61,7 @@ const MANUAL_EXPERIMENT_ID = '117152632';
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
     externalBranches, internalBranches) {
-  if (isGoogleAdsA4AValidEnvironment(win, element)) {
+  if (isGoogleAdsA4AValidEnvironment(win)) {
     maybeSetExperimentFromUrl(win, element,
         experimentName, externalBranches.control,
         externalBranches.experiment, MANUAL_EXPERIMENT_ID);
@@ -337,18 +337,6 @@ export function mergeExperimentIds(newId, currentIdString) {
   }
   return currentIdString || '';
 }
-
-/**
- * Element attribute that stores experiment IDs.
- *
- * Note: This attribute should be used only for tracking experimental
- * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
- * added by a publisher page.
- *
- * @const {!string}
- * @visibleForTesting
- */
-export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
 
 /**
  * Adds a single experimentID to an element iff it's a valid experiment ID.

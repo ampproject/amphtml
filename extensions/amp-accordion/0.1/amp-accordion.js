@@ -104,7 +104,7 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   getSessionStorageKey_() {
-    const id_ = this.element.id;
+    const id_ = this.element.id || this.element.getResourceId();
     const url = removeFragment(this.win.location.href);
     return `amp-${id_}-${url}`;
   }
@@ -170,7 +170,7 @@ class AmpAccordion extends AMP.BaseElement {
         section.setAttribute('expanded', '');
         header.setAttribute('aria-expanded', 'true');
       }
-    }, content);
+    }, section);
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
   }
