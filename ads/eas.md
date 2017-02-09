@@ -18,12 +18,8 @@ limitations under the License.
 
 ## Supported parameters in the amp-ad tag
 
-| Parameter name  | Description                               | Required                                        |
-|-------------------------------------------------------------|-------------------------------------------------|
-| data-eas-domain | Your ad server domain                     | Yes                                             |
-| data-eas-*      | '*' is any ad parameter, for example "cu" | Yes, at least "data-eas-cu" or "data-eas-camp"  |
-
-Note: If any of the required parameters is missing, the ad slot won't be filled.
+- **data-eas-domain** - Required parameter, your ad server domain
+- **data-eas-[parameter]** - Any ad-request parameter, like 'cu'
 
 ## Example
 
@@ -45,8 +41,7 @@ Note: If any of the required parameters is missing, the ad slot won't be filled.
       data-eas-domain="eas4.emediate.eu"
       data-eas-cu="12345"
       data-eas-EASTsomename="somevalue"
-      data-eas-kw1="somekeyword"
-  >
+      data-eas-kw1="somekeyword">
   </amp-ad>
 ```
 
