@@ -128,4 +128,19 @@ export class Signals {
       promiseStruct.reject = undefined;
     }
   }
+
+  /**
+   * Resets all signals.
+   * @param {string} name
+   */
+  reset(name) {
+    if (this.map_[name]) {
+      delete this.map_[name];
+    }
+    // Reset promise it has already been resolved.
+    const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
+    if (promiseStruct && !promiseStruct.resolve) {
+      delete this.promiseMap_[name];
+    }
+  }
 }
