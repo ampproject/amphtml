@@ -87,11 +87,11 @@ describe('Supports Autoplay', () => {
       expect(video.style.height).to.equal('0');
       expect(video.style.opacity).to.equal('0');
 
-      expect(setAttributeSpy.calledWith('muted', '')).to.be.true;
-      expect(setAttributeSpy.calledWith('playsinline', '')).to.be.true;
-      expect(setAttributeSpy.calledWith('webkit-playsinline', '')).to.be.true;
-      expect(setAttributeSpy.calledWith('height', '0')).to.be.true;
-      expect(setAttributeSpy.calledWith('width', '0')).to.be.true;
+      expect(setAttributeSpy).to.have.been.calledWith('muted', '');
+      expect(setAttributeSpy).to.have.been.calledWith('playsinline', '');
+      expect(setAttributeSpy).to.have.been.calledWith('webkit-playsinline', '');
+      expect(setAttributeSpy).to.have.been.calledWith('height', '0');
+      expect(setAttributeSpy).to.have.been.calledWith('width', '0');
 
       expect(video.muted).to.be.true;
       expect(video.playsinline).to.be.true;

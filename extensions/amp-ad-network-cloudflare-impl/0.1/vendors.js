@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
-
 /**
- * @param {!Window} global
- * @param {!Object} data
+ * @const {!JSONType}
  */
-export function xrostssp(global, data) {
+export const NETWORKS = /** @type {!JSONType} */ ({
+  cloudflare: {
+    base: 'https://firebolt.cloudflaredemo.com',
+  },
 
-  validateData(data, [], ['aid', 'slotId']);
+  adzerk: {
+    base: 'https://engine.adzerk.com',
+  },
 
-  const url = 'https://proparm.jp/ssp/p/js1'
-      + '?_aid=' + encodeURIComponent(data['aid'])
-      + '&amp;_slot=' + encodeURIComponent(data['slotId']);
-
-  writeScript(global, url);
-}
+  dianomi: {
+    base: 'https://www.dianomi.com',
+  },
+});

@@ -41,10 +41,19 @@ describe('Timer', () => {
 
   it('delay', () => {
     const handler = () => {};
-    windowMock.expects('setTimeout').withExactArgs(handler, 111)
-        .returns(1).once();
+    windowMock.expects('setTimeout').returns(1).once();
     windowMock.expects('clearTimeout').never();
     timer.delay(handler, 111);
+  });
+
+  it('delay 0 real window', done => {
+    timer = new Timer(self);
+    timer.delay(done, 0);
+  });
+
+  it('delay 1 real window', done => {
+    timer = new Timer(self);
+    timer.delay(done, 1);
   });
 
   it('delay default', done => {

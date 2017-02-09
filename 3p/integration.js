@@ -67,6 +67,7 @@ import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {atomx} from '../ads/atomx';
+import {brainy} from '../ads/brainy';
 import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
@@ -134,7 +135,6 @@ import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
 import {xlift} from '../ads/xlift';
-import {xrostssp} from '../ads/xrostssp';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
 import {yieldbot} from '../ads/yieldbot';
@@ -168,8 +168,10 @@ try {
   window.context = data._context;
 } catch (err) {
   window.context = {};
-  dev().info(
-      'INTEGRATION', 'Could not parse context from:', iframeName);
+  if (!getMode().test) {
+    dev().info(
+        'INTEGRATION', 'Could not parse context from:', iframeName);
+  }
 }
 
 // This should only be invoked after window.context is set
@@ -206,6 +208,7 @@ register('affiliateb', affiliateb);
 register('amoad', amoad);
 register('appnexus', appnexus);
 register('atomx', atomx);
+register('brainy', brainy);
 register('caajainfeed', caajainfeed);
 register('capirs', capirs);
 register('caprofitx', caprofitx);
@@ -278,7 +281,6 @@ register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
 register('xlift' , xlift);
-register('xrostssp', xrostssp);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yieldbot', yieldbot);
