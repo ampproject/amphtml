@@ -1,5 +1,17 @@
 # Managing non-authenticated user state with AMP
 
+**Table of contents**
+
+- [Background](#background)
+- [Implementation guide](#implementation-guide)
+  - [Before getting started](#before-getting-started)
+  - [Task 1: For non-AMP pages on the publisher origin, set up an identifier and send analytics pings](#task-1-for-non-amp-pages-on-the-publisher-origin-set-up-an-identifier-and-send-analytics-pings)
+  - [Task 2: For AMP pages, set up an identifier and send analytics pings by including Client ID replacement in amp-analytics pings](#task-2-for-amp-pages-set-up-an-identifier-and-send-analytics-pings-by-including-client-id-replacement-in-amp-analytics-pings)
+  - [Task 3: Process analytics pings from pages on the publisher origin](#task-3-process-analytics-pings-from-pages-on-the-publisher-origin)
+  - [Task 4: Process analytics pings from AMP cache or AMP viewer display contexts and establish identifier mappings (if needed)](#task-4-process-analytics-pings-from-amp-cache-or-amp-viewer-display-contexts-and-establish-identifier-mappings-if-needed)
+  - [Task 5: Using Client ID in linking and form submission](#task-5-using-client-id-in-linking-and-form-submission)
+- [Strongly recommended practices](#strongly-recommended-practices)
+
 User state is an important concept on today’s web. Consider the following use cases that are enabled by managing user state:
 
  - A merchant builds a useful **shopping cart** that shows a user the same items during their second visit that they had added to the cart during their first visit many weeks ago. Such an experience increases the chance of the user buying that item by making sure they remain aware of the item they considered buying in the past.
@@ -106,7 +118,7 @@ In walking through the technical guidance below, let's  assume that you’ll be 
 
 For clarity throughout the rest of this document, we’ll call various strings of characters that are identifiers by more readable names preceded by a dollar sign (`$`):
 
-```
+``` text
 n34ic982n2386n30 ⇒ $sample_id
 ```
 
@@ -134,21 +146,21 @@ This means there are two cases for the state of non-AMP pages on the publisher o
 
 **Case #1: Initial visit.** Upon first landing on the non-AMP page, there will be no cookie. If you checked for the cookie before one was set, you’d see no values set in the cookie corresponding to the `uid`:
 
-```
+``` text
 > document.cookie
   ""
 ```
 
 Sometime in the initial load, the cookie should be set, so that if you do this once the page is loaded, you will see a value has been set:
 
-```
+``` text
 > document.cookie
   "uid=$publisher_origin_identifier"
 ```
 
 **Case #2: Non-initial visit.** There will be a cookie set. Thus, if you open the developer console on the page, you’d see:
 
-```
+``` text
 > document.cookie
   "uid=$publisher_origin_identifier"
 ```
@@ -159,13 +171,13 @@ Once you’ve set up an identifier, you can now incorporate it in analytics ping
 
 The specific implementation will depend on your desired configuration, but generally you’ll be looking to send pings (requests) to your analytics server, which include useful data within the URL of the request itself. Here’s an example, which also indicates how you’d include your cookie value inside of the request:
 
-```
+``` text
 https://analytics.example.com/ping?type=pageview&user_id=$publisher_origin_identifier
 ```
 
 Note that in the above example the identifier for the user is indicated by a specific query param, `user_id`:
 
-```
+``` text
 user_id=$publisher_origin_identifier
 ```
 
