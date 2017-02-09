@@ -18,10 +18,13 @@
 /**
  * @fileoverview Embeds an playbuzz item.
  * The src attribute can be easily copied from a normal playbuzz URL.
+ * data-item supports item id which can be taken from the item's embed code
+ * in case both are present data-item will be used
  * Example:
  * <code>
     <amp-playbuzz
         src="http://www.playbuzz.com/perezhilton/poll-which-presidential-candidate-did-ken-bone-vote-for"
+        data-item="a6aa5a14-8888-4618-b2e3-fe6a30d8c51b"
         layout="responsive"
         height="300"
         width="300"
@@ -66,7 +69,10 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.iframePromise_ = null;
 
     /** @private {?string} */
-    this.item_ = '';
+    this.itemUrl_ = '';
+
+    /** @private {?string} */
+    this.itemId_ = '';
 
     /** @private {?number} */
     this.itemHeight_ = 300; //default
@@ -90,7 +96,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
    * @override
    */
   preconnectCallback() {
-    this.preconnect.url(this.item_);
+    if (this.itemUrl_) {
+      this.preconnect.url(this.itemUrl_);
+    }
   }
 
   /** @override */
@@ -106,10 +114,20 @@ class AmpPlaybuzz extends AMP.BaseElement {
       `Enable ${EXPERIMENT} experiment`);
 
     const e = this.element;
+    const src = e.getAttribute('src');
+    const itemId = e.getAttribute('data-item');
 
-    this.item_ = assertAbsoluteHttpOrHttpsUrl(e.getAttribute('src'));
+    user().assert(src || itemId,
+      'Either src or data-item attribute is required for <amp-playbuzz> %s',
+      this.element);
+
+    if (src) {
+      this.itemUrl_ = assertAbsoluteHttpOrHttpsUrl(src);
+    }
+
     const parsedHeight = parseInt(e.getAttribute('height'), 10);
 
+    this.itemId_ = itemId;
     this.itemHeight_ = isNaN(parsedHeight) ? this.itemHeight_ : parsedHeight;
     this.displayItemInfo_ = e.getAttribute('data-item-info') === 'true';
     this.displayShareBar_ = e.getAttribute('data-share-buttons') === 'true';
@@ -200,7 +218,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
         createElement('div', 'pb_feed_placeholder_inner',
           createElement('div', 'pb_feed_placeholder_content',
             createElement('div', 'pb_feed_placeholder_preloader', loaderImage)
-      )));
+          )));
 
     return loadingPlaceholder;
   }
@@ -240,11 +258,11 @@ class AmpPlaybuzz extends AMP.BaseElement {
    *
    */
   generateEmbedSourceUrl_() {
-    const itemSrc = parseUrl(this.item_);
+    const iframeSrcUrl = utils.composeItemSrcUrl(this.itemUrl_, this.itemId_);
     const winUrl = this.win.location;
     const params = {
-      itemUrl: removeFragment(itemSrc.href).replace(itemSrc.protocol, ''), //remove scheme (cors) & fragment
-      relativeUrl: itemSrc.pathname,
+      itemUrl: iframeSrcUrl,
+      relativeUrl: parseUrl(iframeSrcUrl).pathname,
       displayItemInfo: this.displayItemInfo_,
       displayShareBar: this.displayShareBar_,
       displayComments: this.displayComments_,

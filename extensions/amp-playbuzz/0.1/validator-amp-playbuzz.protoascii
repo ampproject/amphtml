@@ -57,7 +57,11 @@ tags: {  # <amp-playbuzz>
   also_requires_tag: "amp-playbuzz extension .js script"
   attrs: {
     name: "src"
-    mandatory: true
+    mandatory_oneof: "['src', 'data-item']"
+  }
+  attrs: {
+    name: "data-item"
+    mandatory_oneof: "['src', 'data-item']"
   }
   attrs: {
     name: "data-item-info"
