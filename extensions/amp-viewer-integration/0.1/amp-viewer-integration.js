@@ -63,6 +63,10 @@ export class AmpViewerIntegration {
     this.isWebView_ = viewer.getParam('webview') == '1';
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
 
+    if (!this.isWebView_ && !this.unconfirmedViewerOrigin_) {
+      return Promise.resolve();
+    }
+
     if (this.isWebView_) {
       let source;
       let origin;
