@@ -61,6 +61,15 @@ export function invokeWebWorker(win, method, opt_args) {
 }
 
 /**
+ * @param {!Window} win
+ * @return {!AmpWorker}
+ * @visibleForTesting
+ */
+export function ampWorkerForTesting(win) {
+  return fromClass(win, 'amp-worker', AmpWorker);
+}
+
+/**
  * A Promise-based API wrapper around a single Web Worker.
  * @private
  */
@@ -126,18 +135,20 @@ class AmpWorker {
 
     // Find the stored Promise executor for this message.
     const invocations = this.messages_[method];
-    if (invocations) {
-      const resolve = invocations[id].resolve;
-      if (resolve) {
-        resolve(returnValue);
-        invocations[id] = undefined;
-      } else {
-        dev().error(TAG, `Received unexpected "${method}" message ` +
-            `from worker with id: ${id}.`);
-      }
-    } else {
+    if (!invocations) {
       dev().error(TAG, `Received unexpected "${method}" message from worker.`);
+      return;
     }
+
+    const resolve = invocations[id].resolve;
+    if (!resolve) {
+      dev().error(TAG, `Received unexpected "${method}" message ` +
+          `from worker with id: ${id}.`);
+      return;
+    }
+
+    resolve(returnValue);
+    invocations[id] = undefined;
 
     // Clean up array if there are no more messages in flight for this method.
     let empty = true;
@@ -149,5 +160,15 @@ class AmpWorker {
     if (empty) {
       delete this.messages_[method];
     }
+  }
+
+  /**
+   * @param {string} method
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  hasPendingMessagesFor(method) {
+    const invocations = this.messages_[method];
+    return !!invocations && invocations.length > 0;
   }
 }
