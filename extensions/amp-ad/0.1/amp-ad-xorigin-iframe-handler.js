@@ -203,14 +203,7 @@ export class AmpAdXOriginIframeHandler {
     });
 
     // The actual ad load is eariliest of iframe.onload event and no-content.
-    const adLoadPromise = Promise.race([
-      iframeLoadPromise,
-      noContentPromise,
-    ]);
-    return adLoadPromise.catch(reason => {
-      this.noContent_();
-      user().warn('AMP-AD', 'Ad loading failed', reason);
-    });
+    return Promise.race([iframeLoadPromise, noContentPromise]);
   }
 
   /**
@@ -225,8 +218,7 @@ export class AmpAdXOriginIframeHandler {
       return;
     }
     const data = opt_info.data;
-    this.updateSize_(data.height, data.width,
-                opt_info.source, opt_info.origin);
+    this.updateSize_(data.height, data.width, opt_info.source, opt_info.origin);
     if (this.baseInstance_.emitLifecycleEvent) {
       this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
     }
