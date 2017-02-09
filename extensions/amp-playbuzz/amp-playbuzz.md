@@ -83,6 +83,7 @@ Can be any item URL taken from <a href="http://www.playbuzz.com">playbuzz.com</a
 The item id for the Playbuzz item.
 Can be taken from the item's embed code (at the item's page at playbuzz website)
 
+** in case both are present data-item will be used
 ## Optional Attributes
 
 **data-item-info** (optional)
