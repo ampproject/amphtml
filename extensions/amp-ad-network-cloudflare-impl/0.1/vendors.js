@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,18 @@
  */
 
 /**
- * Determines which tags desire A4A handling
- *
- * @returns {boolean}
+ * @const {!JSONType}
  */
-export function cloudflareIsA4AEnabled() {
-  // We assume fast fetch for all content, but this will gracefully degrade,
-  // when non-a4a content is delivered
-  return true;
-}
+export const NETWORKS = /** @type {!JSONType} */ ({
+  cloudflare: {
+    base: 'https://firebolt.cloudflaredemo.com',
+  },
+
+  adzerk: {
+    base: 'https://engine.adzerk.com',
+  },
+
+  dianomi: {
+    base: 'https://www.dianomi.com',
+  },
+});
