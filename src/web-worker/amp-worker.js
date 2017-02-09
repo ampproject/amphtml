@@ -42,7 +42,7 @@ export function invokeWebWorker(win, method, opt_args) {
     return Promise.reject(`Experiment "${TAG}" is disabled.`);
   }
   if (!win.Worker) {
-    return Promise.reject('Worker not supported in window: ' + win);
+    return Promise.reject('Worker not supported in window.');
   }
   const worker = fromClass(win, 'amp-worker', AmpWorker);
   return worker.sendMessage_(method, opt_args || []);
@@ -77,7 +77,7 @@ class AmpWorker {
 
     /**
      * Array of in-flight messages pending response from worker.
-     * @private {!Array<(PendingMessageDef|undefined)>}
+     * @const @private {!Array<(PendingMessageDef|undefined)>}
      */
     this.messages_ = [];
   }
@@ -90,7 +90,7 @@ class AmpWorker {
    * @private
    */
   sendMessage_(method, args) {
-    const promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const index = this.messages_.length;
       this.messages_[index] = {method, resolve, reject};
 
@@ -98,7 +98,6 @@ class AmpWorker {
       const message = {method, args, id: index};
       this.worker_./*OK*/postMessage(message);
     });
-    return promise;
   }
 
   /**
@@ -131,7 +130,7 @@ class AmpWorker {
       }
     }
     if (empty) {
-      this.messages_ = [];
+      this.messages_.length = 0;
     }
   }
 

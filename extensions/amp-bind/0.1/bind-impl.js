@@ -173,7 +173,7 @@ export class Bind {
       } else {
         this.evaluator_ = new BindEvaluator();
         const parseErrors = this.evaluator_.setBindings(bindings);
-        return Promise.resolve(parseErrors);
+        return parseErrors;
       }
     }).then(parseErrors => {
       this.initialized_ = true;
@@ -192,7 +192,7 @@ export class Bind {
         this.digest_(/* opt_verifyOnly */ !this.digestQueuedAfterScan_);
       }
 
-      dev().fine(TAG, `Worker finished parsing expressions with ` +
+      dev().fine(TAG, `Finished parsing expressions with ` +
           `${Object.keys(parseErrors).length} errors.`);
     });
   }
@@ -387,9 +387,9 @@ export class Bind {
           const {property, expressionString, previousResult} =
               boundProperty;
 
-          // Rewrite attribute value if necessary.
-          // This is not done in the worker since it relies on `url#parseUrl`,
-          // which uses DOM APIs.
+          // TODO(choumx): Perform in worker with URL API.
+          // Rewrite attribute value if necessary. This is not done in the
+          // worker since it relies on `url#parseUrl`, which uses DOM APIs.
           let newValue = results[expressionString];
           if (typeof newValue === 'string') {
             newValue = rewriteAttributeValue(tagName, property, newValue);
