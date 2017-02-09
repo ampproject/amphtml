@@ -21,6 +21,7 @@
  * @param {*} value
  * @param {number=} opt_fromIndex
  * @returns {boolean}
+ * @this {Array}
  */
 export function includes(value, opt_fromIndex) {
   const fromIndex = opt_fromIndex || 0;
