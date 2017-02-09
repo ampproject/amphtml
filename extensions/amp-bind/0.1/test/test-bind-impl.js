@@ -132,12 +132,12 @@ describes.realWin('amp-bind', {
     expect(bind.boundElements_.length).to.equal(0);
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(5);
-      bind.removeBindingsForSubtree(env.win.document.getElementById('parent'));
-      return bind.scanPromise_;
+      return bind
+        .removeBindingsForSubtree(env.win.document.getElementById('parent'));
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(0);
-      bind.addBindingsForSubtree(env.win.document.getElementById('parent'));
-      return bind.scanPromise_;
+      return bind
+        .addBindingsForSubtree(env.win.document.getElementById('parent'));
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(5);
       done();

@@ -153,8 +153,10 @@ export class Bind {
   /**
    * Scans the substree rooted at `rootElement` and adds bindings for nodes
    * that contain bindable elements. This function is not idempotent. To remove
-   * bindings for a subtree, see #removeBindingsForSubtree.
+   * bindings for a subtree, see #removeBindingsForSubtree. Returns a promise
+   * that resolves after bindings have been added.
    * @param {!Element} rootElement
+   * @return {Promise}
    */
   addBindingsForSubtree(rootElement) {
     this.scanPromise_ = this.scanSubtree_(rootElement).then(results => {
@@ -164,7 +166,7 @@ export class Bind {
       Object.assign(this.expressionToElements_, expressionToElements);
       this.bindings_ = this.bindings_.concat(bindings);
 
-      this.evaluator_ = this.evaluator || new BindEvaluator();
+      this.evaluator_ = this.evaluator_ || new BindEvaluator();
       const parseErrors = this.evaluator_.setBindings(this.bindings_);
 
       // Report each parse error.
@@ -184,13 +186,16 @@ export class Bind {
       dev().fine(TAG, `Initialized ${bindings.length} bindings from ` +
           `${boundElements.length} elements.`);
     });
+    return this.scanPromise_;
   }
 
   /**
    * Scans the substree rooted at `rootElement` and removes bindings for nodes
    * that contain bindable elements. This function is not idempotent. To add
-   * bindings for a subtree, see #addBindingsForSubtree.
+   * bindings for a subtree, see #addBindingsForSubtree. Returns a promise
+   * that resolves after bindings have been removed.
    * @param {!Element} rootElement
+   * @return {Promise}
    */
   removeBindingsForSubtree(rootElement) {
     this.scanPromise_ = this.scanSubtree_(rootElement).then(results => {
@@ -244,6 +249,7 @@ export class Bind {
         }
       }
     });
+    return this.scanPromise_;
   }
 
   /**
