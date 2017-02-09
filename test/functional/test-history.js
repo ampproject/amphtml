@@ -167,9 +167,9 @@ describes.fakeWin('History', {
   });
 
   it('should update fragment', () => {
-    bindingMock.expects('updateFragment').withExactArgs('#fragment')
+    bindingMock.expects('updateFragment').withExactArgs('fragment')
         .returns(Promise.resolve()).once();
-    return history.updateFragment('#fragment').then(() => {});
+    return history.updateFragment('fragment').then(() => {});
   });
 });
 
@@ -555,7 +555,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
         new HistoryBindingNatural_(env.win));
     const replaceStateSpy = sandbox.spy();
     env.win.history.replaceState = replaceStateSpy;
-    return history.updateFragment('#bar').then(() => {
+    return history.updateFragment('bar').then(() => {
       expect(replaceStateSpy).to.be.calledOnce;
       expect(replaceStateSpy.lastCall.args).to.jsonEqual([{}, '', '#bar']);
     });
@@ -568,7 +568,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
         new HistoryBindingNatural_(env.win));
     const replaceStateSpy = sandbox.spy();
     env.win.history.replaceState = replaceStateSpy;
-    return history.updateFragment('#bar').then(() => {
+    return history.updateFragment('bar').then(() => {
       expect(replaceStateSpy).to.be.calledOnce;
       expect(replaceStateSpy.lastCall.args).to.jsonEqual([{}, '', '#bar']);
     });
@@ -581,25 +581,9 @@ describes.fakeWin('Get and update fragment', {}, env => {
     viewerMock.expects('hasCapability').withExactArgs('fragment').once()
         .returns(true);
     viewerMock.expects('sendMessageAwaitResponse').withExactArgs('getFragment',
-        undefined, true).once().returns(Promise.resolve('#from-viewer'));
+        undefined, true).once().returns(Promise.resolve('from-viewer'));
     return history.getFragment().then(fragment => {
       expect(fragment).to.equal('from-viewer');
-    });
-  });
-
-  it('should NOT get fragment from the viewer on Virtual ' +
-      'if the viewer has capability of getting fragment, ' +
-      'but fragment from the viewer does not start with #', () => {
-    history = new History(new AmpDocSingle(env.win),
-        new HistoryBindingVirtual_(env.win, viewer));
-    viewerMock.expects('hasCapability').withExactArgs('fragment').once()
-        .returns(true);
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs('getFragment',
-        undefined, true).once().returns(Promise.resolve('from-viewer'));
-    return history.getFragment().then(() => {
-      throw new Error('should not happen');
-    }, error => {
-      expect(error.message).to.match(/should start with #/);
     });
   });
 
@@ -634,9 +618,9 @@ describes.fakeWin('Get and update fragment', {}, env => {
     viewerMock.expects('hasCapability').withExactArgs('fragment').once()
         .returns(true);
     viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'replaceHistory', {fragment: '#fragment'}, true).once()
+        'replaceHistory', {fragment: 'fragment'}, true).once()
         .returns(Promise.resolve());
-    return history.updateFragment('#fragment').then(() => {});
+    return history.updateFragment('fragment').then(() => {});
   });
 
   it('should NOT update fragment of the viewer on Virtual ' +
@@ -646,7 +630,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
     viewerMock.expects('hasCapability').withExactArgs('fragment').once()
         .returns(false);
     viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'replaceHistory', {fragment: '#fragment'}, true).never();
-    return history.updateFragment('#fragment').then(() => {});
+        'replaceHistory', {fragment: 'fragment'}, true).never();
+    return history.updateFragment('fragment').then(() => {});
   });
 });
