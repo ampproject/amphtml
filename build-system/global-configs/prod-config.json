@@ -2,7 +2,6 @@
   "allow-doc-opt-in": ["visibility-v2"],
 
   "canary": 0,
-  "amp-ios-overflow-x": 1,
   "amp-experiment": 1,
   "pan-y": 1,
   "expAdsenseA4A": 0.1,
