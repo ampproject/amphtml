@@ -68,12 +68,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?Promise} */
     this.iframePromise_ = null;
 
-    /** @private {?string} */
-    this.itemUrl_ = '';
-
-    /** @private {?string} */
-    this.itemId_ = '';
-
     /** @private {?number} */
     this.itemHeight_ = 300; //default
 
@@ -96,9 +90,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
    * @override
    */
   preconnectCallback() {
-    if (this.itemUrl_) {
-      this.preconnect.url(this.itemUrl_);
-    }
+    this.preconnect.url(this.iframeSrcUrl_);
   }
 
   /** @override */
@@ -122,12 +114,12 @@ class AmpPlaybuzz extends AMP.BaseElement {
       this.element);
 
     if (src) {
-      this.itemUrl_ = assertAbsoluteHttpOrHttpsUrl(src);
+      assertAbsoluteHttpOrHttpsUrl(src);
     }
 
     const parsedHeight = parseInt(e.getAttribute('height'), 10);
 
-    this.itemId_ = itemId;
+    this.iframeSrcUrl_ = utils.composeItemSrcUrl(src, itemId);
     this.itemHeight_ = isNaN(parsedHeight) ? this.itemHeight_ : parsedHeight;
     this.displayItemInfo_ = e.getAttribute('data-item-info') === 'true';
     this.displayShareBar_ = e.getAttribute('data-share-buttons') === 'true';
@@ -258,11 +250,10 @@ class AmpPlaybuzz extends AMP.BaseElement {
    *
    */
   generateEmbedSourceUrl_() {
-    const iframeSrcUrl = utils.composeItemSrcUrl(this.itemUrl_, this.itemId_);
     const winUrl = this.win.location;
     const params = {
-      itemUrl: iframeSrcUrl,
-      relativeUrl: parseUrl(iframeSrcUrl).pathname,
+      itemUrl: this.iframeSrcUrl_,
+      relativeUrl: parseUrl(this.iframeSrcUrl_).pathname,
       displayItemInfo: this.displayItemInfo_,
       displayShareBar: this.displayShareBar_,
       displayComments: this.displayComments_,
