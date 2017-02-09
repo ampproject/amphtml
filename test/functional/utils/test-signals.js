@@ -120,4 +120,54 @@ describes.sandboxed('Signals', {}, () => {
       expect(signals.whenSignal('sig')).to.equal(promise);  // Reuse promise.
     });
   });
+
+  it('should reset signal before it was triggered', () => {
+    signals.reset('sig');
+    expect(signals.get('sig')).to.be.null;
+    expect(signals.promiseMap_).to.be.null;
+  });
+
+  it('should reset signal after it was triggered', () => {
+    signals.signal('sig');
+    expect(signals.get('sig')).to.be.ok;
+
+    signals.reset('sig');
+    expect(signals.get('sig')).to.be.null;
+    expect(signals.promiseMap_).to.be.null;
+  });
+
+  it('should reset signal after it was requested', () => {
+    signals.whenSignal('sig');
+    const iniPromise = signals.promiseMap_['sig'].promise;
+    expect(iniPromise).to.be.ok;
+
+    signals.reset('sig');
+    // Promise has not changed.
+    expect(signals.promiseMap_['sig'].promise).to.equal(iniPromise);
+    expect(signals.promiseMap_['sig'].resolve).to.be.ok;
+  });
+
+  it('should reset signal after it was resolved', () => {
+    signals.whenSignal('sig');
+    signals.signal('sig');
+    const iniPromise = signals.promiseMap_['sig'].promise;
+    expect(iniPromise).to.be.ok;
+    expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
+
+    signals.reset('sig');
+    // Promise has been reset completely.
+    expect(signals.promiseMap_['sig']).to.be.undefined;
+  });
+
+  it('should reset a pre-resolved signal', () => {
+    signals.signal('sig');
+    signals.whenSignal('sig');
+    const iniPromise = signals.promiseMap_['sig'].promise;
+    expect(iniPromise).to.be.ok;
+    expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
+
+    signals.reset('sig');
+    // Promise has been reset completely.
+    expect(signals.promiseMap_['sig']).to.be.undefined;
+  });
 });

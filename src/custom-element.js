@@ -960,6 +960,8 @@ function createBaseCustomElementClass(win) {
         // It's important to have this flag set in the end to avoid
         // `resources.add` called twice if upgrade happens immediately.
         this.everAttached = true;
+      } else if (this.reconstructWhenReparented()) {
+        this.reset_();
       }
       this.getResources().add(this);
     }
@@ -1163,6 +1165,8 @@ function createBaseCustomElementClass(win) {
         if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
           this.isFirstLayoutCompleted_ = true;
+          // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+          // in PROD.
           this.dispatchCustomEvent('amp:load:end');
         }
       }, reason => {
@@ -1196,7 +1200,7 @@ function createBaseCustomElementClass(win) {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
           timerFor(this.ownerDocument.defaultView).delay(() => {
-            if (this.layoutCount_ == 0 && this.isInViewport_) {
+            if (this.isInViewport_) {
               this.toggleLoading_(true);
             }
           }, 100);
@@ -1262,10 +1266,18 @@ function createBaseCustomElementClass(win) {
       }
       const isReLayoutNeeded = this.implementation_.unlayoutCallback();
       if (isReLayoutNeeded) {
-        this.layoutCount_ = 0;
-        this.isFirstLayoutCompleted_ = false;
+        this.reset_();
       }
       return isReLayoutNeeded;
+    }
+
+    /** @private */
+    reset_() {
+      this.layoutCount_ = 0;
+      this.isFirstLayoutCompleted_ = false;
+      this.signals_.reset('render-start');
+      this.signals_.reset('load-start');
+      this.signals_.reset('load-end');
     }
 
     /**
@@ -1463,6 +1475,16 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * An implementation can call this method to signal to the element that
+     * it has started rendering.
+     * @package @final @this {!Element}
+     */
+    renderStarted() {
+      this.signals_.signal('render-start');
+      this.toggleLoading_(false);
+    }
+
+    /**
      * Whether the loading can be shown for this element.
      * @return {boolean}
      * @private @this {!Element}
@@ -1520,6 +1542,11 @@ function createBaseCustomElementClass(win) {
      */
     toggleLoading_(state, opt_cleanup) {
       assertNotTemplate(this);
+      if (state &&
+          (this.layoutCount_ > 0 || this.signals_.get('render-start'))) {
+        // Loading has already been canceled. Ignore.
+        return;
+      }
       this.loadingState_ = state;
       if (!state && !this.loadingContainer_) {
         return;

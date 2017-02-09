@@ -25,14 +25,15 @@ import {
   IntersectionObserver,
 } from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
 import {AdDisplayState} from './amp-ad-ui';
 import {getHtml} from '../../../src/get-html';
 
-const TIMEOUT_VALUE = 10000;
+const VISIBILITY_TIMEOUT = 10000;
+
 
 export class AmpAdXOriginIframeHandler {
 
@@ -64,9 +65,6 @@ export class AmpAdXOriginIframeHandler {
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(this.baseInstance_.getAmpDoc());
-
-    /** @private {?Promise} */
-    this.adResponsePromise_ = null;
   }
 
   /**
@@ -81,6 +79,7 @@ export class AmpAdXOriginIframeHandler {
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe);
+    const timer = timerFor(this.baseInstance_.win);
 
     // Init IntersectionObserver service.
     this.intersectionObserver_ = new IntersectionObserver(
@@ -125,34 +124,58 @@ export class AmpAdXOriginIframeHandler {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
 
+    // Iframe.onload normally called by the Ad after full load.
+    const iframeLoadPromise = loadPromise(this.iframe).then(() => {
+      // Wait just a little to allow `no-content` message to arrive.
+      return timer.promise(10);
+    });
     if (this.baseInstance_.emitLifecycleEvent) {
       // Only set up a load listener if we know that we can send lifecycle
       // messages.
-      loadPromise(this.iframe).then(() => {
+      iframeLoadPromise.then(() => {
         this.baseInstance_.emitLifecycleEvent('xDomIframeLoaded');
       });
     }
 
-    // Install API that listens to ad response
-    if (this.baseInstance_.config
-        && this.baseInstance_.config.renderStartImplemented) {
-      // If support render-start, create a race between render-start no-content
-      this.adResponsePromise_ = listenForOncePromise(this.iframe,
-        ['render-start', 'no-content'], true).then(info => {
-          const data = info.data;
-          if (data.type == 'render-start') {
-            this.renderStart_(info);
-          } else {
-            this.noContent_();
-          }
-        });
+    // Calculate render-start and no-content signals.
+    let renderStartResolve;
+    const renderStartPromise = new Promise(resolve => {
+      renderStartResolve = resolve;
+    });
+    let noContentResolve;
+    const noContentPromise = new Promise(resolve => {
+      noContentResolve = resolve;
+    });
+    if (this.baseInstance_.config &&
+            this.baseInstance_.config.renderStartImplemented) {
+      // When `render-start` is supported, these signals are mutually
+      // exclusive. Whichever arrives first wins.
+      listenForOncePromise(this.iframe,
+          ['render-start', 'no-content'], true).then(info => {
+            const data = info.data;
+            if (data.type == 'render-start') {
+              this.renderStart_(info);
+              renderStartResolve();
+            } else {
+              this.noContent_();
+              noContentResolve();
+            }
+          });
     } else {
-      // If NOT support render-start, listen to bootstrap-loaded no-content
-      // respectively
-      this.adResponsePromise_ = listenForOncePromise(this.iframe,
-        'bootstrap-loaded', true);
-      listenForOncePromise(this.iframe, 'no-content', true)
-          .then(() => this.noContent_());
+      // If `render-start` is not supported, listen to `bootstrap-loaded`.
+      // This will avoid keeping the Ad empty until it's fully loaded, which
+      // could be a long time.
+      listenForOncePromise(this.iframe, 'bootstrap-loaded', true).then(() => {
+        this.renderStart_();
+        renderStartResolve();
+      });
+      // Likewise, no-content is observed here. However, it's impossible to
+      // assure exclusivity between `no-content` and `bootstrap-loaded` b/c
+      // `bootstrap-loaded` always arrives first.
+      listenForOncePromise(this.iframe, 'no-content', true).then(() => {
+        this.noContent_();
+        noContentResolve();
+      });
     }
 
     if (opt_isA4A) {
@@ -161,37 +184,41 @@ export class AmpAdXOriginIframeHandler {
       this.element_.appendChild(this.iframe);
       return Promise.resolve();
     }
-    // Set iframe initially hidden which will be removed on load event +
-    // post message.
+
+    // Set iframe initially hidden which will be removed on render-start or
+    // load, whichever is earlier.
     setStyle(this.iframe, 'visibility', 'hidden');
     this.element_.appendChild(this.iframe);
+    Promise.race([
+      renderStartPromise,
+      iframeLoadPromise,
+      timer.promise(VISIBILITY_TIMEOUT),
+    ]).then(() => {
+      if (this.iframe) {
+        setStyle(this.iframe, 'visibility', '');
+        if (this.baseInstance_.emitLifecycleEvent) {
+          this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
+        }
+      }
+    });
 
-    return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
-        this.adResponsePromise_,
-        'timeout waiting for ad response').catch(e => {
-          this.noContent_();
-          user().warn('AMP-AD', e);
-        }).then(() => {
-          if (this.iframe) {
-            setStyle(this.iframe, 'visibility', '');
-            if (this.baseInstance_.emitLifecycleEvent) {
-              this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
-            }
-          }
-        });
+    // The actual ad load is eariliest of iframe.onload event and no-content.
+    return Promise.race([iframeLoadPromise, noContentPromise]);
   }
 
   /**
    * callback functon on receiving render-start
-   * @param {!Object} info
+   * @param {!Object=} opt_info
    * @private
    */
-  renderStart_(info) {
-    const data = info.data;
+  renderStart_(opt_info) {
     this.uiHandler_.setDisplayState(AdDisplayState.LOADED_RENDER_START);
-    this.updateSize_(data.height, data.width,
-                info.source, info.origin);
-    this.baseInstance_.signals().signal('render-start');
+    this.baseInstance_.renderStarted();
+    if (!opt_info) {
+      return;
+    }
+    const data = opt_info.data;
+    this.updateSize_(data.height, data.width, opt_info.source, opt_info.origin);
     if (this.baseInstance_.emitLifecycleEvent) {
       this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
     }
