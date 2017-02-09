@@ -732,6 +732,15 @@ describe('Viewer', () => {
       }).to.throw(/message channel must have an origin/);
     });
 
+    it('should allow channel without origin thats an empty string', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = null;
+      const viewer = new Viewer(ampdoc);
+      expect(() => {
+        viewer.setMessageDeliverer(() => {}, '');
+      }).to.not.throw(/message channel must have an origin/);
+    });
+
     it('should decide non-trusted on connection with wrong origin', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = null;
