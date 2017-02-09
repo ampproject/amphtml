@@ -56,9 +56,9 @@ describes.realWin('amp-bind', {
    * @return {!Element}
    */
   function createElementWithBinding(binding) {
-    const fakeDiv = env.win.document.createElement('div');
-    fakeDiv.innerHTML = '<p ' + binding + '></p>';
-    const newElement = fakeDiv.firstElementChild;
+    const div = env.win.document.createElement('div');
+    div.innerHTML = '<p ' + binding + '></p>';
+    const newElement = div.firstElementChild;
     const parent = env.win.document.getElementById('parent');
     parent.appendChild(newElement);
     return newElement;
@@ -133,11 +133,11 @@ describes.realWin('amp-bind', {
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(5);
       return bind
-        .removeBindingsForSubtree(env.win.document.getElementById('parent'));
+        .removeBindingsForNode_(env.win.document.getElementById('parent'));
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(0);
       return bind
-        .addBindingsForSubtree(env.win.document.getElementById('parent'));
+        .addBindingsForNode_(env.win.document.getElementById('parent'));
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(5);
       done();

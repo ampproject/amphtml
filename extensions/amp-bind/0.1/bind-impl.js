@@ -147,19 +147,23 @@ export class Bind {
    * @private
    */
   initialize_() {
-    this.addBindingsForSubtree(this.ampdoc.getBody());
+    this.addBindingsForNode_(this.ampdoc.getBody());
   }
 
   /**
-   * Scans the substree rooted at `rootElement` and adds bindings for nodes
+   * Scans the substree rooted at `node` and adds bindings for nodes
    * that contain bindable elements. This function is not idempotent. To remove
-   * bindings for a subtree, see #removeBindingsForSubtree. Returns a promise
-   * that resolves after bindings have been added.
-   * @param {!Element} rootElement
+   * bindings for a node, see #removeBindingsForNode_.
+   *
+   * Returns a promise that resolves after bindings have been added.
+   *
+   * @param {!Element} node
    * @return {Promise}
+   *
+   * @private
    */
-  addBindingsForSubtree(rootElement) {
-    this.scanPromise_ = this.scanSubtree_(rootElement).then(results => {
+  addBindingsForNode_(node) {
+    this.scanPromise_ = this.scanNode_(node).then(results => {
       const {boundElements, bindings, expressionToElements} = results;
 
       this.boundElements_ = this.boundElements_.concat(boundElements);
@@ -167,6 +171,8 @@ export class Bind {
       this.bindings_ = this.bindings_.concat(bindings);
 
       this.evaluator_ = this.evaluator_ || new BindEvaluator();
+      // TODO(kmh287): Refactor evaluator to allow incremental adding and
+      // removal of bindings.
       const parseErrors = this.evaluator_.setBindings(this.bindings_);
 
       // Report each parse error.
@@ -190,15 +196,19 @@ export class Bind {
   }
 
   /**
-   * Scans the substree rooted at `rootElement` and removes bindings for nodes
+   * Scans the substree rooted at `node` and removes bindings for nodes
    * that contain bindable elements. This function is not idempotent. To add
-   * bindings for a subtree, see #addBindingsForSubtree. Returns a promise
-   * that resolves after bindings have been removed.
-   * @param {!Element} rootElement
+   * bindings for a node and its children, see #addBindingsForNode_.
+   *
+   * Returns a promise that resolves after bindings have been removed.
+   *
+   * @param {!Element} node
    * @return {Promise}
+   *
+   * @private
    */
-  removeBindingsForSubtree(rootElement) {
-    this.scanPromise_ = this.scanSubtree_(rootElement).then(results => {
+  removeBindingsForNode_(node) {
+    this.scanPromise_ = this.scanNode_(node).then(results => {
       const {boundElements, bindings, expressionToElements} = results;
 
       // TODO(kmh287): Discuss strategies for speedup
@@ -228,6 +238,9 @@ export class Bind {
             }
           }
         }
+
+        //TODO(kmh287): Remove bindings from the evaluator
+
       }
 
       // TODO(kmh287): remove as many as appear in bindings and no more
@@ -253,9 +266,9 @@ export class Bind {
   }
 
   /**
-   * Scans `rootElement` for attributes that conform to bind syntax and returns
+   * Scans `node` for attributes that conform to bind syntax and returns
    * a tuple containing bound elements and binding data for the evaluator.
-   * @param {!Element} rootElement
+   * @param {!Element} node
    * @return {
    *   !Promise<{
    *     boundElements: !Array<BoundElementDef>,
@@ -265,7 +278,7 @@ export class Bind {
    * }
    * @private
    */
-  scanSubtree_(rootElement) {
+  scanNode_(node) {
     /** @type {!Array<BoundElementDef>} */
     const boundElements = [];
     /** @type {!Array<./bind-evaluator.BindingDef>} */
@@ -274,8 +287,8 @@ export class Bind {
     const expressionToElements = Object.create(null);
 
     const doc = dev().assert(
-      rootElement.ownerDocument, 'ownerDocument is null.');
-    const walker = doc.createTreeWalker(rootElement, NodeFilter.SHOW_ELEMENT);
+      node.ownerDocument, 'ownerDocument is null.');
+    const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
 
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
