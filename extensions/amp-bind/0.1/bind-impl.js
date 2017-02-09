@@ -81,7 +81,7 @@ export class Bind {
     this.expressionToElements_ = Object.create(null);
 
     /**
-     * @private {!Array<BindingDef>}
+     * @private {!Array<./bind-evaluator.BindingDef>}
      */
     this.bindings_ = [];
 
