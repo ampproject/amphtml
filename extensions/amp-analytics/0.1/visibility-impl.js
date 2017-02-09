@@ -330,7 +330,7 @@ export class Visibility {
     const resId = resource.getId();
     this.listeners_[resId] = (this.listeners_[resId] || []);
     const state = {};
-    state[TIME_LOADED] = Date.now();
+    state[TIME_LOADED] = this.now_();
     this.listeners_[resId].push({config, callback, state, shouldBeVisible});
     this.resources_.push(resource);
 
@@ -395,7 +395,7 @@ export class Visibility {
       const resId = resource.getId();
       this.listeners_[resId] = (this.listeners_[resId] || []);
       const state = {};
-      state[TIME_LOADED] = Date.now();
+      state[TIME_LOADED] = this.now_();
       this.listeners_[resId].push({config, callback, state, shouldBeVisible});
       this.resources_.push(resource);
     });
@@ -573,7 +573,7 @@ export class Visibility {
     const state = listener['state'] || {};
 
     if (visible > 0) {
-      const timeElapsed = Date.now() - state[TIME_LOADED];
+      const timeElapsed = this.now_() - state[TIME_LOADED];
       state[FIRST_SEEN_TIME] = state[FIRST_SEEN_TIME] || timeElapsed;
       state[LAST_SEEN_TIME] = timeElapsed;
       // Consider it as load time visibility if this happens within 300ms of
@@ -584,7 +584,7 @@ export class Visibility {
     }
 
     const wasInViewport = state[IN_VIEWPORT];
-    const timeSinceLastUpdate = Date.now() - state[LAST_UPDATE];
+    const timeSinceLastUpdate = this.now_() - state[LAST_UPDATE];
     state[IN_VIEWPORT] = this.isInViewport_(visible,
         config[VISIBLE_PERCENTAGE_MIN], config[VISIBLE_PERCENTAGE_MAX]);
 
@@ -601,13 +601,13 @@ export class Visibility {
       state[LAST_UPDATE] = -1;
       state[TOTAL_VISIBLE_TIME] += timeSinceLastUpdate;
       state[CONTINUOUS_TIME] = 0;  // Clear only after max is calculated above.
-      state[LAST_VISIBLE_TIME] = Date.now() - state[TIME_LOADED];
+      state[LAST_VISIBLE_TIME] = this.now_() - state[TIME_LOADED];
     } else if (state[IN_VIEWPORT] && !wasInViewport) {
       // The resource came into view. start counting.
       dev().assert(state[LAST_UPDATE] == undefined ||
           state[LAST_UPDATE] == -1, 'lastUpdated time in weird state.');
       state[FIRST_VISIBLE_TIME] = state[FIRST_VISIBLE_TIME] ||
-          Date.now() - state[TIME_LOADED];
+          this.now_() - state[TIME_LOADED];
       this.setState_(state, visible, 0);
     }
 
@@ -671,7 +671,7 @@ export class Visibility {
    * @private
    */
   setState_(s, visible, sinceLast) {
-    s[LAST_UPDATE] = Date.now();
+    s[LAST_UPDATE] = this.now_();
     s[TOTAL_VISIBLE_TIME] = s[TOTAL_VISIBLE_TIME] !== undefined
         ? s[TOTAL_VISIBLE_TIME] + sinceLast : 0;
     s[CONTINUOUS_TIME] = s[CONTINUOUS_TIME] !== undefined
@@ -682,7 +682,7 @@ export class Visibility {
         s[MIN_VISIBLE] ? Math.min(s[MIN_VISIBLE], visible) : visible;
     s[MAX_VISIBLE] =
         s[MAX_VISIBLE] ? Math.max(s[MAX_VISIBLE], visible) : visible;
-    s[LAST_VISIBLE_TIME] = Date.now() - s[TIME_LOADED];
+    s[LAST_VISIBLE_TIME] = this.now_() - s[TIME_LOADED];
   }
 
   /**
@@ -747,7 +747,11 @@ export class Visibility {
   getTotalTime_() {
     const perf = this.ampdoc.win.performance;
     return perf && perf.timing && perf.timing.domInteractive
-        ? Date.now() - perf.timing.domInteractive
+        ? this.now_() - perf.timing.domInteractive
         : null;
+  }
+
+  now_() {
+    return this.ampdoc.win.Date.now();
   }
 }
