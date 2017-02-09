@@ -20,11 +20,32 @@ You can think of AMP as a portable content format that enables content to be loa
 - An AMP cache
 - An AMP viewer
 
-| **Context** | Context #1: the publisher’s origin | Context #2: an AMP cache | Context #3: an AMP viewer |
-| --- | --- | --- | --- |
-| **Can non-AMP pages be served from here?** | Yes | No | No |
-| **Can AMP pages be served from here?** | Yes | Yes | Yes |
-| **Sample URL** | `https://example.com/article.amp.html` | `https://example-com.cdn.ampproject.org/s/example.com/article.amp.html` | `https://google.com/amp/s/example.com/article.amp.html` |
+<table>
+  <tr>
+    <th width="25%"><strong>Context</strong></th>
+    <th width="25%"><strong>Context #1: the publisher’s origin</strong></th>
+    <th width="25%"><strong>Context #2: an AMP cache</strong></th>
+    <th width="25%"><strong>Context #3: an AMP viewer</strong></th>
+  </tr>
+  <tr>
+    <td width="25%"><strong>Can non-AMP pages be served from here?</strong></td>
+    <td width="25%">Yes</td>
+    <td width="25%">No</td>
+    <td width="25%">No</td>
+  </tr>
+  <tr>
+    <td width="25%"><strong>Can AMP pages be served from here?</strong></td>
+    <td width="25%">Yes</td>
+    <td width="25%">Yes</td>
+    <td width="25%">Yes</td>
+  </tr>
+  <tr>
+    <td width="25%"><strong>Sample URL</strong></td>
+    <td width="25%"><code>https://example.com/article.amp.html</code></td>
+    <td width="25%"><code>https://example-com.cdn.ampproject.org/s/example.com/article.amp.html</code></td>
+    <td width="25%"><code>https://google.com/amp/s/example.com/article.amp.html</code></td>
+  </tr>
+</table>
 
 Let’s examine each of these situations more closely.
 
@@ -158,10 +179,16 @@ Through usage of features that require Client ID, AMP will do the “under the h
 
 On AMP pages, construct an analytics-analytics ping containing the Client ID:
 
-| In ... | ... this looks like: |
-| --- | --- |
-| **amp-analytics configuration** | `https://analytics.example.com/ping?type=pageview&user_id=${clientId(uid)}` |
-| **What goes over the network** | `https://analytics.example.com/ping?type=pageview&user_id=$amp_client_id` - *In this case, `${clientId(uid)}` is replaced by an actual value that AMP either generates at that moment or will be returned based on what the user’s browser has already stored locally*|
+<table>
+  <tr>
+    <td width="50%"><strong>amp-analytics configuration looks like:</strong></td>
+    <td width="50%"><code>https://analytics.example.com/ping?type=pageview&amp;user_id=${clientId(uid)}</code></td>
+  </tr>
+  <tr>
+    <td width="50%"><strong>What goes over the network looks like:</strong></td>
+    <td width="50%"><code>https://analytics.example.com/ping?type=pageview&amp;user_id=$amp_client_id</code><br><em>In this case, <code>${clientId(uid)}</code> is replaced by an actual value that AMP either generates at that moment or will be returned based on what the user’s browser has already stored locally</em></td>
+  </tr>
+</table>
 
 Take note of the fact that the parameter passed into the Client ID substitution, `${clientId(uid)`, is “`uid`”. This was a deliberate choice that matches the same cookie name used on the publisher origin as described in Task 1. For the most seamless integration, you should apply the same technique.
 
@@ -179,10 +206,16 @@ Because of the setup performed in Tasks 1 and 2, when someone accesses the AMP v
 
 This is illustrated in the table below:
 
-| An analytics ping coming from... | ... looks like this: |
-| --- | --- | --- |
-| **Non-AMP page on the publisher origin**  | `https://analytics.example.com/ping?type=pageview&user_id=$publisher_origin_identifier` |
-| **AMP page on the publisher origin** | `https://analytics.example.com/ping?type=pageview&user_id=$publisher_origin_identifier` - *In this case, it's the same! By choosing a scope value of “`uid`” the underlying value of the “`uid`” cookie, which is `$publisher_origin_identifier`, gets used.* |
+<table>
+  <tr>
+    <td width="50%">An analytics ping coming from a <strong>non-AMP page on the publisher origin</strong> looks like</td>
+    <td width="50%"><code>https://analytics.example.com/ping?type=pageview&amp;user_id=$publisher_origin_identifier</code></td>
+  </tr>
+  <tr>
+    <td width="50%">An analytics ping coming from an <strong>AMP page on the publisher origin</strong> looks like</td>
+    <td width="50%"><code>https://analytics.example.com/ping?type=pageview&amp;user_id=$publisher_origin_identifier</code><br><em>In this case, it's the same! By choosing a scope value of “<code>uid</code>” the underlying value of the “<code>uid</code>” cookie, which is <code>$publisher_origin_identifier</code>, gets used.</em></td>
+  </tr>
+</table>
 
 ### Task 4: Process analytics pings from AMP cache or AMP viewer display contexts and establish identifier mappings (if needed)
 
@@ -219,13 +252,20 @@ Read the cookies sent as part of the analytics request. In our example, this mea
 
 Our mapping table will associate AMP Client ID values that are seen in the analytics pings to publisher origin identifiers as follows:
 
-| User ID on publisher origin | User ID on AMP page that’s NOT on publisher origin (“alias”) |
-| --- | --- |
-| *Comes from publisher origin identifier or generated as a prospective value if the publisher origin identifier cannot be accessed* | *Comes from AMP Client ID* |
+<table>
+  <tr>
+    <th width="50%"><strong>User ID on publisher origin</strong></th>
+    <th width="50%"><strong>User ID on AMP page that’s NOT on publisher origin (“alias”)</strong></th>
+  </tr>
+  <tr>
+    <td width="50%"><em>Comes from publisher origin identifier or generated as a prospective value if the publisher origin identifier cannot be accessed</em></td>
+    <td width="50%"><em>Comes from AMP Client ID</em></td>
+  </tr>
+</table>
 
 Immediately after determining that you were unsuccessful in reading the publisher origin identifier, check if the AMP Client ID contained within the analytics ping is already used in a mapping. To do this, first consult the incoming amp-analytics request to get the Client ID value. For example, from this request:
 
-```
+``` text
 https://analytics.example.com/ping?type=pageview&user_id=$amp_client_id
 ```
 
@@ -233,9 +273,16 @@ we extract out the bolded portion corresponding to the AMP Client ID: `$amp_clie
 
 Next, examine the mapping table to try and find the same value in the “alias” column:
 
-| User ID on publisher origin | User ID on AMP page that’s NOT on publisher origin (“alias”) |
-| --- | --- |
-| `$existing_publisher_origin_identifier` | `$amp_client_id` |
+<table>
+  <tr>
+    <th width="50%"><strong>User ID on publisher origin</strong></th>
+    <th width="50%"><strong>User ID on AMP page that’s NOT on publisher origin (“alias”)</strong></th>
+  </tr>
+  <tr>
+    <td width="50%"><code>$existing_publisher_origin_identifier</code></td>
+    <td width="50%"><code>$amp_client_id</code></td>
+  </tr>
+</table>
 
 In the example above, we find a record that already exists. The value we find that’s paired with the AMP Client ID becomes the analytics record identifier. Here, that is `$existing_publisher_origin_identifier`. With an analytics record identifier established, we can skip ahead to the “[Data storage](#data-storage)” section.
 
@@ -247,9 +294,16 @@ Otherwise, if the AMP Client ID is not found in a mapping, we need to create a m
 
 The mapping we’ve created ends up looking like this:
 
-| User ID on publisher origin | User ID on AMP page that’s NOT on publisher origin (“alias”) |
-| --- | --- |
-| `$prospective_identifier` (generated just-in-time when analytics ping is received) | `$amp_client_id` (came from analytics ping) |
+<table>
+  <tr>
+    <th width="50%"><strong>User ID on publisher origin</strong></th>
+    <th width="50%"><strong>User ID on AMP page that’s NOT on publisher origin (“alias”)</strong></th>
+  </tr>
+  <tr>
+    <td width="50%"><code>$prospective_identifier</code> (generated just-in-time when analytics ping is received)</td>
+    <td width="50%"><code>$amp_client_id</code> (came from analytics ping)</td>
+  </tr>
+</table>
 
 We’ll use the prospective publisher origin identifier as the analytics record identifier since that’s the value associated with the state on the publisher origin. In this case that’s `$prospective_identifier`, which will come into play in the “[Data storage](#data-storage)” section that follows.
 
@@ -257,7 +311,7 @@ We’ll use the prospective publisher origin identifier as the analytics record 
 
 Now that you've figured out the analytics record identifier you can actually store the user state information (analytics data in this case) keyed by that identifier:
 
-```
+``` text
 {analytics record identifier, analytics data ...}
 ```
 
@@ -279,19 +333,19 @@ Our approach will take advantage of two types of AMP variable substitutions.
 
 **To update outgoing links to use a Client ID substitution:** Define a new query parameter, `ref_id` (“referrer ID”), which will appear within the URL and indicate the **originating context’s identifier** for the user. Set this query parameter to equal the value of AMP’s Client ID substitution:
 
-```
+``` text
 <a href="https://example.com/step2.html?ref_id=CLIENT_ID(uid)">
 ```
 
 **To update form inputs to use a Client ID substitution:** Define a name for the input field, such as `orig_user_id`. Specify the `default-value` of the form field to be the value of AMP’s Client ID substitution:
 
-```
+``` text
 <input name="ref_id" type="hidden" default-value="CLIENT_ID(uid)">
 ```
 
 By taking these steps, the Client ID is available to the target server and/or as a URL parameter on the page the user lands on after the link click or form submission (the **destination context**). The name (or “key”) will be `ref_id` because that’s how we’ve defined it in the above implementations and will have an associated value equal to the Client ID. For instance, by following the link (“`<a>`” tag) defined above, the user will navigate to this URL:
 
-```
+``` text
 https://example.com/step2.html?ref_id=$amp_client_id
 ```
 
@@ -322,26 +376,26 @@ To process on the landing page, the approach will vary depending on whether that
 
 *Updates to AMP page:* Use the Query Parameter substitution feature in your amp-analytics configuration to obtain the `ref_id` identifier value within the URL. The Query Parameter feature takes a parameter that indicates the “key” of the desired key-value pair in the URL and returns the corresponding value. Use the Client ID feature as we have been doing to get the identifier for the AMP page context.
 
-```
+``` text
 https://analytics.example.com/ping?type=pageview&orig_user_id=${queryParam(ref_id)}&user_id=${clientId(uid)}
 ```
 
 When this gets transmitted across the network, actual values will be replaced:
 
-```
+``` text
 https://analytics.example.com/ping?type=pageview&orig_user_id=$referrer_page_identifier&user_id=$current_page_identifier
 ```
 
 Following through our examples above, we have:
 
-```
+``` text
 $referrer_page_identifier is $amp_client_id
 $current_page_identifier is $publisher_origin_id
 ```
 
 so the ping is actually:
 
-```
+``` text
 https://analytics.example.com/ping?type=pageview&orig_user_id=$amp_client_id&user_id=$publisher_origin_id
 ```
 
@@ -359,7 +413,7 @@ We recommend validating the authenticity of query parameter values by using the 
 > 
 > To do this on your non-AMP page, include the following JavaScript, which will remove all query parameters from the URL:
 > 
-> ```
+> ``` javascript
 > var href = location.href.replace(/\?[^#]+/, '');
 > history.replaceState(null, null, href);
 > ```
@@ -376,11 +430,28 @@ Check if either of the values corresponding to  is present in your mapping table
 
 **Case #1: Identifier arrangement when analytics ping is sent from page on publisher origin**
 
-| | User ID on publisher origin | User ID on AMP page that’s NOT on publisher origin (“alias”) |
-| --- | --- | --- |
-| **How it’s expressed in analytics ping** | `user_id=$publisher_origin_id` | `orig_user_id=$amp_client_id` |
-| **Parameter key** | `user_id` | `orig_user_id` |
-| **Parameter value** | `$publisher_origin_id` | `$amp_client_id` |
+<table>
+  <tr>
+    <th width="40%"> </th>
+    <th width="30%"><strong>User ID on publisher origin</strong></th>
+    <th width="30%"><strong>User ID on AMP page that’s NOT on publisher origin (“alias”)</strong></th>
+  </tr>
+  <tr>
+    <td width="40%"><strong>How it’s expressed in analytics ping</strong></td>
+    <td width="30%"><code>user_id=$publisher_origin_id</code></td>
+    <td width="30%"><code>orig_user_id=$amp_client_id</code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Parameter key</strong></td>
+    <td width="30%"><code>user_id</code></td>
+    <td width="30%"><code>orig_user_id</code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Parameter value</strong></td>
+    <td width="30%"><code>$publisher_origin_id</code></td>
+    <td width="30%"><code>$amp_client_id</code></td>
+  </tr>
+</table>
 
 Please notice that the identifier coming from the first pageview corresponds to the rightmost column and the identifier coming from the second pageview is in the middle column, in accordance with how our example flow above was constructed.
 
@@ -388,11 +459,28 @@ If instead the user starts on a page served from the publisher origin and subseq
 
 **Case #2: Identifier arrangement when analytics ping is sent from an AMP page that’s NOT on the publisher origin**
 
-| | User ID on publisher origin | User ID on AMP page that’s NOT on publisher origin (“alias”) |
-| --- | --- | --- |
-| **How it’s expressed in analytics ping** | `orig_user_id=$publisher_origin_id` | `user_id=$amp_client_id` |
-| **Parameter key** | `orig_user_id` | `user_id` |
-| **Parameter value** | `$publisher_origin_id` | `$amp_client_id` |
+<table>
+  <tr>
+    <th width="40%"> </th>
+    <th width="30%"><strong>User ID on publisher origin</strong></th>
+    <th width="30%"><strong>User ID on AMP page that’s NOT on publisher origin (“alias”)</strong></th>
+  </tr>
+  <tr>
+    <td width="40%"><strong>How it’s expressed in analytics ping</strong></td>
+    <td width="30%"><code>user_id=$publisher_origin_id</code></td>
+    <td width="30%"><code>orig_user_id=$amp_client_id</code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Parameter key</strong></td>
+    <td width="30%"><code>orig_user_id</code></td>
+    <td width="30%"><code>user_id</code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Parameter value</strong></td>
+    <td width="30%"><code>$publisher_origin_id</code></td>
+    <td width="30%"><code>$amp_client_id</code></td>
+  </tr>
+</table>
 
 When you are searching the mapping table, take note of which situation applies and search for values within the columns of the mapping table where you expect them to appear. For instance, if the analytics ping is being sent from a page on the publisher origin (Case #1), then check for values keyed by `user_id` in the mapping table column “User ID on publisher origin” and check for values keyed by `orig_user_id` in the column “User ID on AMP page that’s NOT on publisher origin (‘alias’)”.
 
@@ -407,13 +495,13 @@ Values contained in a URL can be maliciously changed, malformed, or somehow othe
 
 For instance, in the steps above, we constructed the following URL, intended for the user to click on and navigate to the corresponding page:
 
-```
+``` text
 https://example.com/step2.html?orig_user_id=$amp_client_id
 ```
 
 However, it’s just as possible that the user or some attacker change this URL to be:
 
-```
+``` text
 https://example.com/step2.html?orig_user_id=$malicious_value
 ```
 
