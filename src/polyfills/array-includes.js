@@ -23,7 +23,7 @@
  * @returns {boolean}
  */
 export function includes(value, opt_fromIndex) {
-  let fromIndex = opt_fromIndex || 0;
+  const fromIndex = opt_fromIndex || 0;
   const len = this.length;
   let i = fromIndex >= 0 ? fromIndex : Math.max(len + fromIndex, 0);
   for (; i < len; i++) {
