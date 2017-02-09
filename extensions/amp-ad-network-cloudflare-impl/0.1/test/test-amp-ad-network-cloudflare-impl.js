@@ -35,23 +35,12 @@ describe('cloudflare-a4a-config', () => {
     });
   });
   it('should pass a4a config predicate', () => {
-    const element = createElementWithAttributes(doc, 'amp-ad', {
+    const el = createElementWithAttributes(doc, 'amp-ad', {
+      'data-cf-network': 'cloudflare',
       src: '/ad.html',
-      'data-a4a': 'true',
+      'data-cf-a4a': 'true',
     });
-    expect(cloudflareIsA4AEnabled(win, element)).to.be.true;
-  });
-  it('should fail a4a config predicate due to missing a4a', () => {
-    const element = createElementWithAttributes(doc, 'amp-ad', {
-      src: '/ad.html',
-    });
-    expect(cloudflareIsA4AEnabled(win, element)).to.be.false;
-  });
-  it('should fail a4a config predicate due to missing src', () => {
-    const element = createElementWithAttributes(doc, 'amp-ad', {
-      'data-a4a': 'true',
-    });
-    expect(cloudflareIsA4AEnabled(win, element)).to.be.false;
+    expect(cloudflareIsA4AEnabled(win, el)).to.be.true;
   });
 });
 
@@ -59,19 +48,21 @@ describe('amp-ad-network-cloudflare-impl', () => {
 
   let sandbox;
   let cloudflareImpl;
-  let cloudflareImplElem;
+  let el;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    cloudflareImplElem = document.createElement('amp-ad');
-    cloudflareImplElem.setAttribute('type', 'cloudflare');
-    cloudflareImplElem.setAttribute('src', '/fake_a4a.json.html');
-    cloudflareImplElem.setAttribute('data-a4a','true');
+    el = document.createElement('amp-ad');
+    el.setAttribute('type', 'cloudflare');
+    el.setAttribute('data-cf-network', 'cloudflare');
+    el.setAttribute('src', '/a4a-ad.html');
+    el.setAttribute('data-cf-a4a','true');
     sandbox.stub(AmpAdNetworkCloudflareImpl.prototype, 'getSigningServiceNames',
       () => {
         return ['cloudflare','cloudflare-dev'];
       });
-    cloudflareImpl = new AmpAdNetworkCloudflareImpl(cloudflareImplElem);
+    document.body.appendChild(el);
+    cloudflareImpl = new AmpAdNetworkCloudflareImpl(el);
   });
 
   afterEach(() => {
@@ -83,10 +74,9 @@ describe('amp-ad-network-cloudflare-impl', () => {
       expect(cloudflareImpl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      cloudflareImplElem =
-document.createElement('amp-ad-network-cloudflare-impl');
-      cloudflareImplElem.setAttribute('type', 'cloudflare');
-      cloudflareImpl = new AmpAdNetworkCloudflareImpl(cloudflareImplElem);
+      el = document.createElement('amp-ad-network-cloudflare-impl');
+      el.setAttribute('type', 'cloudflare');
+      cloudflareImpl = new AmpAdNetworkCloudflareImpl(el);
       expect(cloudflareImpl.isValidElement()).to.be.false;
     });
   });
@@ -94,7 +84,59 @@ document.createElement('amp-ad-network-cloudflare-impl');
   describe('#getAdUrl', () => {
     it('should be valid', () => {
       expect(cloudflareImpl.getAdUrl()).to.equal(
-'/extensions/amp-ad-network-cloudflare-impl/0.1/data/fake_a4a.json.html');
+        'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
+    });
+
+    it('should handle non-a4a URLs', () => {
+      el.setAttribute('data-cf-a4a', 'false');
+      expect(cloudflareImpl.getAdUrl()).to.equal(
+        'https://firebolt.cloudflaredemo.com/a4a-ad.html');
+    });
+
+    it('should handle additional templated width/height', () => {
+      el.setAttribute('src', '/ad?width=SLOT_WIDTH&height=SLOT_HEIGHT');
+      expect(cloudflareImpl.getAdUrl()).to.equal(
+        'https://firebolt.cloudflaredemo.com/_a4a/ad?width=0&height=0');
+    });
+
+    function parseQuery(query) {
+      const kvs = query.split(/&/);
+      const params = {};
+      for (let i = 0; i < kvs.length; i++) {
+        const parts = kvs[i].match(/^([^=]+)=?(.*)/);
+        params[parts[1]] = parts[2];
+      }
+      return params;
+    }
+
+    it('should handle data parameters', () => {
+      el.setAttribute('src', '/ad');
+      el.setAttribute('data-key', 'value');
+      el.setAttribute('data-another', 'more');
+
+      const url = cloudflareImpl.getAdUrl();
+      const base = 'https://firebolt.cloudflaredemo.com/_a4a/ad?';
+      expect(url.substring(0, base.length)).to.equal(base);
+      expect(parseQuery(url.substring(base.length))).to.deep.equal({
+        another: 'more',
+        key: 'value',
+      });
+    });
+
+    it('should handle both data parameters and templated parameters', () => {
+      el.setAttribute('src', '/ad?width=SLOT_WIDTH&height=SLOT_HEIGHT');
+      el.setAttribute('data-key', 'value');
+      el.setAttribute('data-another', 'more');
+
+      const url = cloudflareImpl.getAdUrl();
+      const base = 'https://firebolt.cloudflaredemo.com/_a4a/ad?';
+      expect(url.substring(0, base.length)).to.equal(base);
+      expect(parseQuery(url.substring(base.length))).to.deep.equal({
+        another: 'more',
+        height: '0',
+        key: 'value',
+        width: '0',
+      });
     });
   });
 
