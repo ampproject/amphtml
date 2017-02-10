@@ -213,7 +213,7 @@ export class Bind {
       // Eliminate elements from the expression to elements map that
       // have node as an ancestor. Delete expressions that are no longer
       // bound to elements.
-      let deletedExpressions = [];
+      const deletedExpressions = [];
       for (const expression in this.expressionToElements_) {
         const elements = this.expressionToElements_[expression];
         for (let j = elements.length - 1; j >= 0; j--) {
@@ -241,7 +241,7 @@ export class Bind {
    */
   isAncestorOf_(node, potentialParent) {
     let currentElement = node;
-    while(currentElement) {
+    while (currentElement) {
       if (currentElement === potentialParent) {
         return true;
       }

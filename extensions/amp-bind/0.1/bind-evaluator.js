@@ -17,7 +17,7 @@
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {map, hasOwn} from '../../../src/utils/object'
+import {map, hasOwn} from '../../../src/utils/object';
 
 /**
  * @typedef {{

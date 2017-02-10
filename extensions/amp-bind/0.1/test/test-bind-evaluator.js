@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
- import {BindEvaluator, BindingDef} from '../bind-evaluator'
+import {BindEvaluator, BindingDef} from '../bind-evaluator';
 
- describe('BindEvaluator', () => {
+describe('BindEvaluator', () => {
 
   let evaluator;
 
@@ -25,16 +25,16 @@
   });
 
   it('should allow callers to add bindings multiple times', () => {
-    let bindingDef = {
-      tagName: "P",
-      property: "text",
-      expressionString: "oneplusone + 2"
+    const bindingDef = {
+      tagName: 'P',
+      property: 'text',
+      expressionString: 'oneplusone + 2',
     };
-    let bindingDef2 = {
-      tagName: "SPAN",
-      property: "text",
-      expressionString: "oneplusone + 3"
-    }
+    const bindingDef2 = {
+      tagName: 'SPAN',
+      property: 'text',
+      expressionString: 'oneplusone + 3',
+    };
     expect(evaluator.parsedBindings_.length).to.equal(0);
     evaluator.addBindings([bindingDef]);
     expect(evaluator.parsedBindings_.length).to.equal(1);
@@ -43,16 +43,16 @@
   });
 
   it('should allow callers to remove bindings', () => {
-    let bindingDef = {
-      tagName: "P",
-      property: "text",
-      expressionString: "oneplusone + 2"
+    const bindingDef = {
+      tagName: 'P',
+      property: 'text',
+      expressionString: 'oneplusone + 2',
     };
-    let bindingDef2 = {
-      tagName: "SPAN",
-      property: "text",
-      expressionString: "oneplusone + 3"
-    }
+    const bindingDef2 = {
+      tagName: 'SPAN',
+      property: 'text',
+      expressionString: 'oneplusone + 3',
+    };
     expect(evaluator.parsedBindings_.length).to.equal(0);
     evaluator.addBindings([bindingDef]);
     expect(evaluator.parsedBindings_.length).to.equal(1);
@@ -65,40 +65,41 @@
   });
 
   it('should evaluate expressions given a scope with needed bindings', done => {
-    let bindingDef = {
-      tagName: "P",
-      property: "text",
-      expressionString: "oneplusone + 2"
+    const bindingDef = {
+      tagName: 'P',
+      property: 'text',
+      expressionString: 'oneplusone + 2',
     };
     expect(evaluator.parsedBindings_.length).to.equal(0);
     evaluator.addBindings([bindingDef]);
     expect(evaluator.parsedBindings_.length).to.equal(1);
-    evaluator.evaluate({oneplusone:2}).then(results => {
+    evaluator.evaluate({oneplusone: 2}).then(results => {
       const evaluated = results['results'];
       const errors = results['errors'];
       expect(errors[bindingDef.expressionString]).to.be.undefined;
       expect(evaluated[bindingDef.expressionString]).to.not.be.undefined;
       expect(evaluated[bindingDef.expressionString] = '4');
       done();
-    })
+    });
   });
 
-  it('should fail to evaluate expressions with out-of-scope vars', () => {
-    let bindingDef = {
-      tagName: "P",
-      property: "text",
-      expressionString: "oneplusone + 2"
+  it('should treat out-of-scope vars as null', done => {
+    const outOfScopeDef = {
+      tagName: 'P',
+      property: 'text',
+      expressionString: 'outOfScope',
     };
     expect(evaluator.parsedBindings_.length).to.equal(0);
-    evaluator.addBindings([bindingDef]);
+    evaluator.addBindings([outOfScopeDef]);
     expect(evaluator.parsedBindings_.length).to.equal(1);
-    evaluator.evaluate({twoplustwo:4}).then(results => {
+    evaluator.evaluate({}).then(results => {
       const evaluated = results['results'];
       const errors = results['errors'];
-      expect(errors[bindingDef.expressionString]).to.not.be.undefined;
-      expect(evaluated[bindingDef.expressionString]).to.be.undefined;
+      expect(errors[outOfScopeDef.expressionString]).to.be.undefined;
+      expect(evaluated[outOfScopeDef.expressionString]).to.not.be.undefined;
+      expect(evaluated[outOfScopeDef.expressionString]).to.be.null;
       done();
     });
   });
 
- });
+});
