@@ -2802,8 +2802,6 @@ attr_lists: {
   attrs: { name: "noloading" value: "" }
 }
 tags: {  # <amp-img>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-IMG"
   # <amp-img> is whitelisted for <amp-sidebar>, otherwise:
   # disallowed_ancestor: "AMP-SIDEBAR"
@@ -2823,8 +2821,6 @@ tags: {  # <amp-img>
   }
 }
 tags: {  # <amp-pixel>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-PIXEL"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {

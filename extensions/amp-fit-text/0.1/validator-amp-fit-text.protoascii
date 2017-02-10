@@ -15,8 +15,6 @@
 #
 
 tags: {  # amp-fit-text
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-fit-text extension .js script"
   mandatory_parent: "HEAD"
@@ -54,8 +52,6 @@ tags: {  # amp-fit-text
 # TODO(greggrothaus): amp-fit-text's attribute spec need flushing
 # out now that the spec is available.
 tags: {  # <amp-fit-text>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-FIT-TEXT"
   # <amp-fit-text> is whitelisted for <amp-sidebar>, otherwise:
   # disallowed_ancestor: "AMP-SIDEBAR"
