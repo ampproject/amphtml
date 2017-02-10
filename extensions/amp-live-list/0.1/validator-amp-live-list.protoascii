@@ -15,7 +15,6 @@
 #
 tags: {  # amp-live-list
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-live-list extension .js script"
   mandatory_parent: "HEAD"
@@ -52,7 +51,6 @@ tags: {  # amp-live-list
 }
 tags: {  # <amp-live-list>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-LIVE-LIST"
   also_requires_tag: "amp-live-list extension .js script"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-live-list.html"
@@ -94,7 +92,6 @@ tags: {  # <amp-live-list>
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [update]"
   attrs: { name: "update" mandatory: true }
@@ -102,7 +99,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-LIVE-LIST [items]"
   attrs: { name: "items" mandatory: true }
@@ -113,7 +109,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [pagination]"
   attrs: { name: "pagination" mandatory: true }
@@ -121,7 +116,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [items] item"
   attrs: { name: "id" mandatory: true }

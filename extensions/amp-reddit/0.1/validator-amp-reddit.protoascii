@@ -16,7 +16,6 @@
 
 tags: {  # amp-reddit
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-reddit extension .js script"
   also_requires_tag: "amp-reddit"
@@ -54,7 +53,6 @@ tags: {  # amp-reddit
 }
 tags: {  # <amp-reddit>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-REDDIT"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-reddit extension .js script"
