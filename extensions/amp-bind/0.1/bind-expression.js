@@ -137,7 +137,7 @@ export class BindExpression {
             }
           }
         }
-        throw new Error(`${caller}.${method} is not a supported function.`);
+        throw new Error(`${callerType}.${method} is not a supported function.`);
 
       case AstNodeType.MEMBER_ACCESS:
         const target = this.eval_(args[0], scope);
