@@ -129,6 +129,9 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	runtime := r.URL.Query().Get("rt")
 	if runtime != "" {
 		errorType += "-" + runtime;
+		if runtime == "inabox" {
+			severity = "ERROR"
+		}
 		if runtime == "3p" {
 			is3p = true
 		}
