@@ -15,7 +15,6 @@
 #
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-selector extension .js script"
   also_requires_tag: "amp-selector"
@@ -53,7 +52,6 @@ tags: {
 }
 tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SIDEBAR"
@@ -98,7 +96,6 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
 # always match, we want to prefer 'option' when both of them match.
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
   attrs: { name: "option" mandatory: true }
@@ -108,7 +105,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR child"
   reference_points: {

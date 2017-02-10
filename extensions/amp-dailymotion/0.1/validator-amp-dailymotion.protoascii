@@ -15,7 +15,6 @@
 #
 tags: {  # amp-dailymotion
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-dailymotion extension .js script"
   mandatory_parent: "HEAD"
@@ -52,7 +51,6 @@ tags: {  # amp-dailymotion
 }
 tags: {  # <amp-dailymotion>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-DAILYMOTION"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-dailymotion extension .js script"

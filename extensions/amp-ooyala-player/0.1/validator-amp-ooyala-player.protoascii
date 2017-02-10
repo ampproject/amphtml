@@ -15,6 +15,7 @@
 #
 
 tags: {  # amp-ooyala-player
+  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-ooyala-player extension .js script"
   mandatory_parent: "HEAD"
@@ -50,9 +51,8 @@ tags: {  # amp-ooyala-player
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-ooyala-player.html"
 }
 tags: {  # <amp-ooyala-player>
-  tag_name: "AMP-OOYALA-PLAYER"
   html_format: AMP
-  html_format: AMP4ADS
+  tag_name: "AMP-OOYALA-PLAYER"
   also_requires_tag: "amp-ooyala-player extension .js script"
   attrs: { name: "data-config" }
   attrs: {

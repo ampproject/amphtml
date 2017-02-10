@@ -15,7 +15,6 @@
 #
 tags: {  # <script custom-element="amp-fx-flying-carpet">
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-fx-flying-carpet extension .js script"
   mandatory_parent: "HEAD"
@@ -52,7 +51,6 @@ tags: {  # <script custom-element="amp-fx-flying-carpet">
 }
 tags: {  # <amp-fx-flying-carpet>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-FX-FLYING-CARPET"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-fx-flying-carpet extension .js script"

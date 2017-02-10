@@ -20,6 +20,7 @@
 template_spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
 
 tags: {  # amp-mustache
+  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-mustache extension .js script"
   mandatory_parent: "HEAD"

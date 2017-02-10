@@ -16,7 +16,6 @@
 
 tags: {  # amp-lightbox
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-lightbox extension .js script"
   mandatory_parent: "HEAD"
@@ -53,7 +52,6 @@ tags: {  # amp-lightbox
 }
 tags: {  # <amp-lightbox>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-LIGHTBOX"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-lightbox extension .js script"

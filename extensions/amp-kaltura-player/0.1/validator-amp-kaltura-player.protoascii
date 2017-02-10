@@ -16,7 +16,6 @@
 
 tags: {  # amp-kaltura-player
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-kaltura-player extension .js script"
   mandatory_parent: "HEAD"
@@ -55,7 +54,6 @@ tags: {  # amp-kaltura-player
 # a data-videoid attribute.
 tags: {  # <amp-kaltura-player>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-KALTURA-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-kaltura-player extension .js script"
