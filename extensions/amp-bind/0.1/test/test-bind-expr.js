@@ -193,12 +193,10 @@ describe('BindExpression', () => {
     expect(evaluate('["a", "a"].lastIndexOf("a")')).to.equal(1);
     expect(evaluate('["a", "b", "c"].slice(1, 2)'))
         .to.deep.equal(['b']);
+    expect(evaluate('[1, 2, 3, 4, 5].includes(3)')).to.be.true;
   });
 
   it('should NOT allow access to array non-whitelisted methods', () => {
-    expect(() => {
-      evaluate('["a", "b", "c"].includes("a")');
-    }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
       evaluate('["a", "b", "c"].find()');
     }).to.throw(Error, unsupportedFunctionError);
