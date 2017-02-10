@@ -263,7 +263,7 @@ const EXPERIMENTS = [
     id: 'sticky-ad-early-load',
     name: 'Load sticky-ad early after user first scroll' +
         'Only apply to 1.0 version',
-    cleanupIssue: 'TODO: create issue',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
   },
 ];
 
