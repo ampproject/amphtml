@@ -75,7 +75,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
     return;
   }
   const service = getExistingServiceForDoc(nodeOrAmpDoc, 'chunk');
-  service.run_(fn, priority);
+  service.run(fn, priority);
 }
 
 /**
@@ -324,9 +324,8 @@ class Chunks {
    * Run fn as a "chunk".
    * @param {function(?IdleDeadline)} fn
    * @param {number} priority
-   * @private
    */
-  run_(fn, priority) {
+  run(fn, priority) {
     const t = new Task(fn);
     this.enqueueTask_(t, priority);
   }
