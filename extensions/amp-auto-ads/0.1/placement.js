@@ -16,7 +16,10 @@
 
 import {dev} from '../../../src/log';
 import {resourcesForDoc} from '../../../src/resources';
-import {createElementWithAttributes} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -216,12 +219,9 @@ export function getPlacementsFromConfigObj(win, configObj) {
     return [];
   }
   const placements = [];
-  for (let i = 0; i < placementObjs.length; ++i) {
-    const placement = getPlacementFromObject(win, placementObjs[i]);
-    if (placement) {
-      placements.push(placement);
-    }
-  }
+  placementObjs.forEach(placementObj => {
+    getPlacementsFromObject(win, placementObj, placements);
+  });
   return placements;
 }
 
@@ -230,29 +230,24 @@ export function getPlacementsFromConfigObj(win, configObj) {
  * constructs and returns an instance of the Placement class for it.
  * @param {!Window} win
  * @param {!Object} placementObj
- * @return {?Placement}
+ * @param {!Array<!Placement>} placements
  */
-function getPlacementFromObject(win, placementObj) {
+function getPlacementsFromObject(win, placementObj, placements) {
   const injector = INJECTORS[placementObj['pos']];
   if (!injector) {
     dev().warn(TAG, 'No injector for position');
-    return null;
+    return;
   }
   const anchor = placementObj['anchor'];
   if (!anchor) {
     dev().warn(TAG, 'No anchor in placement');
-    return null;
+    return;
   }
-  const anchorElement = getAnchorElement(win, anchor);
-  if (!anchorElement) {
+  const anchorElements =
+      getAnchorElements(win.document.documentElement, anchor);
+  if (!anchorElements.length) {
     dev().warn(TAG, 'No anchor element found');
-    return null;
-  }
-  if ((placementObj['pos'] == Position.BEFORE ||
-       placementObj['pos'] == Position.AFTER) &&
-      !anchorElement.parentNode) {
-    dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
-    return null;
+    return;
   }
   let margins = undefined;
   if (placementObj['style']) {
@@ -265,24 +260,55 @@ function getPlacementFromObject(win, placementObj) {
       };
     }
   }
-  return new Placement(win, resourcesForDoc(anchorElement), anchorElement,
-      placementObj['pos'], injector, margins);
+  anchorElements.forEach(anchorElement => {
+    if ((placementObj['pos'] == Position.BEFORE ||
+         placementObj['pos'] == Position.AFTER) &&
+        !anchorElement.parentNode) {
+      dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
+      return;
+    }
+    placements.push(new Placement(win, resourcesForDoc(anchorElement),
+        anchorElement, placementObj['pos'], injector, margins));
+  });
 }
 
 /**
- * @param {!Window} win
+ * Looks up the element(s) addresses by the anchorObj.
+ *
+ * @param {!Element} rootElement
  * @param {!Object} anchorObj
- * @return {?Element}
+ * @return {!Array<!Element>}
  */
-function getAnchorElement(win, anchorObj) {
+function getAnchorElements(rootElement, anchorObj) {
   const selector = anchorObj['selector'];
   if (!selector) {
     dev().warn(TAG, 'No selector in anchor');
-    return null;
+    return [];
   }
-  const index = anchorObj['index'] || 0;
-  if (index == 0) {
-    return win.document.querySelector(selector);
+  let elements = [].slice.call(scopedQuerySelectorAll(rootElement, selector));
+
+  const minChars = anchorObj['min_c'] || 0;
+  if (minChars > 0) {
+    elements = elements.filter(el => {
+      return el.textContent.length >= minChars;
+    });
   }
-  return win.document.querySelectorAll(selector)[index] || null;
+
+  if (typeof anchorObj['index'] == 'number' || !anchorObj['all']) {
+    const element = elements[anchorObj['index'] || 0];
+    elements = element ? [element] : [];
+  }
+
+  if (elements.length == 0) {
+    return [];
+  }
+
+  if (anchorObj['sub']) {
+    let subElements = [];
+    elements.forEach(el => {
+      subElements = subElements.concat(getAnchorElements(el, anchorObj['sub']));
+    });
+    return subElements;
+  }
+  return elements;
 }

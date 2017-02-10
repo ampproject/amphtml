@@ -696,5 +696,392 @@ describe('placement', () => {
           });
           expect(placements).to.be.empty;
         });
+
+    it('should get a placement for the 2nd anchor with class name', () => {
+      const anchor1 = document.createElement('div');
+      anchor1.className = 'aClass';
+      container.appendChild(anchor1);
+
+      const anchor2 = document.createElement('div');
+      anchor2.className = 'aClass';
+      container.appendChild(anchor2);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV.aClass',
+              index: 1,
+            },
+            pos: 2,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+
+      expect(placements[0].anchorElement_).to.eql(anchor2);
+    });
+
+    it('should get a placement for all the anchors with class name', () => {
+      const anchor1 = document.createElement('div');
+      anchor1.className = 'aClass';
+      container.appendChild(anchor1);
+
+      const anchor2 = document.createElement('div');
+      anchor2.className = 'aClass';
+      container.appendChild(anchor2);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV.aClass',
+              all: true,
+            },
+            pos: 2,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(2);
+
+      expect(placements[0].anchorElement_).to.eql(anchor1);
+      expect(placements[1].anchorElement_).to.eql(anchor2);
+    });
+
+    it('should get a placement for the 2nd anchor with class name when ' +
+        'index and all both specified.', () => {
+      const anchor1 = document.createElement('div');
+      anchor1.className = 'aClass';
+      container.appendChild(anchor1);
+
+      const anchor2 = document.createElement('div');
+      anchor2.className = 'aClass';
+      container.appendChild(anchor2);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV.aClass',
+              index: 0,
+              all: true,
+            },
+            pos: 2,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+
+      expect(placements[0].anchorElement_).to.eql(anchor1);
+    });
+
+    it('should only get placement for element with sufficient textContent',
+        () => {
+          const nonAnchor = document.createElement('div');
+          nonAnchor.className = 'class1';
+          container.appendChild(nonAnchor);
+          nonAnchor.appendChild(document.createTextNode('abc'));
+
+          const anchor = document.createElement('div');
+          anchor.className = 'class1';
+          container.appendChild(anchor);
+          anchor.appendChild(document.createTextNode('abcd'));
+
+          const placements = getPlacementsFromConfigObj(window, {
+            placements: [
+              {
+                anchor: {
+                  selector: '.class1',
+                  'min_c': 4,
+                },
+                pos: 1,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(1);
+          expect(placements[0].anchorElement_).to.eql(anchor);
+        });
+  });
+
+  describe('getPlacementsFromConfigObj, sub-anchors', () => {
+    it('should get placements using the sub anchor', () => {
+      const nonAnchor = document.createElement('div');
+      nonAnchor.id = 'anId';
+      container.appendChild(nonAnchor);
+
+      const nonSubAnchor1 = document.createElement('div');
+      nonSubAnchor1.className = 'sub-class';
+      nonAnchor.appendChild(nonSubAnchor1);
+
+      const anchor = document.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const subAnchor1 = document.createElement('div');
+      subAnchor1.className = 'sub-class';
+      anchor.appendChild(subAnchor1);
+
+      const nonSubAnchor2 = document.createElement('div');
+      nonSubAnchor2.className = 'non-sub-class';
+      anchor.appendChild(nonSubAnchor2);
+
+      const subAnchor2 = document.createElement('div');
+      subAnchor2.className = 'sub-class';
+      anchor.appendChild(subAnchor2);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+              index: 1,
+              sub: {
+                selector: '.sub-class',
+                all: true,
+              },
+            },
+            pos: 1,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(2);
+      expect(placements[0].anchorElement_).to.eql(subAnchor1);
+      expect(placements[1].anchorElement_).to.eql(subAnchor2);
+    });
+
+    it('should get placement only for anchor indexed in sub-anchor', () => {
+      const anchor = document.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const subAnchor1 = document.createElement('div');
+      subAnchor1.className = 'sub-class';
+      anchor.appendChild(subAnchor1);
+
+      const subAnchor2 = document.createElement('div');
+      subAnchor2.className = 'sub-class';
+      anchor.appendChild(subAnchor2);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+              sub: {
+                selector: '.sub-class',
+                index: 1,
+              },
+            },
+            pos: 1,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+      expect(placements[0].anchorElement_).to.eql(subAnchor2);
+    });
+
+    it('should get placements using recursive sub anchors', () => {
+      const anchor = document.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const subAnchor1 = document.createElement('div');
+      subAnchor1.className = 'sub-class1';
+      anchor.appendChild(subAnchor1);
+
+      const subSubAnchor1 = document.createElement('div');
+      subSubAnchor1.className = 'sub-class2';
+      subAnchor1.appendChild(subSubAnchor1);
+
+      const nonSubSubAnchor = document.createElement('div');
+      nonSubSubAnchor.className = 'sub-class3';
+      subAnchor1.appendChild(nonSubSubAnchor);
+
+      const subAnchor2 = document.createElement('div');
+      subAnchor2.className = 'sub-class1';
+      anchor.appendChild(subAnchor2);
+
+      const subSubAnchor2 = document.createElement('div');
+      subSubAnchor2.className = 'sub-class2';
+      subAnchor2.appendChild(subSubAnchor2);
+
+      const nonSubAnchor = document.createElement('div');
+      nonSubAnchor.className = 'sub-class1';
+      anchor.appendChild(nonSubAnchor);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+              sub: {
+                selector: '.sub-class1',
+                all: true,
+                sub: {
+                  selector: '.sub-class2',
+                  all: true,
+                },
+              },
+            },
+            pos: 1,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(2);
+      expect(placements[0].anchorElement_).to.eql(subSubAnchor1);
+      expect(placements[1].anchorElement_).to.eql(subSubAnchor2);
+    });
+
+    it('should not return placement when no element matches sub anchor', () => {
+      const nonAnchor = document.createElement('div');
+      nonAnchor.id = 'anId';
+      container.appendChild(nonAnchor);
+
+      const nonSubAnchor1 = document.createElement('div');
+      nonSubAnchor1.className = 'sub-class';
+      nonAnchor.appendChild(nonSubAnchor1);
+
+      const anchor = document.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const nonSubAnchor2 = document.createElement('div');
+      nonSubAnchor2.className = 'non-sub-class';
+      anchor.appendChild(nonSubAnchor2);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+              index: 1,
+              sub: {
+                selector: '.sub-class',
+              },
+            },
+            pos: 1,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(0);
+    });
+
+    it('sub anchor query selector matching should be scoped to within parent ' +
+        'anchor element', () => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'class1';
+      container.appendChild(wrapper);
+
+      const anchor = document.createElement('div');
+      anchor.className = 'class2';
+      wrapper.appendChild(anchor);
+
+      const subAnchor = document.createElement('div');
+      subAnchor.className = 'class3';
+      anchor.appendChild(subAnchor);
+
+      const placements = getPlacementsFromConfigObj(window, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV.class2',
+              sub: {
+                selector: 'DIV.class1 DIV.class3',
+                all: true,
+              },
+            },
+            pos: 1,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(0);
+    });
+
+    it('should only get placements for elements with sufficient textContent',
+        () => {
+          const anchor = document.createElement('div');
+          anchor.id = 'anId';
+          container.appendChild(anchor);
+
+          const subAnchor1 = document.createElement('div');
+          subAnchor1.className = 'sub-class';
+          anchor.appendChild(subAnchor1);
+          subAnchor1.appendChild(document.createTextNode('abc'));
+
+          const subAnchor2 = document.createElement('div');
+          subAnchor2.className = 'sub-class';
+          anchor.appendChild(subAnchor2);
+          subAnchor2.appendChild(document.createTextNode('abcd'));
+
+          const subAnchor3 = document.createElement('div');
+          subAnchor3.className = 'sub-class';
+          anchor.appendChild(subAnchor3);
+          subAnchor3.appendChild(document.createTextNode('abcd'));
+
+          const placements = getPlacementsFromConfigObj(window, {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                  sub: {
+                    selector: '.sub-class',
+                    'min_c': 4,
+                    all: true,
+                  },
+                },
+                pos: 1,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(2);
+          expect(placements[0].anchorElement_).to.eql(subAnchor2);
+          expect(placements[1].anchorElement_).to.eql(subAnchor3);
+        });
+
+    it('should only get placement for element with sufficient textContent',
+        () => {
+          const anchor = document.createElement('div');
+          anchor.id = 'anId';
+          container.appendChild(anchor);
+
+          const subAnchor1 = document.createElement('div');
+          subAnchor1.className = 'sub-class';
+          anchor.appendChild(subAnchor1);
+          subAnchor1.appendChild(document.createTextNode('abc'));
+
+          const subAnchor2 = document.createElement('div');
+          subAnchor2.className = 'sub-class';
+          anchor.appendChild(subAnchor2);
+          subAnchor2.appendChild(document.createTextNode('abcd'));
+
+          const placements = getPlacementsFromConfigObj(window, {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                  sub: {
+                    selector: '.sub-class',
+                    'min_c': 4,
+                    index: 0,
+                  },
+                },
+                pos: 1,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(1);
+          expect(placements[0].anchorElement_).to.eql(subAnchor2);
+        });
   });
 });
