@@ -66,8 +66,8 @@ describes.sandboxed('StandardActions', {}, () => {
 
     it('should implement setState', () => {
       const setStateSpy = sandbox.spy();
-      const bind = {setState: setStateSpy};
-      window.services.bind = {obj: bind};
+      const fakeBind = {setStateWithNestedKeys: setStateSpy};
+      window.services.bind = {obj: fakeBind};
       const args = {};
       standardActions.handleAmpTarget({method: 'setState', args});
       return bindForDoc(standardActions.ampdoc).then(() => {

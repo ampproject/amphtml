@@ -112,6 +112,23 @@ describes.realWin('amp-bind', {
     });
   }
 
+  /**
+   * Similar to `onBindReadyAndSetState` but calls `setStateWithNestedKeys()`
+   * instead of `setState()`.
+   * @param {!Object} state
+   * @return {!Promise}
+   */
+  function onBindReadyAndSetStateWithNestedKeys(state) {
+    return env.ampdoc.whenReady().then(() => {
+      return bind.scanPromise_;
+    }).then(() => {
+      bind.setStateWithNestedKeys(state);
+      return bind.evaluatePromise_;
+    }).then(() => {
+      env.flushVsync();
+    });
+  }
+
   it('should throw error if experiment is not enabled', () => {
     toggleExperiment(env.win, 'amp-bind', false);
     expect(() => {
@@ -293,6 +310,14 @@ describes.realWin('amp-bind', {
     return onBindReadyAndSetState({}, () => {
       expect(canBindStub.calledOnce).to.be.true;
       expect(element.getAttribute('oneplusone')).to.be.null;
+    });
+  });
+
+  it('should support nested keys in setStateWithNestedKeys()', () => {
+    const element = createElementWithBinding('[text]="foo.bar"');
+    const state = {'foo.bar': 'baz'};
+    return onBindReadyAndSetStateWithNestedKeys(state).then(() => {
+      expect(element.textContent).to.equal('baz');
     });
   });
 });

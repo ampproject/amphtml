@@ -117,7 +117,7 @@ export class Bind {
 
   /**
    * Same as `setState()` except this method supports keys nested with '.'.
-   * E.g. `{'foo.bar': '123'}` will be "unwrapped" into `{foo: {bar: 123}}`.
+   * E.g. `{'foo.bar': '123'}` will be transformed into `{foo: {bar: 123}}`.
    * @param {!Object} state
    */
   setStateWithNestedKeys(state) {
