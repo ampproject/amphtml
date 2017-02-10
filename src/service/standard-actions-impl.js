@@ -71,7 +71,7 @@ export class StandardActions {
     switch (invocation.method) {
       case 'setState':
         bindForDoc(this.ampdoc).then(bind => {
-          bind.setState(invocation.args);
+          bind.setStateWithNestedKeys(invocation.args);
         });
         return;
       case 'goBack':

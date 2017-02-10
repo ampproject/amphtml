@@ -399,6 +399,18 @@ export function parseActionMap(s, context) {
   const assertAction = assertActionForParser.bind(null, s, context);
   const assertToken = assertTokenForParser.bind(null, s, context);
 
+  // Consumes all subsequent token pairs of the form "<.><ID>" and invokes
+  // `callback` for each <ID> token. Used for variable dereferences.
+  function tokenizeIdDereferences(tokenizer, callback) {
+    for (let peek = tokenizer.peek();
+        peek.type == TokenType.SEPARATOR && peek.value == '.';
+        peek = tokenizer.peek()) {
+      tokenizer.next(); // Skip '.'.
+      const token = assertToken(tokenizer.next(false), [TokenType.ID]);
+      callback(token);
+    }
+  }
+
   let actionMap = null;
 
   const toks = new ParserTokenizer(s);
@@ -444,7 +456,13 @@ export function parseActionMap(s, context) {
             } else if (tok.type == TokenType.LITERAL ||
                 tok.type == TokenType.ID) {
               // Key: "key = "
-              const argKey = tok.value;
+              let argKey = tok.value;
+              // Identifier keys can have dereferences: ".identifier"
+              if (tok.type == TokenType.ID) {
+                tokenizeIdDereferences(toks, token => {
+                  argKey = argKey + '.' + token.value;
+                });
+              }
               assertToken(toks.next(), [TokenType.SEPARATOR], '=');
               // Value is either a literal or a variable: "foo.bar.baz"
               tok = assertToken(toks.next(/* convertValue */ true),
@@ -452,13 +470,9 @@ export function parseActionMap(s, context) {
               const argValueTokens = [tok];
               // Variables have one or more dereferences: ".identifier"
               if (tok.type == TokenType.ID) {
-                for (peek = toks.peek();
-                    peek.type == TokenType.SEPARATOR && peek.value == '.';
-                    peek = toks.peek()) {
-                  tok = toks.next(); // Skip '.'.
-                  tok = assertToken(toks.next(false), [TokenType.ID]);
-                  argValueTokens.push(tok);
-                }
+                tokenizeIdDereferences(toks, token => {
+                  argValueTokens.push(token);
+                });
               }
               const argValue = getActionInfoArgValue(argValueTokens);
               if (!args) {

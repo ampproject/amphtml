@@ -22,6 +22,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
+import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
 
@@ -78,7 +79,7 @@ export class Bind {
     this.validator_ = new BindValidator();
 
     /** @const @private {!Object} */
-    this.scope_ = Object.create(null);
+    this.scope_ = map();
 
     /** @private {?./bind-evaluator.BindEvaluator} */
     this.evaluator_ = null;
@@ -90,7 +91,7 @@ export class Bind {
      * Maps expression string to the element(s) that contain it.
      * @private @const {!Object<string, !Array<!Element>>}
      */
-    this.expressionToElements_ = Object.create(null);
+    this.expressionToElements_ = map();
 
     /** @visibleForTesting {?Promise} */
     this.scanPromise_ = null;
@@ -112,6 +113,30 @@ export class Bind {
     if (getMode().localDev) {
       AMP.reinitializeBind = this.initialize_.bind(this);
     }
+  }
+
+  /**
+   * Same as `setState()` except this method supports keys nested with '.'.
+   * E.g. `{'foo.bar': '123'}` will be "unwrapped" into `{foo: {bar: 123}}`.
+   * @param {!Object} state
+   */
+  setStateWithNestedKeys(state) {
+    const unnestedState = map();
+
+    Object.keys(state).forEach(key => {
+      let value = state[key];
+      const fragments = key.split('.');
+      // Create a wrapping object for each '.' in key, starting from inside.
+      // Stop before the first fragment, which is the top-most key.
+      for (let i = fragments.length - 1; i >= 1; i--) {
+        const wrapper = map();
+        wrapper[fragments[i]] = value;
+        value = wrapper;
+      }
+      unnestedState[fragments[0]] = value;
+    });
+
+    this.setState(unnestedState);
   }
 
   /**
@@ -191,7 +216,7 @@ export class Bind {
     /** @type {!Array<./bind-evaluator.BindingDef>} */
     const bindings = [];
     /** @type {!Object<string, !Array<!Element>>} */
-    const expressionToElements = Object.create(null);
+    const expressionToElements = map();
 
     const doc = dev().assert(body.ownerDocument, 'ownerDocument is null.');
     const walker = doc.createTreeWalker(body, NodeFilter.SHOW_ELEMENT);
