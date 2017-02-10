@@ -84,9 +84,7 @@ export class AmpAdCustom extends AMP.BaseElement {
     // If this promise has no URL yet, create one for it.
     if (!(fullUrl in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
-      ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl, {
-        requireAmpResponseSourceOrigin: false,
-      });
+      ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl);
     }
     return ampCustomadXhrPromises[fullUrl].then(data => {
       this.uiHandler.setDisplayState(AdDisplayState.LOADING);
