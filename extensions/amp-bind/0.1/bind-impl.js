@@ -80,11 +80,6 @@ export class Bind {
      */
     this.expressionToElements_ = Object.create(null);
 
-    /**
-     * @private {!Array<./bind-evaluator.BindingDef>}
-     */
-    this.bindings_ = [];
-
     /** @const @private {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
 
@@ -168,12 +163,9 @@ export class Bind {
 
       this.boundElements_ = this.boundElements_.concat(boundElements);
       Object.assign(this.expressionToElements_, expressionToElements);
-      this.bindings_ = this.bindings_.concat(bindings);
 
       this.evaluator_ = this.evaluator_ || new BindEvaluator();
-      // TODO(kmh287): Refactor evaluator to allow incremental adding and
-      // removal of bindings.
-      const parseErrors = this.evaluator_.setBindings(this.bindings_);
+      const parseErrors = this.evaluator_.addBindings(bindings);
 
       // Report each parse error.
       Object.keys(parseErrors).forEach(expressionString => {
@@ -208,61 +200,54 @@ export class Bind {
    * @private
    */
   removeBindingsForNode_(node) {
-    this.scanPromise_ = this.scanNode_(node).then(results => {
-      const {boundElements, bindings, expressionToElements} = results;
-
-      // TODO(kmh287): Discuss strategies for speedup
-      for (let i = 0; i < boundElements.length; i++) {
-        const boundElementToRemove = boundElements[i];
-        for (let j = this.boundElements_.length - 1; j >= 0; j--) {
-          const currentElement = this.boundElements_[j];
-          if (currentElement
-                .element
-                .isEqualNode(boundElementToRemove.element)) {
-            this.boundElements_.splice(j, 1);
-          }
-        }
-
-        // Remove elements from expression -> elements map
-        // remove expression if no more bound elements
-        for (const expression in expressionToElements) {
-          if (expression in this.expressionToElements_) {
-            const elements = this.expressionToElements_[expression];
-            for (let k = elements.length - 1; k >= 0; k--) {
-              if (elements[k].isEqualNode(boundElementToRemove.element)) {
-                elements.splice(k, 1);
-              }
-            }
-            if (elements.length == 0) {
-              delete this.expressionToElements_[expression];
-            }
-          }
-        }
-
-        //TODO(kmh287): Remove bindings from the evaluator
-
-      }
-
-      // TODO(kmh287): remove as many as appear in bindings and no more
-      for (let m = bindings.length - 1; m >= 0; m--) {
-        const bindingToRemove = bindings[m];
-        for (let p = this.bindings_.length - 1; p >= 0; p--) {
-          const existingBinding = this.bindings_[p];
-          if (bindingToRemove.tagName === existingBinding.tagName
-                && bindingToRemove.property === existingBinding.property
-                && bindingToRemove.expressionString
-                  == existingBinding.expressionString) {
-            this.bindings_.splice(p, 1);
-            // Don't renove more than one binding from `this.bindings_`
-            // for any element in `bindings` as both contain duplicates and
-            // only exactly the number found in `bindings` should be removed
-            // from `this.bindings_`, the array of existing bindings.
-            break;
-          }
+    return new Promise(resolve => {
+      // Eliminate bound elements that have node as an ancestor
+      for (let i = this.boundElements_.length - 1; i >= 0; i--) {
+        // TODO(kmh287): We could probably speed this up more
+        const boundElement = this.boundElements_[i].element;
+        if (this.isAncestorOf_(boundElement, node)) {
+          this.boundElements_.splice(i, 1);
         }
       }
+
+      // Eliminate elements from the expression to elements map that
+      // have node as an ancestor. Delete expressions that are no longer
+      // bound to elements.
+      let deletedExpressions = [];
+      for (const expression in this.expressionToElements_) {
+        const elements = this.expressionToElements_[expression];
+        for (let j = elements.length - 1; j >= 0; j--) {
+          if (this.isAncestorOf_(elements[j], node)) {
+            elements.splice(j, 1);
+          }
+        }
+        if (elements.length == 0) {
+          deletedExpressions.push(expression);
+          delete this.expressionToElements_[expression];
+        }
+      }
+
+      // Remove the bindings from the evaluator
+      this.evaluator_.removeBindingsForExpressions(deletedExpressions);
+      resolve();
     });
-    return this.scanPromise_;
+  }
+
+  /**
+   * Checks if `potentialParent` is an ancestor node of `node`
+   * @param {!Element} node
+   * @param {!Element} potentialParent
+   * @return {boolean}
+   */
+  isAncestorOf_(node, potentialParent) {
+    let currentElement = node;
+    while(currentElement) {
+      if (currentElement === potentialParent) {
+        return true;
+      }
+      currentElement = currentElement.parentElement;
+    }
+    return false;
   }
 
   /**

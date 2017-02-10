@@ -17,6 +17,7 @@
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
+import {map, hasOwn} from '../../../src/utils/object'
 
 /**
  * @typedef {{
@@ -41,7 +42,7 @@ let ParsedBindingDef;
  */
 export class BindEvaluator {
   constructor() {
-    /** @const {!Array<ParsedBindingDef>} */
+    /** @const @visibleForTesting {!Array<ParsedBindingDef>} */
     this.parsedBindings_ = [];
 
     /** @const {!./bind-validator.BindValidator} */
@@ -54,7 +55,7 @@ export class BindEvaluator {
    * @param {!Array<BindingDef>} bindings
    * @return {!Object<string,!Error>}
    */
-  setBindings(bindings) {
+  addBindings(bindings) {
     const errors = Object.create(null);
     // Create BindExpression objects from expression strings.
     // TODO(choumx): Chunk creation of BindExpression or change to web worker.
@@ -77,6 +78,24 @@ export class BindEvaluator {
       });
     }
     return errors;
+  }
+
+  /**
+   * Removes all parsed bindings for the provided expressions.
+   * @param {!Array<string>} expressionStrings
+   */
+  removeBindingsForExpressions(expressionStrings) {
+    const expressionsToRemove = map();  // Used as set
+    for (let i = 0; i < expressionStrings.length; i++) {
+      expressionsToRemove[expressionStrings[i]] = undefined;
+    }
+
+    for (let j = this.parsedBindings_.length - 1; j >= 0; j--) {
+      const expression = this.parsedBindings_[j].expression.expressionString;
+      if (hasOwn(expressionsToRemove, expression)) {
+        this.parsedBindings_.splice(j, 1);
+      }
+    }
   }
 
   /**

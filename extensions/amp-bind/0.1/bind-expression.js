@@ -106,6 +106,8 @@ export class BindExpression {
       return null;
     }
 
+    debugger;
+
     const {type, args, value} = node;
 
     // `value` should always exist for literals.
