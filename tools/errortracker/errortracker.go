@@ -131,6 +131,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		errorType += "-" + runtime;
 		if runtime == "inabox" {
 			severity = "ERROR"
+			level = logging.Error
 		}
 		if runtime == "3p" {
 			is3p = true
