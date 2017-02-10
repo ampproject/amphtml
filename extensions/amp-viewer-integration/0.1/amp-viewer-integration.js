@@ -15,10 +15,12 @@
  */
 
 import {Messaging, WindowPortEmulator} from './messaging.js';
-import {viewerForDoc} from '../../../src/viewer';
+import {getAmpDoc} from '../../../src/ampdoc';
+import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
-import {isIframed} from '../../../src/dom';
+import {getSourceUrl} from '../../../src/url';
+import {viewerForDoc} from '../../../src/viewer';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -122,13 +124,18 @@ export class AmpViewerIntegration {
    * @private
    */
   openChannelAndStart_(viewer, pipe) {
-    const messaging = new Messaging(this.win, pipe);
     dev().fine(TAG, 'Send a handshake request');
-    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {}, true)
-        .then(() => {
-          dev().fine(TAG, 'Channel has been opened!');
-          this.setup_(messaging, viewer);
-        });
+    const messaging = new Messaging(this.win, pipe);
+    const ampDoc = getAmpDoc(this.win.document);
+    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {
+      url: ampDoc.getUrl(),
+      sourceUrl: getSourceUrl(ampDoc.getUrl()),
+    },
+    true)
+      .then(() => {
+        dev().fine(TAG, 'Channel has been opened!');
+        this.setup_(messaging, viewer);
+      });
   }
 
   /**
