@@ -79,7 +79,13 @@ class AmpWorker {
      * Array of in-flight messages pending response from worker.
      * @const @private {!Array<(PendingMessageDef|undefined)>}
      */
-    this.messages_ = [];
+    this.messages_ = {};
+
+    /**
+     * Monotonically increasing integer that increments on each message.
+     * @private {number}
+     */
+    this.counter_ = 0;
   }
 
   /**
@@ -91,12 +97,13 @@ class AmpWorker {
    */
   sendMessage_(method, args) {
     return new Promise((resolve, reject) => {
-      const index = this.messages_.length;
-      this.messages_[index] = {method, resolve, reject};
+      this.messages_[this.counter_] = {method, resolve, reject};
 
       /** @type {ToWorkerMessageDef} */
-      const message = {method, args, id: index};
+      const message = {method, args, id: this.counter_};
       this.worker_./*OK*/postMessage(message);
+
+      this.counter_++;
     });
   }
 
@@ -120,18 +127,8 @@ class AmpWorker {
         `(${method}, ${id}), expected ${message.method}.`);
 
     message.resolve(returnValue);
-    this.messages_[id] = undefined;
 
-    // Clean up array if there are no more pending messages.
-    let empty = true;
-    for (let i = 0; i < this.messages_.length && empty; i++) {
-      if (this.messages_[i] !== undefined) {
-        empty = false;
-      }
-    }
-    if (empty) {
-      this.messages_.length = 0;
-    }
+    delete this.messages_[id];
   }
 
   /**
@@ -139,6 +136,6 @@ class AmpWorker {
    * @visibleForTesting
    */
   hasPendingMessages() {
-    return this.messages_.length > 0;
+    return Object.keys(this.messages_).length > 0;
   }
 }
