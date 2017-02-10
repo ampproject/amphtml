@@ -494,9 +494,29 @@ describe('ValidatorRulesMakeSense', () => {
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
-    if (tagSpec.tagName./*OK*/ startsWith('AMP-')) {
-      it('AMP- tags have html_format', () => {
-        expect(tagSpec.htmlFormat.length).toBeGreaterThan(0);
+    if (tagSpec.tagName./*OK*/ startsWith('AMP-') &&
+        ((tagSpec.htmlFormat.length === 0) ||
+         (tagSpec.htmlFormat.indexOf(
+              amp.validator.TagSpec.HtmlFormat.AMP4ADS) !== -1))) {
+      // AMP4ADS Creative Format document is the source of this whitelist.
+      // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
+      const whitelistedAmp4AdsExtensions = {
+        'AMP-ACCORDION': 0,
+        'AMP-ANALYTICS': 0,
+        'AMP-ANIM': 0,
+        'AMP-AUDIO': 0,
+        'AMP-CAROUSEL': 0,
+        'AMP-FIT-TEXT': 0,
+        'AMP-FONT': 0,
+        'AMP-FORM': 0,
+        'AMP-IMG': 0,
+        'AMP-PIXEL': 0,
+        'AMP-SOCIAL-SHARE': 0,
+        'AMP-VIDEO': 0
+      };
+      it(tagSpec.tagName + ' must be whitelisted for AMP4ADS', () => {
+        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(tagSpec.tagName))
+            .toBe(true);
       });
     }
     // mandatory_parent

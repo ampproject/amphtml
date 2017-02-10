@@ -15,8 +15,6 @@
 #
 
 tags: {  # amp-video
-   html_format: AMP
-   html_format: AMP4ADS
    tag_name: "SCRIPT"
    spec_name: "amp-video extension .js script"
    mandatory_parent: "HEAD"
@@ -52,8 +50,6 @@ tags: {  # amp-video
    spec_url: "https://www.ampproject.org/docs/reference/extended/amp-video.html"
  }
 tags: {  # <amp-video>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-VIDEO"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag_warning: "amp-video extension .js script"

@@ -14,8 +14,6 @@
 # limitations under the license.
 #
 tags: {  # amp-accordion
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-accordion extension .js script"
   mandatory_parent: "HEAD"
@@ -51,8 +49,6 @@ tags: {  # amp-accordion
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-accordion.html"
 }
 tags: {  # <amp-accordion>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-ACCORDION"
   also_requires_tag: "amp-accordion extension .js script"
   attrs: { name: "disable-session-states" value: "" }
@@ -65,8 +61,6 @@ tags: {  # <amp-accordion>
   }
 }
 tags: {  # <amp-accordion> > <section>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SECTION"
   spec_name: "amp-accordion > section"
   mandatory_parent: "AMP-ACCORDION"

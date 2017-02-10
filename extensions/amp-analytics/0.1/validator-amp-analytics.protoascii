@@ -16,8 +16,6 @@
 
 # Specific script tags for custom elements and runtime imports.
 tags: {  # amp-analytics
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .js script"
   mandatory_parent: "HEAD"
@@ -60,8 +58,6 @@ tags: {  # amp-analytics
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
 }
 tags: {  # amp-analytics (json)
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .json script"
   mandatory_parent: "AMP-ANALYTICS"
@@ -83,8 +79,6 @@ tags: {  # amp-analytics (json)
 # This tag isn't intended to be used by publishers directly, but may be
 # emitted by the AMP cache.
 tags: {  # amp-ad-metadata (json)
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-ad-metadata .json script"
   mandatory_parent: "BODY"
@@ -109,8 +103,6 @@ tags: {  # amp-ad-metadata (json)
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
 }
 tags: {  # <amp-analytics>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-ANALYTICS"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-analytics extension .js script"
