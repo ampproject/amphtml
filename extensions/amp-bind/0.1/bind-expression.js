@@ -36,6 +36,7 @@ const FUNCTION_WHITELIST = (function() {
         Array.prototype.join,
         Array.prototype.lastIndexOf,
         Array.prototype.slice,
+        Array.prototype.includes,
       ],
     '[object String]':
       [
