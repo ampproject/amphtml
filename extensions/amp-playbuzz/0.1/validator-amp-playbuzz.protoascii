@@ -16,7 +16,6 @@
 
 tags: {  # amp-playbuzz
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-playbuzz extension .js script"
   also_requires_tag: "amp-playbuzz"
@@ -53,7 +52,6 @@ tags: {  # amp-playbuzz
 }
 tags: {  # <amp-playbuzz>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-PLAYBUZZ"
   also_requires_tag: "amp-playbuzz extension .js script"
   attrs: {

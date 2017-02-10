@@ -16,7 +16,6 @@
 
 tags: {  # amp-slides
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-slides extension .js script"
   mandatory_parent: "HEAD"
