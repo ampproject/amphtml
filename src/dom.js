@@ -500,7 +500,7 @@ export function hasNextNodeInDocumentOrder(element) {
     if (currentElement.nextSibling) {
       return true;
     }
-  } while (currentElement = currentElement.parentNode);
+  } while ((currentElement = currentElement.parentNode));
   return false;
 }
 

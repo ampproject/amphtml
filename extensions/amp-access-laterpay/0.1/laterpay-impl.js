@@ -261,7 +261,7 @@ export class LaterpayVendor {
       return Promise.resolve();
     }
     let unlistener;
-    while (unlistener = this.purchaseOptionListeners_.shift()) {
+    while ((unlistener = this.purchaseOptionListeners_.shift())) {
       unlistener();
     }
     if (this.purchaseButtonListener_) {

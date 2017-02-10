@@ -314,7 +314,7 @@ class Chunks {
     this.viewerPromise_ = viewerPromiseForDoc(ampDoc);
 
     this.win_.addEventListener('message', e => {
-      if (e.data = 'amp-macro-task') {
+      if (e.data == 'amp-macro-task') {
         this.execute_(/* idleDeadline */ null);
       }
     });
