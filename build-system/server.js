@@ -618,15 +618,6 @@ app.get('/dist/rtv/99*/*.js', function(req, res, next) {
   }).catch(next);
 });
 
-app.get('/dist/rtv/*/v0/*.js', function(req, res, next) {
-  var mode = getPathMode(req.headers.referer);
-  var filePath = req.path;
-  filePath = filePath.replace(/\/rtv\/\d{13}/, '');
-  filePath = replaceUrls(mode, filePath);
-  req.url = filePath;
-  next();
-});
-
 app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, res, next) {
   var filePath = '/test/manual/cache-sw.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
@@ -676,14 +667,6 @@ function extractFilePathSuffix(path) {
  * @return {?string}
  */
 function getPathMode(path) {
-  // If is in test mode. Determine mode by  --compiled argv input
-  if (process.argv.includes('test', 2)) {
-    if (process.argv.includes('--compiled', 3)) {
-      return 'min';
-    }
-    return 'max';
-  }
-
   var suffix = extractFilePathSuffix(path);
   if (suffix == '.max.html') {
     return 'max';
