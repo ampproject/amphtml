@@ -65,9 +65,10 @@ export class JankMeter {
    */
   updateMeterDisplay_(paintLatency) {
     // Calculate Good Frame Probability
-    const gfp = (this.totalCnt_ - this.jankCnt_) / this.totalCnt_;
+    const gfp = this.win_.Math.floor(
+        (this.totalCnt_ - this.jankCnt_) / this.totalCnt_ * 100);
     this.jankMeterDisplay_.textContent =
-        `${gfp.toFixed(2)}|${this.totalCnt_}|${paintLatency}ms`;
+        `${gfp}%|${this.totalCnt_}|${paintLatency}ms`;
   }
 }
 
