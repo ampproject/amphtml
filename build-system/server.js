@@ -620,8 +620,8 @@ app.get('/dist/rtv/99*/*.js', function(req, res, next) {
 
 app.get('/dist/rtv/*/v0/*.js', function(req, res, next) {
   var mode = getPathMode(req.headers.referer);
-  var filePath = req.path;
-  filePath = filePath.replace(/\/rtv\/\d{13}/, '');
+  var fileName = path.basename(req.path);
+  var filePath = 'https://cdn.ampproject.org/v0/' + fileName;
   filePath = replaceUrls(mode, filePath);
   req.url = filePath;
   next();
