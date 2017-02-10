@@ -17,6 +17,7 @@
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
 import {poll} from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-sticky-ad 1.0 version', {
   win: { /* window spec */
@@ -67,7 +68,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
         getScrollHeightSpy();
         return 300;
       };
-      impl.displayAfterScroll_();
+      impl.onScroll_();
       expect(getScrollTopSpy).to.have.been.called;
       expect(getSizeSpy).to.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
@@ -103,11 +104,46 @@ describes.realWin('amp-sticky-ad 1.0 version', {
         callback();
       };
 
-      impl.displayAfterScroll_();
+      impl.onScroll_();
       expect(getScrollTopSpy).to.have.been.called;
       expect(getSizeSpy).to.have.been.called;
       expect(scheduleLayoutSpy).to.have.been.called;
       expect(removeOnScrollListenerSpy).to.have.been.called;
+    });
+
+    it('experiment version, should display once user scroll', () => {
+      toggleExperiment(win, 'sticky-ad-early-load');
+      const scheduleLayoutSpy = sandbox.stub(impl, 'scheduleLayoutForAd_',
+          () => {});
+      const removeOnScrollListenerSpy =
+          sandbox.spy(impl, 'removeOnScrollListener_');
+      const getScrollTopSpy = sandbox.spy();
+      const getSizeSpy = sandbox.spy();
+      const getScrollHeightSpy = sandbox.spy();
+
+      impl.viewport_.getScrollTop = function() {
+        getScrollTopSpy();
+        return 1;
+      };
+      impl.viewport_.getSize = function() {
+        getSizeSpy();
+        return {height: 50};
+      };
+      impl.viewport_.getScrollHeight = function() {
+        getScrollHeightSpy();
+        return 300;
+      };
+      impl.deferMutate = function(callback) {
+        callback();
+      };
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
+
+      impl.onScroll_();
+      expect(scheduleLayoutSpy).to.have.been.called;
+      expect(removeOnScrollListenerSpy).to.have.been.called;
+      toggleExperiment(win, 'sticky-ad-early-load');
     });
 
     it('should set body borderBottom correctly', () => {
