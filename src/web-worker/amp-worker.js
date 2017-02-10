@@ -77,7 +77,7 @@ class AmpWorker {
 
     /**
      * Array of in-flight messages pending response from worker.
-     * @const @private {!Array<(PendingMessageDef|undefined)>}
+     * @const @private {!Object<number, (PendingMessageDef|undefined)>}
      */
     this.messages_ = {};
 
@@ -97,13 +97,12 @@ class AmpWorker {
    */
   sendMessage_(method, args) {
     return new Promise((resolve, reject) => {
-      this.messages_[this.counter_] = {method, resolve, reject};
+      const id = this.counter_++;
+      this.messages_[id] = {method, resolve, reject};
 
       /** @type {ToWorkerMessageDef} */
-      const message = {method, args, id: this.counter_};
+      const message = {method, args, id};
       this.worker_./*OK*/postMessage(message);
-
-      this.counter_++;
     });
   }
 
