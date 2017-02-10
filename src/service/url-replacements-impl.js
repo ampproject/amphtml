@@ -725,6 +725,34 @@ export class UrlReplacements {
   }
 
   /**
+    * Returns whether variable substitution is allowed for given url.
+    * @param {!Location} url.
+    * @return {boolean}
+    */
+  isAllowedOrigin_(url) {
+    const docInfo = documentInfoForDoc(this.ampdoc);
+
+    if (url.origin == parseUrl(docInfo.canonicalUrl).origin ||
+        url.origin == parseUrl(docInfo.sourceUrl).origin) {
+      return true;
+    }
+
+    const meta = this.ampdoc.getRootNode().querySelector(
+      'meta[name=amp-link-variable-allowed-origin]');
+
+    if (meta && meta.hasAttribute('content')) {
+      const whitelist = meta.getAttribute('content').trim().split(/\s+/);
+      for (let i = 0; i < whitelist.length; i++) {
+        if (url.origin == parseUrl(whitelist[i]).origin) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Replaces values in the link of an anchor tag if
    * - the link opts into it (via data-amp-replace argument)
    * - the destination is the source or canonical origin of this doc.
@@ -745,18 +773,16 @@ export class UrlReplacements {
     if (!whitelist) {
       return;
     }
-    const docInfo = documentInfoForDoc(this.ampdoc);
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
     // We set this to the original value before doing any work and use it
     // on subsequent replacements, so that each run gets a fresh value.
     const href = dev().assertString(
         element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
     const url = parseUrl(href);
-    if (url.origin != parseUrl(docInfo.canonicalUrl).origin &&
-        url.origin != parseUrl(docInfo.sourceUrl).origin) {
+    if (!this.isAllowedOrigin_(url)) {
       user().warn('URL', 'Ignoring link replacement', href,
           ' because the link does not go to the document\'s' +
-          ' source or canonical origin.');
+          ' source, canonical, or whitelisted origin.');
       return;
     }
     if (!isSecureUrl(href)) {

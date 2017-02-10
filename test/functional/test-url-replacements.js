@@ -119,7 +119,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
       },
       document: {
         nodeType: /* document */ 9,
-        querySelector: () => {return {href: canonical};},
+        querySelector: selector => {
+          if (selector.startsWith('meta')) {
+            return {
+              getAttribute: () => {return 'https://whitelisted.com https://greylisted.com';},
+              hasAttribute: () => {return true;},
+            };
+          } else {
+            return {href: canonical};
+          }
+        },
         cookie: '',
       },
       Math: window.Math,
@@ -1053,6 +1062,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
       urlReplacements.maybeExpandLink(a);
       expect(a.href).to.equal('https://canonical.com/link?out=bar');
+    });
+
+    it('should replace with whitelisted origin', () => {
+      a.href = 'https://whitelisted.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://whitelisted.com/link?out=bar');
     });
 
     it('should not replace to different origin', () => {
