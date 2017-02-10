@@ -158,13 +158,13 @@ export class History {
 
   /**
    * Update the page url fragment
-   * The fragment variable should contain leading '#'
    * @param {string} fragment
    * @return {!Promise}
    */
   updateFragment(fragment) {
-    dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
-        'should start with #');
+    if (fragment[0] == '#') {
+      fragment = fragment.substr(1);
+    }
     return this.binding_.updateFragment(fragment);
   }
 
@@ -300,7 +300,6 @@ class HistoryBindingInterface {
 
   /**
    * Update the page url fragment
-   * The fragment variable should contain leading '#'
    * @param {string} unusedFragment
    * @return {!Promise}
    */
@@ -688,7 +687,7 @@ export class HistoryBindingNatural_ {
   /** @override */
   updateFragment(fragment) {
     if (this.win.history.replaceState) {
-      this.win.history.replaceState({}, '', fragment);
+      this.win.history.replaceState({}, '', '#' + fragment);
     }
     return Promise.resolve();
   }
@@ -800,10 +799,11 @@ export class HistoryBindingVirtual_ {
           if (!hash) {
             return '';
           }
-          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
-              'should start with #');
-          /* Strip leading '#' */
-          return hash.substr(1);
+          /* Strip leading '#'*/
+          if (hash[0] == '#') {
+            hash = hash.substr(1);
+          }
+          return hash;
         });
   }
 
