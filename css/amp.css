@@ -535,10 +535,10 @@ amp-fresh {
   position: fixed;
   background-color: rgba(232,72,95,.5);
   bottom: 0;
-  left: 0;
+  right: 0;
   color: #fff;
   font-size: 16px;
-  text-align: center;
+  width: 110px;
   z-index: 1000;
   padding: 5px;
 }
