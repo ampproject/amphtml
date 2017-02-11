@@ -17,7 +17,7 @@
 import {getCookie, setCookie} from '../../src/cookies';
 
 
-describe('getCookie', () => {
+describe('cookies', () => {
 
   function expectCookie(cookiesString, cookieName) {
     return expect(getCookie({

@@ -210,11 +210,17 @@ describe('toggleExperiment', () => {
       cookie: cookiesString,
     };
     resetExperimentTogglesForTesting();
-    const on = toggleExperiment({document: doc}, experimentId, opt_on);
+    const on = toggleExperiment({
+      document: doc,
+      location: {
+        hostname: 'test.test',
+      },
+    }, experimentId, opt_on);
     const parts = doc.cookie.split(/\s*;\s*/g);
     if (parts.length > 1) {
       expect(parts[1]).to.equal('path=/');
-      expect(parts[2]).to.equal('expires=' + expTime);
+      expect(parts[2]).to.equal('domain=test.test');
+      expect(parts[3]).to.equal('expires=' + expTime);
     }
     return expect(`${on}; ${decodeURIComponent(parts[0])}`);
   }
@@ -281,6 +287,9 @@ describe('toggleExperiment', () => {
       document: {
         cookie: '',
       },
+      location: {
+        hostname: 'test.test',
+      },
     };
     toggleExperiment(win, 'transient', true, true);
     toggleExperiment(win, 'e1', true);
@@ -336,6 +345,9 @@ describe('toggleExperiment', () => {
       document: {
         cookie: '',
       },
+      location: {
+        hostname: 'test.test',
+      },
     };
     // Make sure some experiments are enabled in the cookie.
     toggleExperiment(win, 'e0', true);
@@ -387,6 +399,9 @@ describe('toggleExperiment', () => {
       },
       'AMP_CONFIG': {
         'e1': 1,
+      },
+      location: {
+        hostname: 'test.test',
       },
     };
 

@@ -70,10 +70,14 @@ function tryGetDocumentCookieNoInline(win) {
  * @param {string} name
  * @param {string} value
  * @param {time} expirationTime
- * @param {{highestAvailableDomain:boolean}=} opt_options
+ * @param {{
+ *   highestAvailableDomain:(boolean|undefined),
+ *   domain:(string|undefined)
+ * }=} opt_options
  *     - highestAvailableDomain: If true, set the cookie at the widest domain
  *       scope allowed by the browser. E.g. on example.com if we are currently
  *       on www.example.com.
+ *     - domain: Explicit domain to set.
  */
 export function setCookie(win, name, value, expirationTime, opt_options) {
   if (opt_options && opt_options.highestAvailableDomain) {
@@ -87,7 +91,11 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
       }
     }
   }
-  trySetCookie(win, name, value, expirationTime, undefined);
+  let domain = undefined;
+  if (opt_options && opt_options.domain) {
+    domain = opt_options.domain;
+  }
+  trySetCookie(win, name, value, expirationTime, domain);
 }
 
 /**
