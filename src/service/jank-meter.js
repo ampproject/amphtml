@@ -29,33 +29,34 @@ export class JankMeter {
     this.jankMeterDisplay_ = this.win_.document.createElement('div');
     this.jankMeterDisplay_.classList.add('i-amphtml-jank-meter');
     /** @private {number} */
-    this.jankCounter_ = 0;
+    this.jankCnt_ = 0;
     /** @private {number} */
-    this.bigJankCounter_ = 0;
+    this.totalCnt_ = 0;
     this.win_.document.body.appendChild(this.jankMeterDisplay_);
     this.updateMeterDisplay_(0);
-    /** @private {number} */
-    this.scheduledTime_ = -1;
+    /** @private {?number} */
+    this.scheduledTime_ = null;
   }
 
   onScheduled() {
     // only take the first schedule for the current frame.
-    if (this.scheduledTime_ == -1) {
-      this.scheduledTime_ = Date.now();
+    if (this.scheduledTime_ == null) {
+      this.scheduledTime_ = this.win_.Date.now();
     }
   }
 
   onRun() {
-    const paintLatency = Date.now() - this.scheduledTime_;
-    this.scheduledTime_ = -1;
+    if (this.scheduledTime_ == null) {
+      return;
+    }
+    const paintLatency = this.win_.Date.now() - this.scheduledTime_;
+    this.scheduledTime_ = null;
+    this.totalCnt_++;
     if (paintLatency > 16) {
-      this.jankCounter_++;
-      if (paintLatency > 100) {
-        this.bigJankCounter_++;
-      }
-      this.updateMeterDisplay_(paintLatency);
+      this.jankCnt_++;
       dev().info('JANK', 'Paint latency: ' + paintLatency + 'ms');
     }
+    this.updateMeterDisplay_(paintLatency);
   }
 
   /**
@@ -63,8 +64,11 @@ export class JankMeter {
    * @private
    */
   updateMeterDisplay_(paintLatency) {
+    // Calculate Good Frame Probability
+    const gfp = this.win_.Math.floor(
+        (this.totalCnt_ - this.jankCnt_) / this.totalCnt_ * 100);
     this.jankMeterDisplay_.textContent =
-        `${this.jankCounter_}|${this.bigJankCounter_}|${paintLatency}ms`;
+        `${gfp}%|${this.totalCnt_}|${paintLatency}ms`;
   }
 }
 
