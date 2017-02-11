@@ -192,7 +192,10 @@ function saveExperimentTogglesToCookie(win, toggles) {
   }
 
   setCookie(win, COOKIE_NAME, experimentIds.join(','),
-      Date.now() + COOKIE_EXPIRATION_INTERVAL);
+      Date.now() + COOKIE_EXPIRATION_INTERVAL, {
+        // Set explicit domain, so the cookie gets send to sub domains.
+        domain: win.location.hostname,
+      });
 }
 
 /**
