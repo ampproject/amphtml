@@ -405,6 +405,12 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     this.layoutMeasureExecuted_ = true;
+    const slotRect = this.getIntersectionElementLayoutBox();
+    if (slotRect.height == 0 || slotRect.width == 0) {
+      dev().fine(
+        TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
+      return;
+    }
     user().assert(isAdPositionAllowed(this.element, this.win),
         '<%s> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element.tagName, this.element);

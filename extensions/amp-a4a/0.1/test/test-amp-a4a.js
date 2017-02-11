@@ -48,6 +48,7 @@ import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {AmpContext} from '../../../../3p/ampcontext.js';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
 import * as sinon from 'sinon';
 
 /**
@@ -139,6 +140,10 @@ describe('amp-a4a', () => {
       return ampdocService.getAmpDoc(element);
     };
     element.isBuilt = () => {return true;};
+    element.getLayoutBox = () => {
+      const visible = element.style.display  != 'none';
+      return layoutRectLtwh(0, 0, visible ? 200 : 0, visible ? 50 : 0);
+    };
     doc.body.appendChild(element);
     return element;
   }
@@ -707,6 +712,17 @@ describe('amp-a4a', () => {
         a4aElement.className = 'fixed';
         const a4a = new MockA4AImpl(a4aElement);
         expect(a4a.onLayoutMeasure.bind(a4a)).to.throw(/fixed/);
+      });
+    });
+    it('does not initial promise chain if display none', () => {
+      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        a4aElement.style.display = 'none';
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.not.be.ok;
       });
     });
     function executeLayoutCallbackTest(isValidCreative, opt_failAmpRender) {

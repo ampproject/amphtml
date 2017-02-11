@@ -156,6 +156,14 @@ describe('integration test: a4a', () => {
     });
   });
 
+  it('should not send request if display none', () => {
+    a4aElement.style.display = 'none';
+    return fixture.addElement(a4aElement).then(element => {
+      expect(xhrMock.called).to.be.false;
+      expect(element.querySelector('iframe')).to.not.be.ok;
+    });
+  });
+
   it('should fall back to 3p when the XHR fails', () => {
     xhrMock.resetBehavior();
     xhrMock.throws(new Error('Testing network error'));
