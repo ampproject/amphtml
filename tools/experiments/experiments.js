@@ -393,7 +393,11 @@ function toggleExperiment_(id, name, opt_on) {
     if (id == CANARY_EXPERIMENT_ID) {
       const validUntil = Date.now() +
           COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-      setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
+      setCookie(window, 'AMP_CANARY',
+          (on ? '1' : '0'), (on ? validUntil : 0), {
+            // Set explicit domain, so the cookie gets send to sub domains.
+            domain: location.hostname,
+          });
     } else {
       toggleExperiment(window, id, on);
     }
