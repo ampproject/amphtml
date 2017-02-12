@@ -1028,6 +1028,7 @@ describe('ViewportBindingNatural', () => {
       defaultView: windowApi,
     };
     windowApi.navigator = {userAgent: ''};
+    windowApi.location = {};
     windowMock = sandbox.mock(windowApi);
     installPlatformService(windowApi);
     viewer = {
