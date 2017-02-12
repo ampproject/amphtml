@@ -141,7 +141,7 @@ describe('amp-a4a', () => {
     };
     element.isBuilt = () => {return true;};
     element.getLayoutBox = () => {
-      const visible = element.style.display  != 'none';
+      const visible = element.style.display != 'none';
       return layoutRectLtwh(0, 0, visible ? 200 : 0, visible ? 50 : 0);
     };
     doc.body.appendChild(element);
@@ -723,6 +723,10 @@ describe('amp-a4a', () => {
         const a4a = new MockA4AImpl(a4aElement);
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.not.be.ok;
+        // Second call w/o display none will cause promise chain to execute.
+        a4aElement.style.display = 'block';
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.ok;
       });
     });
     function executeLayoutCallbackTest(isValidCreative, opt_failAmpRender) {
