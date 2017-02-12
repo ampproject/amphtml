@@ -79,7 +79,7 @@ class AmpHulu extends AMP.BaseElement {
   /** @return {string} */
   getVideoIframeSrc_() {
     dev().assert(this.eid_);
-    return `https://secure.hulu.com/dash/mobile_embed.html?eid=${encodeURIComponent(this.eid_ || '')}`;
+    return `https://secure.hulu.com/dash/mobile_embed.html?amp=1&eid=${encodeURIComponent(this.eid_ || '')}`;
   }
 
 };
