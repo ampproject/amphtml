@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpViewerIntegration} from '../amp-viewer-integration';
 import {Messaging, WindowPortEmulator} from '../messaging.js';
 import {ViewerForTesting} from './viewer-for-testing.js';
 
@@ -52,6 +53,27 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         window.eventListeners.fire({type: 'unload'});
         expect(stub).to.be.calledOnce;
       });
+    });
+
+
+    it.only('should open channel and start with the correct message', () => {
+      class Messaging {
+        constructor() {}
+        sendRequest() {}
+        setup_() {}
+      }
+      const messaging = new Messaging();
+      const win = document.createElement('div');
+      win.document = document.createElement('div');
+      const ampViewerIntegration = new AmpViewerIntegration(win);
+      const sendRequestSpy = sandbox.stub(messaging, 'sendRequest', () => {
+        return Promise.resolve();
+      });
+      ampViewerIntegration.openChannelAndStart_(viewer, ampDocSrc, messaging);
+      expect(sendRequestSpy).to.have.been.calledWith('channelOpen', {
+        sourceUrl: 'http://localhost:9876/test/fixtures/served/ampdoc-with-messaging.html',
+        url: '/test/fixtures/served/ampdoc-with-messaging.html',
+      }, true);
     });
   });
 
