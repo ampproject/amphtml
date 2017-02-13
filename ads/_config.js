@@ -216,6 +216,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  eas: {
+    prefetch: 'https://amp.emediate.eu/amp.v0.js',
+    renderStartImplemented: true,
+  },
+
   eplanning: {
     prefetch: 'https://us.img.e-planning.net/layers/epl-amp.js',
   },

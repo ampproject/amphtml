@@ -237,6 +237,42 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Cxense example -->
 
+<!-- Eulerian Analytics tracking -->
+<amp-analytics type="euleriananalytics" id="euleriananalytics">
+<script type="application/json">
+  {
+    "vars": {
+      "analyticsHost": "eulerian.mywebsite.com"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "pageview"
+      },
+      "trackAction": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "action",
+        "vars": {
+          "actionCode": "action_aes",
+          "actionRef": "action_reference"
+        }
+      },
+      "trackUserParam": {
+        "on": "click",
+        "selector": "#test2",
+        "request": "user",
+        "vars": {
+          "userParamKey": "user_param",
+          "userParamVal": "user_param_value"
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Eulerian Analytics example -->
+  
 <!-- Gemius Audience pageview tracking -->
 <amp-analytics type="gemius" id="gemius">
 <script type="application/json">

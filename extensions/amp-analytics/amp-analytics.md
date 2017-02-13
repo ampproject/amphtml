@@ -142,6 +142,12 @@ Type attribute value: `cxense`
 
 Adds support for Cxense Insight analytics. Requires defining *var* `siteId` with Cxense-provided *siteId*. More details can be found at [wiki.cxense.com](https://wiki.cxense.com/display/cust/Accelerated+Mobile+Pages+%28AMP%29+integration).
 
+### Eulerian Analytics
+
+Type attribute value: `euleriananalytics`
+
+Adds support for Eulerian Technologies Analytics. Requires defining *var* `analyticsHost` with Eulerian delegated domain. More details can be found at [eulerian.wiki](https://eulerian.wiki).
+
 ### Gemius
 
 Type attribute value: `gemius`

@@ -394,6 +394,34 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'euleriananalytics': {
+    'vars': {
+      'analyticsHost': '',
+      'documentLocation': 'SOURCE_URL',
+    },
+    'requests': {
+      'base': 'https://${analyticsHost}',
+      'basePrefix': '-/${random}?' +
+        'euid-amp=${clientId(etuix)}&' +
+        'url=${documentLocation}&',
+      'pageview': '${base}/col2/${basePrefix}' +
+        'rf=${documentReferrer}&' +
+        'sd=${screenWidth}x${screenHeight}&' +
+        'sd=${screenColorDepth}&' +
+        'elg=${browserLanguage}',
+      'action': '${base}/action/${basePrefix}' +
+        'eact=${actionCode}&' +
+        'actr=${actionRef}',
+      'user': '${base}/uparam/${basePrefix}' +
+        'euk${userParamKey}=${userParamVal}',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'gemius': {
     'requests': {
       'base': 'https://${prefix}.hit.gemius.pl/_${timestamp}/redot.gif?l=91&id=${identifier}&screen=${screenWidth}x${screenHeight}&window=${viewportWidth}x${viewportHeight}&fr=1&href=${sourceUrl}&ref=${documentReferrer}&extra=gemamp%3D1%7Campid%3D${clientId(gemius)}%7C${extraparams}',
