@@ -83,7 +83,7 @@ export class AmpCallTracking extends AMP.BaseElement {
     return urlReplacementsForDoc(this.getAmpDoc()).expandAsync(this.configUrl_)
       .then(url => fetch_(this.win, url))
       .then(data => {
-        user().assert(data.phoneNumber && data.phoneNumber.length,
+        user().assert(data.phoneNumber,
           'Response must contain a non-empty phoneNumber field %s',
           this.element);
 
