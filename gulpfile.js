@@ -475,6 +475,7 @@ function build() {
     polyfillsForTests(),
     buildAlp(),
     buildSw(),
+    buildWebWorker(),
     buildExtensions({bundleOnlyIfListedInFiles: true}),
     compile(),
   ]);
@@ -494,6 +495,7 @@ function dist() {
     // and whether you need to init logging (initLogConstructor).
     buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+    buildWebWorker({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
     buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true}),
@@ -524,6 +526,7 @@ function checkTypes() {
     './src/service-worker/shell.js',
     './src/service-worker/core.js',
     './src/service-worker/kill.js',
+    './src/web-worker/web-worker.js',
   ];
   var extensionSrcs = Object.values(extensions).filter(function(extension) {
     return !extension.noTypeCheck;
@@ -837,7 +840,7 @@ function buildLoginDoneVersion(version, options) {
 }
 
 /**
- * Build ALP JS
+ * Build ALP JS.
  *
  * @param {!Object} options
  */
@@ -856,12 +859,12 @@ function buildAlp(options) {
 }
 
 /**
- * Build ALP JS
+ * Build service worker JS.
  *
  * @param {!Object} options
  */
 function buildSw(options) {
-  $$.util.log('Bundling service-worker.js');
+  $$.util.log('Bundling sw.js');
   var opts = Object.assign({}, options);
 
   return Promise.all([
@@ -885,6 +888,24 @@ function buildSw(options) {
     buildExtensionJs('./src/service-worker', 'cache-service-worker', '0.1',
         Object.assign({}, opts, {noWrapper: true, filename: 'core.js'})),
   ]);
+}
+
+/**
+ * Build web worker JS.
+ *
+ * @param {!Object} options
+ */
+function buildWebWorker(options) {
+  $$.util.log('Bundling ww.js');
+  var opts = Object.assign({}, options);
+
+  return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
+    toName: 'ww.max.js',
+    minifiedName: 'ww.js',
+    watch: opts.watch,
+    minify: opts.minify || argv.minify,
+    preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
+  });
 }
 
 /**
