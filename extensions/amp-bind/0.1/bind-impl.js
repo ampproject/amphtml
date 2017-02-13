@@ -24,6 +24,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
+import {filterSplice} from '../../../src/utils/array'
 
 const TAG = 'amp-bind';
 
@@ -198,14 +199,11 @@ export class Bind {
    */
   removeBindingsForNode_(node) {
     return new Promise(resolve => {
+
       // Eliminate bound elements that have node as an ancestor
-      for (let i = this.boundElements_.length - 1; i >= 0; i--) {
-        // TODO(kmh287): We could probably speed this up more
-        const boundElement = this.boundElements_[i].element;
-        if (this.isAncestorOf_(boundElement, node)) {
-          this.boundElements_.splice(i, 1);
-        }
-      }
+      this.boundElements_ = filterSplice(this.boundElements_, (boundElement) => {
+        return node.contains(boundElement.element);
+      });
 
       // Eliminate elements from the expression to elements map that
       // have node as an ancestor. Delete expressions that are no longer
@@ -214,7 +212,7 @@ export class Bind {
       for (const expression in this.expressionToElements_) {
         const elements = this.expressionToElements_[expression];
         for (let j = elements.length - 1; j >= 0; j--) {
-          if (this.isAncestorOf_(elements[j], node)) {
+          if (node.contains(elements[j])) {
             elements.splice(j, 1);
           }
         }
