@@ -305,15 +305,20 @@ export class Bind {
         return true;
       }
       const tagName = element.tagName;
-      if (tagName == 'TEMPLATE') {
+      if (DYNAMIC_TAGS.includes(tagName)) {
         // Listen for changes in amp-mustache templates
         // Templated HTML is added as a sibling to the template tag.
         // So observe the parent.
         // TODO(kmh287): What if parent is the body tag?
-        const templateParent = element.parentElement;
-        if (templateParent) {
-          this.subtreeMutationObserver_.observe(templateParent, {childList: true});
-          this.dynamicRoots_.push(templateParent);
+        if (tagName == "TEMPLATE") {
+          const templateParent = element.parentElement;
+          if (templateParent) {
+            this.subtreeMutationObserver_.observe(templateParent, {childList: true});
+            this.dynamicRoots_.push(templateParent);
+          }
+        } else {
+          this.subtreeMutationObserver_.observe(element, {childList: true});
+          this.dynamicRoots_.push(element);
         }
       }
 
