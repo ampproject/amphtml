@@ -198,11 +198,16 @@ export function sanitizeHtml(html) {
         } else {
           attribs = scrubbed.attribs;
           // Restore some of the attributes that AMP is directly responsible
-          // for, such as "on".
+          // for, such as "on" or amp-bind's bracketed attributes.
           for (let i = 0; i < attribs.length; i += 2) {
-            if (WHITELISTED_ATTRS.indexOf(attribs[i]) != -1) {
+            const attrib = attribs[i];
+            if (WHITELISTED_ATTRS.indexOf(attrib) != -1) {
               attribs[i + 1] = savedAttribs[i + 1];
-            } else if (attribs[i].search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
+            } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
+              attribs[i + 1] = savedAttribs[i + 1];
+            } else if (attrib[0] == '[' && attrib[attrib.length - 1] == ']') {
+              // Completely restore bind attribute values, as sanitizer does not recognize
+              // bracketed attribute names and wipes out their values.
               attribs[i + 1] = savedAttribs[i + 1];
             }
           }

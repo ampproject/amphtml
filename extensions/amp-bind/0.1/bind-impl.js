@@ -35,6 +35,12 @@ const TAG = 'amp-bind';
 const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
 
 /**
+ * Tag names that indicate dynamic content i.e. tags that will need
+ * to be observed and rescanned for bindings if they change.
+ */
+const DYNAMIC_TAGS = ['TEMPLATE'];
+
+/**
  * A bound property, e.g. [property]="expression".
  * `previousResult` is the result of this expression during the last digest.
  * @typedef {{
@@ -107,12 +113,12 @@ export class Bind {
     /**
      * @const @private {!Array<Element>}
      */
-    this.templateRoots_ = [];
+    this.dynamicRoots_ = [];
 
     this.subtreeMutationObserver_ = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
         const mutatedNode = mutation.target;
-        if (this.templateRoots_.includes(mutatedNode)) {
+        if (this.dynamicRoots_.includes(mutatedNode)) {
           this.removeBindingsForNode_(mutatedNode).then(() => {
             return this.addBindingsForNode_(mutatedNode);
           }).then(() => {
@@ -307,7 +313,7 @@ export class Bind {
         const templateParent = element.parentElement;
         if (templateParent) {
           this.subtreeMutationObserver_.observe(templateParent, {childList: true});
-          this.templateRoots_.push(templateParent);
+          this.dynamicRoots_.push(templateParent);
         }
       }
 
