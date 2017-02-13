@@ -27,6 +27,97 @@ function AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a() {};
 /** @constructor */
 function AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui() {};
 
+
+window.EzoicAmpAd = function(global, data) {};
+window.EzoicAmpAd.prototype.createAd;
+
+
+window.uAd = {};
+window.uAd.embed;
+
+var Criteo;
+Criteo.DisplayAd;
+Criteo.Log.Debug;
+Criteo.CallRTA;
+Criteo.ComputeDFPTargetingForAMP;
+Criteo.PubTag = {};
+Criteo.PubTag.RTA = {};
+Criteo.PubTag.RTA.DefaultCrtgContentName;
+Criteo.PubTag.RTA.DefaultCrtgRtaCookieName
+
+var googletag;
+window.googletag;
+googletag.cmd;
+googletag.cmd.push;
+googletag.pubads;
+googletag.defineSlot
+
+var _googCsa;
+window._googCsa;
+
+var _inmobi;
+window._inmobi;
+_inmobi.getNewAd;
+
+var pubads;
+pubads.addService;
+pubads.markAsGladeOptOut;
+pubads.markAsAmp;
+pubads.setCorrelator;
+pubads.markAsGladeControl;
+googletag.enableServices;
+
+pubads.setCookieOptions;
+pubads.setTagForChildDirectedTreatment;
+
+var MicroAd;
+MicroAd.Compass;
+MicroAd.Compass.showAd;
+
+var asmi;
+asmi.sas;
+asmi.sas.call;
+asmi.sas.setup;
+
+var dfpData;
+dfpData.dfp;
+dfpData.targeting;
+
+var OX;
+OX._requestArgs;
+var OX_bidder_options;
+OX_bidder_options.bidderType;
+OX_bidder_options.callback;
+var OX_bidder_ads;
+var oxRequest;
+oxRequest.addAdUnit;
+oxRequest.setAdSizes;
+oxRequest.getOrCreateAdUnit;
+
+var rubicontag;
+rubicontag.setFPV;
+rubicontag.setFPI;
+rubicontag.getSlot;
+rubicontag.getAdServerTargeting;
+rubicontag.addKW;
+rubicontag.setUrl;
+rubicontag.setIntegration;
+
+var wads;
+wads.init;
+
+var yieldbot;
+yieldbot.psn;
+yieldbot.enableAsync;
+yieldbot.defineSlot;
+yieldbot.go;
+yieldbot.nextPageview;
+yieldbot.getSlotCriteria;
+
+var PostRelease;
+PostRelease.Start;
+PostRelease.checkIsAdVisible;
+
 // Long list of, uhm, stuff the ads code needs to compile.
 // All unquoted external properties need to be added here.
 data.cid;
@@ -39,8 +130,7 @@ data.client;
 data.zid;
 data.pid;
 data.custom3;
-window.uAd = {};
-window.uAd.embed;
+
 data.pageOpts;
 data.adUnits;
 data.clmb_slot;
@@ -57,15 +147,7 @@ data.epl_e;
 data.guid;
 data.adslot;
 
-var Criteo;
-Criteo.DisplayAd;
-Criteo.Log.Debug;
-Criteo.CallRTA;
-Criteo.ComputeDFPTargetingForAMP;
-Criteo.PubTag = {};
-Criteo.PubTag.RTA = {};
-Criteo.PubTag.RTA.DefaultCrtgContentName;
-Criteo.PubTag.RTA.DefaultCrtgRtaCookieName
+
 data.varname;
 data.tagtype;
 data.cookiename;;
@@ -76,60 +158,26 @@ data.slot;
 data.width;
 data.height;
 
-var googletag;
-window.googletag;
-googletag.cmd;
-googletag.cmd.push;
-googletag.pubads;
-googletag.defineSlot
 data.slot;
 
-var _googCsa;
-window._googCsa;
 
-var _inmobi;
-window._inmobi;
-_inmobi.getNewAd;
 data.siteid;
 data.slotid;
 
-var pubads;
-pubads.addService;
-pubads.markAsGladeOptOut;
-pubads.markAsAmp;
-pubads.setCorrelator;
-pubads.markAsGladeControl;
-googletag.enableServices;
+
 data.slot.setCategoryExclusion;
-pubads.setCookieOptions;
-pubads.setTagForChildDirectedTreatment;
+
 data.slot.setTargeting;
 data.slot.setAttribute;
 data.optin;
 data.keyvalue;
-var asmi;
-asmi.sas;
-asmi.sas.call;
-asmi.sas.setup;
+
 data.spot;
-var MicroAd;
-MicroAd.Compass;
-MicroAd.Compass.showAd;
+
 data.adhost
 data.pos;
-var dfpData;
-dfpData.dfp;
-dfpData.targeting;
-var OX;
-OX._requestArgs;
-var OX_bidder_options;
-OX_bidder_options.bidderType;
-OX_bidder_options.callback;
-var OX_bidder_ads;
-var oxRequest;
-oxRequest.addAdUnit;
-oxRequest.setAdSizes;
-oxRequest.getOrCreateAdUnit;
+
+
 data.host;
 data.nc;
 data.dfpSlot;
@@ -138,22 +186,14 @@ data.sitepage;
 data.auid;
 data.widgetname;
 data.urlprefix;
-var rubicontag;
-rubicontag.setFPV;
-rubicontag.setFPI;
-rubicontag.getSlot;
-rubicontag.getAdServerTargeting;
+
 data.account;
-rubicontag.addKW;
-rubicontag.setUrl;
-rubicontag.setIntegration;
 data.account;
 data.kw;
 data.visitor;
 data.inventory;
 data.callback;
-var wads;
-wads.init;
+
 data.wbo_account_id;
 data.wbo_customparameter;
 data.wbo_tracking_element_id;
@@ -171,18 +211,11 @@ data.wbo_is_mobile;
 data.wbo_vars;
 data.wbo_weak_encoding;
 data.psn;
-var yieldbot;
-yieldbot.psn;
-yieldbot.enableAsync;
-yieldbot.defineSlot;
-yieldbot.go;
+
 data.ybSlot;
-yieldbot.nextPageview;
-yieldbot.getSlotCriteria;
+
 data.ymid;
-var PostRelease;
-PostRelease.Start;
-PostRelease.checkIsAdVisible;
+
 var _prx;
 data.delayByTime;
 window.PulsePointHeaderTag;
