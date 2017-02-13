@@ -19,7 +19,7 @@ import {
   invokeWebWorker,
   ampWorkerForTesting,
 } from '../../../src/web-worker/amp-worker';
-import {toggleExperiment} from '../../../src/experiments';
+import * as experiments from '../../../src/experiments';
 import * as sinon from 'sinon';
 
 describe('invokeWebWorker', () => {
@@ -27,6 +27,7 @@ describe('invokeWebWorker', () => {
   let fakeWin;
   let postMessageStub;
   let fakeWorker;
+  let isExperimentOnStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -39,7 +40,8 @@ describe('invokeWebWorker', () => {
     const fakeWorkerClass = () => fakeWorker;
     fakeWin = {Worker: fakeWorkerClass};
 
-    toggleExperiment(fakeWin, 'web-worker', true);
+    isExperimentOnStub = sandbox.stub(experiments, 'isExperimentOn');
+    isExperimentOnStub.returns(true);
   });
 
   afterEach(() => {
@@ -47,7 +49,7 @@ describe('invokeWebWorker', () => {
   });
 
   it('should check if experiment is enabled', () => {
-    toggleExperiment(fakeWin, 'web-worker', false);
+    isExperimentOnStub.returns(false);
     return expect(invokeWebWorker(fakeWin, 'foo'))
         .to.eventually.be.rejectedWith('disabled');
   });
