@@ -147,6 +147,8 @@ function compile(entryModuleFilenames, outputDir,
       // Currently needed for crypto.js and visibility.js.
       // Should consider refactoring.
       'extensions/amp-analytics/**/*.js',
+      // For amp-bind in the web worker (ww.js).
+      'extensions/amp-bind/**/*.js',
       'src/*.js',
       'src/!(inabox)*/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',

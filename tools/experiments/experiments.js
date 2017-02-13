@@ -249,6 +249,11 @@ const EXPERIMENTS = [
         'amp-bind/amp-bind.md',
   },
   {
+    id: 'web-worker',
+    name: 'Web worker for background processing',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
+  },
+  {
     id: 'jank-meter',
     name: 'Display jank meter',
   },
