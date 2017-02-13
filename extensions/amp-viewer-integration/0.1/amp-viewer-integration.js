@@ -119,13 +119,13 @@ export class AmpViewerIntegration {
 
   /**
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
-   * @param {!WindowPortEmulator} pipe
+   * @param {!WindowPortEmulator} port
    * @return {!Promise<undefined>}
    * @private
    */
-  openChannelAndStart_(viewer, pipe) {
+  openChannelAndStart_(viewer, port) {
     dev().fine(TAG, 'Send a handshake request');
-    const messaging = new Messaging(this.win, pipe);
+    const messaging = new Messaging(this.win, port);
     const ampDoc = getAmpDoc(this.win.document);
     return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {
       url: ampDoc.getUrl(),
