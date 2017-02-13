@@ -60,6 +60,9 @@ export class AmpCallTracking extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.hyperlink_ = null;
+
+    /** @private {?string} */
+    this.configUrl_ = null;
   }
 
   /** @override */
@@ -69,13 +72,15 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.configUrl_ = assertHttpsUrl(
+        this.element.getAttribute('config'), this.element);
+
     this.hyperlink_ = this.getRealChildren()[0];
   }
 
   /** @override */
   layoutCallback() {
-    return urlReplacementsForDoc(this.getAmpDoc()).expandAsync(assertHttpsUrl(
-          this.element.getAttribute('config'), this.element))
+    return urlReplacementsForDoc(this.getAmpDoc()).expandAsync(this.configUrl_)
       .then(url => fetch_(this.win, url))
       .then(data => {
         user().assert(data.phoneNumber && data.phoneNumber.length,
