@@ -314,7 +314,6 @@ const defaultAllowedTypesInCustomFrame = [
  *     on this.
  */
 export function draw3p(win, data, configCallback) {
-  console.log(`draw3p: ${JSON.stringify(win.context)}`);
   const type = data.type;
 
   user().assert(isTagNameAllowed(data.type, win.context.tagName),
