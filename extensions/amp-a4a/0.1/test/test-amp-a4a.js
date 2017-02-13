@@ -48,6 +48,7 @@ import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {AmpContext} from '../../../../3p/ampcontext.js';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
 import * as sinon from 'sinon';
 
 /**
@@ -128,10 +129,10 @@ describe('amp-a4a', () => {
     resetScheduledElementForTesting(window, 'amp-a4a');
   });
 
-  function createA4aElement(doc) {
+  function createA4aElement(doc, opt_rect) {
     const element = createElementWithAttributes(doc, 'amp-a4a', {
-      'width': '200',
-      'height': '50',
+      'width': opt_rect ? String(opt_rect.width) : '200',
+      'height': opt_rect ? String(opt_rect.height) : '50',
       'type': 'adsense',
     });
     element.getAmpDoc = () => {
@@ -139,6 +140,9 @@ describe('amp-a4a', () => {
       return ampdocService.getAmpDoc(element);
     };
     element.isBuilt = () => {return true;};
+    element.getLayoutBox = () => {
+      return opt_rect || layoutRectLtwh(0, 0, 200, 50);
+    };
     doc.body.appendChild(element);
     return element;
   }
@@ -707,6 +711,27 @@ describe('amp-a4a', () => {
         a4aElement.className = 'fixed';
         const a4a = new MockA4AImpl(a4aElement);
         expect(a4a.onLayoutMeasure.bind(a4a)).to.throw(/fixed/);
+      });
+    });
+    it('does not initialize promise chain 0 height/width', () => {
+      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const rect = layoutRectLtwh(0, 0, 200, 0);
+        const a4aElement = createA4aElement(doc, rect);
+        const a4a = new MockA4AImpl(a4aElement);
+        // test 0 height
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.not.be.ok;
+        // test 0 width
+        rect.height = 50;
+        rect.width = 0;
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.not.be.ok;
+        // test with non-zero height/width
+        rect.width = 200;
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.ok;
       });
     });
     function executeLayoutCallbackTest(isValidCreative, opt_failAmpRender) {
