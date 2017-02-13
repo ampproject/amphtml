@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Messaging} from './messaging';
+import {Messaging} from '../messaging';
 
 /**
  * @fileoverview This is an example of how the viewer host can be implemented
