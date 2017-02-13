@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/xhr';
@@ -64,12 +64,7 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.FIXED ||
-        layout === Layout.FIXED_HEIGHT ||
-        layout === Layout.RESPONSIVE ||
-        layout === Layout.CONTAINER ||
-        layout === Layout.FILL ||
-        layout === Layout.FLEX_ITEM;
+    return isLayoutSizeDefined(layout);
   }
 
   /** @override */
