@@ -104,6 +104,14 @@ export class Bind {
      */
     this.digestQueuedAfterScan_ = false;
 
+    this.subtreeMutationObserver = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        const mutatedNode = mutation.target;
+        this.removeBindingsForNode_(mutatedNode);
+        this.addBindingsForNode_(mutatedNode);
+      })
+    })
+
     this.ampdoc.whenReady().then(() => {
       this.initialize_();
     });
@@ -112,6 +120,7 @@ export class Bind {
     if (getMode().localDev) {
       AMP.reinitializeBind = this.initialize_.bind(this);
     }
+
   }
 
   /**
