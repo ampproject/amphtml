@@ -56,7 +56,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
 
-    it.only('should open channel and start with the correct message', () => {
+    it('should open channel and start with the correct message', () => {
       class Messaging {
         constructor() {}
         sendRequest() {}
