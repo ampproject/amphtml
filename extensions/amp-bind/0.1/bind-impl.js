@@ -24,7 +24,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
-import {filterSplice} from '../../../src/utils/array'
+import {filterSplice} from '../../../src/utils/array';
 
 const TAG = 'amp-bind';
 
@@ -201,7 +201,7 @@ export class Bind {
     return new Promise(resolve => {
 
       // Eliminate bound elements that have node as an ancestor
-      this.boundElements_ = filterSplice(this.boundElements_, (boundElement) => {
+      this.boundElements_ = filterSplice(this.boundElements_, boundElement => {
         return node.contains(boundElement.element);
       });
 
