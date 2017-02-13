@@ -487,6 +487,7 @@ export const adConfig = {
   sunmedia: {
     prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
     preconnect: 'https://static.addevweb.com',
+    renderStartImplemented: true,
   },
 
   swoop: {
