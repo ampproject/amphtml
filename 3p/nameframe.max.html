@@ -13,10 +13,12 @@
         document.open();
         document.write(name_data['creative']);
         document.close();
-        window.name = '';
+        delete name_data['creative'];
+        window.name = JSON.stringify(name_data);
       } catch (err) {
         window.parent.postMessage(
           {type: 'no-content', error: err.message}, '*');
+        window.name = '';
       }
     };
   </script>

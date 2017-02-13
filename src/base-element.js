@@ -35,7 +35,7 @@ import {user} from './log';
  * https://developers.google.com/web/fundamentals/getting-started/primers/customelements)
  * and adding AMP style late loading to the mix.
  *
- * The complete lifecycle of custom DOM element is:
+ * The complete lifecycle of a custom DOM element is:
  *
  *           ||
  *           || createdCallback
@@ -150,6 +150,14 @@ export class BaseElement {
 
     /** @public {?Object} For use by sub classes */
     this.config = null;
+  }
+
+  /**
+   * The element's signal tracker.
+   * @return {!./utils/signals.Signals}
+   */
+  signals() {
+    return this.element.signals();
   }
 
   /**
@@ -627,6 +635,14 @@ export class BaseElement {
   }
 
   /**
+   * An implementation can call this method to signal to the element that
+   * it has started rendering.
+   */
+  renderStarted() {
+    this.element.renderStarted();
+  }
+
+  /**
    * Returns the original nodes of the custom element without any service nodes
    * that could have been added for markup. These nodes can include Text,
    * Comment and other child nodes.
@@ -866,4 +882,4 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
-};
+}

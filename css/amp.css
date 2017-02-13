@@ -311,6 +311,7 @@ i-amp-scroll-container {
  */
 i-amp-scroll-container.amp-active {
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .i-amphtml-loading-container {
@@ -530,6 +531,18 @@ amp-fresh {
   visibility: hidden;
 }
 
+.i-amphtml-jank-meter {
+  position: fixed;
+  background-color: rgba(232,72,95,.5);
+  bottom: 0;
+  right: 0;
+  color: #fff;
+  font-size: 16px;
+  width: 110px;
+  z-index: 1000;
+  padding: 5px;
+}
+
 /**
  * Animated equalizer icon for muted autoplaying videos.
  *
@@ -545,6 +558,7 @@ amp-fresh {
   position: absolute;
   right: 7px;
   width: 20px;
+  z-index: 1;
 }
 .amp-video-eq .amp-video-eq-col {
   flex: 1;

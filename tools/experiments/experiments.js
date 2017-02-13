@@ -97,14 +97,14 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
   },
   {
-    id: 'amp-form-custom-validations',
-    name: 'AMP Form Custom Validations',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5423',
+    id: 'amp-form-var-sub',
+    name: 'Variable Substitutions in AMP Form inputs for POST/GET submits',
+    spec: 'https://github.com/ampproject/amphtml/issues/5654',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
   },
   {
-    id: 'amp-form-var-sub',
-    name: 'Variable Substitutions in AMP Form inputs',
+    id: 'amp-form-var-sub-for-post',
+    name: 'Variable Substitutions in AMP Form inputs for POST submits only',
     spec: 'https://github.com/ampproject/amphtml/issues/5654',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
   },
@@ -175,7 +175,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'make-body-relative',
-    name: 'Sets the body to position:relative.',
+    name: 'Sets the body to position:relative (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/5667',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
   },
@@ -220,13 +220,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
   },
   {
-    id: 'amp-selector',
-    name: 'Amp selector extension',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-selector/amp-selector.md',
-  },
-  {
     id: 'amp-accordion-session-state-optout',
     name: 'AMP Accordion attribute to opt out of preserved state.',
     Spec: 'https://github.com/ampproject/amphtml/issues/3813',
@@ -243,11 +236,33 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
+    id: 'version-locking',
+    name: 'Force all extensions to have the same release ' +
+        'as the main JS binary',
+    cleanupIssue: 'DO_NOT_SUBMIT',
+  },
+  {
     id: 'amp-bind',
     name: 'AMP extension for dynamic content',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-bind/amp-bind.md',
+  },
+  {
+    id: 'web-worker',
+    name: 'Web worker for background processing',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
+  },
+  {
+    id: 'jank-meter',
+    name: 'Display jank meter',
+  },
+  {
+    id: 'amp-selector',
+    name: 'Amp selector extension- [LAUNCHED]',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+         'amp-selector/amp-selector.md',
   },
 ];
 
@@ -383,7 +398,11 @@ function toggleExperiment_(id, name, opt_on) {
     if (id == CANARY_EXPERIMENT_ID) {
       const validUntil = Date.now() +
           COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-      setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
+      setCookie(window, 'AMP_CANARY',
+          (on ? '1' : '0'), (on ? validUntil : 0), {
+            // Set explicit domain, so the cookie gets send to sub domains.
+            domain: location.hostname,
+          });
     } else {
       toggleExperiment(window, id, on);
     }

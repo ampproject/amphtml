@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
+/**
+ * @typedef {{
+ *   method: string,
+ *   args: !Array,
+ *   id: number,
+ * }}
+ */
+export let ToWorkerMessageDef;
 
 /**
- * @param {!Window} global
- * @param {!Object} data
+ * @typedef {{
+ *   method: string,
+ *   returnValue: *,
+ *   id: number,
+ * }}
  */
-export function xrostssp(global, data) {
-
-  validateData(data, [], ['aid', 'slotId']);
-
-  const url = 'https://proparm.jp/ssp/p/js1'
-      + '?_aid=' + encodeURIComponent(data['aid'])
-      + '&amp;_slot=' + encodeURIComponent(data['slotId']);
-
-  writeScript(global, url);
-}
+export let FromWorkerMessageDef;

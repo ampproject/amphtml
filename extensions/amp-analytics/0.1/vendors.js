@@ -394,6 +394,34 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'euleriananalytics': {
+    'vars': {
+      'analyticsHost': '',
+      'documentLocation': 'SOURCE_URL',
+    },
+    'requests': {
+      'base': 'https://${analyticsHost}',
+      'basePrefix': '-/${random}?' +
+        'euid-amp=${clientId(etuix)}&' +
+        'url=${documentLocation}&',
+      'pageview': '${base}/col2/${basePrefix}' +
+        'rf=${documentReferrer}&' +
+        'sd=${screenWidth}x${screenHeight}&' +
+        'sd=${screenColorDepth}&' +
+        'elg=${browserLanguage}',
+      'action': '${base}/action/${basePrefix}' +
+        'eact=${actionCode}&' +
+        'actr=${actionRef}',
+      'user': '${base}/uparam/${basePrefix}' +
+        'euk${userParamKey}=${userParamVal}',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'gemius': {
     'requests': {
       'base': 'https://${prefix}.hit.gemius.pl/_${timestamp}/redot.gif?l=91&id=${identifier}&screen=${screenWidth}x${screenHeight}&window=${viewportWidth}x${viewportHeight}&fr=1&href=${sourceUrl}&ref=${documentReferrer}&extra=gemamp%3D1%7Campid%3D${clientId(gemius)}%7C${extraparams}',
@@ -405,6 +433,41 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'on': 'visible',
         'request': 'pageview',
       },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'googleadwords': {
+    'requests': {
+      'conversion_prefix': 'https://www.googleadservices.com/pagead/conversion/',
+      'remarketing_prefix':
+          'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
+      'common_params': '${googleConversionId}/?' +
+          'cv=amp2&' +  // Increment when making changes.
+          'label=${googleConversionLabel}&' +
+          'random=${random}&' +
+          'url=${sourceUrl}&' +
+          'ref=${documentReferrer}&' +
+          'fst=${pageViewId}&' +
+          'num=${counter(googleadwords)}&' +
+          'fmt=3&' +
+          'async=1&' +
+          'u_h=${screenHeight}&u_w=${screenWidth}&' +
+          'u_ah=${availableScreenHeight}&u_aw=${availableScreenWidth}&' +
+          'u_cd=${screenColorDepth}&' +
+          'u_tz=${timezone}&' +
+          'tiba=${title}&' +
+          'guid=ON&script=0',
+      'conversion_params': 'value=${googleConversionValue}&' +
+          'currency_code=${googleConversionCurrency}&' +
+          'bg=${googleConversionColor}&' +
+          'hl=${googleConversionLanguage}',
+      'conversion': '${conversion_prefix}${common_params}&${conversion_params}',
+      'remarketing': '${remarketing_prefix}${common_params}',
     },
     'transport': {
       'beacon': false,
@@ -487,35 +550,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'metric': 'cm',
     },
     'optout': '_gaUserPrefs.ioo',
-  },
-
-  'googleconversion': {
-    'requests': {
-      'conversion': 'https://www.googleadservices.com/pagead/conversion/' +
-          '${google_conversion_id}/?' +
-          'cv=amp1&' +  // Increment when making changes.
-          'value=${google_conversion_value}&' +
-          'currency_code=${google_conversion_currency}&' +
-          'label=${google_conversion_label}&' +
-          'random=${random}&' +
-          'url=${sourceUrl}&' +
-          'fst=${pageViewId}&' +
-          'num=${counter(googleconversion)}&' +
-          'fmt=3&' +
-          'async=3&' +
-          'bg=${google_conversion_color}&' +
-          'u_h=${screenHeight}&u_w=${screenWidth}&' +
-          'u_ah=${viewportHeight}&u_aw=${viewportWidth}&' +
-          'u_cd=${screenColorDepth}&' +
-          'u_tz=${timezone}&' +
-          'tiba=${title}&' +
-          'guid=ON&script=0',
-    },
-    'transport': {
-      'beacon': false,
-      'xhrpost': false,
-      'image': true,
-    },
   },
 
   'krux': {

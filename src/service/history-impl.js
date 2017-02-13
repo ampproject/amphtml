@@ -158,13 +158,13 @@ export class History {
 
   /**
    * Update the page url fragment
-   * The fragment variable should contain leading '#'
    * @param {string} fragment
    * @return {!Promise}
    */
   updateFragment(fragment) {
-    dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
-        'should start with #');
+    if (fragment[0] == '#') {
+      fragment = fragment.substr(1);
+    }
     return this.binding_.updateFragment(fragment);
   }
 
@@ -300,7 +300,6 @@ class HistoryBindingInterface {
 
   /**
    * Update the page url fragment
-   * The fragment variable should contain leading '#'
    * @param {string} unusedFragment
    * @return {!Promise}
    */
@@ -368,7 +367,10 @@ export class HistoryBindingNatural_ {
           history.replaceState.bind(history);
       pushState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
-        this.origPushState_(state, opt_title, opt_url);
+        this.origPushState_(state, opt_title,
+            // A bug in edge causes paths to become undefined if URL is
+            // undefined, filed here: https://goo.gl/KlImZu
+            opt_url || null);
       };
       replaceState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
@@ -685,7 +687,7 @@ export class HistoryBindingNatural_ {
   /** @override */
   updateFragment(fragment) {
     if (this.win.history.replaceState) {
-      this.win.history.replaceState({}, '', fragment);
+      this.win.history.replaceState({}, '', '#' + fragment);
     }
     return Promise.resolve();
   }
@@ -791,16 +793,17 @@ export class HistoryBindingVirtual_ {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve('');
     }
-    return this.viewer_.sendMessageAwaitResponse('fragment', undefined,
+    return this.viewer_.sendMessageAwaitResponse('getFragment', undefined,
         /* cancelUnsent */true).then(
         hash => {
           if (!hash) {
             return '';
           }
-          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
-              'should start with #');
-          /* Strip leading '#' */
-          return hash.substr(1);
+          /* Strip leading '#'*/
+          if (hash[0] == '#') {
+            hash = hash.substr(1);
+          }
+          return hash;
         });
   }
 
@@ -810,7 +813,7 @@ export class HistoryBindingVirtual_ {
       return Promise.resolve();
     }
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-        'fragment', {fragment}, /* cancelUnsent */true));
+        'replaceHistory', {fragment}, /* cancelUnsent */true));
   }
 }
 

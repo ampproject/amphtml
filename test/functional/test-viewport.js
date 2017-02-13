@@ -373,8 +373,8 @@ describes.fakeWin('Viewport', {}, env => {
     viewport.enterLightboxMode();
 
     bindingMock.verify();
-    expect(disableTouchZoomStub.callCount).to.equal(1);
-    expect(hideFixedLayerStub.callCount).to.equal(1);
+    expect(disableTouchZoomStub).to.be.calledOnce;
+    expect(hideFixedLayerStub).to.be.calledOnce;
 
     expect(viewer.sendMessage).to.have.been.calledOnce;
     expect(viewer.sendMessage).to.have.been.calledWith('requestFullOverlay',
@@ -392,8 +392,8 @@ describes.fakeWin('Viewport', {}, env => {
     viewport.leaveLightboxMode();
 
     bindingMock.verify();
-    expect(restoreOriginalTouchZoomStub.callCount).to.equal(1);
-    expect(showFixedLayerStub.callCount).to.equal(1);
+    expect(restoreOriginalTouchZoomStub).to.be.calledOnce;
+    expect(showFixedLayerStub).to.be.calledOnce;
 
     expect(viewer.sendMessage).to.have.been.calledOnce;
     expect(viewer.sendMessage).to.have.been.calledWith('cancelFullOverlay',
@@ -922,12 +922,12 @@ describe('Viewport META', () => {
     it('should initialize original viewport meta', () => {
       viewport.getViewportMeta_();
       expect(viewport.originalViewportMetaString_).to.equal(viewportMetaString);
-      expect(viewportMetaSetter.callCount).to.equal(0);
+      expect(viewportMetaSetter).to.have.not.been.called;
     });
 
     it('should disable TouchZoom', () => {
       viewport.disableTouchZoom();
-      expect(viewportMetaSetter.callCount).to.equal(1);
+      expect(viewportMetaSetter).to.be.calledOnce;
       expect(viewportMetaString).to.have.string('maximum-scale=1');
       expect(viewportMetaString).to.have.string('user-scalable=no');
     });
@@ -936,34 +936,34 @@ describe('Viewport META', () => {
       viewportMetaString = 'width=device-width,minimum-scale=1,' +
           'maximum-scale=1,user-scalable=no';
       viewport.disableTouchZoom();
-      expect(viewportMetaSetter.callCount).to.equal(0);
+      expect(viewportMetaSetter).to.have.not.been.called;
     });
 
     it('should ignore disable TouchZoom if embedded', () => {
       windowApi.parent = {};
       viewport.disableTouchZoom();
-      expect(viewportMetaSetter.callCount).to.equal(0);
+      expect(viewportMetaSetter).to.have.not.been.called;
     });
 
     it('should restore TouchZoom', () => {
       viewport.disableTouchZoom();
-      expect(viewportMetaSetter.callCount).to.equal(1);
+      expect(viewportMetaSetter).to.be.calledOnce;
       expect(viewportMetaString).to.have.string('maximum-scale=1');
       expect(viewportMetaString).to.have.string('user-scalable=no');
 
       viewport.restoreOriginalTouchZoom();
-      expect(viewportMetaSetter.callCount).to.equal(2);
+      expect(viewportMetaSetter).to.have.callCount(2);
       expect(viewportMetaString).to.equal(originalViewportMetaString);
     });
 
     it('should reset TouchZoom; zooming state unknown', () => {
       viewport.resetTouchZoom();
-      expect(viewportMetaSetter.callCount).to.equal(1);
+      expect(viewportMetaSetter).to.be.calledOnce;
       expect(viewportMetaString).to.have.string('maximum-scale=1');
       expect(viewportMetaString).to.have.string('user-scalable=no');
 
       clock.tick(1000);
-      expect(viewportMetaSetter.callCount).to.equal(2);
+      expect(viewportMetaSetter).to.have.callCount(2);
       expect(viewportMetaString).to.equal(originalViewportMetaString);
     });
 
@@ -971,20 +971,20 @@ describe('Viewport META', () => {
       windowApi.document.documentElement.clientHeight = 500;
       windowApi.innerHeight = 500;
       viewport.resetTouchZoom();
-      expect(viewportMetaSetter.callCount).to.equal(0);
+      expect(viewportMetaSetter).to.have.not.been.called;
     });
 
     it('should proceed with reset TouchZoom if currently zoomed', () => {
       windowApi.document.documentElement.clientHeight = 500;
       windowApi.innerHeight = 300;
       viewport.resetTouchZoom();
-      expect(viewportMetaSetter.callCount).to.equal(1);
+      expect(viewportMetaSetter).to.be.calledOnce;
     });
 
     it('should ignore reset TouchZoom if embedded', () => {
       windowApi.parent = {};
       viewport.resetTouchZoom();
-      expect(viewportMetaSetter.callCount).to.equal(0);
+      expect(viewportMetaSetter).to.have.not.been.called;
     });
   });
 });
@@ -1028,6 +1028,7 @@ describe('ViewportBindingNatural', () => {
       defaultView: windowApi,
     };
     windowApi.navigator = {userAgent: ''};
+    windowApi.location = {};
     windowMock = sandbox.mock(windowApi);
     installPlatformService(windowApi);
     viewer = {
@@ -1168,7 +1169,7 @@ describe('ViewportBindingNatural', () => {
   });
 
   it('should offset client rect for layout', () => {
-    windowApi.pageXOffset = 100;
+    windowApi.pageXOffset = 0;
     windowApi.pageYOffset = 200;
     windowApi.document = {scrollingElement: {}};
     const el = {
@@ -1177,14 +1178,14 @@ describe('ViewportBindingNatural', () => {
       },
     };
     const rect = binding.getLayoutRect(el);
-    expect(rect.left).to.equal(112);  // round(100 + 11.5)
+    expect(rect.left).to.equal(12);  // round(0 + 11.5)
     expect(rect.top).to.equal(213);  // round(200 + 12.5)
     expect(rect.width).to.equal(14);  // round(13.5)
     expect(rect.height).to.equal(15);  // round(14.5)
   });
 
   it('should offset client rect for layout and position passed in', () => {
-    windowApi.pageXOffset = 1000;
+    windowApi.pageXOffset = 0;
     windowApi.pageYOffset = 2000;
     windowApi.document = {scrollingElement: {}};
     const el = {
@@ -1405,7 +1406,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const moveEl = bodyChildren[1];
     binding.setScrollTop(10);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(10px)');
-    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView).to.be.calledOnce;
     expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
   });
 
@@ -1415,7 +1416,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     binding.setScrollTop(10);
     // transform = scrollTop - paddingTop
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(-9px)');
-    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView).to.be.calledOnce;
     expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
   });
 
@@ -1426,9 +1427,9 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(1px)');
-    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView).to.be.calledOnce;
     expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
-    expect(event.preventDefault.callCount).to.equal(1);
+    expect(event.preventDefault).to.be.calledOnce;
   });
 
   it('should adjust scroll position when scrolled to 0 w/padding', () => {
@@ -1440,9 +1441,9 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     binding.adjustScrollPos_(event);
     // transform = 1 - updatePadding
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(-9px)');
-    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView).to.be.calledOnce;
     expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
-    expect(event.preventDefault.callCount).to.equal(1);
+    expect(event.preventDefault).to.be.calledOnce;
   });
 
   it('should adjust scroll position when scrolled to 0; w/o event', () => {
@@ -1450,7 +1451,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     posEl.getBoundingClientRect = () => {return {top: 0, left: 0};};
     const moveEl = bodyChildren[1];
     binding.adjustScrollPos_();
-    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView).to.be.calledOnce;
   });
 
   it('should NOT adjust scroll position when scrolled away from 0', () => {
@@ -1459,8 +1460,8 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const moveEl = bodyChildren[1];
     const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
-    expect(moveEl.scrollIntoView.callCount).to.equal(0);
-    expect(event.preventDefault.callCount).to.equal(0);
+    expect(moveEl.scrollIntoView).to.have.not.been.called;
+    expect(event.preventDefault).to.have.not.been.called;
   });
 
   it('should NOT adjust scroll position when overscrolled', () => {
@@ -1469,8 +1470,8 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const moveEl = bodyChildren[1];
     const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
-    expect(moveEl.scrollIntoView.callCount).to.equal(0);
-    expect(event.preventDefault.callCount).to.equal(0);
+    expect(moveEl.scrollIntoView).to.have.not.been.called;
+    expect(event.preventDefault).to.have.not.been.called;
   });
 });
 
@@ -1730,6 +1731,17 @@ describe('createViewport', () => {
     it('should bind to "iOS embed" when not iframed but in dev mode', () => {
       const ampDoc = installDocService(win, true).getAmpDoc();
       getMode(win).development = true;
+      const viewer = installViewerServiceForDoc(ampDoc);
+      sandbox.stub(viewer, 'isEmbedded', () => false);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingNaturalIosEmbed_);
+    });
+
+    it('should bind to "iOS embed" when iframed but in test mode', () => {
+      win.parent = {};
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      getMode(win).test = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
       const viewport = installViewportServiceForDoc(ampDoc);

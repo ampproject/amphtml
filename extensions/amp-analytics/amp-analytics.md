@@ -110,7 +110,7 @@ Adds support for AT Internet. More details for adding AT Internet support can be
 
 Type attribute value: `burt`
 
-Adds support for Burt. Additionally, the `trackingKey` variable must be specified. It's also possible to specify the optional variables `category` and `subCategory`.
+Adds support for Burt. Additionally, the `trackingKey` variable must be specified. It's also possible to specify the optional variables `category` and `subCategory`. More details can be found at [burtcorp.com](http://burtcorp.com).
 
 ### Chartbeat
 
@@ -134,7 +134,7 @@ Adds support for Clicky Web Analytics. More details for adding Clicky support ca
 
 Type attribute value: `comscore`
 
-Adds support for comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*.
+Adds support for comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*. More information can be found at [comscore.com](http://www.comscore.com).
 
 ### Cxense
 
@@ -142,11 +142,17 @@ Type attribute value: `cxense`
 
 Adds support for Cxense Insight analytics. Requires defining *var* `siteId` with Cxense-provided *siteId*. More details can be found at [wiki.cxense.com](https://wiki.cxense.com/display/cust/Accelerated+Mobile+Pages+%28AMP%29+integration).
 
+### Eulerian Analytics
+
+Type attribute value: `euleriananalytics`
+
+Adds support for Eulerian Technologies Analytics. Requires defining *var* `analyticsHost` with Eulerian delegated domain. More details can be found at [eulerian.wiki](https://eulerian.wiki).
+
 ### Gemius
 
 Type attribute value: `gemius`
 
-Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provided `prefix` and `identifier` variables must be specified. It's also possible to specify the optional variable `extraparams` (key1=value1|key2=value2).
+Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provided `prefix` and `identifier` variables must be specified. It's also possible to specify the optional variable `extraparams` (key1=value1|key2=value2). More details can be found at [gemius.com](https://www.gemius.com).
 
 ### Google Analytics
 
@@ -191,7 +197,7 @@ Adds support for Lotame.  More information and configuration details can be foun
 
 Type attribute value: `mediametrie`
 
-Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`. Vars `level1` to `level4` are optional.
+Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`. Vars `level1` to `level4` are optional.  More information can be found at [mediametrie.com](http://www.mediametrie.com/).
 
 ### mParticle
 
@@ -272,7 +278,7 @@ Adds support for Webtrekk. Configuration details can be found at [supportcenter.
 
 Type attribute value: `metrika`
 
-Adds support for Yandex Metrica.
+Adds support for Yandex Metrica.  Configuration details can be found at [Yandex Support](https://yandex.com/support/metrica/code/install-counter-amp.xml).
 
 ## Attributes
 
@@ -396,6 +402,32 @@ As an example, the following configuration can be used to sample 50% of the requ
     },
   },
 },
+```
+
+#### Embed render start trigger (`"on": "render-start"`)
+AMP elements that embed other documents in iframes (e.g. ads) may report `render-start` event. This event
+is typically emitted as soon as it's possible to confirm that rendering of the embedded document has been
+started. Consult the documentation of a particular AMP element to see whether it emits this event.
+
+The trigger for the embed element has to include `selector` that points to the embedding element:
+```javascript
+"triggers": {
+  "renderStart": {
+    "on": "render-start",
+    "request": "render-start",
+    "selector": "#embed1"
+  }
+}
+```
+
+This event is also emitted by the document itself and can be configured as:
+```javascript
+"triggers": {
+  "renderStart": {
+    "on": "render-start",
+    "request": "render-start"
+  }
+}
 ```
 
 #### Page visible trigger (`"on": "visible"`)

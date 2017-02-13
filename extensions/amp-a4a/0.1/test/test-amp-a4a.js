@@ -29,6 +29,7 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {cryptoFor} from '../../../../src/crypto';
 import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
@@ -46,6 +47,8 @@ import {platformFor} from '../../../../src/platform';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {AmpContext} from '../../../../3p/ampcontext.js';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
 import * as sinon from 'sinon';
 
 /**
@@ -126,10 +129,10 @@ describe('amp-a4a', () => {
     resetScheduledElementForTesting(window, 'amp-a4a');
   });
 
-  function createA4aElement(doc) {
+  function createA4aElement(doc, opt_rect) {
     const element = createElementWithAttributes(doc, 'amp-a4a', {
-      'width': '200',
-      'height': '50',
+      'width': opt_rect ? String(opt_rect.width) : '200',
+      'height': opt_rect ? String(opt_rect.height) : '50',
       'type': 'adsense',
     });
     element.getAmpDoc = () => {
@@ -137,6 +140,9 @@ describe('amp-a4a', () => {
       return ampdocService.getAmpDoc(element);
     };
     element.isBuilt = () => {return true;};
+    element.getLayoutBox = () => {
+      return opt_rect || layoutRectLtwh(0, 0, 200, 50);
+    };
     doc.body.appendChild(element);
     return element;
   }
@@ -190,7 +196,8 @@ describe('amp-a4a', () => {
     expect(child).to.be.ok;
     expect(child.src).to.match(/^https?:[^?#]+nameframe(\.max)?\.html/);
     const nameData = child.getAttribute('name');
-    expect(JSON.parse.bind(null, nameData), nameData).not.to.throw(Error);
+    expect(nameData).to.be.ok;
+    verifyNameData(nameData);
     expect(child).to.be.visible;
   }
 
@@ -201,8 +208,23 @@ describe('amp-a4a', () => {
     const child = element.querySelector('iframe[src]');
     expect(child).to.be.ok;
     expect(child.src).to.have.string(srcUrl);
-    expect(child.getAttribute('name')).not.to.be.ok;
+    const nameData = child.getAttribute('name');
+    expect(nameData).to.be.ok;
+    verifyNameData(nameData);
     expect(child).to.be.visible;
+  }
+
+  function verifyNameData(nameData) {
+    let attributes;
+    expect(() => {attributes = JSON.parse(nameData);}).not.to.throw(Error);
+    expect(attributes).to.be.ok;
+    expect(attributes._context).to.be.ok;
+    expect(attributes._context).not.to.contain.all.keys(
+        'sentinel', 'amp3pSentinel');
+    const sentinel = attributes._context.amp3pSentinel ||
+        attributes._context.sentinel;
+    expect(sentinel).to.be.ok;
+    expect(sentinel).to.match(/((\d+)-\d+)/);
   }
 
   describe('ads are visible', () => {
@@ -364,6 +386,16 @@ describe('amp-a4a', () => {
           expect(xhrMock).to.be.calledOnce;
         });
       });
+
+      it('should be able to create AmpContext', () => {
+        return a4a.layoutCallback().then(() => {
+          const window_ = a4aElement.querySelector(
+              'iframe[data-amp-3p-sentinel]');
+          const ac = new AmpContext(window_);
+          expect(ac).to.be.ok;
+          expect(ac.sentinel).to.be.ok;
+        });
+      });
     });
 
     describe('#renderViaNameFrame', () => {
@@ -380,6 +412,16 @@ describe('amp-a4a', () => {
           a4a.vsync_.runScheduledTasks_();
           verifyNameFrameRender(a4aElement);
           expect(xhrMock).to.be.calledOnce;
+        });
+      });
+
+      it('should be able to create AmpContext', () => {
+        return a4a.layoutCallback().then(() => {
+          const window_ = a4aElement.querySelector(
+              'iframe[data-amp-3p-sentinel]');
+          const ac = new AmpContext(window_);
+          expect(ac).to.be.ok;
+          expect(ac.sentinel).to.be.ok;
         });
       });
 
@@ -669,6 +711,27 @@ describe('amp-a4a', () => {
         a4aElement.className = 'fixed';
         const a4a = new MockA4AImpl(a4aElement);
         expect(a4a.onLayoutMeasure.bind(a4a)).to.throw(/fixed/);
+      });
+    });
+    it('does not initialize promise chain 0 height/width', () => {
+      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const rect = layoutRectLtwh(0, 0, 200, 0);
+        const a4aElement = createA4aElement(doc, rect);
+        const a4a = new MockA4AImpl(a4aElement);
+        // test 0 height
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.not.be.ok;
+        // test 0 width
+        rect.height = 50;
+        rect.width = 0;
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.not.be.ok;
+        // test with non-zero height/width
+        rect.width = 200;
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.ok;
       });
     });
     function executeLayoutCallbackTest(isValidCreative, opt_failAmpRender) {
@@ -1175,6 +1238,92 @@ describe('amp-a4a', () => {
           expect(suffix).to.be.undefined;
           throw new Error('test fail within error fn');
         })('world')).to.be.undefined;
+      });
+    });
+
+    describe('verifyCreativeSignature_', () => {
+      let stubVerifySignature;
+      let a4a;
+      beforeEach(() => {
+        return createAdTestingIframePromise().then(fixture => {
+          stubVerifySignature =
+              sandbox.stub(cryptoFor(fixture.win), 'verifySignature');
+          const a4aElement = createA4aElement(fixture.doc);
+          a4a = new MockA4AImpl(a4aElement);
+        });
+      });
+
+      it('properly handles all failures', () => {
+        // Single provider with first key fails but second key passes validation
+        a4a.win.ampA4aValidationKeys = (() => {
+          const providers = [];
+          for (let i = 0; i < 10; i++) {
+            const serviceName = `test-service${i}`;
+            providers[i] = Promise.resolve({serviceName, keys: [
+              Promise.resolve({serviceName}),
+              Promise.resolve({serviceName}),
+            ]});
+          }
+          return providers;
+        })();
+        stubVerifySignature.returns(Promise.resolve(false));
+        return a4a.verifyCreativeSignature_('some_creative', 'some_sig')
+          .then(() => {
+            throw new Error('should have triggered rejection');
+          })
+          .catch(err => {
+            expect(stubVerifySignature).to.be.callCount(20);
+            expect(err).to.equal('No validation service could verify this key');
+          });
+      });
+
+      it('properly handles multiple keys for one provider', () => {
+        // Single provider with first key fails but second key passes validation
+        const serviceName = 'test-service';
+        a4a.win.ampA4aValidationKeys = [
+          Promise.resolve({serviceName, keys: [
+            Promise.resolve({serviceName: '1'}),
+            Promise.resolve({serviceName: '2'}),
+          ]}),
+        ];
+        const creative = 'some_creative';
+        stubVerifySignature.onCall(0).returns(Promise.resolve(false));
+        stubVerifySignature.onCall(1).returns(Promise.resolve(true));
+        return a4a.verifyCreativeSignature_(creative, 'some_sig')
+          .then(verifiedCreative => {
+            expect(stubVerifySignature).to.be.calledTwice;
+            expect(verifiedCreative).to.equal(creative);
+          });
+      });
+
+      it('properly stops verification at first valid key', done => {
+        // Single provider where first key fails, second passes, and third
+        // never calls verifySignature.
+        const serviceName = 'test-service';
+        let keyInfoResolver;
+        a4a.win.ampA4aValidationKeys = [
+          Promise.resolve({serviceName, keys: [
+            Promise.resolve({}),
+            Promise.resolve({}),
+            new Promise(resolver => {
+              keyInfoResolver = resolver;
+            }),
+          ]}),
+        ];
+        const creative = 'some_creative';
+        const signature = 'some_signature';
+        stubVerifySignature.onCall(0).returns(Promise.resolve(false));
+        stubVerifySignature.onCall(1).returns(Promise.resolve(true));
+        a4a.verifyCreativeSignature_(creative, signature)
+          .then(verifiedCreative => {
+            expect(stubVerifySignature).to.be.calledTwice;
+            expect(verifiedCreative).to.equal(creative);
+            done();
+          });
+        // From testing have found that need to yield prior to calling last
+        // key info resolver to ensure previous keys have had a chance to
+        // execute.
+        setTimeout(() => {keyInfoResolver({}); }, 0);
       });
     });
   });

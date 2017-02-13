@@ -37,8 +37,10 @@ exports.rules = [
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/sanitizer.js',
-    whitelist: 'extensions/amp-mustache/0.1/amp-mustache.js->' +
-        'src/sanitizer.js',
+    whitelist: [
+      'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
+      'extensions/amp-bind/0.1/bind-impl.js->src/sanitizer.js',
+    ],
   },
   {
     filesMatching: '**/*.js',
@@ -172,6 +174,7 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/math-sign.js',
       'src/polyfills.js->src/polyfills/object-assign.js',
       'src/polyfills.js->src/polyfills/promise.js',
+      'src/polyfills.js->src/polyfills/array-includes.js',
       'src/service/extensions-impl.js->src/polyfills/document-contains.js',
       'src/service/extensions-impl.js->src/polyfills/domtokenlist-toggle.js',
     ],

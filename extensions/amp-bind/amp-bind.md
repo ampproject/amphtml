@@ -21,7 +21,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td><code>amp-bind</code> allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.</td>
+    <td><code>amp-bind</code> allows adding custom interactivity with data binding and expressions.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
@@ -37,66 +37,80 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>TBD</td>
+    <td><a href="https://ampbyexample.com/components/amp-bind/">Annotated code example for amp-bind</a></td>
   </tr>
 </table>
 
 ## Overview
 
-Once installed, `amp-bind` scans the DOM for bindings -- an element may have attributes, CSS classes or textContent bound to a JS-like expression (see [Expressions](#expressions) below).
+`amp-bind` allows you to add custom interactivity to your pages beyond using AMP's pre-built components.
+It works by mutating elements in response to user actions via data binding and JS-like expressions.
 
-The **scope** is mutable implicit document state that binding expressions may reference. The scope may be initialized with a new AMP component `<amp-state>`. Changes to the scope happen through user actions, e.g. clicking a `<button>` or switching slides on an `<amp-carousel>`.
-
-A **digest** is an evaluation of all binding expressions. Since scope is mutable and expressions can reference the scope, the evaluated result of expressions may change over time. Bound elements are updated as a result of a digest.
+A data binding is a special attribute that links an element to a custom [expression](#expressions). Expressions may reference an implicit mutable JSON state. When that state is changed, expressions
+are re-evaluated and elements with bindings are updated with the new results.
 
 A simple example:
 
 ```html
-<amp-state id=”foo”>
-  <script type=”application/json”>{ message: “Hello World” }</script>
-</amp-state>
+<p [text]="message">Hello amp-bind</p>
 
-<p [text]=”foo.message”>Placeholder text</p>
+<button on="tap:AMP.setState(message='Hello World')">
 ```
 
-1. `amp-bind` scans the DOM and finds the `<p>` element’s `[text]` binding.
-2. During the next digest, `amp-bind` reevaluates the expression `foo.message`.
-3. On the next frame, `amp-bind` updates the `<p>` element's textContent from "Placeholder text" to "Hello World".
+1. When the button is tapped, the implicit state is updated with `{message: 'Hello World'}`.
+2. The state update causes the &lt;p&gt;'s binding expression `message` to be re-evaluated.
+3. The &lt;p&gt;'s text changes to show "Hello World".
 
-## Binding
+### Initializing state
 
-`amp-bind` supports binding to three types of data on an element:
+The implicit state can be initialized at page load with custom JSON. For example:
+
+```html
+<amp-state id="myState">
+  <script type="application/json">
+    {"foo": "bar"}
+  </script>
+</amp-state>
+```
+
+Binding expressions can reference the data in this `<amp-state>` component via dot syntax.
+In this example, `myState.foo` will evaluate to `"bar"`.
+
+## Data binding
+
+`amp-bind` supports data bindings on three types of element state:
 
 | Type | Syntax | Details |
 | --- | --- | --- |
-| Attribute | `[<attr>]` | Only whitelisted attributes are supported.<br>Boolean expression results toggle boolean attributes.
-| CSS Classes | `[class]` | Expression result must be a space-delimited string.
-| Node.textContent | `[text]` | For applicable elements.
-
-**Caveats:**
+| [Node.textContent](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) | `[text]` | Supported on most text elements.
+| [CSS Classes](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class) | `[class]` | Expression result must be a space-delimited string.
+| Element-specific attribute | `[<attr>]` | Only whitelisted attributes are supported.<br>Boolean expression results toggle boolean attributes.
 
 - For security reasons, binding to `innerHTML` is disallowed
 - All attribute bindings are sanitized for unsafe URL protocols (e.g. `javascript:`)
 
 ### Bindable attributes
 
-For non-AMP elements, generally all attributes are bindable.
+For non-AMP elements, most attributes accepted by the [AMP Validator](https://validator.ampproject.org/) are bindable.
 
-For AMP components, only a subset of attributes are bindable:
+For AMP components, only select attributes are bindable:
 
 | Component | Attributes |
 | --- | --- |
-| amp-img | src |
-| amp-video | src |
-| amp-pixel | src |
+| amp-carousel | slide |
+| amp-img | src, srcset, alt |
+| amp-selector | selected |
+| amp-video | src, srcset, alt, controls, loop, poster |
 
-Note that the set of bindable attributes will grow over time as development progresses.
+See [BindValidator](./0.1/bind-validator.js) for the canonical set of bindable
+elements and attributes.
 
 ## Expressions
 
 `amp-bind` expressions are JS-like with some important differences:
 
-- Expressions only have access to the **scope**, not globals like `window` or `document`
+- Expressions may only access the implicit JSON state
+- Expressions do not have access to globals like `window` or `document`
 - Only whitelisted functions are allowed
 - Custom functions and control flow statements (e.g. `for`, `if`) are disallowed
 - Undefined variables, array-index-out-of-bounds return `null` instead of throwing errors

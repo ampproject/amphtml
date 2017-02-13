@@ -15,6 +15,7 @@
  */
 
 import {Observable} from './observable';
+import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
@@ -188,14 +189,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     extensions.installExtensionsInChildWindow(
         childWin, spec.extensionIds || [], opt_preinstallCallback);
     // Ready to be shown.
-    setStyle(iframe, 'visibility', '');
-    if (childWin.document && childWin.document.body) {
-      setStyles(dev().assertElement(childWin.document.body), {
-        opacity: 1,
-        visibility: 'visible',
-        animation: 'none',
-      });
-    }
+    embed.startRender_();
     return embed;
   });
 }
@@ -321,6 +315,9 @@ export class FriendlyIframeEmbed {
 
     /** @private {!Observable<boolean>} */
     this.visibilityObservable_ = new Observable();
+
+    /** @private @const */
+    this.signals_ = new Signals();
   }
 
   /**
@@ -331,6 +328,11 @@ export class FriendlyIframeEmbed {
     disposeServicesForEmbed(this.win);
   }
 
+  /** @return {!Signals} */
+  signals() {
+    return this.signals_;
+  }
+
   /**
    * Returns promise that will resolve when the child window has fully been
    * loaded.
@@ -338,6 +340,19 @@ export class FriendlyIframeEmbed {
    */
   whenLoaded() {
     return this.loadedPromise_;
+  }
+
+  /** @private */
+  startRender_() {
+    this.signals_.signal('render-start');
+    setStyle(this.iframe, 'visibility', '');
+    if (this.win.document && this.win.document.body) {
+      setStyles(dev().assertElement(this.win.document.body), {
+        opacity: 1,
+        visibility: 'visible',
+        animation: 'none',
+      });
+    }
   }
 
   /**
