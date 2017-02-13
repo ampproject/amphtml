@@ -43,7 +43,7 @@ export function mywidget(global, data) {
     noContentAvailable: global.context.noContentAvailable,
 
     /**
-     * @param {{opts:function()} opts.firstIntersectionCallback
+     * @param {{firstIntersectionCallback:function()}} opts
      */
     ready(opts) {
       // Make sure ready() is called only once.
