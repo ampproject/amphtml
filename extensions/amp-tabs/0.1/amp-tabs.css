@@ -13,3 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
+/* TODO: put this in core b/c CSS won't load until js loads and we don't want the page to jump */
+
+/* Non-overridable properties */
+amp-tabs {
+  display: block !important;
+}
+
+
+/* tab header container */
+amp-tabs > ul {
+  display: inline-flex;
+  flex-direction: row;
+  list-style-type: none;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* tab header elements */
+amp-tabs > ul > li {
+  align-items: flex-start;
+  align-self: strech;
+  border-width: 1px;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 1;
+  justify-content: center;
+  margin: 0px 5px;
+  padding: 5px 0px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+amp-tabs > ul > li[selected] {
+  border-bottom: 1px solid black;
+}
+
+amp-tabs > ul > li:hover, 
+amp-tabs > ul > li:focus {
+  border-bottom-style: solid;
+}
+
+/* Hide content by default. */
+amp-tabs > section {
+  display: none !important;
+}
+
+/* Show content when needed. */
+amp-tabs > section[selected] {
+  display: block !important;
+}
