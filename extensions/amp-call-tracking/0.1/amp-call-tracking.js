@@ -75,7 +75,7 @@ export class AmpCallTracking extends AMP.BaseElement {
     this.configUrl_ = assertHttpsUrl(
         this.element.getAttribute('config'), this.element);
 
-    this.hyperlink_ = this.getRealChildren()[0];
+    this.hyperlink_ = this.element.firstElementChild;
   }
 
   /** @override */
