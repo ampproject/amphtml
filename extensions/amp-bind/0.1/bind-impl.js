@@ -104,12 +104,21 @@ export class Bind {
      */
     this.digestQueuedAfterScan_ = false;
 
+    /**
+     * @const @private {!Array<Element>}
+     */
+    this.templateRoots_ = [];
+
     this.subtreeMutationObserver_ = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
         const mutatedNode = mutation.target;
-        this.removeBindingsForNode_(mutatedNode).then(() => {
-          this.addBindingsForNode_(mutatedNode);
-        });
+        if (this.templateRoots_.includes(mutatedNode)) {
+          this.removeBindingsForNode_(mutatedNode).then(() => {
+            return this.addBindingsForNode_(mutatedNode);
+          }).then(() => {
+            this.digest_(false /* opt_verify */);
+          })
+        }
       });
     });
 
@@ -290,10 +299,16 @@ export class Bind {
         return true;
       }
       const tagName = element.tagName;
-
       if (tagName == 'TEMPLATE') {
         // Listen for changes in amp-mustache templates
-        this.subtreeMutationObserver_.observe(element, {subtree: true});
+        // Templated HTML is added as a sibling to the template tag.
+        // So observe the parent.
+        // TODO(kmh287): What if parent is the body tag?
+        const templateParent = element.parentElement;
+        if (templateParent) {
+          this.subtreeMutationObserver_.observe(templateParent, {childList: true});
+          this.templateRoots_.push(templateParent);
+        }
       }
 
       const boundProperties = this.scanElement_(element);

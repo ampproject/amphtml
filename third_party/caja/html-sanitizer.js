@@ -411,7 +411,7 @@ URI.prototype.setPath = function (newPath) {
 URI.prototype.setRawPath = function (newPath) {
   if (newPath) {
     newPath = String(newPath);
-    this.path_ = 
+    this.path_ =
       // Paths must start with '/' unless this is a path-relative URL.
       (!this.domain_ || /^\//.test(newPath)) ? newPath : '/' + newPath;
   } else {
@@ -807,6 +807,7 @@ html4.ATTRIBS = {
   '*::spellcheck': 0,
   '*::style': 3,
   '*::tabindex': 0,
+  '*::text': 0,
   '*::title': 0,
   '*::translate': 0,
   'a::accesskey': 0,
@@ -1608,7 +1609,7 @@ var html = (function(html4) {
 
   var ATTR_RE = new RegExp(
     '^\\s*' +
-    '([-.:\\w]+)' +             // 1 = Attribute name
+    '(\\[?[-.:\\w]+\\]?)'  +             // 1 = Attribute name
     '(?:' + (
       '\\s*(=)\\s*' +           // 2 = Is there a value?
       '(' + (                   // 3 = Attribute value
@@ -2260,6 +2261,7 @@ var html = (function(html4) {
       var value = attribs[i + 1];
       var oldValue = value;
       var atype = null, attribKey;
+      attribName = attribName.replace(/[\[\]']+/g, ''); // Remove square brakcets
       if ((attribKey = tagName + '::' + attribName,
            html4.ATTRIBS.hasOwnProperty(attribKey)) ||
           (attribKey = '*::' + attribName,
