@@ -104,13 +104,14 @@ export class Bind {
      */
     this.digestQueuedAfterScan_ = false;
 
-    this.subtreeMutationObserver = new MutationObserver(mutations => {
+    this.subtreeMutationObserver_ = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
         const mutatedNode = mutation.target;
-        this.removeBindingsForNode_(mutatedNode);
-        this.addBindingsForNode_(mutatedNode);
-      })
-    })
+        this.removeBindingsForNode_(mutatedNode).then(() => {
+          this.addBindingsForNode_(mutatedNode);
+        });
+      });
+    });
 
     this.ampdoc.whenReady().then(() => {
       this.initialize_();
@@ -289,6 +290,12 @@ export class Bind {
         return true;
       }
       const tagName = element.tagName;
+
+      if (tagName == 'TEMPLATE') {
+        // Listen for changes in amp-mustache templates
+        this.subtreeMutationObserver_.observe(element, {subtree: true});
+      }
+
       const boundProperties = this.scanElement_(element);
       if (boundProperties.length > 0) {
         boundElements.push({element, boundProperties});
