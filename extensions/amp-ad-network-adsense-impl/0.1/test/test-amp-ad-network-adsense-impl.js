@@ -310,5 +310,85 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '&dtd=[0-9]+$'));
       });
     });
+
+    describe('#responsive', () => {
+      beforeEach(() => {
+        resetSharedState();
+      });
+
+      it('modifies format, initial resize success', () => {
+        const attemptChangeSizeSpy = sandbox.spy(
+            AmpAdNetworkAdsenseImpl.prototype, 'attemptChangeSize');
+        return createIframePromise().then(fixture => {
+          // Set up the element's underlying infrastructure.
+          upgradeOrRegisterElement(fixture.win, 'amp-a4a',
+              AmpAdNetworkAdsenseImpl);
+          const element = createAdsenseImplElement({
+            'data-ad-client': 'adsense',
+            'width': '300',
+            'height': '250',
+            'layout': 'responsive',
+          }, fixture.doc, 'amp-a4a');
+          return fixture.addElement(element).then(addedElem => {
+            // Create AdsenseImpl instance.
+            impl = new AmpAdNetworkAdsenseImpl(addedElem);
+            return impl.getAdUrl().then(adUrl => {
+              const queryPairs = adUrl.split('?')[1].split('&');
+              const actualQueryParams = {};
+              queryPairs.forEach(pair => {
+                const pairArr = pair.split('=');
+                actualQueryParams[pairArr[0]] = pairArr[1];
+              });
+              expect(actualQueryParams['format']).to.equal('300x278');
+              expect(actualQueryParams['w']).to.equal('300');
+              expect(actualQueryParams['h']).to.equal('278');
+              expect(attemptChangeSizeSpy.withArgs(278,300)).to.be.called;
+              return impl.extractCreativeAndSignature(
+                'text', {
+                  get: () => {
+                    return null;
+                  },
+                }).then(adResponse => {
+                  // Extract should not trigger resize give previous resize
+                  // did not indicate failure.
+                  expect(adResponse.size).to.be.null;
+                });
+            });
+          });
+        });
+      });
+      it('modifies format, initial resize failuer', () => {
+        sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'attemptChangeSize',
+          () => {
+            return Promise.reject('resize failure');
+          });
+        return createIframePromise().then(fixture => {
+          // Set up the element's underlying infrastructure.
+          upgradeOrRegisterElement(fixture.win, 'amp-a4a',
+              AmpAdNetworkAdsenseImpl);
+          const element = createAdsenseImplElement({
+            'data-ad-client': 'adsense',
+            'width': '300',
+            'height': '250',
+            'layout': 'responsive',
+          }, fixture.doc, 'amp-a4a');
+          return fixture.addElement(element).then(addedElem => {
+            // Create AdsenseImpl instance.
+            impl = new AmpAdNetworkAdsenseImpl(addedElem);
+            return impl.getAdUrl().then(unusedAdUrl =>
+              impl.extractCreativeAndSignature(
+                'text', {
+                  get: () => {
+                    return null;
+                  },
+                }).then(adResponse => {
+                  // Extract should not trigger resize give previous resize
+                  // did not indicate failure.
+                  expect(adResponse.size).to.deep.equal([300, 278]);
+                }));
+          });
+        });
+      });
+    });
   });
 });

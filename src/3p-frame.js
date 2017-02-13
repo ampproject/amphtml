@@ -65,6 +65,11 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     domFingerprint: domFingerprint(element),
     experimentToggles: experimentToggles(parentWindow),
   };
+  const layout = element.getAttribute('layout');
+  if (layout) {
+    additionalContext.layout = layout;
+  }
+  console.log(`3p-frame: ${JSON.stringify(additionalContext)}`);
   Object.assign(attributes._context, opt_context);
   Object.assign(attributes._context, additionalContext);
   return attributes;

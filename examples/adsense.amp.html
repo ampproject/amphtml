@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-custom>
     amp-ad {
-      max-width: 500px;
+      max-width: 550px;
     }
     .red {
       background-color: red;
@@ -51,31 +51,32 @@
 </head>
 <body>
 
-  <amp-user-notification
+  <!--amp-user-notification
       layout=nodisplay
       id="amp-user-notification">
     This site uses cookies to personalize content.
     <a href="#learn-more">Learn more.</a>
     <button on="tap:amp-user-notification.dismiss" role="button" tabindex="0">I accept</button>
-  </amp-user-notification>
+  </amp-user-notification-->
 
   <h2>AdSense</h2>
   <amp-ad width=300 height=250
       type="adsense"
       data-ad-client="ca-pub-2005682797531342"
-      data-ad-slot="7046626912">
+      data-ad-slot="7046626912"
+      layout="responsive">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
 
-  <amp-ad width=300 height=250
+  <!--amp-ad width=300 height=250
           type="adsense"
           data-ad-client="ca-pub-2005682797531342"
           data-ad-slot="7046626912"
           data-consent-notification-id="amp-user-notification">
     <div placeholder>should only show ad after notification get dismissed</div>
     <div fallback></div>
-  </amp-ad>
+  </amp-ad-->
 
   <div class=talldiv>
     <!-- Make the second ad below the fold. -->
@@ -86,8 +87,7 @@
   <amp-ad width=300 height=250
       type="adsense"
       data-ad-client="ca-pub-2005682797531342"
-      data-ad-slot="7046626912"
-      data-adtest="on">
+      layout="responsive">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>

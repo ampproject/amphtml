@@ -120,6 +120,7 @@ describe('3p-frame', () => {
       div.setAttribute('data-ping', 'pong');
       div.setAttribute('width', '50');
       div.setAttribute('height', '100');
+      div.setAttribute('layout', 'responsive');
 
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -185,6 +186,7 @@ describe('3p-frame', () => {
           // Note that DOM fingerprint will change if the document DOM changes
           // Note also that running it using --files uses different DOM.
           ',"domFingerprint":"1725030182"' +
+          ',"layout":"responsive"' +
           ',"startTime":1234567888' +
           ',"experimentToggles":{"exp-a":true,"exp-b":true' +
           (sentinelName == 'sentinel' ?
@@ -223,6 +225,7 @@ describe('3p-frame', () => {
         expect(win.context.noContentAvailable).to.be.a('function');
         expect(win.context.observeIntersection).to.be.a('function');
         expect(win.context.reportRenderedEntityIdentifier).to.be.a('function');
+        expect(win.context.layout).to.equal('responsive');
         const c = win.document.getElementById('c');
         expect(c).to.not.be.null;
         expect(c.textContent).to.contain('pong');
