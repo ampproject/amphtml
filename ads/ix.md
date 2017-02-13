@@ -77,6 +77,7 @@ __Required:__
 __Optional:__
 
 - `data-ix-slot`
+- `data-ix-timeout`
 
 Additional parameters including `json` will be passed through in the resulting call to DFP. For details please see the [Doubleclick documentation](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md).
 
