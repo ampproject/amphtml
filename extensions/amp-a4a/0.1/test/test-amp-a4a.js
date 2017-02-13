@@ -129,10 +129,13 @@ describe('amp-a4a', () => {
     resetScheduledElementForTesting(window, 'amp-a4a');
   });
 
-  function createA4aElement(doc) {
+  function createA4aElement(doc, opt_height) {
+    if (opt_height == undefined) {
+      opt_height = 50;
+    }
     const element = createElementWithAttributes(doc, 'amp-a4a', {
       'width': '200',
-      'height': '50',
+      'height': String(opt_height),
       'type': 'adsense',
     });
     element.getAmpDoc = () => {
@@ -142,7 +145,7 @@ describe('amp-a4a', () => {
     element.isBuilt = () => {return true;};
     element.getLayoutBox = () => {
       const visible = element.style.display != 'none';
-      return layoutRectLtwh(0, 0, visible ? 200 : 0, visible ? 50 : 0);
+      return layoutRectLtwh(0, 0, visible ? 200 : 0, visible ? opt_height : 0);
     };
     doc.body.appendChild(element);
     return element;
@@ -714,7 +717,7 @@ describe('amp-a4a', () => {
         expect(a4a.onLayoutMeasure.bind(a4a)).to.throw(/fixed/);
       });
     });
-    it('does not initial promise chain if display none', () => {
+    it('does not initialize promise chain if display none', () => {
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -727,6 +730,16 @@ describe('amp-a4a', () => {
         a4aElement.style.display = 'block';
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
+      });
+    });
+    it('does not initialize promise chain if height 0', () => {
+      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc, 0);
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.not.be.ok;
       });
     });
     function executeLayoutCallbackTest(isValidCreative, opt_failAmpRender) {

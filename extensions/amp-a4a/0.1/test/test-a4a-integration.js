@@ -159,7 +159,7 @@ describe('integration test: a4a', () => {
   it('should not send request if display none', () => {
     a4aElement.style.display = 'none';
     return fixture.addElement(a4aElement).then(element => {
-      expect(xhrMock.called).to.be.false;
+      expect(xhrMock).to.not.be.called;
       expect(element.querySelector('iframe')).to.not.be.ok;
     });
   });
