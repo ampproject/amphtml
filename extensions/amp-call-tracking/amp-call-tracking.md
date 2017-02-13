@@ -66,3 +66,9 @@ unset, `phoneNumber` will be used.
 ## Validation
 
 See [amp-call-tracking rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-call-tracking/0.1/validator-amp-call-tracking.protoascii) in the AMP validator specification.
+
+## See also
+
+- [Design doc](https://docs.google.com/document/d/1UDMYv0f2R9CvMUSBQhxjtkSnC4984t9dJeqwm_8WiAM/edit#heading=h.zha4avn54it8)
+
+- [PR](https://github.com/ampproject/amphtml/pull/7493)
