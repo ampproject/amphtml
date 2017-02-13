@@ -404,10 +404,16 @@ export class AmpA4A extends AMP.BaseElement {
       // onLayoutMeasure gets called multiple times.
       return;
     }
-    this.layoutMeasureExecuted_ = true;
+    const slotRect = this.getIntersectionElementLayoutBox();
+    if (slotRect.height == 0 || slotRect.width == 0) {
+      dev().fine(
+        TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
+      return;
+    }
     user().assert(isAdPositionAllowed(this.element, this.win),
         '<%s> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element.tagName, this.element);
+    this.layoutMeasureExecuted_ = true;
     // OnLayoutMeasure can be called when page is in prerender so delay until
     // visible.  Assume that it is ok to call isValidElement as it should
     // only being looking at window, immutable properties (i.e. location) and
@@ -432,13 +438,12 @@ export class AmpA4A extends AMP.BaseElement {
 
     // If in localDev `type=fake` Ad specifies `force3p`, it will be forced
     // to go via 3p.
-    if (getMode().localDev) {
-      if (this.element.getAttribute('type') == 'fake' &&
-          this.element.getAttribute('force3p') == 'true') {
-        this.adUrl_ = this.getAdUrl();
-        this.adPromise_ = Promise.resolve();
-        return;
-      }
+    if (getMode().localDev &&
+        this.element.getAttribute('type') == 'fake' &&
+        this.element.getAttribute('force3p') == 'true') {
+      this.adUrl_ = this.getAdUrl();
+      this.adPromise_ = Promise.resolve();
+      return;
     }
 
     // Return value from this chain: True iff rendering was "successful"
