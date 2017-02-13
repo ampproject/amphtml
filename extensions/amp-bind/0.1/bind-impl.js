@@ -156,8 +156,7 @@ export class Bind {
 
   /**
    * Scans the substree rooted at `node` and adds bindings for nodes
-   * that contain bindable elements. This function is not idempotent. To remove
-   * bindings for a node, see #removeBindingsForNode_.
+   * that contain bindable elements. This function is not idempotent.
    *
    * Returns a promise that resolves after bindings have been added.
    *
@@ -197,9 +196,7 @@ export class Bind {
   }
 
   /**
-   * Scans the substree rooted at `node` and removes bindings for nodes
-   * that contain bindable elements. This function is not idempotent. To add
-   * bindings for a node and its children, see #addBindingsForNode_.
+   * Removes all bindings nodes with `node` as their parent.
    *
    * Returns a promise that resolves after bindings have been removed.
    *
