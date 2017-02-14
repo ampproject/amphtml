@@ -54,6 +54,7 @@ let ActionInfoArgsDef;
  *   target: string,
  *   method: string,
  *   args: ?ActionInfoArgsDef,
+ *   expr: string,
  *   str: string
  * }}
  */
@@ -71,16 +72,19 @@ export class ActionInvocation {
    * @param {!Node} target
    * @param {string} method
    * @param {?JSONType} args
+   * @param {?string} expr
    * @param {?Element} source
    * @param {?Event} event
    */
-  constructor(target, method, args, source, event) {
+  constructor(target, method, args, expr, source, event) {
     /** @const {!Node} */
     this.target = target;
     /** @const {string} */
     this.method = method;
     /** @const {?JSONType} */
     this.args = args;
+    /** @const {?string} */
+    this.expr = expr;
     /** @const {?Element} */
     this.source = source;
     /** @const {?Event} */
@@ -259,6 +263,7 @@ export class ActionService {
           this.root_,
           actionInfo.method,
           args,
+          actionInfo.expr,
           action.node,
           event);
       globalTarget(invocation);
@@ -424,6 +429,7 @@ export function parseActionMap(s, context) {
       // Method: ".method". Method is optional.
       let method = DEFAULT_METHOD_;
       let args = null;
+      let expr = null;
       peek = toks.peek();
       if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
         toks.next();  // Skip '.'
@@ -434,56 +440,64 @@ export function parseActionMap(s, context) {
         peek = toks.peek();
         if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
           toks.next();  // Skip '('.
-          do {
-            tok = toks.next();
+          peek = toks.peek();
 
+          if (peek.type == TokenType.EXPRESSION) {
+            // Format: {...}
+            expr = toks.next().value;
+            assertToken(toks.next(), [TokenType.SEPARATOR], ')');
+          } else {
             // Format: key = value, ....
-            if (tok.type == TokenType.SEPARATOR &&
-                    (tok.value == ',' || tok.value == ')')) {
-              // Expected: ignore.
-            } else if (tok.type == TokenType.LITERAL ||
-                tok.type == TokenType.ID) {
-              // Key: "key = "
-              const argKey = tok.value;
-              assertToken(toks.next(), [TokenType.SEPARATOR], '=');
-              // Value is either a literal or a variable: "foo.bar.baz"
-              tok = assertToken(toks.next(/* convertValue */ true),
-                  [TokenType.LITERAL, TokenType.ID]);
-              const argValueTokens = [tok];
-              // Variables have one or more dereferences: ".identifier"
-              if (tok.type == TokenType.ID) {
-                for (peek = toks.peek();
-                    peek.type == TokenType.SEPARATOR && peek.value == '.';
-                    peek = toks.peek()) {
-                  tok = toks.next(); // Skip '.'.
-                  tok = assertToken(toks.next(false), [TokenType.ID]);
-                  argValueTokens.push(tok);
+            do {
+              tok = toks.next();
+              if (tok.type == TokenType.SEPARATOR &&
+                      (tok.value == ',' || tok.value == ')')) {
+                // Expected: ignore.
+              } else if (tok.type == TokenType.LITERAL ||
+                  tok.type == TokenType.ID) {
+                // Key: "key = "
+                const argKey = tok.value;
+                assertToken(toks.next(), [TokenType.SEPARATOR], '=');
+                // Value is either a literal or a variable: "foo.bar.baz"
+                tok = assertToken(toks.next(/* convertValue */ true),
+                    [TokenType.LITERAL, TokenType.ID]);
+                const argValueTokens = [tok];
+                // Variables have one or more dereferences: ".identifier"
+                if (tok.type == TokenType.ID) {
+                  for (peek = toks.peek();
+                      peek.type == TokenType.SEPARATOR && peek.value == '.';
+                      peek = toks.peek()) {
+                    tok = toks.next(); // Skip '.'.
+                    tok = assertToken(toks.next(false), [TokenType.ID]);
+                    argValueTokens.push(tok);
+                  }
                 }
+                const argValue = getActionInfoArgValue(argValueTokens);
+                if (!args) {
+                  args = map();
+                }
+                args[argKey] = argValue;
+                peek = toks.peek();
+                assertAction(
+                    peek.type == TokenType.SEPARATOR &&
+                    (peek.value == ',' || peek.value == ')'),
+                    'Expected either [,] or [)]');
+              } else {
+                // Unexpected token.
+                assertAction(false, `; unexpected token [${tok.value || ''}]`);
               }
-              const argValue = getActionInfoArgValue(argValueTokens);
-              if (!args) {
-                args = map();
-              }
-              args[argKey] = argValue;
-              peek = toks.peek();
-              assertAction(
-                  peek.type == TokenType.SEPARATOR &&
-                  (peek.value == ',' || peek.value == ')'),
-                  'Expected either [,] or [)]');
-            } else {
-              // Unexpected token.
-              assertAction(false, `; unexpected token [${tok.value || ''}]`);
-            }
-          } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
+            } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
+          }
         }
       }
-
+      /** @type {ActionInfoDef} */
       const action = {
         event,
         target,
         method,
         args: (args && getMode().test && Object.freeze) ?
             Object.freeze(args) : args,
+        expr,
         str: s,
       };
       if (!actionMap) {
@@ -604,6 +618,7 @@ const TokenType = {
   SEPARATOR: 2,
   LITERAL: 3,
   ID: 4,
+  EXPRESSION: 5,
 };
 
 /**
@@ -621,7 +636,14 @@ const SEPARATOR_SET = ';:.()=,|!';
 const STRING_SET = '"\'';
 
 /** @private @const {string} */
-const SPECIAL_SET = WHITESPACE_SET + SEPARATOR_SET + STRING_SET;
+const EXPR_OPEN = '{';
+
+/** @private @const {string} */
+const EXPR_CLOSE = '}';
+
+/** @private @const {string} */
+const SPECIAL_SET =
+    WHITESPACE_SET + SEPARATOR_SET + STRING_SET + EXPR_OPEN + EXPR_CLOSE;
 
 /** @private */
 class ParserTokenizer {
@@ -724,6 +746,22 @@ class ParserTokenizer {
       const value = this.str_.substring(newIndex + 1, end);
       newIndex = end;
       return {type: TokenType.LITERAL, value, index: newIndex};
+    }
+
+    if (c == EXPR_OPEN) { // '{' character
+      let end = -1;
+      for (let i = newIndex + 1; i < this.str_.length; i++) {
+        if (this.str_.charAt(i) == EXPR_CLOSE) { // '}' character
+          end = i;
+          break;
+        }
+      }
+      if (end == -1) {
+        return {type: TokenType.INVALID, index: newIndex};
+      }
+      const value = this.str_.substring(newIndex, end + 1);
+      newIndex = end;
+      return {type: TokenType.EXPRESSION, value, index: newIndex};
     }
 
     // Advance until next special character.

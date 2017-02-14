@@ -152,6 +152,22 @@ export class Bind {
   }
 
   /**
+   * TODO(choumx)
+   */
+  setStateWithExpression(expression, scope) {
+    let promise;
+    if (this.workerExperimentEnabled_) {
+      promise =
+          invokeWebWorker(this.win_, 'bind.parseObject', [expression, scope]);
+    } else {
+      promise = Promise.resolve(this.evaluator_.parseObject(expression, scope));
+    }
+    promise.then(state => {
+      this.setState(state);
+    });
+  }
+
+  /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
    * @private
    */

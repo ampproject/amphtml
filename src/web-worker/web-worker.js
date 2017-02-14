@@ -48,6 +48,14 @@ self.addEventListener('message', function(event) {
       }
       break;
 
+    case 'bind.parseObject':
+      if (evaluator_) {
+        returnValue = evaluator_.parseObject.apply(evaluator_, args);
+      } else {
+        throw new Error(`${method}: BindEvaluator is not initialized.`);
+      }
+      break;
+
     default:
       throw new Error(`Unrecognized method: ${method}`);
   }

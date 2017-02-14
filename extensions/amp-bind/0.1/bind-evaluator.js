@@ -122,6 +122,14 @@ export class BindEvaluator {
   }
 
   /**
+   * TODO(choumx)
+   */
+  parseObject(expressionString, scope) {
+    const expression = new BindExpression(expressionString);
+    return expression.evaluate(scope);
+  }
+
+  /**
    * Returns the expression result string for a binding to `property`.
    * @param {./bind-expression.BindExpressionResultDef} result
    * @return {?string}

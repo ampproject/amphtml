@@ -71,7 +71,15 @@ export class StandardActions {
     switch (invocation.method) {
       case 'setState':
         bindForDoc(this.ampdoc).then(bind => {
-          bind.setState(invocation.args);
+          if (invocation.expr) {
+            const data = Object.create(null);
+            if (invocation.event && invocation.event.detail) {
+              data['event'] = invocation.event.detail;
+            }
+            bind.setStateWithExpression(invocation.expr, data);
+          } else {
+            bind.setState(invocation.args);
+          }
         });
         return;
       case 'goBack':
