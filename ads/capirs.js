@@ -51,5 +51,6 @@ export function capirs(global, data) {
     },
   };
 
+  writeScript(global, '//ssp.rambler.ru/lpdid.js');
   writeScript(global, '//ssp.rambler.ru/capirs_async.js');
 }
