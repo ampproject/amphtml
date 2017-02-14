@@ -47,7 +47,7 @@ The `amp-form` extension **MUST** be loaded if you're using `<form>` or any inpu
 
 Example:
 ```html
-<form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+<form method="post" action-xhr="https://example.com/subscribe">
   <fieldset>
     <label>
       <span>Your name</span>
@@ -74,11 +74,13 @@ Example:
 
 ## Attributes
 
-**target** (required)
+**target** (optional) (default: '_top')
 
-The value for the `target` attribute must be either `_blank` or `_top`.
+The value for the `target` attribute must be either `_blank` or `_top`. This is only useful for non-XHR GET submissions.
 
-**action**
+**action** (optional for GET, invalid for POST)
+
+For GET submissions, at least one of `action` or `action-xhr` must be provided. 
 
 This attribute is required for `method=GET`. The value must be an `https` URL and must not be a link to a CDN (does **NOT** link to https://cdn.ampproject.org). For `method=POST`, the `action` attribute is invalid, use  `action-xhr` instead.
 
@@ -296,7 +298,6 @@ Here's an example:
 <h4>Show All Invalid Messages On Submit</h4>
 <form method="post"
       action-xhr="/form/echo-json/post"
-      target="_blank"
       custom-validation-reporting="show-all-on-submit">
   <fieldset>
     <label>
