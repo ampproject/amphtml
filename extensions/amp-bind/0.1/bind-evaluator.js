@@ -16,13 +16,8 @@
 
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
-<<<<<<< HEAD
-import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {map, hasOwn} from '../../../src/utils/object';
 import {filterSplice} from '../../../src/utils/array';
-
-=======
->>>>>>> 7e3063eedabb4bb1a833deaff38981f2945bcf32
 
 /**
  * @typedef {{
@@ -86,7 +81,6 @@ export class BindEvaluator {
   }
 
   /**
-<<<<<<< HEAD
    * Removes all parsed bindings for the provided expressions.
    * @param {!Array<string>} expressionStrings
    */
@@ -103,12 +97,8 @@ export class BindEvaluator {
   }
 
   /**
-   * Evaluates all expressions with the given `scope` data and resolves
-   * the returned Promise with a map of expression strings to results.
-=======
    * Evaluates all expressions with the given `scope` data returns two maps:
    * expression strings to results and expression strings to errors.
->>>>>>> 7e3063eedabb4bb1a833deaff38981f2945bcf32
    * @param {!Object} scope
    * @return {{
    *   results: !Object<string, ./bind-expression.BindExpressionResultDef>,
