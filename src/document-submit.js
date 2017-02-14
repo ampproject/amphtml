@@ -99,8 +99,9 @@ export function onDocumentFormSubmit_(e) {
         form);
   } else if (method == 'POST') {
     if (action) {
-      user().error(
-          'form', 'action attribute is invalid for method=POST: %s', form);
+      const TAG = 'form';
+      user().error(TAG,
+          'action attribute is invalid for method=POST: %s', form);
     }
 
     if (!actionXhr) {
