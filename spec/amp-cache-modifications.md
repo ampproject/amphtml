@@ -480,8 +480,7 @@ JSON is appended to the end of the `<body>`.
 
 </details>
 
-#### Record UTF-16 offsets for `amp-access` and `amp-analytics` JSON in added
-JSON
+#### Record UTF-16 offsets for `amp-access` and `amp-analytics` JSON in added JSON
 
 AMP4ADS requires providing the start and end position of `amp-access` and
 `amp-analytics` JSON. These string offsets are in UTF-16 encoding lengths. This
