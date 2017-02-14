@@ -42,7 +42,7 @@ let ParsedBindingDef;
  */
 export class BindEvaluator {
   constructor() {
-    /** @const @visibleForTesting {!Array<ParsedBindingDef>} */
+    /** @const @private {!Array<ParsedBindingDef>} */
     this.parsedBindings_ = [];
 
     /** @const {!./bind-validator.BindValidator} */
@@ -84,15 +84,15 @@ export class BindEvaluator {
    * Removes all parsed bindings for the provided expressions.
    * @param {!Array<string>} expressionStrings
    */
-  removeBindingsForExpressions(expressionStrings) {
-    const expressionsToRemove = map();  // Used as set
+  removeBindingsWithExpressionStrings(expressionStrings) {
+    const expressionsToRemove = Object.create(null);
     for (let i = 0; i < expressionStrings.length; i++) {
-      expressionsToRemove[expressionStrings[i]] = undefined;
+      expressionsToRemove[expressionStrings[i]] = true;
     }
 
     this.parsedBindings_ = filterSplice(this.parsedBindings_, binding => {
-      const expression = binding.expression.expressionString;
-      return !hasOwn(expressionsToRemove, expression);
+      const expressionString = binding.expression.expressionString;
+      return expressionsToRemove[expressionString];
     });
   }
 
@@ -137,6 +137,14 @@ export class BindEvaluator {
       }
     });
     return {results: cache, errors};
+  }
+
+  /**
+   * Return parsed bindings for testing.
+   * @visibleForTesting {!Array<ParsedBindingDef>}
+   */
+  parsedBindingsForTesting() {
+    return this.parsedBindings_;
   }
 
   /**

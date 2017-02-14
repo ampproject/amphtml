@@ -84,12 +84,6 @@ describes.realWin('amp-bind', {
   function onBindReady() {
     return env.ampdoc.whenReady().then(() => {
       return bind.scanPromise_;
-    }).then(() => {
-      if (bind.evaluatePromise_) {
-        return bind.evaluatePromise_.then(() => {
-          env.flushVsync();
-        });
-      }
     });
   }
 
