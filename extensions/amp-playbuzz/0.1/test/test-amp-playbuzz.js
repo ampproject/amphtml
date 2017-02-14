@@ -18,6 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-playbuzz';
 import {adopt} from '../../../../src/runtime';
 
@@ -70,8 +71,8 @@ describe('amp-playbuzz', () => {
     expect(iframe.getAttribute('scrolling')).to.equal('no');
   }
 
-  before(() => {
-    AMP.toggleExperiment('amp-playbuzz', true);
+  beforeEach(() => {
+    toggleExperiment(window, 'amp-playbuzz', true);
   });
 
   it('renders', () => {
