@@ -7,12 +7,16 @@ do on the origin. However, there are some components and server configurations
 that can be problematic.
 
 If a particular document appears and behaves as expected on your origin, but not
-when viewed via the cache (how to map origin URLs to [Google's AMP Cache](https://developers.google.com/amp/cache/overview#amp-cache-url-format)),
-first open the developer console in your browser, and ensure no errors or
-warnings appear. If this doesn't resolve the problem, run the document through
-[AMPBench](https://ampbench.appspot.com/) and resolve any unexpected errors or
-warnings. If you still have a problem after following these steps, check the
-table below.
+when viewed via the cache (how to map origin URLs to [Google's AMP
+Cache](https://developers.google.com/amp/cache/overview#amp-cache-url-format)),
+try the following:
+
+1. Open your browser's developer/error tools console, and resolve
+any errors or warnings that appear.
+1. Run the document through [AMPBench](https://ampbench.appspot.com/) and
+resolve any unexpected errors or warnings.
+
+If you still have a problem after following these steps, check the table below.
 
 |Symptom|Issue|Solution|
 |---|---|---|
