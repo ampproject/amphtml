@@ -46,14 +46,14 @@ const ELEMENTS_ACTIONS_MAP_ = {
  * data in the event that generated the action.
  * @typedef {Object<string,function(!Object):string>}
  */
-let ActionInfoArgsKeyValueDef;
+let ActionInfoArgsDef;
 
 /**
  * @typedef {{
  *   event: string,
  *   target: string,
  *   method: string,
- *   argsKeyValue: ?ActionInfoArgsKeyValueDef,
+ *   args: ?ActionInfoArgsDef,
  *   argsExpression: ?string,
  *   str: string
  * }}
@@ -71,17 +71,20 @@ export class ActionInvocation {
   /**
    * @param {!Node} target
    * @param {string} method
-   * @param {(JSONType|string)} args
+   * @param {?JSONType} args
+   * @param {?string} argsExpression
    * @param {?Element} source
    * @param {?Event} event
    */
-  constructor(target, method, args, source, event) {
+  constructor(target, method, args, argsExpression, source, event) {
     /** @const {!Node} */
     this.target = target;
     /** @const {string} */
     this.method = method;
-    /** @const {(JSONType|string)} */
+    /** @type {?JSONType} */
     this.args = args;
+    /** @type {?string} */
+    this.argsExpression = argsExpression;
     /** @const {?Element} */
     this.source = source;
     /** @const {?Event} */
@@ -251,9 +254,7 @@ export class ActionService {
     const actionInfo = action.actionInfo;
 
     // For key-value args, replace any variables with data in `event`.
-    const args = actionInfo.argsKeyValue
-        ? applyActionInfoArgs(actionInfo.argsKeyValue, event)
-        : actionInfo.argsExpression;
+    const args = applyActionInfoArgs(actionInfo.args, event);
 
     // Global target, e.g. `AMP`.
     const globalTarget = this.globalTargets_[actionInfo.target];
@@ -262,6 +263,7 @@ export class ActionService {
           this.root_,
           actionInfo.method,
           args,
+          actionInfo.argsExpression, // Currently only used for global targets.
           action.node,
           event);
       globalTarget(invocation);
@@ -294,14 +296,14 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} method
-   * @param {(JSONType|string)} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    * @param {?ActionInfoDef} actionInfo
    */
   invoke_(target, method, args, source, event, actionInfo) {
     const invocation = new ActionInvocation(target, method, args,
-        source, event);
+        /* argsExpression */ null, source, event);
 
     // Try a global method handler first.
     if (this.globalMethodHandlers_[invocation.method]) {
@@ -492,7 +494,7 @@ export function parseActionMap(s, context) {
         event,
         target,
         method,
-        argsKeyValue: (args && getMode().test && Object.freeze) ?
+        args: (args && getMode().test && Object.freeze) ?
             Object.freeze(args) : args,
         argsExpression: expression,
         str: s,
@@ -551,23 +553,23 @@ function getActionInfoArgValue(tokens) {
 
 /**
  * Generates method arg values for each key in the given
- * ActionInfoArgsKeyValueDef with the data in the given event.
- * @param {?ActionInfoArgsKeyValueDef} argsKeyValue
+ * ActionInfoArgsDef with the data in the given event.
+ * @param {?ActionInfoArgsDef} args
  * @param {?Event} event
  * @return {?JSONType}
  * @private Visible for testing only.
  */
-export function applyActionInfoArgs(argsKeyValue, event) {
-  if (!argsKeyValue) {
-    return argsKeyValue;
+export function applyActionInfoArgs(args, event) {
+  if (!args) {
+    return args;
   }
   const data = {};
   if (event && event.detail) {
     data['event'] = event.detail;
   }
   const applied = map();
-  Object.keys(argsKeyValue).forEach(key => {
-    applied[key] = argsKeyValue[key].call(null, data);
+  Object.keys(args).forEach(key => {
+    applied[key] = args[key].call(null, data);
   });
   return applied;
 }
