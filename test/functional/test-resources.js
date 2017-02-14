@@ -1846,7 +1846,7 @@ describe('Resources mutateElement and collapse', () => {
       collapsedCallback: sandbox.spy(),
     };
     Resource.setOwner(resource1.element, owner);
-    resources.collapseElement(resource1.element);
+    Resource.completeCollapse();
     expect(owner.collapsedCallback).to.be.calledOnce;
     expect(owner.collapsedCallback.args[0][0]).to.equal(resource1.element);
   });

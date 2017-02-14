@@ -812,11 +812,6 @@ export class Resources {
       this.setRelayoutTop_(box.top);
     }
     resource.completeCollapse();
-    resource.layoutBox_ = layoutRectLtwh(
-        resource.layoutBox_.left,
-        resource.layoutBox_.top,
-        0, 0);
-    element.updateLayoutBox(this.layoutBox_);
     this.schedulePass(FOUR_FRAME_DELAY_);
   }
 
@@ -1056,11 +1051,7 @@ export class Resources {
             }
             // Sync is necessary here to avoid UI jump in the next frame.
             const newScrollHeight = this.viewport_./*OK*/getScrollHeight();
-            console.log('old scrollHeight', state.scrollHeight);
-            console.log('new scrollHeight', newScrollHeight);
-            console.log('old scrollTop', state.scrollTop);
-            console.log('new scrollTop', state./*OK*/scrollTop + newScrollHeight - state./*OK*/scrollHeight);
-            if (newScrollHeight != state./*OK*/scrollHeight) {
+            if (newScrollHeight > state./*OK*/scrollHeight) {
               this.viewport_.setScrollTop(state./*OK*/scrollTop +
                   (newScrollHeight - state./*OK*/scrollHeight));
             }

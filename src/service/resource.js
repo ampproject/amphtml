@@ -432,7 +432,7 @@ export class Resource {
     this.element.updateLayoutBox(this.layoutBox_);
     const owner = this.getOwner();
     if (owner) {
-      owner.colllapsedCallback(this.element);
+      owner.collapsedCallback(this.element);
     }
   }
 
