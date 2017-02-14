@@ -117,22 +117,16 @@ describes.realWin('amp-sticky-ad 1.0 version', {
           () => {});
       const removeOnScrollListenerSpy =
           sandbox.spy(impl, 'removeOnScrollListener_');
-      const getScrollTopSpy = sandbox.spy();
-      const getSizeSpy = sandbox.spy();
-      const getScrollHeightSpy = sandbox.spy();
 
-      impl.viewport_.getScrollTop = function() {
-        getScrollTopSpy();
-        return 1;
-      };
-      impl.viewport_.getSize = function() {
-        getSizeSpy();
-        return {height: 50};
-      };
-      impl.viewport_.getScrollHeight = function() {
-        getScrollHeightSpy();
-        return 300;
-      };
+      const getScrollTopStub = sandbox.stub(impl.viewport_, 'getScrollTop');
+      getScrollTopStub.returns(1);
+      const getSizeStub = sandbox.stub(impl.viewport_, 'getSize');
+      getSizeStub.returns({
+        height: 50,
+      });
+      const getScrollHeightStub = sandbox.stub(impl.viewport_, 'getScrollHeight');
+      getScrollHeightStub.returns(300);
+
       impl.deferMutate = function(callback) {
         callback();
       };
