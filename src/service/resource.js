@@ -413,10 +413,6 @@ export class Resource {
 
     this.element.updateLayoutBox(box);
   }
-  /**
-   * Collapse on changing height/width to 0
-   */
-
 
   /**
    * Completes collapse: ensures that the element is `display:none` and

@@ -791,8 +791,7 @@ export class BaseElement {
    * @public
    */
   attemptCollapse() {
-    return this.element.getResources().attemptCollapse(
-      this.element, 0, /* newWidth */ undefined);
+    return this.element.getResources().attemptCollapse(this.element);
   }
 
 
