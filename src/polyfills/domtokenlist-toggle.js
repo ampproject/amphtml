@@ -42,7 +42,12 @@ function domTokenListTogglePolyfill(token, opt_force) {
  */
 export function install(win) {
   if (isIe(win) && win.DOMTokenList) {
-    win.DOMTokenList.prototype.toggle = domTokenListTogglePolyfill;
+    win.Object.defineProperty(win.DOMTokenList.prototype, 'toggle', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: domTokenListTogglePolyfill,
+    });
   }
 }
 
