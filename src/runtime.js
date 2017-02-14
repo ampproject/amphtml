@@ -894,7 +894,8 @@ export function registerForUnitTest(win) {
 export function registerElementForTesting(win, elementName) {
   const element = elementsForTesting[elementName];
   if (!element) {
-    throw new Error('test element not found: ' + elementName);
+    throw new Error('test element not found: ' + elementName +
+      '\nKnown elements ' + Object.keys(elementsForTesting).sort());
   }
   win.AMP.registerElement(element.name, element.implementationClass,
       element.css);
