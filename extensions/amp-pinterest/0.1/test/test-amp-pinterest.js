@@ -14,58 +14,50 @@
  * limitations under the License.
  */
 
-    import '../amp-pinterest';
-    import {adopt} from '../../../../src/runtime';
-    import {timerFor} from '../../../../src/timer';
+import '../amp-pinterest';
+import {adopt} from '../../../../src/runtime';
 
-    adopt(window);
+adopt(window);
 
-    describe('amp-pinterest', () => {
+describes.realWin('amp-pinterest', {
+  amp: {
+    runtimeOn: false,
+    ampdoc: 'single',
+    extensions: ['amp-pinterest'],
+  },
+}, env => {
 
-      function createDivPromise() {
-        return new Promise(function(resolve) {
-          const div = document.createElement('div');
-          resolve({
-            div,
-            addElement: function(element) {
-              div.appendChild(element);
-              return timerFor(window).promise(16).then(() => {
-                element.implementation_.layoutCallback();
-                return element;
-              });
-            },
-          });
-          document.body.appendChild(div);
-        });
-      };
+  function getPin(pinDo, pinUrl, pinMedia, pinDescription) {
+    const div = document.createElement('div');
+    env.win.document.body.appendChild(div);
 
-      function getPin(pinDo, pinUrl, pinMedia, pinDescription) {
-        return createDivPromise().then(div => {
-          const pin = document.createElement('amp-pinterest');
-          pin.setAttribute('data-do', pinDo);
-          pin.setAttribute('data-url', pinUrl);
-          pin.setAttribute('data-media', pinMedia);
-          pin.setAttribute('data-description', pinDescription);
-          return div.addElement(pin);
-        });
-      };
-
-      it('renders', () => {
-        return getPin('buttonPin',
-          'http://www.flickr.com/photos/kentbrew/6851755809/',
-          'http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg',
-          'Next stop: Pinterest'
-        ).then(pin => {
-          const a = pin.querySelector('a');
-          const href = a.href.replace(/&guid=\w+/, '');
-          expect(a).to.not.be.null;
-          expect(a.tagName).to.equal('A');
-          expect(href).to.equal('https://www.pinterest.com/pin/create/' +
-            'button/?amp=1&url=http%3A%2F%2Fwww.flickr.com%' +
-            '2Fphotos%2Fkentbrew%2F6851755809%2F&media=http%3A%2F%2Fc2.s' +
-            'taticflickr.com%2F8%2F7027%2F6851755809_df5b2051c9_b.jpg&de' +
-            'scription=Next%20stop%3A%20Pinterest');
-        });
-      });
-
+    const pin = env.win.document.createElement('amp-pinterest');
+    pin.setAttribute('data-do', pinDo);
+    pin.setAttribute('data-url', pinUrl);
+    pin.setAttribute('data-media', pinMedia);
+    pin.setAttribute('data-description', pinDescription);
+    div.appendChild(pin);
+    return pin.implementation_.layoutCallback().then(() => {
+      return pin;
     });
+  };
+
+  it('renders', () => {
+    return getPin('buttonPin',
+      'http://www.flickr.com/photos/kentbrew/6851755809/',
+      'http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg',
+      'Next stop: Pinterest'
+    ).then(pin => {
+      const a = pin.querySelector('a');
+      const href = a.href.replace(/&guid=\w+/, '');
+      expect(a).to.not.be.null;
+      expect(a.tagName).to.equal('A');
+      expect(href).to.equal('https://www.pinterest.com/pin/create/' +
+        'button/?amp=1&url=http%3A%2F%2Fwww.flickr.com%' +
+        '2Fphotos%2Fkentbrew%2F6851755809%2F&media=http%3A%2F%2Fc2.s' +
+        'taticflickr.com%2F8%2F7027%2F6851755809_df5b2051c9_b.jpg&de' +
+        'scription=Next%20stop%3A%20Pinterest');
+    });
+  });
+
+});

@@ -18,22 +18,23 @@
 import {AdStrategy} from '../ad-strategy';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {AdTracker} from '../ad-tracker';
-import * as sinon from 'sinon';
 
-describe('ad-strategy', () => {
+describes.realWin('amp-strategy', {
+  amp: {
+    runtimeOn: true,
+    ampdoc: 'single',
+    extensions: ['amp-ad'],
+  },
+}, env => {
 
   let sandbox;
   let container;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    container = document.createElement('div');
-    document.body.appendChild(container);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-    document.body.removeChild(container);
+    sandbox = env.sandbox;
+    container = env.win.document.createElement('div');
+    env.win.frameElement.style.height = '1000px';
+    env.win.document.body.appendChild(container);
   });
 
   it('should place an ad in the first placement only with correct attributes',
@@ -64,7 +65,7 @@ describe('ad-strategy', () => {
             },
           ],
         };
-        const placements = getPlacementsFromConfigObj(window, configObj);
+        const placements = getPlacementsFromConfigObj(env.win, configObj);
         expect(placements).to.have.lengthOf(2);
 
         const adStrategy = new AdStrategy('adsense', placements, [
@@ -117,7 +118,7 @@ describe('ad-strategy', () => {
         },
       ],
     };
-    const placements = getPlacementsFromConfigObj(window, configObj);
+    const placements = getPlacementsFromConfigObj(env.win, configObj);
 
     expect(placements).to.have.lengthOf(2);
     sandbox.stub(placements[0], 'placeAd', () => {
@@ -183,7 +184,7 @@ describe('ad-strategy', () => {
         },
       ],
     };
-    const placements = getPlacementsFromConfigObj(window, configObj);
+    const placements = getPlacementsFromConfigObj(env.win, configObj);
     expect(placements).to.have.lengthOf(2);
 
     const adStrategy = new AdStrategy('adsense', placements, [
@@ -245,7 +246,7 @@ describe('ad-strategy', () => {
         },
       ],
     };
-    const placements = getPlacementsFromConfigObj(window, configObj);
+    const placements = getPlacementsFromConfigObj(env.win, configObj);
     expect(placements).to.have.lengthOf(2);
 
     const adStrategy = new AdStrategy('adsense', placements, [
@@ -315,7 +316,7 @@ describe('ad-strategy', () => {
         },
       ],
     };
-    const placements = getPlacementsFromConfigObj(window, configObj);
+    const placements = getPlacementsFromConfigObj(env.win, configObj);
     expect(placements).to.have.lengthOf(2);
 
     const adStrategy = new AdStrategy('adsense', placements, [
@@ -369,7 +370,7 @@ describe('ad-strategy', () => {
             },
           ],
         };
-        const placements = getPlacementsFromConfigObj(window, configObj);
+        const placements = getPlacementsFromConfigObj(env.win, configObj);
 
         expect(placements).to.have.lengthOf(2);
         sandbox.stub(placements[0], 'placeAd', () => {
