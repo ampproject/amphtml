@@ -16,7 +16,7 @@
 
 import '../amp-selector';
 
-describes.realWin('amp-selector', {
+describes.realWin.only('amp-selector', {
   win: { /* window spec */
     location: '...',
     historyOff: false,
