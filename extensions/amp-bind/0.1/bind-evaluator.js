@@ -89,9 +89,9 @@ export class BindEvaluator {
       expressionsToRemove[expressionStrings[i]] = true;
     }
 
-    this.parsedBindings_ = filterSplice(this.parsedBindings_, binding => {
+    filterSplice(this.parsedBindings_, binding => {
       const expressionString = binding.expression.expressionString;
-      return expressionsToRemove[expressionString];
+      return !expressionsToRemove[expressionString];
     });
   }
 
