@@ -164,7 +164,7 @@ If `<a>` tag does not have attribute `target=_blank` or `target=_top` then add `
 | --- | --- |
 | `<a href=https://example.com/foo.html>Lorem ipsum</a>` | `<a href=https://example.com/foo.html target=_top>Lorem ipsum</a>` |
 | `<a href=https://example.com/bar.html target=_blank>Lorem ipsum</a>` | `<a href=https://example.com/bar.html target=_blank>Lorem ipsum</a>` |
-| `<a href=https://example.com/baz.html target=window>Lorem ipsum</a>` | `<a href=https://example.com/baz.html target=_top>Lorem ipsum</a> |
+| `<a href=https://example.com/baz.html target=window>Lorem ipsum</a>` | `<a href=https://example.com/baz.html target=_top>Lorem ipsum</a>` |
 
 </details>
 
