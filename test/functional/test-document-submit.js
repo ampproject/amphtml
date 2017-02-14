@@ -51,7 +51,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
   it('should check target and action attributes', () => {
     tgt.removeAttribute('action');
     expect(() => onDocumentFormSubmit_(evt)).to.throw(
-        /form action attribute is required/);
+        /form action-xhr or action attribute is required for method=GET/);
 
     tgt.setAttribute('action', 'http://example.com');
     tgt.__AMP_INIT_ACTION__ = undefined;
@@ -66,8 +66,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     tgt.setAttribute('action', 'https://valid.example.com');
     tgt.__AMP_INIT_ACTION__ = undefined;
     tgt.removeAttribute('target');
-    expect(() => onDocumentFormSubmit_(evt)).to.throw(
-        /form target attribute is required/);
+    expect(() => onDocumentFormSubmit_(evt)).to.not.throw();
 
     tgt.setAttribute('action', 'https://valid.example.com');
     tgt.__AMP_INIT_ACTION__ = undefined;
@@ -110,13 +109,6 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     evt.target.setAttribute('action-xhr', 'https://example.com');
     expect(() => onDocumentFormSubmit_(evt)).to.not.throw();
     expect(preventDefaultSpy.callCount).to.equal(callCount + 1);
-  });
-
-  it('should fail when action is provided for POST', () => {
-    evt.target.setAttribute('method', 'post');
-    expect(() => onDocumentFormSubmit_(evt))
-        .to.throw(/form action attribute is invalid for method=POST/);
-    expect(preventDefaultSpy).to.have.been.called;
   });
 
   it('should do nothing if already prevented', () => {
