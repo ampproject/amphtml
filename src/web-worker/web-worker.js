@@ -40,17 +40,17 @@ self.addEventListener('message', function(event) {
       returnValue = evaluator_.setBindings.apply(evaluator_, args);
       break;
 
-    case 'bind.evaluate':
+    case 'bind.evaluateBindings':
       if (evaluator_) {
-        returnValue = evaluator_.evaluate.apply(evaluator_, args);
+        returnValue = evaluator_.evaluateBindings.apply(evaluator_, args);
       } else {
         throw new Error(`${method}: BindEvaluator is not initialized.`);
       }
       break;
 
-    case 'bind.parseObject':
+    case 'bind.evaluateExpression':
       if (evaluator_) {
-        returnValue = evaluator_.parseObject.apply(evaluator_, args);
+        returnValue = evaluator_.evaluateExpression.apply(evaluator_, args);
       } else {
         throw new Error(`${method}: BindEvaluator is not initialized.`);
       }

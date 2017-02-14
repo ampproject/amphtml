@@ -46,15 +46,15 @@ const ELEMENTS_ACTIONS_MAP_ = {
  * data in the event that generated the action.
  * @typedef {Object<string,function(!Object):string>}
  */
-let ActionInfoArgsDef;
+let ActionInfoArgsKeyValueDef;
 
 /**
  * @typedef {{
  *   event: string,
  *   target: string,
  *   method: string,
- *   args: ?ActionInfoArgsDef,
- *   expr: string,
+ *   argsKeyValue: ?ActionInfoArgsKeyValueDef,
+ *   argsExpression: ?string,
  *   str: string
  * }}
  */
@@ -72,19 +72,16 @@ export class ActionInvocation {
    * @param {!Node} target
    * @param {string} method
    * @param {?JSONType} args
-   * @param {?string} expr
    * @param {?Element} source
    * @param {?Event} event
    */
-  constructor(target, method, args, expr, source, event) {
+  constructor(target, method, args, source, event) {
     /** @const {!Node} */
     this.target = target;
     /** @const {string} */
     this.method = method;
     /** @const {?JSONType} */
     this.args = args;
-    /** @const {?string} */
-    this.expr = expr;
     /** @const {?Element} */
     this.source = source;
     /** @const {?Event} */
@@ -253,8 +250,10 @@ export class ActionService {
 
     const actionInfo = action.actionInfo;
 
-    // Replace any variables in args with data in `event`.
-    const args = applyActionInfoArgs(actionInfo.args, event);
+    // For key-value args, replace any variables with data in `event`.
+    const args = actionInfo.argsKeyValue
+        ? applyActionInfoArgs(actionInfo.argsKeyValue, event)
+        : actionInfo.argsExpression;
 
     // Global target, e.g. `AMP`.
     const globalTarget = this.globalTargets_[actionInfo.target];
@@ -263,7 +262,6 @@ export class ActionService {
           this.root_,
           actionInfo.method,
           args,
-          actionInfo.expr,
           action.node,
           event);
       globalTarget(invocation);
@@ -429,7 +427,7 @@ export function parseActionMap(s, context) {
       // Method: ".method". Method is optional.
       let method = DEFAULT_METHOD_;
       let args = null;
-      let expr = null;
+      let expression = null;
       peek = toks.peek();
       if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
         toks.next();  // Skip '.'
@@ -442,12 +440,12 @@ export function parseActionMap(s, context) {
           toks.next();  // Skip '('.
           peek = toks.peek();
 
-          if (peek.type == TokenType.EXPRESSION) {
-            // Format: {...}
-            expr = toks.next().value;
+          // Object literal. Format: {...}
+          if (peek.type == TokenType.LITERAL && peek.value[0] == '{') {
+            expression = toks.next().value;
             assertToken(toks.next(), [TokenType.SEPARATOR], ')');
           } else {
-            // Format: key = value, ....
+            // Key-value pairs. Format: key = value, ....
             do {
               tok = toks.next();
               if (tok.type == TokenType.SEPARATOR &&
@@ -495,9 +493,9 @@ export function parseActionMap(s, context) {
         event,
         target,
         method,
-        args: (args && getMode().test && Object.freeze) ?
+        argsKeyValue: (args && getMode().test && Object.freeze) ?
             Object.freeze(args) : args,
-        expr,
+        argsExpression: expression,
         str: s,
       };
       if (!actionMap) {
@@ -553,24 +551,24 @@ function getActionInfoArgValue(tokens) {
 }
 
 /**
- * Generates method arg values for each key in the given ActionInfoArgsDef
- * with the data in the given event.
- * @param {?ActionInfoArgsDef} args
+ * Generates method arg values for each key in the given
+ * ActionInfoArgsKeyValueDef with the data in the given event.
+ * @param {?ActionInfoArgsKeyValueDef} argsKeyValue
  * @param {?Event} event
  * @return {?JSONType}
  * @private Visible for testing only.
  */
-export function applyActionInfoArgs(args, event) {
-  if (!args) {
-    return args;
+export function applyActionInfoArgs(argsKeyValue, event) {
+  if (!argsKeyValue) {
+    return argsKeyValue;
   }
   const data = {};
   if (event && event.detail) {
     data['event'] = event.detail;
   }
   const applied = map();
-  Object.keys(args).forEach(key => {
-    applied[key] = args[key].call(null, data);
+  Object.keys(argsKeyValue).forEach(key => {
+    applied[key] = argsKeyValue[key].call(null, data);
   });
   return applied;
 }
@@ -618,7 +616,6 @@ const TokenType = {
   SEPARATOR: 2,
   LITERAL: 3,
   ID: 4,
-  EXPRESSION: 5,
 };
 
 /**
@@ -636,14 +633,11 @@ const SEPARATOR_SET = ';:.()=,|!';
 const STRING_SET = '"\'';
 
 /** @private @const {string} */
-const EXPR_OPEN = '{';
-
-/** @private @const {string} */
-const EXPR_CLOSE = '}';
+const OBJECT_SET = '{}';
 
 /** @private @const {string} */
 const SPECIAL_SET =
-    WHITESPACE_SET + SEPARATOR_SET + STRING_SET + EXPR_OPEN + EXPR_CLOSE;
+    WHITESPACE_SET + SEPARATOR_SET + STRING_SET + OBJECT_SET;
 
 /** @private */
 class ParserTokenizer {
@@ -748,10 +742,11 @@ class ParserTokenizer {
       return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
-    if (c == EXPR_OPEN) { // '{' character
+    // Object literal.
+    if (c == OBJECT_SET[0]) { // '{'
       let end = -1;
       for (let i = newIndex + 1; i < this.str_.length; i++) {
-        if (this.str_.charAt(i) == EXPR_CLOSE) { // '}' character
+        if (this.str_.charAt(i) == OBJECT_SET[1]) { // '}'
           end = i;
           break;
         }
@@ -761,7 +756,7 @@ class ParserTokenizer {
       }
       const value = this.str_.substring(newIndex, end + 1);
       newIndex = end;
-      return {type: TokenType.EXPRESSION, value, index: newIndex};
+      return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
     // Advance until next special character.
