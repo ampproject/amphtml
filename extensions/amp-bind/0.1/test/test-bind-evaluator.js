@@ -64,7 +64,7 @@ describe('BindEvaluator', () => {
     expect(evaluator.parsedBindings_.length).to.equal(0);
   });
 
-  it('should evaluate expressions given a scope with needed bindings', done => {
+  it('should evaluate expressions given a scope with needed bindings', () => {
     const bindingDef = {
       tagName: 'P',
       property: 'text',
@@ -73,17 +73,15 @@ describe('BindEvaluator', () => {
     expect(evaluator.parsedBindings_.length).to.equal(0);
     evaluator.addBindings([bindingDef]);
     expect(evaluator.parsedBindings_.length).to.equal(1);
-    evaluator.evaluate({oneplusone: 2}).then(results => {
-      const evaluated = results['results'];
-      const errors = results['errors'];
-      expect(errors[bindingDef.expressionString]).to.be.undefined;
-      expect(evaluated[bindingDef.expressionString]).to.not.be.undefined;
-      expect(evaluated[bindingDef.expressionString] = '4');
-      done();
-    });
+    const results = evaluator.evaluate({oneplusone: 2});
+    const evaluated = results['results'];
+    const errors = results['errors'];
+    expect(errors[bindingDef.expressionString]).to.be.undefined;
+    expect(evaluated[bindingDef.expressionString]).to.not.be.undefined;
+    expect(evaluated[bindingDef.expressionString] = '4');
   });
 
-  it('should treat out-of-scope vars as null', done => {
+  it('should treat out-of-scope vars as null', () => {
     const outOfScopeDef = {
       tagName: 'P',
       property: 'text',
@@ -92,14 +90,12 @@ describe('BindEvaluator', () => {
     expect(evaluator.parsedBindings_.length).to.equal(0);
     evaluator.addBindings([outOfScopeDef]);
     expect(evaluator.parsedBindings_.length).to.equal(1);
-    evaluator.evaluate({}).then(results => {
-      const evaluated = results['results'];
-      const errors = results['errors'];
-      expect(errors[outOfScopeDef.expressionString]).to.be.undefined;
-      expect(evaluated[outOfScopeDef.expressionString]).to.not.be.undefined;
-      expect(evaluated[outOfScopeDef.expressionString]).to.be.null;
-      done();
-    });
+    const results = evaluator.evaluate({});
+    const evaluated = results['results'];
+    const errors = results['errors'];
+    expect(errors[outOfScopeDef.expressionString]).to.be.undefined;
+    expect(evaluated[outOfScopeDef.expressionString]).to.not.be.undefined;
+    expect(evaluated[outOfScopeDef.expressionString]).to.be.null;
   });
 
 });
