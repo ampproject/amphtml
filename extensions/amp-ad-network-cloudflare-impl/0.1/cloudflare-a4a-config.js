@@ -17,13 +17,10 @@
 /**
  * Determines which tags desire A4A handling
  *
- * @param {!Window} win
- * @param {!Element} element
  * @returns {boolean}
  */
-export function cloudflareIsA4AEnabled(win, element) {
-  // check for an explicit attribute to enable A4A processing.
-  // This could be just true, if all ads from this network are A4A, or any
-  // other logic based upon configuration, client settings, etc.
-  return !!element.getAttribute('data-a4a') && element.hasAttribute('src');
+export function cloudflareIsA4AEnabled() {
+  // We assume fast fetch for all content, but this will gracefully degrade,
+  // when non-a4a content is delivered
+  return true;
 }

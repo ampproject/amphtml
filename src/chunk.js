@@ -16,7 +16,7 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
-import {fromClassForDoc} from './service';
+import {fromClassForDoc, getExistingServiceForDoc} from './service';
 import {isExperimentOnAllowUrlOverride} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
@@ -53,7 +53,7 @@ export function startupChunk(nodeOrAmpDoc, fn) {
   }
   const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
   service.runForStartup_(fn);
-};
+}
 
 /**
  * Run the given function sometime in the future without blocking UI.
@@ -74,8 +74,8 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
     resolved.then(fn);
     return;
   }
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  service.run_(fn, priority);
+  const service = getExistingServiceForDoc(nodeOrAmpDoc, 'chunk');
+  service.run(fn, priority);
 }
 
 /**
@@ -314,7 +314,7 @@ class Chunks {
     this.viewerPromise_ = viewerPromiseForDoc(ampDoc);
 
     this.win_.addEventListener('message', e => {
-      if (e.data = 'amp-macro-task') {
+      if (e.data == 'amp-macro-task') {
         this.execute_(/* idleDeadline */ null);
       }
     });
@@ -324,9 +324,8 @@ class Chunks {
    * Run fn as a "chunk".
    * @param {function(?IdleDeadline)} fn
    * @param {number} priority
-   * @private
    */
-  run_(fn, priority) {
+  run(fn, priority) {
     const t = new Task(fn);
     this.enqueueTask_(t, priority);
   }

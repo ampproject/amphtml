@@ -18,24 +18,23 @@ import {AdDisplayState, AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {toggleExperiment} from '../../../../src/experiments';
 import {UX_EXPERIMENT} from '../../../../src/layout';
-import * as sinon from 'sinon';
 
-describe('amp-ad-ui handler', () => {
+describes.realWin('amp-ad-ui handler', {
+  amp: {
+    ampdoc: 'single',
+    extensions: ['amp-ad'],
+  },
+}, env => {
   let sandbox;
   let adImpl;
   let uiHandler;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    const adElement = document.createElement('amp-ad');
+    sandbox = env.sandbox;
+    const adElement = env.win.document.createElement('amp-ad');
     adImpl = new BaseElement(adElement);
     uiHandler = new AmpAdUIHandler(adImpl);
     uiHandler.setDisplayState(AdDisplayState.LOADING);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-    uiHandler = null;
   });
 
   describe('with state LOADED_NO_CONTENT', () => {

@@ -294,6 +294,8 @@ export class Resource {
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+    // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+    // in PROD.
     this.element.dispatchCustomEvent('amp:built');
   }
 

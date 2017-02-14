@@ -42,13 +42,7 @@ import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/platform';
-import {
-  importPublicKey,
-  isCryptoAvailable,
-  verifySignature,
-  verifyHashVersion,
-  PublicKeyInfoDef,
-} from './crypto-verifier';
+import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
@@ -133,7 +127,7 @@ let CreativeMetaDataDef;
  * (promises to) keys, in the order given by the return value from the
  * signing service.
  *
- * @typedef {{serviceName: string, keys: !Array<!Promise<?PublicKeyInfoDef>>}}
+ * @typedef {{serviceName: string, keys: !Array<!Promise<!../../../src/crypto.PublicKeyInfoDef>>}}
  */
 let CryptoKeysDef;
 
@@ -255,6 +249,9 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {boolean} whether creative has been verified as AMP */
     this.isVerifiedAmpCreative_ = false;
 
+    /** @private @const {!../../../src/service/crypto-impl.Crypto} */
+    this.crypto_ = cryptoFor(this.win);
+
     if (!this.win.ampA4aValidationKeys) {
       // Without the following variable assignment, there's no way to apply a
       // type annotation to a win-scoped variable, so the type checker doesn't
@@ -301,16 +298,16 @@ export class AmpA4A extends AMP.BaseElement {
             'Error on emitLifecycleEvent', err, varArgs) ;
       });
 
+    /** @const {string} */
+    this.sentinel = generateSentinel(window);
+
     /**
      * Used to indicate whether this slot should be collapsed or not. Marked
      * true if the ad response has status 204, is null, or has a null
      * arrayBuffer.
      * @private {boolean}
      */
-    this.collapse_ = false;
-
-    /** @const {string} */
-    this.sentinel = generateSentinel(window);
+    this.isCollapsed_ = false;
   }
 
   /** @override */
@@ -405,14 +402,21 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.onLayoutMeasure();
     }
-    if (this.layoutMeasureExecuted_ || !isCryptoAvailable()) {
+    if (this.layoutMeasureExecuted_ ||
+        !this.crypto_.isCryptoAvailable()) {
       // onLayoutMeasure gets called multiple times.
       return;
     }
-    this.layoutMeasureExecuted_ = true;
+    const slotRect = this.getIntersectionElementLayoutBox();
+    if (slotRect.height == 0 || slotRect.width == 0) {
+      dev().fine(
+        TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
+      return;
+    }
     user().assert(isAdPositionAllowed(this.element, this.win),
         '<%s> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element.tagName, this.element);
+    this.layoutMeasureExecuted_ = true;
     // OnLayoutMeasure can be called when page is in prerender so delay until
     // visible.  Assume that it is ok to call isValidElement as it should
     // only being looking at window, immutable properties (i.e. location) and
@@ -437,13 +441,12 @@ export class AmpA4A extends AMP.BaseElement {
 
     // If in localDev `type=fake` Ad specifies `force3p`, it will be forced
     // to go via 3p.
-    if (getMode().localDev) {
-      if (this.element.getAttribute('type') == 'fake' &&
-          this.element.getAttribute('force3p') == 'true') {
-        this.adUrl_ = this.getAdUrl();
-        this.adPromise_ = Promise.resolve();
-        return;
-      }
+    if (getMode().localDev &&
+        this.element.getAttribute('type') == 'fake' &&
+        this.element.getAttribute('force3p') == 'true') {
+      this.adUrl_ = this.getAdUrl();
+      this.adPromise_ = Promise.resolve();
+      return;
     }
 
     // Return value from this chain: True iff rendering was "successful"
@@ -479,10 +482,15 @@ export class AmpA4A extends AMP.BaseElement {
         .then(fetchResponse => {
           checkStillCurrent(promiseId);
           this.protectedEmitLifecycleEvent_('adRequestEnd');
-          // If the response has response code 204, or is null, collapse it.
-          if (!fetchResponse
-              || !fetchResponse.arrayBuffer
-              || fetchResponse.status == 204) {
+          // If the response is null, we want to return null so that
+          // unlayoutCallback will attempt to render via x-domain iframe,
+          // assuming ad url or creative exist.
+          if (!fetchResponse) {
+            return null;
+          }
+          // If the response has response code 204, or arrayBuffer is null,
+          // collapse it.
+          if (!fetchResponse.arrayBuffer || fetchResponse.status == 204) {
             this.forceCollapse();
             return Promise.reject(NO_CONTENT_RESPONSE);
           }
@@ -503,6 +511,12 @@ export class AmpA4A extends AMP.BaseElement {
           // resolve it to a concrete value, but we'll lose track of
           // fetchResponse.headers.
           return fetchResponse.arrayBuffer().then(bytes => {
+            if (bytes.byteLength == 0) {
+              // The server returned no content. Instead of displaying a blank
+              // rectangle, we collapse the slot instead.
+              this.forceCollapse();
+              return Promise.reject(NO_CONTENT_RESPONSE);
+            }
             return {
               bytes,
               headers: fetchResponse.headers,
@@ -639,6 +653,10 @@ export class AmpA4A extends AMP.BaseElement {
     // signature, then the creative is valid AMP.
     /** @type {!AllServicesCryptoKeysDef} */
     const keyInfoSetPromises = this.win.ampA4aValidationKeys;
+    // Track if verification found, as it will ensure that promises yet to
+    // resolve will "cancel" as soon as possible saving unnecessary resource
+    // allocation.
+    let verified = false;
     return some(keyInfoSetPromises.map(keyInfoSetPromise => {
       // Resolve Promise into an object containing a 'keys' field, which
       // is an Array of Promises of signing keys.  *whew*
@@ -646,20 +664,27 @@ export class AmpA4A extends AMP.BaseElement {
         // As long as any one individual key of a particular signing
         // service, keyInfoPromise, can verify the signature, then the
         // creative is valid AMP.
+        if (verified) {
+          return Promise.reject('noop');
+        }
         return some(keyInfoSet.keys.map(keyInfoPromise => {
           // Resolve Promise into signing key.
           return keyInfoPromise.then(keyInfo => {
+            if (verified) {
+              return Promise.reject('noop');
+            }
             if (!keyInfo) {
               return Promise.reject('Promise resolved to null key.');
             }
             const signatureVerifyStartTime = this.getNow_();
             // If the key exists, try verifying with it.
-            return verifySignature(
+            return this.crypto_.verifySignature(
                 new Uint8Array(creative),
                 signature,
                 keyInfo)
                 .then(isValid => {
                   if (isValid) {
+                    verified = true;
                     this.protectedEmitLifecycleEvent_(
                         'signatureVerifySuccess', {
                           'met.delta.AD_SLOT_ID': Math.round(
@@ -674,27 +699,39 @@ export class AmpA4A extends AMP.BaseElement {
                   // necessary, because we checked that above.  But
                   // Closure type compiler can't seem to recognize that, so
                   // this guarantees it to the compiler.
-                  if (keyInfo && verifyHashVersion(signature, keyInfo)) {
+                  if (keyInfo &&
+                      this.crypto_.verifyHashVersion(signature, keyInfo)) {
                     user().error(TAG, this.element.getAttribute('type'),
                         'Key failed to validate creative\'s signature',
                         keyInfo.serviceName, keyInfo.cryptoKey);
                   }
-                  return null;
+                  // Reject to ensure the some operation waits for other
+                  // possible providers to properly verify and resolve.
+                  return Promise.reject(
+                      `${keyInfo.serviceName} key failed to verify`);
                 },
                 err => {
-                  user().error(
+                  dev().error(
                     TAG, this.element.getAttribute('type'), keyInfo.serviceName,
                     err, this.element);
                 });
           });
         }))
         // some() returns an array of which we only need a single value.
-        .then(returnedArray => returnedArray[0]);
+        .then(returnedArray => returnedArray[0], () => {
+          // Rejection occurs if all keys for this provider fail to validate.
+          return Promise.reject(
+              `All keys for ${keyInfoSet.serviceName} failed to verify`);
+        });
       });
     }))
     .then(returnedArray => {
       this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
       return returnedArray[0];
+    }, () => {
+      // rejection occurs if all providers fail to verify.
+      this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
+      return Promise.reject('No validation service could verify this key');
     });
   }
 
@@ -750,7 +787,7 @@ export class AmpA4A extends AMP.BaseElement {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_();
       }
-      if (this.collapse_) {
+      if (this.isCollapsed_) {
         return Promise.resolve();
       }
       // Must be an AMP creative.
@@ -769,6 +806,7 @@ export class AmpA4A extends AMP.BaseElement {
   unlayoutCallback() {
     this.protectedEmitLifecycleEvent_('adSlotCleared');
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    this.isCollapsed_ = false;
 
     // Allow embed to release its resources.
     if (this.friendlyIframeEmbed_) {
@@ -871,6 +909,7 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(this.uiHandler);
     this.uiHandler.setDisplayState(AdDisplayState.LOADING);
     this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+    this.isCollapsed_ = true;
   }
 
   /**
@@ -932,7 +971,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   getKeyInfoSets_() {
-    if (!isCryptoAvailable()) {
+    if (!this.crypto_.isCryptoAvailable()) {
       return [];
     }
     return this.getSigningServiceNames().map(serviceName => {
@@ -964,7 +1003,7 @@ export class AmpA4A extends AMP.BaseElement {
           return {
             serviceName: jwkSet.serviceName,
             keys: jwkSet.keys.map(jwk =>
-                importPublicKey(jwkSet.serviceName, jwk)
+                this.crypto_.importPublicKey(jwkSet.serviceName, jwk)
                 .catch(err => {
                   user().error(TAG, this.element.getAttribute('type'),
                       `error importing keys for service: ${jwkSet.serviceName}`,

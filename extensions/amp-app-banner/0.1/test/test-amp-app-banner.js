@@ -170,13 +170,13 @@ describe('amp-app-banner', () => {
         sandbox.stub(impl.preconnect, 'preload');
         impl.preconnectCallback(true);
         expect(impl.preconnect.url.called).to.be.true;
-        expect(impl.preconnect.url.callCount).to.equal(1);
-        expect(impl.preconnect.url.calledWith('https://play.google.com'))
-            .to.be.true;
+        expect(impl.preconnect.url).to.have.been.calledOnce;
+        expect(impl.preconnect.url)
+            .to.have.been.calledWith('https://play.google.com');
         expect(impl.preconnect.preload.called).to.be.true;
-        expect(impl.preconnect.preload.callCount).to.equal(1);
-        expect(impl.preconnect.preload.calledWith(
-            'https://example.com/manifest.json')).to.be.true;
+        expect(impl.preconnect.preload).to.be.calledOnce;
+        expect(impl.preconnect.preload).to.have.been.calledWith(
+            'https://example.com/manifest.json');
       });
     };
   }
@@ -187,11 +187,12 @@ describe('amp-app-banner', () => {
     return () => {
       sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
       return getAppBanner({manifest}).then(el => {
-        expect(AbstractAppBanner.prototype.setupOpenButton_.calledWith(
-            el.querySelector('button[open-button]'),
-            'android-app://com.medium.reader/https/example.com/amps.html',
-            'https://play.google.com/store/apps/details?id=com.medium.reader'
-        )).to.be.true;
+        expect(AbstractAppBanner.prototype.setupOpenButton_)
+            .to.have.been.calledWith(
+              el.querySelector('button[open-button]'),
+              'android-app://com.medium.reader/https/example.com/amps.html',
+              'https://play.google.com/store/apps/details?id=com.medium.reader'
+        );
       });
     };
   }
@@ -262,9 +263,9 @@ describe('amp-app-banner', () => {
         sandbox.stub(impl.preconnect, 'url');
         impl.preconnectCallback(true);
         expect(impl.preconnect.url.called).to.be.true;
-        expect(impl.preconnect.url.callCount).to.equal(1);
-        expect(impl.preconnect.url.calledWith('https://itunes.apple.com'))
-            .to.be.true;
+        expect(impl.preconnect.url).to.be.calledOnce;
+        expect(impl.preconnect.url)
+            .to.have.been.calledWith('https://itunes.apple.com');
       });
     });
 
@@ -299,11 +300,11 @@ describe('amp-app-banner', () => {
     it('should parse meta content and setup hrefs', () => {
       sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
       return getAppBanner({meta}).then(el => {
-        expect(AbstractAppBanner.prototype.setupOpenButton_.calledWith(
-            el.querySelector('button[open-button]'),
-            'medium://p/cb7f223fad86',
-            'https://itunes.apple.com/us/app/id828256236'
-        )).to.be.true;
+        expect(AbstractAppBanner.prototype.setupOpenButton_)
+            .to.have.been.calledWith(
+                el.querySelector('button[open-button]'),
+                'medium://p/cb7f223fad86',
+                'https://itunes.apple.com/us/app/id828256236');
       });
     });
   });
@@ -361,16 +362,16 @@ describe('amp-app-banner', () => {
         openButton.addEventListener = sandbox.spy();
         const banner = new AbstractAppBanner(element);
         banner.setupOpenButton_(openButton, 'open-button', 'install-link');
-        expect(openButton.addEventListener.calledWith('click')).to.be.true;
+        expect(openButton.addEventListener).to.have.been.calledWith('click');
         win.open = sandbox.spy();
         sandbox.stub(banner, 'redirectTopLocation_', () => {});
         banner.openButtonClicked_('open-button', 'install-link');
-        expect(win.open.calledWith('open-button', '_top')).to.be.true;
+        expect(win.open).to.have.been.calledWith('open-button', '_top');
         return timerFor(iframe.win).delay(() => {
           expect(banner.redirectTopLocation_.called)
               .to.be.true;
-          expect(banner.redirectTopLocation_.calledWith('install-link'))
-              .to.be.true;
+          expect(banner.redirectTopLocation_)
+              .to.have.been.calledWith('install-link');
         }, 2000);
       });
     });

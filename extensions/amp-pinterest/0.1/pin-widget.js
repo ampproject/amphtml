@@ -88,6 +88,11 @@ export class PinWidget {
       Util.log('&type=pidget&pin_count=1');
     }
 
+    // Apply a CSS class when the layout is responsive
+    if (this.layout === 'responsive') {
+      className += ' -amp-pinterest-embed-pin-responsive';
+    }
+
     const structure = Util.make(this.element.ownerDocument, {'span': {}});
     // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
     // form is in PROD for 1-2 weeks.
@@ -225,6 +230,7 @@ export class PinWidget {
   render() {
     this.pinUrl = this.element.getAttribute('data-url');
     this.width = this.element.getAttribute('data-width');
+    this.layout = this.element.getAttribute('layout');
 
     this.pinId = '';
     try {

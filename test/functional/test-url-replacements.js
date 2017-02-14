@@ -24,8 +24,7 @@ import {
 } from '../../src/custom-element';
 import {installCidServiceForDocForTesting,} from
     '../../extensions/amp-analytics/0.1/cid-impl';
-import {installCryptoService,} from
-    '../../extensions/amp-analytics/0.1/crypto-impl';
+import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
@@ -120,7 +119,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
       },
       document: {
         nodeType: /* document */ 9,
-        querySelector: () => {return {href: canonical};},
+        querySelector: selector => {
+          if (selector.startsWith('meta')) {
+            return {
+              getAttribute: () => {return 'https://whitelisted.com https://greylisted.com';},
+              hasAttribute: () => {return true;},
+            };
+          } else {
+            return {href: canonical};
+          }
+        },
         cookie: '',
       },
       Math: window.Math,
@@ -943,7 +951,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .once();
       return expandAsync('?a=ACCESS_READER_ID') .then(res => {
         expect(res).to.match(/a=reader1/);
-        expect(userErrorStub.callCount).to.equal(0);
+        expect(userErrorStub).to.have.not.been.called;
       });
     });
 
@@ -954,7 +962,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .once();
       return expandAsync('?a=AUTHDATA(field1)').then(res => {
         expect(res).to.match(/a=value1/);
-        expect(userErrorStub.callCount).to.equal(0);
+        expect(userErrorStub).to.have.not.been.called;
       });
     });
 
@@ -964,7 +972,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       return expandAsync('?a=ACCESS_READER_ID;', /* disabled */ true)
           .then(res => {
             expect(res).to.match(/a=;/);
-            expect(userErrorStub.callCount).to.equal(1);
+            expect(userErrorStub).to.be.calledOnce;
           });
     });
   });
@@ -1041,11 +1049,26 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(a.href).to.equal('https://example.com/link?out=RANDOM');
     });
 
+    it('should not replace in http (non-secure)', () => {
+      canonical = 'http://example.com/link';
+      a.href = 'http://example.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('http://example.com/link?out=QUERY_PARAM(foo)');
+    });
+
     it('should replace with canonical origin', () => {
       a.href = 'https://canonical.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
       urlReplacements.maybeExpandLink(a);
       expect(a.href).to.equal('https://canonical.com/link?out=bar');
+    });
+
+    it('should replace with whitelisted origin', () => {
+      a.href = 'https://whitelisted.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://whitelisted.com/link?out=bar');
     });
 
     it('should not replace to different origin', () => {
