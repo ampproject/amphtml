@@ -118,6 +118,12 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     expect(tgt.checkValidity).to.have.not.been.called;
   });
 
+  it('should default target to _top when missing', () => {
+    evt.target.removeAttribute('target');
+    onDocumentFormSubmit_(evt);
+    expect(evt.target.getAttribute('target')).to.equal('_top');
+  });
+
   it('should throw if no target', () => {
     evt.target = null;
     expect(() => onDocumentFormSubmit_(evt)).to.throw(/Element expected/);

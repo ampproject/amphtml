@@ -114,12 +114,12 @@ export function onDocumentFormSubmit_(e) {
   }
 
   const target = form.getAttribute('target');
-  if (!target) {
-    form.setAttribute('target', '_top');
-  } else {
+  if (target) {
     user().assert(target == '_blank' || target == '_top',
         'form target=%s is invalid can only be _blank or _top: %s',
         target, form);
+  } else {
+    form.setAttribute('target', '_top');
   }
 
   // For xhr submissions relay the submission event through action service to
