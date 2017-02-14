@@ -219,12 +219,14 @@ describes.realWin('placement', {
       ], new AdTracker([], 0)).then(() => {
         const adElement = anchor.firstChild;
         expect(adElement.tagName).to.equal('AMP-AD');
-        expect(adElement).to.have.attribute('type', 'ad-network-type');
-        expect(adElement).to.have.attribute('layout', 'responsive');
-        expect(adElement).to.have.attribute('width', '320');
-        expect(adElement).to.have.attribute('height', '0');
-        expect(adElement).to.have.attribute('data-custom-att-1', 'val-1');
-        expect(adElement).to.have.attribute('data-custom-att-2', 'val-2');
+        expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+        expect(adElement.getAttribute('layout')).to.equal('responsive');
+        expect(adElement.getAttribute('width')).to.equal('0');
+        expect(adElement.getAttribute('height')).to.equal('0');
+        expect(adElement.getAttribute('data-custom-att-1'))
+            .to.equal('val-1');
+        expect(adElement.getAttribute('data-custom-att-2'))
+            .to.equal('val-2');
       });
     });
 
@@ -254,10 +256,10 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement).to.have.attribute('type', 'ad-network-type');
-            expect(adElement).to.have.attribute('layout', 'responsive');
-            expect(adElement).to.have.attribute('width', '320');
-            expect(adElement).to.have.attribute('height', '0');
+            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('layout')).to.equal('responsive');
+            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('5px');
             expect(adElement.style.marginBottom).to.equal('6px');
             expect(adElement.style.marginLeft).to.equal('');
@@ -290,10 +292,10 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement).to.have.attribute('type', 'ad-network-type');
-            expect(adElement).to.have.attribute('layout', 'responsive');
-            expect(adElement).to.have.attribute('width', '320');
-            expect(adElement).to.have.attribute('height', '0');
+            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('layout')).to.equal('responsive');
+            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('5px');
             expect(adElement.style.marginBottom).to.equal('');
             expect(adElement.style.marginLeft).to.equal('');
@@ -326,10 +328,10 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement).to.have.attribute('type', 'ad-network-type');
-            expect(adElement).to.have.attribute('layout', 'responsive');
-            expect(adElement).to.have.attribute('width', '320');
-            expect(adElement).to.have.attribute('height', '0');
+            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('layout')).to.equal('responsive');
+            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('');
             expect(adElement.style.marginBottom).to.equal('6px');
             expect(adElement.style.marginLeft).to.equal('');
@@ -360,10 +362,10 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement).to.have.attribute('type', 'ad-network-type');
-            expect(adElement).to.have.attribute('layout', 'responsive');
-            expect(adElement).to.have.attribute('width', '320');
-            expect(adElement).to.have.attribute('height', '0');
+            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('layout')).to.equal('responsive');
+            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('');
             expect(adElement.style.marginBottom).to.equal('');
             expect(adElement.style.marginLeft).to.equal('');
