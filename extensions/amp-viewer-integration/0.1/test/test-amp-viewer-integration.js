@@ -72,7 +72,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       ampViewerIntegration.openChannelAndStart_(viewer, ampDocSrc, messaging);
       expect(sendRequestSpy).to.have.been.calledWith('channelOpen', {
         sourceUrl: 'http://localhost:9876/test/fixtures/served/ampdoc-with-messaging.html',
-        url: '/test/fixtures/served/ampdoc-with-messaging.html',
+        url: 'http://localhost:9876/test/fixtures/served/ampdoc-with-messaging.html',
       }, true);
     });
   });
