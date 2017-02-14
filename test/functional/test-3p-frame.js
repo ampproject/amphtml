@@ -206,7 +206,12 @@ describe('3p-frame', () => {
       expect(name.attributes._context.domFingerprint).to.exist;
       delete name.attributes._context.domFingerprint;
       delete parsedFragment._context.domFingerprint;
-      expect(name.attributes).to.deep.equal(parsedFragment);
+      // Value changes between tests.
+      // TODO: Switch test to isolated window.
+      expect(name.attributes._context.experimentToggles).to.exist;
+      delete name.attributes._context.experimentToggles;
+      delete parsedFragment._context.experimentToggles;
+      expect(name.attributes).to.deep.jsonEqual(parsedFragment);
 
       // Switch to same origin for inner tests.
       iframe.src = '/dist.3p/current/frame.max.html';

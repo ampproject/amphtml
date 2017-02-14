@@ -16,10 +16,13 @@
 
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
+<<<<<<< HEAD
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {map, hasOwn} from '../../../src/utils/object';
 import {filterSplice} from '../../../src/utils/array';
 
+=======
+>>>>>>> 7e3063eedabb4bb1a833deaff38981f2945bcf32
 
 /**
  * @typedef {{
@@ -83,6 +86,7 @@ export class BindEvaluator {
   }
 
   /**
+<<<<<<< HEAD
    * Removes all parsed bindings for the provided expressions.
    * @param {!Array<string>} expressionStrings
    */
@@ -101,51 +105,48 @@ export class BindEvaluator {
   /**
    * Evaluates all expressions with the given `scope` data and resolves
    * the returned Promise with a map of expression strings to results.
+=======
+   * Evaluates all expressions with the given `scope` data returns two maps:
+   * expression strings to results and expression strings to errors.
+>>>>>>> 7e3063eedabb4bb1a833deaff38981f2945bcf32
    * @param {!Object} scope
-   * @return {
-   *   !Promise<{
-   *     results: !Object<string, ./bind-expression.BindExpressionResultDef>,
-   *     errors: !Object<string, !Error>,
-   *   }>
-   * }
+   * @return {{
+   *   results: !Object<string, ./bind-expression.BindExpressionResultDef>,
+   *   errors: !Object<string, !Error>,
+   * }}
    */
   evaluate(scope) {
-    return new Promise(resolve => {
-      /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
-      const cache = {};
-      /** @type {!Object<string, !Error>} */
-      const errors = {};
+    /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
+    const cache = {};
+    /** @type {!Object<string, !Error>} */
+    const errors = {};
 
-      this.parsedBindings_.forEach(binding => {
-        const {tagName, property, expression} = binding;
-        const expr = expression.expressionString;
+    this.parsedBindings_.forEach(binding => {
+      const {tagName, property, expression} = binding;
+      const expr = expression.expressionString;
 
-        // Skip if we've already evaluated this expression string.
-        if (cache[expr] !== undefined || errors[expr]) {
-          return;
-        }
+      // Skip if we've already evaluated this expression string.
+      if (cache[expr] !== undefined || errors[expr]) {
+        return;
+      }
 
-        let result;
-        try {
-          result = binding.expression.evaluate(scope);
-        } catch (error) {
-          errors[expr] = error;
-          return;
-        }
+      let result;
+      try {
+        result = binding.expression.evaluate(scope);
+      } catch (error) {
+        errors[expr] = error;
+        return;
+      }
 
-        const resultString = this.stringValueOf_(property, result);
-        if (this.validator_.isResultValid(tagName, property, resultString)) {
-          // Rewrite URL attributes for CDN if necessary.
-          cache[expr] = typeof result === 'string'
-              ? rewriteAttributeValue(tagName, property, result)
-              : result;
-        } else {
-          errors[expr] = new Error(
-              `"${result}" is not a valid result for [${property}].`);
-        }
-      });
-      resolve({results: cache, errors});
+      const resultString = this.stringValueOf_(property, result);
+      if (this.validator_.isResultValid(tagName, property, resultString)) {
+        cache[expr] = result;
+      } else {
+        errors[expr] = new Error(
+            `"${result}" is not a valid result for [${property}].`);
+      }
     });
+    return {results: cache, errors};
   }
 
   /**

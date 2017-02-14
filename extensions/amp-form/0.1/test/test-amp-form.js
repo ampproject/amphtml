@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
 import {
   AmpForm,
   installAmpForm,
@@ -37,38 +36,31 @@ import {actionServiceForDoc} from '../../../../src/action';
 import {
     installCidServiceForDocForTesting,
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {
-    installCryptoService,
-} from '../../../../src/service/crypto-impl';
-import {installDocumentInfoServiceForDoc,} from
-    '../../../../src/service/document-info-impl';
+import {documentInfoForDoc} from '../../../../src/document-info';
 import '../../../amp-selector/0.1/amp-selector';
 
-describe('amp-form', () => {
+describes.realWin('amp-form', {
+  amp: {
+    runtimeOn: false,
+    ampdoc: 'single',
+    extensions: ['amp-selector'],  // amp-form is installed as service.
+  },
+}, env => {
 
   let sandbox;
   const timer = timerFor(window);
 
   function getAmpForm(button1 = true, button2 = false, button3 = false,
                       canonical = 'https://example.com/amps.html') {
-    return createIframePromise().then(iframe => {
-      const docService = installDocService(iframe.win, /* isSingleDoc */ true);
-      const link = iframe.doc.createElement('link');
-      link.setAttribute('href', canonical);
-      link.setAttribute('rel', 'canonical');
-      iframe.doc.head.appendChild(link);
-      installDocumentInfoServiceForDoc(docService.getAmpDoc());
-      installActionServiceForDoc(docService.getAmpDoc());
-      installTemplatesService(iframe.win);
-      installAmpForm(iframe.win);
-      installCidServiceForDocForTesting(docService.getAmpDoc());
-      installCryptoService(iframe.win);
-      toggleExperiment(iframe.win, 'amp-form-var-sub', true);
-      const form = getForm(iframe.doc, button1, button2, button3);
-      iframe.doc.body.appendChild(form);
-      const ampForm = new AmpForm(form, 'amp-form-test-id');
-      return ampForm;
-    });
+    installAmpForm(env.win);
+    documentInfoForDoc(env.win.document).canonicalUrl = canonical;
+    toggleExperiment(env.win, 'amp-form-var-sub', true);
+    installCidServiceForDocForTesting(env.win.document);
+    toggleExperiment(window, 'amp-form-var-sub', true);
+    const form = getForm(env.win.document, button1, button2, button3);
+    env.win.document.body.appendChild(form);
+    const ampForm = new AmpForm(form, 'amp-form-test-id');
+    return Promise.resolve(ampForm);
   }
 
   function getForm(doc = document, button1 = true, button2 = false,
@@ -110,14 +102,13 @@ describe('amp-form', () => {
     installActionServiceForDoc(docService.getAmpDoc());
     toggleExperiment(window, 'amp-form-var-sub', true);
 
-    sandbox = sinon.sandbox.create();
+    sandbox = env.sandbox;
   });
 
   afterEach(() => {
     // Reset supported state for checkValidity and reportValidity.
     setCheckValiditySupportedForTesting(undefined);
     setReportValiditySupportedForTesting(undefined);
-    sandbox.restore();
   });
 
   it('should assert valid action-xhr when provided', () => {
@@ -977,7 +968,7 @@ describe('amp-form', () => {
     this.timeout(3000);
     return getAmpForm().then(ampForm => {
       const form = ampForm.form_;
-      const selector = document.createElement('amp-selector');
+      const selector = env.win.document.createElement('amp-selector');
       selector.setAttribute('name', 'color');
       form.appendChild(selector);
       sandbox.stub(selector, 'whenBuilt')
@@ -1000,7 +991,7 @@ describe('amp-form', () => {
     return getAmpForm().then(ampForm => {
       let builtPromiseResolver_;
       const form = ampForm.form_;
-      const selector = document.createElement('amp-selector');
+      const selector = env.win.document.createElement('amp-selector');
       selector.setAttribute('name', 'color');
       form.appendChild(selector);
       sandbox.stub(selector, 'whenBuilt').returns(new Promise(resolve => {
