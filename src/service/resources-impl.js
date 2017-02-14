@@ -33,7 +33,7 @@ import {dev} from '../log';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
-import {areMarginsChanged} from '../layout-rect';
+import {areMarginsChanged, layoutRectLtwh} from '../layout-rect';
 import {documentInfoForDoc} from '../document-info';
 
 const TAG_ = 'Resources';
@@ -778,6 +778,29 @@ export class Resources {
   }
 
   /**
+   * Return a promise that requests runtime to collapse this element.
+   * The runtime will schedule this request and first attempt to resize
+   * the element to height and width 0. If success runtime will set element
+   * display to none, and notify element owner of this collapse.
+   * @param {!Element} element
+   * @return {!Promise}
+   */
+  attemptCollapse(element) {
+    return new Promise((resolve, reject) => {
+      this.scheduleChangeSize_(Resource.forElement(element), 0, 0, undefined,
+          /* force */ false, success => {
+            if (success) {
+              const resource = Resource.forElement(element);
+              resource.completeCollapse();
+              resolve();
+            } else {
+              reject(new Error('collapse attempt denied'));
+            }
+          });
+    });
+  }
+
+    /**
    * Collapses the element: ensures that it's `display:none`, notifies its
    * owner and updates the layout box.
    * @param {!Element} element
@@ -789,12 +812,11 @@ export class Resources {
       this.setRelayoutTop_(box.top);
     }
     resource.completeCollapse();
-
-    const owner = resource.getOwner();
-    if (owner) {
-      owner.collapsedCallback(element);
-    }
-
+    resource.layoutBox_ = layoutRectLtwh(
+        resource.layoutBox_.left,
+        resource.layoutBox_.top,
+        0, 0);
+    element.updateLayoutBox(this.layoutBox_);
     this.schedulePass(FOUR_FRAME_DELAY_);
   }
 
@@ -1034,7 +1056,11 @@ export class Resources {
             }
             // Sync is necessary here to avoid UI jump in the next frame.
             const newScrollHeight = this.viewport_./*OK*/getScrollHeight();
-            if (newScrollHeight > state./*OK*/scrollHeight) {
+            console.log('old scrollHeight', state.scrollHeight);
+            console.log('new scrollHeight', newScrollHeight);
+            console.log('old scrollTop', state.scrollTop);
+            console.log('new scrollTop', state./*OK*/scrollTop + newScrollHeight - state./*OK*/scrollHeight);
+            if (newScrollHeight != state./*OK*/scrollHeight) {
               this.viewport_.setScrollTop(state./*OK*/scrollTop +
                   (newScrollHeight - state./*OK*/scrollHeight));
             }

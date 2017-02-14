@@ -777,6 +777,26 @@ export class BaseElement {
   }
 
   /**
+   * Collapses the element, setting it to `display: none`, and notifies its
+   * owner (if there is one) through {@link collapsedCallback} that the element
+   * is no longer visible.
+   */
+  collapse() {
+    this.element.getResources().collapseElement(this.element);
+  }
+
+  /**
+   * Return a promise that request the runtime to collapse one element
+   * @return {!Promise}
+   * @public
+   */
+  attemptCollapse() {
+    return this.element.getResources().attemptCollapse(
+      this.element, 0, /* newWidth */ undefined);
+  }
+
+
+  /**
    * Return a promise that requests the runtime to update
    * the height of this element to the specified value.
    * The runtime will schedule this request and attempt to process it
@@ -841,15 +861,6 @@ export class BaseElement {
    */
   deferMutate(callback) {
     this.element.getResources().deferMutate(this.element, callback);
-  }
-
-  /**
-   * Collapses the element, setting it to `display: none`, and notifies its
-   * owner (if there is one) through {@link collapsedCallback} that the element
-   * is no longer visible.
-   */
-  collapse() {
-    this.element.getResources().collapseElement(this.element);
   }
 
   /**

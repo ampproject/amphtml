@@ -315,6 +315,7 @@ export class Resource {
    */
   changeSize(newHeight, newWidth, opt_newMargins) {
     this.element./*OK*/changeSize(newHeight, newWidth, opt_newMargins);
+
     // Schedule for re-layout.
     if (this.state_ != ResourceState.NOT_BUILT) {
       this.state_ = ResourceState.NOT_LAID_OUT;
@@ -412,6 +413,10 @@ export class Resource {
 
     this.element.updateLayoutBox(box);
   }
+  /**
+   * Collapse on changing height/width to 0
+   */
+
 
   /**
    * Completes collapse: ensures that the element is `display:none` and
@@ -425,6 +430,10 @@ export class Resource {
         0, 0);
     this.isFixed_ = false;
     this.element.updateLayoutBox(this.layoutBox_);
+    const owner = this.getOwner();
+    if (owner) {
+      owner.colllapsedCallback(this.element);
+    }
   }
 
   /**
