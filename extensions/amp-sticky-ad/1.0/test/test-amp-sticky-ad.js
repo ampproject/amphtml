@@ -124,7 +124,8 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       getSizeStub.returns({
         height: 50,
       });
-      const getScrollHeightStub = sandbox.stub(impl.viewport_, 'getScrollHeight');
+      const getScrollHeightStub =
+          sandbox.stub(impl.viewport_, 'getScrollHeight');
       getScrollHeightStub.returns(300);
 
       impl.deferMutate = function(callback) {
