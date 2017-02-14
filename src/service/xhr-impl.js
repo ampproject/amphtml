@@ -21,8 +21,13 @@ import {
   getCorsUrl,
   parseUrl,
 } from '../url';
+import {
+  getPath,
+  sortProperties,
+} from '../utils/object';
 import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
+import Cache from '../utils/cache';
 
 
 /**
@@ -70,10 +75,14 @@ export class Xhr {
 
   /**
    * @param {!Window} win
+   * @param {number=} cacheSize
    */
-  constructor(win) {
+  constructor(win, cacheSize) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @const {!Cache} */
+    this.fragmentCache_ = new Cache(cacheSize);
   }
 
   /**
@@ -179,7 +188,12 @@ export class Xhr {
    */
   fetchJson(input, opt_init) {
     const init = setupInit(opt_init, 'application/json');
-    if (init.method == 'POST' && !isFormData(init.body)) {
+    const parsedInput = parseUrl(input);
+    const propertyPath = parsedInput.hash.slice(1); // remove # prefix
+    const getPropertyAtPath = getPath.bind(null, propertyPath);
+    const getResponseJson = response => response.json();
+
+    if (init.method === 'POST' && !isFormData(init.body)) {
       // Assume JSON strict mode where only objects or arrays are allowed
       // as body.
       dev().assert(
@@ -191,8 +205,39 @@ export class Xhr {
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
       init.body = JSON.stringify(init.body);
     }
-    return this.fetch(input, init)
-        .then(response => response.json());
+
+    const isCacheable = (init.method === 'GET' && propertyPath);
+    if (isCacheable) {
+      const cacheKey = this.getCacheKey_(input, opt_init);
+      const cachedPromise = this.fragmentCache_.get(cacheKey);
+      if (cachedPromise) {
+        return cachedPromise.then(getPropertyAtPath);
+      }
+
+      const fetchPromise = this.fetch(input, init).then(getResponseJson);
+
+      // Since a fragment is present, cache the full response promise, then
+      // return a promise with just the value specified by the fragment.
+      this.fragmentCache_.put(cacheKey, fetchPromise);
+      return fetchPromise.then(getPropertyAtPath);
+    } else {
+      return this.fetch(input, init).then(getResponseJson);
+    }
+  }
+
+  /**
+   * Creates a cache key for a fetch.
+   *
+   * @param {string} url
+   * @param {?FetchInitDef=} opt_init
+   * @return {string}
+   * @private
+   */
+  getCacheKey_(url, opt_init) {
+    const urlWithoutHash = url.slice(0, url.indexOf('#'));
+    const sortedOptInit = sortProperties(opt_init);
+    const orderedOptions = opt_init ? JSON.stringify(sortedOptInit) : '';
+    return urlWithoutHash + ';' + orderedOptions;
   }
 
   /**

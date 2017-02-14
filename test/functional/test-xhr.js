@@ -28,27 +28,33 @@ describe('XHR', function() {
   let sandbox;
   let requests;
   const location = {href: 'https://acme.com/path'};
-  const nativeWin = {
-    location,
-    fetch: window.fetch,
-  };
 
-  const polyfillWin = {
-    location,
-    fetch: fetchPolyfill,
-  };
+  function getNativeWin() {
+    return {
+      location,
+      fetch: window.fetch,
+    };
+  }
+
+  function getPolyfillWin() {
+    return {
+      location,
+      fetch: fetchPolyfill,
+    };
+  }
 
   // Given XHR calls give tests more time.
   this.timeout(5000);
 
   const scenarios = [
-    {
-      xhr: xhrServiceForTesting(nativeWin),
+    () => ({
+      xhr: xhrServiceForTesting(getNativeWin()),
       desc: 'Native',
-    }, {
-      xhr: xhrServiceForTesting(polyfillWin),
+    }),
+    () => ({
+      xhr: xhrServiceForTesting(getPolyfillWin()),
       desc: 'Polyfill',
-    },
+    }),
   ];
 
   function setupMockXhr() {
@@ -77,7 +83,8 @@ describe('XHR', function() {
     sandbox.restore();
   });
 
-  scenarios.forEach(test => {
+  scenarios.forEach(getTest => {
+    const test = getTest();
     const xhr = test.xhr;
 
     // Since if it's the Native fetch, it won't use the XHR object so
@@ -120,6 +127,30 @@ describe('XHR', function() {
           expect(put).to.throw();
           expect(patch).to.throw();
           expect(deleteMethod).to.throw();
+        });
+
+        it('should fetch GET requests with fragments once ' +
+            'for identical URLs', () => {
+          const xhr = getTest().xhr;
+          const TEST_RESPONSE = JSON.stringify({a: {b: [{c: 2}, {d: 4}]}});
+          const mockXhr = {
+            status: 200,
+            responseText: TEST_RESPONSE,
+            responseType: 'json',
+          };
+          const fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
+              () => Promise.resolve(new FetchResponse(mockXhr)));
+
+          return Promise.all([
+            xhr.fetchJson('/get?k=v1#a.b[0].c').then(json => {
+              expect(json).to.equal(2);
+            }),
+            xhr.fetchJson('/get?k=v1#a.b[1].d').then(json => {
+              expect(json).to.equal(4);
+            }),
+          ]).then(() => {
+            expect(fetchStub.calledOnce).to.be.true;
+          });
         });
 
         it('should allow FormData as body', () => {
@@ -562,7 +593,8 @@ describe('XHR', function() {
     });
   });
 
-  scenarios.forEach(test => {
+  scenarios.forEach(getTest => {
+    const test = getTest();
     const url = 'http://localhost:31862/post';
 
     describe(test.desc + ' POST', () => {
@@ -663,7 +695,8 @@ describe('XHR', function() {
       });
     });
 
-    scenarios.forEach(test => {
+    scenarios.forEach(getTest => {
+      const test = getTest();
       if (test.desc === 'Polyfill') {
         // FetchRequest is only returned by the Polyfill version of Xhr.
         describe('#text', () => {

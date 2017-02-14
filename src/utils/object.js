@@ -44,3 +44,41 @@ export function map(opt_initial) {
 export function hasOwn(obj, key) {
   return hasOwn_.call(obj, key);
 }
+
+/**
+ * Returns the value of the property referenced by dot-separated keys.
+ * e.g.
+ * `getPath('a.b[0].c', {a: {b: [{c: 2}]}}) === 2`
+ *
+ * @param {T} obj a map-like value
+ * @param {string} path a dot-separated list of keys to reference a value
+ * @return {T}
+ * @template T
+ */
+export function getPath(path, obj) {
+  const arrayIndexRe = /\[(\d+)\]/g;
+  const keys = path.replace(arrayIndexRe, '.$1').split('.');
+  return keys.reduce((acc, key) => acc[key], obj);
+}
+
+/**
+ * Creates a new object identical to the first with sorted properties.
+ *
+ * @param {T} obj a map-like value
+ * @return {T}
+ * @template T
+ */
+export function sortProperties(obj) {
+  if (!obj || typeof obj !== 'object') { return obj; }
+
+  const keys = Object.keys(obj).sort();
+  return keys.reduce((acc, key) => {
+    const value = obj[key];
+    if (typeof value === 'object') {
+      acc[key] = sortProperties(value);
+    } else {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+}
