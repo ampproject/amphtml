@@ -1,20 +1,13 @@
 # AMP cache modifications best practices
 
-These are guidelines for what AMP cache implementations should look like. Some
-items are required for overall security of the platform while others are
-suggestions for performance improvements. All modifications are made to both
-AMP and AMP4ADS documents except where noted.
+These are guidelines for what AMP cache implementations should look like. Some items are required for overall security of the platform while others are suggestions for performance improvements. All modifications are made to both AMP and AMP4ADS documents except where noted.
 
-For example, given a [recent version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.original.html)
-of [everything.amp.html](https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html),
-the output after modifications will be [this version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.out.html).
+For example, given a [recent version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.original.html) of [everything.amp.html](https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html), the output after modifications will be [this version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.out.html).
 
 
 ### HTML Sanitization
 
-The AMP Cache parses and re-serializes all documents to remove any ambiguities
-in parsing the document which might result in subtly different parses in
-different browsers.
+The AMP Cache parses and re-serializes all documents to remove any ambiguities in parsing the document which might result in subtly different parses in different browsers.
 
 #### All HTML comments are stripped
 
@@ -111,7 +104,7 @@ different browsers.
 
 ### URL Rewrites
 
-The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to â€˜fixâ€™ relative URLs found in the document so that the URL remains the same when loaded from the AMP Cache. The other reason is to improve performance by selecting a different equivalent resource. This includes rewriting image and font URLs to use a cached copy or rewriting AMP javascript URLs to use a copy with longer cache lifetimes.
+The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to rebase relative URLs found in the document so that the URL remains the same when loaded from the AMP Cache. The other reason is to improve performance by selecting a different equivalent resource. This includes rewriting image and font URLs to use a cached copy and rewriting AMP javascript URLs to use a copy with longer cache lifetimes.
 
 #### All relative `href` , `src` and `data-iframe-src` URLs are rewritten as absolute URLs
 
@@ -121,6 +114,8 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to â€
 | before | after |
 | --- | --- |
 | `<a href=foo.html target=_top>Lorem ipsum</a>` | `<a href=https://example.com/foo.html target=_top>Lorem ipsum</a>` |
+| `<amp-list src="list.json" ...>...</amp-list>` | `<amp-list src="https://example.com/list.json" ...>...</amp-list>` |
+| `<amp-install-serviceworker data-iframe-src="sw.html"...></amp-install-serviceworker>` | `<amp-install-serviceworker data-iframe-src="https://example.com/sw.html"...></amp-install-serviceworker>` |
 
 </details>
 
@@ -160,47 +155,20 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to â€
 #### Anchor tags must have a target of `_blank` or `_top`
 
 *Condition*:
-If `<a>` tag does not have attribute `target=_blank` or `target=_top` then add `target=_top`.
+If `<a>` tag does not have attribute `target=_blank` or `target=_top` then add `target=_top`. All other `target` values are rewritten to `_top`.
 
 <details>
 <summary>example</summary>
 
 | before | after |
 | --- | --- |
-| `<a href=https://example.com/foo.html>Lorem ipsum</a>`<br>`<a href=https://example.com/bar.html target=_blank>Lorem ipsum</a>` | `<a href=https://example.com/foo.html target=_top>Lorem ipsum</a>`<br>`<a href=https://example.com/bar.html target=_blank>Lorem ipsum</a>` |
+| `<a href=https://example.com/foo.html>Lorem ipsum</a>` | `<a href=https://example.com/foo.html target=_top>Lorem ipsum</a>` |
+| `<a href=https://example.com/bar.html target=_blank>Lorem ipsum</a>` | `<a href=https://example.com/bar.html target=_blank>Lorem ipsum</a>` |
+| `<a href=https://example.com/baz.html target=window>Lorem ipsum</a>` | `<a href=https://example.com/baz.html target=_top>Lorem ipsum</a> |
 
 </details>
-
-#### The AMP engine javascript URL is rewritten to most recent stable version
-
-If possible, rewrite to use the stable version. Otherwise use the unversioned path. The stable version takes the form `<script async src=https://cdn.ampproject.org/rtv/{version}/v0.js></script>`.
-
-<details>
-<summary>example</summary>
-
-| before | after |
-| --- | --- |
-| `<script async src=https://cdn.ampproject.org/v0.js></script>` | `<script async src=https://cdn.ampproject.org/rtv/031485231782273/v0.js></script>` |
-
-</details>
-
 
 ### Insert and Rewrite Tags
-
-#### Insert `<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect">`
-The AMP Cache adds prefetch hint tags for browsers to assist in loading resources earlier and thus speed up page loads.
-
-*Condition*:
-Has a stylesheet of the form: `<link href=https://fonts.googleapis.com/... rel=stylesheet>`.
-
-<details>
-<summary>example</summary>
-
-| before | after |
-| --- | --- |
-| `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`...`<br>`</head>` | `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect">`<br>`...`<br>`</head>` |
-
-</details>
 
 #### Insert `<link rel=icon>`
 
@@ -251,7 +219,7 @@ No `<meta name=referrer ...>` tag present and document was fetched from HTTP and
 
 #### Insert `<meta content=noindex name=robots>` [required]
 
-AMP Cache pages should not show up in search result pages.
+AMP Cache pages should not show up in search result pages. The cache also uses [`robots.txt`](https://cdn.ampproject.org/robots.txt) to enforce this.
 
 <details>
 <summary>example</summary>
@@ -348,7 +316,35 @@ Remove `nonce` from every tag except for `<meta content=NONCE name=i-amphtml-acc
 
 ### Optimizations
 
-These are modifications that either reduce the byte size of the document or decreases the time to render.
+These are modifications that either reduce the byte size of the document or decreases the time to render. An AMP cache is not required to implement these.
+
+#### The AMP engine javascript URL is rewritten to most recent stable version
+
+If possible, rewrite to use the stable version. Otherwise use the unversioned path. The stable version takes the form `<script async src=https://cdn.ampproject.org/rtv/{version}/v0.js></script>`.
+
+<details>
+<summary>example</summary>
+
+| before | after |
+| --- | --- |
+| `<script async src=https://cdn.ampproject.org/v0.js></script>` | `<script async src=https://cdn.ampproject.org/rtv/031485231782273/v0.js></script>` |
+
+</details>
+
+#### Insert `<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect">`
+The AMP Cache adds prefetch hint tags for browsers to assist in loading resources earlier and thus speed up page loads.
+
+*Condition*:
+Has a stylesheet of the form: `<link href=https://fonts.googleapis.com/... rel=stylesheet>`.
+
+<details>
+<summary>example</summary>
+
+| before | after |
+| --- | --- |
+| `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`...`<br>`</head>` | `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect">`<br>`...`<br>`</head>` |
+
+</details>
 
 #### Prioritize AMP engine javascript and other render blocking scripts in `<head>`
 
