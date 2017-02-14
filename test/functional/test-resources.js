@@ -1839,17 +1839,6 @@ describe('Resources mutateElement and collapse', () => {
     expect(resource1.completeCollapse).to.be.calledOnce;
     expect(relayoutTopStub).to.have.not.been.called;
   });
-
-  it('should notify owner', () => {
-    const owner = {
-      contains: () => true,
-      collapsedCallback: sandbox.spy(),
-    };
-    Resource.setOwner(resource1.element, owner);
-    Resource.completeCollapse();
-    expect(owner.collapsedCallback).to.be.calledOnce;
-    expect(owner.collapsedCallback.args[0][0]).to.equal(resource1.element);
-  });
 });
 
 

@@ -33,7 +33,7 @@ import {dev} from '../log';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
-import {areMarginsChanged, layoutRectLtwh} from '../layout-rect';
+import {areMarginsChanged} from '../layout-rect';
 import {documentInfoForDoc} from '../document-info';
 
 const TAG_ = 'Resources';
