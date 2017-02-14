@@ -25,6 +25,7 @@ import {
   serializeMessage,
   deserializeMessage,
 } from '../../src/3p-frame';
+import {Layout} from '../../src/layout';
 import {dev} from '../../src/log';
 import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
@@ -124,6 +125,9 @@ describe('3p-frame', () => {
 
       const width = window.innerWidth;
       const height = window.innerHeight;
+      div.getLayout = function() {
+        return Layout.RESPONSIVE;
+      };
       div.getIntersectionChangeEntry = function() {
         return {
           time: 1234567888,
@@ -338,6 +342,9 @@ describe('3p-frame', () => {
     div.setAttribute('type', '_ping_');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
+    div.getLayout = function() {
+      return Layout.FILL;
+    };
     div.getIntersectionChangeEntry = function() {
       return {
         left: 0,

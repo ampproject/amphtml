@@ -90,13 +90,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.uniqueSlotId_ = null;
 
     /**
-     * Whether element has responsive layout.
-     * @private {boolean}
-     */
-    this.isResponsive_ =
-        this.element.getAttribute('layout') == Layout.RESPONSIVE;
-
-    /**
      * Sizes for resize (width then height).
      * @private {?Array<number>}
      */
@@ -123,8 +116,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const width = slotRect.width;
     // If responsive, set height to value that is considered valid by
     // ad server.
+    const isResponsive = this.element.getLayout() == Layout.RESPONSIVE;
     const height =
-        this.isResponsive_ ? Math.ceil(width / 1.91 + 120) : slotRect.height;
+        isResponsive ? Math.ceil(width / 1.91 + 120) : slotRect.height;
     const format = `${width}x${height}`;
 
     const slotId = this.element.getAttribute('data-amp-slot-index');
@@ -162,7 +156,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       paramList.push({name: 'prev_fmts', value: sharedStateParams.prevFmts});
     }
 
-    if (this.isResponsive_ &&
+    if (isResponsive &&
         (height != slotRect.height || width != slotRect.width)) {
       // If responsive, attempt resize
       this.attemptChangeSize(height, width).catch(() => {

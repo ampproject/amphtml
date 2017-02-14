@@ -1079,6 +1079,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {!Layout}
+     * @final @this {!Element}
+     */
+    getLayout() {
+      return this.implementation_.layout_;
+    }
+
+    /**
      * @return {!./layout-rect.LayoutRectDef}
      * @final @this {!Element}
      */
