@@ -93,7 +93,7 @@ export class BindEvaluator {
     this.parsedBindings_ = filterSplice(this.parsedBindings_, binding => {
       const expression = binding.expression.expressionString;
       return !hasOwn(expressionsToRemove, expression);
-    })
+    });
   }
 
   /**

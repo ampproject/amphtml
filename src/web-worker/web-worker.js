@@ -36,12 +36,12 @@ self.addEventListener('message', function(event) {
   // TODO(choumx): Add error reporting.
   switch (method) {
     case 'bind.addBindings':
-      evaluator_ = evaluator || new BindEvaluator();
+      evaluator_ = evaluator_ || new BindEvaluator();
       returnValue = evaluator_.addBindings.apply(evaluator_, args);
       break;
     case 'bind.removeBindings':
       if (evaluator_) {
-        returnValue = 
+        returnValue =
           evaluator_.removeBindingsForExpressions.apply(evaluator_, args);
       } else {
         throw new Error(`${method}: BindEvaluator is not initialized.`);

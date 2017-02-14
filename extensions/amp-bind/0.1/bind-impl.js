@@ -249,7 +249,9 @@ export class Bind {
       // Remove the bindings from the evaluator
       if (this.workerExperimentEnabled_) {
         dev().fine(TAG, `Asking worker to parse expressions...`);
-        return invokeWebWorker(this.win_, 'bind.removeBindingsForExpressions', [deletedExpressions]);
+        return invokeWebWorker(this.win_,
+          'bind.removeBindingsForExpressions',
+          [deletedExpressions]);
       } else {
         this.evaluator_.removeBindingsForExpressions(deletedExpressions);
       }

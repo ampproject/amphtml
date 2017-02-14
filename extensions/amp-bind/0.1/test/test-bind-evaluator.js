@@ -73,7 +73,7 @@ describe('BindEvaluator', () => {
     expect(evaluator.parsedBindings_.length).to.equal(0);
     evaluator.addBindings([bindingDef]);
     expect(evaluator.parsedBindings_.length).to.equal(1);
-    results = evaluator.evaluate({oneplusone: 2});
+    const results = evaluator.evaluate({oneplusone: 2});
     const evaluated = results['results'];
     const errors = results['errors'];
     expect(errors[bindingDef.expressionString]).to.be.undefined;
@@ -90,7 +90,7 @@ describe('BindEvaluator', () => {
     expect(evaluator.parsedBindings_.length).to.equal(0);
     evaluator.addBindings([outOfScopeDef]);
     expect(evaluator.parsedBindings_.length).to.equal(1);
-    results = evaluator.evaluate({});
+    const results = evaluator.evaluate({});
     const evaluated = results['results'];
     const errors = results['errors'];
     expect(errors[outOfScopeDef.expressionString]).to.be.undefined;
