@@ -165,6 +165,7 @@ export const LIFECYCLE_STAGES = {
   adSlotUnhidden: '17',
   layoutAdPromiseDelay: '18',
   signatureVerifySuccess: '19',
+  networkError: '20',
 };
 
 /**
@@ -947,6 +948,7 @@ export class AmpA4A extends AMP.BaseElement {
           // TODO(taymonbeal): Figure out a more sophisticated test for deciding
           // whether to retry with an iframe after an ad request failure or just
           // give up and render the fallback content (or collapse the ad slot).
+          this.protectedEmitLifecycleEvent_('networkError');
           return null;
         });
   }
