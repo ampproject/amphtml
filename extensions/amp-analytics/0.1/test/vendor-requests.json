@@ -51,6 +51,13 @@
     "base": "https://scomcluster.cxense.com/Repo/rep.gif" ,
     "pageview": "https://scomcluster.cxense.com/Repo/rep.gif?ver=1&typ=pgv&sid=$siteId&ckp=_client_id_&loc=_source_url_&rnd=_random_&ref=_document_referrer_&ltm=_timestamp_&wsz=_screen_width_x_screen_height_&bln=_browser_language_&chs=_document_charset_&col=_screen_color_depth_&tzo=_timezone_&cp_cx_channel=amp"
   },
+  "euleriananalytics": {
+    "base": "https://$analyticsHost",
+    "basePrefix": "-/_random_?euid-amp=_client_id_&url=_source_url_&",
+    "pageview": "https://$analyticsHost/col2/-/_random_?euid-amp=_client_id_&url=_source_url_&rf=_document_referrer_&sd=_screen_width_x_screen_height_&sd=_screen_color_depth_&elg=_browser_language_",
+    "action": "https://$analyticsHost/action/-/_random_?euid-amp=_client_id_&url=_source_url_&eact=$actionCode&actr=$actionRef",
+    "user": "https://$analyticsHost/uparam/-/_random_?euid-amp=_client_id_&url=_source_url_&euk$userParamKey=$userParamVal"
+  },
   "gemius": {
     "base": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams",
     "pageview": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams&et=view&hsrc=1",
@@ -65,8 +72,13 @@
     "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&jid=&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
     "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
   },
-  "googleconversion": {
-    "conversion": "https://www.googleadservices.com/pagead/conversion/$google_conversion_id/?cv=amp1&value=$google_conversion_value&currency_code=$google_conversion_currency&label=$google_conversion_label&random=_random_&url=_source_url_&fst=_page_view_id_&num=_counter_&fmt=3&async=3&bg=$google_conversion_color&u_h=_screen_height_&u_w=_screen_width_&u_ah=_viewport_height_&u_aw=_viewport_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0"
+  "googleadwords": {
+    "conversion_prefix": "<ignore for test>",
+    "remarketing_prefix": "<ignore for test>",
+    "common_params": "<ignore for test>",
+    "conversion_params": "<ignore for test>",
+    "conversion": "https://www.googleadservices.com/pagead/conversion/$googleConversionId/?cv=amp2&label=$googleConversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0&value=$googleConversionValue&currency_code=$googleConversionCurrency&bg=$googleConversionColor&hl=$googleConversionLanguage",
+    "remarketing": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/$googleConversionId/?cv=amp2&label=$googleConversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0"
   },
   "lotame": {
     "pageview": "https://bcp.crwdcntrl.net/amp?c=$account&pv=y"

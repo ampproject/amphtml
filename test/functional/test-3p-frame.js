@@ -25,6 +25,7 @@ import {
   serializeMessage,
   deserializeMessage,
 } from '../../src/3p-frame';
+import {dev} from '../../src/log';
 import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {toggleExperiment} from '../../src/experiments';
@@ -94,6 +95,7 @@ describe('3p-frame', () => {
   });
 
   sentinelNames.forEach(sentinelName => {
+    // TODO(bradfrizzell) break this out into a test-iframe-attributes
     it('should create an iframe', () => {
       window.AMP_MODE = {
         localDev: true,
@@ -171,6 +173,7 @@ describe('3p-frame', () => {
           '{"testAttr":"value","ping":"pong","width":50,"height":100,' +
           '"type":"_ping_",' +
           '"_context":{"referrer":"http://acme.org/",' +
+          '"ampcontextVersion": "$internalRuntimeVersion$",' +
           '"canonicalUrl":"' + docInfo.canonicalUrl + '",' +
           '"sourceUrl":"' + locationHref + '",' +
           '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
@@ -203,7 +206,12 @@ describe('3p-frame', () => {
       expect(name.attributes._context.domFingerprint).to.exist;
       delete name.attributes._context.domFingerprint;
       delete parsedFragment._context.domFingerprint;
-      expect(name.attributes).to.deep.equal(parsedFragment);
+      // Value changes between tests.
+      // TODO: Switch test to isolated window.
+      expect(name.attributes._context.experimentToggles).to.exist;
+      delete name.attributes._context.experimentToggles;
+      delete parsedFragment._context.experimentToggles;
+      expect(name.attributes).to.deep.jsonEqual(parsedFragment);
 
       // Switch to same origin for inner tests.
       iframe.src = '/dist.3p/current/frame.max.html';
@@ -433,12 +441,21 @@ describe('3p-frame', () => {
           'noamp-{"type":"msgtype","sentinel":"msgsentinel"}')).to.be.null;
     });
 
+    it('should return null if the input is not a json', () => {
+      const errorStub = sandbox.stub(dev(), 'error');
+      expect(deserializeMessage('amp-other')).to.be.null;
+      expect(errorStub).to.not.be.called;
+    });
+
     it('should return null if failed to parse the input', () => {
+      const errorStub = sandbox.stub(dev(), 'error');
       expect(deserializeMessage(
-          'amp-"type":"msgtype","sentinel":"msgsentinel"}')).to.be.null;
+          'amp-{"type","sentinel":"msgsentinel"}')).to.be.null;
+      expect(errorStub).to.be.calledOnce;
 
       expect(deserializeMessage(
           'amp-{"type":"msgtype"|"sentinel":"msgsentinel"}')).to.be.null;
+      expect(errorStub).to.be.calledTwice;
     });
   });
 });

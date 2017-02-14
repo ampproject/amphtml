@@ -17,6 +17,7 @@
 import {Bind} from '../bind-impl';
 import {BindExpression} from '../bind-expression';
 import {BindValidator} from '../bind-validator';
+import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
@@ -39,6 +40,9 @@ describes.realWin('amp-bind', {
         BindValidator.prototype, 'canBind').returns(true);
     env.sandbox.stub(
         BindValidator.prototype, 'isResultValid').returns(true);
+
+    // Make sure we have a chunk instance for testing.
+    chunkInstanceForTesting(env.ampdoc);
 
     bind = new Bind(env.ampdoc);
   });
@@ -77,14 +81,16 @@ describes.realWin('amp-bind', {
    */
   function onBindReady(callback) {
     return env.ampdoc.whenReady().then(() => {
+      return bind.scanPromise_;
+    }).then(() => {
       if (bind.evaluatePromise_) {
-        return bind.evaluatePromise_.then(() => {
-          env.flushVsync();
-          callback();
-        });
+        return bind.evaluatePromise_;
       } else {
         callback();
       }
+    }).then(() => {
+      env.flushVsync();
+      callback();
     });
   }
 
@@ -96,11 +102,13 @@ describes.realWin('amp-bind', {
    */
   function onBindReadyAndSetState(state, callback) {
     return env.ampdoc.whenReady().then(() => {
+      return bind.scanPromise_;
+    }).then(() => {
       bind.setState(state);
-      return bind.evaluatePromise_.then(() => {
-        env.flushVsync();
-        callback();
-      });
+      return bind.evaluatePromise_;
+    }).then(() => {
+      env.flushVsync();
+      callback();
     });
   }
 
@@ -131,9 +139,9 @@ describes.realWin('amp-bind', {
     env.sandbox.stub(window, 'AMP_MODE', {development: true});
     // Only the initial value for [a] binding does not match.
     createElementWithBinding('[a]="a" [b]="b" b="b"');
-    const errorStub = env.sandbox.stub(user(), 'error').withArgs('amp-bind');
+    const errorStub = env.sandbox.stub(user(), 'createError');
     return onBindReady(() => {
-      expect(errorStub.callCount).to.equal(1);
+      expect(errorStub).to.be.calledOnce;
     });
   });
 
@@ -141,9 +149,9 @@ describes.realWin('amp-bind', {
     env.sandbox.stub(window, 'AMP_MODE', {development: true});
     // Only the initial value for [c] binding does not match.
     createElementWithBinding(`a [a]="true" [b]="false" c="false" [c]="false"`);
-    const errorStub = env.sandbox.stub(user(), 'error').withArgs('amp-bind');
+    const errorStub = env.sandbox.stub(user(), 'createError');
     return onBindReady(() => {
-      expect(errorStub.callCount).to.equal(1);
+      expect(errorStub).to.be.calledOnce;
     });
   });
 

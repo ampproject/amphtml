@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,23 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Xrost SSP
+# Rambler&Co
 
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="xrostssp"
-    data-aid="10"
-    data-slot-id="3347">
-</amp-ad>
+<amp-ad 
+    width=240
+    height=400
+    type="capirs"
+    data-begun-auto-pad="1212332"
+    data-begun-block-id="5665768"
+    json=""
+></amp-ad>
 ```
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact https://www.opt.ne.jp/contact/
+For semantics of configuration, please see Rambler SSP documentation.
 
 Supported parameters:
 
-- data-aid
-- data-slot-id
+- data-begun-auto-pad
+- data-begun-block-id

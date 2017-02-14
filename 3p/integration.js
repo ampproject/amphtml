@@ -67,7 +67,9 @@ import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {atomx} from '../ads/atomx';
+import {brainy} from '../ads/brainy';
 import {caajainfeed} from '../ads/caajainfeed';
+import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
@@ -78,6 +80,7 @@ import {distroscale} from '../ads/distroscale';
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
+import {eas} from '../ads/eas';
 import {eplanning} from '../ads/eplanning';
 import {f1e} from '../ads/f1e';
 import {felmat} from '../ads/felmat';
@@ -115,6 +118,7 @@ import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {revcontent} from '../ads/revcontent';
+import {relap} from '../ads/relap';
 import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
@@ -122,6 +126,7 @@ import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
+import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
@@ -130,7 +135,6 @@ import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
 import {xlift} from '../ads/xlift';
-import {xrostssp} from '../ads/xrostssp';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
 import {yieldbot} from '../ads/yieldbot';
@@ -164,8 +168,10 @@ try {
   window.context = data._context;
 } catch (err) {
   window.context = {};
-  dev().info(
-      'INTEGRATION', 'Could not parse context from:', iframeName);
+  if (!getMode().test) {
+    dev().info(
+        'INTEGRATION', 'Could not parse context from:', iframeName);
+  }
 }
 
 // This should only be invoked after window.context is set
@@ -202,7 +208,9 @@ register('affiliateb', affiliateb);
 register('amoad', amoad);
 register('appnexus', appnexus);
 register('atomx', atomx);
+register('brainy', brainy);
 register('caajainfeed', caajainfeed);
+register('capirs', capirs);
 register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
@@ -212,6 +220,7 @@ register('csa', csa);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
+register('eas', eas);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
 register('f1e', f1e);
@@ -253,6 +262,7 @@ register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('reddit', reddit);
+register('relap', relap);
 register('revcontent', revcontent);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);
@@ -261,6 +271,7 @@ register('smartadserver', smartadserver);
 register('smartclip', smartclip);
 register('sortable', sortable);
 register('sovrn', sovrn);
+register('swoop', swoop);
 register('taboola', taboola);
 register('teads', teads);
 register('triplelift', triplelift);
@@ -270,7 +281,6 @@ register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
 register('xlift' , xlift);
-register('xrostssp', xrostssp);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yieldbot', yieldbot);

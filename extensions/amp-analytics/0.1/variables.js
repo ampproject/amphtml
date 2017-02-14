@@ -291,7 +291,7 @@ export class VariableService {
    * @return {!Promise<string>}
    */
   hashFilter_(value) {
-    return cryptoFor(this.win_).then(crypto => crypto.sha384Base64(value));
+    return cryptoFor(this.win_).sha384Base64(value);
   }
 
   isFilterExperimentOn_() {

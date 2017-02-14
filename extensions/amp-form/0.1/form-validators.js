@@ -15,7 +15,6 @@
  */
 
 import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {ValidationBubble} from './validation-bubble';
 
 
@@ -349,18 +348,15 @@ export class AsYouGoValidator extends AbstractCustomValidator {
  * @return {!FormValidator}
  */
 export function getFormValidator(form) {
-  const win = form.ownerDocument.defaultView;
-  if (isExperimentOn(win, 'amp-form-custom-validations')) {
-    const customValidation = form.getAttribute(
-        'custom-validation-reporting');
-    switch (customValidation) {
-      case CustomValidationTypes.AsYouGo:
-        return new AsYouGoValidator(form);
-      case CustomValidationTypes.ShowAllOnSubmit:
-        return new ShowAllOnSubmitValidator(form);
-      case CustomValidationTypes.ShowFirstOnSubmit:
-        return new ShowFirstOnSubmitValidator(form);
-    }
+  const customValidation = form.getAttribute(
+      'custom-validation-reporting');
+  switch (customValidation) {
+    case CustomValidationTypes.AsYouGo:
+      return new AsYouGoValidator(form);
+    case CustomValidationTypes.ShowAllOnSubmit:
+      return new ShowAllOnSubmitValidator(form);
+    case CustomValidationTypes.ShowFirstOnSubmit:
+      return new ShowFirstOnSubmitValidator(form);
   }
 
   if (isReportValiditySupported(form.ownerDocument)) {
@@ -373,14 +369,14 @@ export function getFormValidator(form) {
 
 /**
  * Returns whether reportValidity API is supported.
- * @param {!Document} doc
+ * @param {?Document} doc
  * @return {boolean}
  */
 function isReportValiditySupported(doc) {
-  if (reportValiditySupported === undefined) {
-    reportValiditySupported = !!doc.createElement('form').reportValidity;
+  if (doc && reportValiditySupported === undefined) {
+    reportValiditySupported = !!document.createElement('form').reportValidity;
   }
-  return reportValiditySupported;
+  return !!reportValiditySupported;
 }
 
 

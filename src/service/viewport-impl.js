@@ -1014,8 +1014,9 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getScrollLeft() {
-    return this.getScrollingElement_()./*OK*/scrollLeft ||
-        this.win./*OK*/pageXOffset;
+    // The html is set to overflow-x: hidden so the document cannot be
+    // scrolled horizontally. The scrollLeft will always be 0.
+    return 0;
   }
 
   /** @override */
@@ -1301,7 +1302,9 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   getScrollLeft() {
-    return Math.round(this.pos_.x);
+    // The html is set to overflow-x: hidden so the document cannot be
+    // scrolled horizontally. The scrollLeft will always be 0.
+    return 0;
   }
 
   /** @override */
@@ -1558,7 +1561,9 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getScrollLeft() {
-    return this.wrapper_./*OK*/scrollLeft;
+    // The wrapper is set to overflow-x: hidden so the document cannot be
+    // scrolled horizontally. The scrollLeft will always be 0.
+    return 0;
   }
 
   /** @override */
@@ -1765,6 +1770,12 @@ function getViewportType(win, viewer) {
   if (!isIframed(win) && (getMode(win).localDev || getMode(win).development)) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
+
+  // Enable iOS Embedded mode for iframed tests (e.g. integration tests).
+  if (isIframed(win) && getMode(win).test) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
+
   // Override to ios-embed for iframe-viewer mode.
   // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
   if (isIframed(win) && viewer.isEmbedded()) {
