@@ -41,6 +41,7 @@ const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
 /**
  * Tag names that indicate dynamic content i.e. tags that will need
  * to be observed and rescanned for bindings if they change.
+ * @type {!Array<string>}
  */
 const DYNAMIC_TAGS = ['TEMPLATE'];
 
@@ -321,6 +322,8 @@ export class Bind {
         // Templated HTML is added as a sibling to the template tag.
         // So observe the parent.
         // TODO(kmh287): What if parent is the body tag?
+        // TODO(kmh287): Generify logic for node observation strategy
+        // when bind supprots more dynamic nodes.
         if (tagName == "TEMPLATE") {
           const templateParent = element.parentElement;
           if (templateParent) {
