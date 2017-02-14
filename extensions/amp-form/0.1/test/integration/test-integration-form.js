@@ -17,7 +17,8 @@
 import {AmpForm} from '../../amp-form';
 import {timerFor} from '../../../../../src/timer';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
-import {registerExtendedTemplate} from '../../../../../src/service/template-impl';
+import {registerExtendedTemplate,} from
+    '../../../../../src/service/template-impl';
 
 
 describes.realWin('AmpForm Integration', {
