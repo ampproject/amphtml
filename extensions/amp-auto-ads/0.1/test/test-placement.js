@@ -17,22 +17,22 @@
 import {AdTracker} from '../ad-tracker';
 import {resourcesForDoc} from '../../../../src/resources';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
-import * as sinon from 'sinon';
 
-describe('placement', () => {
+describes.realWin('placement', {
+  amp: {
+    runtimeOn: true,
+    ampdoc: 'single',
+    extensions: ['amp-ad'],
+  },
+}, env => {
 
   let sandbox;
   let container;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    container = document.createElement('div');
-    document.body.appendChild(container);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-    document.body.removeChild(container);
+    sandbox = env.sandbox.create();
+    container = env.win.document.createElement('div');
+    env.win.document.body.appendChild(container);
   });
 
   describe('getAdElement', () => {
@@ -41,7 +41,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -65,7 +65,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -91,7 +91,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -117,7 +117,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -143,7 +143,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -169,7 +169,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -194,7 +194,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -233,7 +233,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -270,7 +270,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -306,7 +306,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -342,7 +342,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -381,7 +381,7 @@ describe('placement', () => {
         return Promise.resolve();
       });
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -412,7 +412,7 @@ describe('placement', () => {
         return Promise.reject(new Error('Resize failed'));
       });
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -441,7 +441,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -470,7 +470,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -496,7 +496,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -523,7 +523,7 @@ describe('placement', () => {
       container.appendChild(anchor);
       anchor.appendChild(document.createElement('div'));
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -550,7 +550,7 @@ describe('placement', () => {
       container.appendChild(anchor);
       anchor.appendChild(document.createElement('div'));
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -580,7 +580,7 @@ describe('placement', () => {
       anchor2.className = 'aClass';
       container.appendChild(anchor2);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -610,7 +610,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -625,12 +625,12 @@ describe('placement', () => {
     });
 
     it('should return empty array when no placements array', () => {
-      const placements = getPlacementsFromConfigObj(window, {});
+      const placements = getPlacementsFromConfigObj(env.win, {});
       expect(placements).to.be.empty;
     });
 
     it('should not return a placement with no anchor property', () => {
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             pos: 1,
@@ -646,7 +646,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {},
@@ -663,7 +663,7 @@ describe('placement', () => {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -683,7 +683,7 @@ describe('placement', () => {
           anchor.id = 'wrongId';
           container.appendChild(anchor);
 
-          const placements = getPlacementsFromConfigObj(window, {
+          const placements = getPlacementsFromConfigObj(env.win, {
             placements: [
               {
                 anchor: {
@@ -706,7 +706,7 @@ describe('placement', () => {
       anchor2.className = 'aClass';
       container.appendChild(anchor2);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -732,7 +732,7 @@ describe('placement', () => {
       anchor2.className = 'aClass';
       container.appendChild(anchor2);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -760,7 +760,7 @@ describe('placement', () => {
       anchor2.className = 'aClass';
       container.appendChild(anchor2);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -790,7 +790,7 @@ describe('placement', () => {
           container.appendChild(anchor);
           anchor.appendChild(document.createTextNode('abcd'));
 
-          const placements = getPlacementsFromConfigObj(window, {
+          const placements = getPlacementsFromConfigObj(env.win, {
             placements: [
               {
                 anchor: {
@@ -833,7 +833,7 @@ describe('placement', () => {
       subAnchor2.className = 'sub-class';
       anchor.appendChild(subAnchor2);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -867,7 +867,7 @@ describe('placement', () => {
       subAnchor2.className = 'sub-class';
       anchor.appendChild(subAnchor2);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -915,7 +915,7 @@ describe('placement', () => {
       nonSubAnchor.className = 'sub-class1';
       anchor.appendChild(nonSubAnchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -956,7 +956,7 @@ describe('placement', () => {
       nonSubAnchor2.className = 'non-sub-class';
       anchor.appendChild(nonSubAnchor2);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -988,7 +988,7 @@ describe('placement', () => {
       subAnchor.className = 'class3';
       anchor.appendChild(subAnchor);
 
-      const placements = getPlacementsFromConfigObj(window, {
+      const placements = getPlacementsFromConfigObj(env.win, {
         placements: [
           {
             anchor: {
@@ -1027,7 +1027,7 @@ describe('placement', () => {
           anchor.appendChild(subAnchor3);
           subAnchor3.appendChild(document.createTextNode('abcd'));
 
-          const placements = getPlacementsFromConfigObj(window, {
+          const placements = getPlacementsFromConfigObj(env.win, {
             placements: [
               {
                 anchor: {
@@ -1064,7 +1064,7 @@ describe('placement', () => {
           anchor.appendChild(subAnchor2);
           subAnchor2.appendChild(document.createTextNode('abcd'));
 
-          const placements = getPlacementsFromConfigObj(window, {
+          const placements = getPlacementsFromConfigObj(env.win, {
             placements: [
               {
                 anchor: {

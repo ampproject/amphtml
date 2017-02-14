@@ -34,6 +34,7 @@ import {
 } from '../src/error';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import * as describes from '../testing/describes';
+import stringify from 'json-stable-stringify';
 
 
 // All exposed describes.
@@ -315,8 +316,8 @@ chai.Assertion.addMethod('display', function(display) {
 
 chai.Assertion.addMethod('jsonEqual', function(compare) {
   const obj = this._obj;
-  const a = JSON.stringify(compare);
-  const b = JSON.stringify(obj);
+  const a = stringify(compare);
+  const b = stringify(obj);
   this.assert(
     a == b,
     'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',

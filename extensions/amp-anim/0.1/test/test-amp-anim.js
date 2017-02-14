@@ -16,12 +16,17 @@
 
 import {AmpAnim} from '../amp-anim';
 
-describe('amp-anim', () => {
+describes.realWin('amp-anim', {
+  amp: {
+    ampdoc: 'single',
+    extensions: ['amp-anim'],
+  },
+}, env => {
 
   // TODO(#5589): Add more tests for amp-anim.
 
   it('should propagate ARIA attributes', () => {
-    const el = document.createElement('amp-anim');
+    const el = env.win.document.createElement('amp-anim');
     el.setAttribute('src', 'test.jpg');
     el.setAttribute('width', 100);
     el.setAttribute('height', 100);
