@@ -126,6 +126,7 @@ export class BindEvaluator {
   }
 
   /**
+   * Parses a single expression string, caches and returns it.
    * @param {string} expressionString
    * @return {{
    *   expression: BindExpression,
@@ -148,6 +149,7 @@ export class BindEvaluator {
   }
 
   /**
+   * Evaluate a single expression with the given scope.
    * @param {!BindExpression} expression
    * @param {!Object} scope
    * @return {{

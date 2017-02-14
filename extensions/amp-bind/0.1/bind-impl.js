@@ -114,7 +114,7 @@ export class Bind {
     this.workerExperimentEnabled_ = isExperimentOn(this.win_, 'web-worker');
 
     /**
-     * Resolved when the Bind service is fully initialized.
+     * Resolved when the service is fully initialized.
      * @const @private {Promise}
      */
     this.initializePromise_ = this.ampdoc.whenReady().then(() => {
