@@ -302,7 +302,7 @@ If the document is using `amp-access` type of `server` then the AMP Cache remove
 #### Remove attribute `nonce`
 
 *Condition*:
-Remove `nonce` from every tag except for `<meta content=NONCE name=i-amphtml-access-state>` and `<meta content=NONCE name=i-amp-access-state>`
+Remove `nonce` from every tag except for those that are only inserted by the AMP cache `<meta content=NONCE name=i-amphtml-access-state>` and `<meta content=NONCE name=i-amp-access-state>`
 
 <details>
 <summary>example</summary>
