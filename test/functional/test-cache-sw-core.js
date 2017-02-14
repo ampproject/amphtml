@@ -87,6 +87,11 @@ runner.run('Cache SW', () => {
   const url = `https://cdn.ampproject.org/rtv/${rtv}/v0.js`;
   let sandbox;
 
+  function rtvVersion(url) {
+    const data = sw.requestData(url);
+    return data && data.explicitRtv;
+  }
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
   });
@@ -443,7 +448,7 @@ runner.run('Cache SW', () => {
         return sw.handleFetch(rtvless, clientId).then(() => {
           return sw.handleFetch(compRequest, clientId);
         }).then(resp => {
-          expect(sw.rtvVersion(resp.url)).to.equal(sw.rtvVersion(prodUrl));
+          expect(rtvVersion(resp.url)).to.equal(rtvVersion(prodUrl));
         });
       });
     });
@@ -461,7 +466,7 @@ runner.run('Cache SW', () => {
         return sw.handleFetch(request, clientId).then(() => {
           return sw.handleFetch(prevRequest, clientId);
         }).then(resp => {
-          expect(sw.rtvVersion(resp.url)).to.equal(sw.rtvVersion(request.url));
+          expect(rtvVersion(resp.url)).to.equal(rtvVersion(request.url));
         });
       });
 
@@ -476,10 +481,10 @@ runner.run('Cache SW', () => {
               sw.handleFetch(request, clientId),
               sw.handleFetch(compRequest, clientId),
             ]).then(responses => {
-              expect(sw.rtvVersion(responses[0].url)).to.equal(
-                sw.rtvVersion(prevRequest.url));
-              expect(sw.rtvVersion(responses[1].url)).to.equal(
-                sw.rtvVersion(prevRequest.url));
+              expect(rtvVersion(responses[0].url)).to.equal(
+                rtvVersion(prevRequest.url));
+              expect(rtvVersion(responses[1].url)).to.equal(
+                rtvVersion(prevRequest.url));
             });
           });
         });
@@ -494,8 +499,8 @@ runner.run('Cache SW', () => {
           return sw.handleFetch(compRequest, clientId).then(() => {
             return sw.handleFetch(request, clientId);
           }).then(resp => {
-            expect(sw.rtvVersion(resp.url)).to.equal(
-                sw.rtvVersion(prevRequest.url));
+            expect(rtvVersion(resp.url)).to.equal(
+                rtvVersion(prevRequest.url));
           });
         });
 
@@ -552,10 +557,10 @@ runner.run('Cache SW', () => {
               sw.handleFetch(request, clientId),
               sw.handleFetch(prevRequest, clientId),
             ]).then(responses => {
-              expect(sw.rtvVersion(responses[0].url)).to.equal(
-                sw.rtvVersion(request.url));
-              expect(sw.rtvVersion(responses[1].url)).to.equal(
-                sw.rtvVersion(request.url));
+              expect(rtvVersion(responses[0].url)).to.equal(
+                rtvVersion(request.url));
+              expect(rtvVersion(responses[1].url)).to.equal(
+                rtvVersion(request.url));
             });
           });
         });

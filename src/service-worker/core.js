@@ -105,29 +105,34 @@ const CDN_JS_REGEX = new RegExp(
     // Require text ".js" at the end.
     `\\.js)$`);
 
+
 /**
- * Returns the version of a given versioned JS file.
- *
+ * Determines if a url is a request to a CDN JS file.
  * @param {string} url
- * @return {RtvVersion}
+ * @return {boolean}
  * @visibleForTesting
  */
-export function rtvVersion(url) {
-  // RTVs are 2 digit prefixes followed by the timestamp of the release.
-  const match = CDN_JS_REGEX.exec(url);
-  return (match && match[1]) || '';
+export function isCdnJsFile(url) {
+  return CDN_JS_REGEX.test(url);
 }
 
 /**
- * Returns the pathname of a url, used to key a url (since
- * our JS filenames are unique).
- *
+ * Extracts the data from the request URL.
  * @param {string} url
- * @return {string}
+ * @return {{
+ *   explicitRtv: string
+ *   pathname: string
+ *   rtv: string
+ * }}
+ * @visibleForTesting
  */
-function pathname(url) {
+export function requestData(url) {
   const match = CDN_JS_REGEX.exec(url);
-  return match ? match[2] : '';
+  return {
+    explicitRtv: match[1] || '',
+    pathname: match[2],
+    rtv: match[1] || BASE_RTV_VERSION,
+  };
 }
 
 /**
@@ -139,12 +144,11 @@ function pathname(url) {
  * @visibleForTesting
  */
 export function urlWithVersion(url, version) {
-  const currentVersion = rtvVersion(url);
-  if (currentVersion) {
-    return url.replace(currentVersion, version);
+  const { explicitRtv, pathname } = requestData(url);
+  if (explicitRtv) {
+    return url.replace(explicitRtv, version);
   }
-  const oldPath = pathname(url);
-  return url.replace(oldPath, `/rtv/${version}${oldPath}`);
+  return url.replace(pathname, `/rtv/${version}${pathname}`);
 }
 
 /**
@@ -158,7 +162,8 @@ export function urlWithVersion(url, version) {
  */
 function normalizedRequest(request, version) {
   const url = request.url;
-  if (rtvVersion(url) === version) {
+  const { explicitRtv } = requestData(url);
+  if (explicitRtv === version) {
     return request;
   }
 
@@ -174,16 +179,6 @@ function normalizedRequest(request, version) {
     redirect: request.redirect,
     integrity: request.integrity,
   });
-}
-
-/**
- * Determines if a url is a request to a CDN JS file.
- * @param {string} url
- * @return {boolean}
- * @visibleForTesting
- */
-export function isCdnJsFile(url) {
-  return CDN_JS_REGEX.test(url);
 }
 
 /**
@@ -262,10 +257,11 @@ export function fetchAndCache(cache, request, requestPath, requestVersion) {
         for (let i = 0; i < requests.length; i++) {
           const request = requests[i];
           const url = request.url;
-          if (requestPath !== pathname(url)) {
+          const cachedData = requestData(url);
+          if (requestPath !== cachedData.pathname) {
             continue;
           }
-          if (requestVersion === rtvVersion(url)) {
+          if (requestVersion === cachedData.rtv) {
             continue;
           }
 
@@ -302,35 +298,34 @@ export function getCachedVersion(cache, requestPath, requestVersion) {
     // it is, and increment the number of files we have for that version.
     for (let i = 0; i < requests.length; i++) {
       const url = requests[i].url;
-      const path = pathname(url);
-      const version = rtvVersion(url);
+      const cachedData = requestData(url);
 
       // We do not want to stale serve blacklisted files. If nothing else is
       // cached, we will end up serving whatever version is requested.
-      if (isBlacklisted(version)) {
+      if (isBlacklisted(cached.rtv)) {
         continue;
       }
 
-      let count = counts[version] || 0;
+      let count = counts[cachedData.rtv] || 0;
 
       // Incrementing the number of "files" that have this version with a
       // weight.
       // The main binary (arguably the most important file to cache) is given a
       // heavy weight, while the first requested file is given a slight weight.
       // Everything else increments normally.
-      if (path.indexOf('/', 1) === -1) {
+      if (cachedData.pathname.indexOf('/', 1) === -1) {
         // Main binary
         count += 5;
-      } else if (requestPath === path) {
+      } else if (requestPath === cachedData.pathname) {
         // Give a little precedence to the requested file
         count += 2;
       } else {
         count++;
       }
 
-      counts[version] = count;
+      counts[cachedData.rtv] = count;
       if (count > mostCount) {
-        most = version;
+        most = cachedData.rtv;
         mostCount = count;
       }
     }
@@ -363,11 +358,10 @@ export function handleFetch(request, maybeClientId) {
   // Closure Compiler!
   const clientId = /** @type {string} */(maybeClientId);
 
-  const requestPath = pathname(url);
-  const requestVersion = rtvVersion(url) || BASE_RTV_VERSION;
+  const { pathname, rtv } = requestData(url);
   // Rewrite unversioned requests to the versioned RTV URL. This is a noop if
   // it's already versioned.
-  request = normalizedRequest(request, requestVersion);
+  request = normalizedRequest(request, rtv);
 
   // Wait for the cachePromise to resolve. This is necessary
   // since the SW thread may be killed and restarted at any time.
@@ -379,8 +373,7 @@ export function handleFetch(request, maybeClientId) {
     }
 
     // If not, let's find the version to serve up.
-    return clientsVersion[clientId] = getCachedVersion(cache, requestPath,
-        requestVersion);
+    return clientsVersion[clientId] = getCachedVersion(cache, pathname, rtv);
   }).then(version => {
     const versionedRequest = normalizedRequest(request, version);
 
@@ -390,15 +383,15 @@ export function handleFetch(request, maybeClientId) {
         // Now, was it because we served an old cached version or because
         // they requested this exact version; If we served an old version,
         // let's get the new one.
-        if (version !== requestVersion && requestVersion == BASE_RTV_VERSION) {
-          fetchAndCache(cache, request, requestPath, requestVersion);
+        if (version !== rtv && rtv == BASE_RTV_VERSION) {
+          fetchAndCache(cache, request, pathname, rtv);
         }
 
         return response;
       }
 
       // If not, let's fetch and cache the request.
-      return fetchAndCache(cache, versionedRequest, requestPath, version);
+      return fetchAndCache(cache, versionedRequest, pathname, version);
     });
   });
 }
