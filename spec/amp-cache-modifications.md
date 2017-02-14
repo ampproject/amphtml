@@ -12,7 +12,9 @@ the output after modifications will be [this version](https://github.com/ampproj
 
 ### HTML Sanitization
 
-The AMP Cache rewrites all documents to make the parsing structure of the AML HTML align more closely with the HTML5 spec. This does not fully make the AMP HTML into an HTML5 valid document, but does normalize parsing.
+The AMP Cache parses and re-serializes all documents to remove any ambiguities
+in parsing the document which might result in subtly different parses in
+different browsers.
 
 #### All HTML comments are stripped
 
@@ -67,7 +69,7 @@ The AMP Cache rewrites all documents to make the parsing structure of the AML HT
 
 | before | after |
 | --- | --- |
-| `< p    data-foo=bar    >` | `<p data-foo=bar>` |
+| `<p    data-foo=bar    >` | `<p data-foo=bar>` |
 
 </details>
 
