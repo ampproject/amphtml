@@ -71,7 +71,7 @@ export class ActionInvocation {
   /**
    * @param {!Node} target
    * @param {string} method
-   * @param {?JSONType} args
+   * @param {(JSONType|string)} args
    * @param {?Element} source
    * @param {?Event} event
    */
@@ -80,7 +80,7 @@ export class ActionInvocation {
     this.target = target;
     /** @const {string} */
     this.method = method;
-    /** @const {?JSONType} */
+    /** @const {(JSONType|string)} */
     this.args = args;
     /** @const {?Element} */
     this.source = source;
@@ -294,7 +294,7 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONType} args
+   * @param {(JSONType|string)} args
    * @param {?Element} source
    * @param {?Event} event
    * @param {?ActionInfoDef} actionInfo
@@ -488,7 +488,6 @@ export function parseActionMap(s, context) {
           }
         }
       }
-      /** @type {ActionInfoDef} */
       const action = {
         event,
         target,

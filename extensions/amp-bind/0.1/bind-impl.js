@@ -151,7 +151,7 @@ export class Bind {
    * Parses and evaluates an expression with a given scope and merges the
    * resulting object into current state.
    * @param {string} expression
-   * @param {JSONType} scope
+   * @param {!Object} scope
    */
   setStateWithExpression(expression, scope) {
     this.initializePromise_.then(() => {

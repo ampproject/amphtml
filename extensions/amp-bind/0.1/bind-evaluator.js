@@ -107,35 +107,35 @@ export class BindEvaluator {
   /**
    * Evaluates and returns a single expression string.
    * @param {string} expressionString
-   * @param {JSONType} scope
+   * @param {!Object} scope
    * @return {{
    *   result: ./bind-expression.BindExpressionResultDef,
-   *   error: Error|undefined,
+   *   error: Error,
    * }}
    */
   evaluateExpression(expressionString, scope) {
     const parsed = this.parse_(expressionString);
-    if (parsed.error) {
+    if (!parsed.expression) {
       return {result: null, error: parsed.error};
     }
     const evaluated = this.evaluate_(parsed.expression, scope);
-    if (evaluated.error) {
+    if (!evaluated.result) {
       return {result: null, error: evaluated.error};
     }
-    return {result: evaluated.result, error: undefined};
+    return {result: evaluated.result, error: null};
   }
 
   /**
    * @param {string} expressionString
    * @return {{
-   *   expression: BindExpression|undefined,
-   *   error: Error|undefined,
+   *   expression: BindExpression,
+   *   error: Error,
    * }}
    * @private
    */
   parse_(expressionString) {
     let expression = this.expressionCache_[expressionString];
-    let error;
+    let error = null;
     if (!expression) {
       try {
         expression = new BindExpression(expressionString);
@@ -149,16 +149,16 @@ export class BindEvaluator {
 
   /**
    * @param {!BindExpression} expression
-   * @param {JSONType} scope
+   * @param {!Object} scope
    * @return {{
    *   result: ./bind-expression.BindExpressionResultDef,
-   *   error: Error|undefined,
+   *   error: Error,
    * }}
    * @private
    */
   evaluate_(expression, scope) {
     let result = null;
-    let error;
+    let error = null;
     try {
       result = expression.evaluate(scope);
     } catch (e) {
