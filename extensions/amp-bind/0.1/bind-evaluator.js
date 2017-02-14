@@ -16,7 +16,6 @@
 
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
-import {map, hasOwn} from '../../../src/utils/object';
 import {filterSplice} from '../../../src/utils/array';
 
 /**
