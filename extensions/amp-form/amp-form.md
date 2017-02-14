@@ -378,7 +378,7 @@ Substitutions will happen on every subsequent submission. Read more about [varia
 Your XHR endpoints need to follow and implement [CORS Requests in AMP spec](../../spec/amp-cors-requests.md).
 
 ### Protecting against XSRF
-In addition to following AMP CORS spec, please pay extra attention to [state changing requests note](../../spec/amp-cors-requests.md#note-on-state-changing-requests).
+In addition to following AMP CORS spec, please pay extra attention to [state changing requests note](../../spec/amp-cors-requests.md#note-on-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
 
 In general, keep in mind the following points when accepting input from the user:
 
