@@ -20,7 +20,7 @@ tags: {  # amp-call-tracking
   spec_name: "amp-call-tracking extension .js script"
   satisfies: "amp-call-tracking extension .js script"
   mandatory_parent: "HEAD"
-  unique_warning: true
+  unique: true
   extension_unused_unless_tag_present: "amp-call-tracking"
   attrs: {
     name: "async"
