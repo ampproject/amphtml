@@ -97,7 +97,7 @@ describes.realWin('AmpForm Integration', {
         actionXhr: baseUrl + '/form/post',
         on: 'submit:sameform.submit',
       });
-      const ampForm = new AmpForm(form);
+      const ampForm = new AmpForm(form, 'sameform');
       sandbox.spy(ampForm, 'handleXhrSubmit_');
       sandbox.spy(ampForm, 'handleSubmitAction_');
       sandbox.spy(ampForm.xhr_, 'fetch');
@@ -127,7 +127,7 @@ describes.realWin('AmpForm Integration', {
             ' {{#interests}}{{title}} {{/interests}}.',
         errorTemplate: 'Should not render this.',
       });
-      new AmpForm(form);
+      new AmpForm(form, 'form1');
       form.dispatchEvent(new Event('submit'));
       return timer.promise(100).then(() => {
         const rendered = form.querySelectorAll('[i-amp-rendered]');
@@ -146,7 +146,7 @@ describes.realWin('AmpForm Integration', {
         errorTemplate: 'Oops. {{name}} your email {{email}} is already ' +
             'subscribed.',
       });
-      new AmpForm(form);
+      new AmpForm(form, 'form1');
       const errors = [];
       const realSetTimeout = window.setTimeout;
       sandbox.stub(window, 'setTimeout', (callback, delay) => {
@@ -182,7 +182,7 @@ describes.realWin('AmpForm Integration', {
         ' {{#interests}}{{title}} {{/interests}}.',
         errorTemplate: 'Should not render this.',
       });
-      new AmpForm(form);
+      new AmpForm(form, 'form1');
       form.dispatchEvent(new Event('submit'));
       return timer.promise(100).then(() => {
         const rendered = form.querySelectorAll('[i-amp-rendered]');
@@ -201,7 +201,7 @@ describes.realWin('AmpForm Integration', {
         errorTemplate: 'Oops. {{name}} your email {{email}} is already ' +
         'subscribed.',
       });
-      new AmpForm(form);
+      new AmpForm(form, 'form1');
       const errors = [];
       const realSetTimeout = window.setTimeout;
       sandbox.stub(window, 'setTimeout', (callback, delay) => {
