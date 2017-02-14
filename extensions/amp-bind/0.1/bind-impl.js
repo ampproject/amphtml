@@ -201,8 +201,8 @@ export class Bind {
     return new Promise(resolve => {
 
       // Eliminate bound elements that have node as an ancestor
-      this.boundElements_ = filterSplice(this.boundElements_, boundElement => {
-        return node.contains(boundElement.element);
+      filterSplice(this.boundElements_, boundElement => {
+        return !node.contains(boundElement.element);
       });
 
       // Eliminate elements from the expression to elements map that
@@ -211,11 +211,9 @@ export class Bind {
       const deletedExpressions = [];
       for (const expression in this.expressionToElements_) {
         const elements = this.expressionToElements_[expression];
-        for (let j = elements.length - 1; j >= 0; j--) {
-          if (node.contains(elements[j])) {
-            elements.splice(j, 1);
-          }
-        }
+        filterSplice(elements, element => {
+          return !node.contains(element);
+        });
         if (elements.length == 0) {
           deletedExpressions.push(expression);
           delete this.expressionToElements_[expression];
@@ -226,23 +224,6 @@ export class Bind {
       this.evaluator_.removeBindingsForExpressions(deletedExpressions);
       resolve();
     });
-  }
-
-  /**
-   * Checks if `potentialParent` is an ancestor node of `node`
-   * @param {!Element} node
-   * @param {!Element} potentialParent
-   * @return {boolean}
-   */
-  isAncestorOf_(node, potentialParent) {
-    let currentElement = node;
-    while (currentElement) {
-      if (currentElement === potentialParent) {
-        return true;
-      }
-      currentElement = currentElement.parentElement;
-    }
-    return false;
   }
 
   /**

@@ -18,6 +18,8 @@ import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {map, hasOwn} from '../../../src/utils/object';
+import {filterSplice} from '../../../src/utils/array';
+
 
 /**
  * @typedef {{
@@ -90,12 +92,10 @@ export class BindEvaluator {
       expressionsToRemove[expressionStrings[i]] = undefined;
     }
 
-    for (let j = this.parsedBindings_.length - 1; j >= 0; j--) {
-      const expression = this.parsedBindings_[j].expression.expressionString;
-      if (hasOwn(expressionsToRemove, expression)) {
-        this.parsedBindings_.splice(j, 1);
-      }
-    }
+    this.parsedBindings_ = filterSplice(this.parsedBindings_, binding => {
+      const expression = binding.expression.expressionString;
+      return !hasOwn(expressionsToRemove, expression);
+    })
   }
 
   /**
