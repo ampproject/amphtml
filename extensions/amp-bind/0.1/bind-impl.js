@@ -250,8 +250,7 @@ export class Bind {
    */
   removeBindingsForNode_(node) {
     return new Promise(resolve => {
-
-      // Eliminate bound elements that have node as an ancestor
+      // Eliminate bound elements that have node as an ancestor.
       filterSplice(this.boundElements_, boundElement => {
         return !node.contains(boundElement.element);
       });
@@ -271,14 +270,14 @@ export class Bind {
         }
       }
 
-      // Remove the bindings from the evaluator
+      // Remove the bindings from the evaluator.
       if (this.workerExperimentEnabled_) {
         dev().fine(TAG, `Asking worker to parse expressions...`);
         return invokeWebWorker(this.win_,
-          'bind.removeBindingsForExpressions',
+          'bind.removeBindingsWithExpressionStrings',
           [deletedExpressions]);
       } else {
-        this.evaluator_.removeBindingsForExpressions(deletedExpressions);
+        this.evaluator_.removeBindingsWithExpressionStrings(deletedExpressions);
       }
       resolve();
     });

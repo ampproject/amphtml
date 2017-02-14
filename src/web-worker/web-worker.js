@@ -42,7 +42,7 @@ self.addEventListener('message', function(event) {
     case 'bind.removeBindings':
       if (evaluator_) {
         returnValue =
-          evaluator_.removeBindingsForExpressions.apply(evaluator_, args);
+          evaluator_.removeBindingsForExpressionStrings.apply(evaluator_, args);
       } else {
         throw new Error(`${method}: BindEvaluator is not initialized.`);
       }

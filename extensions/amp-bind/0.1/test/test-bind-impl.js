@@ -84,12 +84,6 @@ describes.realWin('amp-bind', {
   function onBindReady() {
     return env.ampdoc.whenReady().then(() => {
       return bind.scanPromise_;
-    }).then(() => {
-      if (bind.evaluatePromise_) {
-        return bind.evaluatePromise_.then(() => {
-          env.flushVsync();
-        });
-      }
     });
   }
 
@@ -125,18 +119,17 @@ describes.realWin('amp-bind', {
   });
 
   it('should have same state after removing + re-adding a subtree', () => {
+    const doc = env.win.document;
     for (let i = 0; i < 5; i++) {
       createElementWithBinding('[onePlusOne]="1+1"');
     }
     expect(bind.boundElements_.length).to.equal(0);
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(5);
-      return bind
-        .removeBindingsForNode_(env.win.document.getElementById('parent'));
+      return bind.removeBindingsForNode_(doc.getElementById('parent'));
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(0);
-      return bind
-        .addBindingsForNode_(env.win.document.getElementById('parent'));
+      return bind.addBindingsForNode_(doc.getElementById('parent'));
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(5);
     });
