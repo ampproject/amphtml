@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {buildUrl} from './url-builder';
+import {
+  buildUrl,
+  generateFrmAdParamValue,
+} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/document-info';
@@ -113,6 +116,10 @@ export function googleAdUrl(
     const viewportRect = viewport.getRect();
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
+    const frm = generateFrmAdParamValue(window);
+    if (frm) {
+      queryParams.push({name: 'frm', value: frm});
+    }
     if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
       queryParams.push({name: 'amp_ct',
                         value: adElement.parentElement.tagName});
@@ -148,6 +155,7 @@ export function googleAdUrl(
         {name: 'brdim', value: additionalDimensions(win, viewportSize)},
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
+        {name: 'sc', value: 'true'},
       ],
       unboundedQueryParams,
       [
