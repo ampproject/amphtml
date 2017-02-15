@@ -1,6 +1,6 @@
 # About this guide
 
-This Quick Start guide is the TL;DR version of the longer [end-to-end guide](#getting-started-e2e.md) for people who don't want/need a longer explanation.
+This Quick Start guide is the TL;DR version of the longer [end-to-end guide](getting-started-e2e.md) for people who don't want/need a longer explanation.
 
 # One-time Setup
 
