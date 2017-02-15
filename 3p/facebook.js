@@ -60,8 +60,8 @@ function getCommentsContainer(global, data) {
   const container = global.document.createElement('div');
   container.className = 'fb-comments';
   container.setAttribute('data-href', data.href);
-  container.setAttribute('data-numposts', data.numposts);
-  container.setAttribute('data-order-by', data.orderBy);
+  container.setAttribute('data-numposts', data.numposts || 10);
+  container.setAttribute('data-order-by', data.orderBy || 'social');
   container.setAttribute('data-width', '100%');
 
   return container;
