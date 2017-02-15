@@ -551,27 +551,3 @@ is appended to the end of the `<body>`.
 | `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Foo rel=stylesheet>`<br>`<link href=https://fonts.googleapis.com/css?family=Bar rel=stylesheet media=print>`<br>`...`<br>`</head>`<br>`<body>`<br>`...`<br>`</body>` | `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Foo rel=stylesheet>`<br>`<link href=https://fonts.googleapis.com/css?family=Bar rel=stylesheet media=print>`<br>`...`<br>`</head>`<br>`<body>`<br>`...`<br>`<script type=application/json amp-ad-metadata>`<br>`{`<br>`"customStylesheets" : [`<br>`{`<br>`"href" : "https://fonts.googleapis.com/css?family=Foo"`<br>`},`<br>`{`<br>`"href" : "https://fonts.googleapis.com/css?family=Bar",`<br>`"media" : "print"`<br>`}`<br>`}`<br>`</script>`<br>`</body>` |
 
 </details>
-
-
-
-
-
-
-
-
-
-#### Example
-
-<details>
-<summary>example</summary>
-
-| before | after |
-| --- | --- |
-| `` | `` |
-
-</details>
-
-
-
-*Condition*:
-
