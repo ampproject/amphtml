@@ -147,6 +147,9 @@ describes.realWin('AmpForm Integration', {
             'subscribed.',
       });
       new AmpForm(form, 'form1');
+      // Stubbing timeout to catch async-thrown errors and expect
+      // them. These catch errors thrown inside the catch-clause of the
+      // xhr request using rethrowAsync.
       const errors = [];
       const realSetTimeout = window.setTimeout;
       sandbox.stub(window, 'setTimeout', (callback, delay) => {
@@ -203,6 +206,9 @@ describes.realWin('AmpForm Integration', {
       });
       new AmpForm(form, 'form1');
       const errors = [];
+      // Stubbing timeout to catch async-thrown errors and expect
+      // them. These catch errors thrown inside the catch-clause of the
+      // xhr request using rethrowAsync.
       const realSetTimeout = window.setTimeout;
       sandbox.stub(window, 'setTimeout', (callback, delay) => {
         realSetTimeout(() => {
