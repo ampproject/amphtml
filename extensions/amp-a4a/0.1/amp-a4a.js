@@ -299,6 +299,9 @@ export class AmpA4A extends AMP.BaseElement {
             'Error on emitLifecycleEvent', err, varArgs) ;
       });
 
+    /** @const {string} */
+    this.sentinel = generateSentinel(window);
+
     /**
      * Used to indicate whether this slot should be collapsed or not. Marked
      * true if the ad response has status 204, is null, or has a null
@@ -1172,11 +1175,9 @@ export class AmpA4A extends AMP.BaseElement {
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
     // Can't get the attributes until we have the iframe, then set it.
-    const attributes = this.generateSentinelAndContext(iframe);
+    const attributes = getContextMetadata(window, iframe, this.sentinel);
     iframe.setAttribute('name', JSON.stringify(attributes));
-    const sentinel = attributes._context.sentinel ||
-        attributes._context.amp3pSentinel;
-    iframe.setAttribute('data-amp-3p-sentinel', sentinel);
+    iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
     return this.iframeRenderHelper_(iframe);
   }
 
@@ -1228,28 +1229,16 @@ export class AmpA4A extends AMP.BaseElement {
           }, SHARED_IFRAME_PROPERTIES));
       if (method == XORIGIN_MODE.NAMEFRAME) {
         // TODO(bradfrizzell): change name of function and var
-        const attributes = this.generateSentinelAndContext(iframe);
+        const attributes = getContextMetadata(window, iframe, this.sentinel);
         attributes['creative'] = creative;
         const name = JSON.stringify(attributes);
         // Need to reassign the name once we've generated the context
         // attributes off of the iframe. Need the iframe to generate.
         iframe.setAttribute('name', name);
-        const sentinel = attributes._context.sentinel ||
-            attributes._context.amp3pSentinel;
-        iframe.setAttribute('data-amp-3p-sentinel', sentinel);
+        iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
       }
       return this.iframeRenderHelper_(iframe);
     });
-  }
-
-  /**
-   * Generates sentinel for iframe and gets the context metadata.
-   * @param {!Element} iframe
-   * @return {!Object} context
-   */
-  generateSentinelAndContext(iframe) {
-    const sentinel = generateSentinel(window);
-    return getContextMetadata(window, iframe, sentinel);
   }
 
   /**
