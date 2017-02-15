@@ -1096,7 +1096,7 @@ export class Resources {
             }
             // Sync is necessary here to avoid UI jump in the next frame.
             const newScrollHeight = this.viewport_./*OK*/getScrollHeight();
-            if (newScrollHeight > state./*OK*/scrollHeight) {
+            if (newScrollHeight != state./*OK*/scrollHeight) {
               this.viewport_.setScrollTop(state./*OK*/scrollTop +
                   (newScrollHeight - state./*OK*/scrollHeight));
             }
