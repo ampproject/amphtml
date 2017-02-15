@@ -264,6 +264,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
          'amp-selector/amp-selector.md',
   },
+  {
+    id: 'sticky-ad-early-load',
+    name: 'Load sticky-ad early after user first scroll' +
+        'Only apply to 1.0 version',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
+  },
 ];
 
 if (getMode().localDev) {
