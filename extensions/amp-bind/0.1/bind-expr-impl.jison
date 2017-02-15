@@ -215,12 +215,7 @@ variable:
   ;
 
 literal:
-    STRING
-      %{
-        const string = yytext.substr(1, yyleng - 2);
-        $$ = new AstNode(AstNodeType.LITERAL, null, string);
-      %}
-  | NUMBER
+    NUMBER
       %{
         $$ = new AstNode(AstNodeType.LITERAL, null, Number(yytext));
       %}
@@ -236,6 +231,10 @@ literal:
       %{
         $$ = new AstNode(AstNodeType.LITERAL, null, null);
       %}
+  | string_literal
+      %{
+        $$ = $1;
+      %}
   | object_literal
       %{
         $$ = $1;
@@ -243,6 +242,14 @@ literal:
   | array_literal
       %{
         $$ = $1;
+      %}
+  ;
+
+string_literal:
+    STRING
+      %{
+        const string = yytext.substr(1, yyleng - 2);
+        $$ = new AstNode(AstNodeType.LITERAL, null, string);
       %}
   ;
 
@@ -293,8 +300,19 @@ object:
   ;
 
 key_value:
-  expr ':' expr
+  key ':' expr
       %{
         $$ = new AstNode(AstNodeType.KEY_VALUE, [$1, $3]);
+      %}
+  ;
+
+key:
+    NAME
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, $1);
+      %}
+  | string_literal
+      %{
+        $$ = $1;
       %}
   ;
