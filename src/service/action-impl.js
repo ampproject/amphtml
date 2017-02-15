@@ -49,6 +49,9 @@ const ELEMENTS_ACTIONS_MAP_ = {
 let ActionInfoArgsDef;
 
 /**
+ * Parsed action invocation data for "event:target.method(arguments)", where
+ * `arguments` is either comma-separated key-value pairs (args) or an unparsed
+ * expression fragment (argsExpression).
  * @typedef {{
  *   event: string,
  *   target: string,
@@ -81,9 +84,9 @@ export class ActionInvocation {
     this.target = target;
     /** @const {string} */
     this.method = method;
-    /** @type {?JSONType} */
+    /** @const {?JSONType} */
     this.args = args;
-    /** @type {?string} */
+    /** @const {?string} */
     this.argsExpression = argsExpression;
     /** @const {?Element} */
     this.source = source;
@@ -429,7 +432,7 @@ export function parseActionMap(s, context) {
       // Method: ".method". Method is optional.
       let method = DEFAULT_METHOD_;
       let args = null;
-      let expression = null;
+      let argsExpression = null;
       peek = toks.peek();
       if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
         toks.next();  // Skip '.'
@@ -444,7 +447,9 @@ export function parseActionMap(s, context) {
 
           // Object literal. Format: {...}
           if (peek.type == TokenType.LITERAL && peek.value[0] == '{') {
-            expression = toks.next().value;
+            // Don't parse object literals. Tokenize as a single expression
+            // fragment and delegate to specific action handler.
+            argsExpression = toks.next().value;
             assertToken(toks.next(), [TokenType.SEPARATOR], ')');
           } else {
             // Key-value pairs. Format: key = value, ....
@@ -496,7 +501,7 @@ export function parseActionMap(s, context) {
         method,
         args: (args && getMode().test && Object.freeze) ?
             Object.freeze(args) : args,
-        argsExpression: expression,
+        argsExpression,
         str: s,
       };
       if (!actionMap) {
@@ -552,8 +557,8 @@ function getActionInfoArgValue(tokens) {
 }
 
 /**
- * Generates method arg values for each key in the given
- * ActionInfoArgsDef with the data in the given event.
+ * Generates method arg values for each key in the given ActionInfoArgsDef
+ * with the data in the given event.
  * @param {?ActionInfoArgsDef} args
  * @param {?Event} event
  * @return {?JSONType}
