@@ -160,11 +160,10 @@ export class AmpViewerIntegration {
   /**
    * @param {!Messaging} messaging
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
-   * @param {!WindowPortEmulator} port
    * @return {Promise<*>|undefined}
    * @private
    */
-  setup_(messaging, viewer, port) {
+  setup_(messaging, viewer) {
     messaging.setRequestProcessor((type, payload, awaitResponse) => {
       return viewer.receiveMessage(
         type, /** @type {!JSONType} */ (payload), awaitResponse);
@@ -176,7 +175,7 @@ export class AmpViewerIntegration {
     listenOnce(
       this.win, 'unload', this.handleUnload_.bind(this, messaging));
 
-    new TouchHandler(this.win, port);
+    new TouchHandler(this.win, messaging);
   }
 
   /**
