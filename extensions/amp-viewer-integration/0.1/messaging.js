@@ -107,64 +107,9 @@ export class Messaging {
     this.waitingForResponse_ = {};
     /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
     this.requestProcessor_ = null;
-    /** @private {boolean} */
-    this.isMouseDown_ = false;
 
     this.port_.addEventListener('message', this.handleMessage_.bind(this));
     this.port_.start();
-
-    this.listenForTouchEvents();
-  }
-
-  listenForTouchEvents() {
-    const handleTouchEvent = this.handleTouchEvent_.bind(this);
-    listen(this.win, 'touchstart', handleTouchEvent);
-    listen(this.win, 'touchend', handleTouchEvent);
-    listen(this.win, 'touchmove', handleTouchEvent);
-    listen(this.win, 'touchleave', handleTouchEvent); //finger moves outside listening area
-    listen(this.win, 'touchenter', handleTouchEvent);
-    listen(this.win, 'touchcancel', handleTouchEvent);
-
-    const handleMouseEvent = this.handleMouseEvent_.bind(this);
-    listen(this.win, 'mousedown', handleMouseEvent);
-    listen(this.win, 'mouseup', handleMouseEvent);
-    listen(this.win, 'dragstart', handleMouseEvent);
-    listen(this.win, 'dragend', handleMouseEvent);
-    listen(this.win, 'mousemove', handleMouseEvent);
-    listen(this.win, 'mouseleave', handleMouseEvent); //finger moves outside listening area
-    listen(this.win, 'mouseenter', handleMouseEvent);
-  }
-
-  /**
-   * @param {!Event} event
-   * @private
-   */
-  handleTouchEvent_(event) {
-    console.log('handleTouchEvent!', event);
-    debugger;
-    this.requestProcessor_('scroll', event, false);
-  }
-
-  /**
-   * Only send mouse events if mouse is down. Yes? No?
-   * @param {!Event} event
-   * @private
-   */
-  handleMouseEvent_(event) {
-    switch (event.type) {
-      case 'mousedown':
-      case 'dragstart':
-        this.isMouseDown_ = true;
-        break;
-      case 'mouseup':
-      case 'dragend':
-        this.isMouseDown_ = false;
-        break;
-      default:
-        if (this.isMouseDown_) {
-          this.handleTouchEvent_(event);
-        }
-    }
   }
 
   /**

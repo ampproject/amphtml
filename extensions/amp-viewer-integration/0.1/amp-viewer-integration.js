@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {Messaging, WindowPortEmulator} from './messaging.js';
 import {getAmpDoc} from '../../../src/ampdoc';
 import {isIframed} from '../../../src/dom';
+=======
+import {Messaging, WindowPortEmulator} from './messaging';
+import {TouchHandler} from './touch_handler';
+import {viewerForDoc} from '../../../src/viewer';
+>>>>>>> touch_handler
 import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {getSourceUrl} from '../../../src/url';
@@ -160,6 +166,8 @@ export class AmpViewerIntegration {
 
     listenOnce(
       this.win, 'unload', this.handleUnload_.bind(this, messaging));
+
+    new TouchHandler(this.win); //horizontalscrolling?
   }
 
   /**
