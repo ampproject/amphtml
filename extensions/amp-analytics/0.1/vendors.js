@@ -661,9 +661,9 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         '%22title%22%3a%22${title}%22',
         '%22location%22%3a%22${sourceUrl}%22',
         '%22path%22%3a%22${sourcePath}%22',
-        '%22amp_location%22%3a%22${ampdocUrl}%22',
+        '%22src_location%22%3a%22${ampdocUrl}%22',
         '%22referrer%22%3a%22${documentReferrer}%22',
-        '%22template_name%22%3a%22${templateName}%22'
+        '%22templatename%22%3a%22${templateName}%22'
       ].join('%2c'),
       '_basePrefix': '${_host}/s.gif?' +
         'slug=${projectSlug}&' +
