@@ -57,6 +57,9 @@ export class AmpViewerIntegration {
 
     /** @private {boolean} */
     this.isWebView_ = false;
+
+    /** @private {boolean} */
+    this.enableEventForwarding_ = true;
   }
 
   /**
@@ -175,7 +178,9 @@ export class AmpViewerIntegration {
     listenOnce(
       this.win, 'unload', this.handleUnload_.bind(this, messaging));
 
-    new TouchHandler(this.win, messaging);
+    if (this.enableEventForwarding_) {
+      new TouchHandler(this.win, messaging);
+    }
   }
 
   /**

@@ -18,6 +18,26 @@
 import {Messaging} from './messaging';
 import {listen} from '../../../src/event-helper';
 
+
+/**
+ * The list of touch event properites to copy.
+ * @const {!Array<string>}
+ */
+const EVENT_PROPERTIES = [
+  'altKey', 'charCode', 'ctrlKey', 'detail', 'eventPhase', 'keyCode',
+  'layerX', 'layerY', 'metaKey', 'pageX', 'pageY', 'returnValue',
+  'shiftKey', 'timeStamp', 'type', 'which',
+];
+
+/**
+ * The list of touch properties to copy.
+ * @const {!Array<string>}
+ */
+const TOUCH_PROPERTIES = [
+  'clientX', 'clientY', 'force', 'identifier', 'pageX', 'pageY', 'radiusX',
+  'radiusY', 'screenX', 'screenY',
+];
+
 /**
  * @fileoverview Forward touch events from the AMP doc to the viewer.
  */
@@ -49,46 +69,99 @@ export class TouchHandler {
     listen(this.win, 'touchend', handleEvent);
     listen(this.win, 'touchmove', handleEvent);
 
-    listen(this.win, 'mousedown', handleEvent);
-    listen(this.win, 'mouseup', handleEvent);
-    listen(this.win, 'dragstart', handleEvent);
-    listen(this.win, 'dragend', handleEvent);
-    listen(this.win, 'mousemove', handleEvent);
+    listen(this.win, 'mousedown', handleEvent); // DELETE BEFORE MERGING
+    listen(this.win, 'mouseup', handleEvent); // DELETE BEFORE MERGING
+    listen(this.win, 'dragstart', handleEvent); // DELETE BEFORE MERGING
+    listen(this.win, 'dragend', handleEvent); // DELETE BEFORE MERGING
+    listen(this.win, 'mousemove', handleEvent); // DELETE BEFORE MERGING
   }
 
   /**
-   * @param {!Event} event
+   * @param {!Event} e
    * @private
    */
-  handleEvent_(event) {
-    switch (event.type) {
-      case 'dragstart':
-      case 'mousedown':
+  handleEvent_(e) {
+    switch (e.type) {
+      case 'dragstart': // DELETE BEFORE MERGING
+      case 'mousedown': // DELETE BEFORE MERGING
       case 'touchstart':
         this.tracking_ = true;
-        this.forwardEvent_(event);
+        this.forwardEvent_(e);
         break;
-      case 'dragend':
-      case 'mouseup':
+      case 'dragend': // DELETE BEFORE MERGING
+      case 'mouseup': // DELETE BEFORE MERGING
       case 'touchend':
-        this.forwardEvent_(event);
+        this.forwardEvent_(e);
         this.tracking_ = false;
         break;
       default:
         if (this.tracking_) {
-          this.forwardEvent_(event);
+          this.forwardEvent_(e);
         }
     }
   }
 
   /**
-   * @param {!Event} event
+   * @param {!Event} e
    * @private
    */
-  forwardEvent_(event) {
-    console.log('handleTouchEvent!', event);
-    if (event && event.type) {
-      this.messaging_.sendRequest(event.type, event, false);
+  forwardEvent_(e) {
+    console.log('handleTouchEvent!', e);
+    if (e && e.type) {
+      const msg = this.copyTouchEvent_(e);
+      this.messaging_.sendRequest(e.type, msg, false);
     }
+  }
+
+
+  /**
+   * Makes a partial copy of the event.
+   * @param {!Event} e The event object to be copied.
+   * @return {!Object}
+   * @private
+   */
+  copyTouchEvent_(e) {
+    const copiedEvent =
+        this.copyProperties_(e, EVENT_PROPERTIES);
+    if (e.touches) {
+      copiedEvent.touches = this.copyTouches_(e.touches);
+    }
+    if (e.changedTouches) {
+      copiedEvent.changedTouches = this.copyTouches_(e.changedTouches);
+    }
+    return copiedEvent;
+  }
+
+
+  /**
+   * Copies an array of touches.
+   * @param {!Array<!Object>} touchList
+   * @return {!Array<!Object>}
+   * @private
+   */
+  copyTouches_(touchList) {
+    const copiedTouches = [];
+    for (let i = 0; i < touchList.length; i++) {
+      copiedTouches.push(this.copyProperties_(touchList[i], TOUCH_PROPERTIES));
+    }
+    return copiedTouches;
+  }
+
+ /**
+   * Copies specified properties of o to a new object.
+   * @param {!Object} o The source object.
+   * @param {!Array<string>} properties The properties to copy.
+   * @return {!Object} The copy of o.
+   * @private
+   */
+  copyProperties_(o, properties) {
+    const copy = {};
+    for (let i = 0; i < properties.length; i++) {
+      const p = properties[i];
+      if (o[p] !== undefined) {
+        copy[p] = o[p];
+      }
+    }
+    return copy;
   }
 }
