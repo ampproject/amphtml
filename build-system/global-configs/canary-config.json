@@ -20,5 +20,6 @@
   "sentinel-name-change": 1,
   "chunked-amp": 1,
   "make-body-relative": 1,
+  "visibility-v2": 1,
   "amp-selector": 1
 }
