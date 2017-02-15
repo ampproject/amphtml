@@ -72,12 +72,12 @@ function getCommentsContainer(global, data) {
  * @param {!Object} data
  */
 export function facebook(global, data) {
-  const extention = global.context.tagName;
+  const extension = global.context.tagName;
   let container;
 
-  if (extention === 'AMP-FACEBOOK-COMMENTS') {
+  if (extension === 'AMP-FACEBOOK-COMMENTS') {
     container = getCommentsContainer(global, data);
-  } else if(extention === 'AMP-FACEBOOK') {
+  } else if(extension === 'AMP-FACEBOOK') {
     container = getPostContainer(global, data);
   }
 
