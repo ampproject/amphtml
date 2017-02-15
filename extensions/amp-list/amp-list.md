@@ -53,7 +53,7 @@ The response is expected to contain the array that will be rendered. The path to
 is specified using the optional `items` attribute. This attribute contains the dot-notated path
 to the array within the response object. The default value is "items". To indicate that the
 response itself is an array, the "." value can be used. The array can be nested within the
-response and accessed using and expression like `items="field1.field2"`.
+response and accessed using an expression like `items="field1.field2"`.
 
 Thus, when `items="items"` is specified (the default) the response must be a JSON object that
 contains an array property called "items":
