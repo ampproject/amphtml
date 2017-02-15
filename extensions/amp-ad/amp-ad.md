@@ -131,6 +131,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Industrybrains](../../ads/industrybrains.md)
 - [InMobi](../../ads/inmobi.md)
 - [Kargo](../../ads/kargo.md)
+- [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
 - [Ligatus](../../ads/ligatus.md)
 - [LOKA](../../ads/loka.md)
