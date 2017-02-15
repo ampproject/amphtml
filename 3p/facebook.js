@@ -36,31 +36,65 @@ function getFacebookSdk(global, cb) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {!Object} data The element data
+ * @return {!Element} div
  */
-export function facebook(global, data) {
+function getPostContainer(global, data) {
+  const container = global.document.createElement('div');
   const embedAs = data.embedAs || 'post';
   user().assert(['post', 'video'].indexOf(embedAs) !== -1,
       'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
       ' "post" or "video" was: %s', embedAs);
-  const fbPost = global.document.createElement('div');
-  fbPost.className = 'fb-' + embedAs;
-  fbPost.setAttribute('data-href', data.href);
-  global.document.getElementById('c').appendChild(fbPost);
+  container.className = 'fb-' + embedAs;
+  container.setAttribute('data-href', data.href);
+
+  return container;
+}
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data The element data
+ * @return {!Element} div
+ */
+function getCommentsContainer(global, data) {
+  const container = global.document.createElement('div');
+  container.className = 'fb-comments';
+  container.setAttribute('data-href', data.href);
+  container.setAttribute('data-numposts', data.numposts);
+  container.setAttribute('data-order-by', data.orderBy);
+  container.setAttribute('data-width', '100%');
+
+  return container;
+}
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function facebook(global, data) {
+  const extention = global.context.tagName;
+  let container;
+
+  if (extention === 'AMP-FACEBOOK-COMMENTS') {
+    container = getCommentsContainer(global, data);
+  } else if(extention === 'AMP-FACEBOOK') {
+    container = getPostContainer(global, data);
+  }
+
+  global.document.getElementById('c').appendChild(container);
+
   getFacebookSdk(global, FB => {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;
 
-    // Only need to listen to post resizing as FB videos have a fixed ratio
-    // and can automatically resize correctly given the initial width/height.
-    if (embedAs === 'post') {
-      FB.Event.subscribe('xfbml.resize', event => {
-        context.updateDimensions(
-            parseInt(event.width, 10),
-            parseInt(event.height, 10) + /* margins */ 20);
-      });
-    }
+
+    FB.Event.subscribe('xfbml.resize', event => {
+      context.updateDimensions(
+        parseInt(event.width, 10),
+        parseInt(event.height, 10) + /* margins */ 20);
+    });
+
     FB.init({xfbml: true, version: 'v2.5'});
   });
 

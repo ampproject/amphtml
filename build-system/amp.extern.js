@@ -104,7 +104,8 @@ data.pageHidden;
 data.changes;
 data._context;
 data.inViewport;
-
+data.numposts;
+data.orderBy;
 
 // 3p code
 var twttr;
