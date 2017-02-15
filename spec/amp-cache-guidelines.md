@@ -56,6 +56,8 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
     1. The cache is allowed to serve stale content independent of HTTP caching headers. It must make reasonable efforts to keep the cache contents fresh and must revalidate content after serving stale responses.
 
+14. Follows [AMP cache modifications best practices](https://github.com/ampproject/amphtml/blob/master/spec/amp-cachem-modifications.md).
+
 ## Guidelines: Crawling 
 
 * [robots.txt](https://cdn.ampproject.org/robots.txt): Content should be served from the Cache with either the same robot rules as the origin content or stricter rules. See [https://cdn.ampproject.org/robots.txt](https://cdn.ampproject.org/robots.txt) for an example.
