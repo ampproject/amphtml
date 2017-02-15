@@ -132,6 +132,7 @@ export class Bind {
    * unless `opt_skipDigest` is false.
    * @param {!Object} state
    * @param {boolean=} opt_skipDigest
+   * @return {!Promise}
    */
   setState(state, opt_skipDigest) {
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
@@ -140,10 +141,12 @@ export class Bind {
     Object.assign(this.scope_, state);
 
     if (!opt_skipDigest) {
-      this.initializePromise_.then(() => {
-        this.digest_();
+      return this.initializePromise_.then(() => {
         user().fine(TAG, 'State updated; re-evaluating expressions...');
+        return this.digest_();
       });
+    } else {
+      return Promise.resolve();
     }
   }
 
@@ -152,9 +155,10 @@ export class Bind {
    * resulting object into current state.
    * @param {string} expression
    * @param {!Object} scope
+   * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    this.initializePromise_.then(() => {
+    return this.initializePromise_.then(() => {
       if (this.workerExperimentEnabled_) {
         return invokeWebWorker(
             this.win_, 'bind.evaluateExpression', [expression, scope]);
@@ -166,7 +170,7 @@ export class Bind {
         user().error(TAG,
             'AMP.setState() failed with error: ', returnValue.error);
       } else {
-        this.setState(returnValue.result);
+        return this.setState(returnValue.result);
       }
     });
   }
@@ -206,13 +210,13 @@ export class Bind {
         }
       });
 
+      dev().fine(TAG, `Finished parsing expressions with ` +
+          `${Object.keys(parseErrors).length} errors.`);
+
       // Trigger verify-only digest in development.
       if (getMode().development) {
         this.digest_(/* opt_verifyOnly */ true);
       }
-
-      dev().fine(TAG, `Finished parsing expressions with ` +
-          `${Object.keys(parseErrors).length} errors.`);
     });
   }
 
@@ -339,6 +343,7 @@ export class Bind {
    * If `opt_verifyOnly` is true, does not apply results but verifies them
    * against current element values instead.
    * @param {boolean=} opt_verifyOnly
+   * @return {!Promise}
    * @private
    */
   digest_(opt_verifyOnly) {
@@ -351,7 +356,7 @@ export class Bind {
       this.evaluatePromise_ = Promise.resolve(evaluation);
     }
 
-    this.evaluatePromise_.then(returnValue => {
+    return this.evaluatePromise_.then(returnValue => {
       const {results, errors} = returnValue;
       if (opt_verifyOnly) {
         this.verify_(results);

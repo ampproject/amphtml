@@ -80,15 +80,7 @@ describes.realWin('amp-bind', {
    * @return {!Promise}
    */
   function onBindReady(callback) {
-    return env.ampdoc.whenReady().then(() => {
-      return bind.scanPromise_;
-    }).then(() => {
-      if (bind.evaluatePromise_) {
-        return bind.evaluatePromise_;
-      } else {
-        callback();
-      }
-    }).then(() => {
+    return bind.initializePromise_.then(() => {
       env.flushVsync();
       callback();
     });
@@ -101,14 +93,21 @@ describes.realWin('amp-bind', {
    * @return {!Promise}
    */
   function onBindReadyAndSetState(state, callback) {
-    return env.ampdoc.whenReady().then(() => {
-      return bind.scanPromise_;
-    }).then(() => {
-      bind.setState(state);
-      return bind.evaluatePromise_;
-    }).then(() => {
+    return bind.setState(state).then(() => {
       env.flushVsync();
       callback();
+    });
+  }
+
+  /**
+   * Calls `callback` when digest that updates bind state to `state` completes.
+   * @param {!Object} state
+   * @param {!Function} callback
+   * @return {!Promise}
+   */
+  function onBindReadyAndSetStateWithExpression(expression, scope) {
+    return bind.setStateWithExpression(expression, scope).then(() => {
+      env.flushVsync();
     });
   }
 
@@ -205,6 +204,16 @@ describes.realWin('amp-bind', {
     expect(toArray(element.classList)).to.deep.equal([]);
     return onBindReadyAndSetState({}, () => {
       expect(toArray(element.classList)).to.deep.equal(['a', 'b']);
+    });
+  });
+
+  it('should support parsing exprs in `setStateWithExpression`', () => {
+    const element = createElementWithBinding(`[text]="onePlusOne"`);
+    expect(element.textContent).to.equal('');
+    const promise = onBindReadyAndSetStateWithExpression(
+        '{"onePlusOne": one + one}', {one: 1});
+    return promise.then(() => {
+      expect(element.textContent).to.equal('2');
     });
   });
 
