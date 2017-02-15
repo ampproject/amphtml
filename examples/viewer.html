@@ -422,6 +422,7 @@
     };
 
     Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
+      console.log(type);
       log('Viewer.prototype.processRequest_');
       if (type == 'documentLoaded') {
         return this.documentReady_();
