@@ -66,17 +66,17 @@ export class TouchHandler {
       case 'mousedown':
       case 'touchstart':
         this.tracking_ = true;
-        this.forwardTouchEvent_(event);
+        this.forwardEvent_(event);
         break;
       case 'dragend':
       case 'mouseup':
       case 'touchend':
-        this.forwardTouchEvent_(event);
+        this.forwardEvent_(event);
         this.tracking_ = false;
         break;
       default:
         if (this.tracking_) {
-          this.forwardTouchEvent_(event);
+          this.forwardEvent_(event);
         }
     }
   }
@@ -85,7 +85,7 @@ export class TouchHandler {
    * @param {!Event} event
    * @private
    */
-  forwardTouchEvent_(event) {
+  forwardEvent_(event) {
     console.log('handleTouchEvent!', event);
     if (event && event.type) {
       this.messaging_.sendRequest(event.type, event, false);
