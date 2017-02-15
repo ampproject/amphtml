@@ -1083,7 +1083,7 @@ function createBaseCustomElementClass(win) {
      * @final @this {!Element}
      */
     getLayout() {
-      return this.implementation_.layout_;
+      return this.layout_;
     }
 
     /**

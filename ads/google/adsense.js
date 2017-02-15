@@ -15,7 +15,6 @@
  */
 
 import {validateData} from '../../3p/3p';
-import {Layout} from '../../src/layout';
 import {setStyles} from '../../src/style';
 
 /**
@@ -54,9 +53,9 @@ export function adsense(global, data) {
   if (data['tagOrigin']) {
     i.setAttribute('data-tag-origin', data['tagOrigin']);
   }
-  if (global.context['layout'] == Layout.RESPONSIVE) {
-    // Use fluid as it will fill the space which requires at least 250 width
-    // otherwise use auto.
+  if (global.context['layout'] == 'responsive') {
+    // Fluid will fill the space, so use it if eligible (slot width >= 250);
+    // otherwise use auto. Auto is likely to be much smaller than slot.
     i.setAttribute('data-ad-format', data.width >= 250 ? 'fluid' : 'auto');
   }
   i.setAttribute('data-page-url', global.context.canonicalUrl);

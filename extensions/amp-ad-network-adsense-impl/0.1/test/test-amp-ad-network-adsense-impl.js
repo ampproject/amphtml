@@ -31,6 +31,7 @@ import {
   createElementWithAttributes,
   addAttributesToElement,
 } from '../../../../src/dom';
+import {parseQueryString} from '../../../../src/url';
 
 function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
   const doc = opt_doc || document;
@@ -333,12 +334,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             // Create AdsenseImpl instance.
             impl = new AmpAdNetworkAdsenseImpl(addedElem);
             return impl.getAdUrl().then(adUrl => {
-              const queryPairs = adUrl.split('?')[1].split('&');
-              const actualQueryParams = {};
-              queryPairs.forEach(pair => {
-                const pairArr = pair.split('=');
-                actualQueryParams[pairArr[0]] = pairArr[1];
-              });
+              const actualQueryParams = parseQueryString(
+                adUrl.substr(adUrl.indexOf('?') + 1));
               expect(actualQueryParams['format']).to.equal('300x278');
               expect(actualQueryParams['w']).to.equal('300');
               expect(actualQueryParams['h']).to.equal('278');
@@ -357,7 +354,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           });
         });
       });
-      it('modifies format, initial resize failuer', () => {
+      it('modifies format, initial resize failure', () => {
         sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'attemptChangeSize',
           () => {
             return Promise.reject('resize failure');
