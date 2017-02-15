@@ -136,6 +136,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'channel', value: this.element.getAttribute('data-ad-channel')},
       {name: 'vis', value: visibilityStateCodes[visibilityState] || '0'},
       {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
+      {name: 'asnt', value: this.sentinel},
     ];
 
     if (sharedStateParams.prevFmts) {
