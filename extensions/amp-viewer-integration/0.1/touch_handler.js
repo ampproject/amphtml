@@ -15,61 +15,67 @@
  */
 
 
+import {Messaging} from './messaging';
 import {listen} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
 
 /**
- * @fileoverview 
+ * @fileoverview Forward touch events from the AMP doc to the viewer.
  */
 export class TouchHandler {
 
   /**
    * @param {!Window} win
+   * @param {!WindowPortEmulator} port
+   * @param {!Messaging} messaging
    */
-  constructor(win) {
+  constructor(win, messaging) {
     /** @const {!Window} */
     this.win = win;
-    /** @private {boolean} */
-    this.isMouseDown_ = false;
+    /** @private {!Messaging} */
+    this.messaging_ = messaging;
+    /**
+     * Do not forward touch events when false.
+     * @private {boolean}
+     */
+    this.tracking_ = false;
+
     this.listenForTouchEvents();
   }
 
   listenForTouchEvents() {
-    const handleTouchEvent = this.handleTouchEvent_.bind(this);
-    listen(this.win, 'touchstart', handleTouchEvent);
-    listen(this.win, 'touchend', handleTouchEvent);
-    listen(this.win, 'touchmove', handleTouchEvent);
-    listen(this.win, 'touchleave', handleTouchEvent); //finger moves outside listening area
-    listen(this.win, 'touchenter', handleTouchEvent);
-    listen(this.win, 'touchcancel', handleTouchEvent);
+    const handleEvent = this.handleEvent_.bind(this);
 
-    const handleMouseEvent = this.handleMouseEvent_.bind(this);
-    listen(this.win, 'mousedown', handleMouseEvent);
-    listen(this.win, 'mouseup', handleMouseEvent);
-    listen(this.win, 'dragstart', handleMouseEvent);
-    listen(this.win, 'dragend', handleMouseEvent);
-    listen(this.win, 'mousemove', handleMouseEvent);
-    listen(this.win, 'mouseleave', handleMouseEvent); //finger moves outside listening area
-    listen(this.win, 'mouseenter', handleMouseEvent);
+    listen(this.win, 'touchstart', handleEvent);
+    listen(this.win, 'touchend', handleEvent);
+    listen(this.win, 'touchmove', handleEvent);
+
+    listen(this.win, 'mousedown', handleEvent);
+    listen(this.win, 'mouseup', handleEvent);
+    listen(this.win, 'dragstart', handleEvent);
+    listen(this.win, 'dragend', handleEvent);
+    listen(this.win, 'mousemove', handleEvent);
   }
 
   /**
-   * Only send mouse events if mouse is down. Yes? No?
    * @param {!Event} event
    * @private
    */
-  handleMouseEvent_(event) {
+  handleEvent_(event) {
     switch (event.type) {
-      case 'mousedown':
       case 'dragstart':
-        this.isMouseDown_ = true;
+      case 'mousedown':
+      case 'touchstart':
+        this.tracking_ = true;
+        this.handleTouchEvent_(event);
         break;
-      case 'mouseup':
       case 'dragend':
-        this.isMouseDown_ = false;
+      case 'mouseup':
+      case 'touchend':
+        this.handleTouchEvent_(event);
+        this.tracking_ = false;
         break;
       default:
-        if (this.isMouseDown_) {
+        if (this.tracking_) {
           this.handleTouchEvent_(event);
         }
     }
@@ -81,6 +87,8 @@ export class TouchHandler {
    */
   handleTouchEvent_(event) {
     console.log('handleTouchEvent!', event);
+    if (event && event.type) {
+      this.messaging_.sendRequest(event.type, event, false);
+    }
   }
-
 }

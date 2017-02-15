@@ -129,12 +129,20 @@ export class AmpViewerIntegration {
 
   /**
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
+<<<<<<< HEAD
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Messaging} messaging
    * @return {!Promise<undefined>}
    * @private
    */
   openChannelAndStart_(viewer, ampdoc, messaging) {
+=======
+   * @return {!Promise<undefined>}
+   * @private
+   */
+  openChannelAndStart_(viewer, port) {
+    const messaging = new Messaging(this.win, port);
+>>>>>>> touch events
     dev().fine(TAG, 'Send a handshake request');
     const ampdocUrl = ampdoc.getUrl();
     const srcUrl = getSourceUrl(ampdocUrl);
@@ -152,10 +160,11 @@ export class AmpViewerIntegration {
   /**
    * @param {!Messaging} messaging
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @param {!WindowPortEmulator} port
    * @return {Promise<*>|undefined}
    * @private
    */
-  setup_(messaging, viewer) {
+  setup_(messaging, viewer, port) {
     messaging.setRequestProcessor((type, payload, awaitResponse) => {
       return viewer.receiveMessage(
         type, /** @type {!JSONType} */ (payload), awaitResponse);
@@ -167,7 +176,7 @@ export class AmpViewerIntegration {
     listenOnce(
       this.win, 'unload', this.handleUnload_.bind(this, messaging));
 
-    new TouchHandler(this.win); //horizontalscrolling?
+    new TouchHandler(this.win, port);
   }
 
   /**
