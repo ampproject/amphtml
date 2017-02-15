@@ -88,6 +88,13 @@ Accepted MIME types for fonts include the following prefixes:
 |  binary/octet-stream   |
 |  text/plain (not recommended)   |
 
+## Guidelines: Adding a new cache to the AMP ecosystem
+
+* Contact relevant publishers to make sure they update their CORS policies to include your origin.
+* Publicly announce your cache so people know where to find your documentation.
+* Examples of third-party AMP Cache providers:
+  * [Cloudflare](https://www.cloudflare.com/)
+
 # References
 
 ## [Google AMP Cache](https://developers.google.com/amp/cache/)
