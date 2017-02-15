@@ -623,6 +623,16 @@ app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, re
  * End Cache SW LOCALDEV section
  */
 
+/**
+ * Web worker binary.
+ */
+app.get(['/dist/ww.js', '/dist/ww.max.js'], function(req, res) {
+  fs.readFileAsync(process.cwd() + req.path).then(file => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
+    res.end(file);
+  });
+});
 
 /**
  * @param {string} mode
