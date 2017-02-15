@@ -788,7 +788,6 @@ export class BaseElement {
   /**
    * Return a promise that request the runtime to collapse one element
    * @return {!Promise}
-   * @public
    */
   attemptCollapse() {
     return this.element.getResources().attemptCollapse(this.element);

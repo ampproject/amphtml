@@ -1727,6 +1727,15 @@ describe('Resources mutateElement and collapse', () => {
         }
         return Promise.resolve();
       },
+      run: task => {
+        const state = {};
+        if (task.measure) {
+          task.measure(state);
+        }
+        if (task.mutate) {
+          task.mutate(state);
+        }
+      },
     };
     relayoutTopStub = sandbox.stub(resources, 'setRelayoutTop_');
     sandbox.stub(resources, 'schedulePass');
@@ -1822,6 +1831,67 @@ describe('Resources mutateElement and collapse', () => {
       expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
       expect(relayoutTopStub.getCall(1).args[0]).to.equal(1010);
     });
+  });
+
+  it('attemptCollapse should not call attemptChangeSize', () => {
+    // This test ensure that #attemptCollapse won't do any optimization or
+    // refactor by calling attemptChangeSize.
+    // This to support collapsing element above viewport
+    // When attemptChangeSize succeed, resources manager will measure the new
+    // scrollHeight, and we need to make sure the newScrollHeight is measured
+    // after setting element display:none
+    sandbox.stub(resources.viewport_, 'getRect', () => {
+      return {
+        top: 1500,
+        bottom: 1800,
+        left: 0,
+        right: 500,
+        width: 500,
+        height: 300,
+      };
+    });
+    let promiseResolve = null;
+    const promise = new Promise(resolve => {
+      promiseResolve = resolve;
+    });
+    let index = 0;
+    sandbox.stub(resources.viewport_, 'getScrollHeight', () => {
+      // In change element size above viewport path, getScrollHeight will be
+      // called three times. And we care that the last measurement is correct,
+      // which requires it to be measured after element dispaly set to none.
+      if (index == 2) {
+        expect(resource1.completeCollapse).to.be.calledOnce;
+        promiseResolve();
+        return;
+      }
+      expect(resource1.completeCollapse).to.not.been.called;
+      index++;
+    });
+
+    resource1.layoutBox_ = {top: 1000, left: 0, right: 100, bottom: 1050,
+        height: 50};
+    resources.lastVelocity_ = 0;
+    resources.attemptCollapse(resource1.element);
+    resources.mutateWork_();
+    return promise;
+  });
+
+  it('attemptCollapse should complete collapse if resize succeed', () => {
+    sandbox.stub(resources, 'scheduleChangeSize_', (resource, newHeight,
+        newWidth, newMargins, force, callback) => {
+      callback(true);
+    });
+    resources.attemptCollapse(resource1.element);
+    expect(resource1.completeCollapse).to.be.calledOnce;
+  });
+
+  it('attemptCollapse should NOT complete collapse if resize fail', () => {
+    sandbox.stub(resources, 'scheduleChangeSize_', (resource, newHeight,
+        newWidth, newMargins, force, callback) => {
+      callback(false);
+    });
+    resources.attemptCollapse(resource1.element);
+    expect(resource1.completeCollapse).to.not.been.called;
   });
 
   it('should complete collapse and trigger relayout', () => {

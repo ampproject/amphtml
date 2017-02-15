@@ -71,7 +71,7 @@ export function _ping_(global, data) {
       });
     }
   } else {
-    window.setTimeout(() => {
+    global.setTimeout(() => {
       global.context.noContentAvailable();
     }, 1000);
   }
