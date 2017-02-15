@@ -67,8 +67,8 @@ For example:
 
 **autoplay**
 
-If present, the attribute implies that the audio start playing as soon as it is
-ready.
+If present, the attribute implies that the audio will start playing as soon as
+it is ready.
 
 **loop**
 
