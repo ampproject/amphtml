@@ -142,17 +142,17 @@ export function composeEmbedUrl(options) {
   return embedUrl;
 }
 
+function sanitizeUrl(localtion) {
+  return removeFragment(localtion.href)
+    .replace(localtion.protocol, ''); //remove scheme (cors) & fragment
+}
+
 export function composeItemSrcUrl(src, itemId) {
   const DEFAULT_BASE_URL = '//www.playbuzz.com/';
-  const sanitizeUrl = localtion =>
-    removeFragment(localtion.href)
-      .replace(localtion.protocol, ''); //remove scheme (cors) & fragment
 
   const iframeSrcUrl = itemId ?
     DEFAULT_BASE_URL + 'item/' + itemId :
-    [src]
-      .map(url => parseUrl(url))
-      .map(urlLocation => sanitizeUrl(urlLocation))[0];
+    sanitizeUrl(parseUrl(src));
 
   return iframeSrcUrl;
 }
