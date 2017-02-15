@@ -93,6 +93,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdSense](../../ads/google/adsense.md)
 - [AdsNative](../../ads/adsnative.md)
 - [AdSpirit](../../ads/adspirit.md)
+- [AdSpeed](../../ads/adspeed.md)
 - [AdStir](../../ads/adstir.md)
 - [AdTech](../../ads/adtech.md)
 - [Ad Up Technology](../../ads/aduptech.md)
