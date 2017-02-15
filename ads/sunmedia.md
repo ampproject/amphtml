@@ -1,32 +1,42 @@
+<!---
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS-IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
 # SunMedia
-
-
 
 ## Example
 
-```
-<amp-ad width=300 height=1
+```html
+<amp-ad width=300 height=220
 	type="sunmedia"
 	layout="responsive"
 	data-cid="sunmedia_test"
 	data-cskp=1
 	data-crst=1>
 </amp-ad>
-
 ```
 
-### Configuration
+## Configuration
 
-For semantics of configuration, please contact <a href="mailto:adops.support@sunmedia.tv">SunMedia</a>.
+For further information, please contact [SunMedia](http://sunmedia.tv/#contact).
 
-Supported parameters:
+Mandatory parameters:
 
-Mandatory:
+- 	data-cid. Cient Identifier provided by SunMedia
 
-``` data-cid ``` (String, non-empty). SunMedia client ID 
+Optional parameters:
 
-Optional:
-
-``` data-cskp ``` (int:1). Skip button at 10 seconds 
-
-``` data-crst``` (int:1). Restart plugin 
+-	data-cskp. Skip button enabled
+-	data-crst. Restart option enabled
