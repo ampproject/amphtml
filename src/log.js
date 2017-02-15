@@ -55,17 +55,12 @@ export const LogLevel = {
 };
 
 /**
- * @type {function(*, !Element=)|undefined}
- */
-let reportError;
-
-/**
  * Sets reportError function. Called from error.js to break cyclic
  * dependency.
  * @param {function(*, !Element=)|undefined} fn
  */
 export function setReportError(fn) {
-  reportError = fn;
+  self.reportError = fn;
 }
 
 /**
@@ -215,7 +210,7 @@ export class Log {
   error(tag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
-      reportError(error);
+      self.reportError(error);
     }
   }
 
@@ -229,7 +224,7 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;
-      reportError(error);
+      self.reportError(error);
     }
   }
 
@@ -300,7 +295,7 @@ export class Log {
       e.associatedElement = firstElement;
       e.messageArray = messageArray;
       this.prepareError_(e);
-      reportError(e);
+      self.reportError(e);
       throw e;
     }
     return shouldBeTrueish;
@@ -453,7 +448,7 @@ function createErrorVargs(var_args) {
 export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
   setTimeout(() => {
-    reportError(error);
+    self.reportError(error);
     throw error;
   });
 }
