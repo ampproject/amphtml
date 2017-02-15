@@ -26,7 +26,7 @@ import {
 } from '../../../src/style';
 
 /** @const */
-const TAG = 'sticky-ad-early-load';
+const EARLY_LOAD_EXPERIMENT = 'sticky-ad-early-load';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -129,8 +129,8 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   onScroll_() {
-    if (isExperimentOn(this.win, TAG)) {
-      this.displayAfterScroll_();
+    if (isExperimentOn(this.win, EARLY_LOAD_EXPERIMENT)) {
+      this.display_();
       return;
     }
 
@@ -138,7 +138,7 @@ class AmpStickyAd extends AMP.BaseElement {
     const viewportHeight = this.viewport_.getSize().height;
     // Check user has scrolled at least one viewport from init position.
     if (scrollTop > viewportHeight) {
-      this.displayAfterScroll_();
+      this.display_();
     }
   }
 
@@ -146,7 +146,7 @@ class AmpStickyAd extends AMP.BaseElement {
    * Display and load sticky ad.
    * @private
    */
-  displayAfterScroll_() {
+  display_() {
     this.removeOnScrollListener_();
     this.deferMutate(() => {
       this.visible_ = true;

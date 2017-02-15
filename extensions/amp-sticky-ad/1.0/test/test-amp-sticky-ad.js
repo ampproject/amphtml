@@ -180,7 +180,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
         callback();
       };
 
-      impl.displayAfterScroll_();
+      impl.display_();
       expect(addCloseButtonSpy).to.be.called;
       expect(impl.element.children[0]).to.be.not.null;
       expect(impl.element.children[0].tagName).to.equal(
@@ -355,7 +355,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
       return 20;
     };
 
-    impl.displayAfterScroll_();
+    impl.display_();
     impl.ad_.signals().signal('load-end');
     const layoutPromise = impl.layoutAd_();
     const bodyPromise = impl.viewport_.ampdoc.whenBodyAvailable();
@@ -393,7 +393,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
       return 20;
     };
 
-    impl.displayAfterScroll_();
+    impl.display_();
     impl.ad_.signals().signal('load-end');
     const layoutPromise = impl.layoutAd_();
     const bodyPromise = impl.viewport_.ampdoc.whenBodyAvailable();
