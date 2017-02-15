@@ -21,5 +21,6 @@
   "chunked-amp": 1,
   "make-body-relative": 1,
   "visibility-v2": 1,
-  "amp-selector": 1
+  "amp-selector": 1,
+  "sticky-ad-early-load": 1
 }
