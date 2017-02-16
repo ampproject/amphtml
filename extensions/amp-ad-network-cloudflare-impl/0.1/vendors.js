@@ -23,7 +23,7 @@ export const NETWORKS = /** @type {!JSONType} */ ({
   },
 
   adzerk: {
-    base: 'https://engine.adzerk.com',
+    base: 'https://engine.betazerk.com',
   },
 
   dianomi: {
