@@ -36,7 +36,7 @@ export function listen(element, eventType, listener, opt_capture) {
     try {
       return localListener.call(this, event);
     } catch (e) {
-      reportError(e);
+      self.reportError(e);
       throw e;
     }
   };
@@ -71,7 +71,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
     try {
       localListener(event);
     } catch (e) {
-      reportError(e);
+      self.reportError(e);
       throw e;
     } finally {
       unlisten();

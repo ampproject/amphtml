@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,8 @@ import {
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
-import {dev, initLogConstructor, user} from '../src/log';
+import {dev, initLogConstructor, setReportError, user} from '../src/log';
+import {reportError} from '../src/error';
 import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
@@ -180,6 +181,7 @@ try {
 
 // This should only be invoked after window.context is set
 initLogConstructor();
+setReportError(reportError);
 
 // Experiment toggles
 setExperimentToggles(window.context.experimentToggles);
