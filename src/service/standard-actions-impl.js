@@ -20,7 +20,7 @@ import {dev, user} from '../log';
 import {fromClassForDoc} from '../service';
 import {historyForDoc} from '../history';
 import {installResourcesServiceForDoc} from './resources-impl';
-import {toggle} from '../style';
+import {getStyle, toggle} from '../style';
 
 
 /**
@@ -58,6 +58,9 @@ export class StandardActions {
   installActions_(actionService) {
     actionService.addGlobalTarget('AMP', this.handleAmpTarget.bind(this));
     actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
+    actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
+    actionService.addGlobalMethodHandler(
+      'toggle', this.handleToggle.bind(this));
   }
 
   /**
@@ -95,6 +98,34 @@ export class StandardActions {
         toggle(target, false);
       }
     });
+  }
+
+  /**
+   * Handles "show" action. This is a very simple action where "display: none"
+   * is removed from the target element.
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleShow(invocation) {
+    const target = dev().assertElement(invocation.target);
+    this.resources_.deferMutate(target, () => {
+      if (target.classList.contains('i-amphtml-element')) {
+        target./*OK*/expand();
+      } else {
+        toggle(target, true);
+      }
+    });
+  }
+
+  /**
+   * Handles "toggle" action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleToggle(invocation) {
+    if (getStyle(dev().assertElement(invocation.target), 'display') == 'none') {
+      this.handleShow(invocation);
+    } else {
+      this.handleHide(invocation);
+    }
   }
 }
 

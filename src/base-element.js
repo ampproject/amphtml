@@ -862,6 +862,24 @@ export class BaseElement {
   }
 
   /**
+   * Expands the element, resetting its default display value, and notifies its
+   * owner (if there is one) through {@link collapsedCallback} that the element
+   * is no longer visible.
+   */
+  expand() {
+    this.element.getResources().expandElement(this.element);
+  }
+
+  /**
+   * Called every time an owned AmpElement expands itself.
+   * See {@link expand}.
+   * @param {!AmpElement} unusedElement
+   */
+  expandedCallback(unusedElement) {
+    // Subclasses may override.
+  }
+
+  /**
    * Called when one or more attributes are mutated.
    * @note Must be called inside a mutate context.
    * @note Boolean attributes have a value of `true` and `false` when

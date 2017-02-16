@@ -333,6 +333,17 @@ describe('Resource', () => {
     expect(resource.isFixed()).to.be.false;
   });
 
+  it('should show and request measure on expand', () => {
+    resource.element.style.display = 'none';
+    resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
+    resource.isFixed_ = false;
+    resource.requestMeasure = sandbox.stub();
+
+    resource.completeExpand();
+    expect(resource.element.style.display).to.not.equal('none');
+    expect(resource.requestMeasure).to.be.calledOnce;
+  });
+
 
   it('should ignore startLayout if already completed or failed or going',
         () => {
