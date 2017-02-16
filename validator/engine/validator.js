@@ -506,18 +506,17 @@ class ParsedAttrSpecs {
    * Constructs ParsedAttrSpecs for the list with the provided |name| or
    * returns a list from the cache.
    * @param {!string} name
-   * @return {Array<!ParsedAttrSpec>}
+   * @return {!Array<!ParsedAttrSpec>}
    * @private
    */
-  getParsedAttrListByNameOrNull_(name) {
+  getParsedAttrListByName_(name) {
     if (this.parsedAttrListsByName_.hasOwnProperty(name)) {
       return this.parsedAttrListsByName_[name];
     }
-    if (!this.attrListsByName_.hasOwnProperty(name)) {
-      return null;
-    }
+    const attrList = this.attrListsByName_[name];
+    goog.asserts.assert(attrList !== undefined);
     /** @type {!Array<number>} */
-    const attrSpecs = this.attrListsByName_[name].attrs;
+    const attrSpecs = attrList.attrs;
     /** @type {!Array<!ParsedAttrSpec>} */
     const parsedAttrList = [];
     for (const attrSpecId of attrSpecs) {
@@ -525,6 +524,24 @@ class ParsedAttrSpecs {
     }
     this.parsedAttrListsByName_[name] = parsedAttrList;
     return parsedAttrList;
+  }
+
+  /**
+   * Helper for getAttrsFor.
+   * @param {!string} attrListName
+   * @param {!Array<!ParsedAttrSpec>} attrs
+   * @param {!Object<string, ?>} namesSeen
+   * @private
+   */
+  mergeAttrsFromAttrListByName_(attrListName, attrs, namesSeen) {
+    const specs = this.getParsedAttrListByName_(attrListName);
+    for (const spec of specs) {
+      const name = spec.getSpec().name;
+      if (!namesSeen.hasOwnProperty(name)) {
+        namesSeen[name] = 0;
+        attrs.push(spec);
+      }
+    }
   }
 
   /**
@@ -548,17 +565,7 @@ class ParsedAttrSpecs {
     const namesSeen = {};
     // (1) layout attrs.
     if (tagSpec.ampLayout !== null && tagSpec.tagName !== '$REFERENCE_POINT') {
-      const layoutSpecs =
-          this.getParsedAttrListByNameOrNull_('$AMP_LAYOUT_ATTRS');
-      if (layoutSpecs !== null) {
-        for (const spec of layoutSpecs) {
-          const name = spec.getSpec().name;
-          if (!namesSeen.hasOwnProperty(name)) {
-            namesSeen[name] = 0;
-            attrs.push(spec);
-          }
-        }
-      }
+      this.mergeAttrsFromAttrListByName_('$AMP_LAYOUT_ATTRS', attrs, namesSeen);
     }
     // (2) attributes specified within |tagSpec|.
     for (const attrSpecId of tagSpec.attrs) {
@@ -571,29 +578,11 @@ class ParsedAttrSpecs {
     }
     // (3) attributes specified via reference to an attr_list.
     for (const tagSpecKey of tagSpec.attrLists) {
-      const specs = this.getParsedAttrListByNameOrNull_(tagSpecKey);
-      goog.asserts.assert(specs !== null);
-      for (const spec of specs) {
-        const name = spec.getSpec().name;
-        if (!namesSeen.hasOwnProperty(name)) {
-          namesSeen[name] = 0;
-          attrs.push(spec);
-        }
-      }
+      this.mergeAttrsFromAttrListByName_(tagSpecKey, attrs, namesSeen);
     }
     // (4) attributes specified in the global_attr list.
     if (tagSpec.tagName !== '$REFERENCE_POINT') {
-      const globalSpecs = this.getParsedAttrListByNameOrNull_('$GLOBAL_ATTRS');
-      if (globalSpecs === null) {
-        return attrs;
-      }
-      for (const spec of globalSpecs) {
-        const name = spec.getSpec().name;
-        if (!namesSeen.hasOwnProperty(name)) {
-          namesSeen[name] = 0;
-          attrs.push(spec);
-        }
-      }
+      this.mergeAttrsFromAttrListByName_('$GLOBAL_ATTRS', attrs, namesSeen);
     }
     return attrs;
   }
@@ -678,7 +667,8 @@ class ParsedTagSpec {
     this.containsUrl_ = false;
 
     const parsedAttrs = parsedAttrSpecs.getAttrsFor(tagSpec);
-    for (const parsedAttrSpec of parsedAttrs) {
+    for (var ii = 0; ii < parsedAttrs.length; ii++) {
+      const parsedAttrSpec = parsedAttrs[ii];
       this.attrsByName_[parsedAttrSpec.getSpec().name] = parsedAttrSpec;
       if (parsedAttrSpec.getSpec().mandatory) {
         this.mandatoryAttrIds_.push(parsedAttrSpec.getId());
