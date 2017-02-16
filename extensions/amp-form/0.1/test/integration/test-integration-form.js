@@ -100,9 +100,12 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'sameform');
       sandbox.spy(ampForm, 'handleXhrSubmit_');
       sandbox.spy(ampForm, 'handleSubmitAction_');
-      sandbox.spy(ampForm.xhr_, 'fetch');
+      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
       form.dispatchEvent(new Event('submit'));
-      return timer.promise(10).then(() => {
+
+      return timer.promise(100).then(() => {
+        return fetch.returnValues[0];
+      }).then(() => {
         // Due to recursive nature of 'on=submit:sameform.submit' we expect
         // the action handler to be called twice, the first time for the
         // actual user submission.
@@ -127,9 +130,14 @@ describes.realWin('AmpForm Integration', {
             ' {{#interests}}{{title}} {{/interests}}.',
         errorTemplate: 'Should not render this.',
       });
-      new AmpForm(form, 'form1');
+      const ampForm = new AmpForm(form, 'form1');
+
+      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
       form.dispatchEvent(new Event('submit'));
+
       return timer.promise(100).then(() => {
+        return fetch.returnValues[0];
+      }).then(() => {
         const rendered = form.querySelectorAll('[i-amp-rendered]');
         expect(rendered.length).to.equal(1);
         expect(rendered[0].textContent).to.equal(
@@ -146,7 +154,7 @@ describes.realWin('AmpForm Integration', {
         errorTemplate: 'Oops. {{name}} your email {{email}} is already ' +
             'subscribed.',
       });
-      new AmpForm(form, 'form1');
+      const ampForm = new AmpForm(form, 'form1');
       // Stubbing timeout to catch async-thrown errors and expect
       // them. These catch errors thrown inside the catch-clause of the
       // xhr request using rethrowAsync.
@@ -162,8 +170,12 @@ describes.realWin('AmpForm Integration', {
         }, delay);
       });
 
+      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
       form.dispatchEvent(new Event('submit'));
+
       return timer.promise(100).then(() => {
+        return fetch.returnValues[0].catch(() => {});
+      }).then(() => {
         expect(errors.length).to.equal(1);
         expect(errors[0].message).to.match(/HTTP error 500/);
         const rendered = form.querySelectorAll('[i-amp-rendered]');
@@ -185,9 +197,14 @@ describes.realWin('AmpForm Integration', {
         ' {{#interests}}{{title}} {{/interests}}.',
         errorTemplate: 'Should not render this.',
       });
-      new AmpForm(form, 'form1');
+      const ampForm = new AmpForm(form, 'form1');
+
+      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
       form.dispatchEvent(new Event('submit'));
+
       return timer.promise(100).then(() => {
+        return fetch.returnValues[0];
+      }).then(() => {
         const rendered = form.querySelectorAll('[i-amp-rendered]');
         expect(rendered.length).to.equal(1);
         expect(rendered[0].textContent).to.equal(
@@ -204,7 +221,7 @@ describes.realWin('AmpForm Integration', {
         errorTemplate: 'Oops. {{name}} your email {{email}} is already ' +
         'subscribed.',
       });
-      new AmpForm(form, 'form1');
+      const ampForm = new AmpForm(form, 'form1');
       const errors = [];
       // Stubbing timeout to catch async-thrown errors and expect
       // them. These catch errors thrown inside the catch-clause of the
@@ -220,8 +237,12 @@ describes.realWin('AmpForm Integration', {
         }, delay);
       });
 
+      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
       form.dispatchEvent(new Event('submit'));
+
       return timer.promise(100).then(() => {
+        return fetch.returnValues[0].catch(() => {});
+      }).then(() => {
         expect(errors.length).to.equal(1);
         expect(errors[0].message).to.match(/HTTP error 500/);
         const rendered = form.querySelectorAll('[i-amp-rendered]');
