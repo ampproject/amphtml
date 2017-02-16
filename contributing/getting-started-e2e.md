@@ -206,11 +206,9 @@ In the workflow we will be using you'll go to the master branch on your local re
 git checkout master
 
 # pull in the latest changes from the remote amphtml repository
-git pull --rebase upstream master 
+git pull upstream master 
 ```
 If there have been any changes you'll see the details of what changed, otherwise you'll see a message like `Already up-to-date`.
-
-The `--rebase` flag in the `git pull` command tells Git to do a _rebase_ instead of a _merge_ after getting the latest changes.  Understanding what a rebase is vs. what a merge is and why using rebase in this case is a good thing requires a bit more understanding of Git than you need for this guide.  The Atlassian [Merging vs. Rebasing](https://www.atlassian.com/git/tutorials/merging-vs-rebasing) tutorial has the details if you are interested.
 
 After running that `git pull` command your local master branch has the latest files, but your other local branches won't get automatically updated.  To get a local branch in sync:
 
@@ -304,11 +302,15 @@ If your change was not already covered by existing tests, you will generally be 
 
 The amphtml unit tests use the [Mocha](https://mochajs.org/) framework, the [Chai](http://chaijs.com/) assertion library and the [Sinon](http://sinonjs.org/) mocking library.  The specifics of the tests you will need to add will vary depending on the issue/feature you are working on.  If you are fixing a bug in an existing component there should already be tests in the test directory for that component that you can look at for guidance.  For example the [amp-video](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video/amp-video.md) component has [tests](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video/0.1/test/test-amp-video.js).
 
-You can run the tests in a single file by using running `gulp test --files=<file to test>`, e.g. for amp-video:
+You can run the tests in a single file by running `gulp test --files=<file to test>`, e.g. for amp-video:
 
 ```
 gulp test --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
 ```
+
+Alternatively you can take advantage of a Mocha feature that allows for running only certain tests--`describe.only`.  Simply replace the `describe` in the Mocha tests you want to run with `describe.only` and only those tests will be run when you run `gulp test`.  Make sure to remove the `.only` and run all tests before sending your code for review.
+
+To make running the tests more convenient you can also use the `--watch` flag in any `gulp test` command.  This will cause the tests you've indicated to automatically be rerun whenever a file is modified.
 
 If you are not sure how to create these tests you can ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
 
@@ -320,7 +322,7 @@ Before pushing your changes, make sure you have the latest changes in the amphtm
 
 ```
 git checkout master
-git pull --rebase upstream master
+git pull upstream master
 git checkout <branch name>
 git rebase master
 ```
@@ -355,8 +357,8 @@ Note that you *can* edit files in your branch directly on GitHub using the web U
 
 In order for your changes to become part of the amphtml repository, you will need to get your code reviewed by one of the [core committers](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) via a Pull Request (PR).  In fact you won't actually merge your code into the amphtml repository directly; once a core committer approves it he or she will handle the merge for you.
 
-Once your code is ready for a review, go to your GitHub fork at
-`https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.  (Alternatively if the "recently pushed banners" is visible you can just click on the "Compare & pull request" button.)
+Once your code is ready for a review, go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and click on the "Compare & pull request" button on the "recently pushed branches" banner.  If that banner isn't visible, go to your GitHub fork at
+`https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.  
 
 On the "Open a pull request" page, you will see dropdowns at the top indicating the proposed merge.  It will look something like:
 
@@ -375,6 +377,8 @@ On the Pull Request page you can see that a couple of checks are running:
 * the tests are being run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests)
 
 * the system is verifying that you have signed a CLA (Contributor License Agreement).  If this is your first time submitting a Pull Request for the amphtml project you'll need to sign an agreement.  (Make sure the email address you use to sign the CLA is the same one that you configured Git with.)  See details in the [Contributing code](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributing-code) documentation.
+
+If you don't hear back from your reviewer within 2 business days, feel free to ping the pull request by adding a comment.
 
 # Respond to Pull Request comments
 
@@ -423,3 +427,4 @@ This end-to-end guide provided enough details to get a basic understanding of a 
    * the [Git cheat sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) from GitHub provides a quick reference to some common commands, including many we didn't cover in this guide (such as [diff](https://www.git-tower.com/learn/git/ebook/en/command-line/advanced-topics/diffs) and [log](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History))
    * a [Training & Guides video series](https://www.youtube.com/user/GitHubGuides)
 * The official [Git docs](https://git-scm.com/doc) have a lot of information including the [reference docs](https://git-scm.com/docs) and an online version of [Pro Git](https://git-scm.com/book/en/v2).
+* You may see discussions about the difference between rebasing and merging in Git, and we glossed over the details in this guide.  If you're curious about the difference the Atlassian [Merging vs. Rebasing](https://www.atlassian.com/git/tutorials/merging-vs-rebasing) tutorial has a good explanation.

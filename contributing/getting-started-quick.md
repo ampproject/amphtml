@@ -17,7 +17,9 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * Add this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
 
-    ```127.0.0.1               ads.localhost iframe.localhost```
+    ```
+    127.0.0.1               ads.localhost iframe.localhost
+    ```
 
 * Fork the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI.
 
@@ -32,13 +34,15 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 # Build AMP & run a local server
 * Make sure you have the latest packages (after you pull): `yarn`
 * Start the server: `gulp`
-* Access your server at [http://localhost:8000](http://localhost:8000).
-* Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples).
-* Change the suffix for the examples from .html to .max.html to use your local JavaScript.
+* Access your server at [http://localhost:8000](http://localhost:8000)
+* Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
+* Change the suffix for the examples from .html to .max.html to use your local JavaScript
 
 # Test AMP
 * Run the tests: `gulp test`
-* Run a single test: `gulp test --files=<filename`
+* Run the tests in a specified set of files: `gulp test --files=<filename>`
+* Add the `--watch` flag to any `gulp test` command to automatically re-run the tests when a file changes
+* To run only a certain set of Mocha tests change  `describe` to `describe.only` for the tests you want to run; combine this with `gulp test --watch` to automatically rerun your test when files are changed   (but make sure to run all the tests before sending your change for review)
 
 # Create commits to contain your changes
 
@@ -50,7 +54,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 # Pull the latest changes
 
 * `git checkout master`
-* `git pull --rebase upstream master`
+* `git pull upstream master`
 * `git checkout <branch name>`
 * `git rebase master`
 * note that you may need to resolve conflicting changes at this point
@@ -60,14 +64,14 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * pull the latest changes as described above
 * `git checkout <branch name>`
 * `git push origin <branch name>`
-* go to your fork on `https://github.com/<your username>/amphtml`
-* choose your branch from the "Branch" dropdown and click "New pull request"
+* go to https://github.com/ampproject/html and in the banner indicating you've recently pushed a branch, click the "Compare & pull request"  (if this banner does not appear, go to your fork at `https://github.com/<your username>/amphtml`, choose your branch from the "Branch" dropdown and click "New pull request")
 * make sure you've signed the CLA (using the same email address as your git config indicates)
 * if your reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again
+* if you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment
 * once approved your changes are merged into the amphtml repository by a core committer (you don't do this merge)
 
-# Delete your branch
+# Delete your branch after your changes are merged (optional)
 
-* Go to the master branch: `git checkout master`
-* Delete yoour local branch: `git branch -D <branch name>`
+* go to the master branch: `git checkout master`
+* delete your local branch: `git branch -D <branch name>`
 * delete the GitHub fork branch: `git push origin --delete <branch name>`
