@@ -163,6 +163,11 @@ describe('ActionService parseAction', () => {
     expect(parseAction('e:t.m(01=1)').args['01']()).to.equal(1);
   });
 
+  it('should parse with arg keys containing "." chars', () => {
+    const a = parseAction('e:t.m(foo.bar.baz=value)');
+    expect(a.args['foo.bar.baz']()).to.equal('value');
+  });
+
   it('should dereference vars in arg value identifiers', () => {
     const data = {foo: {bar: 'baz'}};
     const a = parseAction('e:t.m(key1=foo.bar)');
