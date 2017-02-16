@@ -778,6 +778,29 @@ export class Resources {
   }
 
   /**
+   * Return a promise that requests runtime to collapse this element.
+   * The runtime will schedule this request and first attempt to resize
+   * the element to height and width 0. If success runtime will set element
+   * display to none, and notify element owner of this collapse.
+   * @param {!Element} element
+   * @return {!Promise}
+   */
+  attemptCollapse(element) {
+    return new Promise((resolve, reject) => {
+      this.scheduleChangeSize_(Resource.forElement(element), 0, 0, undefined,
+          /* force */ false, success => {
+            if (success) {
+              const resource = Resource.forElement(element);
+              resource.completeCollapse();
+              resolve();
+            } else {
+              reject(new Error('collapse attempt denied'));
+            }
+          });
+    });
+  }
+
+    /**
    * Collapses the element: ensures that it's `display:none`, notifies its
    * owner and updates the layout box.
    * @param {!Element} element
@@ -789,12 +812,6 @@ export class Resources {
       this.setRelayoutTop_(box.top);
     }
     resource.completeCollapse();
-
-    const owner = resource.getOwner();
-    if (owner) {
-      owner.collapsedCallback(element);
-    }
-
     this.schedulePass(FOUR_FRAME_DELAY_);
   }
 
