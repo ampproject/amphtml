@@ -121,7 +121,7 @@ amphtml uses Node.js, the yarn package manager and the Gulp build system to buil
    ```
    yarn
    ```
-   You should see a progress indicator and some messages scrolling by.  You may see some WARN messages like "please update X" etc.; in general you can safely ignore these.
+   You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies that are generally safe to ignore.
 
 * For some local testing we refer to fake local URLs in order to simulate referencing third party URLs.  This requires extra setup so your browser will know that these URLs actually point to your local server.
 
@@ -135,12 +135,6 @@ amphtml uses Node.js, the yarn package manager and the Gulp build system to buil
 
    ```
    yarn global add gulp
-   ```
-
-   If you see an error message like "EACCES: permission denied" you will need to run the command with elevated privileges, e.g. sudo on Mac or Linux:
-
-   ```
-   sudo yarn global add gulp
    ```
 
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
