@@ -197,6 +197,35 @@ class MessageRegistry(object):
     return self.message_id_by_tag_spec_name_[tag_spec_name]
 
 
+def ElementTypeFor(descriptor, field_desc):
+  """Returns the element Javascript type for a given field descriptor.
+
+  Args:
+    descriptor: The descriptor module from the protobuf package, e.g.
+        google.protobuf.descriptor.
+    field_desc: A field descriptor for a particular field in a message.
+  Returns:
+    A string; either the type of a field descriptor or iff the
+    field descriptor is a repeated field, it's the element type.
+  """
+  # If the field is a reference to a tagspec name (string) or if it's
+  # holding a message that we're deduplicating and replacing with a
+  # synthetic reference field, make it a number instead as we'll be
+  # replacing this with the message id.
+  if (field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD) or (
+      field_desc.full_name in SYNTHETIC_REFERENCE_FIELD):
+    return 'number'
+  return {descriptor.FieldDescriptor.TYPE_DOUBLE: lambda: 'number',
+          descriptor.FieldDescriptor.TYPE_INT32: lambda: 'number',
+          descriptor.FieldDescriptor.TYPE_BOOL: lambda: 'boolean',
+          descriptor.FieldDescriptor.TYPE_STRING: lambda: 'string',
+          descriptor.FieldDescriptor.TYPE_ENUM: (
+              lambda: field_desc.enum_type.full_name),
+          descriptor.FieldDescriptor.TYPE_MESSAGE: (
+              lambda: field_desc.message_type.full_name)}[
+                  field_desc.type]()
+
+
 def FieldTypeFor(descriptor, field_desc, nullable):
   """Returns the Javascript type for a given field descriptor.
 
@@ -208,23 +237,7 @@ def FieldTypeFor(descriptor, field_desc, nullable):
   Returns:
     The Javascript type for the given field descriptor.
   """
-  element_type = {
-      descriptor.FieldDescriptor.TYPE_DOUBLE: lambda: 'number',
-      descriptor.FieldDescriptor.TYPE_INT32: lambda: 'number',
-      descriptor.FieldDescriptor.TYPE_BOOL: lambda: 'boolean',
-      descriptor.FieldDescriptor.TYPE_STRING: lambda: 'string',
-      descriptor.FieldDescriptor.TYPE_ENUM: (
-          lambda: field_desc.enum_type.full_name),
-      descriptor.FieldDescriptor.TYPE_MESSAGE: (
-          lambda: field_desc.message_type.full_name),
-  }[field_desc.type]()
-  # However, if the field is actually a reference to a tagspec name
-  # (string) or if it's holding a message that we're deduplicating and
-  # replacing with a synthetic reference field, make it a number
-  # instead as we'll be replacing this with the message id.
-  if (field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD) or (
-      field_desc.full_name in SYNTHETIC_REFERENCE_FIELD):
-    element_type = 'number'
+  element_type = ElementTypeFor(descriptor, field_desc)
   if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
     if nullable:
       return 'Array<!%s>' % element_type
@@ -415,7 +428,14 @@ def PrintClassFor(descriptor, msg_desc, out):
           # field.name is also the parameter name.
           assigned_value = UnderscoreToCamelCase(field.name)
         elif field.label == descriptor.FieldDescriptor.LABEL_REPEATED:
-          assigned_value = '[]'
+          # ValidationResult instances may be mutated by validator.js,
+          # so we can't share the empty arrays. But for all other
+          # instances, we do share.
+          if msg_desc.full_name == 'amp.validator.ValidationResult':
+            assigned_value = '[]'
+          else:
+            assigned_value = 'EMPTY_%s_ARRAY' % (
+                ElementTypeFor(descriptor, field).replace('.', '_'))
         elif field.type == descriptor.FieldDescriptor.TYPE_BOOL:
           assigned_value = str(field.default_value).lower()
         elif field.type == descriptor.FieldDescriptor.TYPE_INT32:
@@ -638,6 +658,19 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   out.Line('/** @define {boolean} */')
   out.Line('amp.validator.VALIDATE_CSS = true;')
   out.Line('')
+
+  # We share the empty arrays between all specification object instances; this
+  # works because these arrays are never mutated. To make the Closure compiler
+  # happy, we use one empty array per element type.
+  # PS: It may also help execution performance in V8 to keep the element types
+  #     separate but we did not verify that.
+  empty_arrays = [name for name in all_names
+                  if name in msg_desc_by_name or name in enum_desc_by_name]
+  empty_arrays += ['string', 'number', 'boolean']
+  for name in empty_arrays:
+    out.Line('/** @type {!Array<!%s>} */' % name)
+    out.Line('var EMPTY_%s_ARRAY = [];' % name.replace('.', '_'))
+    out.Line('')
 
   for name in all_names:
     if name in msg_desc_by_name:
