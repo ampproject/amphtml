@@ -69,8 +69,7 @@ tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   requires: "amp-audio extension .js script"
   attrs: {
     name: "autoplay"
-    # ^$| prefix intended. empty string is valid.
-    value_regex: "^$|desktop|tablet|mobile|autoplay"
+    value: ""
   }
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
