@@ -42,15 +42,15 @@ describes.realWin('amp-ad-ui handler', {
       sandbox.stub(adImpl, 'getFallback', () => {
         return false;
       });
-      sandbox.stub(adImpl, 'attemptChangeHeight', height => {
-        expect(height).to.equal(0);
+      const attemptCollapseSpy = sandbox.spy();
+      sandbox.stub(adImpl, 'attemptCollapse', () => {
+        attemptCollapseSpy();
         return Promise.resolve();
       });
-      const collapseSpy = sandbox.stub(adImpl, 'collapse', () => {});
       uiHandler.init();
       uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
       return Promise.resolve().then(() => {
-        expect(collapseSpy).to.be.calledOnce;
+        expect(attemptCollapseSpy).to.be.calledOnce;
         expect(uiHandler.state).to.equal(3);
       });
     });
@@ -59,7 +59,7 @@ describes.realWin('amp-ad-ui handler', {
       sandbox.stub(adImpl, 'getFallback', () => {
         return false;
       });
-      sandbox.stub(adImpl, 'attemptChangeHeight', () => {
+      sandbox.stub(adImpl, 'attemptCollapse', () => {
         return Promise.reject();
       });
       toggleExperiment(window, UX_EXPERIMENT, true);
