@@ -15,7 +15,6 @@
  */
 
 
-import {Messaging} from './messaging';
 import {listen} from '../../../src/event-helper';
 
 
@@ -45,13 +44,12 @@ export class TouchHandler {
 
   /**
    * @param {!Window} win
-   * @param {!WindowPortEmulator} port
-   * @param {!Messaging} messaging
+   * @param {!./messaging.Messaging} messaging
    */
   constructor(win, messaging) {
     /** @const {!Window} */
     this.win = win;
-    /** @private {!Messaging} */
+    /** @private {!./messaging.Messaging} */
     this.messaging_ = messaging;
     /**
      * Do not forward touch events when false.
