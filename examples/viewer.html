@@ -468,7 +468,7 @@
       if (this.messaging_) {
         this.messaging_ = null;
       }
-      return goog.Promise.resolve();
+      return Promise.resolve();
     };
 
     Viewer.prototype.sendRequest_ = function(type, data, awaitResponse) {
