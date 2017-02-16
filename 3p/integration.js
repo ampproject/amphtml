@@ -108,6 +108,7 @@ import {mediavine} from '../ads/mediavine';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
 import {mixpo} from '../ads/mixpo';
+import {mywidget} from '../ads/mywidget';
 import {nativo} from '../ads/nativo';
 import {nend} from '../ads/nend';
 import {nokta} from '../ads/nokta';
@@ -153,6 +154,7 @@ import {zucks} from '../ads/zucks';
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
   'mantis-recommend': true,
+  mywidget: true,
   plista: true,
   smartclip: true,
   taboola: true,
@@ -254,6 +256,7 @@ register('mediavine', mediavine);
 register('meg', meg);
 register('microad', microad);
 register('mixpo', mixpo);
+register('mywidget', mywidget);
 register('nativo', nativo);
 register('nend', nend);
 register('nokta', nokta);
