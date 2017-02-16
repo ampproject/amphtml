@@ -58,21 +58,24 @@ goog.require('parse_srcset.parseSrcset');
 goog.require('parse_url.URL');
 
 /**
- * Sorts and eliminates duplicates in |arrayValue|.
+ * Sorts and eliminates duplicates in |arrayValue|. Modifies the input in place.
  * @param {!Array<T>} arrayValue
- * @return {!Array<T>}
  * @template T
  */
 function sortAndUniquify(arrayValue) {
-  const arrayCopy = arrayValue.slice(0);
-  goog.array.sort(arrayCopy);
-  const unique = [];
-  for (const v of arrayCopy) {
-    if (unique.length === 0 || unique[unique.length - 1] !== v) {
-      unique.push(v);
-    }
+  if (arrayValue.length < 2)
+    return;
+
+  goog.array.sort(arrayValue);
+  var uniqIdx = 0;
+  for (var i = 1; i < arrayValue.length; ++i) {
+    if (arrayValue[i] === arrayValue[uniqIdx])
+      continue;
+    uniqIdx++;
+    if (uniqIdx !== i)
+      arrayValue[uniqIdx] = arrayValue[i];
   }
-  return unique;
+  arrayValue.splice(uniqIdx + 1);
 }
 
 /**
@@ -281,21 +284,21 @@ class ParsedAttrSpec {
      * @private
      */
     this.valuePropertyByName_ = {};
-    const mandatoryValuePropertyNames = [];
-    if (this.spec_.valueProperties !== null) {
-      for (const propertySpec of this.spec_.valueProperties.properties) {
-        this.valuePropertyByName_[propertySpec.name] = propertySpec;
-        if (propertySpec.mandatory) {
-          mandatoryValuePropertyNames.push(propertySpec.name);
-        }
-      }
-    }
     /**
      * @type {!Array<string>}
      * @private
      */
-    this.mandatoryValuePropertyNames_ =
-        sortAndUniquify(mandatoryValuePropertyNames);
+    this.mandatoryValuePropertyNames_ = [];
+
+    if (this.spec_.valueProperties !== null) {
+      for (const propertySpec of this.spec_.valueProperties.properties) {
+        this.valuePropertyByName_[propertySpec.name] = propertySpec;
+        if (propertySpec.mandatory) {
+          this.mandatoryValuePropertyNames_.push(propertySpec.name);
+        }
+      }
+      goog.array.sort(this.mandatoryValuePropertyNames_);
+    }
 
     /**
      * @type {RegExp} valueRegex
@@ -695,7 +698,7 @@ class ParsedTagSpec {
         this.containsUrl_ = true;
       }
     }
-    this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
+    sortAndUniquify(this.mandatoryOneofs_);
 
     for (const condition of tagSpec.requires) {
       this.requires_.push(condition);
@@ -2314,7 +2317,7 @@ function validateAttrValueUrl(
     }
     return;
   }
-  maybeUris = sortAndUniquify(maybeUris);
+  sortAndUniquify(maybeUris);
   const adapter = amp.validator.GENERATE_DETAILED_ERRORS ?
       new UrlErrorInAttrAdapter(attrName) :
       null;
@@ -3981,7 +3984,8 @@ class ParsedValidatorRules {
       }
     }
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      for (const tagMissing of sortAndUniquify(missing)) {
+      sortAndUniquify(missing);
+      for (const tagMissing of missing) {
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
