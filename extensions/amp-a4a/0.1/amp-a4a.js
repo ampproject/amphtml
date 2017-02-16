@@ -1175,7 +1175,7 @@ export class AmpA4A extends AMP.BaseElement {
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
     // Can't get the attributes until we have the iframe, then set it.
-    const attributes = getContextMetadata(window, iframe, this.sentinel);
+    const attributes = getContextMetadata(window, this.element, this.sentinel);
     iframe.setAttribute('name', JSON.stringify(attributes));
     iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
     return this.iframeRenderHelper_(iframe);
