@@ -210,6 +210,7 @@ export class Log {
   error(tag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
+      // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
   }
@@ -224,6 +225,7 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;
+      // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
   }
@@ -295,6 +297,7 @@ export class Log {
       e.associatedElement = firstElement;
       e.messageArray = messageArray;
       this.prepareError_(e);
+      // reportError is installed globally per window in the entry point.
       self.reportError(e);
       throw e;
     }
@@ -448,6 +451,7 @@ function createErrorVargs(var_args) {
 export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
   setTimeout(() => {
+    // reportError is installed globally per window in the entry point.
     self.reportError(error);
     throw error;
   });

@@ -36,6 +36,7 @@ export function listen(element, eventType, listener, opt_capture) {
     try {
       return localListener.call(this, event);
     } catch (e) {
+      // reportError is installed globally per window in the entry point.
       self.reportError(e);
       throw e;
     }
@@ -71,6 +72,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
     try {
       localListener(event);
     } catch (e) {
+      // reportError is installed globally per window in the entry point.
       self.reportError(e);
       throw e;
     } finally {
