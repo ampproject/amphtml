@@ -57,21 +57,21 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * `git pull upstream master`
 * `git checkout <branch name>`
 * `git rebase master`
-* note that you may need to resolve conflicting changes at this point
+* Note that you may need to resolve conflicting changes at this point
 
 # Push your branch & create a Pull Request
 
-* pull the latest changes as described above
+* Pull the latest changes as described above
 * `git checkout <branch name>`
 * `git push origin <branch name>`
-* go to https://github.com/ampproject/html and in the banner indicating you've recently pushed a branch, click the "Compare & pull request"  (if this banner does not appear, go to your fork at `https://github.com/<your username>/amphtml`, choose your branch from the "Branch" dropdown and click "New pull request")
-* make sure you've signed the CLA (using the same email address as your git config indicates)
-* if your reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again
-* if you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment
-* once approved your changes are merged into the amphtml repository by a core committer (you don't do this merge)
+* Go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and in the banner indicating you've recently pushed a branch, click the "Compare & pull request"  (if this banner does not appear, go to your fork at `https://github.com/<your username>/amphtml`, choose your branch from the "Branch" dropdown and click "New pull request")
+* Make sure you've signed the CLA (using the same email address as your git config indicates)
+* If your reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again
+* If you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment
+* Once approved your changes are merged into the amphtml repository by a core committer (you don't do this merge)
 
 # Delete your branch after your changes are merged (optional)
 
-* go to the master branch: `git checkout master`
-* delete your local branch: `git branch -D <branch name>`
-* delete the GitHub fork branch: `git push origin --delete <branch name>`
+* Go to the master branch: `git checkout master`
+* Delete your local branch: `git branch -D <branch name>`
+* Delete the GitHub fork branch: `git push origin --delete <branch name>`
