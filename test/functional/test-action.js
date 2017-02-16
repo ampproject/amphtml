@@ -138,6 +138,49 @@ describe('ActionService parseAction', () => {
     expect(a[1].args['keyA']()).to.equal('valueA');
   });
 
+  it('should parse multiple event types with multiple actions', () => {
+    const a = parseActionMap(
+        'event1:target1, target2.methodA, target3.methodB(keyA=valueA);' +
+        'event2:target4, target5.methodC, target6.methodD(keyB=valueB)');
+
+    expect(Object.keys(a)).to.have.length(2);
+
+    expect(a['event1']).to.have.length(3);
+    expect(a['event2']).to.have.length(3);
+
+    // action definitions for event1
+    expect(a['event1'][0].event).to.equal('event1');
+    expect(a['event1'][0].target).to.equal('target1');
+    expect(a['event1'][0].method).to.equal('activate');
+    expect(a['event1'][0].args).to.be.null;
+
+    expect(a['event1'][1].event).to.equal('event1');
+    expect(a['event1'][1].target).to.equal('target2');
+    expect(a['event1'][1].method).to.equal('methodA');
+    expect(a['event1'][1].args).to.be.null;
+
+    expect(a['event1'][2].event).to.equal('event1');
+    expect(a['event1'][2].target).to.equal('target3');
+    expect(a['event1'][2].method).to.equal('methodB');
+    expect(a['event1'][2].args['keyA']()).to.equal('valueA');
+
+    // action definitions for event2
+    expect(a['event2'][0].event).to.equal('event2');
+    expect(a['event2'][0].target).to.equal('target4');
+    expect(a['event2'][0].method).to.equal('activate');
+    expect(a['event2'][0].args).to.be.null;
+
+    expect(a['event2'][1].event).to.equal('event2');
+    expect(a['event2'][1].target).to.equal('target5');
+    expect(a['event2'][1].method).to.equal('methodC');
+    expect(a['event2'][1].args).to.be.null;
+
+    expect(a['event2'][2].event).to.equal('event2');
+    expect(a['event2'][2].target).to.equal('target6');
+    expect(a['event2'][2].method).to.equal('methodD');
+    expect(a['event2'][2].args['keyB']()).to.equal('valueB');
+  })
+
   it('should parse with multiple args', () => {
     const a = parseAction('event1:target1.method1(key1=value1, key2 = value2)');
     expect(a.event).to.equal('event1');
