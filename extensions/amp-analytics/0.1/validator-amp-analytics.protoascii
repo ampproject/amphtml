@@ -18,6 +18,7 @@
 tags: {  # amp-analytics
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .js script"
+  satisfies: "amp-analytics extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   # amp-analytics is required for amp access, so the presence of either of
@@ -105,13 +106,14 @@ tags: {  # amp-ad-metadata (json)
 tags: {  # <amp-analytics>
   tag_name: "AMP-ANALYTICS"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-analytics extension .js script"
+  requires: "amp-analytics extension .js script"
   attrs: { name: "type" }
   attrs: {
     name: "config"
     value_url: {
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
+      allow_empty: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }

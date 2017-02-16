@@ -19,6 +19,7 @@ tags: {  # amp-experiment
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-experiment extension .js script"
+  satisfies: "amp-experiment extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-experiment"
@@ -75,7 +76,7 @@ tags: {  # <amp-experiment>
   html_format: AMP
   tag_name: "AMP-EXPERIMENT"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-experiment extension .js script"
+  requires: "amp-experiment extension .js script"
   unique: true
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-experiment.html"
 }

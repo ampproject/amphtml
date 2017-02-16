@@ -17,6 +17,7 @@
 tags: {  # amp-fit-text
   tag_name: "SCRIPT"
   spec_name: "amp-fit-text extension .js script"
+  satisfies: "amp-fit-text extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-fit-text"
@@ -55,7 +56,7 @@ tags: {  # <amp-fit-text>
   tag_name: "AMP-FIT-TEXT"
   # <amp-fit-text> is whitelisted for <amp-sidebar>, otherwise:
   # disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-fit-text extension .js script"
+  requires: "amp-fit-text extension .js script"
   attrs: { name: "max-font-size" }
   attrs: { name: "min-font-size" }
   attr_lists: "extended-amp-global"

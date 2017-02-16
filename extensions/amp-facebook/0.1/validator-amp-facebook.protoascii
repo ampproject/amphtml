@@ -18,6 +18,7 @@ tags: {  # amp-facebook
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-facebook extension .js script"
+  satisfies: "amp-facebook extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-facebook"
@@ -54,7 +55,7 @@ tags: {  # <amp-facebook>
   html_format: AMP
   tag_name: "AMP-FACEBOOK"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-facebook extension .js script"
+  requires: "amp-facebook extension .js script"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-href"

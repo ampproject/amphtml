@@ -18,6 +18,7 @@ tags: {  # amp-twitter
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-twitter extension .js script"
+  satisfies: "amp-twitter extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-twitter"
@@ -54,7 +55,7 @@ tags: {  # <amp-twitter>
   html_format: AMP
   tag_name: "AMP-TWITTER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-twitter extension .js script"
+  requires: "amp-twitter extension .js script"
   attrs: {
     name: "data-tweetid"
     mandatory: true
