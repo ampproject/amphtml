@@ -651,11 +651,6 @@ class ParsedTagSpec {
      */
     this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
     /**
-     * @type {!Array<string>}
-     * @private
-     */
-    this.requires_ = [];
-    /**
      * @type {!Array<number>}
      * @private
      */
@@ -689,10 +684,6 @@ class ParsedTagSpec {
       }
     }
     sortAndUniquify(this.mandatoryOneofs_);
-
-    for (const condition of tagSpec.requires) {
-      this.requires_.push(condition);
-    }
   }
 
   /**
@@ -754,7 +745,7 @@ class ParsedTagSpec {
    * @return {!Array<string>}
    */
   requires() {
-    return this.requires_;
+    return this.spec_.requires;
   }
 
   /**
