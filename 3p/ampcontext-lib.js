@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 import {AmpContext} from './ampcontext.js';
-import {initLogConstructor} from '../src/log';
+import {initLogConstructor, setReportError} from '../src/log';
+import {reportError} from '../src/error';
 initLogConstructor();
+setReportError(reportError);
 
 
 /**

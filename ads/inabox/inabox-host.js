@@ -20,7 +20,8 @@
  */
 
 import '../../third_party/babel/custom-babel-helpers';
-import {dev, initLogConstructor} from '../../src/log';
+import {dev, initLogConstructor, setReportError} from '../../src/log';
+import {reportError} from '../../src/error';
 import {InaboxMessagingHost} from './inabox-messaging-host';
 
 const TAG = 'inabox-host';
@@ -38,6 +39,7 @@ function run(win) {
 
   win['ampInaboxInitialized'] = true;
   initLogConstructor();
+  setReportError(reportError);
 
   const host = new InaboxMessagingHost(win, win['ampInaboxIframes']);
 
