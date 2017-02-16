@@ -122,11 +122,11 @@ export function reportError(error, opt_associatedElement) {
         output.apply(console, error.messageArray);
       } else {
         if (element) {
-          output.call(console, error.message, element);
+          output.call(console, error.message, element, error);
         } else if (!getMode().minified) {
-          output.call(console, error.stack);
+          output.call(console, error);
         } else {
-          output.call(console, error.message);
+          output.call(console, error);
         }
       }
     }
