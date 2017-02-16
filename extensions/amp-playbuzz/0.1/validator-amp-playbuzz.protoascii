@@ -57,8 +57,12 @@ tags: {  # <amp-playbuzz>
   satisfies: "amp-playbuzz"
   requires: "amp-playbuzz extension .js script"
   attrs: {
-    name: "data-comments"
-    value_regex_casei: "(false|true)"
+    name: "src"
+    mandatory_oneof: "['src', 'data-item']"
+  }
+  attrs: {
+    name: "data-item"
+    mandatory_oneof: "['src', 'data-item']"
   }
   attrs: {
     name: "data-item-info"
@@ -69,8 +73,8 @@ tags: {  # <amp-playbuzz>
     value_regex_casei: "(false|true)"
   }
   attrs: {
-    name: "src"
-    mandatory: true
+    name: "data-comments"
+    value_regex_casei: "(false|true)"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-playbuzz"
