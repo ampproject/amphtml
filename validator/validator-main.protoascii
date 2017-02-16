@@ -25,7 +25,7 @@ min_validator_revision_required: 210
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 358
+spec_file_revision: 359
 
 # Validator extensions.
 # =====================
@@ -346,6 +346,7 @@ tags: {
 tags: {
   tag_name: "META"
   spec_name: "meta http-equiv=X-UA-Compatible"
+  mandatory_ancestor: "HEAD"
   attrs: {
     name: "http-equiv"
     mandatory: true
@@ -401,6 +402,7 @@ tags: {
 tags: {
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Type"
+  mandatory_ancestor: "HEAD"
   attrs: {
     name: "http-equiv"
     mandatory: true
@@ -418,6 +420,7 @@ tags: {
 tags: {
   tag_name: "META"
   spec_name: "meta http-equiv=content-language"
+  mandatory_ancestor: "HEAD"
   attrs: {
     name: "http-equiv"
     mandatory: true
@@ -435,6 +438,7 @@ tags: {
 tags: {
   tag_name: "META"
   spec_name: "meta http-equiv=pics-label"
+  mandatory_ancestor: "HEAD"
   attrs: {
     name: "http-equiv"
     mandatory: true
@@ -452,6 +456,7 @@ tags: {
 tags: {
   tag_name: "META"
   spec_name: "meta http-equiv=imagetoolbar"
+  mandatory_ancestor: "HEAD"
   attrs: {
     name: "http-equiv"
     mandatory: true
@@ -469,6 +474,7 @@ tags: {
 tags: {
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Style-Type"
+  mandatory_ancestor: "HEAD"
   attrs: {
     name: "http-equiv"
     mandatory: true
@@ -487,6 +493,7 @@ tags: {
 tags: {
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Script-Type"
+  mandatory_ancestor: "HEAD"
   attrs: {
     name: "http-equiv"
     mandatory: true
@@ -504,6 +511,7 @@ tags: {
 tags: {
   tag_name: "META"
   spec_name: "meta http-equiv=origin-trial"
+  mandatory_ancestor: "HEAD"
   attrs: {
     name: "http-equiv"
     mandatory: true
@@ -521,6 +529,7 @@ tags: {
 tags: {
   tag_name: "META"
   spec_name: "meta http-equiv=resource-type"
+  mandatory_ancestor: "HEAD"
   attrs: {
     name: "http-equiv"
     mandatory: true
@@ -2802,6 +2811,8 @@ attr_lists: {
   attrs: { name: "noloading" value: "" }
 }
 tags: {  # <amp-img>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-IMG"
   # <amp-img> is whitelisted for <amp-sidebar>, otherwise:
   # disallowed_ancestor: "AMP-SIDEBAR"
@@ -2821,6 +2832,8 @@ tags: {  # <amp-img>
   }
 }
 tags: {  # <amp-pixel>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-PIXEL"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
