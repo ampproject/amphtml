@@ -21,21 +21,6 @@ import {user} from './log';
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
 /**
- * @type {function(*, !Element=)|undefined}
- */
-let reportError;
-
-/**
- * Sets reportError function. Called from error.js to break cyclic
- * dependency.
- * @param {function(*, !Element=)|undefined} fn
- */
-export function setReportError(fn) {
-  reportError = fn;
-}
-
-
-/**
  * Listens for the specified event on the element.
  * @param {!EventTarget} element
  * @param {string} eventType
@@ -51,7 +36,8 @@ export function listen(element, eventType, listener, opt_capture) {
     try {
       return localListener.call(this, event);
     } catch (e) {
-      reportError(e);
+      // reportError is installed globally per window in the entry point.
+      self.reportError(e);
       throw e;
     }
   };
@@ -86,7 +72,8 @@ export function listenOnce(element, eventType, listener, opt_capture) {
     try {
       localListener(event);
     } catch (e) {
-      reportError(e);
+      // reportError is installed globally per window in the entry point.
+      self.reportError(e);
       throw e;
     } finally {
       unlisten();
