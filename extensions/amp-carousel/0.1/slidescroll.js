@@ -110,7 +110,7 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
 
-    /** @const @private {?../../../src/service/action-impl.ActionService} */
+    /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
   }
 

@@ -39,7 +39,7 @@ export class AmpSelector extends AMP.BaseElement {
     /** @private {boolean} */
     this.isDisabled_ = false;
 
-    /** @const @private {?../../../src/service/action-impl.ActionService} */
+    /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
   }
 
