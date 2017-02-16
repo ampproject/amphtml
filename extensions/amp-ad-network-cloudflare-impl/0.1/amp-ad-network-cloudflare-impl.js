@@ -17,6 +17,8 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {dev} from '../../../src/log';
+import {startsWith} from '../../../src/string';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {NETWORKS} from './vendors';
 
 /**
@@ -42,10 +44,22 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
    */
   isValidElement() {
     const el = this.element;
-    return this.isAmpAdElement()
-      && el.hasAttribute('src')
-      && el.hasAttribute('data-cf-network')
-      && NETWORKS[el.getAttribute('data-cf-network')] != null;
+    if (!(this.isAmpAdElement() && el.hasAttribute('data-cf-network'))) {
+      return false;
+    }
+
+    const network = NETWORKS[el.getAttribute('data-cf-network')];
+    if (!network) {
+      return false;
+    }
+
+    const src = el.getAttribute('src') || network.src;
+    if (!(src && startsWith(src, network.base))) {
+      return false;
+    }
+    assertAbsoluteHttpOrHttpsUrl(src);
+
+    return true;
   }
 
   /** @override */
@@ -74,17 +88,17 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
     const rect = this.getIntersectionElementLayoutBox();
     const el = this.element;
 
-    const network = el.getAttribute('data-cf-network');
+    const network = NETWORKS[el.getAttribute('data-cf-network')];
     const a4a = el.getAttribute('data-cf-a4a') !== 'false';
-    const base = NETWORKS[network].base;
+    const base = network.base;
 
-    // generate URL for ad creative
-    let src = el.getAttribute('src');
-    if (src[0] != '/') {
-      // ensure that we start from the root
-      src = '/' + src;
+    // Get URL for ad creative
+    let url = el.getAttribute('src') || network.src;
+
+    // optionally convert to a4a endpoint
+    if (a4a && url.substr(base.length, 6) != '/_a4a/') {
+      url = base + '/_a4a' + url.slice(base.length);
     }
-    let url = base + (a4a ? '/_a4a' : '') + src;
 
     // compute replacement values
     const values = {
@@ -99,8 +113,8 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
     let pre = url.indexOf('?') < 0 ? '?' : '&';
     for (let i = 0; i < el.attributes.length; i++) {
       const attrib = el.attributes[i];
-      if (attrib.specified && attrib.name.startsWith('data-')
-          && !attrib.name.startsWith('data-cf-')) {
+      if (attrib.specified && startsWith(attrib.name, 'data-')
+          && !startsWith(attrib.name, 'data-cf-')) {
         url += pre + encodeURIComponent(attrib.name.substring(5)) +
           '=' + encodeURIComponent(this.replacements(attrib.value, values));
         pre = '&';
