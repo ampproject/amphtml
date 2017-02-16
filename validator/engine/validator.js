@@ -1513,8 +1513,6 @@ class InvalidAtRuleVisitor extends parse_css.RuleVisitor {
     this.context = context;
     /** @type {!amp.validator.ValidationResult} */
     this.result = result;
-    /** @type {boolean} */
-    this.errorsSeen = false;
   }
 
   /** @inheritDoc */
@@ -1530,7 +1528,6 @@ class InvalidAtRuleVisitor extends parse_css.RuleVisitor {
       } else {
         this.result.status = amp.validator.ValidationResult.Status.FAIL;
       }
-      this.errorsSeen = true;
     }
   }
 }
