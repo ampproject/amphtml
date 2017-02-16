@@ -16,7 +16,6 @@
 
 tags: {  # amp-o2-player
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-o2-player extension .js script"
   satisfies: "amp-o2-player extension .js script"
@@ -54,7 +53,6 @@ tags: {  # amp-o2-player
 }
 tags: {  # <amp-o2-player>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-O2-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-o2-player extension .js script"

@@ -16,7 +16,6 @@
 
 tags: {  # amp-youtube
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-youtube extension .js script"
   satisfies: "amp-youtube extension .js script"
@@ -54,7 +53,6 @@ tags: {  # amp-youtube
 }
 tags: {  # <amp-youtube>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-YOUTUBE"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-youtube extension .js script"

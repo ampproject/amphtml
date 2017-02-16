@@ -16,7 +16,6 @@
 
 tags: {  # amp-facebook
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-facebook extension .js script"
   satisfies: "amp-facebook extension .js script"
@@ -54,7 +53,6 @@ tags: {  # amp-facebook
 }
 tags: {  # <amp-facebook>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-FACEBOOK"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-facebook extension .js script"

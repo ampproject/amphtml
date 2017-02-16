@@ -16,7 +16,6 @@
 
 tags: {  # amp-brightcove
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-brightcove extension .js script"
   satisfies: "amp-brightcove extension .js script"
@@ -54,7 +53,6 @@ tags: {  # amp-brightcove
 }
 tags: {  # <amp-brightcove>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-BRIGHTCOVE"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-brightcove extension .js script"

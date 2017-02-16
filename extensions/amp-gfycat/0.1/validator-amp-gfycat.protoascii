@@ -16,7 +16,6 @@
 
 tags: {  # amp-gfycat
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-gfycat extension .js script"
   satisfies: "amp-gfycat extension .js script"
@@ -54,7 +53,6 @@ tags: {  # amp-gfycat
 }
 tags: {  # <amp-gfycat>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-GFYCAT"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-gfycat extension .js script"

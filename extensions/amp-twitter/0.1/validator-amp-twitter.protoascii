@@ -16,7 +16,6 @@
 
 tags: {  # amp-twitter
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-twitter extension .js script"
   satisfies: "amp-twitter extension .js script"
@@ -54,7 +53,6 @@ tags: {  # amp-twitter
 }
 tags: {  # <amp-twitter>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-TWITTER"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-twitter extension .js script"

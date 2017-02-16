@@ -16,7 +16,6 @@
 
 tags: {  # amp-hulu
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-hulu extension .js script"
   satisfies: "amp-hulu extension .js script"
@@ -53,7 +52,6 @@ tags: {  # amp-hulu
 }
 tags: {  # <amp-hulu>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-HULU"
   satisfies: "amp-hulu"
   disallowed_ancestor: "AMP-SIDEBAR"
