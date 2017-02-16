@@ -66,12 +66,6 @@ export class TouchHandler {
     listen(this.win, 'touchstart', handleEvent);
     listen(this.win, 'touchend', handleEvent);
     listen(this.win, 'touchmove', handleEvent);
-
-    listen(this.win, 'mousedown', handleEvent); // DELETE BEFORE MERGING
-    listen(this.win, 'mouseup', handleEvent); // DELETE BEFORE MERGING
-    listen(this.win, 'dragstart', handleEvent); // DELETE BEFORE MERGING
-    listen(this.win, 'dragend', handleEvent); // DELETE BEFORE MERGING
-    listen(this.win, 'mousemove', handleEvent); // DELETE BEFORE MERGING
   }
 
   /**
@@ -80,14 +74,10 @@ export class TouchHandler {
    */
   handleEvent_(e) {
     switch (e.type) {
-      case 'dragstart': // DELETE BEFORE MERGING
-      case 'mousedown': // DELETE BEFORE MERGING
       case 'touchstart':
         this.tracking_ = true;
         this.forwardEvent_(e);
         break;
-      case 'dragend': // DELETE BEFORE MERGING
-      case 'mouseup': // DELETE BEFORE MERGING
       case 'touchend':
         this.forwardEvent_(e);
         this.tracking_ = false;
