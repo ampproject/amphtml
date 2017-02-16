@@ -23,7 +23,7 @@
 <body>
   <button onclick="AMP.toggleExperiment('AMP-BIND');window.location.href=window.location.href;">Toggle &lt;AMP-BIND&gt; experiment</button>
 
-  <h2>Error examples</h2>
+  <h2>Error &amp; warning examples</h2>
   <p>This page lists the different types of runtime user errors that amp-bind can throw.</p>
   <hr>
 
@@ -40,9 +40,19 @@
   <a [href]="'javascript:alert(1)'">This expression contains an invalid URL protocol.</a>
 
   <h3>4.b Invalid expression result (css)</h3>
-  <a [class]="123">This expression contains an invalid [class] result (only string/array/null supported).</a>
+  <p [class]="123">This expression contains an invalid [class] result (only string/array/null supported).</p>
 
-  <h3>5. Mismatched initial state</h3>
+  <h3>5. (WARN) Undefined variables and members</h3>
+  <p [text]="foo">null</p><p>Expression above references an undefined variable `foo`.</p>
+  <p [text]="myState.qux">null</p><p>Expression above references an undefined member `myState.qux`.</p>
+
+  <h3>6. (WARN) Invalid member access</h3>
+  <p [text]="myState[true]">null</p><p>Expression above tries to access a boolean member.</p>
+  <p [text]="true[3]">null</p><p>Expression above tries to access a member of a boolean.</p>
+  <p [text]="myState[null]">null</p><p>Expression above tries to access a null member.</p>
+  <p [text]="null[3]">null</p><p>Expression above tries to access a member of null.</p>
+
+  <h3>7. Mismatched initial state</h3>
   <h4>(Only with '#development=1')</h4>
   <p [text]="myState.foo">This paragraph's initial `text` state doesn't match the evaluated expression result.</p>
 
