@@ -456,6 +456,20 @@ app.use('/min/', function(req, res) {
   proxyToAmpProxy(req, res, /* minify */ true);
 });
 
+// Nest the response in an iframe.
+// Example:
+// http://localhost:8000/iframe/examples/ads.amp.max.html
+app.get('/iframe/*', function(req, res) {
+  // Returns an html blob with an iframe pointing to the url after /iframe/.
+  res.send(`<!doctype html>
+          <html style="width:100%; height:100%;">
+            <body style="width:98%; height:98%;">
+              <iframe src="${req.url.substr(7)}" style="width:100%; height:100%;">
+              </iframe>
+            </body>
+          </html>`);
+});
+
 // A4A envelope.
 // Examples:
 // http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
