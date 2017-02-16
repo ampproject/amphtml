@@ -17,9 +17,10 @@ tags: {  # amp-bind
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-bind extension .js script"
+  satisfies: "amp-bind extension .js script"
   mandatory_parent: "HEAD"
   unique: true
-  also_requires_tag: "amp-state"
+  requires: "amp-state"
   attrs: {
     name: "async"
     mandatory: true
@@ -53,7 +54,8 @@ tags: {  # <amp-state>
   html_format: AMP
   disallowed_ancestor: "AMP-SIDEBAR"
   tag_name: "AMP-STATE"
-  also_requires_tag: "amp-bind extension .js script"
+  satisfies: "amp-state"
+  requires: "amp-bind extension .js script"
   attrs: {
     name: "id"
     mandatory: true

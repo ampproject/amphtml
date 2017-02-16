@@ -84,6 +84,11 @@ export const adConfig = {
     preconnect: 'https://api.adsnative.com',
   },
 
+  adspeed: {
+    preconnect: 'https://g.adspeed.net',
+    renderStartImplemented: true,
+  },
+
   adspirit: {},
 
   adstir: {
@@ -295,6 +300,10 @@ export const adConfig = {
   },
 
   kargo: {},
+
+  kiosked: {
+    renderStartImplemented: true,
+  },
 
   kixer: {
     prefetch: 'https://cdn.kixer.com/ad/load.js',

@@ -84,6 +84,7 @@ declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-image-lightbox', '0.1', true);
 declareExtension('amp-instagram', '0.1', false);
 declareExtension('amp-install-serviceworker', '0.1', false);
+declareExtension('amp-izlesene', '0.1', false);
 declareExtension('amp-jwplayer', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-lightbox', '0.1', true);
 declareExtension('amp-lightbox-viewer', '0.1', true, 'NO_TYPE_CHECK');
@@ -110,7 +111,6 @@ declareExtension('amp-selector', '0.1', true);
  */
 declareExtension('amp-slides', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-social-share', '0.1', true);
-declareExtension('amp-tabs', '0.1', true);
 declareExtension('amp-twitter', '0.1', false);
 declareExtension('amp-user-notification', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-vimeo', '0.1', false, 'NO_TYPE_CHECK');

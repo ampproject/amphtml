@@ -293,6 +293,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
           '\\?client=adsense&format=0x0&w=0&h=0&adtest=false' +
           '&adk=[0-9]+&bc=1&pv=1&vis=1&wgl=1' +
+          '(&asnt=[0-9]+-[0-9]+)?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           // Depending on how the test is run, it can get different
