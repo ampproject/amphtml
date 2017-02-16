@@ -548,6 +548,9 @@ amp-fresh {
  *
  * TODO(aghassemi, #5306): Move to video extension when video is out of core.
  */
+ i-amp-video-mask {
+  z-index: 1;
+}
 .amp-video-eq {
   align-items: flex-end;
   bottom: 7px;
