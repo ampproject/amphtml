@@ -70,7 +70,7 @@ class AmpWorker {
     /** @const @private {!Window} */
     this.win_ = win;
 
-    /** @const @private {!Xhr} */
+    /** @const @private {!../service/xhr-impl.Xhr} */
     this.xhr_ = xhrFor(win);
 
     const url =
@@ -82,8 +82,7 @@ class AmpWorker {
 
     /** @const @private {!Promise} */
     this.fetchPromise_ = this.xhr_.fetchText(url).then(text => {
-      // Fetch web worker binary and create from Blob as workaround since
-      // Worker constructor won't accept CORS URLs.
+      // Workaround since Worker constructor only accepts same origin URLs.
       const blob = new win.Blob([text], {type: 'text/javascript'});
       const blobUrl = win.URL.createObjectURL(blob);
       this.worker_ = new win.Worker(blobUrl);
