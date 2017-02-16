@@ -21,6 +21,7 @@ tags: {  # amp-playbuzz
   satisfies: "amp-playbuzz extension .js script"
   requires: "amp-playbuzz"
   mandatory_parent: "HEAD"
+  extension_unused_unless_tag_present: "amp-playbuzz"
   unique: true
   attrs: {
     name: "async"
