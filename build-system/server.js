@@ -251,15 +251,6 @@ function proxyToAmpProxy(req, res, minify) {
   });
 }
 
-// Returns an html blob with an iframe pointing to the provided url.
-function nestResponseInIframe(url) {
-  return `<!doctype html>
-          <html style="width:100%; height:100%;">
-            <body style="width:98%; height:98%;">
-              <iframe src="${url}" style="width:100%; height:100%;"></iframe>
-            </body>
-          </html>`;
-}
 
 var liveListUpdateFile = '/examples/live-list-update.amp.html';
 var liveListCtr = 0;
@@ -470,7 +461,14 @@ app.use('/min/', function(req, res) {
 // Example:
 // http://localhost:8000/iframe/examples/ads.amp.max.html
 app.use('/iframe/', function(req, res) {
-  res.send(nestResponseInIframe(req.url));
+  // Returns an html blob with an iframe pointing to the url after /iframe/.
+  res.send(`<!doctype html>
+          <html style="width:100%; height:100%;">
+            <body style="width:98%; height:98%;">
+              <iframe src="${req.url}" style="width:100%; height:100%;">
+              </iframe>
+            </body>
+          </html>`);
 });
 
 // A4A envelope.
