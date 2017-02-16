@@ -18,7 +18,6 @@ feature_tests/urls.html:70:2 Missing URL for attribute 'src' in tag 'amp-anim'. 
 feature_tests/urls.html:71:2 Missing URL for attribute 'src' in tag 'amp-audio'. (see https://www.ampproject.org/docs/reference/extended/amp-audio.html) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:72:2 Missing URL for attribute 'src' in tag 'amp-iframe'. (see https://www.ampproject.org/docs/reference/extended/amp-iframe.html) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:73:2 Missing URL for attribute 'src' in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/amp-img.html) [AMP_TAG_PROBLEM]
-feature_tests/urls.html:74:2 Missing URL for attribute 'src' in tag 'amp-pixel'. (see https://www.ampproject.org/docs/reference/amp-pixel.html) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:75:2 Missing URL for attribute 'src' in tag 'amp-video'. (see https://www.ampproject.org/docs/reference/amp-video.html) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:78:2 Missing URL for attribute 'src' in tag 'amp-ad'. (see https://www.ampproject.org/docs/reference/amp-ad.html) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:80:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-ad'. (see https://www.ampproject.org/docs/reference/amp-ad.html) [AMP_TAG_PROBLEM]

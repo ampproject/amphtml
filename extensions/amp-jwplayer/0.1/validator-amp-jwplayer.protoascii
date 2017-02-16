@@ -18,6 +18,7 @@ tags: {  # amp-jwplayer
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-jwplayer extension .js script"
+  satisfies: "amp-jwplayer extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-jwplayer"
@@ -54,7 +55,7 @@ tags: {  # <amp-jwplayer>
   html_format: AMP
   tag_name: "AMP-JWPLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-jwplayer extension .js script"
+  requires: "amp-jwplayer extension .js script"
   attrs: {
     name: "data-media-id"
     mandatory_oneof: "data-media-id or data-playlist-id"

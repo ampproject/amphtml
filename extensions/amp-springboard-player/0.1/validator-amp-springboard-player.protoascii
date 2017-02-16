@@ -18,6 +18,7 @@ tags: {  # amp-springboard-player
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-springboard-player extension .js script"
+  satisfies: "amp-springboard-player extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-springboard-player"
@@ -54,7 +55,7 @@ tags: {  # <amp-springboard-player>
   html_format: AMP
   tag_name: "AMP-SPRINGBOARD-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-springboard-player extension .js script"
+  requires: "amp-springboard-player extension .js script"
   attrs: {
     name: "data-content-id"
     mandatory: true

@@ -162,8 +162,7 @@ export class AmpAdUIHandler {
         this.state = AdDisplayState.LOADED_NO_CONTENT;
       });
     } else {
-      this.baseInstance_.attemptChangeHeight(0).then(() => {
-        this.baseInstance_./*OK*/collapse();
+      this.baseInstance_.attemptCollapse().then(() => {
         this.state = AdDisplayState.LOADED_NO_CONTENT;
       }, () => {
         // Apply default fallback when resize fail.
