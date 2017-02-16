@@ -465,9 +465,9 @@ class ParsedReferencePoints {
  * They can also reference lists of attributes (AttrLists), thereby
  * sharing those definitions. This abstraction instantiates
  * ParsedAttrSpec for each AttrSpec (from validator-*.protoascii, our
- * specification file) exactly once. To accomplish that, it keeps
- * around the attr lists with ParsedAttrSpec instances, and all
- * ParsedAttrSpec instances indexed by their id.
+ * specification file) exactly once, and provides quick access to the
+ * attr spec names as well, including for simple attr specs (those
+ * which only have a name but no specification for their value).
  * @private
  */
 class ParsedAttrSpecs {
@@ -475,26 +475,26 @@ class ParsedAttrSpecs {
    * @param {!amp.validator.ValidatorRules} rules
    */
   constructor(rules) {
-    /** @private  @type {!Object<string, !Array<number>>} */
-    this.attrListsByName_ = {};
+    /** @type {!Object<string, !Array<number>>} */
+    this.attrListsByName = {};
 
-    /** @private @type {!Array<number>} */
-    this.globalAttrs_ = [];
+    /** @type {!Array<number>} */
+    this.globalAttrs = [];
 
-    /** @private @type {!Array<number>} */
-    this.layoutAttrs_ = [];
+    /** @type {!Array<number>} */
+    this.layoutAttrs = [];
 
     for (const attrList of rules.attrLists) {
       if (attrList.name === '$AMP_LAYOUT_ATTRS') {
-        this.layoutAttrs_ = attrList.attrs;
+        this.layoutAttrs = attrList.attrs;
       } else if (attrList.name === '$GLOBAL_ATTRS') {
-        this.globalAttrs_ = attrList.attrs;
+        this.globalAttrs = attrList.attrs;
       } else {
-        this.attrListsByName_[attrList.name] = attrList.attrs;
+        this.attrListsByName[attrList.name] = attrList.attrs;
       }
     }
-    goog.asserts.assert(this.layoutAttrs_.length > 0, 'layout attrs not found');
-    goog.asserts.assert(this.globalAttrs_.length > 0, 'global attrs not found');
+    goog.asserts.assert(this.layoutAttrs.length > 0, 'layout attrs not found');
+    goog.asserts.assert(this.globalAttrs.length > 0, 'global attrs not found');
 
     /**
      * The AttrSpec instances, indexed by attr spec ids.
@@ -513,102 +513,6 @@ class ParsedAttrSpecs {
      * @private @type {!Array<!ParsedAttrSpec>}
      */
     this.parsedAttrSpecs_ = new Array(rules.attrs.length);
-  }
-
-  /**
-   * Merges the list of attrs into attrsByName, avoiding to merge in attrs
-   * with names that are already in attrsByName.
-   * @param {!Array<number>} attrs
-   * @param {!Object<string, number>} attrsByName
-   * @param {!Array<number>} mandatoryAttrIds
-   * @param {!Array<string>} mandatoryOneofs
-   * @param {!Array<number>} implicitAttrspecs
-   * @return {boolean} Whether or not an attr spec containing a URL was found.
-   */
-  mergeAttrs(
-      attrs, attrsByName, mandatoryAttrIds, mandatoryOneofs,
-      implicitAttrspecs) {
-    let containsUrl = false;
-    for (const attrId of attrs) {
-      const name = this.getNameByAttrSpecId(attrId);
-      if (attrsByName.hasOwnProperty(name)) {
-        continue;
-      }
-      attrsByName[name] = attrId;
-      if (attrId < 0) {  // negative attr ids are simple attrs (only name set).
-        continue;
-      }
-      const attr = this.getByAttrSpecId(attrId);
-      const spec = attr.getSpec();
-      if (spec.mandatory) {
-        mandatoryAttrIds.push(attrId);
-      }
-      if (spec.mandatoryOneof !== null) {
-        mandatoryOneofs.push(spec.mandatoryOneof);
-      }
-      for (const altName of spec.alternativeNames) {
-        attrsByName[altName] = attrId;
-      }
-      if (spec.implicit) {
-        implicitAttrspecs.push(attrId);
-      }
-      if (spec.valueUrl) {
-        containsUrl = true;
-      }
-    }
-    return containsUrl;
-  }
-
-  /**
-   * Collect the attr spec ids for a given |tagspec|.
-   * There are four ways to specify attributes:
-   * (1) implicitly by a tag spec, if the tag spec has the amp_layout field
-   * set - in this case, the AMP_LAYOUT_ATTRS are assumed;
-   * (2) within a TagSpec::attrs;
-   * (3) via TagSpec::attr_lists which references lists by key;
-   * (4) within the $GLOBAL_ATTRS TagSpec::attr_list.
-   * It's possible to provide multiple
-   * specifications for the same attribute name, but for any given tag only one
-   * such specification can be active. The precedence is (1), (2), (3), (4)
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {boolean} isReferencePoint
-   * @param {!Object<string, number>} attrsByName
-   * @param {!Array<number>} mandatoryAttrIds
-   * @param {!Array<string>} mandatoryOneofs
-   * @param {!Array<number>} implicitAttrspecs
-   * @return {boolean} Whether or not an attr spec containing a URL was found.
-   */
-  parseAttrsFor(
-      tagSpec, isReferencePoint, attrsByName, mandatoryAttrIds, mandatoryOneofs,
-      implicitAttrspecs) {
-    let containsUrl = false;
-    // (1) layout attrs.
-    if (tagSpec.ampLayout !== null && !isReferencePoint) {
-      containsUrl = this.mergeAttrs(
-                        this.layoutAttrs_, attrsByName, mandatoryAttrIds,
-                        mandatoryOneofs, implicitAttrspecs) ||
-          containsUrl;
-    }
-    // (2) attributes specified within |tagSpec|.
-    containsUrl = this.mergeAttrs(
-                      tagSpec.attrs, attrsByName, mandatoryAttrIds,
-                      mandatoryOneofs, implicitAttrspecs) ||
-        containsUrl;
-    // (3) attributes specified via reference to an attr_list.
-    for (const attrListName of tagSpec.attrLists) {
-      containsUrl = this.mergeAttrs(
-                        this.attrListsByName_[attrListName], attrsByName,
-                        mandatoryAttrIds, mandatoryOneofs, implicitAttrspecs) ||
-          containsUrl;
-    }
-    // (4) attributes specified in the global_attr list.
-    if (!isReferencePoint) {
-      containsUrl = this.mergeAttrs(
-                        this.globalAttrs_, attrsByName, mandatoryAttrIds,
-                        mandatoryOneofs, implicitAttrspecs) ||
-          containsUrl;
-    }
-    return containsUrl;
   }
 
   /**
@@ -694,10 +598,72 @@ class ParsedTagSpec {
      * @type {boolean}
      * @private
      */
-    this.containsUrl_ = parsedAttrSpecs.parseAttrsFor(
-        tagSpec, this.isReferencePoint_, this.attrsByName_,
-        this.mandatoryAttrIds_, this.mandatoryOneofs_, this.implicitAttrspecs_);
+    this.containsUrl_ = false;
+
+    // Collect the attr spec ids for a given |tagspec|.
+    // There are four ways to specify attributes:
+    // (1) implicitly by a tag spec, if the tag spec has the amp_layout field
+    // set - in this case, the AMP_LAYOUT_ATTRS are assumed;
+    // (2) within a TagSpec::attrs;
+    // (3) via TagSpec::attr_lists which references lists by key;
+    // (4) within the $GLOBAL_ATTRS TagSpec::attr_list.
+    // It's possible to provide multiple specifications for the same attribute
+    // name, but for any given tag only one such specification can be active.
+    // The precedence is (1), (2), (3), (4)
+
+    // (1) layout attrs.
+    if (tagSpec.ampLayout !== null && !this.isReferencePoint_) {
+      this.mergeAttrs(parsedAttrSpecs.layoutAttrs, parsedAttrSpecs);
+    }
+    // (2) attributes specified within |tagSpec|.
+    this.mergeAttrs(tagSpec.attrs, parsedAttrSpecs);
+
+    // (3) attributes specified via reference to an attr_list.
+    for (const attrListName of tagSpec.attrLists) {
+      this.mergeAttrs(
+          parsedAttrSpecs.attrListsByName[attrListName], parsedAttrSpecs);
+    }
+    // (4) attributes specified in the global_attr list.
+    if (!this.isReferencePoint_) {
+      this.mergeAttrs(parsedAttrSpecs.globalAttrs, parsedAttrSpecs);
+    }
     sortAndUniquify(this.mandatoryOneofs_);
+  }
+
+  /**
+   * Merges the list of attrs into attrsByName, avoiding to merge in attrs
+   * with names that are already in attrsByName.
+   * @param {!Array<number>} attrs
+   * @param {!ParsedAttrSpecs} parsedAttrSpecs
+   */
+  mergeAttrs(attrs, parsedAttrSpecs) {
+    for (const attrId of attrs) {
+      const name = parsedAttrSpecs.getNameByAttrSpecId(attrId);
+      if (this.attrsByName_.hasOwnProperty(name)) {
+        continue;
+      }
+      this.attrsByName_[name] = attrId;
+      if (attrId < 0) {  // negative attr ids are simple attrs (only name set).
+        continue;
+      }
+      const attr = parsedAttrSpecs.getByAttrSpecId(attrId);
+      const spec = attr.getSpec();
+      if (spec.mandatory) {
+        this.mandatoryAttrIds_.push(attrId);
+      }
+      if (spec.mandatoryOneof !== null) {
+        this.mandatoryOneofs_.push(spec.mandatoryOneof);
+      }
+      for (const altName of spec.alternativeNames) {
+        this.attrsByName_[altName] = attrId;
+      }
+      if (spec.implicit) {
+        this.implicitAttrspecs_.push(attrId);
+      }
+      if (spec.valueUrl) {
+        this.containsUrl_ = true;
+      }
+    }
   }
 
   /**
