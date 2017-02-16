@@ -16,6 +16,9 @@
 
 import {AstNodeType} from './bind-expr-defines';
 import {parser} from './bind-expr-impl';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-bind';
 
 /**
  * Possible types of a Bind expression evaluation.
@@ -135,27 +138,32 @@ export class BindExpression {
             }
           }
         }
-        throw new Error(`${method}() is not a supported function.`);
+        throw new Error(`${callerType}.${method} is not a supported function.`);
 
       case AstNodeType.MEMBER_ACCESS:
         const target = this.eval_(args[0], scope);
         const member = this.eval_(args[1], scope);
 
         if (target === null || member === null) {
+          this.memberAccessWarning_(target, member);
           return null;
         }
         const targetType = typeof target;
         if (targetType !== 'string' && targetType !== 'object') {
+          this.memberAccessWarning_(target, member);
           return null;
         }
         const memberType = typeof member;
         if (memberType !== 'string' && memberType !== 'number') {
+          this.memberAccessWarning_(target, member);
           return null;
         }
         // Ignore Closure's type constraint for `hasOwnProperty`.
         if (Object.prototype.hasOwnProperty.call(
               /** @type {Object} */ (target), member)) {
           return target[member];
+        } else {
+          this.memberAccessWarning_(target, member);
         }
         return null;
 
@@ -166,6 +174,8 @@ export class BindExpression {
         const variable = value;
         if (Object.prototype.hasOwnProperty.call(scope, variable)) {
           return scope[variable];
+        } else {
+          user().warn(TAG, `${variable} is not defined; returning null.`);
         }
         return null;
 
@@ -255,6 +265,15 @@ export class BindExpression {
       default:
         throw new Error(`Unexpected AstNodeType: ${type}.`);
     }
+  }
+
+  /**
+   * @param {*} target
+   * @param {*} member
+   */
+  memberAccessWarning_(target, member) {
+    user().warn(TAG, `Cannot read property ${JSON.stringify(member)} of ` +
+        `${JSON.stringify(target)}; returning null.`);
   }
 
   /**
