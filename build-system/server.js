@@ -251,6 +251,7 @@ function proxyToAmpProxy(req, res, minify) {
   });
 }
 
+
 var liveListUpdateFile = '/examples/live-list-update.amp.html';
 var liveListCtr = 0;
 var itemCtr = 2;
@@ -454,6 +455,20 @@ app.use('/max/', function(req, res) {
 // http://localhost:8000/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/min/', function(req, res) {
   proxyToAmpProxy(req, res, /* minify */ true);
+});
+
+// Nest the response in an iframe.
+// Example:
+// http://localhost:8000/iframe/examples/ads.amp.max.html
+app.get('/iframe/', function(req, res) {
+  // Returns an html blob with an iframe pointing to the url after /iframe/.
+  res.send(`<!doctype html>
+          <html style="width:100%; height:100%;">
+            <body style="width:98%; height:98%;">
+              <iframe src="${req.url}" style="width:100%; height:100%;">
+              </iframe>
+            </body>
+          </html>`);
 });
 
 // A4A envelope.
