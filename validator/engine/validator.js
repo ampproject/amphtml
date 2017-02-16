@@ -28,7 +28,6 @@ goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AmpLayout');
 goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
-goog.require('amp.validator.AttrList');
 goog.require('amp.validator.CssSpec');
 goog.require('amp.validator.ErrorCategory');
 goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
@@ -330,13 +329,6 @@ class ParsedAttrSpec {
   /**
    * @return {boolean}
    */
-  isSimple() {
-    return false;
-  }
-
-  /**
-   * @return {boolean}
-   */
   hasValueRegex() {
     return this.valueRegex_ !== null;
   }
@@ -391,13 +383,6 @@ class ParsedAttrSpec {
   }
 
   /**
-   * @return {!string}
-   */
-  getName() {
-    return this.spec_.name;
-  }
-
-  /**
    * @return {boolean}
    */
   hasTriggerSpec() {
@@ -416,54 +401,6 @@ class ParsedAttrSpec {
    */
   getValueUrlSpec() {
     return this.valueUrlSpec_;
-  }
-}
-
-/**
- * A simple parsed attr spec only holds the name and the attrId. Note
- * that attrIds for simple attr specs are -1 - -MAXINT. This is
- * because in the generated validator rules, they're a reference to an
- * interned string.
- * @private
- */
-class SimpleParsedAttrSpec {
-  /**
-   * @param {!string} name
-   * @param {number} attrId
-   */
-  constructor(name, attrId) {
-    /**
-     * @type {!string}
-     * @private
-     */
-    this.name_ = name;
-    /**
-     * Globally unique attribute rule id.
-     * @type {number}
-     * @private
-     */
-    this.id_ = attrId;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isSimple() {
-    return true;
-  }
-
-  /**
-   * @return {!string}
-   */
-  getName() {
-    return this.name_;
-  }
-
-  /**
-   * @return {number} unique for this attr spec.
-   */
-  getId() {
-    return this.id_;
   }
 }
 
@@ -538,15 +475,26 @@ class ParsedAttrSpecs {
    * @param {!amp.validator.ValidatorRules} rules
    */
   constructor(rules) {
-    /** @private  @type {!Object<string, !amp.validator.AttrList>} */
+    /** @private  @type {!Object<string, !Array<number>>} */
     this.attrListsByName_ = {};
-    for (const attrList of rules.attrLists) {
-      this.attrListsByName_[attrList.name] = attrList;
-    }
 
-    /** @private @type {!Object<string,
-     * !Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>>} */
-    this.parsedAttrListsByName_ = {};
+    /** @private @type {!Array<number>} */
+    this.globalAttrs_ = [];
+
+    /** @private @type {!Array<number>} */
+    this.layoutAttrs_ = [];
+
+    for (const attrList of rules.attrLists) {
+      if (attrList.name === '$AMP_LAYOUT_ATTRS') {
+        this.layoutAttrs_ = attrList.attrs;
+      } else if (attrList.name === '$GLOBAL_ATTRS') {
+        this.globalAttrs_ = attrList.attrs;
+      } else {
+        this.attrListsByName_[attrList.name] = attrList.attrs;
+      }
+    }
+    goog.asserts.assert(this.layoutAttrs_.length > 0, 'layout attrs not found');
+    goog.asserts.assert(this.globalAttrs_.length > 0, 'global attrs not found');
 
     /**
      * The AttrSpec instances, indexed by attr spec ids.
@@ -565,59 +513,54 @@ class ParsedAttrSpecs {
      * @private @type {!Array<!ParsedAttrSpec>}
      */
     this.parsedAttrSpecs_ = new Array(rules.attrs.length);
-
-    /**
-     * The already instantiated ParsedAttrSpec instances, indexed by
-     * attr spec ids (multiplied by -1).
-     * @private @type {!Array<!SimpleParsedAttrSpec>}
-     */
-    this.simpleParsedAttrSpecs_ = new Array();
   }
 
   /**
-   * Constructs ParsedAttrSpecs for the list with the provided |name| or
-   * returns a list from the cache.
-   * @param {!string} name
-   * @return {!Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>}
-   * @private
+   * Merges the list of attrs into attrsByName, avoiding to merge in attrs
+   * with names that are already in attrsByName.
+   * @param {!Array<number>} attrs
+   * @param {!Object<string, number>} attrsByName
+   * @param {!Array<number>} mandatoryAttrIds
+   * @param {!Array<string>} mandatoryOneofs
+   * @param {!Array<number>} implicitAttrspecs
+   * @return {boolean} Whether or not an attr spec containing a URL was found.
    */
-  getParsedAttrListByName_(name) {
-    if (this.parsedAttrListsByName_.hasOwnProperty(name)) {
-      return this.parsedAttrListsByName_[name];
-    }
-    goog.asserts.assert(this.attrListsByName_.hasOwnProperty(name));
-    const attrList = this.attrListsByName_[name];
-    /** @type {!Array<number>} */
-    const attrSpecs = attrList.attrs;
-    /** @type {!Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>} */
-    const parsedAttrList = [];
-    for (const attrSpecId of attrSpecs) {
-      parsedAttrList.push(this.getByAttrSpecId(attrSpecId));
-    }
-    this.parsedAttrListsByName_[name] = parsedAttrList;
-    return parsedAttrList;
-  }
-
-  /**
-   * Helper for getAttrsFor.
-   * @param {!string} attrListName
-   * @param {!Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>} attrs
-   * @param {!Object<string, ?>} namesSeen
-   * @private
-   */
-  mergeAttrsFromAttrListByName_(attrListName, attrs, namesSeen) {
-    const specs = this.getParsedAttrListByName_(attrListName);
-    for (const spec of specs) {
-      const name = spec.getName();
-      if (!namesSeen.hasOwnProperty(name)) {
-        namesSeen[name] = 0;
-        attrs.push(spec);
+  mergeAttrs(
+      attrs, attrsByName, mandatoryAttrIds, mandatoryOneofs,
+      implicitAttrspecs) {
+    let containsUrl = false;
+    for (const attrId of attrs) {
+      const name = this.getNameByAttrSpecId(attrId);
+      if (attrsByName.hasOwnProperty(name)) {
+        continue;
+      }
+      attrsByName[name] = attrId;
+      if (attrId < 0) {  // negative attr ids are simple attrs (only name set).
+        continue;
+      }
+      const attr = this.getByAttrSpecId(attrId);
+      const spec = attr.getSpec();
+      if (spec.mandatory) {
+        mandatoryAttrIds.push(attrId);
+      }
+      if (spec.mandatoryOneof !== null) {
+        mandatoryOneofs.push(spec.mandatoryOneof);
+      }
+      for (const altName of spec.alternativeNames) {
+        attrsByName[altName] = attrId;
+      }
+      if (spec.implicit) {
+        implicitAttrspecs.push(attrId);
+      }
+      if (spec.valueUrl) {
+        containsUrl = true;
       }
     }
+    return containsUrl;
   }
 
   /**
-   * Collect the ParsedAttrSpec pointers for a given |tagspec|.
+   * Collect the attr spec ids for a given |tagspec|.
    * There are four ways to specify attributes:
    * (1) implicitly by a tag spec, if the tag spec has the amp_layout field
    * set - in this case, the AMP_LAYOUT_ATTRS are assumed;
@@ -628,57 +571,68 @@ class ParsedAttrSpecs {
    * specifications for the same attribute name, but for any given tag only one
    * such specification can be active. The precedence is (1), (2), (3), (4)
    * @param {!amp.validator.TagSpec} tagSpec
-   * @return {!Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>} all of the ParsedAttrSpec pointers
+   * @param {boolean} isReferencePoint
+   * @param {!Object<string, number>} attrsByName
+   * @param {!Array<number>} mandatoryAttrIds
+   * @param {!Array<string>} mandatoryOneofs
+   * @param {!Array<number>} implicitAttrspecs
+   * @return {boolean} Whether or not an attr spec containing a URL was found.
    */
-  getAttrsFor(tagSpec) {
-    /** @type {!Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>} */
-    const attrs = [];
-    /** @type {!Object<string, ?>} */
-    const namesSeen = {};
+  parseAttrsFor(
+      tagSpec, isReferencePoint, attrsByName, mandatoryAttrIds, mandatoryOneofs,
+      implicitAttrspecs) {
+    let containsUrl = false;
     // (1) layout attrs.
-    if (tagSpec.ampLayout !== null && tagSpec.tagName !== '$REFERENCE_POINT') {
-      this.mergeAttrsFromAttrListByName_('$AMP_LAYOUT_ATTRS', attrs, namesSeen);
+    if (tagSpec.ampLayout !== null && !isReferencePoint) {
+      containsUrl = this.mergeAttrs(
+                        this.layoutAttrs_, attrsByName, mandatoryAttrIds,
+                        mandatoryOneofs, implicitAttrspecs) ||
+          containsUrl;
     }
     // (2) attributes specified within |tagSpec|.
-    for (const attrSpecId of tagSpec.attrs) {
-      const parsedAttrSpec = this.getByAttrSpecId(attrSpecId);
-      const name = parsedAttrSpec.getName();
-      if (!namesSeen.hasOwnProperty(name)) {
-        namesSeen[name] = 0;
-        attrs.push(parsedAttrSpec);
-      }
-    }
+    containsUrl = this.mergeAttrs(
+                      tagSpec.attrs, attrsByName, mandatoryAttrIds,
+                      mandatoryOneofs, implicitAttrspecs) ||
+        containsUrl;
     // (3) attributes specified via reference to an attr_list.
-    for (const tagSpecKey of tagSpec.attrLists) {
-      this.mergeAttrsFromAttrListByName_(tagSpecKey, attrs, namesSeen);
+    for (const attrListName of tagSpec.attrLists) {
+      containsUrl = this.mergeAttrs(
+                        this.attrListsByName_[attrListName], attrsByName,
+                        mandatoryAttrIds, mandatoryOneofs, implicitAttrspecs) ||
+          containsUrl;
     }
     // (4) attributes specified in the global_attr list.
-    if (tagSpec.tagName !== '$REFERENCE_POINT') {
-      this.mergeAttrsFromAttrListByName_('$GLOBAL_ATTRS', attrs, namesSeen);
+    if (!isReferencePoint) {
+      containsUrl = this.mergeAttrs(
+                        this.globalAttrs_, attrsByName, mandatoryAttrIds,
+                        mandatoryOneofs, implicitAttrspecs) ||
+          containsUrl;
     }
-    return attrs;
+    return containsUrl;
   }
 
   /**
    * @param {number} id
-   * @return {!ParsedAttrSpec|!SimpleParsedAttrSpec}
+   * @return {!ParsedAttrSpec}
    */
   getByAttrSpecId(id) {
-    if (id < 0) {
-      const idx = -1 - id;
-      if (this.simpleParsedAttrSpecs_.hasOwnProperty(idx)) {
-        return this.simpleParsedAttrSpecs_[idx];
-      }
-      const parsed = new SimpleParsedAttrSpec(this.internedStrings_[idx], id);
-      this.simpleParsedAttrSpecs_[idx] = parsed;
-      return parsed;
-    }
     if (this.parsedAttrSpecs_.hasOwnProperty(id)) {
       return this.parsedAttrSpecs_[id];
     }
     const parsed = new ParsedAttrSpec(this.attrSpecs_[id], id);
     this.parsedAttrSpecs_[id] = parsed;
     return parsed;
+  }
+
+  /**
+   * @param {number} id
+   * @return {!string}
+   */
+  getNameByAttrSpecId(id) {
+    if (id < 0) {
+      return this.internedStrings_[-1 - id];
+    }
+    return this.attrSpecs_[id].name;
   }
 }
 
@@ -710,8 +664,13 @@ class ParsedTagSpec {
      */
     this.isReferencePoint_ = (tagSpec.tagName === '$REFERENCE_POINT');
     /**
+     * @type {boolean}
+     * @private
+     */
+    this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
+    /**
      * ParsedAttributes keyed by name.
-     * @type {!Object<string, !ParsedAttrSpec>}
+     * @type {!Object<string, number>}
      * @private
      */
     this.attrsByName_ = {};
@@ -727,11 +686,6 @@ class ParsedTagSpec {
      */
     this.mandatoryOneofs_ = [];
     /**
-     * @type {boolean}
-     * @private
-     */
-    this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
-    /**
      * @type {!Array<number>}
      * @private
      */
@@ -740,33 +694,9 @@ class ParsedTagSpec {
      * @type {boolean}
      * @private
      */
-    this.containsUrl_ = false;
-
-    const parsedAttrs = parsedAttrSpecs.getAttrsFor(tagSpec);
-    for (var ii = 0; ii < parsedAttrs.length; ii++) {
-      const parsedAttrSpec = parsedAttrs[ii];
-      this.attrsByName_[parsedAttrSpec.getName()] = parsedAttrSpec;
-      if (parsedAttrSpec.isSimple()) {
-        continue;
-      }
-      if (parsedAttrSpec.getSpec().mandatory) {
-        this.mandatoryAttrIds_.push(parsedAttrSpec.getId());
-      }
-      const mandatoryOneof = parsedAttrSpec.getSpec().mandatoryOneof;
-      if (mandatoryOneof !== null) {
-        this.mandatoryOneofs_.push(mandatoryOneof);
-      }
-      const altNames = parsedAttrSpec.getSpec().alternativeNames;
-      for (const altName of altNames) {
-        this.attrsByName_[altName] = parsedAttrSpec;
-      }
-      if (parsedAttrSpec.getSpec().implicit) {
-        this.implicitAttrspecs_.push(parsedAttrSpec.getId());
-      }
-      if (parsedAttrSpec.getSpec().valueUrl) {
-        this.containsUrl_ = true;
-      }
-    }
+    this.containsUrl_ = parsedAttrSpecs.parseAttrsFor(
+        tagSpec, this.isReferencePoint_, this.attrsByName_,
+        this.mandatoryAttrIds_, this.mandatoryOneofs_, this.implicitAttrspecs_);
     sortAndUniquify(this.mandatoryOneofs_);
   }
 
@@ -874,7 +804,7 @@ class ParsedTagSpec {
   }
 
   /**
-   * @return {!Object<string, !ParsedAttrSpec>}
+   * @return {!Object<string, number>}
    */
   getAttrsByName() {
     return this.attrsByName_;
@@ -3294,9 +3224,7 @@ function validateAttributes(
     const attrName = attrKey.toLowerCase();
     let attrValue = encounteredAttrs[i + 1];
 
-    let parsedAttrSpec;
-    if (!attrsByName.hasOwnProperty(attrName) ||
-        (parsedAttrSpec = attrsByName[attrName]) === undefined) {
+    if (!attrsByName.hasOwnProperty(attrName)) {
       // While validating a reference point, we skip attributes that
       // we don't have a spec for. They will be validated when the
       // TagSpec itself gets validated.
@@ -3329,10 +3257,12 @@ function validateAttributes(
         return;
       }
     }
-    if (parsedAttrSpec.isSimple()) {
-      attrspecsValidated[parsedAttrSpec.getId()] = 0;
+    const attrId = attrsByName[attrName];
+    if (attrId < 0) {
+      attrspecsValidated[attrId] = 0;
       continue;
     }
+    const parsedAttrSpec = parsedAttrSpecs.getByAttrSpecId(attrId);
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       if (parsedAttrSpec.getSpec().deprecation !== null) {
         context.addError(
@@ -3440,12 +3370,11 @@ function validateAttributes(
   }
   for (const triggerSpec of parsedTriggerSpecs) {
     for (const alsoRequiresAttr of triggerSpec.getSpec().alsoRequiresAttr) {
-      let parsedAttrSpec;
-      if (!attrsByName.hasOwnProperty(alsoRequiresAttr) ||
-          (parsedAttrSpec = attrsByName[alsoRequiresAttr]) === undefined) {
+      if (!attrsByName.hasOwnProperty(alsoRequiresAttr)) {
         continue;
       }
-      if (!attrspecsValidated.hasOwnProperty(parsedAttrSpec.getId())) {
+      const attrId = attrsByName[alsoRequiresAttr];
+      if (!attrspecsValidated.hasOwnProperty(attrId)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -3453,8 +3382,8 @@ function validateAttributes(
               context.getDocLocator(),
               /* params */
               [
-                parsedAttrSpec.getName(), getTagSpecName(spec),
-                triggerSpec.getAttrName()
+                parsedAttrSpecs.getNameByAttrSpecId(attrId),
+                getTagSpecName(spec), triggerSpec.getAttrName()
               ],
               spec.specUrl, result);
         } else {
@@ -3466,14 +3395,16 @@ function validateAttributes(
   for (const mandatory of parsedTagSpec.getMandatoryAttrIds()) {
     if (!mandatoryAttrsSeen.hasOwnProperty(mandatory)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        const parsedAttrSpec = parsedAttrSpecs.getByAttrSpecId(mandatory);
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
             context.getDocLocator(),
             /* params */
-            [parsedAttrSpec.getName(), getTagSpecName(spec)], spec.specUrl,
-            result);
+            [
+              parsedAttrSpecs.getNameByAttrSpecId(mandatory),
+              getTagSpecName(spec)
+            ],
+            spec.specUrl, result);
       } else {
         result.status = amp.validator.ValidationResult.Status.FAIL;
         break;
