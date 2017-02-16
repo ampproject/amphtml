@@ -713,7 +713,7 @@ class ParsedTagSpec {
   /**
    * A TagSpec may specify generic conditions which are required if the
    * tag is present. This accessor returns the list of those conditions.
-   * @return {!Array<string>}
+   * @return {!Array<number>}
    */
   requires() {
     return this.spec_.requires;
@@ -1846,10 +1846,10 @@ class Context {
 
     /**
      * Set of conditions that we've satisfied.
-     * @type {!Object<string, ?>}
+     * @type {!Array<boolean>}
      * @private
      */
-    this.conditionsSatisfied_ = {};
+    this.conditionsSatisfied_ = [];
 
     /**
      * First tagspec seen (matched) which contains an URL.
@@ -1862,6 +1862,14 @@ class Context {
   /** @return {!amp.validator.ValidatorRules} */
   getRules() {
     return this.rules_;
+  }
+
+  /**
+   * @param {number} id
+   * @return {string}
+   */
+  getInternedString(id) {
+    return this.rules_.internedStrings[-1 - id];
   }
 
   /**
@@ -1909,22 +1917,23 @@ class Context {
   /**
    * Records a condition that's been validated. Returns true iff
    * `condition` has not been seen before.
-   * @param {string} condition
+   * @param {number} condition
    * @return {boolean} whether or not condition has been seen before.
    */
   satisfyCondition(condition) {
-    const duplicate = this.conditionsSatisfied_.hasOwnProperty(condition);
-    if (!duplicate) {
-      this.conditionsSatisfied_[condition] = 0;
+    if (this.satisfiesCondition(condition)) {
+      return false;
     }
-    return !duplicate;
+    this.conditionsSatisfied_[condition] = true;
+    return true;
   }
 
   /**
-   * @return {!Object<string, ?>}
+   * @param {number} condition
+   * @return {boolean}
    */
-  conditionsSatisfied() {
-    return this.conditionsSatisfied_;
+  satisfiesCondition(condition) {
+    return this.conditionsSatisfied_.hasOwnProperty(condition);
   }
 
   /**
@@ -3814,14 +3823,15 @@ class ParsedValidatorRules {
     for (const tagSpecId of tagspecsValidated) {
       const spec = this.getByTagSpecId(tagSpecId);
       for (const condition of spec.requires()) {
-        if (!context.conditionsSatisfied().hasOwnProperty(condition)) {
+        if (!context.satisfiesCondition(condition)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
                 amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
                 context.getDocLocator(),
                 /* params */
-                [condition, getTagSpecName(spec.getSpec())],
+                [context.getInternedString(condition),
+                 getTagSpecName(spec.getSpec())],
                 spec.getSpec().specUrl, validationResult);
           } else {
             validationResult.status =

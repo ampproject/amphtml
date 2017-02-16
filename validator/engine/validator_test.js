@@ -722,7 +722,6 @@ describe('ValidatorRulesMakeSense', () => {
   var allRequires = [];
   for (const tagSpec of rules.tags) {
     for (const condition of tagSpec.requires) {
-      console.log(condition);
       allRequires.push(condition);
     }
     for (const condition of tagSpec.satisfies)

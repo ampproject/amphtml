@@ -381,8 +381,10 @@ ATTR_LIST_NAME_REFERENCE_FIELD = [
 # them with message ids, which are numbers. Thus far we do this for
 # the AttrSpecs.
 SYNTHETIC_REFERENCE_FIELD = [
-    'amp.validator.TagSpec.attrs',
     'amp.validator.AttrList.attrs',
+    'amp.validator.TagSpec.attrs',
+    'amp.validator.TagSpec.requires',
+    'amp.validator.TagSpec.satisfies',
 ]
 
 
@@ -586,6 +588,54 @@ def IsTrivialAttrSpec(attr):
           attr.HasField('name') and len(attr.ListFields()) == 1)
 
 
+def AssignedValueFor(descriptor, field_desc, field_val, registry, out):
+  """Helper function for PrintObject: computes / assigns a value for a field.
+
+  Note that if the field is a complex field (a message), this function
+  may print the message and then reference it via a variable name.
+
+  Args:
+    descriptor: The descriptor module from the protobuf package, e.g.
+        google.protobuf.descriptor.
+    field_desc: The descriptor for a particular field.
+    field_val: The value for a particular field.
+    registry: an instance of MessageRegistry, used for mapping from
+        messages to message keys.
+    out: a list of lines to output (without the newline characters) wrapped as
+        an OutputFormatter instance, to which this function will append.
+  Returns:
+    The rendered field value to assign.
+  """
+  # First we establish how an individual value for this field is going
+  # to be rendered, that is, converted into a string.
+  render_value = lambda: None
+  if field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD:
+    render_value = lambda v: str(registry.MessageIdForTagSpecName(v))
+  elif field_desc.full_name in ATTR_LIST_NAME_REFERENCE_FIELD:
+    render_value = lambda v: str(registry.MessageIdForAttrListName(v))
+  elif field_desc.full_name in SYNTHETIC_REFERENCE_FIELD:
+    def InternOrReference(value):
+      if field_desc.type == descriptor.FieldDescriptor.TYPE_STRING:
+        return str(registry.InternString(value))
+      if IsTrivialAttrSpec(value):
+        return str(registry.InternString(value.name))
+      return str(registry.MessageIdForKey(MessageKey(value)))
+    render_value = InternOrReference
+  elif field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
+    render_value = (
+        lambda v: MaybePrintMessageValue(descriptor, v, registry, out))
+  else:
+    render_value = (
+        lambda v: ValueToString(descriptor, field_desc, v))  # pylint: disable=cell-var-from-loop
+
+  # Then we iterate over the field if it's repeated, or else just
+  # call the render function once.
+  if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
+    elements = [render_value(v) for v in field_val]
+    return '[%s]' % ','.join(elements)
+  return render_value(field_val)
+
+
 def PrintObject(descriptor, msg, registry, out):
   """Prints an object, by recursively constructing it.
 
@@ -610,34 +660,9 @@ def PrintObject(descriptor, msg, registry, out):
 
   field_and_assigned_values = []
   for (field_desc, field_val) in msg.ListFields():
-    # First we establish how an individual value for this field is going
-    # to be rendered, that is, converted into a string.
-    render_value = lambda: None
-    if field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD:
-      render_value = lambda v: str(registry.MessageIdForTagSpecName(v))
-    elif field_desc.full_name in ATTR_LIST_NAME_REFERENCE_FIELD:
-      render_value = lambda v: str(registry.MessageIdForAttrListName(v))
-    elif field_desc.full_name in SYNTHETIC_REFERENCE_FIELD:
-      def InternOrReference(value):
-        if IsTrivialAttrSpec(value):
-          return str(registry.InternString(value.name))
-        return str(registry.MessageIdForKey(MessageKey(value)))
-      render_value = InternOrReference
-    elif field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
-      render_value = (
-          lambda v: MaybePrintMessageValue(descriptor, v, registry, out))
-    else:
-      render_value = (
-          lambda v: ValueToString(descriptor, field_desc, v))  # pylint: disable=cell-var-from-loop
-
-    # Then we iterate over the field if it's repeated, or else just
-    # call the render function once.
-    if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
-      elements = [render_value(v) for v in field_val]
-      field_and_assigned_values.append((field_desc,
-                                        '[%s]' % ','.join(elements)))
-    else:
-      field_and_assigned_values.append((field_desc, render_value(field_val)))
+    field_and_assigned_values.append(
+        (field_desc, AssignedValueFor(
+            descriptor, field_desc, field_val, registry, out)))
 
   # First we emit the constructor call, with the appropriate arguments.
   constructor_arg_values = [value
