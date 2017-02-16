@@ -131,6 +131,41 @@ class MessageRegistry(object):
     # case mapping to resolve them to message ids.
     self.message_id_by_tag_spec_name_ = {}
 
+    # References from tag specs to attr specs in the .protoascii are expressed
+    # as attr list names, so we maintain this mapping to resolve them to
+    # message ids for the generated Javascript.
+    self.message_id_by_attr_list_name_ = {}
+
+    # Interned strings have negative IDs, starting from -1. This makes it
+    # easy to distinguish them from other message ids. In the interned_strings_
+    # array, they can be found by calculating their index -1 - <string_id>.
+    self.interned_strings_ = []
+    self.string_id_by_interned_string_ = {}
+
+  def InternString(self, a_string):
+    """Interns strings to eliminate duplicates and to refer to them as numbers.
+
+    Args:
+      a_string: the string to be interned
+    Returns:
+      The string id, a negative number -1 to -MAXINT.
+    """
+    string_id = self.string_id_by_interned_string_.get(a_string, 0)
+    if string_id != 0:
+      return string_id
+    self.interned_strings_.append(a_string)
+    string_id = -len(self.interned_strings_)
+    self.string_id_by_interned_string_[a_string] = string_id
+    return string_id
+
+  def InternedStrings(self):
+    """The interned strings which will be emitted into validator-generated.js.
+
+    Returns:
+      A list of strings.
+    """
+    return self.interned_strings_
+
   def MessageIdForKey(self, message_key):
     """Yields the message id for a key, registering a new one if needed.
 
@@ -196,6 +231,55 @@ class MessageRegistry(object):
     """
     return self.message_id_by_tag_spec_name_[tag_spec_name]
 
+  def RegisterAttrList(self, attr_list):
+    """Registers an attr list, including for lookups by name.
+
+    Args:
+      attr_list: an instance of validator_pb2.AttrList
+    """
+    message_id = self.MessageIdForKey(MessageKey(attr_list))
+    self.message_id_by_attr_list_name_[attr_list.name] = message_id
+
+  def MessageIdForAttrListName(self, attr_list_name):
+    """Looks up a message id for a tag spec by TagSpecName.
+
+    Args:
+      attr_list_name: a string - the AttrList::name field.
+    Returns:
+      The message id - a number.
+    """
+    return self.message_id_by_attr_list_name_[attr_list_name]
+
+
+def ElementTypeFor(descriptor, field_desc):
+  """Returns the element Javascript type for a given field descriptor.
+
+  Args:
+    descriptor: The descriptor module from the protobuf package, e.g.
+        google.protobuf.descriptor.
+    field_desc: A field descriptor for a particular field in a message.
+  Returns:
+    A string; either the type of a field descriptor or iff the
+    field descriptor is a repeated field, it's the element type.
+  """
+  # If the field is a reference to a tagspec name (string) or if it's
+  # holding a message that we're deduplicating and replacing with a
+  # synthetic reference field, make it a number instead as we'll be
+  # replacing this with the message id.
+  if (field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD) or (
+      field_desc.full_name in SYNTHETIC_REFERENCE_FIELD) or (
+          field_desc.full_name in ATTR_LIST_NAME_REFERENCE_FIELD):
+    return 'number'
+  return {descriptor.FieldDescriptor.TYPE_DOUBLE: lambda: 'number',
+          descriptor.FieldDescriptor.TYPE_INT32: lambda: 'number',
+          descriptor.FieldDescriptor.TYPE_BOOL: lambda: 'boolean',
+          descriptor.FieldDescriptor.TYPE_STRING: lambda: 'string',
+          descriptor.FieldDescriptor.TYPE_ENUM: (
+              lambda: field_desc.enum_type.full_name),
+          descriptor.FieldDescriptor.TYPE_MESSAGE: (
+              lambda: field_desc.message_type.full_name)}[
+                  field_desc.type]()
+
 
 def FieldTypeFor(descriptor, field_desc, nullable):
   """Returns the Javascript type for a given field descriptor.
@@ -208,23 +292,7 @@ def FieldTypeFor(descriptor, field_desc, nullable):
   Returns:
     The Javascript type for the given field descriptor.
   """
-  element_type = {
-      descriptor.FieldDescriptor.TYPE_DOUBLE: lambda: 'number',
-      descriptor.FieldDescriptor.TYPE_INT32: lambda: 'number',
-      descriptor.FieldDescriptor.TYPE_BOOL: lambda: 'boolean',
-      descriptor.FieldDescriptor.TYPE_STRING: lambda: 'string',
-      descriptor.FieldDescriptor.TYPE_ENUM: (
-          lambda: field_desc.enum_type.full_name),
-      descriptor.FieldDescriptor.TYPE_MESSAGE: (
-          lambda: field_desc.message_type.full_name),
-  }[field_desc.type]()
-  # However, if the field is actually a reference to a tagspec name
-  # (string) or if it's holding a message that we're deduplicating and
-  # replacing with a synthetic reference field, make it a number
-  # instead as we'll be replacing this with the message id.
-  if (field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD) or (
-      field_desc.full_name in SYNTHETIC_REFERENCE_FIELD):
-    element_type = 'number'
+  element_type = ElementTypeFor(descriptor, field_desc)
   if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
     if nullable:
       return 'Array<!%s>' % element_type
@@ -298,17 +366,25 @@ CONSTRUCTOR_ARG_FIELDS = [
 # code generator replaces these fields with tag ids, which are numbers.
 TAG_SPEC_NAME_REFERENCE_FIELD = [
     'amp.validator.ReferencePoint.tag_spec_name',
-    'amp.validator.TagSpec.also_requires_tag',
     'amp.validator.TagSpec.also_requires_tag_warning',
     'amp.validator.TagSpec.extension_unused_unless_tag_present',
+]
+
+# In the .protoascii, some fields reference other tags by attr list name.
+# This is a string, and this code generator replaces these fields with attr
+# list ids, which are numbers.
+ATTR_LIST_NAME_REFERENCE_FIELD = [
+    'amp.validator.TagSpec.attr_lists'
 ]
 
 # These fields contain messages in the .protoascii, but we replace
 # them with message ids, which are numbers. Thus far we do this for
 # the AttrSpecs.
 SYNTHETIC_REFERENCE_FIELD = [
-    'amp.validator.TagSpec.attrs',
     'amp.validator.AttrList.attrs',
+    'amp.validator.TagSpec.attrs',
+    'amp.validator.TagSpec.requires',
+    'amp.validator.TagSpec.satisfies',
 ]
 
 
@@ -382,9 +458,6 @@ def PrintClassFor(descriptor, msg_desc, out):
         constructor_arg_fields.append(field)
         constructor_arg_field_names[field.name] = 1
     out.Line('/**')
-    # Special casing for amp.validator.TagSpec
-    if msg_desc.full_name == 'amp.validator.TagSpec':
-      out.Line(' * @param {number} tagSpecId')
     for field in constructor_arg_fields:
       out.Line(' * @param {%s} %s' % (FieldTypeFor(descriptor, field,
                                                    nullable=False),
@@ -396,18 +469,10 @@ def PrintClassFor(descriptor, msg_desc, out):
       out.Line(' * @export')
       export_or_empty = ' @export'
     out.Line(' */')
-    arguments = ''
-    # Special casing for amp.validator.TagSpec
-    if msg_desc.full_name == 'amp.validator.TagSpec':
-      arguments = 'tagSpecId, '
-
-    arguments += ','.join([UnderscoreToCamelCase(f.name)
-                           for f in constructor_arg_fields])
+    arguments = ','.join([UnderscoreToCamelCase(f.name)
+                          for f in constructor_arg_fields])
     out.Line('%s = function(%s) {' % (msg_desc.full_name, arguments))
     out.PushIndent(2)
-    if msg_desc.full_name == 'amp.validator.TagSpec':
-      out.Line('/** @type {number} */')
-      out.Line('this.tagSpecId = tagSpecId;')
 
     for field in msg_desc.fields:
       with GenerateDetailedErrorsIf(field.name in SKIP_FIELDS_FOR_LIGHT, out):
@@ -416,7 +481,14 @@ def PrintClassFor(descriptor, msg_desc, out):
           # field.name is also the parameter name.
           assigned_value = UnderscoreToCamelCase(field.name)
         elif field.label == descriptor.FieldDescriptor.LABEL_REPEATED:
-          assigned_value = '[]'
+          # ValidationResult instances may be mutated by validator.js,
+          # so we can't share the empty arrays. But for all other
+          # instances, we do share.
+          if msg_desc.full_name == 'amp.validator.ValidationResult':
+            assigned_value = '[]'
+          else:
+            assigned_value = 'EMPTY_%s_ARRAY' % (
+                ElementTypeFor(descriptor, field).replace('.', '_'))
         elif field.type == descriptor.FieldDescriptor.TYPE_BOOL:
           assigned_value = str(field.default_value).lower()
         elif field.type == descriptor.FieldDescriptor.TYPE_INT32:
@@ -430,6 +502,8 @@ def PrintClassFor(descriptor, msg_desc, out):
     if msg_desc.full_name == 'amp.validator.ValidatorRules':
       out.Line('/** @type {!Array<!string>} */')
       out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
+      out.Line('/** @type {!Array<!string>} */')
+      out.Line('this.internedStrings = [];')
       out.Line('/** @type {!Array<!amp.validator.AttrSpec>} */')
       out.Line('this.attrs = [];')
     out.PopIndent()
@@ -502,6 +576,66 @@ def MaybePrintMessageValue(descriptor, field_val, registry, out):
   return registry.MessageReferenceForKey(message_key)
 
 
+def IsTrivialAttrSpec(attr):
+  """Determines whether a given attr only has its name field set.
+
+  Args:
+    attr: an AttrSpec instance.
+  Returns:
+    true iff the only field that is set is the name field.
+  """
+  return (attr.DESCRIPTOR.full_name == 'amp.validator.AttrSpec' and
+          attr.HasField('name') and len(attr.ListFields()) == 1)
+
+
+def AssignedValueFor(descriptor, field_desc, field_val, registry, out):
+  """Helper function for PrintObject: computes / assigns a value for a field.
+
+  Note that if the field is a complex field (a message), this function
+  may print the message and then reference it via a variable name.
+
+  Args:
+    descriptor: The descriptor module from the protobuf package, e.g.
+        google.protobuf.descriptor.
+    field_desc: The descriptor for a particular field.
+    field_val: The value for a particular field.
+    registry: an instance of MessageRegistry, used for mapping from
+        messages to message keys.
+    out: a list of lines to output (without the newline characters) wrapped as
+        an OutputFormatter instance, to which this function will append.
+  Returns:
+    The rendered field value to assign.
+  """
+  # First we establish how an individual value for this field is going
+  # to be rendered, that is, converted into a string.
+  render_value = lambda: None
+  if field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD:
+    render_value = lambda v: str(registry.MessageIdForTagSpecName(v))
+  elif field_desc.full_name in ATTR_LIST_NAME_REFERENCE_FIELD:
+    render_value = lambda v: str(registry.MessageIdForAttrListName(v))
+  elif field_desc.full_name in SYNTHETIC_REFERENCE_FIELD:
+    def InternOrReference(value):
+      if field_desc.type == descriptor.FieldDescriptor.TYPE_STRING:
+        return str(registry.InternString(value))
+      if IsTrivialAttrSpec(value):
+        return str(registry.InternString(value.name))
+      return str(registry.MessageIdForKey(MessageKey(value)))
+    render_value = InternOrReference
+  elif field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
+    render_value = (
+        lambda v: MaybePrintMessageValue(descriptor, v, registry, out))
+  else:
+    render_value = (
+        lambda v: ValueToString(descriptor, field_desc, v))  # pylint: disable=cell-var-from-loop
+
+  # Then we iterate over the field if it's repeated, or else just
+  # call the render function once.
+  if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
+    elements = [render_value(v) for v in field_val]
+    return '[%s]' % ','.join(elements)
+  return render_value(field_val)
+
+
 def PrintObject(descriptor, msg, registry, out):
   """Prints an object, by recursively constructing it.
 
@@ -526,39 +660,14 @@ def PrintObject(descriptor, msg, registry, out):
 
   field_and_assigned_values = []
   for (field_desc, field_val) in msg.ListFields():
-    # First we establish how an individual value for this field is going
-    # to be rendered, that is, converted into a string.
-    render_value = lambda: None
-    if field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD:
-      render_value = lambda v: str(registry.MessageIdForTagSpecName(v))
-    elif field_desc.full_name in SYNTHETIC_REFERENCE_FIELD:
-      render_value = lambda v: str(registry.MessageIdForKey(MessageKey(v)))
-    elif field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
-      render_value = (
-          lambda v: MaybePrintMessageValue(descriptor, v, registry, out))
-    else:
-      render_value = (
-          lambda v: ValueToString(descriptor, field_desc, v))  # pylint: disable=cell-var-from-loop
-
-    # Then we iterate over the field if it's repeated, or else just
-    # call the render function once.
-    if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
-      elements = [render_value(v) for v in field_val]
-      field_and_assigned_values.append((field_desc,
-                                        '[%s]' % ','.join(elements)))
-    else:
-      field_and_assigned_values.append((field_desc, render_value(field_val)))
+    field_and_assigned_values.append(
+        (field_desc, AssignedValueFor(
+            descriptor, field_desc, field_val, registry, out)))
 
   # First we emit the constructor call, with the appropriate arguments.
-  constructor_arg_values = []
-  if msg.DESCRIPTOR.full_name == 'amp.validator.TagSpec':
-    # TagSpecs get their messsage ids as the first constructor parameter.
-    constructor_arg_values.append(
-        str(registry.MessageIdForKey(this_message_key)))
-
-  for (field, value) in field_and_assigned_values:
-    if field.full_name in CONSTRUCTOR_ARG_FIELDS:
-      constructor_arg_values.append(value)
+  constructor_arg_values = [value
+                            for (field, value) in field_and_assigned_values
+                            if field.full_name in CONSTRUCTOR_ARG_FIELDS]
 
   this_message_reference = registry.MessageReferenceForKey(
       this_message_key)
@@ -640,6 +749,19 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   out.Line('amp.validator.VALIDATE_CSS = true;')
   out.Line('')
 
+  # We share the empty arrays between all specification object instances; this
+  # works because these arrays are never mutated. To make the Closure compiler
+  # happy, we use one empty array per element type.
+  # PS: It may also help execution performance in V8 to keep the element types
+  #     separate but we did not verify that.
+  empty_arrays = [name for name in all_names
+                  if name in msg_desc_by_name or name in enum_desc_by_name]
+  empty_arrays += ['string', 'number', 'boolean']
+  for name in empty_arrays:
+    out.Line('/** @type {!Array<!%s>} */' % name)
+    out.Line('var EMPTY_%s_ARRAY = [];' % name.replace('.', '_'))
+    out.Line('')
+
   for name in all_names:
     if name in msg_desc_by_name:
       PrintClassFor(descriptor, msg_desc_by_name[name], out)
@@ -658,6 +780,11 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   for t in rules.tags:
     registry.RegisterTagSpec(t)
 
+  # Register the attrlists so they have ids 0 - rules.attr_lists.length.
+  # This means that rules.attr_lists[attr_list_id] works.
+  for a in rules.attr_lists:
+    registry.RegisterAttrList(a)
+
   out.Line('/**')
   out.Line(' * @return {!%s}' % rules.DESCRIPTOR.full_name)
   out.Line(' */')
@@ -674,8 +801,11 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
     tag_spec_id = registry.MessageIdForTagSpecName(TagSpecName(tag_spec))
     dispatch_key = DispatchKeyForTagSpecOrNone(tag_spec)
     if dispatch_key:
-      out.Line('%s.dispatchKeyByTagSpecId[%d]="%s"' % (
+      out.Line('%s.dispatchKeyByTagSpecId[%d]="%s";' % (
           rules_reference, tag_spec_id, dispatch_key))
+
+  out.Line('%s.internedStrings = ["%s"];' % (
+      rules_reference, '","'.join(registry.InternedStrings())))
 
   # Create a mapping from attr spec ids to AttrSpec instances, deduping the
   # AttrSpecs. Then sort by these ids, so now we get a dense array starting
@@ -683,7 +813,8 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   attrs_by_id = {}
   for attr_container in list(rules.attr_lists) + list(rules.tags):
     for attr in attr_container.attrs:
-      attrs_by_id[registry.MessageIdForKey(MessageKey(attr))] = attr
+      if not IsTrivialAttrSpec(attr):
+        attrs_by_id[registry.MessageIdForKey(MessageKey(attr))] = attr
   sorted_attrs = [attr for (_, attr) in sorted(attrs_by_id.items())]
 
   # Emit the attr specs, then assign a list of references to them to

@@ -17,6 +17,7 @@
 tags: {  # amp-brid-player
   html_format: AMP
   tag_name: "SCRIPT"
+  satisfies: "amp-brid-player extension .js script"
   spec_name: "amp-brid-player extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
@@ -54,7 +55,7 @@ tags: {  # <amp-brid-player>
   html_format: AMP
   tag_name: "AMP-BRID-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-brid-player extension .js script"
+  requires: "amp-brid-player extension .js script"
   attrs: {
     name: "data-partner"
     mandatory: true
