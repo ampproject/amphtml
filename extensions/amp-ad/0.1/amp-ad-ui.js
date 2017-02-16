@@ -156,7 +156,7 @@ export class AmpAdUIHandler {
     }, () => {
       this.baseInstance_.deferMutate(() => {
         if (this.state == AdDisplayState.NOT_LAID_OUT) {
-          // If already unlaid out, do not replace current placeholder then.
+          // If already unlaid out, do not replace current placeholder.
           return;
         }
         this.baseInstance_.togglePlaceholder(false);
