@@ -1251,6 +1251,59 @@ describe('Resources discoverWork', () => {
   });
 });
 
+describes.realWin('Resources scrollHeight', {
+  amp: {
+    runtimeOn: true,
+  },
+}, env => {
+  let win;
+  let resources;
+  let viewerSendMessageStub;
+
+  beforeEach(() => {
+    win = env.win;
+    resources = win.services.resources.obj;
+    viewerSendMessageStub = sandbox.stub(resources.viewer_, 'sendMessage');
+    sandbox.stub(resources.vsync_, 'run', task => {
+      task.measure({});
+    });
+  });
+
+  it('should measure initial scrollHeight', () => {
+    const scrollHeight = resources.viewport_.getScrollHeight();
+    expect(resources.maybeChangeHeight_).to.equal(false);
+    expect(resources.documentReady_).to.equal(true);
+    expect(resources.scrollHeight_).to.equal(scrollHeight);
+  });
+
+  it('should send scrollHeight to viewer if height was changed', () => {
+    sandbox.stub(resources.viewport_, 'getScrollHeight', () => {
+      return 200;
+    });
+    resources.maybeChangeHeight_ = true;
+
+    resources.doPass_();
+
+    expect(resources.maybeChangeHeight_).to.equal(false);
+    expect(resources.scrollHeight_).to.equal(200);
+    expect(viewerSendMessageStub).to.be.calledOnce;
+    expect(viewerSendMessageStub).to.be.calledWith(
+        'documentHeight', {height: 200}, true);
+  });
+
+  it('should not send scrollHeight to viewer if height is not changed', () => {
+    const scrollHeight = resources.viewport_.getScrollHeight();
+    resources.maybeChangeHeight_ = true;
+
+    resources.doPass_();
+
+    expect(resources.maybeChangeHeight_).to.equal(false);
+    expect(resources.scrollHeight_).to.equal(scrollHeight);
+    expect(viewerSendMessageStub).to.not.be.called;
+  });
+
+
+});
 
 describe('Resources changeSize', () => {
 

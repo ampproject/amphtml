@@ -935,6 +935,7 @@ export class Resources {
     }
 
     if (this.maybeChangeHeight_) {
+      this.maybeChangeHeight_ = false;
       this.vsync_.measure(() => {
         const measuredScrollHeight = this.viewport_.getScrollHeight();
         if (measuredScrollHeight != this.scrollHeight_) {
@@ -943,7 +944,6 @@ export class Resources {
           this.scrollHeight_ = measuredScrollHeight;
           dev().fine(TAG_, 'document height changed: ' + this.scrollHeight_);
         }
-        this.maybeChangeHeight_ = false;
       });
     }
   }
