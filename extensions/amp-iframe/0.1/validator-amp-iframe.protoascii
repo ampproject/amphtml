@@ -18,6 +18,7 @@ tags: {  # amp-iframe
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "SCRIPT"
   spec_name: "amp-iframe extension .js script"
+  satisfies: "amp-iframe extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-iframe"
@@ -54,7 +55,7 @@ tags: {  # <amp-iframe>
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "AMP-IFRAME"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-iframe extension .js script"
+  requires: "amp-iframe extension .js script"
   attrs: {
     name: "allowfullscreen"
     value: ""

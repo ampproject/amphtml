@@ -16,6 +16,7 @@
 tags: {  # amp-accordion
   tag_name: "SCRIPT"
   spec_name: "amp-accordion extension .js script"
+  satisfies: "amp-accordion extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-accordion"
@@ -50,7 +51,7 @@ tags: {  # amp-accordion
 }
 tags: {  # <amp-accordion>
   tag_name: "AMP-ACCORDION"
-  also_requires_tag: "amp-accordion extension .js script"
+  requires: "amp-accordion extension .js script"
   attrs: { name: "disable-session-states" value: "" }
   child_tags: {
     child_tag_name_oneof: "SECTION"

@@ -18,6 +18,7 @@ tags: {  # amp-form
   # under section "4.10 Forms"
   tag_name: "SCRIPT"
   spec_name: "amp-form extension .js script"
+  satisfies: "amp-form extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   attrs: {

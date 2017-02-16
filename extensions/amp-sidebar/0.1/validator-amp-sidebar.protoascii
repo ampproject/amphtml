@@ -19,6 +19,7 @@ tags: {  # amp-sidebar
   tag_name: "SCRIPT"
   mandatory_parent: "HEAD"
   spec_name: "amp-sidebar extension .js script"
+  satisfies: "amp-sidebar extension .js script"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-sidebar"
   attrs: {
@@ -56,7 +57,7 @@ tags: {  # <amp-sidebar>
   unique: true
   mandatory_parent: "BODY"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-sidebar extension .js script"
+  requires: "amp-sidebar extension .js script"
   attrs: {
     name: "side"
     value_regex: "(left|right)"

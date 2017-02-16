@@ -17,6 +17,7 @@
 tags: {  # amp-font
   tag_name: "SCRIPT"
   spec_name: "amp-font extension .js script"
+  satisfies: "amp-font extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-font"
@@ -52,7 +53,7 @@ tags: {  # amp-font
 tags: {  # <amp-font>
   tag_name: "AMP-FONT"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-font extension .js script"
+  requires: "amp-font extension .js script"
   attrs: {
     name: "font-family"
     mandatory: true

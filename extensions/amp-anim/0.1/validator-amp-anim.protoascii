@@ -17,6 +17,7 @@
 tags: {  # amp-anim
   tag_name: "SCRIPT"
   spec_name: "amp-anim extension .js script"
+  satisfies: "amp-anim extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-anim"
@@ -52,10 +53,9 @@ tags: {  # amp-anim
 tags: {  # <amp-anim>
   tag_name: "AMP-ANIM"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-anim extension .js script"
+  requires: "amp-anim extension .js script"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "autoplay" value: "" }
   attrs: { name: "controls" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"

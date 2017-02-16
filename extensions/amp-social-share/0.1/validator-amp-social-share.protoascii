@@ -17,6 +17,7 @@
 tags: {  # amp-social-share
   tag_name: "SCRIPT"
   spec_name: "amp-social-share extension .js script"
+  satisfies: "amp-social-share extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-social-share"
@@ -51,7 +52,7 @@ tags: {  # amp-social-share
 }
 tags: {  # <amp-social-share>
   tag_name: "AMP-SOCIAL-SHARE"
-  also_requires_tag: "amp-social-share extension .js script"
+  requires: "amp-social-share extension .js script"
   attrs: {
     name: "data-share-endpoint"
     value_url: {

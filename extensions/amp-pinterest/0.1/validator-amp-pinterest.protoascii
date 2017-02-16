@@ -18,6 +18,7 @@ tags: {  # amp-pinterest
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-pinterest extension .js script"
+  satisfies: "amp-pinterest extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-pinterest"
@@ -57,7 +58,7 @@ tags: {  # <amp-pinterest>
   html_format: AMP
   tag_name: "AMP-PINTEREST"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-pinterest extension .js script"
+  requires: "amp-pinterest extension .js script"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-do"

@@ -17,6 +17,7 @@ tags: {  # amp-access
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-access extension .js script"
+  satisfies: "amp-access extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-access extension .json script"
@@ -55,8 +56,8 @@ tags: {  # amp-access (json)
   spec_name: "amp-access extension .json script"
   unique: true
   mandatory_parent: "HEAD"
-  also_requires_tag: "amp-access extension .js script"
-  also_requires_tag: "amp-analytics extension .js script"
+  requires: "amp-access extension .js script"
+  requires: "amp-analytics extension .js script"
   attrs: {
     name: "id"
     mandatory: true
