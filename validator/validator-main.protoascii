@@ -25,7 +25,7 @@ min_validator_revision_required: 217
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 360
+spec_file_revision: 361
 
 # Validator extensions.
 # =====================
@@ -2523,8 +2523,6 @@ tags: {
 # 4.10.7 The select element
 tags: {
   tag_name: "SELECT"
-  mandatory_ancestor: "FORM"
-  requires: "amp-form extension .js script"
   attrs: { name: "autofocus" }
   attrs: { name: "disabled" }
   attrs: { name: "multiple" }
@@ -2536,15 +2534,12 @@ tags: {
 # 4.10.8 The datalist element
 tags: {
   tag_name: "DATALIST"
-  mandatory_ancestor: "FORM"
-  requires: "amp-form extension .js script"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.9 The optgroup element
 tags: {
   tag_name: "OPTGROUP"
   mandatory_parent: "SELECT"
-  requires: "amp-form extension .js script"
   attrs: { name: "disabled" }
   attrs: { name: "label" }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
@@ -2552,8 +2547,6 @@ tags: {
 # 4.10.10 The option element
 tags: {
   tag_name: "OPTION"
-  mandatory_ancestor: "FORM"
-  requires: "amp-form extension .js script"
   attrs: { name: "disabled" }
   attrs: { name: "label" }
   attrs: { name: "selected" }
@@ -2563,8 +2556,6 @@ tags: {
 # 4.10.11 The textarea element
 tags: {
   tag_name: "TEXTAREA"
-  mandatory_ancestor: "FORM"
-  requires: "amp-form extension .js script"
   attrs: { name: "autocomplete" }
   attrs: { name: "autofocus" }
   attrs: { name: "cols" }
