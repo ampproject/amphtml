@@ -238,7 +238,7 @@ function proxyToAmpProxy(req, res, minify) {
   var url = 'https://cdn.ampproject.org/'
       + (req.query['amp_js_v'] ? 'v' : 'c')
       + req.url;
-  console.log('Fetching URL:' + url);
+  console.log('Fetching URL: ' + url);
   request(url, function(error, response, body) {
     body = body
         // Unversion URLs.
