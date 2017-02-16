@@ -17,6 +17,7 @@
 import {AmpViewerIntegration} from '../amp-viewer-integration';
 import {Messaging, WindowPortEmulator} from '../messaging.js';
 import {ViewerForTesting} from './viewer-for-testing.js';
+import {getSourceUrl} from '../../../../src/url';
 
 
 describes.sandboxed('AmpViewerIntegration', {}, () => {
@@ -24,10 +25,11 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
   describe('Handshake', function() {
     let viewerEl;
     let viewer;
+    let ampDocUrl;
 
     beforeEach(() => {
       const loc = window.location;
-      const ampDocUrl =
+      ampDocUrl =
         `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
 
       viewerEl = document.createElement('div');
@@ -56,24 +58,39 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
 
-    it('should open channel and start with the correct message', () => {
-      class Messaging {
-        constructor() {}
-        sendRequest() {}
-        setup_() {}
-      }
-      const messaging = new Messaging();
-      const win = document.createElement('div');
-      win.document = document.createElement('div');
-      const ampViewerIntegration = new AmpViewerIntegration(win);
-      const sendRequestSpy = sandbox.stub(messaging, 'sendRequest', () => {
-        return Promise.resolve();
+    describes.realWin('amp-viewer-integration', {
+      amp: {
+        location: 'https://cdn.ampproject.org/c/s/www.example.com/path',
+        params: {
+          origin: 'https://example.com',
+        },
+      },
+    }, env => {
+      describe('Open Channel', () => {
+        it('should start with the correct message', () => {
+          const ampdocUrl = env.ampdoc.getUrl();
+          const srcUrl = getSourceUrl(ampdocUrl);
+
+          class Messaging {
+            constructor() {}
+            sendRequest() {}
+            setup_() {}
+          }
+          const messaging = new Messaging();
+          const win = document.createElement('div');
+          win.document = document.createElement('div');
+          const ampViewerIntegration = new AmpViewerIntegration(win);
+          const sendRequestSpy = sandbox.stub(messaging, 'sendRequest', () => {
+            return Promise.resolve();
+          });
+          ampViewerIntegration.openChannelAndStart_(
+            viewer, env.ampdoc, messaging);
+          expect(sendRequestSpy).to.have.been.calledWith('channelOpen', {
+            sourceUrl: srcUrl,
+            url: ampdocUrl,
+          }, true);
+        });
       });
-      ampViewerIntegration.openChannelAndStart_(viewer, ampDocSrc, messaging);
-      expect(sendRequestSpy).to.have.been.calledWith('channelOpen', {
-        sourceUrl: 'http://localhost:9876/test/fixtures/served/ampdoc-with-messaging.html',
-        url: '/test/fixtures/served/ampdoc-with-messaging.html',
-      }, true);
     });
   });
 

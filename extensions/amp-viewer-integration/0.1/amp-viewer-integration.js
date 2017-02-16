@@ -69,7 +69,7 @@ export class AmpViewerIntegration {
       return Promise.resolve();
     }
 
-    const ampdocUrl = getAmpDoc(this.win.document).getUrl();
+    const ampdoc = getAmpDoc(this.win.document);
 
     if (this.isWebView_) {
       let source;
@@ -84,14 +84,14 @@ export class AmpViewerIntegration {
       return this.webviewPreHandshakePromise_(source, origin)
           .then(receivedPort => {
             return this.openChannelAndStart_(
-              viewer, ampdocUrl, new Messaging(this.win, receivedPort));
+              viewer, ampdoc, new Messaging(this.win, receivedPort));
           });
     }
 
     const port = new WindowPortEmulator(
       this.win, dev().assertString(this.unconfirmedViewerOrigin_));
     return this.openChannelAndStart_(
-      viewer, ampdocUrl, new Messaging(this.win, port));
+      viewer, ampdoc, new Messaging(this.win, port));
   }
 
   /**
@@ -123,13 +123,14 @@ export class AmpViewerIntegration {
 
   /**
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
-   * @param {string} ampdocUrl
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Messaging} messaging
    * @return {!Promise<undefined>}
    * @private
    */
-  openChannelAndStart_(viewer, ampdocUrl, messaging) {
+  openChannelAndStart_(viewer, ampdoc, messaging) {
     dev().fine(TAG, 'Send a handshake request');
+    const ampdocUrl = ampdoc.getUrl();
     const srcUrl = getSourceUrl(ampdocUrl);
     return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {
       url: ampdocUrl,
