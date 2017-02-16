@@ -23,36 +23,109 @@ import {setParentWindow} from '../../src/service';
 describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
   let mutateElementStub;
+  let deferMutateStub;
+
+  function createAmpElement() {
+    const element = document.createElement('div');
+    element.classList.add('i-amphtml-element');
+    return element;
+  }
+
+  function stubMutate(methodName) {
+    return sandbox.stub(
+        standardActions.resources_,
+        methodName,
+        (unusedElement, mutator) => mutator());
+  }
+
+  function expectElementToHaveBeenHidden(element) {
+    expect(mutateElementStub).to.be.calledOnce;
+    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+    expect(element.style.display).to.equal('none');
+  }
+
+  function expectElementToHaveBeenShown(element) {
+    expect(deferMutateStub).to.be.calledOnce;
+    expect(deferMutateStub.firstCall.args[0]).to.equal(element);
+    expect(element.style.display).to.not.equal('none');
+  }
 
   beforeEach(() => {
     standardActions = new StandardActions(new AmpDocSingle(window));
-    mutateElementStub = sandbox.stub(
-        standardActions.resources_,
-        'mutateElement',
-        (unusedElement, mutator) => mutator());
+    mutateElementStub = stubMutate('mutateElement');
+    deferMutateStub = stubMutate('deferMutate');
   });
 
   describe('"hide" action', () => {
     it('should handle normal element', () => {
       const element = document.createElement('div');
       standardActions.handleHide({target: element});
-      expect(mutateElementStub).to.be.calledOnce;
-      expect(mutateElementStub.firstCall.args[0]).to.equal(element);
-      expect(element.style.display).to.equal('none');
+      // expectElementToHaveBeenHidden(element);
     });
 
     it('should handle AmpElement', () => {
-      const element = document.createElement('div');
-      let called = false;
-      element.classList.add('i-amphtml-element');
-      element.collapse = function() {
-        called = true;
-      };
+      const element = createAmpElement();
+      element.collapse = sandbox.stub();
 
       standardActions.handleHide({target: element});
       expect(mutateElementStub).to.be.calledOnce;
       expect(mutateElementStub.firstCall.args[0]).to.equal(element);
-      expect(called).to.equal(true);
+      expect(element.collapse).to.be.calledOnce;
+    });
+  });
+
+  describe('"show" action', () => {
+    it('should handle normal element', () => {
+      const element = document.createElement('div');
+      standardActions.handleShow({target: element});
+      expectElementToHaveBeenShown(element);
+    });
+
+    it('should handle AmpElement', () => {
+      const element = createAmpElement();
+      element.expand = sandbox.stub();
+
+      standardActions.handleShow({target: element});
+      expect(deferMutateStub).to.be.calledOnce;
+      expect(deferMutateStub.firstCall.args[0]).to.equal(element);
+      expect(element.expand).to.be.calledOnce;
+    });
+
+  });
+
+  describe('"toggle" action', () => {
+    it('should show normal element when hidden', () => {
+      const element = document.createElement('div');
+      element.style.display = 'none';
+      standardActions.handleToggle({target: element});
+      expectElementToHaveBeenShown(element);
+    });
+
+    it('should hide normal element when shown', () => {
+      const element = document.createElement('div');
+      standardActions.handleToggle({target: element});
+      expectElementToHaveBeenHidden(element);
+    });
+
+    it('should show AmpElement when hidden', () => {
+      const element = createAmpElement();
+      element.style.display = 'none';
+      element.expand = sandbox.stub();
+
+      standardActions.handleToggle({target: element});
+      expect(deferMutateStub).to.be.calledOnce;
+      expect(deferMutateStub.firstCall.args[0]).to.equal(element);
+      expect(element.expand).to.be.calledOnce;
+    });
+
+    it('should hide AmpElement when shown', () => {
+      const element = createAmpElement();
+      element.collapse = sandbox.stub();
+
+      standardActions.handleToggle({target: element});
+      expect(mutateElementStub).to.be.calledOnce;
+      expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+      expect(element.collapse).to.be.calledOnce;
     });
   });
 
@@ -106,9 +179,13 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(stub).to.be.calledOnce;
 
       // Global actions.
-      expect(embedActions.addGlobalMethodHandler).to.be.calledOnce;
+      expect(embedActions.addGlobalMethodHandler).to.be.calledThrice;
       expect(embedActions.addGlobalMethodHandler.args[0][0]).to.equal('hide');
       expect(embedActions.addGlobalMethodHandler.args[0][1]).to.be.function;
+      expect(embedActions.addGlobalMethodHandler.args[1][0]).to.equal('show');
+      expect(embedActions.addGlobalMethodHandler.args[1][1]).to.be.function;
+      expect(embedActions.addGlobalMethodHandler.args[2][0]).to.equal('toggle');
+      expect(embedActions.addGlobalMethodHandler.args[2][1]).to.be.function;
       embedActions.addGlobalMethodHandler.args[0][1]();
       expect(hideStub).to.be.calledOnce;
     });

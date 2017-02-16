@@ -1324,6 +1324,24 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Expands the element, and notifies its owner (if there is one) that the
+     * element is now present.
+     * @suppress {missingProperties}
+     */
+    expand() {
+      this.implementation_./*OK*/expand();
+    }
+
+    /**
+     * Called every time an owned AmpElement expands itself.
+     * @param {!AmpElement} element
+     * @suppress {missingProperties}
+     */
+    expandedCallback(element) {
+      this.implementation_.expandedCallback(element);
+    }
+
+    /**
      * Called when one or more attributes are mutated.
      * @note Must be called inside a mutate context.
      * @note Boolean attributes have a value of `true` and `false` when
