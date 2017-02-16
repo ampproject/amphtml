@@ -17,10 +17,22 @@
 import {
   extractGoogleAdCreativeAndSignature,
   additionalDimensions,
+  injectActiveViewAmpAnalyticsElement,
 } from '../utils';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import {
+  installExtensionsService,
+} from '../../../../src/service/extensions-impl';
+import {
+  MockA4AImpl,
+  createAdTestingIframePromise,
+} from '../../../../extensions/amp-a4a/0.1/test/utils';
+import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import * as sinon from 'sinon';
 
 describe('Google A4A utils', () => {
+
   describe('#extractGoogleAdCreativeAndSignature', () => {
     it('should return body and signature', () => {
       const creative = 'some test data';
@@ -94,6 +106,56 @@ describe('Google A4A utils', () => {
       };
       return expect(additionalDimensions(fakeWin, fakeSize)).to.equal(
         '3,4,1,2,11,12,5,6,100px,101px');
+    });
+  });
+
+  describe('#injectActiveViewAmpAnalyticsElement', () => {
+    let sandbox;
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    it('should load extension and create amp-analytics element', () => {
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const element = createElementWithAttributes(doc, 'amp-a4a', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+        });
+        const urls = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
+        const extensions = installExtensionsService(fixture.win);
+        const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+        injectActiveViewAmpAnalyticsElement(
+            new MockA4AImpl(element), extensions, urls);
+        expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+        const ampAnalyticsElements = element.querySelectorAll('amp-analytics');
+        expect(ampAnalyticsElements.length).to.equal(1);
+        const ampAnalyticsElement = ampAnalyticsElements[0];
+        const scriptElements = ampAnalyticsElement.querySelectorAll('script');
+        expect(scriptElements.length).to.equal(1);
+        const scriptElement = scriptElements[0];
+        expect(scriptElement.getAttribute('type')).to.equal('application/json');
+        expect(JSON.parse(scriptElement.textContent)).to.deep.equal(
+          {
+            transport: {beacon: false, xhrpost: false},
+            requests: {
+              visibility1: urls[0], visibility2: urls[1],
+            },
+            triggers: {
+              continuousVisible: {
+                on: 'visible',
+                request: ['visibility1', 'visibility2'],
+                visibilitySpec: {
+                  selector: 'amp-ad',
+                  selectionMethod: 'closest',
+                  visiblePercentageMin: 50,
+                  continuousTimeMin: 1000,
+                },
+              },
+            },
+          });
+      });
     });
   });
 });

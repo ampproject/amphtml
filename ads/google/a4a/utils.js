@@ -24,6 +24,7 @@ import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/viewer';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
+import {createElementWithAttributes} from '../../../src/dom';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -32,7 +33,7 @@ const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
 
 /** @type {string}  */
-export const AMP_ANALYTICS_URLS_HEADER = 'X-AmpAnalytics';
+export const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
 
 /** @const {number} */
 const MAX_URL_LENGTH = 4096;
@@ -336,12 +337,13 @@ export function additionalDimensions(win, viewportSize) {
 };
 
 /**
+ * Creates amp-analytics element within a4a element using urls specified
+ * with amp-ad closest selector and min 50% visible for 1 sec.
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {!./service/extensions-impl.Extensions} extensions
+ * @param {!../../../src/service/extensions-impl.Extensions} extensions
  * @param {!Array<string>} urls
  */
-export function injectActiveViewAmpAnalyticsElement(
-    a4aElement, extensions, urls) {
+export function injectActiveViewAmpAnalyticsElement(a4a, extensions, urls) {
   dev().assert(urls.length);
   extensions.loadExtension('amp-analytics');
   const ampAnalyticsElem =
@@ -352,14 +354,13 @@ export function injectActiveViewAmpAnalyticsElement(
       'continuousVisible': {
         'on': 'visible',
         'visibilitySpec': {
-          // TODO(keithwrightbos): update to nearest amp-ad
           'selector': 'amp-ad',
           'selectionMethod': 'closest',
           'visiblePercentageMin': 50,
-          'continuousTimeMin': 1000
-        }
-      }
-    }
+          'continuousTimeMin': 1000,
+        },
+      },
+    },
   };
   const requests = {};
   for (let idx = 1; idx <= urls.length; idx++) {
@@ -371,9 +372,9 @@ export function injectActiveViewAmpAnalyticsElement(
   config['triggers']['continuousVisible']['request'] = Object.keys(requests);
   const scriptElem = createElementWithAttributes(
       /** @type {!Document} */(a4a.element.ownerDocument), 'script', {
-      'type': 'application/json'
-    });
+        'type': 'application/json',
+      });
   scriptElem.textContent = JSON.stringify(config);
-  ampAnalyticsElem.appendChild(textContent);
+  ampAnalyticsElem.appendChild(scriptElem);
   a4a.element.appendChild(ampAnalyticsElem);
 }

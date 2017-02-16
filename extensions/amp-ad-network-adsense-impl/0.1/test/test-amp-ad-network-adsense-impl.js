@@ -19,6 +19,13 @@ import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl';
+import {AMP_ANALYTICS_HEADER} from '../../../../ads/google/a4a/utils';
+import {
+  createAdTestingIframePromise,
+} from '../../../../extensions/amp-a4a/0.1/test/utils';
+import {
+  installExtensionsService,
+} from '../../../../src/service/extensions-impl';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
@@ -280,6 +287,68 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
               {creative,
                signature: base64UrlDecodeToBytes('AQAB'),
                size: null});
+      });
+    });
+    it('with analytics', () => {
+      return utf8Encode('some creative').then(creative => {
+        const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
+        return impl.extractCreativeAndSignature(
+          creative,
+          {
+            get: function(name) {
+              switch (name) {
+                case AMP_ANALYTICS_HEADER:
+                  return JSON.stringify({urls});
+                case 'X-AmpAdSignature':
+                  return 'AQAB';
+                default:
+                  return undefined;
+              }
+            },
+            has: function(name) {
+              return !!this.get(name);
+            },
+          }).then(adResponse => {
+            expect(adResponse).to.deep.equal(
+              {
+                creative,
+                signature: base64UrlDecodeToBytes('AQAB'),
+                size: null,
+              });
+            expect(impl.ampAnalyticsUrls_).to.deep.equal(urls);
+          });
+      });
+    });
+  });
+
+  describe('#onCreativeRender', () => {
+    let loadExtensionSpy;
+
+    beforeEach(() => {
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+        });
+        impl = new AmpAdNetworkAdsenseImpl(element);
+        const extensions = installExtensionsService(impl.win);
+        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+      });
+    });
+
+    it('injects amp analytics', () => {
+      const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
+      impl.ampAnalyticsUrls_ = urls;
+      impl.onCreativeRender(false);
+      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+      const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
+      expect(ampAnalyticsElement).to.be.ok;
+      // Exact format of amp-analytics element covered in
+      // ads/google/test/test-utils.js.  Just ensure urls given exist somewhere.
+      urls.forEach(url => {
+        expect(ampAnalyticsElement.innerHTML.indexOf(url)).to.not.equal(-1);
       });
     });
   });

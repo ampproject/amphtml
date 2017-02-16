@@ -18,6 +18,7 @@ import {
   MockA4AImpl,
   TEST_URL,
   SIGNATURE_HEADER,
+  createAdTestingIframePromise,
 } from './utils';
 import {
   AmpA4A,
@@ -31,12 +32,10 @@ import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {cryptoFor} from '../../../../src/crypto';
 import {cancellation} from '../../../../src/error';
-import {createIframePromise} from '../../../../testing/iframe';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
@@ -50,33 +49,6 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {AmpContext} from '../../../../3p/ampcontext.js';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import * as sinon from 'sinon';
-
-/**
- * Create a promise for an iframe that has a super-minimal mock AMP environment
- * in it.
- *
- * @return {!Promise<{
- *   win: !Window,
- *   doc: !Document,
- *   iframe: !Element,
- *   addElement: function(!Element):!Promise
- * }>
- */
-function createAdTestingIframePromise() {
-  return createIframePromise().then(fixture => {
-    installDocService(fixture.win, /* isSingleDoc */ true);
-    const doc = fixture.doc;
-    // TODO(a4a-cam@): This is necessary in the short term, until A4A is
-    // smarter about host document styling.  The issue is that it needs to
-    // inherit the AMP runtime style element in order for shadow DOM-enclosed
-    // elements to behave properly.  So we have to set up a minimal one here.
-    const ampStyle = doc.createElement('style');
-    ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
-    doc.head.appendChild(ampStyle);
-    return fixture;
-  });
-}
-
 
 describe('amp-a4a', () => {
   let sandbox;
@@ -255,7 +227,7 @@ describe('amp-a4a', () => {
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
-        expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
+        expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
       });
     });
 
@@ -277,7 +249,7 @@ describe('amp-a4a', () => {
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
-        expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
+        expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
       });
     });
 
@@ -289,7 +261,7 @@ describe('amp-a4a', () => {
         const child = a4aElement.querySelector('iframe[src]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
-        expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
+        expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
       });
     });
 
@@ -362,7 +334,7 @@ describe('amp-a4a', () => {
         a4a.createdCallback();
         a4a.firstAttachedCallback();
         a4a.buildCallback();
-        expect(onCreativeRenderSpy.called).to.be.false;
+        expect(onCreativeRenderSpy).to.not.be.called;
       });
     });
 
@@ -693,7 +665,7 @@ describe('amp-a4a', () => {
               'link[href="https://fonts.googleapis.com/css?family=Questrial"]'))
               .to.be.ok;
             expect(doc.querySelector('script[src*="amp-font-0.1"]')).to.be.ok;
-            expect(onCreativeRenderSpy.calledOnce).to.be.true;
+            expect(onCreativeRenderSpy).to.be.calledOnce;
             expect(updatePriorityStub).to.be.calledOnce;
             expect(updatePriorityStub.args[0][0]).to.equal(0);
           });
@@ -774,7 +746,7 @@ describe('amp-a4a', () => {
             const iframe = a4aElement.getElementsByTagName('iframe')[0];
             if (isValidCreative && !opt_failAmpRender) {
               expect(iframe.getAttribute('src')).to.be.null;
-              expect(onCreativeRenderSpy.withArgs(true).calledOnce).to.be.true;
+              expect(onCreativeRenderSpy.withArgs(true)).to.be.calledOnce;
               expect(updatePriorityStub).to.be.calledOnce;
               expect(updatePriorityStub.args[0][0]).to.equal(0);
             } else {
@@ -782,7 +754,7 @@ describe('amp-a4a', () => {
               expect(iframe.src, 'verify iframe src w/ origin').to
                   .equal(TEST_URL +
                          '&__amp_source_origin=about%3Asrcdoc');
-              expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
+              expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
               if (!opt_failAmpRender) {
                 expect(updatePriorityStub).to.not.be.called;
               }
@@ -853,7 +825,7 @@ describe('amp-a4a', () => {
           expect(frameDoc.querySelector('style[amp-custom]')).to.be.ok;
           expect(frameDoc.body.innerHTML, 'body content')
               .to.contain('Hello, world.');
-          expect(onCreativeRenderSpy.withArgs(true).calledOnce).to.be.true;
+          expect(onCreativeRenderSpy.withArgs(true)).to.be.calledOnce;
         });
       });
     });
@@ -877,7 +849,7 @@ describe('amp-a4a', () => {
           expect(iframe).to.be.ok;
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe).to.be.visible;
-          expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
+          expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
           expect(lifecycleEventStub).to.be.calledWith('networkError');
         });
       });
@@ -896,7 +868,7 @@ describe('amp-a4a', () => {
           expect(iframe.tagName).to.equal('IFRAME');
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe).to.be.visible;
-          expect(onCreativeRenderSpy.called).to.be.false;
+          expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
         }));
       });
     });
@@ -919,7 +891,7 @@ describe('amp-a4a', () => {
           expect(iframe.tagName).to.equal('IFRAME');
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe.style.visibility).to.equal('');
-          expect(onCreativeRenderSpy.withArgs(false).called).to.be.true;
+          expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
         });
       });
     });

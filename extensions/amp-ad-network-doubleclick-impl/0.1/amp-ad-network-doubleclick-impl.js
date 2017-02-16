@@ -21,6 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {dev} from '../../../src/log';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -29,7 +30,7 @@ import {
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
   injectActiveViewAmpAnalyticsElement,
-  AMP_ANALYTICS_URLS_HEADER,
+  AMP_ANALYTICS_HEADER,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -43,6 +44,9 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
+
+/** @type {string} */
+const TAG = 'AMP-AD-NETWORK-DOUBLECLICK-IMPL';
 
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
@@ -63,6 +67,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {!Array<string>}
      */
     this.ampAnalyticsUrls_ = [];
+
+    /** @private {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = extensionsFor(this.win);
   }
 
   /** @override */
@@ -145,9 +152,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    if (responseHeaders.has(AMP_ANALYTICS_URLS_HEADER)) {
-      this.ampAnalyticsUrls_ =
-          responseHeaders.get(AMP_ANALYTICS_URLS_HEADER).split(',');
+    if (responseHeaders.has(AMP_ANALYTICS_HEADER)) {
+      try {
+        const analyticsConfig =
+          JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
+        this.ampAnalyticsUrls_ = analyticsConfig['urls'];
+      } catch (err) {
+        dev().error(TAG, 'Invalid analytics', err,
+            responseHeaders.get(AMP_ANALYTICS_HEADER));
+      }
     }
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
@@ -180,9 +193,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsUrls_.length) {
       injectActiveViewAmpAnalyticsElement(
-        this,
-        extensionsFor(this.win).loadExtension('amp-analytics'),
-        this.ampAnalyticsUrls_);
+        this, this.extensions_, this.ampAnalyticsUrls_);
     }
   }
 

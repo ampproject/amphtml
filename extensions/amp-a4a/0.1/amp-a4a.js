@@ -784,10 +784,6 @@ export class AmpA4A extends AMP.BaseElement {
         layoutAdPromiseDelay: Math.round(delta),
         isAmpCreative: !!creativeMetaData,
       });
-      if (!creativeMetaData) {
-        // Non-AMP creative case, will verify ad url existence.
-        return this.renderNonAmpCreative_();
-      }
       if (this.isCollapsed_) {
         return Promise.resolve();
       }
@@ -854,7 +850,6 @@ export class AmpA4A extends AMP.BaseElement {
       this.xOriginIframeHandler_ = null;
     }
     this.layoutMeasureExecuted_ = false;
-    this.collapse_ = false;
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
     return true;
