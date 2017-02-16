@@ -51,6 +51,9 @@ export function getContextMetadata(
       parentWindow, 'sentinel-name-change');
   attributes._context = {
     ampcontextVersion: '$internalRuntimeVersion$',
+    ampcontextFilepath: 'https://cdn.ampproject.org/' +
+        '$internalRuntimeVersion$' +
+        '/ampcontext-v0.js',
     sourceUrl: docInfo.sourceUrl,
     referrer,
     canonicalUrl: docInfo.canonicalUrl,
