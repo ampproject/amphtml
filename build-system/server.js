@@ -460,7 +460,7 @@ app.use('/min/', function(req, res) {
 // Nest the response in an iframe.
 // Example:
 // http://localhost:8000/iframe/examples/ads.amp.max.html
-app.use('/iframe/', function(req, res) {
+app.get('/iframe/', function(req, res) {
   // Returns an html blob with an iframe pointing to the url after /iframe/.
   res.send(`<!doctype html>
           <html style="width:100%; height:100%;">
