@@ -180,10 +180,9 @@ export class Bind {
 
       // Report each parse error.
       Object.keys(parseErrors).forEach(expressionString => {
-        const errorString = parseErrors[expressionString];
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
-          const err = user().createError(errorString);
+          const err = user().createError(parseErrors[expressionString]);
           reportError(err, elements[0]);
         }
       });
