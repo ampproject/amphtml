@@ -15,7 +15,7 @@
  */
 
 import {validateData} from '../3p/3p';
-import {writeScript} from '../3p/3p';
+import {loadScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -51,5 +51,6 @@ export function capirs(global, data) {
     },
   };
 
-  writeScript(global, '//ssp.rambler.ru/capirs_async.js');
+  loadScript(global, '//ssp.rambler.ru/lpdid.js');
+  loadScript(global, '//ssp.rambler.ru/capirs_async.js');
 }
