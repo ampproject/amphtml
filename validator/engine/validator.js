@@ -665,13 +665,6 @@ class ParsedTagSpec {
   }
 
   /**
-   * @return {number} unique id for this tag spec.
-   */
-  getId() {
-    return this.spec_.tagSpecId;
-  }
-
-  /**
    * Return the original tag spec. This is the json object representation from
    * amp.validator.rules_.
    * @return {!amp.validator.TagSpec}
@@ -1072,13 +1065,12 @@ class ReferencePointMatcher {
       // p.tagSpecName here is actually a number, which was replaced in
       // validator_gen_js.py from the name string, so this works.
       const tagSpecId = /** @type {!number} */ (p.tagSpecName);
-      const parsedSpec = this.parsedValidatorRules_.getByTagSpecId(tagSpecId);
       validateTagAgainstSpec(
-          this.parsedValidatorRules_, parsedSpec, context, attrs,
+          this.parsedValidatorRules_, tagSpecId, context, attrs,
           resultForBestAttempt);
       if (resultForBestAttempt.status !==
           amp.validator.ValidationResult.Status.FAIL) {
-        this.referencePointsMatched_.push(parsedSpec.getId());
+        this.referencePointsMatched_.push(tagSpecId);
         return;
       }
     }
@@ -2680,17 +2672,18 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  * - Unique tags
  * - Tags (identified by their TagSpecName() that are required by other tags.
  * @param {!amp.validator.TagSpec} tag
+ * @param {number} tagSpecId
  * @param {!Array<boolean>} tagSpecIdsToTrack
  * @return {boolean}
  */
-function shouldRecordTagspecValidated(tag, tagSpecIdsToTrack) {
+function shouldRecordTagspecValidated(tag, tagSpecId, tagSpecIdsToTrack) {
   if (amp.validator.GENERATE_DETAILED_ERRORS) {
     return tag.mandatory || tag.unique || tag.uniqueWarning ||
         tag.requires.length > 0 ||
-        tagSpecIdsToTrack.hasOwnProperty(tag.tagSpecId);
+        tagSpecIdsToTrack.hasOwnProperty(tagSpecId);
   } else {
     return tag.mandatory || tag.unique || tag.requires.length > 0 ||
-        tagSpecIdsToTrack.hasOwnProperty(tag.tagSpecId);
+        tagSpecIdsToTrack.hasOwnProperty(tagSpecId);
   }
 }
 
@@ -3487,15 +3480,16 @@ class TagSpecDispatch {
  * Validates the provided |tagName| with respect to a single tag
  * specification.
  * @param {!ParsedValidatorRules} parsedRules
- * @param {!ParsedTagSpec} parsedSpec
+ * @param {number} tagSpecId
  * @param {!Context} context
  * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
  * @param {!amp.validator.ValidationResult} resultForBestAttempt
  */
 function validateTagAgainstSpec(
-    parsedRules, parsedSpec, context, encounteredAttrs, resultForBestAttempt) {
+    parsedRules, tagSpecId, context, encounteredAttrs, resultForBestAttempt) {
   let resultForAttempt = new amp.validator.ValidationResult();
   resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
+  const parsedSpec = parsedRules.getByTagSpecId(tagSpecId);
   validateAttributes(
       parsedRules.getParsedAttrSpecs(), parsedSpec, context, parsedSpec,
       encounteredAttrs, resultForAttempt);
@@ -3554,7 +3548,7 @@ function validateTagAgainstSpec(
   }
 
   if (parsedSpec.shouldRecordTagspecValidated()) {
-    const isUnique = context.recordTagspecValidated(parsedSpec.getId());
+    const isUnique = context.recordTagspecValidated(tagSpecId);
     // If a duplicate tag is encountered for a spec that's supposed
     // to be unique, we've found an error that we must report.
     if (!isUnique) {
@@ -3682,19 +3676,21 @@ class ParsedValidatorRules {
 
     /** @private @type {!Array<boolean>} */
     this.tagSpecIdsToTrack_ = [];
-    for (const tag of this.rules_.tags) {
+    var numTags = this.rules_.tags.length;
+    for (var tagSpecId = 0; tagSpecId < numTags; ++tagSpecId) {
+      const tag = this.rules_.tags[tagSpecId];
       if (!isTagSpecCorrectHtmlFormat(tag, this.htmlFormat_)) {
         continue;
       }
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         if (tag.alsoRequiresTagWarning.length > 0) {
-          this.tagSpecIdsToTrack_[tag.tagSpecId] = true;
+          this.tagSpecIdsToTrack_[tagSpecId] = true;
         }
         for (const otherTag of tag.alsoRequiresTagWarning) {
           this.tagSpecIdsToTrack_[otherTag] = true;
         }
         if (tag.extensionUnusedUnlessTagPresent.length > 0) {
-          this.tagSpecIdsToTrack_[tag.tagSpecId] = true;
+          this.tagSpecIdsToTrack_[tagSpecId] = true;
         }
         for (const otherTag of tag.extensionUnusedUnlessTagPresent) {
           this.tagSpecIdsToTrack_[otherTag] = true;
@@ -3705,15 +3701,15 @@ class ParsedValidatorRules {
           this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
         }
         const tagnameDispatch = this.tagSpecByTagName_[tag.tagName];
-        const dispatchKey = this.rules_.dispatchKeyByTagSpecId[tag.tagSpecId];
+        const dispatchKey = this.rules_.dispatchKeyByTagSpecId[tagSpecId];
         if (dispatchKey === undefined) {
-          tagnameDispatch.registerTagSpec(tag.tagSpecId);
+          tagnameDispatch.registerTagSpec(tagSpecId);
         } else {
-          tagnameDispatch.registerDispatchKey(dispatchKey, tag.tagSpecId);
+          tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
         }
       }
       if (tag.mandatory) {
-        this.mandatoryTagSpecs_.push(tag.tagSpecId);
+        this.mandatoryTagSpecs_.push(tagSpecId);
       }
     }
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -3942,7 +3938,7 @@ class ParsedValidatorRules {
     goog.asserts.assert(tag !== undefined);
     parsed = new ParsedTagSpec(
         this.parsedAttrSpecs_,
-        shouldRecordTagspecValidated(tag, this.tagSpecIdsToTrack_), tag);
+        shouldRecordTagspecValidated(tag, id, this.tagSpecIdsToTrack_), tag);
     this.parsedTagSpecById_[id] = parsed;
     return parsed;
   }
@@ -4221,10 +4217,8 @@ amp.validator.ValidationHandler =
             // validate using whatever the tagspec requests.
             attrValue.toLowerCase(), this.context_.getTagStack().getParent());
         if (maybeTagSpecId !== -1) {
-          const parsedSpec = this.rules_.getByTagSpecId(maybeTagSpecId);
-          goog.asserts.assert(parsedSpec !== undefined, '1');
           validateTagAgainstSpec(
-              this.rules_, parsedSpec, this.context_, encounteredAttrs,
+              this.rules_, maybeTagSpecId, this.context_, encounteredAttrs,
               resultForBestAttempt);
           // Use the dispatched TagSpec validation results, success or fail.
           this.validationResult_.mergeFrom(resultForBestAttempt);
@@ -4254,9 +4248,8 @@ amp.validator.ValidationHandler =
     }
     // Validate against all tagspecs.
     for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
-      const parsedSpec = this.rules_.getByTagSpecId(tagSpecId);
       validateTagAgainstSpec(
-          this.rules_, parsedSpec, this.context_, encounteredAttrs,
+          this.rules_, tagSpecId, this.context_, encounteredAttrs,
           resultForBestAttempt);
       if (resultForBestAttempt.status !==
           amp.validator.ValidationResult.Status.FAIL) {

@@ -456,9 +456,6 @@ def PrintClassFor(descriptor, msg_desc, out):
         constructor_arg_fields.append(field)
         constructor_arg_field_names[field.name] = 1
     out.Line('/**')
-    # Special casing for amp.validator.TagSpec
-    if msg_desc.full_name == 'amp.validator.TagSpec':
-      out.Line(' * @param {number} tagSpecId')
     for field in constructor_arg_fields:
       out.Line(' * @param {%s} %s' % (FieldTypeFor(descriptor, field,
                                                    nullable=False),
@@ -470,18 +467,10 @@ def PrintClassFor(descriptor, msg_desc, out):
       out.Line(' * @export')
       export_or_empty = ' @export'
     out.Line(' */')
-    arguments = ''
-    # Special casing for amp.validator.TagSpec
-    if msg_desc.full_name == 'amp.validator.TagSpec':
-      arguments = 'tagSpecId, '
-
-    arguments += ','.join([UnderscoreToCamelCase(f.name)
-                           for f in constructor_arg_fields])
+    arguments = ','.join([UnderscoreToCamelCase(f.name)
+                          for f in constructor_arg_fields])
     out.Line('%s = function(%s) {' % (msg_desc.full_name, arguments))
     out.PushIndent(2)
-    if msg_desc.full_name == 'amp.validator.TagSpec':
-      out.Line('/** @type {number} */')
-      out.Line('this.tagSpecId = tagSpecId;')
 
     for field in msg_desc.fields:
       with GenerateDetailedErrorsIf(field.name in SKIP_FIELDS_FOR_LIGHT, out):
@@ -651,15 +640,9 @@ def PrintObject(descriptor, msg, registry, out):
       field_and_assigned_values.append((field_desc, render_value(field_val)))
 
   # First we emit the constructor call, with the appropriate arguments.
-  constructor_arg_values = []
-  if msg.DESCRIPTOR.full_name == 'amp.validator.TagSpec':
-    # TagSpecs get their messsage ids as the first constructor parameter.
-    constructor_arg_values.append(
-        str(registry.MessageIdForKey(this_message_key)))
-
-  for (field, value) in field_and_assigned_values:
-    if field.full_name in CONSTRUCTOR_ARG_FIELDS:
-      constructor_arg_values.append(value)
+  constructor_arg_values = [value
+                            for (field, value) in field_and_assigned_values
+                            if field.full_name in CONSTRUCTOR_ARG_FIELDS]
 
   this_message_reference = registry.MessageReferenceForKey(
       this_message_key)
