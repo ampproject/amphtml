@@ -153,7 +153,6 @@ export class Bind {
     if (getMode().localDev) {
       AMP.reinitializeBind = this.initialize_.bind(this);
     }
-
   }
 
   /**
