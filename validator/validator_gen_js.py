@@ -131,6 +131,11 @@ class MessageRegistry(object):
     # case mapping to resolve them to message ids.
     self.message_id_by_tag_spec_name_ = {}
 
+    # References from tag specs to attr specs in the .protoascii are expressed
+    # as attr list names, so we maintain this mapping to resolve them to
+    # message ids for the generated Javascript.
+    self.message_id_by_attr_list_name_ = {}
+
     # Interned strings have negative IDs, starting from -1. This makes it
     # easy to distinguish them from other message ids. In the interned_strings_
     # array, they can be found by calculating their index -1 - <string_id>.
@@ -226,6 +231,25 @@ class MessageRegistry(object):
     """
     return self.message_id_by_tag_spec_name_[tag_spec_name]
 
+  def RegisterAttrList(self, attr_list):
+    """Registers an attr list, including for lookups by name.
+
+    Args:
+      attr_list: an instance of validator_pb2.AttrList
+    """
+    message_id = self.MessageIdForKey(MessageKey(attr_list))
+    self.message_id_by_attr_list_name_[attr_list.name] = message_id
+
+  def MessageIdForAttrListName(self, attr_list_name):
+    """Looks up a message id for a tag spec by TagSpecName.
+
+    Args:
+      attr_list_name: a string - the AttrList::name field.
+    Returns:
+      The message id - a number.
+    """
+    return self.message_id_by_attr_list_name_[attr_list_name]
+
 
 def ElementTypeFor(descriptor, field_desc):
   """Returns the element Javascript type for a given field descriptor.
@@ -243,7 +267,8 @@ def ElementTypeFor(descriptor, field_desc):
   # synthetic reference field, make it a number instead as we'll be
   # replacing this with the message id.
   if (field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD) or (
-      field_desc.full_name in SYNTHETIC_REFERENCE_FIELD):
+      field_desc.full_name in SYNTHETIC_REFERENCE_FIELD) or (
+          field_desc.full_name in ATTR_LIST_NAME_REFERENCE_FIELD):
     return 'number'
   return {descriptor.FieldDescriptor.TYPE_DOUBLE: lambda: 'number',
           descriptor.FieldDescriptor.TYPE_INT32: lambda: 'number',
@@ -343,6 +368,13 @@ TAG_SPEC_NAME_REFERENCE_FIELD = [
     'amp.validator.ReferencePoint.tag_spec_name',
     'amp.validator.TagSpec.also_requires_tag_warning',
     'amp.validator.TagSpec.extension_unused_unless_tag_present',
+]
+
+# In the .protoascii, some fields reference other tags by attr list name.
+# This is a string, and this code generator replaces these fields with attr
+# list ids, which are numbers.
+ATTR_LIST_NAME_REFERENCE_FIELD = [
+    'amp.validator.TagSpec.attr_lists'
 ]
 
 # These fields contain messages in the .protoascii, but we replace
@@ -594,6 +626,8 @@ def PrintObject(descriptor, msg, registry, out):
     render_value = lambda: None
     if field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD:
       render_value = lambda v: str(registry.MessageIdForTagSpecName(v))
+    elif field_desc.full_name in ATTR_LIST_NAME_REFERENCE_FIELD:
+      render_value = lambda v: str(registry.MessageIdForAttrListName(v))
     elif field_desc.full_name in SYNTHETIC_REFERENCE_FIELD:
       def InternOrReference(value):
         if IsTrivialAttrSpec(value):
@@ -737,6 +771,11 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   # that rules.tags[tagspec_id] works.
   for t in rules.tags:
     registry.RegisterTagSpec(t)
+
+  # Register the attrlists so they have ids 0 - rules.attr_lists.length.
+  # This means that rules.attr_lists[attr_list_id] works.
+  for a in rules.attr_lists:
+    registry.RegisterAttrList(a)
 
   out.Line('/**')
   out.Line(' * @return {!%s}' % rules.DESCRIPTOR.full_name)

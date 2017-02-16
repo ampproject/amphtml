@@ -475,8 +475,8 @@ class ParsedAttrSpecs {
    * @param {!amp.validator.ValidatorRules} rules
    */
   constructor(rules) {
-    /** @type {!Object<string, !Array<number>>} */
-    this.attrListsByName = {};
+    /** @type {!Array<!Array<number>>} */
+    this.attrLists = [];
 
     /** @type {!Array<number>} */
     this.globalAttrs = [];
@@ -489,9 +489,8 @@ class ParsedAttrSpecs {
         this.layoutAttrs = attrList.attrs;
       } else if (attrList.name === '$GLOBAL_ATTRS') {
         this.globalAttrs = attrList.attrs;
-      } else {
-        this.attrListsByName[attrList.name] = attrList.attrs;
       }
+      this.attrLists.push(attrList.attrs);
     }
     goog.asserts.assert(this.layoutAttrs.length > 0, 'layout attrs not found');
     goog.asserts.assert(this.globalAttrs.length > 0, 'global attrs not found');
@@ -619,9 +618,8 @@ class ParsedTagSpec {
     this.mergeAttrs(tagSpec.attrs, parsedAttrSpecs);
 
     // (3) attributes specified via reference to an attr_list.
-    for (const attrListName of tagSpec.attrLists) {
-      this.mergeAttrs(
-          parsedAttrSpecs.attrListsByName[attrListName], parsedAttrSpecs);
+    for (const id of tagSpec.attrLists) {
+      this.mergeAttrs(parsedAttrSpecs.attrLists[id], parsedAttrSpecs);
     }
     // (4) attributes specified in the global_attr list.
     if (!this.isReferencePoint_) {
