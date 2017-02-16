@@ -342,16 +342,15 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} actionEventType
-   * @return {?{node: !Element, actionInfos: Array<!ActionInfoDef>}}
+   * @return {?{node: !Element, actionInfos: !Array<!ActionInfoDef>}}
    */
   findAction_(target, actionEventType) {
     // Go from target up the DOM tree and find the applicable action.
     let n = target;
-    let actionInfos = null;
     while (n) {
-      actionInfos = this.matchActionInfos_(n, actionEventType);
+      const actionInfos = this.matchActionInfos_(n, actionEventType);
       if (actionInfos) {
-        return {node: n, actionInfos};
+        return {node: n, actionInfos: dev().assert(actionInfos)};
       }
       n = n.parentElement;
     }
@@ -361,7 +360,7 @@ export class ActionService {
   /**
    * @param {!Element} node
    * @param {string} actionEventType
-   * @return {?Array<ActionInfoDef>}
+   * @return {?Array<!ActionInfoDef>}
    */
   matchActionInfos_(node, actionEventType) {
     const actionMap = this.getActionMap_(node);
@@ -373,7 +372,7 @@ export class ActionService {
 
   /**
    * @param {!Element} node
-   * @return {?Object<string, Array<ActionInfoDef>>}
+   * @return {?Object<string, !Array<!ActionInfoDef>>}
    */
   getActionMap_(node) {
     let actionMap = node[ACTION_MAP_];
@@ -392,7 +391,7 @@ export class ActionService {
 /**
  * @param {string} s
  * @param {!Element} context
- * @return {?Object<string, Array<ActionInfoDef>>}
+ * @return {?Object<string, !Array<!ActionInfoDef>>}
  * @private Visible for testing only.
  */
 export function parseActionMap(s, context) {
