@@ -16,9 +16,11 @@
 
 tags: {  # amp-playbuzz
   html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-playbuzz extension .js script"
-  also_requires_tag: "amp-playbuzz"
+  satisfies: "amp-playbuzz extension .js script"
+  requires: "amp-playbuzz"
   mandatory_parent: "HEAD"
   unique: true
   attrs: {
@@ -52,8 +54,10 @@ tags: {  # amp-playbuzz
 }
 tags: {  # <amp-playbuzz>
   html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-PLAYBUZZ"
-  also_requires_tag: "amp-playbuzz extension .js script"
+  satisfies: "amp-playbuzz"
+  requires: "amp-playbuzz extension .js script"
   attrs: {
     name: "data-comments"
     value_regex_casei: "(false|true)"

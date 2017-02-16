@@ -732,16 +732,6 @@ class ParsedTagSpec {
   /**
    * A TagSpec may specify other tags to be required as well, when that
    * tag is used. This accessor returns the IDs for the tagspecs that
-   * are also required if |this| tag occurs in the document.
-   * @return {!Array<number>}
-   */
-  getAlsoRequiresTag() {
-    return this.spec_.alsoRequiresTag;
-  }
-
-  /**
-   * A TagSpec may specify other tags to be required as well, when that
-   * tag is used. This accessor returns the IDs for the tagspecs that
    * are also required if |this| tag occurs in the document, but where
    * such requirement is currently only a warning.
    * @return {!Array<number>}
@@ -2734,9 +2724,10 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
 function shouldRecordTagspecValidated(tag, tagSpecIdsToTrack) {
   if (amp.validator.GENERATE_DETAILED_ERRORS) {
     return tag.mandatory || tag.unique || tag.uniqueWarning ||
+        tag.requires.length > 0 ||
         tagSpecIdsToTrack.hasOwnProperty(tag.tagSpecId);
   } else {
-    return tag.mandatory || tag.unique ||
+    return tag.mandatory || tag.unique || tag.requires.length > 0 ||
         tagSpecIdsToTrack.hasOwnProperty(tag.tagSpecId);
   }
 }
@@ -3727,13 +3718,6 @@ class ParsedValidatorRules {
       if (!isTagSpecCorrectHtmlFormat(tag, this.htmlFormat_)) {
         continue;
       }
-      const tagSpecName = getTagSpecName(tag);
-      if (tag.alsoRequiresTag.length > 0) {
-        this.tagSpecIdsToTrack_[tag.tagSpecId] = true;
-      }
-      for (const otherTag of tag.alsoRequiresTag) {
-        this.tagSpecIdsToTrack_[otherTag] = true;
-      }
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         if (tag.alsoRequiresTagWarning.length > 0) {
           this.tagSpecIdsToTrack_[tag.tagSpecId] = true;
@@ -3747,14 +3731,6 @@ class ParsedValidatorRules {
         for (const otherTag of tag.extensionUnusedUnlessTagPresent) {
           this.tagSpecIdsToTrack_[otherTag] = true;
         }
-      }
-    }
-    for (const tag of this.rules_.tags) {
-      if (!isTagSpecCorrectHtmlFormat(tag, this.htmlFormat_)) {
-        continue;
-      }
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        goog.asserts.assert(this.rules_.templateSpecUrl !== null);
       }
       if (tag.tagName !== '$REFERENCE_POINT') {
         if (!this.tagSpecByTagName_.hasOwnProperty(tag.tagName)) {
@@ -3882,27 +3858,6 @@ class ParsedValidatorRules {
                 context.getDocLocator(),
                 /* params */
                 [condition, getTagSpecName(spec.getSpec())],
-                spec.getSpec().specUrl, validationResult);
-          } else {
-            validationResult.status =
-                amp.validator.ValidationResult.Status.FAIL;
-            return;
-          }
-        }
-      }
-      for (const tagspecId of spec.getAlsoRequiresTag()) {
-        if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            const alsoRequiresTagspec = this.getByTagSpecId(tagspecId);
-            context.addError(
-                amp.validator.ValidationError.Severity.ERROR,
-                amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
-                context.getDocLocator(),
-                /* params */
-                [
-                  getTagSpecName(alsoRequiresTagspec.getSpec()),
-                  getTagSpecName(spec.getSpec())
-                ],
                 spec.getSpec().specUrl, validationResult);
           } else {
             validationResult.status =

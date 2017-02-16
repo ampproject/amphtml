@@ -471,6 +471,9 @@ describe('ValidatorRulesMakeSense', () => {
   it('min_validator_revision_required defined', () => {
     expect(rules.minValidatorRevisionRequired).toBeGreaterThan(0);
   });
+  it('template_spec_url is set', () => {
+    expect(rules.templateSpecUrl === null).toBe(false);
+  });
 
   // For verifying that all ReferencePoint::tag_spec_names will resolve to a
   // TagSpec that's marked REFERENCE_POINT.
@@ -582,7 +585,7 @@ describe('ValidatorRulesMakeSense', () => {
         if (!extensionExceptions.hasOwnProperty(attrSpec.value)) {
           it('extensions require an additional tag', () => {
             expect(
-                tagSpec.alsoRequiresTag.length +
+                tagSpec.requires.length +
                 tagSpec.extensionUnusedUnlessTagPresent.length)
                 .toBeGreaterThan(0);
           });
@@ -684,6 +687,24 @@ describe('ValidatorRulesMakeSense', () => {
       });
     }
   }
+
+  // satisfies and requires need to match up
+  var allSatisfies = [];
+  var allRequires = [];
+  for (const tagSpec of rules.tags) {
+    for (const condition of tagSpec.requires) {
+      console.log(condition);
+      allRequires.push(condition);
+    }
+    for (const condition of tagSpec.satisfies)
+      allSatisfies.push(condition);
+  }
+  sortAndUniquify(allSatisfies);
+  sortAndUniquify(allRequires);
+  it('all conditions are both required and satisfied', ()=> {
+    expect(subtractDiff(allSatisfies, allRequires)).toEqual([]);
+    expect(subtractDiff(allRequires, allSatisfies)).toEqual([]);
+  });
 
   // attr_lists
   const attrListNameIsUnique = {};

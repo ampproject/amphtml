@@ -298,7 +298,6 @@ CONSTRUCTOR_ARG_FIELDS = [
 # code generator replaces these fields with tag ids, which are numbers.
 TAG_SPEC_NAME_REFERENCE_FIELD = [
     'amp.validator.ReferencePoint.tag_spec_name',
-    'amp.validator.TagSpec.also_requires_tag',
     'amp.validator.TagSpec.also_requires_tag_warning',
     'amp.validator.TagSpec.extension_unused_unless_tag_present',
 ]

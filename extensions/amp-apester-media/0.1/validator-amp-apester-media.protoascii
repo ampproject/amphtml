@@ -18,6 +18,7 @@ tags: {  # amp-apester-media
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-apester-media extension .js script"
+  satisfies: "amp-apester-media extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-apester-media"
@@ -53,7 +54,7 @@ tags: {  # amp-apester-media
 tags: {  # <amp-apester-media>
   html_format: AMP
   tag_name: "AMP-APESTER-MEDIA"
-  also_requires_tag: "amp-apester-media extension .js script"
+  requires: "amp-apester-media extension .js script"
   attrs: {
     name: "data-apester-media-id"
     mandatory_oneof: "['data-apester-media-id', 'data-apester-channel-token']"

@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 210
+min_validator_revision_required: 217
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 359
+spec_file_revision: 360
 
 # Validator extensions.
 # =====================
@@ -760,10 +760,11 @@ tags: {
   html_format: AMP
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
+  satisfies: "head > style[amp-boilerplate]"
   mandatory_alternatives: "head > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
-  also_requires_tag: "noscript > style[amp-boilerplate]"
+  requires: "noscript > style[amp-boilerplate]"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -803,10 +804,11 @@ tags: {
   html_format: AMP
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
+  satisfies: "noscript > style[amp-boilerplate]"
   mandatory_alternatives: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "NOSCRIPT"
-  also_requires_tag: "head > style[amp-boilerplate]"
+  requires: "head > style[amp-boilerplate]"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -2198,7 +2200,7 @@ tags: {
 tags {  # <form method=GET ...>
   tag_name: "FORM"
   spec_name: "FORM [method=GET]"
-  also_requires_tag: "amp-form extension .js script"
+  requires: "amp-form extension .js script"
   disallowed_ancestor: "AMP-APP-BANNER"
   attrs: { name: "accept" }
   attrs: { name: "accept-charset" }
@@ -2248,7 +2250,7 @@ tags {  # <form method=GET ...>
 tags {  # <form method=POST ...>
   tag_name: "FORM"
   spec_name: "FORM [method=POST]"
-  also_requires_tag: "amp-form extension .js script"
+  requires: "amp-form extension .js script"
   disallowed_ancestor: "AMP-APP-BANNER"
   attrs: { name: "accept" }
   attrs: { name: "accept-charset" }
@@ -2500,6 +2502,7 @@ tags: {
 tags: {
   tag_name: "BUTTON"
   spec_name: "amp-app-banner button[open-button]"
+  satisfies: "amp-app-banner button[open-button]"
   mandatory_ancestor: "AMP-APP-BANNER"
   attrs: {
     name: "open-button"
@@ -2521,7 +2524,7 @@ tags: {
 tags: {
   tag_name: "SELECT"
   mandatory_ancestor: "FORM"
-  also_requires_tag: "amp-form extension .js script"
+  requires: "amp-form extension .js script"
   attrs: { name: "autofocus" }
   attrs: { name: "disabled" }
   attrs: { name: "multiple" }
@@ -2534,14 +2537,14 @@ tags: {
 tags: {
   tag_name: "DATALIST"
   mandatory_ancestor: "FORM"
-  also_requires_tag: "amp-form extension .js script"
+  requires: "amp-form extension .js script"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.9 The optgroup element
 tags: {
   tag_name: "OPTGROUP"
   mandatory_parent: "SELECT"
-  also_requires_tag: "amp-form extension .js script"
+  requires: "amp-form extension .js script"
   attrs: { name: "disabled" }
   attrs: { name: "label" }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
@@ -2550,7 +2553,7 @@ tags: {
 tags: {
   tag_name: "OPTION"
   mandatory_ancestor: "FORM"
-  also_requires_tag: "amp-form extension .js script"
+  requires: "amp-form extension .js script"
   attrs: { name: "disabled" }
   attrs: { name: "label" }
   attrs: { name: "selected" }
@@ -2561,7 +2564,7 @@ tags: {
 tags: {
   tag_name: "TEXTAREA"
   mandatory_ancestor: "FORM"
-  also_requires_tag: "amp-form extension .js script"
+  requires: "amp-form extension .js script"
   attrs: { name: "autocomplete" }
   attrs: { name: "autofocus" }
   attrs: { name: "cols" }
