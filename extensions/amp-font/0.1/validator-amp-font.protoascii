@@ -15,10 +15,9 @@
 #
 
 tags: {  # amp-font
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-font extension .js script"
+  satisfies: "amp-font extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-font"
@@ -52,11 +51,9 @@ tags: {  # amp-font
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-font.html"
 }
 tags: {  # <amp-font>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-FONT"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-font extension .js script"
+  requires: "amp-font extension .js script"
   attrs: {
     name: "font-family"
     mandatory: true

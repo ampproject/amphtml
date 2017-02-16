@@ -16,9 +16,9 @@
 
 tags: {  # amp-list
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-list extension .js script"
+  satisfies: "amp-list extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-list"
@@ -53,9 +53,8 @@ tags: {  # amp-list
 }
 tags: {  # <amp-list>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-LIST"
-  also_requires_tag: "amp-list extension .js script"
+  requires: "amp-list extension .js script"
   attrs: { name: "credentials" }
   attrs: {
     name: "src"

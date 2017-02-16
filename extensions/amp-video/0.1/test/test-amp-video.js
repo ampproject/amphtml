@@ -297,7 +297,7 @@ describe(TAG, () => {
     }).then(v => {
       const impl = v.implementation_;
       expect(impl.toggleFallback.called).to.be.true;
-      expect(impl.toggleFallback.calledWith(true)).to.be.true;
+      expect(impl.toggleFallback).to.have.been.calledWith(true);
     });
   });
 

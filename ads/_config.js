@@ -84,6 +84,11 @@ export const adConfig = {
     preconnect: 'https://api.adsnative.com',
   },
 
+  adspeed: {
+    preconnect: 'https://g.adspeed.net',
+    renderStartImplemented: true,
+  },
+
   adspirit: {},
 
   adstir: {
@@ -149,6 +154,8 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  brainy: {},
+
   caajainfeed: {
     prefetch: [
       'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js',
@@ -211,6 +218,11 @@ export const adConfig = {
       'https://tpc.googlesyndication.com',
     ],
     clientIdScope: 'AMP_ECID_GOOGLE',
+    renderStartImplemented: true,
+  },
+
+  eas: {
+    prefetch: 'https://amp.emediate.eu/amp.v0.js',
     renderStartImplemented: true,
   },
 
@@ -288,6 +300,10 @@ export const adConfig = {
   },
 
   kargo: {},
+
+  kiosked: {
+    renderStartImplemented: true,
+  },
 
   kixer: {
     prefetch: 'https://cdn.kixer.com/ad/load.js',
@@ -536,8 +552,6 @@ export const adConfig = {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     renderStartImplemented: true,
   },
-
-  xrostssp: {},
 
   yahoo: {
     prefetch: 'https://s.yimg.com/os/ampad/display.js',

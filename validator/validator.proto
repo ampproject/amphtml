@@ -336,10 +336,7 @@ message TagSpec {
   repeated string disallowed_ancestor = 13;
 
   // If set, other tags - identified by their detail string - must be
-  // present as well.
-  repeated string also_requires_tag = 14;
-  // Same as also_requires_tag, but rather than invalidating a document if not
-  // present, emits a deprecation warning.
+  // present as well or a warning will be issued (will not invalidate doc).
   repeated string also_requires_tag_warning = 22;
   // Similar to also_requires_tag_warning, except emits a more specific warning
   // string with different wording. See WARNING_EXTENSION_UNUSED.
@@ -384,6 +381,9 @@ message TagSpec {
 
   // If set, specifies which AMP Layouts are supported by this element.
   optional AmpLayout amp_layout = 11;
+
+  // Deprecated fields, do not reuse.
+  extensions 14;
 }
 
 // Top level message - start reading here.

@@ -163,8 +163,8 @@ var forbiddenTerms = {
   'installCryptoService': {
     message: privateServiceFactory,
     whitelist: [
-      'extensions/amp-analytics/0.1/amp-analytics.js',
-      'extensions/amp-analytics/0.1/crypto-impl.js',
+      'src/service/crypto-impl.js',
+      'src/runtime.js',
     ],
   },
   'installDocService': {
@@ -336,6 +336,15 @@ var forbiddenTerms = {
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
+    ],
+  },
+  'setReportError\\W': {
+    message: 'Should only be used in error.js and tests.',
+    whitelist: [
+      'dist.3p/current/integration.js',
+      'src/error.js',
+      'src/event-helper.js',
+      'src/log.js',
     ],
   },
   'isTrustedViewer': {
@@ -557,6 +566,7 @@ var forbiddenTermsSrcInclusive = {
   // Functions
   '\\.changeHeight\\(': bannedTermsHelpString,
   '\\.changeSize\\(': bannedTermsHelpString,
+  '\\.attemptChangeHeight\\(0\\)': 'please consider using `attemptCollapse()`',
   '\\.collapse\\(': bannedTermsHelpString,
   '\\.focus\\(': bannedTermsHelpString,
   '\\.getBBox\\(': bannedTermsHelpString,
@@ -589,9 +599,9 @@ var forbiddenTermsSrcInclusive = {
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
+      'src/service/crypto-impl.js',
       'src/shadow-embed.js',
       'extensions/amp-ad/0.1/amp-ad.js',
-      'extensions/amp-analytics/0.1/crypto-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'ads/google/a4a/utils.js',
     ],

@@ -15,10 +15,9 @@
 #
 
 tags: {  # amp-carousel
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-carousel extension .js script"
+  satisfies: "amp-carousel extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-carousel"
@@ -52,11 +51,9 @@ tags: {  # amp-carousel
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-carousel.html"
 }
 tags: {  # <amp-carousel>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-CAROUSEL"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-carousel extension .js script"
+  requires: "amp-carousel extension .js script"
   attrs: {
     name: "arrows"
     value: ""

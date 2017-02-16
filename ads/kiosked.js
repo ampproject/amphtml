@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
-export function xrostssp(global, data) {
+export function kiosked(global, data) {
+  let scriptId;
+  validateData(data, ['scriptid'], []);
+  if (data.hasOwnProperty('scriptid')) {
+    scriptId = data['scriptid'];
+  }
+  window.addEventListener('kioskedAdRender', function() {
+    global.context.renderStart();
+  }, false);
 
-  validateData(data, [], ['aid', 'slotId']);
+  window.addEventListener('kioskedAdNoFill', function() {
+    global.context.noContentAvailable();
+  }, false);
 
-  const url = 'https://proparm.jp/ssp/p/js1'
-      + '?_aid=' + encodeURIComponent(data['aid'])
-      + '&amp;_slot=' + encodeURIComponent(data['slotId']);
+  writeScript(global, 'https://scripts.kiosked.com/loader/kiosked-ad.js?staticTagId=' + scriptId);
 
-  writeScript(global, url);
 }

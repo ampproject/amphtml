@@ -18,24 +18,23 @@ import {AdDisplayState, AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {toggleExperiment} from '../../../../src/experiments';
 import {UX_EXPERIMENT} from '../../../../src/layout';
-import * as sinon from 'sinon';
 
-describe('amp-ad-ui handler', () => {
+describes.realWin('amp-ad-ui handler', {
+  amp: {
+    ampdoc: 'single',
+    extensions: ['amp-ad'],
+  },
+}, env => {
   let sandbox;
   let adImpl;
   let uiHandler;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    const adElement = document.createElement('amp-ad');
+    sandbox = env.sandbox;
+    const adElement = env.win.document.createElement('amp-ad');
     adImpl = new BaseElement(adElement);
     uiHandler = new AmpAdUIHandler(adImpl);
     uiHandler.setDisplayState(AdDisplayState.LOADING);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-    uiHandler = null;
   });
 
   describe('with state LOADED_NO_CONTENT', () => {
@@ -43,15 +42,15 @@ describe('amp-ad-ui handler', () => {
       sandbox.stub(adImpl, 'getFallback', () => {
         return false;
       });
-      sandbox.stub(adImpl, 'attemptChangeHeight', height => {
-        expect(height).to.equal(0);
+      const attemptCollapseSpy = sandbox.spy();
+      sandbox.stub(adImpl, 'attemptCollapse', () => {
+        attemptCollapseSpy();
         return Promise.resolve();
       });
-      const collapseSpy = sandbox.stub(adImpl, 'collapse', () => {});
       uiHandler.init();
       uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
       return Promise.resolve().then(() => {
-        expect(collapseSpy).to.be.calledOnce;
+        expect(attemptCollapseSpy).to.be.calledOnce;
         expect(uiHandler.state).to.equal(3);
       });
     });
@@ -60,7 +59,7 @@ describe('amp-ad-ui handler', () => {
       sandbox.stub(adImpl, 'getFallback', () => {
         return false;
       });
-      sandbox.stub(adImpl, 'attemptChangeHeight', () => {
+      sandbox.stub(adImpl, 'attemptCollapse', () => {
         return Promise.reject();
       });
       toggleExperiment(window, UX_EXPERIMENT, true);

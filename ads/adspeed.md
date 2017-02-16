@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,23 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Xrost SSP
+# AdSpeed
 
 ## Example
 
 ```html
 <amp-ad width="300" height="250"
-    type="xrostssp"
-    data-aid="10"
-    data-slot-id="3347">
+      type="adspeed"
+      data-zone="82441"
+      data-client="3">
+  <div placeholder>Loading ad.</div>
+  <div fallback>Ad could not be loaded.</div>
 </amp-ad>
 ```
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact https://www.opt.ne.jp/contact/
+For semantics of configuration, please see [AdSpeed documentation](https://www.adspeed.com/Knowledges/1950/Ad-Tag/Accelerated-Mobile-Pages-Project-AMP-Ad.html).
 
 Supported parameters:
 
-- data-aid
-- data-slot-id
+- data-zone: the zone ID
+- data-client: the publisher ID
+

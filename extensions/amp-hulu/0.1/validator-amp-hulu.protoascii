@@ -16,12 +16,12 @@
 
 tags: {  # amp-hulu
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-hulu extension .js script"
+  satisfies: "amp-hulu extension .js script"
   mandatory_parent: "HEAD"
   unique: true
-  also_requires_tag: "amp-hulu"
+  requires: "amp-hulu"
   attrs: {
     name: "async"
     mandatory: true
@@ -52,10 +52,10 @@ tags: {  # amp-hulu
 }
 tags: {  # <amp-hulu>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-HULU"
+  satisfies: "amp-hulu"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-hulu extension .js script"
+  requires: "amp-hulu extension .js script"
   attrs: {
     name: "data-eid"
     mandatory: true

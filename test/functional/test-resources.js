@@ -966,17 +966,17 @@ describe('Resources discoverWork', () => {
 
     // 1st pass: measure for the first time.
     resources.discoverWork_();
-    expect(resource1MeasureStub.callCount).to.equal(1);
-    expect(resource1UnloadStub.callCount).to.equal(0);
-    expect(resource2MeasureStub.callCount).to.equal(1);
-    expect(resource2UnloadStub.callCount).to.equal(0);
+    expect(resource1MeasureStub).to.be.calledOnce;
+    expect(resource1UnloadStub).to.have.not.been.called;
+    expect(resource2MeasureStub).to.be.calledOnce;
+    expect(resource2UnloadStub).to.have.not.been.called;
 
     // 2nd pass: do not remeasure anything.
     resources.discoverWork_();
-    expect(resource1MeasureStub.callCount).to.equal(1);
-    expect(resource1UnloadStub.callCount).to.equal(0);
-    expect(resource2MeasureStub.callCount).to.equal(1);
-    expect(resource2UnloadStub.callCount).to.equal(0);
+    expect(resource1MeasureStub).to.be.calledOnce;
+    expect(resource1UnloadStub).to.have.not.been.called;
+    expect(resource2MeasureStub).to.be.calledOnce;
+    expect(resource2UnloadStub).to.have.not.been.called;
 
     // 3rd pass: request remeasures and an unload.
     resource1.requestMeasure();
@@ -986,10 +986,10 @@ describe('Resources discoverWork', () => {
     resource2.element.getBoundingClientRect =
         () => layoutRectLtwh(0, 0, 0, 0);  // Equiv to display:none.
     resources.discoverWork_();
-    expect(resource1MeasureStub.callCount).to.equal(2);
-    expect(resource1UnloadStub.callCount).to.equal(0);
-    expect(resource2MeasureStub.callCount).to.equal(2);
-    expect(resource2UnloadStub.callCount).to.equal(1);
+    expect(resource1MeasureStub).to.have.callCount(2);
+    expect(resource1UnloadStub).to.have.not.been.called;
+    expect(resource2MeasureStub).to.have.callCount(2);
+    expect(resource2UnloadStub).to.be.calledOnce;
   });
 
   it('should eject stale tasks when element unloaded', () => {
@@ -1279,7 +1279,7 @@ describe('Resources changeSize', () => {
     resources.mutateWork_();
     expect(resources.relayoutTop_).to.equal(-1);
     expect(resources.requestsChangeSize_.length).to.equal(0);
-    expect(resource1.changeSize.callCount).to.equal(0);
+    expect(resource1.changeSize).to.have.not.been.called;
   });
 
   it('should change size', () => {
@@ -1287,7 +1287,7 @@ describe('Resources changeSize', () => {
     resources.mutateWork_();
     expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     expect(resources.requestsChangeSize_.length).to.equal(0);
-    expect(resource1.changeSize.callCount).to.equal(1);
+    expect(resource1.changeSize).to.be.calledOnce;
     expect(resource1.changeSize.firstCall.args[0]).to.equal(111);
     expect(resource1.changeSize.firstCall.args[1]).to.equal(222);
   });
@@ -1365,7 +1365,7 @@ describe('Resources changeSize', () => {
       resources.scheduleChangeSize_(resource1, 50, /* width */ undefined,
           {top: 1, right: 2, bottom: 3, left: 4}, false, callback);
 
-      expect(vsyncSpy.callCount).to.equal(1);
+      expect(vsyncSpy).to.be.calledOnce;
       const task = vsyncSpy.lastCall.args[0];
       task.measure({});
 
@@ -1389,7 +1389,7 @@ describe('Resources changeSize', () => {
       resources.scheduleChangeSize_(resource1, 50, /* width */ undefined,
           {top: 1, right: 2, bottom: 4, left: 4}, false, callback);
 
-      expect(vsyncSpy.callCount).to.equal(1);
+      expect(vsyncSpy).to.be.calledOnce;
       const task = vsyncSpy.lastCall.args[0];
       task.measure({});
 
@@ -1518,7 +1518,7 @@ describe('Resources changeSize', () => {
       resources.scheduleChangeSize_(resource1, 111, 222,
           {top: 1, right: 2, bottom: 3, left: 4}, false);
 
-      expect(vsyncSpy.callCount).to.equal(1);
+      expect(vsyncSpy).to.be.calledOnce;
       const task = vsyncSpy.lastCall.args[0];
       task.measure({});
 
@@ -1544,7 +1544,7 @@ describe('Resources changeSize', () => {
       resources.scheduleChangeSize_(resource1, undefined, undefined,
           {bottom: 22}, false);
 
-      expect(vsyncSpy.callCount).to.equal(1);
+      expect(vsyncSpy).to.be.calledOnce;
       const task = vsyncSpy.lastCall.args[0];
       task.measure({});
 
@@ -1572,7 +1572,7 @@ describe('Resources changeSize', () => {
       resources.scheduleChangeSize_(resource1, undefined, undefined,
           {top: 1}, false);
 
-      expect(vsyncSpy.callCount).to.equal(1);
+      expect(vsyncSpy).to.be.calledOnce;
       const marginsTask = vsyncSpy.lastCall.args[0];
       marginsTask.measure({});
 
@@ -1727,6 +1727,15 @@ describe('Resources mutateElement and collapse', () => {
         }
         return Promise.resolve();
       },
+      run: task => {
+        const state = {};
+        if (task.measure) {
+          task.measure(state);
+        }
+        if (task.mutate) {
+          task.mutate(state);
+        }
+      },
     };
     relayoutTopStub = sandbox.stub(resources, 'setRelayoutTop_');
     sandbox.stub(resources, 'schedulePass');
@@ -1767,10 +1776,10 @@ describe('Resources mutateElement and collapse', () => {
       mutateSpy();
     });
     return promise.then(() => {
-      expect(mutateSpy.callCount).to.equal(1);
-      expect(resource1RequestMeasureStub.callCount).to.equal(1);
-      expect(resource2RequestMeasureStub.callCount).to.equal(0);
-      expect(relayoutTopStub.callCount).to.equal(1);
+      expect(mutateSpy).to.be.calledOnce;
+      expect(resource1RequestMeasureStub).to.be.calledOnce;
+      expect(resource2RequestMeasureStub).to.have.not.been.called;
+      expect(relayoutTopStub).to.be.calledOnce;
       expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
     });
   });
@@ -1783,10 +1792,10 @@ describe('Resources mutateElement and collapse', () => {
       mutateSpy();
     });
     return promise.then(() => {
-      expect(mutateSpy.callCount).to.equal(1);
-      expect(resource1RequestMeasureStub.callCount).to.equal(1);
-      expect(resource2RequestMeasureStub.callCount).to.equal(0);
-      expect(relayoutTopStub.callCount).to.equal(1);
+      expect(mutateSpy).to.be.calledOnce;
+      expect(resource1RequestMeasureStub).to.be.calledOnce;
+      expect(resource2RequestMeasureStub).to.have.not.been.called;
+      expect(relayoutTopStub).to.be.calledOnce;
       expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
     });
   });
@@ -1799,10 +1808,10 @@ describe('Resources mutateElement and collapse', () => {
       mutateSpy();
     });
     return promise.then(() => {
-      expect(mutateSpy.callCount).to.equal(1);
-      expect(resource1RequestMeasureStub.callCount).to.equal(1);
-      expect(resource2RequestMeasureStub.callCount).to.equal(0);
-      expect(relayoutTopStub.callCount).to.equal(1);
+      expect(mutateSpy).to.be.calledOnce;
+      expect(resource1RequestMeasureStub).to.be.calledOnce;
+      expect(resource2RequestMeasureStub).to.have.not.been.called;
+      expect(relayoutTopStub).to.be.calledOnce;
       expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
     });
   });
@@ -1815,20 +1824,81 @@ describe('Resources mutateElement and collapse', () => {
       mutateSpy();
     });
     return promise.then(() => {
-      expect(mutateSpy.callCount).to.equal(1);
-      expect(resource1RequestMeasureStub.callCount).to.equal(1);
-      expect(resource2RequestMeasureStub.callCount).to.equal(0);
-      expect(relayoutTopStub.callCount).to.equal(2);
+      expect(mutateSpy).to.be.calledOnce;
+      expect(resource1RequestMeasureStub).to.be.calledOnce;
+      expect(resource2RequestMeasureStub).to.have.not.been.called;
+      expect(relayoutTopStub).to.have.callCount(2);
       expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
       expect(relayoutTopStub.getCall(1).args[0]).to.equal(1010);
     });
   });
 
+  it('attemptCollapse should not call attemptChangeSize', () => {
+    // This test ensure that #attemptCollapse won't do any optimization or
+    // refactor by calling attemptChangeSize.
+    // This to support collapsing element above viewport
+    // When attemptChangeSize succeed, resources manager will measure the new
+    // scrollHeight, and we need to make sure the newScrollHeight is measured
+    // after setting element display:none
+    sandbox.stub(resources.viewport_, 'getRect', () => {
+      return {
+        top: 1500,
+        bottom: 1800,
+        left: 0,
+        right: 500,
+        width: 500,
+        height: 300,
+      };
+    });
+    let promiseResolve = null;
+    const promise = new Promise(resolve => {
+      promiseResolve = resolve;
+    });
+    let index = 0;
+    sandbox.stub(resources.viewport_, 'getScrollHeight', () => {
+      // In change element size above viewport path, getScrollHeight will be
+      // called three times. And we care that the last measurement is correct,
+      // which requires it to be measured after element dispaly set to none.
+      if (index == 2) {
+        expect(resource1.completeCollapse).to.be.calledOnce;
+        promiseResolve();
+        return;
+      }
+      expect(resource1.completeCollapse).to.not.been.called;
+      index++;
+    });
+
+    resource1.layoutBox_ = {top: 1000, left: 0, right: 100, bottom: 1050,
+        height: 50};
+    resources.lastVelocity_ = 0;
+    resources.attemptCollapse(resource1.element);
+    resources.mutateWork_();
+    return promise;
+  });
+
+  it('attemptCollapse should complete collapse if resize succeed', () => {
+    sandbox.stub(resources, 'scheduleChangeSize_', (resource, newHeight,
+        newWidth, newMargins, force, callback) => {
+      callback(true);
+    });
+    resources.attemptCollapse(resource1.element);
+    expect(resource1.completeCollapse).to.be.calledOnce;
+  });
+
+  it('attemptCollapse should NOT complete collapse if resize fail', () => {
+    sandbox.stub(resources, 'scheduleChangeSize_', (resource, newHeight,
+        newWidth, newMargins, force, callback) => {
+      callback(false);
+    });
+    resources.attemptCollapse(resource1.element);
+    expect(resource1.completeCollapse).to.not.been.called;
+  });
+
   it('should complete collapse and trigger relayout', () => {
     const oldTop = resource1.getLayoutBox().top;
     resources.collapseElement(resource1.element);
-    expect(resource1.completeCollapse.callCount).to.equal(1);
-    expect(relayoutTopStub.callCount).to.equal(1);
+    expect(resource1.completeCollapse).to.be.calledOnce;
+    expect(relayoutTopStub).to.be.calledOnce;
     expect(relayoutTopStub.args[0][0]).to.equal(oldTop);
   });
 
@@ -1836,19 +1906,8 @@ describe('Resources mutateElement and collapse', () => {
     resource1.layoutBox_.width = 0;
     resource1.layoutBox_.height = 0;
     resources.collapseElement(resource1.element);
-    expect(resource1.completeCollapse.callCount).to.equal(1);
-    expect(relayoutTopStub.callCount).to.equal(0);
-  });
-
-  it('should notify owner', () => {
-    const owner = {
-      contains: () => true,
-      collapsedCallback: sandbox.spy(),
-    };
-    Resource.setOwner(resource1.element, owner);
-    resources.collapseElement(resource1.element);
-    expect(owner.collapsedCallback.callCount).to.equal(1);
-    expect(owner.collapsedCallback.args[0][0]).to.equal(resource1.element);
+    expect(resource1.completeCollapse).to.be.calledOnce;
+    expect(relayoutTopStub).to.have.not.been.called;
   });
 });
 

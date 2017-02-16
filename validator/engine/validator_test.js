@@ -16,6 +16,7 @@
  */
 goog.provide('amp.validator.ValidatorTest');
 goog.require('amp.validator.CssLength');
+goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.createRules');
 goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.validateString');
@@ -443,6 +444,17 @@ function attrRuleShouldMakeSense(attrSpec) {
       });
     }
   }
+  // Value property names must be unique.
+  if (attrSpec.valueProperties !== null) {
+    var seenPropertySpecNames = {};
+    it('value_properties must be unique', () => {
+      for (const propertySpec of attrSpec.valueProperties.properties) {
+        expect(seenPropertySpecNames.hasOwnProperty(propertySpec.name))
+            .toBe(false);
+        seenPropertySpecNames[propertySpec.name] = 0;
+      }
+    });
+  }
 }
 
 // Test which verifies some constraints on the rules file which the validator
@@ -459,6 +471,9 @@ describe('ValidatorRulesMakeSense', () => {
   });
   it('min_validator_revision_required defined', () => {
     expect(rules.minValidatorRevisionRequired).toBeGreaterThan(0);
+  });
+  it('template_spec_url is set', () => {
+    expect(rules.templateSpecUrl === null).toBe(false);
   });
 
   // For verifying that all ReferencePoint::tag_spec_names will resolve to a
@@ -494,9 +509,29 @@ describe('ValidatorRulesMakeSense', () => {
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
-    if (tagSpec.tagName./*OK*/ startsWith('AMP-')) {
-      it('AMP- tags have html_format', () => {
-        expect(tagSpec.htmlFormat.length).toBeGreaterThan(0);
+    if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
+        ((tagSpec.htmlFormat.length === 0) ||
+         (tagSpec.htmlFormat.indexOf(
+              amp.validator.TagSpec.HtmlFormat.AMP4ADS) !== -1))) {
+      // AMP4ADS Creative Format document is the source of this whitelist.
+      // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
+      const whitelistedAmp4AdsExtensions = {
+        'AMP-ACCORDION': 0,
+        'AMP-ANALYTICS': 0,
+        'AMP-ANIM': 0,
+        'AMP-AUDIO': 0,
+        'AMP-CAROUSEL': 0,
+        'AMP-FIT-TEXT': 0,
+        'AMP-FONT': 0,
+        'AMP-FORM': 0,
+        'AMP-IMG': 0,
+        'AMP-PIXEL': 0,
+        'AMP-SOCIAL-SHARE': 0,
+        'AMP-VIDEO': 0
+      };
+      it(tagSpec.tagName + ' must be whitelisted for AMP4ADS', () => {
+        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(tagSpec.tagName))
+            .toBe(true);
       });
     }
     // mandatory_parent
@@ -524,6 +559,14 @@ describe('ValidatorRulesMakeSense', () => {
     let seenDispatchKey = false;
     const attrNameIsUnique = {};
     for (const attrSpecId of tagSpec.attrs) {
+      if (attrSpecId < 0) {
+        it('unique attr_name within tag_spec (simple attrs)', () => {
+          const attrName = rules.internedStrings[-1 - attrSpecId];
+          expect(attrNameIsUnique.hasOwnProperty(attrName)).toBe(false);
+          attrNameIsUnique[attrName] = 0;
+        });
+        continue;
+      }
       const attrSpec = rules.attrs[attrSpecId];
 
       // attr_name must be unique within tag_spec (no duplicates).
@@ -571,7 +614,7 @@ describe('ValidatorRulesMakeSense', () => {
         if (!extensionExceptions.hasOwnProperty(attrSpec.value)) {
           it('extensions require an additional tag', () => {
             expect(
-                tagSpec.alsoRequiresTag.length +
+                tagSpec.requires.length +
                 tagSpec.extensionUnusedUnlessTagPresent.length)
                 .toBeGreaterThan(0);
           });
@@ -673,6 +716,23 @@ describe('ValidatorRulesMakeSense', () => {
       });
     }
   }
+
+  // satisfies and requires need to match up
+  var allSatisfies = [];
+  var allRequires = [];
+  for (const tagSpec of rules.tags) {
+    for (const condition of tagSpec.requires) {
+      allRequires.push(condition);
+    }
+    for (const condition of tagSpec.satisfies)
+      allSatisfies.push(condition);
+  }
+  sortAndUniquify(allSatisfies);
+  sortAndUniquify(allRequires);
+  it('all conditions are both required and satisfied', ()=> {
+    expect(subtractDiff(allSatisfies, allRequires)).toEqual([]);
+    expect(subtractDiff(allRequires, allSatisfies)).toEqual([]);
+  });
 
   // attr_lists
   const attrListNameIsUnique = {};

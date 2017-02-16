@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,19 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+import {writeScript, validateData} from '../3p/3p';
 
-/** @const */
-const TAG = 'amp-tabs';
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function brainy(global, data) {
 
-export class AmpTabs extends AMP.BaseElement {
+  validateData(data, [], ['aid', 'slotId']);
 
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-  }
+  const url = 'https://proparm.jp/ssp/p/js1'
+      + '?_aid=' + encodeURIComponent(data['aid'])
+      + '&amp;_slot=' + encodeURIComponent(data['slotId']);
 
-  /** @override */
-  buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment "${TAG}" is disabled.`);
-  }
+  writeScript(global, url);
 }
-
-AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerElement(TAG, AmpTabs);
-});

@@ -13,3 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @typedef {{
+ *   method: string,
+ *   args: !Array,
+ *   id: number,
+ * }}
+ */
+export let ToWorkerMessageDef;
+
+/**
+ * @typedef {{
+ *   method: string,
+ *   returnValue: *,
+ *   id: number,
+ * }}
+ */
+export let FromWorkerMessageDef;

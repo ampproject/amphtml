@@ -56,6 +56,7 @@ import {adman} from '../ads/adman';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adsnative} from '../ads/adsnative';
+import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
@@ -67,6 +68,7 @@ import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {atomx} from '../ads/atomx';
+import {brainy} from '../ads/brainy';
 import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
@@ -79,6 +81,7 @@ import {distroscale} from '../ads/distroscale';
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
+import {eas} from '../ads/eas';
 import {eplanning} from '../ads/eplanning';
 import {f1e} from '../ads/f1e';
 import {felmat} from '../ads/felmat';
@@ -93,6 +96,7 @@ import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {ix} from '../ads/ix';
 import {kargo} from '../ads/kargo';
+import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
 import {ligatus} from '../ads/ligatus';
 import {loka} from '../ads/loka';
@@ -133,7 +137,6 @@ import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
 import {xlift} from '../ads/xlift';
-import {xrostssp} from '../ads/xrostssp';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
 import {yieldbot} from '../ads/yieldbot';
@@ -167,8 +170,10 @@ try {
   window.context = data._context;
 } catch (err) {
   window.context = {};
-  dev().info(
-      'INTEGRATION', 'Could not parse context from:', iframeName);
+  if (!getMode().test) {
+    dev().info(
+        'INTEGRATION', 'Could not parse context from:', iframeName);
+  }
 }
 
 // This should only be invoked after window.context is set
@@ -194,6 +199,7 @@ register('adman', adman);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adsnative', adsnative);
+register('adspeed', adspeed);
 register('adspirit', adspirit);
 register('adstir', adstir);
 register('adtech', adtech);
@@ -205,6 +211,7 @@ register('affiliateb', affiliateb);
 register('amoad', amoad);
 register('appnexus', appnexus);
 register('atomx', atomx);
+register('brainy', brainy);
 register('caajainfeed', caajainfeed);
 register('capirs', capirs);
 register('caprofitx', caprofitx);
@@ -216,6 +223,7 @@ register('csa', csa);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
+register('eas', eas);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
 register('f1e', f1e);
@@ -233,6 +241,7 @@ register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('ix', ix);
 register('kargo', kargo);
+register('kiosked', kiosked);
 register('kixer', kixer);
 register('ligatus', ligatus);
 register('loka', loka);
@@ -276,7 +285,6 @@ register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
 register('xlift' , xlift);
-register('xrostssp', xrostssp);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yieldbot', yieldbot);

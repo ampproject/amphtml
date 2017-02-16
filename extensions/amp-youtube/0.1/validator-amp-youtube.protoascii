@@ -16,9 +16,9 @@
 
 tags: {  # amp-youtube
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-youtube extension .js script"
+  satisfies: "amp-youtube extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-youtube"
@@ -53,10 +53,9 @@ tags: {  # amp-youtube
 }
 tags: {  # <amp-youtube>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-YOUTUBE"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-youtube extension .js script"
+  requires: "amp-youtube extension .js script"
   attrs: { name: "autoplay" }
   attrs: {
     name: "data-videoid"
