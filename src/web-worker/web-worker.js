@@ -35,11 +35,18 @@ self.addEventListener('message', function(event) {
 
   // TODO(choumx): Add error reporting.
   switch (method) {
-    case 'bind.initialize':
-      evaluator_ = new BindEvaluator();
-      returnValue = evaluator_.setBindings.apply(evaluator_, args);
+    case 'bind.addBindings':
+      evaluator_ = evaluator_ || new BindEvaluator();
+      returnValue = evaluator_.addBindings.apply(evaluator_, args);
       break;
-
+    case 'bind.removeBindings':
+      if (evaluator_) {
+        const removeBindings = evaluator_.removeBindingsWithExpressionStrings;
+        returnValue = removeBindings.apply(evaluator_, args);
+      } else {
+        throw new Error(`${method}: BindEvaluator is not initialized.`);
+      }
+      break;
     case 'bind.evaluate':
       if (evaluator_) {
         returnValue = evaluator_.evaluate.apply(evaluator_, args);
@@ -47,7 +54,6 @@ self.addEventListener('message', function(event) {
         throw new Error(`${method}: BindEvaluator is not initialized.`);
       }
       break;
-
     default:
       throw new Error(`Unrecognized method: ${method}`);
   }
