@@ -513,8 +513,8 @@ class ParsedAttrSpecs {
     if (this.parsedAttrListsByName_.hasOwnProperty(name)) {
       return this.parsedAttrListsByName_[name];
     }
+    goog.asserts.assert(this.attrListsByName_.hasOwnProperty(name));
     const attrList = this.attrListsByName_[name];
-    goog.asserts.assert(attrList !== undefined);
     /** @type {!Array<number>} */
     const attrSpecs = attrList.attrs;
     /** @type {!Array<!ParsedAttrSpec>} */
