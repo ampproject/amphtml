@@ -131,6 +131,36 @@ class MessageRegistry(object):
     # case mapping to resolve them to message ids.
     self.message_id_by_tag_spec_name_ = {}
 
+    # Interned strings have negative IDs, starting from -1. This makes it
+    # easy to distinguish them from other message ids. In the interned_strings_
+    # array, they can be found by calculating their index -1 - <string_id>.
+    self.interned_strings_ = []
+    self.string_id_by_interned_string_ = {}
+
+  def InternString(self, a_string):
+    """Interns strings to eliminate duplicates and to refer to them as numbers.
+
+    Args:
+      a_string: the string to be interned
+    Returns:
+      The string id, a negative number -1 to -MAXINT.
+    """
+    string_id = self.string_id_by_interned_string_.get(a_string, 0)
+    if string_id != 0:
+      return string_id
+    self.interned_strings_.append(a_string)
+    string_id = -len(self.interned_strings_)
+    self.string_id_by_interned_string_[a_string] = string_id
+    return string_id
+
+  def InternedStrings(self):
+    """The interned strings which will be emitted into validator-generated.js.
+
+    Returns:
+      A list of strings.
+    """
+    return self.interned_strings_
+
   def MessageIdForKey(self, message_key):
     """Yields the message id for a key, registering a new one if needed.
 
@@ -449,6 +479,8 @@ def PrintClassFor(descriptor, msg_desc, out):
     if msg_desc.full_name == 'amp.validator.ValidatorRules':
       out.Line('/** @type {!Array<!string>} */')
       out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
+      out.Line('/** @type {!Array<!string>} */')
+      out.Line('this.internedStrings = [];')
       out.Line('/** @type {!Array<!amp.validator.AttrSpec>} */')
       out.Line('this.attrs = [];')
     out.PopIndent()
@@ -521,6 +553,18 @@ def MaybePrintMessageValue(descriptor, field_val, registry, out):
   return registry.MessageReferenceForKey(message_key)
 
 
+def IsTrivialAttrSpec(attr):
+  """Determines whether a given attr only has its name field set.
+
+  Args:
+    attr: an AttrSpec instance.
+  Returns:
+    true iff the only field that is set is the name field.
+  """
+  return (attr.DESCRIPTOR.full_name == 'amp.validator.AttrSpec' and
+          attr.HasField('name') and len(attr.ListFields()) == 1)
+
+
 def PrintObject(descriptor, msg, registry, out):
   """Prints an object, by recursively constructing it.
 
@@ -551,7 +595,11 @@ def PrintObject(descriptor, msg, registry, out):
     if field_desc.full_name in TAG_SPEC_NAME_REFERENCE_FIELD:
       render_value = lambda v: str(registry.MessageIdForTagSpecName(v))
     elif field_desc.full_name in SYNTHETIC_REFERENCE_FIELD:
-      render_value = lambda v: str(registry.MessageIdForKey(MessageKey(v)))
+      def InternOrReference(value):
+        if IsTrivialAttrSpec(value):
+          return str(registry.InternString(value.name))
+        return str(registry.MessageIdForKey(MessageKey(value)))
+      render_value = InternOrReference
     elif field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
       render_value = (
           lambda v: MaybePrintMessageValue(descriptor, v, registry, out))
@@ -706,8 +754,11 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
     tag_spec_id = registry.MessageIdForTagSpecName(TagSpecName(tag_spec))
     dispatch_key = DispatchKeyForTagSpecOrNone(tag_spec)
     if dispatch_key:
-      out.Line('%s.dispatchKeyByTagSpecId[%d]="%s"' % (
+      out.Line('%s.dispatchKeyByTagSpecId[%d]="%s";' % (
           rules_reference, tag_spec_id, dispatch_key))
+
+  out.Line('%s.internedStrings = ["%s"];' % (
+      rules_reference, '","'.join(registry.InternedStrings())))
 
   # Create a mapping from attr spec ids to AttrSpec instances, deduping the
   # AttrSpecs. Then sort by these ids, so now we get a dense array starting
@@ -715,7 +766,8 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   attrs_by_id = {}
   for attr_container in list(rules.attr_lists) + list(rules.tags):
     for attr in attr_container.attrs:
-      attrs_by_id[registry.MessageIdForKey(MessageKey(attr))] = attr
+      if not IsTrivialAttrSpec(attr):
+        attrs_by_id[registry.MessageIdForKey(MessageKey(attr))] = attr
   sorted_attrs = [attr for (_, attr) in sorted(attrs_by_id.items())]
 
   # Emit the attr specs, then assign a list of references to them to

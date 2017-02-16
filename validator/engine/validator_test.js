@@ -538,6 +538,14 @@ describe('ValidatorRulesMakeSense', () => {
     let seenDispatchKey = false;
     const attrNameIsUnique = {};
     for (const attrSpecId of tagSpec.attrs) {
+      if (attrSpecId < 0) {
+        it('unique attr_name within tag_spec (simple attrs)', () => {
+          const attrName = rules.internedStrings[-1 - attrSpecId];
+          expect(attrNameIsUnique.hasOwnProperty(attrName)).toBe(false);
+          attrNameIsUnique[attrName] = 0;
+        });
+        continue;
+      }
       const attrSpec = rules.attrs[attrSpecId];
 
       // attr_name must be unique within tag_spec (no duplicates).

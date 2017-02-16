@@ -63,17 +63,14 @@ goog.require('parse_url.URL');
  * @template T
  */
 function sortAndUniquify(arrayValue) {
-  if (arrayValue.length < 2)
-    return;
+  if (arrayValue.length < 2) return;
 
   goog.array.sort(arrayValue);
   var uniqIdx = 0;
   for (var i = 1; i < arrayValue.length; ++i) {
-    if (arrayValue[i] === arrayValue[uniqIdx])
-      continue;
+    if (arrayValue[i] === arrayValue[uniqIdx]) continue;
     uniqIdx++;
-    if (uniqIdx !== i)
-      arrayValue[uniqIdx] = arrayValue[i];
+    if (uniqIdx !== i) arrayValue[uniqIdx] = arrayValue[i];
   }
   arrayValue.splice(uniqIdx + 1);
 }
@@ -333,6 +330,13 @@ class ParsedAttrSpec {
   /**
    * @return {boolean}
    */
+  isSimple() {
+    return false;
+  }
+
+  /**
+   * @return {boolean}
+   */
   hasValueRegex() {
     return this.valueRegex_ !== null;
   }
@@ -387,6 +391,13 @@ class ParsedAttrSpec {
   }
 
   /**
+   * @return {!string}
+   */
+  getName() {
+    return this.spec_.name;
+  }
+
+  /**
    * @return {boolean}
    */
   hasTriggerSpec() {
@@ -405,6 +416,54 @@ class ParsedAttrSpec {
    */
   getValueUrlSpec() {
     return this.valueUrlSpec_;
+  }
+}
+
+/**
+ * A simple parsed attr spec only holds the name and the attrId. Note
+ * that attrIds for simple attr specs are -1 - -MAXINT. This is
+ * because in the generated validator rules, they're a reference to an
+ * interned string.
+ * @private
+ */
+class SimpleParsedAttrSpec {
+  /**
+   * @param {!string} name
+   * @param {number} attrId
+   */
+  constructor(name, attrId) {
+    /**
+     * @type {!string}
+     * @private
+     */
+    this.name_ = name;
+    /**
+     * Globally unique attribute rule id.
+     * @type {number}
+     * @private
+     */
+    this.id_ = attrId;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isSimple() {
+    return true;
+  }
+
+  /**
+   * @return {!string}
+   */
+  getName() {
+    return this.name_;
+  }
+
+  /**
+   * @return {number} unique for this attr spec.
+   */
+  getId() {
+    return this.id_;
   }
 }
 
@@ -485,7 +544,8 @@ class ParsedAttrSpecs {
       this.attrListsByName_[attrList.name] = attrList;
     }
 
-    /** @private @type {!Object<string, !Array<!ParsedAttrSpec>>} */
+    /** @private @type {!Object<string,
+     * !Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>>} */
     this.parsedAttrListsByName_ = {};
 
     /**
@@ -495,18 +555,30 @@ class ParsedAttrSpecs {
     this.attrSpecs_ = rules.attrs;
 
     /**
+     * @private @type {!Array<!string>}
+     */
+    this.internedStrings_ = rules.internedStrings;
+
+    /**
      * The already instantiated ParsedAttrSpec instances, indexed by
      * attr spec ids.
      * @private @type {!Array<!ParsedAttrSpec>}
      */
     this.parsedAttrSpecs_ = new Array(rules.attrs.length);
+
+    /**
+     * The already instantiated ParsedAttrSpec instances, indexed by
+     * attr spec ids (multiplied by -1).
+     * @private @type {!Array<!SimpleParsedAttrSpec>}
+     */
+    this.simpleParsedAttrSpecs_ = new Array();
   }
 
   /**
    * Constructs ParsedAttrSpecs for the list with the provided |name| or
    * returns a list from the cache.
    * @param {!string} name
-   * @return {!Array<!ParsedAttrSpec>}
+   * @return {!Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>}
    * @private
    */
   getParsedAttrListByName_(name) {
@@ -517,7 +589,7 @@ class ParsedAttrSpecs {
     const attrList = this.attrListsByName_[name];
     /** @type {!Array<number>} */
     const attrSpecs = attrList.attrs;
-    /** @type {!Array<!ParsedAttrSpec>} */
+    /** @type {!Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>} */
     const parsedAttrList = [];
     for (const attrSpecId of attrSpecs) {
       parsedAttrList.push(this.getByAttrSpecId(attrSpecId));
@@ -529,14 +601,14 @@ class ParsedAttrSpecs {
   /**
    * Helper for getAttrsFor.
    * @param {!string} attrListName
-   * @param {!Array<!ParsedAttrSpec>} attrs
+   * @param {!Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>} attrs
    * @param {!Object<string, ?>} namesSeen
    * @private
    */
   mergeAttrsFromAttrListByName_(attrListName, attrs, namesSeen) {
     const specs = this.getParsedAttrListByName_(attrListName);
     for (const spec of specs) {
-      const name = spec.getSpec().name;
+      const name = spec.getName();
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
         attrs.push(spec);
@@ -556,10 +628,10 @@ class ParsedAttrSpecs {
    * specifications for the same attribute name, but for any given tag only one
    * such specification can be active. The precedence is (1), (2), (3), (4)
    * @param {!amp.validator.TagSpec} tagSpec
-   * @return {!Array<!ParsedAttrSpec>} all of the ParsedAttrSpec pointers
+   * @return {!Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>} all of the ParsedAttrSpec pointers
    */
   getAttrsFor(tagSpec) {
-    /** @type {!Array<!ParsedAttrSpec>} */
+    /** @type {!Array<!ParsedAttrSpec|!SimpleParsedAttrSpec>} */
     const attrs = [];
     /** @type {!Object<string, ?>} */
     const namesSeen = {};
@@ -570,7 +642,7 @@ class ParsedAttrSpecs {
     // (2) attributes specified within |tagSpec|.
     for (const attrSpecId of tagSpec.attrs) {
       const parsedAttrSpec = this.getByAttrSpecId(attrSpecId);
-      const name = parsedAttrSpec.getSpec().name;
+      const name = parsedAttrSpec.getName();
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
         attrs.push(parsedAttrSpec);
@@ -589,9 +661,18 @@ class ParsedAttrSpecs {
 
   /**
    * @param {number} id
-   * @return {!ParsedAttrSpec}
+   * @return {!ParsedAttrSpec|!SimpleParsedAttrSpec}
    */
   getByAttrSpecId(id) {
+    if (id < 0) {
+      const idx = -1 - id;
+      if (this.simpleParsedAttrSpecs_.hasOwnProperty(idx)) {
+        return this.simpleParsedAttrSpecs_[idx];
+      }
+      const parsed = new SimpleParsedAttrSpec(this.internedStrings_[idx], id);
+      this.simpleParsedAttrSpecs_[idx] = parsed;
+      return parsed;
+    }
     if (this.parsedAttrSpecs_.hasOwnProperty(id)) {
       return this.parsedAttrSpecs_[id];
     }
@@ -664,7 +745,10 @@ class ParsedTagSpec {
     const parsedAttrs = parsedAttrSpecs.getAttrsFor(tagSpec);
     for (var ii = 0; ii < parsedAttrs.length; ii++) {
       const parsedAttrSpec = parsedAttrs[ii];
-      this.attrsByName_[parsedAttrSpec.getSpec().name] = parsedAttrSpec;
+      this.attrsByName_[parsedAttrSpec.getName()] = parsedAttrSpec;
+      if (parsedAttrSpec.isSimple()) {
+        continue;
+      }
       if (parsedAttrSpec.getSpec().mandatory) {
         this.mandatoryAttrIds_.push(parsedAttrSpec.getId());
       }
@@ -1588,7 +1672,10 @@ class CdataMatcher {
     var blacklistedCdataRegexStr = '';
     if (tagSpec.cdata !== null) {
       blacklistedCdataRegexStr = tagSpec.cdata.blacklistedCdataRegex
-          .map(function(b) { return b.regex; }).join('|');
+                                     .map(function(b) {
+                                       return b.regex;
+                                     })
+                                     .join('|');
     }
     /**
      * @type {RegExp} blacklistedCdataRegex
@@ -1707,8 +1794,8 @@ class CdataMatcher {
       if (amp.validator.VALIDATE_CSS) {
         this.matchCss_(cdata, cdataSpec.cssSpec, context, validationResult);
         if (!amp.validator.GENERATE_DETAILED_ERRORS &&
-             validationResult.status ==
-                 amp.validator.ValidationResult.Status.FAIL) {
+            validationResult.status ==
+                amp.validator.ValidationResult.Status.FAIL) {
           return;
         }
       }
@@ -2882,11 +2969,12 @@ function validateLayout(parsedTagSpec, context, attrsByKey, result) {
   // We disable validating layout for tags where one of the layout attributes
   // contains mustache syntax.
   const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
-  if (hasTemplateAncestor && (attrValueHasTemplateSyntax(layoutAttr) ||
-                              attrValueHasTemplateSyntax(widthAttr) ||
-                              attrValueHasTemplateSyntax(heightAttr) ||
-                              attrValueHasTemplateSyntax(sizesAttr) ||
-                              attrValueHasTemplateSyntax(heightsAttr)))
+  if (hasTemplateAncestor &&
+      (attrValueHasTemplateSyntax(layoutAttr) ||
+       attrValueHasTemplateSyntax(widthAttr) ||
+       attrValueHasTemplateSyntax(heightAttr) ||
+       attrValueHasTemplateSyntax(sizesAttr) ||
+       attrValueHasTemplateSyntax(heightsAttr)))
     return;
 
   // Parse the input layout attributes which we found for this tag.
@@ -3241,8 +3329,12 @@ function validateAttributes(
         return;
       }
     }
-    if (parsedAttrSpec.getSpec().deprecation !== null) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (parsedAttrSpec.isSimple()) {
+      attrspecsValidated[parsedAttrSpec.getId()] = 0;
+      continue;
+    }
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      if (parsedAttrSpec.getSpec().deprecation !== null) {
         context.addError(
             amp.validator.ValidationError.Severity.WARNING,
             amp.validator.ValidationError.Code.DEPRECATED_ATTR,
@@ -3253,8 +3345,8 @@ function validateAttributes(
               parsedAttrSpec.getSpec().deprecation
             ],
             parsedAttrSpec.getSpec().deprecationUrl, result);
+        // Deprecation is only a warning, so we don't return.
       }
-      // Deprecation is only a warning, so we don't return.
     }
     if (!hasTemplateAncestor || !attrValueHasTemplateSyntax(attrValue)) {
       validateNonTemplateAttrValueAgainstSpec(
@@ -3361,7 +3453,7 @@ function validateAttributes(
               context.getDocLocator(),
               /* params */
               [
-                parsedAttrSpec.getSpec().name, getTagSpecName(spec),
+                parsedAttrSpec.getName(), getTagSpecName(spec),
                 triggerSpec.getAttrName()
               ],
               spec.specUrl, result);
@@ -3380,7 +3472,7 @@ function validateAttributes(
             amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
             context.getDocLocator(),
             /* params */
-            [parsedAttrSpec.getSpec().name, getTagSpecName(spec)], spec.specUrl,
+            [parsedAttrSpec.getName(), getTagSpecName(spec)], spec.specUrl,
             result);
       } else {
         result.status = amp.validator.ValidationResult.Status.FAIL;
