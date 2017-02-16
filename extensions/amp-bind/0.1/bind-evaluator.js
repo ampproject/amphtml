@@ -51,7 +51,7 @@ export class BindEvaluator {
    * Parses and stores given bindings into expression objects and returns map
    * of expression string to parse errors.
    * @param {!Array<BindingDef>} bindings
-   * @return {!Object<string,!Error>}
+   * @return {!Object<string,string>}
    */
   setBindings(bindings) {
     const errors = Object.create(null);
@@ -65,7 +65,7 @@ export class BindEvaluator {
       try {
         expression = new BindExpression(e.expressionString);
       } catch (error) {
-        errors[string] = error;
+        errors[string] = error.message;
         continue;
       }
 
@@ -84,13 +84,13 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   results: !Object<string, ./bind-expression.BindExpressionResultDef>,
-   *   errors: !Object<string, !Error>,
+   *   errors: !Object<string, !string>,
    * }}
    */
   evaluate(scope) {
     /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
     const cache = {};
-    /** @type {!Object<string, !Error>} */
+    /** @type {!Object<string, string>} */
     const errors = {};
 
     this.parsedBindings_.forEach(binding => {
@@ -106,7 +106,7 @@ export class BindEvaluator {
       try {
         result = binding.expression.evaluate(scope);
       } catch (error) {
-        errors[expr] = error;
+        errors[expr] = error.message;
         return;
       }
 
@@ -114,8 +114,7 @@ export class BindEvaluator {
       if (this.validator_.isResultValid(tagName, property, resultString)) {
         cache[expr] = result;
       } else {
-        errors[expr] = new Error(
-            `"${result}" is not a valid result for [${property}].`);
+        errors[expr] = `"${result}" is not a valid result for [${property}].`;
       }
     });
     return {results: cache, errors};

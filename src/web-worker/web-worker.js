@@ -54,5 +54,7 @@ self.addEventListener('message', function(event) {
 
   /** @type {FromWorkerMessageDef} */
   const message = {method, returnValue, id};
+  // `message` may only contain vlaues or objects handled by the
+  // structured clone algorithm.
   self./*OK*/postMessage(message);
 });
