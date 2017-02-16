@@ -92,8 +92,9 @@ Accepted MIME types for fonts include the following prefixes:
 
 * Contact relevant publishers to make sure they update their CORS policies to include your origin.
 * Publicly announce your cache so people know where to find your documentation.
-* Examples of third-party AMP Cache providers:
-  * [Cloudflare](https://www.cloudflare.com/)
+* Examples of AMP Cache providers:
+  * [Google AMP Cache](https://developers.google.com/amp/cache/)
+  * [Cloudflare AMP Cache](https://www.cloudflare.com/website-optimization/accelerated-mobile-links/)
 
 # References
 
