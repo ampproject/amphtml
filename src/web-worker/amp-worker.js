@@ -29,6 +29,29 @@ const TAG = 'web-worker';
 let PendingMessageDef;
 
 /**
+ * Error that can be passed through web worker
+ * @typedef {{
+ *   message: string,
+ *   stack: string,
+ * }}
+ */
+export let AmpWorkerErrorDef;
+
+/**
+ * Converts an amp worker error into a real Error object.
+ * This is necessary as web-workers cannot send or receive
+ * error objects.
+ * @param {!AmpWorkerErrorDef} ampWorkerError
+ * @return {!Error}
+ */
+export function errorForAmpWorkerError(ampWorkerError) {
+  const {message, stack} = ampWorkerError;
+  const error = new Error(message);
+  error.stack = stack;
+  return error;
+}
+
+/**
  * Invokes function named `method` with args `opt_args` on the web worker
  * and returns a Promise that will be resolved with the function's return value.
  * @note Currently only works in a single entry point.

@@ -23,6 +23,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
+import {errorForAmpWorkerError} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
@@ -197,7 +198,9 @@ export class Bind {
       Object.keys(parseErrors).forEach(expressionString => {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
-          const err = user().createError(parseErrors[expressionString]);
+          const ampWorkerError = parseErrors[expressionString];
+          const fullError = errorForAmpWorkerError(ampWorkerError);
+          const err = user().createError(fullError);
           reportError(err, elements[0]);
         }
       });
@@ -404,9 +407,11 @@ export class Bind {
 
       // Report evaluation errors.
       Object.keys(errors).forEach(expressionString => {
-        const err = user().createError(errors[expressionString]);
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
+          const ampWorkerError = errors[expressionString];
+          const fullError = errorForAmpWorkerError(ampWorkerError);
+          const err = user().createError(fullError);
           reportError(err, elements[0]);
         }
       });

@@ -52,7 +52,7 @@ export class BindEvaluator {
    * Parses and stores given bindings into expression objects and returns map
    * of expression string to parse errors.
    * @param {!Array<BindingDef>} bindings
-   * @return {!Object<string,string>}
+   * @return !Object<string, !../../../src/web-worker/amp-worker.AmpWorkerErrorDef>>,
    */
   addBindings(bindings) {
     const errors = Object.create(null);
@@ -66,7 +66,9 @@ export class BindEvaluator {
       try {
         expression = new BindExpression(e.expressionString);
       } catch (error) {
-        errors[string] = error.message;
+        /** @type {../../../src/web-worker/amp-worker.AmpWorkerErrorDef} */
+        const ampWorkerError = {message: error.message, stack: error.stack};
+        errors[string] = ampWorkerError;
         continue;
       }
 
@@ -101,7 +103,7 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   results: !Object<string, ./bind-expression.BindExpressionResultDef>,
-   *   errors: !Object<string, !string>,
+   *   errors: !Object<string, !../../../src/web-worker/amp-worker.AmpWorkerErrorDef>>,
    * }}
    */
   evaluate(scope) {
@@ -123,7 +125,9 @@ export class BindEvaluator {
       try {
         result = binding.expression.evaluate(scope);
       } catch (error) {
-        errors[expr] = error.message;
+        /** @type {../../../src/web-worker/amp-worker.AmpWorkerErrorDef} */
+        const ampWorkerError = {message: error.message, stack: error.stack};
+        errors[expr] = ampWorkerError;
         return;
       }
 
