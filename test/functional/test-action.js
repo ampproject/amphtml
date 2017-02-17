@@ -24,6 +24,14 @@ import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
 
 
+function createExecElement(id, enqueAction) {
+  const execElement = document.createElement('amp-element');
+  execElement.setAttribute('id', id);
+  execElement.enqueAction = enqueAction;
+  return execElement;
+}
+
+
 function assertInvocation(inv, target, method, source, opt_event, opt_args) {
   expect(inv.target).to.equal(target);
   expect(inv.method).to.equal(method);
@@ -140,8 +148,8 @@ describe('ActionService parseAction', () => {
 
   it('should parse multiple event types with multiple actions', () => {
     const a = parseActionMap(
-        'event1:target1, target2.methodA, target3.methodB(keyA=valueA);' +
-        'event2:target4, target5.methodC, target6.methodD(keyB=valueB)');
+        'event1:foo, baz.firstMethod, corge.secondMethod(keyA=valueA);' +
+        'event2:bar, qux.thirdMethod, grault.fourthMethod(keyB=valueB)');
 
     expect(Object.keys(a)).to.have.length(2);
 
@@ -150,36 +158,36 @@ describe('ActionService parseAction', () => {
 
     // action definitions for event1
     expect(a['event1'][0].event).to.equal('event1');
-    expect(a['event1'][0].target).to.equal('target1');
+    expect(a['event1'][0].target).to.equal('foo');
     expect(a['event1'][0].method).to.equal('activate');
     expect(a['event1'][0].args).to.be.null;
 
     expect(a['event1'][1].event).to.equal('event1');
-    expect(a['event1'][1].target).to.equal('target2');
-    expect(a['event1'][1].method).to.equal('methodA');
+    expect(a['event1'][1].target).to.equal('baz');
+    expect(a['event1'][1].method).to.equal('firstMethod');
     expect(a['event1'][1].args).to.be.null;
 
     expect(a['event1'][2].event).to.equal('event1');
-    expect(a['event1'][2].target).to.equal('target3');
-    expect(a['event1'][2].method).to.equal('methodB');
+    expect(a['event1'][2].target).to.equal('corge');
+    expect(a['event1'][2].method).to.equal('secondMethod');
     expect(a['event1'][2].args['keyA']()).to.equal('valueA');
 
     // action definitions for event2
     expect(a['event2'][0].event).to.equal('event2');
-    expect(a['event2'][0].target).to.equal('target4');
+    expect(a['event2'][0].target).to.equal('bar');
     expect(a['event2'][0].method).to.equal('activate');
     expect(a['event2'][0].args).to.be.null;
 
     expect(a['event2'][1].event).to.equal('event2');
-    expect(a['event2'][1].target).to.equal('target5');
-    expect(a['event2'][1].method).to.equal('methodC');
+    expect(a['event2'][1].target).to.equal('qux');
+    expect(a['event2'][1].method).to.equal('thirdMethod');
     expect(a['event2'][1].args).to.be.null;
 
     expect(a['event2'][2].event).to.equal('event2');
-    expect(a['event2'][2].target).to.equal('target6');
-    expect(a['event2'][2].method).to.equal('methodD');
+    expect(a['event2'][2].target).to.equal('grault');
+    expect(a['event2'][2].method).to.equal('fourthMethod');
     expect(a['event2'][2].args['keyB']()).to.equal('valueB');
-  })
+  });
 
   it('should parse with multiple args', () => {
     const a = parseAction('event1:target1.method1(key1=value1, key2 = value2)');
@@ -575,9 +583,7 @@ describe('Action method', () => {
     targetElement.appendChild(child);
     document.body.appendChild(parent);
 
-    execElement = document.createElement('amp-element');
-    execElement.setAttribute('id', id);
-    execElement.enqueAction = onEnqueue;
+    execElement = createExecElement(id, onEnqueue);
     parent.appendChild(execElement);
   });
 
@@ -670,13 +676,6 @@ describe('Multiple handlers action method', () => {
   let onEnqueue1, onEnqueue2;
   let targetElement, parent, child, execElement1, execElement2;
 
-  function createExecElement(id, enqueAction) {
-    const execElement = document.createElement('amp-element');
-    execElement.setAttribute('id', id);
-    execElement.enqueAction = enqueAction;
-    return execElement;
-  }
-
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     win = {
@@ -689,8 +688,8 @@ describe('Multiple handlers action method', () => {
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
     targetElement = document.createElement('target');
-    const id1 = ('Ea' + Math.random()).replace('.', '');
-    const id2 = ('Eb' + Math.random()).replace('.', '');
+    const id1 = 'elementFoo';
+    const id2 = 'elementBar';
     targetElement.setAttribute('on', `tap:${id1}.method1,${id2}.method2`);
     parent = document.createElement('parent');
     child = document.createElement('child');
