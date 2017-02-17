@@ -252,3 +252,5 @@ data.space;
 
 var Swoop
 Swoop.announcePlace
+
+data.siteId
