@@ -529,7 +529,9 @@ describe('ValidatorRulesMakeSense', () => {
         'AMP-SOCIAL-SHARE': 0,
         'AMP-VIDEO': 0
       };
-      it(tagSpec.tagName + ' must be whitelisted for AMP4ADS', () => {
+      it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
+          ' set for AMP4ADS but ' + tagSpec.tagName + ' is not whitelisted' +
+          ' for AMP4ADS', () => {
         expect(whitelistedAmp4AdsExtensions.hasOwnProperty(tagSpec.tagName))
             .toBe(true);
       });
@@ -612,7 +614,8 @@ describe('ValidatorRulesMakeSense', () => {
           'amp-slides': 0
         };
         if (!extensionExceptions.hasOwnProperty(attrSpec.value)) {
-          it('extensions require an additional tag', () => {
+          it(tagSpec.tagName + ' is missing requires or' +
+              ' extension_unused_unless_tag_present', () => {
             expect(
                 tagSpec.requires.length +
                 tagSpec.extensionUnusedUnlessTagPresent.length)
