@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {urls} from './config';
 import {documentInfoForDoc} from './document-info';
 import {isExperimentOn} from './experiments';
 import {viewerForDoc} from './viewer';
@@ -51,8 +52,7 @@ export function getContextMetadata(
       parentWindow, 'sentinel-name-change');
   attributes._context = {
     ampcontextVersion: '$internalRuntimeVersion$',
-    ampcontextFilepath: 'https://cdn.ampproject.org/' +
-        '$internalRuntimeVersion$' +
+    ampcontextFilepath: urls.cdn + '/$internalRuntimeVersion$' +
         '/ampcontext-v0.js',
     sourceUrl: docInfo.sourceUrl,
     referrer,
