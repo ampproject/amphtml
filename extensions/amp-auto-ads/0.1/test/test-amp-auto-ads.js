@@ -131,6 +131,7 @@ describes.realWin('amp-auto-ads', {
     expect(adElement.tagName).to.equal('AMP-AD');
     expect(adElement.getAttribute('type')).to.equal('adsense');
     expect(adElement.getAttribute('data-ad-client')).to.equal(AD_CLIENT);
+    expect(adElement.getAttribute('data-tag-origin')).to.equal('ampa');
   }
 
   it('should insert three ads on page using config', () => {
