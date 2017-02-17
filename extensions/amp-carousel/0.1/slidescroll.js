@@ -110,8 +110,8 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
 
-    /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.action_ = actionServiceForDoc(this.win.document.documentElement);
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
   }
 
   /** @override */
@@ -122,6 +122,7 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   buildSlides() {
     this.vsync_ = this.getVsync();
+    this.action_ = actionServiceForDoc(this.element);
 
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
