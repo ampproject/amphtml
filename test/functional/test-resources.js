@@ -1466,6 +1466,7 @@ describe('Resources changeSize', () => {
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
           height: 50};
       vsyncSpy = sandbox.stub(resources.vsync_, 'run');
+      resources.visible_ = true;
     });
 
     it('should NOT change size when height is unchanged', () => {
@@ -1606,6 +1607,66 @@ describe('Resources changeSize', () => {
       expect(resource1.changeSize).to.be.calledOnce;
       expect(resource1.changeSize).to.be.calledWith(111, 222);
       expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+    });
+
+    it('should NOT resize when above vp but cannot adjust scrolling', () => {
+      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1100,
+          height: 100};
+      resources.lastVelocity_ = 0;
+      clock.tick(5000);
+      resources.scheduleChangeSize_(resource1, 0, 222, undefined, false);
+      expect(vsyncSpy).to.be.calledOnce;
+      vsyncSpy.reset();
+      resources.mutateWork_();
+
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.not.be.called;
+      expect(vsyncSpy).to.not.be.called;
+    });
+
+    it('should resize if multi request above vp can adjust scroll', () => {
+      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1100,
+          height: 100};
+      resource2.layoutBox_ = {top: -1300, left: 0, right: 100, bottom: -1200,
+          height: 100};
+      resources.lastVelocity_ = 0;
+      clock.tick(5000);
+      resources.scheduleChangeSize_(resource2, 200, 222, undefined, false);
+      resources.scheduleChangeSize_(resource1, 0, 222, undefined, false);
+      resources.mutateWork_();
+
+      const task = vsyncSpy.lastCall.args[0];
+      const state = {};
+      task.mutate(state);
+
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(resource2.changeSize).to.be.calledOnce;
+    });
+
+    it('should NOT resize if multi req above vp cannot adjust scroll', () => {
+      // Only to satisfy expectation in beforeEach
+      resources.viewport_.getRect();
+
+      // Force return here, because can't stub getRect fun twice.
+      resources.viewport_.getRect = () => {
+        return {top: 10, left: 0, right: 100, bottom: 210, height: 200};
+      };
+
+      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1100,
+          height: 100};
+      resource2.layoutBox_ = {top: -1300, left: 0, right: 100, bottom: -1200,
+          height: 100};
+      resources.lastVelocity_ = 0;
+      clock.tick(5000);
+      resources.scheduleChangeSize_(resource1, 92, 222, undefined, false);
+      resources.scheduleChangeSize_(resource2, 92, 222, undefined, false);
+      resources.mutateWork_();
+      const task = vsyncSpy.lastCall.args[0];
+      const state = {};
+      task.mutate(state);
+
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(resource2.changeSize).to.not.be.called;
     });
 
     it('should NOT adjust scrolling if size did not increase', () => {
