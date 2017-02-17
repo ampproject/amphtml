@@ -131,13 +131,30 @@ export class Bind {
 
     this.subtreeMutationObserver_ = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
+        debugger;
         const mutatedNode = mutation.target;
         if (this.dynamicRoots_.includes(mutatedNode)) {
-          this.removeBindingsForNode_(mutatedNode).then(() => {
-            return this.addBindingsForNode_(mutatedNode);
+          // Remove all bindings for removed elements
+          const removePromises = [];
+          mutation.removedNodes.forEach(removedNode => {
+            removePromises.push(this.removeBindingsForNode_(removedNode));
+          });
+          const removeAllPromise = removePromises.length > 0 ? 
+            Promise.all(removePromises) :
+            Promise.resolve();
+          removeAllPromise.then(() => {
+            // Add all bindings for added elements
+            const addPromises = [];
+            mutation.addedNodes.forEach(addedNode => {
+              addPromises.push(this.addBindingsForNode_(addedNode));
+            })
+            const addAllPromise = addPromises.length > 0 ? 
+              Promise.all(addPromises) :
+              Promise.resolve();
+            return addAllPromise;
           }).then(() => {
-            this.digest_(false /* opt_verify */);
-          })
+            this.digest_()
+          });
         }
       });
     });

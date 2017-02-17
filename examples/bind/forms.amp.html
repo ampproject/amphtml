@@ -9,19 +9,15 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
-    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
     <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
 </head>
 <body>
 
-    <p> Selected slide: <span [text]="(selectedSlide + 1)">1</span>/3</p>
-
-    <amp-carousel controls type="slides" width="400" height="300"
-    [slide]="selectedSlide" on="slideChange:AMP.setState(selectedSlide=event.index)">
-      <amp-img src="https://ampbyexample.com/img/image1.jpg" width=400 height=300></amp-img>
-      <amp-img src="https://ampbyexample.com/img/image2.jpg" width=400 height=300></amp-img>
-      <amp-img src="https://ampbyexample.com/img/image3.jpg" width=400 height=300></amp-img>
-    </amp-carousel>
+  <p>Submit the form and then press a button to change the text in the below template</p>
+  <button on="tap:AMP.setState(selected=1)">1</button>
+  <button on="tap:AMP.setState(selected=2)">2</button>
+  <button on="tap:AMP.setState(selected=3)">3</button>
+  <button on="tap:AMP.setState(selected=4)">4</button>
 
   <h4>Enter your name and email.</h4>
   <form method="post"
@@ -43,7 +39,7 @@
           <template type="amp-mustache">
               Success! Thanks {{name}} for entering your email: {{email}}
 
-              <p>You have selected slide: <span [text]="selectedSlide + 1">1</span></p>
+              <p>You have selected: <span [text]="selected ? selected : 'No selection'">0</span></p>
           </template>
       </div>
   </form>
