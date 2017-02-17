@@ -22,20 +22,15 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {bindForDoc} from '../../../../src/bind';
 import * as sinon from 'sinon';
 
-describes.realWin('test-scrollable-carousel', {amp: 1}, unused_env => {
+describes.realWin('test-scrollable-carousel', {amp: 1}, env => {
   let iframe;
   let slideNum;
   let carousel;
   let bind;
-  let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     return createIframePromise().then(i => {
       iframe = i;
-      iframe.width = '300';
-      iframe.height = '200';
-
       const div = iframe.doc.createElement('div');
       // Cannot create P element directly as bind property names [*] 
       // are not considered valid element names
@@ -54,18 +49,13 @@ describes.realWin('test-scrollable-carousel', {amp: 1}, unused_env => {
       for (let i = 0; i < slideCount; i++) {
         const img = document.createElement('amp-img');
         img.setAttribute('src', imgUrl);
-        img.setAttribute('width', '120');
-        img.setAttribute('height', '100');
-        img.style.width = '120px';
-        img.style.height = '100px';
-        img.id = 'img-' + i;
         carouselElement.appendChild(img);
       }
       return iframe.addElement(carouselElement)
     }).then(c => {
       carousel = c;
-      toggleExperiment(iframe.win, 'amp-bind', true, true);
       chunkInstanceForTesting(iframe.ampdoc);
+      toggleExperiment(iframe.win, 'amp-bind', true, true);
       bind = installBindForTesting(iframe.ampdoc);
       return iframe.ampdoc.whenReady();
     }).then(() => {
@@ -73,28 +63,30 @@ describes.realWin('test-scrollable-carousel', {amp: 1}, unused_env => {
     });
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
+  function waitForBindApplication() {
+    return bindForDoc(iframe.ampdoc).then(() => {
+      return bind.evaluatePromise_;
+    }).then(() => {
+      return bind.applyPromise_;
+    });
+  }
 
   it('should update dependent bindings when the carousel slide changes', () => {
     const impl = carousel.implementation_;
-    iframe = iframe;
     expect(slideNum.innerHTML).to.equal('0');
-    const triggerSpy = sandbox.spy(impl.action_, 'trigger');
-    debugger;
-    impl.goCallback(1, /* animate */ false);
-    expect(triggerSpy).to.have.been.calledWith(
-      carousel,
-      'slideChange',
-      /* CustomEvent */ sinon.match.has('detail', {index: 1}));
-    return bind.evaluatePromise_.then(() => {
+    impl.go(1, false /* animate */ );
+    return waitForBindApplication().then(() => {
       expect(slideNum.innerHTML).to.equal('1');
-    })
+    });
   });
 
   it('should change slides when the slide variable binding changes', () => {
-
+    const impl = carousel.implementation_;
+    expect(impl.slideIndex_).to.equal(0);
+    bind.setState({selectedSlide:1});
+    return waitForBindApplication().then(() => {
+      expect(impl.slideIndex_).to.equal(1);
+    });
   });
 
 });

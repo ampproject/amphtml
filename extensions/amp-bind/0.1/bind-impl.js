@@ -110,6 +110,9 @@ export class Bind {
     this.evaluatePromise_ = null;
 
     /** @visibleForTesting {?Promise} */
+    this.applyPromise_ = null;
+
+    /** @visibleForTesting {?Promise} */
     this.scanPromise_ = null;
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
@@ -147,7 +150,6 @@ export class Bind {
    * @param {boolean=} opt_skipDigest
    */
   setState(state, opt_skipDigest) {
-    debugger;
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     // TODO(choumx): What if `state` contains references to globals?
@@ -405,7 +407,7 @@ export class Bind {
       this.evaluatePromise_ = Promise.resolve(evaluation);
     }
 
-    this.evaluatePromise_.then(returnValue => {
+    this.evaluatePromise_ = this.evaluatePromise_.then(returnValue => {
       const {results, errors} = returnValue;
       if (opt_verifyOnly) {
         this.verify_(results);
@@ -443,16 +445,19 @@ export class Bind {
   }
 
   /**
-   * Applies expression results to DOM.
+   * Applies expression results to DOM. Returns a promise that resolves when
+   * all bindings have been applied.
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @return !Promise;
    * @private
    */
   apply_(results) {
+    const applyPromises = [];
     this.boundElements_.forEach(boundElement => {
       const {element, boundProperties} = boundElement;
       const tagName = element.tagName;
 
-      this.resources_.mutateElement(element, () => {
+      const applyPromise = this.resources_.mutateElement(element, () => {
         const mutations = {};
         let width, height;
 
@@ -506,7 +511,9 @@ export class Bind {
           element.mutatedAttributesCallback(mutations);
         }
       });
+      applyPromises.push(applyPromise);
     });
+    this.applyPromise_ = Promise.all(applyPromises);
   }
 
   /**
