@@ -96,9 +96,6 @@ export class Bind {
     /** @private {?./bind-evaluator.BindEvaluator} */
     this.evaluator_ = null;
 
-    /** @visibleForTesting {?Promise} */
-    this.scanPromise_ = null;
-
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
 
@@ -191,12 +188,12 @@ export class Bind {
    * Returns a promise that resolves after bindings have been added.
    *
    * @param {!Element} node
-   * @return {Promise}
+   * @return {!Promise}
    *
    * @private
    */
   addBindingsForNode_(node) {
-    this.scanPromise_ = this.scanNode_(node).then(results => {
+    return this.scanNode_(node).then(results => {
       const {boundElements, bindings, expressionToElements} = results;
 
       this.boundElements_ = this.boundElements_.concat(boundElements);
@@ -231,7 +228,6 @@ export class Bind {
         this.digest_(/* opt_verifyOnly */ true);
       }
     });
-    return this.scanPromise_;
   }
 
   /**
@@ -240,7 +236,7 @@ export class Bind {
    * Returns a promise that resolves after bindings have been removed.
    *
    * @param {!Element} node
-   * @return {Promise}
+   * @return {!Promise}
    *
    * @private
    */

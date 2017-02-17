@@ -25,39 +25,39 @@ describe('BindEvaluator', () => {
   });
 
   it('should allow callers to add bindings multiple times', () => {
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(0);
+    expect(evaluator.bindingsForTesting().length).to.equal(0);
     evaluator.addBindings([{
       tagName: 'P',
       property: 'text',
       expressionString: 'oneplusone + 2',
     }]);
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(1);
+    expect(evaluator.bindingsForTesting().length).to.equal(1);
     evaluator.addBindings([{
       tagName: 'SPAN',
       property: 'text',
       expressionString: 'oneplusone + 3',
     }]);
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(2);
+    expect(evaluator.bindingsForTesting().length).to.equal(2);
   });
 
   it('should allow callers to remove bindings', () => {
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(0);
+    expect(evaluator.bindingsForTesting().length).to.equal(0);
     evaluator.addBindings([{
       tagName: 'P',
       property: 'text',
       expressionString: 'oneplusone + 2',
     }]);
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(1);
+    expect(evaluator.bindingsForTesting().length).to.equal(1);
     evaluator.addBindings([{
       tagName: 'SPAN',
       property: 'text',
       expressionString: 'oneplusone + 3',
     }]);
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(2);
+    expect(evaluator.bindingsForTesting().length).to.equal(2);
     evaluator.removeBindingsWithExpressionStrings(['oneplusone + 2']);
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(1);
+    expect(evaluator.bindingsForTesting().length).to.equal(1);
     evaluator.removeBindingsWithExpressionStrings(['oneplusone + 3']);
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(0);
+    expect(evaluator.bindingsForTesting().length).to.equal(0);
   });
 
   it('should evaluate expressions given a scope with needed bindings', () => {
@@ -66,13 +66,13 @@ describe('BindEvaluator', () => {
       property: 'text',
       expressionString: 'oneplusone + 2',
     };
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(0);
+    expect(evaluator.bindingsForTesting().length).to.equal(0);
     evaluator.addBindings([{
       tagName: 'P',
       property: 'text',
       expressionString: 'oneplusone + 2',
     }]);
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(1);
+    expect(evaluator.bindingsForTesting().length).to.equal(1);
     const results = evaluator.evaluate({oneplusone: 2});
     const evaluated = results['results'];
     const errors = results['errors'];
@@ -82,13 +82,13 @@ describe('BindEvaluator', () => {
   });
 
   it('should treat out-of-scope vars as null', () => {
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(0);
+    expect(evaluator.bindingsForTesting().length).to.equal(0);
     evaluator.addBindings([{
       tagName: 'P',
       property: 'text',
       expressionString: 'outOfScope',
     }]);
-    expect(evaluator.parsedBindingsForTesting().length).to.equal(1);
+    expect(evaluator.bindingsForTesting().length).to.equal(1);
     const results = evaluator.evaluate({});
     const evaluated = results['results'];
     const errors = results['errors'];

@@ -502,7 +502,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
     // fragment and delegate to specific action handler.
     const argsExpression = toks.next().value;
     assertToken(toks.next(), [TokenType.SEPARATOR], ')');
-    return {args: null, argsExpression};
+    return {args: null, argsExpression: String(argsExpression)};
   }
 
   // Key-value pairs. Format: key = value, ....

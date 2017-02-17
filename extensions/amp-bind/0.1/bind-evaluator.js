@@ -72,10 +72,8 @@ export class BindEvaluator {
       expressionsToRemove[expressionStrings[i]] = true;
     }
 
-    filterSplice(this.parsedBindings_, binding => {
-      const expressionString = binding.expression.expressionString;
-      return !expressionsToRemove[expressionString];
-    });
+    filterSplice(this.bindings_, binding =>
+      !expressionsToRemove[binding.expressionString]);
   }
 
   /**
@@ -188,10 +186,10 @@ export class BindEvaluator {
 
   /**
    * Return parsed bindings for testing.
-   * @visibleForTesting {!Array<ParsedBindingDef>}
+   * @visibleForTesting {!Array<BindingDef>}
    */
-  parsedBindingsForTesting() {
-    return this.parsedBindings_;
+  bindingsForTesting() {
+    return this.bindings_;
   }
 
   /**
