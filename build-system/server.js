@@ -251,6 +251,7 @@ function proxyToAmpProxy(req, res, minify) {
   });
 }
 
+
 var liveListUpdateFile = '/examples/live-list-update.amp.html';
 var liveListCtr = 0;
 var itemCtr = 2;

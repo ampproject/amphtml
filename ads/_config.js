@@ -480,6 +480,15 @@ export const adConfig = {
     prefetch: 'https://c.imedia.cz/js/amp.js',
   },
 
+  slimcutmedia: {
+    preconnect: [
+      'https://sb.freeskreen.com',
+      'https://static.freeskreen.com',
+      'https://video.freeskreen.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   smartadserver: {
     prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
     preconnect: 'https://static.sascdn.com',
