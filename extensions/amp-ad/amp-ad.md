@@ -96,6 +96,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdSpeed](../../ads/adspeed.md)
 - [AdStir](../../ads/adstir.md)
 - [AdTech](../../ads/adtech.md)
+- [AdThrive](../../ads/adthrive.md)
 - [Ad Up Technology](../../ads/aduptech.md)
 - [Adverline](../../ads/adverline.md)
 - [Adverticum](../../ads/adverticum.md)
