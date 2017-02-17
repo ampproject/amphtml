@@ -102,7 +102,7 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   results: !Object<string, ./bind-expression.BindExpressionResultDef>,
-   *   errors: !Object<string, !../../../src/web-worker/amp-worker.AmpWorkerErrorDef>>,
+   *   errors: !Object<string, !../../../src/web-worker/amp-worker.AmpWorkerErrorDef>,
    * }}
    */
   evaluate(scope) {
