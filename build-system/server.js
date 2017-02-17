@@ -235,27 +235,22 @@ app.use('/share-tracking/get-outgoing-fragment', function(req, res) {
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.
 function proxyToAmpProxy(req, res, minify) {
-  var url = 'https://cdn.ampproject.org/c' + req.url;
-  var localUrlPrefix = getUrlPrefix(req);
-  request(url, function (error, response, body) {
+  var url = 'https://cdn.ampproject.org/'
+      + (req.query['amp_js_v'] ? 'v' : 'c')
+      + req.url;
+  console.log('Fetching URL: ' + url);
+  request(url, function(error, response, body) {
     body = body
         // Unversion URLs.
         .replace(/https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
             'https://cdn.ampproject.org/')
         // <base> href pointing to the proxy, so that images, etc. still work.
-        .replace('<head>', '<head><base href="https://cdn.ampproject.org/">')
-        .replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js')
-        .replace('https://cdn.ampproject.org/v0.max.js',
-            localUrlPrefix + '/dist/amp.js')
-        .replace(/https:\/\/cdn.ampproject.org\/v0\//g,
-            localUrlPrefix + '/dist/v0/');
-    if (minify) {
-      body = body.replace(/\.max\.js/g, '.js')
-          .replace('/dist/amp.js', '/dist/v0.js');
-    }
+        .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
+    body = replaceUrls(minify ? 'min' : 'max', body, getUrlPrefix(req));
     res.status(response.statusCode).send(body);
   });
 }
+
 
 var liveListUpdateFile = '/examples/live-list-update.amp.html';
 var liveListCtr = 0;
@@ -462,6 +457,20 @@ app.use('/min/', function(req, res) {
   proxyToAmpProxy(req, res, /* minify */ true);
 });
 
+// Nest the response in an iframe.
+// Example:
+// http://localhost:8000/iframe/examples/ads.amp.max.html
+app.get('/iframe/*', function(req, res) {
+  // Returns an html blob with an iframe pointing to the url after /iframe/.
+  res.send(`<!doctype html>
+          <html style="width:100%; height:100%;">
+            <body style="width:98%; height:98%;">
+              <iframe src="${req.url.substr(7)}" style="width:100%; height:100%;">
+              </iframe>
+            </body>
+          </html>`);
+});
+
 // A4A envelope.
 // Examples:
 // http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
@@ -630,26 +639,22 @@ app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, re
  */
 
 
-
 /**
  * @param {string} mode
  * @param {string} file
+ * @param {string=} hostName
  */
-function replaceUrls(mode, file) {
-  if (mode) {
-    file = file.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
-    file = file.replace(/(https:\/\/cdn.ampproject.org\/viewer\/.+).max.js/g,
-        '$1.js');
-    file = file.replace('https://cdn.ampproject.org/v0.max.js', '/dist/amp.js');
-    file = file.replace('https://cdn.ampproject.org/amp4ads-v0.max.js', '/dist/amp-inabox.js');
-    file = file.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '/dist/v0/');
-  }
-  if (mode == 'min') {
-    file = file.replace(/\.max\.js/g, '.js');
-    file = file.replace('/dist/amp.js', '/dist/v0.js');
-    file = file.replace('/dist/amp-inabox.js', '/dist/amp4ads-v0.js');
-    file = file.replace(/\/dist.3p\/current\/(.*)\.max.html/,
-        '/dist.3p/current-min/$1.html');
+function replaceUrls(mode, file, hostName) {
+  hostName = hostName || '';
+  if (mode == 'max') {
+    file = file.replace('https://cdn.ampproject.org/v0.js', hostName + '/dist/amp.js');
+    file = file.replace('https://cdn.ampproject.org/amp4ads-v0.js', hostName + '/dist/amp-inabox.js');
+    file = file.replace(/https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g, hostName + '/dist/v0/$1.max.js');
+  } else if (mode == 'min') {
+    file = file.replace('https://cdn.ampproject.org/v0.js', hostName + '/dist/v0.js');
+    file = file.replace('https://cdn.ampproject.org/amp4ads-v0.js', hostName + '/dist/amp4ads-v0.js');
+    file = file.replace(/https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g, hostName + '/dist/v0/$1.js');
+    file = file.replace(/\/dist.3p\/current\/(.*)\.max.html/, hostName + '/dist.3p/current-min/$1.html');
   }
   return file;
 }

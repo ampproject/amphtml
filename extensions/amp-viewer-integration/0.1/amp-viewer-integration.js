@@ -15,10 +15,12 @@
  */
 
 import {Messaging, WindowPortEmulator} from './messaging.js';
-import {viewerForDoc} from '../../../src/viewer';
+import {getAmpDoc} from '../../../src/ampdoc';
+import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
-import {isIframed} from '../../../src/dom';
+import {getSourceUrl} from '../../../src/url';
+import {viewerForDoc} from '../../../src/viewer';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -67,6 +69,8 @@ export class AmpViewerIntegration {
       return Promise.resolve();
     }
 
+    const ampdoc = getAmpDoc(this.win.document);
+
     if (this.isWebView_) {
       let source;
       let origin;
@@ -79,13 +83,15 @@ export class AmpViewerIntegration {
       }
       return this.webviewPreHandshakePromise_(source, origin)
           .then(receivedPort => {
-            return this.openChannelAndStart_(viewer, receivedPort);
+            return this.openChannelAndStart_(
+              viewer, ampdoc, new Messaging(this.win, receivedPort));
           });
     }
 
     const port = new WindowPortEmulator(
       this.win, dev().assertString(this.unconfirmedViewerOrigin_));
-    return this.openChannelAndStart_(viewer, port);
+    return this.openChannelAndStart_(
+      viewer, ampdoc, new Messaging(this.win, port));
   }
 
   /**
@@ -117,18 +123,24 @@ export class AmpViewerIntegration {
 
   /**
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
-   * @param {!WindowPortEmulator} pipe
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Messaging} messaging
    * @return {!Promise<undefined>}
    * @private
    */
-  openChannelAndStart_(viewer, pipe) {
-    const messaging = new Messaging(this.win, pipe);
+  openChannelAndStart_(viewer, ampdoc, messaging) {
     dev().fine(TAG, 'Send a handshake request');
-    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {}, true)
-        .then(() => {
-          dev().fine(TAG, 'Channel has been opened!');
-          this.setup_(messaging, viewer);
-        });
+    const ampdocUrl = ampdoc.getUrl();
+    const srcUrl = getSourceUrl(ampdocUrl);
+    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {
+      url: ampdocUrl,
+      sourceUrl: srcUrl,
+    },
+    true /* awaitResponse */)
+      .then(() => {
+        dev().fine(TAG, 'Channel has been opened!');
+        this.setup_(messaging, viewer);
+      });
   }
 
   /**

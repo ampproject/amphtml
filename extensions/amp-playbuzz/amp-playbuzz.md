@@ -40,11 +40,20 @@ limitations under the License.
 
 ## Examples:
 
-Playbuzz Item (without info, share-buttons, comments)
+Playbuzz Item by plain url (without info, share-buttons, comments)
 
 ```html
 <amp-playbuzz
     src="https://www.playbuzz.com/HistoryUK/10-classic-christmas-movies"
+    height="500">
+</amp-playbuzz>
+```
+
+Playbuzz Item by item-id (can be found in the item's embed code)
+
+```html
+<amp-playbuzz
+    data-item="a6aa5a14-8888-4618-b2e3-fe6a30d8c51b"
     height="500">
 </amp-playbuzz>
 ```
@@ -62,12 +71,19 @@ With optional parameters (info, share-buttons, comments):
 ```
 
 ## Required Attributes
+### One of the following is required:
 
-**src** (required)
+**src**
 
 The URL for the Playbuzz item.
 Can be any item URL taken from <a href="http://www.playbuzz.com">playbuzz.com</a>
 
+**data-item**
+
+The item id for the Playbuzz item.
+Can be taken from the item's embed code (at the item's page at playbuzz website)
+
+** in case both are present data-item will be used
 ## Optional Attributes
 
 **data-item-info** (optional)

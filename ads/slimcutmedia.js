@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
+import {loadScript, validateData} from '../3p/3p';
+
 /**
- * @fileoverview The endpoint for returning Login dialog. It passes the return
- * code back to AMP runtime using window messaging.
+ * @param {!Window} global
+ * @param {!Object} data
  */
+export function slimcutmedia(global, data) {
+  /*eslint "google-camelcase/google-camelcase": 0*/
+  global._scm_amp = {
+    allowed_data: ['pid', 'ffc'],
+    mandatory_data: ['pid'],
+    data,
+  };
 
-import '../../../third_party/babel/custom-babel-helpers';
-import '../../../src/polyfills';
-import {LoginDoneDialog} from './amp-login-done-dialog';
-import {initLogConstructor, setReportError} from '../../../src/log';
-import {reportError} from '../../../src/error';
-import {onDocumentReady} from '../../../src/document-ready';
+  validateData(data,
+      global._scm_amp.mandatory_data, global._scm_amp.allowed_data);
 
-initLogConstructor();
-setReportError(reportError);
-
-onDocumentReady(document, () => {
-  new LoginDoneDialog(window).start();
-});
+  loadScript(global, 'https://static.freeskreen.com/publisher/' + encodeURIComponent(data.pid) + '/freeskreen.min.js');
+}

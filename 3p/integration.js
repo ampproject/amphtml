@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@ import {
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
-import {dev, initLogConstructor, user} from '../src/log';
+import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
@@ -108,6 +108,7 @@ import {mediavine} from '../ads/mediavine';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
 import {mixpo} from '../ads/mixpo';
+import {mywidget} from '../ads/mywidget';
 import {nativo} from '../ads/nativo';
 import {nend} from '../ads/nend';
 import {nokta} from '../ads/nokta';
@@ -124,6 +125,7 @@ import {relap} from '../ads/relap';
 import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
+import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
 import {sortable} from '../ads/sortable';
@@ -153,6 +155,7 @@ import {zucks} from '../ads/zucks';
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
   'mantis-recommend': true,
+  mywidget: true,
   plista: true,
   smartclip: true,
   taboola: true,
@@ -178,6 +181,7 @@ try {
 
 // This should only be invoked after window.context is set
 initLogConstructor();
+setReportError(console.error.bind(console));
 
 // Experiment toggles
 setExperimentToggles(window.context.experimentToggles);
@@ -254,6 +258,7 @@ register('mediavine', mediavine);
 register('meg', meg);
 register('microad', microad);
 register('mixpo', mixpo);
+register('mywidget', mywidget);
 register('nativo', nativo);
 register('nend', nend);
 register('nokta', nokta);
@@ -271,6 +276,7 @@ register('revcontent', revcontent);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);
 register('sklik', sklik);
+register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
 register('sortable', sortable);
