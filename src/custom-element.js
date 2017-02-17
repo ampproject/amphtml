@@ -533,9 +533,12 @@ function createBaseCustomElementClass(win) {
       /**
        * Action queue is initially created and kept around until the element
        * is ready to send actions directly to the implementation.
-       * @private {?Array<!./service/action-impl.ActionInvocation>}
+       * - undefined initially
+       * - array if used
+       * - null after unspun
+       * @private {?Array<!./service/action-impl.ActionInvocation>|undefined}
        */
-      this.actionQueue_ = [];
+      this.actionQueue_ = undefined;
 
       /**
        * Whether the element is in the template.
@@ -716,14 +719,10 @@ function createBaseCustomElementClass(win) {
         this.updateInViewport_(true);
       }
       if (this.actionQueue_) {
-        if (this.actionQueue_.length > 0) {
-          // Only schedule when the queue is not empty, which should be
-          // the case 99% of the time.
-          timerFor(this.ownerDocument.defaultView)
+        // Only schedule when the queue is not empty, which should be
+        // the case 99% of the time.
+        timerFor(this.ownerDocument.defaultView)
             .delay(this.dequeueActions_.bind(this), 1);
-        } else {
-          this.actionQueue_ = null;
-        }
       }
       if (!this.getPlaceholder()) {
         const placeholder = this.createPlaceholder();
@@ -1346,6 +1345,9 @@ function createBaseCustomElementClass(win) {
     enqueAction(invocation) {
       assertNotTemplate(this);
       if (!this.isBuilt()) {
+        if (this.actionQueue_ === undefined) {
+          this.actionQueue_ = [];
+        }
         dev().assert(this.actionQueue_).push(invocation);
       } else {
         this.executionAction_(invocation, false);
