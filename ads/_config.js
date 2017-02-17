@@ -104,6 +104,18 @@ export const adConfig = {
     ],
   },
 
+  adthrive: {
+    prefetch: [
+      'https://www.googletagservices.com/tag/js/gpt.js',
+    ],
+    preconnect: [
+      'https://partner.googleadservices.com',
+      'https://securepubads.g.doubleclick.net',
+      'https://tpc.googlesyndication.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   aduptech: {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
     preconnect: [
