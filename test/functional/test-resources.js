@@ -1662,7 +1662,6 @@ describe('Resources changeSize', () => {
       const task = vsyncSpy.lastCall.args[0];
       const state = {};
       task.mutate(state);
-      console.log('success');
       expect(resource1.changeSize).to.be.calledOnce;
       expect(resource2.changeSize).to.not.be.called;
     });
