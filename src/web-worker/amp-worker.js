@@ -154,4 +154,12 @@ class AmpWorker {
   hasPendingMessages() {
     return Object.keys(this.messages_).length > 0;
   }
+
+  /**
+   * @return {!Promise}
+   * @visibleForTesting
+   */
+  fetchPromiseForTesting() {
+    return this.fetchPromise_;
+  }
 }
