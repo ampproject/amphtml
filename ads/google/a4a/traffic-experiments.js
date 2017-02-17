@@ -23,13 +23,22 @@
  */
 
 import {isGoogleAdsA4AValidEnvironment, EXPERIMENT_ATTRIBUTE} from './utils';
-import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
+import {
+  isExperimentOn,
+  forceExperimentBranch,
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {viewerForDoc} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
-/** @typedef {{control: string, experiment: string, controlMeasureOnRender: ?string}} */
-export let ExperimentInfo;
+/** @typedef {{
+ *    control: string,
+ *    experiment: string,
+ *    controlMeasureOnRender: (string|undefined)
+ *  }} */
+export let A4aExperimentBranches;
 
 /** @type {!string} @private */
 const MANUAL_EXPERIMENT_ID = '117152632';
@@ -56,13 +65,13 @@ const INTERNALLY_SELECTED_ID = '2088462';
  * @param {!Window} win  Host window for the ad.
  * @param {!Element} element Ad tag Element.
  * @param {string} experimentName Overall name for the experiment.
- * @param {!ExperimentInfo} externalBranches experiment and control branch IDs to use
- *   when experiment is triggered externally (e.g., via Google Search
- *   results page).
- * @param {!ExperimentInfo} internalBranches experiment and control branch IDs to
- *   use when experiment is triggered internally (i.e., via client-side
- *   selection).
- * @return {boolean}  Whether Google Ads should attempt to render via the A4A
+ * @param {!A4aExperimentBranches} externalBranches experiment and control
+ *   branch IDs to use when experiment is triggered externally (e.g., via Google
+ *   Search results page).
+ * @param {!A4aExperimentBranches} internalBranches experiment and control
+ *   branch IDs to use when experiment is triggered internally (i.e., via
+ *   client-side selection).
+ * @return {boolean} Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
@@ -76,19 +85,31 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
       experimentName, externalBranches.control,
       externalBranches.experiment, externalBranches.controlMeasureOnRender,
       MANUAL_EXPERIMENT_ID);
-  const experimentInfo = {};
-  experimentInfo[experimentName] = internalBranches;
+  const experimentInfoMap = {};
+  const branches = [
+    internalBranches.control,
+    internalBranches.experiment,
+  ];
+  if (internalBranches.controlMeasureOnRender) {
+    branches.push(internalBranches.controlMeasureOnRender);
+  }
+  experimentInfoMap[experimentName] = {
+    isTrafficEligible: () => true,
+    branches,
+  };
   // Note: Because the same experimentName is being used everywhere here,
-  // randomlySelectUnsetPageExperiments won't add new IDs if
+  // randomlySelectUnsetExperiments won't add new IDs if
   // maybeSetExperimentFromUrl has already set something for this
   // experimentName.
-  randomlySelectUnsetPageExperiments(win, experimentInfo);
+  randomlySelectUnsetExperiments(win, experimentInfoMap);
   if (isExperimentOn(win, experimentName)) {
     // Page is selected into the overall traffic experiment.
     // In other words, if A4A has not yet launched serve A4A Fast Fetch,
     // else serve Delayed Fetch.
-    const selectedBranch = getPageExperimentBranch(win, experimentName);
-    addExperimentIdToElement(selectedBranch, element);
+    const selectedBranch = getExperimentBranch(win, experimentName);
+    if (selectedBranch) {
+      addExperimentIdToElement(selectedBranch, element);
+    }
     // Detect how page was selected into the overall experimentName.
     if (isSetFromUrl) {
       addExperimentIdToElement(EXTERNALLY_SELECTED_ID, element);
@@ -144,8 +165,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   the overall experiment.
  * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
  *   branch of the overall experiment.
- * @param {?string} controlMeasureOnRender  Experiment ID string for the branch
- *   that counts Delayed Fetch on render
+ * @param {string|undefined} controlMeasureOnRender  Experiment ID string for
+ *   the branch that counts Delayed Fetch on render
  * @param {!string} manualId  ID of the manual experiment.
  * @return {boolean}  Whether the experiment state was set from a command-line
  *   parameter or not.
@@ -183,113 +204,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
   }
 }
 
-// TODO(tdrl): New test case: Invoke randomlySelectUnsetPageExperiments twice for different
-// experiment lists.
 
-/**
- * In some browser implementations of Math.random(), sequential calls of
- * Math.random() are correlated and can cause a bias.  In particular,
- * if the previous random() call was < 0.001 (as it will be if we select
- * into an experiment), the next value could be less than 0.5 more than
- * 50.7% of the time.  This provides an implementation that roots down into
- * the crypto API, when available, to produce less biased samples.
- *
- * @return {number} Pseudo-random floating-point value on the range [0, 1).
- */
-function slowButAccuratePrng() {
-  // TODO(tdrl): Implement.
-  return Math.random();
-}
-
-/**
- * Container for alternate random number generator implementations.  This
- * allows us to set an "accurate" PRNG for branch selection, but to mock it
- * out easily in tests.
- *
- * @visibleForTesting
- * @const {!{accuratePrng: function():number}}
- */
-export const RANDOM_NUMBER_GENERATORS = {
-  accuratePrng: slowButAccuratePrng,
-};
-
-/**
- * Selects, uniformly at random, a single property name from all
- * properties set on a given object.
- *
- * @param {!Object} obj Object to select from.
- * @return {string} Single property name from obj.
- */
-function selectRandomProperty(obj) {
-  const allProperties = Object.keys(obj);
-  const rn = RANDOM_NUMBER_GENERATORS.accuratePrng();
-  return allProperties[Math.floor(rn * allProperties.length)];
-}
-
-/**
- * Selects which page-level experiments, if any, a given amp-ad will
- * participate in.  If a given experiment name is already set (including to
- * the null / no branches selected state), this won't alter its state.
- *
- * Check whether a given experiment is set using isExperimentOn(win,
- * experimentName) and, if it is on, look for which branch is selected in
- * win.pageExperimentBranches[experimentName].
- *
- * @param {!Window} win Window context on which to save experiment
- *     selection state.
- * @param {!Object<string,!ExperimentInfo>} experiments  Set of experiments to
- *     configure for this page load.
- * @visibleForTesting
- */
-export function randomlySelectUnsetPageExperiments(win, experiments) {
-  win.pageExperimentBranches = win.pageExperimentBranches || {};
-  for (const experimentName in experiments) {
-    // Skip experimentName if it is not a key of experiments object or if it
-    // has already been populated by some other property.
-    if (!experiments.hasOwnProperty(experimentName) ||
-        win.pageExperimentBranches.hasOwnProperty(experimentName)) {
-      continue;
-    }
-    // If we're in the experiment, but we haven't already forced a specific
-    // experiment branch (e.g., via a test setup), then randomize the branch
-    // choice.
-    if (!win.pageExperimentBranches[experimentName] &&
-        isExperimentOn(win, experimentName)) {
-      const branches = experiments[experimentName];
-      const branch = selectRandomProperty(branches);
-      win.pageExperimentBranches[experimentName] = branches[branch];
-    }
-  }
-}
-
-/**
- * Returns the experiment branch enabled for the given experiment ID.
- * For example, 'control' or 'experiment'.
- *
- * @param {!Window} win Window context to check for experiment state.
- * @param {!string} experimentName Name of the experiment to check.
- * @return {string} Active experiment branch ID for experimentName (possibly
- *     null/false if experimentName has been tested but no branch was enabled).
- */
-export function getPageExperimentBranch(win, experimentName) {
-  return win.pageExperimentBranches[experimentName];
-}
-
-/**
- * Force enable (or disable) a specific branch of a given experiment name.
- * Disables the experiment name altogether if branchId is falseish.
- *
- * @param {!Window} win Window context to check for experiment state.
- * @param {!string} experimentName Name of the experiment to check.
- * @param {?string} branchId ID of branch to force or null/false to disable
- *   altogether.
- * @visibleForTesting
- */
-export function forceExperimentBranch(win, experimentName, branchId) {
-  win.pageExperimentBranches = win.pageExperimentBranches || {};
-  toggleExperiment(win, experimentName, !!branchId, true);
-  win.pageExperimentBranches[experimentName] = branchId;
-}
 
 /**
  * Sets of experiment IDs can be attached to Elements via attributes.  In
@@ -376,7 +291,7 @@ export function isExternallyTriggeredExperiment(element) {
 /**
  * Checks whether the given element is in any of the branches triggered by
  * internal experiment selection (as set by
- * #randomlySelectUnsetPageExperiments).
+ * #randomlySelectUnsetExperiments).
  *
  * @param {!Element} element
  * @return {boolean}
@@ -422,7 +337,7 @@ export function mergeExperimentIds(newId, currentIdString) {
  * Adds a single experimentID to an element iff it's a valid experiment ID.
  *
  * @param {!string} experimentId  ID to add to the element.
- * @param element  Element to add the experiment ID to.
+ * @param element Element to add the experiment ID to.
  */
 export function addExperimentIdToElement(experimentId, element) {
   const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
@@ -433,3 +348,6 @@ export function addExperimentIdToElement(experimentId, element) {
     element.setAttribute(EXPERIMENT_ATTRIBUTE, experimentId);
   }
 }
+
+
+
