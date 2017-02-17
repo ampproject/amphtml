@@ -283,6 +283,10 @@ Remove any `<meta>` tags except for those that:
 
 </details>
 
+#### Remove `amp-live-list` children based on `amp_latest_update_time` parameter
+
+This is discussed in detail at [Server side filtering for `amp-live-list`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
+
 #### Remove `amp-access-hide` sections when `amp-access` JSON is `"type": "server"`
 
 If the document is using `amp-access` type of `server` then the AMP Cache removes any section with the attribute `amp-access-hide` from the document.
