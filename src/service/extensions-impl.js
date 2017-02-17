@@ -35,9 +35,9 @@ import {installPixel} from '../../builtins/amp-pixel';
 import {installStyles} from '../style-installer';
 import {calculateExtensionScriptUrl} from './extension-location';
 
-
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
+const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 
 /**
  * The structure that contains the declaration of a custom element.
@@ -398,7 +398,9 @@ export class Extensions {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       stubElementIfNotKnown(topWin, extensionId);
-      stubElementInChildWindow(childWin, extensionId);
+      if (LEGACY_ELEMENTS.indexOf(extensionId) == -1) {
+        stubElementInChildWindow(childWin, extensionId);
+      }
 
       // Install CSS.
       const promise = this.loadExtension(extensionId).then(extension => {
@@ -590,9 +592,9 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
  * @param {!Window} win
  */
 export function stubLegacyElements(win) {
-  stubElementIfNotKnown(win, 'amp-ad');
-  stubElementIfNotKnown(win, 'amp-embed');
-  stubElementIfNotKnown(win, 'amp-video');
+  LEGACY_ELEMENTS.forEach(name => {
+    stubElementIfNotKnown(win, name);
+  });
 }
 
 

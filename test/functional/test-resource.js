@@ -791,43 +791,6 @@ describe('Resource', () => {
       resource.resume();
     });
   });
-
-  describe('getResourcesInViewport', () => {
-    let resource1;
-    let resource2;
-
-    beforeEach(() => {
-      resource1 = {
-        hasOwner: () => false,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        prerenderAllowed: () => true,
-        overlaps: () => true,
-      };
-      resource2 = {
-        hasOwner: () => false,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        prerenderAllowed: () => true,
-        overlaps: () => false,
-      };
-      resources.resources_ = [resource1, resource2];
-    });
-
-    it('should return a subset of resources that are currently ' +
-       'in the viewport', () => {
-      expect(resources.get().length).to.equal(2);
-      expect(resources.getResourcesInViewport().length).to.equal(1);
-    });
-
-    it('should not return resources that are not allowed to prerender if ' +
-       'in prerender mode', () => {
-      resource1.prerenderAllowed = () => false;
-      expect(resources.get().length).to.equal(2);
-      expect(resources.getResourcesInViewport(false).length).to.equal(1);
-      expect(resources.getResourcesInViewport(true).length).to.equal(0);
-    });
-  });
 });
 
 describe('Resource renderOutsideViewport', () => {

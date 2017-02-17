@@ -151,7 +151,7 @@ export const LIFECYCLE_STAGES = {
   adRequestEnd: '3',
   extractCreativeAndSignature: '4',
   adResponseValidateStart: '5',
-  renderFriendlyStart: '6',
+  renderFriendlyStart: '6',  // TODO(dvoytenko): this signal and similar are actually "embed-create", not "render-start".
   renderCrossDomainStart: '7',
   renderFriendlyEnd: '8',
   renderCrossDomainEnd: '9',
@@ -166,6 +166,7 @@ export const LIFECYCLE_STAGES = {
   layoutAdPromiseDelay: '18',
   signatureVerifySuccess: '19',
   networkError: '20',
+  friendlyIframeIniLoad: '21',
 };
 
 /**
@@ -1066,7 +1067,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Render a validated AMP creative directly in the parent page.
    * @param {!CreativeMetaDataDef} creativeMetaData Metadata required to render
    *     AMP creative.
-   * @return {Promise} Whether the creative was successfully
+   * @return {!Promise} Whether the creative was successfully
    *     rendered.
    * @private
    */
@@ -1095,6 +1096,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     return installFriendlyIframeEmbed(
         iframe, this.element, {
+          host: this.element,
           url: this.adUrl_,
           html: creativeMetaData.minifiedCreative,
           extensionIds: creativeMetaData.customElementExtensions || [],
@@ -1128,7 +1130,13 @@ export class AmpA4A extends AMP.BaseElement {
                 dev().error(TAG, this.element.getAttribute('type'),
                   'getTimingDataAsync for renderFriendlyEnd failed: ', err);
               });
-          return true;
+          // It's enough to wait for "ini-load" signal because in a FIE case
+          // we know that the embed no longer consumes significant resources
+          // after the initial load.
+          return friendlyIframeEmbed.whenIniLoaded();
+        }).then(() => {
+          // Capture ini-load ping.
+          this.protectedEmitLifecycleEvent_('friendlyIframeIniLoad');
         });
   }
 

@@ -15,10 +15,12 @@
  */
 
 import {documentInfoForDoc} from '../document-info';
-import {whenDocumentReady, whenDocumentComplete} from '../document-ready';
+import {layoutRectLtwh} from '../layout-rect';
 import {fromClass} from '../service';
 import {resourcesForDoc} from '../resources';
 import {viewerForDoc} from '../viewer';
+import {viewportForDoc} from '../viewport';
+import {whenDocumentComplete} from '../document-ready';
 
 
 /**
@@ -87,16 +89,6 @@ export class Performance {
 
     /** @private {boolean} */
     this.isPerformanceTrackingOn_ = false;
-
-    /** @private @const {!Promise} */
-    this.whenReadyToRetrieveResourcesPromise_ =
-        whenDocumentReady(this.win.document)
-        .then(() => {
-          // Two fold. First, resolve the promise to undefined.
-          // Second, causes a delay by introducing another async request
-          // (this `#then` block) so that Resources' onDocumentReady event
-          // is guaranteed to fire.
-        });
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => {
@@ -198,20 +190,10 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    return this.whenReadyToRetrieveResources_().then(() => {
-      return Promise.all(this.resources_.getResourcesInViewport().map(r => {
-        return r.loadedOnce();
-      }));
-    });
-  }
-
-  /**
-   * Returns a promise that is resolved when the document is ready and
-   * after a microtask delay.
-   * @return {!Promise}
-   */
-  whenReadyToRetrieveResources_() {
-    return this.whenReadyToRetrieveResourcesPromise_;
+    const size = viewportForDoc(this.win.document).getSize();
+    const rect = layoutRectLtwh(0, 0, size.width, size.height);
+    return this.resources_.getResourcesInRect(this.win, rect).then(
+        resources => Promise.all(resources.map(r => r.loadedOnce())));
   }
 
   /**

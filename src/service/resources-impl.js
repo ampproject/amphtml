@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '../common-signals';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
@@ -37,6 +38,7 @@ import {areMarginsChanged} from '../layout-rect';
 import {documentInfoForDoc} from '../document-info';
 
 const TAG_ = 'Resources';
+const READY_SCAN_SIGNAL_ = 'ready-scan';
 const LAYOUT_TASK_ID_ = 'L';
 const LAYOUT_TASK_OFFSET_ = 0;
 const PRELOAD_TASK_ID_ = 'P';
@@ -252,26 +254,53 @@ export class Resources {
    * @restricted
    */
   renderStarted() {
-    this.ampdoc.signals().signal('render-start');
+    this.ampdoc.signals().signal(CommonSignals.RENDER_START);
   }
 
   /**
-   * Returns a subset of resources which is identified as being in the current
-   * viewport.
+   * Returns a subset of resources which are (1) belong to the specified host
+   * window, and (2) positioned in the specified rect.
+   * @param {!Window} hostWin
+   * @param {!../layout-rect.LayoutRectDef} rect
    * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
-   * @return {!Array<!Resource>}
+   * @return {!Promise<!Array<!Resource>>}
    */
-  getResourcesInViewport(opt_isInPrerender) {
+  getResourcesInRect(hostWin, rect, opt_isInPrerender) {
     opt_isInPrerender = opt_isInPrerender || false;
-    const viewportRect = this.viewport_.getRect();
-    return this.resources_.filter(r => {
-      if (r.hasOwner() || !r.isDisplayed() || !r.overlaps(viewportRect)) {
-        return false;
-      }
-      if (opt_isInPrerender && !r.prerenderAllowed()) {
-        return false;
-      }
-      return true;
+
+    // First, wait for the `ready-scan` signal. Waiting for each element
+    // individually is too expensive and `ready-scan` will cover most of
+    // the initially parsed elements.
+    // TODO(jridgewell): this path should be switched to use a future
+    // "layer has been measured" signal.
+    return this.ampdoc.signals().whenSignal(READY_SCAN_SIGNAL_).then(() => {
+      // Second, wait for any left-over elements to complete measuring.
+      const measurePromiseArray = [];
+      this.resources_.forEach(r => {
+        if (!r.hasBeenMeasured() &&
+            r.hostWin == hostWin &&
+            !r.hasOwner()) {
+          measurePromiseArray.push(this.ensuredMeasured_(r));
+        }
+      });
+      return Promise.all(measurePromiseArray);
+    }).then(() => {
+      // Finally, filter visible resources.
+      return this.resources_.filter(r => {
+        if (r.hostWin != hostWin ||
+            r.hasOwner() ||
+            !r.hasBeenMeasured() ||
+            !r.isDisplayed() ||
+            // TODO(jridgewell): Remove isFixed check here once the position
+            // is calculted correctly in a separate layer for embeds.
+            (!r.overlaps(rect) && !r.isFixed())) {
+          return false;
+        }
+        if (opt_isInPrerender && !r.prerenderAllowed()) {
+          return false;
+        }
+        return true;
+      });
     });
   }
 
@@ -348,15 +377,26 @@ export class Resources {
    */
   getElementLayoutBox(element) {
     const resource = this.getResourceForElementOptional(element);
-    if (resource && resource.hasBeenMeasured()) {
+    if (resource) {
+      return this.ensuredMeasured_(resource);
+    }
+    return this.vsync_.measurePromise(() => {
+      return this.getViewport().getLayoutRect(element);
+    });
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   * @private
+   */
+  ensuredMeasured_(resource) {
+    if (resource.hasBeenMeasured()) {
       return Promise.resolve(resource.getLayoutBox());
     }
     return this.vsync_.measurePromise(() => {
-      if (resource) {
-        resource.measure();
-        return resource.getLayoutBox();
-      }
-      return this.getViewport().getLayoutRect(element);
+      resource.measure();
+      return resource.getLayoutBox();
     });
   }
 
@@ -839,9 +879,7 @@ export class Resources {
     this.vsync_.mutate(() => this.doPass_());
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   doPass_() {
     if (!this.isRuntimeOn_) {
       dev().fine(TAG_, 'runtime is off');
@@ -851,7 +889,9 @@ export class Resources {
     this.visible_ = this.viewer_.isVisible();
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
 
-    if (this.documentReady_ && this.firstPassAfterDocumentReady_) {
+    const firstPassAfterDocumentReady =
+        (this.documentReady_ && this.firstPassAfterDocumentReady_);
+    if (firstPassAfterDocumentReady) {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
       this.viewer_.sendMessage('documentLoaded', {
@@ -873,9 +913,14 @@ export class Resources {
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
 
-    this.visibilityStateMachine_.setState(
-      this.viewer_.getVisibilityState()
-    );
+    this.visibilityStateMachine_.setState(this.viewer_.getVisibilityState());
+    if (firstPassAfterDocumentReady) {
+      // This signal mainly signifies that most of elements have been measured
+      // by now. This is mostly used to avoid measuring too many elements
+      // individually. This will be superceeded by layers API, e.g.
+      // "layer measured".
+      this.ampdoc.signals().signal(READY_SCAN_SIGNAL_);
+    }
   }
 
   /**
@@ -1127,7 +1172,9 @@ export class Resources {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
             /* scheduleWhenBuilt */ false);
       }
-      if (relayoutAll || r.getState() == ResourceState.NOT_LAID_OUT) {
+      if (relayoutAll ||
+              !r.hasBeenMeasured() ||
+              r.getState() == ResourceState.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
         relayoutCount++;
       }
@@ -1143,11 +1190,12 @@ export class Resources {
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
+        if (r.hasOwner()) {
           continue;
         }
         if (relayoutAll ||
                 r.getState() == ResourceState.NOT_LAID_OUT ||
+                !r.hasBeenMeasured() ||
                 r.isMeasureRequested() ||
                 relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
           const wasDisplayed = r.isDisplayed();

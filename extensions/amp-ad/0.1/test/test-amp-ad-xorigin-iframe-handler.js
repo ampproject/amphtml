@@ -193,6 +193,22 @@ describe('amp-ad-xorigin-iframe-handler', () => {
               .be.rejectedWith(/timeout/);
         });
       });
+
+      it('should not update "ini-load" signal implicitly', () => {
+        return initPromise.then(() => {
+          expect(signals.get('ini-load')).to.be.null;
+        });
+      });
+
+      it('should update "ini-load" signal on message', () => {
+        iframe.postMessageToParent({
+          sentinel: 'amp3ptest' + testIndex,
+          type: 'ini-load',
+        });
+        return initPromise.then(() => {
+          expect(signals.get('ini-load')).to.be.ok;
+        });
+      });
     });
 
     it('should trigger render-start on message "bootstrap-loaded" if' +
@@ -229,6 +245,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     it('should resolve directly if it is A4A', () => {
       return iframeHandler.init(iframe, true).then(() => {
         expect(iframe.style.visibility).to.equal('');
+        expect(iframe.readyState).to.equal('complete');
       });
     });
   });

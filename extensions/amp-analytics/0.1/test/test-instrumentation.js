@@ -21,6 +21,7 @@ import {
 import {
   ClickEventTracker,
   CustomEventTracker,
+  IniLoadTracker,
   SignalTracker,
 } from '../events';
 import {VisibilityState} from '../../../../src/visibility-state';
@@ -196,6 +197,21 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(stub).to.be.calledOnce;
       expect(stub).to.be.calledWith(
           analyticsElement, 'render-start', config, handler);
+    });
+
+    it('should add "ini-load" trigger', () => {
+      const config = {on: 'ini-load'};
+      group.addTrigger(config, handler);
+      const tracker = root.getTrackerOptional('ini-load');
+      expect(tracker).to.be.instanceOf(IniLoadTracker);
+
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const handler = function() {};
+      group.addTrigger(config, handler);
+      expect(stub).to.be.calledOnce;
+      expect(stub).to.be.calledWith(
+          analyticsElement, 'ini-load', config, handler);
     });
   });
 });
