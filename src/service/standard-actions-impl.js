@@ -71,17 +71,19 @@ export class StandardActions {
     switch (invocation.method) {
       case 'setState':
         bindForDoc(this.ampdoc).then(bind => {
-          if (invocation.argsExpression) {
-            // Expression args.
+          const args = invocation.args;
+          const objectString = args['__amp_object_string__'];
+          if (objectString) {
+            // Object string arg.
             const scope = Object.create(null);
             const event = invocation.event;
             if (event && event.detail) {
               scope['event'] = event.detail;
             }
-            bind.setStateWithExpression(invocation.argsExpression, scope);
+            bind.setStateWithExpression(objectString, scope);
           } else {
             // Key-value args.
-            bind.setState(invocation.args);
+            bind.setState(args);
           }
         });
         return;

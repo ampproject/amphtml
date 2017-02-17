@@ -73,7 +73,7 @@ describe('BindEvaluator', () => {
       expressionString: 'oneplusone + 2',
     }]);
     expect(evaluator.bindingsForTesting().length).to.equal(1);
-    const results = evaluator.evaluate({oneplusone: 2});
+    const results = evaluator.evaluateBindings({oneplusone: 2});
     const evaluated = results['results'];
     const errors = results['errors'];
     expect(errors['oneplusone + 2']).to.be.undefined;
@@ -89,7 +89,7 @@ describe('BindEvaluator', () => {
       expressionString: 'outOfScope',
     }]);
     expect(evaluator.bindingsForTesting().length).to.equal(1);
-    const results = evaluator.evaluate({});
+    const results = evaluator.evaluateBindings({});
     const evaluated = results['results'];
     const errors = results['errors'];
     expect(errors['outOfScope']).to.be.undefined;

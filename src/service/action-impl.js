@@ -49,15 +49,11 @@ const ELEMENTS_ACTIONS_MAP_ = {
 let ActionInfoArgsDef;
 
 /**
- * Parsed action invocation data for "event:target.method(arguments)", where
- * `arguments` is either comma-separated key-value pairs (args) or an unparsed
- * expression fragment (argsExpression).
  * @typedef {{
  *   event: string,
  *   target: string,
  *   method: string,
  *   args: ?ActionInfoArgsDef,
- *   argsExpression: ?string,
  *   str: string
  * }}
  */
@@ -75,19 +71,16 @@ export class ActionInvocation {
    * @param {!Node} target
    * @param {string} method
    * @param {?JSONType} args
-   * @param {?string} argsExpression
    * @param {?Element} source
    * @param {?Event} event
    */
-  constructor(target, method, args, argsExpression, source, event) {
+  constructor(target, method, args, source, event) {
     /** @const {!Node} */
     this.target = target;
     /** @const {string} */
     this.method = method;
     /** @const {?JSONType} */
     this.args = args;
-    /** @const {?string} */
-    this.argsExpression = argsExpression;
     /** @const {?Element} */
     this.source = source;
     /** @const {?Event} */
@@ -266,7 +259,6 @@ export class ActionService {
             this.root_,
             actionInfo.method,
             args,
-            actionInfo.argsExpression, // Currently only used for global targets.
             action.node,
             event);
         globalTarget(invocation);
@@ -306,7 +298,7 @@ export class ActionService {
    */
   invoke_(target, method, args, source, event, actionInfo) {
     const invocation = new ActionInvocation(target, method, args,
-        /* argsExpression */ null, source, event);
+        source, event);
 
     // Try a global method handler first.
     if (this.globalMethodHandlers_[invocation.method]) {
@@ -435,9 +427,7 @@ export function parseActionMap(s, context) {
 
         // Method: ".method". Method is optional.
         let method = DEFAULT_METHOD_;
-
         let args = null;
-        let argsExpression = null;
 
         peek = toks.peek();
         if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
@@ -449,8 +439,7 @@ export function parseActionMap(s, context) {
           peek = toks.peek();
           if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
             toks.next();  // Skip '('
-            ({args, argsExpression} =
-                tokenizeMethodArguments(toks, assertToken, assertAction));
+            args = tokenizeMethodArguments(toks, assertToken, assertAction);
           }
         }
 
@@ -460,7 +449,6 @@ export function parseActionMap(s, context) {
           method,
           args: (args && getMode().test && Object.freeze) ?
               Object.freeze(args) : args,
-          argsExpression,
           str: s,
         });
 
@@ -489,64 +477,62 @@ export function parseActionMap(s, context) {
  * @param {!ParserTokenizer} toks
  * @param {!Function} assertToken
  * @param {!Function} assertAction
- * @return {{args: Object, argsExpression: ?string}}
+ * @return {ActionInfoArgsDef}
  * @private
  */
 function tokenizeMethodArguments(toks, assertToken, assertAction) {
   let peek = toks.peek();
   let tok;
-
+  let args = null;
   // Object literal. Format: {...}
   if (peek.type == TokenType.LITERAL && peek.value[0] == '{') {
     // Don't parse object literals. Tokenize as a single expression
     // fragment and delegate to specific action handler.
-    const argsExpression = toks.next().value;
+    args = map();
+    args['__amp_object_string__'] = toks.next().value;
     assertToken(toks.next(), [TokenType.SEPARATOR], ')');
-    return {args: null, argsExpression: String(argsExpression)};
-  }
-
-  // Key-value pairs. Format: key = value, ....
-  let args;
-  do {
-    tok = toks.next();
-    const type = tok.type;
-    const value = tok.value;
-    if (type == TokenType.SEPARATOR && (value == ',' || value == ')')) {
-      // Expected: ignore.
-    } else if (type == TokenType.LITERAL || type == TokenType.ID) {
-      // Key: "key = "
-      assertToken(toks.next(), [TokenType.SEPARATOR], '=');
-      // Value is either a literal or a variable: "foo.bar.baz"
-      tok = assertToken(toks.next(/* convertValue */ true),
-          [TokenType.LITERAL, TokenType.ID]);
-      const argValueTokens = [tok];
-      // Variables have one or more dereferences: ".identifier"
-      if (tok.type == TokenType.ID) {
-        for (peek = toks.peek();
-            peek.type == TokenType.SEPARATOR && peek.value == '.';
-            peek = toks.peek()) {
-          tok = toks.next(); // Skip '.'.
-          tok = assertToken(toks.next(false), [TokenType.ID]);
-          argValueTokens.push(tok);
+  } else {
+    // Key-value pairs. Format: key = value, ....
+    do {
+      tok = toks.next();
+      const type = tok.type;
+      const value = tok.value;
+      if (type == TokenType.SEPARATOR && (value == ',' || value == ')')) {
+        // Expected: ignore.
+      } else if (type == TokenType.LITERAL || type == TokenType.ID) {
+        // Key: "key = "
+        assertToken(toks.next(), [TokenType.SEPARATOR], '=');
+        // Value is either a literal or a variable: "foo.bar.baz"
+        tok = assertToken(toks.next(/* convertValue */ true),
+            [TokenType.LITERAL, TokenType.ID]);
+        const argValueTokens = [tok];
+        // Variables have one or more dereferences: ".identifier"
+        if (tok.type == TokenType.ID) {
+          for (peek = toks.peek();
+              peek.type == TokenType.SEPARATOR && peek.value == '.';
+              peek = toks.peek()) {
+            tok = toks.next(); // Skip '.'.
+            tok = assertToken(toks.next(false), [TokenType.ID]);
+            argValueTokens.push(tok);
+          }
         }
+        const argValue = getActionInfoArgValue(argValueTokens);
+        if (!args) {
+          args = map();
+        }
+        args[value] = argValue;
+        peek = toks.peek();
+        assertAction(
+            peek.type == TokenType.SEPARATOR &&
+            (peek.value == ',' || peek.value == ')'),
+            'Expected either [,] or [)]');
+      } else {
+        // Unexpected token.
+        assertAction(false, `; unexpected token [${tok.value || ''}]`);
       }
-      const argValue = getActionInfoArgValue(argValueTokens);
-      if (!args) {
-        args = map();
-      }
-      args[value] = argValue;
-      peek = toks.peek();
-      assertAction(
-          peek.type == TokenType.SEPARATOR &&
-          (peek.value == ',' || peek.value == ')'),
-          'Expected either [,] or [)]');
-    } else {
-      // Unexpected token.
-      assertAction(false, `; unexpected token [${tok.value || ''}]`);
-    }
-  } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
-
-  return {args, argsExpression: null};
+    } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
+  }
+  return args;
 }
 
 /**
@@ -780,10 +766,17 @@ class ParserTokenizer {
     }
 
     // Object literal.
-    if (c == OBJECT_SET[0]) { // '{'
+    if (c == '{') {
+      let numberOfBraces = 1;
       let end = -1;
       for (let i = newIndex + 1; i < this.str_.length; i++) {
-        if (this.str_[i] == OBJECT_SET[1]) { // '}'
+        const char = this.str_[i];
+        if (char == '{') {
+          numberOfBraces++;
+        } else if (char == '}') {
+          numberOfBraces--;
+        }
+        if (numberOfBraces <= 0) {
           end = i;
           break;
         }
