@@ -484,8 +484,17 @@ export function parseActionMap(s, context) {
   return actionMap;
 }
 
+/**
+ * Tokenizes and returns method arguments, e.g. target.method(arguments).
+ * @param {!ParserTokenizer} toks
+ * @param {!Function} assertToken
+ * @param {!Function} assertAction
+ * @return {{args: Object, argsExpression: ?string}}
+ * @private
+ */
 function tokenizeMethodArguments(toks, assertToken, assertAction) {
-  peek = toks.peek();
+  let peek = toks.peek();
+  let tok;
 
   // Object literal. Format: {...}
   if (peek.type == TokenType.LITERAL && peek.value[0] == '{') {
@@ -774,7 +783,7 @@ class ParserTokenizer {
     if (c == OBJECT_SET[0]) { // '{'
       let end = -1;
       for (let i = newIndex + 1; i < this.str_.length; i++) {
-        if (this.str_.charAt(i) == OBJECT_SET[1]) { // '}'
+        if (this.str_[i] == OBJECT_SET[1]) { // '}'
           end = i;
           break;
         }

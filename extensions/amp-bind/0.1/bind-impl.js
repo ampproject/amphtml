@@ -96,9 +96,6 @@ export class Bind {
     /** @private {?./bind-evaluator.BindEvaluator} */
     this.evaluator_ = null;
 
-    /** @visibleForTesting {?Promise<!Object<string,*>>} */
-    this.evaluatePromise_ = null;
-
     /** @visibleForTesting {?Promise} */
     this.scanPromise_ = null;
 
@@ -170,6 +167,7 @@ export class Bind {
       if (returnValue.error) {
         user().error(TAG,
             'AMP.setState() failed with error: ', returnValue.error);
+        throw returnValue.error;
       } else {
         return this.setState(returnValue.result);
       }
@@ -409,16 +407,17 @@ export class Bind {
    * @private
    */
   digest_(opt_verifyOnly) {
+    let evaluatePromise;
     if (this.workerExperimentEnabled_) {
       user().fine(TAG, 'Asking worker to re-evaluate expressions...');
-      this.evaluatePromise_ =
+      evaluatePromise =
           invokeWebWorker(this.win_, 'bind.evaluateBindings', [this.scope_]);
     } else {
       const evaluation = this.evaluator_.evaluateBindings(this.scope_);
-      this.evaluatePromise_ = Promise.resolve(evaluation);
+      evaluatePromise = Promise.resolve(evaluation);
     }
 
-    return this.evaluatePromise_.then(returnValue => {
+    return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;
       if (opt_verifyOnly) {
         this.verify_(results);
