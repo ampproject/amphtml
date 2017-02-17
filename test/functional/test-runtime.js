@@ -32,7 +32,6 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {platformFor} from '../../src/platform';
 import {runChunksForTesting} from '../../src/chunk';
-import {timerFor} from '../../src/timer';
 import {toggleExperiment} from '../../src/experiments';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
@@ -959,11 +958,9 @@ describes.realWin('runtime multidoc', {
 
 
   describe('messaging', () => {
-    let timer;
     let doc1, doc2, doc3;
 
     beforeEach(() => {
-      timer = timerFor(win);
       doc1 = attach('https://example.org/doc1');
       doc2 = attach('https://example.org/doc2');
       doc3 = attach('https://example.org/doc3');
@@ -993,7 +990,7 @@ describes.realWin('runtime multidoc', {
       viewer.onBroadcast(broadcastReceived);
       const onMessage = sandbox.stub();
       amp.onMessage(function(eventType, data) {
-        if (eventType == 'ignore' || eventType == 'documentLoaded') {
+        if (eventType == 'ignore') {
           return Promise.resolve();
         }
         return onMessage(eventType, data);
@@ -1004,8 +1001,6 @@ describes.realWin('runtime multidoc', {
     it('should broadcast to all but sender', () => {
       doc1.viewer.broadcast({test: 1});
       return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
-        return timer.promise(0);
-      }).then(() => {
         // Sender is not called.
         expect(doc1.broadcastReceived).to.not.be.called;
 
@@ -1026,8 +1021,6 @@ describes.realWin('runtime multidoc', {
       doc3.amp.close();
       doc1.viewer.broadcast({test: 1});
       return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
-        return timer.promise(0);
-      }).then(() => {
         // Sender is not called, closed is not called.
         expect(doc1.broadcastReceived).to.not.be.called;
         expect(doc3.broadcastReceived).to.not.be.called;
@@ -1042,8 +1035,6 @@ describes.realWin('runtime multidoc', {
       doc3.hostElement.parentNode.removeChild(doc3.hostElement);
       doc1.viewer.broadcast({test: 1});
       return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
-        return timer.promise(0);
-      }).then(() => {
         // Sender is not called, closed is not called.
         expect(doc1.broadcastReceived).to.not.be.called;
         expect(doc3.broadcastReceived).to.not.be.called;
@@ -1059,8 +1050,6 @@ describes.realWin('runtime multidoc', {
       doc1.onMessage.returns(Promise.resolve());
       return doc1.viewer.sendMessageAwaitResponse('test3', {test: 3}).then(
           () => {
-            return timer.promise(0);
-          }).then(() => {
             expect(doc1.onMessage).to.be.calledOnce;
             expect(doc1.onMessage.args[0][0]).to.equal('test3');
             expect(doc1.onMessage.args[0][1]).to.deep.equal({test: 3});

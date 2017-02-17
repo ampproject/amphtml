@@ -174,6 +174,12 @@ export class Resources {
     /** @private {boolean} */
     this.vsyncScheduled_ = false;
 
+    /** @private {number} */
+    this.scrollHeight_ = 0;
+
+    /** @private {boolean} */
+    this.maybeChangeHeight_ = false;
+
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.viewer_.getVisibilityState()
@@ -812,6 +818,7 @@ export class Resources {
             this.setRelayoutTop_(updatedRelayoutTop);
             this.schedulePass(FOUR_FRAME_DELAY_);
           }
+          this.maybeChangeHeight_ = true;
         });
       },
     });
@@ -900,6 +907,11 @@ export class Resources {
         serverLayout: doc.documentElement.hasAttribute('i-amphtml-element'),
         linkRels: documentInfoForDoc(this.ampdoc).linkRels,
       }, /* cancelUnsent */true);
+
+      this.scrollHeight_ = this.viewport_.getScrollHeight();
+      this.viewer_.sendMessage('documentHeight',
+          {height: this.scrollHeight_}, /* cancelUnsent */true);
+      dev().fine(TAG_, 'document height on load: ' + this.scrollHeight_);
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -920,6 +932,19 @@ export class Resources {
       // individually. This will be superceeded by layers API, e.g.
       // "layer measured".
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL_);
+    }
+
+    if (this.maybeChangeHeight_) {
+      this.maybeChangeHeight_ = false;
+      this.vsync_.measure(() => {
+        const measuredScrollHeight = this.viewport_.getScrollHeight();
+        if (measuredScrollHeight != this.scrollHeight_) {
+          this.viewer_.sendMessage('documentHeight',
+              {height: measuredScrollHeight}, /* cancelUnsent */true);
+          this.scrollHeight_ = measuredScrollHeight;
+          dev().fine(TAG_, 'document height changed: ' + this.scrollHeight_);
+        }
+      });
     }
   }
 
@@ -967,6 +992,7 @@ export class Resources {
       for (let i = 0; i < deferredMutates.length; i++) {
         deferredMutates[i]();
       }
+      this.maybeChangeHeight_ = true;
     }
     if (this.requestsChangeSize_.length > 0) {
       dev().fine(TAG_, 'change size requests:',
@@ -1061,6 +1087,7 @@ export class Resources {
               request.newHeight, request.newWidth, newMargins);
           request.resource.overflowCallback(/* overflown */ false,
               request.newHeight, request.newWidth, newMargins);
+          this.maybeChangeHeight_ = true;
         }
 
         if (request.callback) {
@@ -1100,6 +1127,7 @@ export class Resources {
               this.viewport_.setScrollTop(state./*OK*/scrollTop +
                   (newScrollHeight - state./*OK*/scrollHeight));
             }
+            this.maybeChangeHeight_ = true;
           },
         }, {});
       }
