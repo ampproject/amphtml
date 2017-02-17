@@ -132,7 +132,9 @@ export class BindEvaluator {
       if (this.validator_.isResultValid(tagName, property, resultString)) {
         cache[expr] = result;
       } else {
-        errors[expr] = `"${result}" is not a valid result for [${property}].`;
+        errors[expr] = ampWorkerErrorForError(
+          new Error(`"${result}" is not a valid result for [${property}].`)
+        );
       }
     });
     return {results: cache, errors};
