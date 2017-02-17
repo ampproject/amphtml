@@ -50,6 +50,11 @@ export function assign(target, var_args) {
  */
 export function install(win) {
   if (!win.Object.assign) {
-    win.Object.assign = assign;
+    win.Object.defineProperty(win.Object, 'assign', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: assign,
+    });
   }
 }

@@ -16,6 +16,7 @@
 
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
+import {filterSplice} from '../../../src/utils/array';
 
 /**
  * @typedef {{
@@ -47,7 +48,7 @@ export class BindEvaluator {
    * @param {!Array<BindingDef>} bindings
    * @return {!Object<string,!Error>}
    */
-  setBindings(bindings) {
+  addBindings(bindings) {
     const errors = Object.create(null);
     // Create BindExpression objects from expression strings.
     bindings.forEach(binding => {
@@ -59,6 +60,22 @@ export class BindEvaluator {
       }
     });
     return errors;
+  }
+
+  /**
+   * Removes all parsed bindings for the provided expressions.
+   * @param {!Array<string>} expressionStrings
+   */
+  removeBindingsWithExpressionStrings(expressionStrings) {
+    const expressionsToRemove = Object.create(null);
+    for (let i = 0; i < expressionStrings.length; i++) {
+      expressionsToRemove[expressionStrings[i]] = true;
+    }
+
+    filterSplice(this.parsedBindings_, binding => {
+      const expressionString = binding.expression.expressionString;
+      return !expressionsToRemove[expressionString];
+    });
   }
 
   /**
@@ -167,6 +184,14 @@ export class BindEvaluator {
       error = e;
     }
     return {result, error};
+  }
+
+  /**
+   * Return parsed bindings for testing.
+   * @visibleForTesting {!Array<ParsedBindingDef>}
+   */
+  parsedBindingsForTesting() {
+    return this.parsedBindings_;
   }
 
   /**

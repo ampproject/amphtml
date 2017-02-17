@@ -18,75 +18,111 @@ import {AdDisplayState, AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {toggleExperiment} from '../../../../src/experiments';
 import {UX_EXPERIMENT} from '../../../../src/layout';
-import * as sinon from 'sinon';
 
-describe('amp-ad-ui handler', () => {
+describes.realWin('amp-ad-ui handler', {
+  amp: {
+    ampdoc: 'single',
+  },
+}, env => {
   let sandbox;
   let adImpl;
   let uiHandler;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    const adElement = document.createElement('amp-ad');
+    sandbox = env.sandbox;
+    const adElement = env.win.document.createElement('amp-ad');
     adImpl = new BaseElement(adElement);
     uiHandler = new AmpAdUIHandler(adImpl);
     uiHandler.setDisplayState(AdDisplayState.LOADING);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-    uiHandler = null;
+    // Always set to true since this is in PROD.
+    // TODO: clean once experiment flag gets removed.
+    toggleExperiment(window, UX_EXPERIMENT, true);
   });
 
   describe('with state LOADED_NO_CONTENT', () => {
-    it('should try to collapse element', () => {
+    it('should try to collapse element first', () => {
       sandbox.stub(adImpl, 'getFallback', () => {
-        return false;
+        return true;
       });
-      sandbox.stub(adImpl, 'attemptChangeHeight', height => {
-        expect(height).to.equal(0);
+      const fallbackSpy = sandbox.stub(adImpl, 'toggleFallback', () => {});
+      const collapseSpy = sandbox.stub(adImpl, 'attemptCollapse', () => {
+        expect(fallbackSpy).to.not.been.called;
         return Promise.resolve();
       });
-      const collapseSpy = sandbox.stub(adImpl, 'collapse', () => {});
       uiHandler.init();
       uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
-      return Promise.resolve().then(() => {
-        expect(collapseSpy).to.be.calledOnce;
-        expect(uiHandler.state).to.equal(3);
+      expect(collapseSpy).to.be.calledOnce;
+    });
+
+    it('should toggle fallback when collapse fail', () => {
+      let resolve = null;
+      const promise = new Promise(resolve_ => {
+        resolve = resolve_;
+      });
+      const placeholderSpy = sandbox.spy(adImpl, 'togglePlaceholder');
+      const fallbackSpy = sandbox.spy(adImpl, 'toggleFallback');
+      sandbox.stub(uiHandler.baseInstance_, 'attemptCollapse', () => {
+        return Promise.reject();
+      });
+      sandbox.stub(uiHandler.baseInstance_, 'deferMutate', callback => {
+        callback();
+        resolve();
+      });
+      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      return promise.then(() => {
+        expect(uiHandler.state).to.equal(AdDisplayState.LOADED_NO_CONTENT);
+        expect(placeholderSpy).to.be.calledWith(false);
+        expect(fallbackSpy).to.be.calledWith(true);
       });
     });
 
-    it('should apply default holder when collapse fail', () => {
+    it('should apply default holder if not provided', () => {
       sandbox.stub(adImpl, 'getFallback', () => {
         return false;
       });
-      sandbox.stub(adImpl, 'attemptChangeHeight', () => {
+      let resolve = null;
+      const promise = new Promise(resolve_ => {
+        resolve = resolve_;
+      });
+      sandbox.stub(adImpl, 'attemptCollapse', () => {
         return Promise.reject();
       });
-      toggleExperiment(window, UX_EXPERIMENT, true);
+      sandbox.stub(adImpl, 'deferMutate', callback => {
+        callback();
+        resolve();
+      });
+      sandbox.stub(adImpl, 'togglePlaceholder', () => {});
+      sandbox.stub(adImpl, 'toggleFallback', () => {});
       uiHandler.init();
       uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
-      return Promise.resolve().then(() => {
+      return promise.then(() => {
+        expect(uiHandler.state).to.equal(AdDisplayState.LOADED_NO_CONTENT);
         expect(adImpl.element.querySelector('[fallback]')).to.be.ok;
       });
     });
 
     it('should NOT continue with display state UN_LAID_OUT', () => {
-      sandbox.stub(adImpl, 'getFallback', () => {
-        return document.createElement('div');
+      let resolve = null;
+      const promise = new Promise(resolve_ => {
+        resolve = resolve_;
       });
-      uiHandler = new AmpAdUIHandler(adImpl);
-      uiHandler.setDisplayState(AdDisplayState.LOADING);
-      const spy = sandbox.stub(adImpl, 'deferMutate', callback => {
+
+      sandbox.stub(adImpl, 'attemptCollapse', () => {
+        return Promise.reject();
+      });
+      sandbox.stub(adImpl, 'deferMutate', callback => {
         uiHandler.state = AdDisplayState.NOT_LAID_OUT;
         callback();
+        resolve();
       });
-      const placeHolderSpy = sandbox.stub(adImpl, 'togglePlaceholder');
+      const fallbackSpy = sandbox.spy(adImpl, 'toggleFallback');
+
       uiHandler.init();
       uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
-      expect(spy).to.be.called;
-      expect(placeHolderSpy).to.not.be.called;
-      expect(uiHandler.state).to.equal(AdDisplayState.NOT_LAID_OUT);
+      return promise.then(() => {
+        expect(fallbackSpy).to.not.be.called;
+        expect(uiHandler.state).to.equal(AdDisplayState.NOT_LAID_OUT);
+      });
     });
   });
 });

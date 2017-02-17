@@ -16,6 +16,7 @@
 tags: {  # amp-audio
   tag_name: "SCRIPT"
   spec_name: "amp-audio extension .js script"
+  satisfies: "amp-audio extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   attrs: {
@@ -65,11 +66,10 @@ tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   html_format: AMP
   tag_name: "AMP-AUDIO"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-audio extension .js script"
+  requires: "amp-audio extension .js script"
   attrs: {
     name: "autoplay"
-    # ^$| prefix intended. empty string is valid.
-    value_regex: "^$|desktop|tablet|mobile|autoplay"
+    value: ""
   }
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
@@ -90,7 +90,7 @@ tags: {  # <amp-audio> for A4A (autoplay attribute disallowed)
   tag_name: "AMP-AUDIO"
   spec_name: "amp-audio (A4A)"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-audio extension .js script"
+  requires: "amp-audio extension .js script"
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"

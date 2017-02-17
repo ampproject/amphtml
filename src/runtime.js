@@ -30,7 +30,8 @@ import {
 import {ampdocServiceFor} from './ampdoc';
 import {startupChunk} from './chunk';
 import {cssText} from '../build/css';
-import {dev, user, initLogConstructor} from './log';
+import {dev, user, initLogConstructor, setReportError} from './log';
+import {reportError} from './error';
 import {
   disposeServicesForDoc,
   fromClassForDoc,
@@ -83,6 +84,7 @@ import {waitForBody} from './dom';
 import * as config from './config';
 
 initLogConstructor();
+setReportError(reportError);
 
 /**
  * - n is the name.
@@ -894,7 +896,8 @@ export function registerForUnitTest(win) {
 export function registerElementForTesting(win, elementName) {
   const element = elementsForTesting[elementName];
   if (!element) {
-    throw new Error('test element not found: ' + elementName);
+    throw new Error('test element not found: ' + elementName +
+      '\nKnown elements ' + Object.keys(elementsForTesting).sort());
   }
   win.AMP.registerElement(element.name, element.implementationClass,
       element.css);

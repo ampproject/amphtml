@@ -84,6 +84,11 @@ export const adConfig = {
     preconnect: 'https://api.adsnative.com',
   },
 
+  adspeed: {
+    preconnect: 'https://g.adspeed.net',
+    renderStartImplemented: true,
+  },
+
   adspirit: {},
 
   adstir: {
@@ -296,6 +301,10 @@ export const adConfig = {
 
   kargo: {},
 
+  kiosked: {
+    renderStartImplemented: true,
+  },
+
   kixer: {
     prefetch: 'https://cdn.kixer.com/ad/load.js',
     renderStartImplemented: true,
@@ -383,6 +392,12 @@ export const adConfig = {
     ],
   },
 
+  mywidget: {
+    preconnect: 'https://likemore-fe.go.mail.ru',
+    prefetch: 'https://likemore-go.imgsmail.ru/widget.amp.js',
+    renderStartImplemented: true,
+  },
+
   nativo: {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
@@ -463,6 +478,15 @@ export const adConfig = {
 
   sklik: {
     prefetch: 'https://c.imedia.cz/js/amp.js',
+  },
+
+  slimcutmedia: {
+    preconnect: [
+      'https://sb.freeskreen.com',
+      'https://static.freeskreen.com',
+      'https://video.freeskreen.com',
+    ],
+    renderStartImplemented: true,
   },
 
   smartadserver: {

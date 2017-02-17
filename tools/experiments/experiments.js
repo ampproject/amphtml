@@ -16,7 +16,8 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
-import {dev, initLogConstructor} from '../../src/log';
+import {dev, initLogConstructor, setReportError} from '../../src/log';
+import {reportError} from '../../src/error';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
@@ -26,6 +27,7 @@ import {onDocumentReady} from '../../src/document-ready';
 import '../../src/service/timer-impl';
 
 initLogConstructor();
+setReportError(reportError);
 
 const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
@@ -263,6 +265,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
          'amp-selector/amp-selector.md',
+  },
+  {
+    id: 'sticky-ad-early-load',
+    name: 'Load sticky-ad early after user first scroll' +
+        'Only apply to 1.0 version',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
   },
 ];
 
