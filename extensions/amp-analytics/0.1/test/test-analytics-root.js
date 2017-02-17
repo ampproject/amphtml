@@ -84,6 +84,11 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     expect(root.signals()).to.equal(ampdoc.signals());
   });
 
+  it('should resolve ini-load signal', () => {
+    ampdoc.signals().signal('ready-scan');
+    return root.whenIniLoaded();
+  });
+
 
   describe('getElement', () => {
 
@@ -385,6 +390,13 @@ describes.realWin('EmbedAnalyticsRoot', {
 
   it('should init with embed signals', () => {
     expect(root.signals()).to.equal(embed.signals());
+  });
+
+  it('should resolve ini-load signal', () => {
+    const stub = sandbox.stub(embed, 'whenIniLoaded', () => Promise.resolve());
+    return root.whenIniLoaded().then(() => {
+      expect(stub).to.be.calledOnce;
+    });
   });
 
 

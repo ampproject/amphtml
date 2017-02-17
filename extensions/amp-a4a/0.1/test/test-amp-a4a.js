@@ -25,6 +25,8 @@ import {
   SAFEFRAME_IMPL_PATH,
   protectFunctionWrapper,
 } from '../amp-a4a';
+import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {Signals} from '../../../../src/utils/signals';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
@@ -142,6 +144,11 @@ describe('amp-a4a', () => {
     element.isBuilt = () => {return true;};
     element.getLayoutBox = () => {
       return opt_rect || layoutRectLtwh(0, 0, 200, 50);
+    };
+    const signals = new Signals();
+    element.signals = () => signals;
+    element.renderStarted = () => {
+      signals.signal('render-start');
     };
     doc.body.appendChild(element);
     return element;
@@ -304,6 +311,31 @@ describe('amp-a4a', () => {
         expect(a4aBody).to.be.ok;
         expect(a4aBody).to.be.visible;
         expect(a4a.friendlyIframeEmbed_).to.exist;
+      });
+    });
+
+    it('for A4A FIE should wait for initial layout', () => {
+      let iniLoadResolver;
+      const iniLoadPromise = new Promise(resolve => {
+        iniLoadResolver = resolve;
+      });
+      const whenIniLoadedStub = sandbox.stub(
+          FriendlyIframeEmbed.prototype,
+          'whenIniLoaded',
+          () => iniLoadPromise);
+      const lifecycleEventStub = sandbox.stub(
+          a4a, 'protectedEmitLifecycleEvent_');
+      a4a.onLayoutMeasure();
+      const layoutPromise = a4a.layoutCallback();
+      return Promise.resolve().then(() => {
+        expect(whenIniLoadedStub).to.not.be.called;
+        iniLoadResolver();
+        return layoutPromise;
+      }).then(() => {
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+        expect(a4a.friendlyIframeEmbed_.host).to.equal(a4a.element);
+        expect(whenIniLoadedStub).to.be.calledOnce;
+        expect(lifecycleEventStub).to.be.calledWith('friendlyIframeIniLoad');
       });
     });
 

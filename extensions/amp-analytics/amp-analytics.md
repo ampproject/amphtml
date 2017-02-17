@@ -414,7 +414,7 @@ The trigger for the embed element has to include `selector` that points to the e
 "triggers": {
   "renderStart": {
     "on": "render-start",
-    "request": "render-start",
+    "request": "request",
     "selector": "#embed1"
   }
 }
@@ -425,7 +425,38 @@ This event is also emitted by the document itself and can be configured as:
 "triggers": {
   "renderStart": {
     "on": "render-start",
-    "request": "render-start"
+    "request": "request"
+  }
+}
+```
+
+#### Initial load trigger (`"on": "ini-load"`)
+This event is triggered when initial contents of an AMP element or an AMP document have been loaded.
+
+The "initial load" is defined in relationship to the container and its initial size.
+More specifically:
+ - For a document: all elements in the first viewport.
+ - For an embed element: all content elements in the embed document that are positiond within
+   the initial size of the embed element.
+ - For a simple AMP element (e.g. `amp-img`): the resources itself, such as an image or a video.
+
+The trigger for an embed or an AMP element has to include `selector` that points to the element:
+```javascript
+"triggers": {
+  "iniLoad": {
+    "on": "ini-load",
+    "request": "request",
+    "selector": "#embed1"
+  }
+}
+```
+
+This event is also emitted by the document itself and can be configured as:
+```javascript
+"triggers": {
+  "iniLoad": {
+    "on": "ini-load",
+    "request": "request"
   }
 }
 ```

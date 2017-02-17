@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '../../../src/common-signals';
 import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev,user} from '../../../src/log';
@@ -140,7 +141,7 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /**
-   * Function that check if ad has been built.  If not, wait for the 'built'
+   * Function that check if ad has been built.  If not, wait for the "built"
    * signal. Otherwise schedule layout for ad.
    * @private
    */
@@ -165,8 +166,8 @@ class AmpStickyAd extends AMP.BaseElement {
     // all types of ads.
     const signals = ad.signals();
     return Promise.race([
-      signals.whenSignal('render-start'),
-      signals.whenSignal('load-end'),
+      signals.whenSignal(CommonSignals.RENDER_START),
+      signals.whenSignal(CommonSignals.LOAD_END),
     ]).then(() => {
       return this.vsync_.mutatePromise(() => {
         // Set sticky-ad to visible and change container style

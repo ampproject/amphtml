@@ -21,6 +21,7 @@ import {
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
+import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
 const TAG = 'amp-analytics';
 
@@ -263,6 +264,14 @@ export class AnalyticsRoot {
       }
     };
   }
+
+  /**
+   * Returns the promise that will be resolved as soon as the elements within
+   * the root have been loaded inside the first viewport of the root.
+   * @return {!Promise}
+   * @abstract
+   */
+  whenIniLoaded() {}
 }
 
 
@@ -301,6 +310,11 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
   /** @override */
   getElementById(id) {
     return this.ampdoc.getElementById(id);
+  }
+
+  /** @override */
+  whenIniLoaded() {
+    return whenContentIniLoad(this.ampdoc, this.ampdoc.win);
   }
 }
 
@@ -343,6 +357,11 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
   /** @override */
   getElementById(id) {
     return this.embed.win.document.getElementById(id);
+  }
+
+  /** @override */
+  whenIniLoaded() {
+    return this.embed.whenIniLoaded();
   }
 }
 

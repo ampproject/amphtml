@@ -268,6 +268,7 @@ describe('Resources', () => {
       prerenderAllowed: () => false,
       renderOutsideViewport: () => false,
       startLayout: () => {},
+      applySizesAndMediaQuery: () => {},
     };
     resources.visible_ = false;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
@@ -290,6 +291,7 @@ describe('Resources', () => {
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#P',
+      applySizesAndMediaQuery: () => {},
     };
     resources.visible_ = false;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
@@ -309,6 +311,7 @@ describe('Resources', () => {
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       startLayout: () => {},
+      applySizesAndMediaQuery: () => {},
     };
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(0);
@@ -327,6 +330,7 @@ describe('Resources', () => {
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#L',
+      applySizesAndMediaQuery: () => {},
     };
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
@@ -855,12 +859,41 @@ describe('Resources discoverWork', () => {
     resources.resources_ = [resource1, resource2];
     resources.vsync_ = {
       mutate: callback => callback(),
+      measurePromise: callback => Promise.resolve(callback()),
     };
   });
 
   afterEach(() => {
     viewportMock.verify();
     sandbox.restore();
+  });
+
+  it('should set ready-scan signal on first ready pass', () => {
+    resources.isRuntimeOn_ = true;
+    resources.documentReady_ = true;
+    resources.firstPassAfterDocumentReady_ = true;
+    sandbox.stub(resources.visibilityStateMachine_, 'setState');
+    resources.doPass_();
+    resources.isRuntimeOn_ = false;
+    expect(resources.ampdoc.signals().get('ready-scan')).to.be.ok;
+  });
+
+  it('should measure unbuilt elements', () => {
+    resources.visible_ = true;
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+      VisibilityState.VISIBLE
+    );
+    viewportMock.expects('getRect').returns(
+        layoutRectLtwh(0, 0, 300, 400)).once();
+    resource1.isBuilt = () => false;
+    const mediaSpy = sandbox.stub(resource1.element, 'applySizesAndMediaQuery');
+    expect(resource1.hasBeenMeasured()).to.be.false;
+    resource1.isBuilt = () => false;
+
+    resources.discoverWork_();
+
+    expect(resource1.hasBeenMeasured()).to.be.true;
+    expect(mediaSpy).to.be.calledOnce;
   });
 
   it('should render two screens when visible', () => {
@@ -896,6 +929,8 @@ describe('Resources discoverWork', () => {
   it('should re-render from requested position', () => {
     resource1.state_ = ResourceState.LAYOUT_COMPLETE;
     resource2.state_ = ResourceState.LAYOUT_COMPLETE;
+    resource1.hasBeenMeasured = () => true;
+    resource2.hasBeenMeasured = () => true;
     resource1.element.getBoundingClientRect =
         () => layoutRectLtwh(10, 10, 100, 101);
     resource2.element.getBoundingClientRect =
@@ -1119,6 +1154,100 @@ describe('Resources discoverWork', () => {
 
     expect(resource1.build).to.not.be.called;
     expect(schedulePassStub).to.not.be.called;
+  });
+
+  describe('getResourcesInRect', () => {
+
+    beforeEach(() => {
+      resources.isRuntimeOn_ = false;
+      resources.ampdoc.signals().signal('ready-scan');
+    });
+
+    it('should wait until ready-scan', () => {
+      const rect = layoutRectLtwh(0, 0, 100, 100);
+      resources.ampdoc.signals().reset('ready-scan');
+      expect(resource1.hasBeenMeasured()).to.be.false;
+      const promise = resources.getResourcesInRect(window, rect);
+      resource1.measure();
+      const stub = sandbox.stub(resource1, 'measure');
+      resources.ampdoc.signals().signal('ready-scan');
+      return promise.then(() => {
+        expect(stub).to.not.be.called;
+      });
+    });
+
+    it('should measure when needed only', () => {
+      const rect = layoutRectLtwh(0, 0, 100, 100);
+      expect(resource1.hasBeenMeasured()).to.be.false;
+      expect(resource2.hasBeenMeasured()).to.be.false;
+      resource1.measure();
+      const stub1 = sandbox.stub(resource1, 'measure');
+      const stub2 = sandbox.stub(resource2, 'measure');
+      return resources.getResourcesInRect(window, rect).then(() => {
+        expect(stub1).to.not.be.called;
+        expect(stub2).to.be.calledOnce;
+      });
+    });
+
+    it('should measure only filtered elements', () => {
+      const rect = layoutRectLtwh(0, 0, 100, 100);
+      expect(resource1.hasBeenMeasured()).to.be.false;
+      expect(resource2.hasBeenMeasured()).to.be.false;
+      resource1.hostWin = {};
+      resource2.hasOwner = () => true;
+      const stub1 = sandbox.stub(resource1, 'measure');
+      const stub2 = sandbox.stub(resource2, 'measure');
+      return resources.getResourcesInRect(window, rect).then(() => {
+        expect(stub1).to.not.be.called;
+        expect(stub2).to.not.be.called;
+      });
+    });
+
+    it('should resolve visible elements', () => {
+      const rect = layoutRectLtwh(0, 0, 100, 1500);
+      return resources.getResourcesInRect(window, rect).then(res => {
+        expect(res).to.have.length(2);
+        expect(res[0]).to.equal(resource1);
+        expect(res[1]).to.equal(resource2);
+      });
+    });
+
+    it('should ignore invisible elements', () => {
+      const rect = layoutRectLtwh(0, 0, 100, 1500);
+      resource2.element.getBoundingClientRect =
+          () => layoutRectLtwh(0, 0, 0, 0);
+      return resources.getResourcesInRect(window, rect).then(res => {
+        expect(res).to.have.length(1);
+        expect(res[0]).to.equal(resource1);
+      });
+    });
+
+    it('should ignore out-of-rect elements', () => {
+      const rect = layoutRectLtwh(0, 0, 100, 100);
+      return resources.getResourcesInRect(window, rect).then(res => {
+        expect(res).to.have.length(1);
+        expect(res[0]).to.equal(resource1);
+      });
+    });
+
+    it('should allow out-of-rect fixed elements', () => {
+      const rect = layoutRectLtwh(0, 0, 100, 100);
+      resource2.isFixed = () => true;
+      return resources.getResourcesInRect(window, rect).then(res => {
+        expect(res).to.have.length(2);
+        expect(res[0]).to.equal(resource1);
+        expect(res[1]).to.equal(resource2);
+      });
+    });
+
+    it('should filter out elements', () => {
+      const rect = layoutRectLtwh(0, 0, 100, 1500);
+      resource1.hostWin = {};
+      resource2.hasOwner = () => true;
+      return resources.getResourcesInRect(window, rect).then(res => {
+        expect(res).to.have.length(0);
+      });
+    });
   });
 });
 
@@ -1936,7 +2065,13 @@ describe('Resources.add/remove', () => {
         return true;
       },
       pauseCallback() {},
+      resumeCallback() {},
       dispatchCustomEvent() {},
+      applySizesAndMediaQuery() {},
+      updateLayoutBox() {},
+      getBoundingClientRect() {
+        return layoutRectLtwh(0, 0, 0, 0);
+      },
     };
     element.build = sandbox.spy();
     return element;

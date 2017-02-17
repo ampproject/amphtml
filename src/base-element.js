@@ -697,8 +697,8 @@ export class BaseElement {
   }
 
   /**
-   * Returns the layout rectangle of the element used for reporting this
-   * element's intersection with the viewport.
+   * Returns the layout rectangle used for when calculating this element's
+   * intersection with the viewport.
    * @return {!./layout-rect.LayoutRectDef}
    */
   getIntersectionElementLayoutBox() {
