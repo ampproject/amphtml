@@ -77,7 +77,7 @@ export function facebook(global, data) {
 
   if (extension === 'AMP-FACEBOOK-COMMENTS') {
     container = getCommentsContainer(global, data);
-  } else if(extension === 'AMP-FACEBOOK') {
+  } else if (extension === 'AMP-FACEBOOK') {
     container = getPostContainer(global, data);
   }
 
