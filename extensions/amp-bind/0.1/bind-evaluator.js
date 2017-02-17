@@ -17,6 +17,7 @@
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {filterSplice} from '../../../src/utils/array';
+import {ampWorkerErrorForError} from '../../../src/web-worker/amp-worker';
 
 /**
  * @typedef {{
@@ -66,9 +67,7 @@ export class BindEvaluator {
       try {
         expression = new BindExpression(e.expressionString);
       } catch (error) {
-        /** @type {../../../src/web-worker/amp-worker.AmpWorkerErrorDef} */
-        const ampWorkerError = {message: error.message, stack: error.stack};
-        errors[string] = ampWorkerError;
+        errors[string] = ampWorkerErrorForError(error);
         continue;
       }
 
@@ -125,9 +124,7 @@ export class BindEvaluator {
       try {
         result = binding.expression.evaluate(scope);
       } catch (error) {
-        /** @type {../../../src/web-worker/amp-worker.AmpWorkerErrorDef} */
-        const ampWorkerError = {message: error.message, stack: error.stack};
-        errors[expr] = ampWorkerError;
+        errors[expr] = ampWorkerErrorForError(error);
         return;
       }
 

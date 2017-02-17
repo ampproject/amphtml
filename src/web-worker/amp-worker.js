@@ -39,8 +39,6 @@ export let AmpWorkerErrorDef;
 
 /**
  * Converts an amp worker error into a real Error object.
- * This is necessary as web-workers cannot send or receive
- * error objects.
  * @param {!AmpWorkerErrorDef} ampWorkerError
  * @return {!Error}
  */
@@ -50,6 +48,17 @@ export function errorForAmpWorkerError(ampWorkerError) {
   error.stack = stack;
   return error;
 }
+
+/**
+ * Converts an error into an AmpWorkerError object, which can be
+ * passed by workers.
+ * @param {!Error} error
+ * @return {!AmpWorkerError}
+ */
+export function ampWorkerErrorForError(error) {
+  return {message: error.message, stack: error.stack};
+}
+
 
 /**
  * Invokes function named `method` with args `opt_args` on the web worker
