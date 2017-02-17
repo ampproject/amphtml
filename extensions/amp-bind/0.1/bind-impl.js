@@ -19,6 +19,7 @@ import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
+import {fromClassForDoc} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -57,6 +58,15 @@ let BoundPropertyDef;
  * }}
  */
 let BoundElementDef;
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @return {!Bind}
+ */
+export function installBindForTesting(nodeOrAmpDoc) {
+  return fromClassForDoc(nodeOrAmpDoc, 'bind', Bind);
+}
+
 
 /**
  * Bind is the service that handles the Bind lifecycle, from identifying
@@ -137,6 +147,7 @@ export class Bind {
    * @param {boolean=} opt_skipDigest
    */
   setState(state, opt_skipDigest) {
+    debugger;
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     // TODO(choumx): What if `state` contains references to globals?
