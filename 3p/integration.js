@@ -199,7 +199,7 @@ register('adblade', adblade);
 register('adbutler', adbutler);
 register('adform', adform);
 register('adgeneration', adgeneration);
-register('adhese', adgeneration);
+register('adhese', adhese);
 register('adition', adition);
 register('adman', adman);
 register('adreactor', adreactor);
