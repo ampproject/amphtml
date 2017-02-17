@@ -67,7 +67,6 @@ export function installBindForTesting(nodeOrAmpDoc) {
   return fromClassForDoc(nodeOrAmpDoc, 'bind', Bind);
 }
 
-
 /**
  * Bind is the service that handles the Bind lifecycle, from identifying
  * bindings in the document to scope mutations to reevaluating expressions
@@ -445,10 +444,8 @@ export class Bind {
   }
 
   /**
-   * Applies expression results to DOM. Returns a promise that resolves when
-   * all bindings have been applied.
+   * Applies expression results to DOM.
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
-   * @return !Promise;
    * @private
    */
   apply_(results) {
