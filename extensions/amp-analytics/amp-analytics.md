@@ -431,7 +431,7 @@ This event is also emitted by the document itself and can be configured as:
 ```
 
 #### Initial load trigger (`"on": "ini-load"`)
-This event is triggered when initial contents of an element or a document have been loaded.
+This event is triggered when initial contents of an AMP element or an AMP document have been loaded.
 
 The "initial load" is defined in relationship to the container and its initial size.
 More specifically:
