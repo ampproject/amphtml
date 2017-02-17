@@ -406,7 +406,7 @@ export class Bind {
       this.evaluatePromise_ = Promise.resolve(evaluation);
     }
 
-    this.evaluatePromise_ = this.evaluatePromise_.then(returnValue => {
+    this.evaluatePromise_.then(returnValue => {
       const {results, errors} = returnValue;
       if (opt_verifyOnly) {
         this.verify_(results);
