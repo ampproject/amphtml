@@ -58,6 +58,13 @@ You can listen to multiple events on an element by separating the two events wit
 
 Example: `on="submit-success:lightbox1;submit-error:lightbox2"`
 
+
+## Multiple Actions For One Event
+You can execute multiple actions in sequence for the same event by separating the two actions with a comma ','.
+
+Example: `on="tap:target1.actionA,target2.actionB"`
+
+
 ## Globally defined Events and Actions
 Currently AMP defines `tap` event globally that you can listen to on any HTML element (including amp-elements).
 
