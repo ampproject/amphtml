@@ -15,14 +15,13 @@
  */
 
 import '../../../amp-carousel/0.1/amp-carousel';
-import {Bind, installBindForTesting} from '../bind-impl';
+import {installBindForTesting} from '../bind-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {createIframePromise} from '../../../../testing/iframe';
 import {bindForDoc} from '../../../../src/bind';
-import * as sinon from 'sinon';
 
-describes.realWin('test-scrollable-carousel', {amp: 1}, env => {
+describe('test-scrollable-carousel', () => {
   let iframe;
   let slideNum;
   let carousel;
@@ -32,16 +31,17 @@ describes.realWin('test-scrollable-carousel', {amp: 1}, env => {
     return createIframePromise().then(i => {
       iframe = i;
       const div = iframe.doc.createElement('div');
-      // Cannot create P element directly as bind property names [*] 
+      // Cannot create P element directly as bind property names [*]
       // are not considered valid element names
       div.innerHTML = '<p [text]="selectedSlide">0</p>';
       slideNum = div.firstElementChild;
       iframe.doc.getElementById('parent').appendChild(slideNum);
 
-      div.innerHTML = '<amp-carousel width="300" height="100" type="slides"' + 
-          'id="carousel" on="slideChange:AMP.setState(selectedSlide=event.index)"' + 
+      div.innerHTML = '<amp-carousel width="300" height="100" type="slides" ' +
+          'id="carousel" ' +
+          'on="slideChange:AMP.setState(selectedSlide=event.index)" ' +
           '[slide]="selectedSlide">';
-      carouselElement = div.firstElementChild;
+      const carouselElement = div.firstElementChild;
 
       const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
           'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
@@ -51,7 +51,7 @@ describes.realWin('test-scrollable-carousel', {amp: 1}, env => {
         img.setAttribute('src', imgUrl);
         carouselElement.appendChild(img);
       }
-      return iframe.addElement(carouselElement)
+      return iframe.addElement(carouselElement);
     }).then(c => {
       carousel = c;
       chunkInstanceForTesting(iframe.ampdoc);
@@ -74,7 +74,7 @@ describes.realWin('test-scrollable-carousel', {amp: 1}, env => {
   it('should update dependent bindings when the carousel slide changes', () => {
     const impl = carousel.implementation_;
     expect(slideNum.innerHTML).to.equal('0');
-    impl.go(1, false /* animate */ );
+    impl.go(1, false /* animate */);
     return waitForBindApplication().then(() => {
       expect(slideNum.innerHTML).to.equal('1');
     });
@@ -83,7 +83,7 @@ describes.realWin('test-scrollable-carousel', {amp: 1}, env => {
   it('should change slides when the slide variable binding changes', () => {
     const impl = carousel.implementation_;
     expect(impl.slideIndex_).to.equal(0);
-    bind.setState({selectedSlide:1});
+    bind.setState({selectedSlide: 1});
     return waitForBindApplication().then(() => {
       expect(impl.slideIndex_).to.equal(1);
     });
