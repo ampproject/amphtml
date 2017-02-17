@@ -24,8 +24,31 @@ import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
 
 
+function createExecElement(id, enqueAction) {
+  const execElement = document.createElement('amp-element');
+  execElement.setAttribute('id', id);
+  execElement.enqueAction = enqueAction;
+  return execElement;
+}
+
+
+function assertInvocation(inv, target, method, source, opt_event, opt_args) {
+  expect(inv.target).to.equal(target);
+  expect(inv.method).to.equal(method);
+  expect(inv.source).to.equal(source);
+
+  if (opt_event !== undefined) {
+    expect(inv.event).to.equal(opt_event);
+  }
+
+  if (opt_args !== undefined) {
+    expect(inv.args).to.deep.equal(opt_args);
+  }
+}
+
+
 describe('ActionService parseAction', () => {
-  function parseAction(s) {
+  function parseMultipleActions(s) {
     const actionMap = parseActionMap(s);
     if (actionMap == null) {
       return null;
@@ -35,11 +58,30 @@ describe('ActionService parseAction', () => {
     return actionMap[keys[0]];
   }
 
+  function parseAction(s) {
+    const actions = parseMultipleActions(s);
+    if (actions == null) {
+      return null;
+    }
+    expect(actions).to.have.length(1);
+    return actions[0];
+  }
+
   it('should parse full form', () => {
     const a = parseAction('event1:target1.method1');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
+  });
+
+  it('should parse full form with two actions', () => {
+    const a = parseMultipleActions('event1:target1.methodA,target2.methodB');
+    expect(a[0].event).to.equal('event1');
+    expect(a[0].target).to.equal('target1');
+    expect(a[0].method).to.equal('methodA');
+    expect(a[1].event).to.equal('event1');
+    expect(a[1].target).to.equal('target2');
+    expect(a[1].method).to.equal('methodB');
   });
 
   it('should parse with default method', () => {
@@ -49,11 +91,31 @@ describe('ActionService parseAction', () => {
     expect(a.method).to.equal('activate');
   });
 
+  it('should parse with default method for two different targets', () => {
+    const a = parseMultipleActions('event1:target1,target2');
+    expect(a[0].event).to.equal('event1');
+    expect(a[0].target).to.equal('target1');
+    expect(a[0].method).to.equal('activate');
+    expect(a[1].event).to.equal('event1');
+    expect(a[1].target).to.equal('target2');
+    expect(a[1].method).to.equal('activate');
+  });
+
   it('should parse with numeric target', () => {
     const a = parseAction('event1:1234.method1');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('1234');
     expect(a.method).to.equal('method1');
+  });
+
+  it('should parse with two numeric targets', () => {
+    const a = parseMultipleActions('event1:1234.method1,9876.method2');
+    expect(a[0].event).to.equal('event1');
+    expect(a[0].target).to.equal('1234');
+    expect(a[0].method).to.equal('method1');
+    expect(a[1].event).to.equal('event1');
+    expect(a[1].target).to.equal('9876');
+    expect(a[1].method).to.equal('method2');
   });
 
   it('should parse with lots of whitespace', () => {
@@ -69,6 +131,62 @@ describe('ActionService parseAction', () => {
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
     expect(a.args['key1']()).to.equal('value1');
+  });
+
+  it('should parse args in more than one action', () => {
+    const a = parseMultipleActions(
+      'event1:target1.methodA(key1=value1),target2.methodB(keyA=valueA)');
+    expect(a[0].event).to.equal('event1');
+    expect(a[0].target).to.equal('target1');
+    expect(a[0].method).to.equal('methodA');
+    expect(a[0].args['key1']()).to.equal('value1');
+    expect(a[1].event).to.equal('event1');
+    expect(a[1].target).to.equal('target2');
+    expect(a[1].method).to.equal('methodB');
+    expect(a[1].args['keyA']()).to.equal('valueA');
+  });
+
+  it('should parse multiple event types with multiple actions', () => {
+    const a = parseActionMap(
+        'event1:foo, baz.firstMethod, corge.secondMethod(keyA=valueA);' +
+        'event2:bar, qux.thirdMethod, grault.fourthMethod(keyB=valueB)');
+
+    expect(Object.keys(a)).to.have.length(2);
+
+    expect(a['event1']).to.have.length(3);
+    expect(a['event2']).to.have.length(3);
+
+    // action definitions for event1
+    expect(a['event1'][0].event).to.equal('event1');
+    expect(a['event1'][0].target).to.equal('foo');
+    expect(a['event1'][0].method).to.equal('activate');
+    expect(a['event1'][0].args).to.be.null;
+
+    expect(a['event1'][1].event).to.equal('event1');
+    expect(a['event1'][1].target).to.equal('baz');
+    expect(a['event1'][1].method).to.equal('firstMethod');
+    expect(a['event1'][1].args).to.be.null;
+
+    expect(a['event1'][2].event).to.equal('event1');
+    expect(a['event1'][2].target).to.equal('corge');
+    expect(a['event1'][2].method).to.equal('secondMethod');
+    expect(a['event1'][2].args['keyA']()).to.equal('valueA');
+
+    // action definitions for event2
+    expect(a['event2'][0].event).to.equal('event2');
+    expect(a['event2'][0].target).to.equal('bar');
+    expect(a['event2'][0].method).to.equal('activate');
+    expect(a['event2'][0].args).to.be.null;
+
+    expect(a['event2'][1].event).to.equal('event2');
+    expect(a['event2'][1].target).to.equal('qux');
+    expect(a['event2'][1].method).to.equal('thirdMethod');
+    expect(a['event2'][1].args).to.be.null;
+
+    expect(a['event2'][2].event).to.equal('event2');
+    expect(a['event2'][2].target).to.equal('grault');
+    expect(a['event2'][2].method).to.equal('fourthMethod');
+    expect(a['event2'][2].args['keyB']()).to.equal('valueB');
   });
 
   it('should parse with multiple args', () => {
@@ -303,6 +421,10 @@ describe('ActionService parseAction', () => {
     expect(() => {
       parseAction('event:target1.method(key = value key2 = value2)');
     }).to.throw(/Invalid action/);
+    // Empty (2...n)nd target
+    expect(() => {
+      parseAction('event:target1,');
+    }).to.throw(/Invalid action/);
   });
 });
 
@@ -310,19 +432,20 @@ describe('Action parseActionMap', () => {
 
   it('should parse with a single action', () => {
     const m = parseActionMap('event1:action1');
-    expect(m['event1'].target).to.equal('action1');
+    expect(m['event1'][0].target).to.equal('action1');
   });
 
   it('should parse with two actions', () => {
     const m = parseActionMap('event1:action1; event2: action2');
-    expect(m['event1'].target).to.equal('action1');
-    expect(m['event2'].target).to.equal('action2');
+    expect(m['event1'][0].target).to.equal('action1');
+    expect(m['event2'][0].target).to.equal('action2');
   });
 
   it('should parse with dupe actions by overriding with last', () => {
     const m = parseActionMap('event1:action1; event1: action2');
+    expect(m['event1']).to.have.length(1);
     // Currently, we overwrite the events.
-    expect(m['event1'].target).to.equal('action2');
+    expect(m['event1'][0].target).to.equal('action2');
   });
 
   it('should parse empty forms to null', () => {
@@ -388,7 +511,8 @@ describe('Action findAction', () => {
     const element = document.createElement('div');
     element.setAttribute('on', 'event1:action1');
     const m = action.getActionMap_(element);
-    expect(m['event1'].target).to.equal('action1');
+    expect(m['event1']).to.have.length(1);
+    expect(m['event1'][0].target).to.equal('action1');
   });
 
   it('should cache action map', () => {
@@ -405,7 +529,8 @@ describe('Action findAction', () => {
     element.setAttribute('on', 'event1:action1');
     const a = action.findAction_(element, 'event1');
     expect(a.node).to.equal(element);
-    expect(a.actionInfo.target).to.equal('action1');
+    expect(a.actionInfos).to.have.length(1);
+    expect(a.actionInfos[0].target).to.equal('action1');
 
     expect(action.findAction_(element, 'event3')).to.equal(null);
   });
@@ -419,11 +544,13 @@ describe('Action findAction', () => {
 
     let a = action.findAction_(element, 'event1');
     expect(a.node).to.equal(parent);
-    expect(a.actionInfo.target).to.equal('action1');
+    expect(a.actionInfos).to.have.length(1);
+    expect(a.actionInfos[0].target).to.equal('action1');
 
     a = action.findAction_(element, 'event2');
     expect(a.node).to.equal(element);
-    expect(a.actionInfo.target).to.equal('action2');
+    expect(a.actionInfos).to.have.length(1);
+    expect(a.actionInfos[0].target).to.equal('action2');
 
     expect(action.findAction_(element, 'event3')).to.equal(null);
   });
@@ -456,9 +583,7 @@ describe('Action method', () => {
     targetElement.appendChild(child);
     document.body.appendChild(parent);
 
-    execElement = document.createElement('amp-element');
-    execElement.setAttribute('id', id);
-    execElement.enqueAction = onEnqueue;
+    execElement = createExecElement(id, onEnqueue);
     parent.appendChild(execElement);
   });
 
@@ -540,6 +665,57 @@ describe('Action method', () => {
     expect(inv.method).to.equal('method1');
     expect(inv.args['key1']).to.equal(11);
     expect(inv.source).to.equal(child);
+  });
+});
+
+
+describe('Multiple handlers action method', () => {
+  let sandbox;
+  let win;
+  let action;
+  let onEnqueue1, onEnqueue2;
+  let targetElement, parent, child, execElement1, execElement2;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
+    onEnqueue1 = sandbox.spy();
+    onEnqueue2 = sandbox.spy();
+    targetElement = document.createElement('target');
+    const id1 = 'elementFoo';
+    const id2 = 'elementBar';
+    targetElement.setAttribute('on', `tap:${id1}.method1,${id2}.method2`);
+    parent = document.createElement('parent');
+    child = document.createElement('child');
+    parent.appendChild(targetElement);
+    targetElement.appendChild(child);
+    document.body.appendChild(parent);
+
+    execElement1 = createExecElement(id1, onEnqueue1);
+    execElement2 = createExecElement(id2, onEnqueue2);
+
+    parent.appendChild(execElement1);
+    parent.appendChild(execElement2);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(parent);
+    sandbox.restore();
+  });
+
+  it('should trigger event', () => {
+    action.trigger(child, 'tap', null);
+    expect(onEnqueue1).to.be.calledOnce;
+    assertInvocation(onEnqueue1.getCall(0).args[0], execElement1, 'method1',
+        targetElement);
+    assertInvocation(onEnqueue2.getCall(0).args[0], execElement2, 'method2',
+        targetElement);
   });
 });
 
@@ -708,18 +884,28 @@ describes.sandboxed('Action global target', {}, () => {
     action.trigger(element, 'tap', event);
     expect(target2).to.not.be.called;
     expect(target1).to.be.calledOnce;
-    const inv = target1.args[0][0];
-    expect(inv.target).to.equal(document);
-    expect(inv.method).to.equal('action1');
-    expect(inv.source).to.equal(element);
-    expect(inv.event).to.equal(event);
-    expect(inv.args['a']).to.equal('b');
+    assertInvocation(target1.args[0][0], document, 'action1', element, event,
+        {a: 'b'});
 
     const element2 = document.createElement('div');
     element2.setAttribute('on', 'tap:target2.action1');
     action.trigger(element2, 'tap', event);
     expect(target2).to.be.calledOnce;
     expect(target1).to.be.calledOnce;
+
+    const element3 = document.createElement('div');
+    element3.setAttribute('on', 'tap:target1.action1,target2.action1');
+    action.trigger(element3, 'tap', event);
+    expect(target2).to.be.calledTwice;
+    expect(target1).to.be.calledTwice;
+
+    const element4 = document.createElement('div');
+    element4.setAttribute('on', 'tap:target1.action1,target2.action2(x=y)');
+    action.trigger(element4, 'tap', event);
+    expect(target2).to.be.calledThrice;
+    expect(target1).to.be.calledThrice;
+    assertInvocation(target2.args[2][0], document, 'action2', element4, event,
+        {x: 'y'});
   });
 });
 

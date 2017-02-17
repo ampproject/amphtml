@@ -247,31 +247,31 @@ export class ActionService {
       return;
     }
 
-    const actionInfo = action.actionInfo;
+    for (let i = 0; i < action.actionInfos.length; i++) {
+      const actionInfo = action.actionInfos[i];
+      // Replace any variables in args with data in `event`.
+      const args = applyActionInfoArgs(actionInfo.args, event);
 
-    // Replace any variables in args with data in `event`.
-    const args = applyActionInfoArgs(actionInfo.args, event);
-
-    // Global target, e.g. `AMP`.
-    const globalTarget = this.globalTargets_[actionInfo.target];
-    if (globalTarget) {
-      const invocation = new ActionInvocation(
-          this.root_,
-          actionInfo.method,
-          args,
-          action.node,
-          event);
-      globalTarget(invocation);
-      return;
+      // Global target, e.g. `AMP`.
+      const globalTarget = this.globalTargets_[actionInfo.target];
+      if (globalTarget) {
+        const invocation = new ActionInvocation(
+            this.root_,
+            actionInfo.method,
+            args,
+            action.node,
+            event);
+        globalTarget(invocation);
+      } else {
+        const target = this.root_.getElementById(actionInfo.target);
+        if (target) {
+          this.invoke_(target, actionInfo.method, args,
+              action.node, event, actionInfo);
+        } else {
+          this.actionInfoError_('target not found', actionInfo, target);
+        }
+      }
     }
-
-    const target = this.root_.getElementById(actionInfo.target);
-    if (!target) {
-      this.actionInfoError_('target not found', actionInfo, target);
-      return;
-    }
-    this.invoke_(target, actionInfo.method, args,
-        action.node, event, actionInfo);
   }
 
   /**
@@ -342,16 +342,15 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} actionEventType
-   * @return {?{node: !Element, actionInfo: !ActionInfoDef}}
+   * @return {?{node: !Element, actionInfos: !Array<!ActionInfoDef>}}
    */
   findAction_(target, actionEventType) {
     // Go from target up the DOM tree and find the applicable action.
     let n = target;
-    let actionInfo = null;
     while (n) {
-      actionInfo = this.matchActionInfo_(n, actionEventType);
-      if (actionInfo) {
-        return {node: n, actionInfo};
+      const actionInfos = this.matchActionInfos_(n, actionEventType);
+      if (actionInfos) {
+        return {node: n, actionInfos: dev().assert(actionInfos)};
       }
       n = n.parentElement;
     }
@@ -361,9 +360,9 @@ export class ActionService {
   /**
    * @param {!Element} node
    * @param {string} actionEventType
-   * @return {?ActionInfoDef}
+   * @return {?Array<!ActionInfoDef>}
    */
-  matchActionInfo_(node, actionEventType) {
+  matchActionInfos_(node, actionEventType) {
     const actionMap = this.getActionMap_(node);
     if (!actionMap) {
       return null;
@@ -373,7 +372,7 @@ export class ActionService {
 
   /**
    * @param {!Element} node
-   * @return {?Object<string, ActionInfoDef>}
+   * @return {?Object<string, !Array<!ActionInfoDef>>}
    */
   getActionMap_(node) {
     let actionMap = node[ACTION_MAP_];
@@ -392,7 +391,7 @@ export class ActionService {
 /**
  * @param {string} s
  * @param {!Element} context
- * @return {?Object<string, ActionInfoDef>}
+ * @return {?Object<string, !Array<!ActionInfoDef>>}
  * @private Visible for testing only.
  */
 export function parseActionMap(s, context) {
@@ -416,80 +415,92 @@ export function parseActionMap(s, context) {
       // Event: "event:"
       const event = tok.value;
 
-      // Target: ":target."
+      // Target: ":target." separator
       assertToken(toks.next(), [TokenType.SEPARATOR], ':');
-      const target = assertToken(
-          toks.next(), [TokenType.LITERAL, TokenType.ID]).value;
 
-      // Method: ".method". Method is optional.
-      let method = DEFAULT_METHOD_;
-      let args = null;
-      peek = toks.peek();
-      if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
-        toks.next();  // Skip '.'
-        method = assertToken(
-            toks.next(), [TokenType.LITERAL, TokenType.ID]).value || method;
+      const actions = [];
 
-        // Optionally, there may be arguments: "(key = value, key = value)".
+      // Handlers for event
+      do {
+        const target = assertToken(
+            toks.next(), [TokenType.LITERAL, TokenType.ID]).value;
+
+        // Method: ".method". Method is optional.
+        let method = DEFAULT_METHOD_;
+        let args = null;
         peek = toks.peek();
-        if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
-          toks.next();  // Skip '('.
-          do {
-            tok = toks.next();
+        if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
+          toks.next();  // Skip '.'
+          method = assertToken(
+              toks.next(), [TokenType.LITERAL, TokenType.ID]).value || method;
 
-            // Format: key = value, ....
-            if (tok.type == TokenType.SEPARATOR &&
-                    (tok.value == ',' || tok.value == ')')) {
-              // Expected: ignore.
-            } else if (tok.type == TokenType.LITERAL ||
-                tok.type == TokenType.ID) {
-              // Key: "key = "
-              const argKey = tok.value;
-              assertToken(toks.next(), [TokenType.SEPARATOR], '=');
-              // Value is either a literal or a variable: "foo.bar.baz"
-              tok = assertToken(toks.next(/* convertValue */ true),
-                  [TokenType.LITERAL, TokenType.ID]);
-              const argValueTokens = [tok];
-              // Variables have one or more dereferences: ".identifier"
-              if (tok.type == TokenType.ID) {
-                for (peek = toks.peek();
-                    peek.type == TokenType.SEPARATOR && peek.value == '.';
-                    peek = toks.peek()) {
-                  tok = toks.next(); // Skip '.'.
-                  tok = assertToken(toks.next(false), [TokenType.ID]);
-                  argValueTokens.push(tok);
+          // Optionally, there may be arguments: "(key = value, key = value)".
+          peek = toks.peek();
+          if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
+            toks.next();  // Skip '('.
+            do {
+              tok = toks.next();
+
+              // Format: key = value, ....
+              if (tok.type == TokenType.SEPARATOR &&
+                      (tok.value == ',' || tok.value == ')')) {
+                // Expected: ignore.
+              } else if (tok.type == TokenType.LITERAL ||
+                  tok.type == TokenType.ID) {
+                // Key: "key = "
+                const argKey = tok.value;
+                assertToken(toks.next(), [TokenType.SEPARATOR], '=');
+                // Value is either a literal or a variable: "foo.bar.baz"
+                tok = assertToken(toks.next(/* convertValue */ true),
+                    [TokenType.LITERAL, TokenType.ID]);
+                const argValueTokens = [tok];
+                // Variables have one or more dereferences: ".identifier"
+                if (tok.type == TokenType.ID) {
+                  for (peek = toks.peek();
+                      peek.type == TokenType.SEPARATOR && peek.value == '.';
+                      peek = toks.peek()) {
+                    tok = toks.next(); // Skip '.'.
+                    tok = assertToken(toks.next(false), [TokenType.ID]);
+                    argValueTokens.push(tok);
+                  }
                 }
+                const argValue = getActionInfoArgValue(argValueTokens);
+                if (!args) {
+                  args = map();
+                }
+                args[argKey] = argValue;
+                peek = toks.peek();
+                assertAction(
+                    peek.type == TokenType.SEPARATOR &&
+                    (peek.value == ',' || peek.value == ')'),
+                    'Expected either [,] or [)]');
+              } else {
+                // Unexpected token.
+                assertAction(false, `; unexpected token [${tok.value || ''}]`);
               }
-              const argValue = getActionInfoArgValue(argValueTokens);
-              if (!args) {
-                args = map();
-              }
-              args[argKey] = argValue;
-              peek = toks.peek();
-              assertAction(
-                  peek.type == TokenType.SEPARATOR &&
-                  (peek.value == ',' || peek.value == ')'),
-                  'Expected either [,] or [)]');
-            } else {
-              // Unexpected token.
-              assertAction(false, `; unexpected token [${tok.value || ''}]`);
-            }
-          } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
+            } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
+          }
         }
-      }
 
-      const action = {
-        event,
-        target,
-        method,
-        args: (args && getMode().test && Object.freeze) ?
-            Object.freeze(args) : args,
-        str: s,
-      };
+        actions.push({
+          event,
+          target,
+          method,
+          args: (args && getMode().test && Object.freeze) ?
+              Object.freeze(args) : args,
+          str: s,
+        });
+
+        peek = toks.peek();
+
+      } while (peek.type == TokenType.SEPARATOR && peek.value == ','
+          && toks.next()); // skip "," when found
+
       if (!actionMap) {
         actionMap = map();
       }
-      actionMap[action.event] = action;
+
+      actionMap[event] = actions;
     } else {
       // Unexpected token.
       assertAction(false, `; unexpected token [${tok.value || ''}]`);
