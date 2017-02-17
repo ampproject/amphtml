@@ -43,7 +43,7 @@ describe('vsync', () => {
       setTimeout: (fn, t) => {
         return window.setTimeout(fn, t);
       },
-      clearTimeout: (index) => {
+      clearTimeout: index => {
         window.clearTimeout(index);
       },
       requestAnimationFrame: window.requestAnimationFrame.bind(window),
