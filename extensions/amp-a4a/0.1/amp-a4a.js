@@ -1175,7 +1175,8 @@ export class AmpA4A extends AMP.BaseElement {
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
     // Can't get the attributes until we have the iframe, then set it.
-    const attributes = getContextMetadata(window, iframe, this.sentinel);
+    const attributes = getContextMetadata(
+        this.win, this.element, this.sentinel);
     iframe.setAttribute('name', JSON.stringify(attributes));
     iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
     return this.iframeRenderHelper_(iframe);
@@ -1229,7 +1230,8 @@ export class AmpA4A extends AMP.BaseElement {
           }, SHARED_IFRAME_PROPERTIES));
       if (method == XORIGIN_MODE.NAMEFRAME) {
         // TODO(bradfrizzell): change name of function and var
-        const attributes = getContextMetadata(window, iframe, this.sentinel);
+        const attributes = getContextMetadata(
+            this.win, this.element, this.sentinel);
         attributes['creative'] = creative;
         const name = JSON.stringify(attributes);
         // Need to reassign the name once we've generated the context

@@ -131,6 +131,11 @@ export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
  *     be blocked on key services being loaded.
  */
 export function makeBodyVisible(doc, opt_waitForServices) {
+  /** @const {!Window} */
+  const win = doc.defaultView;
+  if (win[bodyVisibleSentinel]) {
+    return;
+  }
   const set = () => {
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
@@ -140,8 +145,6 @@ export function makeBodyVisible(doc, opt_waitForServices) {
     resourcesForDoc(doc).renderStarted();
   };
   try {
-    /** @const {!Window} */
-    const win = doc.defaultView;
     documentStateFor(win).onBodyAvailable(() => {
       if (win[bodyVisibleSentinel]) {
         return;
@@ -175,6 +178,16 @@ export function makeBodyVisible(doc, opt_waitForServices) {
     rethrowAsync(e);
   }
 }
+
+
+/**
+ * Indicates that the body is always visible. For instance, in case of PWA.
+ * @param {!Window} win
+ */
+export function bodyAlwaysVisible(win) {
+  win[bodyVisibleSentinel] = true;
+}
+
 
 /**
  * Checks whether a style element was registered in the DOM.

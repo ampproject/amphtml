@@ -39,8 +39,8 @@ export class AmpSelector extends AMP.BaseElement {
     /** @private {boolean} */
     this.isDisabled_ = false;
 
-    /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.action_ = actionServiceForDoc(this.win.document.documentElement);
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
   }
 
   /** @override */
@@ -50,6 +50,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.action_ = actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
     this.isDisabled_ = this.element.hasAttribute('disabled');
 
