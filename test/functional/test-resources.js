@@ -1647,11 +1647,9 @@ describe('Resources changeSize', () => {
       // Only to satisfy expectation in beforeEach
       resources.viewport_.getRect();
 
-      // Force return here, because can't stub getRect fun twice.
-      resources.viewport_.getRect = () => {
-        return {top: 10, left: 0, right: 100, bottom: 210, height: 200};
-      };
-
+      viewportMock.expects('getRect').returns({
+        top: 10, left: 0, right: 100, bottom: 210, height: 200,
+      }).once();
       resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1100,
           height: 100};
       resource2.layoutBox_ = {top: -1300, left: 0, right: 100, bottom: -1200,
@@ -1664,12 +1662,12 @@ describe('Resources changeSize', () => {
       const task = vsyncSpy.lastCall.args[0];
       const state = {};
       task.mutate(state);
-
+      console.log('success');
       expect(resource1.changeSize).to.be.calledOnce;
       expect(resource2.changeSize).to.not.be.called;
     });
 
-    it('should NOT adjust scrolling if size did not increase', () => {
+    it('should NOT adjust scrolling if height not change above vp', () => {
       viewportMock.expects('getScrollHeight').returns(2999).once();
       viewportMock.expects('getScrollTop').returns(1777).once();
       resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
@@ -1694,6 +1692,23 @@ describe('Resources changeSize', () => {
       expect(resource1.changeSize).to.be.calledOnce;
       expect(resource1.changeSize).to.be.calledWith(111, 222);
       expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+    });
+
+    it('should adjust scrolling if height change above vp', () => {
+      viewportMock.expects('getScrollHeight').returns(2999).once();
+      viewportMock.expects('getScrollTop').returns(1000).once();
+      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
+          height: 50};
+      resources.lastVelocity_ = 0;
+      clock.tick(5000);
+      resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+      resources.mutateWork_();
+      const task = vsyncSpy.lastCall.args[0];
+      const state = {};
+      task.measure(state);
+      viewportMock.expects('getScrollHeight').returns(2000).once();
+      viewportMock.expects('setScrollTop').withExactArgs(1).once();
+      task.mutate(state);
     });
 
     it('in vp should NOT call overflowCallback if new height smaller', () => {
