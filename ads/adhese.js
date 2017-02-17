@@ -33,7 +33,7 @@ export function adhese(global, data) {
       adhTarget += s + '/';
     }
   }
-  adhTarget += '?t=' + new Date().getTime();
+  adhTarget += '?t=' + Date.now();
   writeScript(window, 'https://ads-' + data['account'] + '.adhese.com/' + data['request_type'] + '/sl' + data['location'] + data['position'] + '-' + data['format'] + '/' + adhTarget);
   const co = global.document.querySelector('#c');
   co.width = data['width'];
