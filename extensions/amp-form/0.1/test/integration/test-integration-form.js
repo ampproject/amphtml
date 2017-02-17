@@ -90,6 +90,7 @@ describes.realWin('AmpForm Integration', {
     return form;
   }
 
+  // Flakey timeouts on saucelabs.
   describe.skip('on=submit:form.submit', () => {
     it('should be protected from recursive-submission', () => {
       const form = getForm({
@@ -121,6 +122,7 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
+  // Flakey timeouts on saucelabs.
   describe.skip('Submit xhr-POST', () => {
     it('should submit and render success', () => {
       const form = getForm({
@@ -187,6 +189,7 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
+  // Flakey timeouts on saucelabs.
   describe.skip('Submit xhr-GET', () => {
     it('should submit and render success', () => {
       const form = getForm({
