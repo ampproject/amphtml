@@ -150,27 +150,20 @@ export class AmpAdUIHandler {
    * @private
    */
   displayNoContentUI_() {
-    // The order here is user provided fallback > collapse > default fallback
-    if (this.hasPageProvidedFallback_) {
+    // The order here is collapse > user provided fallback > default fallback
+    this.baseInstance_.attemptCollapse().then(() => {
+      this.state = AdDisplayState.LOADED_NO_CONTENT;
+    }, () => {
       this.baseInstance_.deferMutate(() => {
         if (this.state == AdDisplayState.NOT_LAID_OUT) {
-          // If already unlaid out, do not replace current placeholder then.
+          // If already unlaid out, do not replace current placeholder.
           return;
         }
         this.baseInstance_.togglePlaceholder(false);
         this.baseInstance_.toggleFallback(true);
         this.state = AdDisplayState.LOADED_NO_CONTENT;
       });
-    } else {
-      this.baseInstance_.attemptCollapse().then(() => {
-        this.state = AdDisplayState.LOADED_NO_CONTENT;
-      }, () => {
-        // Apply default fallback when resize fail.
-        this.baseInstance_.togglePlaceholder(false);
-        this.baseInstance_.toggleFallback(true);
-        this.state = AdDisplayState.LOADED_NO_CONTENT;
-      });
-    }
+    });
   }
 
   /**
