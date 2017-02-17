@@ -84,9 +84,13 @@ html.i-amphtml-ios-embed {
 }
 
 #i-amphtml-wrapper > body {
+  /* Make sure position:absolute elements are positioned relative to the body,
+     not i-amp-html-wrapper */
   position: relative !important;
-  /* Border is necessary to avoid margins collapsing outside body.
-     Alternatively we can also set overflow to hidden. */
+  /* `body` must have a 1px transparent border for two purposes:
+      (1) to cancel out margin collapse in body's children so that position
+          absolute element is positioned correctly
+      (2) to offset scroll adjustment to 1 to avoid scroll freeze problem. */
   border-top: 1px solid transparent !important;
 }
 

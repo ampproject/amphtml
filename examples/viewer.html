@@ -466,6 +466,9 @@
         log('unloaded');
         return this.handleUnload_();
       }
+      if (type == 'documentHeight') {
+        return;
+      }
       return Promise.reject('request not supported: ' + type);
     };
 
