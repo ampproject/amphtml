@@ -61,11 +61,6 @@ class AmpFacebookComments extends AMP.BaseElement {
   }
 
   /** @override */
-  unlayoutOnPause() {
-    return true;
-  }
-
-  /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
