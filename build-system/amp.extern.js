@@ -106,6 +106,7 @@ data._context;
 data.inViewport;
 data.numposts;
 data.orderBy;
+data.colorscheme;
 
 // 3p code
 var twttr;

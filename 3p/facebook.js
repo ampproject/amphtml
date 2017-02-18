@@ -21,9 +21,9 @@ import {user} from '../src/log';
 /**
  * Produces the Facebook SDK object for the passed in callback.
  *
- * Note: Facebook SDK fails to render multiple posts when the SDK is only loaded
- * in one frame. To Allow the SDK to render them correctly we load the script
- * per iframe.
+ * Note: Facebook SDK fails to render multiple plugins when the SDK is only
+ * loaded in one frame. To Allow the SDK to render them correctly we load the
+ * script per iframe.
  *
  * @param {!Window} global
  * @param {function(!Object)} cb
@@ -35,6 +35,8 @@ function getFacebookSdk(global, cb) {
 }
 
 /**
+ * Create DOM element for the Facebook embedded content plugin.
+ * Reference: https://developers.facebook.com/docs/plugins/embedded-posts
  * @param {!Window} global
  * @param {!Object} data The element data
  * @return {!Element} div
@@ -47,11 +49,12 @@ function getPostContainer(global, data) {
       ' "post" or "video" was: %s', embedAs);
   container.className = 'fb-' + embedAs;
   container.setAttribute('data-href', data.href);
-
   return container;
 }
 
 /**
+ * Create DOM element for the Facebook comments plugin:
+ * Reference: https://developers.facebook.com/docs/plugins/comments
  * @param {!Window} global
  * @param {!Object} data The element data
  * @return {!Element} div
@@ -61,9 +64,8 @@ function getCommentsContainer(global, data) {
   container.className = 'fb-comments';
   container.setAttribute('data-href', data.href);
   container.setAttribute('data-numposts', data.numposts || 10);
-  container.setAttribute('data-order-by', data.orderBy || 'social');
+  container.setAttribute('data-colorscheme', data.colorscheme || 'light');
   container.setAttribute('data-width', '100%');
-
   return container;
 }
 
@@ -77,7 +79,7 @@ export function facebook(global, data) {
 
   if (extension === 'AMP-FACEBOOK-COMMENTS') {
     container = getCommentsContainer(global, data);
-  } else if (extension === 'AMP-FACEBOOK') {
+  } else /*AMP-FACEBOOK */ {
     container = getPostContainer(global, data);
   }
 
@@ -88,7 +90,6 @@ export function facebook(global, data) {
     delete data.width;
     delete data.height;
 
-
     FB.Event.subscribe('xfbml.resize', event => {
       context.updateDimensions(
         parseInt(event.width, 10),
@@ -97,5 +98,4 @@ export function facebook(global, data) {
 
     FB.init({xfbml: true, version: 'v2.5'});
   });
-
 }
