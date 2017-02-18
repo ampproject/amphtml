@@ -149,7 +149,7 @@ under the [Apache License, Version 2.0](LICENSE).
 
 ## Contributing
 
-Please see [the CONTRIBUTING file](CONTRIBUTING.md) for information on contributing to the AMP Project, and [the DEVELOPING file](DEVELOPING.md) for documentation on the AMP library internals and [hints how to get started](DEVELOPING.md#starter-issues).
+We strongly encourage contributions from the community, whether it's reporting bugs, suggesting features or diving in and implementing changes to the AMP Project.  Please see [the CONTRIBUTING file](CONTRIBUTING.md) for information on contributing to the AMP Project.
 
 ### Security disclosures
 
