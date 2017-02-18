@@ -1003,6 +1003,7 @@ export class Resources {
       // Find minimum top position and run all mutates.
       let minTop = -1;
       const scrollAdjSet = [];
+      let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
         /** @const {!Resource} */
@@ -1052,11 +1053,20 @@ export class Resources {
           // resize.
           resize = true;
         } else if (bottomDisplacedBoundary <= viewportRect.top + topOffset) {
-          // 5. Elements above the viewport can only be resized when scrolling
-          // has stopped, otherwise defer util next cycle.
+          // 5. Elements above the viewport can only be resized if we are able
+          // to compensate the height change by setting scrollTop.
+          if (heightDiff < 0 &&
+              viewportRect.top + aboveVpHeightChange < -heightDiff) {
+            // Do nothing if height abobe viewport height can't compensate
+            // height decrease
+            continue;
+          }
+          // Can only resized when scrollinghas stopped,
+          // otherwise defer util next cycle.
           if (isScrollingStopped) {
             // These requests will be executed in the next animation cycle and
             // adjust the scroll position.
+            aboveVpHeightChange = aboveVpHeightChange + heightDiff;
             scrollAdjSet.push(request);
           } else {
             // Defer till next cycle.
@@ -1123,7 +1133,7 @@ export class Resources {
             }
             // Sync is necessary here to avoid UI jump in the next frame.
             const newScrollHeight = this.viewport_./*OK*/getScrollHeight();
-            if (newScrollHeight > state./*OK*/scrollHeight) {
+            if (newScrollHeight != state./*OK*/scrollHeight) {
               this.viewport_.setScrollTop(state./*OK*/scrollTop +
                   (newScrollHeight - state./*OK*/scrollHeight));
             }
