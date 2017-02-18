@@ -14,17 +14,48 @@
  * limitations under the License.
  */
 
+// TODO(dvoytenko): rename file to `visibility.js`.
+
+import {
+  DEFAULT_THRESHOLD,
+  IntersectionObserverPolyfill,
+  nativeIntersectionObserverSupported,
+} from '../../../src/intersection-observer-polyfill';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {map} from '../../../src/utils/object';
+import {resourcesForDoc} from '../../../src/resources';
+import {viewerForDoc} from '../../../src/viewer';
+import {viewportForDoc} from '../../../src/viewport';
+
+const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
+
+/** @type {number} */
+let visibilityIdCounter = 1;
 
 
 /**
- * A helper class that implements visibility calculations based on the
+ * @param {!Element} element
+ * @return {number}
+ */
+function getElementId(element) {
+  let id = element[VISIBILITY_ID_PROP];
+  if (!id) {
+    id = ++visibilityIdCounter;
+    element[VISIBILITY_ID_PROP] = id;
+  }
+  return id;
+}
+
+
+/**
+ * This class implements visibility calculations based on the
  * visibility ratio. It's used for documents, embeds and individual element.
  * @implements {../../../src/service.Disposable}
  */
-export class VisibilityHelper {
+export class VisibilityModel {
   /**
-   * @param {?VisibilityHelper} parent
+   * @param {?VisibilityModel} parent
    * @param {!Object<string, *>} spec
    * @param {number=} opt_iniVisibility
    * @param {boolean=} opt_shouldFactorParent
@@ -68,10 +99,10 @@ export class VisibilityHelper {
       this.eventResolver_ = resolve;
     });
 
-    /** @private {?Array<!VisibilityHelper>} */
+    /** @private {?Array<!VisibilityModel>} */
     this.children_ = null;
 
-    /** @private {!Array<!UnsubscribeDef>} */
+    /** @private {!Array<!UnlistenDef>} */
     this.unsubscribe_ = [];
 
     /** @const @private {time} */
@@ -81,13 +112,16 @@ export class VisibilityHelper {
     this.ownVisibility_ = opt_iniVisibility || 0;
 
     /** @private {boolean} */
-    this.blocked_ = false;
+    this.ready_ = true;
 
     /** @private {?number} */
     this.scheduledRunId_ = null;
 
     /** @private {boolean} */
     this.matchesVisibility_ = false;
+
+    /** @private {boolean} */
+    this.everMatchedVisibility_ = false;
 
     /** @private {time} */
     this.continuousTime_ = 0;
@@ -125,10 +159,6 @@ export class VisibilityHelper {
     if (this.parent_) {
       this.parent_.addChild_(this);
     }
-
-    if (this.getVisibility() > 0) {
-      this.update();
-    }
   }
 
   /** @override */
@@ -149,8 +179,8 @@ export class VisibilityHelper {
 
   /**
    * Adds the unsubscribe handler that will be called when this visibility
-   * helper is destroyed.
-   * @param {!UnsubscribeDef} handler
+   * model is destroyed.
+   * @param {!UnlistenDef} handler
    */
   unsubscribe(handler) {
     this.unsubscribe_.push(handler);
@@ -176,26 +206,26 @@ export class VisibilityHelper {
   }
 
   /**
-   * Sets whether this object is blocked. Blocking means that visibility is
-   * not ready to be calculated, e.g. because an element has not yet
+   * Sets whether this object is ready. Ready means that visibility is
+   * ready to be calculated, e.g. because an element has been
    * sufficiently rendered. See `getVisibility()` for the final
    * visibility calculations.
-   * @param {boolean} blocked
+   * @param {boolean} ready
    */
-  setBlocked(blocked) {
-    this.blocked_ = blocked;
+  setReady(ready) {
+    this.ready_ = ready;
     this.update();
   }
 
   /**
    * Returns the final visibility. It depends on the following factors:
    *  1. This object's visibility.
-   *  2. Whether the object is blocked.
+   *  2. Whether the object is ready.
    *  3. The parent's visibility.
    * @return {number}
    */
   getVisibility() {
-    const ownVisibility = this.blocked_ ? 0 : this.ownVisibility_;
+    const ownVisibility = this.ready_ ? this.ownVisibility_ : 0;
     if (!this.parent_) {
       return ownVisibility;
     }
@@ -300,6 +330,7 @@ export class VisibilityHelper {
         visibility <= this.spec_.visiblePercentageMax);
 
     if (this.matchesVisibility_) {
+      this.everMatchedVisibility_ = true;
       if (prevMatchesVisibility) {
         // Keep counting.
         this.totalVisibleTime_ += timeSinceLastUpdate;
@@ -334,7 +365,7 @@ export class VisibilityHelper {
       this.lastVisibleTime_ = now;
     }
 
-    return this.matchesVisibility_ &&
+    return this.everMatchedVisibility_ &&
         (this.totalVisibleTime_ >= this.spec_.totalTimeMin) &&
         (this.totalVisibleTime_ <= this.spec_.totalTimeMax) &&
         (this.maxContinuousVisibleTime_ >= this.spec_.continuousTimeMin) &&
@@ -360,7 +391,7 @@ export class VisibilityHelper {
   }
 
   /**
-   * @param {!VisibilityHelper} child
+   * @param {!VisibilityModel} child
    * @private
    */
   addChild_(child) {
@@ -371,7 +402,7 @@ export class VisibilityHelper {
   }
 
   /**
-   * @param {!VisibilityHelper} child
+   * @param {!VisibilityModel} child
    * @private
    */
   removeChild_(child) {
@@ -393,4 +424,459 @@ export class VisibilityHelper {
  */
 function timeBase(time, baseTime) {
   return time >= baseTime ? time - baseTime : 0;
+}
+
+
+/**
+ * A base class for `VisibilityRootForDoc` and `VisibilityRootForEmbed`. The
+ * instance of this class corresponds 1:1 to `AnalyticsRoot`. It represents a
+ * collection of all visibility triggers declared within the `AnalyticsRoot`.
+ * @implements {../../../src/service.Disposable}
+ * @abstract
+ */
+export class VisibilityRoot {
+  /**
+   * @param {?VisibilityRoot} parent
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(parent, ampdoc) {
+    /** @const @protected */
+    this.parent = parent;
+
+    /** @const @protected */
+    this.ampdoc = ampdoc;
+
+    /** @const @private */
+    this.resources_ = resourcesForDoc(ampdoc);
+
+    /** @const @private {!Array<!VisibilityModel>}> */
+    this.models_ = [];
+
+    /** @const @private {!Array<!UnlistenDef>} */
+    this.unsubscribe_ = [];
+  }
+
+  /** @override */
+  dispose() {
+    // Give the chance for all events to complete.
+    this.getRootModel().setVisibility(0);
+
+    // Dispose all models.
+    this.getRootModel().dispose();
+    for (let i = this.models_.length - 1; i >= 0; i--) {
+      this.models_[i].dispose();
+    }
+
+    // Unsubscribe everything else.
+    this.unsubscribe_.forEach(unsubscribe => {
+      unsubscribe();
+    });
+    this.unsubscribe_.length = 0;
+  }
+
+  /**
+   * @param {!UnlistenDef} handler
+   */
+  unsubscribe(handler) {
+    this.unsubscribe_.push(handler);
+  }
+
+  /**
+   * The start time from which all visibility events and times are measured.
+   * @return {number}
+   * @abstract
+   */
+  getStartTime() {}
+
+  /**
+   * Whether the visibility root is currently in the background.
+   * @return {boolean}
+   * @abstract
+   */
+  isBackgrounded() {}
+
+  /**
+   * Whether the visibility root has been created in the background mode.
+   * @return {boolean}
+   * @abstract
+   */
+  isBackgroundedAtStart() {}
+
+  /**
+   * Returns the visibility model for this root. If the root is not visibile,
+   * it returns the value of 0, otherwise the value greater than 0 and less
+   * than 1.
+   * @return {!VisibilityModel}
+   * @abstract
+   */
+  getRootModel() {}
+
+  /**
+   * Listens to the visibility events on the root as the whole and the given
+   * visibility spec. The visibility tracking can be deferred until
+   * `readyPromise` is resolved, if specified.
+   * @param {!Object<string, *>} spec
+   * @param {?Promise} readySignal
+   * @param {function(!Object<string, *>)} listener
+   * @return {!UnlistenDef}
+   */
+  listenRoot(spec, readySignal, listener) {
+    const model = new VisibilityModel(
+        this.getRootModel(),
+        spec,
+        /* ownVisibility */ 1,
+        /* factorParent */ true);
+    return this.listen_(model, spec, listener, readySignal);
+  }
+
+  /**
+   * Listens to the visibility events for the specified element and the given
+   * visibility spec. The visibility tracking can be deferred until
+   * `readyPromise` is resolved, if specified.
+   * @param {!Element} element
+   * @param {!Object<string, *>} spec
+   * @param {?Promise} readySignal
+   * @param {function(!Object<string, *>)} listener
+   * @return {!UnlistenDef}
+   */
+  listenElement(element, spec, readySignal, listener) {
+    const model = new VisibilityModel(this.getRootModel(), spec);
+    return this.listen_(model, spec, listener, readySignal, element);
+  }
+
+  /**
+   * @param {!VisibilityModel} model
+   * @param {!Object<string, *>} spec
+   * @param {function(!Object<string, *>)} listener
+   * @param {?Promise} readySignal
+   * @param {!Element=} opt_element
+   * @return {!UnlistenDef}
+   * @private
+   */
+  listen_(model, spec, listener, readySignal, opt_element) {
+    // Block visibility.
+    if (readySignal) {
+      model.setReady(false);
+      readySignal.then(() => {
+        model.setReady(true);
+      });
+    }
+
+    // Process the event.
+    model.onEvent(() => {
+      const startTime = this.getStartTime();
+      const state = model.getState(startTime);
+      model.dispose();
+
+      // Additional doc-level state.
+      state['backgrounded'] = this.isBackgrounded() ? 1 : 0;
+      state['backgroundedAtStart'] = this.isBackgroundedAtStart() ? 1 : 0;
+      state['totalTime'] = Date.now() - startTime;
+
+      // Optionally, element-level state.
+      const resource = opt_element ?
+          this.resources_.getResourceForElementOptional(opt_element) : null;
+      if (resource) {
+        const layoutBox = resource.getLayoutBox();
+        state['elementX'] = layoutBox.left;
+        state['elementY'] = layoutBox.top;
+        state['elementWidth'] = layoutBox.width;
+        state['elementHeight'] = layoutBox.height;
+      }
+
+      listener(state);
+    });
+
+    this.models_.push(model);
+    model.unsubscribe(() => {
+      const index = this.models_.indexOf(model);
+      if (index != -1) {
+        this.models_.splice(index, 1);
+      }
+    });
+
+    // Observe the element via InOb.
+    if (opt_element) {
+      // It's important that this happens after all the setup is done, b/c
+      // intersection observer can fire immedidately. Per spec, this should
+      // NOT happen. However, all of the existing InOb polyfills, as well as
+      // some versions of native implementations, make this mistake.
+      this.observe(opt_element, model);
+    }
+
+    // Start update.
+    model.update();
+    return function() {
+      model.dispose();
+    };
+  }
+
+  /**
+   * Observes the intersections of the specified element in the viewport.
+   * @param {!Element} element
+   * @param {!VisibilityModel} unusedModel
+   * @protected
+   * @abstract
+   */
+  observe(element, unusedModel) {}
+}
+
+
+/**
+ * The implementation of `VisibilityRoot` for an AMP document. Two
+ * distinct modes are supported: the main AMP doc and a in-a-box doc.
+ */
+export class VisibilityRootForDoc extends VisibilityRoot {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    super(/* parent */ null, ampdoc);
+
+    /** @const @private */
+    this.viewer_ = viewerForDoc(ampdoc);
+
+    /** @const @private */
+    this.viewport_ = viewportForDoc(ampdoc);
+
+    /** @private {boolean} */
+    this.backgrounded_ = !this.viewer_.isVisible();
+
+    /** @const @private {boolean} */
+    this.backgroundedAtStart_ = this.isBackgrounded();
+
+    /**
+     * @const
+     * @private {!Object<number, {
+     *   element: !Element,
+     *   intersectionRatio: number,
+     *   models: !Array<!VisibilityModel>
+     * }>}
+     */
+    this.trackedElements_ = map();
+
+    /** @private {?IntersectionObserver|?IntersectionObserverPolyfill} */
+    this.intersectionObserver_ = null;
+
+    let rootModel;
+    if (getMode(this.ampdoc.win).runtime == 'inabox') {
+      // In-a-box: visibility depends on the InOb.
+      const root = this.ampdoc.getRootNode();
+      const rootElement = dev().assertElement(
+          root.documentElement || root.body || root);
+      rootModel = new VisibilityModel(/* parent */ null, {});
+      this.observe(rootElement, rootModel);
+    } else {
+      // Main document: visibility is based on the viewer.
+      rootModel = new VisibilityModel(
+          /* parent */ null,
+          {},
+          this.viewer_.isVisible() ? 1 : 0);
+      this.unsubscribe(this.viewer_.onVisibilityChanged(() => {
+        const isVisible = this.viewer_.isVisible();
+        if (!isVisible) {
+          this.backgrounded_ = true;
+        }
+        rootModel.setVisibility(isVisible ? 1 : 0);
+      }));
+    }
+    /** @private @const */
+    this.rootModel_ = rootModel;
+  }
+
+  /** @override */
+  dispose() {
+    super.dispose();
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.disconnect();
+      this.intersectionObserver_ = null;
+    }
+  }
+
+  /** @override */
+  getStartTime() {
+    return dev().assertNumber(this.viewer_.getFirstVisibleTime());
+  }
+
+  /** @override */
+  isBackgrounded() {
+    return this.backgrounded_;
+  }
+
+  /** @override */
+  isBackgroundedAtStart() {
+    return this.backgroundedAtStart_;
+  }
+
+  /** @override */
+  getRootModel() {
+    return this.rootModel_;
+  }
+
+  /** @override */
+  observe(element, model) {
+    this.polyfillAmpElementAsRootIfNeeded_(element);
+    this.getIntersectionObserver_().observe(element);
+
+    const id = getElementId(element);
+    let trackedElement = this.trackedElements_[id];
+    if (!trackedElement) {
+      trackedElement = {
+        element,
+        intersectionRatio: 0,
+        models: [],
+      };
+      this.trackedElements_[id] = trackedElement;
+    } else if (trackedElement.intersectionRatio > 0) {
+      // This has already been tracked and the `intersectionRatio` is fresh.
+      model.setVisibility(trackedElement.intersectionRatio);
+    }
+    trackedElement.models.push(model);
+    model.unsubscribe(() => {
+      const trackedElement = this.trackedElements_[id];
+      if (trackedElement) {
+        const index = trackedElement.models.indexOf(model);
+        if (index != -1) {
+          trackedElement.models.splice(index, 1);
+        }
+        if (trackedElement.models.length == 0) {
+          this.intersectionObserver_.unobserve(element);
+          delete this.trackedElements_[id];
+        }
+      }
+    });
+  }
+
+  /**
+   * @return {!IntersectionObserver|!IntersectionObserverPolyfill}
+   * @private
+   */
+  getIntersectionObserver_() {
+    if (!this.intersectionObserver_) {
+      this.intersectionObserver_ = this.createIntersectionObserver_();
+    }
+    return this.intersectionObserver_;
+  }
+
+  /**
+   * @return {!IntersectionObserver|!IntersectionObserverPolyfill}
+   * @private
+   */
+  createIntersectionObserver_() {
+    // Native.
+    const win = this.ampdoc.win;
+    if (nativeIntersectionObserverSupported(win)) {
+      return new win.IntersectionObserver(
+          this.onIntersectionChanges_.bind(this),
+          {threshold: DEFAULT_THRESHOLD});
+    }
+
+    // Polyfill.
+    const intersectionObserverPolyfill = new IntersectionObserverPolyfill(
+        this.onIntersectionChanges_.bind(this),
+        {threshold: DEFAULT_THRESHOLD});
+    const ticker = () => {
+      intersectionObserverPolyfill.tick(this.viewport_.getRect());
+    };
+    this.unsubscribe(this.viewport_.onScroll(ticker));
+    this.unsubscribe(this.viewport_.onChanged(ticker));
+    setTimeout(ticker, 1);
+    return intersectionObserverPolyfill;
+  }
+
+  /**
+   * @param {!Element} element
+   * @private
+   */
+  polyfillAmpElementAsRootIfNeeded_(element) {
+    const win = this.ampdoc.win;
+    if (nativeIntersectionObserverSupported(win)) {
+      return;
+    }
+
+    // InOb polyfill requires partial AmpElement implementation.
+    if (typeof element.getLayoutBox == 'function') {
+      return;
+    }
+    element.getLayoutBox = () => {
+      return this.viewport_.getRect();
+    };
+    element.getOwner = () => null;
+  }
+
+  /**
+   * @param {!Array<!IntersectionObserverEntry>} entries
+   * @private
+   */
+  onIntersectionChanges_(entries) {
+    entries.forEach(change => {
+      this.onIntersectionChange_(change.target, change.intersectionRatio);
+    });
+  }
+
+  /**
+   * @param {!Element} target
+   * @param {number} intersectionRatio
+   * @private
+   */
+  onIntersectionChange_(target, intersectionRatio) {
+    const id = getElementId(target);
+    const trackedElement = this.trackedElements_[id];
+    if (trackedElement) {
+      trackedElement.intersectionRatio = intersectionRatio;
+      for (let i = 0; i < trackedElement.models.length; i++) {
+        trackedElement.models[i].setVisibility(intersectionRatio);
+      }
+    }
+  }
+}
+
+
+/**
+ * The implementation of `VisibilityRoot` for a FIE embed. This visibility
+ * root delegates most of tracking functions to its parent, the ampdoc root.
+ */
+export class VisibilityRootForEmbed extends VisibilityRoot {
+  /**
+   * @param {!VisibilityRoot} parent
+   * @param {!../../../src/friendly-iframe-embed.FriendlyIframeEmbed} embed
+   */
+  constructor(parent, embed) {
+    super(parent, parent.ampdoc);
+
+    /** @const */
+    this.embed = embed;
+
+    /** @const @private {boolean} */
+    this.backgroundedAtStart_ = this.parent.isBackgrounded();
+
+    /** @private @const */
+    this.rootModel_ = new VisibilityModel(this.parent.getRootModel(), {});
+    this.parent.observe(dev().assertElement(embed.host), this.rootModel_);
+  }
+
+  /** @override */
+  getStartTime() {
+    return this.embed.getStartTime();
+  }
+
+  /** @override */
+  isBackgrounded() {
+    return this.parent.isBackgrounded();
+  }
+
+  /** @override */
+  isBackgroundedAtStart() {
+    return this.backgroundedAtStart_;
+  }
+
+  /** @override */
+  getRootModel() {
+    return this.rootModel_;
+  }
+
+  /** @override */
+  observe(element, model) {
+    this.parent.observe(element, model);
+  }
 }

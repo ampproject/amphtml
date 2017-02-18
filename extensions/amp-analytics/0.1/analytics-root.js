@@ -15,6 +15,10 @@
  */
 
 import {
+  VisibilityRootForDoc,
+  VisibilityRootForEmbed,
+} from './visibility-helper';
+import {
   closestBySelector,
   matches,
   scopedQuerySelector,
@@ -53,6 +57,9 @@ export class AnalyticsRoot {
 
     /** @const */
     this.trackers_ = map();
+
+    /** @private {?./visibility-helper.VisibilityRoot} */
+    this.visibilityRoot_ = null;
   }
 
   /** @override */
@@ -60,6 +67,9 @@ export class AnalyticsRoot {
     for (const k in this.trackers_) {
       this.trackers_[k].dispose();
       delete this.trackers_[k];
+    }
+    if (this.visibilityRoot_) {
+      this.visibilityRoot_.dispose();
     }
   }
 
@@ -275,6 +285,26 @@ export class AnalyticsRoot {
    * @abstract
    */
   whenIniLoaded() {}
+
+  /**
+   * Returns the visibility root corresponding to this analytics root (ampdoc
+   * or embed). The visibility root is created lazily as needed and takes
+   * care of all visibility tracking functions.
+   * @return {!./visibility-helper.VisibilityRoot}
+   */
+  getVisibilityRoot() {
+    if (!this.visibilityRoot_) {
+      this.visibilityRoot_ = this.createVisibilityRoot();
+    }
+    return this.visibilityRoot_;
+  }
+
+  /**
+   * @return {!./visibility-helper.VisibilityRoot}
+   * @protected
+   * @abstract
+   */
+  createVisibilityRoot() {}
 }
 
 
@@ -333,6 +363,11 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
     }
     return whenContentIniLoad(this.ampdoc, this.ampdoc.win, rect);
   }
+
+  /** @override */
+  createVisibilityRoot() {
+    return new VisibilityRootForDoc(this.ampdoc);
+  }
 }
 
 
@@ -379,6 +414,13 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
   /** @override */
   whenIniLoaded() {
     return this.embed.whenIniLoaded();
+  }
+
+  /** @override */
+  createVisibilityRoot() {
+    return new VisibilityRootForEmbed(
+        this.parent.getVisibilityRoot(),
+        this.embed);
   }
 }
 
