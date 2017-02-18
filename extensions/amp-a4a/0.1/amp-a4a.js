@@ -21,11 +21,11 @@ import {
 import {adConfig} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {
-  closestByTag,
   removeChildren,
   createElementWithAttributes,
 } from '../../../src/dom';
 import {cancellation} from '../../../src/error';
+import {installAnchorClickInterceptor} from '../../../src/anchor-click-interceptor';
 import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
@@ -59,9 +59,6 @@ import {rethrowAsync} from '../../../src/log';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-
-/** @private @const {string} */
-const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -1113,7 +1110,7 @@ export class AmpA4A extends AMP.BaseElement {
               friendlyIframeEmbed.win.document;
           setStyle(frameDoc.body, 'visibility', 'visible');
           // Capture phase click handlers on the ad.
-          this.registerExpandUrlParams_(friendlyIframeEmbed.win);
+          installAnchorClickInterceptor(this.getAmpDoc(), friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
           protectFunctionWrapper(this.onAmpCreativeRender, this, err => {
@@ -1350,59 +1347,6 @@ export class AmpA4A extends AMP.BaseElement {
         viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
       });
     });
-  }
-
-  /**
-   * Registers a handler that performs URL replacement on the href
-   * of an ad click.
-   * @param {!Window} iframeWin
-   */
-  registerExpandUrlParams_(iframeWin) {
-    iframeWin.document.documentElement.addEventListener('click',
-        this.maybeExpandUrlParams_.bind(this), /* capture */ true);
-  }
-
-  /**
-   * Handle click on links and replace variables in the click URL.
-   * The function changes the actual href value and stores the
-   * template in the ORIGINAL_HREF_ATTRIBUTE attribute
-   * @param {!Event} e
-   */
-  maybeExpandUrlParams_(e) {
-    const target = closestByTag(dev().assertElement(e.target), 'A');
-    if (!target || !target.href) {
-      // Not a click on a link.
-      return;
-    }
-    const hrefToExpand =
-    target.getAttribute(ORIGINAL_HREF_ATTRIBUTE) || target.getAttribute('href');
-    if (!hrefToExpand) {
-      return;
-    }
-    const vars = {
-      'CLICK_X': () => {
-        return e.pageX;
-      },
-      'CLICK_Y': () => {
-        return e.pageY;
-      },
-    };
-    const newHref = urlReplacementsForDoc(this.getAmpDoc()).expandSync(
-        hrefToExpand, vars, undefined, /* opt_whitelist */ {
-          // For now we only allow to replace the click location vars
-          // and nothing else.
-          // NOTE: Addition to this whitelist requires additional review.
-          'CLICK_X': true,
-          'CLICK_Y': true,
-        });
-    if (newHref != hrefToExpand) {
-      // Store original value so that later clicks can be processed with
-      // freshest values.
-      if (!target.getAttribute(ORIGINAL_HREF_ATTRIBUTE)) {
-        target.setAttribute(ORIGINAL_HREF_ATTRIBUTE, hrefToExpand);
-      }
-      target.setAttribute('href', newHref);
-    }
   }
 
   /**
