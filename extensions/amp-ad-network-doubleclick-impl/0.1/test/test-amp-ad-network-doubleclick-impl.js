@@ -17,8 +17,9 @@
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {AMP_ANALYTICS_HEADER} from '../../../../ads/google/a4a/utils';
 import {
-  createAdTestingIframePromise,
+  setupForAdTesting,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
+import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
@@ -138,7 +139,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     let loadExtensionSpy;
 
     beforeEach(() => {
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         element = createElementWithAttributes(doc, 'amp-ad', {
           'width': '200',

@@ -18,8 +18,9 @@ import {
   MockA4AImpl,
   TEST_URL,
   SIGNATURE_HEADER,
-  createAdTestingIframePromise,
+  setupForAdTesting,
 } from './utils';
+import {createIframePromise} from '../../../../testing/iframe';
 import {
   AmpA4A,
   RENDERING_TYPE_HEADER,
@@ -209,8 +210,9 @@ describe('amp-a4a', () => {
         method: 'GET',
         credentials: 'include',
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createAdTestingIframePromise().then(f => {
+      return createIframePromise().then(f => {
         fixture = f;
+        setupForAdTesting(fixture);
         a4aElement = createA4aElement(fixture.doc);
         a4a = new MockA4AImpl(a4aElement);
         return fixture;
@@ -327,7 +329,8 @@ describe('amp-a4a', () => {
         method: 'GET',
         credentials: 'include',
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         a4aElement = createA4aElement(doc);
         a4a = new MockA4AImpl(a4aElement);
@@ -527,7 +530,8 @@ describe('amp-a4a', () => {
         method: 'GET',
         credentials: 'include',
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         a4aElement = createA4aElement(doc);
         a4a = new MockA4AImpl(a4aElement);
@@ -581,7 +585,8 @@ describe('amp-a4a', () => {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('width', 480);
@@ -613,7 +618,8 @@ describe('amp-a4a', () => {
         method: 'GET',
         credentials: 'include',
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
@@ -674,7 +680,8 @@ describe('amp-a4a', () => {
     });
     it('must not be position:fixed', () => {
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const s = doc.createElement('style');
@@ -687,7 +694,8 @@ describe('amp-a4a', () => {
     });
     it('does not initialize promise chain 0 height/width', () => {
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const rect = layoutRectLtwh(0, 0, 200, 0);
         const a4aElement = createA4aElement(doc, rect);
@@ -712,7 +720,8 @@ describe('amp-a4a', () => {
         method: 'GET',
         credentials: 'include',
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
@@ -778,7 +787,8 @@ describe('amp-a4a', () => {
         method: 'GET',
         credentials: 'include',
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
@@ -831,7 +841,8 @@ describe('amp-a4a', () => {
     });
     it('should run end-to-end in the presence of an XHR error', () => {
       xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
@@ -856,7 +867,8 @@ describe('amp-a4a', () => {
     });
     it('should handle XHR error when resolves before layoutCallback', () => {
       xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
@@ -877,7 +889,8 @@ describe('amp-a4a', () => {
       xhrMock.onFirstCall().returns(new Promise((unusedResolve, reject) => {
         rejectXhr = reject;
       }));
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
@@ -901,7 +914,8 @@ describe('amp-a4a', () => {
 
   describe('#preconnectCallback', () => {
     it('validate adsense', () => {
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
@@ -927,7 +941,8 @@ describe('amp-a4a', () => {
   describe('#getAmpAdMetadata_', () => {
     let a4a;
     beforeEach(() => {
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         a4a = new MockA4AImpl(createA4aElement(fixture.doc));
         return fixture;
       });
@@ -1024,7 +1039,8 @@ describe('amp-a4a', () => {
     let a4a;
     let fixture;
     beforeEach(() => {
-      return createAdTestingIframePromise().then(f => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
         fixture = f;
         a4aElement = createA4aElement(fixture.doc);
         a4a = new MockA4AImpl(a4aElement);
@@ -1054,7 +1070,8 @@ describe('amp-a4a', () => {
     let a4aElement;
     let a4a;
     beforeEach(() => {
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         a4aElement = createA4aElement(doc);
         a4a = new AmpA4A(a4aElement);
@@ -1132,7 +1149,8 @@ describe('amp-a4a', () => {
 
   describe('#unlayoutCallback', () => {
     it('verify state reset', () => {
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
@@ -1148,7 +1166,8 @@ describe('amp-a4a', () => {
       });
     });
     it('verify cancelled promise', () => {
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         let whenFirstVisibleResolve = null;
         viewerWhenVisibleMock.returns(new Promise(resolve => {
           whenFirstVisibleResolve = resolve;
@@ -1219,7 +1238,8 @@ describe('amp-a4a', () => {
       let stubVerifySignature;
       let a4a;
       beforeEach(() => {
-        return createAdTestingIframePromise().then(fixture => {
+        return createIframePromise().then(fixture => {
+          setupForAdTesting(fixture);
           stubVerifySignature =
               sandbox.stub(cryptoFor(fixture.win), 'verifySignature');
           const a4aElement = createA4aElement(fixture.doc);
@@ -1307,7 +1327,8 @@ describe('amp-a4a', () => {
     let win;
     let a4aElement;
     beforeEach(() => {
-      return createAdTestingIframePromise().then(f => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
         fixture = f;
         win = fixture.win;
         a4aElement = createA4aElement(fixture.doc);

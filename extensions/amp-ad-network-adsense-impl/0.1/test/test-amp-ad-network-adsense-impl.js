@@ -21,7 +21,7 @@ import {
 } from '../amp-ad-network-adsense-impl';
 import {AMP_ANALYTICS_HEADER} from '../../../../ads/google/a4a/utils';
 import {
-  createAdTestingIframePromise,
+  setupForAdTesting,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {
   installExtensionsService,
@@ -325,7 +325,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     let loadExtensionSpy;
 
     beforeEach(() => {
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         element = createElementWithAttributes(doc, 'amp-ad', {
           'width': '200',
