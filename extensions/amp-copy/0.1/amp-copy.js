@@ -50,13 +50,13 @@ class AmpCopy extends AMP.BaseElement {
 
     //Create the Copy Button element
     this.copyBtn_ = this.element.ownerDocument.createElement('button');
-    this.copyBtn_.addEventListener('click', this.copyBtnClick_);
+    this.copyBtn_.addEventListener('click', () => this.copyBtnClick_());
     this.copyBtn_.textContent = 'Copy';
 
     //Add the created the elements
-    console.log('I am alive!');
     this.element.appendChild(this.displayedText_);
     this.element.appendChild(this.copyBtn_);
+    console.debug('Amp-copy added to element');
   }
 
   /** Function attatched to copy button to copy text */
@@ -64,36 +64,34 @@ class AmpCopy extends AMP.BaseElement {
    * @private {?Function}
    */
   copyBtnClick_() {
-    console.log('Copy Callback Called!');
+    //Create a tempoaray input element that can be used to copy from
+    let tempInput = this.element.ownerDocument.createElement('input');
+    tempInput.value = this.copyText_;
+
+    //Add the tempInput to the amp-copy element
+    this.element.appendChild(tempInput);
+
+    //Select the text in the temp input to be copied
+    tempInput.select();
+
+    try {
+      // Copy the text
+      document.execCommand('copy');
+    }
+    catch (err) {
+      // If the browser does not support document.execCommand('copy')
+      // Show a temporary prompt saying, copy not supported on this browser
+      alert('please press Ctrl/Cmd+C to copy');
+    } finally {
+      //Blur the temporary input, and remove it from the amp-copy element
+      tempInput.blur();
+      tempInput.remove();
+    }
   }
 
   /** @override */
   // isLayoutSupported(layout) {
   //   return isLayoutSizeDefined(layout);
-  // }
-
-  /** @override */
-  // layoutCallback() {
-  //   const gfyid = user().assert(
-  //     this.element.getAttribute('data-gfyid'),
-  //     'The data-gfyid attribute is required for <amp-gfycat> %s',
-  //     this.element);
-  //   const noautoplay = this.element.hasAttribute('noautoplay');
-  //
-  //   const iframe = this.element.ownerDocument.createElement('iframe');
-  //   iframe.setAttribute('frameborder', '0');
-  //
-  //   let src = 'https://gfycat.com/ifr/' + encodeURIComponent(gfyid);
-  //   if (noautoplay) {
-  //     src += '?autoplay=0';
-  //   }
-  //
-  //   iframe.src = src;
-  //   this.applyFillContent(iframe);
-  //   this.element.appendChild(iframe);
-  //   this.iframe_ = iframe;
-  //
-  //   return this.loadPromise(iframe);
   // }
 }
 
