@@ -14,35 +14,30 @@
  * limitations under the License.
  */
 
+/* The text area field of the copy-able text */
+.amp-copy-input {
+}
+
+/* The input field of the copy-able text */
 .amp-copy-textarea {
-  width: 100%;
-  max-width: 320px;
   min-height: 100px;
 }
 
-.-amp-copy-child-container {
-  position: relative;
+/* The Child Container encapsulating the copy button, and copy notification */
+.amp-copy-child-container {
+  display: inline-block;
 }
 
+/* The Copy Button */
 .amp-copy-button {
-  float: right;
 }
 
 /* Notification on Success/Error of copy */
 .amp-copy-notification {
   /* Position and size */
-  position: absolute;
-  padding: 2px;
+  padding: 1px;
   z-index: 2;
-  right: 0px;
 
-  /* Box Shadow to make it pop out to users */
-  -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
-  -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
-  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
-
-  /* Borders and background color */
-  border: 2px solid black;
-  border-radius: 5px;
+  /* background color, to appear above elements */
   background-color: white;
 }

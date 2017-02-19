@@ -74,25 +74,26 @@ class AmpCopy extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    //Get our copy text attribute
+    //Get our copy text attribute, and assert its existance
     const copyTextAttr = user().assert(this.element.getAttribute('copy-text'),
         'The copy-text attribute is required. %s', this.element);
     this.copyText_ = copyTextAttr;
 
-    //Create the displayed text element
+    //Create the displayed text element, and assert its existance
     const textElementAttr = user().assert(this.element.getAttribute('text-element'),
         'The text-element attribute is required. %s', this.element);
+    //Ensure the text element is supported by the copy
     user().assert(textElementAttr === 'textarea' || textElementAttr === 'input',
         'The text-element attribute must be, "input" or a "textarea". %s', this.element);
     this.displayedText_ = this.element.ownerDocument.createElement(textElementAttr);
     this.displayedText_.className = "amp-copy-" + textElementAttr;
+    //Setting read-only, to make the text only selectable
     this.displayedText_.setAttribute('readonly', '');
-    this.displayedText_.setAttribute("contentEditable", true);
     this.displayedText_.value = this.copyText_;
 
     //Create a container for our copy-button and notification
     this.childContainer_ = this.element.ownerDocument.createElement('div');
-    this.childContainer_.className = "-amp-copy-child-container";
+    this.childContainer_.className = "amp-copy-child-container";
 
     //Get if we are currently on ios
     this.isIos_ = navigator.userAgent.match(IOS_USER_AGENT);
@@ -101,20 +102,34 @@ class AmpCopy extends AMP.BaseElement {
     this.copyBtn_ = this.element.ownerDocument.createElement('button');
     this.copyBtn_.className = "amp-copy-button";
     this.copyBtn_.addEventListener('click', () => this.copyBtnClick_());
+    //Set the text dynamically based if it is mobile safari or not.
+    //Mobile Safari can only select the text,
+    //and not copy it like all other browsers
     if(this.isIos_) {
       this.copyBtn_.textContent = 'Select';
     } else {
       this.copyBtn_.textContent = 'Copy';
     }
 
-    //Create the copy notification element
-    this.copyNotification_ = this.element.ownerDocument.createElement('span');
-    this.copyNotification_.className = "amp-copy-notification"
-
     //Add the created the elements
     this.element.appendChild(this.displayedText_);
     this.element.appendChild(this.childContainer_);
     this.childContainer_.appendChild(this.copyBtn_)
+  }
+
+  /** @override */
+  layoutCallback() {
+    //Create the copy notification element, this is done here, as it is not
+    //immediately required.
+    return new Promise((resolve) => {
+      try {
+        this.copyNotification_ = this.element.ownerDocument.createElement('span');
+        this.copyNotification_.className = "amp-copy-notification"
+        resolve();
+      } catch {
+        reject();
+      }
+    });
   }
 
   /** Function attatched to copy button to copy text */
@@ -141,21 +156,25 @@ class AmpCopy extends AMP.BaseElement {
       // Show a temporary prompt saying, copy not supported on this browser
       this.copyNotification_.textContent = COPY_ERROR;
     } finally {
-      //Add our notification, and cancel the timeout if exists
+      //Remove the copy button,
+      //Add our notification,
+      //and cancel the timeout if exists
+      this.copyBtn_.remove()
       this.childContainer_.appendChild(this.copyNotification_);
       if(this.currentNotificationTimeout_) {
         clearTimeout(this.currentNotificationTimeout_);
       }
       this.currentNotificationTimeout_ = setTimeout(() => {
         this.copyNotification_.remove();
+        this.childContainer_.appendChild(this.copyBtn_);
       }, 4000);
     }
   }
 
   /** @override */
-  // isLayoutSupported(layout) {
-  //   return isLayoutSizeDefined(layout);
-  // }
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
 }
 
 AMP.registerElement('amp-copy', AmpCopy, CSS);

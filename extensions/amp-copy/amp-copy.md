@@ -48,14 +48,85 @@ limitations under the License.
 Text Copy with responsive layout:
 
 ```html
+  <!-- Short Copy-able text (text-element="input") -->
   <amp-copy
           copy-text="Copy me!"
+          text-element="input"
+          layout="responsive">
+  </amp-copy>
+
+  <!-- Long Copy-able text (text-element="textarea") -->
+  <amp-copy
+          copy-text="AMP HTML is a way to build web pages for static content that render with reliable, fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web."
+          text-element="textarea"
           layout="responsive">
   </amp-copy>
 ```
 
 ## Attributes
 
-**copy-text**
+**copy-text** (__required__)
 
 The text that will be displayed with an accompanying button to copy the text
+
+**text-element** (__required__)
+
+The text element type that the copy-able text will be placed in. Valid elements are: "input", and "textarea";
+
+## Styles
+
+### Default Styles
+
+By default, `amp-copy` shows the displayed text input field, with the copy button and copy notification bound in the bottom right, below the text field.
+
+### Custom Styles
+
+Sometimes you want to provide your own style. You can simply override the provided styles like the following (These are all example styles, and not the actual styles):
+```css
+/* The input field of the copy-able text */
+.amp-copy-input {
+  width: 100%;
+  min-width: 100%;
+}
+
+/* The text area field of the copy-able text */
+.amp-copy-textarea {
+  width: 100%;
+  max-width: 100%;
+  min-height: 200px;
+}
+
+/* The Child Container encapsulating the copy button, and copy notification */
+.-amp-copy-child-container {
+  vertical-align: middle;
+  height: 100px;
+}
+
+/* The Copy Button */
+.amp-copy-button {
+  border: 2px solid black;
+  background-color: blue;
+}
+
+/* Notification on Success/Error of copy */
+.amp-copy-notification {
+  /* Position */
+  position: absolute;
+  top: 20px;
+  right: 20px;
+
+  /* Box Shadow to make it pop out to users */
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+
+  /* Borders and background color */
+  border: 2px solid black;
+  border-radius: 5px;
+  background-color: blue;
+}
+```
+
+## Validation
+
+See [amp-copy rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-copy/0.1/validator-amp-copy.protoascii) in the AMP validator specification.
