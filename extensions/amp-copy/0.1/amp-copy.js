@@ -16,6 +16,13 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
+import {CSS} from '../../../build/amp-copy-0.1.css';
+
+/** @const */
+const COPY_SUCCESS = 'Copied!';
+
+/** @const */
+const COPY_ERROR = 'This browser does not support copying. Please select the text manually, and copy';
 
 class AmpCopy extends AMP.BaseElement {
 
@@ -37,6 +44,16 @@ class AmpCopy extends AMP.BaseElement {
      * @private {?Element}
      */
     this.copyBtn_ = null;
+
+    /**
+     * @private {?Element}
+     */
+    this.copyNotification_ = null;
+
+    /**
+     * @private {?Timeout}
+     */
+    this.currentNotificationTimeout_ = null;
   }
 
   /** @override */
@@ -50,13 +67,17 @@ class AmpCopy extends AMP.BaseElement {
 
     //Create the Copy Button element
     this.copyBtn_ = this.element.ownerDocument.createElement('button');
+    this.copyBtn_.className = "amp-copy-button";
     this.copyBtn_.addEventListener('click', () => this.copyBtnClick_());
     this.copyBtn_.textContent = 'Copy';
+
+    //Create the copy notification element
+    this.copyNotification_ = this.element.ownerDocument.createElement('span');
+    this.copyNotification_.className = "amp-copy-notification"
 
     //Add the created the elements
     this.element.appendChild(this.displayedText_);
     this.element.appendChild(this.copyBtn_);
-    console.debug('Amp-copy added to element');
   }
 
   /** Function attatched to copy button to copy text */
@@ -77,15 +98,25 @@ class AmpCopy extends AMP.BaseElement {
     try {
       // Copy the text
       document.execCommand('copy');
+      this.copyNotification_.textContent = COPY_SUCCESS;
     }
     catch (err) {
       // If the browser does not support document.execCommand('copy')
       // Show a temporary prompt saying, copy not supported on this browser
-      alert('please press Ctrl/Cmd+C to copy');
+      this.copyNotification_.textContent = COPY_ERROR;
     } finally {
       //Blur the temporary input, and remove it from the amp-copy element
       tempInput.blur();
       tempInput.remove();
+
+      //Add our notification, and cancel the timeout if exists
+      this.element.appendChild(this.copyNotification_);
+      if(this.currentNotificationTimeout_) {
+        clearTimeout(this.currentNotificationTimeout_);
+      }
+      this.currentNotificationTimeout_ = setTimeout(() => {
+        this.copyNotification_.remove();
+      }, 4000);
     }
   }
 
@@ -95,4 +126,4 @@ class AmpCopy extends AMP.BaseElement {
   // }
 }
 
-AMP.registerElement('amp-copy', AmpCopy);
+AMP.registerElement('amp-copy', AmpCopy, CSS);
