@@ -126,8 +126,8 @@ class AmpCopy extends AMP.BaseElement {
         this.copyNotification_ = this.element.ownerDocument.createElement('span');
         this.copyNotification_.className = "amp-copy-notification"
         resolve();
-      } catch {
-        reject();
+      } catch(err) {
+        reject(err);
       }
     });
   }
