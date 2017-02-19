@@ -16,9 +16,6 @@
 
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {AMP_ANALYTICS_HEADER} from '../../../../ads/google/a4a/utils';
-import {
-  setupForAdTesting,
-} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
@@ -27,6 +24,19 @@ import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+
+function setupForAdTesting(fixture) {
+  installDocService(fixture.win, /* isSingleDoc */ true);
+  const doc = fixture.doc;
+  // TODO(a4a-cam@): This is necessary in the short term, until A4A is
+  // smarter about host document styling.  The issue is that it needs to
+  // inherit the AMP runtime style element in order for shadow DOM-enclosed
+  // elements to behave properly.  So we have to set up a minimal one here.
+  const ampStyle = doc.createElement('style');
+  ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
+  doc.head.appendChild(ampStyle);
+}
 
 describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   let impl;

@@ -16,7 +16,6 @@
 
 import {AmpA4A} from '../amp-a4a';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
 
 /** @type {string} @private */
 export const SIGNATURE_HEADER = 'X-TestSignatureHeader';
@@ -55,27 +54,4 @@ export class MockA4AImpl extends AmpA4A {
   getFallback() {
     return null;
   }
-}
-
-
-/**
- * Setup fixture for ad related testing.
- *
- * @param {!{
- *   win: !Window,
- *   doc: !Document,
- *   iframe: !Element,
- *   addElement: function(!Element):!Promise
- * }} fixture
- */
-export function setupForAdTesting(fixture) {
-  installDocService(fixture.win, /* isSingleDoc */ true);
-  const doc = fixture.doc;
-  // TODO(a4a-cam@): This is necessary in the short term, until A4A is
-  // smarter about host document styling.  The issue is that it needs to
-  // inherit the AMP runtime style element in order for shadow DOM-enclosed
-  // elements to behave properly.  So we have to set up a minimal one here.
-  const ampStyle = doc.createElement('style');
-  ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
-  doc.head.appendChild(ampStyle);
 }
