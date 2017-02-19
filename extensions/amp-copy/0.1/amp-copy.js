@@ -19,7 +19,13 @@ import {user} from '../../../src/log';
 import {CSS} from '../../../build/amp-copy-0.1.css';
 
 /** @const */
+const IOS_USER_AGENT = /ipad|ipod|iphone/i;
+
+/** @const */
 const COPY_SUCCESS = 'Copied!';
+
+/** @const */
+const IOS_SELECT = 'Tap the selected text to copy.';
 
 /** @const */
 const COPY_ERROR = 'This browser does not support copying. Please select the text manually, and copy';
@@ -43,12 +49,22 @@ class AmpCopy extends AMP.BaseElement {
     /**
      * @private {?Element}
      */
+    this.childContainer_ = null;
+
+    /**
+     * @private {?Element}
+     */
     this.copyBtn_ = null;
 
     /**
      * @private {?Element}
      */
     this.copyNotification_ = null;
+
+    /**
+     * @private {?Boolean}
+     */
+    this.isIos_ = null;
 
     /**
      * @private {?Timeout}
@@ -59,17 +75,37 @@ class AmpCopy extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     //Get our copy text attribute
-    this.copyText_ = this.element.getAttribute('copy-text');
+    const copyTextAttr = user().assert(this.element.getAttribute('copy-text'),
+        'The copy-text attribute is required. %s', this.element);
+    this.copyText_ = copyTextAttr;
 
     //Create the displayed text element
-    this.displayedText_ = this.element.ownerDocument.createElement('span');
-    this.displayedText_.textContent = this.copyText_;
+    const textElementAttr = user().assert(this.element.getAttribute('text-element'),
+        'The text-element attribute is required. %s', this.element);
+    user().assert(textElementAttr === 'textarea' || textElementAttr === 'input',
+        'The text-element attribute must be, "input" or a "textarea". %s', this.element);
+    this.displayedText_ = this.element.ownerDocument.createElement(textElementAttr);
+    this.displayedText_.className = "amp-copy-" + textElementAttr;
+    this.displayedText_.setAttribute('readonly', '');
+    this.displayedText_.setAttribute("contentEditable", true);
+    this.displayedText_.value = this.copyText_;
+
+    //Create a container for our copy-button and notification
+    this.childContainer_ = this.element.ownerDocument.createElement('div');
+    this.childContainer_.className = "-amp-copy-child-container";
+
+    //Get if we are currently on ios
+    this.isIos_ = navigator.userAgent.match(IOS_USER_AGENT);
 
     //Create the Copy Button element
     this.copyBtn_ = this.element.ownerDocument.createElement('button');
     this.copyBtn_.className = "amp-copy-button";
     this.copyBtn_.addEventListener('click', () => this.copyBtnClick_());
-    this.copyBtn_.textContent = 'Copy';
+    if(this.isIos_) {
+      this.copyBtn_.textContent = 'Select';
+    } else {
+      this.copyBtn_.textContent = 'Copy';
+    }
 
     //Create the copy notification element
     this.copyNotification_ = this.element.ownerDocument.createElement('span');
@@ -77,7 +113,8 @@ class AmpCopy extends AMP.BaseElement {
 
     //Add the created the elements
     this.element.appendChild(this.displayedText_);
-    this.element.appendChild(this.copyBtn_);
+    this.element.appendChild(this.childContainer_);
+    this.childContainer_.appendChild(this.copyBtn_)
   }
 
   /** Function attatched to copy button to copy text */
@@ -85,32 +122,27 @@ class AmpCopy extends AMP.BaseElement {
    * @private {?Function}
    */
   copyBtnClick_() {
-    //Create a tempoaray input element that can be used to copy from
-    let tempInput = this.element.ownerDocument.createElement('input');
-    tempInput.value = this.copyText_;
-
-    //Add the tempInput to the amp-copy element
-    this.element.appendChild(tempInput);
-
-    //Select the text in the temp input to be copied
-    tempInput.select();
+    //Select the text in the displayed text input to be copied
+    this.displayedText_.focus();
+    this.displayedText_.select();
+    this.displayedText_.setSelectionRange(0, this.displayedText_.value.length);
 
     try {
       // Copy the text
       document.execCommand('copy');
-      this.copyNotification_.textContent = COPY_SUCCESS;
+      if(this.isIos_) {
+        this.copyNotification_.textContent = IOS_SELECT;
+      } else {
+        this.copyNotification_.textContent = COPY_SUCCESS;
+      }
     }
     catch (err) {
       // If the browser does not support document.execCommand('copy')
       // Show a temporary prompt saying, copy not supported on this browser
       this.copyNotification_.textContent = COPY_ERROR;
     } finally {
-      //Blur the temporary input, and remove it from the amp-copy element
-      tempInput.blur();
-      tempInput.remove();
-
       //Add our notification, and cancel the timeout if exists
-      this.element.appendChild(this.copyNotification_);
+      this.childContainer_.appendChild(this.copyNotification_);
       if(this.currentNotificationTimeout_) {
         clearTimeout(this.currentNotificationTimeout_);
       }

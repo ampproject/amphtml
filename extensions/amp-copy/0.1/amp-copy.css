@@ -14,13 +14,27 @@
  * limitations under the License.
  */
 
+.amp-copy-textarea {
+  width: 100%;
+  max-width: 320px;
+  min-height: 100px;
+}
 
+.-amp-copy-child-container {
+  position: relative;
+}
+
+.amp-copy-button {
+  float: right;
+}
+
+/* Notification on Success/Error of copy */
 .amp-copy-notification {
   /* Position and size */
   position: absolute;
-  padding: 5px;
+  padding: 2px;
   z-index: 2;
-  max-width: 250px;
+  right: 0px;
 
   /* Box Shadow to make it pop out to users */
   -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
