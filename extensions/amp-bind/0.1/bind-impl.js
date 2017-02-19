@@ -26,6 +26,7 @@ import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
+import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 
 const TAG = 'amp-bind';
@@ -80,6 +81,12 @@ export class Bind {
     /** @private {!Array<BoundElementDef>} */
     this.boundElements_ = [];
 
+    /**
+     * Maps expression string to the element(s) that contain it.
+     * @private @const {!Object<string, !Array<!Element>>}
+     */
+    this.expressionToElements_ = Object.create(null);
+
     /** @const @private {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
 
@@ -91,12 +98,6 @@ export class Bind {
 
     /** @visibleForTesting {?Promise<!Object<string,*>>} */
     this.evaluatePromise_ = null;
-
-    /**
-     * Maps expression string to the element(s) that contain it.
-     * @private @const {!Object<string, !Array<!Element>>}
-     */
-    this.expressionToElements_ = Object.create(null);
 
     /** @visibleForTesting {?Promise} */
     this.scanPromise_ = null;
@@ -157,11 +158,25 @@ export class Bind {
    */
   initialize_() {
     dev().fine(TAG, 'Scanning DOM for bindings...');
+    this.addBindingsForNode_(this.ampdoc.getBody());
+  }
 
-    this.scanPromise_ = this.scanBody_(this.ampdoc.getBody());
-    this.scanPromise_.then(results => {
+  /**
+   * Scans the substree rooted at `node` and adds bindings for nodes
+   * that contain bindable elements. This function is not idempotent.
+   *
+   * Returns a promise that resolves after bindings have been added.
+   *
+   * @param {!Element} node
+   * @return {Promise}
+   *
+   * @private
+   */
+  addBindingsForNode_(node) {
+    this.scanPromise_ = this.scanNode_(node).then(results => {
       const {boundElements, bindings, expressionToElements} = results;
-      this.boundElements_ = boundElements;
+
+      this.boundElements_ = this.boundElements_.concat(boundElements);
       Object.assign(this.expressionToElements_, expressionToElements);
       dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
           `${boundElements.length} elements.`);
@@ -169,10 +184,10 @@ export class Bind {
       // Parse on web worker if experiment is enabled.
       if (this.workerExperimentEnabled_) {
         dev().fine(TAG, `Asking worker to parse expressions...`);
-        return invokeWebWorker(this.win_, 'bind.initialize', [bindings]);
+        return invokeWebWorker(this.win_, 'bind.addBindings', [bindings]);
       } else {
-        this.evaluator_ = new BindEvaluator();
-        const parseErrors = this.evaluator_.setBindings(bindings);
+        this.evaluator_ = this.evaluator_ || new BindEvaluator();
+        const parseErrors = this.evaluator_.addBindings(bindings);
         return parseErrors;
       }
     }).then(parseErrors => {
@@ -195,12 +210,58 @@ export class Bind {
       dev().fine(TAG, `Finished parsing expressions with ` +
           `${Object.keys(parseErrors).length} errors.`);
     });
+    return this.scanPromise_;
   }
 
   /**
-   * Scans `body` for attributes that conform to bind syntax and returns
+   * Removes all bindings nodes with `node` as their parent.
+   *
+   * Returns a promise that resolves after bindings have been removed.
+   *
+   * @param {!Element} node
+   * @return {Promise}
+   *
+   * @private
+   */
+  removeBindingsForNode_(node) {
+    return new Promise(resolve => {
+      // Eliminate bound elements that have node as an ancestor.
+      filterSplice(this.boundElements_, boundElement => {
+        return !node.contains(boundElement.element);
+      });
+
+      // Eliminate elements from the expression to elements map that
+      // have node as an ancestor. Delete expressions that are no longer
+      // bound to elements.
+      const deletedExpressions = [];
+      for (const expression in this.expressionToElements_) {
+        const elements = this.expressionToElements_[expression];
+        filterSplice(elements, element => {
+          return !node.contains(element);
+        });
+        if (elements.length == 0) {
+          deletedExpressions.push(expression);
+          delete this.expressionToElements_[expression];
+        }
+      }
+
+      // Remove the bindings from the evaluator.
+      if (this.workerExperimentEnabled_) {
+        dev().fine(TAG, `Asking worker to parse expressions...`);
+        return invokeWebWorker(this.win_,
+          'bind.removeBindingsWithExpressionStrings',
+          [deletedExpressions]);
+      } else {
+        this.evaluator_.removeBindingsWithExpressionStrings(deletedExpressions);
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * Scans `node` for attributes that conform to bind syntax and returns
    * a tuple containing bound elements and binding data for the evaluator.
-   * @param {!Element} body
+   * @param {!Element} node
    * @return {
    *   !Promise<{
    *     boundElements: !Array<BoundElementDef>,
@@ -210,7 +271,7 @@ export class Bind {
    * }
    * @private
    */
-  scanBody_(body) {
+  scanNode_(node) {
     /** @type {!Array<BoundElementDef>} */
     const boundElements = [];
     /** @type {!Array<./bind-evaluator.BindingDef>} */
@@ -218,8 +279,9 @@ export class Bind {
     /** @type {!Object<string, !Array<!Element>>} */
     const expressionToElements = Object.create(null);
 
-    const doc = dev().assert(body.ownerDocument, 'ownerDocument is null.');
-    const walker = doc.createTreeWalker(body, NodeFilter.SHOW_ELEMENT);
+    const doc = dev().assert(
+      node.ownerDocument, 'ownerDocument is null.');
+    const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
 
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.

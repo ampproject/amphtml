@@ -151,7 +151,7 @@ export const LIFECYCLE_STAGES = {
   adRequestEnd: '3',
   extractCreativeAndSignature: '4',
   adResponseValidateStart: '5',
-  renderFriendlyStart: '6',
+  renderFriendlyStart: '6',  // TODO(dvoytenko): this signal and similar are actually "embed-create", not "render-start".
   renderCrossDomainStart: '7',
   renderFriendlyEnd: '8',
   renderCrossDomainEnd: '9',
@@ -166,6 +166,7 @@ export const LIFECYCLE_STAGES = {
   layoutAdPromiseDelay: '18',
   signatureVerifySuccess: '19',
   networkError: '20',
+  friendlyIframeIniLoad: '21',
 };
 
 /**
@@ -1111,6 +1112,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     return installFriendlyIframeEmbed(
         iframe, this.element, {
+          host: this.element,
           url: this.adUrl_,
           html: creativeMetaData.minifiedCreative,
           extensionIds: creativeMetaData.customElementExtensions || [],
@@ -1140,7 +1142,13 @@ export class AmpA4A extends AMP.BaseElement {
                 dev().error(TAG, this.element.getAttribute('type'),
                   'getTimingDataAsync for renderFriendlyEnd failed: ', err);
               });
-          return true;
+          // It's enough to wait for "ini-load" signal because in a FIE case
+          // we know that the embed no longer consumes significant resources
+          // after the initial load.
+          return friendlyIframeEmbed.whenIniLoaded();
+        }).then(() => {
+          // Capture ini-load ping.
+          this.protectedEmitLifecycleEvent_('friendlyIframeIniLoad');
         });
   }
 
@@ -1187,7 +1195,8 @@ export class AmpA4A extends AMP.BaseElement {
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
     // Can't get the attributes until we have the iframe, then set it.
-    const attributes = getContextMetadata(window, iframe, this.sentinel);
+    const attributes = getContextMetadata(
+        this.win, this.element, this.sentinel);
     iframe.setAttribute('name', JSON.stringify(attributes));
     iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
     return this.iframeRenderHelper_(iframe);
@@ -1241,7 +1250,8 @@ export class AmpA4A extends AMP.BaseElement {
           }, SHARED_IFRAME_PROPERTIES));
       if (method == XORIGIN_MODE.NAMEFRAME) {
         // TODO(bradfrizzell): change name of function and var
-        const attributes = getContextMetadata(window, iframe, this.sentinel);
+        const attributes = getContextMetadata(
+            this.win, this.element, this.sentinel);
         attributes['creative'] = creative;
         const name = JSON.stringify(attributes);
         // Need to reassign the name once we've generated the context

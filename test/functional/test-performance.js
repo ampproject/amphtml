@@ -17,6 +17,7 @@
 import * as sinon from 'sinon';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {getService, resetServiceForTesting} from '../../src/service';
+import {resourcesForDoc} from '../../src/resources';
 import {viewerForDoc} from '../../src/viewer';
 
 
@@ -460,14 +461,48 @@ describe('performance', () => {
 
   });
 
+  it('should wait for visible resources', () => {
+    function resource() {
+      const res = {
+        loadedComplete: false,
+      };
+      res.loadedOnce = () => Promise.resolve().then(() => {
+        res.loadedComplete = true;
+      });
+      return res;
+    }
+
+    const resources = resourcesForDoc(window.document);
+    const resourcesMock = sandbox.mock(resources);
+    perf.resources_ = resources;
+
+    const res1 = resource();
+    const res2 = resource();
+
+    resourcesMock
+        .expects('getResourcesInRect')
+        .withExactArgs(
+            perf.win,
+            sinon.match(arg =>
+                arg.left == 0 &&
+                arg.top == 0 &&
+                arg.width == perf.win.innerWidth &&
+                arg.height == perf.win.innerHeight))
+        .returns(Promise.resolve([res1, res2]))
+        .once();
+
+    return perf.whenViewportLayoutComplete_().then(() => {
+      expect(res1.loadedComplete).to.be.true;
+      expect(res2.loadedComplete).to.be.true;
+    });
+  });
+
   describe('coreServicesAvailable', () => {
     let tickSpy;
     let viewer;
     let viewerSendMessageStub;
     let whenFirstVisiblePromise;
     let whenFirstVisibleResolve;
-    let whenReadyToRetrieveResourcesPromise;
-    let whenReadyToRetrieveResourcesResolve;
     let whenViewportLayoutCompletePromise;
     let whenViewportLayoutCompleteResolve;
 
@@ -489,18 +524,12 @@ describe('performance', () => {
         whenFirstVisibleResolve = resolve;
       });
 
-      whenReadyToRetrieveResourcesPromise = new Promise(resolve => {
-        whenReadyToRetrieveResourcesResolve = resolve;
-      });
-
       whenViewportLayoutCompletePromise = new Promise(resolve => {
         whenViewportLayoutCompleteResolve = resolve;
       });
 
       sandbox.stub(viewer, 'whenFirstVisible')
           .returns(whenFirstVisiblePromise);
-      sandbox.stub(perf, 'whenReadyToRetrieveResources_')
-          .returns(whenReadyToRetrieveResourcesPromise);
       sandbox.stub(perf, 'whenViewportLayoutComplete_')
           .returns(whenViewportLayoutCompletePromise);
       return viewer.whenMessagingReady();
@@ -521,7 +550,6 @@ describe('performance', () => {
         sandbox.stub(viewer, 'isEmbedded').returns(true);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
-          whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
             expect(viewerSendMessageStub.withArgs(
@@ -537,7 +565,6 @@ describe('performance', () => {
         sandbox.stub(viewer, 'getParam').withArgs('csi').returns(null);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
-          whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
             expect(viewerSendMessageStub.withArgs(
@@ -554,7 +581,6 @@ describe('performance', () => {
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
           expect(tickSpy).to.have.callCount(2);
-          whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
             expect(tickSpy).to.have.callCount(4);
@@ -572,7 +598,6 @@ describe('performance', () => {
       it('should tick `pc` with `opt_value=0` when viewport is complete ' +
          'before user request document to be visible', () => {
         clock.tick(300);
-        whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(tickSpy).to.have.callCount(3);
@@ -598,7 +623,6 @@ describe('performance', () => {
         sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
         sandbox.stub(viewer, 'isEmbedded').returns(true);
         clock.tick(300);
-        whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(viewerSendMessageStub.withArgs(
@@ -609,7 +633,6 @@ describe('performance', () => {
       it('should tick `pc` with `opt_value=undefined` when user requests ' +
          'document to be visible', () => {
         clock.tick(300);
-        whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(tickSpy).to.have.callCount(2);
