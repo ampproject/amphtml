@@ -48,7 +48,7 @@ The [Getting Started End-to-End Guide](contributing/getting-started-e2e.md) prov
 
 The community has created a list of [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issues) specifically for new contributors to the project.  Feel free to find one that interests you and jump in!  Make sure to comment on the issue first so others know you are starting on it.
 
-If you run into any problems we have plenty of people who are willing to help; see the [How to get help](contributing/getting-started-e2e.md#how-to-get-help) section of the Getting Started guide. 
+If you run into any problems we have plenty of people who are willing to help; see the [How to get help](contributing/getting-started-e2e.md#how-to-get-help) section of the Getting Started guide.
 
 ### How to contribute code
 
@@ -90,7 +90,7 @@ The AMP Project hosted at GitHub requires all contributors to sign a Contributor
 
 When you create a Pull Request a check will be run to ensure that you have signed the CLA.  Make sure that you sign the CLA with the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).
 
-## Ongoing Participation
+## Ongoing participation
 
 We actively encourage ongoing participation by community members.
 
