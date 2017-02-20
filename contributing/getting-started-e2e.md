@@ -425,9 +425,9 @@ git push origin --delete <branch name>
 
 **Congratulations on making your first change to AMP!**
 
-Once your changes are merged in, you won't have to wait long to see them live on AMP pages across the web!
+If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.  If your change was to the code that runs on AMP pages across the web, you'll have to wait for them to be included in a release.
 
-In general we cut a release of AMP JS on Thursdays during working hours (Pacific time) and push it to the AMP Dev Channel that day.  After verifying there are no issues, we start rolling that build out the following Monday and complete the push that Thursday.
+In general we cut a release of amphtml on Thursdays during working hours (Pacific time) and push it to the AMP Dev Channel that day.  After verifying there are no issues, we start rolling that build out the following Monday and complete the push that Thursday.
 
 You can see whether your change made it into the Dev Channel or production build on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).  The build marked `Draft` is the version on the Dev Channel and the build marked `Latest Release` is what is running in production.  Your Pull Request will be listed in the first build that includes it; if you don't see your Pull Request listed it will likely be in the next build.
 
