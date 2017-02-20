@@ -216,7 +216,7 @@ In the workflow we will be using you'll go to the master branch on your local re
 git checkout master
 
 # pull in the latest changes from the remote amphtml repository
-git pull upstream master 
+git pull upstream master
 ```
 If there have been any changes you'll see the details of what changed, otherwise you'll see a message like `Already up-to-date`.
 
@@ -224,7 +224,7 @@ After running that `git pull` command your local master branch has the latest fi
 
 ```
 # go to the branch you want to sync
-git checkout <branch name> 
+git checkout <branch name>
 
 # bring the latest changes from your master branch into this branch
 git rebase master
@@ -412,21 +412,25 @@ GitHub offers a convenient "Delete branch" button on the PR page after the chang
 
 ```
 # go back to the master branch
-git checkout master 
+git checkout master
 
 # delete the branch in your local repository
 git branch -D <branch name>
 
 # delete the branch in your GitHub fork (if you didn't use the UI)
-git push origin --delete <branch name> 
+git push origin --delete <branch name>
 ```
 
-# Celebrate
+# See your changes in production
 
-If you've gone through the steps above and had your first pull request approved and merged--or even if you just got the amphtml code built and played around with some local changes--congratulations!
+⚡⚡⚡Congratulations⚡⚡⚡ on making your first change to AMP!
 
-Now that you know the process for making changes to the AMP Project and you already have most of the heavy lifting done we look forward to seeing your future contributions to the project. :) 
+Once your changes are merged in, you won't have to wait long to see them live on AMP pages across the web!
 
+The [Releases](../README.md#releases) section of our README.md has details on the release process and how you can opt in to seeing your changes live even faster via the [AMP Dev Channel](../README.md#amp-dev-channel).
+In general we cut a release on Thursdays during working hours (Pacific time) and push it to the AMP Dev Channel that day.  The following Monday we will start rolling it out across the web slowly with a full rollout expected a few days later on Thursday.  That is:  if your change is merged in on Wednesday, you should generally be able to opt-in to see it the next day and then see it live everywhere a week later.
+
+Now that you know the process for making changes to the AMP Project and you already have most of the heavy lifting done we look forward to seeing your future contributions to the project. :)
 
 # Other resources
 
