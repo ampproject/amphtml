@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,24 +21,26 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function adhese(global, data) {
-  validateData(data, ['location','format', 'account', 'request_type']);
-  let adhTarget = '';
-  if (data['targeting'] != undefined) {
-    const t = data['targeting'];
-    for (const a in t) {
-      let s = a;
-      for (let x = 0; x < t[a].length; x++) {
-        s += t[a][x] + (t[a].length - 1 > x ? ';' : '');
+  validateData(data, ['location','format', 'account', 'requestType']);
+  let targetParam = '';
+  if (data['targeting']) {
+    const targetList = data['targeting'];
+    for (const category in targetList) {
+      targetParam += encodeURIComponent(category);
+      const targets = targetList[category];
+      for (let x = 0; x < targets.length; x++) {
+        targetParam += encodeURIComponent(targets[x]) +
+        (targets.length - 1 > x ? ';' : '');
       }
-      adhTarget += s + '/';
+      targetParam += '/';
     }
   }
-  adhTarget += '?t=' + Date.now();
-  writeScript(window, 'https://ads-' + data['account'] + '.adhese.com/' + data['request_type'] + '/sl' + data['location'] + data['position'] + '-' + data['format'] + '/' + adhTarget);
+  targetParam += '?t=' + Date.now();
+  writeScript(window, 'https://ads-' + encodeURIComponent(data['account']) + '.adhese.com/' + encodeURIComponent(data['requestType']) + '/sl' + encodeURIComponent(data['location']) + encodeURIComponent(data['position']) + '-' + encodeURIComponent(data['format']) + '/' + targetParam);
   const co = global.document.querySelector('#c');
   co.width = data['width'];
   co.height = data['height'];
-  co.addEventListener('adhLoaded',getAdInfo,false);
+  co.addEventListener('adhLoaded', getAdInfo, false);
 }
 
 /**
@@ -52,8 +54,7 @@ function getAdInfo(e) {
       e.detail.width != e.target.width)) {
     global.context.renderStart({width: e.detail.width,
       height: e.detail.height});
-  }
-  else {
+  } else {
     global.context.noContentAvailable();
   }
 }
