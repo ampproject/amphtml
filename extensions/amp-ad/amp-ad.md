@@ -115,6 +115,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Criteo](../../ads/criteo.md)
 - [CSA](../../ads/google/csa.md)
 - [CxenseDisplay](../../ads/eas.md)
+- [Dianomi](../../ads/dianomi.md)
 - [DistroScale](../../ads/distroscale.md)
 - [Dot and Media](../../ads/dotandads.md)
 - [Doubleclick](../../ads/google/doubleclick.md)
@@ -220,7 +221,7 @@ An optional attribute. If provided, will require confirming the [amp-user-notifi
 
 **data-loading-strategy**
 
-Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view. Supported value: `prefer-viewability-over-views`. 
+Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view. Supported value: `prefer-viewability-over-views`.
 
 **common attributes**
 
