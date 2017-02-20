@@ -423,14 +423,23 @@ git push origin --delete <branch name>
 
 # See your changes in production
 
-⚡⚡⚡Congratulations⚡⚡⚡ on making your first change to AMP!
+**Congratulations on making your first change to AMP!**
 
 Once your changes are merged in, you won't have to wait long to see them live on AMP pages across the web!
 
-The [Releases](../README.md#releases) section of our README.md has details on the release process and how you can opt in to seeing your changes live even faster via the [AMP Dev Channel](../README.md#amp-dev-channel).
-In general we cut a release on Thursdays during working hours (Pacific time) and push it to the AMP Dev Channel that day.  The following Monday we will start rolling it out across the web slowly with a full rollout expected a few days later on Thursday.  That is:  if your change is merged in on Wednesday, you should generally be able to opt-in to see it the next day and then see it live everywhere a week later.
+In general we cut a release of AMP JS on Thursdays during working hours (Pacific time) and push it to the AMP Dev Channel that day.  After verifying there are no issues, we start rolling that build out the following Monday and complete the push that Thursday.
 
-Now that you know the process for making changes to the AMP Project and you already have most of the heavy lifting done we look forward to seeing your future contributions to the project. :)
+You can see whether your change made it into the Dev Channel or production build on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).  The build marked `Draft` is the version on the Dev Channel and the build marked `Latest Release` is what is running in production.  Your Pull Request will be listed in the first build that includes it; if you don't see your Pull Request listed it will likely be in the next build.
+
+You can opt-in to using the Dev Channel in a browser by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.  (Note that this only affects the browser in which you enable the experiment.)
+
+You can verify the AMP version your browser is using for a given page by looking at your browser's developer console.  After loading an AMP page (e.g. [https://ampproject.org](https://ampproject.org)) the console will have a message like `Powered by AMP ⚡ HTML – Version <build number>`).  The `<build number>` will match one of the build numbers on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).
+
+The [Releases section of README.md](../README.md#releases) has more details on the release process.
+
+# ⚡⚡⚡...
+
+Now that you know the process for making changes to the AMP Project you already have most of the heavy lifting done.  **We look forward to seeing your future contributions to the project.** :)
 
 # Other resources
 
