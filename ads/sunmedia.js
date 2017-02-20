@@ -22,7 +22,7 @@ import {loadScript, validateData} from '../3p/3p';
 export function sunmedia(global, data) {
  /*eslint "google-camelcase/google-camelcase": 0*/
   global._sunmedia_amp = {
-    allowed_data: ['cskp', 'crst', 'cdb'],
+    allowed_data: ['cskp', 'crst', 'cdb', 'cid'],
     mandatory_data: ['cid'],
     data,
   };

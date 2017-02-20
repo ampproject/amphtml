@@ -6,7 +6,17 @@
 </head>
 <body style="margin:0">
 <div id="c" style="position:absolute;top:0;left:0;bottom:0;right:0;">
-  <script>draw3p()</script>
+  <script>
+  //draw3p()
+  draw3p(undefined,
+      // List of expected amp-ad types.
+      ['sunmedia', 'vod.addevweb.com'],
+      // List of hostnames that are allowed to embed this change.
+      ["localhost", "vod.addevweb.com"]
+      // Please also use ALLOW-FROM X-Frame-Options to get security in
+      // browsers that do not support location.ancestorOrigins.
+      ['vod.addevweb.com']);
+  </script>
 </div>
 <script>if (window.docEndCallback) window.docEndCallback()</script>
 </body>

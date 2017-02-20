@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=300 height=220
+<amp-ad width=300 height=1
 	type="sunmedia"
 	layout="responsive"
 	data-cid="sunmedia_test"
