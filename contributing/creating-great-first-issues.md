@@ -1,10 +1,10 @@
 # Creating Great First Issues
 
-The AMP Project encourages new contributors but figuring out how to get started can be difficult for someone who is new to open source projects, Git/GitHub or the AMP codebase.
+The AMP Project welcomes new contributors and we want to make it as easy as possible for them to contribute.  For many new contributors (who may not have open source/Git/AMP/etc. experience) it can be difficult to figure out how to get started.
 
-To help new contributors to the AMP Project get oriented we curate [Great First Issues](https://github.com/ampproject/amphtml/issues?q=is%3Aopen+is%3Aissue+label%3A%22Great+First+Issues%22)--starter issues that a new contributor can use to get comfortable contributing to the AMP Project.
+To help these new contributors get oriented we curate [Great First Issues](https://github.com/ampproject/amphtml/issues?q=is%3Aopen+is%3Aissue+label%3A%22Great+First+Issues%22)--starter issues that a new contributor can use to get comfortable contributing to the AMP Project.
 
-We depend on people who have been in the community for a while to identify bugs/features that would provide this orientation and to then create a well-documented Great First Issue for them.
+We depend on experienced members of the community to identify bugs/features that would provide this orientation and to then create a well-documented Great First Issue for them.
 
 Our approach is inspired by [Hoodie](http://hood.ie/) which collects starter issues in their [Hoodie Camp](https://github.com/hoodiehq/camp).  See the [Hoodie Camp Issues](https://github.com/hoodiehq/camp/issues) for many examples of what great first issues look like.  (Hoodie's [Welcoming Communities](http://hood.ie/blog/welcoming-communities.html) post is also a great read.)
 
