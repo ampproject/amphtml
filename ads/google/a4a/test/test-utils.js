@@ -26,10 +26,23 @@ import {
 } from '../../../../src/service/extensions-impl';
 import {
   MockA4AImpl,
-  createAdTestingIframePromise,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
+
+function setupForAdTesting(fixture) {
+  installDocService(fixture.win, /* isSingleDoc */ true);
+  const doc = fixture.doc;
+  // TODO(a4a-cam@): This is necessary in the short term, until A4A is
+  // smarter about host document styling.  The issue is that it needs to
+  // inherit the AMP runtime style element in order for shadow DOM-enclosed
+  // elements to behave properly.  So we have to set up a minimal one here.
+  const ampStyle = doc.createElement('style');
+  ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
+  doc.head.appendChild(ampStyle);
+}
 
 describe('Google A4A utils', () => {
 
@@ -116,7 +129,8 @@ describe('Google A4A utils', () => {
     });
 
     it('should load extension and create amp-analytics element', () => {
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         const element = createElementWithAttributes(doc, 'amp-a4a', {
           'width': '200',
