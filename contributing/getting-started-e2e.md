@@ -425,7 +425,7 @@ git push origin --delete <branch name>
 
 **Congratulations on making your first change to AMP!**
 
-If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.  If your change was to the code that runs on AMP pages across the web, you'll have to wait for them to be included in a release.
+If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.  If your change was to the code that runs on AMP pages across the web you'll have to wait for the change to be included in a release.
 
 In general we cut a release of amphtml on Thursdays during working hours (Pacific time) and push it to the AMP Dev Channel that day.  After verifying there are no issues, we start rolling that build out the following Monday and complete the push that Thursday.
 

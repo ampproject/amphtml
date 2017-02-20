@@ -94,7 +94,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 # See your changes in production
 
-* Barring any issues, releases are cut Thursday, pushed to Dev Channel immediately, pushed to 1% on Monday and pushed to all of prod on Thursday.
+* Barring any issues releases are cut Thursday, pushed to Dev Channel immediately, pushed to 1% on Monday and pushed to all of prod on Thursday.
 * The [amphtml Releases page](https://github.com/ampproject/amphtml/releases) will list your PR in the first build that contains it.  `Draft` is the build on the Dev Channel, `Latest Release` is the build in production.
 * Opt-in to using the Dev Channel in a browser by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.
 * Find the AMP version being used on a page in the developer console, i.e. `Powered by AMP ⚡ HTML – Version <build number>`).
