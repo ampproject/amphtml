@@ -195,7 +195,6 @@ export class AccessServerJwtAdapter {
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchText(url, {
             credentials: 'include',
-            requireAmpResponseSourceOrigin: true,
           }));
     }).then(encoded => {
       const jwt = this.jwtHelper_.decode(encoded);
@@ -313,6 +312,7 @@ export class AccessServerJwtAdapter {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
+            requireAmpResponseSourceOrigin: false,
           })).then(response => {
             dev().fine(TAG, 'Authorization response: ', response);
             return this.replaceSections_(response);

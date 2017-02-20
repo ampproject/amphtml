@@ -17,7 +17,10 @@ tags: {  # <script custom-element="amp-sticky-ad">
   html_format: AMP  # Ads are not allowed inside ads.
   tag_name: "SCRIPT"
   spec_name: "amp-sticky-ad extension .js script"
+  satisfies: "amp-sticky-ad extension .js script"
   mandatory_parent: "HEAD"
+  unique: true
+  extension_unused_unless_tag_present: "amp-sticky-ad"
   attrs: {
     name: "async"
     mandatory: true
@@ -29,10 +32,11 @@ tags: {  # <script custom-element="amp-sticky-ad">
     value: "amp-sticky-ad"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-sticky-ad-(latest|0\\.1)\\.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-sticky-ad-(latest|0\\.1||1\\.0)\\.js"
   }
   attrs: {
     name: "type"
@@ -51,7 +55,7 @@ tags: {  # <amp-sticky-ad>
   tag_name: "AMP-STICKY-AD"
   disallowed_ancestor: "AMP-APP-BANNER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-sticky-ad extension .js script"
+  requires: "amp-sticky-ad extension .js script"
   attr_lists: "extended-amp-global"
   unique: true
   child_tags: {

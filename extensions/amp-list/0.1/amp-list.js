@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {assertHttpsUrl} from '../../../src/url';
+import {getValueForExpr} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {templatesFor} from '../../../src/template';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/xhr';
 
@@ -48,6 +49,11 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /** @override */
+  reconstructWhenReparented() {
+    return false;
+  }
+
+  /** @override */
   layoutCallback() {
     return this.urlReplacements_.expandAsync(assertHttpsUrl(
         this.element.getAttribute('src'), this.element)).then(src => {
@@ -55,17 +61,17 @@ export class AmpList extends AMP.BaseElement {
           if (this.element.hasAttribute('credentials')) {
             opts.credentials = this.element.getAttribute('credentials');
           }
-          if (opts.credentials) {
-            opts.requireAmpResponseSourceOrigin = true;
+          if (!opts.credentials) {
+            opts.requireAmpResponseSourceOrigin = false;
           }
           return xhrFor(this.win).fetchJson(src, opts);
         }).then(data => {
-          user().assert(data != null
-              && typeof data == 'object'
-              && Array.isArray(data['items']),
-              'Response must be {items: []} object %s %s',
-              this.element, data);
-          const items = data['items'];
+          user().assert(data != null, 'Response is undefined %s', this.element);
+          const itemsExpr = this.element.getAttribute('items') || 'items';
+          const items = getValueForExpr(data, itemsExpr);
+          user().assert(items && Array.isArray(items),
+              'Response must contain an array at "%s". %s %s',
+              itemsExpr, this.element, data);
           return templatesFor(this.win).findAndRenderTemplateArray(
               this.element, items).then(this.rendered_.bind(this));
         });

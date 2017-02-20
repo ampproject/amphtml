@@ -37,9 +37,7 @@ describe('amp-reach-player', () => {
       if (opt_responsive) {
         reach.setAttribute('layout', 'responsive');
       }
-      iframe.doc.body.appendChild(reach);
-      reach.implementation_.layoutCallback();
-      return reach;
+      return iframe.addElement(reach);
     });
   }
 
@@ -60,7 +58,7 @@ describe('amp-reach-player', () => {
     }, true).then(reach => {
       const iframe = reach.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

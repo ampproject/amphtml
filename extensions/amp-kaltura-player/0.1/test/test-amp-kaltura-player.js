@@ -36,9 +36,7 @@ describe('amp-kaltura-player', () => {
       if (opt_responsive) {
         kalturaPlayer.setAttribute('layout', 'responsive');
       }
-      iframe.doc.body.appendChild(kalturaPlayer);
-      kalturaPlayer.implementation_.layoutCallback();
-      return kalturaPlayer;
+      return iframe.addElement(kalturaPlayer);
     });
   }
 
@@ -64,7 +62,7 @@ describe('amp-kaltura-player', () => {
     }, true).then(bc => {
       const iframe = bc.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

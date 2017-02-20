@@ -55,6 +55,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     'facebook.amp.html',
     'gfycat.amp.html',
     'instagram.amp.html',
+    'ooyalaplayer.amp.html',
     'released.amp.html',
     'soundcloud.amp.html',
     'springboard-player.amp.html',

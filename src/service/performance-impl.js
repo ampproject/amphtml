@@ -15,10 +15,12 @@
  */
 
 import {documentInfoForDoc} from '../document-info';
-import {whenDocumentReady, whenDocumentComplete} from '../document-ready';
+import {layoutRectLtwh} from '../layout-rect';
 import {fromClass} from '../service';
 import {resourcesForDoc} from '../resources';
 import {viewerForDoc} from '../viewer';
+import {viewportForDoc} from '../viewport';
+import {whenDocumentComplete} from '../document-ready';
 
 
 /**
@@ -85,15 +87,8 @@ export class Performance {
     /** @private {boolean} */
     this.isMessagingReady_ = false;
 
-    /** @private @const {!Promise} */
-    this.whenReadyToRetrieveResourcesPromise_ =
-        whenDocumentReady(this.win.document)
-        .then(() => {
-          // Two fold. First, resolve the promise to undefined.
-          // Second, causes a delay by introducing another async request
-          // (this `#then` block) so that Resources' onDocumentReady event
-          // is guaranteed to fire.
-        });
+    /** @private {boolean} */
+    this.isPerformanceTrackingOn_ = false;
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => {
@@ -109,6 +104,9 @@ export class Performance {
   coreServicesAvailable() {
     this.viewer_ = viewerForDoc(this.win.document);
     this.resources_ = resourcesForDoc(this.win.document);
+
+    this.isPerformanceTrackingOn_ = this.viewer_.isEmbedded() &&
+        this.viewer_.getParam('csi') === '1';
 
     // This is for redundancy. Call flush on any visibility change.
     this.viewer_.onVisibilityChanged(this.flush.bind(this));
@@ -192,20 +190,10 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    return this.whenReadyToRetrieveResources_().then(() => {
-      return Promise.all(this.resources_.getResourcesInViewport().map(r => {
-        return r.loadedOnce();
-      }));
-    });
-  }
-
-  /**
-   * Returns a promise that is resolved when the document is ready and
-   * after a microtask delay.
-   * @return {!Promise}
-   */
-  whenReadyToRetrieveResources_() {
-    return this.whenReadyToRetrieveResourcesPromise_;
+    const size = viewportForDoc(this.win.document).getSize();
+    const rect = layoutRectLtwh(0, 0, size.width, size.height);
+    return this.resources_.getResourcesInRect(this.win, rect).then(
+        resources => Promise.all(resources.map(r => r.loadedOnce())));
   }
 
   /**
@@ -215,7 +203,8 @@ export class Performance {
    * @private
    */
   setFlushParams_(params) {
-    this.viewer_.setFlushParams(params);
+    this.viewer_.sendMessage('setFlushParams', params,
+        /* cancelUnsent */true);
   }
 
   /**
@@ -232,8 +221,8 @@ export class Performance {
     opt_from = opt_from == undefined ? null : opt_from;
     opt_value = opt_value == undefined ? Date.now() : opt_value;
 
-    if (this.isMessagingReady_ && this.viewer_.isPerformanceTrackingOn()) {
-      this.viewer_.tick({
+    if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
+      this.viewer_.sendMessage('tick', {
         label,
         from: opt_from,
         value: opt_value,
@@ -276,11 +265,12 @@ export class Performance {
 
 
   /**
-   * Calls the "flushTicks" function on the viewer.
+   * Ask the viewer to flush the ticks
    */
   flush() {
-    if (this.isMessagingReady_ && this.viewer_.isPerformanceTrackingOn()) {
-      this.viewer_.flushTicks();
+    if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
+      this.viewer_.sendMessage('sendCsi', undefined,
+          /* cancelUnsent */true);
     }
   }
 
@@ -319,14 +309,14 @@ export class Performance {
       return;
     }
 
-    if (!this.viewer_.isPerformanceTrackingOn()) {
+    if (!this.isPerformanceTrackingOn_) {
       // drop all queued ticks to not leak
       this.events_.length = 0;
       return;
     }
 
     this.events_.forEach(tickEvent => {
-      this.viewer_.tick(tickEvent);
+      this.viewer_.sendMessage('tick', tickEvent);
     });
     this.events_.length = 0;
   }
@@ -364,10 +354,19 @@ export class Performance {
    */
   prerenderComplete_(value) {
     if (this.viewer_) {
-      this.viewer_.prerenderComplete({
-        value,
-      });
+      this.viewer_.sendMessage('prerenderComplete', {value},
+          /* cancelUnsent */true);
     }
+  }
+
+  /**
+   * Identifies if the viewer is able to track performance.
+   * If the document is not embedded, there is no messaging channel,
+   * so no performance tracking is needed since there is nobody to forward the events.
+   * @return {boolean}
+   */
+  isPerformanceTrackingOn() {
+    return this.isPerformanceTrackingOn_;
   }
 }
 

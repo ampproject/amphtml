@@ -84,6 +84,9 @@ googletag.pubads;
 googletag.defineSlot
 data.slot;
 
+var _googCsa;
+window._googCsa;
+
 var _inmobi;
 window._inmobi;
 _inmobi.getNewAd;
@@ -116,12 +119,20 @@ data.adhost
 data.pos;
 var dfpData;
 dfpData.dfp;
+dfpData.targeting;
 var OX;
 OX._requestArgs;
+var OX_bidder_options;
+OX_bidder_options.bidderType;
+OX_bidder_options.callback;
+var OX_bidder_ads;
 var oxRequest;
 oxRequest.addAdUnit;
 oxRequest.setAdSizes;
 oxRequest.getOrCreateAdUnit;
+data.host;
+data.nc;
+data.dfpSlot;
 data.zone;
 data.sitepage;
 data.auid;
@@ -228,3 +239,18 @@ geckoTag.placementReady;
 data.plc;
 data.sz;
 data.extra;
+var Fusion;
+Fusion.on;
+Fusion.on.warning;
+Fusion.loadAds;
+var ev;
+ev.msg;
+data.adServer;
+data.mediaZone;
+data.layout;
+data.space;
+
+var Swoop
+Swoop.announcePlace
+
+data.siteId

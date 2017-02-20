@@ -15,7 +15,9 @@
  * limitations under the license.
  */
 goog.provide('amp.validator.ValidatorTest');
-goog.require('amp.validator.CssLengthAndUnit');
+goog.require('amp.validator.CssLength');
+goog.require('amp.validator.TagSpec');
+goog.require('amp.validator.createRules');
 goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.validateString');
 
@@ -56,6 +58,19 @@ function isdir(dir) {
   } catch (e) {
     return false;  // If there's neither a file nor a directory.
   }
+}
+
+/**
+ * @param {null|string} regex
+ * @return {boolean}
+ */
+function isValidRegex(regex) {
+  var testRegex = null;
+  try {
+    testRegex = new RegExp(regex);
+  } catch (e) {
+  }
+  return testRegex != null;
 }
 
 /**
@@ -245,12 +260,13 @@ describe('ValidatorCssLengthValidation', () => {
   });
 });
 
-describe('CssLengthAndUnit', () => {
+describe('CssLength', () => {
   it('parses a basic example', () => {
     const parsed =
-        new amp.validator.CssLengthAndUnit('10.1em', /* allowAuto */ false);
+        new amp.validator.CssLength('10.1em', /* allowAuto */ false);
     expect(parsed.isSet).toBe(true);
     expect(parsed.isValid).toBe(true);
+    expect(parsed.numeral).toEqual(10.1);
     expect(parsed.unit).toEqual('em');
     expect(parsed.isAuto).toBe(false);
   });
@@ -259,9 +275,10 @@ describe('CssLengthAndUnit', () => {
     for (const allowedUnit of ['px', 'em', 'rem', 'vh', 'vmin', 'vmax']) {
       const example = '10' + allowedUnit;
       const parsed =
-          new amp.validator.CssLengthAndUnit(example, /* allowAuto */ false);
+          new amp.validator.CssLength(example, /* allowAuto */ false);
       expect(parsed.isSet).toBe(true);
       expect(parsed.isValid).toBe(true);
+      expect(parsed.numeral).toEqual(10);
       expect(parsed.unit).toEqual(allowedUnit);
       expect(parsed.isAuto).toBe(false);
     }
@@ -269,16 +286,17 @@ describe('CssLengthAndUnit', () => {
 
   it('understands empty unit as "px"', () => {
     const parsed =
-        new amp.validator.CssLengthAndUnit('10', /* allowAuto */ false);
+        new amp.validator.CssLength('10', /* allowAuto */ false);
     expect(parsed.isSet).toBe(true);
     expect(parsed.isValid).toBe(true);
+    expect(parsed.numeral).toEqual(10);
     expect(parsed.unit).toEqual('px');
     expect(parsed.isAuto).toBe(false);
   });
 
   it('understands undefined input as valid (means attr is not set)', () => {
     const parsed =
-        new amp.validator.CssLengthAndUnit(undefined, /* allowAuto */ false);
+        new amp.validator.CssLength(undefined, /* allowAuto */ false);
     expect(parsed.isSet).toBe(false);
     expect(parsed.isValid).toBe(true);
     expect(parsed.unit).toEqual('px');
@@ -287,33 +305,33 @@ describe('CssLengthAndUnit', () => {
 
   it('understands empty string as invalid (means attr value is empty)', () => {
     const parsed =
-        new amp.validator.CssLengthAndUnit('', /* allowAuto */ false);
+        new amp.validator.CssLength('', /* allowAuto */ false);
     expect(parsed.isValid).toBe(false);
   });
 
   it('considers other garbage as invalid', () => {
-    expect(new amp.validator.CssLengthAndUnit('100%', /* allowAuto */ false)
+    expect(new amp.validator.CssLength('100%', /* allowAuto */ false)
                .isValid)
         .toBe(false);
     expect(new amp.validator
-               .CssLengthAndUnit('not a number', /* allowAuto */ false)
+               .CssLength('not a number', /* allowAuto */ false)
                .isValid)
         .toBe(false);
-    expect(new amp.validator.CssLengthAndUnit('1.1.1', /* allowAuto */ false)
+    expect(new amp.validator.CssLength('1.1.1', /* allowAuto */ false)
                .isValid)
         .toBe(false);
-    expect(new amp.validator.CssLengthAndUnit('5 inches', /* allowAuto */ false)
+    expect(new amp.validator.CssLength('5 inches', /* allowAuto */ false)
                .isValid)
         .toBe(false);
     expect(
-        new amp.validator.CssLengthAndUnit('fahrenheit', /* allowAuto */ false)
+        new amp.validator.CssLength('fahrenheit', /* allowAuto */ false)
             .isValid)
         .toBe(false);
     expect(
-        new amp.validator.CssLengthAndUnit('px', /* allowAuto */ false).isValid)
+        new amp.validator.CssLength('px', /* allowAuto */ false).isValid)
         .toBe(false);
     expect(new amp.validator
-               .CssLengthAndUnit(  // screen size in ancient Rome.
+               .CssLength(  // screen size in ancient Rome.
                    'ix unciae', /* allowAuto */ false)
                .isValid)
         .toBe(false);
@@ -322,19 +340,449 @@ describe('CssLengthAndUnit', () => {
   it('recongizes auto if allowed', () => {
     {// allow_auto = false with input != auto
      const parsed =
-         new amp.validator.CssLengthAndUnit('1', /* allowAuto */ false);
+         new amp.validator.CssLength('1', /* allowAuto */ false);
      expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(false);} {
         // allow_auto = true with input == auto
         const parsed =
-            new amp.validator.CssLengthAndUnit('1', /* allowAuto */ true);
+            new amp.validator.CssLength('1', /* allowAuto */ true);
         expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(false);} {
         // allow_auto = false with input = auto
         const parsed =
-            new amp.validator.CssLengthAndUnit('auto', /* allowAuto */ false);
+            new amp.validator.CssLength('auto', /* allowAuto */ false);
         expect(parsed.isValid).toBe(false);} {
         // allow_auto = true with input = auto
         const parsed =
-            new amp.validator.CssLengthAndUnit('auto', /* allowAuto */ true);
+            new amp.validator.CssLength('auto', /* allowAuto */ true);
         expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(true);}
+  });
+});
+
+/**
+ * Helper for ValidatorRulesMakeSense.
+ * @param {!amp.validator.AttrSpec} attrSpec
+ */
+function attrRuleShouldMakeSense(attrSpec) {
+  const attrSpecNameRegex = new RegExp('[^A-Z]+');
+  // name
+  it('attr_spec name defined', () => {
+    expect(attrSpec.name).toBeDefined();
+    // Attribute Spec names are matched against lowercased attributes,
+    // so the rules *must* also be lower case or non-cased.
+    expect(attrSpecNameRegex.test(attrSpec.name)).toBe(true);
+  });
+  if (attrSpec.valueUrl !== null) {
+    const allowedProtocolRegex = new RegExp('[a-z-]+');
+    // UrlSpec allowed_protocols are matched against lowercased protocol names
+    // so the rules *must* also be lower case.
+    it('allowed_protocol must be lower case', () => {
+      for (const allowedProtocol of attrSpec.valueUrl.allowedProtocol) {
+        expect(allowedProtocolRegex.test(allowedProtocol)).toBe(true);
+      }
+    });
+    // If disallowed_domain is whatever.ampproject.org then
+    // allow_relative must be false. Otherwise relative URLs would be
+    // rejected for domain whatever.ampproject.org because that is
+    // used as the base URL to parse the relative URL.
+    if ((attrSpec.valueUrl.allowRelative !== null) &&
+        attrSpec.valueUrl.allowRelative) {
+      // allow_relative is true, check to see if whatever.ampproject.org is a
+      // disallowed_domain.
+      it('allow_relative can not be true if ' +
+          'disallowed_domain is whatever.ampproject.org',
+         () => {
+           for (const disallowedDomain of attrSpec.valueUrl.disallowedDomain) {
+             expect(disallowedDomain !== 'whatever.ampproject.org');
+           }
+         });
+    }
+  }
+  // blacklisted_value_regex
+  if (attrSpec.blacklistedValueRegex !== null) {
+    it('blacklisted_value_regex valid', () => {
+      expect(isValidRegex(attrSpec.blacklistedValueRegex)).toBe(true);
+    });
+  }
+  // value_url must have at least one allowed protocol.
+  if (attrSpec.valueUrl !== null) {
+    it('value_url must have at least one allowed protocol', () => {
+      expect(attrSpec.valueUrl.allowedProtocol.length).toBeGreaterThan(0);
+    });
+  }
+  // only has one of value set.
+  let numValues = 0;
+  if (attrSpec.value !== null) numValues += 1;
+  if (attrSpec.valueCasei !== null) numValues += 1;
+  if (attrSpec.valueRegex !== null) numValues += 1;
+  if (attrSpec.valueRegexCasei !== null) numValues += 1;
+  if (attrSpec.valueUrl !== null) numValues += 1;
+  if (attrSpec.valueProperties !== null) numValues += 1;
+  it('attr_spec only has one value set', () => {
+    expect(numValues).toBeLessThan(2);
+  });
+  // deprecation
+  if ((attrSpec.deprecation !== null) || (attrSpec.deprecationUrl !== null)) {
+    it('deprecation and deprecation_url must both be defined if one is defined',
+       () => {
+         expect(attrSpec.deprecation).toBeDefined();
+         expect(attrSpec.deprecationUrl).toBeDefined();
+       });
+  }
+  // dispatch_key
+  if (attrSpec.dispatchKey !== null && attrSpec.dispatchKey) {
+    it('mandatory must be true when dispatch_key is true', () => {
+      expect(attrSpec.mandatory).toBeDefined();
+      expect(attrSpec.mandatory).toBe(true);
+    });
+    it('value or value_casei defined when dispatch_key is true', () => {
+      expect((attrSpec.value !== null) || (attrSpec.valueCasei !== null))
+          .toBe(true);
+    });
+    if (attrSpec.valueCasei !== null) {
+      it('value_casei must be lower case when dispatch_key is true', () => {
+        expect(attrSpec.valueCasei === attrSpec.valueCasei.toLowerCase())
+            .toBe(true);
+      });
+    }
+  }
+  // Value property names must be unique.
+  if (attrSpec.valueProperties !== null) {
+    var seenPropertySpecNames = {};
+    it('value_properties must be unique', () => {
+      for (const propertySpec of attrSpec.valueProperties.properties) {
+        expect(seenPropertySpecNames.hasOwnProperty(propertySpec.name))
+            .toBe(false);
+        seenPropertySpecNames[propertySpec.name] = 0;
+      }
+    });
+  }
+}
+
+// Test which verifies some constraints on the rules file which the validator
+// depends on, but which proto parser isn't robust enough to verify.
+describe('ValidatorRulesMakeSense', () => {
+  const rules = amp.validator.createRules();
+
+  // None of these should be empty.
+  it('tags defined', () => {
+    expect(rules.tags.length).toBeGreaterThan(0);
+  });
+  it('attr_lists defined', () => {
+    expect(rules.attrLists.length).toBeGreaterThan(0);
+  });
+  it('min_validator_revision_required defined', () => {
+    expect(rules.minValidatorRevisionRequired).toBeGreaterThan(0);
+  });
+  it('template_spec_url is set', () => {
+    expect(rules.templateSpecUrl === null).toBe(false);
+  });
+
+  // For verifying that all ReferencePoint::tag_spec_names will resolve to a
+  // TagSpec that's marked REFERENCE_POINT.
+  const allReferencePoints = {};
+  for (const tagSpec of rules.tags) {
+    if (tagSpec.tagName === '$REFERENCE_POINT') {
+      allReferencePoints[tagSpec.specName] = 0;
+    }
+  }
+
+  // tag_specs
+  const specNameIsUnique = {};
+  const tagWithoutSpecNameIsUnique = {};
+  const tagNameRegex =
+      new RegExp('(!DOCTYPE|O:P|[A-Z0-9-]+|\\$REFERENCE_POINT)');
+  const mandatoryParentRegex = new RegExp('(!DOCTYPE|\\$ROOT|[A-Z0-9-]+)');
+  const disallowedAncestorRegex = new RegExp('[A-Z0-9-]+');
+  for (const tagSpec of rules.tags) {
+    // name
+    it('tag_name defined', () => {
+      expect(tagSpec.tagName).toBeDefined();
+      expect(tagNameRegex.test(tagSpec.tagName)).toBe(true);
+    });
+    // spec_name can't be empty and must be unique.
+    it('unique spec_name or if none then unique tag_name', () => {
+      if (tagSpec.specName !== null) {
+        expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
+        specNameIsUnique[tagSpec.specName] = 0;
+      } else {
+        expect(tagWithoutSpecNameIsUnique.hasOwnProperty(tagSpec.tagName))
+            .toBe(false);
+        tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
+      }
+    });
+    if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
+        ((tagSpec.htmlFormat.length === 0) ||
+         (tagSpec.htmlFormat.indexOf(
+              amp.validator.TagSpec.HtmlFormat.AMP4ADS) !== -1))) {
+      // AMP4ADS Creative Format document is the source of this whitelist.
+      // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
+      const whitelistedAmp4AdsExtensions = {
+        'AMP-ACCORDION': 0,
+        'AMP-ANALYTICS': 0,
+        'AMP-ANIM': 0,
+        'AMP-AUDIO': 0,
+        'AMP-CAROUSEL': 0,
+        'AMP-FIT-TEXT': 0,
+        'AMP-FONT': 0,
+        'AMP-FORM': 0,
+        'AMP-IMG': 0,
+        'AMP-PIXEL': 0,
+        'AMP-SOCIAL-SHARE': 0,
+        'AMP-VIDEO': 0
+      };
+      it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
+          ' set for AMP4ADS but ' + tagSpec.tagName + ' is not whitelisted' +
+          ' for AMP4ADS', () => {
+        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(tagSpec.tagName))
+            .toBe(true);
+      });
+    }
+    // mandatory_parent
+    if (tagSpec.mandatoryParent !== null) {
+      it('mandatory parent tag name defined', () => {
+        expect(mandatoryParentRegex.test(tagSpec.mandatoryParent)).toBe(true);
+      });
+    }
+    // disallowed_ancestor must be a upper case alphabetic name.
+    it('disallowed_ancestor defined and not equal to mandatory parent', () => {
+      for (const disallowedAncestor of tagSpec.disallowedAncestor) {
+        expect(disallowedAncestorRegex.test(disallowedAncestor)).toBe(true);
+        // Can't disallow an ancestor and require the same parent.
+        if (tagSpec.mandatoryParent !== null) {
+          expect(disallowedAncestor !== tagSpec.mandatoryParent).toBe(true);
+        }
+      }
+    });
+    // Can't have unique and unique_warning at the same time.
+    it('unique and unique_warning can not be defined at the same time', () => {
+      expect(tagSpec.unique && tagSpec.uniqueWarning).toBe(false);
+    });
+
+    // attr_specs within tag.
+    let seenDispatchKey = false;
+    const attrNameIsUnique = {};
+    for (const attrSpecId of tagSpec.attrs) {
+      if (attrSpecId < 0) {
+        it('unique attr_name within tag_spec (simple attrs)', () => {
+          const attrName = rules.internedStrings[-1 - attrSpecId];
+          expect(attrNameIsUnique.hasOwnProperty(attrName)).toBe(false);
+          attrNameIsUnique[attrName] = 0;
+        });
+        continue;
+      }
+      const attrSpec = rules.attrs[attrSpecId];
+
+      // attr_name must be unique within tag_spec (no duplicates).
+      it('unique attr_spec within tag_spec', () => {
+        expect(attrSpec.name).toBeDefined();
+        expect(attrNameIsUnique.hasOwnProperty(attrSpec.name)).toBe(false);
+        attrNameIsUnique[attrSpec.name] = 0;
+      });
+      // Special check that every <script> tag with a src attribute has a
+      // whitelist check on the attribute value.
+      if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'src') {
+        it('every <script> tag with a src attribute has a whitelist check',
+           () => {
+             expect(attrSpec.value !== null ||
+                    attrSpec.valueRegex !== null).toBe(true);
+           });
+      }
+      // <script> tags with a `custom-element` attribute are extensions. We
+      // have a few additional checks for these.
+      if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'custom-element') {
+        // We want all extensions to be unique in the document. For now,
+        // we have made this a warning for existing extension and a requirement
+        // for new extensions.
+        it(attrSpec.value + ' extension requires that it is unique', () => {
+          expect(tagSpec.unique || tagSpec.uniqueWarning).toBe(true);
+        });
+        // We want the extension to be present only when there is a matching
+        // tag on the page which requires the extension. These extensions don't
+        // have a single matching tag, so we allow these extensions to not
+        // also require an additional tag.
+        const extensionExceptions = {
+          // these extensions match up to more than one matching
+          // tagspec, a mechanism we don't currently have in place.
+          'amp-ad': 0,
+          // This can be present based on 'amp-access', which isn't allowed in
+          // AMP4ADS, which makes checking tricky.
+          'amp-analytics': 0,
+          'amp-form': 0,
+          'amp-audio': 0,
+          // amp-dynamic-css-classes corresponds to no specific tag.
+          'amp-dynamic-css-classes': 0,
+          // amp-slides is deprecated in favor of amp-carousel
+          'amp-slides': 0
+        };
+        if (!extensionExceptions.hasOwnProperty(attrSpec.value)) {
+          it(tagSpec.tagName + ' is missing requires or' +
+              ' extension_unused_unless_tag_present', () => {
+            expect(
+                tagSpec.requires.length +
+                tagSpec.extensionUnusedUnlessTagPresent.length)
+                .toBeGreaterThan(0);
+          });
+        }
+      }
+
+      if (attrSpec.dispatchKey) {
+        it('tag_spec can not have more than one dispatch_key', () => {
+          expect(seenDispatchKey).toBe(false);
+          seenDispatchKey = true;
+        });
+      }
+    }
+
+    // cdata
+    if (tagSpec.cdata !== null) {
+      let usefulCdataSpec = false;
+      // max_bytes
+      it('max_bytes are greater than or equal to -1', () => {
+        expect(tagSpec.cdata.maxBytes).toBeGreaterThan(-2);
+      });
+      if (tagSpec.cdata.maxBytes >= 0) {
+        usefulCdataSpec = true;
+        it('max_bytes > 0 must have max_bytes_spec_url defined', () => {
+          expect(tagSpec.cdata.maxBytesSpecUrl).toBeDefined();
+        });
+      }
+      // blacklisted_cdata_regex
+      it('blacklisted_cdata_regex valid and error_message defined', () => {
+        for (const blacklistedCdataRegex of
+                 tagSpec.cdata.blacklistedCdataRegex) {
+          usefulCdataSpec = true;
+          expect(blacklistedCdataRegex.regex).toBeDefined();
+          expect(isValidRegex(blacklistedCdataRegex.regex)).toBe(true);
+          expect(blacklistedCdataRegex.errorMessage).toBeDefined();
+        }
+      });
+
+      // css_spec
+      if (tagSpec.cdata.cssSpec !== null) {
+        usefulCdataSpec = true;
+        let hasDefaultAtRuleSpec = false;
+        const atRuleSpecNameIsUnique = {};
+        const atRuleSpecRegex = new RegExp('[a-z-_]*');
+        for (const atRuleSpec of tagSpec.cdata.cssSpec.atRuleSpec) {
+          if (atRuleSpec.name === '$DEFAULT') {
+            hasDefaultAtRuleSpec = true;
+          } else {
+            // Must be a lower case alphabetic name.
+            it('at_rule_spec must be lower case alphabetic', () => {
+              expect(atRuleSpecRegex.test(atRuleSpec.name)).toBe(true);
+            });
+          }
+          it('unique at_rule_spec name', () => {
+            expect(atRuleSpecNameIsUnique.hasOwnProperty(atRuleSpec.name))
+                .toBe(false);
+            atRuleSpecNameIsUnique[atRuleSpec.name] = 0;
+          });
+          it('at_rule_spec must have type defined', () => {
+            expect(atRuleSpec.type).toBeDefined();
+          });
+        }
+        it('at_rule_spec has default defined', () => {
+          expect(hasDefaultAtRuleSpec).toBe(true);
+        });
+        it('at_rule_spec has image_url_spec defined', () => {
+          expect(tagSpec.cdata.cssSpec.imageUrlSpec).toBeDefined();
+        });
+        it('at_rule_spec has font_url_spec defined', () => {
+          expect(tagSpec.cdata.cssSpec.fontUrlSpec).toBeDefined();
+        });
+      }
+
+      if (tagSpec.tagName === 'SCRIPT' || tagSpec.tagName === 'STYLE') {
+        it('script and style tags must have cdata rules', () => {
+          expect(
+              (tagSpec.cdata.blacklistedCdataRegex.length > 0) ||
+              tagSpec.cdata.cdataRegex !== null ||
+              tagSpec.cdata.mandatoryCdata !== null)
+              .toBe(true);
+
+        });
+      }
+      // cdata_regex and mandatory_cdata
+      if ((tagSpec.cdata.cdataRegex !== null) ||
+          (tagSpec.cdata.mandatoryCdata !== null)) {
+        usefulCdataSpec = true;
+      }
+      it('a cdata spec must be defined', () => {
+        expect(usefulCdataSpec).toBe(true);
+      });
+
+      // reference_points
+      it('reference_point defined', () => {
+        for (const referencePoint of tagSpec.referencePoints) {
+          expect(allReferencePoints.hasOwnProperty(referencePoint.tagSpecName))
+              .toBe(true);
+        }
+      });
+    }
+  }
+
+  // satisfies and requires need to match up
+  var allSatisfies = [];
+  var allRequires = [];
+  for (const tagSpec of rules.tags) {
+    for (const condition of tagSpec.requires) {
+      allRequires.push(condition);
+    }
+    for (const condition of tagSpec.satisfies)
+      allSatisfies.push(condition);
+  }
+  sortAndUniquify(allSatisfies);
+  sortAndUniquify(allRequires);
+  it('all conditions are both required and satisfied', ()=> {
+    expect(subtractDiff(allSatisfies, allRequires)).toEqual([]);
+    expect(subtractDiff(allRequires, allSatisfies)).toEqual([]);
+  });
+
+  // attr_lists
+  const attrListNameIsUnique = {};
+  for (const attrList of rules.attrLists) {
+    it('unique attr_list name', () => {
+      expect(attrListNameIsUnique.hasOwnProperty(attrList.name)).toBe(false);
+      attrListNameIsUnique[attrList.name] = 0;
+    });
+    it('attr_list has attrs', () => {
+      expect(attrList.attrs.length).toBeGreaterThan(0);
+    });
+  }
+
+  // attr_specs within rules.
+  for (const attrSpec of rules.attrs) {
+    attrRuleShouldMakeSense(attrSpec);
+  }
+
+  // Verify that for every error code in our enum, we have exactly one format
+  // and specificity value in the rules.
+  let numValidCodes = 0;
+  for (const code in amp.validator.ValidationError.Code) {
+    numValidCodes += 1;
+  }
+  let numErrorSpecificity = 0;
+  const errorSpecificityIsUnique = {};
+  it('Two specificity rules found for same error code', () => {
+    for (const errorSpecificity of rules.errorSpecificity) {
+      expect(errorSpecificityIsUnique.hasOwnProperty(errorSpecificity.code))
+          .toBe(false);
+      errorSpecificityIsUnique[errorSpecificity.code] = 0;
+      numErrorSpecificity += 1;
+    }
+  });
+  it('Some error codes are missing specificity rules', () => {
+    expect(numValidCodes == numErrorSpecificity).toBe(true);
+  });
+  let numErrorFormat = 0;
+  const errorFormatIsUnique = {};
+  it('Two error format string rules found for same error code', () => {
+    for (const errorFormat of rules.errorFormats) {
+      expect(errorFormatIsUnique.hasOwnProperty(errorFormat.code)).toBe(false);
+      errorFormatIsUnique[errorFormat.code] = 0;
+      numErrorFormat += 1;
+    }
+  });
+  it('Some error codes are missing format strings', () => {
+    expect(numValidCodes == numErrorFormat).toBe(true);
   });
 });

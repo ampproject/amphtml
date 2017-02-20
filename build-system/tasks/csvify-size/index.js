@@ -23,6 +23,8 @@ var gulp = require('gulp-help')(require('gulp'));
 var util = require('gulp-util');
 
 
+var prettyBytesUnits = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
 /**
  * @typedef {!Array<Fields>}
  */
@@ -85,7 +87,8 @@ function parseSizeFile(file) {
 
     // Older size.txt files contained duplicate entries of the same "entity",
     // for example a file had an entry for its .min and its .max file.
-    var shouldSkip = (name.endsWith('max.js') && !name.endsWith('alp.max.js'))
+    var shouldSkip = (name.endsWith('max.js') &&
+        !name.endsWith('alp.max.js') && !/\s\/\s/.test(name))
         || name == 'current/integration.js' || name == 'amp.js' ||
         name == 'cc.js' || name.endsWith('-latest.js');
 
@@ -105,11 +108,19 @@ function parseSizeFile(file) {
     } else if (name == 'alp.max.js' || name == 'alp.js / install-alp.js' ||
         name == 'alp.js / alp.max.js') {
       name = 'alp.js';
+    } else if (name == 'sw.js / sw.max.js') {
+      name = 'sw.js';
+    } else if (name == 'sw-kill.js / sw-kill.max.js') {
+      name = 'sw-kill.js';
+    } else if (name == 'a4a-host-v0.js / amp-inabox-host.js') {
+      name = 'amp4ads-host-v0.js / amp-inabox-host.js';
+    } else if (name == 'a4a-v0.js / amp-inabox.js') {
+      name = 'amp4ads-v0.js / amp-inabox.js';
     }
 
     return {
       name: `"${name}"`,
-      size: `"${columns[minPos]}"`,
+      size: `"${reversePrettyBytes(columns[minPos])}"`,
     };
   }).filter(x => !!x);
 }
@@ -132,10 +143,8 @@ function mergeTables(dateTimes, tables) {
       if (!obj[name]) {
         obj[name] = [];
       }
-      // Match only numeric values
-      var size = (field.size.match(/\d+(?:\.\d+)?/) || [])[0] || '';
       obj[name].push({
-        size: `"${size}"`,
+        size: field.size,
         dateTime: field.dateTime,
       });
     });
@@ -171,6 +180,26 @@ function mergeTables(dateTimes, tables) {
     });
   });
   return rows;
+}
+
+/**
+ * @param {string} prettyBytes
+ * @return {number}
+ */
+function reversePrettyBytes(prettyBytes) {
+  var triple = prettyBytes.match(
+      /(\d+(?:\.\d+)?)\s+(B|kB|MB|GB|TB|PB|EB|ZB|YB)/);
+  if (!triple) {
+    throw new Error('No matching bytes data found');
+  }
+  var value = triple[1];
+  var unit = triple[2];
+
+  if (!(value && unit)) {
+    return 0;
+  }
+  var exponent = prettyBytesUnits.indexOf(unit);
+  return (Number(value) * Math.pow(1000, exponent)).toFixed(3);
 }
 
 /**

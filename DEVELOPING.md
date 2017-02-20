@@ -24,9 +24,9 @@ We discuss implementation issues on [amphtml-discuss@googlegroups.com](https://g
 
 For more immediate feedback, [sign up for our Slack](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877).
 
-### Starter issues
+### Great First Issues
 
-We're curating a [list of GitHub "starter issues"](https://github.com/ampproject/amphtml/issues?q=is%3Aopen+is%3Aissue+label%3Astarter) of small to medium complexity that are great to jump into development on AMP.
+We're curating a [list of GitHub "great first issues"](https://github.com/ampproject/amphtml/labels/Great%20First%20Issues) of small to medium complexity that are great to jump into development on AMP.
 
 If you have any questions, feel free to ask on the issue or join us on [Slack](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877)!
 
@@ -117,6 +117,37 @@ flag so that we do not strip out the localhost code paths. (We do some
 code elimination to trim down the file size for the file we deploy to production)
 
 If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/min/s/output.jsbin.com/pegizoq/quiet
+
+
+#### A4A envelope
+
+AMP ships with a local A4A envelope for testing local and production AMP documents with the local JS version.
+
+A4A can be run either of these two modes:
+
+1. Friendly iframe mode: http://localhost:8000/a4a/...
+2. 3p iframe mode: http://localhost:8000/a4a-3p/...
+
+The following forms are supported:
+
+- local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
+- proxied document with normal sources: http://localhost:8000/a4a[-3p]/max/output.jsbin.com/pegizoq/quiet
+- proxied document with minified sources: http://localhost:8000/a4a[-3p]/min/output.jsbin.com/pegizoq/quiet
+
+When accessing `min` urls make sure you run `gulp dist` with the `--fortesting`
+flag so that we do not strip out the localhost code paths. (We do some
+code elimination to trim down the file size for the file we deploy to production)
+
+If the origin resource is on HTTPS, the URLs are http://localhost:8000/a4a[-3p]/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/a4a[-3p]/min/s/output.jsbin.com/pegizoq/quiet
+
+Notice that all documents are assumed to have a "fake" signature. Thus, this functionality is only available in the
+`localDev` mode.
+
+Additionally, the following query parameters can be provided:
+
+- `width` - the width of the `amp-ad` (default "300")
+- `height` - the height of the `amp-ad` (default "250")
+
 
 #### Chrome extension
 

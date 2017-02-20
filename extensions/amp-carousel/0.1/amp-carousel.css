@@ -23,10 +23,10 @@ amp-carousel {
  * Every `<amp-carousel>'s` immediate child is considered a slide in
  * the carousel.
  */
-amp-carousel-slide {
-}
-
-.amp-carousel-slide > .-amp-replaced-content {
+/* TODO(dvoytenko, #6794): Remove old `-amp-replaced-content` form after the new
+   form is in PROD for 1-2 weeks. */
+.amp-carousel-slide > .-amp-replaced-content,
+.amp-carousel-slide > .i-amphtml-replaced-content {
   /*
    * Apply contain object-fit to all replaced content to avoid distorted ratios.
    */
@@ -58,13 +58,13 @@ amp-carousel[controls] .amp-carousel-button,
 
 .amp-carousel-button-prev {
   left: 16px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" /></svg>');
   background-size: 18px 18px;
 }
 
 .amp-carousel-button-next {
   right: 16px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff" viewBox="0 0 18 18"><path d="M9 3L7.94 4.06l4.19 4.19H3v1.5h9.13l-4.19 4.19L9 15l6-6z" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff" viewBox="0 0 18 18"><path d="M9 3L7.94 4.06l4.19 4.19H3v1.5h9.13l-4.19 4.19L9 15l6-6z" /></svg>');
   background-size: 18px 18px;
 }
 
@@ -119,7 +119,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 /** Only hide scroll bar for touch devices as it causes jitters on desktops */
-.amp-mode-touch .-amp-slides-container.-amp-no-scroll {
+.-amp-slides-container.-amp-no-scroll {
   overflow-x: hidden !important;
 }
 
@@ -137,6 +137,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 .-amp-slide-item > * {
   height: 100%;
   width: 100%;
+  overflow: hidden !important;
 }
 
 .-amp-slide-item-show {
@@ -163,5 +164,23 @@ amp-carousel .amp-carousel-button.amp-disabled {
   order: 100000000 !important;
   margin-right: -1px !important;
 }
-
 /* End SlideScroll */
+
+/* Begin ScrollableCarousel */
+.-amp-scrollable-carousel-container .amp-carousel-slide {
+  display: inline-block !important;
+  margin-left: 8px;
+}
+
+/*TODO(dvoytenko): this has to be customizable*/
+.-amp-scrollable-carousel-container .amp-carousel-slide:first-child {
+  margin-left: 0px;
+}
+
+.-amp-scrollable-carousel-container {
+  white-space: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+/* End ScrollableCarousel */

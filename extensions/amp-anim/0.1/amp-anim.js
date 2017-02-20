@@ -31,8 +31,8 @@ export class AmpAnim extends AMP.BaseElement {
     /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
 
-    /** @private {?Promise} */
-    this.loadPromise_ = null;
+    /** @private {boolean} */
+    this.hasLoaded_ = false;
   }
 
   /** @override */
@@ -77,21 +77,24 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   firstLayoutCompleted() {
     // Keep the placeholder: amp-anim is using it to start/stop playing.
+    this.hasLoaded_ = true;
+    this.updateInViewport_();
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    if (!inViewport || !this.loadPromise_) {
-      this.updateInViewport_();
-    } else {
-      this.loadPromise_.then(() => this.updateInViewport_());
+  viewportCallback(unusedInViewport) {
+    if (!this.hasLoaded_) {
+      // do nothing if element has not laid out.
+      return;
     }
+    this.updateInViewport_();
   }
 
   /** @override */
   unlayoutCallback() {
     // Release memory held by the image - animations are typically large.
     this.img_.src = '';
+    this.hasLoaded_ = false;
     return true;
   }
 
@@ -116,14 +119,13 @@ export class AmpAnim extends AMP.BaseElement {
       return Promise.resolve();
     }
     this.img_.setAttribute('src', src);
-    this.loadPromise_ = this.loadPromise(this.img_)
+    return this.loadPromise(this.img_)
         .catch(error => {
           if (!this.img_.getAttribute('src')) {
             return;
           }
           throw error;
         });
-    return this.loadPromise_;
   }
 };
 

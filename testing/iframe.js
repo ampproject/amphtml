@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-
+import {FakeLocation} from './fake-dom';
 import {Timer} from '../src/timer';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
@@ -82,6 +82,11 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       // Flag as being a test window.
       win.AMP_TEST_IFRAME = true;
       win.AMP_TEST = true;
+      // Set the testLocation on iframe to parent's location since location of
+      // the test iframe is about:srcdoc.
+      // Unfortunately location object is not configurable, so we have to define
+      // a new property.
+      win.testLocation = new FakeLocation(window.location.href, win);
       win.ampTestRuntimeConfig = window.ampTestRuntimeConfig;
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
@@ -205,6 +210,8 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     iframe.onload = function() {
       // Flag as being a test window.
       iframe.contentWindow.AMP_TEST_IFRAME = true;
+      iframe.contentWindow.testLocation = new FakeLocation(window.location.href,
+          iframe.contentWindow);
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
@@ -216,7 +223,6 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
-      iframe.contentWindow.ampExtendedElements = {};
       installStyles(iframe.contentWindow.document, cssText, () => {
         resolve({
           win: iframe.contentWindow,
@@ -399,7 +405,8 @@ export function poll(description, condition, opt_onError, opt_timeout) {
  */
 export function pollForLayout(win, count, opt_timeout) {
   let getCount = () => {
-    return win.document.querySelectorAll('.-amp-layout,.-amp-error').length;
+    return win.document.querySelectorAll(
+        '.i-amphtml-layout,.i-amphtml-error').length;
   };
   return poll('Waiting for elements to layout: ' + count, () => {
     return getCount() >= count;

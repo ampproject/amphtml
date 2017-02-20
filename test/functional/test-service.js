@@ -15,7 +15,9 @@
  */
 
 import {
+  adoptServiceForEmbed,
   assertDisposable,
+  assertEmbeddable,
   disposeServicesForDoc,
   fromClass,
   getExistingServiceForDocInEmbedScope,
@@ -29,6 +31,7 @@ import {
   getServicePromiseForDoc,
   installServiceInEmbedScope,
   isDisposable,
+  isEmbeddable,
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
@@ -97,14 +100,14 @@ describe('service', () => {
       const a2 = getService(window, 'a', factory);
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(window);
 
       const b1 = getService(window, 'b', factory);
       const b2 = getService(window, 'b', factory);
       expect(b1).to.equal(b2);
       expect(b1).to.not.equal(a1);
-      expect(factory.callCount).to.equal(2);
+      expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(window);
     });
 
@@ -125,7 +128,7 @@ describe('service', () => {
       const c1 = getService(window, 'c', factory);
       const c2 = getService(window, 'c');
       expect(c1).to.equal(c2);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
     });
 
     it('should return the service when it exists', () => {
@@ -157,7 +160,7 @@ describe('service', () => {
         expect(s1).to.equal('from e1');
         return p2.then(s2 => {
           expect(s2).to.equal(s1);
-          expect(factory.callCount).to.equal(0);
+          expect(factory).to.have.not.been.called;
         });
       });
     });
@@ -263,7 +266,7 @@ describe('service', () => {
       const a2 = getServiceForDoc(node, 'a', factory);
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.exist;
       expect(ampdoc.services).to.not.exist;
@@ -274,7 +277,7 @@ describe('service', () => {
       expect(b1).to.equal(b2);
       expect(b1).to.equal(b3);
       expect(b1).to.not.equal(a1);
-      expect(factory.callCount).to.equal(2);
+      expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
       expect(windowApi.services['b']).to.exist;
       expect(ampdoc.services).to.not.exist;
@@ -289,7 +292,7 @@ describe('service', () => {
       expect(a1).to.equal(a2);
       expect(a1).to.equal(a3);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.exist;
       expect(ampdoc.services).to.not.exist;
@@ -302,7 +305,7 @@ describe('service', () => {
       const a2 = getServiceForDoc(node, 'a', factory);
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.not.exist;
       expect(ampdoc.services['a']).to.exist;
@@ -311,7 +314,7 @@ describe('service', () => {
       const b2 = getServiceForDoc(node, 'b', factory);
       expect(b1).to.equal(b2);
       expect(b1).to.not.equal(a1);
-      expect(factory.callCount).to.equal(2);
+      expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
       expect(windowApi.services['b']).to.not.exist;
       expect(ampdoc.services['b']).to.exist;
@@ -321,7 +324,7 @@ describe('service', () => {
       const c1 = getServiceForDoc(node, 'c', factory);
       const c2 = getServiceForDoc(node, 'c');
       expect(c1).to.equal(c2);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
     });
 
     it('should fail without factory on initial setup', () => {
@@ -340,7 +343,7 @@ describe('service', () => {
         expect(s1).to.equal('from e1');
         return p2.then(s2 => {
           expect(s2).to.equal(s1);
-          expect(factory.callCount).to.equal(0);
+          expect(factory).to.have.not.been.called;
         });
       });
     });
@@ -459,6 +462,54 @@ describe('service', () => {
         // up the window chain.
         expect(getExistingServiceForDocInEmbedScope(grandChildWinNode, 'c'))
             .to.equal(topService);
+      });
+    });
+
+    describe('embeddable interface', () => {
+      let embedWin;
+      let embeddable;
+      let nonEmbeddable;
+
+      beforeEach(() => {
+        embedWin = {
+          frameElement: {
+            nodeType: 1,
+            ownerDocument: {defaultView: windowApi},
+          },
+        };
+        nonEmbeddable = {};
+        embeddable = {adoptEmbedWindow: sandbox.spy()};
+        getServiceForDoc(ampdoc, 'embeddable', () => embeddable);
+        getServiceForDoc(ampdoc, 'nonEmbeddable', () => nonEmbeddable);
+      });
+
+      it('should test embeddable interface', () => {
+        expect(isEmbeddable(embeddable)).to.be.true;
+        expect(isEmbeddable(nonEmbeddable)).to.be.false;
+      });
+
+      it('should assert embeddable interface', () => {
+        expect(assertEmbeddable(embeddable)).to.equal(embeddable);
+        expect(() => assertEmbeddable(nonEmbeddable))
+            .to.throw(/required to implement EmbeddableService/);
+      });
+
+      it('should adopt embeddable', () => {
+        adoptServiceForEmbed(embedWin, 'embeddable');
+        expect(embeddable.adoptEmbedWindow).to.be.calledOnce;
+        expect(embeddable.adoptEmbedWindow.args[0][0]).to.equal(embedWin);
+      });
+
+      it('should refuse adopt of non-embeddable', () => {
+        expect(() => {
+          adoptServiceForEmbed(embedWin, 'nonEmbeddable');
+        }).to.throw(/required to implement EmbeddableService/);
+      });
+
+      it('should refuse adopt of unknown service', () => {
+        expect(() => {
+          adoptServiceForEmbed(embedWin, 'unknown');
+        }).to.throw(/unknown/);
       });
     });
   });

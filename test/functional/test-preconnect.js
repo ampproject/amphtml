@@ -103,7 +103,7 @@ describe('preconnect', () => {
       return visible.then(() => {
         expect(iframe.doc.querySelectorAll('link[rel=prefetch]'))
             .to.have.length(0);
-        expect(open.callCount).to.equal(0);
+        expect(open).to.have.not.been.called;
       });
     });
   });
@@ -129,7 +129,7 @@ describe('preconnect', () => {
         expect(iframe.doc.querySelectorAll(
             'link[rel=prefetch],link[rel=preload]'))
                 .to.have.length(0);
-        expect(open.callCount).to.equal(0);
+        expect(open).to.have.not.been.called;
       });
     });
   });
@@ -137,6 +137,7 @@ describe('preconnect', () => {
   it('should preconnect with polyfill', () => {
     isSafari = true;
     return getPreconnectIframe().then(iframe => {
+      clock.tick(1485531293690);
       const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
       const send = sandbox.spy(XMLHttpRequest.prototype, 'send');
       preconnect.url('https://s.preconnect.com/foo/bar');
@@ -152,13 +153,14 @@ describe('preconnect', () => {
           .to.equal('https://s.preconnect.com/');
       expect(iframe.doc.querySelectorAll('link[rel=prefetch]'))
           .to.have.length(0);
-      expect(open.callCount).to.equal(0);
+      expect(open).to.have.not.been.called;
       return visible.then(() => {
-        expect(open.callCount).to.equal(1);
-        expect(send.callCount).to.equal(1);
-        expect(open.args[0][1]).to.include(
+        expect(open).to.be.calledOnce;
+        expect(send).to.be.calledOnce;
+        expect(open.args[0][1]).to.equal(
             'https://s.preconnect.com/amp_preconnect_polyfill_404_or' +
-            '_other_error_expected._Do_not_worry_about_it');
+            '_other_error_expected._Do_not_worry_about_it' +
+            '?1485531180000');
       });
     });
   });

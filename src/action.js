@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForDoc} from './service';
+import {getExistingServiceForDocInEmbedScope} from './service';
 
 
 /**
@@ -23,5 +23,5 @@ import {getExistingServiceForDoc} from './service';
  */
 export function actionServiceForDoc(nodeOrDoc) {
   return /** @type {!./service/action-impl.ActionService} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'action'));
+      getExistingServiceForDocInEmbedScope(nodeOrDoc, 'action'));
 }

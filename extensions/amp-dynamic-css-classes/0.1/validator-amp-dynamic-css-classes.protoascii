@@ -19,6 +19,7 @@ tags: {  # amp-dynamic-css-classes
   tag_name: "SCRIPT"
   spec_name: "amp-dynamic-css-classes extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true
@@ -30,6 +31,7 @@ tags: {  # amp-dynamic-css-classes
     value: "amp-dynamic-css-classes"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

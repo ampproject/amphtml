@@ -33,6 +33,7 @@ function createAmpAd(win) {
     'data-valid': 'true',
     'data-width': '6666',
   });
+  ampAdElement.isBuilt = () => {return true;};
 
   return new AmpAd3PImpl(ampAdElement);
 }
@@ -65,17 +66,18 @@ describe('amp-ad-3p-impl', () => {
   });
 
   describe('layoutCallback', () => {
-
     it('should create iframe and pass data via URL fragment', () => {
       return ad3p.layoutCallback().then(() => {
-        const iframe = ad3p.element.firstChild;
+        const iframe = ad3p.element.querySelector('iframe[src]');
+        expect(iframe).to.be.ok;
         expect(iframe.tagName).to.equal('IFRAME');
         const url = iframe.getAttribute('src');
         expect(url).to.match(/^http:\/\/ads.localhost:/);
-        expect(url).to.match(/frame(.max)?.html#{/);
         expect(iframe.style.display).to.equal('');
 
-        const data = JSON.parse(url.substr(url.indexOf('#') + 1));
+        let data;
+        expect(url).to.match(/frame(.max)?.html/);
+        data = JSON.parse(iframe.name).attributes;
         expect(data).to.have.property('type', '_ping_');
         expect(data).to.have.property('src', 'https://testsrc');
         expect(data).to.have.property('width', 300);
@@ -101,8 +103,12 @@ describe('amp-ad-3p-impl', () => {
       });
 
       return ad3p.layoutCallback().then(() => {
-        const src = ad3p.element.firstChild.getAttribute('src');
-        expect(src).to.contain('"clientId":"sentinel123"');
+        const frame = ad3p.element.querySelector('iframe[src]');
+        expect(frame).to.be.ok;
+        const data = JSON.parse(frame.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        expect(data._context.clientId).to.equal('sentinel123');
       });
     });
 
@@ -111,8 +117,12 @@ describe('amp-ad-3p-impl', () => {
         return Promise.resolve(undefined);
       });
       return ad3p.layoutCallback().then(() => {
-        const src = ad3p.element.firstChild.getAttribute('src');
-        expect(src).to.contain('"clientId":null');
+        const frame = ad3p.element.querySelector('iframe[src]');
+        expect(frame).to.be.ok;
+        const data = JSON.parse(frame.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        expect(data._context.clientId).to.equal(null);
       });
     });
 
@@ -158,8 +168,12 @@ describe('amp-ad-3p-impl', () => {
       ad3p.buildCallback();
       ad3p.onLayoutMeasure();
       return ad3p.layoutCallback().then(() => {
-        const src = ad3p.element.firstChild.getAttribute('src');
-        expect(src).to.contain('"container":"AMP-STICKY-AD"');
+        const frame = ad3p.element.querySelector('iframe[src]');
+        expect(frame).to.be.ok;
+        const data = JSON.parse(frame.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        expect(data._context.container).to.equal('AMP-STICKY-AD');
       });
     });
   });
@@ -216,6 +230,45 @@ describe('amp-ad-3p-impl', () => {
       expect(ad3p2.renderOutsideViewport()).to.equal(false);
       clock.tick(1);
       expect(ad3p2.renderOutsideViewport()).to.equal(3);
+    });
+  });
+
+  describe('#getIntersectionElementLayoutBox', () => {
+    it('should not cache intersection box', () => {
+      return ad3p.layoutCallback().then(() => {
+        const iframe = ad3p.element.firstChild;
+
+        // Force some styles on the iframe, to display it without loading
+        // the iframe and have different size than the ad itself.
+        iframe.style.width = '300px';
+        iframe.style.height = '200px';
+        iframe.style.display = 'block';
+        iframe.style.minHeight = '0px';
+
+        const stub = sandbox.stub(ad3p, 'getLayoutBox');
+        const box = {
+          top: 100,
+          bottom: 200,
+          left: 0,
+          right: 100,
+          width: 100,
+          height: 100,
+        };
+        stub.returns(box);
+
+        ad3p.onLayoutMeasure();
+        const intersection = ad3p.getIntersectionElementLayoutBox();
+
+        // Simulate a fixed position element "moving" 100px by scrolling down
+        // the page.
+        box.top += 100;
+        box.bottom += 100;
+        const newIntersection = ad3p.getIntersectionElementLayoutBox();
+        expect(newIntersection).not.to.deep.equal(intersection);
+        expect(newIntersection.top).to.equal(intersection.top + 100);
+        expect(newIntersection.width).to.equal(300);
+        expect(newIntersection.height).to.equal(200);
+      });
     });
   });
 });

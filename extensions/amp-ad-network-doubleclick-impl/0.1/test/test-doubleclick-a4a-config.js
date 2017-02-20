@@ -21,10 +21,9 @@ import {
   BETA_ATTRIBUTE,
 } from '../doubleclick-a4a-config';
 import {
-  EXPERIMENT_ATTRIBUTE,
   isInManualExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
-import {resetExperimentToggles_} from '../../../../src/experiments';
+import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {parseUrl} from '../../../../src/url';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
@@ -51,7 +50,6 @@ describe('doubleclick-a4a-config', () => {
   });
   afterEach(() => {
     sandbox.restore();
-    resetExperimentToggles_();
   });
 
   describe('#doubleclickIsA4AEnabled', () => {

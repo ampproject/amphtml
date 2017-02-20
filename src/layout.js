@@ -68,7 +68,7 @@ let DimensionsDef;
  * @private  Visible for testing only!
  */
 export const naturalDimensions_ = {
-  'AMP-PIXEL': {width: '1px', height: '1px'},
+  'AMP-PIXEL': {width: '0px', height: '0px'},
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
   // TODO(dvoytenko): audio should have width:auto.
   'AMP-AUDIO': null,
@@ -90,7 +90,9 @@ export const LOADING_ELEMENTS_ = {
   'AMP-IMG': true,
   'AMP-INSTAGRAM': true,
   'AMP-LIST': true,
+  'AMP-OOYALA-PLAYER': true,
   'AMP-PINTEREST': true,
+  'AMP-PLAYBUZZ': true,
   'AMP-VIDEO': true,
   'AMP-YOUTUBE': true,
 };
@@ -116,7 +118,7 @@ export function parseLayout(s) {
  * @return {string}
  */
 export function getLayoutClass(layout) {
-  return '-amp-layout-' + layout;
+  return 'i-amphtml-layout-' + layout;
 }
 
 

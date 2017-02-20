@@ -61,8 +61,8 @@ export class AccessOtherAdapter {
   /** @override */
   authorize() {
     dev().fine(TAG, 'Use the authorization fallback for type=other');
-    // Only allowed for proxy origin (`cdn.ampproject.org`).
-    dev().assert(!this.isProxyOrigin_);
+    // Disallow authorization for proxy origin (`cdn.ampproject.org`).
+    dev().assert(!this.isProxyOrigin_, 'Cannot authorize for proxy origin');
     return Promise.resolve(dev().assert(this.authorizationResponse_));
   }
 

@@ -236,8 +236,8 @@ describe('vsync', () => {
       const mutateSpy = sandbox.spy();
       return vsync.runPromise({measure: measureSpy, mutate: mutateSpy})
           .then(() => {
-            expect(mutateSpy.callCount).to.equal(1);
-            expect(measureSpy.callCount).to.equal(1);
+            expect(mutateSpy).to.be.calledOnce;
+            expect(measureSpy).to.be.calledOnce;
           });
     });
 
@@ -253,7 +253,7 @@ describe('vsync', () => {
     it('should return a promise from mutatePromise that runs mutator', () => {
       const mutator = sandbox.spy();
       return vsync.mutatePromise(mutator).then(() => {
-        expect(mutator.callCount).to.equal(1);
+        expect(mutator).to.be.calledOnce;
       });
     });
 
@@ -472,7 +472,7 @@ describe('vsync', () => {
         return 'ERROR: ' + error;
       }).then(response => {
         expect(response).to.match(/^ERROR/);
-        expect(mutatorSpy.callCount).to.equal(0);
+        expect(mutatorSpy).to.have.not.been.called;
       });
     });
 
@@ -748,7 +748,7 @@ describe('vsync', () => {
         return 'ERROR: ' + error;
       }).then(response => {
         expect(response).to.match(/^ERROR/);
-        expect(mutatorSpy.callCount).to.equal(0);
+        expect(mutatorSpy).to.have.not.been.called;
       });
     });
   });

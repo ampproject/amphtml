@@ -57,7 +57,7 @@ describe('ie-media-bug', () => {
     windowMock.expects('setInterval').never();
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.null;
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
   });
 
   it('should bypass polling when matchMedia is not broken', () => {
@@ -69,7 +69,7 @@ describe('ie-media-bug', () => {
     windowMock.expects('setInterval').never();
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.null;
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
   });
 
   it('should poll when matchMedia is wrong, but eventually succeeds', () => {
@@ -95,7 +95,7 @@ describe('ie-media-bug', () => {
 
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.not.null;
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
     expect(intervalCallback).to.exist;
     windowMock.verify();
     windowMock./*OK*/restore();
@@ -109,7 +109,7 @@ describe('ie-media-bug', () => {
         .once();
     windowMock.expects('clearInterval').never();
     intervalCallback();
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
     windowMock.verify();
     windowMock./*OK*/restore();
 
@@ -126,7 +126,7 @@ describe('ie-media-bug', () => {
     windowMock./*OK*/restore();
 
     return promise.then(() => {
-      expect(devErrorStub.callCount).to.equal(0);
+      expect(devErrorStub).to.have.not.been.called;
     });
   });
 
@@ -154,21 +154,21 @@ describe('ie-media-bug', () => {
 
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.not.null;
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
     expect(intervalCallback).to.exist;
 
     // Second pass.
     clock.tick(10);
     intervalCallback();
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
 
     // Third pass - timeout.
     clock.tick(2000);
     intervalCallback();
-    expect(devErrorStub.callCount).to.equal(1);
+    expect(devErrorStub).to.be.calledOnce;
 
     return promise.then(() => {
-      expect(devErrorStub.callCount).to.equal(1);
+      expect(devErrorStub).to.be.calledOnce;
     });
   });
 
@@ -183,6 +183,6 @@ describe('ie-media-bug', () => {
 
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.null;
-    expect(devErrorStub.callCount).to.equal(1);
+    expect(devErrorStub).to.be.calledOnce;
   });
 });

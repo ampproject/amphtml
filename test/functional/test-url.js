@@ -22,6 +22,7 @@ import {
   getSourceOrigin,
   getSourceUrl,
   isProxyOrigin,
+  isLocalhostOrigin,
   isSecureUrl,
   parseQueryString,
   parseUrl,
@@ -416,19 +417,36 @@ describe('addParamsToUrl', () => {
 describe('isProxyOrigin', () => {
 
   function testProxyOrigin(href, bool) {
-    it('should return whether it is a proxy origin origin for ' + href, () => {
+    it('should return whether it is a proxy origin for ' + href, () => {
       expect(isProxyOrigin(parseUrl(href))).to.equal(bool);
     });
   }
 
+  // CDN
+  testProxyOrigin(
+      'https://cdn.ampproject.org/', true);
+  testProxyOrigin(
+      'http://cdn.ampproject.org/', false);
   testProxyOrigin(
       'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0', true);
   testProxyOrigin(
+      'https://cdn.ampproject.org/c/www.origin.com/foo/?f=0', true);
+
+  // Prefixed CDN
+  testProxyOrigin(
+      'https://xyz.cdn.ampproject.org/', true);
+  testProxyOrigin(
+      'http://xyz.cdn.ampproject.org/', false);
+  testProxyOrigin(
+      'https://xyz-123.cdn.ampproject.org/', true);
+  testProxyOrigin(
+      'https://xyz.cdn.ampproject.org/v/www.origin.com/foo/?f=0', true);
+  testProxyOrigin(
+      'https://xyz.cdn.ampproject.org/c/www.origin.com/foo/?f=0', true);
+
+  // Others
+  testProxyOrigin(
       'http://localhost:123', false);
-  testProxyOrigin(
-      'http://localhost:123/c', true);
-  testProxyOrigin(
-      'http://localhost:123/v', true);
   testProxyOrigin(
       'https://cdn.ampproject.net/v/www.origin.com/foo/?f=0', false);
   testProxyOrigin(
@@ -436,6 +454,27 @@ describe('isProxyOrigin', () => {
   testProxyOrigin(
       'http://www.spiegel.de/politik/deutschland/angela-merkel-a-1062761.html',
       false);
+});
+
+describe('isLocalhostOrigin', () => {
+  function testLocalhostOrigin(href, bool) {
+    it('should return whether it is a localhost origin for ' + href, () => {
+      expect(isLocalhostOrigin(parseUrl(href))).to.equal(bool);
+    });
+  }
+
+  testLocalhostOrigin(
+      'http://localhost', true);
+  testLocalhostOrigin(
+      'https://localhost', true);
+  testLocalhostOrigin(
+      'http://localhost:123/foo.html', true);
+  testLocalhostOrigin(
+      'https://localhost:123/foo.html', true);
+  testLocalhostOrigin(
+      'http://localhost.example.com/foo.html', false);
+  testLocalhostOrigin(
+      'http://www.example.com/foo.html', false);
 });
 
 describe('getSourceOrigin/Url', () => {
@@ -465,6 +504,26 @@ describe('getSourceOrigin/Url', () => {
       'https://origin.com/foo/?f=0');
   testOrigin(
       'https://cdn.ampproject.org/c/s/origin.com%3A81/foo/?f=0',
+      'https://origin.com:81/foo/?f=0');
+
+  // Prefixed CDN
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/v/www.origin.com/foo/?f=0#h',
+      'http://www.origin.com/foo/?f=0#h');
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/v/s/www.origin.com/foo/?f=0#h',
+      'https://www.origin.com/foo/?f=0#h');
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/c/www.origin.com/foo/?f=0',
+      'http://www.origin.com/foo/?f=0');
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/c/s/www.origin.com/foo/?f=0',
+      'https://www.origin.com/foo/?f=0');
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/c/s/origin.com/foo/?f=0',
+      'https://origin.com/foo/?f=0');
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/c/s/origin.com%3A81/foo/?f=0',
       'https://origin.com:81/foo/?f=0');
 
   // Removes amp-related paramters.

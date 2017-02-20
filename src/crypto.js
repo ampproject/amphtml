@@ -14,14 +14,41 @@
  * limitations under the License.
  */
 
-import {getElementService} from './element-service';
+import {getExistingServiceForWindow} from './service';
+
+/**
+ * An object holding the public key and its hash.
+ *
+ * @typedef {{
+ *   serviceName: string,
+ *   hash: Uint8Array,
+ *   cryptoKey: !webCrypto.CryptoKey
+ * }}
+ */
+export let PublicKeyInfoDef;
 
 /**
  * @param {!Window} window
- * @return {!Promise<!../extensions/amp-analytics/0.1/crypto-impl.Crypto>}
+ * @return {!./service/crypto-impl.Crypto}
  */
 export function cryptoFor(window) {
-  return (/** @type {!Promise<
-      !../extensions/amp-analytics/0.1/crypto-impl.Crypto>} */ (
-      getElementService(window, 'crypto', 'amp-analytics')));
+  return (/** @type {!./service/crypto-impl.Crypto} */ (
+      getExistingServiceForWindow(window, 'crypto')));
 }
+
+/**
+ * Hash function djb2a
+ * This is intended to be a simple, fast hashing function using minimal code.
+ * It does *not* have good cryptographic properties.
+ * @param {string} str
+ * @return {string} 32-bit unsigned hash of the string
+ */
+export function stringHash32(str) {
+  const length = str.length;
+  let hash = 5381;
+  for (let i = 0; i < length; i++) {
+    hash = hash * 33 ^ str.charCodeAt(i);
+  }
+  // Convert from 32-bit signed to unsigned.
+  return String(hash >>> 0);
+};

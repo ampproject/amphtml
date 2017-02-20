@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from './common-signals';
 import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     isInternalElement, isLayoutSizeDefined, isLoadingAllowed,
     parseLayout, parseLength, getNaturalDimensions,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
+import {Signals} from './utils/signals';
 import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
-import {documentStateFor} from './document-state';
-import {getIntersectionChangeEntry} from '../src/intersection-observer';
+import {documentStateFor} from './service/document-state';
+import {
+  getIntersectionChangeEntry,
+} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
@@ -56,10 +60,14 @@ const PREPARE_LOADING_THRESHOLD_ = 1000;
 
 
 /**
- * Map from element name to implementation class.
- * @const {Object}
+ * @enum {number}
  */
-const knownElements = {};
+const UpgradeState = {
+  NOT_UPGRADED: 1,
+  UPGRADED: 2,
+  UPGRADE_FAILED: 3,
+  UPGRADE_IN_PROGRESS: 4,
+};
 
 
 /**
@@ -82,23 +90,25 @@ function isTemplateTagSupported() {
 
 
 /**
- * @enum {number}
+ * @param {!Window} win
+ * @return {!Object<string, function(new:./base-element.BaseElement, !Element)>}
  */
-const UpgradeState = {
-  NOT_UPGRADED: 1,
-  UPGRADED: 2,
-  UPGRADE_FAILED: 3,
-  UPGRADE_IN_PROGRESS: 4,
-};
+function getExtendedElements(win) {
+  if (!win.ampExtendedElements) {
+    win.ampExtendedElements = {};
+  }
+  return win.ampExtendedElements;
+}
 
 
 /**
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
  * @param {string} name
- * @param {function(!Function)} toClass
+ * @param {function(new:./base-element.BaseElement, !Element)} toClass
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
+  const knownElements = getExtendedElements(win);
   if (!knownElements[name]) {
     registerElement(win, name, /** @type {!Function} */ (toClass));
     return;
@@ -118,7 +128,8 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
     const element = stub.element;
-    if (element.tagName.toLowerCase() == name) {
+    if (element.tagName.toLowerCase() == name &&
+            element.ownerDocument.defaultView == win) {
       tryUpgradeElementNoInline(element, toClass);
       // Remove element from array.
       stubbedElements.splice(i--, 1);
@@ -145,18 +156,10 @@ function tryUpgradeElementNoInline(element, toClass) {
  * @param {!Window} win
  */
 export function stubElements(win) {
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
-    // If amp-ad and amp-embed haven't been registered, manually register them
-    // with ElementStub, in case the script to the element is not included.
-    if (!knownElements['amp-ad'] && !knownElements['amp-embed']) {
-      stubLegacyElements(win);
-    }
-  }
-  const list = win.document.querySelectorAll('[custom-element]');
+  const knownElements = getExtendedElements(win);
+  const list = win.document.head.querySelectorAll('script[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
-    win.ampExtendedElements[name] = true;
     if (knownElements[name]) {
       continue;
     }
@@ -170,53 +173,73 @@ export function stubElements(win) {
 }
 
 /**
- * @param {!Window} win
- */
-function stubLegacyElements(win) {
-  win.ampExtendedElements['amp-ad'] = true;
-  registerElement(win, 'amp-ad', ElementStub);
-  win.ampExtendedElements['amp-embed'] = true;
-  registerElement(win, 'amp-embed', ElementStub);
-}
-
-/**
  * Stub element if not yet known.
  * @param {!Window} win
  * @param {string} name
  */
 export function stubElementIfNotKnown(win, name) {
-  if (knownElements[name]) {
-    return;
+  const knownElements = getExtendedElements(win);
+  if (!knownElements[name]) {
+    registerElement(win, name, ElementStub);
   }
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
-  }
-  win.ampExtendedElements[name] = true;
-  registerElement(win, name, ElementStub);
+}
+
+/**
+ * Stub element in the child window.
+ * @param {!Window} childWin
+ * @param {string} name
+ */
+export function stubElementInChildWindow(childWin, name) {
+  registerElement(childWin, name, ElementStub);
 }
 
 /**
  * Copies the specified element to child window (friendly iframe). This way
  * all implementations of the AMP elements are shared between all friendly
  * frames.
+ * @param {!Window} parentWin
  * @param {!Window} childWin
  * @param {string} name
  */
-export function copyElementToChildWindow(childWin, name) {
-  if (!childWin.ampExtendedElements) {
-    childWin.ampExtendedElements = {};
-    stubLegacyElements(childWin);
-  }
-  childWin.ampExtendedElements[name] = true;
-  registerElement(childWin, name, knownElements[name] || ElementStub);
+export function copyElementToChildWindow(parentWin, childWin, name) {
+  const toClass = getExtendedElements(parentWin)[name];
+  registerElement(childWin, name, toClass || ElementStub);
 }
 
 
 /**
+ * Upgrade element in the child window.
+ * @param {!Window} parentWin
+ * @param {!Window} childWin
+ * @param {string} name
+ */
+export function upgradeElementInChildWindow(parentWin, childWin, name) {
+  const toClass = getExtendedElements(parentWin)[name];
+  dev().assert(toClass, '%s is not stubbed yet', name);
+  dev().assert(toClass != ElementStub, '%s is not upgraded yet', name);
+  upgradeOrRegisterElement(childWin, name, toClass);
+}
+
+/**
  * Applies layout to the element. Visible for testing only.
  * @param {!Element} element
+ * @return {!Layout}
  */
 export function applyLayout_(element) {
+  // Check if the layout has already been done by the server.
+  const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
+  if (completedLayoutAttr) {
+    const layout = /** @type {!Layout} */ (dev().assert(
+        parseLayout(completedLayoutAttr)));
+    if (layout == Layout.RESPONSIVE && element.firstElementChild) {
+      // Find sizer, but assume that it might not have been parsed yet.
+      element.sizerElement_ =
+          element.querySelector('i-amphtml-sizer') || undefined;
+    }
+    return layout;
+  }
+
+  // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
   const widthAttr = element.getAttribute('width');
   const heightAttr = element.getAttribute('height');
@@ -293,7 +316,7 @@ export function applyLayout_(element) {
   // Apply UI.
   element.classList.add(getLayoutClass(layout));
   if (isLayoutSizeDefined(layout)) {
-    element.classList.add('-amp-layout-size-defined');
+    element.classList.add('i-amphtml-layout-size-defined');
   }
   if (layout == Layout.NODISPLAY) {
     setStyle(element, 'display', 'none');
@@ -305,7 +328,7 @@ export function applyLayout_(element) {
   } else if (layout == Layout.FIXED_HEIGHT) {
     setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
-    const sizer = element.ownerDocument.createElement('i-amp-sizer');
+    const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
     setStyles(sizer, {
       display: 'block',
       paddingTop:
@@ -455,7 +478,7 @@ function createBaseCustomElementClass(win) {
       this.layoutCount_ = 0;
 
       /** @private {boolean} */
-      this.isFirstLayoutCompleted_ = true;
+      this.isFirstLayoutCompleted_ = false;
 
       /** @private {boolean} */
       this.isInViewport_ = false;
@@ -472,9 +495,9 @@ function createBaseCustomElementClass(win) {
       /**
        * This element can be assigned by the {@link applyLayout_} to a child
        * element that will be used to size this element.
-       * @private {?Element}
+       * @private {?Element|undefined}
        */
-      this.sizerElement_ = null;
+      this.sizerElement_ = undefined;
 
       /** @private {boolean|undefined} */
       this.loadingDisabled_ = undefined;
@@ -492,6 +515,7 @@ function createBaseCustomElementClass(win) {
       this.overflowElement_ = undefined;
 
       // `opt_implementationClass` is only used for tests.
+      const knownElements = getExtendedElements(win);
       let Ctor = knownElements[this.elementName()];
       if (getMode().test && this.implementationClassForTesting) {
         Ctor = this.implementationClassForTesting;
@@ -510,15 +534,21 @@ function createBaseCustomElementClass(win) {
       /**
        * Action queue is initially created and kept around until the element
        * is ready to send actions directly to the implementation.
-       * @private {?Array<!./service/action-impl.ActionInvocation>}
+       * - undefined initially
+       * - array if used
+       * - null after unspun
+       * @private {?Array<!./service/action-impl.ActionInvocation>|undefined}
        */
-      this.actionQueue_ = [];
+      this.actionQueue_ = undefined;
 
       /**
        * Whether the element is in the template.
        * @private {boolean|undefined}
        */
       this.isInTemplate_ = undefined;
+
+      /** @private @const */
+      this.signals_ = new Signals();
     }
 
     /**
@@ -527,6 +557,11 @@ function createBaseCustomElementClass(win) {
      * @return {string}
      */
     elementName() {
+    }
+
+    /** @return {!Signals} */
+    signals() {
+      return this.signals_;
     }
 
     /**
@@ -597,12 +632,9 @@ function createBaseCustomElementClass(win) {
       this.upgradeState_ = UpgradeState.UPGRADED;
       this.implementation_ = newImpl;
       this.classList.remove('amp-unresolved');
-      this.classList.remove('-amp-unresolved');
+      this.classList.remove('i-amphtml-unresolved');
       this.implementation_.createdCallback();
-      if (this.layout_ != Layout.NODISPLAY &&
-        !this.implementation_.isLayoutSupported(this.layout_)) {
-        throw user().createError('Layout not supported: ' + this.layout_);
-      }
+      this.assertLayout_();
       this.implementation_.layout_ = this.layout_;
       this.implementation_.layoutWidth_ = this.layoutWidth_;
       if (this.everAttached) {
@@ -614,6 +646,21 @@ function createBaseCustomElementClass(win) {
       }
     }
 
+    /* @private */
+    assertLayout_() {
+      if (this.layout_ != Layout.NODISPLAY &&
+          !this.implementation_.isLayoutSupported(this.layout_)) {
+        let error = 'Layout not supported: ' + this.layout_;
+        if (!this.getAttribute('layout')) {
+          error += '. The element did not specify a layout attribute. ' +
+              'Check https://www.ampproject.org/docs/guides/' +
+              'responsive/control_layout and the respective element ' +
+              'documentation for details.';
+        }
+        throw user().createError(error);
+      }
+    }
+
     /**
      * Whether the element has been built. A built element had its
      * {@link buildCallback} method successfully invoked.
@@ -622,6 +669,15 @@ function createBaseCustomElementClass(win) {
      */
     isBuilt() {
       return this.built_;
+    }
+
+    /**
+     * Returns the promise that's resolved when the element has been built. If
+     * the build fails, the resulting promise is rejected.
+     * @return {!Promise}
+     */
+    whenBuilt() {
+      return this.signals_.whenSignal(CommonSignals.BUILT);
     }
 
     /**
@@ -652,9 +708,11 @@ function createBaseCustomElementClass(win) {
         this.implementation_.buildCallback();
         this.preconnect(/* onLayout */false);
         this.built_ = true;
-        this.classList.remove('-amp-notbuilt');
+        this.classList.remove('i-amphtml-notbuilt');
         this.classList.remove('amp-notbuilt');
+        this.signals_.signal(CommonSignals.BUILT);
       } catch (e) {
+        this.signals_.rejectSignal(CommonSignals.BUILT, e);
         reportError(e, this);
         throw e;
       }
@@ -662,14 +720,10 @@ function createBaseCustomElementClass(win) {
         this.updateInViewport_(true);
       }
       if (this.actionQueue_) {
-        if (this.actionQueue_.length > 0) {
-          // Only schedule when the queue is not empty, which should be
-          // the case 99% of the time.
-          timerFor(this.ownerDocument.defaultView)
+        // Only schedule when the queue is not empty, which should be
+        // the case 99% of the time.
+        timerFor(this.ownerDocument.defaultView)
             .delay(this.dequeueActions_.bind(this), 1);
-        } else {
-          this.actionQueue_ = null;
-        }
       }
       if (!this.getPlaceholder()) {
         const placeholder = this.createPlaceholder();
@@ -718,8 +772,6 @@ function createBaseCustomElementClass(win) {
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
-      // TODO(malteubl): Forward for stubbed elements.
-      // TODO(jridgewell): We should pass the layoutBox down.
       this.implementation_.onLayoutMeasure();
 
       if (this.isLoadingEnabled_()) {
@@ -742,9 +794,22 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {?Element}
+     * @private
+     */
+    getSizer_() {
+      if (this.sizerElement_ === undefined &&
+          this.layout_ === Layout.RESPONSIVE) {
+        // Expect sizer to exist, just not yet discovered.
+        this.sizerElement_ = this.querySelector('i-amphtml-sizer');
+      }
+      return this.sizerElement_ || null;
+    }
+
+    /**
      * If the element has a media attribute, evaluates the value as a media
      * query and based on the result adds or removes the class
-     * `-amp-hidden-by-media-query`. The class adds display:none to the element
+     * `i-amphtml-hidden-by-media-query`. The class adds display:none to the element
      * which in turn prevents any of the resource loading to happen for the
      * element.
      *
@@ -762,7 +827,7 @@ function createBaseCustomElementClass(win) {
       }
       if (this.mediaQuery_) {
         const defaultView = this.ownerDocument.defaultView;
-        this.classList.toggle('-amp-hidden-by-media-query',
+        this.classList.toggle('i-amphtml-hidden-by-media-query',
             !defaultView.matchMedia(this.mediaQuery_).matches);
       }
 
@@ -776,16 +841,18 @@ function createBaseCustomElementClass(win) {
             this.ownerDocument.defaultView));
       }
       // Heights.
-      if (this.heightsList_ === undefined) {
+      if (this.heightsList_ === undefined &&
+          this.layout_ === Layout.RESPONSIVE) {
         const heightsAttr = this.getAttribute('heights');
         this.heightsList_ = heightsAttr ?
-          parseSizeList(heightsAttr, /* allowPercent */ true) : null;
+            parseSizeList(heightsAttr, /* allowPercent */ true) : null;
       }
-
-      if (this.heightsList_ && this.layout_ ===
-        Layout.RESPONSIVE && this.sizerElement_) {
-        setStyle(this.sizerElement_, 'paddingTop', this.heightsList_.select(
-            this.ownerDocument.defaultView));
+      if (this.heightsList_) {
+        const sizer = this.getSizer_();
+        if (sizer) {
+          setStyle(sizer, 'paddingTop',
+              this.heightsList_.select(this.ownerDocument.defaultView));
+        }
       }
     }
 
@@ -797,21 +864,43 @@ function createBaseCustomElementClass(win) {
      *
      * @param {number|undefined} newHeight
      * @param {number|undefined} newWidth
+     * @param {!./layout-rect.LayoutMarginsDef=} opt_newMargins
      * @final
      * @package @this {!Element}
      */
-    changeSize(newHeight, newWidth) {
-      if (this.sizerElement_) {
+    changeSize(newHeight, newWidth, opt_newMargins) {
+      const sizer = this.getSizer_();
+      if (sizer) {
         // From the moment height is changed the element becomes fully
         // responsible for managing its height. Aspect ratio is no longer
         // preserved.
-        setStyle(this.sizerElement_, 'paddingTop', '0');
+        this.sizerElement_ = null;
+        setStyle(sizer, 'paddingTop', '0');
+        if (this.resources_) {
+          this.resources_.deferMutate(this, () => {
+            dom.removeElement(sizer);
+          });
+        }
       }
       if (newHeight !== undefined) {
         setStyle(this, 'height', newHeight, 'px');
       }
       if (newWidth !== undefined) {
         setStyle(this, 'width', newWidth, 'px');
+      }
+      if (opt_newMargins) {
+        if (opt_newMargins.top != null) {
+          setStyle(this, 'marginTop', opt_newMargins.top, 'px');
+        }
+        if (opt_newMargins.right != null) {
+          setStyle(this, 'marginRight', opt_newMargins.right, 'px');
+        }
+        if (opt_newMargins.bottom != null) {
+          setStyle(this, 'marginBottom', opt_newMargins.bottom, 'px');
+        }
+        if (opt_newMargins.left != null) {
+          setStyle(this, 'marginLeft', opt_newMargins.left, 'px');
+        }
       }
     }
 
@@ -822,8 +911,8 @@ function createBaseCustomElementClass(win) {
      */
     connectedCallback() {
       if (!this.everAttached) {
-        this.classList.add('-amp-element');
-        this.classList.add('-amp-notbuilt');
+        this.classList.add('i-amphtml-element');
+        this.classList.add('i-amphtml-notbuilt');
         this.classList.add('amp-notbuilt');
       }
 
@@ -848,15 +937,11 @@ function createBaseCustomElementClass(win) {
         }
         if (!this.isUpgraded()) {
           this.classList.add('amp-unresolved');
-          this.classList.add('-amp-unresolved');
+          this.classList.add('i-amphtml-unresolved');
         }
         try {
           this.layout_ = applyLayout_(this);
-          if (this.layout_ != Layout.NODISPLAY &&
-            !this.implementation_.isLayoutSupported(this.layout_)) {
-            throw user().createError('Layout not supported: ' +
-                this.layout_);
-          }
+          this.assertLayout_();
           this.implementation_.layout_ = this.layout_;
           this.implementation_.firstAttachedCallback();
           if (!this.isUpgraded()) {
@@ -873,6 +958,8 @@ function createBaseCustomElementClass(win) {
         // It's important to have this flag set in the end to avoid
         // `resources.add` called twice if upgrade happens immediately.
         this.everAttached = true;
+      } else if (this.reconstructWhenReparented()) {
+        this.reset_();
       }
       this.getResources().add(this);
     }
@@ -998,6 +1085,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {?Element}
+     * @final @this {!Element}
+     */
+    getOwner() {
+      return this.getResources().getResourceForElement(this).getOwner();
+    }
+
+    /**
      * Returns a change entry for that should be compatible with
      * IntersectionObserverEntry.
      * @return {!IntersectionObserverEntry} A change entry.
@@ -1049,22 +1144,35 @@ function createBaseCustomElementClass(win) {
       dev().assert(this.isBuilt(),
         'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting('amp:load:start');
+      const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
+      if (isLoadEvent) {
+        this.signals_.signal(CommonSignals.LOAD_START);
+      }
       const promise = this.implementation_.layoutCallback();
       this.preconnect(/* onLayout */true);
-      this.classList.add('-amp-layout');
+      this.classList.add('i-amphtml-layout');
       return promise.then(() => {
+        if (isLoadEvent) {
+          this.signals_.signal(CommonSignals.LOAD_END);
+        }
         this.readyState = 'complete';
         this.layoutCount_++;
         this.toggleLoading_(false, /* cleanup */ true);
         // Check if this is the first success layout that needs
         // to call firstLayoutCompleted.
-        if (this.isFirstLayoutCompleted_) {
+        if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
-          this.isFirstLayoutCompleted_ = false;
+          this.isFirstLayoutCompleted_ = true;
+          // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+          // in PROD.
           this.dispatchCustomEvent('amp:load:end');
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
+        if (isLoadEvent) {
+          this.signals_.rejectSignal(
+              CommonSignals.LOAD_END, /** @type {!Error} */ (reason));
+        }
         this.layoutCount_++;
         this.toggleLoading_(false, /* cleanup */ true);
         throw reason;
@@ -1090,7 +1198,7 @@ function createBaseCustomElementClass(win) {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
           timerFor(this.ownerDocument.defaultView).delay(() => {
-            if (this.layoutCount_ == 0 && this.isInViewport_) {
+            if (this.isInViewport_) {
               this.toggleLoading_(true);
             }
           }, 100);
@@ -1156,10 +1264,19 @@ function createBaseCustomElementClass(win) {
       }
       const isReLayoutNeeded = this.implementation_.unlayoutCallback();
       if (isReLayoutNeeded) {
-        this.layoutCount_ = 0;
-        this.isFirstLayoutCompleted_ = true;
+        this.reset_();
       }
       return isReLayoutNeeded;
+    }
+
+    /** @private */
+    reset_() {
+      this.layoutCount_ = 0;
+      this.isFirstLayoutCompleted_ = false;
+      this.signals_.reset(CommonSignals.RENDER_START);
+      this.signals_.reset(CommonSignals.LOAD_START);
+      this.signals_.reset(CommonSignals.LOAD_END);
+      this.signals_.reset(CommonSignals.INI_LOAD);
     }
 
     /**
@@ -1172,6 +1289,18 @@ function createBaseCustomElementClass(win) {
      */
     unlayoutOnPause() {
       return this.implementation_.unlayoutOnPause();
+    }
+
+    /**
+     * Whether the element needs to be reconstructed after it has been
+     * re-parented. Many elements cannot survive fully the reparenting and
+     * are better to be reconstructed from scratch.
+     *
+     * @return {boolean}
+     * @package @final @this {!Element}
+     */
+    reconstructWhenReparented() {
+      return this.implementation_.reconstructWhenReparented();
     }
 
     /**
@@ -1193,6 +1322,19 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Called when one or more attributes are mutated.
+     * @note Must be called inside a mutate context.
+     * @note Boolean attributes have a value of `true` and `false` when
+     *       present and missing, respectively.
+     * @param {
+     *   !Object<string, (null|boolean|string|number|Array|Object)>
+     * } mutations
+     */
+    mutatedAttributesCallback(mutations) {
+      this.implementation_.mutatedAttributesCallback(mutations);
+    }
+
+    /**
      * Enqueues the action with the element. If element has been upgraded and
      * built, the action is dispatched to the implementation right away.
      * Otherwise the invocation is enqueued until the implementation is ready
@@ -1203,6 +1345,9 @@ function createBaseCustomElementClass(win) {
     enqueAction(invocation) {
       assertNotTemplate(this);
       if (!this.isBuilt()) {
+        if (this.actionQueue_ === undefined) {
+          this.actionQueue_ = [];
+        }
         dev().assert(this.actionQueue_).push(invocation);
       } else {
         this.executionAction_(invocation, false);
@@ -1332,6 +1477,16 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * An implementation can call this method to signal to the element that
+     * it has started rendering.
+     * @package @final @this {!Element}
+     */
+    renderStarted() {
+      this.signals_.signal(CommonSignals.RENDER_START);
+      this.toggleLoading_(false);
+    }
+
+    /**
      * Whether the loading can be shown for this element.
      * @return {boolean}
      * @private @this {!Element}
@@ -1368,11 +1523,11 @@ function createBaseCustomElementClass(win) {
         const doc = this.ownerDocument;
 
         const container = doc.createElement('div');
-        container.classList.add('-amp-loading-container');
-        container.classList.add('-amp-fill-content');
+        container.classList.add('i-amphtml-loading-container');
+        container.classList.add('i-amphtml-fill-content');
         container.classList.add('amp-hidden');
 
-        const element = createLoaderElement(doc);
+        const element = createLoaderElement(doc, this.elementName());
         container.appendChild(element);
 
         this.appendChild(container);
@@ -1389,6 +1544,12 @@ function createBaseCustomElementClass(win) {
      */
     toggleLoading_(state, opt_cleanup) {
       assertNotTemplate(this);
+      if (state &&
+          (this.layoutCount_ > 0 ||
+              this.signals_.get(CommonSignals.RENDER_START))) {
+        // Loading has already been canceled. Ignore.
+        return;
+      }
       this.loadingState_ = state;
       if (!state && !this.loadingContainer_) {
         return;
@@ -1492,6 +1653,7 @@ function createBaseCustomElementClass(win) {
  * @param {function(new:./base-element.BaseElement, !Element)} implementationClass
  */
 export function registerElement(win, name, implementationClass) {
+  const knownElements = getExtendedElements(win);
   knownElements[name] = implementationClass;
   const klass = createCustomElementClass(win, name);
 
@@ -1512,6 +1674,7 @@ export function registerElement(win, name, implementationClass) {
  * @param {string} sourceName Name of an existing custom element
  */
 export function registerElementAlias(win, aliasName, sourceName) {
+  const knownElements = getExtendedElements(win);
   const implementationClass = knownElements[sourceName];
   if (implementationClass) {
     // Update on the knownElements to prevent register again.
@@ -1531,10 +1694,10 @@ export function registerElementAlias(win, aliasName, sourceName) {
  * @visibleForTesting
  */
 export function markElementScheduledForTesting(win, elementName) {
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
+  const knownElements = getExtendedElements(win);
+  if (!knownElements[elementName]) {
+    knownElements[elementName] = ElementStub;
   }
-  win.ampExtendedElements[elementName] = true;
 }
 
 /**
@@ -1545,19 +1708,20 @@ export function markElementScheduledForTesting(win, elementName) {
  */
 export function resetScheduledElementForTesting(win, elementName) {
   if (win.ampExtendedElements) {
-    win.ampExtendedElements[elementName] = null;
+    delete win.ampExtendedElements[elementName];
   }
-  delete knownElements[elementName];
 }
 
 /**
  * Returns a currently registered element class.
+ * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
  * @return {?function()}
  * @visibleForTesting
  */
-export function getElementClassForTesting(elementName) {
-  return knownElements[elementName] || null;
+export function getElementClassForTesting(win, elementName) {
+  const knownElements = win.ampExtendedElements;
+  return knownElements && knownElements[elementName] || null;
 }
 
 /** @param {!Element} element */

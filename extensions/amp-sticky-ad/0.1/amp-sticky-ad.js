@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '../../../src/common-signals';
 import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
-import {listenOnce} from '../../../src/event-helper';
-import {
-  setStyle,
-  removeAlphaFromColor,
-} from '../../../src/style';
-import {isExperimentOn} from '../../../src/experiments';
-
-/** @private @const {string} */
-const UX_EXPERIMENT = 'amp-sticky-ad-better-ux';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -149,18 +141,15 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /**
-   * Function that check if ad has been built
-   * If not, wait for the amp:built event
-   * otherwise schedule layout for ad.
+   * Function that check if ad has been built.  If not, wait for the "built"
+   * signal. Otherwise schedule layout for ad.
    * @private
    */
   scheduleLayoutForAd_() {
     if (this.ad_.isBuilt()) {
       this.layoutAd_();
     } else {
-      listenOnce(this.ad_, 'amp:built', () => {
-        this.layoutAd_();
-      });
+      this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
     }
   }
 
@@ -169,14 +158,21 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   layoutAd_() {
-    this.updateInViewport(dev().assertElement(this.ad_), true);
-    this.scheduleLayout(dev().assertElement(this.ad_));
-    listenOnce(this.ad_, 'amp:load:end', () => {
-      this.vsync_.mutate(() => {
+    const ad = dev().assertElement(this.ad_);
+    this.updateInViewport(ad, true);
+    this.scheduleLayout(ad);
+    // Wait for the earliest: `render-start` or `load-end` signals.
+    // `render-start` is expected to arrive first, but it's not emitted by
+    // all types of ads.
+    const signals = ad.signals();
+    return Promise.race([
+      signals.whenSignal(CommonSignals.RENDER_START),
+      signals.whenSignal(CommonSignals.LOAD_END),
+    ]).then(() => {
+      return this.vsync_.mutatePromise(() => {
         // Set sticky-ad to visible and change container style
         this.element.setAttribute('visible', '');
         this.element.classList.add('amp-sticky-ad-loaded');
-        this.forceOpacity_();
       });
     });
   }
@@ -208,33 +204,6 @@ class AmpStickyAd extends AMP.BaseElement {
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
     });
-  }
-
-  /**
-   * To check for background-color alpha and force it to be 1.
-   * Whoever calls this needs to make sure it's in a vsync.
-   * @private
-   */
-  forceOpacity_() {
-    if (!isExperimentOn(this.win, UX_EXPERIMENT)) {
-      return;
-    }
-
-    // TODO(@zhouyx): Move the opacity style to CSS after remove experiments
-    // Note: Use setStyle because we will remove this line later.
-    setStyle(this.element, 'opacity', '1 !important');
-    setStyle(this.element, 'background-image', 'none');
-
-    const backgroundColor = this.win./*OK*/getComputedStyle(this.element)
-        .getPropertyValue('background-color');
-    const newBackgroundColor = removeAlphaFromColor(backgroundColor);
-    if (backgroundColor == newBackgroundColor) {
-      return;
-    }
-
-    user().warn('AMP-STICKY-AD',
-        'Do not allow container to be semitransparent');
-    setStyle(this.element, 'background-color', newBackgroundColor);
   }
 }
 

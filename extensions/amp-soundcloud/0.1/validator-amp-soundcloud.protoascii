@@ -16,10 +16,12 @@
 
 tags: {  # amp-soundcloud
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-soundcloud extension .js script"
+  satisfies: "amp-soundcloud extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
+  extension_unused_unless_tag_present: "amp-soundcloud"
   attrs: {
     name: "async"
     mandatory: true
@@ -31,6 +33,7 @@ tags: {  # amp-soundcloud
     value: "amp-soundcloud"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -50,11 +53,13 @@ tags: {  # amp-soundcloud
 }
 tags: {  # <amp-soundcloud>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-SOUNDCLOUD"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-soundcloud extension .js script"
-  attrs: { name: "data-color" value_regex_casei: "([0-9a-f]{3}){1,2}" }
+  requires: "amp-soundcloud extension .js script"
+  attrs: {
+    name: "data-color"
+    value_regex_casei: "([0-9a-f]{3}){1,2}"
+  }
   attrs: {
     name: "data-secret-token"
     value_regex: "[A-Za-z0-9_-]+"
@@ -64,7 +69,10 @@ tags: {  # <amp-soundcloud>
     mandatory: true
     value_regex: "[0-9]+"
   }
-  attrs: { name: "data-visual" value_regex: "true|false" }
+  attrs: {
+    name: "data-visual"
+    value_regex: "true|false"
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
   amp_layout: {
