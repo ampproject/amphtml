@@ -37,14 +37,16 @@ exports.rules = [
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/sanitizer.js',
-    whitelist: 'extensions/amp-mustache/0.1/amp-mustache.js->' +
-        'src/sanitizer.js',
+    whitelist: [
+      'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
+      'extensions/amp-bind/0.1/bind-impl.js->src/sanitizer.js',
+    ],
   },
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'third_party/**/*.js',
     whitelist: [
-      'extensions/amp-analytics/**/*.js->' +
+      'extensions/amp-crypto-polyfill/**/*.js->' +
           'third_party/closure-library/sha384-generated.js',
       'extensions/amp-mustache/0.1/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
@@ -61,6 +63,7 @@ exports.rules = [
     filesMatching: '3p/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
+      '3p/**->src/utils/object.js',
       '3p/**->src/log.js',
       '3p/**->src/types.js',
       '3p/**->src/string.js',
@@ -82,10 +85,13 @@ exports.rules = [
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
       'ads/**->src/utils/base64.js',
+      'ads/**->src/utils/dom-fingerprint.js',
+      'ads/**->src/utils/object.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
       'ads/**->src/types.js',
+      'ads/**->src/string.js',
       'ads/**->src/style.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
@@ -95,9 +101,13 @@ exports.rules = [
       'ads/google/a4a/**->src/timer.js',
       'ads/google/a4a/**->src/viewer.js',
       'ads/google/a4a/**->src/viewport.js',
+      'ads/google/a4a/performance.js->src/url-replacements.js',
+      'ads/google/a4a/performance.js->src/service/variable-source.js',
       // alp handler needs to depend on src files
       'ads/alp/handler.js->src/dom.js',
       'ads/alp/handler.js->src/config.js',
+      // Some ads need to depend on json.js
+      'ads/**->src/json.js',
     ],
   },
   {
@@ -112,9 +122,13 @@ exports.rules = [
           'doubleclick-a4a-config.js',
       'ads/_a4a-config.js->' +
           'extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config.js',
-      'ads/google/a4a/performance.js->' +
+      'ads/_a4a-config.js->' +
+          'extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config.js',
+      'ads/_a4a-config.js->' +
+          'extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config.js',
+      'ads/google/a4a/google-data-reporter.js->' +
           'extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
-      'ads/google/a4a/performance.js->' +
+      'ads/google/a4a/google-data-reporter.js->' +
           'extensions/amp-ad-network-doubleclick-impl/0.1/' +
           'doubleclick-a4a-config.js',
       'ads/google/a4a/performance.js->extensions/amp-a4a/0.1/amp-a4a.js',
@@ -130,6 +144,19 @@ exports.rules = [
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/service/**/*.js',
+    whitelist: [
+      'extensions/amp-a4a/0.1/a4a-variable-source.js->' +
+          'src/service/variable-source.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js->' +
+          'src/service/url-replacements-impl.js',
+      'extensions/amp-video/0.1/amp-video.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-youtube/0.1/amp-youtube.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js->src/service/variable-source.js',
+    ],
   },
   {
     filesMatching: 'extensions/**/*.js',
@@ -142,11 +169,14 @@ exports.rules = [
       // DO NOT add extensions/ files
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
+      'src/polyfills.js->src/polyfills/domtokenlist-toggle.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/math-sign.js',
       'src/polyfills.js->src/polyfills/object-assign.js',
       'src/polyfills.js->src/polyfills/promise.js',
+      'src/polyfills.js->src/polyfills/array-includes.js',
       'src/service/extensions-impl.js->src/polyfills/document-contains.js',
+      'src/service/extensions-impl.js->src/polyfills/domtokenlist-toggle.js',
     ],
   },
   {

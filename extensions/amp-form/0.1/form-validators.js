@@ -15,13 +15,14 @@
  */
 
 import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {ValidationBubble} from './validation-bubble';
 
 
 /** @type {boolean|undefined} */
 let reportValiditySupported;
 
+/** @type {boolean|undefined} */
+let checkValiditySupported;
 
 /** @type {number} */
 let validationBubbleCount = 0;
@@ -31,8 +32,17 @@ let validationBubbleCount = 0;
  * @param {boolean} isSupported
  * @private visible for testing.
  */
-export function setReportValiditySupported(isSupported) {
+export function setReportValiditySupportedForTesting(isSupported) {
   reportValiditySupported = isSupported;
+}
+
+
+/**
+ * @param {boolean} isSupported
+ * @private visible for testing.
+ */
+export function setCheckValiditySupportedForTesting(isSupported) {
+  checkValiditySupported = isSupported;
 }
 
 
@@ -338,18 +348,15 @@ export class AsYouGoValidator extends AbstractCustomValidator {
  * @return {!FormValidator}
  */
 export function getFormValidator(form) {
-  const win = form.ownerDocument.defaultView;
-  if (isExperimentOn(win, 'amp-form-custom-validations')) {
-    const customValidation = form.getAttribute(
-        'custom-validation-reporting');
-    switch (customValidation) {
-      case CustomValidationTypes.AsYouGo:
-        return new AsYouGoValidator(form);
-      case CustomValidationTypes.ShowAllOnSubmit:
-        return new ShowAllOnSubmitValidator(form);
-      case CustomValidationTypes.ShowFirstOnSubmit:
-        return new ShowFirstOnSubmitValidator(form);
-    }
+  const customValidation = form.getAttribute(
+      'custom-validation-reporting');
+  switch (customValidation) {
+    case CustomValidationTypes.AsYouGo:
+      return new AsYouGoValidator(form);
+    case CustomValidationTypes.ShowAllOnSubmit:
+      return new ShowAllOnSubmitValidator(form);
+    case CustomValidationTypes.ShowFirstOnSubmit:
+      return new ShowFirstOnSubmitValidator(form);
   }
 
   if (isReportValiditySupported(form.ownerDocument)) {
@@ -362,14 +369,27 @@ export function getFormValidator(form) {
 
 /**
  * Returns whether reportValidity API is supported.
- * @param {!Document} doc
+ * @param {?Document} doc
  * @return {boolean}
  */
 function isReportValiditySupported(doc) {
-  if (reportValiditySupported === undefined) {
-    reportValiditySupported = !!doc.createElement('form').reportValidity;
+  if (doc && reportValiditySupported === undefined) {
+    reportValiditySupported = !!document.createElement('form').reportValidity;
   }
-  return reportValiditySupported;
+  return !!reportValiditySupported;
+}
+
+
+/**
+ * Returns whether reportValidity API is supported.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isCheckValiditySupported(doc) {
+  if (checkValiditySupported === undefined) {
+    checkValiditySupported = !!doc.createElement('input').checkValidity;
+  }
+  return checkValiditySupported;
 }
 
 

@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
-import {cidFor} from '../../../src/cid';
+import {cidForDoc} from '../../../src/cid';
 import {fromClass} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {storageForDoc} from '../../../src/storage';
@@ -186,6 +186,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.buildGetHref_(ampUserId).then(href => {
       const getReq = {
         credentials: 'include',
+        requireAmpResponseSourceOrigin: false,
       };
       return xhrFor(this.win).fetchJson(href, getReq);
     });
@@ -200,6 +201,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     return xhrFor(this.win).fetchJson(dev().assert(this.dismissHref_), {
       method: 'POST',
       credentials: 'include',
+      requireAmpResponseSourceOrigin: false,
       body: {
         'elementId': this.elementId_,
         'ampUserId': this.ampUserId_,
@@ -233,7 +235,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   getAsyncCid_() {
-    return cidFor(this.win).then(cid => {
+    return cidForDoc(this.element).then(cid => {
       // `amp-user-notification` is our cid scope, while we give it a resolved
       // promise for the 2nd argument so that the 3rd argument (the
       // persistentConsent) is the one used to resolve getting

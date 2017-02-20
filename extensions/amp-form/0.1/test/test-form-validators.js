@@ -17,7 +17,7 @@
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 import {
-  setReportValiditySupported,
+  setReportValiditySupportedForTesting,
   getFormValidator,
   DefaultValidator,
   PolyfillDefaultValidator,
@@ -26,7 +26,6 @@ import {
   ShowFirstOnSubmitValidator,
 } from '../form-validators';
 import {ValidationBubble} from '../validation-bubble';
-import {toggleExperiment} from '../../../../src/experiments';
 
 
 describe('form-validators', () => {
@@ -48,7 +47,6 @@ describe('form-validators', () => {
 
   function getTestingIframe() {
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-form-custom-validations', true);
       return iframe;
     });
   }
@@ -111,9 +109,9 @@ describe('form-validators', () => {
       return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc);
-        setReportValiditySupported(true);
+        setReportValiditySupportedForTesting(true);
         expect(getFormValidator(form)).to.be.instanceOf(DefaultValidator);
-        setReportValiditySupported(false);
+        setReportValiditySupportedForTesting(false);
         expect(getFormValidator(form)).to.be.instanceOf(
             PolyfillDefaultValidator);
       });

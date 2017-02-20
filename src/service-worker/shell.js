@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import {calculateExtensionScriptUrl} from '../service/extensions-impl';
+import {getMode} from '../mode';
+import {calculateExtensionScriptUrl} from '../service/extension-location';
+import './error-reporting';
 
 /**
  * Import the "core" entry point for the AMP CDN Service Worker. This shell
  * file is kept intentionally small, so that checking if it has changed (and
  * thus, if a new SW must be installed) will be very fast.
  */
-const url = calculateExtensionScriptUrl(self.location, 'cache-service-worker');
+const url = calculateExtensionScriptUrl(self.location, 'cache-service-worker',
+    getMode().localDev);
 importScripts(url);

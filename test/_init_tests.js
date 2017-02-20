@@ -18,6 +18,7 @@
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {removeElement} from '../src/dom';
+import {setReportError} from '../src/log';
 import {
   adopt,
   installAmpdocServices,
@@ -27,8 +28,13 @@ import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
-import {resetAccumulatedErrorMessagesForTesting} from '../src/error';
+import {
+  resetAccumulatedErrorMessagesForTesting,
+  reportError,
+} from '../src/error';
+import {resetExperimentTogglesForTesting} from '../src/experiments';
 import * as describes from '../testing/describes';
+import stringify from 'json-stable-stringify';
 
 
 // All exposed describes.
@@ -99,6 +105,10 @@ class TestConfig {
 
   skipSafari() {
     return this.skip(this.platform_.isSafari.bind(this.platform_));
+  }
+
+  skipIos() {
+    return this.skip(this.platform_.isIos.bind(this.platform_));
   }
 
   /**
@@ -179,7 +189,6 @@ function beforeTest() {
     canary: 'testSentinel',
   };
   window.AMP_TEST = true;
-  window.ampExtendedElements = {};
   const ampdocService = installDocService(window, true);
   const ampdoc = ampdocService.getAmpDoc(window.document);
   installRuntimeServices(window);
@@ -206,7 +215,6 @@ afterEach(function() {
     }
   }
   window.localStorage.clear();
-  window.ampExtendedElements = {};
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
@@ -229,6 +237,8 @@ afterEach(function() {
   }
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
+  resetExperimentTogglesForTesting();
+  setReportError(reportError);
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
@@ -306,8 +316,8 @@ chai.Assertion.addMethod('display', function(display) {
 
 chai.Assertion.addMethod('jsonEqual', function(compare) {
   const obj = this._obj;
-  const a = JSON.stringify(compare);
-  const b = JSON.stringify(obj);
+  const a = stringify(compare);
+  const b = stringify(obj);
   this.assert(
     a == b,
     'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',

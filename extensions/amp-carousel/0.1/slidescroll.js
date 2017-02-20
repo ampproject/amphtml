@@ -16,14 +16,15 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {actionServiceForDoc} from '../../../src/action';
 import {bezierCurve} from '../../../src/curve';
+import {dev, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
 import {platformFor} from '../../../src/platform';
 import {timerFor} from '../../../src/timer';
-import {dev} from '../../../src/log';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = '-amp-slide-item-show';
@@ -36,6 +37,8 @@ const NATIVE_TOUCH_TIMEOUT = 120;
 
 /** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
+
+const TAG = 'AMP-CAROUSEL';
 
 export class AmpSlideScroll extends BaseSlides {
 
@@ -81,8 +84,17 @@ export class AmpSlideScroll extends BaseSlides {
      */
     this.elasticScrollState_ = 0;
 
-    /** @private {?number} */
+    /**
+     * If not laid out yet, null. Otherwise, index of current displayed slide.
+     * @private {?number}
+     */
     this.slideIndex_ = null;
+
+    /**
+     * The slide index that should be shown on first layout.
+     * @private {number}
+     */
+    this.initialSlideIndex_ = 0;
 
     /** @private {number} */
     this.slideWidth_ = 0;
@@ -96,16 +108,21 @@ export class AmpSlideScroll extends BaseSlides {
     const platform = platformFor(this.win);
 
     /** @private @const {boolean} */
-    this.isAndroidFF_ = platform.isAndroid() && platform.isFirefox();
+    this.isIos_ = platform.isIos();
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
+
   /** @override */
   buildSlides() {
     this.vsync_ = this.getVsync();
+    this.action_ = actionServiceForDoc(this.element);
 
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
@@ -159,11 +176,26 @@ export class AmpSlideScroll extends BaseSlides {
       this.slidesContainer_.addEventListener(
           'touchend', this.touchEndHandler_.bind(this));
     }
+
+    this.registerAction('goToSlide', invocation => {
+      const args = invocation.args;
+      if (args) {
+        this.showSlideWhenReady_(args['index']);
+      }
+    });
   }
 
   /** @override */
   isLoopingEligible() {
     return this.noOfSlides_ > 2;
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const slide = mutations['slide'];
+    if (slide !== undefined) {
+      this.showSlideWhenReady_(slide);
+    }
   }
 
   /**
@@ -218,7 +250,7 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   layoutCallback() {
     if (this.slideIndex_ === null) {
-      this.showSlide_(0);
+      this.showSlide_(this.initialSlideIndex_);
     }
     return Promise.resolve();
   }
@@ -259,7 +291,7 @@ export class AmpSlideScroll extends BaseSlides {
               (dir == 1 && !hasPrev) ? 0 : this.slideWidth_;
           this.customSnap_(currentScrollLeft, dir);
         } else {
-          this.showSlide_(newIndex);
+          this.showSlideAndTriggerAction_(newIndex);
         }
       }
     }
@@ -410,16 +442,16 @@ export class AmpSlideScroll extends BaseSlides {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
-      //TODO (camelburrito): Identify more platforms that dont require
+      //TODO (camelburrito): Identify more platforms that require
       // -amp-no-scroll.
-      if (!this.isAndroidFF_) {
+      if (this.isIos_) {
         // Make the container non scrollable to stop scroll events.
         this.slidesContainer_.classList.add('-amp-no-scroll');
       }
       // Scroll to new slide and update scrollLeft to the correct slide.
-      this.showSlide_(newIndex);
+      this.showSlideAndTriggerAction_(newIndex);
       this.vsync_.mutate(() => {
-        if (!this.isAndroidFF_) {
+        if (this.isIos_) {
           // Make the container scrollable again to enable user swiping.
           this.slidesContainer_.classList.remove('-amp-no-scroll');
         }
@@ -429,8 +461,29 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
+   * Parses given value as integer and shows the slide with that index value
+   * when element has been laid out.
+   * @param {*} value
+   * @private
+   */
+  showSlideWhenReady_(value) {
+    const index = parseInt(value, 10);
+    if (isFinite(index)) {
+      // If we haven't been laid out yet, set `initialSlideIndex_` instead.
+      if (this.slideIndex_ === null) {
+        this.initialSlideIndex_ = index;
+      } else {
+        this.showSlide_(index);
+      }
+    } else {
+      user().warn(TAG, 'Invalid [slide] value: %s', value);
+    }
+  }
+
+  /**
    * Makes the slide corresponding to the given index and the slides surrounding
-   *    it available for display.
+   *     it available for display.
+   * @note Element must be laid out.
    * @param {number} newIndex Index of the slide to be displayed.
    * @private
    */
@@ -467,8 +520,10 @@ export class AmpSlideScroll extends BaseSlides {
       if (showIndex == newIndex) {
         this.scheduleLayout(this.slides_[showIndex]);
         this.scheduleResume(this.slides_[showIndex]);
+        this.slides_[showIndex].setAttribute('aria-hidden', 'false');
       } else {
         this.schedulePreload(this.slides_[showIndex]);
+        this.slides_[showIndex].setAttribute('aria-hidden', 'true');
       }
     });
     this.slidesContainer_./*OK*/scrollLeft =
@@ -477,6 +532,20 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+  }
+
+  /**
+   * Shows the slide at the given index and triggers a `slideChange` event.
+   * @param {number} newIndex
+   * @private
+   */
+  showSlideAndTriggerAction_(newIndex) {
+    this.showSlide_(newIndex);
+
+    const name = 'slideChange';
+    const detail = {index: newIndex};
+    const event = new CustomEvent(`slidescroll.${name}`, {detail});
+    this.action_.trigger(this.element, name, event);
   }
 
   /**
@@ -515,6 +584,7 @@ export class AmpSlideScroll extends BaseSlides {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
         this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
+        this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide
       if (this.slideIndex_ != i) {
@@ -589,6 +659,6 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   analyticsEvent_(eventType, vars) {
-    triggerAnalyticsEvent(this.win, eventType, vars);
+    triggerAnalyticsEvent(this.element, eventType, vars);
   }
 }

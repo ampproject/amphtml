@@ -16,7 +16,6 @@
 
 import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
-import {toArray} from './types';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -138,6 +137,19 @@ export function copyChildren(from, to) {
 }
 
 /**
+ * Add attributes to an element.
+ * @param {!Element} element
+ * @param {!Object<string, string>} attributes
+ * @return {!Element} created element
+ */
+export function addAttributesToElement(element, attributes) {
+  for (const attr in attributes) {
+    element.setAttribute(attr, attributes[attr]);
+  }
+  return element;
+}
+
+/**
  * Create a new element on document with specified tagName and attributes.
  * @param {!Document} doc
  * @param {string} tagName
@@ -146,10 +158,7 @@ export function copyChildren(from, to) {
  */
 export function createElementWithAttributes(doc, tagName, attributes) {
   const element = doc.createElement(tagName);
-  for (const attr in attributes) {
-    element.setAttribute(attr, attributes[attr]);
-  }
-  return element;
+  return addAttributesToElement(element, attributes);
 }
 
 
@@ -158,10 +167,11 @@ export function createElementWithAttributes(doc, tagName, attributes) {
  * up the DOM subtree.
  * @param {!Element} element
  * @param {function(!Element):boolean} callback
+ * @param {Element=} opt_stopAt optional elemnt to stop the search at.
  * @return {?Element}
  */
-export function closest(element, callback) {
-  for (let el = element; el; el = el.parentElement) {
+export function closest(element, callback, opt_stopAt) {
+  for (let el = element; el && el !== opt_stopAt; el = el.parentElement) {
     if (callback(el)) {
       return el;
     }
@@ -204,6 +214,39 @@ export function closestByTag(element, tagName) {
   });
 }
 
+/**
+ * Finds the closest element with the specified selector from this element
+ * @param {!Element} element
+ * @param {string} selector
+ * @return {?Element} closest ancestor if found.
+ */
+export function closestBySelector(element, selector) {
+  if (element.closest) {
+    return element.closest(selector);
+  }
+
+  return closest(element, el => {
+    return matches(el, selector);
+  });
+}
+
+/**
+ * Checks if the given element matches the selector
+ * @param  {!Element} el The element to verify
+ * @param  {!string} selector The selector to check against
+ * @return {boolean} True if the element matched the selector. False otherwise.
+ */
+export function matches(el, selector) {
+  const matcher = el.matches ||
+      el.webkitMatchesSelector ||
+      el.mozMatchesSelector ||
+      el.msMatchesSelector ||
+      el.oMatchesSelector;
+  if (matcher) {
+    return matcher.call(el, selector);
+  }
+  return false;  // IE8 always returns false.
+}
 
 /**
  * Finds the first descendant element with the specified name.
@@ -320,15 +363,7 @@ function isScopeSelectorSupported(parent) {
  * @return {?Element}
  */
 export function childElementByAttr(parent, attr) {
-  if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
-  }
-  if (scopeSelectorSupported) {
-    return parent.querySelector(':scope > [' + attr + ']');
-  }
-  return childElement(parent, el => {
-    return el.hasAttribute(attr);
-  });
+  return scopedQuerySelector(parent, `> [${attr}]`);
 }
 
 
@@ -349,18 +384,10 @@ export function lastChildElementByAttr(parent, attr) {
  * Finds all child elements that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
- * @return {!Array<!Element>}
+ * @return {!NodeList<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
-  if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
-  }
-  if (scopeSelectorSupported) {
-    return toArray(parent.querySelectorAll(':scope > [' + attr + ']'));
-  }
-  return childElements(parent, el => {
-    return el.hasAttribute(attr);
-  });
+  return scopedQuerySelectorAll(parent, `> [${attr}]`);
 }
 
 
@@ -371,16 +398,7 @@ export function childElementsByAttr(parent, attr) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
-  if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
-  }
-  if (scopeSelectorSupported) {
-    return parent.querySelector(':scope > ' + tagName);
-  }
-  tagName = tagName.toUpperCase();
-  return childElement(parent, el => {
-    return el.tagName == tagName;
-  });
+  return scopedQuerySelector(parent, `> ${tagName}`);
 }
 
 
@@ -388,19 +406,58 @@ export function childElementByTag(parent, tagName) {
  * Finds all child elements with the specified tag name.
  * @param {!Element} parent
  * @param {string} tagName
- * @return {!Array<!Element>}
+ * @return {!NodeList<!Element>}
  */
 export function childElementsByTag(parent, tagName) {
+  return scopedQuerySelectorAll(parent, `> ${tagName}`);
+}
+
+
+/**
+ * Finds the first element that matches `selector`, scoped inside `root`.
+ * Note: in IE, this causes a quick mutation of the element's class list.
+ * @param {!Element} root
+ * @param {string} selector
+ * @return {?Element}
+ */
+export function scopedQuerySelector(root, selector) {
   if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
+    scopeSelectorSupported = isScopeSelectorSupported(root);
   }
   if (scopeSelectorSupported) {
-    return toArray(parent.querySelectorAll(':scope > ' + tagName));
+    return root./*OK*/querySelector(`:scope ${selector}`);
   }
-  tagName = tagName.toUpperCase();
-  return childElements(parent, el => {
-    return el.tagName == tagName;
-  });
+
+  // Only IE.
+  const unique = `i-amphtml-scoped`;
+  root.classList.add(unique);
+  const element = root./*OK*/querySelector(`.${unique} ${selector}`);
+  root.classList.remove(unique);
+  return element;
+}
+
+
+/**
+ * Finds the every element that matches `selector`, scoped inside `root`.
+ * Note: in IE, this causes a quick mutation of the element's class list.
+ * @param {!Element} root
+ * @param {string} selector
+ * @return {!NodeList<!Element>}
+ */
+export function scopedQuerySelectorAll(root, selector) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(root);
+  }
+  if (scopeSelectorSupported) {
+    return root./*OK*/querySelectorAll(`:scope ${selector}`);
+  }
+
+  // Only IE.
+  const unique = `i-amphtml-scoped`;
+  root.classList.add(unique);
+  const elements = root./*OK*/querySelectorAll(`.${unique} ${selector}`);
+  root.classList.remove(unique);
+  return elements;
 }
 
 
@@ -443,7 +500,7 @@ export function hasNextNodeInDocumentOrder(element) {
     if (currentElement.nextSibling) {
       return true;
     }
-  } while (currentElement = currentElement.parentNode);
+  } while ((currentElement = currentElement.parentNode));
   return false;
 }
 
@@ -572,3 +629,13 @@ export function tryFocus(element) {
     // IE <= 7 may throw exceptions when focusing on hidden items.
   }
 }
+
+/**
+ * Whether the given window is in an iframe or not.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isIframed(win) {
+  return win.parent && win.parent != win;
+}
+

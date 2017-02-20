@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-var path = require('path');
-
-var karmaConf = path.resolve('karma.conf.js');
-
 var commonTestPaths = [
   'test/_init_tests.js',
   'test/fixtures/*.html',
@@ -64,50 +60,11 @@ var integrationTestPaths = commonTestPaths.concat([
   'extensions/**/test/integration/**/*.js',
 ]);
 
-var karmaDefault = {
-  configFile: karmaConf,
-  singleRun: true,
-  client: {
-    mocha: {
-      // Longer timeout on Travis; fail quickly at local.
-      timeout: process.env.TRAVIS ? 10000 : 2000
-    },
-    captureConsole: false,
-  },
-  browserDisconnectTimeout: 10000,
-  browserDisconnectTolerance: 2,
-  browserNoActivityTimeout: 4 * 60 * 1000,
-  captureTimeout: 4 * 60 * 1000,
-};
-
-var karma = {
-  default: karmaDefault,
-  firefox: extend(karmaDefault, {browsers: ['Firefox']}),
-  safari: extend(karmaDefault, {browsers: ['Safari']}),
-  saucelabs: extend(karmaDefault, {
-    reporters: ['dots', 'saucelabs'],
-    browsers: [
-      'SL_Chrome_android',
-      'SL_Chrome_latest',
-      'SL_Chrome_45',
-      'SL_Firefox_latest',
-      'SL_Safari_8',
-      'SL_Safari_9',
-      'SL_Edge_latest',
-      'SL_iOS_8_4',
-      'SL_iOS_9_1',
-      'SL_iOS_10_0',
-      //'SL_IE_11',
-    ],
-  })
-};
-
 /** @const  */
 module.exports = {
   commonTestPaths: commonTestPaths,
   testPaths: testPaths,
   integrationTestPaths: integrationTestPaths,
-  karma: karma,
   lintGlobs: [
     '**/*.js',
     '!**/*.extern.js',
@@ -121,6 +78,7 @@ module.exports = {
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
     '!extensions/amp-access/0.1/access-expr-impl.js',
+    '!extensions/amp-bind/0.1/bind-expr-impl.js',
   ],
   presubmitGlobs: [
     '**/*.{css,js,go}',
@@ -129,7 +87,10 @@ module.exports = {
     // run against the entire transitive closure of deps.
     '!{node_modules,build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
+    '!dist.3p/current/**/ampcontext-lib.js',
+    '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
+    '!validator/nodejs/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
@@ -139,10 +100,7 @@ module.exports = {
     // Files in this testdata dir are machine-generated and are not part
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
+    '!examples/*.js',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };
-
-function extend(orig, add) {
-  return Object.assign({}, orig, add);
-}

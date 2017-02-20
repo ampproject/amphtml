@@ -18,7 +18,6 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installImg} from '../../../../builtins/amp-img';
 import {viewportForDoc} from '../../../../src/viewport';
-import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 import '../amp-fx-flying-carpet';
 
@@ -42,7 +41,6 @@ describe('amp-fx-flying-carpet', () => {
     let flyingCarpet;
     return createIframePromise().then(i => {
       iframe = i;
-      toggleExperiment(iframe.win, 'amp-fx-flying-carpet', true);
 
       const bodyResizer = iframe.doc.createElement('div');
       bodyResizer.style.height = '400vh';
@@ -60,7 +58,7 @@ describe('amp-fx-flying-carpet', () => {
       flyingCarpet = iframe.doc.createElement('amp-fx-flying-carpet');
       flyingCarpet.setAttribute('height', '10px');
       if (opt_childrenCallback) {
-        const children = opt_childrenCallback(iframe);
+        const children = opt_childrenCallback(iframe, flyingCarpet);
         children.forEach(child => {
           flyingCarpet.appendChild(child);
         });
@@ -115,6 +113,35 @@ describe('amp-fx-flying-carpet', () => {
     });
   });
 
+  it('should listen to build callback of children', () => {
+    let img;
+    let layoutSpy;
+    let childLayoutSpy;
+    return getAmpFlyingCarpet((iframe, flyingCarpet) => {
+      // To make sure the flyingCarpet has already tried laying out children
+      layoutSpy = sandbox.spy(flyingCarpet.implementation_, 'layoutCallback');
+
+      // Add the image
+      img = iframe.doc.createElement('amp-img');
+      img.setAttribute('src', '/examples/img/sample.jpg');
+      img.setAttribute('width', 300);
+      img.setAttribute('height', 200);
+      return [img];
+    }).then(flyingCarpet => {
+      expect(layoutSpy).to.have.been.called;
+
+      // Now, allow the image to build.
+      installImg(flyingCarpet.ownerDocument.defaultView);
+
+      childLayoutSpy = sandbox.spy(img.implementation_, 'layoutCallback');
+      return new Promise(resolve => {
+        setTimeout(resolve, 32);
+      });
+    }).then(() => {
+      expect(childLayoutSpy).to.have.been.called;
+    });
+  });
+
   it('should sync width of fixed container', () => {
     return getAmpFlyingCarpet().then(flyingCarpet => {
       const impl = flyingCarpet.implementation_;
@@ -157,7 +184,7 @@ describe('amp-fx-flying-carpet', () => {
     });
   });
 
-  it('should attempt to change height to 0 when its children collapse', () => {
+  it('should attempt to collapse when its children collapse', () => {
     let img;
     return getAmpFlyingCarpet(iframe => {
       installImg(iframe.win);
@@ -171,21 +198,13 @@ describe('amp-fx-flying-carpet', () => {
       const posttext = iframe.doc.createTextNode('\n');
       return [pretext, img, posttext];
     }).then(flyingCarpet => {
-      const attemptChangeHeight = sandbox.stub(flyingCarpet.implementation_,
-          'attemptChangeHeight', height => {
-            flyingCarpet.style.height = height;
+      const attemptCollapse = sandbox.stub(flyingCarpet.implementation_,
+          'attemptCollapse', () => {
             return Promise.resolve();
           });
-      const collapse = sandbox.spy(flyingCarpet.implementation_, 'collapse');
       expect(flyingCarpet.getBoundingClientRect().height).to.be.gt(0);
       img.collapse();
-      expect(attemptChangeHeight).to.have.been.called;
-      expect(attemptChangeHeight.firstCall.args[0]).to.equal(0);
-      return attemptChangeHeight().then(() => {
-        expect(flyingCarpet.getBoundingClientRect().height).to.equal(0);
-        expect(collapse).to.have.been.called;
-        expect(flyingCarpet.style.display).to.equal('none');
-      });
+      expect(attemptCollapse).to.have.been.called;
     });
   });
 });

@@ -21,6 +21,11 @@ tags: {  # amp-ad
   tag_name: "SCRIPT"
   spec_name: "amp-ad extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
+  # This should also require either amp-ad or amp-embed, but we don't have
+  # a mechanism for requiring A or B currently, so this is not checked.
+  # extension_unused_unless_tag_present: "amp-ad"
+  # extension_unused_unless_tag_present: "amp-embed"
   attrs: {
     name: "async"
     mandatory: true
@@ -32,6 +37,7 @@ tags: {  # amp-ad
     value: "amp-ad"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true

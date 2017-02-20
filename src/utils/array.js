@@ -35,3 +35,21 @@ export function filterSplice(array, filter) {
   }
   return splice;
 }
+
+/**
+ * Returns the index of the first element matching the predicate.
+ * Like Array#findIndex.
+ *
+ * @param {!Array<T>} array
+ * @param {function(T, number, !Array<T>):boolean} predicate
+ * @return {number}
+ * @template T
+ */
+export function findIndex(array, predicate) {
+  for (let i = 0; i < array.length; i++) {
+    if (predicate(array[i], i, array)) {
+      return i;
+    }
+  }
+  return -1;
+}

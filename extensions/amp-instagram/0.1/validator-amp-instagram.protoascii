@@ -16,10 +16,12 @@
 
 tags: {  # amp-instagram
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-instagram extension .js script"
+  satisfies: "amp-instagram extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
+  extension_unused_unless_tag_present: "amp-instagram"
   attrs: {
     name: "async"
     mandatory: true
@@ -31,6 +33,7 @@ tags: {  # amp-instagram
     value: "amp-instagram"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -50,10 +53,9 @@ tags: {  # amp-instagram
 }
 tags: {  # <amp-instagram>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-INSTAGRAM"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-instagram extension .js script"
+  requires: "amp-instagram extension .js script"
   attrs: { name: "alt" }
   attrs: {
     name: "data-shortcode"

@@ -19,7 +19,7 @@
  */
 
 import './polyfills';
-import {chunk} from './chunk';
+import {startupChunk} from './chunk';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
@@ -39,6 +39,12 @@ import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
 
+// Store the originalHash as early as possible. Trying to debug:
+// https://github.com/ampproject/amphtml/issues/6070
+if (self.location) {
+  self.location.originalHash = self.location.hash;
+}
+
 /** @type {!./service/ampdoc-impl.AmpDocService} */
 let ampdocService;
 // We must under all circumstances call makeBodyVisible.
@@ -56,14 +62,14 @@ try {
   makeBodyVisible(self.document);
   throw e;
 }
-chunk(self.document, function initial() {
+startupChunk(self.document, function initial() {
   /** @const {!./service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
   /** @const {!./service/performance-impl.Performance} */
   const perf = installPerformanceService(self);
   perf.tick('is');
   installStyles(self.document, cssText, () => {
-    chunk(self.document, function services() {
+    startupChunk(self.document, function services() {
       // Core services.
       installRuntimeServices(self);
       fontStylesheetTimeout(self);
@@ -72,17 +78,17 @@ chunk(self.document, function initial() {
       perf.coreServicesAvailable();
       maybeTrackImpression(self);
     });
-    chunk(self.document, function builtins() {
+    startupChunk(self.document, function builtins() {
       // Builtins.
       installBuiltins(self);
     });
-    chunk(self.document, function adoptWindow() {
+    startupChunk(self.document, function adoptWindow() {
       adopt(self);
     });
-    chunk(self.document, function stub() {
+    startupChunk(self.document, function stub() {
       stubElements(self);
     });
-    chunk(self.document, function final() {
+    startupChunk(self.document, function final() {
       installPullToRefreshBlocker(self);
       installGlobalClickListenerForDoc(ampdoc);
 
@@ -90,7 +96,7 @@ chunk(self.document, function initial() {
       makeBodyVisible(self.document, /* waitForServices */ true);
       installCacheServiceWorker(self);
     });
-    chunk(self.document, function finalTick() {
+    startupChunk(self.document, function finalTick() {
       perf.tick('e_is');
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.

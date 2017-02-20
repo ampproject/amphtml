@@ -16,7 +16,8 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
-import {dev, initLogConstructor} from '../../src/log';
+import {dev, initLogConstructor, setReportError} from '../../src/log';
+import {reportError} from '../../src/error';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
@@ -26,6 +27,7 @@ import {onDocumentReady} from '../../src/document-ready';
 import '../../src/service/timer-impl';
 
 initLogConstructor();
+setReportError(reportError);
 
 const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
@@ -56,17 +58,15 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
+    id: 'ad-type-custom',
+    name: 'Activates support for custom (self-serve) advertisements',
+    spec: 'https://github.com/ampproject/amphtml/ads/custom.md',
+  },
+  {
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
-  },
-  {
-    id: 'amp-fx-flying-carpet',
-    name: 'AMP Flying Carpet',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4003',
   },
   {
     id: 'amp-access-server',
@@ -87,28 +87,28 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
-    id: 'amp-scrollable-carousel',
-    name: 'AMP carousel using horizontal scroll',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4232',
+    id: 'amp-auto-ads',
+    name: 'AMP Auto Ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/6196',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
-    id: 'form-submit',
-    name: 'Global document form submit handler',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3999',
+    id: 'amp-inabox',
+    name: 'AMP inabox',
+    spec: 'https://github.com/ampproject/amphtml/issues/5700',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
   },
   {
-    id: 'amp-form',
-    name: 'AMP Form Extension',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3998',
+    id: 'amp-form-var-sub',
+    name: 'Variable Substitutions in AMP Form inputs for POST/GET submits',
+    spec: 'https://github.com/ampproject/amphtml/issues/5654',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
   },
   {
-    id: 'amp-form-custom-validations',
-    name: 'AMP Form Custom Validations',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5423',
+    id: 'amp-form-var-sub-for-post',
+    name: 'Variable Substitutions in AMP Form inputs for POST submits only',
+    spec: 'https://github.com/ampproject/amphtml/issues/5654',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
   },
   {
     id: 'amp-google-vrview-image',
@@ -137,15 +137,9 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-apester-media',
-    name: 'AMP extension for Apester media',
+    name: 'AMP extension for Apester media (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/3233',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
-  },
-  {
-    id: 'amp-app-banner',
-    name: 'Shows a native app install/open banner.',
-    spec: 'https://github.com/ampproject/amphtml/issues/800',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5166',
   },
   {
     id: 'cache-service-worker',
@@ -170,6 +164,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
   },
   {
+    id: 'amp-playbuzz',
+    name: 'AMP extension for playbuzz items (launched)',
+    spec: 'https://github.com/ampproject/amphtml/issues/6106',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
+  },
+  {
     id: 'make-body-block',
     name: 'Sets the body to display:block.',
     spec: 'https://github.com/ampproject/amphtml/issues/5310',
@@ -177,7 +177,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'make-body-relative',
-    name: 'Sets the body to position:relative.',
+    name: 'Sets the body to position:relative (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/5667',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
   },
@@ -186,13 +186,6 @@ const EXPERIMENTS = [
     name: 'Enables replacing variables in URLs of outgoing links.',
     spec: 'https://github.com/ampproject/amphtml/issues/4078',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
-  },
-  {
-    id: 'pan-y',
-    name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
-        ' touch handlers',
-    spec: 'https://github.com/ampproject/amphtml/issues/4820',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4894',
   },
   {
     id: 'alp-for-a4a',
@@ -212,11 +205,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
-    id: 'amp-sticky-ad-better-ux',
-    name: 'New breaking UX changes make to amp-sticky-ad',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5822',
-  },
-  {
     id: 'amp-animation',
     name: 'High-performing keyframe animations in AMP.',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -227,6 +215,62 @@ const EXPERIMENTS = [
     id: 'amp-ad-loading-ux',
     name: 'New default loading UX to amp-ad',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
+  },
+  {
+    id: 'visibility-v2',
+    name: 'New visibility tracking using native IntersectionObserver',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
+  },
+  {
+    id: 'amp-accordion-session-state-optout',
+    name: 'AMP Accordion attribute to opt out of preserved state.',
+    Spec: 'https://github.com/ampproject/amphtml/issues/3813',
+  },
+  {
+    id: 'sentinel-name-change',
+    name: 'Changed sentinel name from amp3pSentinel to sentinel',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6990',
+    Spec: '',
+  },
+  {
+    id: 'variable-filters',
+    name: 'Format to apply filters to analytics variables',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
+  },
+  {
+    id: 'version-locking',
+    name: 'Force all extensions to have the same release ' +
+        'as the main JS binary',
+    cleanupIssue: 'DO_NOT_SUBMIT',
+  },
+  {
+    id: 'amp-bind',
+    name: 'AMP extension for dynamic content',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-bind/amp-bind.md',
+  },
+  {
+    id: 'web-worker',
+    name: 'Web worker for background processing',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
+  },
+  {
+    id: 'jank-meter',
+    name: 'Display jank meter',
+  },
+  {
+    id: 'amp-selector',
+    name: 'Amp selector extension- [LAUNCHED]',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+         'amp-selector/amp-selector.md',
+  },
+  {
+    id: 'sticky-ad-early-load',
+    name: 'Load sticky-ad early after user first scroll' +
+        'Only apply to 1.0 version',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
   },
 ];
 
@@ -362,7 +406,11 @@ function toggleExperiment_(id, name, opt_on) {
     if (id == CANARY_EXPERIMENT_ID) {
       const validUntil = Date.now() +
           COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-      setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
+      setCookie(window, 'AMP_CANARY',
+          (on ? '1' : '0'), (on ? validUntil : 0), {
+            // Set explicit domain, so the cookie gets send to sub domains.
+            domain: location.hostname,
+          });
     } else {
       toggleExperiment(window, id, on);
     }

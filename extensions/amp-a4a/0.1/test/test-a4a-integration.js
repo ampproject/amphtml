@@ -24,14 +24,19 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
     data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
+import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {adConfig} from '../../../../ads/_config';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
+import {signingServerURLs} from '../../../../ads/_a4a-config';
 import {
     resetScheduledElementForTesting,
     upgradeOrRegisterElement,
 } from '../../../../src/custom-element';
 import {utf8Encode} from '../../../../src/utils/bytes';
+import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {loadPromise} from '../../../../src/event-helper';
 import * as sinon from 'sinon';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
@@ -39,19 +44,34 @@ import * as sinon from 'sinon';
 // otherwise test the complete A4A flow, without making assumptions about
 // the structure of that flow.
 
+/**
+ * Checks various consistency properties on the friendly iframe created by
+ * A4A privileged path rendering.  Note that this returns a Promise, so its
+ * value must be returned from any test invoking it.
+ *
+ * @param {!Element} element amp-ad element to examine.
+ * @param {string} srcdoc  A string that must occur somewhere in the friendly
+ *   iframe `srcdoc` attribute.
+ * @return {!Promise} Promise that executes assertions on friendly
+ *   iframe contents.
+ */
 function expectRenderedInFriendlyIframe(element, srcdoc) {
   expect(element, 'ad element').to.be.ok;
   const child = element.querySelector('iframe[srcdoc]');
   expect(child, 'iframe child').to.be.ok;
   expect(child.getAttribute('srcdoc')).to.contain.string(srcdoc);
-  const childBody = child.contentDocument.body;
-  expect(childBody, 'body of iframe doc').to.be.ok;
-  expect(element, 'ad tag').to.be.visible;
-  expect(child, 'iframe child').to.be.visible;
-  expect(childBody, 'ad creative content body').to.be.visible;
+  return loadPromise(child).then(() => {
+    const childDocument = child.contentDocument.documentElement;
+    expect(childDocument, 'iframe doc').to.be.ok;
+    expect(element, 'ad tag').to.be.visible;
+    expect(child, 'iframe child').to.be.visible;
+    expect(childDocument, 'ad creative content doc').to.be.visible;
+  });
 }
 
 function expectRenderedInXDomainIframe(element, src) {
+  // Note: Unlike expectRenderedInXDomainIframe, this doesn't return a Promise
+  // because it doesn't (cannot) inspect the contents of the iframe.
   expect(element, 'ad element').to.be.ok;
   expect(element.querySelector('iframe[srcdoc]'),
       'does not have a friendly iframe child').to.not.be.ok;
@@ -68,28 +88,45 @@ describe('integration test: a4a', () => {
   let fixture;
   let mockResponse;
   let a4aElement;
+  let headers;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
+    // Expect key set fetches for signing services.
+    const fetchJsonMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+    for (const serviceName in signingServerURLs) {
+      fetchJsonMock.withArgs(signingServerURLs[serviceName],
+        {
+          mode: 'cors',
+          method: 'GET',
+          ampCors: false,
+          credentials: 'omit',
+        }).returns(
+          Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+    }
+    // Expect ad request.
+    headers = {};
+    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
     mockResponse = {
-      arrayBuffer: function() {
-        return utf8Encode(validCSSAmp.reserialized);
-      },
+      arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
       bodyUsed: false,
-      headers: new Headers(),
+      headers: new FetchResponseHeaders({
+        getResponseHeader(name) {
+          return headers[name];
+        },
+      }),
     };
-    mockResponse.headers.append(SIGNATURE_HEADER, validCSSAmp.signature);
     xhrMock.withArgs(TEST_URL, {
       mode: 'cors',
       method: 'GET',
       credentials: 'include',
-      requireAmpResponseSourceOrigin: true,
     }).onFirstCall().returns(Promise.resolve(mockResponse));
     adConfig['mock'] = {};
     a4aRegistry['mock'] = () => {return true;};
     return createIframePromise().then(f => {
       fixture = f;
       installDocService(fixture.win, /* isSingleDoc */ true);
+      installCryptoService(fixture.win);
       upgradeOrRegisterElement(fixture.win, 'amp-a4a', MockA4AImpl);
       const doc = fixture.doc;
       a4aElement = doc.createElement('amp-a4a');
@@ -108,14 +145,22 @@ describe('integration test: a4a', () => {
 
   it('should render a single AMP ad in a friendly iframe', () => {
     return fixture.addElement(a4aElement).then(unusedElement => {
-      expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
+      return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
     });
   });
 
   it('should fall back to 3p when no signature is present', () => {
-    mockResponse.headers.delete(SIGNATURE_HEADER);
+    delete headers[SIGNATURE_HEADER];
     return fixture.addElement(a4aElement).then(unusedElement => {
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
+    });
+  });
+
+  it('should not send request if display none', () => {
+    a4aElement.style.display = 'none';
+    return fixture.addElement(a4aElement).then(element => {
+      expect(xhrMock).to.not.be.called;
+      expect(element.querySelector('iframe')).to.not.be.ok;
     });
   });
 
@@ -125,10 +170,13 @@ describe('integration test: a4a', () => {
     // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
+    const forceCollapseStub =
+        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
-      expect(error.message).to.contain.string('amp-a4a:');
+      expect(error.message).to.contain.string('AMP-A4A-');
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
+      expect(forceCollapseStub).to.be.notCalled;
     });
   });
 
@@ -152,6 +200,7 @@ describe('integration test: a4a', () => {
     extractCreativeAndSignatureStub.onFirstCall().returns({
       creative: utf8Encode(validCSSAmp.reserialized),
       signature: null,
+      size: null,
     });
     return fixture.addElement(a4aElement).then(unusedElement => {
       expect(extractCreativeAndSignatureStub).to.be.calledOnce;
@@ -165,6 +214,7 @@ describe('integration test: a4a', () => {
             .onFirstCall().returns({
               creative: null,
               signature: validCSSAmp.signature,
+              size: null,
             })
             .onSecondCall().throws(new Error(
             'Testing extractCreativeAndSignature should not occur error'));
@@ -178,6 +228,95 @@ describe('integration test: a4a', () => {
         });
       });
 
+  it('should collapse slot when creative response has code 204', () => {
+    headers = {};
+    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+    mockResponse = {
+      arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
+      bodyUsed: false,
+      headers: new FetchResponseHeaders({
+        getResponseHeader(name) {
+          return headers[name];
+        },
+      }),
+      status: 204,
+    };
+    xhrMock.withArgs(TEST_URL, {
+      mode: 'cors',
+      method: 'GET',
+      credentials: 'include',
+    }).onFirstCall().returns(Promise.resolve(mockResponse));
+    const forceCollapseStub =
+        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+    return fixture.addElement(a4aElement).then(unusedElement => {
+      expect(forceCollapseStub).to.be.calledOnce;
+    });
+  });
+
+  it('should NOT collapse slot when creative response is null', () => {
+    xhrMock.withArgs(TEST_URL, {
+      mode: 'cors',
+      method: 'GET',
+      credentials: 'include',
+    }).onFirstCall().returns(Promise.resolve(null));
+    const forceCollapseStub =
+        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+    return fixture.addElement(a4aElement).then(unusedElement => {
+      expect(forceCollapseStub).to.be.notCalled;
+    });
+  });
+
+  it('should collapse slot when creative response.arrayBuffer is null', () => {
+    headers = {};
+    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+    mockResponse = {
+      arrayBuffer: () => null,
+      bodyUsed: false,
+      headers: new FetchResponseHeaders({
+        getResponseHeader(name) {
+          return headers[name];
+        },
+      }),
+      status: 204,
+    };
+    xhrMock.withArgs(TEST_URL, {
+      mode: 'cors',
+      method: 'GET',
+      credentials: 'include',
+    }).onFirstCall().returns(Promise.resolve(mockResponse));
+    const forceCollapseStub =
+        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+    return fixture.addElement(a4aElement).then(unusedElement => {
+      expect(forceCollapseStub).to.be.calledOnce;
+    });
+  });
+
+  it('should collapse slot when creative response.arrayBuffer() is empty',
+      () => {
+        headers = {};
+        headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+        mockResponse = {
+          arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+          bodyUsed: false,
+          headers: new FetchResponseHeaders({
+            getResponseHeader(name) {
+              return headers[name];
+            },
+          }),
+          status: 200,
+        };
+        xhrMock.withArgs(TEST_URL, {
+          mode: 'cors',
+          method: 'GET',
+          credentials: 'include',
+        }).onFirstCall().returns(Promise.resolve(mockResponse));
+        const forceCollapseStub =
+            sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+        return fixture.addElement(a4aElement).then(unusedElement => {
+          expect(forceCollapseStub).to.be.calledOnce;
+        });
+      });
+
   // TODO(@ampproject/a4a): Need a test that double-checks that thrown errors
   // are propagated out and printed to console and/or sent upstream to error
   // logging systems.  This is a bit tricky, because it's handled by the AMP
@@ -187,5 +326,3 @@ describe('integration test: a4a', () => {
   // to whom.
   it('should propagate errors out and report them to upstream error log');
 });
-
-

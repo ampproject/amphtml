@@ -26,6 +26,14 @@ limitations under the License.
     <td>Stable</td>
   </tr>
   <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td>
+      <div>
+        <code>&lt;script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js">&lt;/script></code>
+      </div>
+    </td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>None</td>
   </tr>
@@ -33,13 +41,11 @@ limitations under the License.
 
 ## Syntax
 
-Mustache is a logic-less template syntax. See [Mustache.js docs](https://github.com/janl/mustache.js/)
-for more details. Some of the core Mustache tags are:
+Mustache is a logic-less template syntax. See [Mustache.js docs](https://github.com/janl/mustache.js/) for more details. Some of the core Mustache tags are:
 
-- `{{variable}}` - variable tag. It outputs the the HTML-escaped value of a variable;
-- `{{#section}}{{/section}}` - section tag. It can test existance of a variable and iterate over it if
-it's an array;
-- `{{^section}}{{/section}}` - inverted tag. It can test non-existance of a variable.
+- `{{variable}}`: A variable tag. It outputs the the HTML-escaped value of a variable.
+- `{{#section}}``{{/section}}`: A section tag. It can test the existence of a variable and iterate over it if it's an array.
+- `{{^section}}``{{/section}}`: An inverted tag. It can test the non-existence of a variable.
 
 ## Usage
 

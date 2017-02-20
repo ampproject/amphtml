@@ -157,16 +157,17 @@ export class AccessServerAdapter {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
+            requireAmpResponseSourceOrigin: false,
           }));
-    }).then(response => {
-      dev().fine(TAG, 'Authorization response: ', response);
+    }).then(responseDoc => {
+      dev().fine(TAG, 'Authorization response: ', responseDoc);
       const accessDataString = dev().assert(
-          response.querySelector('script[id="amp-access-data"]'),
+          responseDoc.querySelector('script[id="amp-access-data"]'),
           'No authorization data available').textContent;
       const accessData = JSON.parse(accessDataString);
       dev().fine(TAG, '- access data: ', accessData);
 
-      return this.replaceSections_(response).then(() => {
+      return this.replaceSections_(responseDoc).then(() => {
         return accessData;
       });
     });

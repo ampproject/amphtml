@@ -21,6 +21,11 @@ import {closestNode, escapeCssSelectorIdent} from './dom';
 import {extensionsFor} from './extensions';
 import {insertStyleElement} from './style-installer';
 import {setStyle} from './style';
+import {
+  isShadowDomSupported,
+  getShadowDomSupportedVersion,
+  ShadowDomVersion,
+} from './web-components';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.
@@ -33,32 +38,6 @@ const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_END_REGEX = /[^\-\_0-9a-zA-Z]/;
-
-
-/**
- * @type {boolean|undefined}
- * @visibleForTesting
- */
-let shadowDomSupported;
-
-/**
- * @param {boolean|undefined} val
- * @visibleForTesting
- */
-export function setShadowDomSupportedForTesting(val) {
-  shadowDomSupported = val;
-}
-
-/**
- * Returns `true` if the Shadow DOM is supported.
- * @return {boolean}
- */
-export function isShadowDomSupported() {
-  if (shadowDomSupported === undefined) {
-    shadowDomSupported = !!Element.prototype.createShadowRoot;
-  }
-  return shadowDomSupported;
-}
 
 
 /**
@@ -75,7 +54,10 @@ export function createShadowRoot(hostElement) {
   }
 
   // Native support.
-  if (isShadowDomSupported()) {
+  const shadowDomSupported = getShadowDomSupportedVersion();
+  if (shadowDomSupported == ShadowDomVersion.V1) {
+    return hostElement.attachShadow({mode: 'open'});
+  } else if (shadowDomSupported == ShadowDomVersion.V0) {
     return hostElement.createShadowRoot();
   }
 
@@ -108,7 +90,7 @@ function createShadowRootPolyfill(hostElement) {
   shadowRoot.getElementById = function(id) {
     const escapedId = escapeCssSelectorIdent(win, id);
     return /** @type {HTMLElement|null} */ (
-        shadowRoot.querySelector(`#${escapedId}`));
+        shadowRoot./*OK*/querySelector(`#${escapedId}`));
   };
 
   return shadowRoot;
@@ -197,6 +179,7 @@ export function importShadowBody(shadowRoot, body) {
   }
   setStyle(resultBody, 'position', 'relative');
   shadowRoot.appendChild(resultBody);
+  Object.defineProperty(shadowRoot, 'body', {value: resultBody});
   return resultBody;
 }
 

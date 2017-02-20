@@ -16,6 +16,9 @@
 
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
+import {loadPromise} from '../../src/event-helper';
+import {toArray} from '../../src/types';
+
 
 
 describe('DOM', () => {
@@ -75,6 +78,27 @@ describe('DOM', () => {
     expect(dom.closestByTag(child, 'DIV')).to.equal(child);
   });
 
+  it('closest should stop search at opt_stopAt', () => {
+    const cbSpy = sandbox.spy();
+    const cb = el => {
+      cbSpy();
+      return el.tagName == 'DIV';
+    };
+    const element = document.createElement('div');
+
+    const child = document.createElement('p');
+    const grandchild = document.createElement('img');
+    child.appendChild(grandchild);
+    element.appendChild(child);
+    expect(dom.closest(grandchild, cb)).to.equal(element);
+    expect(cbSpy).to.be.calledThrice;
+
+    expect(dom.closest(grandchild, cb, child)).to.be.null;
+    expect(cbSpy).to.have.callCount(4);
+
+  });
+
+
   it('closest should find first match', () => {
     const parent = document.createElement('parent');
 
@@ -112,7 +136,35 @@ describe('DOM', () => {
     expect(dom.closestNode(text, n => n.nodeType == 11)).to.equal(fragment);
   });
 
-  it('closest should find first match', () => {
+  it('closestBySelector should find first match', () => {
+    const parent = document.createElement('parent');
+    parent.className = 'parent';
+    parent.id = 'parent';
+
+    const element = document.createElement('element');
+    element.id = 'element';
+    element.className = 'element';
+    parent.appendChild(element);
+
+    const child = document.createElement('child');
+    child.id = 'child';
+    child.className = 'child';
+    element.appendChild(child);
+
+    expect(dom.closestBySelector(child, 'child')).to.equal(child);
+    expect(dom.closestBySelector(child, '.child')).to.equal(child);
+    expect(dom.closestBySelector(child, '#child')).to.equal(child);
+
+    expect(dom.closestBySelector(child, 'element')).to.equal(element);
+    expect(dom.closestBySelector(child, '.element')).to.equal(element);
+    expect(dom.closestBySelector(child, '#element')).to.equal(element);
+
+    expect(dom.closestBySelector(child, 'parent')).to.equal(parent);
+    expect(dom.closestBySelector(child, '.parent')).to.equal(parent);
+    expect(dom.closestBySelector(child, '#parent')).to.equal(parent);
+  });
+
+  it('elementByTag should find first match', () => {
     const parent = document.createElement('parent');
 
     const element1 = document.createElement('element');
@@ -217,11 +269,11 @@ describe('DOM', () => {
     const element3 = document.createElement('element23');
     parent.appendChild(element3);
 
-    expect(dom.childElementsByTag(parent, 'element1'))
+    expect(toArray(dom.childElementsByTag(parent, 'element1')))
         .to.deep.equal([element1]);
-    expect(dom.childElementsByTag(parent, 'element23'))
+    expect(toArray(dom.childElementsByTag(parent, 'element23')))
         .to.deep.equal([element2, element3]);
-    expect(dom.childElementsByTag(parent, 'element3'))
+    expect(toArray(dom.childElementsByTag(parent, 'element3')))
         .to.deep.equal([]);
   }
 
@@ -347,6 +399,53 @@ describe('DOM', () => {
         .to.be.equal(0);
   });
 
+  function testScopedQuerySelector() {
+    const grandparent = document.createElement('div');
+
+    const parent = document.createElement('div');
+    grandparent.appendChild(parent);
+
+    const element1 = document.createElement('div');
+    parent.appendChild(element1);
+
+    expect(dom.scopedQuerySelector(parent, 'div')).to.equal(element1);
+    expect(dom.scopedQuerySelector(grandparent, 'div div')).to.equal(element1);
+  }
+
+  it('scopedQuerySelector should find first match', testScopedQuerySelector);
+
+  it('scopedQuerySelector should find first match (polyfill)', () => {
+    dom.setScopeSelectorSupportedForTesting(false);
+    testScopedQuerySelector();
+  });
+
+  function testScopedQuerySelectorAll() {
+    const grandparent = document.createElement('div');
+
+    const parent = document.createElement('div');
+    grandparent.appendChild(parent);
+
+    const element1 = document.createElement('div');
+    parent.appendChild(element1);
+
+    const element2 = document.createElement('div');
+    parent.appendChild(element2);
+
+
+    expect(toArray(dom.scopedQuerySelectorAll(parent, 'div')))
+      .to.deep.equal([element1, element2]);
+    expect(toArray(dom.scopedQuerySelectorAll(grandparent, 'div div')))
+      .to.deep.equal([element1, element2]);
+  }
+
+  it('scopedQuerySelectorAll should find all matches',
+      testScopedQuerySelectorAll);
+
+  it('scopedQuerySelectorAll should find all matches (polyfill)', () => {
+    dom.setScopeSelectorSupportedForTesting(false);
+    testScopedQuerySelectorAll();
+  });
+
   describe('waitFor', () => {
     let parent;
     let child;
@@ -364,13 +463,13 @@ describe('DOM', () => {
       parent.appendChild(child);
       const spy = sandbox.spy();
       dom.waitForChild(parent, contains, spy);
-      expect(spy.callCount).to.equal(1);
+      expect(spy).to.be.calledOnce;
     });
 
     it('should wait until child is available', () => {
       const spy = sandbox.spy();
       dom.waitForChild(parent, contains, spy);
-      expect(spy.callCount).to.equal(0);
+      expect(spy).to.have.not.been.called;
 
       return new Promise(resolve => {
         const interval = setInterval(() => {
@@ -381,7 +480,7 @@ describe('DOM', () => {
         }, 10);
         parent.appendChild(child);
       }).then(() => {
-        expect(spy.callCount).to.equal(1);
+        expect(spy).to.be.calledOnce;
       });
     });
 
@@ -406,8 +505,8 @@ describe('DOM', () => {
       const spy = sandbox.spy();
 
       dom.waitForChild(parent, checkFunc, spy);
-      expect(spy.callCount).to.equal(0);
-      expect(mutationObserver.observe.callCount).to.equal(1);
+      expect(spy).to.have.not.been.called;
+      expect(mutationObserver.observe).to.be.calledOnce;
       expect(mutationObserver.observe.firstCall.args[0]).to.equal(parent);
       expect(mutationObserver.observe.firstCall.args[1])
           .to.deep.equal({childList: true});
@@ -415,14 +514,14 @@ describe('DOM', () => {
 
       // False callback.
       mutationCallback();
-      expect(spy.callCount).to.equal(0);
-      expect(mutationObserver.disconnect.callCount).to.equal(0);
+      expect(spy).to.have.not.been.called;
+      expect(mutationObserver.disconnect).to.have.not.been.called;
 
       // True callback.
       checkFuncValue = true;
       mutationCallback();
-      expect(spy.callCount).to.equal(1);
-      expect(mutationObserver.disconnect.callCount).to.equal(1);
+      expect(spy).to.be.calledOnce;
+      expect(mutationObserver.disconnect).to.be.calledOnce;
     });
 
     it('should fallback to polling without MutationObserver', () => {
@@ -444,19 +543,19 @@ describe('DOM', () => {
       const spy = sandbox.spy();
 
       dom.waitForChild(parent, checkFunc, spy);
-      expect(spy.callCount).to.equal(0);
+      expect(spy).to.have.not.been.called;
       expect(intervalCallback).to.exist;
 
       // False callback.
       intervalCallback();
-      expect(spy.callCount).to.equal(0);
-      expect(win.clearInterval.callCount).to.equal(0);
+      expect(spy).to.have.not.been.called;
+      expect(win.clearInterval).to.have.not.been.called;
 
       // True callback.
       checkFuncValue = true;
       intervalCallback();
-      expect(spy.callCount).to.equal(1);
-      expect(win.clearInterval.callCount).to.equal(1);
+      expect(spy).to.be.calledOnce;
+      expect(win.clearInterval).to.be.calledOnce;
     });
 
     it('should wait for body', () => {
@@ -695,6 +794,46 @@ describe('DOM', () => {
       dom.tryFocus(element);
       expect(focusSpy).to.have.been.called;
       expect(focusSpy).to.not.throw;
+    });
+  });
+
+  describe('matches', () => {
+    let div, img1, iframe, ampEl;
+    beforeEach(() => {
+      ampEl = document.createElement('amp-ad');
+      ampEl.className = 'i-amphtml-element';
+      ampEl.id = 'ampEl';
+      iframe = document.createElement('iframe');
+      div = document.createElement('div');
+      div.id = 'div';
+      img1 = document.createElement('amp-img');
+      img1.id = 'img1';
+      div.appendChild(img1);
+      iframe.srcdoc = div.outerHTML;
+      document.body.appendChild(ampEl);
+
+      const loaded = loadPromise(iframe);
+      ampEl.appendChild(iframe);
+      return loaded;
+
+    });
+
+    afterEach(() => {
+      document.body.removeChild(ampEl);
+    });
+
+    it('finds element by id', () => {
+      expect(dom.matches(ampEl, '#ampEl')).to.be.true;
+      [div, img1, iframe].map(el => {
+        expect(dom.matches(el, '#ampEl')).to.be.false;
+      });
+    });
+
+    it('finds element by tagname', () => {
+      expect(dom.matches(div, 'div')).to.be.true;
+      [ampEl, img1, iframe].map(el => {
+        expect(dom.matches(el, 'div')).to.be.false;
+      });
     });
   });
 });

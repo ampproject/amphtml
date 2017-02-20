@@ -93,7 +93,6 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
 
   // The element is relative to (0, 0), while the viewport moves. So, we must
   // adjust.
-  // TODO(jridgewell, #5149): Fixed position elements must be recalculated.
   const boundingClientRect = moveLayoutRect(element, -viewport.left,
       -viewport.top);
   intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
@@ -114,7 +113,7 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
  * The IntersectionObserver class lets any element share its viewport
  * intersection data with an iframe of its choice (most likely contained within
  * the element itself.). When instantiated the class will start listening for
- * a 'send-intersection' postMessage from the iframe, and only then  would start
+ * a 'send-intersections' postMessage from the iframe, and only then  would start
  * sending intersection data to the iframe. The intersection data would be sent
  * when the element is moved inside or outside the viewport as well as on
  * scroll and resize.

@@ -19,7 +19,7 @@
     - [Verify your examples](#verify-your-examples)
     - [Tests](#tests)
     - [Other tips](#other-tips)
-    
+
 ## Overview
 Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack. Although technically feasible, do not use amp-iframe to render display ads. Using amp-iframe for display ads breaks ad clicks and prevents recording viewability information. If you are an ad technology provider looking to integrate with AMP HTML, please also check the [general 3P inclusion guidelines](../3p/README.md#ads) and [ad service integration guidelines](./_integration-guide.md).
 
@@ -39,7 +39,7 @@ Reasons include:
 
 ## The iframe sandbox
 
-The ad itself is hosted within a document that has an origin different from the primary page.
+The ad itself is hosted within a document that has an origin different from the primary page. The iframe by default loads a [bootstrap HTML](../3p/frame.max.html), which provides a container `div` to hold your content together with a set of APIs. Note that the container `div` (with `id="c"`) is absolute positioned and takes the whole space of the iframe, so you will want to append your content as a child of the container (don't append to `body`).  
 
 ### Available information
 We will provide the following information to the ad:
@@ -51,6 +51,7 @@ We will provide the following information to the ad:
   In browsers that support `location.ancestorOrigins` you can trust that the `origin` of the
   location is actually correct (So rogue pages cannot claim they represent an origin they do not actually represent).
 - `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
+- `window.context.sourceUrl` contains the source URL of the original AMP document. See details [here](../spec/amp-var-substitutions.md#source-url).
 - `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
   - Ad networks must register their cid scope in the variable clientIdScope in [_config.js](./_config.js).
   - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
@@ -66,6 +67,7 @@ More information can be provided in a similar fashion if needed (Please file an 
 - `window.context.renderStart(opt_data)` is a method to inform AMP runtime when the ad starts rendering. The ad will then become visible to user. The optional param `opt_data` is an object of form `{width, height}` to request an [ad resize](#ad-resizing) if the size of the returned ad doesn't match the ad slot. To enable this method, add a line `renderStartImplemented=true` to the corresponding ad config in [_config.js](./_config.js).
 - `window.context.noContentAvailable()` is a method to inform AMP runtime that the ad slot cannot be filled. The ad slot will then display the fallback content if provided, otherwise try to collapse.
 - `window.context.reportRenderedEntityIdentifier()` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
+- `window.context.getHtml (selector, attrs, callback)` is a method that retrieves specified node's content from the parent window which cannot be accessed directly because of security restrictions caused by AMP rules and iframe's usage. `selector` is a CSS selector of the node to take content from. `attrs` takes an array of tag attributes to be left in the stringified HTML representation (for instance, ['id', 'class']). All not specified attributes will be cut off from the result string. `callback` takes a function to be called when the content is ready. `getHtml` invokes callback with the only argument of type string.
 
 ### Exceptions to available APIs and information
 Depending on the ad server / provider some methods of rendering ads involve a second iframe inside the AMP iframe. In these cases, the iframe sandbox methods and information will be unavailable to the ad. We are working on a creative level API that will enable this information to be accessible in such iframed cases and this README will be updated when that is available. Refer to the documentation for the relevant ad servers / providers (e.g., [doubleclick.md](./google/doubleclick.md)) for more details on how to handle such cases.
@@ -77,8 +79,6 @@ Depending on the ad server / provider some methods of rendering ads involve a se
 Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the ad's intersection with the parent viewport.
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
-
-When a listener is registered, it will be called 2x in short order. Once with the position of the ad when its iframe was created and then again with the current position.
 
 Example usage:
 
@@ -223,11 +223,11 @@ Please read through [DEVELOPING.md](../DEVELOPING.md) before contributing to thi
 If you're adding support for a new 3P ad service, changes to the following files are expected:
 
 - `/ads/yournetwork.js` - implement the main logic here. This is the code that will be invoked in the 3P iframe once loaded.
-- `/ads/yournetwork.md` - have your service documented for the publishers to read. 
+- `/ads/yournetwork.md` - have your service documented for the publishers to read.
 - `/ads/_config.js` - add service specific configuration here.
 - `/3p/integration.js` - register your service here.
 - `/extensions/amp-ad/amp-ad.md` - add a link that points to your publisher doc.
-- `/examples/ads.amp.html` - add publisher examples here.
+- `/examples/ads.amp.html` - add publisher examples here. Since real ad isn't guaranteed to fill, a consistently displayed fake ad is highly recommended here to help AMP developers confidently identify new bugs.
 
 ### Verify your examples
 
@@ -236,6 +236,8 @@ To verify the examples that you have put in `/examples/ads.amp.html`, you will n
 Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only it will be a more confident example for publishers to follow, but also for us to catch any regression bug during our releases.
 
 It's encouraged to have multiple examples to cover different use cases.
+
+Please verify your ad is fully functioning, for example, by clicking on an ad. We have seen bugs reported for ads not being clickable, which was due to incorrectly appended content divs.
 
 ### Tests
 
@@ -255,5 +257,5 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 ### Other tips
 
 - Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
-- [CLA](../CONTRIBUTIONG.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are 1) used a different email address in git commit; 2) didn't provide the exact company name in the PR thread. 
+- [CLA](../CONTRIBUTIONG.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are 1) used a different email address in git commit; 2) didn't provide the exact company name in the PR thread.
 

@@ -20,24 +20,36 @@ import {user} from './log';
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
-
 /**
  * Listens for the specified event on the element.
- * @param {?EventTarget} element
+ * @param {!EventTarget} element
  * @param {string} eventType
- * @param {?function(Event)} listener
+ * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
  * @return {!UnlistenDef}
  */
 export function listen(element, eventType, listener, opt_capture) {
-  const capture = opt_capture || false;
-  element.addEventListener(eventType, listener, capture);
-  return () => {
-    if (element) {
-      element.removeEventListener(eventType, listener, capture);
+  let localElement = element;
+  let localListener = listener;
+  /** @type {?Function}  */
+  let wrapped = event => {
+    try {
+      return localListener.call(this, event);
+    } catch (e) {
+      // reportError is installed globally per window in the entry point.
+      self.reportError(e);
+      throw e;
     }
-    listener = null;
-    element = null;
+  };
+  const capture = opt_capture || false;
+  localElement.addEventListener(eventType, wrapped, capture);
+  return () => {
+    if (localElement) {
+      localElement.removeEventListener(eventType, wrapped, capture);
+    }
+    localListener = null;
+    localElement = null;
+    wrapped = null;
   };
 }
 
@@ -45,28 +57,37 @@ export function listen(element, eventType, listener, opt_capture) {
 /**
  * Listens for the specified event on the element and removes the listener
  * as soon as event has been received.
- * @param {?EventTarget} element
+ * @param {!EventTarget} element
  * @param {string} eventType
- * @param {?function(Event)} listener
+ * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
  * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
+  let localElement = element;
+  let localListener = listener;
   const capture = opt_capture || false;
   let unlisten;
   let proxy = event => {
-    listener(event);
-    unlisten();
+    try {
+      localListener(event);
+    } catch (e) {
+      // reportError is installed globally per window in the entry point.
+      self.reportError(e);
+      throw e;
+    } finally {
+      unlisten();
+    }
   };
   unlisten = () => {
-    if (element) {
-      element.removeEventListener(eventType, proxy, capture);
+    if (localElement) {
+      localElement.removeEventListener(eventType, proxy, capture);
     }
-    element = null;
+    localElement = null;
     proxy = null;
-    listener = null;
+    localListener = null;
   };
-  element.addEventListener(eventType, proxy, capture);
+  localElement.addEventListener(eventType, proxy, capture);
   return unlisten;
 }
 

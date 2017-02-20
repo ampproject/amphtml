@@ -38,9 +38,7 @@ describe('amp-gfycat', () => {
       if (opt_params && opt_params.noautoplay) {
         gfycat.setAttribute('noautoplay', '');
       }
-      iframe.doc.body.appendChild(gfycat);
-      gfycat.implementation_.layoutCallback();
-      return gfycat;
+      return iframe.addElement(gfycat);
     });
   }
 
@@ -59,7 +57,7 @@ describe('amp-gfycat', () => {
     }).then(gfycat => {
       const iframe = gfycat.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 
