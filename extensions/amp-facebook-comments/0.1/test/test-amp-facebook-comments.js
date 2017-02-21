@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-import '../amp-facebook';
+import '../amp-facebook-comments';
 import {adopt} from '../../../../src/runtime';
 import {facebook} from '../../../../3p/facebook';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
@@ -124,7 +124,7 @@ describe('amp-facebook-comments', function() {
       obj.unlayoutCallback();
       expect(ampFB.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
-      expect(obj.unlayoutOnPause()).to.be.true;
+      expect(obj.unlayoutOnPause()).to.be.false;
     });
   });
 });
