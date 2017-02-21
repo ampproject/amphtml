@@ -220,7 +220,7 @@ export class Bind {
    *
    * Returns a promise that resolves after bindings have been added.
    *
-   * @param {!Element} node
+   * @param {!Node} node
    * @return {Promise}
    *
    * @private
@@ -271,7 +271,7 @@ export class Bind {
    *
    * Returns a promise that resolves after bindings have been removed.
    *
-   * @param {!Element} node
+   * @param {!Node} node
    * @return {Promise}
    *
    * @private
@@ -339,7 +339,7 @@ export class Bind {
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
     const scanNextNode_ = () => {
-      const element = walker.currentNode;
+      const element = /** @type {Element} */ walker.currentNode;
       if (!element) {
         return true;
       }
