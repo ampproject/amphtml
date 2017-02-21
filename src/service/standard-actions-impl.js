@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {actionServiceForDoc} from '../action';
 import {bindForDoc} from '../bind';
 import {dev, user} from '../log';
@@ -21,7 +22,6 @@ import {fromClassForDoc} from '../service';
 import {historyForDoc} from '../history';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {toggle} from '../style';
-
 
 /**
  * This service contains implementations of some of the most typical actions,
@@ -72,7 +72,7 @@ export class StandardActions {
       case 'setState':
         bindForDoc(this.ampdoc).then(bind => {
           const args = invocation.args;
-          const objectString = args['__amp_object_string__'];
+          const objectString = args[OBJECT_STRING_ARGS_KEY];
           if (objectString) {
             // Object string arg.
             const scope = Object.create(null);

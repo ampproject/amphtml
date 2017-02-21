@@ -22,6 +22,12 @@ import {map} from '../utils/object';
 import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
 
+/**
+ * ActionInfoDef args key that maps to the an unparsed object literal string.
+ * @const {string}
+ */
+export const OBJECT_STRING_ARGS_KEY = '__AMP_OBJECT_STRING__';
+
 /** @const {string} */
 const TAG_ = 'Action';
 
@@ -485,11 +491,11 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
   let tok;
   let args = null;
   // Object literal. Format: {...}
-  if (peek.type == TokenType.LITERAL && peek.value[0] == '{') {
+  if (peek.type == TokenType.OBJECT) {
     // Don't parse object literals. Tokenize as a single expression
     // fragment and delegate to specific action handler.
     args = map();
-    args['__amp_object_string__'] = toks.next().value;
+    args[OBJECT_STRING_ARGS_KEY] = toks.next().value;
     assertToken(toks.next(), [TokenType.SEPARATOR], ')');
   } else {
     // Key-value pairs. Format: key = value, ....
@@ -639,6 +645,7 @@ const TokenType = {
   SEPARATOR: 2,
   LITERAL: 3,
   ID: 4,
+  OBJECT: 5,
 };
 
 /**
@@ -786,7 +793,7 @@ class ParserTokenizer {
       }
       const value = this.str_.substring(newIndex, end + 1);
       newIndex = end;
-      return {type: TokenType.LITERAL, value, index: newIndex};
+      return {type: TokenType.OBJECT, value, index: newIndex};
     }
 
     // Advance until next special character.

@@ -16,6 +16,7 @@
 
 import {
   ActionService,
+  OBJECT_STRING_ARGS_KEY,
   applyActionInfoArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
@@ -283,7 +284,7 @@ describe('ActionService parseAction', () => {
 
   it('should parse with object literal args', () => {
     const a = parseAction('e:t.m({"foo": {"bar": "qux"}})');
-    expect(a.args['__amp_object_string__']).to.equal('{"foo": {"bar": "qux"}}');
+    expect(a.args[OBJECT_STRING_ARGS_KEY]).to.equal('{"foo": {"bar": "qux"}}');
   });
 
   it('should dereference vars in arg value identifiers', () => {
