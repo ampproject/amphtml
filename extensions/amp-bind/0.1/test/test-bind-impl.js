@@ -141,7 +141,7 @@ describes.realWin('amp-bind', {
     doc.getElementById('parent').appendChild(template);
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(0);
-      const textElement = createElementWithBinding('[onePlusOne]="1+1"')
+      const textElement = createElementWithBinding('[onePlusOne]="1+1"');
       template.appendChild(textElement);
       return bind.waitForAllMutationsForTesting_();
     }).then(() => {

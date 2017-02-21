@@ -144,7 +144,7 @@ export class Bind {
           mutation.removedNodes.forEach(removedNode => {
             removePromises.push(this.removeBindingsForNode_(removedNode));
           });
-          const removeAllPromise = removePromises.length > 0 ? 
+          const removeAllPromise = removePromises.length > 0 ?
             Promise.all(removePromises) :
             Promise.resolve();
           this.mutationPromises_.push(removeAllPromise.then(() => {
@@ -152,13 +152,13 @@ export class Bind {
             const addPromises = [];
             mutation.addedNodes.forEach(addedNode => {
               addPromises.push(this.addBindingsForNode_(addedNode));
-            })
-            const addAllPromise = addPromises.length > 0 ? 
+            });
+            const addAllPromise = addPromises.length > 0 ?
               Promise.all(addPromises) :
               Promise.resolve();
             return addAllPromise;
           }).then(() => {
-            this.digest_()
+            this.digest_();
           }));
         }
       });
@@ -345,10 +345,12 @@ export class Bind {
         // TODO(kmh287): What if parent is the body tag?
         // TODO(kmh287): Generify logic for node observation strategy
         // when bind supprots more dynamic nodes.
-        if (tagName == "TEMPLATE") {
+        if (tagName == 'TEMPLATE') {
           const templateParent = element.parentElement;
           if (templateParent) {
-            this.subtreeMutationObserver_.observe(templateParent, {childList: true});
+            this.subtreeMutationObserver_.observe(templateParent, {
+              childList: true,
+            });
             this.dynamicRoots_.push(templateParent);
           }
         } else {
@@ -779,7 +781,7 @@ export class Bind {
         if (this.mutationPromises_.length > 0) {
           resolve();
         } else {
-        setTimeout(waitForMutationCallback.bind(this), 5);
+          setTimeout(waitForMutationCallback.bind(this), 5);
         }
       }).call(this);
     }).then(() => {
