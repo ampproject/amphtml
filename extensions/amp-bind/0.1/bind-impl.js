@@ -733,8 +733,7 @@ export class Bind {
   waitForBindApplicationForTesting_() {
     return this.evaluatePromise_.then(() => {
       return this.applyPromise_;
-    })
+    });
   }
-
 
 }
