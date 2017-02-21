@@ -19,6 +19,8 @@ import {
   invokeWebWorker,
   ampWorkerForTesting,
 } from '../../../src/web-worker/amp-worker';
+import {installXhrService} from '../../../src/service/xhr-impl';
+import {xhrFor} from '../../../src/xhr';
 import {toggleExperiment} from '../../../src/experiments';
 import * as sinon from 'sinon';
 
@@ -27,6 +29,7 @@ describe('invokeWebWorker', () => {
   let fakeWin;
   let postMessageStub;
   let fakeWorker;
+  let workerReadyPromise;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -36,9 +39,21 @@ describe('invokeWebWorker', () => {
     fakeWorker = {};
     fakeWorker.postMessage = postMessageStub;
 
-    const fakeWorkerClass = () => fakeWorker;
-    fakeWin = {Worker: fakeWorkerClass};
+    // Fake Worker constructor just returns our `fakeWorker` instance.
+    fakeWin = {
+      Worker: () => fakeWorker,
+      Blob: sandbox.stub(),
+      URL: {createObjectURL: sandbox.stub()},
+    };
 
+    // Stub xhr.fetchText() to return a resolved promise.
+    installXhrService(fakeWin);
+    sandbox.stub(xhrFor(fakeWin), 'fetchText', () => Promise.resolve());
+
+    const ampWorker = ampWorkerForTesting(fakeWin);
+    workerReadyPromise = ampWorker.fetchPromiseForTesting();
+
+    // Enable 'web-worker' experiment on `fakeWin`.
     toggleExperiment(
         fakeWin,
         'web-worker',
@@ -68,21 +83,26 @@ describe('invokeWebWorker', () => {
 
   it('should send and receive a message', () => {
     // Sending.
-    const promise = invokeWebWorker(fakeWin, 'foo', ['bar', 123]);
-    expect(postMessageStub).to.have.been.calledWithMatch({
-      method: 'foo',
-      args: sinon.match(['bar', 123]),
-      id: 0,
-    });
-    // Receiving.
-    const data = {
-      method: 'foo',
-      returnValue: {'qux': 456},
-      id: 0,
-    };
-    fakeWorker.onmessage({data});
-    return promise.then(returnValue => {
-      expect(returnValue).to.deep.equals({'qux': 456});
+    const invokePromise = invokeWebWorker(fakeWin, 'foo', ['bar', 123]);
+
+    return workerReadyPromise.then(() => {
+      expect(postMessageStub).to.have.been.calledWithMatch({
+        method: 'foo',
+        args: sinon.match(['bar', 123]),
+        id: 0,
+      });
+
+      // Receiving.
+      const data = {
+        method: 'foo',
+        returnValue: {'qux': 456},
+        id: 0,
+      };
+      fakeWorker.onmessage({data});
+
+      return invokePromise.then(returnValue => {
+        expect(returnValue).to.deep.equals({'qux': 456});
+      });
     });
   });
 
@@ -91,91 +111,100 @@ describe('invokeWebWorker', () => {
     const bar = invokeWebWorker(fakeWin, 'bar', ['bar-arg']);
     const qux = invokeWebWorker(fakeWin, 'qux', ['qux-arg']);
 
-    fakeWorker.onmessage({data: {
-      method: 'bar',
-      returnValue: 'bar-retVal',
-      id: 1,
-    }});
-    fakeWorker.onmessage({data: {
-      method: 'qux',
-      returnValue: 'qux-retVal',
-      id: 2,
-    }});
-    fakeWorker.onmessage({data: {
-      method: 'foo',
-      returnValue: 'foo-retVal',
-      id: 0,
-    }});
+    return workerReadyPromise.then(() => {
+      fakeWorker.onmessage({data: {
+        method: 'bar',
+        returnValue: 'bar-retVal',
+        id: 1,
+      }});
+      fakeWorker.onmessage({data: {
+        method: 'qux',
+        returnValue: 'qux-retVal',
+        id: 2,
+      }});
+      fakeWorker.onmessage({data: {
+        method: 'foo',
+        returnValue: 'foo-retVal',
+        id: 0,
+      }});
 
-    return Promise.all([foo, bar, qux]).then(values => {
-      expect(values[0]).to.equal('foo-retVal');
-      expect(values[1]).to.equal('bar-retVal');
-      expect(values[2]).to.equal('qux-retVal');
+      return Promise.all([foo, bar, qux]).then(values => {
+        expect(values[0]).to.equal('foo-retVal');
+        expect(values[1]).to.equal('bar-retVal');
+        expect(values[2]).to.equal('qux-retVal');
+      });
     });
   });
 
   it('should differentiate messages of same method with different ids', () => {
     const one = invokeWebWorker(fakeWin, 'foo', ['one']);
-    expect(postMessageStub).to.have.been.calledWithMatch({
-      method: 'foo',
-      id: 0,
-    });
     const two = invokeWebWorker(fakeWin, 'foo', ['two']);
-    expect(postMessageStub).to.have.been.calledWithMatch({
-      method: 'foo',
-      id: 1,
-    });
     const three = invokeWebWorker(fakeWin, 'foo', ['three']);
-    expect(postMessageStub).to.have.been.calledWithMatch({
-      method: 'foo',
-      id: 2,
-    });
 
-    fakeWorker.onmessage({data: {
-      method: 'foo',
-      returnValue: 'three',
-      id: 2,
-    }});
-    fakeWorker.onmessage({data: {
-      method: 'foo',
-      returnValue: 'one',
-      id: 0,
-    }});
-    fakeWorker.onmessage({data: {
-      method: 'foo',
-      returnValue: 'two',
-      id: 1,
-    }});
+    return workerReadyPromise.then(() => {
+      expect(postMessageStub.firstCall).to.have.been.calledWithMatch({
+        method: 'foo',
+        id: 0,
+      });
+      expect(postMessageStub.secondCall).to.have.been.calledWithMatch({
+        method: 'foo',
+        id: 1,
+      });
+      expect(postMessageStub.thirdCall).to.have.been.calledWithMatch({
+        method: 'foo',
+        id: 2,
+      });
 
-    return Promise.all([one, two, three]).then(values => {
-      expect(values[0]).to.equal('one');
-      expect(values[1]).to.equal('two');
-      expect(values[2]).to.equal('three');
+      fakeWorker.onmessage({data: {
+        method: 'foo',
+        returnValue: 'three',
+        id: 2,
+      }});
+      fakeWorker.onmessage({data: {
+        method: 'foo',
+        returnValue: 'one',
+        id: 0,
+      }});
+      fakeWorker.onmessage({data: {
+        method: 'foo',
+        returnValue: 'two',
+        id: 1,
+      }});
+
+      return Promise.all([one, two, three]).then(values => {
+        expect(values[0]).to.equal('one');
+        expect(values[1]).to.equal('two');
+        expect(values[2]).to.equal('three');
+      });
     });
   });
 
   it('should log error when unexpected message is received', () => {
     const errorStub = sandbox.stub(dev(), 'error');
+
     invokeWebWorker(fakeWin, 'foo');
-    expect(errorStub.callCount).to.equal(0);
 
-    // Unexpected `id` value.
-    fakeWorker.onmessage({data: {
-      method: 'foo',
-      returnValue: undefined,
-      id: 3,
-    }});
-    expect(errorStub.callCount).to.equal(1);
-    expect(errorStub).to.have.been.calledWith('web-worker');
+    return workerReadyPromise.then(() => {
+      expect(errorStub.callCount).to.equal(0);
 
-    // Unexpected method at valid `id`.
-    expect(() => {
+      // Unexpected `id` value.
       fakeWorker.onmessage({data: {
-        method: 'bar',
+        method: 'foo',
         returnValue: undefined,
-        id: 0,
+        id: 3,
       }});
-    }).to.throw('mismatched method');
+      expect(errorStub.callCount).to.equal(1);
+      expect(errorStub).to.have.been.calledWith('web-worker');
+
+      // Unexpected method at valid `id`.
+      expect(() => {
+        fakeWorker.onmessage({data: {
+          method: 'bar',
+          returnValue: undefined,
+          id: 0,
+        }});
+      }).to.throw('mismatched method');
+    });
   });
 
   it('should clean up storage after message completion', () => {
@@ -183,14 +212,16 @@ describe('invokeWebWorker', () => {
 
     invokeWebWorker(fakeWin, 'foo');
 
-    expect(ampWorker.hasPendingMessages()).to.be.true;
+    return workerReadyPromise.then(() => {
+      expect(ampWorker.hasPendingMessages()).to.be.true;
 
-    fakeWorker.onmessage({data: {
-      method: 'foo',
-      returnValue: 'abc',
-      id: 0,
-    }});
+      fakeWorker.onmessage({data: {
+        method: 'foo',
+        returnValue: 'abc',
+        id: 0,
+      }});
 
-    expect(ampWorker.hasPendingMessages()).to.be.false;
+      expect(ampWorker.hasPendingMessages()).to.be.false;
+    });
   });
 });
