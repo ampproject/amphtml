@@ -260,6 +260,8 @@ export function getErrorReportUrl(message, filename, line, col, error,
     }
   }
 
+  const isUserError = isUserErrorMessage(message);
+
   // This is the App Engine app in
   // ../tools/errortracker
   // It stores error reports via https://cloud.google.com/error-reporting/
@@ -268,7 +270,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
-      '&a=' + (isUserErrorMessage(message) ? 1 : 0);
+      '&a=' + (isUserError ? 1 : 0);
   if (expected) {
     // Errors are tagged with "ex" ("expected") label to allow loggers to
     // classify these errors as benchmarks and not exceptions.
@@ -313,8 +315,12 @@ export function getErrorReportUrl(message, filename, line, col, error,
     const tagName = error && error.associatedElement
       ? error.associatedElement.tagName
       : 'u';  // Unknown
-    url += '&el=' + encodeURIComponent(tagName) +
-        '&s=' + encodeURIComponent(error.stack || '');
+    url += `&el=${encodeURIComponent(tagName)}`;
+
+    if (!isUserError) {
+      url += `&s=${encodeURIComponent(error.stack || '')}`;
+    }
+
     error.message += ' _reported_';
   } else {
     url += '&f=' + encodeURIComponent(filename || '') +
