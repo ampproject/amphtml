@@ -98,7 +98,7 @@ For AMP components, only select attributes are bindable:
 | Component | Attributes |
 | --- | --- |
 | amp-carousel | slide |
-| amp-img | src, srcset, alt |
+| amp-img | src, srcset, alt, height, width |
 | amp-selector | selected |
 | amp-video | src, srcset, alt, controls, loop, poster |
 
