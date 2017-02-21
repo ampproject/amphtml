@@ -23,14 +23,6 @@ import {adsense} from './google/adsense';
  * @param {!Object} data
  */
 export function sortable(global, data) {
-  validateData(data, ['site', 'name']);
-
-  const slot = global.document.getElementById('c');
-  const ad = global.document.createElement('div');
-  ad.className = 'ad-tag';
-  ad.setAttribute('data-ad-name', data.name);
-  ad.setAttribute('data-ad-size', data.width + 'x' + data.height);
-  slot.appendChild(ad);
   /**
    * For A/B testing our tags against doubleclick or adsense in AMP ads.
    */
@@ -42,6 +34,14 @@ export function sortable(global, data) {
     adsense(global, data);
     return;
   } 
+
+  validateData(data, ['site', 'name']);
+  const slot = global.document.getElementById('c');
+  const ad = global.document.createElement('div');
+  ad.className = 'ad-tag';
+  ad.setAttribute('data-ad-name', data.name);
+  ad.setAttribute('data-ad-size', data.width + 'x' + data.height);
+  slot.appendChild(ad);
   loadScript(global, 'https://tags-cdn.deployads.com/a/'
       + encodeURIComponent(data.site) + '.js');
 }
