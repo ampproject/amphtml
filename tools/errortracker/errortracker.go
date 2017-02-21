@@ -149,6 +149,9 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		errorType += "-canary"
 		isCanary = true;
 	}
+	if r.URL.Query().Get("ex") == "1" {
+		errorType += "-expected"
+	}
 	sample := rand.Float64()
 	throttleRate := 0.01
 
