@@ -31,7 +31,6 @@ describes.realWin('amp-bind', {
 
   // BindValidator method stubs.
   let canBindStub;
-  let isResultValidStub;
 
   beforeEach(() => {
     toggleExperiment(env.win, 'amp-bind', true);
@@ -39,7 +38,7 @@ describes.realWin('amp-bind', {
     // Stub validator methods to return true for ease of testing.
     canBindStub = env.sandbox.stub(
         BindValidator.prototype, 'canBind').returns(true);
-    isResultValidStub = env.sandbox.stub(
+    env.sandbox.stub(
         BindValidator.prototype, 'isResultValid').returns(true);
 
     // Make sure we have a chunk instance for testing.
