@@ -170,7 +170,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       try {
         const analyticsConfig =
           JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
-        this.ampAnalyticsUrls_ = analyticsConfig['urls'];
+        this.ampAnalyticsUrls_ = analyticsConfig['url'];
       } catch (err) {
         dev().error(TAG, 'Invalid analytics', err,
             responseHeaders.get(AMP_ANALYTICS_HEADER));

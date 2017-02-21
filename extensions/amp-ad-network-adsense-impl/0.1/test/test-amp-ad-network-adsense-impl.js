@@ -301,14 +301,14 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
     it('with analytics', () => {
       return utf8Encode('some creative').then(creative => {
-        const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
+        const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
         return impl.extractCreativeAndSignature(
           creative,
           {
             get: function(name) {
               switch (name) {
                 case AMP_ANALYTICS_HEADER:
-                  return JSON.stringify({urls});
+                  return JSON.stringify({url});
                 case 'X-AmpAdSignature':
                   return 'AQAB';
                 default:
@@ -325,7 +325,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 signature: base64UrlDecodeToBytes('AQAB'),
                 size: null,
               });
-            expect(impl.ampAnalyticsUrls_).to.deep.equal(urls);
+            expect(impl.ampAnalyticsUrls_).to.deep.equal(url);
           });
       });
     });
