@@ -152,8 +152,7 @@ describes.realWin('amp-bind', {
 
   //TODO(kmh287): Move to a different test file?
   it('should NOT allow blacklisted attrs in dynamically added bindings', () => {
-    canBindStub.restore();
-    isResultValidStub.restore();
+    env.sandbox.restore();
     const doc = env.win.document;
     const template = doc.createElement('template');
     let textElement;
