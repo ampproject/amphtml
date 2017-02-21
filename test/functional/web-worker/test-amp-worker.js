@@ -18,6 +18,8 @@ import {dev} from '../../../src/log';
 import {
   invokeWebWorker,
   ampWorkerForTesting,
+  errorForAmpWorkerError,
+  ampWorkerErrorForError,
 } from '../../../src/web-worker/amp-worker';
 import {toggleExperiment} from '../../../src/experiments';
 import * as sinon from 'sinon';
@@ -192,5 +194,27 @@ describe('invokeWebWorker', () => {
     }});
 
     expect(ampWorker.hasPendingMessages()).to.be.false;
+  });
+});
+
+describe('errorForAmpWorkerError', () => {
+  it('should return an error with the same message and stack', () => {
+    const ampWorkerError = {message:'foo', stack:'bar'};
+    const error = errorForAmpWorkerError(ampWorkerError);
+    expect(error).to.be.an.instanceof(Error);
+    expect(error.message).to.equal('foo');
+    expect(error.stack).to.equal('bar');
+  });
+});
+
+describe('ampWorkerErrorForError', () => {
+  it('should return an ampworkererror with the same message and stack', () => {
+    const error = new Error("Oops");
+    const message = error.message;
+    const stack = error.stack;
+    expect(stack).to.not.be.undefined;
+    const ampWorkerError = ampWorkerErrorForError(error);
+    expect(ampWorkerError.message).to.equal(message);
+    expect(ampWorkerError.stack).to.equal(stack);
   });
 });

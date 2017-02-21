@@ -50,10 +50,10 @@ export function errorForAmpWorkerError(ampWorkerError) {
 }
 
 /**
- * Converts an error into an AmpWorkerError object, which can be
+ * Converts an error into an AmpWorkerError, which can be
  * passed by workers.
  * @param {!Error} error
- * @return {!AmpWorkerError}
+ * @return {!AmpWorkerErrorDef}
  */
 export function ampWorkerErrorForError(error) {
   return {message: error.message, stack: error.stack};
