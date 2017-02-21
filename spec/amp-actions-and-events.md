@@ -61,7 +61,7 @@ Example: `on="submit-success:lightbox1;submit-error:lightbox2"`
 ## Globally defined Events and Actions
 Currently AMP defines `tap` event globally that you can listen to on any HTML element (including amp-elements).
 
-AMP also defines a `hide` action globally that you can trigger on any HTML element.
+AMP also defines `hide`, `show` and `toggle` actions globally that you can trigger on any HTML element.
 
 For example, the following is possible in AMP.
 
