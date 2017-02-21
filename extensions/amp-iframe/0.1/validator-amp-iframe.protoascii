@@ -61,6 +61,10 @@ tags: {  # <amp-iframe>
     value: ""
   }
   attrs: {
+    name: "allowpaymentrequest"
+    value: ""
+  }
+  attrs: {
     name: "allowtransparency"
     value: ""
   }

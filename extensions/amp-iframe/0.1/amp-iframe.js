@@ -34,6 +34,16 @@ import {setStyle} from '../../../src/style';
 /** @const {string} */
 const TAG_ = 'amp-iframe';
 
+/** @const {!Array<string>} */
+const ATTRIBUTES_TO_PROPAGATE = [
+  'allowfullscreen',
+  'allowpaymentrequest',
+  'allowtransparency',
+  'frameborder',
+  'referrerpolicy',
+  'scrolling',
+];
+
 /** @type {number}  */
 let count = 0;
 
@@ -310,10 +320,7 @@ export class AmpIframe extends AMP.BaseElement {
       setStyle(iframe, 'zIndex', -1);
     }
 
-    this.propagateAttributes(
-        ['frameborder', 'allowfullscreen', 'allowtransparency',
-         'scrolling', 'referrerpolicy'],
-         iframe);
+    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, iframe);
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
 

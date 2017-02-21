@@ -166,6 +166,7 @@ describe('amp-iframe', () => {
       width: 100,
       height: 100,
       allowfullscreen: '',
+      allowpaymentrequest: '',
       allowtransparency: '',
       referrerpolicy: 'no-referrer',
       frameborder: 3,
@@ -173,6 +174,7 @@ describe('amp-iframe', () => {
       marginwidth: 5,
     }).then(amp => {
       expect(amp.iframe.getAttribute('allowfullscreen')).to.equal('');
+      expect(amp.iframe.getAttribute('allowpaymentrequest')).to.equal('');
       expect(amp.iframe.getAttribute('allowtransparency')).to.equal('');
       expect(amp.iframe.getAttribute('referrerpolicy')).to.equal('no-referrer');
       expect(amp.iframe.getAttribute('frameborder')).to.equal('3');
