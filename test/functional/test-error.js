@@ -299,6 +299,15 @@ describe('reportErrorToServer', () => {
     expect(url).to.contain('&ex=1');
   });
 
+  it('should omit the error stack for user errors', () => {
+    const e = user().createError('123');
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
+          true));
+    const query = parseQueryString(url.search);
+    expect(query.s).to.be.undefined;
+  });
+
   describe('detectNonAmpJs', () => {
     let win;
     let scripts;
