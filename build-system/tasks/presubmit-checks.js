@@ -499,6 +499,14 @@ var forbiddenTerms = {
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
     message: 'SVG data images must use charset=utf-8: ' +
         '"data:image/svg+xml;charset=utf-8,..."',
+  },
+  'installWorkerErrorReporting': {
+    message: 'Should only be used in worker entry points',
+    whitelist: [
+      'src/web-worker/web-worker.js',
+      'src/service-worker/shell.js',
+      'src/worker-error-reporting.js',
+    ],
   }
 };
 
