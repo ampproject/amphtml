@@ -339,10 +339,12 @@ export class Bind {
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
     const scanNextNode_ = () => {
-      const element = /** @type {Element} */ (walker.currentNode);
-      if (!element) {
+      const node = walker.currentNode;
+      if (!node) {
         return true;
       }
+      // Walker is filtered to only return elements
+      const element = /** @type {!Element} */ (node);
       const tagName = element.tagName;
       if (DYNAMIC_TAGS.includes(tagName)) {
         // Listen for changes in amp-mustache templates
