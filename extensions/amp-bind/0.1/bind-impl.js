@@ -449,8 +449,7 @@ export class Bind {
    * @private
    */
   apply_(results) {
-    const applyPromises = [];
-    this.boundElements_.forEach(boundElement => {
+    const applyPromises = this.boundElements_.map(boundElement => {
       const {element, boundProperties} = boundElement;
       const tagName = element.tagName;
 
@@ -508,7 +507,7 @@ export class Bind {
           element.mutatedAttributesCallback(mutations);
         }
       });
-      applyPromises.push(applyPromise);
+      return applyPromise;
     });
     this.applyPromise_ = Promise.all(applyPromises);
   }
