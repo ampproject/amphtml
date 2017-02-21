@@ -108,7 +108,6 @@ export class TouchHandler {
    * @private
    */
   forwardEvent_(e) {
-    console.log('handleTouchEvent!', e);
     if (e && e.type) {
       const msg = this.copyTouchEvent_(e);
       this.messaging_.sendRequest(e.type, msg, false);
