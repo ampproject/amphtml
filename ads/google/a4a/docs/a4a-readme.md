@@ -40,7 +40,7 @@ If publishers want to serve their direct-sold ad formats they must create the ad
 
 ## Creative Agencies
 
-If you are a creative agency, please express interest in [this form](https://goo.gl/forms/P2zpQT3aIEU1UsWj2) so we can include you in outreach related to AMP ads.
+If you are a creative agency, please express interest via [this form](https://goo.gl/forms/P2zpQT3aIEU1UsWj2) so we can include you in any outreach that's AMP ads-related.
 
 ## Ad Networks
 
