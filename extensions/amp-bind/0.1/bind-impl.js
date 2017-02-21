@@ -314,7 +314,7 @@ export class Bind {
   /**
    * Scans `node` for attributes that conform to bind syntax and returns
    * a tuple containing bound elements and binding data for the evaluator.
-   * @param {!Element} node
+   * @param {!Node} node
    * @return {
    *   !Promise<{
    *     boundElements: !Array<BoundElementDef>,
@@ -339,7 +339,7 @@ export class Bind {
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
     const scanNextNode_ = () => {
-      const element = /** @type {Element} */ walker.currentNode;
+      const element = /** @type {Element} */ (walker.currentNode);
       if (!element) {
         return true;
       }
