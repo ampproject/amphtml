@@ -22,7 +22,7 @@ import {createFixtureIframe} from '../../../../testing/iframe';
 import {bindForDoc} from '../../../../src/bind';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 
-describe('integration amp-bind', () => {
+describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
   let iframe;
   let bind;
   const fixture = 'test/fixtures/amp-bind-integrations.html';
