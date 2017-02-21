@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
+import {loadScript, validateData} from '../3p/3p';
+
 /**
- * @const {!JSONType}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-export const NETWORKS = /** @type {!JSONType} */ ({
-  cloudflare: {
-    base: 'https://firebolt.cloudflaredemo.com',
-  },
-
-  adzerk: {
-    base: 'https://engine.betazerk.com',
-  },
-
-  dianomi: {
-    base: 'https://www.dianomi.com',
-  },
-});
+export function adthrive(global, data) {
+  validateData(data, ['siteId', 'adUnit'], ['sizes']);
+  loadScript(global, 'https://ads.adthrive.com/sites/'
+      + encodeURIComponent(data.siteId) + '/amp.min.js');
+}

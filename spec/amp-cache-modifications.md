@@ -2,9 +2,6 @@
 
 These are guidelines for what AMP cache implementations should look like. Some items are required for overall security of the platform while others are suggestions for performance improvements. All modifications are made to both AMP and AMP4ADS documents except where noted.
 
-For example, given a [recent version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.original.html) of [everything.amp.html](https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html), the output after modifications will be [this version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.out.html).
-
-
 ### HTML Sanitization
 
 The AMP Cache parses and re-serializes all documents to remove any ambiguities in parsing the document which might result in subtly different parses in different browsers.
@@ -141,14 +138,17 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 
 </details>
 
-#### All image URLs are rewritten as AMP cache URLs
+#### All image URLs are rewritten as AMP cache URLs except those in `amp-mustache` `template`
 
 <details>
 <summary>example</summary>
 
 | before | after |
 | --- | --- |
-| `<amp-img src=https://example.com/foo.png>`<br>`<amp-video poster=bar.png>` | `<amp-img src=/i/s/foo.png>`<br>`<amp-video poster=/i/s/bar.png>` |
+| `<amp-img src=https://example.com/foo.png></amp-img>` | `<amp-img src=/i/s/foo.png></amp-img>` |
+| `<amp-img srcset="https://example.com/bar.png 1080w, https://example.com/bar-400.png 400w">`| `<amp-img src="/i/s/bar.png 1080w, /i/s/bar-400.png 400w">` |
+| `<amp-anim src=foo.gif></amp-anim>` | `<amp-anim src=/i/s/foo.gif></amp-anim>` |
+| `<amp-video poster=bar.png>` | `<amp-video poster=/i/s/bar.png>` |
 
 </details>
 
@@ -282,6 +282,10 @@ Remove any `<meta>` tags except for those that:
 | `<meta charset=utf-8>`<br>`<meta http-equiv=content-language content=en>`<br>`<meta name=description content="An example AMP page">`<br>`<meta name=twitter:title content="AMP Example">` | `<meta charset=utf-8>`<br>`<meta http-equiv=content-language content=en>`<br>`<meta name=twitter:title content="AMP Example">` |
 
 </details>
+
+#### Remove `amp-live-list` children based on `amp_latest_update_time` parameter
+
+This is discussed in detail at [Server side filtering for `amp-live-list`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
 
 #### Remove `amp-access-hide` sections when `amp-access` JSON is `"type": "server"`
 

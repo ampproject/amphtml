@@ -31,8 +31,7 @@ import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 describe('amp-video', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-video');
-    video.setAttribute('src', 'https://commondatastorage.googleapis.com' +
-      '/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4');
+    video.setAttribute('src', '/examples/av/ForBiggerJoyrides.mp4');
     return video;
   });
 });
@@ -42,7 +41,7 @@ describe('amp-video', () => {
 describe.configure().skipIos().run('amp-youtube', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-youtube');
-    video.setAttribute('data-videoid', 'lBTCB7yLs8Y');
+    video.setAttribute('data-videoid', 'O0QDEXZhow4');
     return video;
   });
 });
