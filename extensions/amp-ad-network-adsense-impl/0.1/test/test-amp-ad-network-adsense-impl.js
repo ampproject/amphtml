@@ -19,7 +19,6 @@ import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl';
-import {AMP_ANALYTICS_HEADER} from '../../../../ads/google/a4a/utils';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
@@ -307,7 +306,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           {
             get: function(name) {
               switch (name) {
-                case AMP_ANALYTICS_HEADER:
+                case 'X-AmpAnalytics':
                   return JSON.stringify({url});
                 case 'X-AmpAdSignature':
                   return 'AQAB';
@@ -325,7 +324,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 signature: base64UrlDecodeToBytes('AQAB'),
                 size: null,
               });
-            expect(impl.ampAnalyticsUrls_).to.deep.equal(url);
+            expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
           });
       });
     });
@@ -351,7 +350,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
 
     it('injects amp analytics', () => {
       const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-      impl.ampAnalyticsUrls_ = urls;
+      impl.ampAnalyticsConfig = {urls};
       impl.onCreativeRender(false);
       expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');

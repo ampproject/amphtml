@@ -121,7 +121,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           {
             get: function(name) {
               switch (name) {
-                case AMP_ANALYTICS_HEADER:
+                case 'X-AmpAnalytics':
                   return JSON.stringify({url});
                 case 'X-AmpAdSignature':
                   return 'AQAB';
@@ -139,7 +139,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
                 signature: base64UrlDecodeToBytes('AQAB'),
                 size: null,
               });
-            expect(impl.ampAnalyticsUrls_).to.deep.equal(url);
+            expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
           });
       });
     });
@@ -165,7 +165,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     it('injects amp analytics', () => {
       const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-      impl.ampAnalyticsUrls_ = urls;
+      impl.ampAnalyticsConfig = {urls};
       impl.onCreativeRender(false);
       expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');

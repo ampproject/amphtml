@@ -33,7 +33,7 @@ const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
 
 /** @type {string}  */
-export const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
+const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
 
 /** @const {number} */
 const MAX_URL_LENGTH = 4096;
@@ -64,6 +64,10 @@ export const QQID_HEADER = 'X-QQID';
  * @visibleForTesting
  */
 export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
+
+/** @typedef {{urls: !Array<string>}}
+ */
+export let AmpAnalyticsConfigDef;
 
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
@@ -337,14 +341,40 @@ export function additionalDimensions(win, viewportSize) {
 };
 
 /**
+ * Extracts configuration used to build amp-analytics element for active view.
+ *
+ * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
+ *   XHR service FetchResponseHeaders object containing the response
+ *   headers.
+ * @return {?AmpAnalyticsConfigDef} config or null if invalid/missing.
+ */
+export function extractAmpAnalyticsConfig(responseHeaders) {
+  if (responseHeaders.has(AMP_ANALYTICS_HEADER)) {
+    try {
+      const analyticsConfig =
+        JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
+      dev().assert(Array.isArray(analyticsConfig['url']));
+      return {urls: analyticsConfig.url};
+    } catch (err) {
+      dev().error('AmpA4A', 'Invalid analytics', err,
+          responseHeaders.get(AMP_ANALYTICS_HEADER));
+    }
+  }
+  return null;
+}
+
+/**
  * Creates amp-analytics element within a4a element using urls specified
  * with amp-ad closest selector and min 50% visible for 1 sec.
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {!../../../src/service/extensions-impl.Extensions} extensions
- * @param {!Array<string>} urls
+ * @param {?AmpAnalyticsConfigDef} inputConfig
  */
-export function injectActiveViewAmpAnalyticsElement(a4a, extensions, urls) {
-  dev().assert(urls.length);
+export function injectActiveViewAmpAnalyticsElement(
+    a4a, extensions, inputConfig) {
+  if (!inputConfig || !inputConfig.urls.length) {
+    return;
+  }
   extensions.loadExtension('amp-analytics');
   const ampAnalyticsElem =
     a4a.element.ownerDocument.createElement('amp-analytics');
@@ -363,6 +393,7 @@ export function injectActiveViewAmpAnalyticsElement(a4a, extensions, urls) {
     },
   };
   const requests = {};
+  const urls = inputConfig.urls;
   for (let idx = 1; idx <= urls.length; idx++) {
     // TODO: Ensure url is valid and not freeform JS?
     requests[`visibility${idx}`] = `${urls[idx - 1]}`;

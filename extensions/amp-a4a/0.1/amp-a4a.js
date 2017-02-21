@@ -796,17 +796,11 @@ export class AmpA4A extends AMP.BaseElement {
       if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_()
-          .then(() => {
-            protectedOnCreativeRender(false);
-            return true;
-          });
+          .then(() => protectedOnCreativeRender(false));
       }
       // Must be an AMP creative.
       return this.renderAmpCreative_(creativeMetaData)
-        .then(() => {
-          protectedOnCreativeRender(true);
-          return true;
-        })
+        .then(() => protectedOnCreativeRender(true))
         .catch(err => {
           // Failed to render via AMP creative path so fallback to non-AMP
           // rendering within cross domain iframe.
@@ -814,10 +808,7 @@ export class AmpA4A extends AMP.BaseElement {
             'Error injecting creative in friendly frame', err);
           rethrowAsync(this.promiseErrorHandler_(err));
           return this.renderNonAmpCreative_()
-            .then(() => {
-              protectedOnCreativeRender(false);
-              return true;
-            });
+            .then(() => protectedOnCreativeRender(false));
         });
     }).catch(error => this.promiseErrorHandler_(error));
   }
@@ -929,6 +920,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Callback executed when creative has successfully rendered within the
    * publisher page.  To be overridden by network implementations as needed.
+   *
    * @param {boolean} isVerifiedAmpCreative whether or not the creative was
    *    verified as AMP and therefore given preferential treatment.
    */
@@ -1051,8 +1043,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Render non-AMP creative within cross domain iframe.
-   * @return {Promise<boolean>} awaiting ad completed insertion indicating if
-   *    successful.
+   * @return {Promise<boolean>} Whether the creative was successfully rendered.
    * @private
    */
   renderNonAmpCreative_() {
@@ -1084,7 +1075,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Render a validated AMP creative directly in the parent page.
    * @param {!CreativeMetaDataDef} creativeMetaData Metadata required to render
    *     AMP creative.
-   * @return {Promise} Whether the creative was successfully rendered.
+   * @return {!Promise} Whether the creative was successfully rendered.
    * @private
    */
   renderAmpCreative_(creativeMetaData) {

@@ -17,6 +17,7 @@
 import {
   extractGoogleAdCreativeAndSignature,
   additionalDimensions,
+  extractAmpAnalyticsConfig,
   injectActiveViewAmpAnalyticsElement,
 } from '../utils';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -122,10 +123,33 @@ describe('Google A4A utils', () => {
     });
   });
 
-  describe('#injectActiveViewAmpAnalyticsElement', () => {
+  describe('#ActiveView AmpAnalytics integration', () => {
     let sandbox;
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
+    });
+
+    it('should extract config from headers', () => {
+      let url = ['https://foo.com?a=b', 'https://bar.com?d=f'];
+      const headers = {
+        get: function(name) {
+          expect(name).to.equal('X-AmpAnalytics');
+          return JSON.stringify({url});
+        },
+        has: function(name) {
+          expect(name).to.equal('X-AmpAnalytics');
+          return true;
+        },
+      };
+      expect(extractAmpAnalyticsConfig(headers)).to.deep.equal({urls: url});
+      url = 'not an array';
+      expect(extractAmpAnalyticsConfig(headers)).to.not.be.ok;
+      url = ['https://foo.com?a=b', 'https://bar.com?d=f'];
+      headers.has = function(name) {
+        expect(name).to.equal('X-AmpAnalytics');
+        return false;
+      };
+      expect(extractAmpAnalyticsConfig(headers)).to.not.be.ok;
     });
 
     it('should load extension and create amp-analytics element', () => {
@@ -138,10 +162,11 @@ describe('Google A4A utils', () => {
           'type': 'adsense',
         });
         const urls = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
+        const config = {urls};
         const extensions = installExtensionsService(fixture.win);
         const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
         injectActiveViewAmpAnalyticsElement(
-            new MockA4AImpl(element), extensions, urls);
+            new MockA4AImpl(element), extensions, config);
         expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
         const ampAnalyticsElements = element.querySelectorAll('amp-analytics');
         expect(ampAnalyticsElements.length).to.equal(1);

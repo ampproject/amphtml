@@ -21,7 +21,6 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {dev} from '../../../src/log';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -30,8 +29,9 @@ import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
+  AmpAnalyticsConfigDef,
+  extractAmpAnalyticsConfig,
   injectActiveViewAmpAnalyticsElement,
-  AMP_ANALYTICS_HEADER,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -46,9 +46,6 @@ import {AdsenseSharedState} from './adsense-shared-state';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
-
-/** @type {string} */
-const TAG = 'AMP-AD-NETWORK-ADSENSE-IMPL';
 
 /**
  * See `VisibilityState` enum.
@@ -96,10 +93,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.uniqueSlotId_ = null;
 
     /**
-     * URLs used to generate amp-analytics element for active view reporting.
-     * @private {!Array<string>}
+     * Config to generate amp-analytics element for active view reporting.
+     * @type {?AmpAnalyticsConfigDef}
+     * @visibleForTesting
      */
-    this.ampAnalyticsUrls_ = [];
+    this.ampAnalyticsConfig = null;
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
@@ -166,16 +164,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    if (responseHeaders.has(AMP_ANALYTICS_HEADER)) {
-      try {
-        const analyticsConfig =
-          JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
-        this.ampAnalyticsUrls_ = analyticsConfig['url'];
-      } catch (err) {
-        dev().error(TAG, 'Invalid analytics', err,
-            responseHeaders.get(AMP_ANALYTICS_HEADER));
-      }
-    }
+    this.ampAnalyticsConfig = extractAmpAnalyticsConfig(responseHeaders);
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
@@ -225,7 +214,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
-    this.ampAnalyticsUrls_ = [];
+    this.ampAnalyticsConfig = null;
   }
 
   /**
@@ -238,10 +227,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
-    if (this.ampAnalyticsUrls_.length) {
-      injectActiveViewAmpAnalyticsElement(
-        this, this.extensions_, this.ampAnalyticsUrls_);
-    }
+    injectActiveViewAmpAnalyticsElement(
+      this, this.extensions_, this.ampAnalyticsConfig);
   }
 }
 
