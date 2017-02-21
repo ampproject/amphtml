@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-import {Messaging, WindowPortEmulator} from './messaging.js';
-import {getAmpDoc} from '../../../src/ampdoc';
-import {isIframed} from '../../../src/dom';
-=======
 import {Messaging, WindowPortEmulator} from './messaging';
 import {TouchHandler} from './touch_handler';
-import {viewerForDoc} from '../../../src/viewer';
->>>>>>> touch_handler
+import {getAmpDoc} from '../../../src/ampdoc';
+import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {getSourceUrl} from '../../../src/url';
@@ -132,20 +127,12 @@ export class AmpViewerIntegration {
 
   /**
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
-<<<<<<< HEAD
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Messaging} messaging
    * @return {!Promise<undefined>}
    * @private
    */
   openChannelAndStart_(viewer, ampdoc, messaging) {
-=======
-   * @return {!Promise<undefined>}
-   * @private
-   */
-  openChannelAndStart_(viewer, port) {
-    const messaging = new Messaging(this.win, port);
->>>>>>> touch events
     dev().fine(TAG, 'Send a handshake request');
     const ampdocUrl = ampdoc.getUrl();
     const srcUrl = getSourceUrl(ampdocUrl);
