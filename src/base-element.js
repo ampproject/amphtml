@@ -872,7 +872,7 @@ export class BaseElement {
 
   /**
    * Expands the element, resetting its default display value, and notifies its
-   * owner (if there is one) through {@link collapsedCallback} that the element
+   * owner (if there is one) through {@link expandedCallback} that the element
    * is no longer visible.
    */
   expand() {
