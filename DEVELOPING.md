@@ -33,9 +33,10 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 ### Installation
 
 1. Install [NodeJS](https://nodejs.org).
-2. In the repo directory, run `npm i` command to install the required npm packages.
-3. Run `npm i -g gulp` command to install gulp system-wide (on Mac or Linux you may need to prefix this with `sudo`, depending on how Node was installed).
-4. Edit your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows) and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`.
+2. Install [yarn](https://yarnpkg.com/en/docs/install) (yarn is faster than `npm install` and gives us deterministic builds)
+3. In the repo directory, run `yarn` command to install the required npm packages.
+4. Run `yarn global add gulp` command to install gulp system-wide (on Mac or Linux you may need to prefix this with `sudo`, depending on how Node was installed).
+5. Edit your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows) and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`.
 <pre>
   127.0.0.1               ads.localhost iframe.localhost
 </pre>
