@@ -21,12 +21,11 @@ import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {createFixtureIframe} from '../../../../testing/iframe';
 import {bindForDoc} from '../../../../src/bind';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {installAmpdocServices,} from '../../../../src/runtime';
 
 describe('integration amp-bind', () => {
   let iframe;
   let bind;
-  const fixture = 'test/fixtures/amp-bind-integrations.html'
+  const fixture = 'test/fixtures/amp-bind-integrations.html';
 
   beforeEach(() => {
     return createFixtureIframe(fixture).then(i => {
@@ -57,7 +56,7 @@ describe('integration amp-bind', () => {
       button.click();
       return waitForBindApplication().then(() => {
         expect(textElement.innerHTML).to.equal('hello world');
-      })
+      });
     });
   });
 
@@ -74,7 +73,6 @@ describe('integration amp-bind', () => {
     });
 
     it('should change slides when the slide attribute binding changes', () => {
-      const slideNum = iframe.doc.getElementById('slideNum');
       const carousel = iframe.doc.getElementById('carousel');
       const goToSlide1Button = iframe.doc.getElementById('goToSlide1Button');
       const impl = carousel.implementation_;
@@ -85,7 +83,5 @@ describe('integration amp-bind', () => {
       });
     });
   });
-
-
 
 });
