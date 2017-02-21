@@ -532,6 +532,10 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   }
   filePath = filePath.substr(0, filePath.length - 9) + '.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    if (req.query['amp_js_v']) {
+      file = addViewerIntegrationScript(req.query['amp_js_v'], file);
+    }
+
     file = replaceUrls(mode, file);
 
     // Extract amp-ad for the given 'type' specified in URL query.
@@ -666,6 +670,31 @@ function replaceUrls(mode, file, hostName) {
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g, hostName + '/dist/v0/$1.js');
     file = file.replace(/\/dist.3p\/current\/(.*)\.max.html/, hostName + '/dist.3p/current-min/$1.html');
   }
+  return file;
+}
+
+/**
+ * @param {string} ampJsVersion
+ * @param {string} file
+ */
+function addViewerIntegrationScript(ampJsVersion, file) {
+  ampJsVersion = parseFloat(ampJsVersion);
+  if (!ampJsVersion) {
+    return file;
+  }
+  var viewerScript;
+  if (Number.isInteger(ampJsVersion)) {
+    // Viewer integration script from gws, such as
+    // https://cdn.ampproject.org/viewer/google/v7.js
+    viewerScript = '<script async src="https://cdn.ampproject.org/viewer/google/v' +
+        ampJsVersion + '.js"></script>';
+  } else {
+    // Viewer integration script from runtime, such as
+    // https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js
+    viewerScript = '<script async src="https://cdn.ampproject.org/v0/amp-viewer-integration-' +
+        ampJsVersion + '.js" data-amp-report-test="viewer-integr.js"></script>';
+  }
+  file = file.replace('</head>', viewerScript + '</head>');
   return file;
 }
 
