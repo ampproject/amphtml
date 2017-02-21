@@ -60,7 +60,7 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  * @return {!Bind}
  */
 export function installBindForTesting(nodeOrAmpDoc) {
