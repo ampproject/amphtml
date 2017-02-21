@@ -344,7 +344,7 @@ export class Bind {
         return true;
       }
       // Walker is filtered to only return elements
-      const element = /** @type {!Element} */ (node);
+      const element = dev().assertElement(node);
       const tagName = element.tagName;
       if (DYNAMIC_TAGS.includes(tagName)) {
         // Listen for changes in amp-mustache templates

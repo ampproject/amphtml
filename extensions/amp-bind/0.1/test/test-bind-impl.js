@@ -31,6 +31,7 @@ describes.realWin('amp-bind', {
 
   // BindValidator method stubs.
   let canBindStub;
+  let isResultValidStub;
 
   beforeEach(() => {
     toggleExperiment(env.win, 'amp-bind', true);
@@ -38,7 +39,7 @@ describes.realWin('amp-bind', {
     // Stub validator methods to return true for ease of testing.
     canBindStub = env.sandbox.stub(
         BindValidator.prototype, 'canBind').returns(true);
-    env.sandbox.stub(
+    isResultValidStub = env.sandbox.stub(
         BindValidator.prototype, 'isResultValid').returns(true);
 
     // Make sure we have a chunk instance for testing.
@@ -146,6 +147,30 @@ describes.realWin('amp-bind', {
       return bind.waitForAllMutationsForTesting_();
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(1);
+    });
+  });
+
+  //TODO(kmh287): Move to a different test file?
+  it('should NOT allow blacklisted attrs in dynamically added bindings', () => {
+    canBindStub.restore();
+    isResultValidStub.restore();
+    const doc = env.win.document;
+    const template = doc.createElement('template');
+    let textElement;
+    doc.getElementById('parent').appendChild(template);
+    return onBindReady().then(() => {
+      expect(bind.boundElements_.length).to.equal(0);
+      const binding = '[onclick]="\'alert(document.cookie)\'" ' +
+        '[onmouseover]="\'alert()\'" ' +
+        '[style]="\'background=color:black\'"';
+      textElement = createElementWithBinding(binding);
+      template.appendChild(textElement);
+      return bind.waitForAllMutationsForTesting_();
+    }).then(() => {
+      expect(bind.boundElements_.length).to.equal(0);
+      expect(textElement.getAttribute('onclick')).to.be.null;
+      expect(textElement.getAttribute('onmouseover')).to.be.null;
+      expect(textElement.getAttribute('style')).to.be.null;
     });
   });
 
