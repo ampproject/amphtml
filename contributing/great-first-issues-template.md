@@ -9,17 +9,17 @@ who have never contributed to open source projects before.
 We know figuring out the process for contributing to an open source project can be intimidating, so we created this issue as a way for you to learn the ropes.  (If you feel comfortable contributing to open source projects, please leave this issue for someone else.)
 
 <!--
-List knowledge the contributor should have before working on this issue.  You can mention that some of these are nice-to-have if you think the knowledge helps but that the issue is still relatively straightforward without that knowledge.
+List knowledge/skills the contributor should already have before working on this bug (for example, knowledge of web components, Node.js internals, etc.).  New contributors can use this section to find bugs that match their existing skills.  This also serves as a filter that can reduce the amount of explanation you will need to do in the "Step by step" section.  Try to be only as restrictive as necessary and call out any nice-to-haves.
 -->
 ### What you will need to know
 
 <!--
-[Optional] If there is additional context that will help the contributor fix the bug add it here.
+[Optional] If there is additional context that will help the contributor fix the bug add it here.  If this is redundant with other sections feel free to remove it.
 -->
 ### Background
 
 <!--
-Explain why fixing this bug/feature is important, i.e. why should the contributor care about fixing this?  Don't skip this section. :)
+Explain why fixing this bug/feature is important, i.e. why should the contributor care about fixing this?  Whose life will be made better by this fix?
 -->
 ### Motivation
 
