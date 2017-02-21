@@ -105,13 +105,13 @@ export class Bind {
     /** @private {?./bind-evaluator.BindEvaluator} */
     this.evaluator_ = null;
 
-    /** @visibleForTesting {?Promise<!Object<string,*>>} */
+    /** @private {?Promise<!Object<string,*>>} */
     this.evaluatePromise_ = null;
 
-    /** @visibleForTesting {?Promise} */
+    /** @private {?Promise} */
     this.applyPromise_ = null;
 
-    /** @visibleForTesting {?Promise} */
+    /** @private {?Promise} */
     this.scanPromise_ = null;
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
@@ -713,4 +713,28 @@ export class Bind {
 
     return false;
   }
+
+  /**
+   * Wait for bind scan to finish for testing.
+   *
+   * @return {!Promise}
+   * @visibleForTesting
+   */
+  waitForScanForTesting_() {
+    return this.scanPromise_;
+  }
+
+  /**
+   * Wait for bindings to evaluate and apply for testing
+   *
+   * @return {!Promise}
+   * @visibleForTesting
+   */
+  waitForBindApplicationForTesting_() {
+    return this.evaluatePromise_.then(() => {
+      return this.applyPromise_;
+    })
+  }
+
+
 }

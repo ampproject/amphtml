@@ -59,15 +59,13 @@ describe('test-scrollable-carousel', () => {
       bind = installBindForTesting(iframe.ampdoc);
       return iframe.ampdoc.whenReady();
     }).then(() => {
-      return bind.scanPromise_;
+      return bind.waitForScanForTesting_();
     });
   });
 
   function waitForBindApplication() {
     return bindForDoc(iframe.ampdoc).then(() => {
-      return bind.evaluatePromise_;
-    }).then(() => {
-      return bind.applyPromise_;
+      return bind.waitForBindApplicationForTesting_();
     });
   }
 
