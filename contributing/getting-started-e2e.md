@@ -427,11 +427,13 @@ git push origin --delete <branch name>
 
 If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.  If your change was to the code that runs on AMP pages across the web you'll have to wait for the change to be included in a release.
 
-In general we cut a release of amphtml on Thursdays during working hours (Pacific time) and push it to the AMP Dev Channel that day.  After verifying there are no issues, we start rolling that build out the following Monday and complete the push that Thursday.
+In general we cut a release of amphtml on Wednesdays during working hours (Pacific time) and push it to the AMP Dev Channel the next day.  After verifying there are no issues, we push that build to 1% of AMP pages the following Monday and complete the push to all AMP pages a few days later on Thursday.  That is:  on Thursday we will typically push last week's build to all AMP pages and this week's build to the Dev Channel.
 
-You can see whether your change made it into the Dev Channel or production build on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).  The build marked `Draft` is the version on the Dev Channel and the build marked `Latest Release` is what is running in production.  Your Pull Request will be listed in the first build that includes it; if you don't see your Pull Request listed it will likely be in the next build.
+**Once the push of the build that includes your change is complete all users of AMP will be using the code you contributed!**
 
-You can opt-in to using the Dev Channel in a browser by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.  (Note that this only affects the browser in which you enable the experiment.)
+You can see whether your change made it into a given build on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).  The build marked `Pre-release` is the version on the Dev Channel and the build marked `Latest Release` is what is running in production.  Your Pull Request will be listed in the first build that includes it; if you don't see your Pull Request listed it will likely be in the next build.
+
+You can set your browser to use the Dev Channel build by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.  This will let you see how your changes will affect any AMP page before your changes are rolled out to all AMP pages.  Note that this only affects the browser in which you enable the experiment.
 
 You can verify the AMP version your browser is using for a given page by looking at your browser's developer console.  After loading an AMP page (e.g. [https://ampproject.org](https://ampproject.org)) the console will have a message like `Powered by AMP ⚡ HTML – Version <build number>`).  The `<build number>` will match one of the build numbers on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).
 
