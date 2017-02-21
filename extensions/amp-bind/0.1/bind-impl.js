@@ -105,7 +105,7 @@ export class Bind {
     /** @private {?./bind-evaluator.BindEvaluator} */
     this.evaluator_ = null;
 
-    /** @private {?Promise<!Object<string,*>>} */
+    /** @private {?Promise} */
     this.evaluatePromise_ = null;
 
     /** @private {?Promise} */
@@ -716,7 +716,7 @@ export class Bind {
   /**
    * Wait for bind scan to finish for testing.
    *
-   * @return {!Promise}
+   * @return {Promise}
    * @visibleForTesting
    */
   waitForScanForTesting_() {
@@ -726,7 +726,7 @@ export class Bind {
   /**
    * Wait for bindings to evaluate and apply for testing
    *
-   * @return {!Promise}
+   * @return {Promise}
    * @visibleForTesting
    */
   waitForBindApplicationForTesting_() {
