@@ -15,7 +15,6 @@
  */
 
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
-import {AMP_ANALYTICS_HEADER} from '../../../../ads/google/a4a/utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
