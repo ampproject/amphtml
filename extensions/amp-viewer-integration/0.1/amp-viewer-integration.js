@@ -52,9 +52,6 @@ export class AmpViewerIntegration {
 
     /** @private {boolean} */
     this.isWebView_ = false;
-
-    /** @private {boolean} */
-    this.enableEventForwarding_ = true;
   }
 
   /**
@@ -154,7 +151,7 @@ export class AmpViewerIntegration {
    * @private
    */
   setup_(messaging, viewer) {
-    messaging.setRequestProcessor((type, payload, awaitResponse) => {
+    messaging.setDefaultHandler((type, payload, awaitResponse) => {
       return viewer.receiveMessage(
         type, /** @type {!JSONType} */ (payload), awaitResponse);
     });
@@ -165,9 +162,7 @@ export class AmpViewerIntegration {
     listenOnce(
       this.win, 'unload', this.handleUnload_.bind(this, messaging));
 
-    if (this.enableEventForwarding_) {
-      new TouchHandler(this.win, messaging);
-    }
+    new TouchHandler(this.win, messaging);
   }
 
   /**

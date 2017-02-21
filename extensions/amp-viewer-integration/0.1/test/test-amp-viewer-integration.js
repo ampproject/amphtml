@@ -119,7 +119,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       });
 
       messaging = new Messaging(this.win, port);
-      messaging.setRequestProcessor(requestProcessor);
+      messaging.setDefaultHandler(requestProcessor);
     });
 
     it('handleMessage_ should call postMessage correctly', () => {

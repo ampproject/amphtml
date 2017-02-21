@@ -38,6 +38,11 @@ const TOUCH_PROPERTIES = [
 ];
 
 /**
+ * @const {string} Request name to enable/disable scrolling.
+ */
+const SCROLL_LOCK = 'scrollLock';
+
+/**
  * @fileoverview Forward touch events from the AMP doc to the viewer.
  */
 export class TouchHandler {
@@ -56,6 +61,15 @@ export class TouchHandler {
      * @private {boolean}
      */
     this.tracking_ = false;
+
+    /**
+     * When true, prevent default to prevent scrolling.
+     * @private {boolean}
+     */
+    this.scrollLocked_ = false;
+
+
+    messaging.registerHandler(SCROLL_LOCK, this.scrollLockHandler_.bind(this));
 
     this.listenForTouchEvents();
   }
@@ -98,6 +112,9 @@ export class TouchHandler {
     if (e && e.type) {
       const msg = this.copyTouchEvent_(e);
       this.messaging_.sendRequest(e.type, msg, false);
+    }
+    if (this.scrollLocked_) {
+      e.preventDefault();
     }
   }
 
@@ -151,5 +168,18 @@ export class TouchHandler {
       }
     }
     return copy;
+  }
+
+  /**
+   * Handles scrollLock requests from the viewer to change the scrollLock state.
+   * @param {string} type Unused.
+   * @param {*} payload True to disable event forwarding / lock scrolling.
+   * @param {boolean} awaitResponse
+   * @return {!Promise<?>|undefined}
+   * @private
+   */
+  scrollLockHandler_(type, payload, awaitResponse) {
+    this.scrollLocked_ = !!payload;
+    return awaitResponse ? Promise.resolve({}) : undefined;
   }
 }
