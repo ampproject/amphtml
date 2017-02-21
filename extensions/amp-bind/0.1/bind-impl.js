@@ -795,7 +795,7 @@ export class Bind {
     }).then(() => {
       return Promise.all(this.mutationPromises_);
     }).then(() => {
-      this.mutationPromises_ = [];
+      this.mutationPromises_.length = 0;
     });
   }
 
