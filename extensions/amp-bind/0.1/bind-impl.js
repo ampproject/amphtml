@@ -113,7 +113,8 @@ export class Bind {
     this.resources_ = resourcesForDoc(ampdoc);
 
     /**
-     * True if all bindings in the document have been scanned and parsed.
+     * True if all initial bindings in the document have been
+     * scanned and parsed.
      * @private {boolean}
      */
     this.initialized_ = false;
@@ -129,9 +130,13 @@ export class Bind {
      */
     this.dynamicRoots_ = [];
 
+    /**
+     * @const @private {!Array<Promise>}
+     */
+    this.mutationPromises_ = [];
+
     this.subtreeMutationObserver_ = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
-        debugger;
         const mutatedNode = mutation.target;
         if (this.dynamicRoots_.includes(mutatedNode)) {
           // Remove all bindings for removed elements
@@ -142,7 +147,7 @@ export class Bind {
           const removeAllPromise = removePromises.length > 0 ? 
             Promise.all(removePromises) :
             Promise.resolve();
-          removeAllPromise.then(() => {
+          this.mutationPromises_.push(removeAllPromise.then(() => {
             // Add all bindings for added elements
             const addPromises = [];
             mutation.addedNodes.forEach(addedNode => {
@@ -154,7 +159,7 @@ export class Bind {
             return addAllPromise;
           }).then(() => {
             this.digest_()
-          });
+          }));
         }
       });
     });
@@ -328,7 +333,7 @@ export class Bind {
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
     const scanNextNode_ = () => {
-      const element = walker.nextNode();
+      const element = walker.currentNode;
       if (!element) {
         return true;
       }
@@ -365,7 +370,7 @@ export class Bind {
         }
         expressionToElements[expressionString].push(element);
       });
-      return false;
+      return walker.nextNode() === null;
     };
 
     return new Promise(resolve => {
@@ -759,4 +764,29 @@ export class Bind {
 
     return false;
   }
+
+  /**
+   * Wait for DOM mutation observer callbacks to fire. Returns a promise
+   * that resolves when mutation callbacks have fired.
+   *
+   * @return {Promise}
+   *
+   * @visibleForTesting
+   */
+  waitForAllMutationsForTesting_() {
+    return new Promise(resolve => {
+      (function waitForMutationCallback() {
+        if (this.mutationPromises_.length > 0) {
+          resolve();
+        } else {
+        setTimeout(waitForMutationCallback.bind(this), 5);
+        }
+      }).call(this);
+    }).then(() => {
+      return Promise.all(this.mutationPromises_);
+    }).then(() => {
+      this.mutationPromises_ = [];
+    });
+  }
+
 }

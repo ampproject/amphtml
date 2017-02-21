@@ -135,6 +135,20 @@ describes.realWin('amp-bind', {
     });
   });
 
+  it('should dynamically detect new bindings added under certain tags', () => {
+    const doc = env.win.document;
+    const template = doc.createElement('template');
+    doc.getElementById('parent').appendChild(template);
+    return onBindReady().then(() => {
+      expect(bind.boundElements_.length).to.equal(0);
+      const textElement = createElementWithBinding('[onePlusOne]="1+1"')
+      template.appendChild(textElement);
+      return bind.waitForAllMutationsForTesting_();
+    }).then(() => {
+      expect(bind.boundElements_.length).to.equal(1);
+    });
+  });
+
   it('should NOT apply expressions on first load', () => {
     const element = createElementWithBinding('[onePlusOne]="1+1"');
     expect(element.getAttribute('onePlusOne')).to.equal(null);
