@@ -669,22 +669,23 @@ function replaceUrls(mode, file, hostName) {
  */
 function addViewerIntegrationScript(ampJsVersion, file) {
   ampJsVersion = parseFloat(ampJsVersion);
-  if (ampJsVersion) {
-    var viewerScript;
-    if (Number.isInteger(ampJsVersion)) {
-      // Viewer integration script from gws, such as
-      // https://cdn.ampproject.org/viewer/google/v7.js
-      viewerScript = '<script async src="https://cdn.ampproject.org/viewer/google/v' +
-          ampJsVersion + '.js"></script>';
-    } else {
-      // Viewer integration script from runtime, such as
-      // https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js
-      viewerScript = '<script async src="https://cdn.ampproject.org/v0/amp-viewer-integration-' +
-          ampJsVersion + '.js" data-amp-report-test="viewer-integr.js"></script>';
-    }
-    file = file.replace('</head>', viewerScript + '</head>');
+  if (!ampJsVersion) {
     return file;
   }
+  var viewerScript;
+  if (Number.isInteger(ampJsVersion)) {
+    // Viewer integration script from gws, such as
+    // https://cdn.ampproject.org/viewer/google/v7.js
+    viewerScript = '<script async src="https://cdn.ampproject.org/viewer/google/v' +
+        ampJsVersion + '.js"></script>';
+  } else {
+    // Viewer integration script from runtime, such as
+    // https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js
+    viewerScript = '<script async src="https://cdn.ampproject.org/v0/amp-viewer-integration-' +
+        ampJsVersion + '.js" data-amp-report-test="viewer-integr.js"></script>';
+  }
+  file = file.replace('</head>', viewerScript + '</head>');
+  return file;
 }
 
 /**
