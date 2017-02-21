@@ -126,7 +126,7 @@ export class Bind {
     this.digestQueuedAfterScan_ = false;
 
     /**
-     * @const @private {!Array<Element>}
+     * @const @private {!Array<Node>}
      */
     this.dynamicRoots_ = [];
 
@@ -141,25 +141,31 @@ export class Bind {
         if (this.dynamicRoots_.includes(mutatedNode)) {
           // Remove all bindings for removed elements
           const removePromises = [];
-          mutation.removedNodes.forEach(removedNode => {
+          const removedNodes = mutation.removedNodes;
+          for (let i = 0; i < removedNodes.length; i++) {
+            const removedNode = removedNodes[i];
             removePromises.push(this.removeBindingsForNode_(removedNode));
-          });
+          }
           const removeAllPromise = removePromises.length > 0 ?
             Promise.all(removePromises) :
             Promise.resolve();
-          this.mutationPromises_.push(removeAllPromise.then(() => {
+          const mutationPromise = removeAllPromise.then(() => {
             // Add all bindings for added elements
             const addPromises = [];
-            mutation.addedNodes.forEach(addedNode => {
+            const addedNodes = mutation.addedNodes;
+            for (let j = 0; j < addedNodes.length; j++) {
+              const addedNode = addedNodes[j];
               addPromises.push(this.addBindingsForNode_(addedNode));
-            });
+            }
             const addAllPromise = addPromises.length > 0 ?
               Promise.all(addPromises) :
               Promise.resolve();
             return addAllPromise;
           }).then(() => {
+            // Immediately apply bindings to new elements with current scope
             this.digest_();
-          }));
+          });
+          this.mutationPromises_.push(mutationPromise);
         }
       });
     });
