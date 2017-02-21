@@ -54,7 +54,6 @@ With the responsive layout, the width and height from the example should yield c
         layout="responsive"
         width="480" height="270"
     ></amp-nexxtv-player>
-
 ```
 
 ## Attributes
@@ -104,4 +103,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-nexxtv-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/validator-amp-nexxtv-player.protoascii) in the AMP validator specification.
+See [amp-nexxtv-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nexxtv-player/0.1/validator-amp-nexxtv-player.protoascii) in the AMP validator specification.
