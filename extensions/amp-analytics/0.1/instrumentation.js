@@ -22,6 +22,7 @@ import {
   AnalyticsEvent,
   ClickEventTracker,
   CustomEventTracker,
+  IniLoadTracker,
   SignalTracker,
 } from './events';
 import {Observable} from '../../../src/observable';
@@ -87,6 +88,11 @@ const EVENT_TRACKERS = {
     name: 'render-start',
     allowedFor: ALLOWED_FOR_ALL,
     klass: SignalTracker,
+  },
+  'ini-load': {
+    name: 'ini-load',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: IniLoadTracker,
   },
 };
 

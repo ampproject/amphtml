@@ -19,6 +19,7 @@ import {
   AnalyticsEvent,
   ClickEventTracker,
   CustomEventTracker,
+  IniLoadTracker,
   SignalTracker,
 } from '../events';
 import {Signals} from '../../../../src/utils/signals';
@@ -301,6 +302,100 @@ describes.realWin('Events', {amp: 1}, env => {
       return promise.then(event => {
         expect(event.target).to.equal(target);
         expect(event.type).to.equal('sig1');
+      });
+    });
+  });
+
+
+  describe('IniLoadTracker', () => {
+    let tracker;
+    let targetSignals;
+
+    beforeEach(() => {
+      tracker = new IniLoadTracker(root);
+      target.classList.add('i-amphtml-element');
+      targetSignals = new Signals();
+      target.signals = () => targetSignals;
+    });
+
+    it('should initalize, add listeners and dispose', () => {
+      expect(tracker.root).to.equal(root);
+    });
+
+    it('should add doc listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded',
+          () => Promise.resolve());
+      tracker.add(analyticsElement, 'ini-load', {}, resolver);
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('ini-load');
+        expect(iniLoadStub).to.be.calledOnce;
+      });
+    });
+
+    it('should add root listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded',
+          () => Promise.resolve());
+      tracker.add(analyticsElement, 'ini-load', {selector: ':root'}, resolver);
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('ini-load');
+        expect(iniLoadStub).to.be.calledOnce;
+      });
+    });
+
+    it('should add host listener equal to root', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded',
+          () => Promise.resolve());
+      tracker.add(analyticsElement, 'sig1', {selector: ':host'}, resolver);
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('sig1');
+        expect(iniLoadStub).to.be.calledOnce;
+      });
+    });
+
+    it('should add target listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      const spy = sandbox.spy(targetSignals, 'whenSignal');
+      tracker.add(analyticsElement, 'ini-load', {selector: '.target'},
+          resolver);
+      targetSignals.signal('ini-load');
+      return promise.then(event => {
+        expect(event.target).to.equal(target);
+        expect(event.type).to.equal('ini-load');
+        expect(spy).to.be.calledWith('ini-load');
+      });
+    });
+
+    it('should trigger via load-end as well', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      const spy = sandbox.spy(targetSignals, 'whenSignal');
+      tracker.add(analyticsElement, 'ini-load', {selector: '.target'},
+          resolver);
+      targetSignals.signal('load-end');
+      return promise.then(event => {
+        expect(event.target).to.equal(target);
+        expect(event.type).to.equal('ini-load');
+        expect(spy).to.be.calledWith('load-end');
       });
     });
   });

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from './common-signals';
 import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     isInternalElement, isLayoutSizeDefined, isLoadingAllowed,
     parseLayout, parseLength, getNaturalDimensions,
@@ -676,7 +677,7 @@ function createBaseCustomElementClass(win) {
      * @return {!Promise}
      */
     whenBuilt() {
-      return this.signals_.whenSignal('built');
+      return this.signals_.whenSignal(CommonSignals.BUILT);
     }
 
     /**
@@ -709,9 +710,9 @@ function createBaseCustomElementClass(win) {
         this.built_ = true;
         this.classList.remove('i-amphtml-notbuilt');
         this.classList.remove('amp-notbuilt');
-        this.signals_.signal('built');
+        this.signals_.signal(CommonSignals.BUILT);
       } catch (e) {
-        this.signals_.rejectSignal('built', e);
+        this.signals_.rejectSignal(CommonSignals.BUILT, e);
         reportError(e, this);
         throw e;
       }
@@ -771,8 +772,6 @@ function createBaseCustomElementClass(win) {
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
-      // TODO(malteubl): Forward for stubbed elements.
-      // TODO(jridgewell): We should pass the layoutBox down.
       this.implementation_.onLayoutMeasure();
 
       if (this.isLoadingEnabled_()) {
@@ -1147,14 +1146,14 @@ function createBaseCustomElementClass(win) {
       this.dispatchCustomEventForTesting('amp:load:start');
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
       if (isLoadEvent) {
-        this.signals_.signal('load-start');
+        this.signals_.signal(CommonSignals.LOAD_START);
       }
       const promise = this.implementation_.layoutCallback();
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
       return promise.then(() => {
         if (isLoadEvent) {
-          this.signals_.signal('load-end');
+          this.signals_.signal(CommonSignals.LOAD_END);
         }
         this.readyState = 'complete';
         this.layoutCount_++;
@@ -1172,7 +1171,7 @@ function createBaseCustomElementClass(win) {
         // add layoutCount_ by 1 despite load fails or not
         if (isLoadEvent) {
           this.signals_.rejectSignal(
-              'load-end', /** @type {!Error} */ (reason));
+              CommonSignals.LOAD_END, /** @type {!Error} */ (reason));
         }
         this.layoutCount_++;
         this.toggleLoading_(false, /* cleanup */ true);
@@ -1274,9 +1273,10 @@ function createBaseCustomElementClass(win) {
     reset_() {
       this.layoutCount_ = 0;
       this.isFirstLayoutCompleted_ = false;
-      this.signals_.reset('render-start');
-      this.signals_.reset('load-start');
-      this.signals_.reset('load-end');
+      this.signals_.reset(CommonSignals.RENDER_START);
+      this.signals_.reset(CommonSignals.LOAD_START);
+      this.signals_.reset(CommonSignals.LOAD_END);
+      this.signals_.reset(CommonSignals.INI_LOAD);
     }
 
     /**
@@ -1482,7 +1482,7 @@ function createBaseCustomElementClass(win) {
      * @package @final @this {!Element}
      */
     renderStarted() {
-      this.signals_.signal('render-start');
+      this.signals_.signal(CommonSignals.RENDER_START);
       this.toggleLoading_(false);
     }
 
@@ -1545,7 +1545,8 @@ function createBaseCustomElementClass(win) {
     toggleLoading_(state, opt_cleanup) {
       assertNotTemplate(this);
       if (state &&
-          (this.layoutCount_ > 0 || this.signals_.get('render-start'))) {
+          (this.layoutCount_ > 0 ||
+              this.signals_.get(CommonSignals.RENDER_START))) {
         // Loading has already been canceled. Ignore.
         return;
       }
