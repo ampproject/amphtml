@@ -364,7 +364,7 @@ function patchRegisterElement() {
       // Need to switch global to self since closure doesn't wrap the module
       // like CommonJS
       file = file.replace('installCustomElements(global);',
-          'installCustomElements(self);');
+          'installCustomElements(self, \'auto\');');
     } else {
       // Get rid of the side effect the module has so we can tree shake it
       // better and control installation, unless --fortesting flag
