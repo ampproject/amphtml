@@ -25,7 +25,9 @@ import {
   createElementWithAttributes,
 } from '../../../src/dom';
 import {cancellation} from '../../../src/error';
-import {installAnchorClickInterceptor} from '../../../src/anchor-click-interceptor';
+import {
+  installAnchorClickInterceptor,
+} from '../../../src/anchor-click-interceptor';
 import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
@@ -35,7 +37,6 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
@@ -51,8 +52,9 @@ import {
   getDefaultBootstrapBaseUrl,
   generateSentinel,
 } from '../../../src/3p-frame';
-import {installUrlReplacementsForEmbed,}
-    from '../../../src/service/url-replacements-impl';
+import {
+  installUrlReplacementsForEmbed,
+} from '../../../src/service/url-replacements-impl';
 import {extensionsFor} from '../../../src/extensions';
 import {A4AVariableSource} from './a4a-variable-source';
 import {rethrowAsync} from '../../../src/log';
@@ -1110,7 +1112,8 @@ export class AmpA4A extends AMP.BaseElement {
               friendlyIframeEmbed.win.document;
           setStyle(frameDoc.body, 'visibility', 'visible');
           // Capture phase click handlers on the ad.
-          installAnchorClickInterceptor(this.getAmpDoc(), friendlyIframeEmbed.win);
+          installAnchorClickInterceptor(
+              this.getAmpDoc(), friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
           protectFunctionWrapper(this.onAmpCreativeRender, this, err => {
