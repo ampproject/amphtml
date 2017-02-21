@@ -152,6 +152,25 @@ describe('Google A4A utils', () => {
       expect(extractAmpAnalyticsConfig(headers)).to.not.be.ok;
     });
 
+    it('should not create amp-analytics element if no urls', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const element = createElementWithAttributes(doc, 'amp-a4a', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+        });
+        const config = {urls: []};
+        const extensions = installExtensionsService(fixture.win);
+        const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+        injectActiveViewAmpAnalyticsElement(
+            new MockA4AImpl(element), extensions, config);
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+        const ampAnalyticsElements = element.querySelectorAll('amp-analytics');
+        expect(ampAnalyticsElements.length).to.equal(0);
+      });
+    });
     it('should load extension and create amp-analytics element', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -171,6 +190,7 @@ describe('Google A4A utils', () => {
         const ampAnalyticsElements = element.querySelectorAll('amp-analytics');
         expect(ampAnalyticsElements.length).to.equal(1);
         const ampAnalyticsElement = ampAnalyticsElements[0];
+        expect(ampAnalyticsElement.getAttribute('scoped')).to.equal('');
         const scriptElements = ampAnalyticsElement.querySelectorAll('script');
         expect(scriptElements.length).to.equal(1);
         const scriptElement = scriptElements[0];

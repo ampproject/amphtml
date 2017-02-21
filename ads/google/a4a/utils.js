@@ -92,7 +92,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
 }
 
 /**
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a class instance
  * @param {string} baseUrl
  * @param {number} startTime
  * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
@@ -378,6 +378,7 @@ export function injectActiveViewAmpAnalyticsElement(
   extensions.loadExtension('amp-analytics');
   const ampAnalyticsElem =
     a4a.element.ownerDocument.createElement('amp-analytics');
+  ampAnalyticsElem.setAttribute('scoped', '');
   const config = {
     'transport': {'beacon': false, 'xhrpost': false},
     'triggers': {
