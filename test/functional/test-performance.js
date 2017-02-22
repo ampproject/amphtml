@@ -661,12 +661,12 @@ describes.fakeWin('performance with experiment', {amp: true}, env => {
     perf = installPerformanceService(win);
   });
 
-  it('nocurls experiment enabled', () => {
+  it('legacy-cdn-domain experiment enabled', () => {
     sandbox.stub(perf, 'getHostname_', () => 'cdn.ampproject.org');
     return perf.coreServicesAvailable().then(() => {
       perf.flush();
       expect(viewerSendMessageStub)
-          .to.be.calledWith('sendCsi', {ampexp: 'nocurls'});
+          .to.be.calledWith('sendCsi', {ampexp: 'legacy-cdn-domain'});
     });
   });
 
