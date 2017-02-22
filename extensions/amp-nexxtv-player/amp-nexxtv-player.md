@@ -44,27 +44,57 @@ limitations under the License.
 With the responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
 
 ```html
-<amp-nexxtv-player
-        data-videoid="872E97169LE9JLU"
-        data-client="ID"
+    <amp-nexxtv-player
+        data-mediaid="PTPFEC4U184674"
+        data-client="583"
         data-streamtype="video"
-        data-autoplay="0"
-        data-delay="20"
+        data-start="2"
         data-mode="static"
+        data-origin="https://embed.nexx.cloud/"
+        layout="responsive"
+        width="480" height="270"
     ></amp-nexxtv-player>
+
 ```
 
 ## Attributes
 
-**autoplay**
+**mediaid**
 
-If this attribute is present, and the browser supports autoplay:
+* Required
+* ID of your media you want to play
 
-* the video is automatically muted before autoplay starts
-* when the video is scrolled out of view, the video is paused
-* when the video is scrolled into view, the video resumes playback
-* when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
+**client**
+
+* Required
+* your domain ID
+
+**streamtype**
+
+* optional
+* default: video
+* possible values: [video | audio | playlists | playlist-masked | live | album]
+* playlist-masked: playlist without possibility to skip or choose video
+* album: is an audio playlist
+
+**start**
+
+Starting point of your media in seconds e.g. video starting 1:30min
+
+* optional
+
+**mode**
+
+* optional
+* default: static
+* possible values: [static | api]
+
+
+**origin**
+
+Source from where media is played
+* optional
+* default: https://embed.nexx.cloud/
 
 
 **common attributes**
