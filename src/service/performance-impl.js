@@ -21,6 +21,7 @@ import {resourcesForDoc} from '../resources';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {whenDocumentComplete} from '../document-ready';
+import {urls} from '../config';
 
 
 /**
@@ -289,7 +290,7 @@ export class Performance {
       return this.enabledExperiments_;
     }
     const experiments = [];
-    if (this.getHostname_() == 'cdn.ampproject.org') {
+    if (this.getHostname_() == urls.cdn.split('://')[1]) {
       experiments.push('nocurls');
     }
     return this.enabledExperiments_ = experiments.join(',');
