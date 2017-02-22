@@ -30,7 +30,8 @@
 
 <body>
   <p>P TAG TEST</p>
-  <button on="tap:AMP.setState(boundText='hello world', boundClass='new')" id="mutateTextButton">hello world!</button>
+  <button on="tap:AMP.setState(boundText='hello world')" id="changeTextButton"></button>
+  <button on="tap:AMP.setState(boundClass='new')" id="changeTextClassButton"></button>
   <p id="textElement" class="original" [class]="boundClass" [text]="boundText">unbound</p>
 
   <p>CAROUSEL TEST</p>
@@ -49,13 +50,9 @@
   </amp-carousel>
 
   <p>AMP-IMG TEST</p>
-  <button
-  on="tap:AMP.setState(imageSrc='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no', imageAlt='hello world')"
-  id="changeImgButton">Change image src and alt!
-  </button>
-  <button
-  on="tap:AMP.setState(imageWidth=300, imageHeight=300)"
-  id="changeImgDimensButton">Change image dimensions!</button>
+  <button on="tap:AMP.setState(imageSrc='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no')" id="changeImgSrcButton"></button>
+  <button on="tap:AMP.setState(imageAlt='hello world')" id="changeImgAltButton"></button>
+  <button on="tap:AMP.setState(imageWidth=300, imageHeight=300)" id="changeImgDimensButton"></button>
 
   <amp-img id="image"
     src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no"

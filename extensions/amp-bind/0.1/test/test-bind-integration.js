@@ -56,9 +56,9 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
   describe('amp-bind text integration', () => {
     it('should update text when text attribute binding changes', () => {
       const textElement = iframe.doc.getElementById('textElement');
-      const button = iframe.doc.getElementById('mutateTextButton');
+      const changeTextButton = iframe.doc.getElementById('changeTextButton');
       expect(textElement.innerHTML).to.equal('unbound');
-      button.click();
+      changeTextButton.click();
       return waitForBindApplication().then(() => {
         expect(textElement.innerHTML).to.equal('hello world');
       });
@@ -66,9 +66,10 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
 
     it('should update CSS class when class binding changes', () => {
       const textElement = iframe.doc.getElementById('textElement');
-      const button = iframe.doc.getElementById('mutateTextButton');
+      const changeClassButton =
+        iframe.doc.getElementById('changeTextClassButton');
       expect(textElement.className).to.equal('original');
-      button.click();
+      changeClassButton.click();
       return waitForBindApplication().then(() => {
         expect(textElement.className).to.equal('new');
       });
@@ -103,11 +104,12 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
 
   describe('amp-bind amp-img integration', () => {
     it('should change src when the src attribute binding changes', () => {
-      const changeImgButton = iframe.doc.getElementById('changeImgButton');
+      const changeImgSrcButton =
+        iframe.doc.getElementById('changeImgSrcButton');
       const img = iframe.doc.getElementById('image');
       expect(img.getAttribute('src')).to.equal('https://lh3.googleusercontent' +
         '.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no');
-      changeImgButton.click();
+      changeImgSrcButton.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('src')).to.equal('https://lh3' +
           '.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9O' +
@@ -116,36 +118,38 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
 
     it('should NOT change src when new value is a blocked URL', () => {
-      const changeImgButton = iframe.doc.getElementById('changeImgButton');
+      const changeImgSrcButton =
+        iframe.doc.getElementById('changeImgSrcButton');
       const img = iframe.doc.getElementById('image');
       const originalSrc = 'https://lh3.googleusercontent.com/' +
         '5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
       expect(img.getAttribute('src')).to.equal(originalSrc);
       const newSrc = '__amp_source_origin';
       const blockedURLBinding = `imageSrc="${newSrc}"`;
-      setButtonBinding(changeImgButton, blockedURLBinding);
-      changeImgButton.click();
+      setButtonBinding(changeImgSrcButton, blockedURLBinding);
+      changeImgSrcButton.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('src')).to.equal(originalSrc);
       });
     });
 
     it('should NOT change src when new value uses an invalid protocol', () => {
-      const changeImgButton = iframe.doc.getElementById('changeImgButton');
+      const changeImgSrcButton =
+        iframe.doc.getElementById('changeImgSrcButton');
       const img = iframe.doc.getElementById('image');
       const originalSrc = 'https://lh3.googleusercontent.com/' +
         '5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
       expect(img.getAttribute('src')).to.equal(originalSrc);
       const ftpSrc = 'ftp://foo:bar@192.168.1.1/lol.jpg';
       const ftpBinding = `imageSrc="${ftpSrc}"`;
-      setButtonBinding(changeImgButton, ftpBinding);
-      changeImgButton.click();
+      setButtonBinding(changeImgSrcButton, ftpBinding);
+      changeImgSrcButton.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('src')).to.equal(originalSrc);
         const telSrc = 'tel:1-555-867-5309';
         const telBinding = `imageSrc="${telSrc}"`;
-        setButtonBinding(changeImgButton, telBinding);
-        changeImgButton.click();
+        setButtonBinding(changeImgSrcButton, telBinding);
+        changeImgSrcButton.click();
         return waitForBindApplication();
       }).then(() => {
         expect(img.getAttribute('src')).to.equal(originalSrc);
@@ -153,10 +157,11 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
 
     it('should change alt when the alt attribute binding changes', () => {
-      const changeImgButton = iframe.doc.getElementById('changeImgButton');
+      const changeImgAltButton =
+        iframe.doc.getElementById('changeImgAltButton');
       const img = iframe.doc.getElementById('image');
       expect(img.getAttribute('alt')).to.equal('unbound');
-      changeImgButton.click();
+      changeImgAltButton.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('alt')).to.equal('hello world');
       });
