@@ -64,6 +64,13 @@ let reportingBackoff = function(work) {
 };
 
 /**
+ * The true JS engine, as detected by inspecting an Error stack. This should be
+ * used with the userAgent to tell definitely. I.e., Chrome on iOS is really a
+ * Safari JS engine.
+ */
+let detectedJsEngine;
+
+/**
  * Reports an error. If the error has an "associatedElement" property
  * the element is marked with the `i-amphtml-element-error` and displays
  * the message itself. The message is always send to the console.
@@ -311,6 +318,11 @@ export function getErrorReportUrl(message, filename, line, col, error,
     }
   }
 
+  if (!detectedJsEngine) {
+    detectedJsEngine = detectJsEngineFromStack();
+  }
+  url += `&jse=${detectJsEngineFromStack}`;
+
   if (error) {
     const tagName = error && error.associatedElement
       ? error.associatedElement.tagName
@@ -340,6 +352,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
  * Returns true if it appears like there is non-AMP JS on the
  * current page.
  * @param {!Window} win
+ * @return {boolean}
  * @visibleForTesting
  */
 export function detectNonAmpJs(win) {
@@ -354,4 +367,52 @@ export function detectNonAmpJs(win) {
 
 export function resetAccumulatedErrorMessagesForTesting() {
   accumulatedErrorMessages = [];
+}
+
+/**
+ * Does a series of checks on the stack of an thrown error to determine the
+ * JS engine that is currently running. This gives a bit more information than
+ * just the UserAgent, since browsers often allow overriding it to "emulate"
+ * mobile.
+ * @return {string}
+ * @visibleForTesting
+ */
+export function detectJsEngineFromStack() {
+  const object = Object.create({
+    // DO NOT rename this property.
+    // DO NOT transform into shorthand method syntax.
+    t: function() {
+      throw new Error('message');
+    },
+  });
+  try {
+    object.t();
+  } catch (e) {
+    const stack = e.stack;
+    // Firefox uses a "<." to show prototype method.
+    if (stack.indexOf('<.t@') > -1) {
+      return 'Firefox';
+    }
+
+    // Safari does not show the context ("object."), just the function name.
+    if (stack.indexOf('t@') === 0) {
+      return 'Safari';
+    }
+
+    // IE looks like Chrome, but includes a context for the base stack line.
+    // Explicitly, we're looking for something like:
+    // "    at Global code https://example.com/app.js:1:200" or
+    // "    at Anonymous function https://example.com/app.js:1:200"
+    const last = stack.split('\n').pop();
+    if (/\bat \w+ /i.test(last)) {
+      return 'IE';
+    }
+
+    // Finally, chrome includes the error message in the stack.
+    if (stack.indexOf('message') > -1) {
+      return 'Chrome';
+    }
+  }
+
+  return 'unknown';
 }
