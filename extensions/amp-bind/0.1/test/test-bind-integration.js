@@ -121,8 +121,9 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
       const originalSrc = 'https://lh3.googleusercontent.com/' +
         '5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
       expect(img.getAttribute('src')).to.equal(originalSrc);
-      const blockedURLSrc = 'imageSrc="__amp_source_origin"';
-      setButtonBinding(changeImgButton, blockedURLSrc);
+      const newSrc = '__amp_source_origin';
+      const blockedURLBinding = `imageSrc="${newSrc}"`;
+      setButtonBinding(changeImgButton, blockedURLBinding);
       changeImgButton.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('src')).to.equal(originalSrc);
@@ -135,13 +136,15 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
       const originalSrc = 'https://lh3.googleusercontent.com/' +
         '5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
       expect(img.getAttribute('src')).to.equal(originalSrc);
-      const ftpSrc = 'imageSrc="ftp://foo:bar@192.168.1.1/lol.jpg"';
-      setButtonBinding(changeImgButton, ftpSrc);
+      const ftpSrc = 'ftp://foo:bar@192.168.1.1/lol.jpg';
+      const ftpBinding = `imageSrc="${ftpSrc}"`;
+      setButtonBinding(changeImgButton, ftpBinding);
       changeImgButton.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('src')).to.equal(originalSrc);
-        const telSrc = 'imageSrc="tel:1-555-867-5309"';
-        setButtonBinding(changeImgButton, telSrc);
+        const telSrc = 'tel:1-555-867-5309';
+        const telBinding = `imageSrc="${telSrc}"`;
+        setButtonBinding(changeImgButton, telBinding);
         changeImgButton.click();
         return waitForBindApplication();
       }).then(() => {
