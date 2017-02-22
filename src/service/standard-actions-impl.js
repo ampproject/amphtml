@@ -21,6 +21,7 @@ import {fromClassForDoc} from '../service';
 import {historyForDoc} from '../history';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {toggle} from '../style';
+import {vsyncFor} from '../vsync';
 
 
 /**
@@ -126,14 +127,20 @@ export class StandardActions {
    */
   handleToggle(invocation) {
     const target = dev().assertElement(invocation.target);
-    const display = this.win_./*OK*/getComputedStyle(target)
-        .getPropertyValue('display');
 
-    if (display == 'none') {
-      this.handleShow(invocation);
-    } else {
-      this.handleHide(invocation);
-    }
+    vsyncFor(this.win_).run({
+      measure: state => {
+        state.display = this.win_./*OK*/getComputedStyle(target)
+          .getPropertyValue('display');
+      },
+      mutate: state => {
+        if (state.display == 'none') {
+          this.handleShow(invocation);
+        } else {
+          this.handleHide(invocation);
+        }
+      },
+    }, {});
   }
 }
 
