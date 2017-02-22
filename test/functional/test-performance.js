@@ -643,6 +643,38 @@ describe('performance', () => {
       });
     });
   });
+});
 
+describes.fakeWin('performance with experiment', {amp: true}, env => {
 
+  let win;
+  let perf;
+  let viewerSendMessageStub;
+
+  beforeEach(() => {
+    win = env.win;
+    const viewer = viewerForDoc(win.document);
+    viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
+    sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
+    sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
+    sandbox.stub(viewer, 'isEmbedded').returns(true);
+    perf = installPerformanceService(win);
+  });
+
+  it('legacy-cdn-domain experiment enabled', () => {
+    sandbox.stub(perf, 'getHostname_', () => 'cdn.ampproject.org');
+    return perf.coreServicesAvailable().then(() => {
+      perf.flush();
+      expect(viewerSendMessageStub)
+          .to.be.calledWith('sendCsi', {ampexp: 'legacy-cdn-domain'});
+    });
+  });
+
+  it('no experiment', () => {
+    sandbox.stub(perf, 'getHostname_', () => 'curls.cdn.ampproject.org');
+    return perf.coreServicesAvailable().then(() => {
+      perf.flush();
+      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', undefined);
+    });
+  });
 });
