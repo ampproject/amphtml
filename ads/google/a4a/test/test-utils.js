@@ -166,7 +166,7 @@ describe('Google A4A utils', () => {
         const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
         injectActiveViewAmpAnalyticsElement(
             new MockA4AImpl(element), extensions, config);
-            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+        expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
         const ampAnalyticsElements = element.querySelectorAll('amp-analytics');
         expect(ampAnalyticsElements.length).to.equal(0);
       });
