@@ -21,7 +21,7 @@ import {dev, user} from '../log';
 import {fromClassForDoc} from '../service';
 import {historyForDoc} from '../history';
 import {installResourcesServiceForDoc} from './resources-impl';
-import {getStyle, toggle} from '../style';
+import {toggle} from '../style';
 
 /**
  * This service contains implementations of some of the most typical actions,
@@ -43,11 +43,15 @@ export class StandardActions {
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = installResourcesServiceForDoc(ampdoc);
 
+    /** @private {!Window} */
+    this.win_ = ampdoc.win;
+
     this.installActions_(this.actions_);
   }
 
   /** @override */
   adoptEmbedWindow(embedWin) {
+    this.win_ = embedWin;
     this.installActions_(actionServiceForDoc(embedWin.document));
   }
 
@@ -134,7 +138,11 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleToggle(invocation) {
-    if (getStyle(dev().assertElement(invocation.target), 'display') == 'none') {
+    const target = dev().assertElement(invocation.target);
+    const display = this.win_./*OK*/getComputedStyle(target)
+        .getPropertyValue('display');
+
+    if (display == 'none') {
       this.handleShow(invocation);
     } else {
       this.handleHide(invocation);
