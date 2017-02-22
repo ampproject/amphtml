@@ -352,6 +352,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
  * Returns true if it appears like there is non-AMP JS on the
  * current page.
  * @param {!Window} win
+ * @return {boolean}
  * @visibleForTesting
  */
 export function detectNonAmpJs(win) {
@@ -368,13 +369,21 @@ export function resetAccumulatedErrorMessagesForTesting() {
   accumulatedErrorMessages = [];
 }
 
+/**
+ * Does a series of checks on the stack of an thrown error to determine the
+ * JS engine that is currently running. This gives a bit more information than
+ * just the UserAgent, since browsers often allow overriding it to "emulate"
+ * mobile.
+ * @return {string}
+ * @visibleForTesting
+ */
 export function detectJsEngineFromStack() {
   const object = Object.create({
     // DO NOT rename this property.
     // DO NOT transform into shorthand method syntax.
     t: function() {
       throw new Error('message');
-    }
+    },
   });
   try {
     object.t();
