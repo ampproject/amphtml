@@ -54,6 +54,7 @@ With the responsive layout, the width and height from the example should yield c
         layout="responsive"
         width="480" height="270"
     ></amp-nexxtv-player>
+
 ```
 
 ## Attributes
