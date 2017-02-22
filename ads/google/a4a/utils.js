@@ -356,7 +356,7 @@ export function extractAmpAnalyticsConfig(responseHeaders) {
       dev().assert(Array.isArray(analyticsConfig['url']));
       return {urls: analyticsConfig.url};
     } catch (err) {
-      dev().error('AmpA4A', 'Invalid analytics', err,
+      dev().error('AMP-A4A', 'Invalid analytics', err,
           responseHeaders.get(AMP_ANALYTICS_HEADER));
     }
   }
