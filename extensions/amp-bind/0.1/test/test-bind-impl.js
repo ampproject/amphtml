@@ -143,7 +143,7 @@ describes.realWin('amp-bind', {
       expect(bind.boundElements_.length).to.equal(0);
       const textElement = createElementWithBinding('[onePlusOne]="1+1"');
       template.appendChild(textElement);
-      return bind.waitForAllMutationsForTesting_();
+      return bind.waitForAllMutationsForTesting();
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(1);
     });
@@ -163,7 +163,7 @@ describes.realWin('amp-bind', {
         '[style]="\'background=color:black\'"';
       textElement = createElementWithBinding(binding);
       template.appendChild(textElement);
-      return bind.waitForAllMutationsForTesting_();
+      return bind.waitForAllMutationsForTesting();
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(0);
       expect(textElement.getAttribute('onclick')).to.be.null;

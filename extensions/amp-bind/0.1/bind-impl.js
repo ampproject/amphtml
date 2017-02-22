@@ -139,29 +139,23 @@ export class Bind {
       mutations.forEach(mutation => {
         const mutatedNode = mutation.target;
         if (this.dynamicRoots_.includes(mutatedNode)) {
-          // Remove all bindings for removed elements
           const removePromises = [];
           const removedNodes = mutation.removedNodes;
           for (let i = 0; i < removedNodes.length; i++) {
             const removedNode = removedNodes[i];
             removePromises.push(this.removeBindingsForNode_(removedNode));
           }
-          const removeAllPromise = removePromises.length > 0 ?
-            Promise.all(removePromises) :
-            Promise.resolve();
-          const mutationPromise = removeAllPromise.then(() => {
-            // Add all bindings for added elements
-            const addPromises = [];
-            const addedNodes = mutation.addedNodes;
-            for (let j = 0; j < addedNodes.length; j++) {
-              const addedNode = addedNodes[j];
-              addPromises.push(this.addBindingsForNode_(addedNode));
-            }
-            const addAllPromise = addPromises.length > 0 ?
-              Promise.all(addPromises) :
-              Promise.resolve();
-            return addAllPromise;
-          }).then(() => {
+          const removeAllPromise = Promise.all(removePromises);
+
+          const addPromises = [];
+          const addedNodes = mutation.addedNodes;
+          for (let j = 0; j < addedNodes.length; j++) {
+            const addedNode = addedNodes[j];
+            addPromises.push(this.addBindingsForNode_(addedNode));
+          }
+          const addAllPromise = Promise.all(addPromises);
+          let mutationPromise = Promise.all([removeAllPromise, addAllPromise]);
+          mutationPromise = mutationPromise.then(() => {
             // Immediately apply bindings to new elements with current scope
             this.digest_();
           });
@@ -353,18 +347,13 @@ export class Bind {
         // TODO(kmh287): What if parent is the body tag?
         // TODO(kmh287): Generify logic for node observation strategy
         // when bind supprots more dynamic nodes.
-        if (tagName == 'TEMPLATE') {
-          const templateParent = element.parentElement;
-          if (templateParent) {
-            this.subtreeMutationObserver_.observe(templateParent, {
-              childList: true,
-            });
-            this.dynamicRoots_.push(templateParent);
-          }
-        } else {
-          this.subtreeMutationObserver_.observe(element, {childList: true});
-          this.dynamicRoots_.push(element);
-        }
+        const elementToObserve = tagName === 'TEMPLATE' ?
+          element.parentElement :
+          element;
+        this.subtreeMutationObserver_.observe(elementToObserve, {
+          childList: true,
+        });
+        this.dynamicRoots_.push(elementToObserve);
       }
 
       const boundProperties = this.scanElement_(element);
@@ -783,7 +772,7 @@ export class Bind {
    *
    * @visibleForTesting
    */
-  waitForAllMutationsForTesting_() {
+  waitForAllMutationsForTesting() {
     return new Promise(resolve => {
       (function waitForMutationCallback() {
         if (this.mutationPromises_.length > 0) {
