@@ -47,7 +47,17 @@ describe('amp-samba-player', () => {
       'data-project-id': '442189dbff37920ceae523517366b5fd',
       'data-media-id': '32e56bfe9b1602fea761a26af305325a'
     }).then(sbplayer => {
+      // whether player exists
       expect(sbplayer).to.not.be.null;
+
+      let hasValidUrl = false;
+
+      for (let v of sbplayer.implementation_.element.getElementsByTagName('iframe'))
+        if (v.src && /(\/[0-9a-z]{32}){1,2}[\/\?]?/i.test(v.src))
+          hasValidUrl = true;
+
+      // whether player has a valid media URL
+      expect(hasValidUrl).to.be.true;
     });
   });
   

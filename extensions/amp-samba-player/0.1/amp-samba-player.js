@@ -44,7 +44,7 @@ class AmpSambaPlayer extends AMP.BaseElement {
 		this.player_ = null;
 	}
 
-		/** @override */
+	/** @override */
 	preconnectCallback(opt_onLayout) {
 		// host to serve the player
 		this.preconnect.url('https://fast.player.liquidplatform.com', opt_onLayout);
@@ -60,30 +60,22 @@ class AmpSambaPlayer extends AMP.BaseElement {
 
 	/** @override */
 	buildCallback() {
+		this.layout_ = this.element.getAttribute('layout');
+
 		this.projectId_ = user().assert(this.element.getAttribute('data-project-id'),
 			`The data-project-id attribute is required for <${TAG}> %s`, this.element);
 
 		// not required (in case of live)
 		this.mediaId_ = this.element.getAttribute('data-media-id');
-
-		this.params_ = getDataParamsFromAttributes(this.element);
-
-		window.__sbPlayerLoadHandler = (function(e) {
-			console.info(this.params_);
-
-			if (this.element.frames.length === 0) {
-				throw new Error('SambaPlayer failed to append itself into provided container.');
-				return;
-			}
-			
-			this.applyFillContent(this.element.frames[0]);
-		}).bind(this);
+		// player features related params
+		// WORKAROUND: object was invalid (e.g. without "hasOwnProperty" method) so recreate it
+		this.params_ = Object.assign({}, getDataParamsFromAttributes(this.element));
 	}
 
 	/** @override */
 	layoutCallback() {
 		return new Promise((function(onSuccess, onError) {
-			this.loadSambaPlayerAPI('', (function(e) {
+			this.loadSambaPlayerAPI('prod', (function(e) {
 				if (!e.success) {
 					onError();
 					return;
@@ -92,10 +84,18 @@ class AmpSambaPlayer extends AMP.BaseElement {
 				this.player_ = new SambaPlayer(this.element, {
 					width: 480,
 					height: 360,
-					events: {
-						'onLoad': '__sbPlayerLoadHandler'
-					}
+					ph: this.projectId_,
+					m: this.mediaId_,
+					playerParams: this.params_
 				});
+
+				for (let v of this.element.getElementsByTagName('iframe')) {
+					console.info(v.name, this.player_.MEDIA_ID, v.name === this.player_.MEDIA_ID);
+					if (v.name === this.player_.MEDIA_ID) {
+						this.applyFillContent(v);
+						break;
+					}
+				}
 
 				onSuccess();
 			}).bind(this));
@@ -110,27 +110,37 @@ class AmpSambaPlayer extends AMP.BaseElement {
 	/** @override */
 	unlayoutCallback() {
 		if (this.player_ && this.element.frames.length > 0) {
+			// TODO: when events are available listeners must be removed as well
 			removeElement(this.element.frames[0]);
 			this.player_ = null;
 		}
-		return true; // Call layoutCallback again.
+
+		// "layoutCallback" must be called again
+		return true;
 	}
 
 	/** @private */
-	loadSambaPlayerAPI(env, cb, castApi = 'prod') {
-		let script = document.createElement('script');
-		script.setAttribute('samba-player-api', 'player');
+	loadSambaPlayerAPI(env, cb) {
+		const baseUrl = API_DICTIONARY[env];
 
-		script.src = `//${API_DICTIONARY[env]}samba.player.api.js?iframeURL=${env}`;
+		if (baseUrl == null)
+			throw new Error(`SambaPlayer wrong environment ${env}.`);
+
+		const script = document.createElement('script');
+
+		script.setAttribute('samba-player-api', 'player');
+		script.src = `//${baseUrl}samba.player.api.js?iframeURL=${env}`;
 		
 		script.onload = script.onreadystatechange = () => {
 			if (!this.readyState || this.readyState === 'loaded' || this.readyState === 'complete') {
-				if(cb) cb({success: true});
+				cb && cb({success: true});
 			}
 		};
+
 		script.onerror = function() {
 			cb && cb({success: false});
-		}
+		};
+
 		document.querySelector('body').appendChild(script);
 	}
 }
