@@ -23,7 +23,7 @@ import {documentStateFor} from './document-state';
 import {getService} from '../service';
 import {installTimerService} from './timer-impl';
 import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
-import {JankMeter, isJankMeterEnabled} from './jank-meter';
+import {JankMeter} from './jank-meter';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -130,9 +130,8 @@ export class Vsync {
       this.docState_.onVisibilityChanged(boundOnVisibilityChanged);
     }
 
-    /** @private {?JankMeter} */
-    this.jankMeter_ =
-        isJankMeterEnabled(this.win) ? new JankMeter(this.win) : null;
+    /** @private {!JankMeter} */
+    this.jankMeter_ = new JankMeter(this.win);
   }
 
   /** @private */
@@ -350,9 +349,7 @@ export class Vsync {
     }
     // Schedule actual animation frame and then run tasks.
     this.scheduled_ = true;
-    if (this.jankMeter_) {
-      this.jankMeter_.onScheduled();
-    }
+    this.jankMeter_.onScheduled();
     this.forceSchedule_();
   }
 
@@ -373,9 +370,7 @@ export class Vsync {
    */
   runScheduledTasks_() {
     this.scheduled_ = false;
-    if (this.jankMeter_) {
-      this.jankMeter_.onRun();
-    }
+    this.jankMeter_.onRun();
 
     const tasks = this.tasks_;
     const states = this.states_;
@@ -456,4 +451,4 @@ export function installVsyncService(window) {
     installTimerService(window);
     return new Vsync(window);
   }));
-};
+}
