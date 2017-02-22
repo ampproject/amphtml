@@ -20,6 +20,7 @@ import {
   getErrorReportUrl,
   installErrorReporting,
   reportError,
+  detectJsEngineFromStack,
 } from '../../src/error';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
@@ -407,5 +408,42 @@ describes.sandboxed('reportError', {}, () => {
     expect(() => {
       clock.tick();
     }).to.throw(/_reported_ Error reported incorrectly/);
+  });
+});
+
+describe('detectJsEngineFromStack', () => {
+  // Note that these are not true of every case. You can emulate iOS Safari
+  // on Desktop Chrome and break this. These tests are explicitly for
+  // SauceLabs, which runs does not masquerade with UserAgent.
+  describe.configure().ifIos().run('on iOS', () => {
+    it.configure().ifSafari().run('detects safari as safari', () => {
+      expect(detectJsEngineFromStack()).to.equal('Safari');
+    });
+
+    it.configure().ifChrome().run('detects chrome as safari', () => {
+      expect(detectJsEngineFromStack()).to.equal('Safari');
+    });
+
+    it.configure().ifFirefox().run('detects firefox as safari', () => {
+      expect(detectJsEngineFromStack()).to.equal('Safari');
+    });
+  });
+
+  describe.configure().skipIos().run('on other OSs', () => {
+    it.configure().ifSafari().run('detects safari as safari', () => {
+      expect(detectJsEngineFromStack()).to.equal('Safari');
+    });
+
+    it.configure().ifChrome().run('detects chrome as chrome', () => {
+      expect(detectJsEngineFromStack()).to.equal('Chrome');
+    });
+
+    it.configure().ifFirefox().run('detects firefox as firefox', () => {
+      expect(detectJsEngineFromStack()).to.equal('Firefox');
+    });
+
+    it.configure().ifEdge().run('detects edge as IE', () => {
+      expect(detectJsEngineFromStack()).to.equal('IE');
+    });
   });
 });
