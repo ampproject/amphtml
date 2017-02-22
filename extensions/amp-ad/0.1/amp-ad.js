@@ -19,7 +19,7 @@ import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
 import {a4aRegistry} from '../../../ads/_a4a-config';
 import {adConfig} from '../../../ads/_config';
-import {dev, user} from '../../../src/log';
+import {user} from '../../../src/log';
 import {extensionsFor} from '../../../src/extensions';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {isExperimentOn} from '../../../src/experiments';
