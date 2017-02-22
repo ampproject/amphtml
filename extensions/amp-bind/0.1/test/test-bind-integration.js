@@ -219,41 +219,72 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
 
   describe('amp-bind amp-video integration', () => {
     it('should change src when the src attribute binding changes', () => {
-      const changeVidButton = iframe.doc.getElementById('mutateVideoButton');
+      const changeVidSrcButton =
+        iframe.doc.getElementById('changeVideoSrcButton');
       const vid = iframe.doc.getElementById('video');
       const originalSrc = 'https://www.google.com/unbound.webm';
       const newSrc = 'https://www.google.com/bound.webm';
       expect(vid.getAttribute('src')).to.equal(originalSrc);;
-      changeVidButton.click();
+      changeVidSrcButton.click();
       return waitForBindApplication().then(() => {
         expect(vid.getAttribute('src')).to.equal(newSrc);
       });
     });
 
     it('should NOT change src when new value is a blocked URL', () => {
-      const changeVidButton = iframe.doc.getElementById('mutateVideoButton');
+      const changeVidSrcButton =
+        iframe.doc.getElementById('changeVideoSrcButton');
       const vid = iframe.doc.getElementById('video');
       const originalSrc = 'https://www.google.com/unbound.webm';
       const newSrc = '__amp_source_origin';
       const blockedURLBinding = `videoSrc="${newSrc}"`;
-      setButtonBinding(changeVidButton, blockedURLBinding);
+      setButtonBinding(changeVidSrcButton, blockedURLBinding);
       expect(vid.getAttribute('src')).to.equal(originalSrc);;
-      changeVidButton.click();
+      changeVidSrcButton.click();
       return waitForBindApplication().then(() => {
         expect(vid.getAttribute('src')).to.equal(originalSrc);
       });
     });
 
     it('should NOT change src when new value uses an invalid protocol', () => {
-
+      const changeVidSrcButton =
+      iframe.doc.getElementById('changeVideoSrcButton');
+      const vid = iframe.doc.getElementById('video');
+      const originalSrc = 'https://www.google.com/unbound.webm';
+      expect(vid.getAttribute('src')).to.equal(originalSrc);
+      // Only HTTPS is allowed
+      const httpSrc = 'http://www.google.com/justhttp.ogg';
+      const httpBinding = `videoSrc="${httpSrc}"`;
+      setButtonBinding(changeVidSrcButton, httpBinding);
+      changeVidSrcButton.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.getAttribute('src')).to.equal(originalSrc);
+        const ftpSrc = 'ftp://foo:bar@192.168.1.1/lol.mp4';
+        const ftpBinding = `videoSrc="${ftpSrc}"`;
+        setButtonBinding(changeVidSrcButton, ftpBinding);
+        changeVidSrcButton.click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(vid.getAttribute('src')).to.equal(originalSrc);
+        const telSrc = 'tel:1-555-867-5309';
+        const telBinding = `videoSrc="${telSrc}"`;
+        setButtonBinding(changeVidSrcButton, telBinding);
+        changeVidSrcButton.click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(vid.getAttribute('src')).to.equal(originalSrc);
+      });
     });
 
     it('should change alt when the alt attribute binding changes', () => {
-
-    });
-
-    it('should change width and height when their bindings change', () => {
-
+      const changeVideoAltButton =
+        iframe.doc.getElementById('changeVideoAltButton');
+      const vid = iframe.doc.getElementById('video');
+      expect(vid.getAttribute('alt')).to.equal('unbound');
+      changeVideoAltButton.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.getAttribute('alt')).to.equal('hello world');
+      });
     });
   });
 

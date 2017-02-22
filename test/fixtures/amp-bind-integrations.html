@@ -78,11 +78,24 @@
   </amp-selector>
 
   <p> AMP-VIDEO TEST</p>
-  <button
-  on="tap:AMP.setState(videoSrc='https://www.google.com/bound.webm', videoAlt='hello world', controls=true)"
-  id="mutateVideoButton">Change video src, alt, and add controls!
-  </button>
-  <amp-video width="300" height="300" layout="responsive" id="video" src="https://www.google.com/unbound.webm" [src]="videoSrc" alt="unbound" [alt]="videoAlt" [controls]></amp-video>
+  <button on="tap:AMP.setState(videoSrc='https://www.google.com/bound.webm')" id="changeVideoSrcButton">Change video src! </button>
+  <button on="tap:AMP.setState(videoAlt='hello world')" id="changeVideoAltButton"></button>
+  <button on="tap:AMP.setState(videoControls=true)" id="changeVideoControlsButton"></button>
+  <button on="tap:AMP.setState(videoWidth=300, videoHeight=300)" id="changeVideoDimensButton"></button>
+  <amp-video
+    layout="responsive"
+    id="video"
+    src="https://www.google.com/unbound.webm"
+    [src]="videoSrc"
+    alt="unbound"
+    [alt]="videoAlt"
+    width="200"
+    [width]="videoWidth"
+    height="200"
+    [height]="videoHeight"
+    [controls]="videoControls">
+
+  </amp-video>
 
 
 
