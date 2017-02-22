@@ -48,7 +48,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
   }
 
-  //TODO(kmh287): Remove all bindigns from HTML and use this func exclusively?
+  //TODO(kmh287): Set all 'on' attributes in the test for clarity?
   function setButtonBinding(button, binding) {
     button.setAttribute('on', `tap:AMP.setState(${binding})`);
   }
@@ -105,13 +105,38 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
       });
     });
 
+    it('should NOT change src when new value is a blocked URL', () => {
+      const changeImgButton = iframe.doc.getElementById('changeImgButton');
+      const img = iframe.doc.getElementById('image');
+      const originalSrc = 'https://lh3.googleusercontent.com/' +
+        '5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
+      expect(img.getAttribute('src')).to.equal(originalSrc);
+      const blockedURLSrc = 'imageSrc="__amp_source_origin"';
+      setButtonBinding(changeImgButton, blockedURLSrc);
+      changeImgButton.click();
+      return waitForBindApplication().then(() => {
+        expect(img.getAttribute('src')).to.equal(originalSrc);
+      })
+    });
+
     it('should NOT change src when new value uses an invalid protocol', () => {
       const changeImgButton = iframe.doc.getElementById('changeImgButton');
       const img = iframe.doc.getElementById('image');
-      expect(img.getAttribute('src')).to.equal('https://lh3.googleusercontent' +
-        '.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no');
-      changeImageButton.setAttribute('on', 'tap:AMP.setState(imageSrc=' +
-        '"ftp://ftp_image.jpeg")';
+      const originalSrc = 'https://lh3.googleusercontent.com/' +
+        '5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
+      expect(img.getAttribute('src')).to.equal(originalSrc);
+      const ftpSrc = 'imageSrc="ftp://foo:bar@192.168.1.1/lol.jpg"';
+      setButtonBinding(changeImgButton, ftpSrc);
+      changeImgButton.click();
+      return waitForBindApplication().then(() => {
+        expect(img.getAttribute('src')).to.equal(originalSrc);
+        const telSrc = 'imageSrc="tel:1-555-867-5309"';
+        setButtonBinding(changeImgButton, telSrc);
+        changeImgButton.click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(img.getAttribute('src')).to.equal(originalSrc);
+      })
     });
 
     it('should change alt when the alt attribute binding changes', () => {
