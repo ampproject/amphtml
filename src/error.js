@@ -153,6 +153,17 @@ export function cancellation() {
 }
 
 /**
+ * @param {?Error|string} errorOrMessage
+ * @return {boolean}
+ */
+export function isCancellation(errorOrMessage) {
+  if (!errorOrMessage) {
+    return false;
+  }
+  return errorOrMessage == CANCELLED || errorOrMessage.message == CANCELLED;
+}
+
+/**
  * Install handling of global unhandled exceptions.
  * @param {!Window} win
  */
@@ -313,9 +324,12 @@ export function getErrorReportUrl(message, filename, line, col, error,
 
   if (error) {
     const tagName = error && error.associatedElement
-      ? error.associatedElement.tagName
-      : 'u';  // Unknown
+        ? error.associatedElement.tagName
+        : 'u';  // Unknown
     url += `&el=${encodeURIComponent(tagName)}`;
+    if (error.args) {
+      url += `&args=${encodeURIComponent(JSON.stringify(error.args))}`;
+    }
 
     if (!isUserError) {
       url += `&s=${encodeURIComponent(error.stack || '')}`;
