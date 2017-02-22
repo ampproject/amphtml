@@ -18,6 +18,7 @@ import {StandardActions} from '../../src/service/standard-actions-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {bindForDoc} from '../../src/bind';
 import {setParentWindow} from '../../src/service';
+import {vsyncFor} from '../../src/vsync';
 
 
 describes.sandboxed('StandardActions', {}, () => {
@@ -25,10 +26,39 @@ describes.sandboxed('StandardActions', {}, () => {
   let mutateElementStub;
   let deferMutateStub;
 
-  function createAmpElement() {
+  const elementsToCleanUp = [];
+
+  function addStyles(cssText) {
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.appendChild(document.createTextNode(cssText));
+    document.head.appendChild(style);
+  }
+
+  function createElement() {
     const element = document.createElement('div');
-    element.classList.add('i-amphtml-element');
+    window.document.body.appendChild(element);
+    elementsToCleanUp.push(element);
     return element;
+  }
+
+  function createAmpElement() {
+    const element = createElement();
+    element.classList.add('i-amphtml-element');
+    element.collapse = sandbox.stub();
+    element.expand = sandbox.stub();
+    return element;
+  }
+
+  function stubVsyncRun() {
+    sandbox.stub(vsyncFor(window), 'run', (task, state) => {
+      if (task.measure) {
+        task.measure(state);
+      }
+      if (task.mutate) {
+        task.mutate(state);
+      }
+    });
   }
 
   function stubMutate(methodName) {
@@ -50,82 +80,101 @@ describes.sandboxed('StandardActions', {}, () => {
     expect(element.style.display).to.not.equal('none');
   }
 
+  function expectAmpElementToHaveBeenHidden(element) {
+    expect(mutateElementStub).to.be.calledOnce;
+    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+    expect(element.collapse).to.be.calledOnce;
+  }
+
+  function expectAmpElementToHaveBeenShown(element) {
+    expect(deferMutateStub).to.be.calledOnce;
+    expect(deferMutateStub.firstCall.args[0]).to.equal(element);
+    expect(element.expand).to.be.calledOnce;
+  }
+
   beforeEach(() => {
     standardActions = new StandardActions(new AmpDocSingle(window));
     mutateElementStub = stubMutate('mutateElement');
     deferMutateStub = stubMutate('deferMutate');
+    addStyles('.-test-hidden { display: none }');
+    stubVsyncRun();
+  });
+
+  afterEach(() => {
+    while (elementsToCleanUp.length) {
+      const element = elementsToCleanUp.pop();
+      element.parentNode.removeChild(element);
+    }
   });
 
   describe('"hide" action', () => {
     it('should handle normal element', () => {
-      const element = document.createElement('div');
+      const element = createElement();
       standardActions.handleHide({target: element});
-      // expectElementToHaveBeenHidden(element);
+      expectElementToHaveBeenHidden(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      element.collapse = sandbox.stub();
-
       standardActions.handleHide({target: element});
-      expect(mutateElementStub).to.be.calledOnce;
-      expect(mutateElementStub.firstCall.args[0]).to.equal(element);
-      expect(element.collapse).to.be.calledOnce;
+      expectAmpElementToHaveBeenHidden(element);
     });
   });
 
   describe('"show" action', () => {
     it('should handle normal element', () => {
-      const element = document.createElement('div');
+      const element = createElement();
       standardActions.handleShow({target: element});
       expectElementToHaveBeenShown(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      element.expand = sandbox.stub();
-
       standardActions.handleShow({target: element});
-      expect(deferMutateStub).to.be.calledOnce;
-      expect(deferMutateStub.firstCall.args[0]).to.equal(element);
-      expect(element.expand).to.be.calledOnce;
+      expectAmpElementToHaveBeenShown(element);
     });
 
   });
 
   describe('"toggle" action', () => {
-    it('should show normal element when hidden', () => {
-      const element = document.createElement('div');
+    it('should show normal element when hidden (inline)', () => {
+      const element = createElement();
       element.style.display = 'none';
       standardActions.handleToggle({target: element});
       expectElementToHaveBeenShown(element);
     });
 
+    it('should show normal element when hidden (css)', () => {
+      const element = createElement();
+      element.className += ' -test-hidden';
+      standardActions.handleToggle({target: element});
+      expectElementToHaveBeenShown(element);
+    });
+
     it('should hide normal element when shown', () => {
-      const element = document.createElement('div');
+      const element = createElement();
       standardActions.handleToggle({target: element});
       expectElementToHaveBeenHidden(element);
     });
 
-    it('should show AmpElement when hidden', () => {
+    it('should show AmpElement when hidden (inline)', () => {
       const element = createAmpElement();
       element.style.display = 'none';
-      element.expand = sandbox.stub();
-
       standardActions.handleToggle({target: element});
-      expect(deferMutateStub).to.be.calledOnce;
-      expect(deferMutateStub.firstCall.args[0]).to.equal(element);
-      expect(element.expand).to.be.calledOnce;
+      expectAmpElementToHaveBeenShown(element);
+    });
+
+    it('should show AmpElement when hidden (css)', () => {
+      const element = createAmpElement();
+      element.className += ' -test-hidden';
+      standardActions.handleToggle({target: element});
+      expectAmpElementToHaveBeenShown(element);
     });
 
     it('should hide AmpElement when shown', () => {
       const element = createAmpElement();
-      element.collapse = sandbox.stub();
-
       standardActions.handleToggle({target: element});
-      expect(mutateElementStub).to.be.calledOnce;
-      expect(mutateElementStub.firstCall.args[0]).to.equal(element);
-      expect(element.collapse).to.be.calledOnce;
+      expectAmpElementToHaveBeenHidden(element);
     });
   });
 
