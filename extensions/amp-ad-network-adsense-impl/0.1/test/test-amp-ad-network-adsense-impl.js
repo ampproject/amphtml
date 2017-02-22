@@ -19,6 +19,9 @@ import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl';
+import {
+  installExtensionsService,
+} from '../../../../src/service/extensions-impl';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
@@ -31,6 +34,7 @@ import {
   createElementWithAttributes,
   addAttributesToElement,
 } from '../../../../src/dom';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 
 function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
   const doc = opt_doc || document;
@@ -39,6 +43,18 @@ function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
     'type': 'adsense',
   });
   return addAttributesToElement(element, attributes);
+}
+
+function setupForAdTesting(fixture) {
+  installDocService(fixture.win, /* isSingleDoc */ true);
+  const doc = fixture.doc;
+  // TODO(a4a-cam@): This is necessary in the short term, until A4A is
+  // smarter about host document styling.  The issue is that it needs to
+  // inherit the AMP runtime style element in order for shadow DOM-enclosed
+  // elements to behave properly.  So we have to set up a minimal one here.
+  const ampStyle = doc.createElement('style');
+  ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
+  doc.head.appendChild(ampStyle);
 }
 
 describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
@@ -280,6 +296,69 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
               {creative,
                signature: base64UrlDecodeToBytes('AQAB'),
                size: null});
+      });
+    });
+    it('with analytics', () => {
+      return utf8Encode('some creative').then(creative => {
+        const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
+        return impl.extractCreativeAndSignature(
+          creative,
+          {
+            get: function(name) {
+              switch (name) {
+                case 'X-AmpAnalytics':
+                  return JSON.stringify({url});
+                case 'X-AmpAdSignature':
+                  return 'AQAB';
+                default:
+                  return undefined;
+              }
+            },
+            has: function(name) {
+              return !!this.get(name);
+            },
+          }).then(adResponse => {
+            expect(adResponse).to.deep.equal(
+              {
+                creative,
+                signature: base64UrlDecodeToBytes('AQAB'),
+                size: null,
+              });
+            expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
+          });
+      });
+    });
+  });
+
+  describe('#onCreativeRender', () => {
+    let loadExtensionSpy;
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+        });
+        impl = new AmpAdNetworkAdsenseImpl(element);
+        const extensions = installExtensionsService(impl.win);
+        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+      });
+    });
+
+    it('injects amp analytics', () => {
+      const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
+      impl.ampAnalyticsConfig = {urls};
+      impl.onCreativeRender(false);
+      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+      const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
+      expect(ampAnalyticsElement).to.be.ok;
+      // Exact format of amp-analytics element covered in
+      // ads/google/test/test-utils.js.  Just ensure urls given exist somewhere.
+      urls.forEach(url => {
+        expect(ampAnalyticsElement.innerHTML.indexOf(url)).to.not.equal(-1);
       });
     });
   });
