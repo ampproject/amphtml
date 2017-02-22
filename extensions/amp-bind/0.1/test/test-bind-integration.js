@@ -111,13 +111,12 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
 
     it('should allow bindings to width and height attributes', () => {
-      const changeImgDimensButton = 
+      const changeImgDimensButton =
         iframe.doc.getElementById('changeImgDimensButton');
       const img = iframe.doc.getElementById('image');
       expect(img.getAttribute('height')).to.equal('200');
       expect(img.getAttribute('width')).to.equal('200');
       changeImgDimensButton.click();
-      debugger;
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('height')).to.equal('300');
         expect(img.getAttribute('width')).to.equal('300');

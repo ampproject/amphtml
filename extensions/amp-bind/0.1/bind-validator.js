@@ -76,7 +76,6 @@ export class BindValidator {
    * @return {boolean}
    */
   canBind(tag, property) {
-    debugger;
     return (this.rulesForTagAndProperty_(tag, property) !== undefined);
   }
 
