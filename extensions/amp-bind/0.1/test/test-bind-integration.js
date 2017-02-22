@@ -51,11 +51,21 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
   describe('amp-bind text integration', () => {
     it('should update text when text attribute binding changes', () => {
       const textElement = iframe.doc.getElementById('textElement');
-      const button = iframe.doc.getElementById('boundTextButton');
+      const button = iframe.doc.getElementById('mutateTextButton');
       expect(textElement.innerHTML).to.equal('unbound');
       button.click();
       return waitForBindApplication().then(() => {
         expect(textElement.innerHTML).to.equal('hello world');
+      });
+    });
+
+    it('should update CSS class when class binding changes', () => {
+      const textElement = iframe.doc.getElementById('textElement');
+      const button = iframe.doc.getElementById('mutateTextButton');
+      expect(textElement.className).to.equal('original');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(textElement.className).to.equal('new');
       });
     });
   });
