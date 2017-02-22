@@ -90,6 +90,9 @@ export class Performance {
     /** @private {boolean} */
     this.isPerformanceTrackingOn_ = false;
 
+    /** @private {?string} */
+    this.enabledExperiments_ = null;
+
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => {
       this.tick('ol');
@@ -269,11 +272,28 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.sendMessage('sendCsi', undefined,
-          /* cancelUnsent */true);
+      const experiments = this.getEnabledExperiments_();
+      const payload = experiments === '' ? undefined : {
+        ampexp: experiments,
+      };
+      this.viewer_.sendMessage('sendCsi', payload, /* cancelUnsent */true);
     }
   }
 
+  /**
+   * @returns {string} comma-separated list of experiment IDs
+   * @private
+   */
+  getEnabledExperiments_() {
+    if (this.enabledExperiments_ !== null) {
+      return this.enabledExperiments_;
+    }
+    const experiments = [];
+    if (this.win.location.hostname == 'cdn.ampproject.org') {
+      experiments.push('nocurls');
+    }
+    return this.enabledExperiments_ = experiments.join(',');
+  }
 
   /**
    * Queues the events to be flushed when tick function is set.
