@@ -141,6 +141,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }), '*');
   };
 
+<<<<<<< HEAD
   // emitter
   handleNexxMessages_(event) {
     const data = isObject(event.data) ? event.data : tryParseJson(event.data);
