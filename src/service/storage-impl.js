@@ -286,33 +286,11 @@ export class LocalStorageBinding {
     this.win = win;
 
     /** @private @const {boolean} */
-    this.isLocalStorageSupported_ = this.checkIsLocalStorageSupported_();
+    this.isLocalStorageSupported_ = 'localStorage' in this.win;
 
     if (!this.isLocalStorageSupported_) {
       const error = new Error('localStorage not supported.');
       dev().expectedError(TAG, error);
-    }
-  }
-
-  /**
-   * Determines whether localStorage API is supported by ensuring it is declared
-   * and does not throw an exception when used.
-   * @return {boolean}
-   * @private
-   */
-  checkIsLocalStorageSupported_() {
-    try {
-      if (!('localStorage' in this.win)) {
-        return false;
-      }
-
-      // We do not care about the value fetched from local storage; we only care
-      // whether the call throws an exception or not.  As such, we can look up
-      // any arbitrary key.
-      this.win.localStorage.getItem('test');
-      return true;
-    } catch(e) {
-      return false;
     }
   }
 
