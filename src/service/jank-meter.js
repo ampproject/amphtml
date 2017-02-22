@@ -45,7 +45,6 @@ export class JankMeter {
     }
   }
 
-
   onRun() {
     if (this.scheduledTime_ == null) {
       return;
