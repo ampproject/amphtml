@@ -15,7 +15,7 @@
  */
 
 import {Messaging, WindowPortEmulator} from './messaging';
-import {TouchHandler} from './touch_handler';
+import {TouchHandler} from './touch-handler';
 import {getAmpDoc} from '../../../src/ampdoc';
 import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
