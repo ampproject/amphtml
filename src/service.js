@@ -73,8 +73,8 @@ export class EmbeddableService {
  */
 export function getExistingServiceForWindow(win, id) {
   const exists = getExistingServiceForWindowOrNull(win, id);
-  return dev().assert(exists, `${id} service not found. Make sure it is ` +
-      `installed.`);
+  return dev().assert(/** @type {!Object} */ (exists),
+      `${id} service not found. Make sure it is installed.`);
 }
 
 /**
