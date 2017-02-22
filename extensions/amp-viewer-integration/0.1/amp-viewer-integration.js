@@ -163,7 +163,7 @@ export class AmpViewerIntegration {
       this.win, 'unload', this.handleUnload_.bind(this, messaging));
 
     if (viewer.hasCapability('swipe')) {
-      new TouchHandler(this.win, messaging);
+      this.initTouchHandler_(messaging);
     }
   }
 
@@ -175,6 +175,14 @@ export class AmpViewerIntegration {
    */
   handleUnload_(messaging) {
     return messaging.sendRequest(RequestNames.UNLOADED, {}, true);
+  }
+
+  /**
+   * @param {!Messaging} messaging
+   * @private
+   */
+  initTouchHandler_(messaging) {
+    new TouchHandler(this.win, messaging);
   }
 }
 
