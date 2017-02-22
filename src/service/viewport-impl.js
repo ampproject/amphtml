@@ -308,8 +308,12 @@ export class Viewport {
   }
 
   /**
-   * Returns the scroll height of the content of the document. Note that this
-   * method is not cached since we there's no indication when it might change.
+   * Returns the scroll height of the content of the document, including the
+   * padding top for the viewer header.
+   * The scrollHeight will be the viewport height if there's not enough content
+   * to fill up the viewport.
+   * Note that this method is not cached since we there's no indication when
+   * it might change.
    * @return {number}
    */
   getScrollHeight() {
@@ -846,7 +850,10 @@ export class ViewportBindingDef {
   getScrollWidth() {}
 
   /**
-   * Returns the scroll height of the content of the document.
+   * Returns the scroll height of the content of the document, including the
+   * padding top for the viewer header.
+   * The scrollHeight will be the viewport height if there's not enough content
+   * to fill up the viewport.
    * @return {number}
    */
   getScrollHeight() {}

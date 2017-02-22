@@ -237,7 +237,7 @@ export class AmpAnimation extends AMP.BaseElement {
     }
 
     const vsync = this.getVsync();
-    const readyPromise = this.embed_ ? this.embed_.whenLoaded() :
+    const readyPromise = this.embed_ ? this.embed_.whenReady() :
         this.getAmpDoc().whenReady();
     return readyPromise.then(() => {
       const measurer = new MeasureScanner(this.win, {
