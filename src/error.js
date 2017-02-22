@@ -412,7 +412,7 @@ export function detectJsEngineFromStack() {
     if (stack.indexOf('message') > -1) {
       return 'Chrome';
     }
-
-    return 'unknown';
   }
+
+  return 'unknown';
 }
