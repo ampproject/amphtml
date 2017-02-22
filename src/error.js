@@ -380,18 +380,26 @@ export function detectJsEngineFromStack() {
     object.t();
   } catch (e) {
     const stack = e.stack;
+    // Firefox uses a "<." to show prototype method.
     if (stack.indexOf('<.t@') > -1) {
       return 'Firefox';
     }
 
+    // Safari does not show the context ("object."), just the function name.
     if (stack.indexOf('t@') === 0) {
       return 'Safari';
     }
 
-    if (stack.indexOf('at Global code') > -1) {
+    // IE looks like Chrome, but includes a context for the base stack line.
+    // Explicitly, we're looking for something like:
+    // "    at Global code https://example.com/app.js:1:200" or
+    // "    at Anonymous function https://example.com/app.js:1:200"
+    const last = stack.split('\n').pop();
+    if (/\bat \w+ /i.test(last)) {
       return 'IE';
     }
 
+    // Finally, chrome includes the error message in the stack.
     if (stack.indexOf('message') > -1) {
       return 'Chrome';
     }
