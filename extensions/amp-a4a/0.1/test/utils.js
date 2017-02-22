@@ -55,4 +55,3 @@ export class MockA4AImpl extends AmpA4A {
     return null;
   }
 }
-
