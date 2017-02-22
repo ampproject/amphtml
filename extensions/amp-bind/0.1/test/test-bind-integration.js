@@ -48,6 +48,11 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
   }
 
+  //TODO(kmh287): Remove all bindigns from HTML and use this func exclusively?
+  function setButtonBinding(button, binding) {
+    button.setAttribute('on', `tap:AMP.setState(${binding})`);
+  }
+
   describe('amp-bind text integration', () => {
     it('should update text when text attribute binding changes', () => {
       const textElement = iframe.doc.getElementById('textElement');
@@ -98,6 +103,15 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
           '.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9O' +
           'EIQ_QXcbubWIOdkY=w400-h300-no');
       });
+    });
+
+    it('should NOT change src when new value uses an invalid protocol', () => {
+      const changeImgButton = iframe.doc.getElementById('changeImgButton');
+      const img = iframe.doc.getElementById('image');
+      expect(img.getAttribute('src')).to.equal('https://lh3.googleusercontent' +
+        '.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no');
+      changeImageButton.setAttribute('on', 'tap:AMP.setState(imageSrc=' +
+        '"ftp://ftp_image.jpeg")';
     });
 
     it('should change alt when the alt attribute binding changes', () => {
