@@ -290,6 +290,7 @@ export class Performance {
       return this.enabledExperiments_;
     }
     const experiments = [];
+    // Check if it's the legacy CDN domain.
     if (this.getHostname_() == urls.cdn.split('://')[1]) {
       experiments.push('nocurls');
     }
