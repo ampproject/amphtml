@@ -15,7 +15,7 @@
  */
 
 import {isExperimentOn} from '../experiments';
-import {performanceFor} from '../performance';
+import {performanceForOrNull} from '../performance';
 import {dev} from '../log';
 
 /** @const {number} */
@@ -36,7 +36,7 @@ export class JankMeter {
     /** @private {?number} */
     this.scheduledTime_ = null;
     /** @private {?./performance-impl.Performance} */
-    this.perf_ = performanceFor(win);
+    this.perf_ = performanceForOrNull(win);
 
     if (isJankMeterEnabled(win)) {
       /** @private {!Element} */
