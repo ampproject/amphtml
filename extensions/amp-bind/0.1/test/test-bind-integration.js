@@ -214,4 +214,44 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
   });
 
+  describe('amp-bind amp-video integration', () => {
+    it('should change src when the src attribute binding changes', () => {
+      const changeVidButton = iframe.doc.getElementById('mutateVideoButton');
+      const vid = iframe.doc.getElementById('video');
+      const originalSrc = 'https://www.google.com/unbound.webm';
+      const newSrc = 'https://www.google.com/bound.webm';
+      expect(vid.getAttribute('src')).to.equal(originalSrc);;
+      changeVidButton.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.getAttribute('src')).to.equal(newSrc);
+      });
+    });
+
+    it('should NOT change src when new value is a blocked URL', () => {
+      const changeVidButton = iframe.doc.getElementById('mutateVideoButton');
+      const vid = iframe.doc.getElementById('video');
+      const originalSrc = 'https://www.google.com/unbound.webm';
+      const newSrc = '__amp_source_origin';
+      const blockedURLBinding = `videoSrc="${newSrc}"`;
+      setButtonBinding(changeVidButton, blockedURLBinding);
+      expect(vid.getAttribute('src')).to.equal(originalSrc);;
+      changeVidButton.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.getAttribute('src')).to.equal(originalSrc);
+      });
+    });
+
+    it('should NOT change src when new value uses an invalid protocol', () => {
+
+    });
+
+    it('should change alt when the alt attribute binding changes', () => {
+
+    });
+
+    it('should change width and height when their bindings change', () => {
+
+    });
+  });
+
 });
