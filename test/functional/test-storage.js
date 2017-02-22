@@ -508,6 +508,7 @@ describe('LocalStorageBinding', () => {
         .throws(new Error('unknown'))
         .once();
     binding = new LocalStorageBinding(windowApi);
+    localStorageMock.expects('getItem').never();
     return binding.loadBlob('https://acme.com')
         .then(() => 'SUCCESS', () => 'ERROR').then(res => {
           expect(res).to.equal('SUCCESS');
