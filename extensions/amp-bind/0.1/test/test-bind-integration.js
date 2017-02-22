@@ -77,7 +77,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
       const goToSlide1Button = iframe.doc.getElementById('goToSlide1Button');
       const impl = carousel.implementation_;
       // No previous slide as current slide is 0th side
-      expect(impl.hasPrev()).to.be.false
+      expect(impl.hasPrev()).to.be.false;
       goToSlide1Button.click();
       return waitForBindApplication().then(() => {
         // Has previous slide since the index has changed
