@@ -225,7 +225,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
   describe('amp-bind amp-video integration', () => {
     it('should change src when the src attribute binding changes', () => {
       const changeVidSrcButton =
-        iframe.doc.getElementById('changeVideoSrcButton');
+        iframe.doc.getElementById('changeVidSrcButton');
       const vid = iframe.doc.getElementById('video');
       const originalSrc = 'https://www.google.com/unbound.webm';
       const newSrc = 'https://www.google.com/bound.webm';
@@ -238,7 +238,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
 
     it('should NOT change src when new value is a blocked URL', () => {
       const changeVidSrcButton =
-        iframe.doc.getElementById('changeVideoSrcButton');
+        iframe.doc.getElementById('changeVidSrcButton');
       const vid = iframe.doc.getElementById('video');
       const originalSrc = 'https://www.google.com/unbound.webm';
       const newSrc = '__amp_source_origin';
@@ -253,7 +253,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
 
     it('should NOT change src when new value uses an invalid protocol', () => {
       const changeVidSrcButton =
-      iframe.doc.getElementById('changeVideoSrcButton');
+      iframe.doc.getElementById('changeVidSrcButton');
       const vid = iframe.doc.getElementById('video');
       const originalSrc = 'https://www.google.com/unbound.webm';
       expect(vid.getAttribute('src')).to.equal(originalSrc);
@@ -283,12 +283,29 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
 
     it('should change alt when the alt attribute binding changes', () => {
       const changeVideoAltButton =
-        iframe.doc.getElementById('changeVideoAltButton');
+        iframe.doc.getElementById('changeVidAltButton');
       const vid = iframe.doc.getElementById('video');
       expect(vid.getAttribute('alt')).to.equal('unbound');
       changeVideoAltButton.click();
       return waitForBindApplication().then(() => {
         expect(vid.getAttribute('alt')).to.equal('hello world');
+      });
+    });
+
+    it('should show/hide vid controls when the control binding changes', () => {
+      const showControlsButton =
+        iframe.doc.getElementById('showVidControlsButton');
+      const vid = iframe.doc.getElementById('video');
+      expect(vid.hasAttribute('controls')).to.be.false;
+      showControlsButton.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.hasAttribute('controls')).to.be.true;
+        const hideControlsButton =
+          iframe.doc.getElementById('hideVidControlsButton');
+        hideControlsButton.click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(vid.hasAttribute('controls')).to.be.false;
       });
     });
   });
