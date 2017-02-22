@@ -159,7 +159,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
       });
     });
 
-    it('should allow bindings to width and height attributes', () => {
+    it('should change width and height when their bindings change', () => {
       const changeImgDimensButton =
         iframe.doc.getElementById('changeImgDimensButton');
       const img = iframe.doc.getElementById('image');
