@@ -173,4 +173,14 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
   });
 
+  describe('amp-bind amp-selector integration', () => {
+    it('should update dependent bindings when selection changes', () => {
+
+    });
+
+    it('should update selection when bound value for selected changes', () => {
+
+    });
+  });
+
 });
