@@ -116,7 +116,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
       changeImgButton.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('src')).to.equal(originalSrc);
-      })
+      });
     });
 
     it('should NOT change src when new value uses an invalid protocol', () => {
@@ -136,7 +136,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
         return waitForBindApplication();
       }).then(() => {
         expect(img.getAttribute('src')).to.equal(originalSrc);
-      })
+      });
     });
 
     it('should change alt when the alt attribute binding changes', () => {
