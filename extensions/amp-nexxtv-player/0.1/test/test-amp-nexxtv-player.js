@@ -24,5 +24,41 @@ adopt(window);
 
 describe('amp-nexxtv-player', () => {
 
+    function getNexxtv(mediaid, client, streamtype, start, mode, origin){
+        return createIframePromise(true).then(iframe => {
+            doNotLoadExternalResourcesInTest(iframe.win);
+            const player = iframe.doc.createElement('amp-nexxtv-player');
 
+            if (mediaid) {
+                player.setAttribute('data-mediaid', mediaid);
+            }
+            if (client) {
+                player.setAttribute('data-client', client);
+            }
+
+            return iframe.addElement(player);
+        });
+    }
+
+    it('renders nexxtv video player', () => {
+        return getNexxtv('PTPFEC4U184674', '583', 'video', '2', 'static',
+            'https://embed.nexx.cloud/').then(player => {
+            const playerIframe = player.querySelector('iframe');
+
+            expect(playerIframe).to.not.be.null;
+            expect(playerIframe.src).to.equal('https://embed.nexx.cloud/583/PTPFEC4U184674?start=0&datamode=static');
+        });
+    });
+
+    it('fails without mediaid', () => {
+        return getNexxtv(null, '583', 'video', '2', 'static',
+            'https://embed.nexx.cloud/').should.eventually.be.rejectedWith(
+            /The data-mediaid attribute is required/);
+    });
+
+    it('fails without client', () => {
+        return getNexxtv('PTPFEC4U184674', null, 'video', '2', 'static',
+            'https://embed.nexx.cloud/').should.eventually.be.rejectedWith(
+            /The data-client attribute is required/);
+    });
 });

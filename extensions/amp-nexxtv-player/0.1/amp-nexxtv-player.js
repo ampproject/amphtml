@@ -22,18 +22,9 @@ import {user} from '../../../src/log';
 
 class AmpNexxtvPlayer extends AMP.BaseElement {
 
-
     /** @param {!AmpElement} element */
     constructor(element) {
         super(element);
-
-        this.mediaid_ = '';
-        this.client_ = '';
-        this.delay_ = null;
-        this.mode_ = '';
-        this.streamtype_ = ''; // default
-        this.autoplay_ = 0; // default
-        this.origin_ = '';
     }
 
     /**
@@ -41,9 +32,6 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
      * @override
      */
     preconnectCallback(opt_onLayout) {
-        console.log('preconnect',this.origin_);
-
-
         this.preconnect.url(this.origin_, opt_onLayout);
     }
 
@@ -62,13 +50,10 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
             'The data-client attribute is required for <amp-nexxtv-player> %s',
             this.element);
 
-        this.delay_ = this.element.getAttribute('data-delay') || 0;
+        this.start_ = this.element.getAttribute('data-start') || 0;
         this.mode_ = this.element.getAttribute('data-mode') || 'static'; // default
         this.streamtype_ = this.element.getAttribute('data-streamtype') || 'video'; // default
-        this.autoplay_ = this.element.getAttribute('data-autoplay') || 0; // default
         this.origin_ = this.element.getAttribute('data-origin') || 'https://embed.nexx.cloud/'; // default
-
-        console.log('build :: ', this.origin_);
     }
 
     /** @override */
@@ -82,18 +67,17 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
         }
 
         src += `${encodeURIComponent(this.client_)}/${encodeURIComponent(this.mediaid_)}`;
-        src += `?autoplay=${encodeURIComponent(this.autoplay_)}&start=${encodeURIComponent(this.delay_)}`;
+        src += `?start=${encodeURIComponent(this.start_)}`;
         src += `&datamode=${encodeURIComponent(this.mode_)}`;
 
         iframe.setAttribute('frameborder', '0');
         iframe.setAttribute('allowfullscreen', 'true');
         iframe.src = src;
 
-        console.log(src);
-
         this.applyFillContent(iframe);
         this.element.appendChild(iframe);
         this.iframe_ = iframe;
+
         return this.loadPromise(iframe);
     }
 }

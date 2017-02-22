@@ -1,4 +1,4 @@
 FAIL
-amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:36:2 The mandatory attribute 'data-videoid' is missing in tag 'amp-nexxtv-player'. (see https://www.ampproject.org/docs/reference/extended/amp-nexxtv-player.html) [AMP_TAG_PROBLEM]
+amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:36:2 The mandatory attribute 'data-mediaid' is missing in tag 'amp-nexxtv-player'. (see https://www.ampproject.org/docs/reference/extended/amp-nexxtv-player.html) [AMP_TAG_PROBLEM]
 amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:38:2 The implied layout 'CONTAINER' is not supported by tag 'amp-nexxtv-player'. (see https://www.ampproject.org/docs/reference/extended/amp-nexxtv-player.html) [AMP_LAYOUT_PROBLEM]
-amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:41:2 The attribute 'data-videoid' in tag 'amp-nexxtv-player' is set to the invalid value 'https://www.nexxtv-player.com/watch?v=dQw4w9WgXcQ'. (see https://www.ampproject.org/docs/reference/extended/amp-nexxtv-player.html) [AMP_TAG_PROBLEM]
+amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:41:2 The attribute 'data-mediaid' in tag 'amp-nexxtv-player' is set an invalid value. (see https://www.ampproject.org/docs/reference/extended/amp-nexxtv-player.html) [AMP_TAG_PROBLEM]
