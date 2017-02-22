@@ -272,7 +272,6 @@ export class Messaging {
         this.sendResponseError_(requestId, message.name, reason);
       });
     }
-    return true;
   }
 
   /**

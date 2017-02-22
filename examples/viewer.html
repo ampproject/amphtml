@@ -222,7 +222,7 @@
         prerenderSize: this.prerenderSize_,
         origin: parseUrl(window.location.href).origin,
         csi: this.csi_,
-        cap: 'foo,a2a',
+        cap: 'foo,a2a,swipe',
       };
       log('Params:' + JSON.stringify(params));
 
@@ -457,6 +457,7 @@
         case 'setFlushParams':
         case 'prerenderComplete':
         case 'scroll':
+        case 'replaceHistory':
           return;
         default:
           return Promise.reject('request not supported: ' + type);

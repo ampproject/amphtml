@@ -162,7 +162,9 @@ export class AmpViewerIntegration {
     listenOnce(
       this.win, 'unload', this.handleUnload_.bind(this, messaging));
 
-    new TouchHandler(this.win, messaging);
+    if (viewer.hasCapability('swipe')) {
+      new TouchHandler(this.win, messaging);
+    }
   }
 
   /**

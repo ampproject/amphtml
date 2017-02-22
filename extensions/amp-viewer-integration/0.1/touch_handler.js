@@ -54,14 +54,8 @@ export class TouchHandler {
   constructor(win, messaging) {
     /** @const {!Window} */
     this.win = win;
-    /** @private {!./messaging.Messaging} */
+    /** @const @private {!./messaging.Messaging} */
     this.messaging_ = messaging;
-    /**
-     * Do not forward touch events when false.
-     * @private {boolean}
-     */
-    this.tracking_ = false;
-
     /**
      * When true, prevent default to prevent scrolling.
      * @private {boolean}
@@ -76,10 +70,11 @@ export class TouchHandler {
 
   listenForTouchEvents() {
     const handleEvent = this.handleEvent_.bind(this);
+    const doc = this.win.document;
 
-    listen(this.win, 'touchstart', handleEvent);
-    listen(this.win, 'touchend', handleEvent);
-    listen(this.win, 'touchmove', handleEvent);
+    listen(doc, 'touchstart', handleEvent);
+    listen(doc, 'touchend', handleEvent);
+    listen(doc, 'touchmove', handleEvent);
   }
 
   /**
@@ -89,17 +84,12 @@ export class TouchHandler {
   handleEvent_(e) {
     switch (e.type) {
       case 'touchstart':
-        this.tracking_ = true;
-        this.forwardEvent_(e);
-        break;
       case 'touchend':
+      case 'touchmove':
         this.forwardEvent_(e);
-        this.tracking_ = false;
         break;
       default:
-        if (this.tracking_) {
-          this.forwardEvent_(e);
-        }
+        return;
     }
   }
 
@@ -112,6 +102,7 @@ export class TouchHandler {
       const msg = this.copyTouchEvent_(e);
       this.messaging_.sendRequest(e.type, msg, false);
     }
+    // TODO: switch to passive events and pan-touch action.
     if (this.scrollLocked_) {
       e.preventDefault();
     }
