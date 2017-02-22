@@ -289,10 +289,14 @@ export class Performance {
       return this.enabledExperiments_;
     }
     const experiments = [];
-    if (this.win.location.hostname == 'cdn.ampproject.org') {
+    if (this.getHostname_() == 'cdn.ampproject.org') {
       experiments.push('nocurls');
     }
     return this.enabledExperiments_ = experiments.join(',');
+  }
+
+  getHostname_() {
+    return this.win.location.hostname;
   }
 
   /**
