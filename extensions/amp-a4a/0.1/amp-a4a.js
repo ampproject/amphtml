@@ -57,7 +57,6 @@ import {
 } from '../../../src/service/url-replacements-impl';
 import {extensionsFor} from '../../../src/extensions';
 import {A4AVariableSource} from './a4a-variable-source';
-import {rethrowAsync} from '../../../src/log';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';

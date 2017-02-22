@@ -153,7 +153,7 @@ export function cancellation() {
 }
 
 /**
- * @param {?Error|string} errorOrMessage
+ * @param {*} errorOrMessage
  * @return {boolean}
  */
 export function isCancellation(errorOrMessage) {

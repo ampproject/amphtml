@@ -1369,7 +1369,7 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe.only('error handler', () => {
+  describe('error handler', () => {
     let a4aElement;
     let a4a;
     let userErrorStub;
@@ -1380,7 +1380,8 @@ describe('amp-a4a', () => {
       userErrorStub = sandbox.stub(user(), 'error');
       userWarnStub = sandbox.stub(user(), 'warn');
       devExpectedErrorStub = sandbox.stub(dev(), 'expectedError');
-      return createAdTestingIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
         const doc = fixture.doc;
         a4aElement = createA4aElement(doc);
         a4a = new MockA4AImpl(a4aElement);
