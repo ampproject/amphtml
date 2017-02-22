@@ -60,7 +60,8 @@ self.addEventListener('message', function(event) {
 
   /** @type {FromWorkerMessageDef} */
   const message = {method, returnValue, id};
-  // `message` may only contain vlaues or objects handled by the
+  // `message` may only contain values or objects handled by the
   // structured clone algorithm.
+  // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
   self./*OK*/postMessage(message);
 });

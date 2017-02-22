@@ -17,7 +17,6 @@
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {filterSplice} from '../../../src/utils/array';
-import {ampWorkerErrorForError} from '../../../src/web-worker/amp-worker';
 
 /**
  * @typedef {{
@@ -38,6 +37,15 @@ export let BindingDef;
 let ParsedBindingDef;
 
 /**
+ * Error that can be passed through web worker
+ * @typedef {{
+ *   message: string,
+ *   stack: string,
+ * }}
+ */
+export let EvaluatorErrorDef;
+
+/**
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
@@ -53,7 +61,7 @@ export class BindEvaluator {
    * Parses and stores given bindings into expression objects and returns map
    * of expression string to parse errors.
    * @param {!Array<BindingDef>} bindings
-   * @return !Object<string, !../../../src/web-worker/amp-worker.AmpWorkerErrorDef>>,
+   * @return {!Object<string,EvaluatorErrorDef>},
    */
   addBindings(bindings) {
     const errors = Object.create(null);
@@ -67,7 +75,7 @@ export class BindEvaluator {
       try {
         expression = new BindExpression(e.expressionString);
       } catch (error) {
-        errors[string] = ampWorkerErrorForError(error);
+        errors[string] = {message: error.message, stack: error.stack};
         continue;
       }
 
@@ -102,13 +110,13 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   results: !Object<string, ./bind-expression.BindExpressionResultDef>,
-   *   errors: !Object<string, !../../../src/web-worker/amp-worker.AmpWorkerErrorDef>,
+   *   errors: !Object<string, !EvaluatorErrorDef>,
    * }}
    */
   evaluate(scope) {
     /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
     const cache = {};
-    /** @type {!Object<string, string>} */
+    /** @type {!Object<string, !EvaluatorErrorDef>} */
     const errors = {};
 
     this.parsedBindings_.forEach(binding => {
@@ -124,7 +132,7 @@ export class BindEvaluator {
       try {
         result = binding.expression.evaluate(scope);
       } catch (error) {
-        errors[expr] = ampWorkerErrorForError(error);
+        errors[expr] = {message: error.message, stack: error.stack};
         return;
       }
 
@@ -132,9 +140,9 @@ export class BindEvaluator {
       if (this.validator_.isResultValid(tagName, property, resultString)) {
         cache[expr] = result;
       } else {
-        errors[expr] = ampWorkerErrorForError(
-          new Error(`"${result}" is not a valid result for [${property}].`)
-        );
+        const error =
+          new Error(`"${result}" is not a valid result for [${property}].`);
+        errors[expr] = {message: error.message, stack: error.stack};
       }
     });
     return {results: cache, errors};
