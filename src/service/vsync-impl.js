@@ -23,8 +23,7 @@ import {documentStateFor} from './document-state';
 import {getService} from '../service';
 import {installTimerService} from './timer-impl';
 import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
-import {JankMeter, isJankMeterEnabled} from './jank-meter';
-import {performanceFor} from '../performance';
+import {JankMeter} from './jank-meter';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -452,4 +451,4 @@ export function installVsyncService(window) {
     installTimerService(window);
     return new Vsync(window);
   }));
-};
+}
