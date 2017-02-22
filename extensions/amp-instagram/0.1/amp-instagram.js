@@ -168,7 +168,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (data.type == 'MEASURE') {
       const height = data.details.height;
       if (this.iframe_./*OK*/offsetHeight !== height) {
-        // Height returned by Instagram includes header, so 
+        // Height returned by Instagram includes header, so
         // subtract 48px top padding
         this.attemptChangeHeight(height - PADDING_TOP).catch(() => {});
       }

@@ -134,16 +134,16 @@ describe('amp-instagram', () => {
       const iframe = ins.querySelector('iframe');
       const attemptChangeHeight = sandbox.spy(impl, 'attemptChangeHeight');
       const newHeight = 977;
-      
+
       expect(iframe).to.not.be.null;
 
       sendFakeMessage(ins, iframe, 'MEASURE', {
-        height: newHeight
+        height: newHeight,
       });
 
       expect(attemptChangeHeight).to.be.calledOnce;
       // Height minus padding
-      expect(attemptChangeHeight.firstCall.args[0]).to.equal(newHeight - 48);      
+      expect(attemptChangeHeight.firstCall.args[0]).to.equal(newHeight - 48);
     });
   });
 
@@ -152,8 +152,8 @@ describe('amp-instagram', () => {
       origin: 'https://www.instagram.com',
       source: iframe.contentWindow,
       data: JSON.stringify({
-        type: type,
-        details: details
+        type,
+        details,
       }),
     });
   }
