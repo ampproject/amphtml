@@ -207,3 +207,15 @@ export function removeAlphaFromColor(rgbaColor) {
   return rgbaColor.replace(
       /\(([^,]+),([^,]+),([^,)]+),[^)]+\)/g, '($1,$2,$3, 1)');
 }
+
+/**
+ * Gets the computed style of the element. The helper is necessary to enforce
+ * the possible `null` value returned by a buggy Firefox.
+ *
+ * @param {!Window} win
+ * @param {!Element} el
+ * @return {?CSSStyleDeclaration}
+ */
+export function computedStyle(win, el) {
+  return /** @type {?CSSStyleDeclaration} */(win.getComputedStyle(el));
+}

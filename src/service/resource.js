@@ -20,7 +20,7 @@ import {
   moveLayoutRect,
 } from '../layout-rect';
 import {dev} from '../log';
-import {toggle} from '../style';
+import {toggle, computedStyle} from '../style';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -376,10 +376,12 @@ export class Resource {
           isFixed = true;
           break;
         }
-        if (viewport.isDeclaredFixed(n) &&
-                win./*OK*/getComputedStyle(n).position == 'fixed') {
-          isFixed = true;
-          break;
+        if (viewport.isDeclaredFixed(n)) {
+          const style = computedStyle(win, n);
+          if (style && style.position == 'fixed') {
+            isFixed = true;
+            break;
+          }
         }
       }
     }

@@ -16,7 +16,7 @@
 
 import {dev, user} from '../log';
 import {platformFor} from '../platform';
-import {getStyle, setStyle, setStyles} from '../style';
+import {getStyle, setStyle, setStyles, computedStyle} from '../style';
 
 const TAG = 'FixedLayer';
 
@@ -251,8 +251,7 @@ export class FixedLayer {
         // 3. Calculated fixed info.
         this.fixedElements_.forEach(fe => {
           const element = fe.element;
-          const styles = this.ampdoc.win./*OK*/getComputedStyle(
-              element, null);
+          const styles = computedStyle(this.ampdoc.win, element);
           if (!styles) {
             // Notice that `styles` can be `null`, courtesy of long-standing
             // Gecko bug: https://bugzilla.mozilla.org/show_bug.cgi?id=548397

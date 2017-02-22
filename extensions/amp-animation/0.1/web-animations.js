@@ -16,7 +16,7 @@
 
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
-import {getVendorJsPropertyName} from '../../../src/style';
+import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
 import {isArray, isObject} from '../../../src/types';
 import {
   WebAnimationDef,
@@ -470,8 +470,10 @@ export class MeasureScanner extends Scanner {
   measure_(target, prop) {
     const index = this.targets_.indexOf(target);
     if (!this.computedStyleCache_[index]) {
+      const style = computedStyle(this.win, target);
+      dev().assert(style, 'Got null computed style, which should never happen');
       this.computedStyleCache_[index] = /** @type {!CSSStyleDeclaration} */ (
-          this.win./*OK*/getComputedStyle(target));
+          style);
     }
     const vendorName = getVendorJsPropertyName(
         this.computedStyleCache_[index], prop);
