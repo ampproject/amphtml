@@ -311,7 +311,7 @@ export class LocalStorageBinding {
       // any arbitrary key.
       this.win.localStorage.getItem('test');
       return true;
-    } catch(e) {
+    } catch (e) {
       return false;
     }
   }
