@@ -19,11 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a <a href="https://www.izlesene.com/">Izlesene</a> video.</td>
+    <td>Displays an embedded <a href="https://www.izlesene.com/">Izlesene</a> video.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
+    <td>Coming Soon; Available on <a href="https://www.ampproject.org/docs/reference/experimental#opt-into-the-amp-dev-channel">Dev Channel</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+    <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
 </table>
 
@@ -46,31 +46,29 @@ With responsive layout the width and height from the example should yield correc
     width="480" height="270"></amp-izlesene>
 ```
 
-## Required Attributes
+## Attributes
 
-**data-videoid**
+**data-videoid** (required)
 
-The Izlesene video id found in every Izlesene video page URL
+The ID of the Izlesene video, which can be found in the Izlesene video page URL. For example, in https://www.izlesene.com/video/yayin-yok/7221390, the video ID is `7221390`.
 
-E.g. in https://www.izlesene.com/video/yayin-yok/7221390 `"7221390"` is the video id.
+**data-param-showrel** (optional)
 
-## Optional Attributes
+This is an optional attribute that indicates whether to show related content. This functionality is not available for iOS devices.
 
-**data-param-showrel**
+* Accepted values: `1` or `0`
+* Default value: `1`
 
-Whether to show related content or not. (Not available for IOS devices)
+**data-param-showreplay** (optional)
 
-Value: `"1"` or `"0"`
+This is an optional attribute that indicates whether to show the replay button at the end of the content.
 
-Default value: `"1"`
+* Accepted values: `1` or `0`
+* Default value: `1`
 
-**data-param-showreplay**
+**common attributes**
 
-Whether to show replay button at the end content or not.
-
-Value: `"1"` or `"0"`
-
-Default value: `"1"`
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
