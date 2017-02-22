@@ -2,7 +2,7 @@
 
 The AMP Project welcomes new contributors and we want to make it as easy as possible for them to contribute.  For many new contributors (who may not have open source/Git/AMP/etc. experience) it can be difficult to figure out how to get started.
 
-To help these new contributors get oriented we curate [Great First Issues](https://github.com/ampproject/amphtml/issues?q=is%3Aopen+is%3Aissue+label%3A%22Great+First+Issues%22).  A Great First Issue is a starter issue that a new contributor can use to get comfortable contributing to the AMP Project.
+To help these new contributors get oriented we curate [Great First Issues](https://github.com/ampproject/amphtml/milestone/25).  A Great First Issue is a starter issue that a new contributor can use to get comfortable contributing to the AMP Project.
 
 We depend on experienced members of the community to identify bugs/features that would provide this orientation and to then create a well-documented Great First Issue for them.
 
@@ -17,6 +17,8 @@ Keep these qualities in mind when creating your Great First Issues:
 * **The issue should be P3.**  The issue may not get picked up right away and the person fixing it may encounter problems while working on it so it should be an issue we are okay with going unresolved for a while.
 * **New contributors have a variety of backgrounds; we should have a variety of Great First Issues.**  The goal isn't for each Great First Issue to be a great first issue for _every_ new contributor.  Some new contributors may have extensive web development experience but haven't used Git; some may know everything about Git & Pull Requests but don't have a lot of experience with web components.  You can specify "What you will need to know" in the bug so new contributors can find a Great First Issue that matches their current experience.
 
-## Great First Issue Template
+## How to create a Great First Issue
 
-The [Great First Issues Template](great-first-issues-template.md) contains a template you should use when creating your Great First Issue (inspired by Hoodie's [template](https://github.com/hoodiehq/camp/blob/gh-pages/ISSUE_TEMPLATE.md)).  Copy the [raw markdown](https://raw.githubusercontent.com/ampproject/amphtml/master/contributing/great-first-issues-template.md) into your issue and follow the guidance in the comments.
+* When you identify an issue that would make a Great First Issue, create a new issue using the [Great First Issues Template](great-first-issues-template.md) (inspired by Hoodie's [template](https://github.com/hoodiehq/camp/blob/gh-pages/ISSUE_TEMPLATE.md)).  Copy the [raw markdown](https://raw.githubusercontent.com/ampproject/amphtml/master/contributing/great-first-issues-template.md) into your issue and follow the guidance in the comments.
+* Add the issue to the [Great First Issues milestone](https://github.com/ampproject/amphtml/milestone/25).
+* If you come across a good candidate for a Great First Issue but are momentarily unable to spend the time filling out the template add the [GFI Candidate](https://github.com/ampproject/amphtml/labels/GFI%20Candidate) label to the issue.  The time spent converting GFI Candidates to Great First Issues will pay off for the AMP Project so please remember to come back to issues you labeled as a GFI Candidate.
