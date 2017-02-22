@@ -64,6 +64,13 @@ let reportingBackoff = function(work) {
 };
 
 /**
+ * The true JS engine, as detected by inspecting an Error stack. This should be
+ * used with the userAgent to tell definitely. I.e., Chrome on iOS is really a
+ * Safari JS engine.
+ */
+let detectedJsEngine;
+
+/**
  * Reports an error. If the error has an "associatedElement" property
  * the element is marked with the `i-amphtml-element-error` and displays
  * the message itself. The message is always send to the console.
@@ -311,6 +318,11 @@ export function getErrorReportUrl(message, filename, line, col, error,
     }
   }
 
+  if (!detectedJsEngine) {
+    detectedJsEngine = detectJsEngineFromStack();
+  }
+  url += `&jse=${detectJsEngineFromStack}`;
+
   if (error) {
     const tagName = error && error.associatedElement
       ? error.associatedElement.tagName
@@ -354,4 +366,36 @@ export function detectNonAmpJs(win) {
 
 export function resetAccumulatedErrorMessagesForTesting() {
   accumulatedErrorMessages = [];
+}
+
+export function detectJsEngineFromStack() {
+  const object = Object.create({
+    // DO NOT rename this property.
+    // DO NOT transform into shorthand method syntax.
+    t: function() {
+      throw new Error('message');
+    }
+  });
+  try {
+    object.t();
+  } catch (e) {
+    const stack = e.stack;
+    if (stack.indexOf('<.t@') > -1) {
+      return 'Firefox';
+    }
+
+    if (stack.indexOf('t@') === 0) {
+      return 'Safari';
+    }
+
+    if (stack.indexOf('at Global code') > -1) {
+      return 'IE';
+    }
+
+    if (stack.indexOf('message') > -1) {
+      return 'Chrome';
+    }
+
+    return 'unknown';
+  }
 }
