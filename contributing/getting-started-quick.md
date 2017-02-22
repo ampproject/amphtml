@@ -91,3 +91,10 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * Go to the master branch: `git checkout master`
 * Delete your local branch: `git branch -D <branch name>`
 * Delete the GitHub fork branch: `git push origin --delete <branch name>`
+
+# See your changes in production
+
+* Barring any issues releases are cut on Wednesdays, pushed to Dev Channel Thursday, pushed to 1% of AMP pages on Monday and pushed to all pages a few days later on Thursday.
+* The [amphtml Releases page](https://github.com/ampproject/amphtml/releases) will list your PR in the first build that contains it.  `Pre-release` is the build on the Dev Channel, `Latest Release` is the build in production.
+* Opt-in to using the Dev Channel in a browser by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.
+* Find the AMP version being used on a page in the developer console, i.e. `Powered by AMP ⚡ HTML – Version <build number>`).
