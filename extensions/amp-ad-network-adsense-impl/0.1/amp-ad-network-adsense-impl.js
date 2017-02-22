@@ -37,6 +37,7 @@ import {
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {Layout} from '../../../src/layout';
 import {viewerForDoc} from '../../../src/viewer';
 import {AdsenseSharedState} from './adsense-shared-state';
 
@@ -87,6 +88,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * @private {?string}
      */
     this.uniqueSlotId_ = null;
+
+    /**
+     * Sizes for resize (width then height).
+     * @private {?Array<number>}
+     */
+    this.resizeSize_ = null;
   }
 
   /** @override */
@@ -106,7 +113,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
-    const format = `${slotRect.width}x${slotRect.height}`;
+    const width = slotRect.width;
+    // If responsive, set height to value that is considered valid by
+    // ad server.
+    const isResponsive = this.element.getLayout() == Layout.RESPONSIVE;
+    const height =
+        isResponsive ? Math.ceil(width / 1.91 + 120) : slotRect.height;
+    const format = `${width}x${height}`;
+
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
     // TODO(bcassels): Uncomment the assertion, fixing the tests.
@@ -120,8 +134,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const paramList = [
       {name: 'client', value: adClientId},
       {name: 'format', value: format},
-      {name: 'w', value: slotRect.width},
-      {name: 'h', value: slotRect.height},
+      {name: 'w', value: width},
+      {name: 'h', value: height},
       {name: 'adtest', value: adTestOn},
       {name: 'adk', value: adk},
       {
@@ -143,6 +157,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       paramList.push({name: 'prev_fmts', value: sharedStateParams.prevFmts});
     }
 
+    if (isResponsive &&
+        (height != slotRect.height || width != slotRect.width)) {
+      // If responsive, attempt resize
+      this.attemptChangeSize(height, width).catch(() => {
+        // resize failed so will try again via extractCreativeAndSignature.
+        this.resizeSize_ = [width, height];
+      });
+    }
+
     return googleAdUrl(
         this, ADSENSE_BASE_URL, startTime, paramList, []);
   }
@@ -150,7 +173,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders)
+      .then(adResponse => {
+        adResponse.size = this.resizeSize_;
+        return adResponse;
+      });
   }
 
   /**

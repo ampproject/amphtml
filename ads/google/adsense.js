@@ -53,6 +53,11 @@ export function adsense(global, data) {
   if (data['tagOrigin']) {
     i.setAttribute('data-tag-origin', data['tagOrigin']);
   }
+  if (global.context['layout'] == 'responsive') {
+    // Fluid will fill the space, so use it if eligible (slot width >= 250);
+    // otherwise use auto. Auto is likely to be much smaller than slot.
+    i.setAttribute('data-ad-format', data.width >= 250 ? 'fluid' : 'auto');
+  }
   i.setAttribute('data-page-url', global.context.canonicalUrl);
   i.setAttribute('class', 'adsbygoogle');
   setStyles(i, {
