@@ -16,7 +16,7 @@
 
 import {dev, user} from '../log';
 import {platformFor} from '../platform';
-import {getStyle, setStyle, setStyles} from '../style';
+import {getStyle, setStyle, setStyles, computedStyle} from '../style';
 
 const TAG = 'FixedLayer';
 
@@ -251,22 +251,8 @@ export class FixedLayer {
         // 3. Calculated fixed info.
         this.fixedElements_.forEach(fe => {
           const element = fe.element;
-          const styles = this.ampdoc.win./*OK*/getComputedStyle(
-              element, null);
-          if (!styles) {
-            // Notice that `styles` can be `null`, courtesy of long-standing
-            // Gecko bug: https://bugzilla.mozilla.org/show_bug.cgi?id=548397
-            // See #3096 for more details.
-            state[fe.id] = {
-              fixed: false,
-              transferrable: false,
-              top: '',
-              zIndex: '',
-            };
-            return;
-          }
-
-          const position = styles.getPropertyValue('position');
+          const styles = computedStyle(this.ampdoc.win, element);
+          const position = styles.position;
           // Element is indeed fixed. Visibility is added to the test to
           // avoid moving around invisible elements.
           const isFixed = (
@@ -292,7 +278,7 @@ export class FixedLayer {
           // actual calculated value in all other browsers. To find out whether
           // or not the `top` was actually set in CSS, this method compares
           // `offsetTop` with `style.top = 'auto'` and without.
-          let top = styles.getPropertyValue('top');
+          let top = styles.top;
           const currentOffsetTop = element./*OK*/offsetTop;
           const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
           if ((top == 'auto' || isImplicitAuto) && top != '0px') {
@@ -302,8 +288,8 @@ export class FixedLayer {
             }
           }
 
-          const bottom = styles.getPropertyValue('bottom');
-          const opacity = parseFloat(styles.getPropertyValue('opacity'));
+          const bottom = styles.bottom;
+          const opacity = parseFloat(styles.opacity);
           // Transferability requires element to be fixed and top or bottom to
           // be styled with `0`. Also, do not transfer transparent
           // elements - that's a lot of work for no benefit.  Additionally,
@@ -325,8 +311,8 @@ export class FixedLayer {
             fixed: isFixed,
             transferrable: isTransferrable,
             top,
-            zIndex: styles.getPropertyValue('z-index'),
-            transform: styles.getPropertyValue('transform'),
+            zIndex: styles.zIndex,
+            transform: styles.transform,
           };
         });
       },

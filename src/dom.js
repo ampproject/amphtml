@@ -638,4 +638,3 @@ export function tryFocus(element) {
 export function isIframed(win) {
   return win.parent && win.parent != win;
 }
-

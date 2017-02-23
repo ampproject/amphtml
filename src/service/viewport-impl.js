@@ -28,7 +28,7 @@ import {dev} from '../log';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
 import {platformFor} from '../platform';
-import {px, setStyle, setStyles} from '../style';
+import {px, setStyle, setStyles, computedStyle} from '../style';
 import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {viewerForDoc} from '../viewer';
@@ -1243,9 +1243,10 @@ export class ViewportBindingNaturalIosEmbed_ {
       // Add extra paddingTop to make the content stay at the same position
       // when the hiding header operation is transient
       onDocumentReady(this.win.document, doc => {
+        const body = dev().assertElement(doc.body);
         const existingPaddingTop =
-            this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
-        setStyles(dev().assertElement(doc.body), {
+            computedStyle(this.win, body).paddingTop || '0';
+        setStyles(body, {
           paddingTop: `calc(${existingPaddingTop} + ${lastPaddingTop}px)`,
           borderTop: '',
         });
