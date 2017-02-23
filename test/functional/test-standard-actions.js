@@ -18,7 +18,6 @@ import {StandardActions} from '../../src/service/standard-actions-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {bindForDoc} from '../../src/bind';
 import {setParentWindow} from '../../src/service';
-import {vsyncFor} from '../../src/vsync';
 
 
 describes.sandboxed('StandardActions', {}, () => {
