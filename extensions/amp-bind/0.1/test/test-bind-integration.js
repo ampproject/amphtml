@@ -181,7 +181,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
   });
 
-  describe('amp-bind amp-selector integration', () => {
+  describe('amp-selector integration', () => {
     it('should update dependent bindings when selection changes', () => {
       const selectionText = iframe.doc.getElementById('selectionText');
       const img1 = iframe.doc.getElementById('selectorImg1');
