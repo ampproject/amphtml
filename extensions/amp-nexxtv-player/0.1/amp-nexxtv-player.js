@@ -15,16 +15,34 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {addParamsToUrl} from '../../../src/url';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
+import {removeElement} from '../../../src/dom';
+import {
+    installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
+import {isObject} from '../../../src/types';
+import {VideoEvents} from '../../../src/video-interface';
+import {videoManagerForDoc} from '../../../src/video-manager';
 
 
+/**
+ * @implements {../../../src/video-interface.VideoInterface}
+ */
 class AmpNexxtvPlayer extends AMP.BaseElement {
 
     /** @param {!AmpElement} element */
     constructor(element) {
         super(element);
+
+        /** @private {?Element} */
+        this.iframe_ = null;
+
+        /** @private {?Promise} */
+        this.playerReadyPromise_ = null;
+
+        /** @private {?Function} */
+        this.playerReadyResolver_ = null;
     }
 
     /**
@@ -50,10 +68,13 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
             'The data-client attribute is required for <amp-nexxtv-player> %s',
             this.element);
 
-        this.start_ = this.element.getAttribute('data-start') || 0;
+        this.start_ = this.element.getAttribute('data-seek-to') || 0;
         this.mode_ = this.element.getAttribute('data-mode') || 'static'; // default
         this.streamtype_ = this.element.getAttribute('data-streamtype') || 'video'; // default
         this.origin_ = this.element.getAttribute('data-origin') || 'https://embed.nexx.cloud/'; // default
+
+        installVideoManagerForDoc(this.element);
+        videoManagerForDoc(this.element).register(this);
     }
 
     /** @override */
