@@ -366,7 +366,7 @@ function patchRegisterElement() {
       // Need to switch global to self since closure doesn't wrap the module
       // like CommonJS
       file = file.replace(
-        /installCustomElements\(([^,)]+)\)/g,
+        /^installCustomElements\(([^,)]+)\)/g,
         function($0, $1) {
           if ($1 == 'global') {
             $1 = 'self';
