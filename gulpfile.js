@@ -465,6 +465,8 @@ function build() {
       thirdPartyFrameRegex: TESTING_HOST,
       localDev: true,
     };
+    AMP_CONFIG = Object.assign(AMP_CONFIG, JSON.parse(fs.readFileSync(
+        'build-system/global-configs/prod-config.json').toString()));
     $$.util.log($$.util.colors.green('trying to write AMP_CONFIG.'));
     fs.writeFileSync('node_modules/AMP_CONFIG.json',
         JSON.stringify(AMP_CONFIG));
