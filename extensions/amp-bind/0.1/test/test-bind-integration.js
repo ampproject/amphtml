@@ -222,7 +222,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
   });
 
-  describe('amp-bind amp-video integration', () => {
+  describe('amp-video integration', () => {
     it('should change src when the src attribute binding changes', () => {
       const changeVidSrcButton =
         iframe.doc.getElementById('changeVidSrcButton');
