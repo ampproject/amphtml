@@ -87,13 +87,15 @@ describe('reportErrorToServer', () => {
   beforeEach(() => {
     onError = window.onerror;
     sandbox = sinon.sandbox.create();
-    sandbox.spy(window, 'Image');
+    // sandbox.spy(window, 'Image');
   });
 
   afterEach(() => {
     window.onerror = onError;
-    sandbox.restore();
-    window.viewerState = undefined;
+    // sandbox.restore();
+    if (sandbox) {
+      window.viewerState = undefined;
+    }
   });
 
   it('reportError with error object', () => {
