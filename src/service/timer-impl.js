@@ -18,8 +18,11 @@
 import '../polyfills';
 
 import {user} from '../log';
-import {fromClass} from '../service';
+import {registerService, getService} from '../service';
 import {reportError} from '../error';
+
+/** @const @private {string} */
+const TIMER_SERVICE_TAG = 'timer';
 
 /**
  * Helper with all things Timer.
@@ -156,6 +159,14 @@ export class Timer {
  * @param {!Window} window
  * @return {!Timer}
  */
+export function timerServiceForTesting(window) {
+  installTimerService(window);
+  getService(window, TIMER_SERVICE_TAG, undefined);
+}
+
+/**
+ * @param {!Window} window
+ */
 export function installTimerService(window) {
-  return fromClass(window, 'timer', Timer);
+  registerService(window, TIMER_SERVICE_TAG, Timer);
 };
