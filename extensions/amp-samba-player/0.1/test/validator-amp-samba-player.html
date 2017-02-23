@@ -28,12 +28,21 @@
   <script async custom-element="amp-samba-player" src="https://cdn.ampproject.org/v0/amp-samba-player-0.1.js"></script>
 </head>
 <body>
-  <!-- a valid amp-samba-player -->
+
+  <!-- valid amp-samba-player -->
   <amp-samba-player
       data-project-id="442189dbff37920ceae523517366b5fd"
       data-media-id="32e56bfe9b1602fea761a26af305325a"
       layout="responsive"
-      width="160" height="90">
+      width="640" height="360">
   </amp-samba-player>
+
+  <!-- invalid amp-samba-player: `data-project-id` is missing -->
+  <amp-samba-player
+      data-media-id="32e56bfe9b1602fea761a26af305325a"
+      layout="responsive"
+      width="640" height="360">
+  </amp-samba-player>
+
 </body>
 </html>

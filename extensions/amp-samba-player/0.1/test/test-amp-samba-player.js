@@ -49,16 +49,32 @@ describe('amp-samba-player', () => {
     }).then(sbplayer => {
       // whether player exists
       expect(sbplayer).to.not.be.null;
-
-      let hasValidUrl = false;
-
-      for (let v of sbplayer.implementation_.element.getElementsByTagName('iframe'))
-        if (v.src && /(\/[0-9a-z]{32}){1,2}[\/\?]?/i.test(v.src))
-          hasValidUrl = true;
-
-      // whether player has a valid media URL
-      expect(hasValidUrl).to.be.true;
+      // whether player has a valid SambaTech platform URL
+      expect(getSambaPlayerIframe(sbplayer.implementation_.element)).to.not.be.null;
     });
   });
-  
+
+  it('requires data-project-id param', () => {
+    return getSambaPlayer({}).should.eventually.be.rejectedWith(
+        /The data-project-id attribute is required for/);
+  });
+
+  it('should pass data-param-* attributes to the iframe src', () => {
+    return getSambaPlayer({
+      'data-project-id': '442189dbff37920ceae523517366b5fd',
+      'data-media-id': '32e56bfe9b1602fea761a26af305325a',
+      'data-param-enable-controls': false
+    }).then(sbplayer => {
+      const iframe = getSambaPlayerIframe(sbplayer.implementation_.element);
+      expect(iframe.src.indexOf('enableControls=false') !== -1).to.be.true;
+    });
+  });
+
+  function getSambaPlayerIframe(parent) {
+    for (let v of parent.getElementsByTagName('iframe'))
+      if (v.src && /(\/[0-9a-z]{32}){1,2}[\/\?]?/i.test(v.src))
+        return v;
+
+    return null;
+  }
 });

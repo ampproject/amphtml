@@ -16,6 +16,8 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {videoManagerForDoc} from '../../../src/video-manager';
 import {user} from '../../../src/log';
 
 /** @const {string} */
@@ -40,6 +42,9 @@ class AmpSambaPlayer extends AMP.BaseElement {
 		/** @private {?string} */
 		this.mediaId_ = null;
 
+		/** @private {?Object} */
+		this.params_ = null;
+
 		/** @private {?SambaPlayer} */
 		this.player_ = null;
 	}
@@ -60,16 +65,17 @@ class AmpSambaPlayer extends AMP.BaseElement {
 
 	/** @override */
 	buildCallback() {
-		this.layout_ = this.element.getAttribute('layout');
-
 		this.projectId_ = user().assert(this.element.getAttribute('data-project-id'),
 			`The data-project-id attribute is required for <${TAG}> %s`, this.element);
 
 		// not required (in case of live)
 		this.mediaId_ = this.element.getAttribute('data-media-id');
 		// player features related params
-		// WORKAROUND: object was invalid (e.g. without "hasOwnProperty" method) so recreate it
+		// WARN: methods missing on returned object (e.g. hasOwnProperty) so recreate it
 		this.params_ = Object.assign({}, getDataParamsFromAttributes(this.element));
+
+		installVideoManagerForDoc(this.element);
+		videoManagerForDoc(this.element).register(this);
 	}
 
 	/** @override */
@@ -90,7 +96,6 @@ class AmpSambaPlayer extends AMP.BaseElement {
 				});
 
 				for (let v of this.element.getElementsByTagName('iframe')) {
-					console.info(v.name, this.player_.MEDIA_ID, v.name === this.player_.MEDIA_ID);
 					if (v.name === this.player_.MEDIA_ID) {
 						this.applyFillContent(v);
 						break;
@@ -118,6 +123,42 @@ class AmpSambaPlayer extends AMP.BaseElement {
 		// "layoutCallback" must be called again
 		return true;
 	}
+
+	// VideoInterface implementation
+
+	/** @override */
+	supportsPlatform() {
+		return true;
+	}
+
+	/** @override */
+	isInteractive() {
+		return true;
+	}
+
+	/** @override */
+	play(unusedIsAutoplay) {
+		this.player_ && this.player_.play();
+	}
+
+	/** @override */
+	pause() {
+		this.player_ && this.player_.pause();
+	}
+
+	/** @override */
+	mute() {}
+
+	/** @override */
+	unmute() {}
+
+	/** @override */
+	showControls() {}
+
+	/** @override */
+	hideControls() {}
+
+	// End of VideoInterface implementation
 
 	/** @private */
 	loadSambaPlayerAPI(env, cb) {

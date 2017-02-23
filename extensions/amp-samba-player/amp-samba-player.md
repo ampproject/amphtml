@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-jwplayer"></a> `amp-jwplayer`
+# <a name="amp-samba-player"></a> `amp-samba-player`
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a cloud-hosted <a href="https://www.jwplayer.com/">JW Player</a>.</td>
+    <td>Displays <a href="http://sambatech.com/">SambaTech</a> video player.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-jwplayer" src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-samba-player" src="https://cdn.ampproject.org/v0/amp-samba-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -35,23 +35,23 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-jwplayer/">Annotated code example for amp-jwplayer</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-samba-player/">Annotated code example for amp-samba-player</a></td>
   </tr>
 </table>
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts (16:9 in this case).
 
 Example:
 
 ```html
-<amp-jwplayer
-    data-player-id="aBcD1234"
-    data-media-id="5678WxYz"
+<amp-samba-player
+    data-project-id="442189dbff37920ceae523517366b5fd"
+    data-media-id="32e56bfe9b1602fea761a26af305325a"
     layout="responsive"
-    width="16" height="9">
-</amp-jwplayer>
+    width="640" height="360">
+</amp-samba-player>
 ```
 
 Non-responsive layout is also supported.
@@ -59,30 +59,36 @@ Non-responsive layout is also supported.
 Example:
 
 ```html
-<amp-jwplayer
-    data-player-id="aBcD1234"
-    data-playlist-id="5678WxYz"
-    width="160" height="90">
-</amp-jwplayer>
+<amp-samba-player
+    data-project-id="442189dbff37920ceae523517366b5fd"
+    data-media-id="32e56bfe9b1602fea761a26af305325a"
+    width="640" height="360">
+</amp-samba-player>
 ```
 
 ## Attributes
 
-**data-player-id**
+**data-project-id** (required)
 
-JW Platform player id. This is an 8-digit alphanumeric sequence that can be found in the [Players](https://dashboard.jwplayer.com/#/players) section in your JW Player Dashboard. (**Required**)
+The SambaTech platform project ID. This is an 32-digit hexadecimal sequence used to identify the publisher's project.
 
 **data-media-id**
 
-The JW Platform media id. This is an 8-digit alphanumeric sequence that can be found in the [Content](https://dashboard.jwplayer.com/#/content) section in your JW Player Dashboard. (**Required if `data-playlist-id` is not defined.**)
+The SambaTech platform media ID. This is an 32-digit hexadecimal sequence that identifies media content.
 
-**data-playlist-id**
+**data-param-***
 
-The JW Platform playlist id. This is an 8-digit alphanumeric sequence that can be found in the [Playlists](https://dashboard.jwplayer.com/#/content/playlists) section in your JW Player Dashboard.  If both `data-playlist-id` and `data-media-id` are specified, `data-playlist-id` takes precedence.  (**Required if `data-media-id` is not defined.**)
+All `data-param-*` attributes will be added as query parameter to the SambaPlayer iframe URL. This may be used to pass custom values through to SambaPlayer, such as whether to show controls, select default output quality, resume from a position, etc.
+
+Keys and values will be URI encoded. Keys will be camel cased.
+
+- `data-param-enable-controls=false` becomes `&enabledControls=false`
+
+See [SambaTech's player documentation](http://dev.sambatech.com/documentation/player/) for more parameter options for SambaPlayer.
 
 **common attributes**
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
-See [amp-jwplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/0.1/validator-amp-jwplayer.protoascii) in the AMP validator specification.
+See [amp-samba-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-samba-player/0.1/validator-amp-samba-player.protoascii) in the AMP validator specification.
