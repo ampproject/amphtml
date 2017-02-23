@@ -100,8 +100,8 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
   });
 
   describe('getElement', () => {
-    let div, img1, img2, analytics, iframe, ampEl, iframeAmpDoc,
-        iframeAnalytics;
+    let div, img1, img2, analytics, iframe, ampEl, iframeAmpDoc;
+    let iframeAnalytics;
     beforeEach(() => {
       ampEl = doc.createElement('span');
       ampEl.className = 'i-amphtml-element';
@@ -533,8 +533,9 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
       };
       sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
           .returns(resource);
-      sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
-          .returns(resource);
+      sandbox.stub(
+          visibility.resourcesService_, 'getResourceForElementOptional')
+              .returns(resource);
       // no way to stub performance API so stub a private method instead
       sandbox.stub(visibility, 'getTotalTime_').returns(1234);
       return visibility;
