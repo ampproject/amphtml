@@ -354,7 +354,7 @@ export class InstrumentationService {
    * Register for a listener to be called when the boundaries specified in
    * config are reached.
    * @param {!JSONType} config the config that specifies the boundaries.
-   * @param {Function} listener
+   * @param {function(!AnalyticsEvent)} listener
    * @private
    */
   registerScrollTrigger_(config, listener) {
@@ -465,7 +465,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!Function} listener
+   * @param {!function(!AnalyticsEvent)} listener
    * @param {JSONType} timerSpec
    * @private
    */
