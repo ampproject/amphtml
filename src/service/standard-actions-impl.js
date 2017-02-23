@@ -25,7 +25,7 @@ import {getStyle, toggle} from '../style';
 
 /**
  * @param {!Element} element
- * @return {bool}
+ * @return {boolean}
  */
 function isHidden(element) {
   return getStyle(element, 'display') == 'none'
