@@ -268,7 +268,7 @@ export class Visibility {
    * @param {!Element} analyticsElement The amp-analytics element that the
    *   config is associated with.
    */
-  listenOnceV2(config, callback, shouldBeVisible, analyticsElement) {
+  listenOnce(config, callback, shouldBeVisible, analyticsElement) {
     const selector = config['selector'];
     const element = user().assertElement(
         getElement(this.ampdoc, selector,

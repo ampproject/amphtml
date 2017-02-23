@@ -34,18 +34,7 @@ import {documentStateFor} from '../../../../src/service/document-state';
 import * as lolex from 'lolex';
 
 describes.realWin('amp-analytics.visibility', {amp: true}, env => {
-  let visibility;
-  let clock;
-  let ampElement;
   let ampdoc;
-  let resourceLoadedResolver;
-  let scrollTop;
-
-  let inObCallback;
-  let observeSpy;
-  let unobserveSpy;
-  let callbackSpy1;
-  let callbackSpy2;
   let doc;
   let win;
 
@@ -53,36 +42,6 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
-
-    const docState = documentStateFor(win);
-    sandbox.stub(docState, 'isHidden', () => false);
-
-    ampElement = doc.createElement('amp-analytics');
-    ampElement.id = 'abc';
-    doc.body.appendChild(ampElement);
-
-    observeSpy = sandbox.stub();
-    unobserveSpy = sandbox.stub();
-    callbackSpy1 = sandbox.stub();
-    callbackSpy2 = sandbox.stub();
-    if (inob.nativeIntersectionObserverSupported(ampdoc.win)) {
-      sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
-        inObCallback = callback;
-        return {
-          observe: observeSpy,
-          unobserve: unobserveSpy,
-        };
-      });
-    } else {
-      sandbox.stub(inob, 'IntersectionObserverPolyfill', callback => {
-        inObCallback = callback;
-        return {
-          observe: observeSpy,
-          unobserve: unobserveSpy,
-        };
-      });
-    }
   });
 
   describe('isVisibilitySpecValid', () => {
@@ -219,13 +178,57 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
     });
   });
 
-  describe('listenOnceV2', () => {
+  describe('listenOnce', () => {
+    let resourceLoadedResolver;
+    let clock;
+    let scrollTop;
+    let inObCallback;
+    let observeSpy;
+    let unobserveSpy;
+    let callbackSpy1;
+    let callbackSpy2;
+    let visibility;
+    let ampElement;
+
+    beforeEach(() => {
+      clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+
+      const docState = documentStateFor(win);
+      sandbox.stub(docState, 'isHidden', () => false);
+
+      ampElement = doc.createElement('amp-analytics');
+      ampElement.id = 'abc';
+      doc.body.appendChild(ampElement);
+
+      observeSpy = sandbox.stub();
+      unobserveSpy = sandbox.stub();
+      callbackSpy1 = sandbox.stub();
+      callbackSpy2 = sandbox.stub();
+      if (inob.nativeIntersectionObserverSupported(ampdoc.win)) {
+        sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
+          inObCallback = callback;
+          return {
+            observe: observeSpy,
+            unobserve: unobserveSpy,
+          };
+        });
+      } else {
+        sandbox.stub(inob, 'IntersectionObserverPolyfill', callback => {
+          inObCallback = callback;
+          return {
+            observe: observeSpy,
+            unobserve: unobserveSpy,
+          };
+        });
+      }
+    });
+
     it('"visible" trigger should work with simple spec', () => {
       const viewer = viewerForDoc(ampdoc);
       viewer.setVisibilityState_(VisibilityState.VISIBLE);
       visibility = createVisibility();
 
-      visibility.listenOnceV2({
+      visibility.listenOnce({
         selector: '#abc',
       }, callbackSpy1, true, ampElement);
 
@@ -260,13 +263,13 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
       viewerForDoc(ampdoc).setVisibilityState_(VisibilityState.VISIBLE);
       visibility = createVisibility();
 
-      visibility.listenOnceV2({
+      visibility.listenOnce({
         selector: '#abc',
         visiblePercentageMin: 20,
       }, callbackSpy1, true, ampElement);
 
       // add multiple triggers on the same element
-      visibility.listenOnceV2({
+      visibility.listenOnce({
         selector: '#abc',
         visiblePercentageMin: 30,
       }, callbackSpy2, true, ampElement);
@@ -337,7 +340,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
       viewer.setVisibilityState_(VisibilityState.VISIBLE);
       visibility = createVisibility();
 
-      visibility.listenOnceV2({
+      visibility.listenOnce({
         selector: '#abc',
         continuousTimeMin: 1000,
         visiblePercentageMin: 0,
@@ -398,7 +401,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
       viewer.setVisibilityState_(VisibilityState.HIDDEN);
       visibility = createVisibility();
 
-      visibility.listenOnceV2({
+      visibility.listenOnce({
         selector: '#abc',
         visiblePercentageMin: 0,
       }, callbackSpy1, true, ampElement);
@@ -422,7 +425,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
       viewer.setVisibilityState_(VisibilityState.VISIBLE);
       visibility = createVisibility();
 
-      visibility.listenOnceV2({
+      visibility.listenOnce({
         selector: '#abc',
         visiblePercentageMin: 10,
       }, callbackSpy1, true, ampElement);
@@ -449,7 +452,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
       viewer.setVisibilityState_(VisibilityState.VISIBLE);
       visibility = createVisibility();
 
-      visibility.listenOnceV2({
+      visibility.listenOnce({
         selector: '#abc',
         continuousTimeMin: 1000,
         visiblePercentageMin: 10,
@@ -509,41 +512,41 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
         });
       });
     });
+
+    function createVisibility() {
+      const visibility = new Visibility(ampdoc);
+
+      const getIdStub = sandbox.stub();
+      getIdStub.returns('0');
+      const getIntersectionStub = sandbox.stub();
+      ampElement.getResourceId = getIdStub;
+
+      scrollTop = 10;
+      const resourceLoadedPromise =
+          new Promise(resolve => resourceLoadedResolver = resolve);
+      const resource = {
+        getLayoutBox: () => layoutRectLtwh(0, scrollTop, 100, 100),
+        element: {getIntersectionChangeEntry: getIntersectionStub},
+        getId: getIdStub,
+        hasLoadedOnce: () => true,
+        loadedOnce: () => resourceLoadedPromise,
+      };
+      sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
+          .returns(resource);
+      sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
+          .returns(resource);
+      // no way to stub performance API so stub a private method instead
+      sandbox.stub(visibility, 'getTotalTime_').returns(1234);
+      return visibility;
+    }
+
+    function fireIntersect(intersectPercent) {
+      scrollTop = 100 - intersectPercent;
+      const entry = makeIntersectionEntry(
+          [0, scrollTop, 100, 100], [0, 0, 100, 100]);
+      inObCallback([entry]);
+    }
   });
-
-  function createVisibility() {
-    const visibility = new Visibility(ampdoc);
-
-    const getIdStub = sandbox.stub();
-    getIdStub.returns('0');
-    const getIntersectionStub = sandbox.stub();
-    ampElement.getResourceId = getIdStub;
-
-    scrollTop = 10;
-    const resourceLoadedPromise =
-        new Promise(resolve => resourceLoadedResolver = resolve);
-    const resource = {
-      getLayoutBox: () => layoutRectLtwh(0, scrollTop, 100, 100),
-      element: {getIntersectionChangeEntry: getIntersectionStub},
-      getId: getIdStub,
-      hasLoadedOnce: () => true,
-      loadedOnce: () => resourceLoadedPromise,
-    };
-    sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
-        .returns(resource);
-    sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
-        .returns(resource);
-    // no way to stub performance API so stub a private method instead
-    sandbox.stub(visibility, 'getTotalTime_').returns(1234);
-    return visibility;
-  }
-
-  function fireIntersect(intersectPercent) {
-    scrollTop = 100 - intersectPercent;
-    const entry = makeIntersectionEntry(
-        [0, scrollTop, 100, 100], [0, 0, 100, 100]);
-    inObCallback([entry]);
-  }
 });
 
 function makeIntersectionEntry(boundingClientRect, rootBounds) {

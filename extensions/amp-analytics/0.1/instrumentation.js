@@ -310,7 +310,7 @@ export class InstrumentationService {
         return;
       }
 
-      this.visibility_.listenOnceV2(spec, vars => {
+      this.visibility_.listenOnce(spec, vars => {
         const el = getElement(this.ampdoc, spec['selector'],
             analyticsElement, spec['selectionMethod']);
         if (el) {
