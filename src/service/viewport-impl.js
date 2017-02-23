@@ -457,14 +457,18 @@ export class Viewport {
    * Should only be used for temporarily disabling scroll.
    */
   disableScroll() {
-    this.binding_.disableScroll();
+    this.vsync_.mutate(() => {
+      this.binding_.disableScroll();
+    });
   }
 
   /*
    * Reset the scrolling by removing overflow: hidden.
    */
   resetScroll() {
-    this.binding_.resetScroll();
+    this.vsync_.mutate(() => {
+      this.binding_.resetScroll();
+    });
   }
 
   /**
