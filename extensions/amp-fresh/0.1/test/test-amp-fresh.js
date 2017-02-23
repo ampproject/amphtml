@@ -16,10 +16,7 @@
 
 import * as sinon from 'sinon';
 import {AmpFresh} from '../amp-fresh';
-import {
-  installAmpFreshManagerForDoc,
-  getAmpFreshManagerForDoc,
-} from '../amp-fresh-manager';
+import {getOrInsallAmpFreshManager} from '../amp-fresh-manager';
 import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -38,8 +35,7 @@ describe('amp-fresh', () => {
     const span = document.createElement('span');
     span.textContent = 'hello';
     elem.appendChild(span);
-    installAmpFreshManagerForDoc(window.document);
-    manager = getAmpFreshManagerForDoc(window.document);
+    manager = getOrInsallAmpFreshManager(window.document);
     fresh = new AmpFresh(elem);
     sandbox = sinon.sandbox.create();
     fresh.mutateElement = function(cb) {

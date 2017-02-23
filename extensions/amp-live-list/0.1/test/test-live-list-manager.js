@@ -16,11 +16,7 @@
 
 import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {
-  installLiveListManager,
-  getLiveListManager,
-  LiveListManager,
-} from '../live-list-manager';
+import {installLiveListManager, LiveListManager} from '../live-list-manager';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -48,8 +44,7 @@ describe('LiveListManager', () => {
       requests.push(xhr);
     };
     viewer = installViewerServiceForDoc(new AmpDocSingle(window));
-    installLiveListManager(window);
-    manager = getLiveListManager(window);
+    manager = installLiveListManager(window);
     liveList = getLiveList({'data-sort-time': '1111'});
     sandbox.stub(liveList, 'getInterval', () => 5000);
   });
