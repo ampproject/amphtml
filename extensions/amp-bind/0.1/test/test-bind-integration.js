@@ -48,14 +48,14 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
   }
 
-  describe('amp-bind text integration', () => {
+  describe('text integration', () => {
     it('should update text when text attribute binding changes', () => {
       const textElement = iframe.doc.getElementById('textElement');
       const button = iframe.doc.getElementById('mutateTextButton');
-      expect(textElement.innerHTML).to.equal('unbound');
+      expect(textElement.textContent).to.equal('unbound');
       button.click();
       return waitForBindApplication().then(() => {
-        expect(textElement.innerHTML).to.equal('hello world');
+        expect(textElement.textContent).to.equal('hello world');
       });
     });
 
@@ -70,15 +70,15 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
   });
 
-  describe('amp-bind amp-carousel integration', () => {
+  describe('amp-carousel integration', () => {
     it('should update dependent bindings on carousel slide changes', () => {
       const slideNum = iframe.doc.getElementById('slideNum');
       const carousel = iframe.doc.getElementById('carousel');
       const impl = carousel.implementation_;
-      expect(slideNum.innerHTML).to.equal('0');
+      expect(slideNum.textContent).to.equal('0');
       impl.go(1, false /* animate */);
       return waitForBindApplication().then(() => {
-        expect(slideNum.innerHTML).to.equal('1');
+        expect(slideNum.textContent).to.equal('1');
       });
     });
 
