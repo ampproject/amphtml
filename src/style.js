@@ -15,6 +15,8 @@
  */
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
+import {map} from './utils/object.js';
+
 
 /** @type {Object<string, string>} */
 let propertyNameCache;
@@ -36,7 +38,7 @@ export function camelCaseToTitleCase(camelCase) {
  * Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
- * @param {!CSSStyleDeclaration|!HTMLDocument} style
+ * @param {!Object} style
  * @param {string} titleCase the title case version of a css property name
  * @return {string} the prefixed property name or null.
  */
@@ -55,7 +57,7 @@ function getVendorJsPropertyName_(style, titleCase) {
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
  * @export
- * @param {!CSSStyleDeclaration|!HTMLDocument} style
+ * @param {!Object} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
  *   mapping
@@ -63,7 +65,7 @@ function getVendorJsPropertyName_(style, titleCase) {
  */
 export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
   if (!propertyNameCache) {
-    propertyNameCache = Object.create(null);
+    propertyNameCache = map();
   }
   let propertyName = propertyNameCache[camelCase];
   if (!propertyName || opt_bypassCache) {
@@ -206,4 +208,17 @@ export function scale(value) {
 export function removeAlphaFromColor(rgbaColor) {
   return rgbaColor.replace(
       /\(([^,]+),([^,]+),([^,)]+),[^)]+\)/g, '($1,$2,$3, 1)');
+}
+
+/**
+ * Gets the computed style of the element. The helper is necessary to enforce
+ * the possible `null` value returned by a buggy Firefox.
+ *
+ * @param {!Window} win
+ * @param {!Element} el
+ * @return {!Object<string, string>}
+ */
+export function computedStyle(win, el) {
+  const style = /** @type {?CSSStyleDeclaration} */(win.getComputedStyle(el));
+  return /** @type {!Object<string, string>} */(style) || map();
 }
