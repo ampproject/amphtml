@@ -18,7 +18,7 @@ import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {ClickEventTracker} from '../events';
 import {Crypto} from '../../../../src/service/crypto-impl';
-import {InstrumentationService} from '../instrumentation';
+import {instrumentationServiceForDocForTesting} from '../instrumentation';
 import {variableServiceFor} from '../variables';
 import {
   installUserNotificationManager,
@@ -100,8 +100,7 @@ describe('amp-analytics', function() {
       installCidServiceForDocForTesting(ampdoc);
       uidService = installUserNotificationManager(iframe.win);
 
-      ins = fromClassForDoc(
-          ampdoc, 'amp-analytics-instrumentation', InstrumentationService);
+      ins = instrumentationServiceForDocForTesting(ampdoc);
     });
   });
 
