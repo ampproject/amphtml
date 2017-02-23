@@ -154,6 +154,8 @@ export class Bind {
    */
   setStateWithExpression(expression, scope) {
     return this.initializePromise_.then(() => {
+      // Allow expression to reference current scope in addition to event scope.
+      Object.assign(scope, this.scope_);
       if (this.workerExperimentEnabled_) {
         return invokeWebWorker(
             this.win_, 'bind.evaluateExpression', [expression, scope]);

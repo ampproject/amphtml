@@ -495,7 +495,8 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
     // Don't parse object literals. Tokenize as a single expression
     // fragment and delegate to specific action handler.
     args = map();
-    args[OBJECT_STRING_ARGS_KEY] = toks.next().value;
+    const value = toks.next().value;
+    args[OBJECT_STRING_ARGS_KEY] = () => value;
     assertToken(toks.next(), [TokenType.SEPARATOR], ')');
   } else {
     // Key-value pairs. Format: key = value, ....
