@@ -28,7 +28,6 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   getService,
   resetServiceForTesting,
-  fromClassForDoc,
 } from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';

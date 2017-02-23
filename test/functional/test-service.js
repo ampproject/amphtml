@@ -19,7 +19,6 @@ import {
   assertDisposable,
   assertEmbeddable,
   disposeServicesForDoc,
-  fromClass,
   getExistingServiceForDocInEmbedScope,
   getExistingServiceForWindowInEmbedScope,
   getExistingServiceForDoc,
@@ -109,19 +108,6 @@ describe('service', () => {
       expect(b1).to.not.equal(a1);
       expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(window);
-    });
-
-    it('should make instances from class', () => {
-
-      const a1 = fromClass(window, 'a', Class);
-      const a2 = fromClass(window, 'a', Class);
-      expect(a1).to.equal(a2);
-      expect(a1.count).to.equal(1);
-
-      const b1 = fromClass(window, 'b', Class);
-      const b2 = fromClass(window, 'b', Class);
-      expect(b1).to.equal(b2);
-      expect(b1).to.not.equal(a1);
     });
 
     it('should work without a factory', () => {
