@@ -32,7 +32,11 @@ import {
     InstrumentationService,
     instrumentationServiceForDoc,
 } from './instrumentation';
-import {ExpansionOptions, variableServiceFor} from './variables';
+import {
+    ExpansionOptions,
+    installVariableService,
+    getVariableService,
+} from './variables';
 import {ANALYTICS_CONFIG} from './vendors';
 
 // Register doc-service factory.
@@ -41,7 +45,7 @@ AMP.registerServiceForDoc(
 AMP.registerServiceForDoc('activity', Activity);
 AMP.registerServiceForDoc('cid', Cid);
 
-variableServiceFor(AMP.win);
+installVariableService(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
@@ -96,7 +100,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ = null;
 
     /** @private {!./variables.VariableService} */
-    this.variableService_ = variableServiceFor(this.win);
+    this.variableService_ = getVariableService(this.win);
 
     /** @private {!../../../src/service/crypto-impl.Crypto} */
     this.cryptoService_ = cryptoFor(this.win);

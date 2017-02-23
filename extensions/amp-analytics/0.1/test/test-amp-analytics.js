@@ -18,7 +18,10 @@ import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {ClickEventTracker} from '../events';
 import {Crypto} from '../../../../src/service/crypto-impl';
-import {InstrumentationService} from '../instrumentation';
+import {
+  InstrumentationService,
+  instrumentationServiceForDocForTesting
+} from '../instrumentation';
 import {variableServiceFor} from '../variables';
 import {
   installUserNotificationManager,
@@ -28,7 +31,8 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   getService,
   resetServiceForTesting,
-  fromClassForDoc,
+  installServiceForDoc,
+  getServiceForDoc,
 } from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';
@@ -99,9 +103,7 @@ describe('amp-analytics', function() {
       ampdoc = new AmpDocSingle(windowApi);
       installCidServiceForDocForTesting(ampdoc);
       uidService = installUserNotificationManager(iframe.win);
-
-      ins = fromClassForDoc(
-          ampdoc, 'amp-analytics-instrumentation', InstrumentationService);
+      ins =
     });
   });
 

@@ -17,12 +17,15 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {cryptoFor} from '../../../src/crypto';
 import {dev, user} from '../../../src/log';
-import {fromClass} from '../../../src/service';
+import {installService, getService} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 
 /** @const {string} */
 const TAG = 'Analytics.Variables';
+
+/** @const {string} */
+const VARIABLES_SERVICE_ID = 'amp-analytics-variables';
 
 /** @const {RegExp} */
 const VARIABLE_ARGS_REGEXP = /^(?:([^\s]*)(\([^)]*\))|[^]+)$/;
@@ -299,11 +302,17 @@ export class VariableService {
   }
 }
 
+/**
+ * @param {!Window} win
+ */
+export function installVariableService(win) {
+  installService(win, VARIABLES_SERVICE_ID, VariableService);
+}
 
 /**
  * @param {!Window} win
  * @return {!VariableService}
  */
-export function variableServiceFor(win) {
-  return fromClass(win, 'amp-analytics-variables', VariableService);
+export function getVariableService(win) {
+  return getService(win, VARIABLES_SERVICE_ID);
 }
