@@ -74,6 +74,12 @@ class AmpSambaPlayer extends AMP.BaseElement {
 		// WARN: methods missing on returned object (e.g. hasOwnProperty) so recreate it
 		this.params_ = Object.assign({}, getDataParamsFromAttributes(this.element));
 
+		// remove auto-start attribute (video manager will take care of it)
+		if ('autoStart' in this.params_) {
+			delete this.params_['autoStart'];
+			user().error(TAG, 'Use autoplay attribute instead of data-param-auto-start.');
+		}
+
 		installVideoManagerForDoc(this.element);
 		videoManagerForDoc(this.element).register(this);
 	}
@@ -109,7 +115,7 @@ class AmpSambaPlayer extends AMP.BaseElement {
 
 	/** @override */
 	pauseCallback() {
-		this.player_ && this.player_.pause();
+		this.pause();
 	}
 
 	/** @override */
