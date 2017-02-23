@@ -26,20 +26,8 @@ describes.sandboxed('StandardActions', {}, () => {
   let mutateElementStub;
   let deferMutateStub;
 
-  const elementsToCleanUp = [];
-
-  function addStyles(cssText) {
-    const style = document.createElement('style');
-    style.type = 'text/css';
-    style.appendChild(document.createTextNode(cssText));
-    document.head.appendChild(style);
-  }
-
   function createElement() {
-    const element = document.createElement('div');
-    window.document.body.appendChild(element);
-    elementsToCleanUp.push(element);
-    return element;
+    return document.createElement('div');
   }
 
   function createAmpElement() {
@@ -48,17 +36,6 @@ describes.sandboxed('StandardActions', {}, () => {
     element.collapse = sandbox.stub();
     element.expand = sandbox.stub();
     return element;
-  }
-
-  function stubVsyncRun() {
-    sandbox.stub(vsyncFor(window), 'run', (task, state) => {
-      if (task.measure) {
-        task.measure(state);
-      }
-      if (task.mutate) {
-        task.mutate(state);
-      }
-    });
   }
 
   function stubMutate(methodName) {
@@ -78,6 +55,7 @@ describes.sandboxed('StandardActions', {}, () => {
     expect(deferMutateStub).to.be.calledOnce;
     expect(deferMutateStub.firstCall.args[0]).to.equal(element);
     expect(element.style.display).to.not.equal('none');
+    expect(element.hasAttribute('hidden')).to.be.false;
   }
 
   function expectAmpElementToHaveBeenHidden(element) {
@@ -96,15 +74,6 @@ describes.sandboxed('StandardActions', {}, () => {
     standardActions = new StandardActions(new AmpDocSingle(window));
     mutateElementStub = stubMutate('mutateElement');
     deferMutateStub = stubMutate('deferMutate');
-    addStyles('.-test-hidden { display: none }');
-    stubVsyncRun();
-  });
-
-  afterEach(() => {
-    while (elementsToCleanUp.length) {
-      const element = elementsToCleanUp.pop();
-      element.parentNode.removeChild(element);
-    }
   });
 
   describe('"hide" action', () => {
@@ -122,14 +91,23 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"show" action', () => {
-    it('should handle normal element', () => {
+    it('should handle normal element (inline css)', () => {
       const element = createElement();
+      element.style.display = 'none';
       standardActions.handleShow({target: element});
       expectElementToHaveBeenShown(element);
     });
 
-    it('should handle AmpElement', () => {
+    it('should handle normal element (hidden attribute)', () => {
+      const element = createElement();
+      element.setAttribute('hidden', '');
+      standardActions.handleShow({target: element});
+      expectElementToHaveBeenShown(element);
+    });
+
+    it('should handle AmpElement (inline css)', () => {
       const element = createAmpElement();
+      element.style.display = 'none';
       standardActions.handleShow({target: element});
       expectAmpElementToHaveBeenShown(element);
     });
@@ -137,16 +115,16 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"toggle" action', () => {
-    it('should show normal element when hidden (inline)', () => {
+    it('should show normal element when hidden (inline css)', () => {
       const element = createElement();
       element.style.display = 'none';
       standardActions.handleToggle({target: element});
       expectElementToHaveBeenShown(element);
     });
 
-    it('should show normal element when hidden (css)', () => {
+    it('should show normal element when hidden (hidden attribute)', () => {
       const element = createElement();
-      element.className += ' -test-hidden';
+      element.setAttribute('hidden', '');
       standardActions.handleToggle({target: element});
       expectElementToHaveBeenShown(element);
     });
@@ -157,16 +135,9 @@ describes.sandboxed('StandardActions', {}, () => {
       expectElementToHaveBeenHidden(element);
     });
 
-    it('should show AmpElement when hidden (inline)', () => {
+    it('should show AmpElement when hidden (inline css)', () => {
       const element = createAmpElement();
       element.style.display = 'none';
-      standardActions.handleToggle({target: element});
-      expectAmpElementToHaveBeenShown(element);
-    });
-
-    it('should show AmpElement when hidden (css)', () => {
-      const element = createAmpElement();
-      element.className += ' -test-hidden';
       standardActions.handleToggle({target: element});
       expectAmpElementToHaveBeenShown(element);
     });
