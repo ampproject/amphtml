@@ -305,7 +305,7 @@ export class Bind {
       const tagName = element.tagName;
       if (tagName === 'TEMPLATE') {
         // Listen for changes in amp-mustache templates
-
+        this.beginObservingElementForMutations_(element);
       }
 
       const boundProperties = this.scanElement_(element);
