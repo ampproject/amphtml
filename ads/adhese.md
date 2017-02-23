@@ -30,7 +30,7 @@ More information about us can be found on our [website](https://www.adhese.com).
     data-position=""
     data-format="amprectangle"
     data-account="demo"
-    data-requestType="ad">
+    data-request-type="ad">
 </amp-ad>
 ```
 
@@ -43,7 +43,7 @@ More information about us can be found on our [website](https://www.adhese.com).
     data-position=""
     data-format="amprectangle"
     data-account="demo"
-    data-requestType="ad"
+    data-request-type="ad"
     json='{"targeting":{"br": ["sport", "info"],"dt": ["desktop"]}}'>
 </amp-ad>
 ```

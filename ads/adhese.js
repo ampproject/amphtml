@@ -30,13 +30,17 @@ export function adhese(global, data) {
       const targets = targetList[category];
       for (let x = 0; x < targets.length; x++) {
         targetParam += encodeURIComponent(targets[x]) +
-        (targets.length - 1 > x ? ';' : '');
+            (targets.length - 1 > x ? ';' : '');
       }
       targetParam += '/';
     }
   }
   targetParam += '?t=' + Date.now();
-  writeScript(window, 'https://ads-' + encodeURIComponent(data['account']) + '.adhese.com/' + encodeURIComponent(data['requestType']) + '/sl' + encodeURIComponent(data['location']) + encodeURIComponent(data['position']) + '-' + encodeURIComponent(data['format']) + '/' + targetParam);
+  writeScript(window, 'https://ads-' + encodeURIComponent(data['account']) +
+      '.adhese.com/' + encodeURIComponent(data['requestType']) + '/sl' +
+      encodeURIComponent(data['location']) +
+      encodeURIComponent(data['position']) + '-' +
+      encodeURIComponent(data['format']) + '/' + targetParam);
   const co = global.document.querySelector('#c');
   co.width = data['width'];
   co.height = data['height'];
@@ -48,12 +52,12 @@ export function adhese(global, data) {
  */
 function getAdInfo(e) {
   if (e.detail.isReady && e.detail.width == e.target.width &&
-     e.detail.height == e.target.height) {
+      e.detail.height == e.target.height) {
     global.context.renderStart();
   } else if (e.detail.isReady && (e.detail.width != e.target.width ||
       e.detail.width != e.target.width)) {
     global.context.renderStart({width: e.detail.width,
-      height: e.detail.height});
+        height: e.detail.height});
   } else {
     global.context.noContentAvailable();
   }
