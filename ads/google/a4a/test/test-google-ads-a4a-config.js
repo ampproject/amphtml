@@ -24,7 +24,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
-import {documentStateFor} from '../../../../src/service/document-state';
+import {installDocumentState} from '../../../../src/service/document-state';
 import * as sinon from 'sinon';
 
 const EXP_ID = 'EXP_ID';
@@ -78,7 +78,7 @@ describe('a4a_config', () => {
     const ampdocService = installDocService(win, /* isSingleDoc */ true);
     const ampdoc = ampdocService.getAmpDoc();
     events = {};
-    documentStateFor(win);
+    installDocumentState(win);
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
     element = document.createElement('div');
@@ -293,7 +293,7 @@ describe('a4a_config hash param parsing', () => {
     ampdoc = ampdocService.getAmpDoc();
     events = {};
     installPlatformService(win);
-    documentStateFor(win);
+    installDocumentState(win);
     const attrs = {};
     element = {
       nodeType: /* ELEMENT */ 1,

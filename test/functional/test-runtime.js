@@ -225,7 +225,7 @@ describes.fakeWin('runtime', {
 
         expect(progress).to.equal('1HIGHAB2');
 
-        const extensions = ext.installExtensionsService(win);
+        const extensions = ext.getExtensionsService(win);
         const ext1 = extensions.waitForExtension('ext1');
         const ext2 = extensions.waitForExtension('ext2');
         return Promise.all([ext1, ext2]);
@@ -367,7 +367,7 @@ describes.fakeWin('runtime', {
 
     beforeEach(() => {
       adopt(win);
-      extensions = ext.installExtensionsService(win);
+      extensions = ext.getExtensionsService(win);
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 
@@ -516,7 +516,7 @@ describes.fakeWin('runtime', {
 
     beforeEach(() => {
       adoptShadowMode(win);
-      extensions = ext.installExtensionsService(win);
+      extensions = ext.getExtensionsService(win);
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 

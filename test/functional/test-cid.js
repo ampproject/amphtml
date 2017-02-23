@@ -32,7 +32,7 @@ import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {
-  installExtensionsService,
+  getExtensionsService,
 } from '../../src/service/extensions-impl';
 import * as sinon from 'sinon';
 
@@ -103,7 +103,7 @@ describe('cid', () => {
     installPlatformService(fakeWin);
 
     // stub extensions service to provide crypto-polyfill
-    const extensions = installExtensionsService(fakeWin);
+    const extensions = getExtensionsService(fakeWin);
     sandbox.stub(extensions, 'loadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(fakeWin);

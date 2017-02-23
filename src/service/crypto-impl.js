@@ -15,7 +15,7 @@
  */
 
 import {PublicKeyInfoDef} from '../crypto';
-import {fromClass} from '../service';
+import {registerService} from '../service';
 import {dev} from '../log';
 import {getExistingServiceForWindow} from '../service';
 import {extensionsFor} from '../extensions';
@@ -272,5 +272,5 @@ function hashesEqual(signature, keyHash) {
 }
 
 export function installCryptoService(win) {
-  return fromClass(win, 'crypto', Crypto);
+  return registerService(win, 'crypto', Crypto);
 }
