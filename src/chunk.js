@@ -16,7 +16,7 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
-import {fromClassForDoc, getExistingServiceForDoc} from './service';
+import {registerServiceForDoc, getExistingServiceForDoc} from './service';
 import {isExperimentOnAllowUrlOverride} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
@@ -25,6 +25,11 @@ import {viewerPromiseForDoc} from './viewer';
  * @const {string}
  */
 const TAG = 'CHUNK';
+
+/**
+ * @const {string}
+ */
+const CHUNK_SERVICE_TAG = 'chunk';
 
 /**
  * @type {boolean}
@@ -51,7 +56,8 @@ export function startupChunk(nodeOrAmpDoc, fn) {
     resolved.then(fn);
     return;
   }
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  installChunkServiceForDoc_(nodeOrAmpDoc);
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   service.runForStartup_(fn);
 }
 
@@ -74,16 +80,33 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
     resolved.then(fn);
     return;
   }
-  const service = getExistingServiceForDoc(nodeOrAmpDoc, 'chunk');
+  installChunkServiceForDoc_(nodeOrAmpDoc);
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   service.run(fn, priority);
 }
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Chunks}
  */
 export function chunkInstanceForTesting(nodeOrAmpDoc) {
-  return fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  registerServiceForDoc(nodeOrDoc, CHUNK_SERVICE_TAG, Chunks);
+  return getChunkServiceForDoc_(nodeOrAmpDoc);
+}
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!Chunks}
+ */
+export function getChunkServiceForDoc_(nodeOrAmpDoc) {
+  return getExistingServiceForDoc(nodeOrAmpDoc, CHUNK_SERVICE_TAG);
+}
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ */
+export function installChunkServiceForDoc_(nodeOrAmpDoc) {
+  registerServiceForDoc(nodeOrAmpDoc, CHUNK_SERVICE_TAG, Chunks);
 }
 
 /**
@@ -107,7 +130,7 @@ export function activateChunkingForTesting() {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  */
 export function runChunksForTesting(nodeOrAmpDoc) {
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   const errors = [];
   while (true) {
     try {
