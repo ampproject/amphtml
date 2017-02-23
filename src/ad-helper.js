@@ -15,6 +15,7 @@
  */
 
 import {dev} from './log';
+import {computedStyle} from './style';
 
 /**
  * Tags that are allowed to have fixed positioning
@@ -34,7 +35,7 @@ const CONTAINERS = {
  * @return {boolean}
  */
 function isPositionFixed(el, win) {
-  return win./*OK*/getComputedStyle(el).position == 'fixed';
+  return computedStyle(win, el).position == 'fixed';
 }
 
 /**

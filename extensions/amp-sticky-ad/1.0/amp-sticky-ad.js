@@ -19,7 +19,7 @@ import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {Layout} from '../../../src/layout';
 import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
-import {toggle} from '../../../src/style';
+import {toggle, computedStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
 import {
   setStyle,
@@ -234,8 +234,8 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   forceOpacity_() {
-    const backgroundColor = this.win./*OK*/getComputedStyle(this.element)
-        .getPropertyValue('background-color');
+    const backgroundColor =
+        computedStyle(this.win, this.element).backgroundColor;
     const newBackgroundColor = removeAlphaFromColor(backgroundColor);
     if (backgroundColor == newBackgroundColor) {
       return;

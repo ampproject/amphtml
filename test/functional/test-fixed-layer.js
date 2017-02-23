@@ -124,11 +124,7 @@ describe('FixedLayer', () => {
       },
       defaultView: {
         getComputedStyle: elem => {
-          return {
-            getPropertyValue: prop => {
-              return elem.computedStyle[prop] || '';
-            },
-          };
+          return elem.computedStyle;
         },
         navigator: window.navigator,
       },
@@ -177,6 +173,10 @@ describe('FixedLayer', () => {
       computedStyle: {
         opacity: '0.9',
         visibility: 'visible',
+        top: '',
+        bottom: '',
+        zIndex: '',
+        transform: '',
       },
       matches: () => true,
       compareDocumentPosition: other => {
@@ -742,7 +742,7 @@ describe('FixedLayer', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
-      element1.computedStyle['z-index'] = '101';
+      element1.computedStyle['zIndex'] = '101';
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
