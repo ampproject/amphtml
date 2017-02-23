@@ -56,7 +56,7 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
     1. The cache is allowed to serve stale content independent of HTTP caching headers. It must make reasonable efforts to keep the cache contents fresh and must revalidate content after serving stale responses.
 
-14. Follows [AMP cache modifications best practices](https://github.com/ampproject/amphtml/blob/master/spec/amp-cachem-modifications.md).
+14. Follows [AMP cache modifications best practices](/spec/amp-cache-modifications.md).
 
 ## Guidelines: Crawling 
 
@@ -87,6 +87,15 @@ Accepted MIME types for fonts include the following prefixes:
 |  application/vnd.ms-fontobject   |
 |  binary/octet-stream   |
 |  text/plain (not recommended)   |
+
+## Guidelines: Adding a new cache to the AMP ecosystem
+
+* Contact relevant publishers to make sure they update their CORS policies to include your origin.
+  * For further information please refer to the [CORS Security in AMP Guidelines](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+* Publicly announce your cache so people know where to find your documentation.
+* Examples of AMP Cache providers:
+  * [Google AMP Cache](https://developers.google.com/amp/cache/)
+  * [Cloudflare AMP Cache](https://www.cloudflare.com/website-optimization/accelerated-mobile-links/)
 
 # References
 

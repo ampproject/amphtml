@@ -42,6 +42,7 @@ import {maybeTrackImpression} from '../impression';
 import {isExperimentOn} from '../experiments';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {installInaboxViewportService} from './inabox-viewport';
+import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
 import {getMode} from '../mode';
 
 getMode(self).runtime = 'inabox';
@@ -102,6 +103,7 @@ startupChunk(self.document, function initial() {
     startupChunk(self.document, function final() {
       installPullToRefreshBlocker(self);
       installGlobalClickListenerForDoc(ampdoc);
+      installAnchorClickInterceptor(ampdoc, self);
 
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
