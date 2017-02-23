@@ -198,10 +198,10 @@ export class Bind {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
           const parseError = parseErrors[expressionString];
-          const fullError = new Error(parseError.message);
-          fullError.stack = parseError.stack;
-          const err = user().createError(fullError);
-          reportError(err, elements[0]);
+          const error = new Error(parseError.message);
+          error.stack = parseError.stack;
+          const userError = user().createError(error);
+          reportError(userError, elements[0]);
         }
       });
 

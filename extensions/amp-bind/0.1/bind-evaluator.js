@@ -43,7 +43,7 @@ let ParsedBindingDef;
  *   stack: string,
  * }}
  */
-export let EvaluatorErrorDef;
+let EvaluatorErrorDef;
 
 /**
  * Asynchronously evaluates a set of Bind expressions.
