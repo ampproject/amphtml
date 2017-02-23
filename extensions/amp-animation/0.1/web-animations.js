@@ -29,6 +29,7 @@ import {
   WebMultiAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {dashToCamelCase} from '../../../src/string';
 
 
 /** @const {string} */
@@ -470,14 +471,11 @@ export class MeasureScanner extends Scanner {
   measure_(target, prop) {
     const index = this.targets_.indexOf(target);
     if (!this.computedStyleCache_[index]) {
-      const style = computedStyle(this.win, target);
-      dev().assert(style, 'Got null computed style, which should never happen');
-      this.computedStyleCache_[index] = /** @type {!CSSStyleDeclaration} */ (
-          style);
+      this.computedStyleCache_[index] = computedStyle(this.win, target);
     }
-    const vendorName = getVendorJsPropertyName(
-        this.computedStyleCache_[index], prop);
-    return this.computedStyleCache_[index].getPropertyValue(vendorName);
+    const vendorName = getVendorJsPropertyName(this.computedStyleCache_[index],
+        dashToCamelCase(prop));
+    return this.computedStyleCache_[index][vendorName];
   }
 
   /**

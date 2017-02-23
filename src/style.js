@@ -15,6 +15,8 @@
  */
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
+import {map} from './utils/object.js';
+
 
 /** @type {Object<string, string>} */
 let propertyNameCache;
@@ -214,8 +216,9 @@ export function removeAlphaFromColor(rgbaColor) {
  *
  * @param {!Window} win
  * @param {!Element} el
- * @return {?CSSStyleDeclaration}
+ * @return {!CSSStyleDeclaration|!Object<string, string>}
  */
 export function computedStyle(win, el) {
-  return /** @type {?CSSStyleDeclaration} */(win.getComputedStyle(el));
+  const style = /** @type {?CSSStyleDeclaration} */(win.getComputedStyle(el));
+  return style || map();
 }

@@ -1547,7 +1547,7 @@ export class Resources {
    * @private
    */
   getLayoutMargins_(resource) {
-    const style = computedStyle(this.win, resource.element) || {};
+    const style = computedStyle(this.win, resource.element);
     return {
       top: parseInt(style.marginTop, 10) || 0,
       right: parseInt(style.marginRight, 10) || 0,

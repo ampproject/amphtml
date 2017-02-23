@@ -376,12 +376,10 @@ export class Resource {
           isFixed = true;
           break;
         }
-        if (viewport.isDeclaredFixed(n)) {
-          const style = computedStyle(win, n);
-          if (style && style.position == 'fixed') {
-            isFixed = true;
-            break;
-          }
+        if (viewport.isDeclaredFixed(n)
+            && computedStyle(win, n).position == 'fixed') {
+          isFixed = true;
+          break;
         }
       }
     }

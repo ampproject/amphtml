@@ -1244,8 +1244,8 @@ export class ViewportBindingNaturalIosEmbed_ {
       // when the hiding header operation is transient
       onDocumentReady(this.win.document, doc => {
         const body = dev().assertElement(doc.body);
-        const style = computedStyle(this.win, body) || {};
-        const existingPaddingTop = style['padding-top'] || '0';
+        const existingPaddingTop =
+            computedStyle(this.win, body).paddingTop || '0';
         setStyles(body, {
           paddingTop: `calc(${existingPaddingTop} + ${lastPaddingTop}px)`,
           borderTop: '',

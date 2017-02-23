@@ -234,9 +234,8 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   forceOpacity_() {
-    const style = computedStyle(this.win, this.element);
-    const backgroundColor = style ? style.getPropertyValue('background-color')
-        : '';
+    const backgroundColor =
+        computedStyle(this.win, this.element).backgroundColor;
     const newBackgroundColor = removeAlphaFromColor(backgroundColor);
     if (backgroundColor == newBackgroundColor) {
       return;
