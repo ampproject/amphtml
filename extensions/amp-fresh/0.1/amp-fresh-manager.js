@@ -24,6 +24,9 @@ import {xhrFor} from '../../../src/xhr';
 /** @const */
 const TAG = 'amp-fresh';
 
+/** @const {string} */
+const FRESH_MANAGER_SERVICE_TAG = 'ampFreshManager';
+
 /**
  * Manages registered amp-fresh components and does the xhr request
  * and update.
@@ -115,14 +118,14 @@ export class AmpFreshManager {
   }
 }
 
-export function installAmpFreshManagerServiceForDoc(nodeOrDoc) {
-  installServiceForDoc(nodeOrDoc, 'ampFreshManager', AmpFreshManager);
+export function installAmpFreshManagerForDoc(nodeOrDoc) {
+  installServiceForDoc(nodeOrDoc, FRESH_MANAGER_SERVICE_TAG, AmpFreshManager);
 }
 
 /**
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  */
-export function getAmpFreshManagerServiceForDoc(nodeOrDoc) {
+export function getAmpFreshManagerForDoc(nodeOrDoc) {
   return /** @type {!AmpFreshManager} */ (
-      getServiceForDoc(nodeOrDoc, 'ampFreshManager', AmpFreshManager));
+      getServiceForDoc(nodeOrDoc, FRESH_MANAGER_SERVICE_TAG, AmpFreshManager));
 }

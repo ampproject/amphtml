@@ -17,8 +17,8 @@
 import {CSS} from '../../../build/amp-fresh-0.1.css';
 import {copyChildren} from '../../../src/dom';
 import {
-  installAmpFreshManagerServiceForDoc,
-  getAmpFreshManagerServiceForDoc
+  installAmpFreshManagerForDoc,
+  getAmpFreshManagerForDoc
 } from './amp-fresh-manager';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -57,8 +57,8 @@ export class AmpFresh extends AMP.BaseElement {
     this.ampFreshId_ = user().assert(this.element.getAttribute('id'),
         'amp-fresh must have an id.');
 
-    installAmpFreshManagerServiceForDoc(this.element);
-    this.manager_ = getAmpFreshManagerServiceForDoc(this.element);
+    installAmpFreshManagerForDoc(this.element);
+    this.manager_ = getAmpFreshManagerForDoc(this.element);
 
     this.manager_.register(this.ampFreshId_, this);
   }
