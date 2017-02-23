@@ -135,42 +135,63 @@ describes.realWin('amp-bind', {
     });
   });
 
-  it('should dynamically detect new bindings added under certain tags', () => {
-    const doc = env.win.document;
-    const template = doc.createElement('template');
-    doc.getElementById('parent').appendChild(template);
-    return onBindReady().then(() => {
-      expect(bind.boundElements_.length).to.equal(0);
-      const textElement = createElementWithBinding('[onePlusOne]="1+1"');
-      template.appendChild(textElement);
-      return bind.waitForAllMutationsForTesting();
-    }).then(() => {
-      expect(bind.boundElements_.length).to.equal(1);
+  describe('under dynamic tags', () => {
+    it('should dynamically detect new bindings', () => {
+      const doc = env.win.document;
+      const template = doc.createElement('template');
+      doc.getElementById('parent').appendChild(template);
+      return onBindReady().then(() => {
+        expect(bind.boundElements_.length).to.equal(0);
+        createElementWithBinding('[onePlusOne]="1+1"');
+        return bind.waitForAllMutationsForTesting();
+      }).then(() => {
+        expect(bind.boundElements_.length).to.equal(1);
+      });
+    });
+
+    it('should NOT bind blacklisted attributes', () => {
+      env.sandbox.restore();
+      const doc = env.win.document;
+      const template = doc.createElement('template');
+      let textElement;
+      doc.getElementById('parent').appendChild(template);
+      return onBindReady().then(() => {
+        expect(bind.boundElements_.length).to.equal(0);
+        const binding = '[onclick]="\'alert(document.cookie)\'" ' +
+          '[onmouseover]="\'alert()\'" ' +
+          '[style]="\'background=color:black\'"';
+        textElement = createElementWithBinding(binding);
+        return bind.waitForAllMutationsForTesting();
+      }).then(() => {
+        expect(bind.boundElements_.length).to.equal(0);
+        expect(textElement.getAttribute('onclick')).to.be.null;
+        expect(textElement.getAttribute('onmouseover')).to.be.null;
+        expect(textElement.getAttribute('style')).to.be.null;
+      });
+    });
+
+    it('should NOT allow unsecure attribute values', () => {
+      env.sandbox.restore();
+      const doc = env.win.document;
+      const template = doc.createElement('template');
+      let aElement;
+      doc.getElementById('parent').appendChild(template);
+      return onBindReady().then(() => {
+        expect(bind.boundElements_.length).to.equal(0);
+        const binding = '[href]="javascript:alert(1)"';
+        const div = env.win.document.createElement('div');
+        div.innerHTML = '<a ' + binding + '></a>';
+        aElement = div.firstElementChild;
+        // Templated HTML is added as a sibling to the template,
+        // not as a child
+        doc.getElementById('parent').appendChild(aElement);
+        return bind.waitForAllMutationsForTesting();
+      }).then(() => {
+        expect(aElement.getAttribute('href')).to.be.null;
+      });
     });
   });
 
-  //TODO(kmh287): Move to a different test file?
-  it('should NOT allow blacklisted attrs in dynamically added bindings', () => {
-    env.sandbox.restore();
-    const doc = env.win.document;
-    const template = doc.createElement('template');
-    let textElement;
-    doc.getElementById('parent').appendChild(template);
-    return onBindReady().then(() => {
-      expect(bind.boundElements_.length).to.equal(0);
-      const binding = '[onclick]="\'alert(document.cookie)\'" ' +
-        '[onmouseover]="\'alert()\'" ' +
-        '[style]="\'background=color:black\'"';
-      textElement = createElementWithBinding(binding);
-      template.appendChild(textElement);
-      return bind.waitForAllMutationsForTesting();
-    }).then(() => {
-      expect(bind.boundElements_.length).to.equal(0);
-      expect(textElement.getAttribute('onclick')).to.be.null;
-      expect(textElement.getAttribute('onmouseover')).to.be.null;
-      expect(textElement.getAttribute('style')).to.be.null;
-    });
-  });
 
   it('should NOT apply expressions on first load', () => {
     const element = createElementWithBinding('[onePlusOne]="1+1"');

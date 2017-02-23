@@ -106,6 +106,10 @@ const WHITELISTED_ATTRS = [
   'href',
   'on',
   'placeholder',
+  /* Attributes added for amp-bind */
+  // TODO(kmh287): Add more whitelisted attributes for bind?
+  'text',
+  'class',
 ];
 
 
@@ -186,6 +190,16 @@ export function sanitizeHtml(html) {
         }
         return;
       }
+      const bindAttribsIndices = [];
+      // Special handling for attributes for amp-bind which are formatted as
+      // [attr]. The brackets are restored at the end of this function.
+      for (let i = 0; i < attribs.length; i += 2) {
+        const attr = attribs[i];
+        if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
+          bindAttribsIndices.push(i);
+          attribs[i] = attr.slice(1, -1);
+        }
+      }
       if (BLACKLISTED_TAGS[tagName]) {
         ignore++;
       } else if (tagName.indexOf('amp-') != 0) {
@@ -204,10 +218,6 @@ export function sanitizeHtml(html) {
             if (WHITELISTED_ATTRS.indexOf(attrib) != -1) {
               attribs[i + 1] = savedAttribs[i + 1];
             } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
-              attribs[i + 1] = savedAttribs[i + 1];
-            } else if (attrib[0] == '[' && attrib[attrib.length - 1] == ']') {
-              // Completely restore bind attribute values, as sanitizer does not recognize
-              // bracketed attribute names and wipes out their values.
               attribs[i + 1] = savedAttribs[i + 1];
             }
           }
@@ -256,7 +266,11 @@ export function sanitizeHtml(html) {
           continue;
         }
         emit(' ');
-        emit(attrName);
+        if (bindAttribsIndices.includes(i)) {
+          emit('[' + attrName + ']');
+        } else {
+          emit(attrName);
+        }
         emit('="');
         if (attrValue) {
           emit(htmlSanitizer.escapeAttrib(rewriteAttributeValue(

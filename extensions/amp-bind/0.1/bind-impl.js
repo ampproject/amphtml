@@ -39,13 +39,6 @@ const TAG = 'amp-bind';
 const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
 
 /**
- * Tag names that indicate dynamic content i.e. tags that will need
- * to be observed and rescanned for bindings if they change.
- * @type {!Array<string>}
- */
-const DYNAMIC_TAGS = ['TEMPLATE'];
-
-/**
  * A bound property, e.g. [property]="expression".
  * `previousResult` is the result of this expression during the last digest.
  * @typedef {{
@@ -126,43 +119,12 @@ export class Bind {
     this.digestQueuedAfterScan_ = false;
 
     /**
-     * @const @private {!Array<Node>}
-     */
-    this.dynamicRoots_ = [];
-
-    /**
      * @const @private {!Array<Promise>}
      */
     this.mutationPromises_ = [];
 
-    this.subtreeMutationObserver_ = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
-        const mutatedNode = mutation.target;
-        if (this.dynamicRoots_.includes(mutatedNode)) {
-          const removePromises = [];
-          const removedNodes = mutation.removedNodes;
-          for (let i = 0; i < removedNodes.length; i++) {
-            const removedNode = removedNodes[i];
-            removePromises.push(this.removeBindingsForNode_(removedNode));
-          }
-          const removeAllPromise = Promise.all(removePromises);
-
-          const addPromises = [];
-          const addedNodes = mutation.addedNodes;
-          for (let j = 0; j < addedNodes.length; j++) {
-            const addedNode = addedNodes[j];
-            addPromises.push(this.addBindingsForNode_(addedNode));
-          }
-          const addAllPromise = Promise.all(addPromises);
-          let mutationPromise = Promise.all([removeAllPromise, addAllPromise]);
-          mutationPromise = mutationPromise.then(() => {
-            // Immediately apply bindings to new elements with current scope
-            this.digest_();
-          });
-          this.mutationPromises_.push(mutationPromise);
-        }
-      });
-    });
+    this.mutationObserver_ =
+        new MutationObserver(this.onMutationsObserved_.bind(this));
 
     /** @const @private {boolean} */
     this.workerExperimentEnabled_ = isExperimentOn(this.win_, 'web-worker');
@@ -205,7 +167,9 @@ export class Bind {
    */
   initialize_() {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    this.addBindingsForNode_(this.ampdoc.getBody());
+    this.addBindingsForNode_(this.ampdoc.getBody()).then(() => {
+      this.initialized_ = true;
+    });
   }
 
   /**
@@ -238,7 +202,6 @@ export class Bind {
         return parseErrors;
       }
     }).then(parseErrors => {
-      this.initialized_ = true;
 
       // Report each parse error.
       Object.keys(parseErrors).forEach(expressionString => {
@@ -340,20 +303,9 @@ export class Bind {
       // Walker is filtered to only return elements
       const element = dev().assertElement(node);
       const tagName = element.tagName;
-      if (DYNAMIC_TAGS.includes(tagName)) {
+      if (tagName === 'TEMPLATE') {
         // Listen for changes in amp-mustache templates
-        // Templated HTML is added as a sibling to the template tag.
-        // So observe the parent.
-        // TODO(kmh287): What if parent is the body tag?
-        // TODO(kmh287): Generify logic for node observation strategy
-        // when bind supprots more dynamic nodes.
-        const elementToObserve = tagName === 'TEMPLATE' ?
-          element.parentElement :
-          element;
-        this.subtreeMutationObserver_.observe(elementToObserve, {
-          childList: true,
-        });
-        this.dynamicRoots_.push(elementToObserve);
+
       }
 
       const boundProperties = this.scanElement_(element);
@@ -369,7 +321,7 @@ export class Bind {
         }
         expressionToElements[expressionString].push(element);
       });
-      return walker.nextNode() === null;
+      return !!walker.nextNode();
     };
 
     return new Promise(resolve => {
@@ -691,6 +643,43 @@ export class Bind {
         `after the next state change.`);
       reportError(err, element);
     }
+  }
+
+  /**
+   *
+   */
+  beginObservingElementForMutations_(element) {
+    // TODO(kmh287): What if parent is the body tag?
+    // TODO(kmh287): Generify logic for node observation strategy
+    // when bind supprots more dynamic nodes.
+    const elementToObserve = element.parentElement;
+    this.mutationObserver_.observe(elementToObserve, {childList: true});
+  }
+
+  /**
+   * Respond to observed mutations. Meant to be used with MutationObserver
+   *
+   * @param mutations {Array<MutationRecord>}
+   */
+  onMutationsObserved_(mutations) {
+    mutations.forEach(mutation => {
+      const mutationPromises = [];
+      const removedNodes = mutation.removedNodes;
+      for (let i = 0; i < removedNodes.length; i++) {
+        const removedNode = removedNodes[i];
+        mutationPromises.push(this.removeBindingsForNode_(removedNode));
+      }
+      const addedNodes = mutation.addedNodes;
+      for (let j = 0; j < addedNodes.length; j++) {
+        const addedNode = addedNodes[j];
+        mutationPromises.push(this.addBindingsForNode_(addedNode));
+      }
+      const mutationPromise = Promise.all(mutationPromises).then(() => {
+        // Immediately apply bindings to new elements with current scope
+        this.digest_();
+      });
+      this.mutationPromises_.push(mutationPromise);
+    });
   }
 
   /**
