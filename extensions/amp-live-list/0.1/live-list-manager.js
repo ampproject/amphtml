@@ -17,12 +17,14 @@
 import {Poller} from './poller';
 import {addParamToUrl} from '../../../src/url';
 import {getMode} from '../../../src/mode';
-import {fromClass} from '../../../src/service';
+import {registerService, getService} from '../../../src/service';
 import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 
+/** @const {string} */
+const LIVE_LIST_MANAGER_SERVICE_TAG = 'liveListManager';
 
 /**
  * Manages registered AmpLiveList components.
@@ -223,5 +225,9 @@ export class LiveListManager {
  * @return {!LiveListManager}
  */
 export function installLiveListManager(win) {
-  return fromClass(win, 'liveListManager', LiveListManager);
+  registerService(win, LIVE_LIST_MANAGER_SERVICE_TAG, LiveListManager);
+}
+
+export function getLiveListManager(win) {
+  return getService(win, LIVE_LIST_MANAGER_SERVICE_TAG, LiveListManager);
 }
