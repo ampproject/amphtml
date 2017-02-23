@@ -33,8 +33,12 @@ import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {
+  getParentWindowFrameElement,
+  getServiceForDoc,
+  getServicePromiseForDoc,
+  registerServiceForDoc,
+} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {timerFor} from '../../../src/timer';
@@ -594,7 +598,7 @@ export function instrumentationServicePromiseForDoc(nodeOrDoc) {
  * @return {!InstrumentationService}
  */
 export function instrumentationServiceForDocForTesting(nodeOrDoc) {
-  installServiceForDoc(
+  registerServiceForDoc(
       ampdoc, INSTRUMENTATION_SERVICE_TAG, InstrumentationService);
   return getServiceForDoc(ampdoc, INSTRUMENTATION_SERVICE_TAG);
 }

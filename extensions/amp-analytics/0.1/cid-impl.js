@@ -23,7 +23,7 @@
  */
 
 import {getCookie, setCookie} from '../../../src/cookies';
-import {installServiceForDoc, getServiceForDoc} from '../../../src/service';
+import {registerServiceForDoc, getServiceForDoc} from '../../../src/service';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -428,6 +428,6 @@ function getEntropy(win) {
  * @private visible for testing
  */
 export function installCidServiceForDocForTesting(ampdoc) {
-   installServiceForDoc(ampdoc, 'cid', Cid);
+   registerServiceForDoc(ampdoc, 'cid', Cid);
    return getServiceForDoc(ampdoc, 'cid');
 }

@@ -17,7 +17,7 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {cryptoFor} from '../../../src/crypto';
 import {dev, user} from '../../../src/log';
-import {installService, getService} from '../../../src/service';
+import {registerService, getService} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 
@@ -306,7 +306,7 @@ export class VariableService {
  * @param {!Window} win
  */
 export function installVariableService(win) {
-  installService(win, VARIABLES_SERVICE_ID, VariableService);
+  registerService(win, VARIABLES_SERVICE_ID, VariableService);
 }
 
 /**
