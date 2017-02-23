@@ -2945,6 +2945,10 @@ attr_lists: {
   attrs: { name: "dir" }
   attrs: { name: "draggable" }
   attrs: {
+    name: "hidden"
+    value: ""
+  }
+  attrs: {
     name: "id"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
