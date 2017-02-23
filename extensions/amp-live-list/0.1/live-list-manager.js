@@ -229,5 +229,5 @@ export function installLiveListManager(win) {
 }
 
 export function getLiveListManager(win) {
-  return getService(win, LIVE_LIST_MANAGER_SERVICE_TAG, LiveListManager);
+  return getService(win, LIVE_LIST_MANAGER_SERVICE_TAG);
 }

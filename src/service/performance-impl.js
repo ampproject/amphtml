@@ -407,5 +407,5 @@ export function installPerformanceService(window) {
 
 export function getPerformanceService(window) {
   installPerformanceService(window);
-  return getService(window, 'performance', Performance);
+  return getService(window, 'performance');
 }

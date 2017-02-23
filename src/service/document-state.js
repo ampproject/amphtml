@@ -158,6 +158,6 @@ export function installDocumentState(window) {
  * @return {!DocumentState}
  */
 export function documentStateFor(window) {
-  installDocumentState(window, DOCUMENT_STATE_SERVICE_TAG, DocumentState);
-  return getService(window, DOCUMENT_STATE_SERVICE_TAG, DocumentState);
+  installDocumentState(window);
+  return getService(window, DOCUMENT_STATE_SERVICE_TAG);
 }

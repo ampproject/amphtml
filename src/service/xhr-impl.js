@@ -550,7 +550,7 @@ export class FetchResponseHeaders {
  */
 export function xhrServiceForTesting(window) {
   installXhrService(window);
-  return getService(window, 'xhr', Xhr);
+  return getService(window, 'xhr');
 }
 
 /**

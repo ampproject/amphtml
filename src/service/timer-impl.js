@@ -161,7 +161,7 @@ export class Timer {
  */
 export function timerServiceForTesting(window) {
   installTimerService(window);
-  getService(window, TIMER_SERVICE_TAG, undefined);
+  getService(window, TIMER_SERVICE_TAG);
 }
 
 /**

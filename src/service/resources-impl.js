@@ -1937,7 +1937,7 @@ export let SizeDef;
  */
 export function getResourcesServiceForDoc(ampdoc) {
   installResourcesServiceForDoc(ampdoc);
-  getServiceForDoc(ampdoc, 'resources', Resources);
+  getServiceForDoc(ampdoc, 'resources');
 }
 
 /**

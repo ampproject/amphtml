@@ -443,7 +443,7 @@ export class UserNotificationManager {
  */
 function getUserNotificationManager_(window) {
   return getService(
-    window, USER_NOTIFICATION_MANAGER_SERVICE_TAG, UserNotificationManager);
+    window, USER_NOTIFICATION_MANAGER_SERVICE_TAG);
 }
 
 /**

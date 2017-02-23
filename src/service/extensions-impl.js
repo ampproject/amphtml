@@ -96,7 +96,8 @@ export function installExtensionsService(window) {
  * @restricted
  */
 export function getExtensionsService(window) {
-  return getService(window, 'extensions', Extensions);
+  installExtensionsService(window);
+  return getService(window, 'extensions');
 }
 
 
