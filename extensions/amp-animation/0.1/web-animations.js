@@ -290,7 +290,7 @@ export class MeasureScanner extends Scanner {
     /** @private {!Array<!Element> } */
     this.targets_ = [];
 
-    /** @private {!Array<!CSSStyleDeclaration>} */
+    /** @private {!Array<!Object<string, string>>} */
     this.computedStyleCache_ = [];
   }
 
