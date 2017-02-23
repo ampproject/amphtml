@@ -77,7 +77,7 @@ With the responsive layout, the width and height from the example should yield c
 * playlist-masked: playlist without possibility to skip or choose video
 * album: is an audio playlist
 
-**start**
+**seek-to**
 
 Starting point of your media in seconds e.g. video starting 1:30min
 
@@ -92,7 +92,8 @@ Starting point of your media in seconds e.g. video starting 1:30min
 
 **origin**
 
-Source from where media is played
+Source from which embed domain media is played.
+
 * optional
 * default: https://embed.nexx.cloud/
 
