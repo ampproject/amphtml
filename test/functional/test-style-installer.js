@@ -18,7 +18,7 @@ import {getStyle} from '../../src/style';
 import * as rds from '../../src/render-delaying-services';
 import {getPerformanceService} from '../../src/service/performance-impl';
 import {createIframePromise} from '../../testing/iframe';
-import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
+import {getResourcesServiceForDoc} from '../../src/service/resources-impl';
 import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 
@@ -41,7 +41,7 @@ describe('Styles', () => {
       const perf = getPerformanceService(doc.defaultView);
       tickSpy = sandbox.spy(perf, 'tick');
 
-      const resources = installResourcesServiceForDoc(doc);
+      const resources = getResourcesServiceForDoc(doc);
       ampdoc = resources.ampdoc;
       schedulePassSpy = sandbox.spy(resources, 'schedulePass');
       waitForServicesStub = sandbox.stub(rds, 'waitForServices');

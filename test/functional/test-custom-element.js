@@ -17,7 +17,7 @@
 import {BaseElement} from '../../src/base-element';
 import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
+import {getResourcesServiceForDoc} from '../../src/service/resources-impl';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
@@ -79,7 +79,7 @@ describes.realWin('CustomElement register', {amp: 1}, env => {
 
 describe('CustomElement', () => {
 
-  const resources = installResourcesServiceForDoc(window.document);
+  const resources = getResourcesServiceForDoc(window.document);
   let testElementCreatedCallback;
   let testElementPreconnectCallback;
   let testElementFirstAttachedCallback;
@@ -1413,7 +1413,7 @@ describe('CustomElement Loading Indicator', () => {
     prototype: createAmpElementProto(window, 'amp-test-loader', TestElement),
   });
 
-  const resources = installResourcesServiceForDoc(window.document);
+  const resources = getResourcesServiceForDoc(window.document);
   let sandbox;
   let clock;
   let element;
@@ -1712,7 +1712,7 @@ describe('CustomElement Overflow Element', () => {
     prototype: createAmpElementProto(window, 'amp-test-overflow', TestElement),
   });
 
-  const resources = installResourcesServiceForDoc(window.document);
+  const resources = getResourcesServiceForDoc(window.document);
   let sandbox;
   let element;
   let overflowElement;
