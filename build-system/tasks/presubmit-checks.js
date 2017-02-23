@@ -484,21 +484,29 @@ var forbiddenTerms = {
     message: 'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
         'and getMode() to access config',
     whitelist: [
-      'build-system/server.js',
       'build-system/amp.extern.js',
-      'build-system/tasks/prepend-global/test.js',
+      'build-system/server.js',
       'build-system/tasks/prepend-global/index.js',
-      'src/service-worker/core.js',
-      'src/service-worker/error-reporting.js',
-      'src/mode.js',
-      'src/experiments.js',
-      'src/config.js',
+      'build-system/tasks/prepend-global/test.js',
       'dist.3p/current/integration.js',
+      'src/config.js',
+      'src/experiments.js',
+      'src/mode.js',
+      'src/service-worker/core.js',
+      'src/worker-error-reporting.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
     message: 'SVG data images must use charset=utf-8: ' +
         '"data:image/svg+xml;charset=utf-8,..."',
+  },
+  'installWorkerErrorReporting': {
+    message: 'Should only be used in worker entry points',
+    whitelist: [
+      'src/web-worker/web-worker.js',
+      'src/service-worker/shell.js',
+      'src/worker-error-reporting.js',
+    ],
   }
 };
 
