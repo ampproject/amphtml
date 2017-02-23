@@ -70,6 +70,8 @@ Currently AMP defines `tap` event globally that you can listen to on any HTML el
 
 AMP also defines `hide`, `show` and `toggle` actions globally that you can trigger on any HTML element.
 
+**Note:** An AMP element can only be shown if it was previously hidden by a `hide` or `toggle` action. Normal elements can set the `hidden` attribute if the element has to be hidden by default.
+
 For example, the following is possible in AMP.
 
 ```html
