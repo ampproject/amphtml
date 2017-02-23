@@ -102,7 +102,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', () => {
     });
   });
 
-  describe('amp-bind amp-img integration', () => {
+  describe('amp-img integration', () => {
     it('should change src when the src attribute binding changes', () => {
       const changeImgSrcButton =
         iframe.doc.getElementById('changeImgSrcButton');
