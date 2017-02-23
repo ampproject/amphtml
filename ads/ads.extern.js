@@ -30,6 +30,23 @@ function AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui() {};
 // Long list of, uhm, stuff the ads code needs to compile.
 // All unquoted external properties need to be added here.
 
+// Under 3p folder
+
+// facebook.js
+data.embedAs;
+data.href;
+
+// reddit.js
+data.uuid;
+data.embedcreated;
+data.embedparent;
+data.embedlive;
+data.embedtype;
+data.src;
+
+//twitter.js
+data.tweetid
+
 // Under ads/google folder
 
 // adsense.js
@@ -54,6 +71,9 @@ pubads.markAsGladeControl;
 googletag.enableServices;
 pubads.setCookieOptions;
 pubads.setTagForChildDirectedTreatment;
+data.slot.setCategoryExclusion;
+data.slot.setTargeting;
+data.slot.setAttribute;
 data.useSameDomainRenderingUntilDeprecated;
 data.multiSize;
 data.overrideWidth;
@@ -80,7 +100,6 @@ data.aax_src;
 data.cid;
 
 // adform.js
-data.src;
 data.bn;
 data.mid;
 
@@ -147,7 +166,7 @@ data.member;
 data.code;
 data.pageOpts;
 data.debug;
-data.adUnits.forEach;
+data.adUnits;
 data.target;
 
 // colombia.js
@@ -190,6 +209,11 @@ data.epl_kvs;
 data.epl_e;
 
 // ezoic.js
+/**
+ * @constructor
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 window.EzoicAmpAd = function(global, data) {};
 window.EzoicAmpAd.prototype.createAd;
 
@@ -288,6 +312,7 @@ data.delayByTime;
 data.category;
 
 // openadstream.js
+data.adhost
 data.sitepage;
 data.pos;
 data.query;
