@@ -14,26 +14,16 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+import {writeScript, validateData} from '../3p/3p';
 
-/** @const */
-const TAG = 'amp-tabs';
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function adspeed(global, data) {
+  validateData(data, ['zone', 'client']);
 
-export class AmpTabs extends AMP.BaseElement {
+  const url = 'https://g.adspeed.net/ad.php?do=amphtml&zid=' + data.zone + '&oid=' + data.client + '&cb=' + Math.random();
 
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-  }
-
-  /** @override */
-  buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment "${TAG}" is disabled.`);
-  }
+  writeScript(global, url);
 }
-
-AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerElement(TAG, AmpTabs);
-});

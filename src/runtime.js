@@ -16,6 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
+import {CommonSignals} from './common-signals';
 import {VisibilityState} from './visibility-state';
 import {
   addDocFactoryToExtension,
@@ -30,7 +31,8 @@ import {
 import {ampdocServiceFor} from './ampdoc';
 import {startupChunk} from './chunk';
 import {cssText} from '../build/css';
-import {dev, user, initLogConstructor} from './log';
+import {dev, user, initLogConstructor, setReportError} from './log';
+import {reportError} from './error';
 import {
   disposeServicesForDoc,
   fromClassForDoc,
@@ -83,6 +85,7 @@ import {waitForBody} from './dom';
 import * as config from './config';
 
 initLogConstructor();
+setReportError(reportError);
 
 /**
  * - n is the name.
@@ -654,7 +657,7 @@ class MultidocManager {
     // E.g. integrate with dynamic classes. In shadow case specifically, we have
     // to wait for stubbing to complete, which may take awhile due to importNode.
     setTimeout(() => {
-      ampdoc.signals().signal('render-start');
+      ampdoc.signals().signal(CommonSignals.RENDER_START);
       setStyle(hostElement, 'visibility', 'visible');
     }, 50);
 

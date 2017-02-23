@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '../../../src/common-signals';
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {Layout} from '../../../src/layout';
 import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   setStyle,
   removeAlphaFromColor,
 } from '../../../src/style';
+
+/** @const */
+const EARLY_LOAD_EXPERIMENT = 'sticky-ad-early-load';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -68,7 +73,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
     // On viewport scroll, check requirements for amp-stick-ad to display.
     this.scrollUnlisten_ =
-        this.viewport_.onScroll(() => this.displayAfterScroll_());
+        this.viewport_.onScroll(() => this.onScroll_());
   }
 
   /** @override */
@@ -120,29 +125,40 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /**
-   * The listener function that listen on onScroll event and
-   * show sticky ad when user scroll at least one viewport and
-   * there is at least one more viewport available.
+   * The listener function that listen on viewport scroll event.
+   * And decide when to display the ad.
    * @private
    */
-  displayAfterScroll_() {
+  onScroll_() {
+    if (isExperimentOn(this.win, EARLY_LOAD_EXPERIMENT)) {
+      this.display_();
+      return;
+    }
+
     const scrollTop = this.viewport_.getScrollTop();
     const viewportHeight = this.viewport_.getSize().height;
-
     // Check user has scrolled at least one viewport from init position.
     if (scrollTop > viewportHeight) {
-      this.removeOnScrollListener_();
-      this.deferMutate(() => {
-        this.visible_ = true;
-        this.viewport_.addToFixedLayer(this.element);
-        this.addCloseButton_();
-        this.scheduleLayoutForAd_();
-      });
+      this.display_();
     }
   }
 
   /**
-   * Function that check if ad has been built.  If not, wait for the 'built'
+   * Display and load sticky ad.
+   * @private
+   */
+  display_() {
+    this.removeOnScrollListener_();
+    this.deferMutate(() => {
+      this.visible_ = true;
+      this.viewport_.addToFixedLayer(this.element);
+      this.addCloseButton_();
+      this.scheduleLayoutForAd_();
+    });
+  }
+
+  /**
+   * Function that check if ad has been built.  If not, wait for the "built"
    * signal. Otherwise schedule layout for ad.
    * @private
    */
@@ -168,8 +184,8 @@ class AmpStickyAd extends AMP.BaseElement {
     // all types of ads.
     const signals = ad.signals();
     return Promise.race([
-      signals.whenSignal('render-start'),
-      signals.whenSignal('load-end'),
+      signals.whenSignal(CommonSignals.RENDER_START),
+      signals.whenSignal(CommonSignals.LOAD_END),
     ]).then(() => {
       return this.vsync_.mutatePromise(() => {
         // Set sticky-ad to visible and change container style

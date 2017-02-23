@@ -72,12 +72,21 @@ export class EmbeddableService {
  * @return {!Object} The service.
  */
 export function getExistingServiceForWindow(win, id) {
-  win = getTopWindow(win);
-  const exists = win.services && win.services[id] && win.services[id].obj;
-  return dev().assert(exists, `${id} service not found. Make sure it is ` +
-      `installed.`);
+  const exists = getExistingServiceForWindowOrNull(win, id);
+  return dev().assert(/** @type {!Object} */ (exists),
+      `${id} service not found. Make sure it is installed.`);
 }
 
+/**
+ * Returns a service or null with the given id.
+ * @param {!Window} win
+ * @param {string} id
+ * @return {?Object} The service.
+ */
+export function getExistingServiceForWindowOrNull(win, id) {
+  win = getTopWindow(win);
+  return win.services && win.services[id] && win.services[id].obj;
+}
 
 /**
  * Returns a service with the given id. Assumes that it has been constructed

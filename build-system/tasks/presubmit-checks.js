@@ -253,7 +253,7 @@ var forbiddenTerms = {
       'src/service/xhr-impl.js',
     ],
   },
-  'initLogConstructor': {
+  'initLogConstructor|setReportError': {
     message: 'Should only be called from JS binary entry files.',
     whitelist: [
       '3p/integration.js',
@@ -336,15 +336,6 @@ var forbiddenTerms = {
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
-    ],
-  },
-  'setReportError\\W': {
-    message: 'Should only be used in error.js and tests.',
-    whitelist: [
-      'dist.3p/current/integration.js',
-      'src/error.js',
-      'src/event-helper.js',
-      'src/log.js',
     ],
   },
   'isTrustedViewer': {
@@ -566,6 +557,7 @@ var forbiddenTermsSrcInclusive = {
   // Functions
   '\\.changeHeight\\(': bannedTermsHelpString,
   '\\.changeSize\\(': bannedTermsHelpString,
+  '\\.attemptChangeHeight\\(0\\)': 'please consider using `attemptCollapse()`',
   '\\.collapse\\(': bannedTermsHelpString,
   '\\.focus\\(': bannedTermsHelpString,
   '\\.getBBox\\(': bannedTermsHelpString,
@@ -602,6 +594,7 @@ var forbiddenTermsSrcInclusive = {
       'src/shadow-embed.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
+      'ads/google/a4a/utils.js',
     ],
   },
   'loadElementClass': {

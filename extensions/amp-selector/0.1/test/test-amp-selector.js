@@ -541,10 +541,9 @@ describes.realWin('amp-selector', {
           selectedCount: 2,
         },
       });
-
+      ampSelector.build();
       const impl = ampSelector.implementation_;
       const triggerSpy = sandbox.spy(impl.action_, 'trigger');
-      ampSelector.build();
 
       impl.clickHandler_({target: impl.options_[3]});
 

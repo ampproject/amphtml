@@ -28,6 +28,9 @@ import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
+  AmpAnalyticsConfigDef,
+  extractAmpAnalyticsConfig,
+  injectActiveViewAmpAnalyticsElement,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -35,6 +38,7 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
+import {extensionsFor} from '../../../src/extensions';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
 /** @const {string} */
@@ -54,6 +58,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      */
     this.lifecycleReporter_ = this.lifecycleReporter_ ||
         this.initLifecycleReporter();
+
+    /**
+     * Config to generate amp-analytics element for active view reporting.
+     * @type {?AmpAnalyticsConfigDef}
+     * @visibleForTesting
+     */
+    this.ampAnalyticsConfig = null;
+
+    /** @private {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = extensionsFor(this.win);
   }
 
   /** @override */
@@ -109,6 +123,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
       {name: 'u_sd', value: global.devicePixelRatio},
       {name: 'adtest', value: adTestOn},
+      {name: 'asnt', value: this.sentinel},
     ], [
       {
         name: 'scp',
@@ -135,6 +150,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
+    this.ampAnalyticsConfig = extractAmpAnalyticsConfig(responseHeaders);
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
@@ -152,6 +168,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
+    this.ampAnalyticsConfig = null;
   }
 
   /**
@@ -159,6 +176,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   initLifecycleReporter() {
     return googleLifecycleReporterFactory(this);
+  }
+
+  /** @override */
+  onCreativeRender(isVerifiedAmpCreative) {
+    super.onCreativeRender(isVerifiedAmpCreative);
+    injectActiveViewAmpAnalyticsElement(
+      this, this.extensions_, this.ampAnalyticsConfig);
   }
 
   /**

@@ -15,10 +15,13 @@
  */
 
 import {documentInfoForDoc} from '../document-info';
-import {whenDocumentReady, whenDocumentComplete} from '../document-ready';
+import {layoutRectLtwh} from '../layout-rect';
 import {fromClass} from '../service';
 import {resourcesForDoc} from '../resources';
 import {viewerForDoc} from '../viewer';
+import {viewportForDoc} from '../viewport';
+import {whenDocumentComplete} from '../document-ready';
+import {urls} from '../config';
 
 
 /**
@@ -88,15 +91,8 @@ export class Performance {
     /** @private {boolean} */
     this.isPerformanceTrackingOn_ = false;
 
-    /** @private @const {!Promise} */
-    this.whenReadyToRetrieveResourcesPromise_ =
-        whenDocumentReady(this.win.document)
-        .then(() => {
-          // Two fold. First, resolve the promise to undefined.
-          // Second, causes a delay by introducing another async request
-          // (this `#then` block) so that Resources' onDocumentReady event
-          // is guaranteed to fire.
-        });
+    /** @private {?string} */
+    this.enabledExperiments_ = null;
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => {
@@ -198,20 +194,10 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    return this.whenReadyToRetrieveResources_().then(() => {
-      return Promise.all(this.resources_.getResourcesInViewport().map(r => {
-        return r.loadedOnce();
-      }));
-    });
-  }
-
-  /**
-   * Returns a promise that is resolved when the document is ready and
-   * after a microtask delay.
-   * @return {!Promise}
-   */
-  whenReadyToRetrieveResources_() {
-    return this.whenReadyToRetrieveResourcesPromise_;
+    const size = viewportForDoc(this.win.document).getSize();
+    const rect = layoutRectLtwh(0, 0, size.width, size.height);
+    return this.resources_.getResourcesInRect(this.win, rect).then(
+        resources => Promise.all(resources.map(r => r.loadedOnce())));
   }
 
   /**
@@ -287,11 +273,33 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.sendMessage('sendCsi', undefined,
-          /* cancelUnsent */true);
+      const experiments = this.getEnabledExperiments_();
+      const payload = experiments === '' ? undefined : {
+        ampexp: experiments,
+      };
+      this.viewer_.sendMessage('sendCsi', payload, /* cancelUnsent */true);
     }
   }
 
+  /**
+   * @returns {string} comma-separated list of experiment IDs
+   * @private
+   */
+  getEnabledExperiments_() {
+    if (this.enabledExperiments_ !== null) {
+      return this.enabledExperiments_;
+    }
+    const experiments = [];
+    // Check if it's the legacy CDN domain.
+    if (this.getHostname_() == urls.cdn.split('://')[1]) {
+      experiments.push('legacy-cdn-domain');
+    }
+    return this.enabledExperiments_ = experiments.join(',');
+  }
+
+  getHostname_() {
+    return this.win.location.hostname;
+  }
 
   /**
    * Queues the events to be flushed when tick function is set.

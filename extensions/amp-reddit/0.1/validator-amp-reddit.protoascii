@@ -18,7 +18,8 @@ tags: {  # amp-reddit
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-reddit extension .js script"
-  also_requires_tag: "amp-reddit"
+  satisfies: "amp-reddit extension .js script"
+  requires: "amp-reddit"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-reddit"
@@ -54,8 +55,9 @@ tags: {  # amp-reddit
 tags: {  # <amp-reddit>
   html_format: AMP
   tag_name: "AMP-REDDIT"
+  satisfies: "amp-reddit"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-reddit extension .js script"
+  requires: "amp-reddit extension .js script"
   attrs: {
     name: "data-embedlive"
     value_regex_casei: "(false|true)"

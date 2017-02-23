@@ -140,6 +140,8 @@ export class Xhr {
       init['headers'] = init['headers'] || {};
       init['headers']['AMP-Same-Origin'] = 'true';
     }
+    // In edge a `TypeMismatchError` is thrown when body is set to null.
+    dev().assert(init.body !== null, 'fetch `body` can not be `null`');
     return this.fetch_(input, init).then(response => {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);

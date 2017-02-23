@@ -42,10 +42,8 @@ export function getContextMetadata(
     locationHref = parentWindow.parent.location.href;
   }
 
-  const docInfo = documentInfoForDoc(parentWindow.document);
-
-  const referrer = viewerForDoc(parentWindow.document)
-      .getUnconfirmedReferrerUrl();
+  const docInfo = documentInfoForDoc(element);
+  const referrer = viewerForDoc(element).getUnconfirmedReferrerUrl();
 
   const sentinelNameChange = isExperimentOn(
       parentWindow, 'sentinel-name-change');

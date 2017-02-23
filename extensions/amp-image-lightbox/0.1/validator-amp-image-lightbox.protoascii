@@ -17,6 +17,7 @@ tags: {  # amp-image-lightbox
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-image-lightbox extension .js script"
+  satisfies: "amp-image-lightbox extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_unused_unless_tag_present: "amp-image-lightbox"
@@ -53,7 +54,7 @@ tags: {  # <amp-image-lightbox>
   html_format: AMP
   tag_name: "AMP-IMAGE-LIGHTBOX"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-image-lightbox extension .js script"
+  requires: "amp-image-lightbox extension .js script"
   # Support dimensions / sizes / etc. like an amp-lightbox.
   attrs: { name: "controls" }
   attr_lists: "extended-amp-global"

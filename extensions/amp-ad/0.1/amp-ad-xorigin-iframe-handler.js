@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-import {removeElement} from '../../../src/dom';
+import {AdDisplayState} from './amp-ad-ui';
+import {CommonSignals} from '../../../src/common-signals';
+import {
+  IntersectionObserver,
+} from '../../../src/intersection-observer';
 import {
   SubscriptionApi,
   listenFor,
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {
-  IntersectionObserver,
-} from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
-import {AdDisplayState} from './amp-ad-ui';
 import {getHtml} from '../../../src/get-html';
+import {removeElement} from '../../../src/dom';
 
 const VISIBILITY_TIMEOUT = 10000;
 
@@ -127,6 +128,10 @@ export class AmpAdXOriginIframeHandler {
     // Iframe.onload normally called by the Ad after full load.
     const iframeLoadPromise = loadPromise(this.iframe).then(() => {
       // Wait just a little to allow `no-content` message to arrive.
+      if (this.iframe) {
+        // Chrome does not reflect the iframe readystate.
+        this.iframe.readyState = 'complete';
+      }
       return timer.promise(10);
     });
     if (this.baseInstance_.emitLifecycleEvent) {
@@ -178,11 +183,23 @@ export class AmpAdXOriginIframeHandler {
       });
     }
 
+    // Wait for initial load signal. Notice that this signal is not
+    // used to resolve the final layout promise because iframe may still be
+    // consuming significant network and CPU resources.
+    listenForOncePromise(this.iframe, CommonSignals.INI_LOAD, true).then(() => {
+      // TODO(dvoytenko): ensure that in-a-box "ini-load" message is received
+      // here as well.
+      this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
+    });
+
     if (opt_isA4A) {
       // A4A writes creative frame directly to page therefore does not expect
       // post message to unset visibility hidden
       this.element_.appendChild(this.iframe);
-      return Promise.resolve();
+      // TODO(dvoytenko): if this is guaranteed to be a quasi-valid AMP creative
+      // then the `ini-load` message will work better here. Reconsider once
+      // `ini-load` message is supported in the in-a-box.
+      return iframeLoadPromise;
     }
 
     // Set iframe initially hidden which will be removed on render-start or

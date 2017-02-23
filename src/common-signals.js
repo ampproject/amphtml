@@ -15,8 +15,34 @@
  */
 
 
-describes.sandboxed('AmpTabs', {}, () => {
-  it('should work', () => {
-    // TODO
-  });
-});
+/**
+ * Commonly used signals across different elements and documents.
+ * @enum {string}
+ */
+export const CommonSignals = {
+
+  /**
+   * The element has been built.
+   */
+  BUILT: 'built',
+
+  /**
+   * The initial contents of an element/document/embed have been loaded.
+   */
+  INI_LOAD: 'ini-load',
+
+  /**
+   * The element has been loaded.
+   */
+  LOAD_END: 'load-end',
+
+  /**
+   * The element has started loading.
+   */
+  LOAD_START: 'load-start',
+
+  /**
+   * Rendering has been confirmed to have been started.
+   */
+  RENDER_START: 'render-start',
+};
