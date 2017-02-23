@@ -192,13 +192,13 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       expect(img1.hasAttribute('selected')).to.be.false;
       expect(img2.hasAttribute('selected')).to.be.false;
       expect(img3.hasAttribute('selected')).to.be.false;
-      expect(selectionText.innerHTML).to.equal('None');
+      expect(selectionText.textContent).to.equal('None');
       img2.click();
       return waitForBindApplication().then(() => {
         expect(img1.hasAttribute('selected')).to.be.false;
         expect(img2.hasAttribute('selected')).to.be.true;
         expect(img3.hasAttribute('selected')).to.be.false;
-        expect(selectionText.innerHTML).to.equal('2');
+        expect(selectionText.textContent).to.equal('2');
       });
     });
 
@@ -212,14 +212,14 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       expect(img1.hasAttribute('selected')).to.be.false;
       expect(img2.hasAttribute('selected')).to.be.false;
       expect(img3.hasAttribute('selected')).to.be.false;
-      expect(selectionText.innerHTML).to.equal('None');
+      expect(selectionText.textContent).to.equal('None');
       // Changes selection to 2
       changeSelectionButton.click();
       return waitForBindApplication().then(() => {
         expect(img1.hasAttribute('selected')).to.be.false;
         expect(img2.hasAttribute('selected')).to.be.true;
         expect(img3.hasAttribute('selected')).to.be.false;
-        expect(selectionText.innerHTML).to.equal('2');
+        expect(selectionText.textContent).to.equal('2');
       });
     });
   });
