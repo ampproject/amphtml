@@ -20,8 +20,17 @@ import {dev, user} from '../log';
 import {fromClassForDoc} from '../service';
 import {historyForDoc} from '../history';
 import {installResourcesServiceForDoc} from './resources-impl';
-import {toggle} from '../style';
-import {vsyncFor} from '../vsync';
+import {getStyle, toggle} from '../style';
+
+
+/**
+ * @param {!Element} element
+ * @return {bool}
+ */
+function isHidden(element) {
+  return getStyle(element, 'display') == 'none'
+      || element.hasAttribute('hidden');
+}
 
 
 /**
@@ -44,15 +53,11 @@ export class StandardActions {
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = installResourcesServiceForDoc(ampdoc);
 
-    /** @private {!Window} */
-    this.win_ = ampdoc.win;
-
     this.installActions_(this.actions_);
   }
 
   /** @override */
   adoptEmbedWindow(embedWin) {
-    this.win_ = embedWin;
     this.installActions_(actionServiceForDoc(embedWin.document));
   }
 
@@ -95,12 +100,15 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleHide(invocation) {
+    // TODO(alanorozco, #7753) use 'hidden' attribute for AMP elements
     const target = dev().assertElement(invocation.target);
+
     this.resources_.mutateElement(target, () => {
       if (target.classList.contains('i-amphtml-element')) {
         target./*OK*/collapse();
       } else {
         toggle(target, false);
+        target.setAttribute('hidden', '');
       }
     });
   }
@@ -111,14 +119,25 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleShow(invocation) {
+    // TODO(alanorozco, #7753) use 'hidden' attribute for AMP elements
     const target = dev().assertElement(invocation.target);
-    this.resources_.deferMutate(target, () => {
-      if (target.classList.contains('i-amphtml-element')) {
-        target./*OK*/expand();
-      } else {
+
+    user().assert(isHidden(target),
+        'Element can only be shown when it has the "hidden" attribute set or ' +
+        'was previously hidden by an AMP action. %s',
+        target);
+
+    // deferMutate will only work on AMP elements
+    if (target.classList.contains('i-amphtml-element')) {
+      this.resources_.deferMutate(target, () => {
+        target./*OK*/expand()
+      });
+    } else {
+      this.resources_.mutateElement(target, () => {
         toggle(target, true);
-      }
-    });
+        target.removeAttribute('hidden');
+      });
+    }
   }
 
   /**
@@ -126,21 +145,11 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleToggle(invocation) {
-    const target = dev().assertElement(invocation.target);
-
-    vsyncFor(this.win_).run({
-      measure: state => {
-        state.display = this.win_./*OK*/getComputedStyle(target)
-          .getPropertyValue('display');
-      },
-      mutate: state => {
-        if (state.display == 'none') {
-          this.handleShow(invocation);
-        } else {
-          this.handleHide(invocation);
-        }
-      },
-    }, {});
+    if (isHidden(dev().assertElement(invocation.target))) {
+      this.handleShow(invocation);
+    } else {
+      this.handleHide(invocation);
+    }
   }
 }
 
