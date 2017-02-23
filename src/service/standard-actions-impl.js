@@ -143,7 +143,7 @@ export class StandardActions {
     // deferMutate will only work on AMP elements
     if (target.classList.contains('i-amphtml-element')) {
       this.resources_.deferMutate(target, () => {
-        target./*OK*/expand()
+        target./*OK*/expand();
       });
     } else {
       this.resources_.mutateElement(target, () => {
