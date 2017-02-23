@@ -15,7 +15,7 @@
  */
 
 import {dev, user} from '../log';
-import {registerService} from '../service';
+import {registerService, getService} from '../service';
 import {
   getSourceOrigin,
   getCorsUrl,

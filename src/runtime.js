@@ -39,7 +39,7 @@ import {
   getServiceForDoc,
 } from './service';
 import {
-  registerServiceForDoc as registerServiceForDocExternal
+  registerServiceForDoc as registerServiceForDocExternal,
 } from './service';
 import {childElementsByTag} from './dom';
 import {
@@ -512,7 +512,7 @@ function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
   dev().assert((opt_ctor || opt_factory) && (!opt_ctor || !opt_factory),
       'Only one: a class or a factory must be specified');
   if (opt_ctor) {
-    registerServiceForDoc(ampdoc, name, opt_ctor);
+    registerServiceForDocExternal(ampdoc, name, opt_ctor);
   } else {
     getServiceForDoc(ampdoc, name, opt_factory);
   }

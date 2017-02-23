@@ -336,17 +336,17 @@ export function registerExtendedTemplate(win, type, templateClass) {
  * @param {!Window} window
  * @return {!Templates}
  */
- export function templatesServiceForTesting(window) {
-  return getTemplateService(window);
- }
+export function templatesServiceForTesting(window) {
+  return getTemplatesService(window);
+}
 
 /**
  * @param {!Window} window
  */
- function getTemplatesService(window) {
+function getTemplatesService(window) {
   installTemplatesService(window);
-  return getService(window, TEMPLATE_SERVICE_TAG, undefined);
- }
+  return getService(window, TEMPLATE_SERVICE_TAG);
+}
 
 
 /**

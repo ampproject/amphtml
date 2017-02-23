@@ -90,7 +90,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
  * @return {!Chunks}
  */
 export function chunkInstanceForTesting(nodeOrAmpDoc) {
-  registerServiceForDoc(nodeOrDoc, CHUNK_SERVICE_TAG, Chunks);
+  registerServiceForDoc(nodeOrAmpDoc, CHUNK_SERVICE_TAG, Chunks);
   return getChunkServiceForDoc_(nodeOrAmpDoc);
 }
 

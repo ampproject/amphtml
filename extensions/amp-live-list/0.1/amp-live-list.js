@@ -20,7 +20,7 @@ import {childElementByAttr} from '../../../src/dom';
 import {
   installLiveListManager,
   getLiveListManager,
-  LiveListManager
+  LiveListManager,
 } from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';

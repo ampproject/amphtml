@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-fresh-0.1.css';
 import {copyChildren} from '../../../src/dom';
 import {
   installAmpFreshManagerForDoc,
-  getAmpFreshManagerForDoc
+  getAmpFreshManagerForDoc,
 } from './amp-fresh-manager';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';

@@ -74,7 +74,6 @@ describe('service', () => {
 
   describe('window singletons', () => {
 
-    let Class;
     let count;
     let factory;
 
@@ -83,11 +82,7 @@ describe('service', () => {
       factory = sandbox.spy(() => {
         return ++count;
       });
-      Class = class {
-        constructor() {
-          this.count = ++count;
-        }
-      };
+
       resetServiceForTesting(window, 'a');
       resetServiceForTesting(window, 'b');
       resetServiceForTesting(window, 'c');

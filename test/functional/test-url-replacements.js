@@ -28,7 +28,9 @@ import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
-import {activityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
+import {
+  activityServiceForTesting,
+} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';

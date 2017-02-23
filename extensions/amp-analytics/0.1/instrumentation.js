@@ -599,6 +599,6 @@ export function instrumentationServicePromiseForDoc(nodeOrDoc) {
  */
 export function instrumentationServiceForDocForTesting(nodeOrDoc) {
   registerServiceForDoc(
-      ampdoc, INSTRUMENTATION_SERVICE_TAG, InstrumentationService);
-  return getServiceForDoc(ampdoc, INSTRUMENTATION_SERVICE_TAG);
+      nodeOrDoc, INSTRUMENTATION_SERVICE_TAG, InstrumentationService);
+  return getServiceForDoc(nodeOrDoc, INSTRUMENTATION_SERVICE_TAG);
 }

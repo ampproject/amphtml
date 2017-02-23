@@ -1935,10 +1935,10 @@ export let SizeDef;
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Resources}
  */
- export function getResourcesServiceForDoc(ampdoc) {
+export function getResourcesServiceForDoc(ampdoc) {
   installResourcesServiceForDoc(ampdoc);
   getServiceForDoc(ampdoc, 'resources', Resources);
- }
+}
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc

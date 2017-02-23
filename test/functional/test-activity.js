@@ -15,7 +15,9 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {activityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
+import {
+  activityServiceForTesting,
+} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {activityForDoc} from '../../src/activity';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';

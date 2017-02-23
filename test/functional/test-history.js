@@ -22,7 +22,10 @@ import {
   installHistoryServiceForDoc,
 } from '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
-import {timerServiceForTesting} from '../../src/service/timer-impl';
+import {
+  timerServiceForTesting,
+  installTimerService,
+} from '../../src/service/timer-impl';
 import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
 
