@@ -2,7 +2,7 @@
 
 We push a new release of AMP to all AMP pages every week on Thursday. The more detailed schedule is as follows:
 
-- Every Wednesday we cut a green release from our `master` branch.
+- Every Wednesday we cut a green release at the latest commit that passed all tests.
 - On Thursday this is pushed to users of AMP who opted into the [AMP Dev Channel](#amp-dev-channel).
 - On Monday we check error rates for opt-in users and bug reports and if everything looks fine, we push this new release to 1% of AMP pages.
 - We then continue to monitor error rates and bug reports throughout the week.
