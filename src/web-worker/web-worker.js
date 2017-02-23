@@ -24,6 +24,9 @@
 import '../../third_party/babel/custom-babel-helpers';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
+import {installWorkerErrorReporting} from '../worker-error-reporting';
+
+installWorkerErrorReporting('ww');
 
 /** @private {BindEvaluator} */
 let evaluator_;
@@ -33,7 +36,6 @@ self.addEventListener('message', function(event) {
 
   let returnValue;
 
-  // TODO(choumx): Add error reporting.
   switch (method) {
     case 'bind.addBindings':
       evaluator_ = evaluator_ || new BindEvaluator();
