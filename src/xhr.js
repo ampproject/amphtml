@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForWindow} from './service';
+import {getService} from './service';
 
 
 /**
@@ -23,5 +23,5 @@ import {getExistingServiceForWindow} from './service';
  */
 export function xhrFor(window) {
   return /** @type {!./service/xhr-impl.Xhr} */ (
-      getExistingServiceForWindow(window, 'xhr'));
+      getService(window, 'xhr'));
 };

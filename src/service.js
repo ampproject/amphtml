@@ -65,27 +65,13 @@ export class EmbeddableService {
   adoptEmbedWindow(unusedEmbedWin) {}
 }
 
-
-/**
- * Returns a service with the given id. Assumes that it has been constructed
- * already.
- * @param {!Window} win
- * @param {string} id
- * @return {!Object} The service.
- */
-export function getExistingServiceForWindow(win, id) {
-  const exists = getExistingServiceForWindowOrNull(win, id);
-  return dev().assert(/** @type {!Object} */ (exists),
-      `${id} service not found. Make sure it is installed.`);
-}
-
 /**
  * Returns a service or null with the given id.
  * @param {!Window} win
  * @param {string} id
  * @return {?Object} The service.
  */
-export function getExistingServiceForWindowOrNull(win, id) {
+export function getServiceOrNull(win, id) {
   win = getTopWindow(win);
   return win.services && win.services[id] && win.services[id].obj;
 }
@@ -97,14 +83,14 @@ export function getExistingServiceForWindowOrNull(win, id) {
  * @param {string} id
  * @return {!Object} The service.
  */
-export function getExistingServiceForWindowInEmbedScope(win, id) {
+export function getServiceInEmbedScope(win, id) {
   // First, try to resolve via local (embed) window.
   const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
   if (local) {
     return local;
   }
   // Fallback to top-level window.
-  return getExistingServiceForWindow(win, id);
+  return getService(win, id);
 }
 
 
@@ -428,7 +414,8 @@ function getServiceInternal(holder, context, id, opt_factory,
   if (!s.obj) {
 
     if (s.ctor) {
-      s.obj = new s.ctor(context);
+      const ctor = s.ctor;
+      s.obj = new ctor(context);
     } else {
       dev().assert(opt_factory || opt_constructor,
           'Factory or class not given and service missing %s', id);

@@ -20,9 +20,8 @@ import {
   assertEmbeddable,
   disposeServicesForDoc,
   getExistingServiceForDocInEmbedScope,
-  getExistingServiceForWindowInEmbedScope,
+  getServiceInEmbedScope,
   getExistingServiceForDoc,
-  getExistingServiceForWindow,
   getParentWindowFrameElement,
   getService,
   getServicePromise,
@@ -114,14 +113,14 @@ describe('service', () => {
 
     it('should return the service when it exists', () => {
       const c1 = getService(window, 'c', factory);
-      const c2 = getExistingServiceForWindow(window, 'c');
+      const c2 = getService(window, 'c');
       expect(c1).to.equal(c2);
     });
 
     it('should throw before creation', () => {
       getService(window, 'another service to avoid NPE', () => {});
       expect(() => {
-        getExistingServiceForWindow(window, 'c');
+        getService(window, 'c');
       }).to.throw();
     });
 
@@ -153,13 +152,13 @@ describe('service', () => {
       const child = {};
       setParentWindow(child, window);
       expect(getService(child, 'c', factory)).to.equal(c);
-      expect(getExistingServiceForWindow(child, 'c')).to.equal(c);
+      expect(getService(child, 'c')).to.equal(c);
 
       // A grandchild.
       const grandchild = {};
       setParentWindow(grandchild, child);
       expect(getService(grandchild, 'c', factory)).to.equal(c);
-      expect(getExistingServiceForWindow(grandchild, 'c')).to.equal(c);
+      expect(getService(grandchild, 'c')).to.equal(c);
     });
 
     describe('embed service', () => {
@@ -179,30 +178,30 @@ describe('service', () => {
       });
 
       it('should return top service for top window', () => {
-        expect(getExistingServiceForWindowInEmbedScope(window, 'c'))
+        expect(getServiceInEmbedScope(window, 'c'))
             .to.equal(topService);
       });
 
       it('should return top service when not overriden', () => {
-        expect(getExistingServiceForWindowInEmbedScope(childWin, 'c'))
+        expect(getServiceInEmbedScope(childWin, 'c'))
             .to.equal(topService);
-        expect(getExistingServiceForWindowInEmbedScope(grandchildWin, 'c'))
+        expect(getServiceInEmbedScope(grandchildWin, 'c'))
             .to.equal(topService);
       });
 
       it('should return overriden service', () => {
         const overridenService = {};
         installServiceInEmbedScope(childWin, 'c', overridenService);
-        expect(getExistingServiceForWindowInEmbedScope(childWin, 'c'))
+        expect(getServiceInEmbedScope(childWin, 'c'))
             .to.equal(overridenService);
         // Top-level service doesn't change.
-        expect(getExistingServiceForWindow(window, 'c'))
+        expect(getService(window, 'c'))
             .to.equal(topService);
 
         // Notice that only direct overrides are allowed for now. This is
         // arbitrary can change in the future to allow hierarchical lookup
         // up the window chain.
-        expect(getExistingServiceForWindow(grandchildWin, 'c'))
+        expect(getService(grandchildWin, 'c'))
             .to.equal(topService);
       });
     });

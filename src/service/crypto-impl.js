@@ -17,7 +17,7 @@
 import {PublicKeyInfoDef} from '../crypto';
 import {registerService} from '../service';
 import {dev} from '../log';
-import {getExistingServiceForWindow} from '../service';
+import {getService} from '../service';
 import {extensionsFor} from '../extensions';
 import {stringToBytes, utf8Encode} from '../utils/bytes';
 import {
@@ -126,7 +126,7 @@ export class Crypto {
     }
     return this.polyfillPromise_ = extensionsFor(this.win_)
         .loadExtension('amp-crypto-polyfill')
-        .then(() => getExistingServiceForWindow(this.win_, 'crypto-polyfill'));
+        .then(() => getService(this.win_, 'crypto-polyfill'));
   }
 
   /**
