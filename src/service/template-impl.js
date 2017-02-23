@@ -15,7 +15,7 @@
  */
 
 import {childElementByTag} from '../dom';
-import {fromClass} from '../service';
+import {registerService, getService} from '../service';
 import {dev, user} from '../log';
 
 
@@ -36,6 +36,9 @@ const PROP_ = '__AMP_IMPL_';
 
 /** @private @const {string} */
 const PROP_PROMISE_ = '__AMP_WAIT_';
+
+/** @private @const {string} */
+const TEMPLATE_SERVICE_TAG = 'templates';
 
 
 /**
@@ -326,14 +329,29 @@ export class Templates {
  * @package
  */
 export function registerExtendedTemplate(win, type, templateClass) {
-  return installTemplatesService(win).registerTemplate_(type, templateClass);
+  return getTemplatesService(win).registerTemplate_(type, templateClass);
 }
-
 
 /**
  * @param {!Window} window
  * @return {!Templates}
  */
+ export function templatesServiceForTesting(window) {
+  return getTemplateService(window);
+ }
+
+/**
+ * @param {!Window} window
+ */
+ function getTemplatesService(window) {
+  installTemplatesService(window);
+  return getService(window, TEMPLATE_SERVICE_TAG, undefined);
+ }
+
+
+/**
+ * @param {!Window} window
+ */
 export function installTemplatesService(window) {
-  return fromClass(window, 'templates', Templates);
+  registerService(window, TEMPLATE_SERVICE_TAG, Templates);
 };
