@@ -15,31 +15,41 @@
  */
 
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
+import {createIframePromise} from '../../../../testing/iframe';
+import {
+  installExtensionsService,
+} from '../../../../src/service/extensions-impl';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+
+function setupForAdTesting(fixture) {
+  installDocService(fixture.win, /* isSingleDoc */ true);
+  const doc = fixture.doc;
+  // TODO(a4a-cam@): This is necessary in the short term, until A4A is
+  // smarter about host document styling.  The issue is that it needs to
+  // inherit the AMP runtime style element in order for shadow DOM-enclosed
+  // elements to behave properly.  So we have to set up a minimal one here.
+  const ampStyle = doc.createElement('style');
+  ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
+  doc.head.appendChild(ampStyle);
+}
 
 describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   let impl;
   let element;
 
-  beforeEach(() => {
-    element = document.createElement('amp-ad');
-    element.setAttribute('type', 'doubleclick');
-    element.setAttribute('data-ad-client', 'adsense');
-    sandbox.stub(AmpAdNetworkDoubleclickImpl.prototype,
-                 'getSigningServiceNames',
-        () => {
-          return ['google'];
-        });
-    document.body.appendChild(element);
-    impl = new AmpAdNetworkDoubleclickImpl(element);
-  });
-
-  afterEach(() => {
-  });
-
   describe('#isValidElement', () => {
+    beforeEach(() => {
+      element = document.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      element.setAttribute('data-ad-client', 'adsense');
+      document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+
     it('should be valid', () => {
       expect(impl.isValidElement()).to.be.true;
     });
@@ -67,6 +77,14 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   });
 
   describe('#extractCreativeAndSignature', () => {
+    beforeEach(() => {
+      element = document.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      element.setAttribute('data-ad-client', 'adsense');
+      document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
         return expect(impl.extractCreativeAndSignature(
@@ -94,12 +112,82 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
              size: null});
       });
     });
+    it('with analytics', () => {
+      return utf8Encode('some creative').then(creative => {
+        const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
+        return impl.extractCreativeAndSignature(
+          creative,
+          {
+            get: function(name) {
+              switch (name) {
+                case 'X-AmpAnalytics':
+                  return JSON.stringify({url});
+                case 'X-AmpAdSignature':
+                  return 'AQAB';
+                default:
+                  return undefined;
+              }
+            },
+            has: function(name) {
+              return !!this.get(name);
+            },
+          }).then(adResponse => {
+            expect(adResponse).to.deep.equal(
+              {
+                creative,
+                signature: base64UrlDecodeToBytes('AQAB'),
+                size: null,
+              });
+            expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
+          });
+      });
+    });
+  });
+
+  describe('#onCreativeRender', () => {
+    let loadExtensionSpy;
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+        });
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+        const extensions = installExtensionsService(impl.win);
+        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+      });
+    });
+
+    it('injects amp analytics', () => {
+      const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
+      impl.ampAnalyticsConfig = {urls};
+      impl.onCreativeRender(false);
+      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+      const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
+      expect(ampAnalyticsElement).to.be.ok;
+      // Exact format of amp-analytics element covered in
+      // ads/google/test/test-utils.js.  Just ensure urls given exist somewhere.
+      urls.forEach(url => {
+        expect(ampAnalyticsElement.innerHTML.indexOf(url)).to.not.equal(-1);
+      });
+    });
   });
 
   describe('#getAdUrl', () => {
+    beforeEach(() => {
+      element = document.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      element.setAttribute('data-ad-client', 'adsense');
+      document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
-      impl.onLayoutMeasure();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
           '^https://securepubads\\.g\\.doubleclick\\.net/gampad/ads' +
