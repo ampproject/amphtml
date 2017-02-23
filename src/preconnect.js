@@ -335,7 +335,7 @@ export class Preconnect {
  * @return {!PreconnectService}
  */
 function preconnectFor(window) {
-  return fromClass(window, 'preconnect', PreconnectService);
+  return getService(window, 'preconnect', PreconnectService);
 }
 
 
