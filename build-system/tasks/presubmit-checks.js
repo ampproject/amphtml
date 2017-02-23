@@ -484,15 +484,15 @@ var forbiddenTerms = {
     message: 'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
         'and getMode() to access config',
     whitelist: [
-      'build-system/server.js',
       'build-system/amp.extern.js',
-      'build-system/tasks/prepend-global/test.js',
+      'build-system/server.js',
       'build-system/tasks/prepend-global/index.js',
+      'build-system/tasks/prepend-global/test.js',
       'dist.3p/current/integration.js',
-      'src/service-worker/core.js',
       'src/config.js',
       'src/experiments.js',
       'src/mode.js',
+      'src/service-worker/core.js',
       'src/worker-error-reporting.js',
     ],
   },
