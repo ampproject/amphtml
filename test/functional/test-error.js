@@ -265,6 +265,17 @@ describe('reportErrorToServer', () => {
     const e = cancellation();
     expect(isCancellation(e)).to.be.true;
     expect(isCancellation(e.message)).to.be.true;
+
+    // Suffix is tollerated.
+    e.message += '___';
+    expect(isCancellation(e)).to.be.true;
+    expect(isCancellation(e.message)).to.be.true;
+
+    // Prefix is not tollerated.
+    e.message = '___' + e.message;
+    expect(isCancellation(e)).to.be.false;
+    expect(isCancellation(e.message)).to.be.false;
+
     expect(isCancellation('')).to.be.false;
     expect(isCancellation(null)).to.be.false;
     expect(isCancellation(1)).to.be.false;

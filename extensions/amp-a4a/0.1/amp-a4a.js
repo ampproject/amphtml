@@ -1087,7 +1087,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderAmpCreative_(creativeMetaData) {
-    dev().assert(creativeMetaData.minifiedCreative);
+    dev().assert(creativeMetaData.minifiedCreative,
+        'missing minified creative');
     dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
     this.protectedEmitLifecycleEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.

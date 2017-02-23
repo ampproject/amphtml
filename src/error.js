@@ -24,10 +24,11 @@ import {
   USER_ERROR_SENTINEL,
   isUserErrorMessage,
 } from './log';
-import {makeBodyVisible} from './style-installer';
-import {urls} from './config';
 import {isProxyOrigin} from './url';
 import {isCanary} from './experiments';
+import {makeBodyVisible} from './style-installer';
+import {startsWith} from './string';
+import {urls} from './config';
 
 
 /**
@@ -160,7 +161,13 @@ export function isCancellation(errorOrMessage) {
   if (!errorOrMessage) {
     return false;
   }
-  return errorOrMessage == CANCELLED || errorOrMessage.message == CANCELLED;
+  if (typeof errorOrMessage == 'string') {
+    return startsWith(errorOrMessage, CANCELLED);
+  }
+  if (typeof errorOrMessage.message == 'string') {
+    return startsWith(errorOrMessage.message, CANCELLED);
+  }
+  return false;
 }
 
 /**
