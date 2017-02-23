@@ -21,11 +21,13 @@ import {
 import {adConfig} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {
-  closestByTag,
   removeChildren,
   createElementWithAttributes,
 } from '../../../src/dom';
 import {cancellation} from '../../../src/error';
+import {
+  installAnchorClickInterceptor,
+} from '../../../src/anchor-click-interceptor';
 import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
@@ -35,7 +37,6 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
@@ -51,17 +52,15 @@ import {
   getDefaultBootstrapBaseUrl,
   generateSentinel,
 } from '../../../src/3p-frame';
-import {installUrlReplacementsForEmbed,}
-    from '../../../src/service/url-replacements-impl';
+import {
+  installUrlReplacementsForEmbed,
+} from '../../../src/service/url-replacements-impl';
 import {extensionsFor} from '../../../src/extensions';
 import {A4AVariableSource} from './a4a-variable-source';
 import {rethrowAsync} from '../../../src/log';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-
-/** @private @const {string} */
-const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -785,22 +784,31 @@ export class AmpA4A extends AMP.BaseElement {
         layoutAdPromiseDelay: Math.round(delta),
         isAmpCreative: !!creativeMetaData,
       });
-      if (!creativeMetaData) {
-        // Non-AMP creative case, will verify ad url existence.
-        return this.renderNonAmpCreative_();
-      }
       if (this.isCollapsed_) {
         return Promise.resolve();
       }
+      const protectedOnCreativeRender =
+        protectFunctionWrapper(this.onCreativeRender, this, err => {
+          dev().error(TAG, this.element.getAttribute('type'),
+              'Error executing onCreativeRender', err);
+        });
+      if (!creativeMetaData) {
+        // Non-AMP creative case, will verify ad url existence.
+        return this.renderNonAmpCreative_()
+          .then(() => protectedOnCreativeRender(false));
+      }
       // Must be an AMP creative.
-      return this.renderAmpCreative_(creativeMetaData).catch(err => {
-        // Failed to render via AMP creative path so fallback to non-AMP
-        // rendering within cross domain iframe.
-        user().error(TAG, this.element.getAttribute('type'),
-          'Error injecting creative in friendly frame', err);
-        rethrowAsync(this.promiseErrorHandler_(err));
-        return this.renderNonAmpCreative_();
-      });
+      return this.renderAmpCreative_(creativeMetaData)
+        .then(() => protectedOnCreativeRender(true))
+        .catch(err => {
+          // Failed to render via AMP creative path so fallback to non-AMP
+          // rendering within cross domain iframe.
+          user().error(TAG, this.element.getAttribute('type'),
+            'Error injecting creative in friendly frame', err);
+          rethrowAsync(this.promiseErrorHandler_(err));
+          return this.renderNonAmpCreative_()
+            .then(() => protectedOnCreativeRender(false));
+        });
     }).catch(error => this.promiseErrorHandler_(error));
   }
 
@@ -821,24 +829,18 @@ export class AmpA4A extends AMP.BaseElement {
       return true;
     }
 
-    // TODO(keithwrightbos): is mutate necessary?  Could this lead to a race
-    // condition where unlayoutCallback fires and during/after subsequent
-    // layoutCallback execution, the mutate operation executes causing our
-    // state to be destroyed?
-    this.vsync_.mutate(() => {
-      removeChildren(this.element);
-      this.adPromise_ = null;
-      this.adUrl_ = null;
-      this.creativeBody_ = null;
-      this.isVerifiedAmpCreative_ = false;
-      this.experimentalNonAmpCreativeRenderMethod_ =
-          platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
-      if (this.xOriginIframeHandler_) {
-        this.xOriginIframeHandler_.freeXOriginIframe();
-        this.xOriginIframeHandler_ = null;
-      }
-      this.layoutMeasureExecuted_ = false;
-    });
+    removeChildren(this.element);
+    this.adPromise_ = null;
+    this.adUrl_ = null;
+    this.creativeBody_ = null;
+    this.isVerifiedAmpCreative_ = false;
+    this.experimentalNonAmpCreativeRenderMethod_ =
+        platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.freeXOriginIframe();
+      this.xOriginIframeHandler_ = null;
+    }
+    this.layoutMeasureExecuted_ = false;
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
     return true;
@@ -915,11 +917,16 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Callback executed when AMP creative has successfully rendered within the
+   * Callback executed when creative has successfully rendered within the
    * publisher page.  To be overridden by network implementations as needed.
+   *
+   * @param {boolean} isVerifiedAmpCreative whether or not the creative was
+   *    verified as AMP and therefore given preferential treatment.
    */
-  onAmpCreativeRender() {
-    this.protectedEmitLifecycleEvent_('renderFriendlyEnd');
+  onCreativeRender(isVerifiedAmpCreative) {
+    if (isVerifiedAmpCreative) {
+      this.protectedEmitLifecycleEvent_('renderFriendlyEnd');
+    }
   }
 
   /**
@@ -1035,7 +1042,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Render non-AMP creative within cross domain iframe.
-   * @return {Promise} awaiting ad completed insertion.
+   * @return {Promise<boolean>} Whether the creative was successfully rendered.
    * @private
    */
   renderNonAmpCreative_() {
@@ -1059,7 +1066,7 @@ export class AmpA4A extends AMP.BaseElement {
       // report to user in case of empty.
       user().warn(TAG, this.element.getAttribute('type'),
         'No creative or URL available -- A4A can\'t render any ad');
-      return Promise.resolve();
+      return Promise.resolve(false);
     }
   }
 
@@ -1067,8 +1074,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Render a validated AMP creative directly in the parent page.
    * @param {!CreativeMetaDataDef} creativeMetaData Metadata required to render
    *     AMP creative.
-   * @return {!Promise} Whether the creative was successfully
-   *     rendered.
+   * @return {!Promise} Whether the creative was successfully rendered.
    * @private
    */
   renderAmpCreative_(creativeMetaData) {
@@ -1113,13 +1119,10 @@ export class AmpA4A extends AMP.BaseElement {
               friendlyIframeEmbed.win.document;
           setStyle(frameDoc.body, 'visibility', 'visible');
           // Capture phase click handlers on the ad.
-          this.registerExpandUrlParams_(friendlyIframeEmbed.win);
+          installAnchorClickInterceptor(
+              this.getAmpDoc(), friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
-          protectFunctionWrapper(this.onAmpCreativeRender, this, err => {
-            dev().error(TAG, this.element.getAttribute('type'),
-                'Error executing onAmpCreativeRender', err);
-          })();
           // Capture timing info for friendly iframe load completion.
           getTimingDataAsync(friendlyIframeEmbed.win,
               'navigationStart', 'loadEventEnd').then(delta => {
@@ -1350,59 +1353,6 @@ export class AmpA4A extends AMP.BaseElement {
         viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
       });
     });
-  }
-
-  /**
-   * Registers a handler that performs URL replacement on the href
-   * of an ad click.
-   * @param {!Window} iframeWin
-   */
-  registerExpandUrlParams_(iframeWin) {
-    iframeWin.document.documentElement.addEventListener('click',
-        this.maybeExpandUrlParams_.bind(this), /* capture */ true);
-  }
-
-  /**
-   * Handle click on links and replace variables in the click URL.
-   * The function changes the actual href value and stores the
-   * template in the ORIGINAL_HREF_ATTRIBUTE attribute
-   * @param {!Event} e
-   */
-  maybeExpandUrlParams_(e) {
-    const target = closestByTag(dev().assertElement(e.target), 'A');
-    if (!target || !target.href) {
-      // Not a click on a link.
-      return;
-    }
-    const hrefToExpand =
-    target.getAttribute(ORIGINAL_HREF_ATTRIBUTE) || target.getAttribute('href');
-    if (!hrefToExpand) {
-      return;
-    }
-    const vars = {
-      'CLICK_X': () => {
-        return e.pageX;
-      },
-      'CLICK_Y': () => {
-        return e.pageY;
-      },
-    };
-    const newHref = urlReplacementsForDoc(this.getAmpDoc()).expandSync(
-        hrefToExpand, vars, undefined, /* opt_whitelist */ {
-          // For now we only allow to replace the click location vars
-          // and nothing else.
-          // NOTE: Addition to this whitelist requires additional review.
-          'CLICK_X': true,
-          'CLICK_Y': true,
-        });
-    if (newHref != hrefToExpand) {
-      // Store original value so that later clicks can be processed with
-      // freshest values.
-      if (!target.getAttribute(ORIGINAL_HREF_ATTRIBUTE)) {
-        target.setAttribute(ORIGINAL_HREF_ATTRIBUTE, hrefToExpand);
-      }
-      target.setAttribute('href', newHref);
-    }
   }
 
   /**
