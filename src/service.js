@@ -24,6 +24,7 @@ import {dev} from './log';
  * - obj: Actual service implementation when available.
  * - promise: Promise for the obj.
  * - resolve: Function to resolve the promise with the object.
+ * - ctor: Constructor for the service (for lazy creation)
  * @typedef {{
  *   obj: (?Object),
  *   promise: (?Promise|undefined),

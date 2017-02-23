@@ -20,7 +20,7 @@
  */
 
 
-import {fromClass} from './service';
+import {getService} from './service';
 import {parseUrl} from './url';
 import {timerFor} from './timer';
 import {platformFor} from './platform';
