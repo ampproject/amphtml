@@ -277,7 +277,7 @@ export class FixedLayer {
         this.elements_.forEach(fe => {
           const element = fe.element;
           const styles = computedStyle(this.ampdoc.win, element);
-          const position = styles.position;
+          const position = styles.position || '';
           // Element is indeed fixed. Visibility is added to the test to
           // avoid moving around invisible elements.
           const isFixed = (
