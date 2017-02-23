@@ -445,7 +445,6 @@ function getServiceInternal(holder, context, id, opt_factory,
 function registerServiceInternal(holder, context, id, constructor) {
   const services = getServices(holder);
   let s = services[id];
-  dev().assert(!s, `Service ${id} already registered`);
   if (!s) {
     s = services[id] = {
       obj: null,

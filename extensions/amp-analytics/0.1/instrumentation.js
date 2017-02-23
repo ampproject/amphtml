@@ -584,7 +584,7 @@ export class AnalyticsGroup {
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<InstrumentationService>}
  */
-export function instrumentationServiceForDoc(nodeOrDoc) {
+export function instrumentationServicePromiseForDoc(nodeOrDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
       getServicePromiseForDoc(nodeOrDoc, INSTRUMENTATION_SERVICE_TAG));
 }
