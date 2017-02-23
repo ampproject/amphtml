@@ -574,9 +574,10 @@ var forbiddenTermsSrcInclusive = {
   '\\.scheduleUnlayout\\(': bannedTermsHelpString,
   'getComputedStyle\\(': {
     message: 'Due to various bugs in Firefox, you must use the computedStyle ' +
-        'helper in style.js. Note that this CAN return null!',
+        'helper in style.js.',
     whitelist: [
       'src/style.js',
+      'dist.3p/current/integration.js',
     ],
   },
   // Super complicated regex that says "find any querySelector method call that
