@@ -26,7 +26,7 @@
 <body>
   <button onclick="AMP.toggleExperiment('amp-bind');window.location.href=window.location.href;">Toggle &lt;amp-bind&gt; experiment</button>
 
-  <h2>Game example: 2048 mini-me</h2>
+  <h2>Game example: 32 (mini 2048)</h2>
 
   <p class="grid">
     <span [text]="G.grid[0][0]">2</span> <span [text]="G.grid[0][1]">2</span>
@@ -34,37 +34,32 @@
     <span [text]="G.grid[1][0]">2</span> <span [text]="G.grid[1][1]">0</span>
   </p>
 
-  <h2>Score: <span [text]="Math.max(G.grid[0][0], G.grid[0][1], G.grid[1][0], G.grid[1][1])">0</span></h2>
+  <h2>Score: <span [text]="G.grid[0][0] + G.grid[0][1] + G.grid[1][0] + G.grid[1][1]">0</span></h2>
 
   <!--
   TODO: Add win/loss message!
 
   cases for RIGHT:
-    1. X, X -> ?, X+X (combine & gen)
-    2. 0, X -> ?, X   (gen)
+    1. X, X -> ?, X+X
+    2. 0, X -> 0, X
     3. X, 0 -> ?, X
     4. X, Y -> X, Y
-    5. 0, 0 -> 0, ?
   -->
 
   <button on="tap:AMP.setState({
     'G': {
       'grid': [
-        (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[0][1] ? [G.grid[0][0] + G.grid[0][1], (Math.random() > G.spawnChance ? 2 : 0)] :
-            (G.grid[0][0] == 0 && G.grid[0][1] > 0 ? [G.grid[0][1], (Math.random() > G.spawnChance ? 2 : 0)] :
-                (G.grid[0][0] > 0 && G.grid[0][1] == 0 ? [G.grid[0][0], (Math.random() > G.spawnChance ? 2 : 0)] :
-                    (G.grid[0][0] == 0 && G.grid[0][1] == 0 ? [0, (Math.random() > G.spawnChance ? 2 : 0)] :
-                        G.grid[0]
-                    )
+        (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[0][1] ? [G.grid[0][0] + G.grid[0][1], (Math.random() < G.spawnChance ? 2 : 0)] :
+            (G.grid[0][0] == 0 && G.grid[0][1] > 0 ? [G.grid[0][1], (Math.random() < G.spawnChance ? 2 : 0)] :
+                (G.grid[0][0] > 0 && G.grid[0][1] == 0 ? [G.grid[0][0], 0] :
+                    G.grid[0]
                 )
             )
         ),
-        (G.grid[1][0] > 0 && G.grid[1][0] == G.grid[1][1] ? [G.grid[1][0] + G.grid[1][1], (Math.random() > G.spawnChance ? 2 : 0)] :
-            (G.grid[1][0] == 0 && G.grid[1][1] > 0 ? [G.grid[1][1], (Math.random() > G.spawnChance ? 2 : 0)] :
-                (G.grid[1][0] > 0 && G.grid[1][1] == 0 ? [G.grid[1][0], (Math.random() > G.spawnChance ? 2 : 0)] :
-                    (G.grid[1][0] == 0 && G.grid[1][1] == 0 ? [0, (Math.random() > G.spawnChance ? 2 : 0)] :
-                        G.grid[1]
-                    )
+        (G.grid[1][0] > 0 && G.grid[1][0] == G.grid[1][1] ? [G.grid[1][0] + G.grid[1][1], (Math.random() < G.spawnChance ? 2 : 0)] :
+            (G.grid[1][0] == 0 && G.grid[1][1] > 0 ? [G.grid[1][1], (Math.random() < G.spawnChance ? 2 : 0)] :
+                (G.grid[1][0] > 0 && G.grid[1][1] == 0 ? [G.grid[1][0], 0] :
+                    G.grid[1]
                 )
             )
         )
@@ -76,21 +71,17 @@
   <button on="tap:AMP.setState({
     'G': {
       'grid': [
-        (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[0][1] ? [(Math.random() > G.spawnChance ? 2 : 0), G.grid[0][0] + G.grid[0][1]] :
-            (G.grid[0][0] == 0 && G.grid[0][1] > 0 ? [(Math.random() > G.spawnChance ? 2 : 0), G.grid[0][1]] :
-                (G.grid[0][0] > 0 && G.grid[0][1] == 0 ? [(Math.random() > G.spawnChance ? 2 : 0), G.grid[0][0]] :
-                    (G.grid[0][0] == 0 && G.grid[0][1] == 0 ? [(Math.random() > G.spawnChance ? 2 : 0), 0] :
-                        G.grid[0]
-                    )
+        (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[0][1] ? [(Math.random() < G.spawnChance ? 2 : 0), G.grid[0][0] + G.grid[0][1]] :
+            (G.grid[0][0] == 0 && G.grid[0][1] > 0 ? [0, G.grid[0][1]] :
+                (G.grid[0][0] > 0 && G.grid[0][1] == 0 ? [(Math.random() < G.spawnChance ? 2 : 0), G.grid[0][0]] :
+                    G.grid[0]
                 )
             )
         ),
-        (G.grid[1][0] > 0 && G.grid[1][0] == G.grid[1][1] ? [(Math.random() > G.spawnChance ? 2 : 0), G.grid[1][0] + G.grid[1][1]] :
-            (G.grid[1][0] == 0 && G.grid[1][1] > 0 ? [(Math.random() > G.spawnChance ? 2 : 0), G.grid[1][1]] :
-                (G.grid[1][0] > 0 && G.grid[1][1] == 0 ? [(Math.random() > G.spawnChance ? 2 : 0), G.grid[1][0]] :
-                    (G.grid[1][0] == 0 && G.grid[1][1] == 0 ? [(Math.random() > G.spawnChance ? 2 : 0), 0] :
-                        G.grid[1]
-                    )
+        (G.grid[1][0] > 0 && G.grid[1][0] == G.grid[1][1] ? [(Math.random() < G.spawnChance ? 2 : 0), G.grid[1][0] + G.grid[1][1]] :
+            (G.grid[1][0] == 0 && G.grid[1][1] > 0 ? [0, G.grid[1][1]] :
+                (G.grid[1][0] > 0 && G.grid[1][1] == 0 ? [(Math.random() < G.spawnChance ? 2 : 0), G.grid[1][0]] :
+                    G.grid[1]
                 )
             )
         )
@@ -106,38 +97,30 @@
           (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? G.grid[0][0] + G.grid[1][0] :
               (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? G.grid[1][0] :
                   (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? G.grid[0][0] :
-                      (G.grid[0][0] == 0 && G.grid[1][0] == 0 ? 0 :
-                          G.grid[0][0]
-                      )
+                      G.grid[0][0]
                   )
               )
           ),
           (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? G.grid[0][1] + G.grid[1][1] :
               (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? G.grid[1][1] :
                   (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? G.grid[0][1] :
-                      (G.grid[0][1] == 0 && G.grid[1][1] == 0 ? 0 :
-                          G.grid[0][1]
-                      )
+                      G.grid[0][1]
                   )
               )
           )
         ],
         [
-          (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? (Math.random() > G.spawnChance ? 2 : 0) :
-              (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? (Math.random() > G.spawnChance ? 2 : 0) :
-                  (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? (Math.random() > G.spawnChance ? 2 : 0) :
-                      (G.grid[0][0] == 0 && G.grid[1][0] == 0 ? (Math.random() > G.spawnChance ? 2 : 0) :
-                          G.grid[1][0]
-                      )
+          (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? (Math.random() < G.spawnChance ? 2 : 0) :
+              (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? (Math.random() < G.spawnChance ? 2 : 0) :
+                  (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? 0 :
+                      G.grid[1][0]
                   )
               )
           ),
-          (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? (Math.random() > G.spawnChance ? 2 : 0) :
-              (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? (Math.random() > G.spawnChance ? 2 : 0) :
-                  (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? (Math.random() > G.spawnChance ? 2 : 0) :
-                      (G.grid[0][1] == 0 && G.grid[1][1] == 0 ? (Math.random() > G.spawnChance ? 2 : 0) :
-                          G.grid[1][1]
-                      )
+          (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? (Math.random() < G.spawnChance ? 2 : 0) :
+              (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? (Math.random() < G.spawnChance ? 2 : 0) :
+                  (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? 0 :
+                      G.grid[1][1]
                   )
               )
           )
@@ -151,21 +134,17 @@
     'G': {
       'grid': [
         [
-          (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? (Math.random() > G.spawnChance ? 2 : 0) :
-              (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? (Math.random() > G.spawnChance ? 2 : 0) :
-                  (G.grid[0][0] > 0 && G.grid[1][0] == 0 ?  (Math.random() > G.spawnChance ? 2 : 0) :
-                      (G.grid[0][0] == 0 && G.grid[1][0] == 0 ? (Math.random() > G.spawnChance ? 2 : 0) :
-                          G.grid[0][0]
-                      )
+          (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? (Math.random() < G.spawnChance ? 2 : 0):
+              (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? (Math.random() < G.spawnChance ? 2 : 0) :
+                  (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? 0 :
+                      G.grid[0][0]
                   )
               )
           ),
-          (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? (Math.random() > G.spawnChance ? 2 : 0) :
-              (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? (Math.random() > G.spawnChance ? 2 : 0) :
-                  (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? (Math.random() > G.spawnChance ? 2 : 0) :
-                      (G.grid[0][1] == 0 && G.grid[1][1] == 0 ? (Math.random() > G.spawnChance ? 2 : 0) :
-                          G.grid[0][1]
-                      )
+          (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? (Math.random() < G.spawnChance ? 2 : 0) :
+              (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? (Math.random() < G.spawnChance ? 2 : 0) :
+                  (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? 0 :
+                      G.grid[0][1]
                   )
               )
           )
@@ -174,18 +153,14 @@
           (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? G.grid[0][0] + G.grid[1][0] :
               (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? G.grid[1][0] :
                   (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? G.grid[0][0] :
-                      (G.grid[0][0] == 0 && G.grid[1][0] == 0 ? 0 :
-                          G.grid[1][0]
-                      )
+                      G.grid[1][0]
                   )
               )
           ),
           (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? G.grid[0][1] + G.grid[1][1] :
-              (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? G.grid[1][1] :
+              (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? G.grid[1][1]  :
                   (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? G.grid[0][1] :
-                      (G.grid[0][1] == 0 && G.grid[1][1] == 0 ? 0 :
-                          G.grid[1][1]
-                      )
+                      G.grid[1][1]
                   )
               )
           )
@@ -203,7 +178,7 @@
           [2, 2],
           [2, 0]
         ],
-        "spawnChance": 0.5
+        "spawnChance": 0.4
       }
     </script>
   </amp-state>
