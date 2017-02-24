@@ -20,15 +20,16 @@ import {
   assertEmbeddable,
   disposeServicesForDoc,
   getExistingServiceForDocInEmbedScope,
+  getParentWindowFrameElement,
   getServiceInEmbedScope,
   getServiceForDoc,
-  getParentWindowFrameElement,
   getService,
   getServicePromise,
   getServicePromiseForDoc,
   installServiceInEmbedScope,
   isDisposable,
   isEmbeddable,
+  registerService,
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
@@ -74,12 +75,20 @@ describe('service', () => {
 
     let count;
     let factory;
+    let constructorSpy;
 
     beforeEach(() => {
       count = 0;
       factory = sandbox.spy(() => {
         return ++count;
       });
+
+      constructorSpy = sandbox.spy();
+      FakeService = class {
+        constructor() {
+          constructorSpy();
+        }
+      }
 
       resetServiceForTesting(window, 'a');
       resetServiceForTesting(window, 'b');
@@ -109,6 +118,12 @@ describe('service', () => {
       expect(c1).to.equal(c2);
       expect(factory).to.be.calledOnce;
     });
+    it('should only instantiate a service when requested', () => {
+      registerService(window, 'fake service', FakeService)
+      expect(constructorSpy).to.have.not.been.called;
+      getService(window, 'fake service')
+      expect(constructorSpy).to.be.calledOnce;
+    })
 
     it('should return the service when it exists', () => {
       const c1 = getService(window, 'c', factory);
