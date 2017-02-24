@@ -437,7 +437,7 @@ You can set your browser to use the Dev Channel build by enabling `dev-channel` 
 
 You can verify the AMP version your browser is using for a given page by looking at your browser's developer console.  After loading an AMP page (e.g. [https://ampproject.org](https://ampproject.org)) the console will have a message like `Powered by AMP ⚡ HTML – Version <build number>`).  The `<build number>` will match one of the build numbers on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).
 
-The [Releases section of README.md](../README.md#releases) has more details on the release process.
+The [Release Schedule](release-schedule.md) doc has more details on the release process.
 
 # ⚡⚡⚡...
 

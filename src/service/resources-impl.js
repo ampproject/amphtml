@@ -36,6 +36,7 @@ import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
 import {documentInfoForDoc} from '../document-info';
+import {computedStyle} from '../style';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -1546,12 +1547,12 @@ export class Resources {
    * @private
    */
   getLayoutMargins_(resource) {
-    const computedStyle = this.win./*OK*/getComputedStyle(resource.element);
+    const style = computedStyle(this.win, resource.element);
     return {
-      top: parseInt(computedStyle.marginTop, 10) || 0,
-      right: parseInt(computedStyle.marginRight, 10) || 0,
-      bottom: parseInt(computedStyle.marginBottom, 10) || 0,
-      left: parseInt(computedStyle.marginLeft, 10) || 0,
+      top: parseInt(style.marginTop, 10) || 0,
+      right: parseInt(style.marginRight, 10) || 0,
+      bottom: parseInt(style.marginBottom, 10) || 0,
+      left: parseInt(style.marginLeft, 10) || 0,
     };
   }
 
