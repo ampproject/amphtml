@@ -32,7 +32,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>container, fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+    <td>container, fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
 </table>
 
