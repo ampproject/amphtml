@@ -39,7 +39,6 @@ import {
 import {cssText} from '../../build/css';
 import {maybeValidate} from '../validator-integration';
 import {maybeTrackImpression} from '../impression';
-import {isExperimentOn} from '../experiments';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
@@ -78,12 +77,10 @@ startupChunk(self.document, function initial() {
       installRuntimeServices(self);
       fontStylesheetTimeout(self);
 
-      if (isExperimentOn(self, 'amp-inabox')) {
-        // Install inabox specific Viewport service before
-        // runtime tries to install the normal one.
-        installViewerServiceForDoc(ampdoc);
-        installInaboxViewportService(ampdoc);
-      }
+      // Install inabox specific Viewport service before
+      // runtime tries to install the normal one.
+      installViewerServiceForDoc(ampdoc);
+      installInaboxViewportService(ampdoc);
 
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
