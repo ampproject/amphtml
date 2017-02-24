@@ -321,7 +321,7 @@ export class Bind {
         }
         expressionToElements[expressionString].push(element);
       });
-      return !!walker.nextNode();
+      return !walker.nextNode();
     };
 
     return new Promise(resolve => {
@@ -666,19 +666,21 @@ export class Bind {
       // Add bindings for new nodes first to ensure that a binding isn't removed
       // and then subsequently re-added.
       const addPromises = [];
-      const addedNodes =
-          mutation.addedNodes.filter(node => node.nodeType == 1);
+      const addedNodes = mutation.addedNodes;
       for (let i = 0; i < addedNodes.length; i++) {
-        const addedNode = addedNodes[j];
-        addPromises.push(this.addBindingsForNode_(addedNode));
+        const addedNode = addedNodes[i];
+        if (addedNode.nodeType == Node.ELEMENT_NODE) {
+          addPromises.push(this.addBindingsForNode_(addedNode));
+        }
       }
       const mutationPromise = Promise.all(addPromises).then(() => {
         const removePromises = [];
-        const removedNodes =
-          mutation.removedNodes.filter(node => node.nodeType == 1);
+        const removedNodes = mutation.removedNodes;
         for (let i = 0; i < removedNodes.length; i++) {
           const removedNode = removedNodes[i];
-          removePromises.push(this.removeBindingsForNode_(removedNode));
+          if (removedNode.nodeType == Node.ELEMENT_NODE) {
+            removePromises.push(this.removeBindingsForNode_(removedNode));
+          }
         }
         return Promise.all(removePromises);
       }).then(() => {
