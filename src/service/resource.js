@@ -420,6 +420,7 @@ export class Resource {
    */
   completeCollapse() {
     toggle(this.element, false);
+    this.element.removeAttribute('hidden');
     this.layoutBox_ = layoutRectLtwh(
         this.layoutBox_.left,
         this.layoutBox_.top,
@@ -438,6 +439,7 @@ export class Resource {
    */
   completeExpand() {
     toggle(this.element, true);
+    this.element.setAttribute('hidden', '');
     this.requestMeasure();
   }
 
