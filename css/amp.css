@@ -225,6 +225,16 @@ i-amphtml-sizer {
   overflow: hidden !important;
 }
 
+.i-amphtml-scroll-disabled {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
+#i-amphtml-wrapper.i-amphtml-scroll-disabled {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
 /* "notbuild" classes are set as soon as an element is created and removed
    as soon as the element is built. */
 
