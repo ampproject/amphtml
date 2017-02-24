@@ -663,19 +663,25 @@ export class Bind {
    */
   onMutationsObserved_(mutations) {
     mutations.forEach(mutation => {
-      const mutationPromises = [];
-      const removedNodes = mutation.removedNodes;
-      for (let i = 0; i < removedNodes.length; i++) {
-        const removedNode = removedNodes[i];
-        mutationPromises.push(this.removeBindingsForNode_(removedNode));
-      }
-      const addedNodes = mutation.addedNodes;
-      for (let j = 0; j < addedNodes.length; j++) {
+      // Add bindings for new nodes first to ensure that a binding isn't removed
+      // and then subsequently re-added.
+      const addPromises = [];
+      const addedNodes =
+          mutation.addedNodes.filter(node => node.nodeType == 1);
+      for (let i = 0; i < addedNodes.length; i++) {
         const addedNode = addedNodes[j];
-        mutationPromises.push(this.addBindingsForNode_(addedNode));
+        addPromises.push(this.addBindingsForNode_(addedNode));
       }
-      const mutationPromise = Promise.all(mutationPromises).then(() => {
-        // Immediately apply bindings to new elements with current scope
+      const mutationPromise = Promise.all(addPromises).then(() => {
+        const removePromises = [];
+        const removedNodes =
+          mutation.removedNodes.filter(node => node.nodeType == 1);
+        for (let i = 0; i < removedNodes.length; i++) {
+          const removedNode = removedNodes[i];
+          removePromises.push(this.removeBindingsForNode_(removedNode));
+        }
+        return Promise.all(removePromises);
+      }).then(() => {
         this.digest_();
       });
       this.mutationPromises_.push(mutationPromise);
