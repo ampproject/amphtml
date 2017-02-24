@@ -238,6 +238,25 @@ describe('BindExpression', () => {
     expect(evaluate('foo[0]')).to.be.null;
   });
 
+  it('should support select Math functions', () => {
+    expect(evaluate('Math.abs(-1)')).to.equal(1);
+    expect(evaluate('Math.ceil(0.1)')).to.equal(1);
+    expect(evaluate('Math.floor(1.9)')).to.equal(1);
+    expect(evaluate('Math.round(0.6)')).to.equal(1);
+    const r = evaluate('Math.random()');
+    expect(r).to.be.at.least(0);
+    expect(r).to.be.at.below(1);
+    expect(evaluate('Math.max(0, 1)')).to.equal(1);
+    expect(evaluate('Math.min(0, 1)')).to.equal(0);
+
+    expect(() => {
+      evaluate('Math.sin(0.5)')
+    }).to.throw(unsupportedFunctionError);
+    expect(() => {
+      evaluate('Math.pow(3, 2)')
+    }).to.throw(unsupportedFunctionError);
+  });
+
   it('should NOT allow access to prototype properties', () => {
     expect(evaluate('constructor')).to.be.null;
     expect(evaluate('prototype')).to.be.null;
@@ -381,7 +400,7 @@ describe('BindExpression', () => {
   });
 
   /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects */
-  it('should NOT allow access to globals', () => {
+  it('should NOT allow access to non-whitelisted globals', () => {
     expect(evaluate('window')).to.be.null;
     expect(evaluate('arguments')).to.be.null;
 
@@ -416,7 +435,6 @@ describe('BindExpression', () => {
     expect(evaluate('URIError')).to.be.null;
 
     expect(evaluate('Number')).to.be.null;
-    expect(evaluate('Math')).to.be.null;
     expect(evaluate('Date')).to.be.null;
 
     expect(evaluate('String')).to.be.null;

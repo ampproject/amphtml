@@ -202,6 +202,13 @@ Array.indexOf
 Array.join
 Array.lastIndexOf
 Array.slice
+Math.abs,
+Math.ceil,
+Math.floor,
+Math.random,
+Math.round,
+Math.max,
+Math.min,
 String.charAt
 String.charCodeAt
 String.concat
@@ -215,4 +222,4 @@ String.toLowerCase
 String.toUpperCase
 ```
 
-The full expression implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison).
+The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).

@@ -55,6 +55,16 @@ const FUNCTION_WHITELIST = (function() {
         String.prototype.toLowerCase,
         String.prototype.toUpperCase,
       ],
+    '[object Math]':
+      [
+        Math.abs,
+        Math.ceil,
+        Math.floor,
+        Math.random,
+        Math.round,
+        Math.max,
+        Math.min,
+      ],
   };
   // Creates a prototype-less map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
@@ -83,8 +93,12 @@ export class BindExpression {
     /** @const {string} */
     this.expressionString = expressionString;
 
-    /** @const {!./bind-expr-defines.AstNode} */
+    /** @const @private {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
+
+    /** @const @private {!Object} */
+    this.builtInScope_ = Object.create(null);
+    this.builtInScope_['Math'] = Math;
   }
 
   /**
@@ -94,7 +108,12 @@ export class BindExpression {
    * @return {BindExpressionResultDef}
    */
   evaluate(scope) {
-    return this.eval_(this.ast_, scope);
+    // Include `builtInScope_` for access to built-in objects like `Math`.
+    const combined = Object.create(null);
+    Object.assign(combined, this.builtInScope_);
+    Object.assign(combined, scope);
+
+    return this.eval_(this.ast_, combined);
   }
 
   /**
