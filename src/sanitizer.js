@@ -190,13 +190,13 @@ export function sanitizeHtml(html) {
         }
         return;
       }
-      const bindAttribsIndices = [];
+      const bindAttribsIndices = {};
       // Special handling for attributes for amp-bind which are formatted as
       // [attr]. The brackets are restored at the end of this function.
       for (let i = 0; i < attribs.length; i += 2) {
         const attr = attribs[i];
         if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
-          bindAttribsIndices.push(i);
+          bindAttribsIndices[i] = true;
           attribs[i] = attr.slice(1, -1);
         }
       }
@@ -212,7 +212,7 @@ export function sanitizeHtml(html) {
         } else {
           attribs = scrubbed.attribs;
           // Restore some of the attributes that AMP is directly responsible
-          // for, such as "on" or amp-bind's bracketed attributes.
+          // for, such as "on"
           for (let i = 0; i < attribs.length; i += 2) {
             const attrib = attribs[i];
             if (WHITELISTED_ATTRS.indexOf(attrib) != -1) {
@@ -266,7 +266,7 @@ export function sanitizeHtml(html) {
           continue;
         }
         emit(' ');
-        if (bindAttribsIndices.includes(i)) {
+        if (bindAttribsIndices.hasOwnProperty(i)) {
           emit('[' + attrName + ']');
         } else {
           emit(attrName);

@@ -110,6 +110,9 @@ export class Bind {
      */
     this.mutationPromises_ = [];
 
+    /**
+     * @const @private {MutationObserver}
+     */
     this.mutationObserver_ =
         new MutationObserver(this.onMutationsObserved_.bind(this));
 
@@ -322,7 +325,7 @@ export class Bind {
       const tagName = element.tagName;
       if (tagName === 'TEMPLATE') {
         // Listen for changes in amp-mustache templates
-        this.beginObservingElementForMutations_(element);
+        this.observeElementForMutations_(element);
       }
 
       const boundProperties = this.scanElement_(element);
@@ -665,9 +668,12 @@ export class Bind {
   }
 
   /**
-   *
+   * Begin observing mutations to element. Presently, all supported elements
+   * that can add/remove bindings add new elements to their parent, so parent
+   * node should be observed for mutations.
+   * @private
    */
-  beginObservingElementForMutations_(element) {
+  observeElementForMutations_(element) {
     // TODO(kmh287): What if parent is the body tag?
     // TODO(kmh287): Generify logic for node observation strategy
     // when bind supprots more dynamic nodes.
@@ -676,9 +682,14 @@ export class Bind {
   }
 
   /**
-   * Respond to observed mutations. Meant to be used with MutationObserver
+   * Respond to observed mutations. Adds all bindings for newly added elements
+   * removes bindings for removed elements, then immediately applies the current
+   * scope to the new bindings.
+   *
+   * Meant to be used with MutationObserver
    *
    * @param mutations {Array<MutationRecord>}
+   * @private
    */
   onMutationsObserved_(mutations) {
     mutations.forEach(mutation => {
