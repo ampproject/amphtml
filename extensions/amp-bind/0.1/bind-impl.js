@@ -96,20 +96,8 @@ export class Bind {
     /** @private {?./bind-evaluator.BindEvaluator} */
     this.evaluator_ = null;
 
-    /** @visibleForTesting {?Promise<!Object<string,*>>} */
-    this.evaluatePromise_ = null;
-
-    /** @visibleForTesting {?Promise} */
-    this.scanPromise_ = null;
-
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
-
-    /**
-     * True if all bindings in the document have been scanned and parsed.
-     * @private {boolean}
-     */
-    this.initialized_ = false;
 
     /**
      * True if a digest is triggered before scan for bindings completes.
@@ -120,8 +108,12 @@ export class Bind {
     /** @const @private {boolean} */
     this.workerExperimentEnabled_ = isExperimentOn(this.win_, 'web-worker');
 
-    this.ampdoc.whenReady().then(() => {
-      this.initialize_();
+    /**
+     * Resolved when the service is fully initialized.
+     * @const @private {Promise}
+     */
+    this.initializePromise_ = this.ampdoc.whenReady().then(() => {
+      return this.initialize_();
     });
 
     // Expose for testing on dev.
@@ -135,6 +127,7 @@ export class Bind {
    * unless `opt_skipDigest` is false.
    * @param {!Object} state
    * @param {boolean=} opt_skipDigest
+   * @return {!Promise}
    */
   setState(state, opt_skipDigest) {
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
@@ -143,22 +136,51 @@ export class Bind {
     Object.assign(this.scope_, state);
 
     if (!opt_skipDigest) {
-      if (this.initialized_) {
-        this.digest_();
-      } else {
-        this.digestQueuedAfterScan_ = true;
-      }
-      user().fine(TAG, 'State updated; re-evaluating expressions...');
+      return this.initializePromise_.then(() => {
+        user().fine(TAG, 'State updated; re-evaluating expressions...');
+        return this.digest_();
+      });
+    } else {
+      return Promise.resolve();
     }
   }
 
   /**
+   * Parses and evaluates an expression with a given scope and merges the
+   * resulting object into current state.
+   * @param {string} expression
+   * @param {!Object} scope
+   * @return {!Promise}
+   */
+  setStateWithExpression(expression, scope) {
+    return this.initializePromise_.then(() => {
+      // Allow expression to reference current scope in addition to event scope.
+      Object.assign(scope, this.scope_);
+      if (this.workerExperimentEnabled_) {
+        return invokeWebWorker(
+            this.win_, 'bind.evaluateExpression', [expression, scope]);
+      } else {
+        return this.evaluator_.evaluateExpression(expression, scope);
+      }
+    }).then(returnValue => {
+      if (returnValue.error) {
+        user().error(TAG,
+            'AMP.setState() failed with error: ', returnValue.error);
+        throw returnValue.error;
+      } else {
+        return this.setState(returnValue.result);
+      }
+    });
+  }
+
+  /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
+   * @return {!Promise}
    * @private
    */
   initialize_() {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    this.addBindingsForNode_(this.ampdoc.getBody());
+    return this.addBindingsForNode_(this.ampdoc.getBody());
   }
 
   /**
@@ -168,12 +190,12 @@ export class Bind {
    * Returns a promise that resolves after bindings have been added.
    *
    * @param {!Element} node
-   * @return {Promise}
+   * @return {!Promise}
    *
    * @private
    */
   addBindingsForNode_(node) {
-    this.scanPromise_ = this.scanNode_(node).then(results => {
+    return this.scanNode_(node).then(results => {
       const {boundElements, bindings, expressionToElements} = results;
 
       this.boundElements_ = this.boundElements_.concat(boundElements);
@@ -191,8 +213,6 @@ export class Bind {
         return parseErrors;
       }
     }).then(parseErrors => {
-      this.initialized_ = true;
-
       // Report each parse error.
       Object.keys(parseErrors).forEach(expressionString => {
         const elements = this.expressionToElements_[expressionString];
@@ -202,15 +222,14 @@ export class Bind {
         }
       });
 
-      // Trigger verify-only digest in development.
-      if (getMode().development || this.digestQueuedAfterScan_) {
-        this.digest_(/* opt_verifyOnly */ !this.digestQueuedAfterScan_);
-      }
-
       dev().fine(TAG, `Finished parsing expressions with ` +
           `${Object.keys(parseErrors).length} errors.`);
+
+      // Trigger verify-only digest in development.
+      if (getMode().development) {
+        this.digest_(/* opt_verifyOnly */ true);
+      }
     });
-    return this.scanPromise_;
   }
 
   /**
@@ -219,7 +238,7 @@ export class Bind {
    * Returns a promise that resolves after bindings have been removed.
    *
    * @param {!Element} node
-   * @return {Promise}
+   * @return {!Promise}
    *
    * @private
    */
@@ -382,19 +401,21 @@ export class Bind {
    * If `opt_verifyOnly` is true, does not apply results but verifies them
    * against current element values instead.
    * @param {boolean=} opt_verifyOnly
+   * @return {!Promise}
    * @private
    */
   digest_(opt_verifyOnly) {
+    let evaluatePromise;
     if (this.workerExperimentEnabled_) {
       user().fine(TAG, 'Asking worker to re-evaluate expressions...');
-      this.evaluatePromise_ =
-          invokeWebWorker(this.win_, 'bind.evaluate', [this.scope_]);
+      evaluatePromise =
+          invokeWebWorker(this.win_, 'bind.evaluateBindings', [this.scope_]);
     } else {
-      const evaluation = this.evaluator_.evaluate(this.scope_);
-      this.evaluatePromise_ = Promise.resolve(evaluation);
+      const evaluation = this.evaluator_.evaluateBindings(this.scope_);
+      evaluatePromise = Promise.resolve(evaluation);
     }
 
-    this.evaluatePromise_.then(returnValue => {
+    return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;
       if (opt_verifyOnly) {
         this.verify_(results);
