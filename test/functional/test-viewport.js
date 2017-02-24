@@ -367,6 +367,7 @@ describes.fakeWin('Viewport', {}, env => {
     viewport.vsync_ = {mutate: callback => callback()};
     const disableTouchZoomStub = sandbox.stub(viewport, 'disableTouchZoom');
     const hideFixedLayerStub = sandbox.stub(viewport, 'hideFixedLayer');
+    const disableScrollStub = sandbox.stub(viewport, 'disableScroll');
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateLightboxMode').withArgs(true).once();
 
@@ -375,6 +376,7 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.verify();
     expect(disableTouchZoomStub).to.be.calledOnce;
     expect(hideFixedLayerStub).to.be.calledOnce;
+    expect(disableScrollStub).to.be.calledOnce;
 
     expect(viewer.sendMessage).to.have.been.calledOnce;
     expect(viewer.sendMessage).to.have.been.calledWith('requestFullOverlay',
@@ -386,6 +388,7 @@ describes.fakeWin('Viewport', {}, env => {
     const restoreOriginalTouchZoomStub = sandbox.stub(viewport,
         'restoreOriginalTouchZoom');
     const showFixedLayerStub = sandbox.stub(viewport, 'showFixedLayer');
+    const resetScrollStub = sandbox.stub(viewport, 'resetScroll');
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateLightboxMode').withArgs(false).once();
 
@@ -394,10 +397,32 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.verify();
     expect(restoreOriginalTouchZoomStub).to.be.calledOnce;
     expect(showFixedLayerStub).to.be.calledOnce;
+    expect(resetScrollStub).to.be.calledOnce;
 
     expect(viewer.sendMessage).to.have.been.calledOnce;
     expect(viewer.sendMessage).to.have.been.calledWith('cancelFullOverlay',
         {}, true);
+  });
+
+  it('should update viewport when entering sidebar mode', () => {
+    const disableTouchZoomStub = sandbox.stub(viewport, 'disableTouchZoom');
+    const disableScrollStub = sandbox.stub(viewport, 'disableScroll');
+
+    viewport.enterSidebarMode();
+
+    expect(disableTouchZoomStub).to.be.calledOnce;
+    expect(disableScrollStub).to.be.calledOnce;
+  });
+
+  it('should update viewport when leaving sidebar mode', () => {
+    const restoreOriginalTouchZoomStub = sandbox.stub(viewport,
+        'restoreOriginalTouchZoom');
+    const resetScrollStub = sandbox.stub(viewport, 'resetScroll');
+
+    viewport.leaveSidebarMode();
+
+    expect(restoreOriginalTouchZoomStub).to.be.calledOnce;
+    expect(resetScrollStub).to.be.calledOnce;
   });
 
   it('should send scroll events', () => {
