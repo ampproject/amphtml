@@ -864,7 +864,7 @@ export class BaseElement {
   /**
    * Called every time an owned AmpElement collapses itself.
    * See {@link collapse}.
-   * @param {!AmpElement} unusedElement
+   * @param {!AmpElement} unusedElement Child element that was collapsed.
    */
   collapsedCallback(unusedElement) {
     // Subclasses may override.
@@ -882,7 +882,7 @@ export class BaseElement {
   /**
    * Called every time an owned AmpElement expands itself.
    * See {@link expand}.
-   * @param {!AmpElement} unusedElement
+   * @param {!AmpElement} unusedElement Child element that was expanded.
    */
   expandedCallback(unusedElement) {
     // Subclasses may override.
