@@ -24,10 +24,11 @@ import {
   USER_ERROR_SENTINEL,
   isUserErrorMessage,
 } from './log';
-import {makeBodyVisible} from './style-installer';
-import {urls} from './config';
 import {isProxyOrigin} from './url';
 import {isCanary} from './experiments';
+import {makeBodyVisible} from './style-installer';
+import {startsWith} from './string';
+import {urls} from './config';
 
 
 /**
@@ -157,6 +158,23 @@ export function reportError(error, opt_associatedElement) {
  */
 export function cancellation() {
   return new Error(CANCELLED);
+}
+
+/**
+ * @param {*} errorOrMessage
+ * @return {boolean}
+ */
+export function isCancellation(errorOrMessage) {
+  if (!errorOrMessage) {
+    return false;
+  }
+  if (typeof errorOrMessage == 'string') {
+    return startsWith(errorOrMessage, CANCELLED);
+  }
+  if (typeof errorOrMessage.message == 'string') {
+    return startsWith(errorOrMessage.message, CANCELLED);
+  }
+  return false;
 }
 
 /**
@@ -325,9 +343,12 @@ export function getErrorReportUrl(message, filename, line, col, error,
 
   if (error) {
     const tagName = error && error.associatedElement
-      ? error.associatedElement.tagName
-      : 'u';  // Unknown
+        ? error.associatedElement.tagName
+        : 'u';  // Unknown
     url += `&el=${encodeURIComponent(tagName)}`;
+    if (error.args) {
+      url += `&args=${encodeURIComponent(JSON.stringify(error.args))}`;
+    }
 
     if (!isUserError) {
       url += `&s=${encodeURIComponent(error.stack || '')}`;
