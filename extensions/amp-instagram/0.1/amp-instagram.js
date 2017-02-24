@@ -63,7 +63,7 @@ class AmpInstagram extends AMP.BaseElement {
     /** @private {?string} */
     this.shortcode_ = '';
 
-    /** @private {?function} */
+    /** @private {?Function} */
     this.unlistenMessage_ = null;
   }
  /**
