@@ -420,6 +420,7 @@ export class Resource {
    */
   completeCollapse() {
     toggle(this.element, false);
+    this.element.removeAttribute('hidden');
     this.layoutBox_ = layoutRectLtwh(
         this.layoutBox_.left,
         this.layoutBox_.top,
@@ -430,6 +431,26 @@ export class Resource {
     if (owner) {
       owner.collapsedCallback(this.element);
     }
+  }
+
+  /**
+   * Completes expand: ensures that the element is not `display:none` and
+   * updates measurements.
+   */
+  completeExpand() {
+    toggle(this.element, true);
+    this.element.setAttribute('hidden', '');
+    this.requestMeasure();
+  }
+
+  /**
+   * Completes expand: ensures that the element is not `display:none` and
+   * updates measurements.
+   */
+  completeExpand() {
+    toggle(this.element, true);
+    this.element.setAttribute('hidden', '');
+    this.requestMeasure();
   }
 
   /**
