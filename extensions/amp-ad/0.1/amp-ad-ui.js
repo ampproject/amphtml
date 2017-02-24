@@ -15,8 +15,6 @@
  */
 
 import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {UX_EXPERIMENT} from '../../../src/layout';
 
 const TAG = 'AmpAdUIHandler';
 
@@ -73,10 +71,6 @@ export class AmpAdUIHandler {
    * TODO(@zhouyx): Add ad tag to the ad.
    */
   init() {
-    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
-      return;
-    }
-
     if (this.hasPageProvidedFallback_) {
       return;
     }
@@ -118,9 +112,6 @@ export class AmpAdUIHandler {
    * See BaseElement method.
    */
   createPlaceholderCallback() {
-    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
-      return null;
-    }
     return this.addDefaultUiComponent_('placeholder');
   }
 

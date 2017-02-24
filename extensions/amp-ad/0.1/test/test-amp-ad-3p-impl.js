@@ -236,7 +236,7 @@ describe('amp-ad-3p-impl', () => {
   describe('#getIntersectionElementLayoutBox', () => {
     it('should not cache intersection box', () => {
       return ad3p.layoutCallback().then(() => {
-        const iframe = ad3p.element.firstChild;
+        const iframe = ad3p.element.querySelector('iframe');
 
         // Force some styles on the iframe, to display it without loading
         // the iframe and have different size than the ad itself.
