@@ -15,7 +15,7 @@
  */
 
 
-import {getExistingServiceForDoc} from './service';
+import {getServiceForDoc} from './service';
 
 
 /**
@@ -25,5 +25,5 @@ import {getExistingServiceForDoc} from './service';
  */
 export function historyForDoc(nodeOrDoc) {
   return /** @type {!./service/history-impl.History} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'history'));
+      getServiceForDoc(nodeOrDoc, 'history'));
 }

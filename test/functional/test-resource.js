@@ -401,6 +401,7 @@ describe('Resource', () => {
     resource.layoutCount_ = 1;
     elementMock.expects('isRelayoutNeeded').returns(false).atLeast(1);
     resource.startLayout(true);
+    debugger;
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
   });
 

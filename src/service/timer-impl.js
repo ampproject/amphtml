@@ -21,9 +21,6 @@ import {user} from '../log';
 import {registerService, getService} from '../service';
 import {reportError} from '../error';
 
-/** @const @private {string} */
-const TIMER_SERVICE_TAG = 'timer';
-
 /**
  * Helper with all things Timer.
  */
@@ -161,12 +158,12 @@ export class Timer {
  */
 export function timerServiceForTesting(window) {
   installTimerService(window);
-  getService(window, TIMER_SERVICE_TAG);
+  return getService(window, 'timer');
 }
 
 /**
  * @param {!Window} window
  */
 export function installTimerService(window) {
-  registerService(window, TIMER_SERVICE_TAG, Timer);
+  registerService(window, 'timer', Timer);
 };

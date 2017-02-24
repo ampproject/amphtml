@@ -331,7 +331,7 @@ export class Preconnect {
 
 
 function installPreconnectService(window) {
-  registerService(window, 'preconnect', Preconnect);
+  registerService(window, 'preconnect', PreconnectService);
 }
 
 /**

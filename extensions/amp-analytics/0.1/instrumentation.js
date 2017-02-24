@@ -103,10 +103,6 @@ const EVENT_TRACKERS = {
 /** @const {string} */
 const TAG = 'Analytics.Instrumentation';
 
-/** @const {string} */
-const INSTRUMENTATION_SERVICE_TAG = 'amp-analytics-instrumentation';
-
-
 /**
  * Events that can result in analytics data to be sent.
  * @const {Array<AnalyticsEventType>}
@@ -590,7 +586,7 @@ export class AnalyticsGroup {
  */
 export function instrumentationServicePromiseForDoc(nodeOrDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
-      getServicePromiseForDoc(nodeOrDoc, INSTRUMENTATION_SERVICE_TAG));
+      getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
 }
 
 /*
@@ -599,6 +595,6 @@ export function instrumentationServicePromiseForDoc(nodeOrDoc) {
  */
 export function instrumentationServiceForDocForTesting(nodeOrDoc) {
   registerServiceForDoc(
-      nodeOrDoc, INSTRUMENTATION_SERVICE_TAG, InstrumentationService);
-  return getServiceForDoc(nodeOrDoc, INSTRUMENTATION_SERVICE_TAG);
+      nodeOrDoc, 'amp-analytics-instrumentation', InstrumentationService);
+  return getServiceForDoc(nodeOrDoc, 'amp-analytics-instrumentation');
 }

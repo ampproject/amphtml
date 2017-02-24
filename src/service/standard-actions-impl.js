@@ -17,7 +17,7 @@
 import {actionServiceForDoc} from '../action';
 import {bindForDoc} from '../bind';
 import {dev, user} from '../log';
-import {registerServiceForDoc} from '../service';
+import {registerServiceForDoc, getServiceForDoc} from '../service';
 import {historyForDoc} from '../history';
 import {getResourcesServiceForDoc} from './resources-impl';
 import {toggle} from '../style';
@@ -101,9 +101,10 @@ export class StandardActions {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!StandardActions}
  */
 export function installStandardActionsForDoc(ampdoc) {
-  return registerServiceForDoc(
-      ampdoc, 'standard-actions', StandardActions);
+  registerServiceForDoc(ampdoc, 'standard-actions', StandardActions);
+  /** Immediately instantiate */
+  getServiceForDoc(ampdoc, 'standard-actions');
+
 };

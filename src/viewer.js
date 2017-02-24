@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForDoc, getServicePromiseForDoc} from './service';
+import {getServiceForDoc, getServicePromiseForDoc} from './service';
 
 
 /**
@@ -23,7 +23,7 @@ import {getExistingServiceForDoc, getServicePromiseForDoc} from './service';
  */
 export function viewerForDoc(nodeOrDoc) {
   return /** @type {!./service/viewer-impl.Viewer} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'viewer'));
+      getServiceForDoc(nodeOrDoc, 'viewer'));
 }
 
 

@@ -15,9 +15,8 @@
  */
 
 import {PublicKeyInfoDef} from '../crypto';
-import {registerService} from '../service';
+import {registerService, getService} from '../service';
 import {dev} from '../log';
-import {getService} from '../service';
 import {extensionsFor} from '../extensions';
 import {stringToBytes, utf8Encode} from '../utils/bytes';
 import {
@@ -269,6 +268,11 @@ function hashesEqual(signature, keyHash) {
     }
   }
   return true;
+}
+
+export function cryptoServiceForTesting(win) {
+  installCryptoService(win);
+  return getService(win, 'crypto');
 }
 
 export function installCryptoService(win) {

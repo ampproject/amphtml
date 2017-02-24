@@ -16,14 +16,14 @@
 
 import {
   BaseTemplate,
-  templateServiceForTesting,
+  templatesServiceForTesting,
   registerExtendedTemplate,
 } from '../../src/service/template-impl';
 
 
 describe('Template', () => {
 
-  const templates = templateServiceForTesting(window);
+  const templates = templatesServiceForTesting(window);
 
   class TemplateImpl extends BaseTemplate {
     render(data) {

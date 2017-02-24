@@ -93,23 +93,6 @@ export function getServiceInEmbedScope(win, id) {
   return getService(win, id);
 }
 
-
-/**
- * Returns a service with the given id. Assumes that it has been constructed
- * already.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @param {string} id
- * @return {!Object} The service.
- */
-export function getExistingServiceForDoc(nodeOrDoc, id) {
-  const serviceHolder = getAmpdocServiceHolder(nodeOrDoc);
-  const exists = serviceHolder && serviceHolder.services &&
-      serviceHolder.services[id] && serviceHolder.services[id].obj;
-  return dev().assert(exists, `${id} doc service not found. Make sure it is ` +
-      `installed.`);
-}
-
-
 /**
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
@@ -129,7 +112,7 @@ export function getExistingServiceForDocInEmbedScope(nodeOrDoc, id) {
     }
   }
   // Fallback to ampdoc.
-  return getExistingServiceForDoc(nodeOrDoc, id);
+  return getServiceForDoc(nodeOrDoc, id);
 }
 
 
@@ -398,8 +381,7 @@ function getAmpdocService(win) {
  * @return {*}
  * @template T
  */
-function getServiceInternal(holder, context, id, opt_factory,
-    opt_constructor) {
+function getServiceInternal(holder, context, id, opt_factory) {
   const services = getServices(holder);
   let s = services[id];
   if (!s) {
@@ -412,16 +394,12 @@ function getServiceInternal(holder, context, id, opt_factory,
   }
 
   if (!s.obj) {
-
     if (s.ctor) {
       const ctor = s.ctor;
       s.obj = new ctor(context);
     } else {
-      dev().assert(opt_factory || opt_constructor,
-          'Factory or class not given and service missing %s', id);
-      s.obj = opt_constructor
-          ? new opt_constructor(context)
-          : opt_factory(context);
+      dev().assert(opt_factory, 'Factory not given and service missing %s', id);
+      s.obj = opt_factory(context);
     }
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
@@ -497,7 +475,8 @@ function getServicePromiseOrNullInternal(holder, id) {
     if (s.obj) {
       return s.promise = Promise.resolve(s.obj);
     }
-    dev().assert(false, 'Expected object or promise to be present');
+    dev().assert(false,
+      `Expected object or promise to be present for service ${id}`);
   }
   return null;
 }
@@ -632,7 +611,7 @@ export function adoptServiceForEmbed(embedWin, serviceId) {
   const frameElement = /** @type {!Node} */ (dev().assert(
       embedWin.frameElement,
       'frameElement not found for embed'));
-  const service = getExistingServiceForDoc(frameElement, serviceId);
+  const service = getServiceForDoc(frameElement, serviceId);
   assertEmbeddable(service).adoptEmbedWindow(embedWin);
 }
 

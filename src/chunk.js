@@ -16,7 +16,7 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
-import {registerServiceForDoc, getExistingServiceForDoc} from './service';
+import {registerServiceForDoc, getServiceForDoc} from './service';
 import {isExperimentOnAllowUrlOverride} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
@@ -99,7 +99,7 @@ export function chunkInstanceForTesting(nodeOrAmpDoc) {
  * @return {!Chunks}
  */
 export function getChunkServiceForDoc_(nodeOrAmpDoc) {
-  return getExistingServiceForDoc(nodeOrAmpDoc, CHUNK_SERVICE_TAG);
+  return getServiceForDoc(nodeOrAmpDoc, CHUNK_SERVICE_TAG);
 }
 
 /**

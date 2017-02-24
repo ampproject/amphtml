@@ -21,11 +21,10 @@ import {
   disposeServicesForDoc,
   getExistingServiceForDocInEmbedScope,
   getServiceInEmbedScope,
-  getExistingServiceForDoc,
+  getServiceForDoc,
   getParentWindowFrameElement,
   getService,
   getServicePromise,
-  getServiceForDoc,
   getServicePromiseForDoc,
   installServiceInEmbedScope,
   isDisposable,
@@ -253,7 +252,7 @@ describe('service', () => {
 
       const b1 = getServiceForDoc(node, 'b', factory);
       const b2 = getServiceForDoc(node, 'b', factory);
-      const b3 = getExistingServiceForDoc(node, 'b');
+      const b3 = getServiceForDoc(node, 'b');
       expect(b1).to.equal(b2);
       expect(b1).to.equal(b3);
       expect(b1).to.not.equal(a1);
@@ -268,7 +267,7 @@ describe('service', () => {
 
       const a1 = getServiceForDoc(ampdoc, 'a', factory);
       const a2 = getServiceForDoc(ampdoc, 'a', factory);
-      const a3 = getExistingServiceForDoc(ampdoc, 'a', factory);
+      const a3 = getServiceForDoc(ampdoc, 'a', factory);
       expect(a1).to.equal(a2);
       expect(a1).to.equal(a3);
       expect(a1).to.equal(1);
@@ -338,7 +337,7 @@ describe('service', () => {
           {nodeType: 1, ownerDocument: {defaultView: childWin}};
       setParentWindow(childWin, windowApi);
       expect(getServiceForDoc(childWinNode, 'c', factory)).to.equal(c);
-      expect(getExistingServiceForDoc(childWinNode, 'c')).to.equal(c);
+      expect(getServiceForDoc(childWinNode, 'c')).to.equal(c);
 
       // A grandchild.
       const grandchildWin = {};
@@ -346,7 +345,7 @@ describe('service', () => {
           {nodeType: 1, ownerDocument: {defaultView: grandchildWin}};
       setParentWindow(grandchildWin, childWin);
       expect(getServiceForDoc(grandChildWinNode, 'c', factory)).to.equal(c);
-      expect(getExistingServiceForDoc(grandChildWinNode, 'c')).to.equal(c);
+      expect(getServiceForDoc(grandChildWinNode, 'c')).to.equal(c);
     });
 
     it('should dispose disposable services', () => {

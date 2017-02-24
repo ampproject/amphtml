@@ -249,5 +249,6 @@ function installInputService(window) {
  * @return {!Input}
  */
 export function inputFor(window) {
+  installInputService(window);
   return getService(window, 'input');
 };
