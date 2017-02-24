@@ -387,6 +387,8 @@ export class Log {
       } else if (error.message.indexOf(this.suffix_) == -1) {
         error.message += this.suffix_;
       }
+    } else if (isUserErrorMessage(error.message)) {
+      error.message = error.message.replace(USER_ERROR_SENTINEL, '');
     }
   }
 }

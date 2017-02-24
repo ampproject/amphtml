@@ -19,6 +19,7 @@ import {
   detectNonAmpJs,
   getErrorReportUrl,
   installErrorReporting,
+  isCancellation,
   reportError,
   detectJsEngineFromStack,
 } from '../../src/error';
@@ -116,6 +117,18 @@ describe('reportErrorToServer', () => {
     expect(query.ae).to.equal('');
     expect(query.r).to.contain('http://localhost');
     expect(query.noAmp).to.equal('1');
+    expect(query.args).to.be.undefined;
+  });
+
+  it('reportError with error object w/args', () => {
+    const e = new Error('XYZ');
+    e.args = {x: 1};
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
+          true));
+    const query = parseQueryString(url.search);
+
+    expect(query.args).to.equal(JSON.stringify({x: 1}));
   });
 
   it('reportError with a string instead of error', () => {
@@ -247,6 +260,27 @@ describe('reportErrorToServer', () => {
     const url =
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
     expect(url).to.be.undefined;
+  });
+
+  it('should construct cancellation', () => {
+    const e = cancellation();
+    expect(isCancellation(e)).to.be.true;
+    expect(isCancellation(e.message)).to.be.true;
+
+    // Suffix is tollerated.
+    e.message += '___';
+    expect(isCancellation(e)).to.be.true;
+    expect(isCancellation(e.message)).to.be.true;
+
+    // Prefix is not tollerated.
+    e.message = '___' + e.message;
+    expect(isCancellation(e)).to.be.false;
+    expect(isCancellation(e.message)).to.be.false;
+
+    expect(isCancellation('')).to.be.false;
+    expect(isCancellation(null)).to.be.false;
+    expect(isCancellation(1)).to.be.false;
+    expect(isCancellation({})).to.be.false;
   });
 
   it('reportError with error object', () => {
