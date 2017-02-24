@@ -93,7 +93,7 @@ In this example, `myState.foo` will evaluate to `"bar"`.
 
 For non-AMP elements, most attributes accepted by the [AMP Validator](https://validator.ampproject.org/) are bindable.
 
-For AMP components, only select attributes are bindable:
+For AMP components, the height and width attributes are bindable along with the following specific attributes:
 
 | Component | Attributes |
 | --- | --- |
