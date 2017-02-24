@@ -19,18 +19,18 @@ import {Layout, getLayoutClass} from '../layout';
 import {actionServiceForDoc} from '../action';
 import {bindForDoc} from '../bind';
 import {dev, user} from '../log';
-import {getMode} from '../mode';
 import {fromClassForDoc} from '../service';
 import {historyForDoc} from '../history';
 import {installResourcesServiceForDoc} from './resources-impl';
-import {getStyle, toggle} from '../style';
+import {computedStyle, getStyle, toggle} from '../style';
+import {vsyncFor} from '../vsync';
 
 
 /**
  * @param {!Element} element
  * @return {boolean}
  */
-function isHidden(element) {
+function isShowable(element) {
   return getStyle(element, 'display') == 'none'
       || element.hasAttribute('hidden');
 }
@@ -134,19 +134,26 @@ export class StandardActions {
    */
   handleShow(invocation) {
     const target = dev().assertElement(invocation.target);
+    const ownerWindow = target.ownerDocument.defaultView;
 
-    if (getMode().development) {
-      dev().assert(
-          !target.classList.contains(getLayoutClass(Layout.NODISPLAY)),
+    if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
+      user().warn(
           'Elements with layout=nodisplay cannot be dynamically shown. %s',
           target);
 
-      dev().assert(
-          target.style.display == 'none' || target.hasAttribute('hidden'),
-          'Elements can only be dynamically shown when they have the "hidden"' +
-          ' attribute set or when they were previously dynamically hidden. %s',
-          target);
+      return;
     }
+
+    vsyncFor(ownerWindow).measure(() => {
+      if (computedStyle(ownerWindow, target).display == 'none' &&
+          !isShowable(target)) {
+
+        user().warn(
+            'Elements can only be dynamically shown when they have the ' +
+            '"hidden" attribute set or when they were dynamically hidden. %s',
+            target);
+      }
+    });
 
     // deferMutate will only work on AMP elements
     if (target.classList.contains('i-amphtml-element')) {
@@ -166,7 +173,7 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleToggle(invocation) {
-    if (isHidden(dev().assertElement(invocation.target))) {
+    if (isShowable(dev().assertElement(invocation.target))) {
       this.handleShow(invocation);
     } else {
       this.handleHide(invocation);
