@@ -206,11 +206,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'amp-ad-loading-ux',
-    name: 'New default loading UX to amp-ad',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
-  },
-  {
     id: 'visibility-v2',
     name: 'New visibility tracking using native IntersectionObserver',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',

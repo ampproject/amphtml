@@ -16,8 +16,6 @@
 
 import {AdDisplayState, AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
-import {toggleExperiment} from '../../../../src/experiments';
-import {UX_EXPERIMENT} from '../../../../src/layout';
 
 describes.realWin('amp-ad-ui handler', {
   amp: {
@@ -34,9 +32,6 @@ describes.realWin('amp-ad-ui handler', {
     adImpl = new BaseElement(adElement);
     uiHandler = new AmpAdUIHandler(adImpl);
     uiHandler.setDisplayState(AdDisplayState.LOADING);
-    // Always set to true since this is in PROD.
-    // TODO: clean once experiment flag gets removed.
-    toggleExperiment(window, UX_EXPERIMENT, true);
   });
 
   describe('with state LOADED_NO_CONTENT', () => {
