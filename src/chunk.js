@@ -27,11 +27,6 @@ import {viewerPromiseForDoc} from './viewer';
 const TAG = 'CHUNK';
 
 /**
- * @const {string}
- */
-const CHUNK_SERVICE_TAG = 'chunk';
-
-/**
  * @type {boolean}
  */
 let deactivated = /nochunking=1/.test(self.location.hash);
@@ -90,7 +85,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
  * @return {!Chunks}
  */
 export function chunkInstanceForTesting(nodeOrAmpDoc) {
-  registerServiceForDoc(nodeOrAmpDoc, CHUNK_SERVICE_TAG, Chunks);
+  registerServiceForDoc(nodeOrAmpDoc, 'chunk', Chunks);
   return getChunkServiceForDoc_(nodeOrAmpDoc);
 }
 
@@ -98,15 +93,15 @@ export function chunkInstanceForTesting(nodeOrAmpDoc) {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  * @return {!Chunks}
  */
-export function getChunkServiceForDoc_(nodeOrAmpDoc) {
-  return getServiceForDoc(nodeOrAmpDoc, CHUNK_SERVICE_TAG);
+function getChunkServiceForDoc_(nodeOrAmpDoc) {
+  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
 }
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  */
 export function installChunkServiceForDoc_(nodeOrAmpDoc) {
-  registerServiceForDoc(nodeOrAmpDoc, CHUNK_SERVICE_TAG, Chunks);
+  registerServiceForDoc(nodeOrAmpDoc, 'chunk', Chunks);
 }
 
 /**

@@ -19,10 +19,6 @@ import {registerService, getService} from '../service';
 import {getVendorJsPropertyName} from '../style';
 import {waitForChild} from '../dom';
 
-
-/** @const @private {string} */
-const DOCUMENT_STATE_SERVICE_TAG = 'documentState';
-
 /**
  */
 export class DocumentState {
@@ -150,7 +146,7 @@ export class DocumentState {
 
 
 export function installDocumentState(window) {
-  registerService(window, DOCUMENT_STATE_SERVICE_TAG, DocumentState);
+  registerService(window, 'documentState', DocumentState);
 }
 
 /**
@@ -159,5 +155,5 @@ export function installDocumentState(window) {
  */
 export function documentStateFor(window) {
   installDocumentState(window);
-  return getService(window, DOCUMENT_STATE_SERVICE_TAG);
+  return getService(window, 'documentState');
 }

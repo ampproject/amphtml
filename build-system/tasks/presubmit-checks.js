@@ -154,12 +154,6 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
-  'cidServiceForDocForTesting': {
-    message: privateServiceFactory,
-    whitelist: [
-      'extensions/amp-analytics/0.1/cid-impl.js',
-    ],
-  },
   'installCryptoService': {
     message: privateServiceFactory,
     whitelist: [
@@ -401,7 +395,7 @@ var forbiddenTerms = {
       'src/service/url-replacements-impl.js',
     ],
   },
-  '': '',
+  'debugger': '',
   // Overridden APIs.
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',

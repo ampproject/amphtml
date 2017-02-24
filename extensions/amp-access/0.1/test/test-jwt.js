@@ -21,7 +21,7 @@ import * as sinon from 'sinon';
 
 describe('JwtHelper', () => {
 
-  // Generated from https://jwt.io/#
+  // Generated from https://jwt.io/#debugger
   // Name deliberately changed from "John Doe" to "John ௵Z加䅌ਇ☎Èʘغޝ" to test
   // correct unicode handling on our part.
   const TOKEN_HEADER = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
