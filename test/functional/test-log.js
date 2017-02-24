@@ -404,6 +404,15 @@ describe('Logging', () => {
       expect(message.indexOf(USER_ERROR_SENTINEL)).to.equal(-1);
     });
 
+    it('should strip suffix if not available', () => {
+      const error = log.createError(new Error('test'));
+      expect(isUserErrorMessage(error.message)).to.be.true;
+
+      const noSuffixLog = new Log(win, RETURNS_FINE);
+      noSuffixLog.createError(error);
+      expect(isUserErrorMessage(error.message)).to.be.false;
+    });
+
     it('should create other-suffixed errors', () => {
       log = new Log(win, RETURNS_FINE, '-other');
       const error = log.createError('test');
