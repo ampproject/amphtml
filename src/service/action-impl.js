@@ -22,6 +22,12 @@ import {map} from '../utils/object';
 import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
 
+/**
+ * ActionInfoDef args key that maps to the an unparsed object literal string.
+ * @const {string}
+ */
+export const OBJECT_STRING_ARGS_KEY = '__AMP_OBJECT_STRING__';
+
 /** @const {string} */
 const TAG_ = 'Action';
 
@@ -428,6 +434,7 @@ export function parseActionMap(s, context) {
         // Method: ".method". Method is optional.
         let method = DEFAULT_METHOD_;
         let args = null;
+
         peek = toks.peek();
         if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
           toks.next();  // Skip '.'
@@ -437,48 +444,8 @@ export function parseActionMap(s, context) {
           // Optionally, there may be arguments: "(key = value, key = value)".
           peek = toks.peek();
           if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
-            toks.next();  // Skip '('.
-            do {
-              tok = toks.next();
-
-              // Format: key = value, ....
-              if (tok.type == TokenType.SEPARATOR &&
-                      (tok.value == ',' || tok.value == ')')) {
-                // Expected: ignore.
-              } else if (tok.type == TokenType.LITERAL ||
-                  tok.type == TokenType.ID) {
-                // Key: "key = "
-                const argKey = tok.value;
-                assertToken(toks.next(), [TokenType.SEPARATOR], '=');
-                // Value is either a literal or a variable: "foo.bar.baz"
-                tok = assertToken(toks.next(/* convertValue */ true),
-                    [TokenType.LITERAL, TokenType.ID]);
-                const argValueTokens = [tok];
-                // Variables have one or more dereferences: ".identifier"
-                if (tok.type == TokenType.ID) {
-                  for (peek = toks.peek();
-                      peek.type == TokenType.SEPARATOR && peek.value == '.';
-                      peek = toks.peek()) {
-                    tok = toks.next(); // Skip '.'.
-                    tok = assertToken(toks.next(false), [TokenType.ID]);
-                    argValueTokens.push(tok);
-                  }
-                }
-                const argValue = getActionInfoArgValue(argValueTokens);
-                if (!args) {
-                  args = map();
-                }
-                args[argKey] = argValue;
-                peek = toks.peek();
-                assertAction(
-                    peek.type == TokenType.SEPARATOR &&
-                    (peek.value == ',' || peek.value == ')'),
-                    'Expected either [,] or [)]');
-              } else {
-                // Unexpected token.
-                assertAction(false, `; unexpected token [${tok.value || ''}]`);
-              }
-            } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
+            toks.next();  // Skip '('
+            args = tokenizeMethodArguments(toks, assertToken, assertAction);
           }
         }
 
@@ -509,6 +476,70 @@ export function parseActionMap(s, context) {
   } while (tok.type != TokenType.EOF);
 
   return actionMap;
+}
+
+/**
+ * Tokenizes and returns method arguments, e.g. target.method(arguments).
+ * @param {!ParserTokenizer} toks
+ * @param {!Function} assertToken
+ * @param {!Function} assertAction
+ * @return {ActionInfoArgsDef}
+ * @private
+ */
+function tokenizeMethodArguments(toks, assertToken, assertAction) {
+  let peek = toks.peek();
+  let tok;
+  let args = null;
+  // Object literal. Format: {...}
+  if (peek.type == TokenType.OBJECT) {
+    // Don't parse object literals. Tokenize as a single expression
+    // fragment and delegate to specific action handler.
+    args = map();
+    const value = toks.next().value;
+    args[OBJECT_STRING_ARGS_KEY] = () => value;
+    assertToken(toks.next(), [TokenType.SEPARATOR], ')');
+  } else {
+    // Key-value pairs. Format: key = value, ....
+    do {
+      tok = toks.next();
+      const type = tok.type;
+      const value = tok.value;
+      if (type == TokenType.SEPARATOR && (value == ',' || value == ')')) {
+        // Expected: ignore.
+      } else if (type == TokenType.LITERAL || type == TokenType.ID) {
+        // Key: "key = "
+        assertToken(toks.next(), [TokenType.SEPARATOR], '=');
+        // Value is either a literal or a variable: "foo.bar.baz"
+        tok = assertToken(toks.next(/* convertValue */ true),
+            [TokenType.LITERAL, TokenType.ID]);
+        const argValueTokens = [tok];
+        // Variables have one or more dereferences: ".identifier"
+        if (tok.type == TokenType.ID) {
+          for (peek = toks.peek();
+              peek.type == TokenType.SEPARATOR && peek.value == '.';
+              peek = toks.peek()) {
+            tok = toks.next(); // Skip '.'.
+            tok = assertToken(toks.next(false), [TokenType.ID]);
+            argValueTokens.push(tok);
+          }
+        }
+        const argValue = getActionInfoArgValue(argValueTokens);
+        if (!args) {
+          args = map();
+        }
+        args[value] = argValue;
+        peek = toks.peek();
+        assertAction(
+            peek.type == TokenType.SEPARATOR &&
+            (peek.value == ',' || peek.value == ')'),
+            'Expected either [,] or [)]');
+      } else {
+        // Unexpected token.
+        assertAction(false, `; unexpected token [${tok.value || ''}]`);
+      }
+    } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
+  }
+  return args;
 }
 
 /**
@@ -615,6 +646,7 @@ const TokenType = {
   SEPARATOR: 2,
   LITERAL: 3,
   ID: 4,
+  OBJECT: 5,
 };
 
 /**
@@ -632,7 +664,11 @@ const SEPARATOR_SET = ';:.()=,|!';
 const STRING_SET = '"\'';
 
 /** @private @const {string} */
-const SPECIAL_SET = WHITESPACE_SET + SEPARATOR_SET + STRING_SET;
+const OBJECT_SET = '{}';
+
+/** @private @const {string} */
+const SPECIAL_SET =
+    WHITESPACE_SET + SEPARATOR_SET + STRING_SET + OBJECT_SET;
 
 /** @private */
 class ParserTokenizer {
@@ -735,6 +771,30 @@ class ParserTokenizer {
       const value = this.str_.substring(newIndex + 1, end);
       newIndex = end;
       return {type: TokenType.LITERAL, value, index: newIndex};
+    }
+
+    // Object literal.
+    if (c == '{') {
+      let numberOfBraces = 1;
+      let end = -1;
+      for (let i = newIndex + 1; i < this.str_.length; i++) {
+        const char = this.str_[i];
+        if (char == '{') {
+          numberOfBraces++;
+        } else if (char == '}') {
+          numberOfBraces--;
+        }
+        if (numberOfBraces <= 0) {
+          end = i;
+          break;
+        }
+      }
+      if (end == -1) {
+        return {type: TokenType.INVALID, index: newIndex};
+      }
+      const value = this.str_.substring(newIndex, end + 1);
+      newIndex = end;
+      return {type: TokenType.OBJECT, value, index: newIndex};
     }
 
     // Advance until next special character.

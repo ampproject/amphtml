@@ -34,7 +34,8 @@
   <p>The image above will increase in size and change its src</p>
   <amp-video src="https://ampbyexample.com/video/tokyo.mp4" [src]="videoSrc" width=480 height=270 autoplay [controls]="videoControls"></amp-video>
   <div>
-    <button on="tap:AMP.setState(foo='foo', isButtonDisabled=true, textClass='redBackground', imgSrc='https://ampbyexample.com/img/Shetland_Sheepdog.jpg', imgSize=200, imgAlt='Sheepdog', videoSrc='https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', videoControls=true)">Click me</button>
+    <button on="tap:AMP.setState(foo='foo', isButtonDisabled=true, textClass='redBackground', imgSrc='https://ampbyexample.com/img/Shetland_Sheepdog.jpg', imgSize=200, imgAlt='Sheepdog', videoSrc='https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', videoControls=true)">Click me (key-value args)</button>
+    <button on="tap:AMP.setState({'foo': 'foo', 'isButtonDisabled': true, 'textClass': 'redBackground', 'imgSrc': 'https://ampbyexample.com/img/Shetland_Sheepdog.jpg', 'imgSize': 200, 'imgAlt': 'Sheepdog', 'videoSrc': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', 'videoControls': true})">Click me (object args)</button>
   </div>
 
   <amp-state id="myState">
