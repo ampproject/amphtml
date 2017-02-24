@@ -32,10 +32,7 @@ amp-lightbox                                     |   1000         |   extensions
 .-amp-sidebar-mask                               |   2147483646   |   extensions/amp-sidebar/0.1/amp-sidebar.css
 .amp-lbv-button-prev                             |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
 .amp-lbv-button-next                             |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-
-.amp-lbv-button-gallery                         |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-
-.amp-lbv-button-close                           |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-
-.amp-lbv-button-back                            |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
+.amp-lbv-button-gallery                          |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
+.amp-lbv-button-close                            |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
+.amp-lbv-button-back                             |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
 amp-sidebar                                      |   2147483647   |   extensions/amp-sidebar/0.1/amp-sidebar.css
