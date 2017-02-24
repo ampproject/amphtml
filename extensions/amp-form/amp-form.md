@@ -47,7 +47,7 @@ The `amp-form` extension **MUST** be loaded if you're using `<form>` or any inpu
 
 Example:
 ```html
-<form method="post" action-xhr="https://example.com/subscribe">
+<form method="post" action-xhr="https://example.com/subscribe" target="_top">
   <fieldset>
     <label>
       <span>Your name</span>
@@ -74,9 +74,9 @@ Example:
 
 ## Attributes
 
-**target** (optional) (default: '_top')
+**target**
 
-The value for the `target` attribute must be either `_blank` or `_top`. This is only useful for non-XHR GET submissions.
+The value for the `target` attribute must be either `_blank` or `_top`.
 
 **action** (optional for GET, invalid for POST)
 
