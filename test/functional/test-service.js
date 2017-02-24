@@ -76,6 +76,7 @@ describe('service', () => {
     let count;
     let factory;
     let constructorSpy;
+    let FakeService;
 
     beforeEach(() => {
       count = 0;
@@ -88,7 +89,7 @@ describe('service', () => {
         constructor() {
           constructorSpy();
         }
-      }
+      };
 
       resetServiceForTesting(window, 'a');
       resetServiceForTesting(window, 'b');
@@ -118,12 +119,13 @@ describe('service', () => {
       expect(c1).to.equal(c2);
       expect(factory).to.be.calledOnce;
     });
+
     it('should only instantiate a service when requested', () => {
-      registerService(window, 'fake service', FakeService)
+      registerService(window, 'fake service', FakeService);
       expect(constructorSpy).to.have.not.been.called;
-      getService(window, 'fake service')
+      getService(window, 'fake service');
       expect(constructorSpy).to.be.calledOnce;
-    })
+    });
 
     it('should return the service when it exists', () => {
       const c1 = getService(window, 'c', factory);
