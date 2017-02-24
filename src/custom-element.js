@@ -772,7 +772,9 @@ function createBaseCustomElementClass(win) {
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
-      this.implementation_.onLayoutMeasure();
+      if (this.isBuilt()) {
+        this.implementation_.onLayoutMeasure();
+      }
 
       if (this.isLoadingEnabled_()) {
         if (this.isInViewport_) {
