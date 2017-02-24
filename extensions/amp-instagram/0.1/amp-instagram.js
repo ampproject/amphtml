@@ -41,6 +41,7 @@ import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {tryParseJson} from '../../../src/json';
 import {isObject} from '../../../src/types';
+import {listen} from '../../../src/event-helper';
 
 const PADDING_LEFT = 8;
 const PADDING_RIGHT = 8;
@@ -61,6 +62,9 @@ class AmpInstagram extends AMP.BaseElement {
 
     /** @private {?string} */
     this.shortcode_ = '';
+
+    /** @private {?function} */
+    this.unlistenMessage_ = null;
   }
  /**
   * @param {boolean=} opt_onLayout
@@ -127,8 +131,11 @@ class AmpInstagram extends AMP.BaseElement {
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
 
-    this.win.addEventListener(
-        'message', event => this.handleInstagramMessages_(event));
+    this.unlistenMessage_ = listen(
+      this.win,
+      'message',
+      this.handleInstagramMessages_.bind(this)
+    );
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
@@ -165,13 +172,15 @@ class AmpInstagram extends AMP.BaseElement {
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data.type == 'MEASURE') {
+    if (data.type == 'MEASURE' && data.details) {
       const height = data.details.height;
-      if (this.iframe_./*OK*/offsetHeight !== height) {
-        // Height returned by Instagram includes header, so
-        // subtract 48px top padding
-        this.attemptChangeHeight(height - PADDING_TOP).catch(() => {});
-      }
+      this.getVsync().measure(() => {
+        if (this.iframe_./*OK*/offsetHeight !== height) {
+          // Height returned by Instagram includes header, so
+          // subtract 48px top padding
+          this.attemptChangeHeight(height - PADDING_TOP).catch(() => {});
+        }
+      });
     }
   }
 
@@ -186,6 +195,9 @@ class AmpInstagram extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
       this.iframePromise_ = null;
+    }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
     }
     return true;  // Call layoutCallback again.
   }

@@ -47,6 +47,21 @@ describe('amp-instagram', () => {
       if (opt_responsive) {
         ins.setAttribute('layout', 'responsive');
       }
+      ins.implementation_.getVsync = () => {
+        return {
+          mutate(cb) { cb(); },
+          measure(cb) { cb(); },
+          runPromise(task, state = {}) {
+            if (task.measure) {
+              task.measure(state);
+            }
+            if (task.mutate) {
+              task.mutate(state);
+            }
+            return Promise.resolve();
+          },
+        };
+      };
       return iframe.addElement(ins);
     });
   }
