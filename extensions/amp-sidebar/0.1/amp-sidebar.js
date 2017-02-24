@@ -191,7 +191,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.isOpen_()) {
       return;
     }
-    this.viewport_.enterSidebarMode();
+    this.viewport_.enterOverlayMode();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
       this.openMask_();
@@ -228,7 +228,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (!this.isOpen_()) {
       return;
     }
-    this.viewport_.leaveSidebarMode();
+    this.viewport_.leaveOverlayMode();
     this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');

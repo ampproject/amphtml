@@ -435,9 +435,8 @@ export class Viewport {
    */
   enterLightboxMode() {
     this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */true);
-    this.disableTouchZoom();
+    this.enterOverlayMode();
     this.hideFixedLayer();
-    this.disableScroll();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(true));
   }
 
@@ -446,24 +445,23 @@ export class Viewport {
    */
   leaveLightboxMode() {
     this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */true);
-    this.resetScroll();
     this.showFixedLayer();
-    this.restoreOriginalTouchZoom();
+    this.leaveOverlayMode();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(false));
   }
 
   /*
-   * Instruct the viewport to enter sidebar mode.
+   * Instruct the viewport to enter overlay mode.
    */
-  enterSidebarMode() {
+  enterOverlayMode() {
     this.disableTouchZoom();
     this.disableScroll();
   }
 
   /*
-   * Instruct the viewport to leave sidebar mode.
+   * Instruct the viewport to leave overlay mode.
    */
-  leaveSidebarMode() {
+  leaveOverlayMode() {
     this.resetScroll();
     this.restoreOriginalTouchZoom();
   }
