@@ -32,7 +32,6 @@ describes.realWin('amp-ad-ui handler', {
     adImpl = new BaseElement(adElement);
     uiHandler = new AmpAdUIHandler(adImpl);
     uiHandler.setDisplayState(AdDisplayState.LOADING);
-    // Always set to true since this is in PROD.
   });
 
   describe('with state LOADED_NO_CONTENT', () => {

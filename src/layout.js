@@ -273,5 +273,8 @@ export function getNaturalDimensions(element) {
  */
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
+  if (tagName == 'AMP-AD' || tagName == 'AMP-EMBED') {
+    return true;
+  }
   return LOADING_ELEMENTS_[tagName] || false;
 }
