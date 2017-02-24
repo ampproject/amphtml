@@ -21,8 +21,7 @@ import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
-describe('LiveListManager', function() {
-  this.timeout(1000);
+describe('LiveListManager', () => {
   const jitterOffset = 1000;
   let manager;
   let sandbox;
@@ -147,6 +146,7 @@ describe('LiveListManager', function() {
   });
 
   it('should get the amp_latest_update_time on doc ready', () => {
+    sandbox.stub(viewer, 'isVisible').returns(true);
     sandbox.stub(Math, 'random', () => 1);
     ready();
     const liveList2 = getLiveList({'data-sort-time': '2222'}, 'id-2');
@@ -177,7 +177,7 @@ describe('LiveListManager', function() {
     });
   });
 
-  it('should poll if at least one amp-live-list\'s is still active after  ' +
+  it('should poll if at least one amp-live-list\'s is still active after ' +
      'register', () => {
     const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
 
@@ -187,6 +187,7 @@ describe('LiveListManager', function() {
     liveList2.buildCallback();
     liveList.toggle(false);
     liveList2.toggle(true);
+    sandbox.stub(viewer, 'isVisible').returns(true);
     return manager.whenDocReady_().then(() => {
       liveList.toggle(false);
       liveList2.toggle(true);
@@ -194,7 +195,7 @@ describe('LiveListManager', function() {
     });
   });
 
-  it('should not poll if no amp-live-list\'s is still active after  ' +
+  it('should not poll if no amp-live-list\'s is still active after ' +
      'register', () => {
     const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
 
@@ -221,6 +222,7 @@ describe('LiveListManager', function() {
     liveList2.buildCallback();
     expect(liveList.isEnabled()).to.be.true;
     expect(liveList2.isEnabled()).to.be.true;
+    sandbox.stub(viewer, 'isVisible').returns(true);
     return manager.whenDocReady_().then(() => {
       expect(manager.poller_.isRunning()).to.be.true;
 
@@ -311,6 +313,7 @@ describe('LiveListManager', function() {
     sandbox.stub(Math, 'random', () => 1);
     ready();
     const fetchSpy = sandbox.spy(manager, 'work_');
+    sandbox.stub(viewer, 'isVisible').returns(true);
     liveList.buildCallback();
     return manager.whenDocReady_().then(() => {
       const interval = liveList.getInterval();
@@ -343,6 +346,7 @@ describe('LiveListManager', function() {
     sandbox.stub(Math, 'random', () => 1);
     ready();
     const fetchSpy = sandbox.spy(manager, 'work_');
+    sandbox.stub(viewer, 'isVisible').returns(true);
     liveList.buildCallback();
     return manager.whenDocReady_().then(() => {
       const interval = liveList.getInterval();
@@ -411,6 +415,9 @@ describe('LiveListManager', function() {
     const fetchSpy = sandbox.spy(manager, 'work_');
     expect(fetchSpy).to.have.not.been.called;
     liveList.buildCallback();
+    const isVisibleStub = sandbox.stub(viewer, 'isVisible')
+    isVisibleStub.onCall(0).returns(true);
+    isVisibleStub.onCall(1).returns(false);
     return manager.whenDocReady_().then(() => {
       expect(viewer.isVisible()).to.be.true;
       expect(manager.poller_.isRunning()).to.be.true;
