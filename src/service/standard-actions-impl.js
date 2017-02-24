@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {Layout, getLayoutClass} from '../layout';
 import {actionServiceForDoc} from '../action';
 import {bindForDoc} from '../bind';
 import {dev, user} from '../log';
+import {getMode} from '../mode';
 import {fromClassForDoc} from '../service';
 import {historyForDoc} from '../history';
 import {installResourcesServiceForDoc} from './resources-impl';
@@ -100,7 +102,6 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleHide(invocation) {
-    // TODO(alanorozco, #7753) use 'hidden' attribute for AMP elements
     const target = dev().assertElement(invocation.target);
 
     this.resources_.mutateElement(target, () => {
@@ -119,13 +120,20 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleShow(invocation) {
-    // TODO(alanorozco, #7753) use 'hidden' attribute for AMP elements
     const target = dev().assertElement(invocation.target);
 
-    user().assert(isHidden(target),
-        'Element can only be shown when it has the "hidden" attribute set or ' +
-        'was previously hidden by an AMP action. %s',
-        target);
+    if (getMode().development) {
+      dev().assert(
+          !target.classList.contains(getLayoutClass(Layout.NODISPLAY)),
+          'Elements with layout=nodisplay cannot be dynamically shown. %s',
+          target);
+
+      dev().assert(
+          target.style.display == 'none' || target.hasAttribute('hidden'),
+          'Elements can only be dynamically shown when they have the "hidden"' +
+          ' attribute set or when they were previously dynamically hidden. %s',
+          target);
+    }
 
     // deferMutate will only work on AMP elements
     if (target.classList.contains('i-amphtml-element')) {
