@@ -24,7 +24,7 @@ import {
   removeChildren,
   createElementWithAttributes,
 } from '../../../src/dom';
-import {cancellation} from '../../../src/error';
+import {cancellation, isCancellation} from '../../../src/error';
 import {
   installAnchorClickInterceptor,
 } from '../../../src/anchor-click-interceptor';
@@ -57,7 +57,6 @@ import {
 } from '../../../src/service/url-replacements-impl';
 import {extensionsFor} from '../../../src/extensions';
 import {A4AVariableSource} from './a4a-variable-source';
-import {rethrowAsync} from '../../../src/log';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
@@ -83,7 +82,7 @@ export const SAFEFRAME_IMPL_PATH =
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 
 /** @type {string} */
-const TAG = 'AMP-A4A';
+const TAG = 'amp-a4a';
 
 /** @type {string} */
 const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
@@ -625,7 +624,7 @@ export class AmpA4A extends AMP.BaseElement {
           // If error in chain occurs, report it and return null so that
           // layoutCallback can render via cross domain iframe assuming ad
           // url or creative exist.
-          rethrowAsync(this.promiseErrorHandler_(error));
+          this.promiseErrorHandler_(error);
           return null;
         });
   }
@@ -739,32 +738,38 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Handles uncaught errors within promise flow.
    * @param {*} error
-   * @return {*}
    * @private
    */
   promiseErrorHandler_(error) {
-    if (error && error.message) {
-      if (error.message.indexOf(TAG) == 0) {
-        // caught previous call to promiseErrorHandler?  Infinite loop?
-        return error;
-      }
-      if (error.message == cancellation().message) {
-        // Rethrow if cancellation
-        throw error;
-      }
+    if (isCancellation(error)) {
+      // Rethrow if cancellation.
+      throw error;
     }
-    // Returning promise reject should trigger unhandledrejection which will
-    // trigger reporting via src/error.js
+
+    if (!error || !error.message) {
+      error = new Error('unknown error ' + error);
+    }
+
+    // Add `type` to the message. Ensure to preserve the original stack.
+    const type = this.element.getAttribute('type') || 'notype';
+    error.message = `${TAG}: ${type}: ${error.message}`;
+
+    // Additional arguments.
     const adQueryIdx = this.adUrl_ ? this.adUrl_.indexOf('?') : -1;
-    const state = {
-      'm': error instanceof Error ? error.message : error,
-      's': error instanceof Error ? error.stack : '',
-      'tag': this.element.tagName,
-      'type': this.element.getAttribute('type'),
+    error.args = {
       'au': adQueryIdx < 0 ? '' :
           this.adUrl_.substring(adQueryIdx + 1, adQueryIdx + 251),
     };
-    return new Error(TAG + ': ' + JSON.stringify(state));
+
+    if (getMode().development || getMode().localDev || getMode().log) {
+      user().error(TAG, error);
+    } else {
+      user().warn(TAG, error);
+      // Report with 1% sampling as an expected dev error.
+      if (Math.random() < 0.01) {
+        dev().expectedError(TAG, error);
+      }
+    }
   }
 
   /** @override */
@@ -805,11 +810,14 @@ export class AmpA4A extends AMP.BaseElement {
           // rendering within cross domain iframe.
           user().error(TAG, this.element.getAttribute('type'),
             'Error injecting creative in friendly frame', err);
-          rethrowAsync(this.promiseErrorHandler_(err));
+          this.promiseErrorHandler_(err);
           return this.renderNonAmpCreative_()
             .then(() => protectedOnCreativeRender(false));
         });
-    }).catch(error => this.promiseErrorHandler_(error));
+    }).catch(error => {
+      this.promiseErrorHandler_(error);
+      throw cancellation();
+    });
   }
 
   /** @override  */
@@ -1046,6 +1054,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderNonAmpCreative_() {
+    this.promiseErrorHandler_(new Error('fallback to 3p'));
     this.protectedEmitLifecycleEvent_('preAdThrottle');
     incrementLoadingAds(this.win);
     // Haven't rendered yet, so try rendering via one of our
@@ -1078,7 +1087,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderAmpCreative_(creativeMetaData) {
-    dev().assert(creativeMetaData.minifiedCreative);
+    dev().assert(creativeMetaData.minifiedCreative,
+        'missing minified creative');
     dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
     this.protectedEmitLifecycleEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
