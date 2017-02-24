@@ -40,13 +40,13 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       bind = installBindForTesting(iframe.ampdoc);
       return iframe.ampdoc.whenReady();
     }).then(() => {
-      return bind.waitForScanForTesting_();
+      return bind.waitForInitializationForTesting();
     });
   });
 
   function waitForBindApplication() {
     return bindForDoc(iframe.ampdoc).then(() => {
-      return bind.waitForBindApplicationForTesting_();
+      return bind.waitForApplicationForTesting();
     });
   }
 
