@@ -118,9 +118,6 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   pauseCallback(){
-    // Only send pauseVideo command if the player is playing. Otherwise
-    // The player breaks if the user haven't played the video yet specially
-    // on mobile.
     if (this.iframe_) {
       this.pause();
     }
