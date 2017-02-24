@@ -444,6 +444,16 @@ export class Resource {
   }
 
   /**
+   * Completes expand: ensures that the element is not `display:none` and
+   * updates measurements.
+   */
+  completeExpand() {
+    toggle(this.element, true);
+    this.element.setAttribute('hidden', '');
+    this.requestMeasure();
+  }
+
+  /**
    * @return {boolean}
    */
   isMeasureRequested() {
