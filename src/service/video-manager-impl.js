@@ -484,8 +484,7 @@ export function clearSupportsAutoplayCacheForTesting() {
 
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!VideoManager}
  */
 export function installVideoManagerForDoc(nodeOrDoc) {
-  return registerServiceForDoc(nodeOrDoc, 'video-manager', VideoManager);
+  registerServiceForDoc(nodeOrDoc, 'video-manager', VideoManager);
 };

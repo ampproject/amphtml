@@ -29,7 +29,7 @@ import {dev} from './log';
  *   obj: (?Object),
  *   promise: (?Promise|undefined),
  *   resolve: (?function(!Object)|undefined),
- *   ctor: {?function(new:T, !Window)}
+ *   ctor: (?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc))
  * }}
  */
 let ServiceHolderDef;
@@ -376,8 +376,6 @@ function getAmpdocService(win) {
  *     Should create the service if it does not exist yet. If the factory
  *     is not given, it is an error if the service does not exist yet.
  *     Called with context.
- * @param {function(new:T, ?)=} opt_constructor
- *     Constructor function to new the service. Called with context.
  * @return {*}
  * @template T
  */
@@ -453,6 +451,7 @@ function getServicePromiseInternal(holder, id) {
     obj: null,
     promise: p,
     resolve,
+    ctor: null,
   };
 
   return p;

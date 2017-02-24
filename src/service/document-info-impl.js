@@ -44,10 +44,9 @@ export let DocumentInfoDef;
 
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!DocInfo} Info about the doc
  */
 export function installDocumentInfoServiceForDoc(nodeOrDoc) {
-  return registerServiceForDoc(nodeOrDoc, 'documentInfo', DocInfo);
+  registerServiceForDoc(nodeOrDoc, 'documentInfo', DocInfo);
 }
 
 

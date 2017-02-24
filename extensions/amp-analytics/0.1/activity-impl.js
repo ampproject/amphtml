@@ -124,9 +124,9 @@ const ACTIVE_EVENT_TYPES = [
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @return {Activity}
  */
-export function activityServiceForTesting(ampdoc) {
-  registerServiceForDoc(ampdoc, 'activity', Activity);
-  return getServiceForDoc(ampdoc, 'activity');
+export function activityServiceForTesting(ampDoc) {
+  registerServiceForDoc(ampDoc, 'activity', Activity);
+  return getServiceForDoc(ampDoc, 'activity');
 }
 
 export class Activity {

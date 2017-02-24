@@ -86,7 +86,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
 }
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  * @return {!Chunks}
  */
 export function chunkInstanceForTesting(nodeOrAmpDoc) {
@@ -95,7 +95,7 @@ export function chunkInstanceForTesting(nodeOrAmpDoc) {
 }
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  * @return {!Chunks}
  */
 export function getChunkServiceForDoc_(nodeOrAmpDoc) {
@@ -103,7 +103,7 @@ export function getChunkServiceForDoc_(nodeOrAmpDoc) {
 }
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  */
 export function installChunkServiceForDoc_(nodeOrAmpDoc) {
   registerServiceForDoc(nodeOrAmpDoc, CHUNK_SERVICE_TAG, Chunks);

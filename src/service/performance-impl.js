@@ -399,12 +399,15 @@ export class Performance {
 
 /**
  * @param {!Window} window
- * @return {!Performance}
  */
 export function installPerformanceService(window) {
   registerService(window, 'performance', Performance);
 }
 
+/**
+ * @param {!Window} window
+ * @return {!Performance}
+ */
 export function getPerformanceService(window) {
   installPerformanceService(window);
   return getService(window, 'performance');

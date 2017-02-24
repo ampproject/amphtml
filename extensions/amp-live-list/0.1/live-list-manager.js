@@ -23,9 +23,6 @@ import {viewerForDoc} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 
-/** @const {string} */
-const LIVE_LIST_MANAGER_SERVICE_TAG = 'liveListManager';
-
 /**
  * Manages registered AmpLiveList components.
  * Primarily handles network requests and updates the components
@@ -222,12 +219,15 @@ export class LiveListManager {
 
 /**
  * @param {!Window} win
- * @return {!LiveListManager}
  */
 export function installLiveListManager(win) {
-  registerService(win, LIVE_LIST_MANAGER_SERVICE_TAG, LiveListManager);
+  registerService(win, 'liveListManager', LiveListManager);
 }
 
+/**
+ * @param {!Window} win
+ * @return {!LiveListManager}
+ */
 export function getLiveListManager(win) {
-  return getService(win, LIVE_LIST_MANAGER_SERVICE_TAG);
+  return getService(win, 'liveListManager');
 }

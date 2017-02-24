@@ -839,7 +839,6 @@ function isNum(c) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!ActionService}
  */
 export function installActionServiceForDoc(ampdoc) {
   registerServiceForDoc(ampdoc, 'action', ActionService);
