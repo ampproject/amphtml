@@ -250,10 +250,10 @@ describe('BindExpression', () => {
     expect(evaluate('Math.min(0, 1)')).to.equal(0);
 
     expect(() => {
-      evaluate('Math.sin(0.5)')
+      evaluate('Math.sin(0.5)');
     }).to.throw(unsupportedFunctionError);
     expect(() => {
-      evaluate('Math.pow(3, 2)')
+      evaluate('Math.pow(3, 2)');
     }).to.throw(unsupportedFunctionError);
   });
 
