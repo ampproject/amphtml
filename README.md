@@ -17,17 +17,16 @@ If you're new here, sign up for our [Slack](https://docs.google.com/forms/d/e/1F
 If you are creating AMP pages,
 check out the docs on [ampproject.org](https://www.ampproject.org/) and samples on [ampbyexample.com](https://ampbyexample.com/).
 
+Reference:
+* [Component reference](https://www.ampproject.org/docs/reference/components)
 
 Resources:
-* [AMP-HTML on StackOverflow](https://stackoverflow.com/questions/tagged/amp-html)
+* [AMP on StackOverflow](https://stackoverflow.com/questions/tagged/amp-html)
 * [Release schedule](contributing/release-schedule.md)
 
-Reference:
-* [AMP HTML components](https://www.ampproject.org/docs/reference/components)
-
-Technical Specifications:
-* [AMP HTML format specification](spec/amp-html-format.md)
-* [AMP HTML custom element specification](spec/amp-html-components.md)
+Technical specifications:
+* [Format specification](spec/amp-html-format.md)
+* [Custom element specification](spec/amp-html-components.md)
 
 ## Who makes AMP HTML?
 
