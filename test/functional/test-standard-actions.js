@@ -51,8 +51,8 @@ describes.sandboxed('StandardActions', {}, () => {
   }
 
   function expectElementToHaveBeenShown(element) {
-    expect(deferMutateStub).to.be.calledOnce;
-    expect(deferMutateStub.firstCall.args[0]).to.equal(element);
+    expect(mutateElementStub).to.be.calledOnce;
+    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
     expect(element.style.display).to.not.equal('none');
     expect(element.hasAttribute('hidden')).to.be.false;
   }
