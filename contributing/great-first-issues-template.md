@@ -52,7 +52,7 @@ Ideally suggest a reviewer for the Pull Request; not knowing who to set as the r
 <!--
 If this issue is a change that won't go out with a push (e.g. a doc change, a fix to the build, etc.) update the sentence about how to see their change is live.
 -->
-Once approved, your changes will be merged.  **⚡⚡⚡Congrats on making your first contribution to the AMP Project!⚡⚡⚡**  You'll be able to see it [live across the web soon](https://github.com/ampproject/amphtml/blob/master/README.md#releases)!
+Once approved, your changes will be merged.  **⚡⚡⚡Congrats on making your first contribution to the AMP Project!⚡⚡⚡**  You'll be able to see it [live across the web soon](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md)!
 
 Thanks, and we hope to see more contributions from you soon.
 
