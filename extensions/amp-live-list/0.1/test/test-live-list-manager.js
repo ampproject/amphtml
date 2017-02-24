@@ -21,7 +21,8 @@ import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
-describe('LiveListManager', () => {
+describe('LiveListManager', function() {
+  this.timeout(1000);
   const jitterOffset = 1000;
   let manager;
   let sandbox;
