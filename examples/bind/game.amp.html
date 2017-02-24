@@ -20,13 +20,16 @@
     .grid p {
 
     }
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 
 <body>
   <button onclick="AMP.toggleExperiment('amp-bind');window.location.href=window.location.href;">Toggle &lt;amp-bind&gt; experiment</button>
 
-  <h2>Game example: 32 (mini 2048)</h2>
+  <h2>Game example: 28 (mini 2048)</h2>
 
   <p class="grid">
     <span [text]="G.grid[0][0]">2</span> <span [text]="G.grid[0][1]">2</span>
@@ -36,9 +39,26 @@
 
   <h2>Score: <span [text]="G.grid[0][0] + G.grid[0][1] + G.grid[1][0] + G.grid[1][1]">0</span></h2>
 
-  <!--
-  TODO: Add win/loss message!
+  <h2 class="hidden" [class]="(
+      (G.grid[0][0] != G.grid[0][1] && G.grid[1][0] != G.grid[1][1] && G.grid[0][0] != G.grid[1][0] && G.grid[0][1] != G.grid[1][1]) &&
+      (G.grid[0][0] > 0 && G.grid[0][1] > 0 && G.grid[1][0] > 0 && G.grid[1][1] > 0)
+  ) ? 'lose' : 'hidden'">
+      You <span [text]="(G.grid[0][0] + G.grid[0][1] + G.grid[1][0] + G.grid[1][1] >= 30) ? 'WON' : 'LOST'"></span>!
+  </h2>
 
+  <button on="tap:AMP.setState({
+    'G': {
+      'grid': [
+        [ (Math.random() < G.spawnChance ? 2 : 0) , (Math.random() < G.spawnChance ? 2 : 0) ],
+        [ (Math.random() < G.spawnChance ? 2 : 0) , (Math.random() < G.spawnChance ? 2 : 0) ]
+      ],
+      'spawnChance': G.spawnChance
+    }
+  })">New game</button>
+
+  <br>
+
+  <!--
   cases for RIGHT:
     1. X, X -> ?, X+X
     2. 0, X -> 0, X
@@ -178,7 +198,7 @@
           [2, 2],
           [2, 0]
         ],
-        "spawnChance": 0.4
+        "spawnChance": 0.5
       }
     </script>
   </amp-state>
