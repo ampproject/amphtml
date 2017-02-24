@@ -88,6 +88,8 @@ Type attribute value: `acquialift`
 
 Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` must be specified. More information about Acquia Lift can be found at [https://docs.acquia.com/lift](https://docs.acquia.com/lift).
 
+Please consult the documentation from your vendor, which may be linked in the sections below. You can also look at the [vendors.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/0.1/vendors.js) file for further information on each vendor's configuration.
+
 ### Adobe Analytics
 
 Type attribute value: `adobeanalytics`
