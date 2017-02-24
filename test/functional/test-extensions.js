@@ -390,7 +390,6 @@ describes.sandboxed('Extensions', {}, () => {
 
     beforeEach(() => {
       parentWin = env.win;
-      debugger;
       resetScheduledElementForTesting(parentWin, 'amp-test');
       extensions = getExtensionsService(parentWin);
       extensionsMock = sandbox.mock(extensions);
@@ -448,7 +447,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should adopt core services', () => {
-      debugger;
+      ;
       const actionsMock = sandbox.mock(
           parentWin.services['action'].obj);
       const standardActionsMock = sandbox.mock(

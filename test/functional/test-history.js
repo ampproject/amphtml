@@ -43,7 +43,6 @@ describes.fakeWin('History', {
   let history;
 
   beforeEach(() => {
-    debugger;
     installTimerService(env.win);
     sandbox = env.sandbox;
     clock = sandbox.useFakeTimers();
@@ -208,7 +207,6 @@ describes.sandboxed('History install', {}, () => {
   });
 
   it('should create natural binding and make it singleton', () => {
-    debugger;
     const history = installHistoryServiceForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
     expect(win.services.history.obj).to.equal(history);

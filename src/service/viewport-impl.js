@@ -30,10 +30,7 @@ import {onDocumentReady, whenDocumentReady} from '../document-ready';
 import {platformFor} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timerFor} from '../timer';
-import {
-  installVsyncService,
-  getVsyncService,
-} from './vsync-impl';
+import {getVsyncService} from './vsync-impl';
 import {viewerForDoc} from '../viewer';
 import {isExperimentOn} from '../experiments';
 import {waitForBody, isIframed} from '../dom';

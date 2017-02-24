@@ -401,7 +401,7 @@ var forbiddenTerms = {
       'src/service/url-replacements-impl.js',
     ],
   },
-  'debugger': '',
+  '': '',
   // Overridden APIs.
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',

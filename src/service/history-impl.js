@@ -17,7 +17,7 @@
 import {
   registerService,
   getService,
-  getServiceForDoc
+  getServiceForDoc,
 } from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';

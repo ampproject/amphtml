@@ -17,10 +17,7 @@
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {
-  installVsyncService,
-  getVsyncService,
-} from '../../../../src/service/vsync-impl';
+import {getVsyncService} from '../../../../src/service/vsync-impl';
 import {installDynamicClassesForTesting} from '../amp-dynamic-css-classes';
 
 const tcoReferrer = 'http://t.co/xyzabc123';
