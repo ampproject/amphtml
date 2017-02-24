@@ -990,7 +990,7 @@ describe('Viewport META', () => {
 });
 
 
-describes.realWin('ViewportBindingNatural', {}, env => {
+describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   let binding;
   let win;
   let viewer;
@@ -1114,6 +1114,29 @@ describes.realWin('ViewportBindingNatural', {}, env => {
     expect(rect.top).to.equal(213);  // round(200 + 12.5)
     expect(rect.width).to.equal(14);  // round(13.5)
     expect(rect.height).to.equal(15);  // round(14.5)
+  });
+
+
+  it('should disable scroll temporarily and reset scroll', () => {
+    let htmlCss = win.getComputedStyle(win.document.documentElement);
+    expect(htmlCss.overflowX).to.equal('hidden');
+    expect(htmlCss.overflowY).to.equal('auto');
+
+    binding.disableScroll();
+
+    expect(win.document.documentElement).to.have.class(
+        'i-amphtml-scroll-disabled');
+    htmlCss = win.getComputedStyle(win.document.documentElement);
+    expect(htmlCss.overflowX).to.equal('hidden');
+    expect(htmlCss.overflowY).to.equal('hidden');
+
+    binding.resetScroll();
+
+    expect(win.document.documentElement).to.not.have.class(
+        'i-amphtml-scroll-disabled');
+    htmlCss = win.getComputedStyle(win.document.documentElement);
+    expect(htmlCss.overflowX).to.equal('hidden');
+    expect(htmlCss.overflowY).to.equal('auto');
   });
 });
 
@@ -1520,6 +1543,27 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     }).then(() => {
       expect(binding.getScrollTop()).to.equal(11);
     });
+  });
+
+  it('should disable scroll temporarily and reset scroll', () => {
+    let wrapperCss = win.getComputedStyle(binding.wrapper_);
+    expect(wrapperCss.overflowX).to.equal('hidden');
+    expect(wrapperCss.overflowY).to.equal('auto');
+
+    binding.disableScroll();
+
+    expect(binding.wrapper_).to.have.class('i-amphtml-scroll-disabled');
+    wrapperCss = win.getComputedStyle(binding.wrapper_);
+    expect(wrapperCss.overflowX).to.equal('hidden');
+    expect(wrapperCss.overflowY).to.equal('hidden');
+
+    binding.resetScroll();
+
+    expect(binding.wrapper_).to.not.have.class(
+        'i-amphtml-scroll-disabled');
+    wrapperCss = win.getComputedStyle(binding.wrapper_);
+    expect(wrapperCss.overflowX).to.equal('hidden');
+    expect(wrapperCss.overflowY).to.equal('auto');
   });
 });
 
