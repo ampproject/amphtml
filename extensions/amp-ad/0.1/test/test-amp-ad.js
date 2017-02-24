@@ -75,7 +75,7 @@ describe('Ad loader', () => {
 
       describe('with consent-notification-id, upgradeCallback', () => {
         it('should block for notification dismissal', () => {
-          return iframePromise.then((fixture) => {
+          return iframePromise.then(fixture => {
             ampAdElement.setAttribute('data-consent-notification-id', 'notif');
 
             return Promise.race([
@@ -83,9 +83,9 @@ describe('Ad loader', () => {
                 throw new Error('upgradeCallback should not resolve without ' +
                   'notification dismissal');
               }),
-              timerFor(fixture.win).promise(25)
+              timerFor(fixture.win).promise(25),
             ]);
-         });
+          });
         });
 
         it('should resolve once notification is dismissed', () => {
