@@ -24,9 +24,6 @@ import {map} from '../../../src/utils/object';
 /** @const {string} */
 const TAG = 'Analytics.Variables';
 
-/** @const {string} */
-const VARIABLES_SERVICE_ID = 'amp-analytics-variables';
-
 /** @const {RegExp} */
 const VARIABLE_ARGS_REGEXP = /^(?:([^\s]*)(\([^)]*\))|[^]+)$/;
 
@@ -306,7 +303,9 @@ export class VariableService {
  * @param {!Window} win
  */
 export function installVariableService(win) {
-  registerService(win, VARIABLES_SERVICE_ID, VariableService);
+  registerService(win, 'amp-analytics-variables', VariableService);
+  /** Immediately instantiate */
+  getService(win, 'amp-analytics-variables');
 }
 
 /**
@@ -314,5 +313,6 @@ export function installVariableService(win) {
  * @return {!VariableService}
  */
 export function getVariableService(win) {
-  return getService(win, VARIABLES_SERVICE_ID);
+  installVariableService(win);
+  return getService(win, 'amp-analytics-variables');
 }

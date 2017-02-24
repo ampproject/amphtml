@@ -19,9 +19,9 @@ import {AmpAnalytics} from '../amp-analytics';
 import {ClickEventTracker} from '../events';
 import {Crypto} from '../../../../src/service/crypto-impl';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {variableServiceFor} from '../variables';
+import {getVariableService} from '../variables';
 import {
-  installUserNotificationManager,
+  getUserNotificationManager,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -97,7 +97,7 @@ describe('amp-analytics', function() {
       windowApi = iframe.win;
       ampdoc = new AmpDocSingle(windowApi);
       cidServiceForDocForTesting(ampdoc);
-      uidService = installUserNotificationManager(iframe.win);
+      uidService = getUserNotificationManager(iframe.win);
 
       ins = instrumentationServiceForDocForTesting(ampdoc);
     });
@@ -202,7 +202,7 @@ describe('amp-analytics', function() {
                 expect(this.replacements_).to.have.property(name);
                 return {sync: '_' + name.toLowerCase() + '_'};
               });
-            const variables = variableServiceFor(analytics.win);
+            const variables = getVariableService(analytics.win);
             const encodeVars = variables.encodeVars;
             sandbox.stub(variables, 'encodeVars', function(val, name) {
               val = encodeVars.call(this, val, name);

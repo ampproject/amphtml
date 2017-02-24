@@ -74,7 +74,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         }
         if (opt_options.withActivity) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
-          activityServiceForTesting(iframe.win);
+          activityServiceForTesting(iframe.ampdoc);
         }
         if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');

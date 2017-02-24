@@ -229,5 +229,6 @@ export function installLiveListManager(win) {
  * @return {!LiveListManager}
  */
 export function getLiveListManager(win) {
+  installLiveListManager(win);
   return getService(win, 'liveListManager');
 }

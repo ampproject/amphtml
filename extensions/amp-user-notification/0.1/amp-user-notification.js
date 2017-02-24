@@ -30,10 +30,6 @@ import {setStyle} from '../../../src/style';
 /** @private @const {string} */
 const TAG = 'amp-user-notification';
 
-/** @private @const {string} */
-const USER_NOTIFICATION_MANAGER_SERVICE_TAG = 'userNotificationManager';
-
-
 /**
  * @export
  * @typedef {{
@@ -110,7 +106,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
     this.storagePromise_ = storageForDoc(ampdoc);
     if (!this.userNotificationManager_) {
-      this.userNotificationManager_ = getUserNotificationManager_(this.win);
+      this.userNotificationManager_ = getUserNotificationManager(this.win);
     }
 
     /** @private {?string} */
@@ -439,21 +435,17 @@ export class UserNotificationManager {
 /**
  * @param {!Window} window
  * @return {!UserNotificationManager}
- * @private
  */
-function getUserNotificationManager_(window) {
-  return getService(
-    window, USER_NOTIFICATION_MANAGER_SERVICE_TAG);
+export function getUserNotificationManager(window) {
+  installUserNotificationManager(window);
+  return getService(window, 'userNotificationManager');
 }
 
 /**
  * @param {!Window} window
- * @return {!UserNotificationManager}
- * @private
  */
 export function installUserNotificationManager(window) {
-  registerService(
-    window, USER_NOTIFICATION_MANAGER_SERVICE_TAG, UserNotificationManager);
+  registerService(window, 'userNotificationManager', UserNotificationManager);
 }
 
 installUserNotificationManager(AMP.win);
