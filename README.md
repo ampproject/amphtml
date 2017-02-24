@@ -33,8 +33,6 @@ Technical Specifications:
 
 AMP HTML is made by the [AMP Project](https://www.ampproject.org/).  If you're a contributor to the open source community this includes you!
 
-AMP HTML is licensed under the [Apache License, Version 2.0](LICENSE).
-
 ## Security disclosures
 
 The AMP Project accepts responsible security disclosures through the [Google Application Security program](https://www.google.com/about/appsecurity/).
@@ -42,3 +40,7 @@ The AMP Project accepts responsible security disclosures through the [Google App
 ## Code of conduct
 
 The AMP Project strives for a positive and growing project community that provides a safe environment for everyone.  All members, committers and volunteers in the community are required to act according to the [code of conduct](CODE_OF_CONDUCT.md).
+
+## License
+
+AMP HTML is licensed under the [Apache License, Version 2.0](LICENSE).
