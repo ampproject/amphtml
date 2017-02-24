@@ -379,6 +379,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept string and report incorrect use', () => {
+    window.AMP_MODE = {localDev: true, test: false};
     const result = reportError('error');
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.be.equal('error');
@@ -390,6 +391,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept number and report incorrect use', () => {
+    window.AMP_MODE = {localDev: true, test: false};
     const result = reportError(101);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.be.equal('101');
@@ -401,6 +403,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept null and report incorrect use', () => {
+    window.AMP_MODE = {localDev: true, test: false};
     const result = reportError(null);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.be.equal('Unknown error');
