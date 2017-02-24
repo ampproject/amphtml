@@ -115,8 +115,8 @@ export class FixedLayer {
     const platform = platformFor(this.ampdoc.win);
     if (this.elements_.length > 0 && !this.transfer_ && platform.isIos()) {
       user().warn(TAG, 'Please test this page inside of an AMP Viewer such' +
-          ' as Google\'s because the fixed positioning might have slightly' +
-          ' different layout.');
+          ' as Google\'s because the fixed or sticky positioning might have' +
+          ' slightly different layout.');
     }
 
     this.update();
