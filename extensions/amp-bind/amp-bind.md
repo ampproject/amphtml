@@ -98,7 +98,7 @@ For AMP components, the height and width attributes are bindable along with the 
 | Component | Attributes |
 | --- | --- |
 | amp-carousel | slide |
-| amp-img | src, srcset, alt  |
+| amp-img | src, srcset, alt |
 | amp-selector | selected |
 | amp-video | src, srcset, alt, controls, loop, poster |
 
