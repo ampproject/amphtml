@@ -171,7 +171,7 @@ describe('integration test: a4a', () => {
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
     const forceCollapseStub =
-        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
       expect(error.message).to.contain.string('AMP-A4A-');
@@ -247,8 +247,8 @@ describe('integration test: a4a', () => {
       credentials: 'include',
     }).onFirstCall().returns(Promise.resolve(mockResponse));
     const forceCollapseStub =
-        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
-    return fixture.addElement(a4aElement).then(unusedElement => {
+        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
+    return fixture.addElement(a4aElement).then(() => {
       expect(forceCollapseStub).to.be.calledOnce;
     });
   });
@@ -260,7 +260,7 @@ describe('integration test: a4a', () => {
       credentials: 'include',
     }).onFirstCall().returns(Promise.resolve(null));
     const forceCollapseStub =
-        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
     return fixture.addElement(a4aElement).then(unusedElement => {
       expect(forceCollapseStub).to.be.notCalled;
     });
@@ -285,8 +285,8 @@ describe('integration test: a4a', () => {
       credentials: 'include',
     }).onFirstCall().returns(Promise.resolve(mockResponse));
     const forceCollapseStub =
-        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
-    return fixture.addElement(a4aElement).then(unusedElement => {
+        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
+    return fixture.addElement(a4aElement).then(() => {
       expect(forceCollapseStub).to.be.calledOnce;
     });
   });
@@ -311,7 +311,7 @@ describe('integration test: a4a', () => {
           credentials: 'include',
         }).onFirstCall().returns(Promise.resolve(mockResponse));
         const forceCollapseStub =
-            sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+            sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
         return fixture.addElement(a4aElement).then(unusedElement => {
           expect(forceCollapseStub).to.be.calledOnce;
         });

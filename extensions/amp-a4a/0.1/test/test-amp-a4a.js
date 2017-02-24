@@ -46,7 +46,7 @@ import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import {platformFor} from '../../../../src/platform';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {dev} from '../../../../src/log';
+import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {AmpContext} from '../../../../3p/ampcontext.js';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
@@ -1209,6 +1209,7 @@ describe('amp-a4a', () => {
         });
       });
     });
+
     it('verify cancelled promise', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -1220,6 +1221,7 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        const errorHandlerSpy = sandbox.spy(a4a, 'promiseErrorHandler_');
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         const adPromise = a4a.adPromise_;
@@ -1236,6 +1238,7 @@ describe('amp-a4a', () => {
           expect(getAdUrlSpy.called, 'getAdUrl never called')
               .to.be.false;
           expect(reason).to.deep.equal(cancellation());
+          expect(errorHandlerSpy).to.be.calledOnce;
         });
       });
     });
@@ -1363,6 +1366,81 @@ describe('amp-a4a', () => {
         // execute.
         setTimeout(() => {keyInfoResolver({}); }, 0);
       });
+    });
+  });
+
+  describe('error handler', () => {
+    let a4aElement;
+    let a4a;
+    let userErrorStub;
+    let userWarnStub;
+    let devExpectedErrorStub;
+
+    beforeEach(() => {
+      userErrorStub = sandbox.stub(user(), 'error');
+      userWarnStub = sandbox.stub(user(), 'warn');
+      devExpectedErrorStub = sandbox.stub(dev(), 'expectedError');
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        a4aElement = createA4aElement(doc);
+        a4a = new MockA4AImpl(a4aElement);
+        a4a.adUrl_ = 'https://acme.org?query';
+      });
+    });
+
+    it('should rethrow cancellation', () => {
+      expect(() => {
+        a4a.promiseErrorHandler_(cancellation());
+      }).to.throw(/CANCELLED/);
+    });
+
+    it('should create an error if needed', () => {
+      window.AMP_MODE = {development: true};
+      a4a.promiseErrorHandler_('intentional');
+      expect(userErrorStub).to.be.calledOnce;
+      expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
+      expect(userErrorStub.args[0][1].message).to.be.match(/intentional/);
+    });
+
+    it('should route error to user.error in dev mode', () => {
+      const error = new Error('intentional');
+      window.AMP_MODE = {development: true};
+      a4a.promiseErrorHandler_(error);
+      expect(userErrorStub).to.be.calledOnce;
+      expect(userErrorStub.args[0][1]).to.be.equal(error);
+      expect(error.message).to.equal('amp-a4a: adsense: intentional');
+      expect(error.args).to.deep.equal({au: 'query'});
+      expect(devExpectedErrorStub).to.not.be.called;
+    });
+
+    it('should route error to user.warn in prod mode', () => {
+      const error = new Error('intentional');
+      window.AMP_MODE = {development: false};
+      a4a.promiseErrorHandler_(error);
+      expect(userWarnStub).to.be.calledOnce;
+      expect(userWarnStub.args[0][1]).to.be.equal(error);
+      expect(error.message).to.equal('amp-a4a: adsense: intentional');
+      expect(error.args).to.deep.equal({au: 'query'});
+    });
+
+    it('should send an expected error in prod mode with sampling', () => {
+      const error = new Error('intentional');
+      sandbox.stub(Math, 'random', () => 0.005);
+      window.AMP_MODE = {development: false};
+      a4a.promiseErrorHandler_(error);
+      expect(devExpectedErrorStub).to.be.calledOnce;
+      expect(devExpectedErrorStub.args[0][1]).to.be.equal(error);
+      expect(error.message).to.equal('amp-a4a: adsense: intentional');
+      expect(error.args).to.deep.equal({au: 'query'});
+    });
+
+    it('should NOT send an expected error in prod mode with sampling', () => {
+      const error = new Error('intentional');
+      sandbox.stub(Math, 'random', () => 0.011);
+      window.AMP_MODE = {development: false};
+      a4a.promiseErrorHandler_(error);
+      expect(devExpectedErrorStub).to.not.be.called;
     });
   });
 
