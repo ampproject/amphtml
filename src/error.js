@@ -98,7 +98,7 @@ export function reportError(error, opt_associatedElement) {
       error = new Error('Unknown error');
     }
     // Report if error is not an expected type.
-    if (!isValidError && getMode().localDev) {
+    if (!isValidError && getMode().localDev && !getMode().test) {
       setTimeout(function() {
         const rethrow = new Error(
             '_reported_ Error reported incorrectly: ' + error);

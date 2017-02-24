@@ -88,7 +88,6 @@ describe('reportErrorToServer', () => {
   beforeEach(() => {
     onError = window.onerror;
     sandbox = sinon.sandbox.create();
-    sandbox.spy(window, 'Image');
   });
 
   afterEach(() => {
@@ -109,10 +108,12 @@ describe('reportErrorToServer', () => {
     expect(query.m).to.equal('XYZ');
     expect(query.el).to.equal('u');
     expect(query.a).to.equal('0');
-    expect(query.s).to.equal(e.stack);
+    expect(query.s).to.equal(e.stack.trim());
     expect(query['3p']).to.equal(undefined);
     expect(e.message).to.contain('_reported_');
-    expect(query.or).to.contain('http://localhost');
+    if (location.ancestorOrigins) {
+      expect(query.or).to.contain('http://localhost');
+    }
     expect(query.vs).to.be.undefined;
     expect(query.ae).to.equal('');
     expect(query.r).to.contain('http://localhost');
@@ -412,6 +413,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept string and report incorrect use', () => {
+    window.AMP_MODE = {localDev: true, test: false};
     const result = reportError('error');
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.be.equal('error');
@@ -423,6 +425,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept number and report incorrect use', () => {
+    window.AMP_MODE = {localDev: true, test: false};
     const result = reportError(101);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.be.equal('101');
@@ -434,6 +437,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept null and report incorrect use', () => {
+    window.AMP_MODE = {localDev: true, test: false};
     const result = reportError(null);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.be.equal('Unknown error');
