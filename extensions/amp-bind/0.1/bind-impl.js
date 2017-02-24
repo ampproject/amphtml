@@ -100,12 +100,6 @@ export class Bind {
     this.resources_ = resourcesForDoc(ampdoc);
 
     /**
-     * True if a digest is triggered before scan for bindings completes.
-     * @private {boolean}
-     */
-    this.digestQueuedAfterScan_ = false;
-
-    /**
      * @const @private {!Array<Promise>}
      */
     this.mutationPromises_ = [];

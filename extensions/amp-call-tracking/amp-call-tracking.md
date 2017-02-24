@@ -32,7 +32,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
+    <td>container, fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
 </table>
 
@@ -44,24 +44,22 @@ by a CORS endpoint.
 
 **Example**
 
-    <amp-call-tracking config="https://example.com/calltracking.json">
-      <a href="tel:123456789">+1 (23) 456-789</a>
-    </amp-call-tracking>
-
+```html
+<amp-call-tracking config="https://example.com/calltracking.json">
+  <a href="tel:123456789">+1 (23) 456-789</a>
+</amp-call-tracking>
+```
 Note that every unique CORS endpoint will only be called once per page.
 
 ## Attributes
 
-**`config`** (required)
+**config** (required)
 
 Defines a CORS URL. The URL's protocol must be HTTPS. The response must consist
 of a valid JSON object with the following fields:
 
-- **`phoneNumber` (required)**: The number that will be called when clicking on
-the hyperlink.
-
-- **`formattedPhoneNumber`**: The phone number as it will be displayed. If
-unset, `phoneNumber` will be used.
+- `phoneNumber` (required): Specifies the phone number to call when the user clicks the link. 
+- `formattedPhoneNumber` (optional): Specifies the phone number to display. If not specified, the value in `phoneNumber` is used.
 
 ## Validation
 
@@ -70,5 +68,4 @@ See [amp-call-tracking rules](https://github.com/ampproject/amphtml/blob/master/
 ## See also
 
 - [Design doc](https://docs.google.com/document/d/1UDMYv0f2R9CvMUSBQhxjtkSnC4984t9dJeqwm_8WiAM/edit#heading=h.zha4avn54it8)
-
 - [PR](https://github.com/ampproject/amphtml/pull/7493)
