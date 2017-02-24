@@ -31,9 +31,7 @@ Technical Specifications:
 
 ## Who makes AMP HTML?
 
-AMP HTML is made by the [AMP Project](https://www.ampproject.org/).  If you're a contributor to the open source community this includes you!
-
-AMP HTML is licensed under the [Apache License, Version 2.0](LICENSE).
+AMP HTML is made by the [AMP Project](https://www.ampproject.org/).  If you're a [contributor to the open source community](https://github.com/ampproject/amphtml/graphs/contributors) this includes you!
 
 ## Security disclosures
 
