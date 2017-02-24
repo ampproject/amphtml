@@ -15,13 +15,13 @@
 #
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-selector extension .js script"
-  also_requires_tag: "amp-selector"
+  satisfies: "amp-selector extension .js script"
+  requires: "amp-selector"
   mandatory_parent: "HEAD"
   unique: true
-  also_requires_tag_warning: "amp-selector"
+  extension_unused_unless_tag_present: "amp-selector"
   attrs: {
     name: "async"
     mandatory: true
@@ -33,6 +33,7 @@ tags: {
     value: "amp-selector"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -52,14 +53,20 @@ tags: {
 }
 tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-SELECTOR"
+  satisfies: "amp-selector"
   disallowed_ancestor: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-selector extension .js script"
-  attrs: { name: "disabled" value: "" }
+  requires: "amp-selector extension .js script"
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
   attrs: { name: "form" }
-  attrs: { name: "multiple" value: "" }
+  attrs: {
+    name: "multiple"
+    value: ""
+  }
   reference_points: {
     tag_spec_name: "AMP-SELECTOR option"
   }
@@ -91,7 +98,6 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
 # always match, we want to prefer 'option' when both of them match.
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
   attrs: { name: "option" mandatory: true }
@@ -101,7 +107,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR child"
   reference_points: {

@@ -52,11 +52,13 @@ With responsive layout, the width and height from the example should yield corre
 
 ## Attributes
 
-**data-videoid**
+**data-videoid** (required)
 
-The Vimeo video id found in every Vimeo video page URL
+The Vimeo video id found in every Vimeo video page URL For example, `27246366` is the video id for the following url: https://vimeo.com/27246366.
 
-E.g. in https://vimeo.com/27246366 27246366 is the video id.
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

@@ -17,9 +17,10 @@ tags: {  # amp-bind
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-bind extension .js script"
+  satisfies: "amp-bind extension .js script"
   mandatory_parent: "HEAD"
   unique: true
-  also_requires_tag: "amp-state"
+  requires: "amp-state"
   attrs: {
     name: "async"
     mandatory: true
@@ -31,6 +32,7 @@ tags: {  # amp-bind
     value: "amp-bind"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -52,8 +54,8 @@ tags: {  # <amp-state>
   html_format: AMP
   disallowed_ancestor: "AMP-SIDEBAR"
   tag_name: "AMP-STATE"
-  mandatory_parent: "HEAD"
-  also_requires_tag: "amp-bind extension .js script"
+  satisfies: "amp-state"
+  requires: "amp-bind extension .js script"
   attrs: {
     name: "id"
     mandatory: true
@@ -65,6 +67,7 @@ tags: {  # <amp-state> (json)
   tag_name: "SCRIPT"
   spec_name: "amp-bind extension .json script"
   mandatory_parent: "AMP-STATE"
+  attrs: { name: "nonce" }
   attrs: {
     name: "type"
     mandatory: true

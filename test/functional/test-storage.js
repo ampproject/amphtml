@@ -448,13 +448,13 @@ describe('LocalStorageBinding', () => {
   it('should throw if localStorage is not supported', () => {
     const errorSpy = sandbox.spy(dev(), 'expectedError');
 
-    expect(errorSpy.callCount).to.equal(0);
+    expect(errorSpy).to.have.not.been.called;
     new LocalStorageBinding(windowApi);
-    expect(errorSpy.callCount).to.equal(0);
+    expect(errorSpy).to.have.not.been.called;
 
     delete windowApi.localStorage;
     new LocalStorageBinding(windowApi);
-    expect(errorSpy.callCount).to.equal(1);
+    expect(errorSpy).to.be.calledOnce;
     expect(errorSpy.args[0][1].message).to.match(/localStorage not supported/);
   });
 
@@ -478,7 +478,8 @@ describe('LocalStorageBinding', () => {
     });
   });
 
-  it('should reject on local storage failure', () => {
+  it('should reject on local storage failure w/ localStorage support', () => {
+    binding.isLocalStorageSupported_ = true;
     localStorageMock.expects('getItem')
         .withExactArgs('amp-store:https://acme.com')
         .throws(new Error('unknown'))
@@ -499,6 +500,18 @@ describe('LocalStorageBinding', () => {
         .then(res => `SUCCESS ${res}`, () => 'ERROR').then(res => {
           // Resolves with null
           expect(res).to.equal('SUCCESS null');
+        });
+  });
+
+  it('should bypass loading from localStorage if getItem throws', () => {
+    localStorageMock.expects('getItem')
+        .throws(new Error('unknown'))
+        .once();
+    binding = new LocalStorageBinding(windowApi);
+    localStorageMock.expects('getItem').never();
+    return binding.loadBlob('https://acme.com')
+        .then(() => 'SUCCESS', () => 'ERROR').then(res => {
+          expect(res).to.equal('SUCCESS');
         });
   });
 
@@ -529,6 +542,21 @@ describe('LocalStorageBinding', () => {
     // Never reaches setItem
     return binding.saveBlob('https://acme.com', 'BLOB1')
         .then(() => 'SUCCESS', () => `ERROR`).then(res => {
+          expect(res).to.equal('SUCCESS');
+        });
+  });
+
+  it('should bypass saving to localStorage if getItem throws', () => {
+    const setItemSpy = sandbox.spy(windowApi.localStorage, 'setItem');
+
+    localStorageMock.expects('getItem')
+        .throws(new Error('unknown'))
+        .once();
+    binding = new LocalStorageBinding(windowApi);
+    // Never reaches setItem
+    return binding.saveBlob('https://acme.com', 'BLOB1')
+        .then(() => 'SUCCESS', () => `ERROR`).then(res => {
+          expect(setItemSpy).to.have.not.been.called;
           expect(res).to.equal('SUCCESS');
         });
   });

@@ -26,7 +26,7 @@ describe('BindExpression', () => {
    * @return {*}
    */
   function evaluate(expression, opt_scope) {
-    return new BindExpression(expression).evaluate(opt_scope);
+    return new BindExpression(expression).evaluate(opt_scope || {});
   }
 
   it('should evaluate arithmetic operations', () => {
@@ -157,8 +157,6 @@ describe('BindExpression', () => {
     expect(evaluate('foo', {foo: [1, 2, 3]})).to.deep.equal([1, 2, 3]);
     expect(evaluate('foo', {foo: {'bar': 'qux'}}))
         .to.deep.equal({bar: 'qux'});
-    expect(evaluate('{foo: "bar"}', {foo: 'qux'}))
-        .to.deep.equal({qux: 'bar'});
     expect(evaluate('{"foo": bar}', {bar: 'qux'}))
         .to.deep.equal({foo: 'qux'});
     expect(evaluate('[foo]', {foo: 'bar'})).to.deep.equal(['bar']);
@@ -193,12 +191,10 @@ describe('BindExpression', () => {
     expect(evaluate('["a", "a"].lastIndexOf("a")')).to.equal(1);
     expect(evaluate('["a", "b", "c"].slice(1, 2)'))
         .to.deep.equal(['b']);
+    expect(evaluate('[1, 2, 3, 4, 5].includes(3)')).to.be.true;
   });
 
   it('should NOT allow access to array non-whitelisted methods', () => {
-    expect(() => {
-      evaluate('["a", "b", "c"].includes("a")');
-    }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
       evaluate('["a", "b", "c"].find()');
     }).to.throw(Error, unsupportedFunctionError);
@@ -224,9 +220,14 @@ describe('BindExpression', () => {
     expect(evaluate('{}')).to.deep.equal({});
     expect(evaluate('{}["a"]')).to.be.null;
     expect(evaluate('{}[{}]')).to.be.null;
+    expect(evaluate('{a: "b"}')).to.deep.equal({a: 'b'});
     expect(evaluate('{"a": "b"}')).to.deep.equal({'a': 'b'});
-    expect(evaluate('{foo: "b"}', {foo: 'a'}))
-        .to.deep.equal({'a': 'b'});
+    expect(evaluate('{123: "b"}')).to.deep.equal({123: 'b'});
+    expect(evaluate('{true: "b"}')).to.deep.equal({true: 'b'});
+    expect(evaluate('{null: "b"}')).to.deep.equal({null: 'b'});
+    // Unquoted string keys should _not_ be evaluated as expressions.
+    expect(evaluate('{a: "b"}', {a: 'foo'})).to.deep.equal({a: 'b'});
+    expect(() => evaluate('{1+1: "b"}')).to.throw();
   });
 
   it('should evaluate undefined vars and properties to null', () => {

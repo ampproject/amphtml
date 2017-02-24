@@ -28,7 +28,7 @@ import {dev} from '../log';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
 import {platformFor} from '../platform';
-import {px, setStyle, setStyles} from '../style';
+import {px, setStyle, setStyles, computedStyle} from '../style';
 import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {viewerForDoc} from '../viewer';
@@ -98,9 +98,6 @@ export class Viewport {
     /** @private {?number} */
     this./*OK*/scrollTop_ = null;
 
-    /** @private {?number} */
-    this.lastMeasureScrollTop_ = null;
-
     /** @private {boolean} */
     this.scrollAnimationFrameThrottled_ = false;
 
@@ -108,13 +105,10 @@ export class Viewport {
     this./*OK*/scrollLeft_ = null;
 
     /** @private {number} */
-    this.paddingTop_ = viewer.getPaddingTop();
+    this.paddingTop_ = Number(viewer.getParam('paddingTop') || 0);
 
     /** @private {number} */
     this.lastPaddingTop_ = 0;
-
-    /** @private {number} */
-    this.scrollMeasureTime_ = 0;
 
     /** @private {!./timer-impl.Timer} */
     this.timer_ = timerFor(this.ampdoc.win);
@@ -151,7 +145,8 @@ export class Viewport {
     /** @private @const (function()) */
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
-    this.viewer_.onViewportEvent(this.updateOnViewportEvent_.bind(this));
+    this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
+    this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
     this.binding_.updatePaddingTop(this.paddingTop_);
 
     this.binding_.onScroll(this.scroll_.bind(this));
@@ -313,8 +308,12 @@ export class Viewport {
   }
 
   /**
-   * Returns the scroll height of the content of the document. Note that this
-   * method is not cached since we there's no indication when it might change.
+   * Returns the scroll height of the content of the document, including the
+   * padding top for the viewer header.
+   * The scrollHeight will be the viewport height if there's not enough content
+   * to fill up the viewport.
+   * Note that this method is not cached since we there's no indication when
+   * it might change.
    * @return {number}
    */
   getScrollHeight() {
@@ -438,6 +437,7 @@ export class Viewport {
     this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */true);
     this.disableTouchZoom();
     this.hideFixedLayer();
+    this.disableScroll();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(true));
   }
 
@@ -446,9 +446,29 @@ export class Viewport {
    */
   leaveLightboxMode() {
     this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */true);
+    this.resetScroll();
     this.showFixedLayer();
     this.restoreOriginalTouchZoom();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(false));
+  }
+
+  /*
+   * Disable the scrolling by setting overflow: hidden.
+   * Should only be used for temporarily disabling scroll.
+   */
+  disableScroll() {
+    this.vsync_.mutate(() => {
+      this.binding_.disableScroll();
+    });
+  }
+
+  /*
+   * Reset the scrolling by removing overflow: hidden.
+   */
+  resetScroll() {
+    this.vsync_.mutate(() => {
+      this.binding_.resetScroll();
+    });
   }
 
   /**
@@ -584,28 +604,40 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} event
+   * @param {!JSONType} data
    * @private
    */
-  updateOnViewportEvent_(event) {
-    const paddingTop = event['paddingTop'];
-    const duration = event['duration'] || 0;
-    const curve = event['curve'];
-    /** @const {boolean} */
-    const transient = event['transient'];
+  viewerSetScrollTop_(data) {
+    const targetScrollTop = data['scrollTop'];
+    this.setScrollTop(targetScrollTop);
+  }
 
-    if (paddingTop != this.paddingTop_) {
-      this.lastPaddingTop_ = this.paddingTop_;
-      this.paddingTop_ = paddingTop;
-      if (this.paddingTop_ < this.lastPaddingTop_) {
-        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-        this.animateFixedElements_(duration, curve, transient);
-      } else {
-        this.animateFixedElements_(duration, curve, transient).then(() => {
-          this.binding_.showViewerHeader(transient, this.paddingTop_);
-        });
-      }
+  /**
+   * @param {!JSONType} data
+   * @private
+   */
+  updateOnViewportEvent_(data) {
+    const paddingTop = data['paddingTop'];
+    const duration = data['duration'] || 0;
+    const curve = data['curve'];
+    /** @const {boolean} */
+    const transient = data['transient'];
+
+    if (paddingTop == undefined || paddingTop == this.paddingTop_) {
+      return;
     }
+
+    this.lastPaddingTop_ = this.paddingTop_;
+    this.paddingTop_ = paddingTop;
+    if (this.paddingTop_ < this.lastPaddingTop_) {
+      this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+      this.animateFixedElements_(duration, curve, transient);
+    } else {
+      this.animateFixedElements_(duration, curve, transient).then(() => {
+        this.binding_.showViewerHeader(transient, this.paddingTop_);
+      });
+    }
+
   }
 
   /**
@@ -801,6 +833,17 @@ export class ViewportBindingDef {
    */
   showViewerHeader(unusedTransient, unusedPaddingTop) {}
 
+  /*
+   * Disable the scrolling by setting overflow: hidden.
+   * Should only be used for temporarily disabling scroll.
+   */
+  disableScroll() {}
+
+  /*
+   * Reset the scrolling by removing overflow: hidden.
+   */
+  resetScroll() {}
+
   /**
    * Updates the viewport whether it's currently in the lightbox or a normal
    * mode.
@@ -839,7 +882,10 @@ export class ViewportBindingDef {
   getScrollWidth() {}
 
   /**
-   * Returns the scroll height of the content of the document.
+   * Returns the scroll height of the content of the document, including the
+   * padding top for the viewer header.
+   * The scrollHeight will be the viewport height if there's not enough content
+   * to fill up the viewport.
    * @return {number}
    */
   getScrollHeight() {}
@@ -980,6 +1026,18 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
+  disableScroll() {
+    this.win.document.documentElement.classList.add(
+        'i-amphtml-scroll-disabled');
+  }
+
+  /** @override */
+  resetScroll() {
+    this.win.document.documentElement.classList.remove(
+        'i-amphtml-scroll-disabled');
+  }
+
+  /** @override */
   updateLightboxMode(unusedLightboxMode) {
     // The layout is always accurate.
   }
@@ -1007,8 +1065,9 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getScrollLeft() {
-    return this.getScrollingElement_()./*OK*/scrollLeft ||
-        this.win./*OK*/pageXOffset;
+    // The html is set to overflow-x: hidden so the document cannot be
+    // scrolled horizontally. The scrollLeft will always be 0.
+    return 0;
   }
 
   /** @override */
@@ -1228,9 +1287,10 @@ export class ViewportBindingNaturalIosEmbed_ {
       // Add extra paddingTop to make the content stay at the same position
       // when the hiding header operation is transient
       onDocumentReady(this.win.document, doc => {
+        const body = dev().assertElement(doc.body);
         const existingPaddingTop =
-            this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
-        setStyles(dev().assertElement(doc.body), {
+            computedStyle(this.win, body).paddingTop || '0';
+        setStyles(body, {
           paddingTop: `calc(${existingPaddingTop} + ${lastPaddingTop}px)`,
           borderTop: '',
         });
@@ -1247,6 +1307,16 @@ export class ViewportBindingNaturalIosEmbed_ {
     }
     // No need to adjust borderTop and paddingTop when the showing header
     // operation is transient
+  }
+
+  /** @override */
+  disableScroll() {
+    // This is not supported in ViewportBindingNaturalIosEmbed_
+  }
+
+  /** @override */
+  resetScroll() {
+    // This is not supported in ViewportBindingNaturalIosEmbed_
   }
 
   /** @override */
@@ -1294,7 +1364,9 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   getScrollLeft() {
-    return Math.round(this.pos_.x);
+    // The html is set to overflow-x: hidden so the document cannot be
+    // scrolled horizontally. The scrollLeft will always be 0.
+    return 0;
   }
 
   /** @override */
@@ -1532,6 +1604,16 @@ export class ViewportBindingIosEmbedWrapper_ {
   }
 
   /** @override */
+  disableScroll() {
+    this.wrapper_.classList.add('i-amphtml-scroll-disabled');
+  }
+
+  /** @override */
+  resetScroll() {
+    this.wrapper_.classList.remove('i-amphtml-scroll-disabled');
+  }
+
+  /** @override */
   updateLightboxMode(unusedLightboxMode) {
     // The layout is always accurate.
   }
@@ -1551,7 +1633,9 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getScrollLeft() {
-    return this.wrapper_./*OK*/scrollLeft;
+    // The wrapper is set to overflow-x: hidden so the document cannot be
+    // scrolled horizontally. The scrollLeft will always be 0.
+    return 0;
   }
 
   /** @override */
@@ -1709,7 +1793,8 @@ function createViewport(ampdoc) {
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')
         // The overriding of document.body fails in iOS7.
-        && platformFor(ampdoc.win).getMajorVersion() > 7) {
+        // Also, iOS8 sometimes freezes scrolling.
+        && platformFor(ampdoc.win).getMajorVersion() > 8) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
@@ -1757,6 +1842,12 @@ function getViewportType(win, viewer) {
   if (!isIframed(win) && (getMode(win).localDev || getMode(win).development)) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
+
+  // Enable iOS Embedded mode for iframed tests (e.g. integration tests).
+  if (isIframed(win) && getMode(win).test) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
+
   // Override to ios-embed for iframe-viewer mode.
   // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
   if (isIframed(win) && viewer.isEmbedded()) {

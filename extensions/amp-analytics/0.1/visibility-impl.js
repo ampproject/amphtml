@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import {closestByTag, closestBySelector} from '../../../src/dom';
+import {
+  closestByTag,
+  closestBySelector,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {map} from '../../../src/utils/object';
 import {resourcesForDoc} from '../../../src/resources';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
@@ -24,7 +29,11 @@ import {viewportForDoc} from '../../../src/viewport';
 import {viewerForDoc} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
 import {startsWith} from '../../../src/string';
-import {DEFAULT_THRESHOLD} from '../../../src/intersection-observer-polyfill';
+import {
+  DEFAULT_THRESHOLD,
+  IntersectionObserverPolyfill,
+  nativeIntersectionObserverSupported,
+} from '../../../src/intersection-observer-polyfill';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
@@ -53,7 +62,6 @@ const LAST_UPDATE = 'lU';
 const IN_VIEWPORT = 'iV';
 const TIME_LOADED = 'tL';
 const SCHEDULED_RUN_ID = 'schId';
-const LAST_CHANGE_ENTRY = 'lCE';
 
 // Keys used in VisibilitySpec
 const CONTINUOUS_TIME_MAX = 'continuousTimeMax';
@@ -177,7 +185,8 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);
   } else if (selectionMethod == 'scope') {
-    foundEl = analyticsEl.parentElement.querySelector(selector);
+    foundEl = scopedQuerySelector(
+        dev().assertElement(analyticsEl.parentElement), selector);
   } else if (selector[0] == '#') {
     const containerDoc = friendlyFrame ? analyticsEl.ownerDocument : ampdoc;
     foundEl = containerDoc.getElementById(selector.slice(1));
@@ -263,6 +272,12 @@ export class Visibility {
 
     /** @private {boolean} */
     this.backgrounded_ = this.backgroundedAtStart_;
+
+    /** @private {!Object<number, number>} */
+    this.lastVisiblePercent_ = map();
+
+    /** @private {?IntersectionObserver|?IntersectionObserverPolyfill} */
+    this.intersectionObserver_ = null;
   }
 
   /** @private */
@@ -315,7 +330,7 @@ export class Visibility {
     const resId = resource.getId();
     this.listeners_[resId] = (this.listeners_[resId] || []);
     const state = {};
-    state[TIME_LOADED] = Date.now();
+    state[TIME_LOADED] = this.now_();
     this.listeners_[resId].push({config, callback, state, shouldBeVisible});
     this.resources_.push(resource);
 
@@ -349,13 +364,29 @@ export class Visibility {
         resource, 'Visibility tracking not supported on element: ', element);
 
     if (!this.intersectionObserver_) {
-      const onIntersectionChange = this.onIntersectionChange_.bind(this);
-      /** @private {!IntersectionObserver} */
-      this.intersectionObserver_ =
-          // TODO: polyfill IntersectionObserver
-          new this.ampdoc.win.IntersectionObserver(entries => {
-            entries.forEach(onIntersectionChange);
-          }, {threshold: DEFAULT_THRESHOLD});
+      const onIntersectionChanges = entries => {
+        entries.forEach(change => {
+          this.onIntersectionChange_(
+              change.target,
+              change.intersectionRatio * 100,
+              /* docVisible */true);
+        });
+      };
+
+      if (nativeIntersectionObserverSupported(this.ampdoc.win)) {
+        this.intersectionObserver_ = new this.ampdoc.win.IntersectionObserver(
+            onIntersectionChanges, {threshold: DEFAULT_THRESHOLD});
+      } else {
+        this.intersectionObserver_ = new IntersectionObserverPolyfill(
+            onIntersectionChanges, {threshold: DEFAULT_THRESHOLD});
+        //TODO: eventually this is go into the proposed layoutManager.
+        const viewport = viewportForDoc(this.ampdoc);
+        const ticker = () => {
+          this.intersectionObserver_.tick(viewport.getRect());
+        };
+        viewport.onScroll(ticker);
+        viewport.onChanged(ticker);
+      }
     }
 
     resource.loadedOnce().then(() => {
@@ -364,35 +395,56 @@ export class Visibility {
       const resId = resource.getId();
       this.listeners_[resId] = (this.listeners_[resId] || []);
       const state = {};
-      state[TIME_LOADED] = Date.now();
+      state[TIME_LOADED] = this.now_();
       this.listeners_[resId].push({config, callback, state, shouldBeVisible});
       this.resources_.push(resource);
     });
 
-    // TODO: support "hidden" spec.
+    if (!this.visibilityListenerRegistered_) {
+      this.viewer_.onVisibilityChanged(() => {
+        this.onDocumentVisibilityChange_(this.viewer_.isVisible());
+      });
+      this.visibilityListenerRegistered_ = true;
+    }
   }
 
-  /** @private */
-  onIntersectionChange_(change) {
-    const listeners = this.listeners_[change.target.getResourceId()];
+  /**
+   * @param {!Element} target
+   * @param {number} visible
+   * @param {boolean} docVisible
+   * @private
+   **/
+  onIntersectionChange_(target, visible, docVisible) {
+    const resource = this.resourcesService_.getResourceForElement(target);
+    const listeners = this.listeners_[resource.getId()];
+    if (docVisible) {
+      this.lastVisiblePercent_[resource.getId()] = visible;
+    } else {
+      visible = 0;
+    }
 
-    const visible = change.intersectionRatio * 100;
     for (let c = listeners.length - 1; c >= 0; c--) {
       const listener = listeners[c];
       const shouldBeVisible = !!listener.shouldBeVisible;
       const config = listener.config;
       const state = listener.state;
-      state[LAST_CHANGE_ENTRY] = change;
 
       // Update states and check if all conditions are satisfied
-      if (this.updateCounters_(visible, listener, shouldBeVisible)) {
-        if (state[SCHEDULED_RUN_ID]) {
-          this.timer_.cancel(state[SCHEDULED_RUN_ID]);
-          state[SCHEDULED_RUN_ID] = null;
+      const conditionsMet =
+          this.updateCounters_(visible, listener, shouldBeVisible);
+
+      // Hidden trigger
+      if (!shouldBeVisible) {
+        if (!docVisible && conditionsMet) {
+          this.triggerCallback_(listeners, listener, resource.getLayoutBox());
         }
-        this.prepareStateForCallback_(state, change.boundingClientRect);
-        listener.callback(state);
-        listeners.splice(c, 1);
+        // done for hidden trigger
+        continue;
+      }
+
+      // Visible trigger
+      if (conditionsMet) {
+        this.triggerCallback_(listeners, listener, resource.getLayoutBox());
       } else if (state[IN_VIEWPORT] && !state[SCHEDULED_RUN_ID]) {
         // There is unmet duration condition, schedule a check
         const timeToWait = this.computeTimeToWait_(state, config);
@@ -401,14 +453,10 @@ export class Visibility {
         }
         state[SCHEDULED_RUN_ID] = this.timer_.delay(() => {
           dev().assert(state[IN_VIEWPORT], 'should have been in viewport');
-          const lastChange = state[LAST_CHANGE_ENTRY];
-
           if (this.updateCounters_(
-              lastChange.intersectionRatio * 100,
-              listener, shouldBeVisible)) {
-            this.prepareStateForCallback_(state, lastChange.boundingClientRect);
-            listener.callback(state);
-            listeners.splice(listeners.indexOf(listener), 1);
+              this.lastVisiblePercent_[resource.getId()],
+              listener, /* shouldBeVisible */ true)) {
+            this.triggerCallback_(listeners, listener, resource.getLayoutBox());
           }
         }, timeToWait);
       } else if (!state[IN_VIEWPORT] && state[SCHEDULED_RUN_ID]) {
@@ -419,7 +467,24 @@ export class Visibility {
 
     // Remove target that have no listeners.
     if (listeners.length == 0) {
-      this.intersectionObserver_.unobserve(change.target);
+      this.intersectionObserver_.unobserve(target);
+    }
+  }
+
+  /**
+   * @param {boolean} docVisible
+   * @private
+   */
+  onDocumentVisibilityChange_(docVisible) {
+    for (let i = 0; i < this.resources_.length; i++) {
+      const resource = this.resources_[i];
+      if (!resource.hasLoadedOnce()) {
+        continue;
+      }
+      this.onIntersectionChange_(
+          resource.element,
+          this.lastVisiblePercent_[resource.getId()] || 0,
+          docVisible);
     }
   }
 
@@ -450,7 +515,6 @@ export class Visibility {
       }
 
       const change = res.element.getIntersectionChangeEntry();
-      const br = change.boundingClientRect;
       const visible = !isFiniteNumber(change.intersectionRatio) ? 0
           : change.intersectionRatio * 100;
 
@@ -459,7 +523,8 @@ export class Visibility {
         const shouldBeVisible = !!listeners[c]['shouldBeVisible'];
         if (this.updateCounters_(visible, listeners[c], shouldBeVisible) &&
             this.viewer_.isVisible() == shouldBeVisible) {
-          this.prepareStateForCallback_(listeners[c]['state'], br);
+          this.prepareStateForCallback_(
+              listeners[c]['state'], res.getLayoutBox());
           listeners[c].callback(listeners[c]['state']);
           listeners.splice(c, 1);
         } else {
@@ -508,7 +573,7 @@ export class Visibility {
     const state = listener['state'] || {};
 
     if (visible > 0) {
-      const timeElapsed = Date.now() - state[TIME_LOADED];
+      const timeElapsed = this.now_() - state[TIME_LOADED];
       state[FIRST_SEEN_TIME] = state[FIRST_SEEN_TIME] || timeElapsed;
       state[LAST_SEEN_TIME] = timeElapsed;
       // Consider it as load time visibility if this happens within 300ms of
@@ -519,7 +584,7 @@ export class Visibility {
     }
 
     const wasInViewport = state[IN_VIEWPORT];
-    const timeSinceLastUpdate = Date.now() - state[LAST_UPDATE];
+    const timeSinceLastUpdate = this.now_() - state[LAST_UPDATE];
     state[IN_VIEWPORT] = this.isInViewport_(visible,
         config[VISIBLE_PERCENTAGE_MIN], config[VISIBLE_PERCENTAGE_MAX]);
 
@@ -536,13 +601,13 @@ export class Visibility {
       state[LAST_UPDATE] = -1;
       state[TOTAL_VISIBLE_TIME] += timeSinceLastUpdate;
       state[CONTINUOUS_TIME] = 0;  // Clear only after max is calculated above.
-      state[LAST_VISIBLE_TIME] = Date.now() - state[TIME_LOADED];
+      state[LAST_VISIBLE_TIME] = this.now_() - state[TIME_LOADED];
     } else if (state[IN_VIEWPORT] && !wasInViewport) {
       // The resource came into view. start counting.
       dev().assert(state[LAST_UPDATE] == undefined ||
           state[LAST_UPDATE] == -1, 'lastUpdated time in weird state.');
       state[FIRST_VISIBLE_TIME] = state[FIRST_VISIBLE_TIME] ||
-          Date.now() - state[TIME_LOADED];
+          this.now_() - state[TIME_LOADED];
       this.setState_(state, visible, 0);
     }
 
@@ -554,9 +619,9 @@ export class Visibility {
         (config[TOTAL_TIME_MAX] === undefined ||
             state[TOTAL_VISIBLE_TIME] <= config[TOTAL_TIME_MAX]) &&
         (config[CONTINUOUS_TIME_MIN] === undefined ||
-            state[CONTINUOUS_TIME] >= config[CONTINUOUS_TIME_MIN]) &&
+            (state[MAX_CONTINUOUS_TIME] || 0) >= config[CONTINUOUS_TIME_MIN]) &&
         (config[CONTINUOUS_TIME_MAX] === undefined ||
-            state[CONTINUOUS_TIME] <= config[CONTINUOUS_TIME_MAX]);
+            (state[MAX_CONTINUOUS_TIME] || 0) <= config[CONTINUOUS_TIME_MAX]);
   }
 
   /**
@@ -596,10 +661,6 @@ export class Visibility {
    * @private
    */
   isInViewport_(visible, min, max) {
-    if (min === undefined && max === undefined) {
-      return true;
-    }
-
     return !!(visible > (min || 0) && visible <= (max || 100));
   }
 
@@ -610,7 +671,7 @@ export class Visibility {
    * @private
    */
   setState_(s, visible, sinceLast) {
-    s[LAST_UPDATE] = Date.now();
+    s[LAST_UPDATE] = this.now_();
     s[TOTAL_VISIBLE_TIME] = s[TOTAL_VISIBLE_TIME] !== undefined
         ? s[TOTAL_VISIBLE_TIME] + sinceLast : 0;
     s[CONTINUOUS_TIME] = s[CONTINUOUS_TIME] !== undefined
@@ -621,23 +682,40 @@ export class Visibility {
         s[MIN_VISIBLE] ? Math.min(s[MIN_VISIBLE], visible) : visible;
     s[MAX_VISIBLE] =
         s[MAX_VISIBLE] ? Math.max(s[MAX_VISIBLE], visible) : visible;
-    s[LAST_VISIBLE_TIME] = Date.now() - s[TIME_LOADED];
+    s[LAST_VISIBLE_TIME] = this.now_() - s[TIME_LOADED];
+  }
+
+  /**
+   * Trigger listener callback.
+   * @param {!Array<VisibilityListenerDef>} listeners
+   * @param {!VisibilityListenerDef} listener
+   * @param {!../../../src/layout-rect.LayoutRectDef} layoutBox The bounding rectangle
+   *     for the element
+   * @private
+   */
+  triggerCallback_(listeners, listener, layoutBox) {
+    const state = listener.state;
+    if (state[SCHEDULED_RUN_ID]) {
+      this.timer_.cancel(state[SCHEDULED_RUN_ID]);
+      state[SCHEDULED_RUN_ID] = null;
+    }
+    this.prepareStateForCallback_(state, layoutBox);
+    listener.callback(state);
+    listeners.splice(listeners.indexOf(listener), 1);
   }
 
   /**
    * Sets variable values for callback. Cleans up existing values.
    * @param {Object<string, *>} state The state object to populate
-   * @param {!../../../src/layout-rect.LayoutRectDef} br The bounding rectangle
+   * @param {!../../../src/layout-rect.LayoutRectDef} layoutBox The bounding rectangle
    *     for the element
    * @private
    */
-  prepareStateForCallback_(state, br) {
-    const viewport = viewportForDoc(this.ampdoc);
-
-    state[ELEMENT_X] = viewport.getScrollLeft() + br.left;
-    state[ELEMENT_Y] = viewport.getScrollTop() + br.top;
-    state[ELEMENT_WIDTH] = br.width;
-    state[ELEMENT_HEIGHT] = br.height;
+  prepareStateForCallback_(state, layoutBox) {
+    state[ELEMENT_X] = layoutBox.left;
+    state[ELEMENT_Y] = layoutBox.top;
+    state[ELEMENT_WIDTH] = layoutBox.width;
+    state[ELEMENT_HEIGHT] = layoutBox.height;
     state[TOTAL_TIME] = this.getTotalTime_() || '';
 
     state[LOAD_TIME_VISIBILITY] = state[LOAD_TIME_VISIBILITY] || 0;
@@ -658,7 +736,6 @@ export class Visibility {
     delete state[IN_VIEWPORT];
     delete state[TIME_LOADED];
     delete state[SCHEDULED_RUN_ID];
-    delete state[LAST_CHANGE_ENTRY];
 
     for (const k in state) {
       if (state.hasOwnProperty(k)) {
@@ -670,7 +747,11 @@ export class Visibility {
   getTotalTime_() {
     const perf = this.ampdoc.win.performance;
     return perf && perf.timing && perf.timing.domInteractive
-        ? Date.now() - perf.timing.domInteractive
+        ? this.now_() - perf.timing.domInteractive
         : null;
+  }
+
+  now_() {
+    return this.ampdoc.win.Date.now();
   }
 }

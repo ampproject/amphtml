@@ -16,7 +16,7 @@
 
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
-import {getVendorJsPropertyName} from '../../../src/style';
+import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
 import {isArray, isObject} from '../../../src/types';
 import {
   WebAnimationDef,
@@ -29,6 +29,11 @@ import {
   WebMultiAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {dashToCamelCase} from '../../../src/string';
+
+
+/** @const {string} */
+const TAG = 'amp-animation';
 
 
 /**
@@ -285,7 +290,7 @@ export class MeasureScanner extends Scanner {
     /** @private {!Array<!Element> } */
     this.targets_ = [];
 
-    /** @private {!Array<!CSSStyleDeclaration>} */
+    /** @private {!Array<!Object<string, string>>} */
     this.computedStyleCache_ = [];
   }
 
@@ -466,12 +471,11 @@ export class MeasureScanner extends Scanner {
   measure_(target, prop) {
     const index = this.targets_.indexOf(target);
     if (!this.computedStyleCache_[index]) {
-      this.computedStyleCache_[index] = /** @type {!CSSStyleDeclaration} */ (
-          this.win./*OK*/getComputedStyle(target));
+      this.computedStyleCache_[index] = computedStyle(this.win, target);
     }
-    const vendorName = getVendorJsPropertyName(
-        this.computedStyleCache_[index], prop);
-    return this.computedStyleCache_[index].getPropertyValue(vendorName);
+    const vendorName = getVendorJsPropertyName(this.computedStyleCache_[index],
+        dashToCamelCase(prop));
+    return this.computedStyleCache_[index][vendorName];
   }
 
   /**
@@ -501,12 +505,9 @@ export class MeasureScanner extends Scanner {
 
     // Validate.
     if (this.validate_) {
-      user().assert(duration >= 0,
-          '"duration" is invalid: %s', newTiming.duration);
-      user().assert(delay >= 0,
-          '"delay" is invalid: %s', newTiming.delay);
-      user().assert(endDelay >= 0,
-          '"endDelay" is invalid: %s', newTiming.endDelay);
+      this.validateTime_(duration, newTiming.duration, 'duration');
+      this.validateTime_(delay, newTiming.delay, 'delay');
+      this.validateTime_(endDelay, newTiming.endDelay, 'endDelay');
       user().assert(iterations >= 0,
           '"iterations" is invalid: %s', newTiming.iterations);
       user().assert(iterationStart >= 0,
@@ -526,6 +527,25 @@ export class MeasureScanner extends Scanner {
       direction,
       fill,
     };
+  }
+
+  /**
+   * @param {number|undefined} value
+   * @param {*} newValue
+   * @param {string} field
+   * @private
+   */
+  validateTime_(value, newValue, field) {
+    // Ensure that positive or zero values are only allowed.
+    user().assert(value >= 0,
+        '"%s" is invalid: %s', field, newValue);
+    // Make sure that the values are in milliseconds: show a warning if
+    // time is fractional.
+    if (newValue != null && Math.floor(value) != value) {
+      user().warn(TAG,
+          `"${field}" is fractional.`
+          + ' Note that all times are in milliseconds.');
+    }
   }
 }
 

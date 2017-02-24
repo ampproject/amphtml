@@ -164,9 +164,8 @@
   <script src="./viewer-integr-messaging.js"></script>
 
   <script>
-    var SENTINEL = '__AMPHTML__';
-
     var allViewers = [];
+    var currentContainerId = null;
 
     function Viewer(containerId, id, url, visible) {
       this.id = id;
@@ -221,7 +220,7 @@
         paddingTop: this.header./*OK*/offsetHeight,
         visibilityState: this.visibilityState_,
         prerenderSize: this.prerenderSize_,
-        viewerorigin: parseUrl(window.location.href).origin,
+        origin: parseUrl(window.location.href).origin,
         csi: this.csi_,
         cap: 'foo,a2a',
       };
@@ -237,9 +236,6 @@
       log('AMP URL = ', url);
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
-
-      // Notice that name can only be set once the IFrame is in the DOM.
-      this.iframe.contentWindow.name = SENTINEL + paramsStr(params);
 
       this.awaitHandshake_();
 
@@ -259,14 +255,20 @@
       var targetOrigin = this.frameOrigin_;
       var listener = function(event) {
         if (event.origin == targetOrigin &&
-                event.data == 'amp-handshake-request' &&
+                this.isChannelOpen_(event.data) &&
                 (!event.source || event.source == target)) {
           log('event: ',event);
           log('Viewer ' + this.id + ' messaging established with ',
               targetOrigin);
           window.removeEventListener('message', listener, false);
 
-          target./*OK*/postMessage('amp-handshake-response', targetOrigin);
+          const message = {
+            app: APP,
+            requestid: event.data.requestid,
+            data: {},
+            type: MessageType.RESPONSE,
+          };
+          target./*OK*/postMessage(message, targetOrigin);
 
           this.messaging_ = new ViewerMessaging(target, targetOrigin,
               this.processRequest_.bind(this), targetId);
@@ -277,6 +279,11 @@
         }
       }.bind(this);
       window.addEventListener('message', listener, false);
+    };
+
+    Viewer.prototype.isChannelOpen_ = function(eventData) {
+      return eventData.app == APP &&
+        eventData.name == 'channelOpen';
     };
 
 
@@ -409,6 +416,10 @@
       });
     };
 
+    Viewer.prototype.scrollAmpDoc = function(scrollTop) {
+      log('viewer scroll amp doc: ', scrollTop);
+      this.sendRequest_('scroll', {scrollTop}, true);
+    };
 
     Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
       log('Viewer.prototype.processRequest_');
@@ -451,9 +462,23 @@
         log('a2a navigation', data);
         return;
       }
+      if (type == 'unloaded') {
+        log('unloaded');
+        return this.handleUnload_();
+      }
+      if (type == 'documentHeight') {
+        return;
+      }
       return Promise.reject('request not supported: ' + type);
     };
 
+    Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
+      log('Viewer.prototype.handleUnload_');
+      if (this.messaging_) {
+        this.messaging_ = null;
+      }
+      return goog.Promise.resolve();
+    };
 
     Viewer.prototype.sendRequest_ = function(type, data, awaitResponse) {
       log('Viewer.prototype.sendRequest_');
@@ -508,21 +533,21 @@
       new Viewer(
           'container1',
           '1',
-          './everything.amp.max.html',
+          './everything.amp.max.html?amp_js_v=0.1',
           true).start();
       addShowContainer('1');
 
       new Viewer(
           'container2',
           '2',
-          './article.amp.max.html',
+          './article.amp.max.html?amp_js_v=0.1',
           false).start();
       addShowContainer('2');
 
       new Viewer(
           'container3',
           '3',
-          './article-access.amp.max.html',
+          './article-access.amp.max.html?amp_js_v=0.1',
           false).start();
       addShowContainer('3');
 
@@ -536,7 +561,7 @@
       new Viewer(
           'container5',
           '5',
-          './article-fixed-header.amp.max.html',
+          './article-fixed-header.amp.max.html?amp_js_v=0.1',
           false).start();
       addShowContainer('5');
 
@@ -557,6 +582,17 @@
       allViewers.forEach(function(viewer) {
         viewer.toggleVisibility(viewer.id == id, viewer.id == id);
       });
+      currentContainerId = id;
+    }
+
+    function getContainer(id) {
+      return allViewers[id - 1];
+    }
+
+    function viewerScrollCurrentAmpDoc(scrollTop) {
+      if (currentContainerId) {
+        getContainer(currentContainerId).scrollAmpDoc(scrollTop);
+      }
     }
 
     window.onload = loadAmpDoc;

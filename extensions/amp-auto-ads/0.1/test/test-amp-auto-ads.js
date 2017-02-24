@@ -18,9 +18,14 @@ import {AmpAutoAds} from '../amp-auto-ads';
 import {toggleExperiment} from '../../../../src/experiments';
 import {xhrFor} from '../../../../src/xhr';
 import {waitForChild} from '../../../../src/dom';
-import * as sinon from 'sinon';
 
-describe('amp-auto-ads', () => {
+describes.realWin('amp-auto-ads', {
+  amp: {
+    runtimeOn: true,
+    ampdoc: 'single',
+    extensions: ['amp-ad', 'amp-auto-ads'],
+  },
+}, env => {
 
   const AD_CLIENT = 'ca-pub-1234';
 
@@ -28,29 +33,61 @@ describe('amp-auto-ads', () => {
   let container;
   let anchor1;
   let anchor2;
+  let anchor3;
+  let anchor4;
   let ampAutoAds;
   let ampAutoAdsElem;
   let xhr;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-auto-ads', true);
-    sandbox = sinon.sandbox.create();
+    // There seem to be a lot of tests that don't clean up after themselves,
+    // meaning there are a lot of <AMP-AD>s left over in the DOM.
+    // An alternative to doing this clean up would be for this test to do all
+    // its DOM stuff in a dedicated window, but trying that seems to result in a
+    // lot of errors.
+    const ampAds = env.win.document.getElementsByTagName('AMP-AD');
+    while (ampAds.length) {
+      ampAds[0].parentNode.removeChild(ampAds[0]);
+    }
 
-    container = document.createElement('div');
-    document.body.appendChild(container);
+    toggleExperiment(env.win, 'amp-auto-ads', true);
+    sandbox = env.sandbox;
 
-    anchor1 = document.createElement('div');
+    container = env.win.document.createElement('div');
+    env.win.document.body.appendChild(container);
+
+    anchor1 = env.win.document.createElement('div');
     anchor1.id = 'anId1';
     container.appendChild(anchor1);
 
-    anchor2 = document.createElement('div');
+    const spacer = env.win.document.createElement('div');
+    spacer.style.height = '1000px';
+    container.appendChild(spacer);
+
+    anchor2 = env.win.document.createElement('div');
     anchor2.id = 'anId2';
     container.appendChild(anchor2);
 
-    ampAutoAdsElem = document.createElement('amp-auto-ads');
-    document.body.appendChild(ampAutoAdsElem);
+    const spacer2 = env.win.document.createElement('div');
+    spacer2.style.height = '499px';
+    container.appendChild(spacer2);
 
-    xhr = xhrFor(window);
+    anchor3 = env.win.document.createElement('div');
+    anchor3.id = 'anId3';
+    container.appendChild(anchor3);
+
+    const spacer3 = env.win.document.createElement('div');
+    spacer3.style.height = '500px';
+    container.appendChild(spacer3);
+
+    anchor4 = env.win.document.createElement('div');
+    anchor4.id = 'anId4';
+    container.appendChild(anchor4);
+
+    ampAutoAdsElem = env.win.document.createElement('amp-auto-ads');
+    env.win.document.body.appendChild(ampAutoAdsElem);
+
+    xhr = xhrFor(env.win);
     xhr.fetchJson = () => {
       return Promise.resolve({
         placements: [
@@ -68,6 +105,20 @@ describe('amp-auto-ads', () => {
             pos: 2,
             type: 1,
           },
+          {
+            anchor: {
+              selector: 'DIV#anId3',
+            },
+            pos: 2,
+            type: 1,
+          },
+          {
+            anchor: {
+              selector: 'DIV#anId4',
+            },
+            pos: 2,
+            type: 1,
+          },
         ],
       });
     };
@@ -76,27 +127,30 @@ describe('amp-auto-ads', () => {
     ampAutoAds = new AmpAutoAds(ampAutoAdsElem);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-    document.body.removeChild(container);
-    document.body.removeChild(ampAutoAdsElem);
-  });
+  function verifyAdElement(adElement) {
+    expect(adElement.tagName).to.equal('AMP-AD');
+    expect(adElement.getAttribute('type')).to.equal('adsense');
+    expect(adElement.getAttribute('data-ad-client')).to.equal(AD_CLIENT);
+  }
 
-  it('should insert a single ad on page using config', done => {
+  it('should insert three ads on page using config', () => {
     ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
     ampAutoAdsElem.setAttribute('type', 'adsense');
     ampAutoAds.buildCallback();
 
-    waitForChild(anchor1, parent => {
-      return parent.childNodes.length > 0;
-    }, () => {
-      expect(anchor1.childNodes.length).to.equal(1);
-      expect(anchor2.childNodes.length).to.equal(0);
-      const adElement = anchor1.childNodes[0];
-      expect(adElement.tagName).to.equal('AMP-AD');
-      expect(adElement.getAttribute('type')).to.equal('adsense');
-      expect(adElement.getAttribute('data-ad-client')).to.equal(AD_CLIENT);
-      done();
+    return new Promise(resolve => {
+      waitForChild(anchor4, parent => {
+        return parent.childNodes.length > 0;
+      }, () => {
+        expect(anchor1.childNodes).to.have.lengthOf(1);
+        expect(anchor2.childNodes).to.have.lengthOf(1);
+        expect(anchor3.childNodes).to.have.lengthOf(0);
+        expect(anchor4.childNodes).to.have.lengthOf(1);
+        verifyAdElement(anchor1.childNodes[0]);
+        verifyAdElement(anchor2.childNodes[0]);
+        verifyAdElement(anchor4.childNodes[0]);
+        resolve();
+      });
     });
   });
 
@@ -106,10 +160,9 @@ describe('amp-auto-ads', () => {
     ampAutoAds.buildCallback();
 
     return ampAutoAds.layoutCallback().then(() => {
-      const hostname = window.location.hostname;
       expect(xhr.fetchJson).to.have.been.calledWith(
           '//pagead2.googlesyndication.com/getconfig/ama?client=' +
-          AD_CLIENT + '&plah=' + hostname + '&ama_t=amp', {
+          AD_CLIENT + '&plah=localhost&ama_t=amp', {
             mode: 'cors',
             method: 'GET',
             credentials: 'omit',
@@ -137,7 +190,7 @@ describe('amp-auto-ads', () => {
   });
 
   it('should not try and fetch config if experiment off', () => {
-    toggleExperiment(window, 'amp-auto-ads', false);
+    toggleExperiment(env.win, 'amp-auto-ads', false);
     ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
     ampAutoAdsElem.setAttribute('type', 'adsense');
 

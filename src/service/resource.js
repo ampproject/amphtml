@@ -20,7 +20,7 @@ import {
   moveLayoutRect,
 } from '../layout-rect';
 import {dev} from '../log';
-import {toggle} from '../style';
+import {toggle, computedStyle} from '../style';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -294,6 +294,8 @@ export class Resource {
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+    // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+    // in PROD.
     this.element.dispatchCustomEvent('amp:built');
   }
 
@@ -309,9 +311,11 @@ export class Resource {
    * awaiting the measure and possibly layout.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
+   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    */
-  changeSize(newHeight, newWidth) {
-    this.element./*OK*/changeSize(newHeight, newWidth);
+  changeSize(newHeight, newWidth, opt_newMargins) {
+    this.element./*OK*/changeSize(newHeight, newWidth, opt_newMargins);
+
     // Schedule for re-layout.
     if (this.state_ != ResourceState.NOT_BUILT) {
       this.state_ = ResourceState.NOT_LAID_OUT;
@@ -323,15 +327,20 @@ export class Resource {
    * @param {boolean} overflown
    * @param {number|undefined} requestedHeight
    * @param {number|undefined} requestedWidth
+   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined}
+   *     requestedMargins
    */
-  overflowCallback(overflown, requestedHeight, requestedWidth) {
+  overflowCallback(overflown, requestedHeight, requestedWidth,
+      requestedMargins) {
     if (overflown) {
       this.pendingChangeSize_ = {
         height: requestedHeight,
         width: requestedWidth,
+        margins: requestedMargins,
       };
     }
-    this.element.overflowCallback(overflown, requestedHeight, requestedWidth);
+    this.element.overflowCallback(overflown, requestedHeight, requestedWidth,
+        requestedMargins);
   }
 
   resetPendingChangeSize() {
@@ -367,8 +376,8 @@ export class Resource {
           isFixed = true;
           break;
         }
-        if (viewport.isDeclaredFixed(n) &&
-                win./*OK*/getComputedStyle(n).position == 'fixed') {
+        if (viewport.isDeclaredFixed(n)
+            && computedStyle(win, n).position == 'fixed') {
           isFixed = true;
           break;
         }
@@ -417,6 +426,10 @@ export class Resource {
         0, 0);
     this.isFixed_ = false;
     this.element.updateLayoutBox(this.layoutBox_);
+    const owner = this.getOwner();
+    if (owner) {
+      owner.collapsedCallback(this.element);
+    }
   }
 
   /**

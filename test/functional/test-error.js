@@ -19,7 +19,9 @@ import {
   detectNonAmpJs,
   getErrorReportUrl,
   installErrorReporting,
+  isCancellation,
   reportError,
+  detectJsEngineFromStack,
 } from '../../src/error';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
@@ -86,7 +88,6 @@ describe('reportErrorToServer', () => {
   beforeEach(() => {
     onError = window.onerror;
     sandbox = sinon.sandbox.create();
-    sandbox.spy(window, 'Image');
   });
 
   afterEach(() => {
@@ -107,14 +108,28 @@ describe('reportErrorToServer', () => {
     expect(query.m).to.equal('XYZ');
     expect(query.el).to.equal('u');
     expect(query.a).to.equal('0');
-    expect(query.s).to.equal(e.stack);
+    expect(query.s).to.equal(e.stack.trim());
     expect(query['3p']).to.equal(undefined);
     expect(e.message).to.contain('_reported_');
-    expect(query.or).to.contain('http://localhost');
+    if (location.ancestorOrigins) {
+      expect(query.or).to.contain('http://localhost');
+    }
     expect(query.vs).to.be.undefined;
     expect(query.ae).to.equal('');
     expect(query.r).to.contain('http://localhost');
     expect(query.noAmp).to.equal('1');
+    expect(query.args).to.be.undefined;
+  });
+
+  it('reportError with error object w/args', () => {
+    const e = new Error('XYZ');
+    e.args = {x: 1};
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
+          true));
+    const query = parseQueryString(url.search);
+
+    expect(query.args).to.equal(JSON.stringify({x: 1}));
   });
 
   it('reportError with a string instead of error', () => {
@@ -248,6 +263,27 @@ describe('reportErrorToServer', () => {
     expect(url).to.be.undefined;
   });
 
+  it('should construct cancellation', () => {
+    const e = cancellation();
+    expect(isCancellation(e)).to.be.true;
+    expect(isCancellation(e.message)).to.be.true;
+
+    // Suffix is tollerated.
+    e.message += '___';
+    expect(isCancellation(e)).to.be.true;
+    expect(isCancellation(e.message)).to.be.true;
+
+    // Prefix is not tollerated.
+    e.message = '___' + e.message;
+    expect(isCancellation(e)).to.be.false;
+    expect(isCancellation(e.message)).to.be.false;
+
+    expect(isCancellation('')).to.be.false;
+    expect(isCancellation(null)).to.be.false;
+    expect(isCancellation(1)).to.be.false;
+    expect(isCancellation({})).to.be.false;
+  });
+
   it('reportError with error object', () => {
     const e = cancellation();
     const url =
@@ -272,6 +308,24 @@ describe('reportErrorToServer', () => {
     expect(url).to.contain('&ex=1');
   });
 
+  it('should not report Script errors', () => {
+    sandbox.stub(Math, 'random', () => (1e-3 + 1e-4));
+    const e = new Error('Script error.');
+    const url =
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
+    expect(url).to.be.undefined;
+  });
+
+  it('should report throttled Script errors at threshold', () => {
+    sandbox.stub(Math, 'random', () => 1e-3);
+    const e = new Error('Script error.');
+    const url =
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
+    expect(url).to.be.ok;
+    expect(url).to.contain('&ex=1');
+  });
+
+
   it('should report throttled load errors under threshold', () => {
     sandbox.stub(Math, 'random', () => (1e-3 - 1e-4));
     const e = new Error('Failed to load:');
@@ -279,6 +333,15 @@ describe('reportErrorToServer', () => {
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
     expect(url).to.be.ok;
     expect(url).to.contain('&ex=1');
+  });
+
+  it('should omit the error stack for user errors', () => {
+    const e = user().createError('123');
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
+          true));
+    const query = parseQueryString(url.search);
+    expect(query.s).to.be.undefined;
   });
 
   describe('detectNonAmpJs', () => {
@@ -350,6 +413,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept string and report incorrect use', () => {
+    window.AMP_MODE = {localDev: true, test: false};
     const result = reportError('error');
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.be.equal('error');
@@ -361,6 +425,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept number and report incorrect use', () => {
+    window.AMP_MODE = {localDev: true, test: false};
     const result = reportError(101);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.be.equal('101');
@@ -372,6 +437,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept null and report incorrect use', () => {
+    window.AMP_MODE = {localDev: true, test: false};
     const result = reportError(null);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.be.equal('Unknown error');
@@ -380,5 +446,42 @@ describes.sandboxed('reportError', {}, () => {
     expect(() => {
       clock.tick();
     }).to.throw(/_reported_ Error reported incorrectly/);
+  });
+});
+
+describe('detectJsEngineFromStack', () => {
+  // Note that these are not true of every case. You can emulate iOS Safari
+  // on Desktop Chrome and break this. These tests are explicitly for
+  // SauceLabs, which runs does not masquerade with UserAgent.
+  describe.configure().ifIos().run('on iOS', () => {
+    it.configure().ifSafari().run('detects safari as safari', () => {
+      expect(detectJsEngineFromStack()).to.equal('Safari');
+    });
+
+    it.configure().ifChrome().run('detects chrome as safari', () => {
+      expect(detectJsEngineFromStack()).to.equal('Safari');
+    });
+
+    it.configure().ifFirefox().run('detects firefox as safari', () => {
+      expect(detectJsEngineFromStack()).to.equal('Safari');
+    });
+  });
+
+  describe.configure().skipIos().run('on other OSs', () => {
+    it.configure().ifSafari().run('detects safari as safari', () => {
+      expect(detectJsEngineFromStack()).to.equal('Safari');
+    });
+
+    it.configure().ifChrome().run('detects chrome as chrome', () => {
+      expect(detectJsEngineFromStack()).to.equal('Chrome');
+    });
+
+    it.configure().ifFirefox().run('detects firefox as firefox', () => {
+      expect(detectJsEngineFromStack()).to.equal('Firefox');
+    });
+
+    it.configure().ifEdge().run('detects edge as IE', () => {
+      expect(detectJsEngineFromStack()).to.equal('IE');
+    });
   });
 });

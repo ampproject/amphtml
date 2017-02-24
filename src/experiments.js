@@ -34,35 +34,15 @@ const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 /** @const {time} */
 const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
-/** @const {string} */
-const CANARY_EXPERIMENT_ID = 'dev-channel';
-
 /** @type {Object<string, boolean>|undefined} */
 let toggles_;
 
 /**
- * Whether the scripts come from a dev channel.
+ * Whether we are in canary.
  * @param {!Window} win
  * @return {boolean}
  */
-export function isDevChannel(win) {
-  if (isExperimentOn(win, CANARY_EXPERIMENT_ID)) {
-    return true;
-  }
-  if (isDevChannelVersionDoNotUse_(win)) {
-    return true;
-  }
-  return false;
-}
-
-
-/**
- * Whether the version corresponds to the dev-channel binary.
- * @param {!Window} win
- * @return {boolean}
- * @private Visible for testing only!
- */
-export function isDevChannelVersionDoNotUse_(win) {
+export function isCanary(win) {
   return !!(win.AMP_CONFIG && win.AMP_CONFIG.canary);
 }
 
@@ -155,6 +135,23 @@ export function experimentToggles(win) {
     }
   }
 
+  // Read document level override from meta tag.
+  if (win.AMP_CONFIG
+      && Array.isArray(win.AMP_CONFIG['allow-doc-opt-in'])
+      && win.AMP_CONFIG['allow-doc-opt-in'].length > 0) {
+    const allowed = win.AMP_CONFIG['allow-doc-opt-in'];
+    const meta =
+        win.document.head.querySelector('meta[name="amp-experiments-opt-in"]');
+    if (meta) {
+      const optedInExperiments = meta.getAttribute('content').split(',');
+      for (let i = 0; i < optedInExperiments.length; i++) {
+        if (allowed.indexOf(optedInExperiments[i]) != -1) {
+          toggles_[optedInExperiments[i]] = true;
+        }
+      }
+    }
+  }
+
   Object.assign(toggles_, getExperimentTogglesFromCookie(win));
   return toggles_;
 }
@@ -195,7 +192,10 @@ function saveExperimentTogglesToCookie(win, toggles) {
   }
 
   setCookie(win, COOKIE_NAME, experimentIds.join(','),
-      Date.now() + COOKIE_EXPIRATION_INTERVAL);
+      Date.now() + COOKIE_EXPIRATION_INTERVAL, {
+        // Set explicit domain, so the cookie gets send to sub domains.
+        domain: win.location.hostname,
+      });
 }
 
 /**

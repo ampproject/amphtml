@@ -54,6 +54,14 @@ export const LogLevel = {
   FINE: 4,
 };
 
+/**
+ * Sets reportError function. Called from error.js to break cyclic
+ * dependency.
+ * @param {function(*, !Element=)|undefined} fn
+ */
+export function setReportError(fn) {
+  self.reportError = fn;
+}
 
 /**
  * Logging class.
@@ -202,7 +210,8 @@ export class Log {
   error(tag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
-      this.win.setTimeout(() => {throw /** @type {!Error} */ (error);});
+      // reportError is installed globally per window in the entry point.
+      self.reportError(error);
     }
   }
 
@@ -216,7 +225,8 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;
-      this.win.setTimeout(() => {throw /** @type {!Error} */ (error);});
+      // reportError is installed globally per window in the entry point.
+      self.reportError(error);
     }
   }
 
@@ -287,6 +297,8 @@ export class Log {
       e.associatedElement = firstElement;
       e.messageArray = messageArray;
       this.prepareError_(e);
+      // reportError is installed globally per window in the entry point.
+      self.reportError(e);
       throw e;
     }
     return shouldBeTrueish;
@@ -311,14 +323,14 @@ export class Log {
   }
 
   /**
-   * Throws an error if the first argument isn't a string.
+   * Throws an error if the first argument isn't a string. The string can
+   * be empty.
    *
-   * Otherwise see `assert` for usage
+   * For more details see `assert`.
    *
    * @param {*} shouldBeString
    * @param {string=} opt_message The assertion message
-   * @return {string} The value of shouldBeTrueish.
-   * @template T
+   * @return {string} The string value. Can be an empty string.
    */
   /*eslint "google-camelcase/google-camelcase": 2*/
   assertString(shouldBeString, opt_message) {
@@ -328,13 +340,15 @@ export class Log {
   }
 
   /**
-   * Throws an error if the first argument isn't a number.
+   * Throws an error if the first argument isn't a number. The allowed values
+   * include `0` and `NaN`.
    *
-   * Otherwise see `assert` for usage
+   * For more details see `assert`.
    *
    * @param {*} shouldBeNumber
    * @param {string=} opt_message The assertion message
-   * @return {number} The value of shouldBeTrueish.
+   * @return {number} The number value. The allowed values include `0`
+   *   and `NaN`.
    */
   assertNumber(shouldBeNumber, opt_message) {
     this.assert(typeof shouldBeNumber == 'number',
@@ -373,6 +387,8 @@ export class Log {
       } else if (error.message.indexOf(this.suffix_) == -1) {
         error.message += this.suffix_;
       }
+    } else if (isUserErrorMessage(error.message)) {
+      error.message = error.message.replace(USER_ERROR_SENTINEL, '');
     }
   }
 }
@@ -436,7 +452,11 @@ function createErrorVargs(var_args) {
  */
 export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
-  setTimeout(() => {throw error;});
+  setTimeout(() => {
+    // reportError is installed globally per window in the entry point.
+    self.reportError(error);
+    throw error;
+  });
 }
 
 

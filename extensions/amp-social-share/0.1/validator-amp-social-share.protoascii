@@ -15,13 +15,12 @@
 #
 
 tags: {  # amp-social-share
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-social-share extension .js script"
+  satisfies: "amp-social-share extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-social-share"
+  extension_unused_unless_tag_present: "amp-social-share"
   attrs: {
     name: "async"
     mandatory: true
@@ -33,6 +32,7 @@ tags: {  # amp-social-share
     value: "amp-social-share"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -51,14 +51,8 @@ tags: {  # amp-social-share
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
 }
 tags: {  # <amp-social-share>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-SOCIAL-SHARE"
-  also_requires_tag: "amp-social-share extension .js script"
-  attrs: {
-    name: "type"
-    mandatory: true
-  }
+  requires: "amp-social-share extension .js script"
   attrs: {
     name: "data-share-endpoint"
     value_url: {
@@ -86,6 +80,10 @@ tags: {  # <amp-social-share>
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"

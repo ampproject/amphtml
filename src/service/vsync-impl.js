@@ -19,10 +19,11 @@ import {ampdocServiceFor} from '../ampdoc';
 import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
 import {documentStateFor} from './document-state';
+
 import {getService} from '../service';
 import {installTimerService} from './timer-impl';
 import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
-
+import {JankMeter} from './jank-meter';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -42,11 +43,11 @@ let VsyncTaskSpecDef;
 
 
 /**
- * Abstraction over requestAnimationFrame that align DOM read (measure)
- * and write (mutate) tasks in a single frame.
+ * Abstraction over requestAnimationFrame that batches DOM read (measure)
+ * and write (mutate) tasks in a single frame, to eliminate layout thrashing.
  *
  * NOTE: If the document is invisible due to prerendering (this includes
- * application level prerendering where the doc is rendered in a hidden
+ * application-level prerendering where the doc is rendered in a hidden
  * iframe or webview), then no frame will be scheduled.
  * @package Visible for type.
  */
@@ -128,6 +129,9 @@ export class Vsync {
       // per-doc visibility when necessary.
       this.docState_.onVisibilityChanged(boundOnVisibilityChanged);
     }
+
+    /** @private {!JankMeter} */
+    this.jankMeter_ = new JankMeter(this.win);
   }
 
   /** @private */
@@ -345,6 +349,7 @@ export class Vsync {
     }
     // Schedule actual animation frame and then run tasks.
     this.scheduled_ = true;
+    this.jankMeter_.onScheduled();
     this.forceSchedule_();
   }
 
@@ -365,6 +370,8 @@ export class Vsync {
    */
   runScheduledTasks_() {
     this.scheduled_ = false;
+    this.jankMeter_.onRun();
+
     const tasks = this.tasks_;
     const states = this.states_;
     const resolver = this.nextFrameResolver_;
@@ -444,4 +451,4 @@ export function installVsyncService(window) {
     installTimerService(window);
     return new Vsync(window);
   }));
-};
+}

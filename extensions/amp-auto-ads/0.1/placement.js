@@ -16,7 +16,10 @@
 
 import {dev} from '../../../src/log';
 import {resourcesForDoc} from '../../../src/resources';
-import {createElementWithAttributes} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -46,6 +49,7 @@ export const PlacementState = {
   UNUSED: 0,
   RESIZE_FAILED: 1,
   PLACED: 2,
+  TOO_NEAR_EXISTING_AD: 3,
 };
 
 /**
@@ -80,18 +84,33 @@ INJECTORS[Position.LAST_CHILD] = (anchorElement, elementToInject) => {
 export class Placement {
   /**
    * @param {!Window} win
+   * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
+   * @param {!Position} position
    * @param {!function(!Element, !Element)} injector
+   * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
-  constructor(win, anchorElement, injector) {
+  constructor(win, resources, anchorElement, position, injector, opt_margins) {
     /** @const @private {!Window} */
     this.win_ = win;
+
+    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = resources;
 
     /** @const @private {!Element} */
     this.anchorElement_ = anchorElement;
 
+    /** @const @private {!Position} */
+    this.position_ = position;
+
     /** @const @private {!function(!Element, !Element)} */
     this.injector_ = injector;
+
+    /**
+     * @const
+     * @private {!../../../src/layout-rect.LayoutMarginsChangeDef|undefined}
+     */
+    this.margins_ = opt_margins;
 
     /** @private {?Element} */
     this.adElement_ = null;
@@ -101,21 +120,70 @@ export class Placement {
   }
 
   /**
+   * @return {!Element}
+   */
+  getAdElement() {
+    return dev().assertElement(this.adElement_, 'No ad element');
+  }
+
+  /**
+   * An estimate of the y-position of the placement based on the position of its
+   * anchor. This is known to not be completely reliable, since the position
+   * of the anchor does not necessarily indicate the position of a sibling.
+   * @return {!Promise<number>}
+   */
+  getEstimatedPosition() {
+    return this.resources_.getElementLayoutBox(this.anchorElement_).then(
+        layoutBox => {
+          return this.getEstimatedPositionFromAchorLayout_(layoutBox);
+        });
+  }
+
+  /**
+   * @param {!../../../src/layout-rect.LayoutRectDef} anchorLayout
+   * @return {number}
+   * @private
+   */
+  getEstimatedPositionFromAchorLayout_(anchorLayout) {
+    // TODO: This should really take account of margins and padding too.
+    switch (this.position_) {
+      case Position.BEFORE:
+      case Position.FIRST_CHILD:
+        return anchorLayout.top;
+      case Position.LAST_CHILD:
+      case Position.AFTER:
+        return anchorLayout.bottom;
+      default:
+        throw new Error('Unknown position');
+    }
+  }
+
+  /**
    * @param {string} type
    * @param {!Array<!DataAttributeDef>} dataAttributes
+   * @param {!./ad-tracker.AdTracker} adTracker
    * @return {!Promise<!PlacementState>}
    */
-  placeAd(type, dataAttributes) {
-    this.adElement_ = this.createAdElement_(type, dataAttributes);
-    this.injector_(this.anchorElement_, this.adElement_);
-    return resourcesForDoc(this.adElement_).attemptChangeSize(
-        this.adElement_, TARGET_AD_HEIGHT_PX, TARGET_AD_WIDTH_PX).then(() => {
-          this.state_ = PlacementState.PLACED;
+  placeAd(type, dataAttributes, adTracker) {
+    return this.getEstimatedPosition().then(yPosition => {
+      return adTracker.isTooNearAnAd(yPosition).then(tooNear => {
+        if (tooNear) {
+          this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
-        }, () => {
-          this.state_ = PlacementState.RESIZE_FAILED;
-          return this.state_;
-        });
+        }
+        this.adElement_ = this.createAdElement_(type, dataAttributes);
+        this.injector_(this.anchorElement_, this.adElement_);
+        return this.resources_.attemptChangeSize(this.adElement_,
+            TARGET_AD_HEIGHT_PX, TARGET_AD_WIDTH_PX, this.margins_)
+                .then(() => {
+                  this.state_ = PlacementState.PLACED;
+                  return this.state_;
+                }, () => {
+                  this.state_ = PlacementState.RESIZE_FAILED;
+                  return this.state_;
+                });
+      });
+    });
   }
 
   /**
@@ -151,12 +219,9 @@ export function getPlacementsFromConfigObj(win, configObj) {
     return [];
   }
   const placements = [];
-  for (let i = 0; i < placementObjs.length; ++i) {
-    const placement = getPlacementFromObject(win, placementObjs[i]);
-    if (placement) {
-      placements.push(placement);
-    }
-  }
+  placementObjs.forEach(placementObj => {
+    getPlacementsFromObject(win, placementObj, placements);
+  });
   return placements;
 }
 
@@ -165,47 +230,85 @@ export function getPlacementsFromConfigObj(win, configObj) {
  * constructs and returns an instance of the Placement class for it.
  * @param {!Window} win
  * @param {!Object} placementObj
- * @return {?Placement}
+ * @param {!Array<!Placement>} placements
  */
-function getPlacementFromObject(win, placementObj) {
+function getPlacementsFromObject(win, placementObj, placements) {
   const injector = INJECTORS[placementObj['pos']];
   if (!injector) {
     dev().warn(TAG, 'No injector for position');
-    return null;
+    return;
   }
   const anchor = placementObj['anchor'];
   if (!anchor) {
     dev().warn(TAG, 'No anchor in placement');
-    return null;
+    return;
   }
-  const anchorElement = getAnchorElement(win, anchor);
-  if (!anchorElement) {
+  const anchorElements =
+      getAnchorElements(win.document.documentElement, anchor);
+  if (!anchorElements.length) {
     dev().warn(TAG, 'No anchor element found');
-    return null;
+    return;
   }
-  if ((placementObj['pos'] == Position.BEFORE ||
-       placementObj['pos'] == Position.AFTER) &&
-      !anchorElement.parentNode) {
-    dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
-    return null;
+  let margins = undefined;
+  if (placementObj['style']) {
+    const marginTop = parseInt(placementObj['style']['top_m'], 10);
+    const marginBottom = parseInt(placementObj['style']['bot_m'], 10);
+    if (marginTop || marginBottom) {
+      margins = {
+        top: marginTop || undefined,
+        bottom: marginBottom || undefined,
+      };
+    }
   }
-  return new Placement(win, anchorElement, injector);
+  anchorElements.forEach(anchorElement => {
+    if ((placementObj['pos'] == Position.BEFORE ||
+         placementObj['pos'] == Position.AFTER) &&
+        !anchorElement.parentNode) {
+      dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
+      return;
+    }
+    placements.push(new Placement(win, resourcesForDoc(anchorElement),
+        anchorElement, placementObj['pos'], injector, margins));
+  });
 }
 
 /**
- * @param {!Window} win
+ * Looks up the element(s) addresses by the anchorObj.
+ *
+ * @param {!Element} rootElement
  * @param {!Object} anchorObj
- * @return {?Element}
+ * @return {!Array<!Element>}
  */
-function getAnchorElement(win, anchorObj) {
+function getAnchorElements(rootElement, anchorObj) {
   const selector = anchorObj['selector'];
   if (!selector) {
     dev().warn(TAG, 'No selector in anchor');
-    return null;
+    return [];
   }
-  const index = anchorObj['index'] || 0;
-  if (index == 0) {
-    return win.document.querySelector(selector);
+  let elements = [].slice.call(scopedQuerySelectorAll(rootElement, selector));
+
+  const minChars = anchorObj['min_c'] || 0;
+  if (minChars > 0) {
+    elements = elements.filter(el => {
+      return el.textContent.length >= minChars;
+    });
   }
-  return win.document.querySelectorAll(selector)[index] || null;
+
+  if (typeof anchorObj['index'] == 'number' || !anchorObj['all']) {
+    const element = elements[anchorObj['index'] || 0];
+    elements = element ? [element] : [];
+  }
+
+  if (elements.length == 0) {
+    return [];
+  }
+
+  if (anchorObj['sub']) {
+    let subElements = [];
+    elements.forEach(el => {
+      subElements = subElements.concat(getAnchorElements(el, anchorObj['sub']));
+    });
+    return subElements;
+  }
+  return elements;
 }

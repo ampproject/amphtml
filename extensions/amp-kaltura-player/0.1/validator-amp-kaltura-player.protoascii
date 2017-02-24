@@ -16,12 +16,12 @@
 
 tags: {  # amp-kaltura-player
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-kaltura-player extension .js script"
+  satisfies: "amp-kaltura-player extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-kaltura-player"
+  extension_unused_unless_tag_present: "amp-kaltura-player"
   attrs: {
     name: "async"
     mandatory: true
@@ -33,6 +33,7 @@ tags: {  # amp-kaltura-player
     value: "amp-kaltura-player"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -54,13 +55,13 @@ tags: {  # amp-kaltura-player
 # a data-videoid attribute.
 tags: {  # <amp-kaltura-player>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-KALTURA-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-kaltura-player extension .js script"
-
-  attrs: { name: "data-partner" mandatory: true }
-
+  requires: "amp-kaltura-player extension .js script"
+  attrs: {
+    name: "data-partner"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-kaltura-player.html"
   amp_layout: {

@@ -16,12 +16,12 @@
 
 tags: {  # amp-brid-player
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
+  satisfies: "amp-brid-player extension .js script"
   spec_name: "amp-brid-player extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  also_requires_tag_warning: "amp-brid-player"
+  extension_unused_unless_tag_present: "amp-brid-player"
   attrs: {
     name: "async"
     mandatory: true
@@ -33,6 +33,7 @@ tags: {  # amp-brid-player
     value: "amp-brid-player"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -52,10 +53,9 @@ tags: {  # amp-brid-player
 }
 tags: {  # <amp-brid-player>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-BRID-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-brid-player extension .js script"
+  requires: "amp-brid-player extension .js script"
   attrs: {
     name: "data-partner"
     mandatory: true

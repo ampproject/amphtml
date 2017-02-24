@@ -9,8 +9,9 @@
   <script id="amp-access" type="application/json">
     {
       "vendor": "laterpay",
-      "laterpay": {},
-      "authorizationFallbackResponse": {"error": true}
+      "laterpay": {
+        "articleTitleSelector": ".content-container > header > h1"
+      }
     }
   </script>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
@@ -22,11 +23,6 @@
 
     .brand-logo {
       font-family: 'Open Sans';
-    }
-
-    .ad-container {
-      display: flex;
-      justify-content: center;
     }
 
     .content-container p {
@@ -125,20 +121,6 @@
       background-color: #f4f4f4;
     }
 
-    .login-section {
-      margin: 16px;
-      margin-top: 24px;
-      padding: 16px;
-      background: #ffc;
-    }
-
-    .meter-section {
-      margin: 16px;
-      margin-top: 24px;
-      padding: 16px;
-      background: #ffa;
-    }
-
     .error-section {
       margin: 16px;
       margin-top: 24px;
@@ -150,11 +132,9 @@
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
   <script async custom-element="amp-access-laterpay" src="https://cdn.ampproject.org/v0/amp-access-laterpay-0.1.js"></script>
-  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async src="./viewer-integr.js"></script>
 </head>
 <body>
 <amp-analytics type="googleanalytics" id="analytics2">
@@ -234,28 +214,13 @@
           </div>
         </div>
 
-        <section id="meter-notif" amp-access="views > 0" amp-access-hide class="meter-section">
-          <template amp-access-template type="amp-mustache">
-            You are viewing article {{views}} of {{maxViews}}!
-          </template>
-          <a on="tap:meter-notif.hide">[Close]</a>
-        </section>
-
-        <section amp-access="NOT error AND NOT access" amp-access-hide class="login-section">
-          <a on="tap:amp-access.login">Login to read more!</a>
+        <section amp-access="NOT error AND NOT access" amp-access-hide>
+          <div id="amp-access-laterpay-dialog" class="amp-access-laterpay"></div>
         </section>
 
         <section amp-access="error" amp-access-hide class="error-section">
           Oops... Something broke.
         </section>
-
-        <amp-ad amp-access="access" amp-access-hide
-            width=300 height=250
-            type="a9"
-            data-aax_size="300x250"
-            data-aax_pubname="abc123"
-            data-aax_src="302">
-        </amp-ad>
 
         <div amp-access="access" amp-access-hide class="article-body" itemprop="articleBody">
           <p>
@@ -276,15 +241,6 @@
             Mauris sem est, accumsan sed tincidunt ut, sagittis vel arcu.
             Nullam in libero nisi.
           </p>
-
-          <div class="ad-container">
-            <amp-ad width=300 height=250
-                type="a9"
-                data-aax_size="300x250"
-                data-aax_pubname="abc123"
-                data-aax_src="302">
-            </amp-ad>
-          </div>
 
           <p>
             Sed pharetra semper fringilla. Nulla fringilla, neque eget
@@ -344,13 +300,6 @@
             Ut elementum velit fermentum felis volutpat sodales in non libero.
             Aliquam erat volutpat.
           </p>
-
-          <div class="ad-container">
-            <amp-ad width=300 height=200
-                type="adsense"
-                data-ad-client="ca-pub-9350112648257122">
-            </amp-ad>
-          </div>
 
           <p>
             Morbi at velit vitae eros congue congue venenatis non dui.

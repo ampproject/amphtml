@@ -79,11 +79,10 @@ export class AmpShareTracking extends AMP.BaseElement {
       const outgoingFragment = results[1];
       dev().fine(TAG, 'incomingFragment: ', incomingFragment);
       dev().fine(TAG, 'outgoingFragment: ', outgoingFragment);
-      if (outgoingFragment) {
+      if (outgoingFragment && outgoingFragment != '') {
         const newFragment = this.getNewViewerFragment_(incomingFragment,
             outgoingFragment);
-        // Update the viewer fragment with leading '#'
-        this.getHistory_().updateFragment('#' + newFragment);
+        this.getHistory_().updateFragment(newFragment);
       }
       return {incomingFragment, outgoingFragment};
     });
@@ -142,7 +141,6 @@ export class AmpShareTracking extends AMP.BaseElement {
     const postReq = {
       method: 'POST',
       credentials: 'include',
-      requireAmpResponseSourceOrigin: true,
       body: {},
     };
     return xhrFor(this.win).fetchJson(vendorUrl, postReq).then(response => {
