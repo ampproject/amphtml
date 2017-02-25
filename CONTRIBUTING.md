@@ -56,7 +56,7 @@ If you run into any problems we have plenty of people who are willing to help; s
 
 The [Getting Started Quick Start Guide](contributing/getting-started-quick.md) has installation steps and instructions for building/testing AMP.
 
-[DEVELOPING.md](DEVELOPING.md) has some more advanced instructions that may be necessary depending on the complexity of the changes you are making.
+[DEVELOPING.md](contributing/DEVELOPING.md) has some more advanced instructions that may be necessary depending on the complexity of the changes you are making.
 
 A few things to note:
 
