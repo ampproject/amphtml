@@ -44,14 +44,12 @@ describe('ad-network-config', () => {
           AD_CLIENT + '&plah=foo.bar&ama_t=amp');
     });
 
-    it('should generate the data attributes', () => {
+    it('should generate the attributes', () => {
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
-      expect(adNetwork.getDataAttributes()).to.deep.equal([
-        {
-          name: 'ad-client',
-          value: 'ca-pub-1234',
-        },
-      ]);
+      expect(adNetwork.getAttributes()).to.deep.equal({
+        'type': 'adsense',
+        'data-ad-client': 'ca-pub-1234',
+      });
     });
   });
 

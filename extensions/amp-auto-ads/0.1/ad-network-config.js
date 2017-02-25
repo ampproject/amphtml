@@ -31,14 +31,11 @@ class AdNetworkConfigDef {
   getConfigUrl() {}
 
   /**
-   * Any data attributes derived from either the page or the auto-amp-ads tag
-   * that should be applied to any ads inserted.
-   * @return {!Array<!{name: string, value: (boolean|number|string)}>} The array
-   *     contains the type: {!./placement.DataAttributeDef}, but for some reason
-   *     'gulp check-types' throws a warning if we try to reference the typedef
-   *     here.
+   * Any attributes derived from either the page or the auto-amp-ads tag that
+   * should be applied to any ads inserted.
+   * @return {!Object<string, string>}
    */
-  getDataAttributes() {}
+  getAttributes() {}
 }
 
 /**
@@ -82,12 +79,10 @@ class AdSenseNetworkConfig {
   }
 
   /** @override */
-  getDataAttributes() {
-    return [
-      {
-        name: 'ad-client',
-        value: this.autoAmpAdsElement_.getAttribute('data-ad-client'),
-      },
-    ];
+  getAttributes() {
+    return {
+      'type': 'adsense',
+      'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+    };
   }
 }
