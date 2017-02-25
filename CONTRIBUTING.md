@@ -36,6 +36,8 @@ If you find a bug in AMP, please [file an issue](https://github.com/ampproject/a
 
 The best bug reports provide a detailed description of the issue (including screenshots if possible), step-by-step instructions for predictably reproducing the issue, and possibly even a working example that demonstrates the issue.
 
+If you want to learn more about our issues priorities and implementation guidelines check out [this document](https://github.com/ampproject/amphtml/blob/master/contributing/issue-priorities.md).
+
 ## Contributing code
 
 The AMP Project accepts and greatly appreciates code contributions!
