@@ -310,11 +310,7 @@ export class InstrumentationService {
         return;
       }
 
-      const listenOnceFunc = this.visibilityV2Enabled_
-          ? this.visibility_.listenOnceV2.bind(this.visibility_)
-          : this.visibility_.listenOnce.bind(this.visibility_);
-
-      listenOnceFunc(spec, vars => {
+      this.visibility_.listenOnce(spec, vars => {
         const el = getElement(this.ampdoc, spec['selector'],
             analyticsElement, spec['selectionMethod']);
         if (el) {

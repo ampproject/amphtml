@@ -310,6 +310,9 @@ describe('amp-analytics.instrumentation OLD', function() {
     ins.addListenerDepr_({'on': 'hidden'}, fn);
     ins.viewer_.setVisibilityState_(VisibilityState.HIDDEN);
     expect(fn.calledOnce).to.be.true;
+
+    // remove the side effect. many other tests need viewer to be visible
+    ins.viewer_.setVisibilityState_(VisibilityState.VISIBLE);
   });
 
   it('only fires when the timer interval exceeds the minimum', () => {
