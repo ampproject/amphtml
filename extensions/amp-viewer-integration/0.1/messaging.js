@@ -43,6 +43,11 @@ const MessageType = {
 export let Message;
 
 /**
+ * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
+ */
+export let RequestHandler;
+
+/**
  * @fileoverview This class is a de-facto implementation of MessagePort
  * from Channel Messaging API:
  * https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API
@@ -105,11 +110,42 @@ export class Messaging {
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};
-    /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
-    this.requestProcessor_ = null;
+    /**
+     * A map from message names to request handlers.
+     * @private {!Object<string, !RequestHandler>}
+     */
+    this.messageHandlers_ = {};
+
+    /** @private {?RequestHandler} */
+    this.defaultHandler_ = null;
 
     this.port_.addEventListener('message', this.handleMessage_.bind(this));
     this.port_.start();
+  }
+
+  /**
+   * Registers a method that will handle requests sent to the specified
+   * message name.
+   * @param {string} messageName The name of the message to handle.
+   * @param {!RequestHandler} requestHandler
+   */
+  registerHandler(messageName, requestHandler) {
+    this.messageHandlers_[messageName] = requestHandler;
+  }
+
+  /**
+   * Unregisters the handler for the specified message name.
+   * @param {string} messageName The name of the message to unregister.
+   */
+  unregisterHandler(messageName) {
+    delete this.messageHandlers_[messageName];
+  }
+
+  /**
+   * @param {?RequestHandler} requestHandler
+   */
+  setDefaultHandler(requestHandler) {
+    this.defaultHandler_ = requestHandler;
   }
 
   /**
@@ -211,14 +247,19 @@ export class Messaging {
    */
   handleRequest_(message) {
     dev().fine(TAG, 'handleRequest_', message);
-    if (!this.requestProcessor_) {
+
+    let handler = this.messageHandlers_[message.name];
+    if (!handler) {
+      handler = this.defaultHandler_;
+    }
+    if (!handler) {
       throw new Error(
         'Cannot handle request because handshake is not yet confirmed!');
     }
-    const requestId = message.requestid;
+
+    const promise = handler(message.name, message.data, !!message.rsvp);
     if (message.rsvp) {
-      const promise =
-        this.requestProcessor_(message.name, message.data, message.rsvp);
+      const requestId = message.requestid;
       if (!promise) {
         this.sendResponseError_(
           requestId, message.name, new Error('no response'));
@@ -252,14 +293,6 @@ export class Messaging {
         pending.resolve(message.data);
       }
     }
-  }
-
-  /**
-   * @param {function(string, *, boolean):(!Promise<*>|undefined)}
-   *    requestProcessor
-   */
-  setRequestProcessor(requestProcessor) {
-    this.requestProcessor_ = requestProcessor;
   }
 
   /**
