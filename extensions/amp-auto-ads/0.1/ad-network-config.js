@@ -88,6 +88,10 @@ class AdSenseNetworkConfig {
         name: 'ad-client',
         value: this.autoAmpAdsElement_.getAttribute('data-ad-client'),
       },
+      {
+        name: 'tag-origin',
+        value: 'ampa',
+      },
     ];
   }
 }

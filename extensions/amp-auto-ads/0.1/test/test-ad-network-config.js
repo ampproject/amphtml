@@ -51,6 +51,10 @@ describe('ad-network-config', () => {
           name: 'ad-client',
           value: 'ca-pub-1234',
         },
+        {
+          name: 'tag-origin',
+          value: 'ampa',
+        },
       ]);
     });
   });
