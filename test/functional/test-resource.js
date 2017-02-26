@@ -63,6 +63,9 @@ describe('Resource', () => {
         marginBottom: '3px',
         marginLeft: '4px',
       },
+      nodeType: 1,
+      removeAttribute: () => {},
+      setAttribute: () => {},
     };
     elementMock = sandbox.mock(element);
 
