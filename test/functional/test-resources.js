@@ -1509,12 +1509,14 @@ describe('Resources changeSize', () => {
   describe('attemptChangeSize rules wrt viewport', () => {
     let overflowCallbackSpy;
     let vsyncSpy;
+    let viewportRect;
 
     beforeEach(() => {
       overflowCallbackSpy = sandbox.spy();
       resource1.element.overflowCallback = overflowCallbackSpy;
-      viewportMock.expects('getRect').returns(
-          {top: 0, left: 0, right: 100, bottom: 200, height: 200}).atLeast(1);
+
+      viewportRect = {top: 2, left: 0, right: 100, bottom: 200, height: 200};
+      viewportMock.expects('getRect').returns(viewportRect).atLeast(1);
       viewportMock.expects('getScrollHeight').returns(10000).atLeast(1);
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
           height: 50};
@@ -1633,6 +1635,35 @@ describe('Resources changeSize', () => {
       expect(resources.requestsChangeSize_.length).to.equal(1);
       expect(resource1.changeSize).to.not.been.called;
       expect(overflowCallbackSpy).to.not.been.called;
+    });
+
+    it('should defer change size if just inside viewport and viewport ' +
+        'scrolled by user.', () => {
+      viewportRect.top = 2;
+      resource1.layoutBox_ = {top: -50, left: 0, right: 100, bottom: 1,
+          height: 51};
+      resources.lastVelocity_ = 10;
+      resources.lastScrollTime_ = Date.now();
+      resources.scheduleChangeSize_(resource1, 111, 222, false);
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_.length).to.equal(1);
+      expect(resource1.changeSize).to.not.been.called;
+      expect(overflowCallbackSpy).to.not.been.called;
+    });
+
+    it('should NOT change size and call overflow callback if viewport not ' +
+        'scrolled by user.', () => {
+      viewportRect.top = 1;
+      resource1.layoutBox_ = {top: -50, left: 0, right: 100, bottom: 0,
+          height: 51};
+      resources.lastVelocity_ = 10;
+      resources.lastScrollTime_ = Date.now();
+      resources.scheduleChangeSize_(resource1, 111, 222, false);
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_.length).to.equal(0);
+      expect(resource1.changeSize).to.not.been.called;
+      expect(overflowCallbackSpy).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledWith(true, 111, 222);
     });
 
     it('should change size when above the vp and adjust scrolling', () => {
@@ -1792,7 +1823,7 @@ describe('Resources changeSize', () => {
 
     it('should NOT change size when resized margin in viewport and should ' +
         'call overflowCallback', () => {
-      resource1.layoutBox_ = {top: -50, left: 0, right: 100, bottom: 0,
+      resource1.layoutBox_ = {top: -48, left: 0, right: 100, bottom: 2,
           height: 50};
       resource1.element.fakeComputedStyle = {
         marginBottom: '21px',
@@ -1816,7 +1847,7 @@ describe('Resources changeSize', () => {
     });
 
     it('should change size when resized margin above viewport', () => {
-      resource1.layoutBox_ = {top: -50, left: 0, right: 100, bottom: 0,
+      resource1.layoutBox_ = {top: -49, left: 0, right: 100, bottom: 1,
           height: 50};
       resource1.element.fakeComputedStyle = {
         marginBottom: '21px',

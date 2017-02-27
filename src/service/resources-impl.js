@@ -1069,9 +1069,13 @@ export class Resources {
           // an element's boundary is not changed above the viewport after
           // resize.
           resize = true;
-        } else if (bottomDisplacedBoundary <= viewportRect.top + topOffset) {
+        } else if (viewportRect.top > 1 &&
+            bottomDisplacedBoundary <= viewportRect.top + topOffset) {
           // 5. Elements above the viewport can only be resized if we are able
-          // to compensate the height change by setting scrollTop.
+          // to compensate the height change by setting scrollTop and only if
+          // the page has already been scrolled by some amount (1px due to iOS).
+          // Otherwise the scrolling might move important things like the menu
+          // bar out of the viewport at initial page load.
           if (heightDiff < 0 &&
               viewportRect.top + aboveVpHeightChange < -heightDiff) {
             // Do nothing if height abobe viewport height can't compensate
