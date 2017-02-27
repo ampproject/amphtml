@@ -28,178 +28,178 @@ import {videoManagerForDoc} from "../../../src/video-manager";
 
 class AmpNexxtvPlayer extends AMP.BaseElement {
 
-    /** @param {!AmpElement} element */
-    constructor(element) {
-        super(element);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-        /** @private {?Element} */
-        this.iframe_ = null;
+    /** @private {?Element} */
+    this.iframe_ = null;
 
-        /** @private {?Promise} */
-        this.playerReadyPromise_ = null;
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
 
-        /** @private {?Function} */
-        this.playerReadyResolver_ = null;
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url(this.origin_, opt_onLayout);
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+
+  buildCallback() {
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
+    this.mediaid_ = user().assert(
+      this.element.getAttribute('data-mediaid'),
+      'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
+      this.element);
+
+    this.client_ = user().assert(this.element.getAttribute('data-client'),
+      'The data-client attribute is required for <amp-nexxtv-player> %s',
+      this.element);
+
+    this.start_ = this.element.getAttribute('data-seek-to') || 0;
+    this.mode_ = this.element.getAttribute('data-mode') || 'static'; // default
+    this.streamtype_ = this.element.getAttribute('data-streamtype') || 'video'; // default
+    this.origin_ = this.element.getAttribute('data-origin') || 'https://embed.nexx.cloud/'; // default
+
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    this.iframe_ = iframe;
+
+    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
+    this.applyFillContent(iframe);
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+
+    this.element.appendChild(iframe);
+
+    installVideoManagerForDoc(this.element);
+    videoManagerForDoc(this.element).register(this);
+  }
+
+  /** @override */
+  viewportCallback(visible) {
+    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+  }
+
+  /** @override */
+  layoutCallback() {
+    let src = this.origin_;
+
+    if(this.streamtype_ !== 'video'){
+      src += `${encodeURIComponent(this.streamtype_)}/`;
     }
 
-    /**
-     * @param {boolean=} opt_onLayout
-     * @override
-     */
-    preconnectCallback(opt_onLayout) {
-        this.preconnect.url(this.origin_, opt_onLayout);
+    src += `${encodeURIComponent(this.client_)}/${encodeURIComponent(this.mediaid_)}`;
+    src += `?start=${encodeURIComponent(this.start_)}`;
+    src += `&datamode=${encodeURIComponent(this.mode_)}&amp=1`;
+
+    this.iframe_.src = src;
+
+    this.win.addEventListener('message',
+    event => this.handleNexxMessages_(event));
+
+    return this.loadPromise(this.iframe_)
+      .then(() => {
+        this.playerReadyPromise_;
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
+  }
+
+  pauseCallback(){
+    // Only send pauseVideo command if the player is playing. Otherwise
+    // The player breaks if the user haven't played the video yet specially
+    // on mobile.
+    if (this.iframe_) {
+      this.pause();
+    }
+  }
+
+  sendCommand_(command){
+    this.iframe_.contentWindow.postMessage(JSON.stringify({
+      'cmd': command
+    }), '*');
+  };
+
+  // emitter
+  handleNexxMessages_(event) {
+    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+      if (data === undefined) {
+      return; // We only process valid JSON.
     }
 
-    /** @override */
-    isLayoutSupported(layout) {
-        return isLayoutSizeDefined(layout);
+    if(data.cmd == 'onload'){
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      this.playerReadyResolver_(this.iframe_);
+    } else if (data.cmd == 'play') {
+     this.element.dispatchCustomEvent(VideoEvents.PLAY);
+    } else if (data.cmd == 'pause') {
+      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+    } else if (data.cmd == 'mute') {
+     this.element.dispatchCustomEvent(VideoEvents.MUTE);
+    } else if (data.cmd == 'unmute') {
+      this.element.dispatchCustomEvent(VideoEvents.UNMUTE);
     }
+  }
 
-    buildCallback() {
-        this.playerReadyPromise_ = new Promise(resolve => {
-            this.playerReadyResolver_ = resolve;
-        });
+  // VideoInterface Implementation
+  // only send in json format
+  /** @override */
+  play(unusedIsAutoplay) {
+    this.playerReadyPromise_.then(() => {
+      this.sendCommand_('play');
+    });
+  }
 
-        this.mediaid_ = user().assert(
-            this.element.getAttribute('data-mediaid'),
-            'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
-            this.element);
+  /** @override */
+  pause() {
+    this.playerReadyPromise_.then(() => {
+      this.sendCommand_('pause');
+    });
+  }
 
-        this.client_ = user().assert(this.element.getAttribute('data-client'),
-            'The data-client attribute is required for <amp-nexxtv-player> %s',
-            this.element);
+  /** @override */
+  mute() {
+    this.playerReadyPromise_.then(() => {
+      this.sendCommand_('mute');
+    });
+  }
 
-        this.start_ = this.element.getAttribute('data-seek-to') || 0;
-        this.mode_ = this.element.getAttribute('data-mode') || 'static'; // default
-        this.streamtype_ = this.element.getAttribute('data-streamtype') || 'video'; // default
-        this.origin_ = this.element.getAttribute('data-origin') || 'https://embed.nexx.cloud/'; // default
+  /** @override */
+  unmute() {
+    this.playerReadyPromise_.then(() => {
+      this.sendCommand_('unmute');
+    });
+  }
 
-        const iframe = this.element.ownerDocument.createElement('iframe');
-        this.iframe_ = iframe;
+  /** @override */
+  supportsPlatform() {
+    return true;
+  }
 
-        this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
-        this.applyFillContent(iframe);
-        iframe.setAttribute('frameborder', '0');
-        iframe.setAttribute('allowfullscreen', 'true');
+  /** @override */
+  isInteractive() {
+    return true;
+  }
 
-        this.element.appendChild(iframe);
+  /** @override */
+  showControls() {
+  }
 
-        installVideoManagerForDoc(this.element);
-        videoManagerForDoc(this.element).register(this);
-    }
-
-    /** @override */
-    viewportCallback(visible) {
-        this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-    }
-
-    /** @override */
-    layoutCallback() {
-        let src = this.origin_;
-
-        if(this.streamtype_ !== 'video'){
-            src += `${encodeURIComponent(this.streamtype_)}/`;
-        }
-
-        src += `${encodeURIComponent(this.client_)}/${encodeURIComponent(this.mediaid_)}`;
-        src += `?start=${encodeURIComponent(this.start_)}`;
-        src += `&datamode=${encodeURIComponent(this.mode_)}&amp=1`;
-
-        this.iframe_.src = src;
-
-        this.win.addEventListener('message',
-            event => this.handleNexxMessages_(event));
-
-        return this.loadPromise(this.iframe_)
-            .then(() => {
-                this.playerReadyPromise_;
-                this.element.dispatchCustomEvent(VideoEvents.LOAD);
-            });
-    }
-
-    pauseCallback(){
-        // Only send pauseVideo command if the player is playing. Otherwise
-        // The player breaks if the user haven't played the video yet specially
-        // on mobile.
-        if (this.iframe_) {
-            this.pause();
-        }
-    }
-
-    sendCommand_(command){
-        this.iframe_.contentWindow.postMessage(JSON.stringify({
-            'cmd': command
-        }), '*');
-    };
-
-    // emitter
-    handleNexxMessages_(event) {
-        const data = isObject(event.data) ? event.data : tryParseJson(event.data);
-        if (data === undefined) {
-            return; // We only process valid JSON.
-        }
-
-        if(data.cmd == 'onload'){
-            this.element.dispatchCustomEvent(VideoEvents.LOAD);
-            this.playerReadyResolver_(this.iframe_);
-        } else if (data.cmd == 'play') {
-            this.element.dispatchCustomEvent(VideoEvents.PLAY);
-        } else if (data.cmd == 'pause') {
-            this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-        } else if (data.cmd == 'mute') {
-            this.element.dispatchCustomEvent(VideoEvents.MUTE);
-        } else if (data.cmd == 'unmute') {
-            this.element.dispatchCustomEvent(VideoEvents.UNMUTE);
-        }
-    }
-
-    // VideoInterface Implementation
-    // only send in json format
-    /** @override */
-    play(unusedIsAutoplay) {
-        this.playerReadyPromise_.then(() => {
-            this.sendCommand_('play');
-        });
-    }
-
-    /** @override */
-    pause() {
-        this.playerReadyPromise_.then(() => {
-            this.sendCommand_('pause');
-        });
-    }
-
-    /** @override */
-    mute() {
-        this.playerReadyPromise_.then(() => {
-            this.sendCommand_('mute');
-        });
-    }
-
-    /** @override */
-    unmute() {
-        this.playerReadyPromise_.then(() => {
-            this.sendCommand_('unmute');
-        });
-    }
-
-    /** @override */
-    supportsPlatform() {
-        return true;
-    }
-
-    /** @override */
-    isInteractive() {
-        return true;
-    }
-
-    /** @override */
-    showControls() {
-    }
-
-    /** @override */
-    hideControls() {
-    }
+  /** @override */
+  hideControls() {
+  }
 }
 
 AMP.registerElement('amp-nexxtv-player', AmpNexxtvPlayer);
