@@ -21,6 +21,8 @@
 import {isLayoutSizeDefined} from "../../../src/layout";
 import {user} from "../../../src/log";
 import {installVideoManagerForDoc} from "../../../src/service/video-manager-impl";
+import {isObject} from '../../../src/types';
+import {tryParseJson} from '../../../src/json';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from "../../../src/video-manager";
 
@@ -74,6 +76,8 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
         const iframe = this.element.ownerDocument.createElement('iframe');
         this.iframe_ = iframe;
+
+        this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
         this.applyFillContent(iframe);
         iframe.setAttribute('frameborder', '0');
         iframe.setAttribute('allowfullscreen', 'true');
@@ -82,6 +86,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
         installVideoManagerForDoc(this.element);
         videoManagerForDoc(this.element).register(this);
+    }
+
+    /** @override */
+    viewportCallback(visible) {
+        this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
     }
 
     /** @override */
@@ -98,8 +107,22 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
         this.iframe_.src = src;
 
+        this.win.addEventListener('message',
+            event => this.handleNexxMessages_(event));
+
+        /*console.log('LAYOUT CALLBACK');
+        console.log(this.handleNexxMessages_({
+            origin: 'https://embed.nexx.cloud',
+            source: this.iframe_.contentWindow,
+            data: JSON.stringify({
+                cmd: 'unmute'
+            })}));*/
+
         return this.loadPromise(this.iframe_)
-            .then(() => this.playerReadyPromise_);
+            .then(() => {
+                this.element.dispatchCustomEvent(VideoEvents.LOAD);
+                this.playerReadyPromise_;
+            });
     }
 
     pauseCallback(){
@@ -111,16 +134,40 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
         }
     }
 
-    /** @override */
-    viewportCallback(visible) {
-        this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-    }
-
     sendCommand_(command){
         this.iframe_.contentWindow.postMessage(JSON.stringify({
             'cmd': command
         }), '*');
     };
+
+    // emitter
+    handleNexxMessages_(event) {
+        const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+        if (data === undefined) {
+            return; // We only process valid JSON.
+        }
+        console.log('CMD', data);
+
+        // this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+
+        if(data.cmd == 'onload'){
+            console.log('ONLOAD');
+            this.element.dispatchCustomEvent(VideoEvents.LOAD);
+            this.playerReadyResolver_(this.iframe_);
+        } else if (data.cmd == 'play') {
+            console.log('PLAY');
+            this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        } else if (data.cmd == 'pause') {
+            console.log('PAUSE');
+            this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        } else if (data.cmd == 'mute') {
+            console.log('MUTE');
+            this.element.dispatchCustomEvent(VideoEvents.MUTE);
+        } else if (data.cmd == 'unmute') {
+            console.log('UNMUTE');
+            this.element.dispatchCustomEvent(VideoEvents.UNMUTE);
+        }
+    }
 
     // VideoInterface Implementation
     // only send in json format
