@@ -70,7 +70,9 @@ describe('amp-facebook-comments', function() {
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       iframe.doc.body.appendChild(div);
-      iframe.win.context.tagName = 'AMP-FACEBOOK-COMMENTS';
+      iframe.win.context = {
+        tagName: 'AMP-FACEBOOK-COMMENTS',
+      };
 
       facebook(iframe.win, {
         href: fbCommentsHref,

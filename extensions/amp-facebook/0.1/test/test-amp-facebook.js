@@ -83,7 +83,9 @@ describe('amp-facebook', function() {
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       iframe.doc.body.appendChild(div);
-      iframe.win.context.tagName = 'AMP-FACEBOOK';
+      iframe.win.context = {
+        tagName: 'AMP-FACEBOOK',
+      };
 
       facebook(iframe.win, {
         href: fbPostHref,
