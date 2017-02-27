@@ -567,6 +567,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.changeSize\\(': bannedTermsHelpString,
   '\\.attemptChangeHeight\\(0\\)': 'please consider using `attemptCollapse()`',
   '\\.collapse\\(': bannedTermsHelpString,
+  '\\.expand\\(': bannedTermsHelpString,
   '\\.focus\\(': bannedTermsHelpString,
   '\\.getBBox\\(': bannedTermsHelpString,
   '\\.getBoundingClientRect\\(': bannedTermsHelpString,

@@ -864,9 +864,27 @@ export class BaseElement {
   /**
    * Called every time an owned AmpElement collapses itself.
    * See {@link collapse}.
-   * @param {!AmpElement} unusedElement
+   * @param {!AmpElement} unusedElement Child element that was collapsed.
    */
   collapsedCallback(unusedElement) {
+    // Subclasses may override.
+  }
+
+  /**
+   * Expands the element, resetting its default display value, and notifies its
+   * owner (if there is one) through {@link expandedCallback} that the element
+   * is no longer visible.
+   */
+  expand() {
+    this.element.getResources().expandElement(this.element);
+  }
+
+  /**
+   * Called every time an owned AmpElement expands itself.
+   * See {@link expand}.
+   * @param {!AmpElement} unusedElement Child element that was expanded.
+   */
+  expandedCallback(unusedElement) {
     // Subclasses may override.
   }
 

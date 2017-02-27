@@ -864,6 +864,22 @@ export class Resources {
   }
 
   /**
+   * Expands the element.
+   * @param {!Element} element
+   */
+  expandElement(element) {
+    const resource = Resource.forElement(element);
+    resource.completeExpand();
+
+    const owner = resource.getOwner();
+    if (owner) {
+      owner.expandedCallback(element);
+    }
+
+    this.schedulePass(FOUR_FRAME_DELAY_);
+  }
+
+  /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
    * @param {boolean=} opt_relayoutAll
