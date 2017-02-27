@@ -142,7 +142,7 @@ export function makeBodyVisible(doc, opt_waitForServices) {
       visibility: 'visible',
       animation: 'none',
     });
-    resourcesForDoc(doc).renderStarted();
+    renderStartedNoInline(doc);
   };
   try {
     documentStateFor(win).onBodyAvailable(() => {
@@ -176,6 +176,20 @@ export function makeBodyVisible(doc, opt_waitForServices) {
     // Avoid errors in the function to break execution flow as this is
     // often called as a last resort.
     rethrowAsync(e);
+  }
+}
+
+
+/**
+ * @param {!Document} doc
+ */
+function renderStartedNoInline(doc) {
+  try {
+    resourcesForDoc(doc).renderStarted();
+  } catch (e) {
+    // `makeBodyVisible` is called in the error-processing cycle and thus
+    // could be triggered when runtime's initialization is incomplete which
+    // would cause unrelated errors to be thrown here.
   }
 }
 

@@ -28,6 +28,7 @@ describe('Styles', () => {
   let sandbox;
   let win;
   let doc;
+  let resources;
   let ampdoc;
   let tickSpy;
   let schedulePassSpy;
@@ -41,7 +42,7 @@ describe('Styles', () => {
       const perf = installPerformanceService(doc.defaultView);
       tickSpy = sandbox.spy(perf, 'tick');
 
-      const resources = installResourcesServiceForDoc(doc);
+      resources = installResourcesServiceForDoc(doc);
       ampdoc = resources.ampdoc;
       schedulePassSpy = sandbox.spy(resources, 'schedulePass');
       waitForServicesStub = sandbox.stub(rds, 'waitForServices');
@@ -66,6 +67,14 @@ describe('Styles', () => {
       expect(getStyle(doc.body, 'visibility')).to.equal('visible');
       expect(getStyle(doc.body, 'animation')).to.equal('none');
       expect(ampdoc.signals().get('render-start')).to.be.ok;
+    });
+
+    it('should ignore resources failures for render-start', () => {
+      sandbox.stub(resources, 'renderStarted', () => {
+        throw new Error('intentional');
+      });
+      styles.makeBodyVisible(doc);
+      expect(ampdoc.signals().get('render-start')).to.be.null;
     });
 
     it('should wait for render delaying services', done => {
