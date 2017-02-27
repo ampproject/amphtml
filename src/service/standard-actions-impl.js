@@ -18,7 +18,7 @@ import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {actionServiceForDoc} from '../action';
 import {bindForDoc} from '../bind';
 import {dev, user} from '../log';
-import {registerServiceForDoc, getServiceForDoc} from '../service';
+import {registerServiceForDoc} from '../service';
 import {historyForDoc} from '../history';
 import {getResourcesServiceForDoc} from './resources-impl';
 import {toggle} from '../style';
@@ -116,8 +116,9 @@ export class StandardActions {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installStandardActionsForDoc(ampdoc) {
-  registerServiceForDoc(ampdoc, 'standard-actions', StandardActions);
-  /** Immediately instantiate */
-  getServiceForDoc(ampdoc, 'standard-actions');
-
+  registerServiceForDoc(
+    ampdoc,
+    'standard-actions',
+    StandardActions,
+    /* opt_instantiate */ true);
 };

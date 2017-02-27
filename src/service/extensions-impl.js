@@ -18,7 +18,8 @@ import {
   adoptServiceForEmbed,
   registerService,
   getService,
-  setParentWindow} from '../service';
+  setParentWindow,
+} from '../service';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,

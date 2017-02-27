@@ -51,7 +51,6 @@ export function startupChunk(nodeOrAmpDoc, fn) {
     resolved.then(fn);
     return;
   }
-  installChunkServiceForDoc_(nodeOrAmpDoc);
   const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   service.runForStartup_(fn);
 }
@@ -75,7 +74,6 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
     resolved.then(fn);
     return;
   }
-  installChunkServiceForDoc_(nodeOrAmpDoc);
   const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   service.run(fn, priority);
 }
@@ -85,7 +83,6 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
  * @return {!Chunks}
  */
 export function chunkInstanceForTesting(nodeOrAmpDoc) {
-  registerServiceForDoc(nodeOrAmpDoc, 'chunk', Chunks);
   return getChunkServiceForDoc_(nodeOrAmpDoc);
 }
 
@@ -94,6 +91,7 @@ export function chunkInstanceForTesting(nodeOrAmpDoc) {
  * @return {!Chunks}
  */
 function getChunkServiceForDoc_(nodeOrAmpDoc) {
+  installChunkServiceForDoc_(nodeOrAmpDoc);
   return getServiceForDoc(nodeOrAmpDoc, 'chunk');
 }
 

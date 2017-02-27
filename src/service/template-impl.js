@@ -37,9 +37,6 @@ const PROP_ = '__AMP_IMPL_';
 /** @private @const {string} */
 const PROP_PROMISE_ = '__AMP_WAIT_';
 
-/** @private @const {string} */
-const TEMPLATE_SERVICE_TAG = 'templates';
-
 
 /**
  * The interface that is implemented by all templates.
@@ -345,7 +342,7 @@ export function templatesServiceForTesting(window) {
  */
 function getTemplatesService(window) {
   installTemplatesService(window);
-  return getService(window, TEMPLATE_SERVICE_TAG);
+  return getService(window, 'templates');
 }
 
 
@@ -353,5 +350,5 @@ function getTemplatesService(window) {
  * @param {!Window} window
  */
 export function installTemplatesService(window) {
-  registerService(window, TEMPLATE_SERVICE_TAG, Templates);
+  registerService(window, 'templates', Templates);
 };

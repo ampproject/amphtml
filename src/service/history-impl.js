@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  registerService,
-  getService,
-  getServiceForDoc,
-} from '../service';
+import {registerService, getService, getServiceForDoc} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {timerFor} from '../timer';

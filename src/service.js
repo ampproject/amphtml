@@ -435,6 +435,9 @@ function registerServiceInternal(holder, context, id, constructor) {
       ctor: constructor,
     };
   }
+  // TODO(kmh287) Show a warning if service is already registered AND
+  // the constructor passed in doesn't match the one the service was intiially
+  // registered with?
 }
 
 

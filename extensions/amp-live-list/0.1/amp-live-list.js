@@ -17,11 +17,7 @@
 
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
-import {
-  installLiveListManager,
-  getLiveListManager,
-  LiveListManager,
-} from './live-list-manager';
+import {getLiveListManager, LiveListManager} from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 
@@ -184,7 +180,6 @@ export class AmpLiveList extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
 
-    installLiveListManager(this.win);
     this.manager_ = getLiveListManager(this.win);
 
     this.updateSlot_ = user().assert(

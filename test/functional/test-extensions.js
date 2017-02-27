@@ -447,7 +447,6 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should adopt core services', () => {
-      ;
       const actionsMock = sandbox.mock(
           parentWin.services['action'].obj);
       const standardActionsMock = sandbox.mock(

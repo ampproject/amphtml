@@ -16,9 +16,7 @@
 
 import * as sinon from 'sinon';
 import {AmpFresh} from '../amp-fresh';
-import {
-  getAmpFreshManagerForDoc,
- } from '../amp-fresh-manager';
+import {getAmpFreshManagerForDoc} from '../amp-fresh-manager';
 import {installXhrService} from '../../../../src/service/xhr-impl';
 import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';

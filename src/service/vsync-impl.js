@@ -441,10 +441,13 @@ function callTaskNoInline(callback, state) {
   return true;
 }
 
+/**
+ * @param {!Window} window
+ * @return {!Vsync}
+ */
 function installVsyncInternal(window) {
   installTimerService(window);
   registerService(window, 'vsync', Vsync);
-  /** Immediately instantiate */
   return getService(window, 'vsync');
 }
 
