@@ -365,7 +365,7 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should update viewport when entering lightbox mode', () => {
     viewport.vsync_ = {mutate: callback => callback()};
-    const disableTouchZoomStub = sandbox.stub(viewport, 'disableTouchZoom');
+    const enterOverlayModeStub = sandbox.stub(viewport, 'enterOverlayMode');
     const hideFixedLayerStub = sandbox.stub(viewport, 'hideFixedLayer');
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateLightboxMode').withArgs(true).once();
@@ -373,7 +373,7 @@ describes.fakeWin('Viewport', {}, env => {
     viewport.enterLightboxMode();
 
     bindingMock.verify();
-    expect(disableTouchZoomStub).to.be.calledOnce;
+    expect(enterOverlayModeStub).to.be.calledOnce;
     expect(hideFixedLayerStub).to.be.calledOnce;
 
     expect(viewer.sendMessage).to.have.been.calledOnce;
@@ -383,8 +383,7 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should update viewport when leaving lightbox mode', () => {
     viewport.vsync_ = {mutate: callback => callback()};
-    const restoreOriginalTouchZoomStub = sandbox.stub(viewport,
-        'restoreOriginalTouchZoom');
+    const leaveOverlayModeStub = sandbox.stub(viewport, 'leaveOverlayMode');
     const showFixedLayerStub = sandbox.stub(viewport, 'showFixedLayer');
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateLightboxMode').withArgs(false).once();
@@ -392,12 +391,33 @@ describes.fakeWin('Viewport', {}, env => {
     viewport.leaveLightboxMode();
 
     bindingMock.verify();
-    expect(restoreOriginalTouchZoomStub).to.be.calledOnce;
+    expect(leaveOverlayModeStub).to.be.calledOnce;
     expect(showFixedLayerStub).to.be.calledOnce;
 
     expect(viewer.sendMessage).to.have.been.calledOnce;
     expect(viewer.sendMessage).to.have.been.calledWith('cancelFullOverlay',
         {}, true);
+  });
+
+  it('should update viewport when entering overlay mode', () => {
+    const disableTouchZoomStub = sandbox.stub(viewport, 'disableTouchZoom');
+    const disableScrollStub = sandbox.stub(viewport, 'disableScroll');
+
+    viewport.enterOverlayMode();
+
+    expect(disableTouchZoomStub).to.be.calledOnce;
+    expect(disableScrollStub).to.be.calledOnce;
+  });
+
+  it('should update viewport when leaving overlay mode', () => {
+    const restoreOriginalTouchZoomStub = sandbox.stub(viewport,
+        'restoreOriginalTouchZoom');
+    const resetScrollStub = sandbox.stub(viewport, 'resetScroll');
+
+    viewport.leaveOverlayMode();
+
+    expect(restoreOriginalTouchZoomStub).to.be.calledOnce;
+    expect(resetScrollStub).to.be.calledOnce;
   });
 
   it('should send scroll events', () => {
