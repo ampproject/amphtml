@@ -31,6 +31,13 @@ describes.realWin('placement', {
 
   beforeEach(() => {
     sandbox = env.sandbox.create();
+
+    env.win.frameElement.style.height = '1000px';
+
+    const belowFoldSpacer = document.createElement('div');
+    belowFoldSpacer.style.height = '1000px';
+    env.win.document.body.appendChild(belowFoldSpacer);
+
     container = env.win.document.createElement('div');
     env.win.document.body.appendChild(container);
   });
