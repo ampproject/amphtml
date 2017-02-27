@@ -333,6 +333,8 @@ export class AmpLiveList extends AMP.BaseElement {
       // number of items to delete down to `data-max-items-per-page`.
       return this.removeOverflowItems_(itemsSlot);
       // TODO(erwinm, #3332) compensate scroll position here.
+    }).then(() => {
+      this.sendAmpDomUpdateEvent_();
     });
 
     if (hasInsertItems) {
@@ -829,6 +831,11 @@ export class AmpLiveList extends AMP.BaseElement {
   /** @override */
   getUpdateTime() {
     return this.updateTime_;
+  }
+
+  sendAmpDomUpdateEvent_() {
+    const event = new Event('amp-dom-update');
+    this.win.dispatchEvent(event);
   }
 }
 

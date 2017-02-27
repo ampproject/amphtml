@@ -31,6 +31,10 @@ var url = require('url');
 
 app.use(bodyParser.json());
 
+app.use('/ping', function(req, res, next) {
+  res.end('pong');
+});
+
 app.use('/pwa', function(req, res, next) {
   var file;
   var contentType;
@@ -316,10 +320,10 @@ app.use('/examples/live-list-update.amp.(min|max).html', function(req, res) {
 });
 
 function liveListReplace(item) {
-  item.setAttribute('data-update-time', Date.now());
-  var itemContents = item.querySelectorAll('.content');
-  itemContents[0].textContent = Math.floor(Math.random() * 10);
-  itemContents[1].textContent = Math.floor(Math.random() * 10);
+  //item.setAttribute('data-update-time', Date.now());
+  //var itemContents = item.querySelectorAll('.content');
+  //itemContents[0].textContent = Math.floor(Math.random() * 10);
+  //itemContents[1].textContent = Math.floor(Math.random() * 10);
 }
 
 function liveListInsert(liveList, node) {

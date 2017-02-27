@@ -721,7 +721,9 @@ function isDisabled_(element) {
 function installSubmissionHandlers(win) {
   onDocumentReady(win.document, doc => {
     toArray(doc.forms).forEach((form, index) => {
-      new AmpForm(form, `amp-form-${index}`);
+      if (!form.classList.contains('-amp-form')) {
+        new AmpForm(form, `amp-form-${index}`);
+      }
     });
   });
 }
@@ -740,4 +742,15 @@ export function installAmpForm(win) {
   });
 }
 
+/**
+ * @param {!Window} win
+ * @private visible for testing.
+ */
+export function installGlobalEventListener(win) {
+  win.addEventListener('amp-dom-update', function() {
+    installSubmissionHandlers(win);
+  });
+}
+
 installAmpForm(AMP.win);
+installGlobalEventListener(AMP.win);
