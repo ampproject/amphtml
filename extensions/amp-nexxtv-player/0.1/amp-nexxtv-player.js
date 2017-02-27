@@ -129,6 +129,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+
     return true;
   }
 
