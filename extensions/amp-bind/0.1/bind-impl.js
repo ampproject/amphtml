@@ -198,9 +198,8 @@ export class Bind {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
           const parseError = parseErrors[expressionString];
-          const error = new Error(parseError.message);
-          error.stack = parseError.stack;
-          const userError = user().createError(error);
+          const userError = user().createError(parseError.message);
+          userError.stack = parseError.stack;
           reportError(userError, elements[0]);
         }
       });
@@ -410,9 +409,8 @@ export class Bind {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
           const evalError = errors[expressionString];
-          const fullError = new Error(evalError.message);
-          fullError.stack = evalError.stack;
-          const err = user().createError(fullError);
+          const err = user().createError(evalError.message);
+          err.stack = evalError.stack;
           reportError(err, elements[0]);
         }
       });
