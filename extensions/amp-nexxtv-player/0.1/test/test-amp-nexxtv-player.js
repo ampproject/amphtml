@@ -28,99 +28,99 @@ adopt(window);
 
 describe('amp-nexxtv-player', () => {
 
-    let sandbox;
-    const timer = timerFor(window);
+  let sandbox;
+  const timer = timerFor(window);
 
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
 
-    afterEach(() => {
-        sandbox.restore();
-    });
+  afterEach(() => {
+    sandbox.restore();
+  });
 
-    function getNexxtv(mediaid, client){
-        return createIframePromise(true).then(iframe => {
-            doNotLoadExternalResourcesInTest(iframe.win);
-            const nexxtv = iframe.doc.createElement('amp-nexxtv-player');
+  function getNexxtv(mediaid, client){
+    return createIframePromise(true).then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
+      const nexxtv = iframe.doc.createElement('amp-nexxtv-player');
 
-            if (mediaid) {
-                nexxtv.setAttribute('data-mediaid', mediaid);
-            }
-            if (client) {
-                nexxtv.setAttribute('data-client', client);
-            }
+      if (mediaid) {
+        nexxtv.setAttribute('data-mediaid', mediaid);
+      }
+      if (client) {
+        nexxtv.setAttribute('data-client', client);
+      }
 
-            // see yt test implementation
-            timer.promise(50).then(() => {
-                const nexxTimerIframe = nexxtv.querySelector('iframe');
+      // see yt test implementation
+      timer.promise(50).then(() => {
+        const nexxTimerIframe = nexxtv.querySelector('iframe');
 
-                nexxtv.implementation_.handleNexxMessages_({
-                    origin: 'https://embed.nexx.cloud',
-                    source: nexxTimerIframe.contentWindow,
-                    data: JSON.stringify({cmd: 'onload'}),
-                });
-            });
-
-            return iframe.addElement(nexxtv);
-        });
-    }
-
-    it('renders nexxtv video player', () => {
-        return getNexxtv('PTPFEC4U184674', '583').then(nexxtv => {
-            const playerIframe = nexxtv.querySelector('iframe');
-
-            expect(playerIframe).to.not.be.null;
-            expect(playerIframe.src).to.equal('https://embed.nexx.cloud/583/PTPFEC4U184674?start=0&datamode=static&amp=1');
-        });
-    });
-
-    it('fails without mediaid', () => {
-        return getNexxtv(null, '583').should.eventually.be.rejectedWith(
-            /The data-mediaid attribute is required/);
-    });
-
-    it('fails without client', () => {
-        return getNexxtv('PTPFEC4U184674', null).should.eventually.be.rejectedWith(
-            /The data-client attribute is required/);
-    });
-
-
-    it('should forward certain events from nexxtv-player to the amp element', () => {
-        return getNexxtv('PTPFEC4U184674', '583').then(nexxtv => {
-            const iframe = nexxtv.querySelector('iframe');
-
-            return Promise.resolve()
-                .then(() => {
-                    const p = listenOncePromise(nexxtv, VideoEvents.PLAY);
-                    sendFakeMessage(nexxtv, iframe, 'play');
-                    return p;
-                })
-                .then(() => {
-                    const p = listenOncePromise(nexxtv, VideoEvents.MUTE);
-                    sendFakeMessage(nexxtv, iframe, 'mute');
-                    return p;
-                })
-                .then(() => {
-                    const p = listenOncePromise(nexxtv, VideoEvents.PAUSE);
-                    sendFakeMessage(nexxtv, iframe, 'pause');
-                    return p;
-                })
-                .then(() => {
-                    const p = listenOncePromise(nexxtv, VideoEvents.UNMUTE);
-                    sendFakeMessage(nexxtv, iframe, 'unmute');
-                    return p;
-                });
-        });
-    });
-
-    function sendFakeMessage(nexxtv, iframe, command) {
         nexxtv.implementation_.handleNexxMessages_({
-            origin: 'https://embed.nexx.cloud',
-            source: iframe.contentWindow,
-            data: JSON.stringify({
-                cmd: command
-            })
+          origin: 'https://embed.nexx.cloud',
+          source: nexxTimerIframe.contentWindow,
+          data: JSON.stringify({cmd: 'onload'}),
         });
-    }
+      });
+
+      return iframe.addElement(nexxtv);
+    });
+  }
+
+  it('renders nexxtv video player', () => {
+    return getNexxtv('PTPFEC4U184674', '583').then(nexxtv => {
+      const playerIframe = nexxtv.querySelector('iframe');
+
+      expect(playerIframe).to.not.be.null;
+      expect(playerIframe.src).to.equal('https://embed.nexx.cloud/583/PTPFEC4U184674?start=0&datamode=static&amp=1');
+    });
+  });
+
+  it('fails without mediaid', () => {
+    return getNexxtv(null, '583').should.eventually.be.rejectedWith(
+      /The data-mediaid attribute is required/);
+  });
+
+  it('fails without client', () => {
+    return getNexxtv('PTPFEC4U184674', null).should.eventually.be.rejectedWith(
+      /The data-client attribute is required/);
+  });
+
+
+  it('should forward certain events from nexxtv-player to the amp element', () => {
+    return getNexxtv('PTPFEC4U184674', '583').then(nexxtv => {
+      const iframe = nexxtv.querySelector('iframe');
+
+      return Promise.resolve()
+        .then(() => {
+          const p = listenOncePromise(nexxtv, VideoEvents.PLAY);
+          sendFakeMessage(nexxtv, iframe, 'play');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(nexxtv, VideoEvents.MUTE);
+          sendFakeMessage(nexxtv, iframe, 'mute');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(nexxtv, VideoEvents.PAUSE);
+          sendFakeMessage(nexxtv, iframe, 'pause');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(nexxtv, VideoEvents.UNMUTE);
+          sendFakeMessage(nexxtv, iframe, 'unmute');
+          return p;
+        });
+    });
+  });
+
+  function sendFakeMessage(nexxtv, iframe, command) {
+    nexxtv.implementation_.handleNexxMessages_({
+      origin: 'https://embed.nexx.cloud',
+      source: iframe.contentWindow,
+      data: JSON.stringify({
+        cmd: command
+      })
+    });
+  }
 });
