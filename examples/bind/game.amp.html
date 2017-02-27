@@ -11,14 +11,8 @@
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
 
   <style amp-custom>
-    .redBackground {
-      background-color: red;
-    }
     button {
       border: solid 1px black;
-    }
-    .grid p {
-
     }
     .hidden {
       display: none;
@@ -30,21 +24,6 @@
   <button onclick="AMP.toggleExperiment('amp-bind');window.location.href=window.location.href;">Toggle &lt;amp-bind&gt; experiment</button>
 
   <h2>Game example: 28 (mini 2048)</h2>
-
-  <p class="grid">
-    <span [text]="G.grid[0][0]">2</span> <span [text]="G.grid[0][1]">2</span>
-    <br>
-    <span [text]="G.grid[1][0]">2</span> <span [text]="G.grid[1][1]">0</span>
-  </p>
-
-  <h2>Score: <span [text]="G.grid[0][0] + G.grid[0][1] + G.grid[1][0] + G.grid[1][1]">0</span></h2>
-
-  <h2 class="hidden" [class]="(
-      (G.grid[0][0] != G.grid[0][1] && G.grid[1][0] != G.grid[1][1] && G.grid[0][0] != G.grid[1][0] && G.grid[0][1] != G.grid[1][1]) &&
-      (G.grid[0][0] > 0 && G.grid[0][1] > 0 && G.grid[1][0] > 0 && G.grid[1][1] > 0)
-  ) ? 'lose' : 'hidden'">
-      You <span [text]="(G.grid[0][0] + G.grid[0][1] + G.grid[1][0] + G.grid[1][1] >= 30) ? 'WON' : 'LOST'"></span>!
-  </h2>
 
   <button on="tap:AMP.setState({
     'G': {
@@ -58,11 +37,80 @@
 
   <br>
 
+  <h2>Score: <span [text]="G.grid[0][0] + G.grid[0][1] + G.grid[1][0] + G.grid[1][1]">0</span></h2>
+
+  <h2 class="hidden" [class]="(
+      (G.grid[0][0] != G.grid[0][1] && G.grid[1][0] != G.grid[1][1] && G.grid[0][0] != G.grid[1][0] && G.grid[0][1] != G.grid[1][1]) &&
+      (G.grid[0][0] > 0 && G.grid[0][1] > 0 && G.grid[1][0] > 0 && G.grid[1][1] > 0)
+  ) ? '' : 'hidden'">
+      You <span [text]="(G.grid[0][0] + G.grid[0][1] + G.grid[1][0] + G.grid[1][1] >= 30) ? 'WON' : 'LOST'"></span>!
+  </h2>
+
+  <p class="grid">
+    <span [text]="G.grid[0][0]">2</span> <span [text]="G.grid[0][1]">2</span>
+    <br>
+    <span [text]="G.grid[1][0]">2</span> <span [text]="G.grid[1][1]">0</span>
+  </p>
+
   <!--
-  cases for RIGHT:
-    1. X, X -> ?, X+X
-    2. 0, X -> 0, X
-    3. X, 0 -> ?, X
+  cases for UP:
+    1. X, -> X+X,
+       X     ?
+    2. 0, -> X,
+       X     ?
+    3. X, -> X,
+       0     0
+    4. X, -> X,
+       Y     Y
+  -->
+
+  <button on="tap:AMP.setState({
+    'G': {
+      'grid': [
+        [
+          (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? G.grid[0][0] + G.grid[1][0] :
+              (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? G.grid[1][0] :
+                  (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? G.grid[0][0] :
+                      G.grid[0][0]
+                  )
+              )
+          ),
+          (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? G.grid[0][1] + G.grid[1][1] :
+              (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? G.grid[1][1] :
+                  (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? G.grid[0][1] :
+                      G.grid[0][1]
+                  )
+              )
+          )
+        ],
+        [
+          (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? (Math.random() < G.spawnChance ? 2 : 0) :
+              (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? (Math.random() < G.spawnChance ? 2 : 0) :
+                  (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? 0 :
+                      G.grid[1][0]
+                  )
+              )
+          ),
+          (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? (Math.random() < G.spawnChance ? 2 : 0) :
+              (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? (Math.random() < G.spawnChance ? 2 : 0) :
+                  (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? 0 :
+                      G.grid[1][1]
+                  )
+              )
+          )
+        ]
+      ],
+      'spawnChance': G.spawnChance
+    }
+  })">UP</button>
+
+  <br>
+
+  <!--
+  cases for LEFT:
+    1. X, X -> X+X, ?
+    2. 0, X -> X, 0
+    3. X, 0 -> X, ?
     4. X, Y -> X, Y
   -->
 
@@ -110,45 +158,7 @@
     }
   })">RIGHT</button>
 
-  <button on="tap:AMP.setState({
-    'G': {
-      'grid': [
-        [
-          (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? G.grid[0][0] + G.grid[1][0] :
-              (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? G.grid[1][0] :
-                  (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? G.grid[0][0] :
-                      G.grid[0][0]
-                  )
-              )
-          ),
-          (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? G.grid[0][1] + G.grid[1][1] :
-              (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? G.grid[1][1] :
-                  (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? G.grid[0][1] :
-                      G.grid[0][1]
-                  )
-              )
-          )
-        ],
-        [
-          (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? (Math.random() < G.spawnChance ? 2 : 0) :
-              (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? (Math.random() < G.spawnChance ? 2 : 0) :
-                  (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? 0 :
-                      G.grid[1][0]
-                  )
-              )
-          ),
-          (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? (Math.random() < G.spawnChance ? 2 : 0) :
-              (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? (Math.random() < G.spawnChance ? 2 : 0) :
-                  (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? 0 :
-                      G.grid[1][1]
-                  )
-              )
-          )
-        ]
-      ],
-      'spawnChance': G.spawnChance
-    }
-  })">UP</button>
+  <br>
 
   <button on="tap:AMP.setState({
     'G': {
