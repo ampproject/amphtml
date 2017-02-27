@@ -20,9 +20,6 @@ import {user} from '../../../src/log';
 import {CSS} from '../../../build/amp-copy-0.1.css';
 
 /** @const */
-const IOS_USER_AGENT = /ipad|ipod|iphone/i;
-
-/** @const */
 const COPY_SUCCESS = 'Copied!';
 
 /** @const */
@@ -125,13 +122,9 @@ class AmpCopy extends AMP.BaseElement {
     //Create the copy notification element, this is done here, as it is not
     //immediately required.
     return new Promise((resolve) => {
-      try {
-        this.copyNotification_ = this.element.ownerDocument.createElement('span');
-        this.copyNotification_.className = "amp-copy-notification"
-        resolve();
-      } catch(err) {
-        reject(err);
-      }
+      this.copyNotification_ = this.element.ownerDocument.createElement('span');
+      this.copyNotification_.className = "amp-copy-notification"
+      resolve();
     });
   }
 

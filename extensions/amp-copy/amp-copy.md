@@ -22,9 +22,8 @@ limitations under the License.
     <td>Shows text, with a button to copy to the user's clipboard.</td>
   </tr>
   <tr>
-    <!-- TODO: Change this? -->
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
+    <td>Experimental</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
