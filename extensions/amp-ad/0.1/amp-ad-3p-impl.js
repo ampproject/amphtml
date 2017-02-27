@@ -84,8 +84,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {IntersectionObserver} */
     this.intersectionObserver_ = null;
 
-    /** @private {?string|undefined} */
-    this.container_ = undefined;
+    /** {?string|undefined} */
+    this.container = undefined;
 
     /** @private {?Promise} */
     this.layoutPromise_ = null;
@@ -172,8 +172,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   onLayoutMeasure() {
     this.isInFixedContainer_ = !isAdPositionAllowed(this.element, this.win);
     /** detect ad containers, add the list to element as a new attribute */
-    if (this.container_ === undefined) {
-      this.container_ = getAdContainer(this.element);
+    if (this.container === undefined) {
+      this.container = getAdContainer(this.element);
     }
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
@@ -232,7 +232,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.uiHandler.setDisplayState(AdDisplayState.LOADING);
       const opt_context = {
         clientId: cid || null,
-        container: this.container_,
+        container: this.container,
       };
 
       // In this path, the request and render start events are entangled,

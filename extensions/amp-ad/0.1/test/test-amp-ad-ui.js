@@ -35,6 +35,15 @@ describes.realWin('amp-ad-ui handler', {
   });
 
   describe('with state LOADED_NO_CONTENT', () => {
+    it('should force collapse ad in special container', () => {
+      adImpl.container = 'AMP-STICKY-AD';
+      const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
+      const collapseSpy = sandbox.spy(adImpl, 'collapse');
+      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      expect(collapseSpy).to.be.calledOnce;
+      expect(attemptCollapseSpy).to.not.be.called;
+    });
+
     it('should try to collapse element first', () => {
       sandbox.stub(adImpl, 'getFallback', () => {
         return true;

@@ -141,6 +141,12 @@ export class AmpAdUIHandler {
    * @private
    */
   displayNoContentUI_() {
+    if (this.baseInstance_.container == 'AMP-STICKY-AD') {
+      // force collapse the sticky-ad
+      this.baseInstance_.collapse();
+      this.state = AdDisplayState.LOADED_NO_CONTENT;
+      return;
+    }
     // The order here is collapse > user provided fallback > default fallback
     this.baseInstance_.attemptCollapse().then(() => {
       this.state = AdDisplayState.LOADED_NO_CONTENT;
