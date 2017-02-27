@@ -110,18 +110,10 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
         this.win.addEventListener('message',
             event => this.handleNexxMessages_(event));
 
-        /*console.log('LAYOUT CALLBACK');
-        console.log(this.handleNexxMessages_({
-            origin: 'https://embed.nexx.cloud',
-            source: this.iframe_.contentWindow,
-            data: JSON.stringify({
-                cmd: 'unmute'
-            })}));*/
-
         return this.loadPromise(this.iframe_)
             .then(() => {
-                this.element.dispatchCustomEvent(VideoEvents.LOAD);
                 this.playerReadyPromise_;
+                this.element.dispatchCustomEvent(VideoEvents.LOAD);
             });
     }
 
@@ -146,25 +138,17 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
         if (data === undefined) {
             return; // We only process valid JSON.
         }
-        console.log('CMD', data);
-
-        // this.element.dispatchCustomEvent(VideoEvents.PAUSE);
 
         if(data.cmd == 'onload'){
-            console.log('ONLOAD');
             this.element.dispatchCustomEvent(VideoEvents.LOAD);
             this.playerReadyResolver_(this.iframe_);
         } else if (data.cmd == 'play') {
-            console.log('PLAY');
             this.element.dispatchCustomEvent(VideoEvents.PLAY);
         } else if (data.cmd == 'pause') {
-            console.log('PAUSE');
             this.element.dispatchCustomEvent(VideoEvents.PAUSE);
         } else if (data.cmd == 'mute') {
-            console.log('MUTE');
             this.element.dispatchCustomEvent(VideoEvents.MUTE);
         } else if (data.cmd == 'unmute') {
-            console.log('UNMUTE');
             this.element.dispatchCustomEvent(VideoEvents.UNMUTE);
         }
     }
