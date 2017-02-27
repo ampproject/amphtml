@@ -18,13 +18,16 @@
  * @implements {../../../src/video-interface.VideoInterface}
  */
 
-import {isLayoutSizeDefined} from "../../../src/layout";
-import {user} from "../../../src/log";
-import {installVideoManagerForDoc} from "../../../src/service/video-manager-impl";
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {user} from '../../../src/log';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
+import {removeElement} from '../../../src/dom';
 import {isObject} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from "../../../src/video-manager";
+import {videoManagerForDoc} from '../../../src/video-manager';
 
 class AmpNexxtvPlayer extends AMP.BaseElement {
 
@@ -70,9 +73,10 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       this.element);
 
     this.start_ = this.element.getAttribute('data-seek-to') || 0;
-    this.mode_ = this.element.getAttribute('data-mode') || 'static'; // default
-    this.streamtype_ = this.element.getAttribute('data-streamtype') || 'video'; // default
-    this.origin_ = this.element.getAttribute('data-origin') || 'https://embed.nexx.cloud/'; // default
+    this.mode_ = this.element.getAttribute('data-mode') || 'static';
+    this.streamtype_ = this.element.getAttribute('data-streamtype') || 'video';
+    this.origin_ = this.element.getAttribute('data-origin')
+                  || 'https://embed.nexx.cloud/';
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
@@ -97,11 +101,12 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   layoutCallback() {
     let src = this.origin_;
 
-    if(this.streamtype_ !== 'video'){
+    if (this.streamtype_ !== 'video') {
       src += `${encodeURIComponent(this.streamtype_)}/`;
     }
 
-    src += `${encodeURIComponent(this.client_)}/${encodeURIComponent(this.mediaid_)}`;
+    src += `${encodeURIComponent(this.client_)}/`;
+    src += `${encodeURIComponent(this.mediaid_)}`;
     src += `?start=${encodeURIComponent(this.start_)}`;
     src += `&datamode=${encodeURIComponent(this.mode_)}&amp=1`;
 
@@ -117,7 +122,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       });
   }
 
-  pauseCallback(){
+  pauseCallback() {
     // Only send pauseVideo command if the player is playing. Otherwise
     // The player breaks if the user haven't played the video yet specially
     // on mobile.
@@ -135,28 +140,28 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     return true;
   }
 
-  sendCommand_(command){
+  sendCommand_(command) {
     this.iframe_.contentWindow.postMessage(JSON.stringify({
-      'cmd': command
+      'cmd': command,
     }), '*');
   };
 
   // emitter
   handleNexxMessages_(event) {
     const data = isObject(event.data) ? event.data : tryParseJson(event.data);
-      if (data === undefined) {
+    if (data === undefined) {
       return; // We only process valid JSON.
     }
 
-    if(data.cmd == 'onload'){
+    if (data.cmd == 'onload') {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
       this.playerReadyResolver_(this.iframe_);
     } else if (data.cmd == 'play') {
-     this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      this.element.dispatchCustomEvent(VideoEvents.PLAY);
     } else if (data.cmd == 'pause') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     } else if (data.cmd == 'mute') {
-     this.element.dispatchCustomEvent(VideoEvents.MUTE);
+      this.element.dispatchCustomEvent(VideoEvents.MUTE);
     } else if (data.cmd == 'unmute') {
       this.element.dispatchCustomEvent(VideoEvents.UNMUTE);
     }
