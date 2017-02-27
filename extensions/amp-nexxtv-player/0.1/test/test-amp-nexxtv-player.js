@@ -27,7 +27,7 @@ import * as sinon from 'sinon';
 adopt(window);
 
 describe('amp-nexxtv-player', () => {
-  
+
   let sandbox;
   const timer = timerFor(window);
 
