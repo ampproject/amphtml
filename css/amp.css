@@ -47,6 +47,9 @@ body {
   text-size-adjust: 100%;
 }
 
+[hidden] {
+  display: none !important;
+}
 
 /**
  * The enables passive touch handlers, e.g. for document swipe, since they

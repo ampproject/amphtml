@@ -1308,7 +1308,6 @@ function createBaseCustomElementClass(win) {
     /**
      * Collapses the element, and notifies its owner (if there is one) that the
      * element is no longer present.
-     * @suppress {missingProperties}
      */
     collapse() {
       this.implementation_./*OK*/collapse();
@@ -1317,10 +1316,25 @@ function createBaseCustomElementClass(win) {
     /**
      * Called every time an owned AmpElement collapses itself.
      * @param {!AmpElement} element
-     * @suppress {missingProperties}
      */
     collapsedCallback(element) {
       this.implementation_.collapsedCallback(element);
+    }
+
+    /**
+     * Expands the element, and notifies its owner (if there is one) that the
+     * element is now present.
+     */
+    expand() {
+      this.implementation_./*OK*/expand();
+    }
+
+    /**
+     * Called every time an owned AmpElement expands itself.
+     * @param {!AmpElement} element
+     */
+    expandedCallback(element) {
+      this.implementation_.expandedCallback(element);
     }
 
     /**
