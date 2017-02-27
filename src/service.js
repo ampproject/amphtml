@@ -179,10 +179,14 @@ export function getService(win, id, opt_factory) {
  * @param {!Window} win
  * @param {string} id of the service.
  * @param {function(new:Object, !Window)} constructor
+ * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
-export function registerService(win, id, constructor) {
+export function registerService(win, id, constructor, opt_instantiate) {
   win = getTopWindow(win);
   registerServiceInternal(win, win, id, constructor);
+  if (opt_instantiate) {
+    getServiceInternal(win, win, id);
+  }
 }
 
 
@@ -241,14 +245,19 @@ export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} constructor
+ * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
-export function registerServiceForDoc(nodeOrDoc, id, constructor) {
+export function registerServiceForDoc(
+  nodeOrDoc,
+  id,
+  constructor,
+  opt_instantiate) {
   const ampdoc = getAmpdoc(nodeOrDoc);
-  registerServiceInternal(
-      getAmpdocServiceHolder(ampdoc),
-      ampdoc,
-      id,
-      constructor);
+  const holder = getAmpdocServiceHolder(ampdoc);
+  registerServiceInternal(holder, ampdoc, id, constructor);
+  if (opt_instantiate) {
+    getServiceInternal(holder, ampdoc, id);
+  }
 }
 
 
