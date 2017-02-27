@@ -239,21 +239,31 @@ describe('BindExpression', () => {
   });
 
   it('should support select Math functions', () => {
-    expect(evaluate('Math.abs(-1)')).to.equal(1);
-    expect(evaluate('Math.ceil(0.1)')).to.equal(1);
-    expect(evaluate('Math.floor(1.9)')).to.equal(1);
-    expect(evaluate('Math.round(0.6)')).to.equal(1);
-    const r = evaluate('Math.random()');
+    expect(evaluate('abs(-1)')).to.equal(1);
+    expect(evaluate('ceil(0.1)')).to.equal(1);
+    expect(evaluate('floor(1.9)')).to.equal(1);
+    expect(evaluate('max(0, 1)')).to.equal(1);
+    expect(evaluate('min(0, 1)')).to.equal(0);
+    expect(evaluate('round(0.6)')).to.equal(1);
+    const r = evaluate('random()');
     expect(r).to.be.at.least(0);
     expect(r).to.be.at.below(1);
-    expect(evaluate('Math.max(0, 1)')).to.equal(1);
-    expect(evaluate('Math.min(0, 1)')).to.equal(0);
+    expect(evaluate('sign(-1)')).to.equal(-1);
 
+    // Functions should not conflict with scope variables.
+    expect(evaluate('abs(-2) + abs', {abs: 2})).to.equal(4);
+
+    // Don't support non-whitelisted functions.
     expect(() => {
-      evaluate('Math.sin(0.5)');
+      evaluate('sin(0.5)');
     }).to.throw(unsupportedFunctionError);
     expect(() => {
-      evaluate('Math.pow(3, 2)');
+      evaluate('pow(3, 2)');
+    }).to.throw(unsupportedFunctionError);
+
+    // Don't support calling functions with `Math.` prefix.
+    expect(() => {
+      evaluate('Math.abs(-1)', {Math});
     }).to.throw(unsupportedFunctionError);
   });
 
@@ -400,7 +410,7 @@ describe('BindExpression', () => {
   });
 
   /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects */
-  it('should NOT allow access to non-whitelisted globals', () => {
+  it('should NOT allow access to globals', () => {
     expect(evaluate('window')).to.be.null;
     expect(evaluate('arguments')).to.be.null;
 
@@ -435,6 +445,7 @@ describe('BindExpression', () => {
     expect(evaluate('URIError')).to.be.null;
 
     expect(evaluate('Number')).to.be.null;
+    expect(evaluate('Math')).to.be.null;
     expect(evaluate('Date')).to.be.null;
 
     expect(evaluate('String')).to.be.null;
