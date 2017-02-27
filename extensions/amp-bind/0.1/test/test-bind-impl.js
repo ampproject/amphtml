@@ -113,18 +113,6 @@ describes.realWin('amp-bind', {
     });
   }
 
-  /**
-   * Calls `callback` when digest that updates bind state to `state` completes.
-   * @param {!Object} state
-   * @param {!Function} callback
-   * @return {!Promise}
-   */
-  function onBindReadyAndSetStateWithExpression(expression, scope) {
-    return bind.setStateWithExpression(expression, scope).then(() => {
-      env.flushVsync();
-    });
-  }
-
   it('should throw error if experiment is not enabled', () => {
     toggleExperiment(env.win, 'amp-bind', false);
     expect(() => {
