@@ -39,7 +39,14 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyles} from '../../../src/style';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
+import {tryParseJson} from '../../../src/json';
+import {isObject} from '../../../src/types';
+import {listen} from '../../../src/event-helper';
 
+const PADDING_LEFT = 8;
+const PADDING_RIGHT = 8;
+const PADDING_BOTTOM = 48;
+const PADDING_TOP = 48;
 
 class AmpInstagram extends AMP.BaseElement {
 
@@ -55,6 +62,9 @@ class AmpInstagram extends AMP.BaseElement {
 
     /** @private {?string} */
     this.shortcode_ = '';
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
  /**
   * @param {boolean=} opt_onLayout
@@ -102,10 +112,10 @@ class AmpInstagram extends AMP.BaseElement {
     // This makes the non-iframe image appear in the exact same spot
     // where it will be inside of the iframe.
     setStyles(image, {
-      'top': '48px',
-      'bottom': '48px',
-      'left': '8px',
-      'right': '8px',
+      'top': PADDING_TOP + 'px',
+      'bottom': PADDING_BOTTOM + 'px',
+      'left': PADDING_LEFT + 'px',
+      'right': PADDING_RIGHT + 'px',
     });
     placeholder.appendChild(image);
     return placeholder;
@@ -120,6 +130,13 @@ class AmpInstagram extends AMP.BaseElement {
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
+
+    this.unlistenMessage_ = listen(
+      this.win,
+      'message',
+      this.handleInstagramMessages_.bind(this)
+    );
+
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     //Add title to the iframe for better accessibility.
@@ -141,6 +158,32 @@ class AmpInstagram extends AMP.BaseElement {
     });
   }
 
+  /** @private */
+  handleInstagramMessages_(event) {
+    if (event.origin != 'https://www.instagram.com' ||
+        event.source != this.iframe_.contentWindow) {
+      return;
+    }
+    if (!event.data ||
+        !(isObject(event.data) || event.data.indexOf('{') == 0)) {
+      return;  // Doesn't look like JSON.
+    }
+    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    if (data === undefined) {
+      return; // We only process valid JSON.
+    }
+    if (data.type == 'MEASURE' && data.details) {
+      const height = data.details.height;
+      this.getVsync().measure(() => {
+        if (this.iframe_./*OK*/offsetHeight !== height) {
+          // Height returned by Instagram includes header, so
+          // subtract 48px top padding
+          this.attemptChangeHeight(height - PADDING_TOP).catch(() => {});
+        }
+      });
+    }
+  }
+
   /** @override */
   unlayoutOnPause() {
     return true;
@@ -152,6 +195,9 @@ class AmpInstagram extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
       this.iframePromise_ = null;
+    }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
     }
     return true;  // Call layoutCallback again.
   }
