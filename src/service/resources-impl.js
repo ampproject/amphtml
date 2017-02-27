@@ -24,11 +24,11 @@ import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
-import {fromClassForDoc} from '../service';
+import {registerServiceForDoc, getServiceForDoc} from '../service';
 import {inputFor} from '../input';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
-import {installVsyncService} from './vsync-impl';
+import {getVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
@@ -167,7 +167,7 @@ export class Resources {
     this.viewport_ = viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = installVsyncService(this.win);
+    this.vsync_ = getVsyncService(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -1936,6 +1936,16 @@ export let SizeDef;
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Resources}
  */
+export function getResourcesServiceForDoc(ampdoc) {
+  installResourcesServiceForDoc(ampdoc);
+  return getServiceForDoc(ampdoc, 'resources');
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ */
 export function installResourcesServiceForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'resources', Resources);
+  registerServiceForDoc(ampdoc, 'resources', Resources);
 };
+
+

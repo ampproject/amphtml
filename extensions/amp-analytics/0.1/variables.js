@@ -17,7 +17,7 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {cryptoFor} from '../../../src/crypto';
 import {dev, user} from '../../../src/log';
-import {fromClass} from '../../../src/service';
+import {registerService, getService} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 
@@ -299,11 +299,22 @@ export class VariableService {
   }
 }
 
+/**
+ * @param {!Window} win
+ */
+export function installVariableService(win) {
+  registerService(
+    win,
+    'amp-analytics-variables',
+    VariableService,
+    /* opt_instantiate */ true);
+}
 
 /**
  * @param {!Window} win
  * @return {!VariableService}
  */
-export function variableServiceFor(win) {
-  return fromClass(win, 'amp-analytics-variables', VariableService);
+export function getVariableService(win) {
+  installVariableService(win);
+  return getService(win, 'amp-analytics-variables');
 }

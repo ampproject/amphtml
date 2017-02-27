@@ -22,6 +22,7 @@
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {listen} from '../../../src/event-helper';
+import {registerServiceForDoc, getServiceForDoc} from '../../../src/service';
 
 
 /**
@@ -118,6 +119,15 @@ class ActivityHistory {
 const ACTIVE_EVENT_TYPES = [
   'mousedown', 'mouseup', 'mousemove', 'keydown', 'keyup',
 ];
+
+/**
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+ * @return {Activity}
+ */
+export function activityServiceForTesting(ampDoc) {
+  registerServiceForDoc(ampDoc, 'activity', Activity);
+  return getServiceForDoc(ampDoc, 'activity');
+}
 
 export class Activity {
 

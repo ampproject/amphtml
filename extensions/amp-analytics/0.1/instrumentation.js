@@ -33,8 +33,12 @@ import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {
+  getParentWindowFrameElement,
+  getServiceForDoc,
+  getServicePromiseForDoc,
+  registerServiceForDoc,
+} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {timerFor} from '../../../src/timer';
@@ -98,7 +102,6 @@ const EVENT_TRACKERS = {
 
 /** @const {string} */
 const TAG = 'Analytics.Instrumentation';
-
 
 /**
  * Events that can result in analytics data to be sent.
@@ -577,7 +580,17 @@ export class AnalyticsGroup {
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<InstrumentationService>}
  */
-export function instrumentationServiceForDoc(nodeOrDoc) {
+export function instrumentationServicePromiseForDoc(nodeOrDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
       getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
+}
+
+/*
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!InstrumentationService}
+ */
+export function instrumentationServiceForDocForTesting(nodeOrDoc) {
+  registerServiceForDoc(
+      nodeOrDoc, 'amp-analytics-instrumentation', InstrumentationService);
+  return getServiceForDoc(nodeOrDoc, 'amp-analytics-instrumentation');
 }

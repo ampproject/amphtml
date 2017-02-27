@@ -23,7 +23,7 @@ import {
 import {createElementWithAttributes} from '../../../../src/dom';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {
-  installExtensionsService,
+  getExtensionsService,
 } from '../../../../src/service/extensions-impl';
 import {
   MockA4AImpl,
@@ -162,7 +162,7 @@ describe('Google A4A utils', () => {
           'type': 'adsense',
         });
         const config = {urls: []};
-        const extensions = installExtensionsService(fixture.win);
+        const extensions = getExtensionsService(fixture.win);
         const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
         injectActiveViewAmpAnalyticsElement(
             new MockA4AImpl(element), extensions, config);
@@ -182,7 +182,7 @@ describe('Google A4A utils', () => {
         });
         const urls = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
         const config = {urls};
-        const extensions = installExtensionsService(fixture.win);
+        const extensions = getExtensionsService(fixture.win);
         const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
         injectActiveViewAmpAnalyticsElement(
             new MockA4AImpl(element), extensions, config);

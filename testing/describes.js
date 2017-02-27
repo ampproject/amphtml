@@ -37,7 +37,7 @@ import {createAmpElementProto} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {
   installBuiltinElements,
-  installExtensionsService,
+  getExtensionsService,
   registerExtension,
 } from '../src/service/extensions-impl';
 import {resetScheduledElementForTesting} from '../src/custom-element';
@@ -474,7 +474,7 @@ class AmpFixture {
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
     const ampdocService = installDocService(win, singleDoc);
     env.ampdocService  = ampdocService;
-    env.extensions = installExtensionsService(win);
+    env.extensions = getExtensionsService(win);
     installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {

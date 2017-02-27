@@ -16,7 +16,7 @@
 
 import {documentInfoForDoc} from '../document-info';
 import {layoutRectLtwh} from '../layout-rect';
-import {fromClass} from '../service';
+import {registerService, getService} from '../service';
 import {resourcesForDoc} from '../resources';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
@@ -401,8 +401,16 @@ export class Performance {
 
 /**
  * @param {!Window} window
- * @return {!Performance}
  */
 export function installPerformanceService(window) {
-  return fromClass(window, 'performance', Performance);
-};
+  registerService(window, 'performance', Performance);
+}
+
+/**
+ * @param {!Window} window
+ * @return {!Performance}
+ */
+export function getPerformanceService(window) {
+  installPerformanceService(window);
+  return getService(window, 'performance');
+}

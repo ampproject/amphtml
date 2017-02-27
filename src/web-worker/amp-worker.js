@@ -17,7 +17,7 @@
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev} from '../log';
-import {fromClass} from '../service';
+import {registerService, getService} from '../service';
 import {getMode} from '../mode';
 import {isExperimentOn} from '../experiments';
 import {xhrFor} from '../xhr';
@@ -28,6 +28,15 @@ const TAG = 'web-worker';
  * @typedef {{method: string, resolve: !Function, reject: !Function}}
  */
 let PendingMessageDef;
+
+/**
+ * @param {!Window} win
+ * @private
+ */
+function installWebWorker(win) {
+  registerService(win, 'amp-worker', AmpWorker);
+}
+
 
 /**
  * Invokes function named `method` with args `opt_args` on the web worker
@@ -45,7 +54,8 @@ export function invokeWebWorker(win, method, opt_args) {
   if (!win.Worker) {
     return Promise.reject('Worker not supported in window.');
   }
-  const worker = fromClass(win, 'amp-worker', AmpWorker);
+  installWebWorker(win);
+  const worker = getService(win, 'amp-worker');
   return worker.sendMessage_(method, opt_args || []);
 }
 
@@ -55,7 +65,8 @@ export function invokeWebWorker(win, method, opt_args) {
  * @visibleForTesting
  */
 export function ampWorkerForTesting(win) {
-  return fromClass(win, 'amp-worker', AmpWorker);
+  installWebWorker(win);
+  return getService(win, 'amp-worker');
 }
 
 /**

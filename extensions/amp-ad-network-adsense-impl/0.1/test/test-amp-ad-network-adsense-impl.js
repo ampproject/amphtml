@@ -20,7 +20,7 @@ import {
   resetSharedState,
 } from '../amp-ad-network-adsense-impl';
 import {
-  installExtensionsService,
+  getExtensionsService,
 } from '../../../../src/service/extensions-impl';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
@@ -343,7 +343,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'type': 'adsense',
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
-        const extensions = installExtensionsService(impl.win);
+        const extensions = getExtensionsService(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });

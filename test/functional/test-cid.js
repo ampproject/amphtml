@@ -16,11 +16,11 @@
 
 import {cidForDoc} from '../../src/cid';
 import {
-  installCidServiceForDocForTesting,
+  cidServiceForDocForTesting,
   getProxySourceOrigin,
   viewerBaseCid,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
-import {installCryptoService, Crypto,}
+import {installCryptoService, Crypto, cryptoServiceForTesting,}
     from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
@@ -32,7 +32,7 @@ import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {
-  installExtensionsService,
+  getExtensionsService,
 } from '../../src/service/extensions-impl';
 import * as sinon from 'sinon';
 
@@ -103,7 +103,7 @@ describe('cid', () => {
     installPlatformService(fakeWin);
 
     // stub extensions service to provide crypto-polyfill
-    const extensions = installExtensionsService(fakeWin);
+    const extensions = getExtensionsService(fakeWin);
     sandbox.stub(extensions, 'loadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(fakeWin);
@@ -131,8 +131,8 @@ describe('cid', () => {
         });
 
     return Promise
-        .all([installCidServiceForDocForTesting(ampdoc),
-              installCryptoService(fakeWin)])
+        .all([cidServiceForDocForTesting(ampdoc),
+              cryptoServiceForTesting(fakeWin)])
         .then(results => {
           cid = results[0];
           crypto = results[1];
@@ -343,7 +343,7 @@ describe('cid', () => {
     installTimerService(win);
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc2);
-    installCidServiceForDocForTesting(ampdoc2);
+    cidServiceForDocForTesting(ampdoc2);
     installCryptoService(win);
     return cidForDoc(ampdoc2).then(cid => {
       return cid.get('foo', hasConsent).then(c1 => {

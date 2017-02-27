@@ -20,7 +20,7 @@ import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {
-  installExtensionsService,
+  getExtensionsService,
 } from '../../src/service/extensions-impl';
 import {stringToBytes} from '../../src/utils/bytes';
 
@@ -93,7 +93,7 @@ describes.realWin('crypto-impl', {}, env => {
   }
 
   function createCrypto(win) {
-    const extensions = installExtensionsService(win);
+    const extensions = getExtensionsService(win);
     sandbox.stub(extensions, 'loadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(win);

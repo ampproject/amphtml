@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForDoc} from './service';
+import {getServiceForDoc} from './service';
 
 
 /**
@@ -23,5 +23,5 @@ import {getExistingServiceForDoc} from './service';
  */
 export function videoManagerForDoc(nodeOrDoc) {
   return /** @type {!./service/video-manager-impl.VideoManager} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'video-manager'));
+      getServiceForDoc(nodeOrDoc, 'video-manager'));
 };

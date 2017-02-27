@@ -15,7 +15,7 @@
  */
 
 import {childElementByTag} from '../dom';
-import {fromClass} from '../service';
+import {registerService, getService} from '../service';
 import {dev, user} from '../log';
 
 
@@ -326,14 +326,29 @@ export class Templates {
  * @package
  */
 export function registerExtendedTemplate(win, type, templateClass) {
-  return installTemplatesService(win).registerTemplate_(type, templateClass);
+  return getTemplatesService(win).registerTemplate_(type, templateClass);
 }
-
 
 /**
  * @param {!Window} window
  * @return {!Templates}
  */
+export function templatesServiceForTesting(window) {
+  return getTemplatesService(window);
+}
+
+/**
+ * @param {!Window} window
+ */
+function getTemplatesService(window) {
+  installTemplatesService(window);
+  return getService(window, 'templates');
+}
+
+
+/**
+ * @param {!Window} window
+ */
 export function installTemplatesService(window) {
-  return fromClass(window, 'templates', Templates);
+  registerService(window, 'templates', Templates);
 };
