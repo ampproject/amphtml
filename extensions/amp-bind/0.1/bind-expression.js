@@ -60,10 +60,11 @@ const FUNCTION_WHITELIST = (function() {
         Math.abs,
         Math.ceil,
         Math.floor,
-        Math.random,
-        Math.round,
         Math.max,
         Math.min,
+        Math.random,
+        Math.round,
+        Math.sign,
       ],
   };
   // Creates a prototype-less map of function name to the function itself.
