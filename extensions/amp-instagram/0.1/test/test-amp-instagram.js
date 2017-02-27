@@ -20,10 +20,21 @@ import {
 } from '../../../../testing/iframe';
 import '../amp-instagram';
 import {adopt} from '../../../../src/runtime';
+import * as sinon from 'sinon';
 
 adopt(window);
 
 describe('amp-instagram', () => {
+
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
 
   function getIns(shortcode, opt_responsive, opt_beforeLayoutCallback) {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
@@ -36,6 +47,21 @@ describe('amp-instagram', () => {
       if (opt_responsive) {
         ins.setAttribute('layout', 'responsive');
       }
+      ins.implementation_.getVsync = () => {
+        return {
+          mutate(cb) { cb(); },
+          measure(cb) { cb(); },
+          runPromise(task, state = {}) {
+            if (task.measure) {
+              task.measure(state);
+            }
+            if (task.mutate) {
+              task.mutate(state);
+            }
+            return Promise.resolve();
+          },
+        };
+      };
       return iframe.addElement(ins);
     });
   }
@@ -116,4 +142,34 @@ describe('amp-instagram', () => {
     expect(getIns('')).to.be.rejectedWith(
         /The data-shortcode attribute is required for/);
   });
+
+  it('resizes in response to messages from Instagram iframe', () => {
+    return getIns('fBwFP', true).then(ins => {
+      const impl = ins.implementation_;
+      const iframe = ins.querySelector('iframe');
+      const attemptChangeHeight = sandbox.spy(impl, 'attemptChangeHeight');
+      const newHeight = 977;
+
+      expect(iframe).to.not.be.null;
+
+      sendFakeMessage(ins, iframe, 'MEASURE', {
+        height: newHeight,
+      });
+
+      expect(attemptChangeHeight).to.be.calledOnce;
+      // Height minus padding
+      expect(attemptChangeHeight.firstCall.args[0]).to.equal(newHeight - 48);
+    });
+  });
+
+  function sendFakeMessage(ins, iframe, type, details) {
+    ins.implementation_.handleInstagramMessages_({
+      origin: 'https://www.instagram.com',
+      source: iframe.contentWindow,
+      data: JSON.stringify({
+        type,
+        details,
+      }),
+    });
+  }
 });
