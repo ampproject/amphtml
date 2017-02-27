@@ -126,6 +126,15 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
   }
 
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
+  }
+
   sendCommand_(command){
     this.iframe_.contentWindow.postMessage(JSON.stringify({
       'cmd': command
