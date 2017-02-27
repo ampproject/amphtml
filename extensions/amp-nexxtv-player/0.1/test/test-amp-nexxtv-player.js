@@ -39,7 +39,7 @@ describe('amp-nexxtv-player', () => {
     sandbox.restore();
   });
 
-  function getNexxtv(mediaid, client){
+  function getNexxtv(mediaid, client) {
     return createIframePromise(true).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const nexxtv = iframe.doc.createElement('amp-nexxtv-player');
@@ -71,7 +71,8 @@ describe('amp-nexxtv-player', () => {
       const playerIframe = nexxtv.querySelector('iframe');
 
       expect(playerIframe).to.not.be.null;
-      expect(playerIframe.src).to.equal('https://embed.nexx.cloud/583/PTPFEC4U184674?start=0&datamode=static&amp=1');
+      expect(playerIframe.src).to.equal('https://embed.nexx.cloud/583/'
+            + 'PTPFEC4U184674?start=0&datamode=static&amp=1');
     });
   });
 
@@ -86,7 +87,7 @@ describe('amp-nexxtv-player', () => {
   });
 
 
-  it('should forward certain events from nexxtv-player to the amp element', () => {
+  it('should forward events from nexxtv-player to the amp element', () => {
     return getNexxtv('PTPFEC4U184674', '583').then(nexxtv => {
       const iframe = nexxtv.querySelector('iframe');
 
@@ -120,8 +121,8 @@ describe('amp-nexxtv-player', () => {
       origin: 'https://embed.nexx.cloud',
       source: iframe.contentWindow,
       data: JSON.stringify({
-        cmd: command
-      })
+        cmd: command,
+      }),
     });
   }
 });
