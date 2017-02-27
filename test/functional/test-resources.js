@@ -1879,7 +1879,7 @@ describe('Resources changeSize', () => {
       viewportMock.expects('setScrollTop').withExactArgs(2777).once();
       scrollAdjustTask.mutate(state);
       expect(resource1.changeSize).to.be.calledOnce;
-      expect(resource1.changeSize).to.be.calledWith(undefined, undefined, 
+      expect(resource1.changeSize).to.be.calledWith(undefined, undefined,
           {top: 1});
       expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     });
