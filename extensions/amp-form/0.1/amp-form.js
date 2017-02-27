@@ -747,7 +747,7 @@ export function installAmpForm(win) {
  * @private visible for testing.
  */
 export function installGlobalEventListener(win) {
-  win.addEventListener('amp-dom-update', function() {
+  win.document.addEventListener('amp:dom-update', function() {
     installSubmissionHandlers(win);
   });
 }
