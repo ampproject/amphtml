@@ -15,6 +15,7 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {platformFor} from '../../../src/platform';
 import {user} from '../../../src/log';
 import {CSS} from '../../../build/amp-copy-0.1.css';
 
@@ -70,6 +71,11 @@ class AmpCopy extends AMP.BaseElement {
      * @private {?Timeout}
      */
     this.currentNotificationTimeout_ = null;
+
+    const platform = platformFor(this.win);
+
+    /** @private @const {boolean} */
+    this.isIos_ = platform.isIos();
   }
 
   /** @override */
@@ -94,9 +100,6 @@ class AmpCopy extends AMP.BaseElement {
     //Create a container for our copy-button and notification
     this.childContainer_ = this.element.ownerDocument.createElement('div');
     this.childContainer_.className = "amp-copy-child-container";
-
-    //Get if we are currently on ios
-    this.isIos_ = navigator.userAgent.match(IOS_USER_AGENT);
 
     //Create the Copy Button element
     this.copyBtn_ = this.element.ownerDocument.createElement('button');

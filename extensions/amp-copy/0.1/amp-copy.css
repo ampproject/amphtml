@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/* The text area field of the copy-able text */
-.amp-copy-input {
-}
-
 /* The input field of the copy-able text */
 .amp-copy-textarea {
   min-height: 100px;
@@ -28,10 +24,6 @@
   display: inline-block;
 }
 
-/* The Copy Button */
-.amp-copy-button {
-}
-
 /* Notification on Success/Error of copy */
 .amp-copy-notification {
   /* Position and size */
@@ -39,5 +31,5 @@
   z-index: 2;
 
   /* background color, to appear above elements */
-  background-color: white;
+  background-color: #fff;
 }
