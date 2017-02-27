@@ -29,6 +29,9 @@ import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
+  AmpAnalyticsConfigDef,
+  extractAmpAnalyticsConfig,
+  injectActiveViewAmpAnalyticsElement,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -36,6 +39,7 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
+import {extensionsFor} from '../../../src/extensions';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {viewerForDoc} from '../../../src/viewer';
 import {AdsenseSharedState} from './adsense-shared-state';
@@ -87,6 +91,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * @private {?string}
      */
     this.uniqueSlotId_ = null;
+
+    /**
+     * Config to generate amp-analytics element for active view reporting.
+     * @type {?AmpAnalyticsConfigDef}
+     * @visibleForTesting
+     */
+    this.ampAnalyticsConfig = null;
+
+    /** @private {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = extensionsFor(this.win);
   }
 
   /** @override */
@@ -150,6 +164,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
+    this.ampAnalyticsConfig = extractAmpAnalyticsConfig(responseHeaders);
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
@@ -199,14 +214,21 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
+    this.ampAnalyticsConfig = null;
   }
-
 
   /**
    * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
    */
   initLifecycleReporter() {
     return googleLifecycleReporterFactory(this);
+  }
+
+  /** @override */
+  onCreativeRender(isVerifiedAmpCreative) {
+    super.onCreativeRender(isVerifiedAmpCreative);
+    injectActiveViewAmpAnalyticsElement(
+      this, this.extensions_, this.ampAnalyticsConfig);
   }
 }
 

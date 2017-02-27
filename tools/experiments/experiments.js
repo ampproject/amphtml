@@ -93,12 +93,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
-    id: 'amp-inabox',
-    name: 'AMP inabox',
-    spec: 'https://github.com/ampproject/amphtml/issues/5700',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
-  },
-  {
     id: 'amp-form-var-sub',
     name: 'Variable Substitutions in AMP Form inputs for POST/GET submits',
     spec: 'https://github.com/ampproject/amphtml/issues/5654',
@@ -210,11 +204,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-animation/amp-animation.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
-  },
-  {
-    id: 'amp-ad-loading-ux',
-    name: 'New default loading UX to amp-ad',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
   },
   {
     id: 'visibility-v2',

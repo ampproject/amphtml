@@ -83,32 +83,42 @@ class TestConfig {
      * @type {!Array<function():boolean>}
      */
     this.skipMatchers = [];
+
+    /**
+     * List of predicate functions that are called before running each test
+     * suite to check whether the suite should be skipped or not.
+     * If any of the functions return 'false', the suite will be skipped.
+     * @type {!Array<function():boolean>}
+     */
+    this.ifMatchers = [];
+
     /**
      * Called for each test suite (things created by `describe`).
      * @type {!Array<function(!TestSuite)>}
      */
     this.configTasks = [];
-    this.platform_ = platformFor(window);
+
+    this.platform = platformFor(window);
   }
 
   skipChrome() {
-    return this.skip(this.platform_.isChrome.bind(this.platform_));
+    return this.skip(this.platform.isChrome.bind(this.platform));
   }
 
   skipEdge() {
-    return this.skip(this.platform_.isEdge.bind(this.platform_));
+    return this.skip(this.platform.isEdge.bind(this.platform));
   }
 
   skipFirefox() {
-    return this.skip(this.platform_.isFirefox.bind(this.platform_));
+    return this.skip(this.platform.isFirefox.bind(this.platform));
   }
 
   skipSafari() {
-    return this.skip(this.platform_.isSafari.bind(this.platform_));
+    return this.skip(this.platform.isSafari.bind(this.platform));
   }
 
   skipIos() {
-    return this.skip(this.platform_.isIos.bind(this.platform_));
+    return this.skip(this.platform.isIos.bind(this.platform));
   }
 
   /**
@@ -116,6 +126,34 @@ class TestConfig {
    */
   skip(fn) {
     this.skipMatchers.push(fn);
+    return this;
+  }
+
+  ifChrome() {
+    return this.if(this.platform.isChrome.bind(this.platform));
+  }
+
+  ifEdge() {
+    return this.if(this.platform.isEdge.bind(this.platform));
+  }
+
+  ifFirefox() {
+    return this.if(this.platform.isFirefox.bind(this.platform));
+  }
+
+  ifSafari() {
+    return this.if(this.platform.isSafari.bind(this.platform));
+  }
+
+  ifIos() {
+    return this.if(this.platform.isIos.bind(this.platform));
+  }
+
+  /**
+   * @param {function():boolean} fn
+   */
+  if(fn) {
+    this.ifMatchers.push(fn);
     return this;
   }
 
@@ -135,7 +173,14 @@ class TestConfig {
    */
   run(desc, fn) {
     for (let i = 0; i < this.skipMatchers.length; i++) {
-      if (this.skipMatchers[i]()) {
+      if (this.skipMatchers[i].call(this)) {
+        this.runner.skip(desc, fn);
+        return;
+      }
+    }
+
+    for (let i = 0; i < this.ifMatchers.length; i++) {
+      if (!this.ifMatchers[i].call(this)) {
         this.runner.skip(desc, fn);
         return;
       }

@@ -24,8 +24,8 @@ import {
   randomlySelectUnsetPageExperiments,
   validateExperimentIds,
 } from '../traffic-experiments';
+import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../utils';
-import {isExperimentOn} from '../../../../src/experiments';
 import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
 
@@ -71,8 +71,7 @@ describe('all-traffic-experiments-tests', () => {
 
     it('handles empty experiments list', () => {
       // Opt out of experiment.
-      // TODO(tdrl): remove the direct access to AMP_CONFIG
-      sandbox.win.AMP_CONFIG['testExperimentId'] = 0.0;
+      toggleExperiment(sandbox.win, 'testExperimentId', false, true);
       randomlySelectUnsetPageExperiments(sandbox.win, {});
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.false;
@@ -80,7 +79,7 @@ describe('all-traffic-experiments-tests', () => {
     });
     it('handles experiment not diverted path', () => {
       // Opt out of experiment.
-      sandbox.win.AMP_CONFIG['testExperimentId'] = 0.0;
+      toggleExperiment(sandbox.win, 'testExperimentId', false, true);
       randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.false;
@@ -88,10 +87,10 @@ describe('all-traffic-experiments-tests', () => {
           'testExperimentId')).to.not.be.ok;
     });
     it('handles experiment diverted path: control', () => {
-      // Force experiment on by setting its triggering probability to 1, then
+      // Force experiment on.
+      toggleExperiment(sandbox.win, 'testExperimentId', true, true);
       // force the control branch to be chosen by making the accurate PRNG
       // return a value < 0.5.
-      sandbox.win.AMP_CONFIG['testExperimentId'] = 1.0;
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
       randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
@@ -100,10 +99,10 @@ describe('all-traffic-experiments-tests', () => {
           testExperimentSet['testExperimentId'].control);
     });
     it('handles experiment diverted path: experiment', () => {
-      // Force experiment on by setting its triggering probability to 1, then
-      // force the experiment branch to be chosen by making the accurate PRNG
+      // Force experiment on.
+      toggleExperiment(sandbox.win, 'testExperimentId', true, true);
+      // Force the experiment branch to be chosen by making the accurate PRNG
       // return a value > 0.5.
-      sandbox.win.AMP_CONFIG['testExperimentId'] = 1.0;
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.6);
       randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
@@ -112,12 +111,11 @@ describe('all-traffic-experiments-tests', () => {
           testExperimentSet['testExperimentId'].experiment);
     });
     it('handles multiple experiments', () => {
-      sandbox.win.AMP_CONFIG = {};
-      const config = sandbox.win.AMP_CONFIG;
-      config['expt_0'] = 1.0;
-      config['expt_1'] = 0.0;
-      config['expt_2'] = 1.0;
-      config['expt_3'] = 1.0;
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      toggleExperiment(sandbox.win, 'expt_1', false, true);
+      toggleExperiment(sandbox.win, 'expt_2', true, true);
+      toggleExperiment(sandbox.win, 'expt_3', true, true);
+
       const experimentInfo = {
         'expt_0': {
           control: '0_c',
@@ -153,9 +151,7 @@ describe('all-traffic-experiments-tests', () => {
     });
     it('handles multi-way branches', () => {
       dev().info(TAG_, 'Testing multi-way branches');
-      sandbox.win.AMP_CONFIG = {};
-      const config = sandbox.win.AMP_CONFIG;
-      config['expt_0'] = 1.0;
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
       const experimentInfo = {
         'expt_0': {
           b0: '0_0',
@@ -173,12 +169,11 @@ describe('all-traffic-experiments-tests', () => {
           '0_3');
     });
     it('handles multiple experiments with multi-way branches', () => {
-      sandbox.win.AMP_CONFIG = {};
-      const config = sandbox.win.AMP_CONFIG;
-      config['expt_0'] = 1.0;
-      config['expt_1'] = 0.0;
-      config['expt_2'] = 1.0;
-      config['expt_3'] = 1.0;
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      toggleExperiment(sandbox.win, 'expt_1', false, true);
+      toggleExperiment(sandbox.win, 'expt_2', true, true);
+      toggleExperiment(sandbox.win, 'expt_3', true, true);
+
       const experimentInfo = {
         'expt_0': {
           b0: '0_0',
@@ -235,11 +230,8 @@ describe('all-traffic-experiments-tests', () => {
           experiment: '108642',
         },
       };
-      sandbox.win.AMP_CONFIG = {};
-      const config = sandbox.win.AMP_CONFIG;
-      config['fooExpt'] = 0.0;
+      toggleExperiment(sandbox.win, 'fooExpt', false, true);
       randomlySelectUnsetPageExperiments(sandbox.win, exptAInfo);
-      config['fooExpt'] = 1.0;
       randomlySelectUnsetPageExperiments(sandbox.win, exptBInfo);
       // Even though we tried to set up a second time, using a config
       // parameter that should ensure that the experiment was activated, the
