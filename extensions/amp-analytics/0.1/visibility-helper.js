@@ -135,6 +135,9 @@ export class VisibilityHelper {
 
   /** @override */
   dispose() {
+    if (this.parent_) {
+      this.parent_.removeChild_(this);
+    }
     if (this.scheduledRunId_) {
       clearTimeout(this.scheduledRunId_);
       this.scheduledRunId_ = null;
@@ -366,6 +369,19 @@ export class VisibilityHelper {
       this.children_ = [];
     }
     this.children_.push(child);
+  }
+
+  /**
+   * @param {!VisibilityHelper} child
+   * @private
+   */
+  removeChild_(child) {
+    if (this.children_) {
+      const index = this.children_.indexOf(child);
+      if (index != -1) {
+        this.children_.splice(index, 1);
+      }
+    }
   }
 }
 

@@ -164,6 +164,16 @@ describes.sandboxed('VisibilityHelper', {}, () => {
       expect(vh.eventResolver_).to.be.null;
     });
 
+    it('should dispose with parent', () => {
+      const parent = new VisibilityHelper(NO_PARENT, NO_SPEC, 0);
+      const vh = new VisibilityHelper(parent, NO_SPEC, 0);
+      expect(parent.children_).to.have.length(1);
+      expect(parent.children_[0]).to.equal(vh);
+
+      vh.dispose();
+      expect(parent.children_).to.have.length(0);
+    });
+
     it('should update on any visibility event', () => {
       const updateStub = sandbox.stub(VisibilityHelper.prototype, 'update');
       const vh = new VisibilityHelper(NO_PARENT, NO_SPEC, 0);
