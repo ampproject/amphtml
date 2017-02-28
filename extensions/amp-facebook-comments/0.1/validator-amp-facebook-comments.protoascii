@@ -21,7 +21,8 @@ tags: {  # amp-facebook-comments
   spec_name: "amp-facebook-comments extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  extension_unused_unless_tag_present: "amp-facebook-comments"
+  satisfies: "amp-facebook-comments extension .js script"
+  requires: "amp-facebook-comments"
   attrs: {
     name: "async"
     mandatory: true
@@ -56,7 +57,8 @@ tags: {  # <amp-facebook-comments>
   html_format: AMP4ADS
   tag_name: "AMP-FACEBOOK-COMMENTS"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-facebook-comments extension .js script"
+  satisfies: "amp-facebook-comments"
+  requires: "amp-facebook-comments extension .js script"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-href"
