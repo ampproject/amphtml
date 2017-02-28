@@ -199,6 +199,7 @@ def GenValidatorGeneratedJs(out_dir):
       specfile='%s/validator.protoascii' % out_dir,
       validator_pb2=validator_pb2,
       text_format=text_format,
+      html_format=None,
       descriptor=descriptor,
       out=out)
   out.append('')

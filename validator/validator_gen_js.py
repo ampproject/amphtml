@@ -704,7 +704,7 @@ def DispatchKeyForTagSpecOrNone(tag_spec):
 
 
 def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
-                                 descriptor, out):
+                                 html_format, descriptor, out):
   """Main method for the code generator.
 
   This method reads the specfile and emits Javascript to sys.stdout.
@@ -715,6 +715,9 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
     validator_pb2: The proto2 Python module generated from validator.proto.
     text_format: The text_format module from the protobuf package, e.g.
         google.protobuf.text_format.
+    html_format: Either a TagSpec.HtmlFormat enum value indicating which
+        HTML format the generated validator code should support,
+        or None indicating that all formats should be supported.
     descriptor: The descriptor module from the protobuf package, e.g.
         google.protobuf.descriptor.
     out: a list of lines to output (without the newline characters), to
@@ -772,6 +775,19 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   # message of type ValidatorRules.
   rules = validator_pb2.ValidatorRules()
   text_format.Merge(open(specfile).read(), rules)
+
+  # If html_format is set, only keep the tags which are relevant to it.
+  if html_format is not None:
+    filtered_rules = [t for t in rules.tags
+                      if not t.html_format or html_format in t.html_format]
+    del rules.tags[:]
+    rules.tags.extend(filtered_rules)
+    # As an optimization, if we're only generating for a specific
+    # format, we also erase the information about which format a
+    # specific tagspec covers.
+    # TODO(powdercloud): Avoid generating the TagSpec.html_format field.
+    for t in rules.tags:
+      t.html_format[:] = []
 
   registry = MessageRegistry()
 
