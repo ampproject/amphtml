@@ -28,6 +28,7 @@ import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
+import {timerFor} from '../../../src/timer';
 
 const TAG = 'amp-bind';
 
@@ -194,7 +195,7 @@ export class Bind {
    *
    * Returns a promise that resolves after bindings have been added.
    *
-   * @param {!Node} node
+   * @param {!Element} node
    * @return {!Promise}
    *
    * @private
@@ -242,7 +243,7 @@ export class Bind {
    *
    * Returns a promise that resolves after bindings have been removed.
    *
-   * @param {!Node} node
+   * @param {!Element} node
    * @return {!Promise}
    *
    * @private
@@ -694,7 +695,8 @@ export class Bind {
       for (let i = 0; i < addedNodes.length; i++) {
         const addedNode = addedNodes[i];
         if (addedNode.nodeType == Node.ELEMENT_NODE) {
-          addPromises.push(this.addBindingsForNode_(addedNode));
+          const addedElement = /** @type {!Element} */ (addedNode);
+          addPromises.push(this.addBindingsForNode_(addedElement));
         }
       }
       const mutationPromise = Promise.all(addPromises).then(() => {
@@ -703,7 +705,8 @@ export class Bind {
         for (let i = 0; i < removedNodes.length; i++) {
           const removedNode = removedNodes[i];
           if (removedNode.nodeType == Node.ELEMENT_NODE) {
-            removePromises.push(this.removeBindingsForNode_(removedNode));
+            const removedElement = /** @type {!Element} */ (removedNode);
+            removePromises.push(this.removeBindingsForNode_(removedElement));
           }
         }
         return Promise.all(removePromises);
@@ -794,14 +797,8 @@ export class Bind {
    * @visibleForTesting
    */
   waitForAllMutationsForTesting() {
-    return new Promise(resolve => {
-      (function waitForMutationCallback() {
-        if (this.mutationPromises_.length > 0) {
-          resolve();
-        } else {
-          setTimeout(waitForMutationCallback.bind(this), 5);
-        }
-      }).call(this);
+    return timerFor(this.win_).poll(5, () => {
+      return this.mutationPromises_.length > 0;
     }).then(() => {
       return Promise.all(this.mutationPromises_);
     }).then(() => {

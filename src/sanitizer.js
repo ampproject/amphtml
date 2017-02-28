@@ -25,6 +25,7 @@ import {
 import {parseSrcset} from './srcset';
 import {user} from './log';
 import {urls} from './config';
+import {map, hasOwn} from './utils/object';
 
 
 /** @private @const {string} */
@@ -190,7 +191,7 @@ export function sanitizeHtml(html) {
         }
         return;
       }
-      const bindAttribsIndices = {};
+      const bindAttribsIndices = map();
       // Special handling for attributes for amp-bind which are formatted as
       // [attr]. The brackets are restored at the end of this function.
       for (let i = 0; i < attribs.length; i += 2) {
@@ -215,7 +216,7 @@ export function sanitizeHtml(html) {
           // for, such as "on"
           for (let i = 0; i < attribs.length; i += 2) {
             const attrib = attribs[i];
-            if (WHITELISTED_ATTRS.indexOf(attrib) != -1) {
+            if (WHITELISTED_ATTRS.includes(attrib) != -1) {
               attribs[i + 1] = savedAttribs[i + 1];
             } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
@@ -266,7 +267,7 @@ export function sanitizeHtml(html) {
           continue;
         }
         emit(' ');
-        if (bindAttribsIndices.hasOwnProperty(i)) {
+        if (hasOwn(bindAttribsIndices, String(i))) {
           emit('[' + attrName + ']');
         } else {
           emit(attrName);

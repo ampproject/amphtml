@@ -21,6 +21,7 @@ import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
+import {installTimerService} from '../../../../src/service/timer-impl';
 
 describes.realWin('amp-bind', {
   amp: {
@@ -33,6 +34,7 @@ describes.realWin('amp-bind', {
   let canBindStub;
 
   beforeEach(() => {
+    installTimerService(env.win);
     toggleExperiment(env.win, 'amp-bind', true);
 
     // Stub validator methods to return true for ease of testing.

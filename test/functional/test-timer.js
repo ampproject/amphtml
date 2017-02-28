@@ -28,9 +28,11 @@ describe('Timer', () => {
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(unusedCallback, unusedDelay) {};
     WindowApi.prototype.clearTimeout = function(unusedTimerId) {};
+    WindowApi.prototype.setInterval = function(unusedCallback, unusedDelay) {};
     WindowApi.prototype.document = {};
     const windowApi = new WindowApi();
     windowMock = sandbox.mock(windowApi);
+
     timer = new Timer(windowApi);
   });
 
@@ -142,4 +144,12 @@ describe('Timer', () => {
       expect(reason.message).to.contain('timeout');
     });
   });
+
+  it('poll', () => {
+    windowMock.expects('setTimeout').never();
+    windowMock.expects('clearTimeout').never();
+    windowMock.expects('setInterval').once();
+    timer.poll(111, () => true);
+  });
+
 });
