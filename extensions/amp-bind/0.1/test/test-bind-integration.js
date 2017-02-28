@@ -39,7 +39,6 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     }).then(() => {
       const ampdocService = ampdocServiceFor(iframe.win);
       ampdoc = ampdocService.getAmpDoc(iframe.doc);
-      chunkInstanceForTesting(ampdoc);
       bind = installBindForTesting(ampdoc);
       return bind.initializePromiseForTesting();
     });
