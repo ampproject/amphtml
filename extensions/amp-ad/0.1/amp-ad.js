@@ -18,10 +18,12 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
 import {a4aRegistry} from '../../../ads/_a4a-config';
-import {dev, user} from '../../../src/log';
+import {adConfig} from '../../../ads/_config';
+import {user} from '../../../src/log';
 import {extensionsFor} from '../../../src/extensions';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {isExperimentOn} from '../../../src/experiments';
+import {hasOwn} from '../../../src/utils/object';
 
 
 /**
@@ -51,17 +53,20 @@ export class AmpAd extends AMP.BaseElement {
 
     return consent.then(() => {
       const type = this.element.getAttribute('type');
-      if (!type) {
-        // Unspecified or empty type.  Nothing to do here except bail out.
-        return null;
-      }
+      const isCustom = type === 'custom' && isExperimentOn(this.win,
+          'ad-type-custom');
+      user().assert(isCustom || hasOwn(adConfig, type)
+          || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);
+
       // Check for the custom ad type (no ad network, self-service)
-      if (type === 'custom' && isExperimentOn(this.win, 'ad-type-custom')) {
+      if (isCustom) {
         return new AmpAdCustom(this.element);
       }
+
       window.ampAdSlotIdCounter = window.ampAdSlotIdCounter || 0;
       const slotId = window.ampAdSlotIdCounter++;
       this.element.setAttribute('data-amp-slot-index', slotId);
+
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
           !a4aRegistry[type](this.win, this.element)) {
@@ -70,6 +75,7 @@ export class AmpAd extends AMP.BaseElement {
         // tag as A4A.  Fall back to the 3p implementation.
         return new AmpAd3PImpl(this.element);
       }
+
       const extensionTagName = networkImplementationTag(type);
       this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
       return extensionsFor(this.win).loadElementClass(extensionTagName)
@@ -83,18 +89,6 @@ export class AmpAd extends AMP.BaseElement {
           return new AmpAd3PImpl(this.element);
         });
     });
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  buildCallback() {
-    // This is only called when no type was set on the element and thus
-    // upgrade element fell through.
-    dev().assert(this.element.getAttribute('type'), 'Required attribute type');
   }
 }
 
