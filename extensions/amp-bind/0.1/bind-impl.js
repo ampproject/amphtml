@@ -130,11 +130,6 @@ export class Bind {
      */
     this.setStatePromise_ = null;
 
-    /**
-     * @private {?Promise}
-     */
-    this.applyPromise_ = null;
-
     // Expose for testing on dev.
     if (getMode().localDev) {
       AMP.reinitializeBind = this.initialize_.bind(this);
@@ -750,7 +745,7 @@ export class Bind {
    * @return {?Promise}
    * @visibleForTesting
    */
-  waitForInitializationForTesting() {
+  initializePromiseForTesting() {
     return this.initializePromise_;
   }
 
@@ -762,7 +757,7 @@ export class Bind {
    * @return {?Promise}
    * @visibleForTesting
    */
-  waitForApplicationForTesting() {
+  setStatePromiseForTesting() {
     return this.setStatePromise_;
   }
 

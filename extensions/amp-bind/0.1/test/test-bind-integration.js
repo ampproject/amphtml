@@ -20,33 +20,34 @@ import {toggleExperiment} from '../../../../src/experiments';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {createFixtureIframe} from '../../../../testing/iframe';
 import {bindForDoc} from '../../../../src/bind';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {ampdocServiceFor} from '../../../../src/ampdoc';
 
 describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   let iframe;
+  let ampdoc;
   let bind;
   const fixture = 'test/fixtures/amp-bind-integrations.html';
 
   this.timeout(5000);
 
   beforeEach(() => {
+
     return createFixtureIframe(fixture).then(i => {
       iframe = i;
-      const ampdocService = installDocService(iframe.win, true);
-      const ampdoc = ampdocService.getAmpDoc(iframe.doc);
-      iframe.ampdoc = ampdoc;
-      chunkInstanceForTesting(iframe.ampdoc);
       toggleExperiment(iframe.win, 'amp-bind', true, true);
-      bind = installBindForTesting(iframe.ampdoc);
-      return iframe.ampdoc.whenReady();
+      return iframe.awaitEvent('amp:load:start', 1);
     }).then(() => {
-      return bind.waitForInitializationForTesting();
+      const ampdocService = ampdocServiceFor(iframe.win);
+      ampdoc = ampdocService.getAmpDoc(iframe.doc);
+      chunkInstanceForTesting(ampdoc);
+      bind = installBindForTesting(ampdoc);
+      return bind.initializePromiseForTesting();
     });
   });
 
   function waitForBindApplication() {
-    return bindForDoc(iframe.ampdoc).then(() => {
-      return bind.waitForApplicationForTesting();
+    return bindForDoc(ampdoc).then(() => {
+      return bind.setStatePromiseForTesting();
     });
   }
 
