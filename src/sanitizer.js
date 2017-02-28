@@ -339,11 +339,11 @@ export function isValidAttr(tagName, attrName, attrValue) {
     return false;
   }
 
-  // if (attrName == 'class' &&
-  //     attrValue &&
-  //     attrValue.search(/(^|\\W)i-amphtml-/i) == 0) {
-  //   return false;
-  // }
+  if (attrName == 'class' &&
+      attrValue &&
+      attrValue.search(/(^|\\W)i-amphtml-/i) == 0) {
+    return false;
+  }
 
   // No attributes with "javascript" or other blacklisted substrings in them.
   if (attrValue) {
