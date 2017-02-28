@@ -36,7 +36,6 @@ import {
 import {getParentWindowFrameElement} from '../../../src/service';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
