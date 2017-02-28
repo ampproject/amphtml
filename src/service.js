@@ -92,8 +92,8 @@ export function getExistingServiceForWindowOrNull(win, id) {
 
 /**
  * Returns a service with the given id. Assumes that it has been constructed
- * already
-. * @param {!Window} win
+ * already.
+ * @param {!Window} win
  * @param {string} id
  * @return {!Object} The service.
  */
@@ -471,7 +471,7 @@ function getServiceInternal(holder, context, id, opt_factory,
       const ctor = s.ctor;
       s.obj = new ctor(context);
     } else {
-      // TODO(lmh287): Replace opt_constructor param with ctor on service
+      // TODO(kmh287): Replace opt_constructor param with ctor on service
       dev().assert(opt_factory || opt_constructor,
           'Factory or class not given and service missing %s', id);
       s.obj = opt_constructor
