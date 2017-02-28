@@ -20,6 +20,13 @@ const NO_PARENT = null;
 const NO_SPEC = {};
 
 
+// QQQ
+// visiblePercentageMin: Number(spec['visiblePercentageMin']) / 100 || 0,
+// visiblePercentageMax: Number(spec['visiblePercentageMax']) / 100 || 1,
+// totalTimeMin: Number(spec['totalTimeMin']) || 0,
+// totalTimeMax: Number(spec['totalTimeMax']) || Infinity,
+// continuousTimeMin: Number(spec['continuousTimeMin']) || 0,
+// continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
 describes.sandboxed('VisibilityHelper', {}, () => {
   let startTime;
   let clock;
@@ -34,114 +41,114 @@ describes.sandboxed('VisibilityHelper', {}, () => {
   describe('config', () => {
 
     function config(spec) {
-      return new VisibilityHelper(NO_PARENT, spec, 0);
+      return new VisibilityHelper(NO_PARENT, spec, 0).spec_;
     }
 
     it('should parse visiblePercentageMin', () => {
-      expect(config({}).visiblePercentageMin_).to.equal(0);
-      expect(config({visiblePercentageMin: ''}).visiblePercentageMin_)
+      expect(config({}).visiblePercentageMin).to.equal(0);
+      expect(config({visiblePercentageMin: ''}).visiblePercentageMin)
           .to.equal(0);
-      expect(config({visiblePercentageMin: 0}).visiblePercentageMin_)
+      expect(config({visiblePercentageMin: 0}).visiblePercentageMin)
           .to.equal(0);
-      expect(config({visiblePercentageMin: '0'}).visiblePercentageMin_)
+      expect(config({visiblePercentageMin: '0'}).visiblePercentageMin)
           .to.equal(0);
-      expect(config({visiblePercentageMin: 50}).visiblePercentageMin_)
+      expect(config({visiblePercentageMin: 50}).visiblePercentageMin)
           .to.equal(0.5);
-      expect(config({visiblePercentageMin: '50'}).visiblePercentageMin_)
+      expect(config({visiblePercentageMin: '50'}).visiblePercentageMin)
           .to.equal(0.5);
-      expect(config({visiblePercentageMin: 100}).visiblePercentageMin_)
+      expect(config({visiblePercentageMin: 100}).visiblePercentageMin)
           .to.equal(1);
-      expect(config({visiblePercentageMin: '100'}).visiblePercentageMin_)
+      expect(config({visiblePercentageMin: '100'}).visiblePercentageMin)
           .to.equal(1);
     });
 
     it('should parse visiblePercentageMax', () => {
-      expect(config({}).visiblePercentageMax_).to.equal(1);
-      expect(config({visiblePercentageMax: ''}).visiblePercentageMax_)
+      expect(config({}).visiblePercentageMax).to.equal(1);
+      expect(config({visiblePercentageMax: ''}).visiblePercentageMax)
           .to.equal(1);
-      expect(config({visiblePercentageMax: 0}).visiblePercentageMax_)
+      expect(config({visiblePercentageMax: 0}).visiblePercentageMax)
           .to.equal(1);
-      expect(config({visiblePercentageMax: '0'}).visiblePercentageMax_)
+      expect(config({visiblePercentageMax: '0'}).visiblePercentageMax)
           .to.equal(1);
-      expect(config({visiblePercentageMax: 50}).visiblePercentageMax_)
+      expect(config({visiblePercentageMax: 50}).visiblePercentageMax)
           .to.equal(0.5);
-      expect(config({visiblePercentageMax: '50'}).visiblePercentageMax_)
+      expect(config({visiblePercentageMax: '50'}).visiblePercentageMax)
           .to.equal(0.5);
-      expect(config({visiblePercentageMax: 100}).visiblePercentageMax_)
+      expect(config({visiblePercentageMax: 100}).visiblePercentageMax)
           .to.equal(1);
-      expect(config({visiblePercentageMax: '100'}).visiblePercentageMax_)
+      expect(config({visiblePercentageMax: '100'}).visiblePercentageMax)
           .to.equal(1);
     });
 
     it('should parse totalTimeMin', () => {
-      expect(config({}).totalTimeMin_).to.equal(0);
-      expect(config({totalTimeMin: ''}).totalTimeMin_)
+      expect(config({}).totalTimeMin).to.equal(0);
+      expect(config({totalTimeMin: ''}).totalTimeMin)
           .to.equal(0);
-      expect(config({totalTimeMin: 0}).totalTimeMin_)
+      expect(config({totalTimeMin: 0}).totalTimeMin)
           .to.equal(0);
-      expect(config({totalTimeMin: '0'}).totalTimeMin_)
+      expect(config({totalTimeMin: '0'}).totalTimeMin)
           .to.equal(0);
-      expect(config({totalTimeMin: 50}).totalTimeMin_)
+      expect(config({totalTimeMin: 50}).totalTimeMin)
           .to.equal(50);
-      expect(config({totalTimeMin: '50'}).totalTimeMin_)
+      expect(config({totalTimeMin: '50'}).totalTimeMin)
           .to.equal(50);
-      expect(config({totalTimeMin: 100}).totalTimeMin_)
+      expect(config({totalTimeMin: 100}).totalTimeMin)
           .to.equal(100);
-      expect(config({totalTimeMin: '100'}).totalTimeMin_)
+      expect(config({totalTimeMin: '100'}).totalTimeMin)
           .to.equal(100);
     });
 
     it('should parse totalTimeMax', () => {
-      expect(config({}).totalTimeMax_).to.equal(Infinity);
-      expect(config({totalTimeMax: ''}).totalTimeMax_)
+      expect(config({}).totalTimeMax).to.equal(Infinity);
+      expect(config({totalTimeMax: ''}).totalTimeMax)
           .to.equal(Infinity);
-      expect(config({totalTimeMax: 0}).totalTimeMax_)
+      expect(config({totalTimeMax: 0}).totalTimeMax)
           .to.equal(Infinity);
-      expect(config({totalTimeMax: '0'}).totalTimeMax_)
+      expect(config({totalTimeMax: '0'}).totalTimeMax)
           .to.equal(Infinity);
-      expect(config({totalTimeMax: 50}).totalTimeMax_)
+      expect(config({totalTimeMax: 50}).totalTimeMax)
           .to.equal(50);
-      expect(config({totalTimeMax: '50'}).totalTimeMax_)
+      expect(config({totalTimeMax: '50'}).totalTimeMax)
           .to.equal(50);
-      expect(config({totalTimeMax: 100}).totalTimeMax_)
+      expect(config({totalTimeMax: 100}).totalTimeMax)
           .to.equal(100);
-      expect(config({totalTimeMax: '100'}).totalTimeMax_)
+      expect(config({totalTimeMax: '100'}).totalTimeMax)
           .to.equal(100);
     });
 
     it('should parse continuousTimeMin', () => {
-      expect(config({}).continuousTimeMin_).to.equal(0);
-      expect(config({continuousTimeMin: ''}).continuousTimeMin_)
+      expect(config({}).continuousTimeMin).to.equal(0);
+      expect(config({continuousTimeMin: ''}).continuousTimeMin)
           .to.equal(0);
-      expect(config({continuousTimeMin: 0}).continuousTimeMin_)
+      expect(config({continuousTimeMin: 0}).continuousTimeMin)
           .to.equal(0);
-      expect(config({continuousTimeMin: '0'}).continuousTimeMin_)
+      expect(config({continuousTimeMin: '0'}).continuousTimeMin)
           .to.equal(0);
-      expect(config({continuousTimeMin: 50}).continuousTimeMin_)
+      expect(config({continuousTimeMin: 50}).continuousTimeMin)
           .to.equal(50);
-      expect(config({continuousTimeMin: '50'}).continuousTimeMin_)
+      expect(config({continuousTimeMin: '50'}).continuousTimeMin)
           .to.equal(50);
-      expect(config({continuousTimeMin: 100}).continuousTimeMin_)
+      expect(config({continuousTimeMin: 100}).continuousTimeMin)
           .to.equal(100);
-      expect(config({continuousTimeMin: '100'}).continuousTimeMin_)
+      expect(config({continuousTimeMin: '100'}).continuousTimeMin)
           .to.equal(100);
     });
 
     it('should parse continuousTimeMax', () => {
-      expect(config({}).continuousTimeMax_).to.equal(Infinity);
-      expect(config({continuousTimeMax: ''}).continuousTimeMax_)
+      expect(config({}).continuousTimeMax).to.equal(Infinity);
+      expect(config({continuousTimeMax: ''}).continuousTimeMax)
           .to.equal(Infinity);
-      expect(config({continuousTimeMax: 0}).continuousTimeMax_)
+      expect(config({continuousTimeMax: 0}).continuousTimeMax)
           .to.equal(Infinity);
-      expect(config({continuousTimeMax: '0'}).continuousTimeMax_)
+      expect(config({continuousTimeMax: '0'}).continuousTimeMax)
           .to.equal(Infinity);
-      expect(config({continuousTimeMax: 50}).continuousTimeMax_)
+      expect(config({continuousTimeMax: 50}).continuousTimeMax)
           .to.equal(50);
-      expect(config({continuousTimeMax: '50'}).continuousTimeMax_)
+      expect(config({continuousTimeMax: '50'}).continuousTimeMax)
           .to.equal(50);
-      expect(config({continuousTimeMax: 100}).continuousTimeMax_)
+      expect(config({continuousTimeMax: 100}).continuousTimeMax)
           .to.equal(100);
-      expect(config({continuousTimeMax: '100'}).continuousTimeMax_)
+      expect(config({continuousTimeMax: '100'}).continuousTimeMax)
           .to.equal(100);
     });
   });

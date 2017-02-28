@@ -40,9 +40,31 @@ export class VisibilityHelper {
      */
     this.factorParent_ = opt_factorParent || false;
 
+    /**
+     * Spec parameters.
+     * @private {{
+     *   visiblePercentageMin: number,
+     *   visiblePercentageMax: number,
+     *   totalTimeMin: number,
+     *   totalTimeMax: number,
+     *   continuousTimeMin: number,
+     *   continuousTimeMax: number,
+     * }}
+     */
+    this.spec_ = {
+      visiblePercentageMin: Number(spec['visiblePercentageMin']) / 100 || 0,
+      visiblePercentageMax: Number(spec['visiblePercentageMax']) / 100 || 1,
+      totalTimeMin: Number(spec['totalTimeMin']) || 0,
+      totalTimeMax: Number(spec['totalTimeMax']) || Infinity,
+      continuousTimeMin: Number(spec['continuousTimeMin']) || 0,
+      continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
+    };
+
+    /** @private {?function()} */
+    this.eventResolver_ = null;
+
     /** @const @private */
     this.eventPromise_ = new Promise(resolve => {
-      /** @private {?function()} */
       this.eventResolver_ = resolve;
     });
 
@@ -51,30 +73,6 @@ export class VisibilityHelper {
 
     /** @private {!Array<!UnsubscribeDef>} */
     this.unsubscribe_ = [];
-
-    // Spec.
-
-    /** @const @private {number} */
-    this.visiblePercentageMin_ =
-        Number(spec['visiblePercentageMin']) / 100 || 0;
-
-    /** @const @private {number} */
-    this.visiblePercentageMax_ =
-        Number(spec['visiblePercentageMax']) / 100 || 1;
-
-    /** @const @private {time} */
-    this.totalTimeMin_ = Number(spec['totalTimeMin']) || 0;
-
-    /** @const @private {time} */
-    this.totalTimeMax_ = Number(spec['totalTimeMax']) || Infinity;
-
-    /** @const @private {time} */
-    this.continuousTimeMin_ = Number(spec['continuousTimeMin']) || 0;
-
-    /** @const @private {time} */
-    this.continuousTimeMax_ = Number(spec['continuousTimeMax']) || Infinity;
-
-    // Runtime.
 
     /** @const @private {time} */
     this.createdTime_ = Date.now();
@@ -197,14 +195,14 @@ export class VisibilityHelper {
    * @return {number}
    */
   getVisibility() {
-    const ownVisibility = this.ownVisibility_ * (this.blocked_ ? 0 : 1);
+    const ownVisibility = this.blocked_ ? 0 : this.ownVisibility_;
     if (!this.parent_) {
       return ownVisibility;
     }
     if (this.factorParent_) {
       return ownVisibility * this.parent_.getVisibility();
     }
-    return ownVisibility * (this.parent_.getVisibility() > 0 ? 1 : 0);
+    return this.parent_.getVisibility() > 0 ? ownVisibility : 0;
   }
 
   /**
@@ -260,6 +258,7 @@ export class VisibilityHelper {
         this.scheduledRunId_ = null;
       }
       this.eventResolver_();
+      this.eventResolver_ = null;
     } else if (this.matchesVisibility_ && !this.scheduledRunId_) {
       // There is unmet duration condition, schedule a check
       const timeToWait = this.computeTimeToWait_();
@@ -297,20 +296,20 @@ export class VisibilityHelper {
     const timeSinceLastUpdate =
         this.lastVisibleUpdateTime_ ? now - this.lastVisibleUpdateTime_ : 0;
     this.matchesVisibility_ = (
-        visibility > this.visiblePercentageMin_ &&
-        visibility <= this.visiblePercentageMax_);
+        visibility > this.spec_.visiblePercentageMin &&
+        visibility <= this.spec_.visiblePercentageMax);
 
     if (this.matchesVisibility_) {
-      if (!prevMatchesVisibility) {
-        // The resource came into view: start counting.
-        dev().assert(!this.lastVisibleUpdateTime_);
-        this.fistVisibleTime_ = this.fistVisibleTime_ || now;
-      } else {
+      if (prevMatchesVisibility) {
         // Keep counting.
         this.totalVisibleTime_ += timeSinceLastUpdate;
         this.continuousTime_ += timeSinceLastUpdate;
         this.maxContinuousVisibleTime_ =
             Math.max(this.maxContinuousVisibleTime_, this.continuousTime_);
+      } else {
+        // The resource came into view: start counting.
+        dev().assert(!this.lastVisibleUpdateTime_);
+        this.fistVisibleTime_ = this.fistVisibleTime_ || now;
       }
       this.lastVisibleUpdateTime_ = now;
       this.minVisiblePercentage_ =
@@ -320,7 +319,7 @@ export class VisibilityHelper {
       this.maxVisiblePercentage_ =
           Math.max(this.maxVisiblePercentage_, visibility);
       this.lastVisibleTime_ = now;
-    } else if (!this.matchesVisibility_ && prevMatchesVisibility) {
+    } else if (prevMatchesVisibility) {
       // The resource went out of view. Do final calculations and reset state.
       dev().assert(this.lastVisibleUpdateTime_ > 0);
 
@@ -336,10 +335,10 @@ export class VisibilityHelper {
     }
 
     return this.matchesVisibility_ &&
-        (this.totalVisibleTime_ >= this.totalTimeMin_) &&
-        (this.totalVisibleTime_ <= this.totalTimeMax_) &&
-        (this.maxContinuousVisibleTime_ >= this.continuousTimeMin_) &&
-        (this.maxContinuousVisibleTime_ <= this.continuousTimeMax_);
+        (this.totalVisibleTime_ >= this.spec_.totalTimeMin) &&
+        (this.totalVisibleTime_ <= this.spec_.totalTimeMax) &&
+        (this.maxContinuousVisibleTime_ >= this.spec_.continuousTimeMin) &&
+        (this.maxContinuousVisibleTime_ <= this.spec_.continuousTimeMax);
   }
 
   /**
@@ -350,9 +349,9 @@ export class VisibilityHelper {
    */
   computeTimeToWait_() {
     const waitForContinuousTime = Math.max(
-        this.continuousTimeMin_ - this.continuousTime_, 0);
+        this.spec_.continuousTimeMin - this.continuousTime_, 0);
     const waitForTotalTime = Math.max(
-        this.totalTimeMin_ - this.totalVisibleTime_, 0);
+        this.spec_.totalTimeMin - this.totalVisibleTime_, 0);
     const maxWaitTime = Math.max(waitForContinuousTime, waitForTotalTime);
     return Math.min(
         maxWaitTime,
