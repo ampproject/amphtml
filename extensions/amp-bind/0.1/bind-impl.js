@@ -695,7 +695,7 @@ export class Bind {
       for (let i = 0; i < addedNodes.length; i++) {
         const addedNode = addedNodes[i];
         if (addedNode.nodeType == Node.ELEMENT_NODE) {
-          const addedElement = /** @type {!Element} */ (addedNode);
+          const addedElement = dev().assertElement(addedNode);
           addPromises.push(this.addBindingsForNode_(addedElement));
         }
       }
@@ -705,7 +705,7 @@ export class Bind {
         for (let i = 0; i < removedNodes.length; i++) {
           const removedNode = removedNodes[i];
           if (removedNode.nodeType == Node.ELEMENT_NODE) {
-            const removedElement = /** @type {!Element} */ (removedNode);
+            const removedElement = dev().assertElement(removedNode);
             removePromises.push(this.removeBindingsForNode_(removedElement));
           }
         }
