@@ -209,5 +209,13 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           '&dtd=[0-9]+$'));
       });
     });
+
+    it('handles tagForChildDirectedTreatment', () => {
+      element.setAttribute('json', '{"tagForChildDirectedTreatment": 1}');
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&tfcd=1&/);
+      });
+    });
   });
 });
