@@ -94,7 +94,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
-    const tfcd = jsonParameters['tfcd'];
+    const tfcd = jsonParameters['tagForChildDirectedTreatment'];
     const adTestOn = isInManualExperiment(this.element);
 
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
