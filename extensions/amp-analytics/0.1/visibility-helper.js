@@ -27,9 +27,9 @@ export class VisibilityHelper {
    * @param {?VisibilityHelper} parent
    * @param {!Object<string, *>} spec
    * @param {number=} opt_iniVisibility
-   * @param {boolean=} opt_factorParent
+   * @param {boolean=} opt_shouldFactorParent
    */
-  constructor(parent, spec, opt_iniVisibility, opt_factorParent) {
+  constructor(parent, spec, opt_iniVisibility, opt_shouldFactorParent) {
     /** @const @private */
     this.parent_ = parent;
 
@@ -38,7 +38,7 @@ export class VisibilityHelper {
      * final visibility will be this visibility times parent.
      * @const @private {boolean}
      */
-    this.factorParent_ = opt_factorParent || false;
+    this.shouldFactorParent_ = opt_shouldFactorParent || false;
 
     /**
      * Spec parameters.
@@ -199,7 +199,7 @@ export class VisibilityHelper {
     if (!this.parent_) {
       return ownVisibility;
     }
-    if (this.factorParent_) {
+    if (this.shouldFactorParent_) {
       return ownVisibility * this.parent_.getVisibility();
     }
     return this.parent_.getVisibility() > 0 ? ownVisibility : 0;
