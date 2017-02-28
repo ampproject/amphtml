@@ -42,7 +42,7 @@ describe('Object', () => {
   });
 
   describe('getPath', () => {
-    const obj = {a: {aa: [{aaa: 1}, {bbb: 2}]}, b: 3};
+    const obj = {a: {aa: [{aaa: 1}, {bbb: 2}]}, b: 3, c: null};
 
     it('should return the value of a single property', () => {
       expect(object.getPath('b', obj)).to.equal(3);
@@ -55,36 +55,18 @@ describe('Object', () => {
     it('should return the value of a sub-object', () => {
       expect(object.getPath('a.aa', obj)).to.jsonEqual(obj.a.aa);
     });
-  });
 
-  describe('sortProperties', () => {
-    it('should sort an object\'s properties alphabetically', () => {
-      const unsorted = {z: 0, y: 1, x: 2, w: 3};
-      const sorted = {w: 3, x: 2, y: 1, z: 0};
-
-      const testSorted = JSON.stringify(object.sortProperties(unsorted));
-      const expectedSorted = JSON.stringify(sorted);
-      expect(testSorted).to.equal(expectedSorted);
-      expect(object.sortProperties({})).to.deep.equal({});
+    it('should throw when a key cannot be found', () => {
+      expect(() => object.getPath('foo', obj)).to.throw(/foo/);
+      expect(() => object.getPath('foo.bar', obj)).to.throw(/foo\.bar/);
+      expect(() => object.getPath('a.foo', obj)).to.throw(/a\.foo/);
+      expect(() => object.getPath('a.aa.bar', obj)).to.throw(/a\.aa\.bar/);
+      expect(() => object.getPath('a.c.bar', obj)).to.throw(/a\.c\.bar/);
     });
 
-    it('should deep sort all nested objects\' properties', () => {
-      const unsorted = {z: 0, y: 1, x: 2, w: {c: 3, b: 4, a: {e: 6, d: 5}}};
-      const sorted = {w: {a: {d: 5, e: 6}, b: 4, c: 3}, x: 2, y: 1, z: 0};
-
-      const testSorted = JSON.stringify(object.sortProperties(unsorted));
-      const expectedSorted = JSON.stringify(sorted);
-      expect(testSorted).to.equal(expectedSorted);
-    });
-
-    it('should return the input value for non-objects', () => {
-      const identity = x => x;
-
-      expect(object.sortProperties(0)).to.equal(0);
-      expect(object.sortProperties('hello, world!')).to.equal('hello, world!');
-      expect(object.sortProperties(null)).to.equal(null);
-      expect(object.sortProperties(NaN)).to.be.NaN;
-      expect(object.sortProperties(identity)).to.equal(identity);
+    it('should throw for invalid paths', () => {
+      const obj = {'.': {'.': 0}}; // not supported
+      expect(() => object.getPath('...', obj)).to.throw();
     });
   });
 });

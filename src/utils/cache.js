@@ -18,7 +18,7 @@
  * An LRU Cache
  * @template T
  */
-export default class Cache {
+export class Cache {
   /**
    * Construct a new Cache with the given size
    * @param size {number=}
@@ -43,10 +43,6 @@ export default class Cache {
    * @param value {T}
    */
   put(key, value) {
-    if (typeof key !== 'string') {
-      throw new Error('Cache keys must be strings');
-    }
-
     const index = this.queue_.indexOf(key);
     if (index > -1) {
       this.queue_.splice(index, 1);
@@ -72,9 +68,5 @@ export default class Cache {
       this.queue_.push(key);
     }
     return this.map_[key];
-  }
-
-  get length() {
-    return this.queue_.length;
   }
 }

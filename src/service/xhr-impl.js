@@ -21,13 +21,8 @@ import {
   getCorsUrl,
   parseUrl,
 } from '../url';
-import {
-  getPath,
-  sortProperties,
-} from '../utils/object';
 import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
-import Cache from '../utils/cache';
 
 
 /**
@@ -47,13 +42,10 @@ import Cache from '../utils/cache';
  *   ampCors: (boolean|undefined)
  * }}
  */
-let FetchInitDef;
+export let FetchInitDef;
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
-
-/** @private @const {!Array<function(*):boolean>} */
-const allowedJsonBodyTypes_ = [isArray, isObject];
 
 /** @private @enum {number} Allowed fetch responses. */
 const allowedFetchTypes_ = {
@@ -75,14 +67,13 @@ export class Xhr {
 
   /**
    * @param {!Window} win
-   * @param {number=} cacheSize
    */
-  constructor(win, cacheSize) {
+  constructor(win) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const {!Cache} */
-    this.fragmentCache_ = new Cache(cacheSize);
+    /** @private @const {!Array<function(*):boolean>} */
+    this.allowedJsonBodyTypes_ = [isArray, isObject];
   }
 
   /**
@@ -187,17 +178,14 @@ export class Xhr {
    * @return {!Promise<!JSONType>}
    */
   fetchJson(input, opt_init) {
-    const init = setupInit(opt_init, 'application/json');
-    const parsedInput = parseUrl(input);
-    const propertyPath = parsedInput.hash.slice(1); // remove # prefix
-    const getPropertyAtPath = getPath.bind(null, propertyPath);
+    const init = this.setupInit_(opt_init, 'application/json');
     const getResponseJson = response => response.json();
 
     if (init.method === 'POST' && !isFormData(init.body)) {
       // Assume JSON strict mode where only objects or arrays are allowed
       // as body.
       dev().assert(
-        allowedJsonBodyTypes_.some(test => test(init.body)),
+        this.allowedJsonBodyTypes_.some(test => test(init.body)),
         'body must be of type object or array. %s',
         init.body
       );
@@ -206,38 +194,7 @@ export class Xhr {
       init.body = JSON.stringify(init.body);
     }
 
-    const isCacheable = (init.method === 'GET' && propertyPath);
-    if (isCacheable) {
-      const cacheKey = this.getCacheKey_(input, opt_init);
-      const cachedPromise = this.fragmentCache_.get(cacheKey);
-      if (cachedPromise) {
-        return cachedPromise.then(getPropertyAtPath);
-      }
-
-      const fetchPromise = this.fetch(input, init).then(getResponseJson);
-
-      // Since a fragment is present, cache the full response promise, then
-      // return a promise with just the value specified by the fragment.
-      this.fragmentCache_.put(cacheKey, fetchPromise);
-      return fetchPromise.then(getPropertyAtPath);
-    } else {
-      return this.fetch(input, init).then(getResponseJson);
-    }
-  }
-
-  /**
-   * Creates a cache key for a fetch.
-   *
-   * @param {string} url
-   * @param {?FetchInitDef=} opt_init
-   * @return {string}
-   * @private
-   */
-  getCacheKey_(url, opt_init) {
-    const urlWithoutHash = url.slice(0, url.indexOf('#'));
-    const sortedOptInit = sortProperties(opt_init);
-    const orderedOptions = opt_init ? JSON.stringify(sortedOptInit) : '';
-    return urlWithoutHash + ';' + orderedOptions;
+    return this.fetch(input, init).then(getResponseJson);
   }
 
   /**
@@ -252,7 +209,7 @@ export class Xhr {
    * @return {!Promise<string>}
    */
   fetchText(input, opt_init) {
-    const init = setupInit(opt_init, 'text/plain');
+    const init = this.setupInit_(opt_init, 'text/plain');
     return this.fetch(input, init)
         .then(response => response.text());
   }
@@ -266,7 +223,7 @@ export class Xhr {
    * @return {!Promise<!Document>}
    */
   fetchDocument(input, opt_init) {
-    const init = setupInit(opt_init, 'text/html');
+    const init = this.setupInit_(opt_init, 'text/html');
     init.responseType = 'document';
     return this.fetch(input, init)
         .then(response => response.document_());
@@ -278,7 +235,7 @@ export class Xhr {
    * @return {!Promise<!FetchResponse>}
    */
   fetch(input, opt_init) {
-    const init = setupInit(opt_init);
+    const init = this.setupInit_(opt_init);
     return this.fetchAmpCors_(input, init).then(response =>
       assertSuccess(response));
   }
@@ -310,6 +267,23 @@ export class Xhr {
   getCorsUrl(win, url) {
     return getCorsUrl(win, url);
   }
+
+  /**
+   * Sets up and normalizes the FetchInitDef
+   *
+   * @param {?FetchInitDef=} opt_init Fetch options object.
+   * @param {string=} opt_accept The HTTP Accept header value.
+   * @return {!FetchInitDef}
+   */
+  setupInit_(opt_init, opt_accept) {
+    const init = opt_init || {};
+    init.method = normalizeMethod_(init.method);
+    init.headers = init.headers || {};
+    if (opt_accept) {
+      init.headers['Accept'] = opt_accept;
+    }
+    return init;
+  }
 }
 
 
@@ -319,7 +293,7 @@ export class Xhr {
  * @return {string}
  * @private
  */
-export function normalizeMethod_(method) {
+function normalizeMethod_(method) {
   if (method === undefined) {
     return 'GET';
   }
@@ -334,24 +308,6 @@ export function normalizeMethod_(method) {
 
   return method;
 }
-
-/**
- * Sets up and normalizes the FetchInitDef
- *
- * @param {?FetchInitDef=} opt_init Fetch options object.
- * @param {string=} opt_accept The HTTP Accept header value.
- * @return {!FetchInitDef}
- */
-function setupInit(opt_init, opt_accept) {
-  const init = opt_init || {};
-  init.method = normalizeMethod_(init.method);
-  init.headers = init.headers || {};
-  if (opt_accept) {
-    init.headers['Accept'] = opt_accept;
-  }
-  return init;
-}
-
 
 /**
  * A minimal polyfill of Fetch API. It only polyfills what we currently use.

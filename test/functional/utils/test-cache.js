@@ -31,28 +31,14 @@ describe('Cache', function() {
     return keys.map(key => cache.get(key));
   }
 
-  it('should return the correct length of the queue', () => {
-    expect(cache.length).to.equal(0);
-    cache.put('a', 0);
-    cache.put('b', 1);
-    expect(cache.length).to.equal(2);
-    cache.put('c', 2);
-    cache.put('d', 3);
-    cache.put('e', 4);
-    expect(cache.length).to.equal(5);
-    cache.put('f', 5);
-    cache.put('g', 6);
-    expect(cache.length).to.equal(5);
-  });
-
   it('should support caching arbitrary data types', () => {
     cache.put('a', 'abc');
     cache.put('b', 123);
     cache.put('c', ['x', 'y']);
     cache.put('d', {foo: 'bar'});
 
-    expect(toArray(cache, 'abcd'.split(''))).to.deep.equal(
-      ['abc', 123, ['x', 'y'], {foo: 'bar'}]);
+    expect(toArray(cache, 'abcd'.split(''))).to.jsonEqual(
+        ['abc', 123, ['x', 'y'], {foo: 'bar'}]);
   });
 
   it('should remove least recently used items first', () => {
@@ -67,9 +53,5 @@ describe('Cache', function() {
     expect(cache.get('g')).to.not.be.undefined;
     expect(cache.get('b')).to.not.be.undefined;
     expect(cache.get('c')).to.be.undefined;
-  });
-
-  it('should throw error when keys are not strings', () => {
-    expect(() => { cache.put({}, 'c'); }).to.throw(Error);
   });
 });

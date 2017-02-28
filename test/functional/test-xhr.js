@@ -129,30 +129,6 @@ describe('XHR', function() {
           expect(deleteMethod).to.throw();
         });
 
-        it('should fetch GET requests with fragments once ' +
-            'for identical URLs', () => {
-          const xhr = getTest().xhr;
-          const TEST_RESPONSE = JSON.stringify({a: {b: [{c: 2}, {d: 4}]}});
-          const mockXhr = {
-            status: 200,
-            responseText: TEST_RESPONSE,
-            responseType: 'json',
-          };
-          const fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
-              () => Promise.resolve(new FetchResponse(mockXhr)));
-
-          return Promise.all([
-            xhr.fetchJson('/get?k=v1#a.b[0].c').then(json => {
-              expect(json).to.equal(2);
-            }),
-            xhr.fetchJson('/get?k=v1#a.b[1].d').then(json => {
-              expect(json).to.equal(4);
-            }),
-          ]).then(() => {
-            expect(fetchStub.calledOnce).to.be.true;
-          });
-        });
-
         it('should allow FormData as body', () => {
           const formData = new FormData();
           sandbox.stub(JSON, 'stringify');

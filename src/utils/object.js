@@ -57,28 +57,14 @@ export function hasOwn(obj, key) {
  */
 export function getPath(path, obj) {
   const arrayIndexRe = /\[(\d+)\]/g;
-  const keys = path.replace(arrayIndexRe, '.$1').split('.');
-  return keys.reduce((acc, key) => acc[key], obj);
-}
-
-/**
- * Creates a new object identical to the first with sorted properties.
- *
- * @param {T} obj a map-like value
- * @return {T}
- * @template T
- */
-export function sortProperties(obj) {
-  if (!obj || typeof obj !== 'object') { return obj; }
-
-  const keys = Object.keys(obj).sort();
-  return keys.reduce((acc, key) => {
-    const value = obj[key];
-    if (typeof value === 'object') {
-      acc[key] = sortProperties(value);
-    } else {
-      acc[key] = value;
+  const keys = path.replace(arrayIndexRe, '.$1')
+      .split('.');
+  let value = obj;
+  for (let i = 0; i < keys.length; i++) {
+    if (!hasOwn(value, keys[i])) {
+      throw new Error(`Cannot find property ${keys[i]} in path ${path}.`);
     }
-    return acc;
-  }, {});
+    value = value[keys[i]];
+  }
+  return value;
 }
