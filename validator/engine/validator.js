@@ -476,24 +476,13 @@ class ParsedAttrSpecs {
    */
   constructor(rules) {
     /** @type {!Array<!Array<number>>} */
-    this.attrLists = [];
+    this.attrLists = rules.directAttrLists;
 
     /** @type {!Array<number>} */
-    this.globalAttrs = [];
+    this.globalAttrs = rules.globalAttrs;
 
     /** @type {!Array<number>} */
-    this.layoutAttrs = [];
-
-    for (const attrList of rules.attrLists) {
-      if (attrList.name === '$AMP_LAYOUT_ATTRS') {
-        this.layoutAttrs = attrList.attrs;
-      } else if (attrList.name === '$GLOBAL_ATTRS') {
-        this.globalAttrs = attrList.attrs;
-      }
-      this.attrLists.push(attrList.attrs);
-    }
-    goog.asserts.assert(this.layoutAttrs.length > 0, 'layout attrs not found');
-    goog.asserts.assert(this.globalAttrs.length > 0, 'global attrs not found');
+    this.ampLayoutAttrs = rules.ampLayoutAttrs;
 
     /**
      * The AttrSpec instances, indexed by attr spec ids.
@@ -612,7 +601,7 @@ class ParsedTagSpec {
 
     // (1) layout attrs.
     if (tagSpec.ampLayout !== null && !this.isReferencePoint_) {
-      this.mergeAttrs(parsedAttrSpecs.layoutAttrs, parsedAttrSpecs);
+      this.mergeAttrs(parsedAttrSpecs.ampLayoutAttrs, parsedAttrSpecs);
     }
     // (2) attributes specified within |tagSpec|.
     this.mergeAttrs(tagSpec.attrs, parsedAttrSpecs);

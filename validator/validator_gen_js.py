@@ -32,6 +32,7 @@ sync.
 """
 
 import hashlib
+import json
 import os
 
 
@@ -361,8 +362,6 @@ CONSTRUCTOR_ARG_FIELDS = [
     'amp.validator.AmpLayout.supported_layouts',
     'amp.validator.AtRuleSpec.name',
     'amp.validator.AtRuleSpec.type',
-    'amp.validator.AttrList.attrs',
-    'amp.validator.AttrList.name',
     'amp.validator.AttrSpec.name',
     'amp.validator.AttrTriggerSpec.also_requires_attr',
     'amp.validator.BlackListedCDataRegex.error_message',
@@ -373,7 +372,6 @@ CONSTRUCTOR_ARG_FIELDS = [
     'amp.validator.PropertySpecList.properties',
     'amp.validator.TagSpec.tag_name',
     'amp.validator.UrlSpec.allowed_protocol',
-    'amp.validator.ValidatorRules.attr_lists',
     'amp.validator.ValidatorRules.tags',
 ]
 
@@ -485,6 +483,10 @@ def PrintClassFor(descriptor, msg_desc, light, out):
     out.PushIndent(2)
 
     for field in msg_desc.fields:
+      # We generate ValidatorRules.directAttrLists, ValidatorRules.globalAttrs,
+      # and validator.ampLayoutAttrs instead.
+      if field.full_name == 'amp.validator.ValidatorRules.attr_lists':
+        continue
       assigned_value = 'null'
       if field.name in constructor_arg_field_names:
         # field.name is also the parameter name.
@@ -516,6 +518,12 @@ def PrintClassFor(descriptor, msg_desc, light, out):
       out.Line('this.internedStrings = [];')
       out.Line('/** @type {!Array<!amp.validator.AttrSpec>} */')
       out.Line('this.attrs = [];')
+      out.Line('/** @type {!Array<!Array<number>>} */')
+      out.Line('this.directAttrLists = [];')
+      out.Line('/** @type {!Array<number>} */')
+      out.Line('this.globalAttrs = [];')
+      out.Line('/** @type {!Array<number>} */')
+      out.Line('this.ampLayoutAttrs = [];')
     out.PopIndent()
     out.Line('};')
 
@@ -703,6 +711,10 @@ def PrintObject(descriptor, msg, registry, light, out):
 
   field_and_assigned_values = []
   for (field_desc, field_val) in msg.ListFields():
+    # We generate ValidatorRules.directAttrLists, ValidatorRules.globalAttrs,
+    # and validator.ampLayoutAttrs instead.
+    if field_desc.full_name == 'amp.validator.ValidatorRules.attr_lists':
+      continue
     if light and field_desc.name in SKIP_FIELDS_FOR_LIGHT:
       continue
     field_and_assigned_values.append((field_desc, AssignedValueFor(
@@ -875,9 +887,6 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format, light,
       out.Line('%s.dispatchKeyByTagSpecId[%d]="%s";' %
                (rules_reference, tag_spec_id, dispatch_key))
 
-  out.Line('%s.internedStrings = ["%s"];' %
-           (rules_reference, '","'.join(registry.InternedStrings())))
-
   # Create a mapping from attr spec ids to AttrSpec instances, deduping the
   # AttrSpecs. Then sort by these ids, so now we get a dense array starting
   # with the attr that has attr spec id 0 - number of attr specs.
@@ -894,6 +903,44 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format, light,
     PrintObject(descriptor, attr, registry, light, out)
   out.Line('%s.attrs = [%s];' % (rules_reference, ','.join(
       [registry.MessageReferenceForKey(MessageKey(a)) for a in sorted_attrs])))
+
+  # We emit the attr lists as arrays of arrays of numbers (which are
+  # the attr ids), and treat the globalAttrs and the ampLayoutAttrs
+  # seperately for fast access.
+  direct_attr_lists = []
+  global_attrs = []
+  amp_layout_attrs = []
+  unique_attr_list_names = set()
+  for attr_list in rules.attr_lists:
+    assert attr_list.name not in unique_attr_list_names, attr_list.name
+    unique_attr_list_names.add(attr_list.name)
+    assert attr_list.attrs
+
+    attr_id_list = []
+    for attr in attr_list.attrs:
+      if IsTrivialAttrSpec(attr):
+        attr_id_list.append(registry.InternString(attr.name))
+      else:
+        attr_id_list.append(registry.MessageIdForKey(MessageKey(attr)))
+    if attr_list.name == '$GLOBAL_ATTRS':
+      global_attrs = attr_id_list
+      direct_attr_lists.append([])
+    elif attr_list.name == '$AMP_LAYOUT_ATTRS':
+      amp_layout_attrs = attr_id_list
+      direct_attr_lists.append([])
+    else:
+      direct_attr_lists.append(attr_id_list)
+
+  out.Line('%s.directAttrLists = %s;' % (
+      rules_reference, json.dumps(direct_attr_lists)))
+  out.Line('%s.globalAttrs = %s;' % (
+      rules_reference, json.dumps(global_attrs)))
+  out.Line('%s.ampLayoutAttrs = %s;' % (
+      rules_reference, json.dumps(amp_layout_attrs)))
+
+  # We emit these after the last call to registry.InternString.
+  out.Line('%s.internedStrings = ["%s"];' %
+           (rules_reference, '","'.join(registry.InternedStrings())))
 
   out.Line('return %s;' % rules_reference)
   out.PopIndent()
