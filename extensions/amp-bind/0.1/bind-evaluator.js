@@ -28,6 +28,15 @@ import {filterSplice} from '../../../src/utils/array';
 export let BindingDef;
 
 /**
+ * Error that can be passed through web worker
+ * @typedef {{
+ *   message: string,
+ *   stack: string,
+ * }}
+ */
+let EvaluatorErrorDef;
+
+/**
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
@@ -46,7 +55,7 @@ export class BindEvaluator {
    * Parses and stores given bindings into expression objects and returns map
    * of expression string to parse errors.
    * @param {!Array<BindingDef>} bindings
-   * @return {!Object<string,!Error>}
+   * @return {!Object<string,EvaluatorErrorDef>},
    */
   addBindings(bindings) {
     const errors = Object.create(null);
@@ -54,7 +63,10 @@ export class BindEvaluator {
     bindings.forEach(binding => {
       const parsed = this.parse_(binding.expressionString);
       if (parsed.error) {
-        errors[binding.expressionString] = parsed.error;
+        errors[binding.expressionString] = {
+          message: parsed.error.message,
+          stack: parsed.error.stack,
+        };
       } else {
         this.bindings_.push(binding);
       }
@@ -82,13 +94,13 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   results: !Object<string, ./bind-expression.BindExpressionResultDef>,
-   *   errors: !Object<string, !Error>,
+   *   errors: !Object<string, !EvaluatorErrorDef>,
    * }}
    */
   evaluateBindings(scope) {
     /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
     const cache = {};
-    /** @type {!Object<string, !Error>} */
+    /** @type {!Object<string, !EvaluatorErrorDef>} */
     const errors = {};
 
     this.bindings_.forEach(binding => {
@@ -99,21 +111,23 @@ export class BindEvaluator {
       }
       const expression = this.expressionCache_[expressionString];
       if (!expression) {
-        errors[expressionString] = new Error(
-            `Expression "${expressionString} is not cached."`);
+        const error =
+          new Error(`Expression "${expressionString}"" is not cached.`);
+        errors[expressionString] = {message: error.message, stack: error.stack};
         return;
       }
       const {result, error} = this.evaluate_(expression, scope);
       if (error) {
-        errors[expressionString] = error;
+        errors[expressionString] = {message: error.message, stack: error.stack};
         return;
       }
       const resultString = this.stringValueOf_(property, result);
       if (this.validator_.isResultValid(tagName, property, resultString)) {
         cache[expressionString] = result;
       } else {
-        errors[expressionString] = new Error(
-            `"${result}" is not a valid result for [${property}].`);
+        const error =
+          new Error(`"${result}" is not a valid result for [${property}].`);
+        errors[expressionString] = {message: error.message, stack: error.stack};
       }
     });
     return {results: cache, errors};
