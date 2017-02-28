@@ -85,18 +85,13 @@ export class ViewportBindingInabox {
     // 2) broadcast the request
     this.iframeClient_.setHostWindow(win.top);
 
-    /** @private {boolean} */
-    this.visibilityV2Enabled_ =
-        nativeIntersectionObserverSupported(win) &&
-            isExperimentOn(win, 'visibility-v2');
-
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
   /** @override */
   connect() {
-    if (this.visibilityV2Enabled_) {
-      // Visibility V2 uses native IntersectionObserver, no position data needed
+    if (nativeIntersectionObserverSupported(this.win)) {
+      // Using native IntersectionObserver, no position data needed
       // from host doc.
       return;
     }
