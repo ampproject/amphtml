@@ -993,7 +993,9 @@ function createBaseCustomElementClass(win) {
         this.completeUpgrade_(impl);
       } else if (typeof res.then == 'function') {
         // It's a promise: wait until it's done.
-        res.then(impl => this.completeUpgrade_(impl)).catch(reason => {
+        res.then(upgrade => {
+          this.completeUpgrade_(upgrade || impl);
+        }).catch(reason => {
           this.upgradeState_ = UpgradeState.UPGRADE_FAILED;
           rethrowAsync(reason);
         });
