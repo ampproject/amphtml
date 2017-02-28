@@ -79,6 +79,9 @@ export class FakeWindow {
     Object.defineProperty(this.document, 'defaultView', {
       get: () => this,
     });
+    Object.defineProperty(this.document, 'readyState', {
+      get: () => this.readyState,
+    });
 
     EventListeners.intercept(this.document);
     EventListeners.intercept(this.document.documentElement);

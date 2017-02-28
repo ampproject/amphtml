@@ -455,7 +455,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const validMetric = urlReplacements.expandAsync('?sh=PAGE_LOAD_TIME&s');
       urlReplacements.ampdoc.win.performance.timing.loadEventStart = 109;
       win.document.readyState = 'complete';
-      eventListeners['readystatechange']();
+      loadObservable.fire({type: 'load'});
       return validMetric.then(res => {
         expect(res).to.match(/sh=9&s/);
       });
