@@ -159,17 +159,14 @@ export class Timer {
    * @return {!Promise}
    */
   poll(delay, predicate) {
-    let resolve;
-    const p = new Promise(r => {
-      resolve = r;
+    return new Promise(resolve => {
+      const interval = this.win.setInterval(() => {
+        if (predicate()) {
+          this.win.clearInterval(interval);
+          resolve();
+        }
+      }, delay);
     });
-    const interval = this.win.setInterval(() => {
-      if (predicate()) {
-        this.win.clearInterval(interval);
-        resolve();
-      }
-    }, delay);
-    return p;
   }
 
 }

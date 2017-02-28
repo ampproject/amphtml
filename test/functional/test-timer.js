@@ -17,7 +17,7 @@
 import {Timer} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
-describe('Timer', () => {
+describes.fakeWin('Timer', {}, env => {
 
   let sandbox;
   let windowMock;
@@ -28,7 +28,6 @@ describe('Timer', () => {
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(unusedCallback, unusedDelay) {};
     WindowApi.prototype.clearTimeout = function(unusedTimerId) {};
-    WindowApi.prototype.setInterval = function(unusedCallback, unusedDelay) {};
     WindowApi.prototype.document = {};
     const windowApi = new WindowApi();
     windowMock = sandbox.mock(windowApi);
@@ -145,11 +144,30 @@ describe('Timer', () => {
     });
   });
 
-  it('poll', () => {
-    windowMock.expects('setTimeout').never();
-    windowMock.expects('clearTimeout').never();
-    windowMock.expects('setInterval').once();
-    timer.poll(111, () => true);
+  it('poll - resolves only when condition is true', done => {
+    const realTimer = new Timer(env.win);
+    let predicate = false;
+    realTimer.poll(111, () => {
+      return predicate;
+    }).then(() => {
+      expect(predicate).to.be.true;
+      done();
+    });
+    setTimeout(() => {
+      predicate = true;
+    }, 222);
+  });
+
+  it('poll - clears out interval when complete', done => {
+    const realTimer = new Timer(env.win);
+    const clearIntervalStub = sandbox.stub();
+    env.win.clearInterval = clearIntervalStub;
+    realTimer.poll(111, () => {
+      return true;
+    }).then(() => {
+      expect(clearIntervalStub).to.have.been.calledOnce;
+      done();
+    });
   });
 
 });
