@@ -216,7 +216,7 @@ export function sanitizeHtml(html) {
           // for, such as "on"
           for (let i = 0; i < attribs.length; i += 2) {
             const attrib = attribs[i];
-            if (WHITELISTED_ATTRS.includes(attrib) != -1) {
+            if (WHITELISTED_ATTRS.includes(attrib)) {
               attribs[i + 1] = savedAttribs[i + 1];
             } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
