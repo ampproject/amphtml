@@ -156,11 +156,11 @@ export class AmpSidebar extends AMP.BaseElement {
     }, true);
   }
 
- /**
-  * Returns true if the sidebar is opened.
-  * @returns {boolean}
-  * @private
-  */
+  /**
+   * Returns true if the sidebar is opened.
+   * @returns {boolean}
+   * @private
+   */
   isOpen_() {
     return this.element.hasAttribute('open');
   }
