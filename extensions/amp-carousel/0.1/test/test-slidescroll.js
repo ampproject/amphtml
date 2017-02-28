@@ -17,7 +17,6 @@
 import * as sinon from 'sinon';
 import '../amp-carousel';
 import {createIframePromise} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describe('SlideScroll', () => {
   const SHOW_CLASS = '-amp-slide-item-show';
@@ -34,7 +33,6 @@ describe('SlideScroll', () => {
   function getAmpSlideScroll(
       opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true) {
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-slidescroll', true);
       iframe.width = '1000';
       iframe.height = '1000';
       const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
@@ -94,23 +92,6 @@ describe('SlideScroll', () => {
           .to.be.true;
       expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
       expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
-    });
-  });
-
-  it('should create start/end markers when scroll-snap is available', () => {
-    return getAmpSlideScroll().then(obj => {
-      const ampSlideScroll = obj.ampSlideScroll;
-      const impl = ampSlideScroll.implementation_;
-      ampSlideScroll.style['scrollSnapType'] = '';
-      ampSlideScroll.style['webkitScrollSnapType'] = '';
-      ampSlideScroll.style['msScrollSnapType'] = '';
-      impl.buildCarousel();
-      expect(
-          ampSlideScroll.getElementsByClassName(
-              '-amp-carousel-start-marker').length).to.be.at.least(1);
-      expect(
-          ampSlideScroll.getElementsByClassName(
-              '-amp-carousel-end-marker').length).to.be.at.least(1);
     });
   });
 
@@ -516,34 +497,6 @@ describe('SlideScroll', () => {
     });
   });
 
-  it('should handle custom elastic scroll', () => {
-    return getAmpSlideScroll().then(obj => {
-      const ampSlideScroll = obj.ampSlideScroll;
-      const impl = ampSlideScroll.implementation_;
-      const customSnapSpy = sandbox.stub(impl, 'customSnap_', () => {
-        return {
-          then: cb => {
-            cb();
-          },
-        };
-      });
-
-      impl.handleCustomElasticScroll_(-10);
-      expect(impl.elasticScrollState_).to.equal(-1);
-      impl.previousScrollLeft_ = -10;
-      impl.handleCustomElasticScroll_(-5);
-      expect(customSnapSpy).to.have.been.calledWith(-5);
-
-      impl.previousScrollLeft_ = null;
-
-      impl.handleCustomElasticScroll_(410);
-      expect(impl.elasticScrollState_).to.equal(1);
-      impl.previousScrollLeft_ = 410;
-      impl.handleCustomElasticScroll_(405);
-      expect(customSnapSpy).to.have.been.calledWith(405);
-    });
-  });
-
   it('should handle layout measures (orientation changes)', () => {
     return getAmpSlideScroll().then(obj => {
       const ampSlideScroll = obj.ampSlideScroll;
@@ -566,7 +519,6 @@ describe('SlideScroll', () => {
 
   describe('Looping', () => {
     beforeEach(() => {
-      toggleExperiment(window, 'amp-slidescroll', true);
       sandbox = sinon.sandbox.create();
     });
 
