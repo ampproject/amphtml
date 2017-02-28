@@ -17,7 +17,7 @@
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
-  installExtensionsService,
+  getExtensionsService,
 } from '../../../../src/service/extensions-impl';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
@@ -157,7 +157,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'type': 'adsense',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
-        const extensions = installExtensionsService(impl.win);
+        const extensions = getExtensionsService(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });

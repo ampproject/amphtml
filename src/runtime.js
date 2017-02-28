@@ -24,7 +24,7 @@ import {
   addShadowRootFactoryToExtension,
   installBuiltinElements,
   installExtensionsInShadowDoc,
-  installExtensionsService,
+  getExtensionsService,
   registerExtension,
   stubLegacyElements,
 } from './service/extensions-impl';
@@ -182,7 +182,7 @@ function adoptShared(global, opts, callback) {
   const preregisteredExtensions = global.AMP || [];
 
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = installExtensionsService(global);
+  const extensions = getExtensionsService(global);
   installRuntimeServices(global);
   stubLegacyElements(global);
 
