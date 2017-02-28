@@ -213,14 +213,6 @@ String.substr()
 String.substring()
 String.toLowerCase()
 String.toUpperCase()
-abs()
-ceil()
-floor()
-max()
-min()
-random()
-round()
-sign()
 ```
 
 The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
