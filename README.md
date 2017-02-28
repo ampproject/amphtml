@@ -6,9 +6,9 @@ You can learn more at [ampproject.org](https://www.ampproject.org/) including [w
 
 ## We'd ❤️️ your help making AMP better!
 
-**There are a lot of ways you can [contribute](CONTRIBUTING.md) to making AMP better!**  You can [report bugs and feature requests](CONTRIBUTING.md#filing-issues) or ideally become an [ongoing participant](CONTRIBUTING.md#ongoing-participation) in the AMP Project community and [contribute code to the open source project](CONTRIBUTING.md#contributing-code).
+There are a lot of ways you can [contribute](CONTRIBUTING.md) to making AMP better! You can [report bugs and feature requests](CONTRIBUTING.md#filing-issues) or ideally become an [ongoing participant](CONTRIBUTING.md#ongoing-participation) in the AMP Project community and [contribute code to the open source project](CONTRIBUTING.md#contributing-code).
 
-We **_⚡❤️️⚡ enthusiastically ⚡❤️️⚡_ welcome new contributors** to the AMP Project **_even if you have no experience being part of an open source project_**.  We've got some [tips for new contributors](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#tips-for-new-open-source-contributors) and guides to getting started (both a [detailed version](contributing/getting-started-e2e.md) and a [TL;DR](contributing/getting-started-quick.md)).
+We enthusiastically welcome new contributors to the AMP Project **_even if you have no experience being part of an open source project_**.  We've got some [tips for new contributors](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#tips-for-new-open-source-contributors) and guides to getting started (both a [detailed version](contributing/getting-started-e2e.md) and a [TL;DR](contributing/getting-started-quick.md)).
 
 If you're new here, sign up for our [Slack](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) and say "Hi!" in the appropriately named [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel.
 
