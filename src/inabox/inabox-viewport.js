@@ -21,7 +21,6 @@ import {resourcesForDoc} from '../../src/resources';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
-import {isExperimentOn} from '../../src/experiments';
 import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame';
