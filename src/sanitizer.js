@@ -130,7 +130,6 @@ const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ '</script',
 ];
 
-
 /** @const {!Object<string, !Object<string, !RegExp>>} */
 const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = {
   'input': {
@@ -340,6 +339,12 @@ export function isValidAttr(tagName, attrName, attrValue) {
     return false;
   }
 
+  // if (attrName == 'class' &&
+  //     attrValue &&
+  //     attrValue.search(/(^|\\W)i-amphtml-/i) == 0) {
+  //   return false;
+  // }
+
   // No attributes with "javascript" or other blacklisted substrings in them.
   if (attrValue) {
     const attrValueNorm = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
@@ -356,7 +361,8 @@ export function isValidAttr(tagName, attrName, attrValue) {
     return false;
   }
 
-  // Remove blacklisted values for specific attributes e.g. input[type=image].
+  // Remove blacklisted values for specific attributes for specific tags
+  // e.g. input[type=image].
   const attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
   if (attrBlacklist) {
     const blacklistedValuesRegex = attrBlacklist[attrName];

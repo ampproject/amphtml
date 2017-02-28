@@ -171,6 +171,13 @@ describe('sanitizeHtml', () => {
         .equal('<p [text]="foo" [class]="bar"></p>');
   });
 
+  it('should NOT output blacklisted values for class attributes', () => {
+    expect(sanitizeHtml('<p class="i-amphtml></p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p [class]="i-amphtml></p>')).to.be
+        .equal('<p>hello</p>');
+  });
+
   it('should NOT output security-sensitive amp-bind attributes', () => {
     expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be.equal(
         'a<a>b</a>');
