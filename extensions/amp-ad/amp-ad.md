@@ -87,6 +87,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdButler](../../ads/adbutler.md)
 - [Adform](../../ads/adform.md)
 - [Ad Generation](../../ads/adgeneration.md)
+- [Adhese](../../ads/adhese.md)
 - [ADITION](../../ads/adition.md)
 - [Adman](../../ads/adman.md)
 - [AdReactor](../../ads/adreactor.md)
