@@ -550,6 +550,13 @@ export class Visibility {
 
     listener['state'] = state;
 
+    // QQQQ: This is semantically wrong! To answer the question, whether
+    // the `visibilitySpec = {}` has been triggered it's not important
+    // whether or not the the element is _currently_ visible. Consider this,
+    // `visibilitySpec = {}` is the default of `visibilitySpec = {totalVisibleTime > 0}`.
+    // When `totalVisibleTime == 1` it doesn't matter whether the element is currently
+    // visible. All it matters that, mathematically, `1 > 0`.
+    // Otherwise, checking for visibility here creates a probability of risk condition.
     return ((triggerType && state[IN_VIEWPORT]) || !triggerType) &&
         (config[TOTAL_TIME_MIN] === undefined ||
             state[TOTAL_VISIBLE_TIME] >= config[TOTAL_TIME_MIN]) &&
