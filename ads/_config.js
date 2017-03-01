@@ -67,6 +67,10 @@ export const adConfig = {
     prefetch: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   },
 
+  adhese: {
+    renderStartImplemented: true,
+  },
+
   adition: {},
 
   adman: {},
