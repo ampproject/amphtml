@@ -68,7 +68,7 @@ import {installUrlReplacementsServiceForDoc,} from
     './service/url-replacements-impl';
 import {installViewerServiceForDoc, setViewerVisibilityState,} from
     './service/viewer-impl';
-import {installViewportServiceForDoc} from './service/viewport-impl';
+import {getViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
@@ -131,7 +131,7 @@ export function installRuntimeServices(global) {
 export function installAmpdocServices(ampdoc, opt_initParams) {
   installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
-  installViewportServiceForDoc(ampdoc);
+  getViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);

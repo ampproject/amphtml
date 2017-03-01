@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForDoc} from './service';
+import {getServiceForDoc} from './service';
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
@@ -22,5 +22,5 @@ import {getExistingServiceForDoc} from './service';
  */
 export function viewportForDoc(nodeOrDoc) {
   return /** @type {!./service/viewport-impl.Viewport} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'viewport'));
+      getServiceForDoc(nodeOrDoc, 'viewport'));
 }

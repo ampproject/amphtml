@@ -21,7 +21,7 @@ import {fromClassForDoc} from '../../src/service';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
+import {getViewportServiceForDoc} from '../../src/service/viewport-impl';
 import {viewportForDoc} from '../../src/viewport';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
@@ -107,7 +107,7 @@ describe('Activity getTotalEngagedTime', () => {
       visibilityObservable.add(handler);
     });
 
-    installViewportServiceForDoc(ampdoc);
+    getViewportServiceForDoc(ampdoc);
     viewport = viewportForDoc(ampdoc);
 
     sandbox.stub(viewport, 'onScroll', handler => {
