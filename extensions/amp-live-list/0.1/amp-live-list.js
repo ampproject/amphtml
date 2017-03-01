@@ -287,6 +287,9 @@ export class AmpLiveList extends AMP.BaseElement {
     const hasInsertItems = this.pendingItemsInsert_.length > 0;
     const hasTombstoneItems = this.pendingItemsTombstone_.length > 0;
 
+    const shouldSendAmpDomUpdateEvent = this.pendingItemsInsert_.length > 0 ||
+        this.pendingItemsReplace_.length > 0;
+
     let promise = this.mutateElement(() => {
 
       const itemsSlot = user().assertElement(this.itemsSlot_);
@@ -334,6 +337,12 @@ export class AmpLiveList extends AMP.BaseElement {
       return this.removeOverflowItems_(itemsSlot);
       // TODO(erwinm, #3332) compensate scroll position here.
     });
+
+    if (shouldSendAmpDomUpdateEvent) {
+      promise = promise.then(() => {
+        this.sendAmpDomUpdateEvent_();
+      });
+    }
 
     if (hasInsertItems) {
       promise = promise.then(() => {
@@ -829,6 +838,12 @@ export class AmpLiveList extends AMP.BaseElement {
   /** @override */
   getUpdateTime() {
     return this.updateTime_;
+  }
+
+  sendAmpDomUpdateEvent_() {
+    const event = this.win.document.createEvent('Event');
+    event.initEvent('amp:dom-update', true, true);
+    this.win.document.dispatchEvent(event);
   }
 }
 
