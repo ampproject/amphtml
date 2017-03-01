@@ -25,7 +25,7 @@ import {
 import {installCidServiceForDocForTesting,} from
     '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
+import {getDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
 import {Activity} from '../../extensions/amp-analytics/0.1/activity-impl';
@@ -142,7 +142,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       },
     };
     win.document.defaultView = win;
-    const ampdocService = installDocService(win, true);
+    const ampdocService = getDocService(win, true);
     const ampdoc = ampdocService.getAmpDoc(win.document);
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;

@@ -15,7 +15,7 @@
  */
 
 import {handleMessageEvent} from '../a2a-listener';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {getDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
 describe('amp-ad a2a listener', function() {
@@ -57,7 +57,7 @@ describe('amp-ad a2a listener', function() {
       },
     };
     win.document.defaultView = win;
-    installDocService(win, /* isSingleDoc */ true);
+    getDocService(win, /* isSingleDoc */ true);
   });
 
   afterEach(() => {

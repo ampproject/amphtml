@@ -18,7 +18,7 @@ import {FakeLocation} from './fake-dom';
 import {Timer} from '../src/timer';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
-import {installDocService} from '../src/service/ampdoc-impl';
+import {getDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {
   installAmpdocServices,
@@ -215,7 +215,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
-      const ampdocService = installDocService(iframe.contentWindow, true);
+      const ampdocService = getDocService(iframe.contentWindow, true);
       const ampdoc = ampdocService.getAmpDoc(iframe.contentWindow.document);
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);

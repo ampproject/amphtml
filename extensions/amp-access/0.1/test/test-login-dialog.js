@@ -18,7 +18,7 @@ import {
   WebLoginDialog,
   openLoginDialog,
 } from '../login-dialog';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {getDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
 const RETURN_URL_ESC = encodeURIComponent('http://localhost:8000/extensions' +
@@ -68,7 +68,7 @@ describe('ViewerLoginDialog', () => {
       },
     };
     windowApi.document.defaultView = windowApi;
-    installDocService(windowApi, /* isSingleDoc */ true);
+    getDocService(windowApi, /* isSingleDoc */ true);
   });
 
   afterEach(() => {
@@ -197,7 +197,7 @@ describe('WebLoginDialog', () => {
     windowApi = windowObj;
     windowApi.document.defaultView = windowApi;
     windowMock = sandbox.mock(windowApi);
-    installDocService(windowApi, /* isSingleDoc */ true);
+    getDocService(windowApi, /* isSingleDoc */ true);
 
     dialogUrl = null;
     dialog = {

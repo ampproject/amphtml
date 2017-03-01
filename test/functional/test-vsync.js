@@ -15,7 +15,7 @@
  */
 
 import {Vsync} from '../../src/service/vsync-impl';
-import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
+import {AmpDocShadow, getDocService} from '../../src/service/ampdoc-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {viewerPromiseForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
@@ -77,7 +77,7 @@ describe('vsync', () => {
     let vsync;
 
     beforeEach(() => {
-      const ampdocService = installDocService(win, /* isSingleDoc */ true);
+      const ampdocService = getDocService(win, /* isSingleDoc */ true);
       ampdoc = ampdocService.getAmpDoc();
       win.services['viewer'] = {obj: viewer};
       vsync = new Vsync(win);
@@ -514,7 +514,7 @@ describe('vsync', () => {
     let vsync;
 
     beforeEach(() => {
-      installDocService(win, /* isSingleDoc */ false);
+      getDocService(win, /* isSingleDoc */ false);
       root = document.createElement('i-amp-shadow-root');
       document.body.appendChild(root);
       ampdoc = new AmpDocShadow(win, 'https://acme.org/', root);

@@ -25,7 +25,7 @@ import {installActionServiceForDoc,} from
     '../../../../src/service/action-impl';
 import {installCidServiceForDocForTesting,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {installDocService,} from
+import {getDocService,} from
     '../../../../src/service/ampdoc-impl';
 import {installPerformanceService,} from
     '../../../../src/service/performance-impl';
@@ -43,7 +43,7 @@ describe('AccessService', () => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
+    const docService = getDocService(window, /* isSingleDoc */ true);
     installActionServiceForDoc(docService.getAmpDoc());
     installCidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -373,7 +373,7 @@ describe('AccessService adapter context', () => {
     clock.tick(0);
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
+    const docService = getDocService(window, /* isSingleDoc */ true);
     installActionServiceForDoc(docService.getAmpDoc());
     installCidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -484,7 +484,7 @@ describe('AccessService authorization', () => {
     clock.tick(0);
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
+    const docService = getDocService(window, /* isSingleDoc */ true);
     installActionServiceForDoc(docService.getAmpDoc());
     installCidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -787,7 +787,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
+    const docService = getDocService(window, /* isSingleDoc */ true);
     installActionServiceForDoc(docService.getAmpDoc());
     installCidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -935,7 +935,7 @@ describe('AccessService pingback', () => {
     clock = sandbox.useFakeTimers();
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
+    const docService = getDocService(window, /* isSingleDoc */ true);
     installActionServiceForDoc(docService.getAmpDoc());
     installCidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -1271,7 +1271,7 @@ describe('AccessService login', () => {
     clock = sandbox.useFakeTimers();
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
+    const docService = getDocService(window, /* isSingleDoc */ true);
     installActionServiceForDoc(docService.getAmpDoc());
     installCidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -1626,7 +1626,7 @@ describe('AccessService analytics', () => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
+    const docService = getDocService(window, /* isSingleDoc */ true);
     installActionServiceForDoc(docService.getAmpDoc());
     installCidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);

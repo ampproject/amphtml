@@ -21,7 +21,7 @@ import {
   onIdle,
   startupChunk,
 } from '../../src/chunk';
-import {installDocService} from '../../src/service/ampdoc-impl';
+import {getDocService} from '../../src/service/ampdoc-impl';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc, viewerPromiseForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
@@ -94,7 +94,7 @@ describe('chunk', () => {
   }, env => {
 
     beforeEach(() => {
-      installDocService(env.win, true);
+      getDocService(env.win, true);
       expect(env.win.services.viewer).to.be.undefined;
       env.win.document.hidden = false;
     });
@@ -107,7 +107,7 @@ describe('chunk', () => {
   }, env => {
 
     beforeEach(() => {
-      installDocService(env.win, true);
+      getDocService(env.win, true);
       expect(env.win.services.viewer).to.be.undefined;
       env.win.document.hidden = true;
       env.win.requestIdleCallback = function() {

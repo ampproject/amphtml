@@ -28,7 +28,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
-import {installDocService,} from
+import {getDocService,} from
     '../../../../src/service/ampdoc-impl';
 import {installActionServiceForDoc,} from
     '../../../../src/service/action-impl';
@@ -98,7 +98,7 @@ describes.realWin('amp-form', {
 
   beforeEach(() => {
     installTemplatesService(window);
-    const docService = installDocService(window, /* isSingleDoc */ true);
+    const docService = getDocService(window, /* isSingleDoc */ true);
     installActionServiceForDoc(docService.getAmpDoc());
     toggleExperiment(window, 'amp-form-var-sub', true);
 

@@ -34,7 +34,7 @@ import {
 } from '../src/runtime';
 import {cssText} from '../build/css';
 import {createAmpElementProto} from '../src/custom-element';
-import {installDocService} from '../src/service/ampdoc-impl';
+import {getDocService} from '../src/service/ampdoc-impl';
 import {
   installBuiltinElements,
   installExtensionsService,
@@ -472,7 +472,7 @@ class AmpFixture {
     }
     const ampdocType = spec.ampdoc || 'single';
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
-    const ampdocService = installDocService(win, singleDoc);
+    const ampdocService = getDocService(win, singleDoc);
     env.ampdocService  = ampdocService;
     env.extensions = installExtensionsService(win);
     installBuiltinElements(win);

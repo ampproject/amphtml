@@ -50,11 +50,11 @@ import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {AmpContext} from '../../../../3p/ampcontext.js';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {getDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
 function setupForAdTesting(fixture) {
-  installDocService(fixture.win, /* isSingleDoc */ true);
+  getDocService(fixture.win, /* isSingleDoc */ true);
   const doc = fixture.doc;
   // TODO(a4a-cam@): This is necessary in the short term, until A4A is
   // smarter about host document styling.  The issue is that it needs to

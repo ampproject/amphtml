@@ -16,7 +16,7 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
-import {installDocService} from '../../src/service/ampdoc-impl';
+import {getDocService} from '../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
@@ -77,7 +77,7 @@ describe('Viewer', () => {
     windowApi.history = {
       replaceState: sandbox.spy(),
     };
-    const ampdocService = installDocService(windowApi, /* isSingleDoc */ true);
+    const ampdocService = getDocService(windowApi, /* isSingleDoc */ true);
     ampdoc = ampdocService.getAmpDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);

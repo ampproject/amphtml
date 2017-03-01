@@ -21,7 +21,7 @@
 
 import './polyfills';
 
-import {installDocService} from './service/ampdoc-impl';
+import {getDocService} from './service/ampdoc-impl';
 import {
   adoptShadowMode,
   installBuiltins,
@@ -40,7 +40,7 @@ bodyAlwaysVisible(self);
 deactivateChunking();
 
 // Declare that this runtime will support multiple shadow-root docs.
-installDocService(self, /* isSingleDoc */ false);
+getDocService(self, /* isSingleDoc */ false);
 
 // Core services.
 installRuntimeServices(self);

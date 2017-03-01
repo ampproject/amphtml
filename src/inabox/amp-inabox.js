@@ -27,7 +27,7 @@ import {installPullToRefreshBlocker} from '../pull-to-refresh';
 import {installGlobalClickListenerForDoc} from '../document-click';
 import {installStyles, makeBodyVisible} from '../style-installer';
 import {installErrorReporting} from '../error';
-import {installDocService} from '../service/ampdoc-impl';
+import {getDocService} from '../service/ampdoc-impl';
 import {installCacheServiceWorker} from '../service-worker/install';
 import {stubElements} from '../custom-element';
 import {
@@ -59,7 +59,7 @@ try {
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  ampdocService = installDocService(self, /* isSingleDoc */ true);
+  ampdocService = getDocService(self, /* isSingleDoc */ true);
 } catch (e) {
   // In case of an error call this.
   makeBodyVisible(self.document);

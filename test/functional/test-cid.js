@@ -22,7 +22,7 @@ import {
 } from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService, Crypto,}
     from '../../src/service/crypto-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
+import {getDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
 import {installPlatformService} from '../../src/service/platform-impl';
@@ -97,7 +97,7 @@ describe('cid', () => {
       setTimeout: window.setTimeout,
     };
     fakeWin.document.defaultView = fakeWin;
-    const ampdocService = installDocService(fakeWin, /* isSingleDoc */ true);
+    const ampdocService = getDocService(fakeWin, /* isSingleDoc */ true);
     ampdoc = ampdocService.getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
@@ -336,7 +336,7 @@ describe('cid', () => {
         body: {},
       },
     };
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
+    const ampdocService = getDocService(win, /* isSingleDoc */ true);
     const ampdoc2 = ampdocService.getAmpDoc();
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');

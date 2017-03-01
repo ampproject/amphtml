@@ -18,7 +18,7 @@ import {createIframePromise} from '../../testing/iframe';
 import {documentInfoForDoc} from '../../src/document-info';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
+import {getDocService} from '../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
 describe('document-info', () => {
@@ -46,7 +46,7 @@ describe('document-info', () => {
         }
       }
       const win = iframe.win;
-      installDocService(win, true);
+      getDocService(win, true);
       sandbox.stub(win.Math, 'random', () => 0.123456789);
       installDocumentInfoServiceForDoc(win.document);
       return iframe.win;
@@ -72,7 +72,7 @@ describe('document-info', () => {
       },
     };
     win.document.defaultView = win;
-    installDocService(win, true);
+    getDocService(win, true);
     installDocumentInfoServiceForDoc(win.document);
     expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
         'http://www.origin.com/foo/?f=0');
@@ -90,7 +90,7 @@ describe('document-info', () => {
       },
     };
     win.document.defaultView = win;
-    installDocService(win, true);
+    getDocService(win, true);
     installDocumentInfoServiceForDoc(win.document);
     expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
         'http://www.origin.com/foo/?f=0');

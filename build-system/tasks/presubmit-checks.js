@@ -167,7 +167,7 @@ var forbiddenTerms = {
       'src/runtime.js',
     ],
   },
-  'installDocService': {
+  'getDocService': {
     message: privateServiceFactory,
     whitelist: [
       'src/amp.js',
