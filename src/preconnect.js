@@ -329,13 +329,13 @@ export class Preconnect {
   }
 }
 
-
 /**
  * @param {!Window} window
  * @return {!PreconnectService}
  */
 function preconnectFor(window) {
-  return fromClass(window, 'preconnect', PreconnectService);
+  registerService(window, 'preconnect', PreconnectService);
+  return getService(window, 'preconnect');
 }
 
 
