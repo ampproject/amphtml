@@ -20,13 +20,6 @@ const NO_PARENT = null;
 const NO_SPEC = {};
 
 
-// QQQ
-// visiblePercentageMin: Number(spec['visiblePercentageMin']) / 100 || 0,
-// visiblePercentageMax: Number(spec['visiblePercentageMax']) / 100 || 1,
-// totalTimeMin: Number(spec['totalTimeMin']) || 0,
-// totalTimeMax: Number(spec['totalTimeMax']) || Infinity,
-// continuousTimeMin: Number(spec['continuousTimeMin']) || 0,
-// continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
 describes.sandboxed('VisibilityHelper', {}, () => {
   let startTime;
   let clock;
