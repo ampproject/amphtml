@@ -861,6 +861,9 @@ export class AmpA4A extends AMP.BaseElement {
       this.xOriginIframeHandler_ = null;
     }
     this.layoutMeasureExecuted_ = false;
+    // Paranoia: Ensure that no future user of this slot is same domain as
+    // the current user.
+    this.nameframeUrl_ = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
     return true;
