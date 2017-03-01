@@ -74,6 +74,15 @@ const clientsVersion = Object.create(null);
  */
 const referrersLastRequestTime = Object.create(null);
 
+/**
+ * A mapping from a URL to a fetch request for that URL. This is used to batch
+ * repeated requests into a single fetch. This batching is deleted after the
+ * fetch completes.
+ *
+ * @type {!Object<string, !Promise<!Response>>}
+ */
+const fetchPromises = Object.create(null);
+
 
 /**
  * A regex that matches every CDN JS URL we care to cache.
@@ -107,7 +116,7 @@ const CDN_JS_REGEX = new RegExp(
 
 
 /**
- * Determines if a url is a request to a CDN JS file.
+ * Determines if a URL is a request to a CDN JS file.
  * @param {string} url
  * @return {boolean}
  * @visibleForTesting
@@ -136,7 +145,7 @@ export function requestData(url) {
 }
 
 /**
- * Returns the url with the requested version changed to `version`.
+ * Returns the URL with the requested version changed to `version`.
  *
  * @param {string} url
  * @param {RtvVersion} version
@@ -144,7 +153,7 @@ export function requestData(url) {
  * @visibleForTesting
  */
 export function urlWithVersion(url, version) {
-  const { explicitRtv, pathname } = requestData(url);
+  const {explicitRtv, pathname} = requestData(url);
   if (explicitRtv) {
     return url.replace(explicitRtv, version);
   }
@@ -162,7 +171,7 @@ export function urlWithVersion(url, version) {
  */
 function normalizedRequest(request, version) {
   const url = request.url;
-  const { explicitRtv } = requestData(url);
+  const {explicitRtv} = requestData(url);
   if (explicitRtv === version) {
     return request;
   }
@@ -220,6 +229,84 @@ export function generateFallbackClientId(referrer) {
 }
 
 /**
+ * Fetches a URL, and stores it into the cache if the response is valid.
+ * Repeated fetches of the same URL will be batched into a single request while
+ * the first is still fetching.
+ *
+ * @param {!Cache} cache
+ * @param {!Request} requestOrUrl
+ * @return {!Promise<!Response>}
+ * @visibleForTesting
+ */
+export function fetchAndCache(cache, request) {
+  const url = request.url;
+
+  return fetchPromises[url] = cache.match(request)
+      .then(response => {
+        if (response && !expired(response)) {
+          delete fetchPromises[url];
+          return response;
+        }
+
+        return fetch(request).then(response => {
+          delete fetchPromises[url];
+
+          // Did we receive a invalid response?
+          if (!response.ok) {
+            throw new Error(`failed fetching ${url}`);
+          }
+
+          // You must clone to prevent double reading the body.
+          cache.put(request, response.clone());
+          return response;
+        }, err => {
+          delete fetchPromises[url];
+          throw err;
+        });
+      });
+}
+
+/**
+ * Checks if a (valid) response has expired.
+ *
+ * @param {!Response} response
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function expired(response) {
+  const {headers} = response;
+  let date;
+  let age = 0;
+
+  if (headers.has('date') && headers.has('cache-control')) {
+    const maxAge = /max-age=(\d+)/gi.exec(headers.get('cache-control'));
+    date = headers.get('date');
+    age = maxAge ? maxAge[1] * 1000 : -Infinity;
+  } else {
+    date = headers.get('expires');
+  }
+
+  return Date.now() >= Number(new Date(date)) + age;
+}
+
+/*
+ * Resets clientsVersion, referrersLastRequestTime, and fetchPromises.
+ * @visibleForTesting
+ */
+export function resetMemosForTesting() {
+  for (const key in clientsVersion) {
+    delete clientsVersion[key];
+  }
+  for (const key in referrersLastRequestTime) {
+    delete referrersLastRequestTime[key];
+  }
+  for (const key in fetchPromises) {
+    delete fetchPromises[key];
+  }
+}
+
+
+/**
  * A promise to open up our CDN JS cache, which will be resolved before any
  * requests are intercepted by the SW.
  *
@@ -240,37 +327,41 @@ const cachePromise = self.caches.open('cdn-js').then(result => {
  * @return {!Promise<!Response>}
  * @visibleForTesting
  */
-export function fetchAndCache(cache, request, requestPath, requestVersion) {
+export function fetchJsFile(cache, request, requestPath, requestVersion) {
   // TODO(jridgewell): we should also fetch this requestVersion for all files
   // we know about.
-  return fetch(request).then(response => {
-    // Did we receive a valid response (200 <= status < 300)?
-    if (response && response.ok) {
-      // You must clone to prevent double reading the body.
-      cache.put(request, response.clone());
-
-      // Prune old versions of this file from the cache.
-      // This intentionally does not block the request resolution to speed
-      // things up. This is likely fine since you don't have multiple
-      // `<script>`s with the same `src` on a page.
-      cache.keys().then(requests => {
-        for (let i = 0; i < requests.length; i++) {
-          const request = requests[i];
-          const url = request.url;
-          const cachedData = requestData(url);
-          if (requestPath !== cachedData.pathname) {
-            continue;
-          }
-          if (requestVersion === cachedData.rtv) {
-            continue;
-          }
-
-          cache.delete(request);
-        }
-      });
-    }
+  return fetchAndCache(cache, request).then(response => {
+    // Prune old versions from the cache.
+    purge(cache, requestPath, requestVersion);
 
     return response;
+  });
+}
+
+/**
+ * Purges our cache of old files.
+ *
+ * @param {!Cache} cache
+ * @param {string} path
+ * @param {string} version
+ * @return {!Promise<undefined>}
+ */
+function purge(cache, path, version) {
+  return cache.keys().then(requests => {
+    for (let i = 0; i < requests.length; i++) {
+      const request = requests[i];
+      const url = request.url;
+      const cachedData = requestData(url);
+
+      if (path !== cachedData.pathname) {
+        continue;
+      }
+      if (version === cachedData.rtv) {
+        continue;
+      }
+
+      cache.delete(request);
+    }
   });
 }
 
@@ -286,9 +377,10 @@ export function fetchAndCache(cache, request, requestPath, requestVersion) {
  * @visibleForTesting
  */
 export function getCachedVersion(cache, requestPath, requestVersion) {
+
+  // TODO(jridgewell): Maybe we should add a very short delay (~5ms) to collect
+  // several requests. Then, use all requests to determine what to serve.
   return cache.keys().then(requests => {
-    // TODO(jridgewell): This should really count the bytes of the response,
-    // but there's no efficient way to do that.
     const counts = {};
     let most = requestVersion;
     let mostCount = 0;
@@ -298,34 +390,34 @@ export function getCachedVersion(cache, requestPath, requestVersion) {
     // it is, and increment the number of files we have for that version.
     for (let i = 0; i < requests.length; i++) {
       const url = requests[i].url;
-      const cachedData = requestData(url);
+      const {pathname, rtv} = requestData(url);
 
       // We do not want to stale serve blacklisted files. If nothing else is
       // cached, we will end up serving whatever version is requested.
-      if (isBlacklisted(cached.rtv)) {
+      if (isBlacklisted(rtv)) {
         continue;
       }
 
-      let count = counts[cachedData.rtv] || 0;
+      let count = counts[rtv] || 0;
 
       // Incrementing the number of "files" that have this version with a
       // weight.
       // The main binary (arguably the most important file to cache) is given a
       // heavy weight, while the first requested file is given a slight weight.
       // Everything else increments normally.
-      if (cachedData.pathname.indexOf('/', 1) === -1) {
+      if (pathname.indexOf('/', 1) === -1) {
         // Main binary
         count += 5;
-      } else if (requestPath === cachedData.pathname) {
+      } else if (requestPath === pathname) {
         // Give a little precedence to the requested file
         count += 2;
       } else {
         count++;
       }
 
-      counts[cachedData.rtv] = count;
+      counts[rtv] = count;
       if (count > mostCount) {
-        most = cachedData.rtv;
+        most = rtv;
         mostCount = count;
       }
     }
@@ -358,7 +450,7 @@ export function handleFetch(request, maybeClientId) {
   // Closure Compiler!
   const clientId = /** @type {string} */(maybeClientId);
 
-  const { pathname, rtv } = requestData(url);
+  const {pathname, rtv} = requestData(url);
   // Rewrite unversioned requests to the versioned RTV URL. This is a noop if
   // it's already versioned.
   request = normalizedRequest(request, rtv);
@@ -384,14 +476,14 @@ export function handleFetch(request, maybeClientId) {
         // they requested this exact version; If we served an old version,
         // let's get the new one.
         if (version !== rtv && rtv == BASE_RTV_VERSION) {
-          fetchAndCache(cache, request, pathname, rtv);
+          fetchJsFile(cache, request, pathname, rtv);
         }
 
         return response;
       }
 
       // If not, let's fetch and cache the request.
-      return fetchAndCache(cache, versionedRequest, pathname, version);
+      return fetchJsFile(cache, versionedRequest, pathname, version);
     });
   });
 }
