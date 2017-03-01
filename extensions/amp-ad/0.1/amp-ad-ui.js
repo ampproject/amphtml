@@ -142,9 +142,8 @@ export class AmpAdUIHandler {
    * @private
    */
   displayNoContentUI_() {
-    const adContainer = getAdContainer(this.baseInstance_.element);
-    if (adContainer == 'AMP-STICKY-AD') {
-      // force collapse the sticky-ad
+    if (getAdContainer(this.baseInstance_.element) == 'AMP-STICKY-AD') {
+      // Special case: force collapse sticky-ad if no content.
       this.baseInstance_./*OK*/collapse();
       this.state = AdDisplayState.LOADED_NO_CONTENT;
       return;
