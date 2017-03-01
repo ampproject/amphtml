@@ -72,7 +72,7 @@ export class StandardActions {
     actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
     actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
     actionService.addGlobalMethodHandler(
-      'toggleVisibility', this.handleToggle.bind(this));
+      'toggle', this.handleToggle.bind(this));
   }
 
   /**
@@ -138,7 +138,7 @@ export class StandardActions {
     if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
       user().warn(
           'STANDARD-ACTIONS',
-          'Elements with layout=nodisplay cannot be dynamically shown.',
+          'Elements with layout=nodisplay cannot be dynamically shown. %s',
           target);
 
       return;
@@ -151,7 +151,7 @@ export class StandardActions {
         user().warn(
             'STANDARD-ACTIONS',
             'Elements can only be dynamically shown when they have the ' +
-            '"hidden" attribute set or when they were dynamically hidden.',
+            '"hidden" attribute set or when they were dynamically hidden. %s',
             target);
       }
     });
