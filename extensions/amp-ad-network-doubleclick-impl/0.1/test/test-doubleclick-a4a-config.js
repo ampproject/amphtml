@@ -82,21 +82,6 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
 
-    it('should carve out remote.html, in spite of experiment override', () => {
-      const doc = testFixture.doc;
-      mockWin.location = parseUrl(
-          'https://cdn.ampproject.org/some/path/to/content.html');
-      mockWin.document.querySelector = doc.querySelector.bind(doc);
-      const remoteTag = doc.createElement('meta');
-      remoteTag.setAttribute('name', 'amp-3p-iframe-src');
-      doc.head.appendChild(remoteTag);
-      const elem = doc.createElement('div');
-      elem.setAttribute(BETA_ATTRIBUTE, 'true');
-      doc.body.appendChild(elem);
-      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-    });
-
     [-1, 0, 1, 2].forEach(expFlagValue => {
       it(`exp flag=${expFlagValue} should set eid attribute`, () => {
         mockWin.location = parseUrl(
@@ -115,21 +100,6 @@ describe('doubleclick-a4a-config', () => {
         }
       });
 
-      it(`should carve out remote.html, in spite of exp flag=${expFlagValue}`,
-          () => {
-            const doc = testFixture.doc;
-            mockWin.location = parseUrl(
-                'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:' +
-                String(expFlagValue));
-            mockWin.document.querySelector = doc.querySelector.bind(doc);
-            const remoteTag = doc.createElement('meta');
-            remoteTag.setAttribute('name', 'amp-3p-iframe-src');
-            doc.head.appendChild(remoteTag);
-            const elem = doc.createElement('div');
-            doc.body.appendChild(elem);
-            expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-            expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-          });
     });
 
     [0, 1, 2].forEach(expFlagValue => {

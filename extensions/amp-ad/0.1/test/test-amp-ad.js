@@ -135,6 +135,19 @@ describe('Ad loader', () => {
         });
       });
 
+      it('falls back to Delayed Fetch if remote.html is used', () => {
+        return iframePromise.then(({doc}) => {
+          const meta = doc.createElement('meta');
+          meta.setAttribute('name', 'amp-3p-iframe-src');
+          meta.setAttribute('content', 'https://example.com/remote.html');
+          doc.head.append(meta);
+          a4aRegistry['zort'] = () => true;
+          ampAdElement.setAttribute('type', 'zort');
+          const upgraded = new AmpAd(ampAdElement).upgradeCallback();
+          return expect(upgraded).to.eventually.be.instanceof(AmpAd3PImpl);
+        });
+      });
+
       it('upgrades to registered, A4A type network-specific element', () => {
         return iframePromise.then(fixture => {
           a4aRegistry['zort'] = function() {
