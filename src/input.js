@@ -15,7 +15,7 @@
  */
 
 import {Observable} from './observable';
-import {fromClass} from './service';
+import {getService, registerService} from './service';
 import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
 
@@ -239,11 +239,11 @@ export class Input {
   }
 }
 
-
 /**
  * @param {!Window} window
  * @return {!Input}
  */
 export function inputFor(window) {
-  return fromClass(window, 'input', Input);
+  registerService(window, 'input', Input);
+  return getService(window, 'input');
 };
