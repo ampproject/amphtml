@@ -19,7 +19,7 @@ import {Activity} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {activityForDoc} from '../../src/activity';
 import {fromClassForDoc} from '../../src/service';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
+import {getViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
 import {viewportForDoc} from '../../src/viewport';
@@ -97,7 +97,7 @@ describe('Activity getTotalEngagedTime', () => {
 
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
-    viewer = installViewerServiceForDoc(ampdoc);
+    viewer = getViewerServiceForDoc(ampdoc);
 
     const whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolve = resolve;

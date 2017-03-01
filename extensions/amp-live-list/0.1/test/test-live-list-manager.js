@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {installLiveListManager, LiveListManager} from '../live-list-manager';
-import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
+import {getViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -43,7 +43,7 @@ describe('LiveListManager', () => {
     mockXhr.onCreate = function(xhr) {
       requests.push(xhr);
     };
-    viewer = installViewerServiceForDoc(new AmpDocSingle(window));
+    viewer = getViewerServiceForDoc(new AmpDocSingle(window));
     manager = installLiveListManager(window);
     liveList = getLiveList({'data-sort-time': '1111'});
     sandbox.stub(liveList, 'getInterval', () => 5000);

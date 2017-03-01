@@ -66,7 +66,7 @@ import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsServiceForDoc,} from
     './service/url-replacements-impl';
-import {installViewerServiceForDoc, setViewerVisibilityState,} from
+import {getViewerServiceForDoc, setViewerVisibilityState,} from
     './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
@@ -130,7 +130,7 @@ export function installRuntimeServices(global) {
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
   installDocumentInfoServiceForDoc(ampdoc);
-  installViewerServiceForDoc(ampdoc, opt_initParams);
+  getViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);

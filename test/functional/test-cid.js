@@ -26,7 +26,7 @@ import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
+import {getViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {
   installCryptoPolyfill,
@@ -110,7 +110,7 @@ describe('cid', () => {
       return Promise.resolve();
     });
 
-    viewer = installViewerServiceForDoc(ampdoc);
+    viewer = getViewerServiceForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
@@ -342,7 +342,7 @@ describe('cid', () => {
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
     installPlatformService(win);
-    installViewerServiceForDoc(ampdoc2);
+    getViewerServiceForDoc(ampdoc2);
     installCidServiceForDocForTesting(ampdoc2);
     installCryptoService(win);
     return cidForDoc(ampdoc2).then(cid => {

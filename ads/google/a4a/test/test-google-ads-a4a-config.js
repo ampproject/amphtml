@@ -22,7 +22,7 @@ import {
 } from '../traffic-experiments';
 import {toggleExperiment} from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
+import {getViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
 import {documentStateFor} from '../../../../src/service/document-state';
 import * as sinon from 'sinon';
@@ -80,7 +80,7 @@ describe('a4a_config', () => {
     events = {};
     documentStateFor(win);
     installPlatformService(win);
-    installViewerServiceForDoc(ampdoc);
+    getViewerServiceForDoc(ampdoc);
     element = document.createElement('div');
     document.body.appendChild(element);
     toggleExperiment(win, EXP_ID, true, true);
@@ -252,7 +252,7 @@ describe('a4a_config', () => {
 });
 
 // These tests are separated because they need to invoke
-// installViewerServiceForDoc within the test, rather than in the beforeEach().
+// getViewerServiceForDoc within the test, rather than in the beforeEach().
 describe('a4a_config hash param parsing', () => {
   let sandbox;
   let win;
@@ -317,7 +317,7 @@ describe('a4a_config hash param parsing', () => {
   hashBaseConditions.forEach(hashBase => {
     it(`should find viewer param when pattern is ${hashBase}`, () => {
       win.location.hash = hashBase.replace('PARAM', 'a4a:-1');
-      installViewerServiceForDoc(ampdoc);
+      getViewerServiceForDoc(ampdoc);
       // Should not register as 'A4A enabled', but should still attach the
       // control experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
@@ -339,7 +339,7 @@ describe('a4a_config hash param parsing', () => {
     it(`hash should trump search; pattern=${hashBase}`, () => {
       win.location.search = hashBase.replace('PARAM', 'a4a:-1');
       win.location.hash = hashBase.replace('PARAM', 'a4a:2');
-      installViewerServiceForDoc(ampdoc);
+      getViewerServiceForDoc(ampdoc);
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;

@@ -16,7 +16,7 @@
 
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
+import {getViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {installVsyncService} from '../../../../src/service/vsync-impl';
 import {installDynamicClassesForTesting} from '../amp-dynamic-css-classes';
 
@@ -69,7 +69,7 @@ describe('dynamic classes are inserted at runtime', () => {
       vsync.runScheduledTasks_();
     };
 
-    viewer = installViewerServiceForDoc(ampdoc);
+    viewer = getViewerServiceForDoc(ampdoc);
     viewer.isEmbedded = () => !!embeded;
 
     if (userAgent !== undefined) {
