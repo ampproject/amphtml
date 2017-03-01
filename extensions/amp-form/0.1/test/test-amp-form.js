@@ -147,7 +147,7 @@ describes.realWin('amp-form', {
     expect(form.addEventListener).to.be.calledWith('submit');
     expect(form.addEventListener).to.be.calledWith('blur');
     expect(form.addEventListener).to.be.calledWith('input');
-    expect(form.className).to.contain('-amp-form');
+    expect(form.className).to.contain('i-amphtml-form');
     document.body.removeChild(form);
   });
 
