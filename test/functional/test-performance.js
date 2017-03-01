@@ -16,7 +16,7 @@
 
 import * as sinon from 'sinon';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import {getService, resetServiceForTesting} from '../../src/service';
+import {resetServiceForTesting} from '../../src/service';
 import {resourcesForDoc} from '../../src/resources';
 import {viewerForDoc} from '../../src/viewer';
 
