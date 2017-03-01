@@ -306,8 +306,14 @@ export class ActionService {
     const invocation = new ActionInvocation(target, method, args,
         source, event);
 
-    // Try a global method handler first.
-    if (this.globalMethodHandlers_[invocation.method]) {
+    // Try a global method handler first but ignore it if target overrides the
+    // action to suite their special behavior if needed.
+    // Fot instance sidebar overrides the global `toggle` action to do more than
+    // just hide/show.
+    const isGlobalAction = this.globalMethodHandlers_[invocation.method];
+    const isGlobalActionOverriden = target.supportsAction &&
+        target.supportsAction(invocation.method);
+    if (isGlobalAction && !isGlobalActionOverriden) {
       this.globalMethodHandlers_[invocation.method](invocation);
       return;
     }
