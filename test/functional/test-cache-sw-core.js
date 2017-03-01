@@ -79,10 +79,12 @@ runner.run('Cache SW', () => {
   const blacklistedVersion =
       self.AMP_CONFIG['cache-service-worker-blacklist'][0];
 
-  const rtv = `00${version}`;
+  const rtv = `01${version}`;
   const prodRtv = self.AMP_CONFIG.v;
-  const prevRtv = `00${prevVersion}`;
-  const blacklistedRtv = `00${blacklistedVersion}`;
+  const prevRtv = `01${prevVersion}`;
+  const blacklistedRtv = `01${blacklistedVersion}`;
+  const diversionRtv = `02${version}`;
+  const prevDiversionRtv = `02${prevVersion}`;
 
   const url = `https://cdn.ampproject.org/rtv/${rtv}/v0.js`;
   let sandbox;
@@ -99,6 +101,7 @@ runner.run('Cache SW', () => {
   afterEach(() => {
     sandbox.restore();
     cache.cached.length = 0;
+    sw.resetMemosForTesting();
   });
 
   describe('urlWithVersion', () => {
@@ -216,15 +219,11 @@ runner.run('Cache SW', () => {
 
   describe('generateFallbackClientId', () => {
     let clock;
-    let i = 0;
     const referrer = 'https://publisher.com/amp/article';
     const other = 'https://publisher.com/amp/other';
 
     beforeEach(() => {
       clock = sandbox.useFakeTimers();
-      i++;
-      // Ensure the clientIds are not cached.
-      clock.tick(61 * 1000 * i);
     });
 
     it('generates a clientId lumped in 60 second blocks', () => {
@@ -248,26 +247,199 @@ runner.run('Cache SW', () => {
     });
   });
 
+  describe('expired', () => {
+    let response;
+    let clock;
+
+    beforeEach(() => {
+      clock = sandbox.useFakeTimers();
+      clock.tick();
+      response = new Response('');
+    });
+
+    describe('with cache-control and date', () => {
+      describe('date in the past', () => {
+        beforeEach(() => {
+          response.headers.set('date', new Date(Date.now() - 1000)
+              .toUTCString());
+        });
+
+        it('cache-control no-cache', () => {
+          response.headers.set('cache-control', 'public, no-cache');
+          expect(sw.expired(response)).to.be.true;
+        });
+
+        it('cache-control max-age=-1', () => {
+          response.headers.set('cache-control', 'public, max-age=-1');
+          expect(sw.expired(response)).to.be.true;
+        });
+
+        it('cache-control max-age=0', () => {
+          response.headers.set('cache-control', 'public, max-age=0');
+          expect(sw.expired(response)).to.be.true;
+        });
+
+        it('cache-control max-age=year', () => {
+          response.headers.set('cache-control', 'public, max-age=31536000');
+          expect(sw.expired(response)).to.be.false;
+        });
+      });
+
+      describe('date is now', () => {
+        beforeEach(() => {
+          response.headers.set('date', new Date().toUTCString());
+        });
+
+        it('cache-control no-cache', () => {
+          response.headers.set('cache-control', 'public, no-cache');
+          expect(sw.expired(response)).to.be.true;
+        });
+
+        it('cache-control max-age=-1', () => {
+          response.headers.set('cache-control', 'public, max-age=-1');
+          expect(sw.expired(response)).to.be.true;
+        });
+
+        it('cache-control max-age=0', () => {
+          response.headers.set('cache-control', 'public, max-age=0');
+          expect(sw.expired(response)).to.be.true;
+        });
+
+        it('cache-control max-age=year', () => {
+          response.headers.set('cache-control', 'public, max-age=31536000');
+          expect(sw.expired(response)).to.be.false;
+        });
+      });
+
+      describe('date in the future', () => {
+        beforeEach(() => {
+          response.headers.set('date', new Date(Date.now() + 1000)
+              .toUTCString());
+        });
+
+        it('cache-control no-cache', () => {
+          response.headers.set('cache-control', 'public, no-cache');
+          expect(sw.expired(response)).to.be.true;
+        });
+
+        it('cache-control max-age=-1', () => {
+          response.headers.set('cache-control', 'public, max-age=-1');
+          expect(sw.expired(response)).to.be.true;
+        });
+
+        it('cache-control max-age=0', () => {
+          response.headers.set('cache-control', 'public, max-age=0');
+          expect(sw.expired(response)).to.be.false;
+        });
+
+        it('cache-control max-age=year', () => {
+          response.headers.set('cache-control', 'public, max-age=31536000');
+          expect(sw.expired(response)).to.be.false;
+        });
+      });
+    });
+
+    describe('with expires', () => {
+      it('expires in the past', () => {
+        response.headers.set('expires', new Date(Date.now() - 1000)
+            .toUTCString());
+        expect(sw.expired(response)).to.be.true;
+      });
+
+      it('expires now', () => {
+        response.headers.set('expires', new Date(Date.now()).toUTCString());
+        expect(sw.expired(response)).to.be.true;
+      });
+
+      it('expires in the future', () => {
+        response.headers.set('expires', new Date(Date.now() + 1000)
+            .toUTCString());
+        expect(sw.expired(response)).to.be.false;
+      });
+
+      it('is overridden by cache-control and date', () => {
+        response.headers.set('expires', new Date(Date.now() - 1000)
+            .toUTCString());
+        response.headers.set('date', new Date(Date.now()).toUTCString());
+        response.headers.set('cache-control', 'public, max-age=31536000');
+        expect(sw.expired(response)).to.be.false;
+      });
+    });
+
+    describe('with no cache information', () => {
+      it('is expired', () => {
+        expect(sw.expired(response)).to.be.true;
+      });
+    });
+  });
+
   describe('fetchAndCache', () => {
-    const request = {url};
+    const request = new Request(url);
     const response = {
       ok: true,
       clone() {},
     };
     let fetch;
     let put;
+    let calls;
 
     beforeEach(() => {
-      // "Previous" cached requests
-      cache.cached.push(
-        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}, null],
-        // A different file
-        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp-0.1.js`}, null]
-      );
+      calls = 0;
       fetch = sandbox.stub(window, 'fetch', () => {
-        return Promise.resolve(response);
+        calls++;
+        if (calls == 1) {
+          return Promise.resolve(response);
+        }
+        return Promise.resolve(Object.create(response));
       });
       put = sandbox.spy(cache, 'put');
+    });
+
+    it('batches fetch to same url', () => {
+      const v1 = new Request(`https://cdn.ampproject.org/rtv/${rtv}/v1.js`);
+      const v2 = new Request(`https://cdn.ampproject.org/rtv/${rtv}/v2.js`);
+
+      return Promise.all([
+        sw.fetchAndCache(cache, request),
+        sw.fetchAndCache(cache, request),
+        sw.fetchAndCache(cache, v1),
+        sw.fetchAndCache(cache, v2),
+      ]).then(responses => {
+        const first = responses[0];
+        const v1 = responses[2];
+        const v2 = responses[3];
+
+        expect(first).to.equal(responses[1]);
+        expect(v1).not.to.equal(first);
+        expect(v2).not.to.equal(first);
+        expect(v1).not.to.equal(v2);
+      });
+    });
+
+    describe('when already in cache', () => {
+      let response;
+      beforeEach(() => {
+        response = new Response('', {
+          headers: {
+            'cache-control': 'private, max-age=60',
+            'date': new Date().toUTCString(),
+          },
+        });
+        cache.put(request, response);
+      });
+
+      it('returns cached response if fresh', () => {
+        return sw.fetchAndCache(cache, request).then(() => {
+          expect(fetch).to.not.have.been.called;
+        });
+      });
+
+      it('returns cached response is expired', () => {
+        response.headers.set('cache-control', 'private, no-cache');
+        return sw.fetchAndCache(cache, request).then(() => {
+          expect(fetch).to.have.been.called;
+        });
+      });
     });
 
     describe('when response is ok', () => {
@@ -275,8 +447,15 @@ runner.run('Cache SW', () => {
         response.ok = true;
       });
 
+      it('fetches the url', () => {
+        return sw.fetchAndCache(cache, request).then(resp => {
+          expect(fetch).to.have.been.called;
+          expect(resp).to.equal(response);
+        });
+      });
+
       it('fetches the request', () => {
-        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(resp => {
+        return sw.fetchAndCache(cache, request).then(resp => {
           expect(fetch).to.have.been.called;
           expect(resp).to.equal(response);
         });
@@ -285,16 +464,8 @@ runner.run('Cache SW', () => {
       it('stores response into cache', () => {
         const cloned = {};
         sandbox.stub(response, 'clone', () => cloned);
-        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(() => {
+        return sw.fetchAndCache(cache, request).then(() => {
           expect(put).to.have.been.calledWith(request, cloned);
-        });
-      });
-
-      it('prunes previous cached responses for file', () => {
-        const deleter = sandbox.stub(cache, 'delete');
-        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(() => {
-          expect(deleter).to.have.been.calledWith(cache.cached[0][0]);
-          expect(deleter).to.not.have.been.calledWith(cache.cached[1][0]);
         });
       });
     });
@@ -304,21 +475,180 @@ runner.run('Cache SW', () => {
         response.ok = false;
       });
 
-      it('fetches the request', () => {
-        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(resp => {
-          expect(resp).to.equal(response);
+      it('returns rejected promise', () => {
+        return sw.fetchAndCache(cache, request).then(() => {
+          throw new Error('should have rejected');
+        }, () => {
+          // noop.
         });
       });
 
       it('does not store response into cache', () => {
-        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(() => {
+        return sw.fetchAndCache(cache, request).catch(() => {
           expect(put).to.not.have.been.called;
         });
       });
+    });
+  });
+
+  describe('fetchJsFile', () => {
+    const request = {url};
+    const response = new Response('');
+    let fetch;
+    let deleter;
+
+    beforeEach(() => {
+      const expires = {
+        expires: new Date(Date.now() + 10000).toUTCString(),
+      };
+      // "Previous" cached requests
+      cache.cached.push(
+        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}, null],
+        // A different file
+        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp-0.1.js`}, null],
+        // A diversion of v0
+        [{url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0.js`}, new Response('', {headers: expires})],
+        // A diversion of amp-comp
+        [{url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0/amp-comp-0.1.js`}, , new Response('', {headers: expires})]
+      );
+      deleter = sandbox.stub(cache, 'delete');
+      fetch = sandbox.stub(window, 'fetch');
+      fetch.onCall(0).returns(Promise.resolve(response));
+      fetch.onCall(1).returns(Promise.reject('diversions'));
+    });
+
+    describe('when response is ok', () => {
+      beforeEach(() => {
+        response.ok = true;
+      });
+
+      it('prunes previous cached responses for file', () => {
+        return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+          return new Promise(resolve => setTimeout(resolve, 25));
+        }).then(() => {
+          expect(deleter).to.have.been.calledWith(cache.cached[0][0]);
+          expect(deleter).to.not.have.been.calledWith(cache.cached[1][0]);
+        });
+      });
+
+      describe('when diversions request fails', () => {
+        it('does not prune new production of new script', () => {
+          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 25));
+          }).then(() => {
+            expect(deleter).to.not.have.been.calledWith(cache.cached[4][0]);
+          });
+        });
+
+        it('does not prune production of any other script', () => {
+          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 25));
+          }).then(() => {
+            expect(deleter).to.not.have.been.calledWith(cache.cached[1][0]);
+          });
+        });
+
+        it('does not prune diversions of new script', () => {
+          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 25));
+          }).then(() => {
+            expect(deleter).to.not.have.been.calledWith(cache.cached[2][0]);
+          });
+        });
+
+        it('does not prune diversions of any other script', () => {
+          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 25));
+          }).then(() => {
+            expect(deleter).to.not.have.been.calledWith(cache.cached[3][0]);
+          });
+        });
+      });
+
+      describe('when diversions request succeeds with diversions', () => {
+        beforeEach(() => {
+          fetch.onCall(1).returns(Promise.resolve(
+              new Response(`["${diversionRtv}","${prevDiversionRtv}"]`)));
+          fetch.onCall(2).returns(Promise.resolve(new Response('02')));
+          fetch.onCall(3).returns(Promise.resolve(new Response('03')));
+        });
+
+        it('fetches new diversions', () => {
+          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 25));
+          }).then(() => {
+            expect(fetch).calledThrice;
+            expect(fetch.getCall(2).args[0].url).to.equal(
+                `https://cdn.ampproject.org/rtv/${diversionRtv}/v0.js`);
+          });
+        });
+
+        it('does not prune new production of new script', () => {
+          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 25));
+          }).then(() => {
+            expect(deleter).to.not.have.been.calledWith(cache.cached[4][0]);
+          });
+        });
+
+        it('does not prune production of any other script', () => {
+          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 25));
+          }).then(() => {
+            expect(deleter).to.not.have.been.calledWith(cache.cached[1][0]);
+          });
+        });
+
+        it('prunes old diversions of new script', () => {
+          // Remove prevDiversionRtv from diversions response
+          fetch.onCall(1).returns(Promise.resolve(
+              new Response(`["${diversionRtv}"]`)));
+          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 25));
+          }).then(() => {
+            expect(deleter).to.have.been.calledWith(cache.cached[2][0]);
+          });
+        });
+
+        it('prunes old diversions of any other script', () => {
+          // Remove prevDiversionRtv from diversions response
+          fetch.onCall(1).returns(Promise.resolve(
+              new Response(`["${diversionRtv}"]`)));
+          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 25));
+          }).then(() => {
+            expect(deleter).to.have.been.calledWith(cache.cached[3][0]);
+          });
+        });
+
+        it('does not prune current diversion of new script', () => {
+          // prevDiversionRtv is in diversions response
+          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 25));
+          }).then(() => {
+            expect(deleter).to.not.have.been.calledWith(cache.cached[2][0]);
+          });
+        });
+        it('does not prune current diversion of any other script', () => {
+          // prevDiversionRtv is in diversions response
+          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 25));
+          }).then(() => {
+            expect(deleter).to.not.have.been.calledWith(cache.cached[3][0]);
+          });
+        });
+      });
+    });
+
+    describe('when response is not ok', () => {
+      beforeEach(() => {
+        response.ok = false;
+      });
 
       it('does not prune requests for file', () => {
-        const deleter = sandbox.stub(cache, 'delete');
-        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(() => {
+        return sw.fetchJsFile(cache, request, '/v0.js', rtv).catch(() => {
+          return new Promise(resolve => setTimeout(resolve, 25));
+        }).then(() => {
           expect(deleter).to.not.have.been.called;
         });
       });
@@ -328,23 +658,24 @@ runner.run('Cache SW', () => {
   describe('getCachedVersion', () => {
     let keys;
     beforeEach(() => {
-      keys = [{url}];
+      keys = [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}];
       sandbox.stub(cache, 'keys', () => {
         return Promise.resolve(keys);
       });
     });
 
     it('returns cached rtv version, if file is cached', () => {
-      return sw.getCachedVersion(cache, '/v0.js', prevRtv).then(version => {
-        expect(version).to.equal(rtv);
+      return sw.getCachedVersion(cache, '/v0.js', rtv, '01').then(version => {
+        expect(version).to.equal(prevRtv);
       });
     });
 
     it('defaults to requested version, if file no files are cached', () => {
       keys.length = 0;
-      return sw.getCachedVersion(cache, '/v0.js', prevRtv).then(version => {
-        expect(version).to.equal(prevRtv);
-      });
+      return sw.getCachedVersion(cache, '/v0.js', prevRtv, '01')
+        .then(version => {
+          expect(version).to.equal(prevRtv);
+        });
     });
 
     it('returns version with most responses', () => {
@@ -352,7 +683,7 @@ runner.run('Cache SW', () => {
           {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-1-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-2-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-3-0.1.js`});
-      return sw.getCachedVersion(cache, '/v0.js', rtv).then(version => {
+      return sw.getCachedVersion(cache, '/v0.js', rtv, '01').then(version => {
         expect(version).to.equal(prevRtv);
       });
     });
@@ -364,7 +695,7 @@ runner.run('Cache SW', () => {
           {url: `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-3-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-4-0.1.js`});
 
-      return sw.getCachedVersion(cache, '/v0/amp-4-0.1.js', '123')
+      return sw.getCachedVersion(cache, '/v0/amp-4-0.1.js', '01123', '01')
         .then(version => {
           expect(version).to.equal(rtv);
         });
@@ -376,8 +707,47 @@ runner.run('Cache SW', () => {
           {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-2-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-3-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${rtv}/v0.js`});
-      return sw.getCachedVersion(cache, '/v0.js', '123').then(version => {
-        expect(version).to.equal(rtv);
+      return sw.getCachedVersion(cache, '/v0.js', '01123', '01')
+        .then(version => {
+          expect(version).to.equal(rtv);
+        });
+    });
+
+    it('ignores cached blacklisted versions', () => {
+      keys.splice(0, 1,
+          {url: `https://cdn.ampproject.org/rtv/${blacklistedRtv}/v0.js`},
+          {url: `https://cdn.ampproject.org/rtv/${blacklistedRtv}/v0/amp-2-0.1.js`},
+          {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-3-0.1.js`});
+      return sw.getCachedVersion(cache, '/v0.js', rtv, '01').then(version => {
+        expect(version).to.equal(prevRtv);
+      });
+    });
+
+    it('ignores cached diversions', () => {
+      keys.splice(0, 1,
+          {url: `https://cdn.ampproject.org/rtv/${diversionRtv}/v0.js`},
+          {url: `https://cdn.ampproject.org/rtv/${diversionRtv}/v0/amp-2-0.1.js`},
+          {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-3-0.1.js`});
+      return sw.getCachedVersion(cache, '/v0.js', rtv, '01').then(version => {
+        expect(version).to.equal(prevRtv);
+      });
+    });
+
+    describe('when requesting diversion', () => {
+      it('returns diversion explicitly', () => {
+        return sw.getCachedVersion(cache, '/v0.js', diversionRtv, '02')
+          .then(version => {
+            expect(version).to.equal(diversionRtv);
+          });
+      });
+
+      it('returns diversion explicitly, even with previous diversion', () => {
+        keys.splice(0, 1,
+            {url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0.js`});
+        return sw.getCachedVersion(cache, '/v0.js', diversionRtv, '02')
+          .then(version => {
+            expect(version).to.equal(diversionRtv);
+          });
       });
     });
   });
