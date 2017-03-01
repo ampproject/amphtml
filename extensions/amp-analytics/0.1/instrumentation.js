@@ -36,7 +36,6 @@ import {
 import {getParentWindowFrameElement} from '../../../src/service';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
@@ -127,9 +126,6 @@ export class InstrumentationService {
 
     /** @const */
     this.ampdocRoot_ = new AmpdocAnalyticsRoot(this.ampdoc);
-
-    /** @private {boolean} */
-    this.visibilityV2Enabled_ = isExperimentOn(ampdoc.win, 'visibility-v2');
 
     /** @const @private {!./visibility-impl.Visibility} */
     this.visibility_ = new Visibility(this.ampdoc);
