@@ -217,8 +217,10 @@ export class Bind {
       Object.keys(parseErrors).forEach(expressionString => {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
-          const err = user().createError(parseErrors[expressionString]);
-          reportError(err, elements[0]);
+          const parseError = parseErrors[expressionString];
+          const userError = user().createError(parseError.message);
+          userError.stack = parseError.stack;
+          reportError(userError, elements[0]);
         }
       });
 
@@ -425,10 +427,12 @@ export class Bind {
 
       // Report evaluation errors.
       Object.keys(errors).forEach(expressionString => {
-        const err = user().createError(errors[expressionString]);
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
-          reportError(err, elements[0]);
+          const evalError = errors[expressionString];
+          const userError = user().createError(evalError.message);
+          userError.stack = evalError.stack;
+          reportError(userError, elements[0]);
         }
       });
     });

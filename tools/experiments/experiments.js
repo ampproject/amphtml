@@ -206,11 +206,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'amp-ad-loading-ux',
-    name: 'New default loading UX to amp-ad',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
-  },
-  {
     id: 'visibility-v2',
     name: 'New visibility tracking using native IntersectionObserver',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
@@ -265,6 +260,12 @@ const EXPERIMENTS = [
     name: 'Load sticky-ad early after user first scroll' +
         'Only apply to 1.0 version',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
+  },
+  {
+    id: 'amp-fx-parallax',
+    name: 'Amp extension for a parallax effect',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
+    spec: 'https://github.com/ampproject/amphtml/issues/1443',
   },
 ];
 

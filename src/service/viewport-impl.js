@@ -435,19 +435,54 @@ export class Viewport {
    */
   enterLightboxMode() {
     this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */true);
-    this.disableTouchZoom();
+    this.enterOverlayMode();
     this.hideFixedLayer();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(true));
   }
 
   /**
-   * Instruct the viewport to enter lightbox mode.
+   * Instruct the viewport to leave lightbox mode.
    */
   leaveLightboxMode() {
     this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */true);
     this.showFixedLayer();
-    this.restoreOriginalTouchZoom();
+    this.leaveOverlayMode();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(false));
+  }
+
+  /*
+   * Instruct the viewport to enter overlay mode.
+   */
+  enterOverlayMode() {
+    this.disableTouchZoom();
+    this.disableScroll();
+  }
+
+  /*
+   * Instruct the viewport to leave overlay mode.
+   */
+  leaveOverlayMode() {
+    this.resetScroll();
+    this.restoreOriginalTouchZoom();
+  }
+
+  /*
+   * Disable the scrolling by setting overflow: hidden.
+   * Should only be used for temporarily disabling scroll.
+   */
+  disableScroll() {
+    this.vsync_.mutate(() => {
+      this.binding_.disableScroll();
+    });
+  }
+
+  /*
+   * Reset the scrolling by removing overflow: hidden.
+   */
+  resetScroll() {
+    this.vsync_.mutate(() => {
+      this.binding_.resetScroll();
+    });
   }
 
   /**
@@ -812,6 +847,17 @@ export class ViewportBindingDef {
    */
   showViewerHeader(unusedTransient, unusedPaddingTop) {}
 
+  /*
+   * Disable the scrolling by setting overflow: hidden.
+   * Should only be used for temporarily disabling scroll.
+   */
+  disableScroll() {}
+
+  /*
+   * Reset the scrolling by removing overflow: hidden.
+   */
+  resetScroll() {}
+
   /**
    * Updates the viewport whether it's currently in the lightbox or a normal
    * mode.
@@ -991,6 +1037,18 @@ export class ViewportBindingNatural_ {
     if (!transient) {
       this.updatePaddingTop(paddingTop);
     }
+  }
+
+  /** @override */
+  disableScroll() {
+    this.win.document.documentElement.classList.add(
+        'i-amphtml-scroll-disabled');
+  }
+
+  /** @override */
+  resetScroll() {
+    this.win.document.documentElement.classList.remove(
+        'i-amphtml-scroll-disabled');
   }
 
   /** @override */
@@ -1263,6 +1321,16 @@ export class ViewportBindingNaturalIosEmbed_ {
     }
     // No need to adjust borderTop and paddingTop when the showing header
     // operation is transient
+  }
+
+  /** @override */
+  disableScroll() {
+    // This is not supported in ViewportBindingNaturalIosEmbed_
+  }
+
+  /** @override */
+  resetScroll() {
+    // This is not supported in ViewportBindingNaturalIosEmbed_
   }
 
   /** @override */
@@ -1547,6 +1615,16 @@ export class ViewportBindingIosEmbedWrapper_ {
     if (!transient) {
       this.updatePaddingTop(paddingTop);
     }
+  }
+
+  /** @override */
+  disableScroll() {
+    this.wrapper_.classList.add('i-amphtml-scroll-disabled');
+  }
+
+  /** @override */
+  resetScroll() {
+    this.wrapper_.classList.remove('i-amphtml-scroll-disabled');
   }
 
   /** @override */
