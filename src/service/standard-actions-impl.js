@@ -19,7 +19,7 @@ import {Layout, getLayoutClass} from '../layout';
 import {actionServiceForDoc} from '../action';
 import {bindForDoc} from '../bind';
 import {dev, user} from '../log';
-import {fromClassForDoc} from '../service';
+import {registerServiceForDoc} from '../service';
 import {historyForDoc} from '../history';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {computedStyle, getStyle, toggle} from '../style';
@@ -186,9 +186,11 @@ export class StandardActions {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!StandardActions}
  */
 export function installStandardActionsForDoc(ampdoc) {
-  return fromClassForDoc(
-      ampdoc, 'standard-actions', StandardActions);
+  registerServiceForDoc(
+      ampdoc,
+      'standard-actions',
+      StandardActions,
+      /* opt_instantiate */ true);
 };
