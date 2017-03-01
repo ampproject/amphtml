@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -32,10 +32,6 @@ limitations under the License.
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-youtube/">Annotated code example for amp-youtube</a></td>
   </tr>
 </table>
 

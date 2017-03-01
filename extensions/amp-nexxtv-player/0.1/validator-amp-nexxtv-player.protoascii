@@ -1,5 +1,5 @@
 #
-# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ tags: {  # amp-nexxtv-player
   spec_name: "amp-nexxtv-player extension .js script"
   satisfies: "amp-nexxtv-player extension .js script"
   mandatory_parent: "HEAD"
-  unique_warning: true
+  unique: true
   extension_unused_unless_tag_present: "amp-nexxtv-player"
   attrs: {
     name: "async"
@@ -49,21 +49,21 @@ tags: {  # amp-nexxtv-player
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-nexxtv-player.html"
+  spec_url: "/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
 }
 tags: {  # <amp-nexxtv-player>
   html_format: AMP
-  tag_name: "AMP-nexxtv-player"
+  tag_name: "AMP-NEXXTV-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-nexxtv-player extension .js script"
   attrs: { name: "autoplay" }
   attrs: {
-    name: "data-videoid"
+    name: "data-mediaid"
     mandatory: true
     value_regex: "[^=/?:]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-nexxtv-player.html"
+  spec_url: "/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

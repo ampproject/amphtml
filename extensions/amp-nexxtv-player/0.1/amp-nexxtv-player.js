@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import {
 import {removeElement} from '../../../src/dom';
 import {isObject} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
+import {listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/video-manager';
 
@@ -37,6 +38,12 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private {?string} */
+    this.videoIframeSrc_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
 
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
@@ -50,7 +57,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(this.origin_, opt_onLayout);
+    this.preconnect.url(this.getVideoIframeSrc_(), opt_onLayout);
   }
 
   /** @override */
@@ -76,12 +83,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     this.mode_ = this.element.getAttribute('data-mode') || 'static';
     this.streamtype_ = this.element.getAttribute('data-streamtype') || 'video';
     this.origin_ = this.element.getAttribute('data-origin')
-                  || 'https://embed.nexx.cloud/';
+      || 'https://embed.nexx.cloud/';
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
 
-    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
     this.applyFillContent(iframe);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
@@ -92,13 +98,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     videoManagerForDoc(this.element).register(this);
   }
 
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
+  getVideoIframeSrc_() {
+    if (this.videoIframeSrc_) {
+      return this.videoIframeSrc_;
+    }
 
-  /** @override */
-  layoutCallback() {
     let src = this.origin_;
 
     if (this.streamtype_ !== 'video') {
@@ -110,19 +114,30 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     src += `?start=${encodeURIComponent(this.start_)}`;
     src += `&datamode=${encodeURIComponent(this.mode_)}&amp=1`;
 
-    this.iframe_.src = src;
+    return this.videoIframeSrc_ = src;
+  }
 
-    this.win.addEventListener('message',
-    event => this.handleNexxMessages_(event));
+  /** @override */
+  viewportCallback(visible) {
+    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.iframe_.src = this.getVideoIframeSrc_();
+
+    this.unlistenMessage_ = listen(this.iframe_,'message', event => {
+      this.handleNexxMessages_(event);
+    });
 
     return this.loadPromise(this.iframe_)
       .then(() => {
-        this.playerReadyPromise_;
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        this.playerReadyPromise_;
       });
   }
 
-  pauseCallback(){
+  pauseCallback() {
     if (this.iframe_) {
       this.pause();
     }
@@ -133,6 +148,10 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
+    }
+
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
     }
 
     return true;
