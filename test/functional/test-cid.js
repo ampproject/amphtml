@@ -20,7 +20,7 @@ import {
   getProxySourceOrigin,
   viewerBaseCid,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
-import {installCryptoService, Crypto,}
+import {installCryptoService, Crypto, cryptoServiceForTesting}
     from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
@@ -132,7 +132,7 @@ describe('cid', () => {
 
     return Promise
         .all([installCidServiceForDocForTesting(ampdoc),
-              installCryptoService(fakeWin)])
+              cryptoServiceForTesting(fakeWin)])
         .then(results => {
           cid = results[0];
           crypto = results[1];
