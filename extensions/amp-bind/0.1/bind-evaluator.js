@@ -112,7 +112,7 @@ export class BindEvaluator {
       const expression = this.expressionCache_[expressionString];
       if (!expression) {
         const error =
-          new Error(`Expression "${expressionString}"" is not cached.`);
+            new Error(`Expression "${expressionString}"" is not cached.`);
         errors[expressionString] = {message: error.message, stack: error.stack};
         return;
       }
@@ -126,7 +126,7 @@ export class BindEvaluator {
         cache[expressionString] = result;
       } else {
         const error =
-          new Error(`"${result}" is not a valid result for [${property}].`);
+            new Error(`"${result}" is not a valid result for [${property}].`);
         errors[expressionString] = {message: error.message, stack: error.stack};
       }
     });
