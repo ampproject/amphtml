@@ -69,7 +69,7 @@ With the responsive layout, the width and height from the example should yield c
 
 * optional
 * default: video
-* possible values: [video | audio | playlists | playlist-masked | live | album]
+* possible values: [video | audio | playlist | playlist-masked | live | album]
 * playlist-masked: playlist without possibility to skip or choose video
 * album: is an audio playlist
 
