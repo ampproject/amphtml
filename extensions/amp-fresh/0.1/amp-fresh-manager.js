@@ -15,7 +15,7 @@
  */
 
 import {addParamToUrl} from '../../../src/url';
-import {fromClassForDoc} from '../../../src/service';
+import {registerServiceForDoc, getServiceForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/xhr';
@@ -118,7 +118,16 @@ export class AmpFreshManager {
 /**
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  */
-export function getOrInsallAmpFreshManager(nodeOrDoc) {
+export function installAmpFreshManagerForDoc(nodeOrDoc) {
+  registerServiceForDoc(nodeOrDoc, 'ampFreshManager', AmpFreshManager);
+}
+
+/**
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!AmpFreshManager
+ */
+export function getAmpFreshManagerForDoc(nodeOrDoc) {
+  installAmpFreshManagerForDoc(nodeOrDoc);
   return /** @type {!AmpFreshManager} */ (
-      fromClassForDoc(nodeOrDoc, 'ampFreshManager', AmpFreshManager));
+      getServiceForDoc(nodeOrDoc, 'ampFreshManager'));
 }

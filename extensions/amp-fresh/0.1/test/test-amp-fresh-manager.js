@@ -16,7 +16,7 @@
 
 import * as sinon from 'sinon';
 import {AmpFresh} from '../amp-fresh';
-import {getOrInsallAmpFreshManager} from '../amp-fresh-manager';
+import {getAmpFreshManagerForDoc} from '../amp-fresh-manager';
 import {installXhrService} from '../../../../src/service/xhr-impl';
 import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -52,14 +52,14 @@ describe('amp-fresh-manager', () => {
 
   it('should fetch document on install', () => {
     expect(requests).to.have.lengthOf(0);
-    getOrInsallAmpFreshManager(window.document);
+    getAmpFreshManagerForDoc(window.document);
     expect(requests).to.have.lengthOf(1);
   });
 
   it('only update when doc is ready', () => {
     sandbox.stub(AmpDoc.prototype, 'whenReady')
         .returns(Promise.resolve());
-    const service = getOrInsallAmpFreshManager(window.document);
+    const service = getAmpFreshManagerForDoc(window.document);
     const updateSpy = sandbox.spy(service, 'update_');
     expect(updateSpy).to.have.not.been.called;
     requests[0].respond(200, {
@@ -71,7 +71,7 @@ describe('amp-fresh-manager', () => {
   });
 
   it('adds amp-fresh=1 query param to request', () => {
-    getOrInsallAmpFreshManager(window.document);
+    getAmpFreshManagerForDoc(window.document);
     expect(requests[0].url).to.match(/amp-fresh=1/);
   });
 
@@ -87,7 +87,7 @@ describe('amp-fresh-manager', () => {
     const fresh2 = new AmpFresh(elem2);
     const setFreshReadySpy = sandbox.spy(fresh, 'setFreshReady');
     const setFreshReadySpy2 = sandbox.spy(fresh2, 'setFreshReady');
-    const service = getOrInsallAmpFreshManager(window.document);
+    const service = getAmpFreshManagerForDoc(window.document);
     requests[0].respond(404, {
       'Content-Type': 'text/xml',
     }, '<html></html>');
@@ -110,7 +110,7 @@ describe('amp-fresh-manager', () => {
     container.appendChild(elem2);
     const fresh = new AmpFresh(elem);
     const fresh2 = new AmpFresh(elem2);
-    getOrInsallAmpFreshManager(window.document);
+    getAmpFreshManagerForDoc(window.document);
     fresh.buildCallback();
     expect(function() {
       fresh2.buildCallback();
