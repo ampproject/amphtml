@@ -47,5 +47,5 @@ tags: {  # amp-access-laterpay
       error_message: "contents"
     }
   }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-laterpay/amp-access-laterpay.md"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-access-laterpay"
 }
