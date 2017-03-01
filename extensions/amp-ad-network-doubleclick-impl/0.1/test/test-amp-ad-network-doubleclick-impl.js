@@ -217,5 +217,13 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         expect(url).to.match(/&tfcd=1&/);
       });
     });
+
+    it('handles categoryExclusions without targeting', () => {
+      element.setAttribute('json', '{"categoryExclusions": "sports"}');
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&scp=excl_cat%3Dsports&/);
+      });
+    });
   });
 });

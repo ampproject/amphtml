@@ -209,15 +209,13 @@ AMP.registerElement(
  * @return {?string}
  */
 function serializeTargeting(targeting, categoryExclusions) {
-  if (!targeting) {
-    return null;
-  }
-  const serialized = Object.keys(targeting).map(
-      key => serializeItem(key, targeting[key]));
+  const serialized = targeting ?
+      Object.keys(targeting).map(key => serializeItem(key, targeting[key])) :
+      [];
   if (categoryExclusions) {
     serialized.push(serializeItem('excl_cat', categoryExclusions));
   }
-  return serialized.join('&');
+  return serialized.length ? serialized.join('&') : null;
 }
 
 /**
