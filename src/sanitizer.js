@@ -340,6 +340,8 @@ export function isValidAttr(tagName, attrName, attrValue) {
     return false;
   }
 
+  // See validator-main.protoascii
+  // https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
   if (attrName == 'class' &&
       attrValue &&
       /(^|\W)i-amphtml-/i.test(attrValue)) {

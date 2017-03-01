@@ -100,10 +100,13 @@ export class Bind {
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
 
-    /**
-     * @const @private {!Array<Promise>}
-     */
-    this.mutationPromises_ = [];
+    if (getMode().test) {
+      /**
+       * Array to keep track of mutations during testing
+       * @const @private {!Array<Promise>}
+       */
+      this.mutationPromises_ = [];
+    }
 
     /**
      * @const @private {MutationObserver}
@@ -681,8 +684,6 @@ export class Bind {
    * removes bindings for removed elements, then immediately applies the current
    * scope to the new bindings.
    *
-   * Meant to be used with MutationObserver
-   *
    * @param mutations {Array<MutationRecord>}
    * @private
    */
@@ -711,9 +712,11 @@ export class Bind {
         }
         return Promise.all(removePromises);
       }).then(() => {
-        this.digest_();
+        return this.digest_();
       });
-      this.mutationPromises_.push(mutationPromise);
+      if (getMode().test) {
+        this.mutationPromises_.push(mutationPromise);
+      }
     });
   }
 
@@ -797,13 +800,15 @@ export class Bind {
    * @visibleForTesting
    */
   waitForAllMutationsForTesting() {
-    return timerFor(this.win_).poll(5, () => {
-      return this.mutationPromises_.length > 0;
-    }).then(() => {
-      return Promise.all(this.mutationPromises_);
-    }).then(() => {
-      this.mutationPromises_.length = 0;
-    });
+    if (getMode().test) {
+      return timerFor(this.win_).poll(5, () => {
+        return this.mutationPromises_.length > 0;
+      }).then(() => {
+        return Promise.all(this.mutationPromises_);
+      }).then(() => {
+        this.mutationPromises_.length = 0;
+      });
+    }
   }
 
 }
