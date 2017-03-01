@@ -29,6 +29,12 @@ export let AmpVersion;
  */
 export let RtvVersion;
 
+/**
+ * An environment of the RTV version.
+ * @typedef {string}
+ */
+export let RtvEnvironment;
+
 /** @const */
 const TAG = 'cache-service-worker';
 
@@ -50,7 +56,7 @@ const BASE_RTV_VERSION = self.AMP_CONFIG.v;
 /**
  * The SW's current environment.
  * @const
- * @type {RtvVersion}
+ * @type {RtvEnvironment}
  */
 const BASE_RTV_ENVIRONMENT = BASE_RTV_VERSION.substr(0, 2);
 
@@ -65,7 +71,7 @@ let cache;
  * A mapping from a Client's (unique per tab _and_ refresh) ID to the AMP
  * release version we are serving it.
  *
- * @type {!Object<string, !Promise<RtvVersion>>}
+ * @type {!Object<string, !Promise<!RtvVersion>>}
  */
 const clientsVersion = Object.create(null);
 
@@ -136,10 +142,10 @@ export function isCdnJsFile(url) {
  * Extracts the data from the request URL.
  * @param {string} url
  * @return {{
- *   environment: string,
- *   explicitRtv: RtvVersion,
+ *   environment: !RtvEnvironment,
+ *   explicitRtv: !RtvVersion,
  *   pathname: string,
- *   rtv: RtvVersion,
+ *   rtv: !RtvVersion,
  * }}
  * @visibleForTesting
  */
@@ -157,7 +163,7 @@ export function requestData(url) {
  * Returns the URL with the requested version changed to `version`.
  *
  * @param {string} url
- * @param {RtvVersion} version
+ * @param {!RtvVersion} version
  * @return {string}
  * @visibleForTesting
  */
@@ -175,7 +181,7 @@ export function urlWithVersion(url, version) {
  * a versioned.
  *
  * @param {!Request} request
- * @param {RtvVersion} version
+ * @param {!RtvVersion} version
  * @return {!Request}
  */
 function normalizedRequest(request, version) {
@@ -201,7 +207,7 @@ function normalizedRequest(request, version) {
 
 /**
  * Determines if a AMP version is blacklisted.
- * @param {RtvVersion} version
+ * @param {!RtvVersion} version
  * @return {boolean}
  * @visibleForTesting
  */
@@ -243,7 +249,7 @@ export function generateFallbackClientId(referrer) {
  * the first is still fetching.
  *
  * @param {!Cache} cache
- * @param {!Request} requestOrUrl
+ * @param {!Request} request
  * @return {!Promise<!Response>}
  * @visibleForTesting
  */
@@ -307,7 +313,7 @@ export function expired(response) {
  * Returns the active percent diversions.
  *
  * @param {!Cache} cache
- * @return {!Promise<!Array<RtvVersion>>}
+ * @return {!Promise<!Array<!RtvVersion>>}
  */
 function diversions(cache) {
   const request = new Request(`${urls.cdn}/diversions`);
@@ -357,7 +363,7 @@ const cachePromise = self.caches.open('cdn-js').then(result => {
  * @param {!Cache} cache
  * @param {!Request} request
  * @param {string} requestPath the pathname of the request
- * @param {RtvVersion} requestVersion the version of the request
+ * @param {!RtvVersion} requestVersion the version of the request
  * @return {!Promise<!Response>}
  * @visibleForTesting
  */
@@ -399,7 +405,7 @@ export function fetchJsFile(cache, request, requestPath, requestVersion) {
  * @param {!Cache} cache
  * @param {string} path
  * @param {string} version
- * @param {?Array<RtvVersion>} diversions
+ * @param {?Array<!RtvVersion>} diversions
  * @return {!Promise<undefined>}
  */
 function purge(cache, path, version, diversions) {
@@ -461,8 +467,9 @@ function purge(cache, path, version, diversions) {
  *
  * @param {!Cache} cache
  * @param {string} requestPath
- * @param {RtvVersion} requestVersion
- * @return {!Promise<RtvVersion>}
+ * @param {!RtvVersion} requestVersion
+ * @param {!RtvEnvironment} requestEnv
+ * @return {!Promise<!RtvVersion>}
  * @visibleForTesting
  */
 export function getCachedVersion(cache, requestPath, requestVersion,
