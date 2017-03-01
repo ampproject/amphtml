@@ -111,7 +111,6 @@ const WHITELISTED_ATTRS = [
   /* Attributes added for amp-bind */
   // TODO(kmh287): Add more whitelisted attributes for bind?
   'text',
-  'class',
 ];
 
 
