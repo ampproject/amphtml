@@ -19,7 +19,7 @@ import {
   History,
   HistoryBindingNatural_,
   HistoryBindingVirtual_,
-  installHistoryServiceForDoc,
+  getHistoryServiceForDoc,
 } from '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -204,7 +204,8 @@ describes.sandboxed('History install', {}, () => {
   });
 
   it('should create natural binding and make it singleton', () => {
-    const history = installHistoryServiceForDoc(ampdoc);
+    debugger;
+    const history = getHistoryServiceForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
     expect(win.services.history.obj).to.equal(history);
     // Ensure that binding is installed as a singleton.
@@ -214,7 +215,7 @@ describes.sandboxed('History install', {}, () => {
 
   it('should create virtual binding', () => {
     viewer.isOvertakeHistory = () => true;
-    const history = installHistoryServiceForDoc(ampdoc);
+    const history = getHistoryServiceForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingVirtual_);
     expect(win.services.history.obj).to.equal(history);
     // Ensure that the global singleton has not been created.

@@ -51,7 +51,7 @@ import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {extensionsFor} from './extensions';
-import {installHistoryServiceForDoc} from './service/history-impl';
+import {getHistoryServiceForDoc} from './service/history-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
@@ -132,7 +132,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);
-  installHistoryServiceForDoc(ampdoc);
+  getHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
