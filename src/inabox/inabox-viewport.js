@@ -94,7 +94,6 @@ export class ViewportBindingInabox {
       // from host doc.
       return;
     }
-
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
         data => {
