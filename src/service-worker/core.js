@@ -299,7 +299,7 @@ export function expired(response) {
   let age = 0;
 
   if (headers.has('date') && headers.has('cache-control')) {
-    const maxAge = /max-age=(\d+)/gi.exec(headers.get('cache-control'));
+    const maxAge = /max-age=(\d+)/i.exec(headers.get('cache-control'));
     date = headers.get('date');
     age = maxAge ? maxAge[1] * 1000 : -Infinity;
   } else {
