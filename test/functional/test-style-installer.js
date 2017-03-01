@@ -16,7 +16,7 @@
 
 import {getStyle} from '../../src/style';
 import * as rds from '../../src/render-delaying-services';
-import {installPerformanceService} from '../../src/service/performance-impl';
+import {getPerformanceService} from '../../src/service/performance-impl';
 import {createIframePromise} from '../../testing/iframe';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
 import * as sinon from 'sinon';
@@ -39,7 +39,7 @@ describe('Styles', () => {
       sandbox = sinon.sandbox.create();
       win = iframe.win;
       doc = win.document;
-      const perf = installPerformanceService(doc.defaultView);
+      const perf = getPerformanceService(doc.defaultView);
       tickSpy = sandbox.spy(perf, 'tick');
 
       resources = installResourcesServiceForDoc(doc);
