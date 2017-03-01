@@ -17,7 +17,6 @@
 import {Observable} from '../observable';
 import {fromClassForDoc} from '../service';
 import {isExperimentOn} from '../experiments';
-import {onDocumentReady} from '../document-ready';
 import {setStyles} from '../style';
 import {toArray} from '../types';
 import {user} from '../log';
@@ -42,9 +41,7 @@ export class ParallaxService {
     /** @private {number} */
     this.previousScroll_ = 0;
 
-    onDocumentReady(ampdoc.win.document, () => {
-      this.installParallaxHandlers_(ampdoc.win);
-    });
+    this.installParallaxHandlers_(ampdoc.win);
   }
 
 
@@ -78,7 +75,7 @@ export class ParallaxService {
    */
   parallaxMutate_(elements, viewport) {
     const newScrollTop = viewport.getScrollTop();
-    const previousScrollTop = this.getPreviousScroll();
+    const previousScrollTop = this.getPreviousScroll_();
     const delta = previousScrollTop - newScrollTop;
 
     elements.forEach(element => {
@@ -86,10 +83,10 @@ export class ParallaxService {
         return;
       }
       element.update(delta);
-      this.setPreviousScroll(newScrollTop);
+      this.setPreviousScroll_(newScrollTop);
     });
 
-    this.fire(newScrollTop);
+    this.fire_(newScrollTop);
   }
 
   /**
@@ -104,40 +101,47 @@ export class ParallaxService {
   /**
    * Get the previous scroll value.
    * @return {number}
+   * @private
    */
-  getPreviousScroll() {
+  getPreviousScroll_() {
     return this.previousScroll_;
   }
 
   /**
    * Set the previous scroll value.
    * @param {number} scroll
+   * @private
    */
-  setPreviousScroll(scroll) {
+  setPreviousScroll_(scroll) {
     this.previousScroll_ = scroll;
   }
 
   /**
    * Add listeners to parallax scroll events.
    * @param {!function()} cb
+   * @private
+   * @visibleForTesting
    */
-  addScrollListener(cb) {
+  addScrollListener_(cb) {
     this.parallaxObservable_.add(cb);
   }
 
   /**
    * Remove listeners from parallax scroll events.
    * @param {!function()} cb
+   * @private
+   * @visibleForTesting
    */
-  removeScrollListener(cb) {
+  removeScrollListener_(cb) {
     this.parallaxObservable_.remove(cb);
   }
 
   /**
    * Alert listeners that a scroll has occurred.
    * @param {number} scrollTop
+   * @private
    */
-  fire(scrollTop) {
+  fire_(scrollTop) {
     this.parallaxObservable_.fire(scrollTop);
   }
 }

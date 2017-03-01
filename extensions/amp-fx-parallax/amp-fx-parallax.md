@@ -51,7 +51,3 @@ Example:
 **amp-fx-parallax**
 
 The factor to use when scrolling. A value greater than 1 scrolls the element upward when the user scrolls down the page. A value less than 1 scrolls the element downward when the user scrolls downward. A value of 1 behaves normally. A value of 0 effectively makes the element scroll fixed with the page.
-
-## Styling
-
-- You may use the `amp-fx-parallax` attribute selector to style it freely.

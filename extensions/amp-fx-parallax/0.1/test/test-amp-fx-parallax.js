@@ -84,7 +84,7 @@ describes.sandboxed('amp-fx-parallax', {}, () => {
           expect(top).to.equal(viewport.getScrollTop());
 
           return new Promise(resolve => {
-            parallaxService.addScrollListener(() => {
+            parallaxService.addScrollListener_(() => {
               const top = element.getBoundingClientRect().top;
               expect(top).to.equal(expectedParallax);
               resolve();
@@ -103,7 +103,7 @@ describes.sandboxed('amp-fx-parallax', {}, () => {
           const parallaxService = parallaxForDoc(iframe.doc);
 
           return new Promise(resolve => {
-            parallaxService.addScrollListener(() => {
+            parallaxService.addScrollListener_(() => {
               const top = element.getBoundingClientRect().top;
               expect(top).to.not.equal(expectedParallax);
               resolve();
@@ -121,7 +121,7 @@ describes.sandboxed('amp-fx-parallax', {}, () => {
         .then(({element, iframe, viewport}) => {
           const parallaxService = parallaxForDoc(iframe.doc);
           return new Promise(resolve => {
-            parallaxService.addScrollListener(() => {
+            parallaxService.addScrollListener_(() => {
               const top = element.getBoundingClientRect().top;
               expect(top).to.equal(expectedParallax);
               resolve();
@@ -140,12 +140,12 @@ describes.sandboxed('amp-fx-parallax', {}, () => {
         .then(({element, iframe, viewport}) => {
           const parallaxService = parallaxForDoc(iframe.doc);
           return new Promise(resolve => {
-            parallaxService.addScrollListener(afterFirstScroll);
+            parallaxService.addScrollListener_(afterFirstScroll);
             viewport.setScrollTop(scroll);
 
             function afterFirstScroll() {
-              parallaxService.removeScrollListener(afterFirstScroll);
-              parallaxService.addScrollListener(afterSecondScroll);
+              parallaxService.removeScrollListener_(afterFirstScroll);
+              parallaxService.addScrollListener_(afterSecondScroll);
               viewport.setScrollTop(2 * scroll);
             }
 
@@ -165,18 +165,18 @@ describes.sandboxed('amp-fx-parallax', {}, () => {
         .then(({element, iframe, viewport}) => {
           const parallaxService = parallaxForDoc(iframe.doc);
           return new Promise(resolve => {
-            parallaxService.addScrollListener(afterFirstScroll);
+            parallaxService.addScrollListener_(afterFirstScroll);
             viewport.setScrollTop(10);
 
             function afterFirstScroll() {
-              parallaxService.removeScrollListener(afterFirstScroll);
-              parallaxService.addScrollListener(afterSecondScroll);
+              parallaxService.removeScrollListener_(afterFirstScroll);
+              parallaxService.addScrollListener_(afterSecondScroll);
               viewport.setScrollTop(200);
             }
 
             function afterSecondScroll() {
-              parallaxService.removeScrollListener(afterSecondScroll);
-              parallaxService.addScrollListener(afterThirdScroll);
+              parallaxService.removeScrollListener_(afterSecondScroll);
+              parallaxService.addScrollListener_(afterThirdScroll);
               viewport.setScrollTop(0);
             }
 

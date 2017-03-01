@@ -16,6 +16,9 @@
 
 import {ampdocServiceFor} from '../../../src/ampdoc';
 import {installParallaxForDoc} from '../../../src/service/parallax-impl';
+import {onDocumentReady} from '../../../src/document-ready';
 
 const ampdoc = ampdocServiceFor(AMP.win).getAmpDoc();
-installParallaxForDoc(ampdoc.getRootNode());
+onDocumentReady(ampdoc.win.document, () => {
+  installParallaxForDoc(ampdoc.getRootNode());
+});
