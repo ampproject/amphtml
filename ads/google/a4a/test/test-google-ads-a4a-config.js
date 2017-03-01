@@ -31,8 +31,8 @@ import * as sinon from 'sinon';
 
 const EXP_ID = 'EXP_ID';
 
-// Note: All branch IDs must be numeric so that they pass validateExperimentIds
-// and are preserved by addExperimentIdToElement.
+// Note: All branch IDs must be string formatted numbers so that they pass
+// validateExperimentIds and are preserved by addExperimentIdToElement.
 /** @type {!Branches} */
 const EXTERNAL_BRANCHES = {
   control: '1',

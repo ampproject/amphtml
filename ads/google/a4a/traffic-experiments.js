@@ -68,7 +68,7 @@ const INTERNALLY_SELECTED_ID = '2088462';
 export function googleAdsIsA4AEnabled(win, element, experimentName,
     externalBranches, internalBranches) {
   if (isGoogleAdsA4AValidEnvironment(win)) {
-    maybeSetExperimentFromUrl(win, element,
+    const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
         experimentName, externalBranches.control,
         externalBranches.experiment, MANUAL_EXPERIMENT_ID);
     const experimentInfo = {};
@@ -83,11 +83,10 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
       const selectedBranch = getPageExperimentBranch(win, experimentName);
       addExperimentIdToElement(selectedBranch, element);
       // Detect how page was selected into the overall experimentName.
-      if (selectedBranch == externalBranches.experiment ||
-          selectedBranch == externalBranches.control) {
+      if (isSetFromUrl) {
         addExperimentIdToElement(EXTERNALLY_SELECTED_ID, element);
-      } else if (selectedBranch == internalBranches.experiment ||
-          selectedBranch == internalBranches.control) {
+      } else {
+        // Must be internally selected.
         addExperimentIdToElement(INTERNALLY_SELECTED_ID, element);
       }
       // Detect whether page is on the "experiment" (i.e., use A4A rendering
@@ -131,18 +130,20 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
  *   (i.e., a4a) branch of the overall experiment.
  * @param {!string} manualId  ID of the manual experiment.
+ * @return {boolean}  Whether the experiment state was set from a command-line
+ *   parameter or not.
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
     controlBranchId, treatmentBranchId, manualId) {
   const expParam = viewerForDoc(element).getParam('exp') ||
       parseQueryString(win.location.search)['exp'];
   if (!expParam) {
-    return;
+    return false;
   }
   const match = /(^|,)(a4a:[^,]*)/.exec(expParam);
   const a4aParam = match && match[2];
   if (!a4aParam) {
-    return;
+    return false;
   }
   // In the future, we may want to specify multiple experiments in the a4a
   // arg.  For the moment, however, assume that it's just a single flag.
@@ -155,10 +156,12 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
+    return true;
   } else {
     dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,
         ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
         'branch), or 2 (a4a experiment branch)');
+    return false;
   }
 }
 
