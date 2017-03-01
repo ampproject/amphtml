@@ -174,7 +174,15 @@ describe('sanitizeHtml', () => {
   it('should NOT output blacklisted values for class attributes', () => {
     expect(sanitizeHtml('<p class="i-amphtml-">hello</p>')).to.be
         .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p class="i-amphtml-class">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p class="foo-i-amphtml-bar">hello</p>')).to.be
+        .equal('<p>hello</p>');
     expect(sanitizeHtml('<p [class]="i-amphtml-">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p [class]="i-amphtml-class">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p [class]="foo-i-amphtml-bar">hello</p>')).to.be
         .equal('<p>hello</p>');
   });
 

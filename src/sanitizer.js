@@ -26,6 +26,7 @@ import {parseSrcset} from './srcset';
 import {user} from './log';
 import {urls} from './config';
 import {map, hasOwn} from './utils/object';
+import {startsWith} from './string';
 
 
 /** @private @const {string} */
@@ -202,7 +203,7 @@ export function sanitizeHtml(html) {
       }
       if (BLACKLISTED_TAGS[tagName]) {
         ignore++;
-      } else if (tagName.indexOf('amp-') != 0) {
+      } else if (!startsWith(tagName, 'amp-')) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
@@ -330,7 +331,7 @@ export function sanitizeFormattingHtml(html) {
 export function isValidAttr(tagName, attrName, attrValue) {
 
   // "on*" attributes are not allowed.
-  if (attrName.indexOf('on') == 0 && attrName != 'on') {
+  if (startsWith(attrName, 'on') && attrName != 'on') {
     return false;
   }
 
@@ -341,7 +342,7 @@ export function isValidAttr(tagName, attrName, attrValue) {
 
   if (attrName == 'class' &&
       attrValue &&
-      attrValue.search(/(^|\\W)i-amphtml-/i) == 0) {
+      /(^|\W)i-amphtml-/i.test(attrValue)) {
     return false;
   }
 
@@ -410,7 +411,7 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
 
-  if (attrName == 'href' && attrValue.indexOf('#') != 0) {
+  if (attrName == 'href' && !startsWith(attrValue, '#')) {
     return resolveRelativeUrl(attrValue, baseUrl);
   }
 
