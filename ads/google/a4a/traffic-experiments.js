@@ -34,6 +34,12 @@ export let ExperimentInfo;
 /** @type {!string} @private */
 const MANUAL_EXPERIMENT_ID = '117152632';
 
+/** @type {!string} @private */
+const EXTERNALLY_SELECTED_ID = '2088461';
+
+/** @type {!string} @private */
+const INTERNALLY_SELECTED_ID = '2088462';
+
 /**
  * Check whether Google Ads supports the A4A rendering pathway for a given ad
  * Element on a given Window.  The tests we use are:
@@ -76,6 +82,14 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
       // Page is selected into the overall traffic experiment.
       const selectedBranch = getPageExperimentBranch(win, experimentName);
       addExperimentIdToElement(selectedBranch, element);
+      // Detect how page was selected into the overall experimentName.
+      if (selectedBranch == externalBranches.experiment ||
+          selectedBranch == externalBranches.control) {
+        addExperimentIdToElement(EXTERNALLY_SELECTED_ID, element);
+      } else if (selectedBranch == internalBranches.experiment ||
+          selectedBranch == internalBranches.control) {
+        addExperimentIdToElement(INTERNALLY_SELECTED_ID, element);
+      }
       // Detect whether page is on the "experiment" (i.e., use A4A rendering
       // pathway) branch of the overall traffic experiment or it's on the
       // "control" (i.e., use traditional, 3p iframe rendering pathway).
@@ -303,6 +317,30 @@ export function isInExperiment(element, id) {
  */
 export function isInManualExperiment(element) {
   return isInExperiment(element, MANUAL_EXPERIMENT_ID);
+}
+
+/**
+ * Checks whether the given element is in any of the branches triggered by
+ * the externally-provided experiment parameter (as decided by the
+ * #maybeSetExperimentFromUrl function).
+ *
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isExternallyTriggeredExperiment(element) {
+  return isInExperiment(element, EXTERNALLY_SELECTED_ID);
+}
+
+/**
+ * Checks whether the given element is in any of the branches triggered by
+ * internal experiment selection (as set by
+ * #randomlySelectUnsetPageExperiments).
+ *
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isInternallyTriggeredExperiment(element) {
+  return isInExperiment(element, INTERNALLY_SELECTED_ID);
 }
 
 /**

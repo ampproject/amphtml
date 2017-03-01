@@ -22,6 +22,7 @@ import {
 } from '../doubleclick-a4a-config';
 import {
   isInManualExperiment,
+  isInExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {parseUrl} from '../../../../src/url';
@@ -185,8 +186,8 @@ describe('doubleclick-a4a-config', () => {
       expect(elem0.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
       expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.true;
-      expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment);
+      expect(isInExperiment(elem1,
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment)).to.be.true;
     });
   });
 });
