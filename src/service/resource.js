@@ -420,7 +420,6 @@ export class Resource {
    */
   completeCollapse() {
     toggle(this.element, false);
-    this.element.setAttribute('hidden', '');
     this.layoutBox_ = layoutRectLtwh(
         this.layoutBox_.left,
         this.layoutBox_.top,

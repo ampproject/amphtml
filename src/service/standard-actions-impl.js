@@ -122,7 +122,6 @@ export class StandardActions {
         target./*OK*/collapse();
       } else {
         toggle(target, false);
-        target.setAttribute('hidden', '');
       }
     });
   }
