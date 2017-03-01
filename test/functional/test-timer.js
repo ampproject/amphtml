@@ -147,7 +147,7 @@ describes.fakeWin('Timer', {}, env => {
   it('poll - resolves only when condition is true', done => {
     const realTimer = new Timer(env.win);
     let predicate = false;
-    realTimer.poll(111, () => {
+    realTimer.poll(10, () => {
       return predicate;
     }).then(() => {
       expect(predicate).to.be.true;
@@ -155,7 +155,7 @@ describes.fakeWin('Timer', {}, env => {
     });
     setTimeout(() => {
       predicate = true;
-    }, 222);
+    }, 15);
   });
 
   it('poll - clears out interval when complete', done => {

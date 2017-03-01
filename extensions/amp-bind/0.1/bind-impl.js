@@ -100,13 +100,10 @@ export class Bind {
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
 
-    if (getMode().test) {
-      /**
-       * Array to keep track of mutations during testing
-       * @const @private {!Array<Promise>}
-       */
-      this.mutationPromises_ = [];
-    }
+    /**
+     * @const @private {!Array<Promise>}
+     */
+    this.mutationPromises_ = [];
 
     /**
      * @const @private {MutationObserver}
@@ -800,15 +797,13 @@ export class Bind {
    * @visibleForTesting
    */
   waitForAllMutationsForTesting() {
-    if (getMode().test) {
-      return timerFor(this.win_).poll(5, () => {
-        return this.mutationPromises_.length > 0;
-      }).then(() => {
-        return Promise.all(this.mutationPromises_);
-      }).then(() => {
-        this.mutationPromises_.length = 0;
-      });
-    }
+    return timerFor(this.win_).poll(5, () => {
+      return this.mutationPromises_.length > 0;
+    }).then(() => {
+      return Promise.all(this.mutationPromises_);
+    }).then(() => {
+      this.mutationPromises_.length = 0;
+    });
   }
 
 }
