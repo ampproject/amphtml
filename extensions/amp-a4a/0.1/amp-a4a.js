@@ -308,6 +308,14 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isCollapsed_ = false;
+
+    // Note: This URL needs to be per-slot because we don't want ads in
+    // different slots to be able to interfere with each other, so they
+    // need to be cross-domain from each other.  However, we want the
+    // preconnect URL to be the same as the URL used in the fetch step
+    // (obviously), so generate it once here.
+    /** @const {string} */
+    this.nameframeUrl_ = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
   }
 
   /** @override */
@@ -375,7 +383,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   preconnectCallback(unusedOnLayout) {
     this.preconnect.url(SAFEFRAME_IMPL_PATH);
-    this.preconnect.url(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
+    this.preconnect.url(this.nameframeUrl_);
     if (!this.config) {
       return;
     }
@@ -1236,7 +1244,7 @@ export class AmpA4A extends AMP.BaseElement {
           srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
           break;
         case XORIGIN_MODE.NAMEFRAME:
-          srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
+          srcPath = this.nameframeUrl_;
           // Name will be set for real below in nameframe case.
           break;
         default:
