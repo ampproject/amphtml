@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {map} from './object';
+
+
 /**
  * An LRU Cache
  * @template T
@@ -31,7 +34,7 @@ export class Cache {
     this.queue_ = [];
 
     /** @private @const {Object<string, T>} */
-    this.map_ = {};
+    this.map_ = map();
   }
 
   /**

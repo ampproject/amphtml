@@ -47,6 +47,9 @@ export let FetchInitDef;
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
+/** @private @const {!Array<function(*):boolean>} */
+const allowedJsonBodyTypes_ = [isArray, isObject];
+
 /** @private @enum {number} Allowed fetch responses. */
 const allowedFetchTypes_ = {
   document: 1,
@@ -71,9 +74,6 @@ export class Xhr {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
-
-    /** @private @const {!Array<function(*):boolean>} */
-    this.allowedJsonBodyTypes_ = [isArray, isObject];
   }
 
   /**
@@ -178,14 +178,12 @@ export class Xhr {
    * @return {!Promise<!JSONType>}
    */
   fetchJson(input, opt_init) {
-    const init = this.setupInit_(opt_init, 'application/json');
-    const getResponseJson = response => response.json();
-
-    if (init.method === 'POST' && !isFormData(init.body)) {
+    const init = setupInit(opt_init, 'application/json');
+    if (init.method == 'POST' && !isFormData(init.body)) {
       // Assume JSON strict mode where only objects or arrays are allowed
       // as body.
       dev().assert(
-        this.allowedJsonBodyTypes_.some(test => test(init.body)),
+        allowedJsonBodyTypes_.some(test => test(init.body)),
         'body must be of type object or array. %s',
         init.body
       );
@@ -193,8 +191,17 @@ export class Xhr {
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
       init.body = JSON.stringify(init.body);
     }
+    return this.fetchJson_(input, init);
+  }
 
-    return this.fetch(input, init).then(getResponseJson);
+  /**
+   * @param {string} input
+   * @param {!FetchInitDef} init
+   * @return {!Promise<!JSONType>}
+   * @protected
+   */
+  fetchJson_(input, init) {
+    return this.fetch(input, init).then(response => response.json());
   }
 
   /**
@@ -209,9 +216,18 @@ export class Xhr {
    * @return {!Promise<string>}
    */
   fetchText(input, opt_init) {
-    const init = this.setupInit_(opt_init, 'text/plain');
-    return this.fetch(input, init)
-        .then(response => response.text());
+    const init = setupInit(opt_init, 'text/plain');
+    return this.fetchText_(input, init);
+  }
+
+  /**
+   * @param {string} input
+   * @param {!FetchInitDef} init
+   * @return {!Promise<string>}
+   * @protected
+   */
+  fetchText_(input, init) {
+    return this.fetch(input, init).then(response => response.text());
   }
 
   /**
@@ -223,10 +239,19 @@ export class Xhr {
    * @return {!Promise<!Document>}
    */
   fetchDocument(input, opt_init) {
-    const init = this.setupInit_(opt_init, 'text/html');
+    const init = setupInit(opt_init, 'text/html');
     init.responseType = 'document';
-    return this.fetch(input, init)
-        .then(response => response.document_());
+    return this.fetchDocument_(input, init);
+  }
+
+  /**
+   * @param {string} input
+   * @param {!FetchInitDef} init
+   * @return {!Promise<!Document>}
+   * @protected
+   */
+  fetchDocument_(input, init) {
+    return this.fetch(input, init).then(response => response.document_());
   }
 
   /**
@@ -235,7 +260,7 @@ export class Xhr {
    * @return {!Promise<!FetchResponse>}
    */
   fetch(input, opt_init) {
-    const init = this.setupInit_(opt_init);
+    const init = setupInit(opt_init);
     return this.fetchAmpCors_(input, init).then(response =>
       assertSuccess(response));
   }
@@ -267,25 +292,7 @@ export class Xhr {
   getCorsUrl(win, url) {
     return getCorsUrl(win, url);
   }
-
-  /**
-   * Sets up and normalizes the FetchInitDef
-   *
-   * @param {?FetchInitDef=} opt_init Fetch options object.
-   * @param {string=} opt_accept The HTTP Accept header value.
-   * @return {!FetchInitDef}
-   */
-  setupInit_(opt_init, opt_accept) {
-    const init = opt_init || {};
-    init.method = normalizeMethod_(init.method);
-    init.headers = init.headers || {};
-    if (opt_accept) {
-      init.headers['Accept'] = opt_accept;
-    }
-    return init;
-  }
 }
-
 
 /**
  * Normalized method name by uppercasing.
@@ -308,6 +315,24 @@ function normalizeMethod_(method) {
 
   return method;
 }
+
+/**
+ * Sets up and normalizes the FetchInitDef
+ *
+ * @param {?FetchInitDef=} opt_init Fetch options object.
+ * @param {string=} opt_accept The HTTP Accept header value.
+ * @return {!FetchInitDef}
+ */
+function setupInit(opt_init, opt_accept) {
+  const init = opt_init || {};
+  init.method = normalizeMethod_(init.method);
+  init.headers = init.headers || {};
+  if (opt_accept) {
+    init.headers['Accept'] = opt_accept;
+  }
+  return init;
+}
+
 
 /**
  * A minimal polyfill of Fetch API. It only polyfills what we currently use.

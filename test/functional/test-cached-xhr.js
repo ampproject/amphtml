@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
-import {
-  fetchPolyfill,
-  FetchResponse,
-} from '../../src/service/xhr-impl';
+import {FetchResponse, fetchPolyfill} from '../../src/service/xhr-impl';
 import {installCachedXhrService} from '../../src/service/cached-xhr-impl';
 
-describe('XHR', function() {
-  let sandbox;
+
+describes.realWin('CachedXhr', {}, env => {
   const location = {href: 'https://acme.com/path'};
 
   function getPolyfillWin() {
@@ -37,19 +33,14 @@ describe('XHR', function() {
   const xhr = installCachedXhrService(getPolyfillWin());
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     location.href = 'https://acme.com/path';
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  describe('#XHR', () => {
-
-    it('should fetch GET requests with fragments once ' +
+  describe('#fetchJson', () => {
+    it('should fetch JSON GET requests with fragments once ' +
         'for identical URLs', () => {
-      const TEST_RESPONSE = JSON.stringify({a: {b: [{c: 2}, {d: 4}]}});
+      const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
+      const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
       const mockXhr = {
         status: 200,
         responseText: TEST_RESPONSE,
@@ -59,23 +50,63 @@ describe('XHR', function() {
           () => Promise.resolve(new FetchResponse(mockXhr)));
 
       return Promise.all([
-        xhr.fetchJson('/get?k=v1#a.b[0].c').then(json => {
-          expect(json).to.equal(2);
-        }),
-        xhr.fetchJson('/get?k=v1#a.b[1].d').then(json => {
-          expect(json).to.equal(4);
-        }),
-      ]).then(() => {
+        xhr.fetchJson('/get?k=v1'),
+        xhr.fetchJson('/get?k=v1'),
+      ]).then(results => {
         expect(fetchStub.calledOnce).to.be.true;
+        expect(results[0]).to.jsonEqual(TEST_OBJECT);
+        expect(results[1]).to.jsonEqual(TEST_OBJECT);
       });
     });
+  });
 
-    it('should reject for paths that do not exist', () => {
-      return xhr.fetchJson('/get?k=v1#a.b[0].c.y').then(() => {
-        throw new Error('Expected fetch to fail!');
-      }, err => {
-        expect(err).to.be.an('error');
-        expect(err.message).to.contain('a.b[0].c.y');
+  describe('#fetchDocument', () => {
+    it('should fetch document GET requests with fragments once ' +
+        'for identical URLs', () => {
+      const doc = env.win.document;
+      const TEST_CONTENT = '<b>Hello, world';
+      const TEST_RESPONSE_TEXT = '<!doctype html><html><body>' + TEST_CONTENT;
+      const TEST_RESPONSE_DOC = doc.implementation.createHTMLDocument();
+      TEST_RESPONSE_DOC.body.innerHTML = TEST_CONTENT;
+
+      const mockXhr = {
+        status: 200,
+        responseText: TEST_RESPONSE_TEXT,
+        responseXML: TEST_RESPONSE_DOC,
+        responseType: 'text/html',
+      };
+      const fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
+          () => Promise.resolve(new FetchResponse(mockXhr)));
+
+      return Promise.all([
+        xhr.fetchDocument('/get?k=v1'),
+        xhr.fetchDocument('/get?k=v1'),
+      ]).then(results => {
+        expect(fetchStub.calledOnce).to.be.true;
+        expect(results[0].isEqualNode(TEST_RESPONSE_DOC)).to.be.true;
+        expect(results[1].isEqualNode(TEST_RESPONSE_DOC)).to.be.true;
+      });
+    });
+  });
+
+  describe('#fetchText', () => {
+    it('should fetch document GET requests with fragments once ' +
+        'for identical URLs', () => {
+      const TEST_RESPONSE = 'Hello, world!';
+      const mockXhr = {
+        status: 200,
+        responseText: TEST_RESPONSE,
+      };
+      const fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
+          () => Promise.resolve(new FetchResponse(mockXhr)));
+
+      return Promise.all([
+        xhr.fetchText('/get?k=v1'),
+        xhr.fetchText('/get?k=v1'),
+      ]).then(results => {
+        expect(fetchStub.calledOnce).to.be.true;
+        expect(results[0]).to.equal(TEST_RESPONSE);
+        expect(results[1]).to.equal(TEST_RESPONSE);
       });
     });
   });

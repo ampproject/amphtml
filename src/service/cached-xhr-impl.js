@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
-import {fromClass} from '../service';
-import {
-  parseUrl,
-  removeFragment,
-} from '../url';
-import {getPath, hasOwn} from '../utils/object';
-import {isArray, isObject, isFormData} from '../types';
 import {Cache} from '../utils/cache';
-import {
-  FetchInitDef,
-  Xhr,
-} from './xhr-impl';
+import {Xhr} from './xhr-impl';
+import {fromClass} from '../service';
+import {removeFragment} from '../url';
 
 
 /**
- * A service that polyfills Fetch API for use within AMP.
+ * A wrapper around the Xhr service which caches the result of GET requests
  *
  * @package Visible for type.
  * @visibleForTesting
@@ -45,93 +36,82 @@ export class CachedXhr extends Xhr {
     super(win);
 
     /** @const {!Cache} */
-    this.fragmentCache_ = new Cache(cacheSize);
+    this.cache_ = new Cache(cacheSize);
   }
 
   /**
-   * Fetches and constructs JSON object based on the fetch polyfill.
-   *
-   * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
-   *
-   * See `fetchAmpCors_` for more detail.
-   *
-   * @param {string} input
-   * @param {?FetchInitDef=} opt_init
+   * Attempt to cache the result of a fetch.
+   * @param {string} key The cache key
+   * @param {!./xhr-impl.FetchInitDef} init Fetch options object
+   * @param {!Promise<!JSONType>|!Promise<string>|!Promise<!Document>} fetch
+   * @return {!Promise<!JSONType>|!Promise<string>|!Promise<!Document>}
+   */
+  cacheFetch_(key, init, fetch) {
+    const isCacheable = (init.method === 'GET');
+    if (isCacheable) {
+      this.cache_.put(key, fetch);
+    }
+    return fetch;
+  }
+
+  /**
+   * Attempt to retrieve a cached fetch.
+   * @param {string} key The cache key
+   * @return {?Promise<!JSONType>|?Promise<string>|?Promise<!Document>}
+   */
+  getCachedFetch_(key) {
+    return this.cache_.get(key);
+  }
+
+  /**
+   * Fetches and caches a JSON request.
+   * @param {string} input URL
+   * @param {!./xhr-impl.FetchInitDef} init
    * @return {!Promise<!JSONType>}
    * @override
    */
-  fetchJson(input, opt_init) {
-    const init = this.setupInit_(opt_init, 'application/json');
-    const parsedInput = parseUrl(input);
-    const propertyPath = parsedInput.hash.slice(1); // remove # prefix
-    const getResponseJson = response => response.json();
+  fetchJson_(input, init) {
+    const key = this.getCacheKey_(input, init);
+    return this.getCachedFetch_(key) ||
+        this.cacheFetch_(key, init, super.fetchJson_(input, init));
+  }
 
-    if (init.method === 'POST' && !isFormData(init.body)) {
-      // Assume JSON strict mode where only objects or arrays are allowed
-      // as body.
-      dev().assert(
-        this.allowedJsonBodyTypes_.some(test => test(init.body)),
-        'body must be of type object or array. %s',
-        init.body
-      );
+  /**
+   * Fetches and caches a text request.
+   * @param {string} input
+   * @param {!./xhr-impl.FetchInitDef} init
+   * @return {!Promise<string>}
+   * @override
+   */
+  fetchText_(input, init) {
+    const key = this.getCacheKey_(input, init);
+    return this.getCachedFetch_(key) ||
+        this.cacheFetch_(key, init, super.fetchText_(input, init));
+  }
 
-      init.headers['Content-Type'] = 'application/json;charset=utf-8';
-      init.body = JSON.stringify(init.body);
-    }
-
-    const isCacheable = (init.method === 'GET');
-    if (isCacheable) {
-      const getPropertyAtPath = getPath.bind(null, propertyPath);
-      const cacheKey = this.getCacheKey_(input, opt_init);
-      const cachedPromise = this.fragmentCache_.get(cacheKey);
-      if (cachedPromise) {
-        return cachedPromise.then(getPropertyAtPath);
-      }
-
-      const fetchPromise = this.fetch(input, init).then(getResponseJson);
-
-      // Since a fragment is present, cache the full response promise, then
-      // return a promise with just the value specified by the fragment.
-      this.fragmentCache_.put(cacheKey, fetchPromise);
-      return fetchPromise.then(getPropertyAtPath);
-    } else {
-      return this.fetch(input, init).then(getResponseJson);
-    }
+  /**
+   * Fetches and caches a document request.
+   * @param {string} input
+   * @param {!./xhr-impl.FetchInitDef} init
+   * @return {!Promise<!Document>}
+   * @override
+   */
+  fetchDocument_(input, init) {
+    const key = this.getCacheKey_(input, init);
+    return this.getCachedFetch_(key) ||
+        this.cacheFetch_(key, init, super.fetchDocument_(input, init));
   }
 
   /**
    * Creates a cache key for a fetch.
    *
-   * @param {string} url
-   * @param {?FetchInitDef=} opt_init
+   * @param {string} input
    * @return {string}
    * @private
    */
-  getCacheKey_(url, opt_init) {
-    const serializedOptions = opt_init ? simpleSerialize(opt_init) : '';
-    return removeFragment(url) + ';' + serializedOptions;
-  }
-}
-
-/**
- * Deterministically traverse and serialize an object, array, or primitive.
- * @param {?} obj
- * @return {string}
- */
-function simpleSerialize(obj) {
-  if (isObject(obj) && !isArray(obj)) {
-    const keys = Object.keys(obj).sort();
-    const result = [];
-    for (let i = 0; i < keys.length; i++) {
-      if (hasOwn(obj, keys[i])) {
-        result.push(`{${keys[i]}:${simpleSerialize(obj[keys[i]])}}`);
-      }
-    }
-    return result.join(',');
-  } else if (isArray(obj)) {
-    return `[${obj.map(simpleSerialize).join(',')}]`;
-  } else {
-    return obj;
+  getCacheKey_(input, init) {
+    const accept = init.headers['Accept'] || '';
+    return removeFragment(input) + accept;
   }
 }
 

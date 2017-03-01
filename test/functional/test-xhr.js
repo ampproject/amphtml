@@ -28,33 +28,27 @@ describe('XHR', function() {
   let sandbox;
   let requests;
   const location = {href: 'https://acme.com/path'};
+  const nativeWin = {
+    location,
+    fetch: window.fetch,
+  };
 
-  function getNativeWin() {
-    return {
-      location,
-      fetch: window.fetch,
-    };
-  }
-
-  function getPolyfillWin() {
-    return {
-      location,
-      fetch: fetchPolyfill,
-    };
-  }
+  const polyfillWin = {
+    location,
+    fetch: fetchPolyfill,
+  };
 
   // Given XHR calls give tests more time.
   this.timeout(5000);
 
   const scenarios = [
-    () => ({
-      xhr: xhrServiceForTesting(getNativeWin()),
+    {
+      xhr: xhrServiceForTesting(nativeWin),
       desc: 'Native',
-    }),
-    () => ({
-      xhr: xhrServiceForTesting(getPolyfillWin()),
+    }, {
+      xhr: xhrServiceForTesting(polyfillWin),
       desc: 'Polyfill',
-    }),
+    },
   ];
 
   function setupMockXhr() {
@@ -83,8 +77,7 @@ describe('XHR', function() {
     sandbox.restore();
   });
 
-  scenarios.forEach(getTest => {
-    const test = getTest();
+  scenarios.forEach(test => {
     const xhr = test.xhr;
 
     // Since if it's the Native fetch, it won't use the XHR object so
@@ -569,8 +562,7 @@ describe('XHR', function() {
     });
   });
 
-  scenarios.forEach(getTest => {
-    const test = getTest();
+  scenarios.forEach(test => {
     const url = 'http://localhost:31862/post';
 
     describe(test.desc + ' POST', () => {
@@ -671,8 +663,7 @@ describe('XHR', function() {
       });
     });
 
-    scenarios.forEach(getTest => {
-      const test = getTest();
+    scenarios.forEach(test => {
       if (test.desc === 'Polyfill') {
         // FetchRequest is only returned by the Polyfill version of Xhr.
         describe('#text', () => {

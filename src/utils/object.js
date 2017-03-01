@@ -50,9 +50,9 @@ export function hasOwn(obj, key) {
  * e.g.
  * `getPath('a.b[0].c', {a: {b: [{c: 2}]}}) === 2`
  *
- * @param {T} obj a map-like value
  * @param {string} path a dot-separated list of keys to reference a value
- * @return {T}
+ * @param {T} obj a map-like value
+ * @return {*}
  * @template T
  */
 export function getPath(path, obj) {
