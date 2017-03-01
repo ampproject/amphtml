@@ -21,7 +21,7 @@ import {Crypto} from '../../../../src/service/crypto-impl';
 import {InstrumentationService} from '../instrumentation';
 import {variableServiceFor} from '../variables';
 import {
-  installUserNotificationManager,
+  getUserNotificationManager,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -98,7 +98,7 @@ describe('amp-analytics', function() {
       windowApi = iframe.win;
       ampdoc = new AmpDocSingle(windowApi);
       installCidServiceForDocForTesting(ampdoc);
-      uidService = installUserNotificationManager(iframe.win);
+      uidService = getUserNotificationManager(iframe.win);
 
       ins = fromClassForDoc(
           ampdoc, 'amp-analytics-instrumentation', InstrumentationService);
