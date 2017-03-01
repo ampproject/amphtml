@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../../src/ampdoc';
-import {installParallaxForDoc} from '../../../src/service/parallax-impl';
+import {getExistingServiceForDoc} from './service';
 
-const ampdoc = ampdocServiceFor(AMP.win).getAmpDoc();
-installParallaxForDoc(ampdoc.getRootNode());
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!./service/parallax-impl.ParallaxService}
+ */
+export function parallaxForDoc(nodeOrDoc) {
+  return /** @type {!./service/parallax-impl.ParallaxService} */ (
+      getExistingServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
+};

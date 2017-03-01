@@ -15,16 +15,17 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {getService} from '../../../../src/service';
-import {installParallaxService} from '../amp-fx-parallax';
+import {installParallaxForDoc} from '../../../../src/service/parallax-impl';
+import {parallaxForDoc} from '../../../../src/parallax';
 import {toggleExperiment} from '../../../../src/experiments';
 import {viewportForDoc} from '../../../../src/viewport';
+import {vsyncFor} from '../../../../src/vsync';
 
-describe('amp-fx-parallax', () => {
+describes.sandboxed('amp-fx-parallax', {}, () => {
   const DEFAULT_FACTOR = 1.7;
 
   function addTextChildren(iframe) {
-    return [iframe.doc.createTextNode('This is some parallaxy text.')];
+    return [iframe.doc.createTextNode('AMP: Accelerated Mobile Pages')];
   }
 
   function getAmpParallaxElement(opt_childrenCallback, opt_factor, opt_top) {
@@ -35,13 +36,14 @@ describe('amp-fx-parallax', () => {
 
     return createIframePromise().then(iframe => {
       const bodyResizer = iframe.doc.createElement('div');
-      bodyResizer.style.height = '400vh';
+      bodyResizer.style.height = '4000px';
       bodyResizer.style.width = '1px';
       iframe.doc.body.appendChild(bodyResizer);
 
-      iframe.doc.body.style.position = 'relative';
       viewport = viewportForDoc(iframe.win.document);
       viewport.resize_();
+
+      toggleExperiment(iframe.win, 'amp-fx-parallax', true);
 
       parallaxElement = iframe.doc.createElement('div');
       parallaxElement.setAttribute('amp-fx-parallax', factor);
@@ -54,17 +56,20 @@ describe('amp-fx-parallax', () => {
 
       const parent = iframe.doc.querySelector('#parent');
       parent.appendChild(parallaxElement);
-      viewport.setScrollTop(top);
+      installParallaxForDoc(iframe.doc);
 
-      toggleExperiment(iframe.win, 'amp-fx-parallax', true);
-      installParallaxService(iframe.win);
-      return {
-        iframe,
-        viewport,
-        element: parallaxElement,
-      };
-    }).then(null, error => {
-      return Promise.reject({error, parallaxElement});
+      return new Promise(resolve => {
+        vsyncFor(iframe.win).mutate(() => {
+          resolve({
+            element: parallaxElement,
+            iframe,
+            viewport,
+          });
+        });
+        viewport.setScrollTop(top);
+      });
+    }).catch(error => {
+      return Promise.reject({error, parallaxElement, stack: error.stack});
     });
   }
 
@@ -74,7 +79,7 @@ describe('amp-fx-parallax', () => {
 
     return getAmpParallaxElement(addTextChildren)
         .then(({element, iframe, viewport}) => {
-          const parallaxService = getService(iframe.win, 'amp-fx-parallax');
+          const parallaxService = parallaxForDoc(iframe.doc);
           const top = element.getBoundingClientRect().top;
           expect(top).to.equal(viewport.getScrollTop());
 
@@ -95,7 +100,7 @@ describe('amp-fx-parallax', () => {
 
     return getAmpParallaxElement(addTextChildren, DEFAULT_FACTOR)
         .then(({element, iframe, viewport}) => {
-          const parallaxService = getService(iframe.win, 'amp-fx-parallax');
+          const parallaxService = parallaxForDoc(iframe.doc);
 
           return new Promise(resolve => {
             parallaxService.addScrollListener(() => {
@@ -114,7 +119,7 @@ describe('amp-fx-parallax', () => {
 
     return getAmpParallaxElement(addTextChildren, DEFAULT_FACTOR)
         .then(({element, iframe, viewport}) => {
-          const parallaxService = getService(iframe.win, 'amp-fx-parallax');
+          const parallaxService = parallaxForDoc(iframe.doc);
           return new Promise(resolve => {
             parallaxService.addScrollListener(() => {
               const top = element.getBoundingClientRect().top;
@@ -133,7 +138,7 @@ describe('amp-fx-parallax', () => {
 
     return getAmpParallaxElement(addTextChildren, factor)
         .then(({element, iframe, viewport}) => {
-          const parallaxService = getService(iframe.win, 'amp-fx-parallax');
+          const parallaxService = parallaxForDoc(iframe.doc);
           return new Promise(resolve => {
             parallaxService.addScrollListener(afterFirstScroll);
             viewport.setScrollTop(scroll);
@@ -158,7 +163,7 @@ describe('amp-fx-parallax', () => {
 
     return getAmpParallaxElement(addTextChildren, factor)
         .then(({element, iframe, viewport}) => {
-          const parallaxService = getService(iframe.win, 'amp-fx-parallax');
+          const parallaxService = parallaxForDoc(iframe.doc);
           return new Promise(resolve => {
             parallaxService.addScrollListener(afterFirstScroll);
             viewport.setScrollTop(10);
