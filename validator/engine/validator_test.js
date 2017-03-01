@@ -466,8 +466,14 @@ describe('ValidatorRulesMakeSense', () => {
   it('tags defined', () => {
     expect(rules.tags.length).toBeGreaterThan(0);
   });
-  it('attr_lists defined', () => {
-    expect(rules.attrLists.length).toBeGreaterThan(0);
+  it('direct_attr_lists defined', () => {
+    expect(rules.directAttrLists.length).toBeGreaterThan(0);
+  });
+  it('global_attrs defined', () => {
+    expect(rules.globalAttrs.length).toBeGreaterThan(0);
+  });
+  it('amp_layout_attrs defined', () => {
+    expect(rules.ampLayoutAttrs.length).toBeGreaterThan(0);
   });
   it('min_validator_revision_required defined', () => {
     expect(rules.minValidatorRevisionRequired).toBeGreaterThan(0);
@@ -736,18 +742,6 @@ describe('ValidatorRulesMakeSense', () => {
     expect(subtractDiff(allSatisfies, allRequires)).toEqual([]);
     expect(subtractDiff(allRequires, allSatisfies)).toEqual([]);
   });
-
-  // attr_lists
-  const attrListNameIsUnique = {};
-  for (const attrList of rules.attrLists) {
-    it('unique attr_list name', () => {
-      expect(attrListNameIsUnique.hasOwnProperty(attrList.name)).toBe(false);
-      attrListNameIsUnique[attrList.name] = 0;
-    });
-    it('attr_list has attrs', () => {
-      expect(attrList.attrs.length).toBeGreaterThan(0);
-    });
-  }
 
   // attr_specs within rules.
   for (const attrSpec of rules.attrs) {
