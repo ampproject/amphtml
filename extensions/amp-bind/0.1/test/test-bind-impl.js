@@ -32,7 +32,6 @@ describes.realWin('amp-bind', {
 
   // BindValidator method stubs.
   let canBindStub;
-  let isResultValidStub;
 
   beforeEach(() => {
     installTimerService(env.win);
@@ -41,7 +40,7 @@ describes.realWin('amp-bind', {
     // Stub validator methods to return true for ease of testing.
     canBindStub = env.sandbox.stub(
         BindValidator.prototype, 'canBind').returns(true);
-    isResultValidStub = env.sandbox.stub(
+    env.sandbox.stub(
         BindValidator.prototype, 'isResultValid').returns(true);
 
     // Make sure we have a chunk instance for testing.
@@ -163,8 +162,8 @@ describes.realWin('amp-bind', {
 
     //TODO(kmh287): Move to integration test
     it('should NOT bind blacklisted attributes', () => {
-      canBindStub.restore();
-      isResultValidStub.restore();
+      // Restore real implementations of canBind and isResultValid
+      sandbox.restore();
       const doc = env.win.document;
       const template = doc.createElement('template');
       let textElement;
@@ -186,8 +185,8 @@ describes.realWin('amp-bind', {
 
     //TODO(kmh287): Move to integration test
     it('should NOT allow unsecure attribute values', () => {
-      canBindStub.restore();
-      isResultValidStub.restore();
+      // Restore real implementations of canBind and isResultValid
+      sandbox.restore();
       const doc = env.win.document;
       const template = doc.createElement('template');
       let aElement;
