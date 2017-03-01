@@ -69,10 +69,12 @@ export class AmpAd extends AMP.BaseElement {
 
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
-          !a4aRegistry[type](this.win, this.element)) {
-        // Network either has not provided any A4A implementation or the
-        // implementation exists, but has explicitly chosen not to handle this
-        // tag as A4A.  Fall back to the 3p implementation.
+          !a4aRegistry[type](this.win, this.element) ||
+          this.win.document.querySelector('meta[name=amp-3p-iframe-src]')) {
+        // Either this ad network doesn't support Fast Fetch, its Fast Fetch
+        // implementation has explicitly opted not to handle this tag, or this
+        // page uses remote.html which is inherently incompatible with Fast
+        // Fetch. Fall back to Delayed Fetch.
         return new AmpAd3PImpl(this.element);
       }
 
