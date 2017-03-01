@@ -39,7 +39,7 @@ import {
   getServiceForDoc,
 } from './service';
 import {
-  registerServiceForDoc as registerServiceForDocExternal;
+  registerServiceForDoc as registerServiceForDocExternal,
 } from './service';
 import {childElementsByTag} from './dom';
 import {

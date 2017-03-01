@@ -477,11 +477,11 @@ function getServiceInternal(holder, context, id, opt_factory,
       s.obj = opt_constructor
           ? new opt_constructor(context)
           : opt_factory(context);
-      // The service may have been requested already, in which case we have a
-      // pending promise we need to fulfill.
-      if (s.resolve) {
-        s.resolve(s.obj);
-      }
+    }
+    // The service may have been requested already, in which case we have a
+    // pending promise we need to fulfill.
+    if (s.resolve) {
+      s.resolve(s.obj);
     }
   }
   return s.obj;
