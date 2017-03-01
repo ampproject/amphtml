@@ -261,6 +261,12 @@ const EXPERIMENTS = [
         'Only apply to 1.0 version',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
   },
+  {
+    id: 'amp-fx-parallax',
+    name: 'Amp extension for a parallax effect',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
+    spec: 'https://github.com/ampproject/amphtml/issues/1443',
+  },
 ];
 
 if (getMode().localDev) {
