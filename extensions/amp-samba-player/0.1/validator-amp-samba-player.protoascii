@@ -65,6 +65,14 @@ tags: {  # <amp-samba-player>
     name: "data-media-id"
     value_regex_casei: "[0-9a-f]{32}"
   }
+  attrs: {
+    name: "data-env"
+    value_regex_casei: "[0-9a-z\\-]"
+  }
+  attrs: {
+    name: "data-protocol"
+    value_regex_casei: "[0-9a-z]{3,5}"
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-samba-player.html"
   amp_layout: {

@@ -25,11 +25,9 @@ const TAG = 'amp-samba-player';
 
 /** @private {Object} */
 const API_DICTIONARY = {
-	'web4-7091': '//playerapitest2.liquidplatform.com:7091/embed/',
-	'localhost-8080': '//localhost:8080/player-api/embed/',
-	'web4-7021': '//playerapitest2.liquidplatform.com:7021/embed/',
-	'staging': '//staging-player-api.sambavideos.sambatech.com/v3/embed/',
-	'prod': '//fast.player.liquidplatform.com/pApiv2/embed/'
+	'web4-7091': 'player.sambatech.com.br/v3_dev/',
+	staging: 'player.sambatech.com.br/v3_staging/',
+	prod: 'player.sambatech.com.br/v3/'
 };
 
 class AmpSambaPlayer extends AMP.BaseElement {
@@ -44,23 +42,17 @@ class AmpSambaPlayer extends AMP.BaseElement {
 		/** @private {?string} */
 		this.mediaId_ = null;
 
-		/** @private {string} */
-		this.env_ = 'prod';
-
-		/** @private {string} */
-		this.protocol_ = this.win.location.protocol || 'http:';
-
 		/** @private {?Object} */
 		this.params_ = null;
 
-		/** @private {?HTMLIFrameElement} */
-		this.iframe_ = null;
+		/** @private {?SambaPlayer} */
+		this.player_ = null;
 	}
 
 	/** @override */
 	preconnectCallback(opt_onLayout) {
 		// host to serve the player
-		this.preconnect.url(API_DICTIONARY['prod'], opt_onLayout);
+		this.preconnect.url('https://fast.player.liquidplatform.com', opt_onLayout);
 		// host to serve media contents
 		this.preconnect.url('http://pvbps-sambavideos.akamaized.net', opt_onLayout);
 	}
@@ -76,15 +68,8 @@ class AmpSambaPlayer extends AMP.BaseElement {
 		this.projectId_ = user().assert(this.element.getAttribute('data-project-id'),
 			`The data-project-id attribute is required for <${TAG}> %s`, this.element);
 
-		// not required in case of live
+		// not required (in case of live)
 		this.mediaId_ = this.element.getAttribute('data-media-id');
-
-		// which environment to run
-		this.env_ = this.element.getAttribute('data-env') || this.env_;
-
-		// the protocol to be used (HTTP, HTTPS)
-		this.protocol_ = (this.element.getAttribute('data-protocol') || this.protocol_).replace(/\:?$/, ':');
-
 		// player features related params
 		// WARN: methods missing on returned object (e.g. hasOwnProperty) so recreate it
 		this.params_ = Object.assign({}, getDataParamsFromAttributes(this.element));
@@ -101,17 +86,31 @@ class AmpSambaPlayer extends AMP.BaseElement {
 
 	/** @override */
 	layoutCallback() {
-		const iframe = this.element.ownerDocument.createElement('iframe');
+		return new Promise((function(onSuccess, onError) {
+			this.loadSambaPlayerAPI('prod', (function(e) {
+				if (!e.success) {
+					onError();
+					return;
+				}
 
-		iframe.setAttribute('frameborder', '0');
-		iframe.setAttribute('allowfullscreen', 'true');
-		iframe.src = API_DICTIONARY[this.env_];
+				this.player_ = new SambaPlayer(this.element, {
+					width: 480,
+					height: 360,
+					ph: this.projectId_,
+					m: this.mediaId_,
+					playerParams: this.params_
+				});
 
-		this.applyFillContent(iframe);
-		this.element.appendChild(iframe);
-		this.iframe_ = iframe;
+				for (let v of this.element.getElementsByTagName('iframe')) {
+					if (v.name === this.player_.MEDIA_ID) {
+						this.applyFillContent(v);
+						break;
+					}
+				}
 
-		return this.loadPromise(iframe);
+				onSuccess();
+			}).bind(this));
+		}).bind(this));
 	}
 
 	/** @override */
@@ -121,10 +120,10 @@ class AmpSambaPlayer extends AMP.BaseElement {
 
 	/** @override */
 	unlayoutCallback() {
-		if (this.iframe_ && this.element.frames.length > 0) {
+		if (this.player_ && this.element.frames.length > 0) {
 			// TODO: when events are available listeners must be removed as well
 			removeElement(this.element.frames[0]);
-			this.iframe_ = null;
+			this.player_ = null;
 		}
 
 		// "layoutCallback" must be called again
@@ -145,12 +144,12 @@ class AmpSambaPlayer extends AMP.BaseElement {
 
 	/** @override */
 	play(unusedIsAutoplay) {
-		this.iframe_ && this.iframe_.play();
+		this.player_ && this.player_.play();
 	}
 
 	/** @override */
 	pause() {
-		this.iframe_ && this.iframe_.pause();
+		this.player_ && this.player_.pause();
 	}
 
 	/** @override */
