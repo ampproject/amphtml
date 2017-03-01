@@ -68,6 +68,53 @@ const VISIBLE_PERCENTAGE_MAX = 'visiblePercentageMax';
 
 const TAG_ = 'Analytics.Visibility';
 
+const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
+
+/** @type {number} */
+let visibilityIdCounter = 1;
+
+
+/**
+ * @param {!Element} element
+ * @return {number}
+ */
+function getElementId(element) {
+  let id = element[VISIBILITY_ID_PROP];
+  if (!id) {
+    id = ++visibilityIdCounter;
+    element[VISIBILITY_ID_PROP] = id;
+  }
+  return id;
+}
+
+
+/**
+ * Partial implementation of Resource interface to cover the InOb uses.
+ */
+class RootResourceFake {
+  constructor(element) {
+    this.element = element;
+    this.win = element.ownerDocument.defaultView;
+  }
+
+  getLayoutBox() {
+    return layoutRectLtwh(0, 0, this.win.innerWidth, this.win.innerHeight);
+  }
+
+  getOwner() {
+    return null;
+  }
+
+  hasLoadedOnce() {
+    return true;
+  }
+
+  loadedOnce() {
+    return Promise.resolve();
+  }
+}
+
+
 /**
  * Checks if the value is undefined or positive number like.
  * "", 1, 0, undefined, 100, 101 are positive. -1, NaN are not.
@@ -265,22 +312,49 @@ export class Visibility {
    * @param {function(!Object)} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
    *   when callback is called. False otherwise.
-   * @param {!Element} analyticsElement The amp-analytics element that the
-   *   config is associated with.
+   * @return {!UnlistenDef}
    */
-  listenOnce(config, callback, shouldBeVisible, analyticsElement) {
-    const selector = config['selector'];
-    const element = user().assertElement(
-        getElement(this.ampdoc, selector,
-            dev().assertElement(analyticsElement),
-            config['selectionMethod']),
-        'Element not found for visibilitySpec: ' + selector);
+  listenDoc(config, callback) {
+    let unlisten;
+    // This is a main document. Driven by viewer visibility.
+    // This is straight from Instrumentation.createVisibilityListener_.
+    if (this.viewer_.isVisible() == shouldBeVisible) {
+      callback(new AnalyticsEvent(target));
+      config['called'] = true;
+      unlisten = function() {};
+    } else {
+      unlisten = this.viewer_.onVisibilityChanged(() => {
+        if (!config['called'] &&
+            this.viewer_.isVisible() == shouldBeVisible) {
+          callback(new AnalyticsEvent(target));
+          config['called'] = true;
+        }
+      });
+    }
+    // QQQ:
+    // 1) Why do we keep duplciating this code?
+    // 2) Why can't we apply visibilitySpec to the main doc? Some aspects of it
+    // make sense - most of the spec is meaningful except perhaps visibilityPercent.
+    return unlisten;
+  }
 
-    const resource =
+  /**
+   * @param {!Element} element
+   * @param {!Object} config
+   * @param {function(!Object)} callback
+   * @param {boolean} shouldBeVisible True if the element should be visible
+   *   when callback is called. False otherwise.
+   * @return {!UnlistenDef}
+   */
+  listenOnce(element, config, callback, shouldBeVisible) {
+    const id = getElementId(element);
+
+    let resource =
         this.resourcesService_.getResourceForElementOptional(element);
-
-    user().assert(
-        resource, 'Visibility tracking not supported on element: ', element);
+    if (!resource) {
+      // This must be a root element and thus we need to use a fake.
+      resource = new RootResourceFake(element);
+    }
 
     if (!this.intersectionObserver_) {
       const onIntersectionChanges = entries => {
@@ -308,15 +382,20 @@ export class Visibility {
       }
     }
 
-    resource.loadedOnce().then(() => {
+    const unlistenPromise = resource.loadedOnce().then(() => {
       this.intersectionObserver_.observe(element);
 
-      const resId = resource.getId();
-      this.listeners_[resId] = (this.listeners_[resId] || []);
+      this.listeners_[id] = (this.listeners_[id] || []);
       const state = {};
+      // QQQ: this is not correct.
       state[TIME_LOADED] = this.now_();
-      this.listeners_[resId].push({config, callback, state, shouldBeVisible});
+      const listener = {config, callback, state, shouldBeVisible};
+      this.listeners_[id].push(listener);
       this.resources_.push(resource);
+
+      return () => {
+        this.cleanup_(element, this.listeners_[id], listener);
+      };
     });
 
     if (!this.visibilityListenerRegistered_) {
@@ -325,6 +404,12 @@ export class Visibility {
       });
       this.visibilityListenerRegistered_ = true;
     }
+
+    return function() {
+      unlistenPromise.then(unlisten => {
+        unlisten();
+      });
+    };
   }
 
   /**
@@ -334,10 +419,11 @@ export class Visibility {
    * @private
    **/
   onIntersectionChange_(target, visible, docVisible) {
-    const resource = this.resourcesService_.getResourceForElement(target);
-    const listeners = this.listeners_[resource.getId()];
+    const id = getElementId(target);
+    const listeners = this.listeners_[id];
+    const resource = listeners.resource;
     if (docVisible) {
-      this.lastVisiblePercent_[resource.getId()] = visible;
+      this.lastVisiblePercent_[id] = visible;
     } else {
       visible = 0;
     }
@@ -355,7 +441,7 @@ export class Visibility {
       // Hidden trigger
       if (!shouldBeVisible) {
         if (!docVisible && conditionsMet) {
-          this.triggerCallback_(listeners, listener, resource.getLayoutBox());
+          this.triggerCallback_(target, listeners, listener, resource.getLayoutBox());
         }
         // done for hidden trigger
         continue;
@@ -363,7 +449,7 @@ export class Visibility {
 
       // Visible trigger
       if (conditionsMet) {
-        this.triggerCallback_(listeners, listener, resource.getLayoutBox());
+        this.triggerCallback_(target, listeners, listener, resource.getLayoutBox());
       } else if (state[IN_VIEWPORT] && !state[SCHEDULED_RUN_ID]) {
         // There is unmet duration condition, schedule a check
         const timeToWait = this.computeTimeToWait_(state, config);
@@ -373,20 +459,15 @@ export class Visibility {
         state[SCHEDULED_RUN_ID] = this.timer_.delay(() => {
           dev().assert(state[IN_VIEWPORT], 'should have been in viewport');
           if (this.updateCounters_(
-              this.lastVisiblePercent_[resource.getId()],
+              this.lastVisiblePercent_[id],
               listener, /* shouldBeVisible */ true)) {
-            this.triggerCallback_(listeners, listener, resource.getLayoutBox());
+            this.triggerCallback_(target, listeners, listener, resource.getLayoutBox());
           }
         }, timeToWait);
       } else if (!state[IN_VIEWPORT] && state[SCHEDULED_RUN_ID]) {
         this.timer_.cancel(state[SCHEDULED_RUN_ID]);
         state[SCHEDULED_RUN_ID] = null;
       }
-    }
-
-    // Remove target that have no listeners.
-    if (listeners.length == 0) {
-      this.intersectionObserver_.unobserve(target);
     }
   }
 
@@ -398,14 +479,18 @@ export class Visibility {
     if (!docVisible) {
       this.backgrounded_ = true;
     }
+    // QQQ: This is in essense the parent -> child functionality. However,
+    // resources is not the only thing possible here if we allow visibilitySpec
+    // for document/roots.
     for (let i = 0; i < this.resources_.length; i++) {
       const resource = this.resources_[i];
       if (!resource.hasLoadedOnce()) {
         continue;
       }
+      const id = getElementId(resource.element);
       this.onIntersectionChange_(
           resource.element,
-          this.lastVisiblePercent_[resource.getId()] || 0,
+          this.lastVisiblePercent_[id] || 0,
           docVisible);
     }
   }
@@ -539,21 +624,37 @@ export class Visibility {
 
   /**
    * Trigger listener callback.
+   * @param {!Element} element
    * @param {!Array<VisibilityListenerDef>} listeners
    * @param {!VisibilityListenerDef} listener
    * @param {!../../../src/layout-rect.LayoutRectDef} layoutBox The bounding rectangle
    *     for the element
    * @private
    */
-  triggerCallback_(listeners, listener, layoutBox) {
+  triggerCallback_(element, listeners, listener, layoutBox) {
+    this.cleanup_(element, listeners, listener);
+    const state = listener.state;
+    this.prepareStateForCallback_(state, layoutBox);
+    listener.callback(state);
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {!Array<VisibilityListenerDef>} listeners
+   * @param {!VisibilityListenerDef} listener
+   * @private
+   */
+  cleanup_(element, listeners, listener) {
     const state = listener.state;
     if (state[SCHEDULED_RUN_ID]) {
       this.timer_.cancel(state[SCHEDULED_RUN_ID]);
       state[SCHEDULED_RUN_ID] = null;
     }
-    this.prepareStateForCallback_(state, layoutBox);
-    listener.callback(state);
     listeners.splice(listeners.indexOf(listener), 1);
+    // Remove target that have no listeners.
+    if (listeners.length == 0) {
+      this.intersectionObserver_.unobserve(element);
+    }
   }
 
   /**
