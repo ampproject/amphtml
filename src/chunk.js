@@ -16,7 +16,7 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
-import {fromClassForDoc, getExistingServiceForDoc} from './service';
+import {registerServiceForDoc, getServiceForDoc} from './service';
 import {isExperimentOnAllowUrlOverride} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
@@ -51,7 +51,7 @@ export function startupChunk(nodeOrAmpDoc, fn) {
     resolved.then(fn);
     return;
   }
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc, 'chunk', Chunks);
   service.runForStartup_(fn);
 }
 
@@ -74,7 +74,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
     resolved.then(fn);
     return;
   }
-  const service = getExistingServiceForDoc(nodeOrAmpDoc, 'chunk');
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc, 'chunk');
   service.run(fn, priority);
 }
 
@@ -83,7 +83,23 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
  * @return {!Chunks}
  */
 export function chunkInstanceForTesting(nodeOrAmpDoc) {
-  return fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  return getChunkServiceForDoc_(nodeOrAmpDoc);
+}
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @return {!Chunks}
+ */
+function getChunkServiceForDoc_(nodeOrAmpDoc) {
+  installChunkServiceForDoc_(nodeOrAmpDoc);
+  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
+}
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ */
+export function installChunkServiceForDoc_(nodeOrAmpDoc) {
+  registerServiceForDoc(nodeOrAmpDoc, 'chunk', Chunks);
 }
 
 /**
@@ -107,7 +123,7 @@ export function activateChunkingForTesting() {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  */
 export function runChunksForTesting(nodeOrAmpDoc) {
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc, 'chunk', Chunks);
   const errors = [];
   while (true) {
     try {
