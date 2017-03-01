@@ -501,6 +501,17 @@ export class BaseElement {
     }
   }
 
+ /**
+  * Whether the given method has a registered action handler.
+  * @param {string} method
+  * @return {number}
+  * @package
+  */
+  supportsAction(method) {
+    this.initActionMap_();
+    return !!this.actionMap_[method];
+  }
+
   /**
    * Registers the action handler for the method with the specified name.
    * @param {string} method

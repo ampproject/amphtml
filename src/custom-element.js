@@ -1407,6 +1407,21 @@ function createBaseCustomElementClass(win) {
       }
     }
 
+     /**
+      * Whether the given method has a registered action handler at the time
+      * of this call.
+      * Returns false in the unknown case (e.g. element not built yet)
+      * @param {string} method
+      * @return {boolean}
+      * @package
+      */
+      supportsAction(method) {
+        if (!this.isBuilt()) {
+          return false;
+        }
+        return this.implementation_.supportsAction(method);
+      }
+
     /**
      * Returns the original nodes of the custom element without any service nodes
      * that could have been added for markup. These nodes can include Text,
