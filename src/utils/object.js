@@ -57,8 +57,7 @@ export function hasOwn(obj, key) {
  */
 export function getPath(path, obj) {
   const arrayIndexRe = /\[(\d+)\]/g;
-  const keys = path.replace(arrayIndexRe, '.$1')
-      .split('.');
+  const keys = path.replace(arrayIndexRe, '.$1').split('.');
   let value = obj;
   for (let i = 0; i < keys.length; i++) {
     if (!hasOwn(value, keys[i])) {
