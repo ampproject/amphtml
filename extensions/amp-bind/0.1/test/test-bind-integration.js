@@ -78,7 +78,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       const carousel = iframe.doc.getElementById('carousel');
       const impl = carousel.implementation_;
       expect(slideNum.textContent).to.equal('0');
-      impl.go(1, false /* animate */);
+      impl.go(1, /* animate */ false);
       return waitForBindApplication().then(() => {
         expect(slideNum.textContent).to.equal('1');
       });
