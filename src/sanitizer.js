@@ -25,7 +25,7 @@ import {
 import {parseSrcset} from './srcset';
 import {user} from './log';
 import {urls} from './config';
-import {map, hasOwn} from './utils/object';
+import {map} from './utils/object';
 import {startsWith} from './string';
 
 
@@ -266,7 +266,7 @@ export function sanitizeHtml(html) {
           continue;
         }
         emit(' ');
-        if (hasOwn(bindAttribsIndices, String(i))) {
+        if (bindAttribsIndices[i]) {
           emit('[' + attrName + ']');
         } else {
           emit(attrName);
