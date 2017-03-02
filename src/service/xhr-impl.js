@@ -191,16 +191,6 @@ export class Xhr {
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
       init.body = JSON.stringify(init.body);
     }
-    return this.fetchJson_(input, init);
-  }
-
-  /**
-   * @param {string} input
-   * @param {!FetchInitDef} init
-   * @return {!Promise<!JSONType>}
-   * @protected
-   */
-  fetchJson_(input, init) {
     return this.fetch(input, init).then(response => response.json());
   }
 
@@ -217,16 +207,6 @@ export class Xhr {
    */
   fetchText(input, opt_init) {
     const init = setupInit(opt_init, 'text/plain');
-    return this.fetchText_(input, init);
-  }
-
-  /**
-   * @param {string} input
-   * @param {!FetchInitDef} init
-   * @return {!Promise<string>}
-   * @protected
-   */
-  fetchText_(input, init) {
     return this.fetch(input, init).then(response => response.text());
   }
 
@@ -241,16 +221,6 @@ export class Xhr {
   fetchDocument(input, opt_init) {
     const init = setupInit(opt_init, 'text/html');
     init.responseType = 'document';
-    return this.fetchDocument_(input, init);
-  }
-
-  /**
-   * @param {string} input
-   * @param {!FetchInitDef} init
-   * @return {!Promise<!Document>}
-   * @protected
-   */
-  fetchDocument_(input, init) {
     return this.fetch(input, init).then(response => response.document_());
   }
 

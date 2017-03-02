@@ -90,7 +90,7 @@ describes.realWin('CachedXhr', {}, env => {
   });
 
   describe('#fetchText', () => {
-    it('should fetch document GET requests with fragments once ' +
+    it('should fetch text GET requests with fragments once ' +
         'for identical URLs', () => {
       const TEST_RESPONSE = 'Hello, world!';
       const mockXhr = {

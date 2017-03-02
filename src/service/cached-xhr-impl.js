@@ -42,12 +42,14 @@ export class CachedXhr extends Xhr {
   /**
    * Attempt to cache the result of a fetch.
    * @param {string} key The cache key
-   * @param {!./xhr-impl.FetchInitDef} init Fetch options object
    * @param {!Promise<!JSONType>|!Promise<string>|!Promise<!Document>} fetch
+   * @param {?./xhr-impl.FetchInitDef=} opt_init Fetch options object
    * @return {!Promise<!JSONType>|!Promise<string>|!Promise<!Document>}
    */
-  cacheFetch_(key, init, fetch) {
-    const isCacheable = (init.method === 'GET');
+  cacheFetch_(key, fetch, opt_init) {
+    // A fetch is cachable if it's implicitly or explicitly a GET
+    const isCacheable =
+        (!opt_init || !opt_init.method || opt_init.method === 'GET');
     if (isCacheable) {
       this.cache_.put(key, fetch);
     }
@@ -66,52 +68,52 @@ export class CachedXhr extends Xhr {
   /**
    * Fetches and caches a JSON request.
    * @param {string} input URL
-   * @param {!./xhr-impl.FetchInitDef} init
+   * @param {?./xhr-impl.FetchInitDef=} opt_init
    * @return {!Promise<!JSONType>}
    * @override
    */
-  fetchJson_(input, init) {
-    const key = this.getCacheKey_(input, init);
+  fetchJson(input, opt_init) {
+    const key = this.getCacheKey_(input, 'json');
     return this.getCachedFetch_(key) ||
-        this.cacheFetch_(key, init, super.fetchJson_(input, init));
+        this.cacheFetch_(key, super.fetchJson(input, opt_init), opt_init);
   }
 
   /**
    * Fetches and caches a text request.
    * @param {string} input
-   * @param {!./xhr-impl.FetchInitDef} init
+   * @param {?./xhr-impl.FetchInitDef=} opt_init
    * @return {!Promise<string>}
    * @override
    */
-  fetchText_(input, init) {
-    const key = this.getCacheKey_(input, init);
+  fetchText(input, opt_init) {
+    const key = this.getCacheKey_(input, 'text');
     return this.getCachedFetch_(key) ||
-        this.cacheFetch_(key, init, super.fetchText_(input, init));
+        this.cacheFetch_(key, super.fetchText(input, opt_init), opt_init);
   }
 
   /**
    * Fetches and caches a document request.
    * @param {string} input
-   * @param {!./xhr-impl.FetchInitDef} init
+   * @param {?./xhr-impl.FetchInitDef=} opt_init
    * @return {!Promise<!Document>}
    * @override
    */
-  fetchDocument_(input, init) {
-    const key = this.getCacheKey_(input, init);
+  fetchDocument(input, opt_init) {
+    const key = this.getCacheKey_(input, 'document');
     return this.getCachedFetch_(key) ||
-        this.cacheFetch_(key, init, super.fetchDocument_(input, init));
+        this.cacheFetch_(key, super.fetchDocument(input, opt_init), opt_init);
   }
 
   /**
    * Creates a cache key for a fetch.
    *
-   * @param {string} input
+   * @param {string} input URL
+   * @param {string} responseType
    * @return {string}
    * @private
    */
-  getCacheKey_(input, init) {
-    const accept = init.headers['Accept'] || '';
-    return removeFragment(input) + accept;
+  getCacheKey_(input, responseType) {
+    return removeFragment(input) + responseType;
   }
 }
 
