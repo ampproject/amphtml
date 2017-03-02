@@ -17,7 +17,6 @@
 import '../../../amp-carousel/0.1/amp-carousel';
 import {installBindForTesting} from '../bind-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {createFixtureIframe} from '../../../../testing/iframe';
 import {bindForDoc} from '../../../../src/bind';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
