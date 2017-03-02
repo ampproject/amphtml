@@ -78,6 +78,7 @@ declareExtension('amp-font', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-form', '0.1', true);
 declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true);
+declareExtension('amp-fx-parallax', '0.1', false);
 declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-hulu', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
@@ -465,6 +466,8 @@ function build() {
       thirdPartyFrameRegex: TESTING_HOST,
       localDev: true,
     };
+    AMP_CONFIG = Object.assign(AMP_CONFIG, JSON.parse(fs.readFileSync(
+        'build-system/global-configs/prod-config.json').toString()));
     $$.util.log($$.util.colors.green('trying to write AMP_CONFIG.'));
     fs.writeFileSync('node_modules/AMP_CONFIG.json',
         JSON.stringify(AMP_CONFIG));

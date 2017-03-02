@@ -18,8 +18,9 @@ import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev} from '../log';
 import {fromClass} from '../service';
-import {isExperimentOn} from '../experiments';
 import {getMode} from '../mode';
+import {isExperimentOn} from '../experiments';
+import {xhrFor} from '../xhr';
 
 const TAG = 'web-worker';
 
@@ -69,11 +70,25 @@ class AmpWorker {
     /** @const @private {!Window} */
     this.win_ = win;
 
+    /** @const @private {!../service/xhr-impl.Xhr} */
+    this.xhr_ = xhrFor(win);
+
     const url =
         calculateEntryPointScriptUrl(location, 'ww', getMode().localDev);
-    /** @const @private {!Worker} */
-    this.worker_ = new win.Worker(url);
-    this.worker_.onmessage = this.receiveMessage_.bind(this);
+    dev().fine(TAG, 'Fetching web worker from:', url);
+
+    /** @private {Worker} */
+    this.worker_ = null;
+
+    /** @const @private {!Promise} */
+    this.fetchPromise_ =
+        this.xhr_.fetchText(url, {ampCors: false}).then(text => {
+          // Workaround since Worker constructor only accepts same origin URLs.
+          const blob = new win.Blob([text], {type: 'text/javascript'});
+          const blobUrl = win.URL.createObjectURL(blob);
+          this.worker_ = new win.Worker(blobUrl);
+          this.worker_.onmessage = this.receiveMessage_.bind(this);
+        });
 
     /**
      * Array of in-flight messages pending response from worker.
@@ -96,13 +111,15 @@ class AmpWorker {
    * @private
    */
   sendMessage_(method, args) {
-    return new Promise((resolve, reject) => {
-      const id = this.counter_++;
-      this.messages_[id] = {method, resolve, reject};
+    return this.fetchPromise_.then(() => {
+      return new Promise((resolve, reject) => {
+        const id = this.counter_++;
+        this.messages_[id] = {method, resolve, reject};
 
-      /** @type {ToWorkerMessageDef} */
-      const message = {method, args, id};
-      this.worker_./*OK*/postMessage(message);
+        /** @type {ToWorkerMessageDef} */
+        const message = {method, args, id};
+        this.worker_./*OK*/postMessage(message);
+      });
     });
   }
 
@@ -136,5 +153,13 @@ class AmpWorker {
    */
   hasPendingMessages() {
     return Object.keys(this.messages_).length > 0;
+  }
+
+  /**
+   * @return {!Promise}
+   * @visibleForTesting
+   */
+  fetchPromiseForTesting() {
+    return this.fetchPromise_;
   }
 }

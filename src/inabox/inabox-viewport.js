@@ -21,7 +21,6 @@ import {resourcesForDoc} from '../../src/resources';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
-import {isExperimentOn} from '../../src/experiments';
 import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame';
@@ -85,18 +84,13 @@ export class ViewportBindingInabox {
     // 2) broadcast the request
     this.iframeClient_.setHostWindow(win.top);
 
-    /** @private {boolean} */
-    this.visibilityV2Enabled_ =
-        nativeIntersectionObserverSupported(win) &&
-            isExperimentOn(win, 'visibility-v2');
-
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
   /** @override */
   connect() {
-    if (this.visibilityV2Enabled_) {
-      // Visibility V2 uses native IntersectionObserver, no position data needed
+    if (nativeIntersectionObserverSupported(this.win)) {
+      // Using native IntersectionObserver, no position data needed
       // from host doc.
       return;
     }
@@ -173,6 +167,8 @@ export class ViewportBindingInabox {
   /** @override */ updatePaddingTop() {/* no-op */}
   /** @override */ hideViewerHeader() {/* no-op */}
   /** @override */ showViewerHeader() {/* no-op */}
+  /** @override */ disableScroll() {/* no-op */}
+  /** @override */ resetScroll() {/* no-op */}
   /** @override */ ensureReadyForElements() {/* no-op */}
   /** @override */ updateLightboxMode() {/* no-op */}
   /** @override */ setScrollTop() {/* no-op */}

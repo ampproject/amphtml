@@ -67,28 +67,67 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       },
     }, env => {
       describe('Open Channel', () => {
-        it('should start with the correct message', () => {
-          const ampdocUrl = env.ampdoc.getUrl();
-          const srcUrl = getSourceUrl(ampdocUrl);
+        class Messaging {
+          constructor() {}
+          sendRequest() {}
+          setup_() {}
+          setDefaultHandler() {}
+          registerHandler() {}
+        }
 
-          class Messaging {
-            constructor() {}
-            sendRequest() {}
-            setup_() {}
-          }
-          const messaging = new Messaging();
-          const win = document.createElement('div');
+        let win;
+        let messaging;
+        let ampViewerIntegration;
+
+        beforeEach(() => {
+          win = document.createElement('div');
           win.document = document.createElement('div');
-          const ampViewerIntegration = new AmpViewerIntegration(win);
+          ampViewerIntegration = new AmpViewerIntegration(win);
+          messaging = new Messaging();
+
+        });
+
+        it('should start with the correct message', () => {
           const sendRequestSpy = sandbox.stub(messaging, 'sendRequest', () => {
             return Promise.resolve();
           });
+
           ampViewerIntegration.openChannelAndStart_(
             viewer, env.ampdoc, messaging);
+
+          const ampdocUrl = env.ampdoc.getUrl();
+          const srcUrl = getSourceUrl(ampdocUrl);
+
           expect(sendRequestSpy).to.have.been.calledWith('channelOpen', {
             sourceUrl: srcUrl,
             url: ampdocUrl,
           }, true);
+        });
+
+        it('should not initiate the Touch Handler', () => {
+          sandbox.stub(messaging, 'sendRequest', () => {
+            return Promise.resolve();
+          });
+          const initTouchHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
+          ampViewerIntegration.openChannelAndStart_(
+            viewer, env.ampdoc, messaging);
+
+          expect(initTouchHandlerStub).to.not.be.called;
+        });
+
+        it('should initiate the Touch Handler', () => {
+          sandbox.stub(messaging, 'sendRequest', () => {
+            return Promise.resolve();
+          });
+          sandbox.stub(viewer, 'hasCapability').returns(true);
+          const initTouchHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
+          ampViewerIntegration.unconfirmedViewerOrigin_ = '';
+          ampViewerIntegration.openChannelAndStart_(
+            viewer, env.ampdoc, messaging).then(() => {
+              expect(initTouchHandlerStub).to.be.called;
+            });
         });
       });
     });
@@ -119,7 +158,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       });
 
       messaging = new Messaging(this.win, port);
-      messaging.setRequestProcessor(requestProcessor);
+      messaging.setDefaultHandler(requestProcessor);
     });
 
     it('handleMessage_ should call postMessage correctly', () => {

@@ -36,6 +36,7 @@ import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
 import {documentInfoForDoc} from '../document-info';
+import {computedStyle} from '../style';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -863,6 +864,22 @@ export class Resources {
   }
 
   /**
+   * Expands the element.
+   * @param {!Element} element
+   */
+  expandElement(element) {
+    const resource = Resource.forElement(element);
+    resource.completeExpand();
+
+    const owner = resource.getOwner();
+    if (owner) {
+      owner.expandedCallback(element);
+    }
+
+    this.schedulePass(FOUR_FRAME_DELAY_);
+  }
+
+  /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
    * @param {boolean=} opt_relayoutAll
@@ -1052,9 +1069,13 @@ export class Resources {
           // an element's boundary is not changed above the viewport after
           // resize.
           resize = true;
-        } else if (bottomDisplacedBoundary <= viewportRect.top + topOffset) {
+        } else if (viewportRect.top > 1 &&
+            bottomDisplacedBoundary <= viewportRect.top + topOffset) {
           // 5. Elements above the viewport can only be resized if we are able
-          // to compensate the height change by setting scrollTop.
+          // to compensate the height change by setting scrollTop and only if
+          // the page has already been scrolled by some amount (1px due to iOS).
+          // Otherwise the scrolling might move important things like the menu
+          // bar out of the viewport at initial page load.
           if (heightDiff < 0 &&
               viewportRect.top + aboveVpHeightChange < -heightDiff) {
             // Do nothing if height abobe viewport height can't compensate
@@ -1546,12 +1567,12 @@ export class Resources {
    * @private
    */
   getLayoutMargins_(resource) {
-    const computedStyle = this.win./*OK*/getComputedStyle(resource.element);
+    const style = computedStyle(this.win, resource.element);
     return {
-      top: parseInt(computedStyle.marginTop, 10) || 0,
-      right: parseInt(computedStyle.marginRight, 10) || 0,
-      bottom: parseInt(computedStyle.marginBottom, 10) || 0,
-      left: parseInt(computedStyle.marginLeft, 10) || 0,
+      top: parseInt(style.marginTop, 10) || 0,
+      right: parseInt(style.marginRight, 10) || 0,
+      bottom: parseInt(style.marginBottom, 10) || 0,
+      left: parseInt(style.marginLeft, 10) || 0,
     };
   }
 

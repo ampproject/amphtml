@@ -176,6 +176,11 @@ invocation:
       %{
         $$ = new AstNode(AstNodeType.INVOCATION, [$1, $4], $3);
       %}
+  |
+    NAME args
+      %{
+        $$ = new AstNode(AstNodeType.INVOCATION, [null, $2], $1)
+      %}
   ;
 
 args:
@@ -215,6 +220,21 @@ variable:
   ;
 
 literal:
+    primitive
+      ${
+        $$ = $1;
+      }
+  | object_literal
+      %{
+        $$ = $1;
+      %}
+  | array_literal
+      %{
+        $$ = $1;
+      %}
+  ;
+
+primitive:
     STRING
       %{
         const string = yytext.substr(1, yyleng - 2);
@@ -235,14 +255,6 @@ literal:
   | NULL
       %{
         $$ = new AstNode(AstNodeType.LITERAL, null, null);
-      %}
-  | object_literal
-      %{
-        $$ = $1;
-      %}
-  | array_literal
-      %{
-        $$ = $1;
       %}
   ;
 
@@ -293,8 +305,19 @@ object:
   ;
 
 key_value:
-  expr ':' expr
+  key ':' expr
       %{
         $$ = new AstNode(AstNodeType.KEY_VALUE, [$1, $3]);
+      %}
+  ;
+
+key:
+    NAME
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, $1);
+      %}
+  | primitive
+      %{
+        $$ = $1;
       %}
   ;

@@ -772,7 +772,9 @@ function createBaseCustomElementClass(win) {
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
-      this.implementation_.onLayoutMeasure();
+      if (this.isBuilt()) {
+        this.implementation_.onLayoutMeasure();
+      }
 
       if (this.isLoadingEnabled_()) {
         if (this.isInViewport_) {
@@ -991,7 +993,9 @@ function createBaseCustomElementClass(win) {
         this.completeUpgrade_(impl);
       } else if (typeof res.then == 'function') {
         // It's a promise: wait until it's done.
-        res.then(impl => this.completeUpgrade_(impl)).catch(reason => {
+        res.then(upgrade => {
+          this.completeUpgrade_(upgrade || impl);
+        }).catch(reason => {
           this.upgradeState_ = UpgradeState.UPGRADE_FAILED;
           rethrowAsync(reason);
         });
@@ -1306,7 +1310,6 @@ function createBaseCustomElementClass(win) {
     /**
      * Collapses the element, and notifies its owner (if there is one) that the
      * element is no longer present.
-     * @suppress {missingProperties}
      */
     collapse() {
       this.implementation_./*OK*/collapse();
@@ -1315,10 +1318,25 @@ function createBaseCustomElementClass(win) {
     /**
      * Called every time an owned AmpElement collapses itself.
      * @param {!AmpElement} element
-     * @suppress {missingProperties}
      */
     collapsedCallback(element) {
       this.implementation_.collapsedCallback(element);
+    }
+
+    /**
+     * Expands the element, and notifies its owner (if there is one) that the
+     * element is now present.
+     */
+    expand() {
+      this.implementation_./*OK*/expand();
+    }
+
+    /**
+     * Called every time an owned AmpElement expands itself.
+     * @param {!AmpElement} element
+     */
+    expandedCallback(element) {
+      this.implementation_.expandedCallback(element);
     }
 
     /**

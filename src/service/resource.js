@@ -20,7 +20,7 @@ import {
   moveLayoutRect,
 } from '../layout-rect';
 import {dev} from '../log';
-import {toggle} from '../style';
+import {toggle, computedStyle} from '../style';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -376,8 +376,8 @@ export class Resource {
           isFixed = true;
           break;
         }
-        if (viewport.isDeclaredFixed(n) &&
-                win./*OK*/getComputedStyle(n).position == 'fixed') {
+        if (viewport.isDeclaredFixed(n)
+            && computedStyle(win, n).position == 'fixed') {
           isFixed = true;
           break;
         }
@@ -430,6 +430,16 @@ export class Resource {
     if (owner) {
       owner.collapsedCallback(this.element);
     }
+  }
+
+  /**
+   * Completes expand: ensures that the element is not `display:none` and
+   * updates measurements.
+   */
+  completeExpand() {
+    toggle(this.element, true);
+    this.element.removeAttribute('hidden');
+    this.requestMeasure();
   }
 
   /**

@@ -97,6 +97,7 @@ exports.rules = [
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/document-info.js',
+      'ads/google/a4a/**->src/dom.js',
       'ads/google/a4a/**->src/experiments.js',
       'ads/google/a4a/**->src/timer.js',
       'ads/google/a4a/**->src/viewer.js',
@@ -156,6 +157,8 @@ exports.rules = [
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->src/service/variable-source.js',
+      'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
+          'src/service/parallax-impl.js',
     ],
   },
   {

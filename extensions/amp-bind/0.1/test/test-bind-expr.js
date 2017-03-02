@@ -157,8 +157,6 @@ describe('BindExpression', () => {
     expect(evaluate('foo', {foo: [1, 2, 3]})).to.deep.equal([1, 2, 3]);
     expect(evaluate('foo', {foo: {'bar': 'qux'}}))
         .to.deep.equal({bar: 'qux'});
-    expect(evaluate('{foo: "bar"}', {foo: 'qux'}))
-        .to.deep.equal({qux: 'bar'});
     expect(evaluate('{"foo": bar}', {bar: 'qux'}))
         .to.deep.equal({foo: 'qux'});
     expect(evaluate('[foo]', {foo: 'bar'})).to.deep.equal(['bar']);
@@ -222,9 +220,14 @@ describe('BindExpression', () => {
     expect(evaluate('{}')).to.deep.equal({});
     expect(evaluate('{}["a"]')).to.be.null;
     expect(evaluate('{}[{}]')).to.be.null;
+    expect(evaluate('{a: "b"}')).to.deep.equal({a: 'b'});
     expect(evaluate('{"a": "b"}')).to.deep.equal({'a': 'b'});
-    expect(evaluate('{foo: "b"}', {foo: 'a'}))
-        .to.deep.equal({'a': 'b'});
+    expect(evaluate('{123: "b"}')).to.deep.equal({123: 'b'});
+    expect(evaluate('{true: "b"}')).to.deep.equal({true: 'b'});
+    expect(evaluate('{null: "b"}')).to.deep.equal({null: 'b'});
+    // Unquoted string keys should _not_ be evaluated as expressions.
+    expect(evaluate('{a: "b"}', {a: 'foo'})).to.deep.equal({a: 'b'});
+    expect(() => evaluate('{1+1: "b"}')).to.throw();
   });
 
   it('should evaluate undefined vars and properties to null', () => {
@@ -233,6 +236,35 @@ describe('BindExpression', () => {
     expect(evaluate('foo["bar"]')).to.be.null;
     expect(evaluate('foo[bar]')).to.be.null;
     expect(evaluate('foo[0]')).to.be.null;
+  });
+
+  it('should support select Math functions', () => {
+    expect(evaluate('abs(-1)')).to.equal(1);
+    expect(evaluate('ceil(0.1)')).to.equal(1);
+    expect(evaluate('floor(1.9)')).to.equal(1);
+    expect(evaluate('max(0, 1)')).to.equal(1);
+    expect(evaluate('min(0, 1)')).to.equal(0);
+    expect(evaluate('round(0.6)')).to.equal(1);
+    const r = evaluate('random()');
+    expect(r).to.be.at.least(0);
+    expect(r).to.be.at.below(1);
+    expect(evaluate('sign(-1)')).to.equal(-1);
+
+    // Functions should not conflict with scope variables.
+    expect(evaluate('abs(-2) + abs', {abs: 2})).to.equal(4);
+
+    // Don't support non-whitelisted functions.
+    expect(() => {
+      evaluate('sin(0.5)');
+    }).to.throw(unsupportedFunctionError);
+    expect(() => {
+      evaluate('pow(3, 2)');
+    }).to.throw(unsupportedFunctionError);
+
+    // Don't support calling functions with `Math.` prefix.
+    expect(() => {
+      evaluate('Math.abs(-1)', {Math});
+    }).to.throw(unsupportedFunctionError);
   });
 
   it('should NOT allow access to prototype properties', () => {

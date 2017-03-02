@@ -21,6 +21,7 @@ import {resourcesForDoc} from '../resources';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {whenDocumentComplete} from '../document-ready';
+import {urls} from '../config';
 
 
 /**
@@ -89,6 +90,9 @@ export class Performance {
 
     /** @private {boolean} */
     this.isPerformanceTrackingOn_ = false;
+
+    /** @private {?string} */
+    this.enabledExperiments_ = null;
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => {
@@ -211,6 +215,8 @@ export class Performance {
    * Ticks a timing event.
    *
    * @param {string} label The variable name as it will be reported.
+   *     See TICKEVENTS.md for available metrics, and edit this file
+   *     when adding a new metric.
    * @param {?string=} opt_from The label of a previous tick to use as a
    *    relative start for this tick.
    * @param {number=} opt_value The time to record the tick at. Optional, if
@@ -269,11 +275,33 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.sendMessage('sendCsi', undefined,
-          /* cancelUnsent */true);
+      const experiments = this.getEnabledExperiments_();
+      const payload = experiments === '' ? undefined : {
+        ampexp: experiments,
+      };
+      this.viewer_.sendMessage('sendCsi', payload, /* cancelUnsent */true);
     }
   }
 
+  /**
+   * @returns {string} comma-separated list of experiment IDs
+   * @private
+   */
+  getEnabledExperiments_() {
+    if (this.enabledExperiments_ !== null) {
+      return this.enabledExperiments_;
+    }
+    const experiments = [];
+    // Check if it's the legacy CDN domain.
+    if (this.getHostname_() == urls.cdn.split('://')[1]) {
+      experiments.push('legacy-cdn-domain');
+    }
+    return this.enabledExperiments_ = experiments.join(',');
+  }
+
+  getHostname_() {
+    return this.win.location.hostname;
+  }
 
   /**
    * Queues the events to be flushed when tick function is set.
