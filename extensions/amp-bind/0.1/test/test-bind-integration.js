@@ -22,7 +22,7 @@ import {bindForDoc} from '../../../../src/bind';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 
 describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
-  let iframe;
+  let fixture;
   let ampdoc;
   let bind;
   const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
@@ -46,6 +46,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   });
 
   function waitForBindApplication() {
+    // Bind should be available, but need to wait for actions to resolve
+    // service promise for bind and call setState
     return bindForDoc(ampdoc).then(() => {
       return bind.setStatePromiseForTesting();
     });
