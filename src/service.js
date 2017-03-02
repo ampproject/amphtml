@@ -226,7 +226,10 @@ export function fromClass(win, id, constructor) {
  * @param {function(new:Object, !Window)} constructor
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
-export function registerService(win, id, constructor, opt_instantiate) {
+export function registerServiceConstructor(win,
+                                           id,
+                                           constructor,
+                                           opt_instantiate) {
   win = getTopWindow(win);
   registerServiceInternal(win, win, id, constructor);
   if (opt_instantiate) {
@@ -242,11 +245,10 @@ export function registerService(win, id, constructor, opt_instantiate) {
  * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} constructor
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
-export function registerServiceForDoc(
-  nodeOrDoc,
-  id,
-  constructor,
-  opt_instantiate) {
+export function registerServiceForDoc(nodeOrDoc,
+                                      id,
+                                      constructor,
+                                      opt_instantiate) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   registerServiceInternal(holder, ampdoc, id, constructor);
