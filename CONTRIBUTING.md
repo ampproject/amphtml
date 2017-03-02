@@ -56,12 +56,12 @@ If you run into any problems we have plenty of people who are willing to help; s
 
 The [Getting Started Quick Start Guide](contributing/getting-started-quick.md) has installation steps and instructions for building/testing AMP.
 
-[DEVELOPING.md](DEVELOPING.md) has some more advanced instructions that may be necessary depending on the complexity of the changes you are making.
+[DEVELOPING.md](contributing/DEVELOPING.md) has some more advanced instructions that may be necessary depending on the complexity of the changes you are making.
 
 A few things to note:
 
 * The AMP Project follows the [fork & pull](https://help.github.com/articles/using-pull-requests/#fork--pull) model for accepting contributions.
-* Familiarize yourself with our [Design Principles](DESIGN_PRINCIPLES.md).
+* Familiarize yourself with our [Design Principles](contributing/DESIGN_PRINCIPLES.md).
 * We follow [Google's JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html).  More generally make sure to follow the same comment and coding style as the rest of the project.
 * Include tests when contributing code.  There are plenty of tests that you can use as examples.
 * A key feature of AMP is performance.  All changes will be analyzed for any performance impact; we particularly appreciate changes that make things even faster.  Please include any measured performance impact with substantial pull requests.
@@ -69,7 +69,7 @@ A few things to note:
 ## Contributing features
 
 Follow this process for contributing new features:
-* Familiarize yourself with the [AMP Design Principles](DESIGN_PRINCIPLES.md)
+* Familiarize yourself with the [AMP Design Principles](contributing/DESIGN_PRINCIPLES.md)
 * [Create a new GitHub issue](https://github.com/ampproject/amphtml/issues/new) to start discussion of the new feature.
 * Before starting on the code get approval for your feature from an [OWNER](https://github.com/ampproject/amphtml/search?utf8=%E2%9C%93&q=filename%3AOWNERS.yaml&type=Code) of your feature's area and a [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md#core-committers).  In most cases the people who can give this approval and are most familiar with your feature's area will get involved proactively or someone else in the community will add them.  If you are having trouble finding the right people add a comment on the issue or reach out on one of the channels in [How to get help](contributing/getting-started-e2e.md#how-to-get-help).
 * Consider bringing the eng design for your feature to our [weekly design review](#weekly-design-review).
