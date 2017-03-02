@@ -41,17 +41,17 @@ class AmpSambaPlayer extends AMP.BaseElement {
 		/** @private {string} */
 		this.projectId_ = '';
 
-		/** @private {?string} */
-		this.mediaId_ = null;
+		/** @private {string} */
+		this.mediaId_ = '';
 
 		/** @private {string} */
 		this.env_ = 'prod';
 
 		/** @private {string} */
-		this.protocol_ = this.win.location.protocol || 'http:';
+		this.protocol_ = this.win.location.protocol || 'http';
 
-		/** @private {?Object} */
-		this.params_ = null;
+		/** @private {Object} */
+		this.params_ = {};
 
 		/** @private {?HTMLIFrameElement} */
 		this.iframe_ = null;
@@ -77,7 +77,7 @@ class AmpSambaPlayer extends AMP.BaseElement {
 			`The data-project-id attribute is required for <${TAG}> %s`, this.element);
 
 		// not required in case of live
-		this.mediaId_ = this.element.getAttribute('data-media-id');
+		this.mediaId_ = this.element.getAttribute('data-media-id') || '';
 
 		// which environment to run
 		this.env_ = this.element.getAttribute('data-env') || this.env_;
@@ -102,10 +102,17 @@ class AmpSambaPlayer extends AMP.BaseElement {
 	/** @override */
 	layoutCallback() {
 		const iframe = this.element.ownerDocument.createElement('iframe');
+		let params = 'jsApi=true';
+		const s = '&';
+
+		for (let k in this.params_)
+			params += `${s}${k.replace(/url$/i, 'URL')}=${this.params_[k]}`;
+
+		params += `&parentURL=#${this.element.ownerDocument.location.href}`;
 
 		iframe.setAttribute('frameborder', '0');
 		iframe.setAttribute('allowfullscreen', 'true');
-		iframe.src = API_DICTIONARY[this.env_];
+		iframe.src = `${this.protocol_}${API_DICTIONARY[this.env_]}${this.projectId_}/${this.mediaId_}?${params}`;
 
 		this.applyFillContent(iframe);
 		this.element.appendChild(iframe);
@@ -121,9 +128,8 @@ class AmpSambaPlayer extends AMP.BaseElement {
 
 	/** @override */
 	unlayoutCallback() {
-		if (this.iframe_ && this.element.frames.length > 0) {
-			// TODO: when events are available listeners must be removed as well
-			removeElement(this.element.frames[0]);
+		if (this.iframe_) {
+			removeElement(this.iframe_);
 			this.iframe_ = null;
 		}
 
@@ -145,12 +151,12 @@ class AmpSambaPlayer extends AMP.BaseElement {
 
 	/** @override */
 	play(unusedIsAutoplay) {
-		this.iframe_ && this.iframe_.play();
+		this.iframe_.contentWindow./*OK*/postMessage('play', '*');
 	}
 
 	/** @override */
 	pause() {
-		this.iframe_ && this.iframe_.pause();
+		this.iframe_.contentWindow./*OK*/postMessage('pause', '*');
 	}
 
 	/** @override */
@@ -166,31 +172,6 @@ class AmpSambaPlayer extends AMP.BaseElement {
 	hideControls() {}
 
 	// End of VideoInterface implementation
-
-	/** @private */
-	loadSambaPlayerAPI(env, cb) {
-		const baseUrl = API_DICTIONARY[env];
-
-		if (baseUrl == null)
-			throw new Error(`SambaPlayer wrong environment ${env}.`);
-
-		const script = document.createElement('script');
-
-		script.setAttribute('samba-player-api', 'player');
-		script.src = `//${baseUrl}samba.player.api.js?iframeURL=${env}`;
-		
-		script.onload = script.onreadystatechange = () => {
-			if (!this.readyState || this.readyState === 'loaded' || this.readyState === 'complete') {
-				cb && cb({success: true});
-			}
-		};
-
-		script.onerror = function() {
-			cb && cb({success: false});
-		};
-
-		document.querySelector('body').appendChild(script);
-	}
 }
 
 AMP.registerElement(TAG, AmpSambaPlayer);
