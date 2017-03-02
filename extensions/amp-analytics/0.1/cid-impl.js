@@ -37,8 +37,6 @@ import {tryParseJson} from '../../../src/json';
 import {timerFor} from '../../../src/timer';
 import {user, rethrowAsync} from '../../../src/log';
 
-const TAG_ = 'Cid';
-
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
 /**
@@ -326,7 +324,7 @@ export function viewerBaseCid(ampdoc, opt_data) {
     // it should resolve in milli seconds.
     return timerFor(ampdoc.win).timeoutPromise(10000, cidPromise, 'base cid')
         .catch(error => {
-          rethrowAsync(TAG_, error);
+          rethrowAsync(error);
           return undefined;
         });
   });
