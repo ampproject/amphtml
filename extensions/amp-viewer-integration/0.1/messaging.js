@@ -288,8 +288,8 @@ export class Messaging {
       delete this.waitingForResponse_[requestId];
       if (message.error) {
         this.logError_(TAG + ': handleResponse_ error: ', message.error);
-        pending.reject(new Error(
-          'Request ' + message.name + ' failed: ' + message.error));
+        pending.reject(
+          new Error(`Request ${message.name} failed: ${message.error}`));
       } else {
         pending.resolve(message.data);
       }
