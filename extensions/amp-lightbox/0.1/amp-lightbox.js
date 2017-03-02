@@ -42,8 +42,9 @@ const A4A_PROTOTYPE_EXPERIMENT = 'amp-lightbox-a4a-proto';
 function enterFrameFullOverlayMode(iframe, topLevelWindow) {
   // TODO(alanorozco): use viewport service
   // TODO(alanorozco): move ad banner resizing logic to its extension class
-
-  const iframeDoc = iframe.contentDocument || this.win.document;
+  // TODO(alanorozco): check for FriendlyIframeEmbed.win.document as iframeDoc
+  //                   fallback.
+  const iframeDoc = iframe.contentDocument;
   const iframeBody = iframeDoc.body;
   const adBannerRoot =
       dev().assertElement(iframeBody.querySelector('amp-ad-banner'));
@@ -84,7 +85,7 @@ function enterFrameFullOverlayMode(iframe, topLevelWindow) {
  * @param {!Window} topLevelWindow
  */
 function leaveFrameFullOverlayMode(iframe, topLevelWindow) {
-  const iframeDoc = iframe.contentDocument || this.win.document;
+  const iframeDoc = iframe.contentDocument;
   const iframeBody = iframeDoc.body;
   const adBannerRoot =
       dev().assertElement(iframeBody.querySelector('amp-ad-banner'));
