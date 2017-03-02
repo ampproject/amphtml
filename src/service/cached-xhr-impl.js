@@ -16,7 +16,7 @@
 
 import {Cache} from '../utils/cache';
 import {Xhr} from './xhr-impl';
-import {fromClass} from '../service';
+import {getService, registerServiceBuilder} from '../service';
 import {removeFragment} from '../url';
 
 
@@ -117,8 +117,16 @@ export class CachedXhr extends Xhr {
 
 /**
  * @param {!Window} window
- * @return {!Xhr}
+ * @return {!CachedXhr}
+ */
+export function cachedXhrServiceForTesting(window) {
+  installCachedXhrService(window);
+  return getService(window, 'xhr');
+}
+
+/**
+ * @param {!Window} window
  */
 export function installCachedXhrService(window) {
-  return fromClass(window, 'cached-xhr', CachedXhr);
+  registerServiceBuilder(window, 'xhr', CachedXhr);
 };

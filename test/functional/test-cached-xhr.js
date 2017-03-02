@@ -15,7 +15,7 @@
  */
 
 import {FetchResponse, fetchPolyfill} from '../../src/service/xhr-impl';
-import {installCachedXhrService} from '../../src/service/cached-xhr-impl';
+import {cachedXhrServiceForTesting} from '../../src/service/cached-xhr-impl';
 
 
 describes.realWin('CachedXhr', {}, env => {
@@ -30,7 +30,7 @@ describes.realWin('CachedXhr', {}, env => {
 
   // Since if it's the Native fetch, it won't use the XHR object so
   // mocking and testing the request becomes not doable.
-  const xhr = installCachedXhrService(getPolyfillWin());
+  const xhr = cachedXhrServiceForTesting(getPolyfillWin());
 
   beforeEach(() => {
     location.href = 'https://acme.com/path';
