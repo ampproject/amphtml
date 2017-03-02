@@ -277,6 +277,11 @@ export function fetchAndCache(cache, request) {
                 `${response.status}.`);
           }
 
+          // Override the Date header, to avoid time skew between the server
+          // and the client (ie, a client with set to an incorrect date int the
+          // future).
+          response.headers.set('date', new Date().toUTCString());
+
           // You must clone to prevent double reading the body.
           cache.put(request, response.clone());
           return response;
