@@ -255,6 +255,10 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
 
+    if (!isExperimentOn(this.getAmpDoc().win, A4A_PROTOTYPE_EXPERIMENT)) {
+      return;
+    }
+
     leaveFrameFullOverlayMode(this.getIframe_(), this.getAmpDoc().win);
   }
 
