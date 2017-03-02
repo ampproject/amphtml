@@ -295,17 +295,14 @@ export function fetchAndCache(cache, request) {
  */
 export function expired(response) {
   const {headers} = response;
-  let date;
-  let age = 0;
 
-  if (headers.has('date') && headers.has('cache-control')) {
-    const maxAge = /max-age=(\d+)/i.exec(headers.get('cache-control'));
-    date = headers.get('date');
-    age = maxAge ? maxAge[1] * 1000 : -Infinity;
-  } else {
-    date = headers.get('expires');
+  if (!headers.has('date') || !headers.has('cache-control')) {
+    return false;
   }
 
+  const maxAge = /max-age=(\d+)/i.exec(headers.get('cache-control'));
+  const date = headers.get('date');
+  const age = maxAge ? maxAge[1] * 1000 : -Infinity;
   return Date.now() >= Number(new Date(date)) + age;
 }
 

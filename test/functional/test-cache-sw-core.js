@@ -339,33 +339,6 @@ runner.run('Cache SW', () => {
       });
     });
 
-    describe('with expires', () => {
-      it('expires in the past', () => {
-        response.headers.set('expires', new Date(Date.now() - 1000)
-            .toUTCString());
-        expect(sw.expired(response)).to.be.true;
-      });
-
-      it('expires now', () => {
-        response.headers.set('expires', new Date(Date.now()).toUTCString());
-        expect(sw.expired(response)).to.be.true;
-      });
-
-      it('expires in the future', () => {
-        response.headers.set('expires', new Date(Date.now() + 1000)
-            .toUTCString());
-        expect(sw.expired(response)).to.be.false;
-      });
-
-      it('is overridden by cache-control and date', () => {
-        response.headers.set('expires', new Date(Date.now() - 1000)
-            .toUTCString());
-        response.headers.set('date', new Date(Date.now()).toUTCString());
-        response.headers.set('cache-control', 'public, max-age=31536000');
-        expect(sw.expired(response)).to.be.false;
-      });
-    });
-
     describe('with no cache information', () => {
       it('is expired', () => {
         expect(sw.expired(response)).to.be.true;
