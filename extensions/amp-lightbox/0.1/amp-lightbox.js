@@ -32,6 +32,7 @@ const TAG = 'amp-lightbox';
 /** @const {string} */
 const A4A_PROTOTYPE_EXPERIMENT = 'amp-lightbox-a4a-proto';
 
+
 // TODO(alanorozco):
 //   Move this where it makes sense (possibly FriendlyIframeEmbed?)
 /**
@@ -75,6 +76,7 @@ function enterFrameFullOverlayMode(iframe, topLevelWindow) {
   }, {});
 }
 
+
 // TODO(alanorozco):
 //   Move this where it makes sense (possibly FriendlyIframeEmbed?)
 /**
@@ -102,6 +104,7 @@ function leaveFrameFullOverlayMode(iframe, topLevelWindow) {
     });
   });
 }
+
 
 class AmpLightbox extends AMP.BaseElement {
 

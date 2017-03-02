@@ -140,7 +140,7 @@ describe('Ad loader', () => {
           const meta = doc.createElement('meta');
           meta.setAttribute('name', 'amp-3p-iframe-src');
           meta.setAttribute('content', 'https://example.com/remote.html');
-          doc.head.append(meta);
+          doc.head.appendChild(meta);
           a4aRegistry['zort'] = () => true;
           ampAdElement.setAttribute('type', 'zort');
           const upgraded = new AmpAd(ampAdElement).upgradeCallback();
