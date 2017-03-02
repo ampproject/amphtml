@@ -19,7 +19,7 @@ import {createIframePromise} from '../../testing/iframe';
 
 describe('ad-helper', () => {
   describe('isAdPositionAllowed function', () => {
-    it('should allow position fixed element that is whitelisted element', () => {
+    it('should allow position fixed element that is whitelisted', () => {
       return createIframePromise().then(iframe => {
         const whitelistedElement = iframe.doc.createElement('amp-lightbox');
         whitelistedElement.style.position = 'fixed';
@@ -86,7 +86,8 @@ describe('ad-helper', () => {
         iframe.doc.body.appendChild(parentElement);
         parentElement.appendChild(childElement);
         childElement.appendChild(childChildElement);
-        expect(getAdContainer(childChildElement)).to.equal(childElement.tagName);
+        expect(getAdContainer(childChildElement)).to.equal(
+            childElement.tagName);
       });
     });
 
