@@ -15,7 +15,6 @@
  */
 
 import {dev} from '../../../src/log';
-import {getAdContainer} from '../../../src/ad-helper';
 
 const TAG = 'AmpAdUIHandler';
 
@@ -142,12 +141,6 @@ export class AmpAdUIHandler {
    * @private
    */
   displayNoContentUI_() {
-    if (getAdContainer(this.baseInstance_.element) == 'AMP-STICKY-AD') {
-      // Special case: force collapse sticky-ad if no content.
-      this.baseInstance_./*OK*/collapse();
-      this.state = AdDisplayState.LOADED_NO_CONTENT;
-      return;
-    }
     // The order here is collapse > user provided fallback > default fallback
     this.baseInstance_.attemptCollapse().then(() => {
       this.state = AdDisplayState.LOADED_NO_CONTENT;

@@ -18,6 +18,7 @@ import {
   getElementServiceForDoc,
   getElementServiceIfAvailableForDoc,
 } from './element-service';
+import {createElementWithAttributes} from './dom';
 
 
 /**
@@ -54,5 +55,30 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
       return;
     }
     analytics.triggerEvent(eventType, opt_vars);
+  });
+}
+
+/**
+ * Helper method to create analytics element for specific root.
+ * @param {BaseElement} baseInstance
+ * @param {!JSONType} config
+ */
+export function createAnalyticsForExtension(baseInstance, config) {
+  // Note: Require ampdoc include analytics script
+  analyticsForDocOrNull(baseInstance.element).then(analytics => {
+    if (!analytics) {
+      return;
+    }
+    // Create analytics element;
+    const analyticsElem =
+        baseInstance.win.document.createElement('amp-analytics');
+    const scriptElem = createElementWithAttributes(baseInstance.win.document,
+        'script', {
+          'type': 'application/json',
+        });
+    scriptElem.textContent = JSON.stringify(config);
+    analyticsElem.appendChild(scriptElem);
+    baseInstance.element.appendChild(analyticsElem);
+    // TODO: create analytics root to scope analytics in this specifc node.
   });
 }
