@@ -288,7 +288,9 @@ export class Messaging {
       delete this.waitingForResponse_[requestId];
       if (message.error) {
         this.logError_(TAG + ': handleResponse_ error: ', message.error);
-        pending.reject(new Error(message.error));
+        const errorMsg = 'Request "${' + message.name + '} failed: ${' +
+          message.error + '}';
+        pending.reject(new Error(errorMsg));
       } else {
         pending.resolve(message.data);
       }
