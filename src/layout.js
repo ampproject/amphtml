@@ -22,10 +22,6 @@
 import {dev, user} from './log';
 import {isFiniteNumber} from './types';
 import {setStyles} from './style';
-import {isExperimentOn} from './experiments';
-
-/** @const {string} */
-export const UX_EXPERIMENT = 'amp-ad-loading-ux';
 
 /**
  * @enum {string}
@@ -220,7 +216,7 @@ export function getLengthUnits(length) {
  */
 export function getLengthNumeral(length) {
   const res = parseFloat(length);
-  return !isFiniteNumber(res) ? undefined : res;
+  return isFiniteNumber(res) ? res : undefined;
 }
 
 
@@ -278,10 +274,7 @@ export function getNaturalDimensions(element) {
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
   if (tagName == 'AMP-AD' || tagName == 'AMP-EMBED') {
-    const win = element.ownerDocument.defaultView;
-    if (isExperimentOn(win, UX_EXPERIMENT)) {
-      return true;
-    }
+    return true;
   }
   return LOADING_ELEMENTS_[tagName] || false;
 }
