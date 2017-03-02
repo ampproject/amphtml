@@ -322,7 +322,10 @@ function diversions(cache) {
       return null;
     }
 
-    return diversions;
+    return diversions.filter(diversion => {
+      // Diversions cannot use the production environment.
+      return requestData(diversion).environment != BASE_RTV_VERSION;
+    });
   }, () => null);
 }
 
