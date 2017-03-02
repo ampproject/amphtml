@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Observable} from '../observable';
 import {fromClassForDoc} from '../service';
 import {isExperimentOn} from '../experiments';
 import {setStyles} from '../style';
@@ -35,9 +34,6 @@ export class ParallaxService {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @private @const {!Observable} */
-    this.parallaxObservable_ = new Observable();
-
     this.installParallaxHandlers_(ampdoc.win);
   }
 
@@ -79,8 +75,6 @@ export class ParallaxService {
       }
       element.update(viewport);
     });
-
-    this.fire_(viewport);
   }
 
   /**
@@ -90,35 +84,6 @@ export class ParallaxService {
    */
   transform_(position) {
     return `translate3d(0,${position.toFixed(2)}px,0)`;
-  }
-
-  /**
-   * Add listeners to parallax scroll events.
-   * @param {!function()} cb
-   * @private
-   * @visibleForTesting
-   */
-  addScrollListener_(cb) {
-    this.parallaxObservable_.add(cb);
-  }
-
-  /**
-   * Remove listeners from parallax scroll events.
-   * @param {!function()} cb
-   * @private
-   * @visibleForTesting
-   */
-  removeScrollListener_(cb) {
-    this.parallaxObservable_.remove(cb);
-  }
-
-  /**
-   * Alert listeners that a scroll has occurred.
-   * @param {number} scrollTop
-   * @private
-   */
-  fire_(scrollTop) {
-    this.parallaxObservable_.fire(scrollTop);
   }
 }
 
