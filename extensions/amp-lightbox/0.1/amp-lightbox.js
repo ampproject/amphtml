@@ -51,10 +51,10 @@ function enterFrameFullOverlayMode(iframe, topLevelWindow) {
 
   vsyncFor(topLevelWindow).run({
     measure: state => {
-      const iframeRect = iframe.getBoundingClientRect();
+      const iframeRect = iframe./*OK*/getBoundingClientRect();
 
-      const winWidth = topLevelWindow.innerWidth;
-      const winHeight = topLevelWindow.innerHeight;
+      const winWidth = topLevelWindow./*OK*/innerWidth;
+      const winHeight = topLevelWindow./*OK*/innerHeight;
 
       state.adBannerRootStyle = {
         'position': 'absolute',
