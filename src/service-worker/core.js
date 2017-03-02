@@ -273,7 +273,8 @@ export function fetchAndCache(cache, request) {
 
           // Did we receive a invalid response?
           if (!response.ok) {
-            throw new Error(`failed fetching ${url}`);
+            throw new Error(`fetching ${url} failed with statusCode ` +
+                `${response.status}.`);
           }
 
           // You must clone to prevent double reading the body.
