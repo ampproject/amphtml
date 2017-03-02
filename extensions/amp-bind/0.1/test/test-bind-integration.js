@@ -25,19 +25,21 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   let iframe;
   let ampdoc;
   let bind;
-  const fixture = 'test/fixtures/amp-bind-integrations.html';
+  const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
 
   this.timeout(5000);
 
   beforeEach(() => {
 
-    return createFixtureIframe(fixture).then(i => {
-      iframe = i;
-      toggleExperiment(iframe.win, 'amp-bind', true, true);
-      return iframe.awaitEvent('amp:load:start', 1);
+    return createFixtureIframe(fixtureLocation).then(f => {
+      fixture = f;
+      toggleExperiment(fixture, 'amp-bind', true, true);
+      return fixture.awaitEvent('amp:load:start', 1);
     }).then(() => {
-      const ampdocService = ampdocServiceFor(iframe.win);
-      ampdoc = ampdocService.getAmpDoc(iframe.doc);
+      const ampdocService = ampdocServiceFor(fixture.win);
+      ampdoc = ampdocService.getAmpDoc(fixture.doc);
+      // Bind is installed manually here to get around an issue
+      // toggling experiments on the iframe fixture.
       bind = installBindForTesting(ampdoc);
       return bind.initializePromiseForTesting();
     });
@@ -51,8 +53,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
   describe('text integration', () => {
     it('should update text when text attribute binding changes', () => {
-      const textElement = iframe.doc.getElementById('textElement');
-      const button = iframe.doc.getElementById('mutateTextButton');
+      const textElement = fixture.doc.getElementById('textElement');
+      const button = fixture.doc.getElementById('mutateTextButton');
       expect(textElement.textContent).to.equal('unbound');
       button.click();
       return waitForBindApplication().then(() => {
@@ -61,8 +63,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
 
     it('should update CSS class when class binding changes', () => {
-      const textElement = iframe.doc.getElementById('textElement');
-      const button = iframe.doc.getElementById('mutateTextButton');
+      const textElement = fixture.doc.getElementById('textElement');
+      const button = fixture.doc.getElementById('mutateTextButton');
       expect(textElement.className).to.equal('original');
       button.click();
       return waitForBindApplication().then(() => {
@@ -73,8 +75,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
   describe('amp-carousel integration', () => {
     it('should update dependent bindings on carousel slide changes', () => {
-      const slideNum = iframe.doc.getElementById('slideNum');
-      const carousel = iframe.doc.getElementById('carousel');
+      const slideNum = fixture.doc.getElementById('slideNum');
+      const carousel = fixture.doc.getElementById('carousel');
       const impl = carousel.implementation_;
       expect(slideNum.textContent).to.equal('0');
       impl.go(1, /* animate */ false);
@@ -84,8 +86,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
 
     it('should change slides when the slide attribute binding changes', () => {
-      const carousel = iframe.doc.getElementById('carousel');
-      const goToSlide1Button = iframe.doc.getElementById('goToSlide1Button');
+      const carousel = fixture.doc.getElementById('carousel');
+      const goToSlide1Button = fixture.doc.getElementById('goToSlide1Button');
       const impl = carousel.implementation_;
       // No previous slide as current slide is 0th side
       expect(impl.hasPrev()).to.be.false;
