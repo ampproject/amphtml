@@ -61,14 +61,38 @@
     .ballons {
       position: absolute;
       z-index: 1;
+      top: 0;
       bottom: 0;
       display: flex;
       flex-direction: row;
       width: 100%;
     }
 
-    .ballon img {
+    .ballon {
+      display: flex;
+      flex: 1;
+    }
+
+    .ballon.b1 amp-img {
+      transform: scale(0.85);
+    }
+
+    .ballon.b2 amp-img {
+      transform: scale(0.6);
+    }
+
+    .ballon.b3 amp-img {
+      transform: scale(1.1);
+    }
+
+    .ballon amp-img {
+      display: flex;
+      align-self: flex-end;
+    }
+
+    .ballon amp-img img {
       object-fit: contain;
+      object-position: bottom center;
     }
 
   </style>
@@ -102,9 +126,15 @@
       <div class="sky-scene">
         <amp-img width="1920" height="1280" layout="responsive" src="img/sky.jpg"></amp-img>
         <div class="ballons">
-          <amp-img amp-fx-parallax=1.3 class="ballon b1" width="13vw" height="13vw" layout="flex-item" src="img/ballon1.png"></amp-img>
-          <amp-img amp-fx-parallax=1.2 class="ballon b2" width="10vw" height="10vw" layout="flex-item" src="img/ballon3.png"></amp-img>
-          <amp-img amp-fx-parallax=1.5 class="ballon b3" width="20vw" height="20vw" layout="flex-item" src="img/ballon2.png"></amp-img>
+          <div class="ballon b1" amp-fx-parallax=1.3>
+            <amp-img layout="fill" src="img/ballon1.png"></amp-img>
+          </div>
+          <div class="ballon b2" amp-fx-parallax=1.15>
+            <amp-img layout="fill" src="img/ballon3.png"></amp-img>
+          </div>
+          <div class="ballon b3" amp-fx-parallax=1.5>
+            <amp-img layout="fill" src="img/ballon2.png"></amp-img>
+          </div>
         </div>
       </div>
       <p>

@@ -38,9 +38,6 @@ export class ParallaxService {
     /** @private @const {!Observable} */
     this.parallaxObservable_ = new Observable();
 
-    /** @private {number} */
-    this.previousScroll_ = 0;
-
     this.installParallaxHandlers_(ampdoc.win);
   }
 
@@ -63,6 +60,7 @@ export class ParallaxService {
         this.parallaxMutate_.bind(this, parallaxElements, viewport);
 
     viewport.onScroll(() => vsync.mutate(mutate));
+    viewport.onChanged(() => vsync.mutate(mutate));
     // initialize the elements with the current scroll position
     vsync.mutate(mutate);
   }
@@ -75,19 +73,14 @@ export class ParallaxService {
    * @private
    */
   parallaxMutate_(elements, viewport) {
-    const newScrollTop = viewport.getScrollTop();
-    const previousScrollTop = this.getPreviousScroll_();
-    const delta = previousScrollTop - newScrollTop;
-
     elements.forEach(element => {
       if (!element.shouldUpdate(viewport)) {
         return;
       }
-      element.update(delta);
+      element.update(viewport);
     });
 
-    this.setPreviousScroll_(newScrollTop);
-    this.fire_(newScrollTop);
+    this.fire_(viewport);
   }
 
   /**
@@ -97,24 +90,6 @@ export class ParallaxService {
    */
   transform_(position) {
     return `translate3d(0,${position.toFixed(2)}px,0)`;
-  }
-
-  /**
-   * Get the previous scroll value.
-   * @return {number}
-   * @private
-   */
-  getPreviousScroll_() {
-    return this.previousScroll_;
-  }
-
-  /**
-   * Set the previous scroll value.
-   * @param {number} scroll
-   * @private
-   */
-  setPreviousScroll_(scroll) {
-    this.previousScroll_ = scroll;
   }
 
   /**
@@ -169,16 +144,24 @@ export class ParallaxElement {
 
     /** @private {number} */
     this.offset_ = 0;
+
+    /** @private {number} */
+    this.previousScroll_ = 0;
   }
 
   /**
    * Apply the parallax effect to the offset given how much the page
    * has moved since the last frame.
-   * @param {number} delta The movement of the base layer e.g. the page.
+   * @param {!./viewport-impl.Viewport} viewport.
    */
-  update(delta) {
+  update(viewport) {
+    const newScrollTop = viewport.getScrollTop();
+    const previousScrollTop = this.getPreviousScroll_();
+    const delta = previousScrollTop - newScrollTop;
+
     this.offset_ += delta * this.factor_;
     setStyles(this.element_, {transform: this.transform_(this.offset_)});
+    this.setPreviousScroll_(newScrollTop);
   }
 
   /**
@@ -188,9 +171,7 @@ export class ParallaxElement {
    */
   shouldUpdate(viewport) {
     const viewportRect = viewport.getRect();
-    const elementRect = viewport.getLayoutRect(this.element_);
-    elementRect.top -= viewportRect.top;
-    elementRect.bottom = elementRect.top + elementRect.height;
+    const elementRect = this.element_/*OK*/.getBoundingClientRect();
     return this.isRectInView_(elementRect, viewportRect.height);
   }
 
@@ -202,6 +183,24 @@ export class ParallaxElement {
    */
   isRectInView_(rect, viewportHeight) {
     return rect.bottom >= 0 && rect.top <= viewportHeight;
+  }
+
+  /**
+   * Get the previous scroll value.
+   * @return {number}
+   * @private
+   */
+  getPreviousScroll_() {
+    return this.previousScroll_;
+  }
+
+  /**
+   * Set the previous scroll value.
+   * @param {number} scroll
+   * @private
+   */
+  setPreviousScroll_(scroll) {
+    this.previousScroll_ = scroll;
   }
 }
 
