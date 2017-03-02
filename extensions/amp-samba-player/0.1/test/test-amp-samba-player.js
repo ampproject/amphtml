@@ -50,7 +50,8 @@ describe('amp-samba-player', () => {
       // whether player exists
       expect(sbplayer).to.not.be.null;
       // whether player has a valid SambaTech platform URL
-      expect(getSambaPlayerIframe(sbplayer.implementation_.element)).to.not.be.null;
+      const url = sbplayer.querySelector('iframe').src;
+      expect(url && /(\/[0-9a-z]{32}){1,2}[\/\?]?/i.test(url)).to.be.true;
     });
   });
 
@@ -65,16 +66,8 @@ describe('amp-samba-player', () => {
       'data-media-id': '32e56bfe9b1602fea761a26af305325a',
       'data-param-enable-controls': false
     }).then(sbplayer => {
-      const iframe = getSambaPlayerIframe(sbplayer.implementation_.element);
-      expect(iframe.src.indexOf('enableControls=false') !== -1).to.be.true;
+      const url = sbplayer.querySelector('iframe').src;
+      expect(url.indexOf('enableControls=false') !== -1).to.be.true;
     });
   });
-
-  function getSambaPlayerIframe(parent) {
-    for (let v of parent.getElementsByTagName('iframe'))
-      if (v.src && /(\/[0-9a-z]{32}){1,2}[\/\?]?/i.test(v.src))
-        return v;
-
-    return null;
-  }
 });
