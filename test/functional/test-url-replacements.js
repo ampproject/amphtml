@@ -35,7 +35,6 @@ import {
 import {getService, fromClassForDoc} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
-import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
 import * as trackPromise from '../../src/impression';
 
@@ -987,7 +986,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
       win = getFakeWindow();
       win.location = parseUrl('https://example.com/base?foo=bar&bar=abc');
       urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
-      toggleExperiment(win, 'link-url-replace', true);
     });
 
     it('should replace href', () => {
@@ -1004,14 +1002,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(a.href).to.equal('https://example.com/link?out=bar');
       urlReplacements.maybeExpandLink(a);
       expect(a.href).to.equal('https://example.com/link?out=bar');
-    });
-
-    it('should not do anything with experiment off', () => {
-      toggleExperiment(win, 'link-url-replace', false);
-      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
-      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
-      expect(a.href).to.equal('https://example.com/link?out=QUERY_PARAM(foo)');
     });
 
     it('should replace href 2', () => {
