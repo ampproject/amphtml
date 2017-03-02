@@ -63,7 +63,8 @@ export class ParallaxService {
         this.parallaxMutate_.bind(this, parallaxElements, viewport);
 
     viewport.onScroll(() => vsync.mutate(mutate));
-    mutate(); // initialize the elements with the current scroll position
+    // initialize the elements with the current scroll position
+    vsync.mutate(mutate);
   }
 
   /**
@@ -83,9 +84,9 @@ export class ParallaxService {
         return;
       }
       element.update(delta);
-      this.setPreviousScroll_(newScrollTop);
     });
 
+    this.setPreviousScroll_(newScrollTop);
     this.fire_(newScrollTop);
   }
 
