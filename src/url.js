@@ -299,7 +299,7 @@ export function getFragment(url) {
   if (index == -1) {
     return '';
   }
-  return url.substring(index + 1);
+  return url.substring(index);
 }
 
 /**

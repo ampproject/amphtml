@@ -48,14 +48,14 @@ export function hasOwn(obj, key) {
 /**
  * Returns the value of the property referenced by dot-separated keys.
  * e.g.
- * `getPath('a.b[0].c', {a: {b: [{c: 2}]}}) === 2`
+ * `getPath({a: {b: [{c: 2}]}}, 'a.b[0].c') === 2`
  *
- * @param {string} path a dot-separated list of keys to reference a value
  * @param {T} obj a map-like value
+ * @param {string} path a dot-separated list of keys to reference a value
  * @return {*}
  * @template T
  */
-export function getPath(path, obj) {
+export function getPath(obj, path) {
   const arrayIndexRe = /\[(\d+)\]/g;
   const keys = path.replace(arrayIndexRe, '.$1').split('.');
   let value = obj;

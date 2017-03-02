@@ -66,9 +66,9 @@ export class AmpList extends AMP.BaseElement {
             opts.requireAmpResponseSourceOrigin = false;
           }
           const fetchPromise = cachedXhrFor(this.win).fetchJson(src, opts);
-          const fragment = getFragment(src);
+          const fragment = getFragment(src).slice(1);
           return fragment ?
-              fetchPromise.then(json => getPath(fragment, json)) :
+              fetchPromise.then(json => getPath(json, fragment)) :
               fetchPromise;
         }).then(data => {
           user().assert(data != null, 'Response is undefined %s', this.element);
