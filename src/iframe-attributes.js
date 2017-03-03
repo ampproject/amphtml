@@ -64,8 +64,7 @@ export function getContextMetadata(
     mode: getModeObject(),
     canary: isCanary(parentWindow),
     hidden: !viewer.isVisible(),
-    initialIntersection: element.getIntersectionChangeEntry ?
-        element.getIntersectionChangeEntry() : null,
+    initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
     experimentToggles: experimentToggles(parentWindow),
   };
