@@ -19,18 +19,18 @@ limitations under the License.
 ## How to get started
 
 Before you start developing in AMP, check out these resources:
-* [CONTRIBUTING.md](CONTRIBUTING.md) has details on various ways you can contribute to the AMP Project.
-  * If you're developing in AMP, you should read the [Contributing code](CONTRIBUTING.md#contributing-code) and [Contributing features](CONTRIBUTING.md#contributing-features) sections..
-  * The [Ongoing participation](CONTRIBUTING.md#ongoing-participation) section has details on various ways of getting in touch with others in the community including email and Slack.
-  * **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](CONTRIBUTING.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on. 
-* The [Getting Started Quick Start Guide](contributing/getting-started-quick.md) has installation steps and basic instructions for [one-time setup](contributing/getting-started-quick.md#one-time-setup), how to [build AMP & run a local server](contributing/getting-started-quick.md#build-amp--run-a-local-server) and how to [test AMP](contributing/getting-started-quick.md#test-amp). 
+* [CONTRIBUTING.md](../CONTRIBUTING.md) has details on various ways you can contribute to the AMP Project.
+  * If you're developing in AMP, you should read the [Contributing code](../CONTRIBUTING.md#contributing-code) and [Contributing features](../CONTRIBUTING.md#contributing-features) sections.
+  * The [Ongoing participation](../CONTRIBUTING.md#ongoing-participation) section has details on various ways of getting in touch with others in the community including email and Slack.
+  * **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](../CONTRIBUTING.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on. 
+* The [Getting Started Quick Start Guide](getting-started-quick.md) has installation steps and basic instructions for [one-time setup](getting-started-quick.md#one-time-setup), how to [build AMP & run a local server](getting-started-quick.md#build-amp--run-a-local-server) and how to [test AMP](getting-started-quick.md#test-amp). 
 
 
 ## Build & Test
 
-For most developers the instructions in the [Getting Started Quick Start Guide](contributing/getting-started-quick.md) will be sufficient for building/running/testing during development.  This section provides a more detailed reference.
+For most developers the instructions in the [Getting Started Quick Start Guide](getting-started-quick.md) will be sufficient for building/running/testing during development.  This section provides a more detailed reference.
 
-The Quick Start Guide's  [One-time setup](contributing/getting-started-quick.md#one-time-setup) has instructions for installing Node.js, Yarn, and Gulp which you'll need before running these commands.
+The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setup) has instructions for installing Node.js, Yarn, and Gulp which you'll need before running these commands.
 
 | Command                                                                 | Description                                                           |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
@@ -126,7 +126,7 @@ Additionally, the following query parameters can be provided:
 
 ### Chrome extension
 
-For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](testing/local-amp-chrome-extension/README.md).
+For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](../testing/local-amp-chrome-extension/README.md).
 
 ## Testing on Sauce Labs
 
@@ -203,6 +203,6 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 - [AMP Layout system](spec/amp-html-layout.md)
 - [Building an AMP Extension](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit#)
 
-We also recommend scanning the [spec](spec/). The non-element part should help understand some of the design aspects.
+We also recommend scanning the [spec](../spec/). The non-element part should help understand some of the design aspects.
 
-## [Code of conduct](CODE_OF_CONDUCT.md)
+## [Code of conduct](../CODE_OF_CONDUCT.md)
