@@ -534,8 +534,8 @@ function registerServiceInternal(holder, context, id, opt_factory, opt_ctor) {
     return;
   }
 
-  s.ctor = opt_ctor;
-  s.factory = opt_factory;
+  s.ctor = opt_ctor || null;
+  s.factory = opt_factory || null;
 }
 
 
