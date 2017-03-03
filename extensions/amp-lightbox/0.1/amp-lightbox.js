@@ -18,6 +18,7 @@ import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {childElementByTag} from '../../../src/dom.js';
 import {dev} from '../../../src/log';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {historyForDoc} from '../../../src/history';
@@ -33,6 +34,19 @@ const TAG = 'amp-lightbox';
 const A4A_PROTOTYPE_EXPERIMENT = 'amp-lightbox-a4a-proto';
 
 
+
+/**
+ * @param {!HTMLBodyElement} bodyElement
+ * @return {!Element}
+ */
+ // TODO(alanorozco):
+//   Move this where it makes sense (possibly FriendlyIframeEmbed?)
+function getAdBannerRoot(bodyElement) {
+  return dev().assertElement(childElementByTag(
+      /** @type {!Element} */ (bodyElement), 'amp-ad-banner'));
+}
+
+
 // TODO(alanorozco):
 //   Move this where it makes sense (possibly FriendlyIframeEmbed?)
 /**
@@ -45,9 +59,8 @@ function enterFrameFullOverlayMode(iframe, topLevelWindow) {
   // TODO(alanorozco): check for FriendlyIframeEmbed.win.document as iframeDoc
   //                   fallback.
   const iframeDoc = iframe.contentDocument;
-  const iframeBody = iframeDoc.body;
-  const adBannerRoot =
-      dev().assertElement(iframeBody.querySelector('amp-ad-banner'));
+  const iframeBody = /** @type {!HTMLBodyElement} */ (iframeDoc.body);
+  const adBannerRoot = getAdBannerRoot(iframeBody);
 
   vsyncFor(topLevelWindow).run({
     measure: state => {
@@ -86,9 +99,8 @@ function enterFrameFullOverlayMode(iframe, topLevelWindow) {
  */
 function leaveFrameFullOverlayMode(iframe, topLevelWindow) {
   const iframeDoc = iframe.contentDocument;
-  const iframeBody = iframeDoc.body;
-  const adBannerRoot =
-      dev().assertElement(iframeBody.querySelector('amp-ad-banner'));
+  const iframeBody = /** @type {!HTMLBodyElement} */ (iframeDoc.body);
+  const adBannerRoot = getAdBannerRoot(iframeBody);
 
   vsyncFor(topLevelWindow).mutate(() => {
     st.setStyles(adBannerRoot, {
