@@ -49,7 +49,7 @@ tags: {  # amp-nexxtv-player
       error_message: "contents"
     }
   }
-  spec_url: "/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
+  spec_url: "https://github.com/nexxtv/amphtml/blob/nexxtv-player/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
 }
 tags: {  # <amp-nexxtv-player>
   html_format: AMP
@@ -57,14 +57,14 @@ tags: {  # <amp-nexxtv-player>
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-nexxtv-player extension .js script"
   attrs: {
-    name: "data-mediaid"
-    mandatory: true
-    value_regex: "[^=/?:]+"
-  }
-  attrs: {
     name: "client"
     mandatory: true
   }
+  attrs: {
+      name: "data-mediaid"
+      mandatory: true
+      value_regex: "[^=/?:]+"
+    }
   attrs: {
     name: "mode"
     value_regex: "api|static"
@@ -86,7 +86,7 @@ tags: {  # <amp-nexxtv-player>
     value_regex: "album|audio|live|playlist|playlist-marked|video"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
+  spec_url: "https://github.com/nexxtv/amphtml/blob/nexxtv-player/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
