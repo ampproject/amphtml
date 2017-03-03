@@ -16,6 +16,7 @@
 
 import {computeInMasterFrame, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {cidForDocOrNull} from '../src/cid';
 
 /* global Navegg: false */
 
@@ -24,16 +25,20 @@ import {doubleclick} from '../ads/google/doubleclick';
  * @param {!Object} data
  */
 export function navegg(global, data) {
-    var acc = data.acc;
+    let acc = data.acc;
+    let ampPromise = Promise.resolve();
     delete(data.acc);
-    loadScript(global, 'https://tag.navdmp.com/amp.min.js', () => {
-        global['nvg'+acc] = new global['Navegg']({
-            acc: acc
+    loadScript(global, 'http://local.amp.com.br/amp.js', () => {
+        new global['AMPNavegg']({
+           acc: acc,
+        }).then(function(nvg_targeting){
+            console.log('nvg_targeting',nvg_targeting);
+            doubleclick(global, data);
         });
-    for(var x=0;x<global['nvg'+acc].seg.length; x++){
+/*    for(var x=0;x<global['nvg'+acc].seg.length; x++){
         var seg_name = global['nvg'+acc].seg[x];
         data.targeting[seg_name] = global['nvg'+acc].getSegment(seg_name);
-    }
+    }*/
     doubleclick(global, data);
   });
 }
