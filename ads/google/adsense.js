@@ -26,7 +26,7 @@ export function adsense(global, data) {
   // TODO: check mandatory fields
   validateData(data, [],
       ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
-        'ampSlotIndex']);
+       'ampSlotIndex', 'adChannel']);
 
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
@@ -41,6 +41,9 @@ export function adsense(global, data) {
 
   const i = global.document.createElement('ins');
   i.setAttribute('data-ad-client', data['adClient']);
+  if (data['adChannel']) {
+    i.setAttribute('data-ad-channel', data['adChannel']);
+  }
   if (data['adSlot']) {
     i.setAttribute('data-ad-slot', data['adSlot']);
   }
