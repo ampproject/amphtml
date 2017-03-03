@@ -35,7 +35,7 @@ export class CachedXhr extends Xhr {
   constructor(win, cacheSize) {
     super(win);
 
-    /** @const {!Cache} */
+    /** @const {!Cache<!Promise<!./xhr-impl.FetchResponse>>} */
     this.cache_ = new Cache(cacheSize);
   }
 
