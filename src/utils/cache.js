@@ -24,7 +24,7 @@ import {map} from './object';
 export class Cache {
   /**
    * Construct a new Cache with the given size
-   * @param size {number=}
+   * @param {number=} size
    */
   constructor(size) {
     /** @private @const {number} */
@@ -42,8 +42,8 @@ export class Cache {
    * If the cache is full, remove the least-recently-used entry.
    * If the item exists in the cache, move it to the most-recently-used end.
    *
-   * @param key {string}
-   * @param value {T}
+   * @param {string} key
+   * @param {T} value
    */
   put(key, value) {
     const index = this.queue_.indexOf(key);
@@ -61,7 +61,7 @@ export class Cache {
    * Update the priority of the requested item and then return it.
    * If the item does not exist, return undefined.
    *
-   * @param key {string}
+   * @param {string} key
    * @returns {T}
    */
   get(key) {
