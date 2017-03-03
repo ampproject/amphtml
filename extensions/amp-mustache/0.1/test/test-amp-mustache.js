@@ -40,7 +40,47 @@ describe('amp-mustache template', () => {
     expect(result./*OK*/innerHTML).to.equal('value = <a target="_top">abc</a>');
   });
 
+  it('should sanitize templated tag names', () => {
+    const templateElement = document.createElement('div');
+    templateElement./*OK*/innerHTML =
+        'value = <{{value}} href="javascript:alert(0)">abc</{{value}}>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: 'a',
+    });
+    expect(result./*OK*/innerHTML).to.not
+        .equal('<a href="javascript:alert(0)">abc</a>');
+    expect(result.firstElementChild).to.be.null;
+  });
+
   describe('Sanitizing data- attributes', () => {
+
+    it('should sanitize templated attribute names', () => {
+      const templateElement = document.createElement('div');
+      templateElement./*OK*/innerHTML =
+          'value = <a {{value}}="javascript:alert(0)">abc</a>';
+      let template = new AmpMustache(templateElement);
+      template.compileCallback();
+      let result = template.render({
+        value: 'href',
+      });
+      expect(result).to.not.equal('<a href="javascript:alert(0)">abc</a>');
+      expect(result.firstElementChild.getAttribute('href')).to.be.null;
+
+      templateElement./*OK*/innerHTML =
+          'value = <p [{{value}}]="javascript:alert()">ALERT</p>';
+      template = new AmpMustache(templateElement);
+      template.compileCallback();
+      result = template.render({
+        value: 'onclick',
+      });
+      expect(result).to.not
+          .equal('<p [onclick]="javascript:alert()">ALERT</p>');
+      expect(result.firstElementChild.getAttribute('[onclick]')).to.be.null;
+      expect(result.firstElementChild.getAttribute('onclick')).to.be.null;
+    });
+
     it('should parse data-&style=value output correctly', () => {
       const templateElement = document.createElement('div');
       templateElement./*OK*/innerHTML = 'value = <a href="{{value}}"' +

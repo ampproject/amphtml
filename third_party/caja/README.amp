@@ -9,3 +9,4 @@ Run compile.sh to generate a new version.
 Local Modifications:
 Export to ES6.
 Change unicode literal to unicode escaped character. (see https://github.com/google/caja/issues/1978)
+Change html attribute regex to optionally accept bracketed attribute names for amp-bind

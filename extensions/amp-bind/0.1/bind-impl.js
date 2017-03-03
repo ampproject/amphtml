@@ -28,6 +28,7 @@ import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
+import {timerFor} from '../../../src/timer';
 
 const TAG = 'amp-bind';
 
@@ -100,10 +101,15 @@ export class Bind {
     this.resources_ = resourcesForDoc(ampdoc);
 
     /**
-     * True if a digest is triggered before scan for bindings completes.
-     * @private {boolean}
+     * @const @private {!Array<Promise>}
      */
-    this.digestQueuedAfterScan_ = false;
+    this.mutationPromises_ = [];
+
+    /**
+     * @const @private {MutationObserver}
+     */
+    this.mutationObserver_ =
+        new MutationObserver(this.onMutationsObserved_.bind(this));
 
     /** @const @private {boolean} */
     this.workerExperimentEnabled_ = isExperimentOn(this.win_, 'web-worker');
@@ -282,7 +288,7 @@ export class Bind {
   /**
    * Scans `node` for attributes that conform to bind syntax and returns
    * a tuple containing bound elements and binding data for the evaluator.
-   * @param {!Element} node
+   * @param {!Node} node
    * @return {
    *   !Promise<{
    *     boundElements: !Array<BoundElementDef>,
@@ -307,11 +313,18 @@ export class Bind {
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
     const scanNextNode_ = () => {
-      const element = walker.nextNode();
-      if (!element) {
+      const node = walker.currentNode;
+      if (!node) {
         return true;
       }
+      // Walker is filtered to only return elements
+      const element = dev().assertElement(node);
       const tagName = element.tagName;
+      if (tagName === 'TEMPLATE') {
+        // Listen for changes in amp-mustache templates
+        this.observeElementForMutations_(element);
+      }
+
       const boundProperties = this.scanElement_(element);
       if (boundProperties.length > 0) {
         boundElements.push({element, boundProperties});
@@ -325,7 +338,7 @@ export class Bind {
         }
         expressionToElements[expressionString].push(element);
       });
-      return false;
+      return !walker.nextNode();
     };
 
     return new Promise(resolve => {
@@ -654,6 +667,61 @@ export class Bind {
   }
 
   /**
+   * Begin observing mutations to element. Presently, all supported elements
+   * that can add/remove bindings add new elements to their parent, so parent
+   * node should be observed for mutations.
+   * @private
+   */
+  observeElementForMutations_(element) {
+    // TODO(kmh287): What if parent is the body tag?
+    // TODO(kmh287): Generify logic for node observation strategy
+    // when bind supprots more dynamic nodes.
+    const elementToObserve = element.parentElement;
+    this.mutationObserver_.observe(elementToObserve, {childList: true});
+  }
+
+  /**
+   * Respond to observed mutations. Adds all bindings for newly added elements
+   * removes bindings for removed elements, then immediately applies the current
+   * scope to the new bindings.
+   *
+   * @param mutations {Array<MutationRecord>}
+   * @private
+   */
+  onMutationsObserved_(mutations) {
+    mutations.forEach(mutation => {
+      // Add bindings for new nodes first to ensure that a binding isn't removed
+      // and then subsequently re-added.
+      const addPromises = [];
+      const addedNodes = mutation.addedNodes;
+      for (let i = 0; i < addedNodes.length; i++) {
+        const addedNode = addedNodes[i];
+        if (addedNode.nodeType == Node.ELEMENT_NODE) {
+          const addedElement = dev().assertElement(addedNode);
+          addPromises.push(this.addBindingsForNode_(addedElement));
+        }
+      }
+      const mutationPromise = Promise.all(addPromises).then(() => {
+        const removePromises = [];
+        const removedNodes = mutation.removedNodes;
+        for (let i = 0; i < removedNodes.length; i++) {
+          const removedNode = removedNodes[i];
+          if (removedNode.nodeType == Node.ELEMENT_NODE) {
+            const removedElement = dev().assertElement(removedNode);
+            removePromises.push(this.removeBindingsForNode_(removedElement));
+          }
+        }
+        return Promise.all(removePromises);
+      }).then(() => {
+        return this.digest_();
+      });
+      if (getMode().test) {
+        this.mutationPromises_.push(mutationPromise);
+      }
+    });
+  }
+
+  /**
    * Returns true if both arrays contain the same strings.
    * @param {!(IArrayLike<string>|Array<string>)} a
    * @param {!(IArrayLike<string>|Array<string>)} b
@@ -723,4 +791,23 @@ export class Bind {
 
     return false;
   }
+
+  /**
+   * Wait for DOM mutation observer callbacks to fire. Returns a promise
+   * that resolves when mutation callbacks have fired.
+   *
+   * @return {Promise}
+   *
+   * @visibleForTesting
+   */
+  waitForAllMutationsForTesting() {
+    return timerFor(this.win_).poll(5, () => {
+      return this.mutationPromises_.length > 0;
+    }).then(() => {
+      return Promise.all(this.mutationPromises_);
+    }).then(() => {
+      this.mutationPromises_.length = 0;
+    });
+  }
+
 }
