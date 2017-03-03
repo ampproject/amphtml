@@ -215,6 +215,8 @@ export class Performance {
    * Ticks a timing event.
    *
    * @param {string} label The variable name as it will be reported.
+   *     See TICKEVENTS.md for available metrics, and edit this file
+   *     when adding a new metric.
    * @param {?string=} opt_from The label of a previous tick to use as a
    *    relative start for this tick.
    * @param {number=} opt_value The time to record the tick at. Optional, if

@@ -161,7 +161,7 @@ export class AmpForm {
     if (!this.shouldValidate_) {
       this.form_.setAttribute('amp-novalidate', '');
     }
-    this.form_.classList.add('-amp-form');
+    this.form_.classList.add('i-amphtml-form');
 
     const submitButtons = this.form_.querySelectorAll('[type="submit"]');
     /** @const @private {!Array<!Element>} */
@@ -721,7 +721,9 @@ function isDisabled_(element) {
 function installSubmissionHandlers(win) {
   onDocumentReady(win.document, doc => {
     toArray(doc.forms).forEach((form, index) => {
-      new AmpForm(form, `amp-form-${index}`);
+      if (!form.classList.contains('i-amphtml-form')) {
+        new AmpForm(form, `amp-form-${index}`);
+      }
     });
   });
 }
@@ -740,4 +742,15 @@ export function installAmpForm(win) {
   });
 }
 
+/**
+ * @param {!Window} win
+ * @private visible for testing.
+ */
+export function installGlobalEventListener(win) {
+  win.document.addEventListener('amp:dom-update', function() {
+    installSubmissionHandlers(win);
+  });
+}
+
 installAmpForm(AMP.win);
+installGlobalEventListener(AMP.win);

@@ -156,14 +156,14 @@ export class AmpSidebar extends AMP.BaseElement {
     }, true);
   }
 
- /**
-  * Returns true if the sidebar is opened.
-  * @returns {boolean}
-  * @private
-  */
- isOpen_() {
-   return this.element.hasAttribute('open');
- }
+  /**
+   * Returns true if the sidebar is opened.
+   * @returns {boolean}
+   * @private
+   */
+  isOpen_() {
+    return this.element.hasAttribute('open');
+  }
 
   /** @override */
   activate() {
@@ -191,7 +191,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.isOpen_()) {
       return;
     }
-    this.viewport_.disableTouchZoom();
+    this.viewport_.enterOverlayMode();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
       this.openMask_();
@@ -228,7 +228,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (!this.isOpen_()) {
       return;
     }
-    this.viewport_.restoreOriginalTouchZoom();
+    this.viewport_.leaveOverlayMode();
     this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
