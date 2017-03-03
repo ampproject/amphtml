@@ -36,6 +36,7 @@ import {urlReplacementsForDoc} from './url-replacements';
  */
 export function installGlobalClickListenerForDoc(ampdoc) {
   fromClassForDoc(ampdoc, 'clickhandler', ClickHandler);
+  fromClassForDoc(ampdoc, 'CaptureClickHandler', CaptureClickHandler);
 }
 
 
