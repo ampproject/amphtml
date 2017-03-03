@@ -17,7 +17,7 @@
 import {Cache} from '../../../src/utils/cache';
 
 
-describe('Cache', function() {
+describes.sandboxed('Cache', {}, function() {
   let cache;
 
   beforeEach(() => {
