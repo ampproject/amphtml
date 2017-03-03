@@ -20,7 +20,7 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
-import {chunk} from '../chunk';
+import {startupChunk} from '../chunk';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {installPerformanceService} from '../service/performance-impl';
 import {installPullToRefreshBlocker} from '../pull-to-refresh';
@@ -39,12 +39,12 @@ import {
 import {cssText} from '../../build/css';
 import {maybeValidate} from '../validator-integration';
 import {maybeTrackImpression} from '../impression';
-import {Inabox} from './inabox';
-import {isExperimentOn} from '../experiments';
+import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {installInaboxViewportService} from './inabox-viewport';
+import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
+import {getMode} from '../mode';
 
-if (isExperimentOn(self, 'amp-inabox')) {
-  new Inabox(self).init();
-}
+getMode(self).runtime = 'inabox';
 
 // TODO(lannka): only install the necessary services.
 
@@ -65,41 +65,48 @@ try {
   makeBodyVisible(self.document);
   throw e;
 }
-chunk(self.document, function initial() {
+startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
   /** @const {!../service/performance-impl.Performance} */
   const perf = installPerformanceService(self);
   perf.tick('is');
   installStyles(self.document, cssText, () => {
-    chunk(self.document, function services() {
+    startupChunk(self.document, function services() {
       // Core services.
       installRuntimeServices(self);
       fontStylesheetTimeout(self);
+
+      // Install inabox specific Viewport service before
+      // runtime tries to install the normal one.
+      installViewerServiceForDoc(ampdoc);
+      installInaboxViewportService(ampdoc);
+
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
       maybeTrackImpression(self);
     });
-    chunk(self.document, function builtins() {
+    startupChunk(self.document, function builtins() {
       // Builtins.
       installBuiltins(self);
     });
-    chunk(self.document, function adoptWindow() {
+    startupChunk(self.document, function adoptWindow() {
       adopt(self);
     });
-    chunk(self.document, function stub() {
+    startupChunk(self.document, function stub() {
       stubElements(self);
     });
-    chunk(self.document, function final() {
+    startupChunk(self.document, function final() {
       installPullToRefreshBlocker(self);
       installGlobalClickListenerForDoc(ampdoc);
+      installAnchorClickInterceptor(ampdoc, self);
 
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
       installCacheServiceWorker(self);
     });
-    chunk(self.document, function finalTick() {
+    startupChunk(self.document, function finalTick() {
       perf.tick('e_is');
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.

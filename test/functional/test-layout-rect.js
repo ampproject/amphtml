@@ -109,3 +109,84 @@ describe('LayoutRect', () => {
     expect(lr.rectIntersection(rect1, rect2, rect3, rect4)).to.be.null;
   });
 });
+
+describe('areMarginsChanged', () => {
+  it('should find margins are not changed when values the same', () => {
+    const margins = {
+      top: 1,
+      right: 2,
+      bottom: 3,
+      left: 4,
+    };
+    const changes = {
+      top: 1,
+      right: 2,
+      bottom: 3,
+      left: 4,
+    };
+    expect(lr.areMarginsChanged(margins, changes)).to.be.false;
+  });
+
+  it('should find margins are not changed when all changes undefined', () => {
+    const margins = {
+      top: 1,
+      right: 2,
+      bottom: 3,
+      left: 4,
+    };
+    const changes = {};
+    expect(lr.areMarginsChanged(margins, changes)).to.be.false;
+  });
+
+  it('should find margins to be changed when top different', () => {
+    const margins = {
+      top: 1,
+      right: 2,
+      bottom: 3,
+      left: 4,
+    };
+    const changes = {
+      top: 5,
+    };
+    expect(lr.areMarginsChanged(margins, changes)).to.be.true;
+  });
+
+  it('should find margins to be changed when right different', () => {
+    const margins = {
+      top: 1,
+      right: 2,
+      bottom: 3,
+      left: 4,
+    };
+    const changes = {
+      right: 5,
+    };
+    expect(lr.areMarginsChanged(margins, changes)).to.be.true;
+  });
+
+  it('should find margins to be changed when bottom different', () => {
+    const margins = {
+      top: 1,
+      right: 2,
+      bottom: 3,
+      left: 4,
+    };
+    const changes = {
+      bottom: 5,
+    };
+    expect(lr.areMarginsChanged(margins, changes)).to.be.true;
+  });
+
+  it('should find margins to be changed when left different', () => {
+    const margins = {
+      top: 1,
+      right: 2,
+      bottom: 3,
+      left: 4,
+    };
+    const changes = {
+      left: 5,
+    };
+    expect(lr.areMarginsChanged(margins, changes)).to.be.true;
+  });
+});

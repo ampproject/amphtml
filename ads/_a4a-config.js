@@ -25,8 +25,16 @@ import {
   fakeIsA4AEnabled,
 } from
 '../extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config';
+import {
+  tripleliftIsA4AEnabled,
+} from
+'../extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config';
+import {
+  cloudflareIsA4AEnabled,
+} from
+'../extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config';
 import {getMode} from '../src/mode';
-import {map} from '../src/types';
+import {map} from '../src/utils/object';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
@@ -44,6 +52,8 @@ import {map} from '../src/types';
 export const a4aRegistry = map({
   'adsense': adsenseIsA4AEnabled,
   'doubleclick': doubleclickIsA4AEnabled,
+  'triplelift': tripleliftIsA4AEnabled,
+  'cloudflare': cloudflareIsA4AEnabled,
   // TODO: Add new ad network implementation "is enabled" functions here.  Note:
   // if you add a function here that requires a new "import", above, you'll
   // probably also need to add a whitelist exception to
@@ -66,4 +76,6 @@ if (getMode().localDev || getMode().test) {
 export const signingServerURLs = {
   'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
   'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
+  'cloudflare': 'https://amp.cloudflare.com/amp-ad-verifying-keyset.json',
+  'cloudflare-dev': 'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
 };

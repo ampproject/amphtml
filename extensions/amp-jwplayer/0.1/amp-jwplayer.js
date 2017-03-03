@@ -89,13 +89,6 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  unlayoutOnPause() {
-    // TODO(aghassemi, #6483): Temporarily unlayout on pause until JWPlayer
-    // fixes the "pause" behaviour as described in bug #6483.
-    return true;
-  }
-
-  /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);

@@ -25,6 +25,7 @@ import {parseUrl, resolveRelativeUrl} from '../src/url';
  *   location: (string|undefined),
  *   navigator: ({userAgent:(string|undefined)}|undefined),
  *   readyState: (boolean|undefined),
+ *   top: (FakeWindowSpec|undefined),
  * }}
  */
 export let FakeWindowSpec;
@@ -49,7 +50,25 @@ export class FakeWindow {
     /** @const */
     this.HTMLElement = window.HTMLElement;
     /** @const */
+    this.HTMLFormElement = window.HTMLFormElement;
+    /** @const */
+    this.Element = window.Element;
+    /** @const */
+    this.Node = window.Node;
+    /** @const */
+    this.EventTarget = window.EventTarget;
+    /** @const */
     this.DOMTokenList = window.DOMTokenList;
+    /** @const */
+    this.Math = window.Math;
+
+    // Parent Window points to itself if spec.parent was not passed.
+    /** @const @type {!Window} */
+    this.parent = spec.parent ? new FakeWindow(spec.parent) : this;
+
+    // Top Window points to parent if spec.top was not passed.
+    /** @const */
+    this.top = spec.top ? new FakeWindow(spec.top) : this.parent;
 
     // Events.
     EventListeners.intercept(this);
@@ -59,6 +78,9 @@ export class FakeWindow {
     this.document = self.document.implementation.createHTMLDocument('');
     Object.defineProperty(this.document, 'defaultView', {
       get: () => this,
+    });
+    Object.defineProperty(this.document, 'readyState', {
+      get: () => this.readyState,
     });
 
     EventListeners.intercept(this.document);
@@ -310,7 +332,7 @@ export function interceptEventListeners(target) {
 /**
  * @extends {!Location}
  */
-class FakeLocation {
+export class FakeLocation {
 
   /**
    * @param {string} href

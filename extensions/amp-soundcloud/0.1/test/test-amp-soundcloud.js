@@ -65,7 +65,7 @@ describe('amp-soundcloud', () => {
 
   it('renders fixed-height', () => {
     return getIns('243169232', {layout: 'fixed-height'}).then(ins => {
-      expect(ins.className).to.match(/amp-layout-fixed-height/);
+      expect(ins.className).to.match(/i-amphtml-layout-fixed-height/);
     });
   });
 

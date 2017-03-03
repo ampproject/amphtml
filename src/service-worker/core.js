@@ -77,7 +77,7 @@ const referrersLastRequestTime = Object.create(null);
 
 /**
  * A regex that matches every CDN JS URL we care to cache.
- * The "experiments" JS is explicitly disallowed.
+ * The "experiments" and "validator" JS is explicitly disallowed.
  *
  * The RTV will be the first capture group, if it is present.
  * The pathname will be the second capture group.
@@ -90,6 +90,7 @@ const referrersLastRequestTime = Object.create(null);
  *
  * Unmatched URLS include:
  *  - https://cdn.ampproject.org/v0/experiments.js
+ *  - https://cdn.ampproject.org/v0/validator.js
  */
 const CDN_JS_REGEX = new RegExp(
     // Require the CDN URL origin at the beginning.
@@ -99,8 +100,8 @@ const CDN_JS_REGEX = new RegExp(
     // Require text "/v0"
     `(/v0` +
       // Allow, but don't require, an extension under the v0 directory.
-      // We explicitly forbid the `experiments` "extension".
-      `(?:/(?!experiments).+)?` +
+      // We explicitly forbid the `experiments` and `validator` "extension".
+      `(?:/(?!experiments|validator).+)?` +
     // Require text ".js" at the end.
     `\\.js)$`);
 
@@ -142,9 +143,8 @@ export function urlWithVersion(url, version) {
   if (currentVersion) {
     return url.replace(currentVersion, version);
   }
-  const location = new URL(url);
-  location.pathname = `/rtv/${version}${location.pathname}`;
-  return location.href;
+  const oldPath = pathname(url);
+  return url.replace(oldPath, `/rtv/${version}${oldPath}`);
 }
 
 /**
@@ -162,7 +162,18 @@ function normalizedRequest(request, version) {
     return request;
   }
 
-  return new Request(urlWithVersion(url, version), request);
+  return new Request(urlWithVersion(url, version), {
+    // For Foreign Fetch, constructing a request using an origin that does
+    // not match the SW's is mutinous.
+    referer: `${urls.cdn}/sw.js`,
+    headers: request.headers,
+    method: request.method,
+    mode: request.mode,
+    credentials: request.credentials,
+    cache: request.cache,
+    redirect: request.redirect,
+    integrity: request.integrity,
+  });
 }
 
 /**

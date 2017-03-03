@@ -17,7 +17,8 @@ tags: {  # <script custom-element="amp-sticky-ad">
   html_format: AMP  # Ads are not allowed inside ads.
   tag_name: "SCRIPT"
   spec_name: "amp-app-banner extension .js script"
-  also_requires_tag: "amp-app-banner"
+  satisfies: "amp-app-banner extension .js script"
+  requires: "amp-app-banner"
   mandatory_parent: "HEAD"
   unique_warning: true
   attrs: {
@@ -31,6 +32,7 @@ tags: {  # <script custom-element="amp-sticky-ad">
     value: "amp-app-banner"
     dispatch_key: true
   }
+  attrs: { name: "nonce" }
   attrs: {
     name: "src"
     mandatory: true
@@ -52,16 +54,19 @@ tags: {  # <amp-app-banner>
   html_format: AMP
   tag_name: "AMP-APP-BANNER"
   spec_name: "amp-app-banner"
+  satisfies: "amp-app-banner"
   mandatory_parent: "BODY"
-
   requires: "amp-app-banner data source"
-  also_requires_tag: "amp-app-banner extension .js script"
+  requires: "amp-app-banner extension .js script"
   # The "amp-app-banner button[open-button]" tag is in
   # validator-main.protoascii and in turn has an "AMP-APP-BANNER"
   # mandatory_parent.
-  also_requires_tag: "amp-app-banner button[open-button]"
+  requires: "amp-app-banner button[open-button]"
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
-  attrs: { name: "id" mandatory: true }
   unique: true
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-add-banner.html"
   amp_layout: {

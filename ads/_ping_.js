@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {validateData} from '../3p/3p';
 import {dev} from '../src/log';
 
 /**
@@ -21,12 +22,18 @@ import {dev} from '../src/log';
  * @param {!Object} data
  */
 export function _ping_(global, data) {
+  validateData(data, [], ['valid', 'adHeight', 'adWidth', 'enableIo', 'url']);
   global.document.getElementById('c').textContent = data.ping;
-  if (!data.nativeIntersectionObserver) {
-    function nullIO() {};
-    nullIO.prototype = Object.create(null);
-    global.IntersectionObserver = nullIO;
-  }
+  global.ping = Object.create(null);
+
+  global.context.onResizeSuccess(() => {
+    global.ping.resizeSuccess = true;
+  });
+
+  global.context.onResizeDenied(() => {
+    global.ping.resizeSuccess = false;
+  });
+
   if (data.ad_container) {
     dev().assert(
         global.context.container == data.ad_container, 'wrong container');
@@ -35,6 +42,8 @@ export function _ping_(global, data) {
     const img = document.createElement('img');
     if (data.url) {
       img.setAttribute('src', data.url);
+      img.setAttribute('width', data.width);
+      img.setAttribute('height', data.height);
     }
     let width, height;
     if (data.adHeight) {
@@ -51,18 +60,19 @@ export function _ping_(global, data) {
     } else {
       global.context.renderStart();
     }
-    const unlisten = global.context.observeIntersection(function(changes) {
-      changes.forEach(function(c) {
-        dev().info('AMP-AD', 'Intersection: (WxH)' +
-            `${c.intersectionRect.width}x${c.intersectionRect.height}`);
+    if (data.enableIo) {
+      global.context.observeIntersection(function(changes) {
+        changes.forEach(function(c) {
+          dev().info('AMP-AD', 'Intersection: (WxH)' +
+              `${c.intersectionRect.width}x${c.intersectionRect.height}`);
+        });
+        // store changes to global.lastIO for testing purpose
+        global.ping.lastIO = changes[changes.length - 1];
       });
-    });
-    if (data.unlistenIo) {
-      global.setTimeout(() => {
-        unlisten();
-      }, Number(data.unlistenIo));
     }
   } else {
-    global.context.noContentAvailable();
+    global.setTimeout(() => {
+      global.context.noContentAvailable();
+    }, 1000);
   }
 }

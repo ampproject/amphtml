@@ -22,9 +22,9 @@ import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
 } from '../../src/custom-element';
-import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
-import {installCryptoService,} from
-    '../../extensions/amp-analytics/0.1/crypto-impl';
+import {installCidServiceForDocForTesting,} from
+    '../../extensions/amp-analytics/0.1/cid-impl';
+import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
@@ -67,7 +67,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       if (opt_options) {
         if (opt_options.withCid) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
-          installCidService(iframe.win);
+          installCidServiceForDocForTesting(iframe.ampdoc);
           installCryptoService(iframe.win);
         }
         if (opt_options.withActivity) {
@@ -119,7 +119,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
       },
       document: {
         nodeType: /* document */ 9,
-        querySelector: () => {return {href: canonical};},
+        querySelector: selector => {
+          if (selector.startsWith('meta')) {
+            return {
+              getAttribute: () => {return 'https://whitelisted.com https://greylisted.com';},
+              hasAttribute: () => {return true;},
+            };
+          } else {
+            return {href: canonical};
+          }
+        },
         cookie: '',
       },
       Math: window.Math,
@@ -446,7 +455,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const validMetric = urlReplacements.expandAsync('?sh=PAGE_LOAD_TIME&s');
       urlReplacements.ampdoc.win.performance.timing.loadEventStart = 109;
       win.document.readyState = 'complete';
-      eventListeners['readystatechange']();
+      loadObservable.fire({type: 'load'});
       return validMetric.then(res => {
         expect(res).to.match(/sh=9&s/);
       });
@@ -942,7 +951,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .once();
       return expandAsync('?a=ACCESS_READER_ID') .then(res => {
         expect(res).to.match(/a=reader1/);
-        expect(userErrorStub.callCount).to.equal(0);
+        expect(userErrorStub).to.have.not.been.called;
       });
     });
 
@@ -953,7 +962,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .once();
       return expandAsync('?a=AUTHDATA(field1)').then(res => {
         expect(res).to.match(/a=value1/);
-        expect(userErrorStub.callCount).to.equal(0);
+        expect(userErrorStub).to.have.not.been.called;
       });
     });
 
@@ -963,7 +972,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       return expandAsync('?a=ACCESS_READER_ID;', /* disabled */ true)
           .then(res => {
             expect(res).to.match(/a=;/);
-            expect(userErrorStub.callCount).to.equal(1);
+            expect(userErrorStub).to.be.calledOnce;
           });
     });
   });
@@ -1040,11 +1049,26 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(a.href).to.equal('https://example.com/link?out=RANDOM');
     });
 
+    it('should not replace in http (non-secure)', () => {
+      canonical = 'http://example.com/link';
+      a.href = 'http://example.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('http://example.com/link?out=QUERY_PARAM(foo)');
+    });
+
     it('should replace with canonical origin', () => {
       a.href = 'https://canonical.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
       urlReplacements.maybeExpandLink(a);
       expect(a.href).to.equal('https://canonical.com/link?out=bar');
+    });
+
+    it('should replace with whitelisted origin', () => {
+      a.href = 'https://whitelisted.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://whitelisted.com/link?out=bar');
     });
 
     it('should not replace to different origin', () => {
@@ -1056,8 +1080,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
 
     it('should replace CID', () => {
-      a.href = 'https://canonical.com/link?out=QUERY_PARAM(foo)&c=CLIENT_ID(abc)';
-      a.setAttribute('data-amp-replace', 'QUERY_PARAM,CLIENT_ID');
+      a.href = 'https://canonical.com/link?' +
+          'out=QUERY_PARAM(foo)&c=CLIENT_ID(abc)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM CLIENT_ID');
       // No replacement without previous async replacement
       urlReplacements.maybeExpandLink(a);
       expect(a.href).to.equal(
@@ -1095,6 +1120,81 @@ describes.sandboxed('UrlReplacements', {}, () => {
             'RANDOM': Promise.resolve('abc'),
           }).then(expanded => {
             expect(expanded).to.equal('abc:X:Y');
+          });
+    });
+  });
+
+  describe('Expanding Input Value', () => {
+    it('should fail for non-inputs', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const input = document.createElement('textarea');
+      input.value = 'RANDOM';
+      input.setAttribute('data-amp-replace', 'RANDOM');
+      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+          /Input value expansion only works on hidden input fields/);
+      expect(input.value).to.equal('RANDOM');
+    });
+
+    it('should fail for non-hidden inputs', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const input = document.createElement('input');
+      input.value = 'RANDOM';
+      input.setAttribute('data-amp-replace', 'RANDOM');
+      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+          /Input value expansion only works on hidden input fields/);
+      expect(input.value).to.equal('RANDOM');
+    });
+
+    it('should not replace not whitelisted vars', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const input = document.createElement('input');
+      input.value = 'RANDOM';
+      input.type = 'hidden';
+      input.setAttribute('data-amp-replace', 'CANONICAL_URL');
+      let expandedValue = urlReplacements.expandInputValueSync(input);
+      expect(expandedValue).to.equal('RANDOM');
+      input.setAttribute('data-amp-replace', 'CANONICAL_URL RANDOM');
+      expandedValue = urlReplacements.expandInputValueSync(input);
+      expect(expandedValue).to.match(/(\d+(\.\d+)?)/);
+      expect(input.value).to.match(/(\d+(\.\d+)?)/);
+      expect(input['amp-original-value']).to.equal('RANDOM');
+    });
+
+    it('should replace input value with var subs - sync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const input = document.createElement('input');
+      input.value = 'RANDOM';
+      input.type = 'hidden';
+      input.setAttribute('data-amp-replace', 'RANDOM');
+      let expandedValue = urlReplacements.expandInputValueSync(input);
+      expect(expandedValue).to.match(/(\d+(\.\d+)?)/);
+
+      input['amp-original-value'] = 'RANDOM://example.com/RANDOM';
+      expandedValue = urlReplacements.expandInputValueSync(input);
+      expect(expandedValue).to.match(
+          /(\d+(\.\d+)?):\/\/example\.com\/(\d+(\.\d+)?)$/);
+      expect(input.value).to.match(
+          /(\d+(\.\d+)?):\/\/example\.com\/(\d+(\.\d+)?)$/);
+      expect(input['amp-original-value']).to.equal(
+          'RANDOM://example.com/RANDOM');
+    });
+
+    it('should replace input value with var subs - sync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const input = document.createElement('input');
+      input.value = 'RANDOM';
+      input.type = 'hidden';
+      input.setAttribute('data-amp-replace', 'RANDOM');
+      return urlReplacements.expandInputValueAsync(input)
+          .then(expandedValue => {
+            expect(input['amp-original-value']).to.equal('RANDOM');
+            expect(input.value).to.match(/(\d+(\.\d+)?)/);
+            expect(expandedValue).to.match(/(\d+(\.\d+)?)/);
           });
     });
   });

@@ -16,6 +16,8 @@
 
 import {parseUrl, serializeQueryString} from '../../../../src/url';
 
+const APP = '__AMPHTML__';
+
 /**
  * @fileoverview This is a Viewer file that communicates with ampdocs. It is
  * used for testing of the ampdoc-viewer messaging protocol for the
@@ -80,7 +82,7 @@ export class ViewerForTesting {
       height: this.containerEl./*OK*/offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
-      viewerorigin: parseUrl(window.location.href).origin,
+      origin: parseUrl(window.location.href).origin,
       csi: 1,
       cap: 'foo,a2a',
     };
@@ -100,21 +102,32 @@ export class ViewerForTesting {
     // a notification that a document was loaded.
     window.addEventListener('message', e => {
       this.log('message received', e, e.data);
+      const target = this.iframe.contentWindow;
+      const targetOrigin = this.frameOrigin_;
       // IMPORTANT: There could be many windows with the same origin!
       // IMPORTANT: Event.source might not be available in all browsers!?
-      if (e.origin != this.frameOrigin_ ||
-          e.source != this.iframe.contentWindow) {
+      if (e.origin != targetOrigin ||
+          e.source != target ||
+          e.data.app != APP) {
         this.log('This message is not for us: ', e);
         return;
       }
-      if (e.data == 'amp-handshake-request' &&
+      if (e.data.name == 'channelOpen' &&
           this.handshakeReceivedResolve_) {
-        // SEND CONFIRMATION!?
+        // Send handshake confirmation.
+        const message = {
+          app: APP,
+          requestid: event.data.requestid,
+          data: {},
+          type: 's',
+        };
+        target./*OK*/postMessage(message, targetOrigin);
+
         this.log('handshake request received!');
         this.handshakeReceivedResolve_();
         this.handshakeReceivedResolve_ = null;
       }
-      if (e.data.type == 'documentLoaded') {
+      if (e.data.name == 'documentLoaded') {
         this.log('documentLoaded!');
         this.documentLoadedResolve_();
       }
@@ -143,18 +156,16 @@ export class ViewerForTesting {
   }
 
   /**
-   * I'm sending Bob a new outgoing request.
-   * @param {string} eventType
-   * @param {*} data
-   * @param {boolean} awaitResponse
-   * @return {!Promise<*>|undefined}
+   * This is only used for a unit test.
    */
-  sendRequest_(type, data, awaitResponse) {
-    this.log('here @ Viewer.prototype.sendRequest_');
-    if (!this.messaging_) {
-      return;
-    }
-    return this.messaging_.sendRequest(type, data, awaitResponse);
+  hasCapability() {
+    return false;
+  }
+
+  /**
+   * This is only used for a unit test.
+   */
+  setMessageDeliverer() {
   }
 
   log() {

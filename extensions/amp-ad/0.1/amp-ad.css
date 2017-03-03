@@ -24,7 +24,25 @@ amp-ad iframe {
   padding: 0 !important;
 }
 
-.amp-ad-default-fallback {
-  /* TODO(zhouyx): Confirm on the background-color value */
-  background-color: #d3d3d3;
+.-amp-ad-default-holder {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(200, 200, 200, 0.5);
+}
+
+.-amp-ad-default-holder:after {
+  content: "Ad";
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 2px;
+  color: #fff;
+  font-size: 16px;
+  line-height: 16px;
+  font-family: Arial, sans-serif;
+  padding: 2px 4px;
 }

@@ -159,8 +159,8 @@ describe('Layout', () => {
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div.style.display).to.equal('none');
-    expect(div).to.have.class('-amp-layout-nodisplay');
-    expect(div).to.not.have.class('-amp-layout-size-defined');
+    expect(div).to.have.class('i-amphtml-layout-nodisplay');
+    expect(div).to.not.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(0);
   });
 
@@ -172,8 +172,8 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.FIXED);
     expect(div.style.width).to.equal('100px');
     expect(div.style.height).to.equal('200px');
-    expect(div).to.have.class('-amp-layout-fixed');
-    expect(div).to.have.class('-amp-layout-size-defined');
+    expect(div).to.have.class('i-amphtml-layout-fixed');
+    expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(0);
   });
 
@@ -198,8 +198,8 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.FIXED_HEIGHT);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('200px');
-    expect(div).to.have.class('-amp-layout-fixed-height');
-    expect(div).to.have.class('-amp-layout-size-defined');
+    expect(div).to.have.class('i-amphtml-layout-fixed-height');
+    expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(0);
   });
 
@@ -210,8 +210,8 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.FIXED_HEIGHT);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('200px');
-    expect(div).to.have.class('-amp-layout-fixed-height');
-    expect(div).to.have.class('-amp-layout-size-defined');
+    expect(div).to.have.class('i-amphtml-layout-fixed-height');
+    expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(0);
   });
 
@@ -253,10 +253,10 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
-    expect(div).to.have.class('-amp-layout-responsive');
-    expect(div).to.have.class('-amp-layout-size-defined');
+    expect(div).to.have.class('i-amphtml-layout-responsive');
+    expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
-    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amp-sizer');
+    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
     expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
@@ -267,10 +267,10 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
-    expect(div).to.have.class('-amp-layout-responsive');
-    expect(div).to.have.class('-amp-layout-size-defined');
+    expect(div).to.have.class('i-amphtml-layout-responsive');
+    expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
-    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amp-sizer');
+    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
     expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
@@ -279,8 +279,8 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.FILL);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
-    expect(div).to.have.class('-amp-layout-fill');
-    expect(div).to.have.class('-amp-layout-size-defined');
+    expect(div).to.have.class('i-amphtml-layout-fill');
+    expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(0);
   });
 
@@ -289,8 +289,8 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.CONTAINER);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
-    expect(div).to.have.class('-amp-layout-container');
-    expect(div).to.not.have.class('-amp-layout-size-defined');
+    expect(div).to.have.class('i-amphtml-layout-container');
+    expect(div).to.not.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(0);
   });
 
@@ -301,8 +301,8 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.FLEX_ITEM);
     expect(div.style.width).to.equal('100px');
     expect(div.style.height).to.equal('200px');
-    expect(div).to.have.class('-amp-layout-flex-item');
-    expect(div).to.have.class('-amp-layout-size-defined');
+    expect(div).to.have.class('i-amphtml-layout-flex-item');
+    expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(0);
   });
 
@@ -317,8 +317,8 @@ describe('Layout', () => {
   it('should configure natural dimensions; default layout', () => {
     const pixel = document.createElement('amp-pixel');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
-    expect(pixel.style.width).to.equal('1px');
-    expect(pixel.style.height).to.equal('1px');
+    expect(pixel.style.width).to.equal('0px');
+    expect(pixel.style.height).to.equal('0px');
   });
 
   it('should configure natural dimensions; default layout; with width', () => {
@@ -326,14 +326,14 @@ describe('Layout', () => {
     pixel.setAttribute('width', '11');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
     expect(pixel.style.width).to.equal('11px');
-    expect(pixel.style.height).to.equal('1px');
+    expect(pixel.style.height).to.equal('0px');
   });
 
   it('should configure natural dimensions; default layout; with height', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('height', '11');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
-    expect(pixel.style.width).to.equal('1px');
+    expect(pixel.style.width).to.equal('0px');
     expect(pixel.style.height).to.equal('11px');
   });
 
@@ -341,15 +341,15 @@ describe('Layout', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('layout', 'fixed');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
-    expect(pixel.style.width).to.equal('1px');
-    expect(pixel.style.height).to.equal('1px');
+    expect(pixel.style.width).to.equal('0px');
+    expect(pixel.style.height).to.equal('0px');
   });
 
   it('should configure natural dimensions; layout=fixed-height', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('layout', 'fixed-height');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED_HEIGHT);
-    expect(pixel.style.height).to.equal('1px');
+    expect(pixel.style.height).to.equal('0px');
     expect(pixel.style.width).to.equal('');
   });
 
@@ -381,5 +381,49 @@ describe('Layout', () => {
     expect(() => {
       applyLayout_(pixel);
     }).to.throw(/Invalid height value/);
+  });
+
+  it('should trust server layout', () => {
+    div.setAttribute('i-amphtml-layout', 'flex-item');
+    div.setAttribute('layout', 'responsive');
+    div.setAttribute('width', 'invalid');
+    div.setAttribute('height', 'invalid');
+    div.className = 'other';
+    div.style.width = '111px';
+    div.style.height = '112px';
+    expect(applyLayout_(div)).to.equal(Layout.FLEX_ITEM);
+    // No other attributes are read or changed.
+    expect(div.style.width).to.equal('111px');
+    expect(div.style.height).to.equal('112px');
+    expect(div.className).to.equal('other');
+    expect(div.style.display).to.equal('');
+    expect(div.children.length).to.equal(0);
+  });
+
+  it('should read sizer for responsive layout', () => {
+    div.setAttribute('i-amphtml-layout', 'responsive');
+    const sizer = document.createElement('i-amphtml-sizer');
+    div.appendChild(sizer);
+    expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
+    expect(div.sizerElement_).to.equal(sizer);
+  });
+
+  it('should allow sizer to be missing', () => {
+    div.setAttribute('i-amphtml-layout', 'responsive');
+    expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
+    expect(div.sizerElement_).to.be.undefined;
+  });
+
+  it('should allow sizer to be missing even if other children there', () => {
+    div.setAttribute('i-amphtml-layout', 'responsive');
+    const other = document.createElement('div');
+    div.appendChild(other);
+    expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
+    expect(div.sizerElement_).to.be.undefined;
+  });
+
+  it('should fail when server generates invalid layout', () => {
+    div.setAttribute('i-amphtml-layout', 'invalid');
+    expect(() => applyLayout_(div)).to.throw(/failed/);
   });
 });

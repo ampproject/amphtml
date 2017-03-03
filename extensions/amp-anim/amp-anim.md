@@ -41,9 +41,10 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-anim` component is very similar to the `amp-image` element, and provides additional functionality to manage loading and playing of animated images such as GIFs.
+The `amp-anim` component is very similar to the `amp-img` element, and provides additional functionality to manage loading and playing of animated images such as GIFs.
 
 The `amp-anim` component can also have an optional placeholder child, to display while the `src` file is loading. The placeholder is specified via the `placeholder` attribute:
+
 ```html
 <amp-anim width=400 height=300 src="my-gif.gif">
   <amp-img placeholder width=400 height=300 src="my-gif-screencap.jpg">
@@ -68,7 +69,15 @@ A string of alternate text, similar to the `alt` attribute on `img`.
 
 **attribution**
 
-A string that indicates the attribution of the image. E.g. `attribution="CC courtesy of Cats on Flicker"`
+A string that indicates the attribution of the image. For example, `attribution="CC courtesy of Cats on Flicker"`.
+
+**height** and **width**
+
+An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image. 
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 
 ## Styling

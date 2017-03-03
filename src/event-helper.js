@@ -20,7 +20,6 @@ import {user} from './log';
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
-
 /**
  * Listens for the specified event on the element.
  * @param {!EventTarget} element
@@ -32,14 +31,25 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
 export function listen(element, eventType, listener, opt_capture) {
   let localElement = element;
   let localListener = listener;
+  /** @type {?Function}  */
+  let wrapped = event => {
+    try {
+      return localListener.call(this, event);
+    } catch (e) {
+      // reportError is installed globally per window in the entry point.
+      self.reportError(e);
+      throw e;
+    }
+  };
   const capture = opt_capture || false;
-  localElement.addEventListener(eventType, localListener, capture);
+  localElement.addEventListener(eventType, wrapped, capture);
   return () => {
     if (localElement) {
-      localElement.removeEventListener(eventType, localListener, capture);
+      localElement.removeEventListener(eventType, wrapped, capture);
     }
     localListener = null;
     localElement = null;
+    wrapped = null;
   };
 }
 
@@ -59,8 +69,15 @@ export function listenOnce(element, eventType, listener, opt_capture) {
   const capture = opt_capture || false;
   let unlisten;
   let proxy = event => {
-    localListener(event);
-    unlisten();
+    try {
+      localListener(event);
+    } catch (e) {
+      // reportError is installed globally per window in the entry point.
+      self.reportError(e);
+      throw e;
+    } finally {
+      unlisten();
+    }
   };
   unlisten = () => {
     if (localElement) {

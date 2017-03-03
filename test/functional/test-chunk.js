@@ -16,23 +16,21 @@
 
 import {
   activateChunkingForTesting,
-  chunk,
+  chunkInstanceForTesting,
   deactivateChunking,
   onIdle,
-  resolvedObjectforTesting,
+  startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {toggleExperiment} from '../../src/experiments';
-import {viewerForDoc} from '../../src/viewer';
+import {viewerForDoc, viewerPromiseForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
 
 
 describe('chunk', () => {
 
-  let resolved;
   let experimentOn;
   beforeEach(() => {
-    resolved = resolvedObjectforTesting();
     experimentOn = true;
     activateChunkingForTesting();
   });
@@ -49,17 +47,28 @@ describe('chunk', () => {
     beforeEach(() => {
       toggleExperiment(env.win, 'chunked-amp', experimentOn);
       fakeWin = env.win;
+      // If there is a viewer, wait for it, so we run with it being
+      // installed.
+      if (env.win.services.viewer) {
+        return viewerPromiseForDoc(env.win.document).then(() => {
+          // Make sure we make a chunk instance, so all runs
+          // have a viewer.
+          chunkInstanceForTesting(env.win.document);
+        });
+      }
     });
 
     it('should execute a chunk', done => {
-      chunk(fakeWin.document, done);
+      startupChunk(fakeWin.document, unusedIdleDeadline => {
+        done();
+      });
     });
 
     it('should execute chunks', done => {
       let count = 0;
       let progress = '';
       function complete(str) {
-        return function() {
+        return function(unusedIdleDeadline) {
           progress += str;
           if (++count == 6) {
             expect(progress).to.equal('abcdef');
@@ -67,20 +76,20 @@ describe('chunk', () => {
           }
         };
       }
-      chunk(fakeWin.document, complete('a'));
-      chunk(fakeWin.document, complete('b'));
-      chunk(fakeWin.document, function() {
+      startupChunk(fakeWin.document, complete('a'));
+      startupChunk(fakeWin.document, complete('b'));
+      startupChunk(fakeWin.document, function() {
         complete('c')();
-        chunk(fakeWin.document, function() {
+        startupChunk(fakeWin.document, function() {
           complete('d')();
-          chunk(fakeWin.document, complete('e'));
-          chunk(fakeWin.document, complete('f'));
+          startupChunk(fakeWin.document, complete('e'));
+          startupChunk(fakeWin.document, complete('f'));
         });
       });
     });
   }
 
-  describes.fakeWin('no amp', {
+  describes.fakeWin('visible no amp', {
     amp: false,
   }, env => {
 
@@ -88,6 +97,32 @@ describe('chunk', () => {
       installDocService(env.win, true);
       expect(env.win.services.viewer).to.be.undefined;
       env.win.document.hidden = false;
+    });
+
+    basicTests(env);
+  });
+
+  describes.fakeWin('invisible no amp', {
+    amp: false,
+  }, env => {
+
+    beforeEach(() => {
+      installDocService(env.win, true);
+      expect(env.win.services.viewer).to.be.undefined;
+      env.win.document.hidden = true;
+      env.win.requestIdleCallback = function() {
+        throw new Error('Should not be called');
+      };
+      env.win.postMessage = function(data, targetOrigin) {
+        expect(targetOrigin).to.equal('*');
+        Promise.resolve().then(() => {
+          const event = {
+            data,
+            type: 'message',
+          };
+          env.win.eventListeners.fire(event);
+        });
+      };
     });
 
     basicTests(env);
@@ -137,10 +172,10 @@ describe('chunk', () => {
       });
 
       it('should proceed on error and rethrowAsync', d => {
-        chunk(fakeWin.document, () => {
+        startupChunk(fakeWin.document, () => {
           throw new Error('test async');
         });
-        chunk(fakeWin.document, () => {
+        startupChunk(fakeWin.document, () => {
           done = d;
         });
       });
@@ -149,10 +184,9 @@ describe('chunk', () => {
     describe('invisible experiment off', () => {
       beforeEach(() => {
         experimentOn = false;
-        const viewer = viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible', () => {
-          throw new Error('No calls expected: isVisible');
-        });
+        env.win.postMessage = () => {
+          throw new Error('No calls expected: postMessage');
+        };
         env.win.requestIdleCallback = () => {
           throw new Error('No calls expected: requestIdleCallback');
         };
@@ -170,8 +204,9 @@ describe('chunk', () => {
         });
         env.win.requestIdleCallback =
             resolvingIdleCallbackWithTimeRemaining(15);
-        env.sandbox.stub(resolved, 'then', () => {
-          throw new Error('No calls expected');
+        const chunks = chunkInstanceForTesting(env.win.document);
+        env.sandbox.stub(chunks, 'executeAsap_', () => {
+          throw new Error('No calls expected: executeAsap_');
         });
         env.win.location.resetHref('test#visibilityState=hidden');
       });
@@ -203,8 +238,9 @@ describe('chunk', () => {
         });
         env.win.requestIdleCallback =
             resolvingIdleCallbackWithTimeRemaining(15);
-        env.sandbox.stub(resolved, 'then', () => {
-          throw new Error('No calls expected');
+        const chunks = chunkInstanceForTesting(env.win.document);
+        env.sandbox.stub(chunks, 'executeAsap_', () => {
+          throw new Error('No calls expected: executeAsap_');
         });
         env.win.document.hidden = true;
       });

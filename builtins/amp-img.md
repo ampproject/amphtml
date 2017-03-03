@@ -54,13 +54,15 @@ Additional image features like captions can be implemented with standard HTML - 
 
 **src**
 
-Similar to the `src` attribute on the `img` tag. The value must be a URL that
-points to a publicly-cacheable image file. Cache providers may rewrite these
-URLs when ingesting AMP files to point to a cached version of the image.
+This attribute is similar to the `src` attribute on the `img` tag. The value must be a URL that points to a publicly-cacheable image file. Cache providers may rewrite these URLs when ingesting AMP files to point to a cached version of the image.
 
 **srcset**
 
 Same as `srcset` attribute on the `img` tag. The behavior will be polyfilled where not natively supported.
+
+**sizes**
+
+Same as `srcset` attribute on the `img` tag. For more information see the [common `sizes` attribute docs](../spec/amp-html-layout.md#sizes).
 
 **alt**
 
@@ -68,18 +70,34 @@ A string of alternate text, similar to the `alt` attribute on `img`.
 
 **attribution**
 
-A string that indicates the attribution of the image. E.g. `attribution="CC courtesy of Cats on Flicker"`
+A string that indicates the attribution of the image. For example, `attribution="CC courtesy of Cats on Flicker"`
 
+**height** and **width**
+
+An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image.
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Styling
 
 `amp-img` can be styled directly via CSS properties. Setting a grey background
 placeholder for example could be achieved via:
+
 ```css
 amp-img {
   background-color: grey;
 }
 ```
+
 ## Validation
 
 See [amp-img rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
+
+
+## Related documentation
+
+* Guide: [Include Images & Video](https://www.ampproject.org/docs/guides/amp_replacements)
+* Guide: [Layout & Media Queries](https://www.ampproject.org/docs/guides/responsive/control_layout)
+* Guide: [Art direction with srcset, sizes & heights](https://www.ampproject.org/docs/guides/responsive/art_direction)

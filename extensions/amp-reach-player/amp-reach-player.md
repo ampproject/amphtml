@@ -20,13 +20,12 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>
-    An <code>amp-reach-player</code> component displays the Reach Player configured in the <a href="http://beachfrontreach.com">Beachfront Reach</a> platform.
+    <td>Displays the Reach Player configured in the <a href="http://beachfrontreach.com">Beachfront Reach</a> platform.
     </td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Beta</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -64,6 +63,10 @@ Example:
 **data-embed-id**
 
 The Reach player embed id found in the "players" section or in the generated embed itself.
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

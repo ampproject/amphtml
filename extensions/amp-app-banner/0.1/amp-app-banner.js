@@ -213,6 +213,9 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     /** @private {?Element} */
     this.metaTag_ = null;
+
+    /** @private {boolean} */
+    this.isEmbeddedSafari_ = false;
   }
 
   /**
@@ -246,6 +249,16 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return;
     }
 
+    this.isEmbeddedSafari_ = viewer.isEmbedded() && platform.isSafari();
+    if (this.isEmbeddedSafari_) {
+      user().warn(TAG,
+          'Due to a bug in browser, we are unable to show amp-app-banner. ' +
+          'Please refer to https://github.com/ampproject/amphtml/issues/6454 ' +
+          'for more details.');
+      this.hide_();
+      return;
+    }
+
     this.metaTag_ = this.win.document.head.querySelector(
         'meta[name=apple-itunes-app]');
     if (!this.metaTag_) {
@@ -267,6 +280,10 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     }
 
     if (this.canShowBuiltinBanner_) {
+      return Promise.resolve();
+    }
+
+    if (this.isEmbeddedSafari_) {
       return Promise.resolve();
     }
 
@@ -381,8 +398,9 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
       return Promise.resolve();
     }
 
-    return xhrFor(this.win).fetchJson(this.manifestHref_)
-        .then(response => this.parseManifest_(response))
+    return xhrFor(this.win).fetchJson(this.manifestHref_, {
+      requireAmpResponseSourceOrigin: false,
+    }).then(response => this.parseManifest_(response))
         .catch(error => {
           this.hide_();
           rethrowAsync(error);

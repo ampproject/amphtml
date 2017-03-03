@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 import './polyfills';
-import {dev, user} from '../src/log';
+import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame';
+import {tryParseJson} from '../src/json';
 
 export class AmpContext {
 
@@ -24,7 +25,9 @@ export class AmpContext {
    *  @param {Window} win The window that the instance is built inside.
    */
   constructor(win) {
-    this.setupMetadata_();
+    this.win_ = win;
+
+    this.findAndSetMetadata_();
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.getHostWindow_());
     this.client_.setSentinel(this.sentinel);
@@ -61,10 +64,10 @@ export class AmpContext {
   /**
    *  Send message to runtime requesting to resize ad to height and width.
    *    This is not guaranteed to succeed. All this does is make the request.
-   *  @param {int} height The new height for the ad we are requesting.
    *  @param {int} width The new width for the ad we are requesting.
+   *  @param {int} height The new height for the ad we are requesting.
    */
-  requestResize(height, width) {
+  requestResize(width, height) {
     this.client_.sendMessage(MessageType.EMBED_SIZE, {width, height});
   };
 
@@ -105,22 +108,21 @@ export class AmpContext {
   /**
    *  Parse the metadata attributes from the name and add them to
    *  the class instance.
+   *  @param {!Object|string} contextData
    *  @private
    */
-  setupMetadata_() {
-    try {
-      const data = JSON.parse(decodeURI(this.win_.name));
-      const context = data._context;
-      this.location = context.location;
-      this.canonicalUrl = context.canonicalUrl;
-      this.pageViewId = context.pageViewId;
-      this.sentinel = context.sentinel;
-      this.startTime = context.startTime;
-      this.referrer = context.referrer;
-    } catch (err) {
-      user().error('AMPCONTEXT', '- Could not parse metadata.');
-      throw new Error('Could not parse metadata.');
+  setupMetadata_(data) {
+    data = tryParseJson(data);
+    if (!data) {
+      throw new Error('Could not setup metadata.');
     }
+    const context = data._context;
+    this.location = context.location;
+    this.canonicalUrl = context.canonicalUrl;
+    this.pageViewId = context.pageViewId;
+    this.sentinel = context.sentinel || context.amp3pSentinel;
+    this.startTime = context.startTime;
+    this.referrer = context.referrer;
   }
 
   /**
@@ -137,5 +139,22 @@ export class AmpContext {
       ancestors.push(win.parent);
     }
     return ancestors[(ancestors.length - 1) - depth];
+  }
+
+  /**
+   *  Checks to see if there is a window variable assigned with the
+   *  sentinel value, sets it, and returns true if so.
+   *  @private
+   */
+  findAndSetMetadata_() {
+    // If the context data is set on window, that means we don't need
+    // to check the name attribute as it has been bypassed.
+    if (!this.win_.AMP_CONTEXT_DATA) {
+      this.setupMetadata_(this.win_.name);
+    } else if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
+      this.sentinel = this.win_.AMP_CONTEXT_DATA;
+    } else {
+      this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
+    }
   }
 }

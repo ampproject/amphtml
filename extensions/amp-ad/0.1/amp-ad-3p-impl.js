@@ -20,13 +20,17 @@ import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
 } from './concurrent-load';
+import {LayoutDelayMeter} from './layout-delay-meter';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
 import {adConfig} from '../../../ads/_config';
-import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
+import {
+  getLifecycleReporter,
+  ReporterNamespace,
+} from '../../../ads/google/a4a/google-data-reporter';
 import {user, dev} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -35,11 +39,6 @@ import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
-
-/**
- * NOTE: For testing purpose of 3p ad, please consider using ad type `_ping_`,
- * as it disables native IntersectionObserver and sends renderStart signal.
- */
 
 export class AmpAd3PImpl extends AMP.BaseElement {
 
@@ -91,10 +90,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?Promise} */
     this.layoutPromise_ = null;
 
-    /** {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
-    this.lifecycleReporter = getLifecycleReporter(this, 'amp', undefined,
+    /** @type {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
+    this.lifecycleReporter = getLifecycleReporter(this, ReporterNamespace.AMP,
         this.element.getAttribute('data-amp-slot-index'));
 
+    /** @private {!./layout-delay-meter.LayoutDelayMeter} */
+    this.layoutDelayMeter_ = new LayoutDelayMeter(this.win);
     this.lifecycleReporter.sendPing('adSlotBuilt');
   }
 
@@ -217,6 +218,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.layoutDelayMeter_.startLayout();
+
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
@@ -250,6 +253,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
+    if (inViewport) {
+      this.layoutDelayMeter_.enterViewport();
+    }
   }
 
   /** @override  */
@@ -262,5 +268,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
     this.lifecycleReporter.sendPing('adSlotCleared');
     return true;
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    return this.uiHandler.createPlaceholderCallback();
   }
 }

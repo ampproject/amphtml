@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForWindow} from './service';
+import {
+  getExistingServiceForWindow,
+  getExistingServiceForWindowOrNull,
+} from './service';
 
 /**
  * @param {!Window} window
@@ -23,4 +26,13 @@ import {getExistingServiceForWindow} from './service';
 export function performanceFor(window) {
   return /** @type {!./service/performance-impl.Performance}*/ (
       getExistingServiceForWindow(window, 'performance'));
-};
+}
+
+/**
+ * @param {!Window} window
+ * @return {!./service/performance-impl.Performance}
+ */
+export function performanceForOrNull(window) {
+  return /** @type {!./service/performance-impl.Performance}*/ (
+      getExistingServiceForWindowOrNull(window, 'performance'));
+}
