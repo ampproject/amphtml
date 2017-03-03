@@ -237,7 +237,9 @@ class AmpSambaPlayer extends AMP.BaseElement {
 		if (data == null || typeof data !== 'object')
 			return;
 
-		this.element.dispatchCustomEvent(EVENTS_MAP[data.event]);
+		const videoEvent = EVENTS_MAP[data.event];
+
+		videoEvent && this.element.dispatchCustomEvent(videoEvent);
 	}
 }
 
