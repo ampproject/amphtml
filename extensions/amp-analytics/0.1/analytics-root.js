@@ -424,6 +424,37 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
   }
 }
 
+/**
+ * Scope selector within the extension element itself
+ */
+export class AmpElementAnalyticsRoot extends AnalyticsRoot {
+  constructor(ampdoc, element) {
+    super(ampdoc, /* parent */ element);
+    this.element = element;
+  }
+
+  getType() {
+    return 'extension';
+  }
+
+  getRoot() {
+    return this.element;
+  }
+
+  getHostElement() {
+    return null;
+  }
+
+  signals() {
+    return this.element.signals();
+  }
+
+  /** @override */
+  whenIniLoaded() {
+    return this.element.whenBuilt();
+  }
+}
+
 
 /**
  * @param  {!Element} el
