@@ -44,8 +44,7 @@ function protocolCharIsValid(code) {
  */
 function isPositiveInteger(maybeInt) {
   const re = /^[0-9]*$/g;
-  const match = re.exec(maybeInt);
-  return match !== null;
+  return re.test(maybeInt);
 }
 
 /**
@@ -103,15 +102,60 @@ function hostCharIsValid(code) {
 }
 
 /**
- * Check if a host might be an IPv6 literal, i.e. all characters
- * match [0-9A-Fa-f:.], and at least 2 colons exist.
+ * Check if a host might be an IPv6 literal. See man page for INET_PTON(3)
  * @param {string} host
  * @return {boolean}
  */
 function hostIsIPv6Literal(host) {
-  const re = /^([0-9A-Fa-f.]*:){2}[0-9A-Fa-f.:]*$/g;
-  const match = re.exec(host);
-  return match !== null;
+  // 16-bit hexadecimal number, where leading zeroes can be discarded.
+  const hexRe = /^[0-9A-Fa-f]{1,4}$/;
+  // IPv4 address
+  const ipv4Re = /^([0-9]{1,3}\.){3}[0-9]{1,3}$/;
+  var hasEmpty = false;
+  const parts = host.split(':');
+  var numParts = parts.length;
+  for (var i = 0; i < parts.length; ++i) {
+    const part = parts[i];
+
+    // Look for empty parts, caused abbreviating contiguous zero values with
+    // '::' syntax.
+    if (part === '') {
+      // There can be exactly one empty 'part'
+      if (hasEmpty)
+        return false;
+      hasEmpty = true;
+      // Leading and trailing empty parts are written as '::' resulting in
+      // host.split returning two empty parts. We skip these in this case.
+      // We must use two conditions to cover the case of host being exactly
+      // '::'.
+      if (i === 0) {
+        ++i;
+        --numParts;
+      }
+      if (i === parts.length - 2) {
+        ++i;
+        --numParts;
+      }
+    }
+    // Typically we expect a 16-bit hexadecimal number for each part.
+    else if (hexRe.test(part)) {}
+    // Or, if the last 'part', we can allow a IPv4 address:
+    else if (i === parts.length - 1 && ipv4Re.test(part)) {
+      // An IPv4 address counts for 2 parts.
+      ++numParts;
+    }
+    else {
+      return false;
+    }
+  }
+
+  // There should be 8 parts, with an empty part possibly counting as more than
+  // one.
+  if (numParts > 8)
+    return false;
+  if (numParts < 8 && !hasEmpty)
+    return false;
+  return true;
 }
 
 parse_url.URL = class {

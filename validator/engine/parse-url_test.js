@@ -105,13 +105,13 @@ describe('parse_url', () => {
   });
 
   it ('parses login with ipv6 host that has colons to confuse things', () => {
-    let urlString = 'https://user:password@[2001:0db8:85a3]/';
+    let urlString = 'https://user:password@[2001:0db8::85a3]/';
     let url = new parse_url.URL(urlString);
     assertStrictEqual('user:password', url.login);
   });
 
   it ('parses login with ipv6 host and [ character in password', () => {
-    let urlString = 'https://user:pas[word@[2001:0db8:85a3]/';
+    let urlString = 'https://user:pas[word@[2001:0db8::85a3]/';
     let url = new parse_url.URL(urlString);
     assertStrictEqual('user:pas[word', url.login);
   });
@@ -135,19 +135,37 @@ describe('parse_url', () => {
   });
 
   it ('parses valid IPv6 hostname', () => {
-    let urlString = 'https://[2001:0db8:85a3]/';
-    let url = new parse_url.URL(urlString);
-    assertStrictEqual(true, url.isValid);
+    for (let urlString of [
+        "https://[2001:0db8::85a3]/",
+        "https://[::1]/",
+        "https://[::]/",
+        "https://[0:0:0:0:0:0:0:1]/",
+        "https://[0:0:0:0:0:0:8.8.8.8]/",
+        "https://[0:0:0:0:0:0:8.124.8.8]/",
+        "https://[0:0:0:0:0:0:8.8.8.22]/",
+        "https://[::8.8.8.8]/"]) {
+      let url = new parse_url.URL(urlString);
+      assert.ok(url.isValid, "Expected " + urlString + " to be valid.");
+    }
   });
 
   it ('fails on invalid IPv6 hostname', () => {
-    let urlString = 'https://[2001:0db8:85ag]/';  // 'g' not valid hex character
-    let url = new parse_url.URL(urlString);
-    assertStrictEqual(false, url.isValid);
-
-    urlString = 'https://[2001:0db8]/';
-    url = new parse_url.URL(urlString);
-    assertStrictEqual(false, url.isValid);
+    for (let urlString of [
+        "https://[2001:0db8:85a3]/",
+        "https://[20012:0db8::85a3]/",
+        "https://[200g:0db8:85a3]/",
+        "https://[:::1]/",
+        "https://[0:0:0:0:0:0:1]/",
+        "https://[0:0:0:0:0:0:0:0:1]/",
+        "https://[0:0:0:0:0:0:8.8.8.1024]/",
+        "https://[0:0:0:0:0:0:8.8.8]/",
+        "https://[0:0:0:0:0:0:8.8.8.8.8]/",
+        "https://[0:0:0:0:0:0:0:8.8.8.8]/",
+        "https://[0:0:0:0:0:8.8.8.8]/",
+        "https://[0:0:0:0:0:8.8.8.8:1]/"]) {
+      let url = new parse_url.URL(urlString);
+      assert.ok(!url.isValid, "Expected " + urlString + " to be invalid.");
+    }
   });
 
   it ('fails on invalid port characters', () => {
@@ -278,14 +296,3 @@ describe('parse_url', () => {
     assertStrictEqual('', url.host);
   });
 });
-
-
-
-
-
-
-
-
-
-
-
