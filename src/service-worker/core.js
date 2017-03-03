@@ -146,11 +146,14 @@ export function isCdnJsFile(url) {
  *   explicitRtv: !RtvVersion,
  *   pathname: string,
  *   rtv: !RtvVersion,
- * }}
+ * }|null}
  * @visibleForTesting
  */
 export function requestData(url) {
   const match = CDN_JS_REGEX.exec(url);
+  if (!match) {
+    return null;
+  }
   return {
     environment: match[2] || BASE_RTV_ENVIRONMENT,
     explicitRtv: match[1] || '',
@@ -168,7 +171,11 @@ export function requestData(url) {
  * @visibleForTesting
  */
 export function urlWithVersion(url, version) {
-  const {explicitRtv, pathname} = requestData(url);
+  const data = requestData(url);
+  if (!data) {
+    return url;
+  }
+  const {explicitRtv, pathname} = data;
   if (explicitRtv) {
     return url.replace(explicitRtv, version);
   }
@@ -186,8 +193,8 @@ export function urlWithVersion(url, version) {
  */
 function normalizedRequest(request, version) {
   const url = request.url;
-  const {explicitRtv} = requestData(url);
-  if (explicitRtv === version) {
+  const data = requestData(url);
+  if (data && data.explicitRtv === version) {
     return request;
   }
 
@@ -303,7 +310,7 @@ export function expired(response) {
   const {headers} = response;
 
   if (!headers.has('date') || !headers.has('cache-control')) {
-    return false;
+    return true;
   }
 
   const maxAge = /max-age=(\d+)/i.exec(headers.get('cache-control'));
@@ -328,10 +335,7 @@ function diversions(cache) {
       return null;
     }
 
-    return diversions.filter(diversion => {
-      // Diversions cannot use the production environment.
-      return requestData(diversion).environment != BASE_RTV_VERSION;
-    });
+    return diversions;
   }, () => null);
 }
 
@@ -420,6 +424,9 @@ function purge(cache, path, version, diversions) {
       const request = requests[i];
       const url = request.url;
       const cachedData = requestData(url);
+      if (!cachedData) {
+        continue;
+      }
 
       if (path === cachedData.pathname) {
         // This is case 1.
@@ -500,7 +507,12 @@ export function getCachedVersion(cache, requestPath, requestVersion,
     // it is, and increment the number of files we have for that version.
     for (let i = 0; i < requests.length; i++) {
       const url = requests[i].url;
-      const {pathname, rtv, environment} = requestData(url);
+      const data = requestData(url);
+      if (!data) {
+        continue;
+      }
+
+      const {pathname, rtv, environment} = data;
 
       // We will not stale serve a version that does not match the request's
       // environment. This is so cached percent diversions will not be "stale"
@@ -558,16 +570,17 @@ export function getCachedVersion(cache, requestPath, requestVersion,
  */
 export function handleFetch(request, maybeClientId) {
   const url = request.url;
-
   // We only cache CDN JS files, and we need a clientId to do our magic.
-  if (!maybeClientId || !isCdnJsFile(url)) {
+  const data = requestData(url);
+
+  if (!maybeClientId || !data) {
     return null;
   }
 
   // Closure Compiler!
   const clientId = /** @type {string} */(maybeClientId);
+  const {pathname, rtv, environment} = data;
 
-  const {pathname, rtv, environment} = requestData(url);
   // Rewrite unversioned requests to the versioned RTV URL. This is a noop if
   // it's already versioned.
   request = normalizedRequest(request, rtv);

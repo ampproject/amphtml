@@ -348,10 +348,7 @@ runner.run('Cache SW', () => {
 
   describe('fetchAndCache', () => {
     const request = new Request(url);
-    const response = {
-      ok: true,
-      clone() {},
-    };
+    const response = new Response('');
     let fetch;
     let put;
     let calls;
@@ -363,7 +360,7 @@ runner.run('Cache SW', () => {
         if (calls == 1) {
           return Promise.resolve(response);
         }
-        return Promise.resolve(Object.create(response));
+        return Promise.resolve(new Response(''));
       });
       put = sandbox.spy(cache, 'put');
     });
@@ -445,7 +442,7 @@ runner.run('Cache SW', () => {
 
     describe('when response is not ok', () => {
       beforeEach(() => {
-        response.ok = false;
+        Object.defineProperty(response, 'ok', {value: false});
       });
 
       it('returns rejected promise', () => {
@@ -467,13 +464,17 @@ runner.run('Cache SW', () => {
   describe('fetchJsFile', () => {
     const request = {url};
     const response = new Response('');
+    const rejected = Promise.reject();
+    rejected.catch(() => {});
     let fetch;
     let deleter;
 
     beforeEach(() => {
       const expires = {
-        expires: new Date(Date.now() + 10000).toUTCString(),
+        'cache-control': 'public, max-age=60',
+        date: new Date().toUTCString(),
       };
+
       // "Previous" cached requests
       cache.cached.push(
         [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}, null],
@@ -487,7 +488,7 @@ runner.run('Cache SW', () => {
       deleter = sandbox.stub(cache, 'delete');
       fetch = sandbox.stub(window, 'fetch');
       fetch.onCall(0).returns(Promise.resolve(response));
-      fetch.onCall(1).returns(Promise.reject('diversions'));
+      fetch.onCall(1).returns(rejected);
     });
 
     describe('when response is ok', () => {
@@ -735,14 +736,13 @@ runner.run('Cache SW', () => {
     let prevRequest;
     let blacklistedRequest;
 
-    function responseFromRequest(request) {
-      return {
-        ok: true,
-        url: request.url,
-        clone() {
-          return this;
-        },
-      };
+    function responseFromRequest(req) {
+      const res = new Response('');
+      Object.defineProperty(res, 'url', {value: req.url});
+      Object.defineProperty(res, 'clone', {value: function() {
+        return this;
+      }});
+      return res;
     }
 
     beforeEach(() => {
@@ -753,13 +753,7 @@ runner.run('Cache SW', () => {
 
       clientId++;
       fetch = sandbox.stub(window, 'fetch', req => {
-        return Promise.resolve({
-          ok: true,
-          url: req.url,
-          clone() {
-            return this;
-          },
-        });
+        return Promise.resolve(responseFromRequest(req));
       });
     });
 
