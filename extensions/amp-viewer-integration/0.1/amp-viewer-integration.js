@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Messaging, WindowPortEmulator} from './messaging.js';
+import {Messaging, WindowPortEmulator} from './messaging';
+import {TouchHandler} from './touch-handler';
 import {getAmpDoc} from '../../../src/ampdoc';
 import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
@@ -150,7 +151,7 @@ export class AmpViewerIntegration {
    * @private
    */
   setup_(messaging, viewer) {
-    messaging.setRequestProcessor((type, payload, awaitResponse) => {
+    messaging.setDefaultHandler((type, payload, awaitResponse) => {
       return viewer.receiveMessage(
         type, /** @type {!JSONType} */ (payload), awaitResponse);
     });
@@ -160,6 +161,10 @@ export class AmpViewerIntegration {
 
     listenOnce(
       this.win, 'unload', this.handleUnload_.bind(this, messaging));
+
+    if (viewer.hasCapability('swipe')) {
+      this.initTouchHandler_(messaging);
+    }
   }
 
   /**
@@ -170,6 +175,14 @@ export class AmpViewerIntegration {
    */
   handleUnload_(messaging) {
     return messaging.sendRequest(RequestNames.UNLOADED, {}, true);
+  }
+
+  /**
+   * @param {!Messaging} messaging
+   * @private
+   */
+  initTouchHandler_(messaging) {
+    new TouchHandler(this.win, messaging);
   }
 }
 
