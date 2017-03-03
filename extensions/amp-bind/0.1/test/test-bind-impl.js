@@ -84,7 +84,7 @@ describes.realWin('amp-bind', {
    * @return {!Promise}
    */
   function onBindReady() {
-    return bind.initializePromise_.then(() => {
+    return bind.initializePromiseForTesting().then(() => {
       env.flushVsync();
     });
   }
@@ -95,10 +95,11 @@ describes.realWin('amp-bind', {
    * @return {!Promise}
    */
   function onBindReadyAndSetState(state) {
-    return bind.initializePromise_.then(() => {
+    return bind.initializePromiseForTesting().then(() => {
       return bind.setState(state);
     }).then(() => {
       env.flushVsync();
+      return bind.setStatePromiseForTesting();
     });
   }
 

@@ -19,6 +19,7 @@ import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
+import {fromClassForDoc} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -58,6 +59,14 @@ let BoundPropertyDef;
  * }}
  */
 let BoundElementDef;
+
+/**
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @return {!Bind}
+ */
+export function installBindForTesting(nodeOrAmpDoc) {
+  return fromClassForDoc(nodeOrAmpDoc, 'bind', Bind);
+}
 
 /**
  * Bind is the service that handles the Bind lifecycle, from identifying
@@ -122,6 +131,11 @@ export class Bind {
       return this.initialize_();
     });
 
+    /**
+     * @private {?Promise}
+     */
+    this.setStatePromise_ = null;
+
     // Expose for testing on dev.
     if (getMode().localDev) {
       AMP.reinitializeBind = this.initialize_.bind(this);
@@ -142,10 +156,11 @@ export class Bind {
     Object.assign(this.scope_, state);
 
     if (!opt_skipDigest) {
-      return this.initializePromise_.then(() => {
+      this.setStatePromise_ = this.initializePromise_.then(() => {
         user().fine(TAG, 'State updated; re-evaluating expressions...');
         return this.digest_();
       });
+      return this.setStatePromise_;
     } else {
       return Promise.resolve();
     }
@@ -159,7 +174,7 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    return this.initializePromise_.then(() => {
+    this.setStatePromise_ = this.initializePromise_.then(() => {
       // Allow expression to reference current scope in addition to event scope.
       Object.assign(scope, this.scope_);
       if (this.workerExperimentEnabled_) {
@@ -177,6 +192,7 @@ export class Bind {
         return this.setState(returnValue.result);
       }
     });
+    return this.setStatePromise_;
   }
 
   /**
@@ -432,11 +448,6 @@ export class Bind {
 
     return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;
-      if (opt_verifyOnly) {
-        this.verify_(results);
-      } else {
-        this.apply_(results);
-      }
 
       // Report evaluation errors.
       Object.keys(errors).forEach(expressionString => {
@@ -448,7 +459,14 @@ export class Bind {
           reportError(userError, elements[0]);
         }
       });
+
+      if (opt_verifyOnly) {
+        this.verify_(results);
+      } else {
+        return this.apply_(results);
+      }
     });
+
   }
 
   /**
@@ -475,11 +493,11 @@ export class Bind {
    * @private
    */
   apply_(results) {
-    this.boundElements_.forEach(boundElement => {
+    const applyPromises = this.boundElements_.map(boundElement => {
       const {element, boundProperties} = boundElement;
       const tagName = element.tagName;
 
-      this.resources_.mutateElement(element, () => {
+      const applyPromise = this.resources_.mutateElement(element, () => {
         const mutations = {};
         let width, height;
 
@@ -533,7 +551,9 @@ export class Bind {
           element.mutatedAttributesCallback(mutations);
         }
       });
+      return applyPromise;
     });
+    return Promise.all(applyPromises);
   }
 
   /**
@@ -546,7 +566,6 @@ export class Bind {
    */
   applyBinding_(boundProperty, element, newValue) {
     const property = boundProperty.property;
-
     switch (property) {
       case 'text':
         element.textContent = String(newValue);
@@ -561,10 +580,8 @@ export class Bind {
             ampClasses.push(cssClass);
           }
         }
-        if (Array.isArray(newValue)) {
+        if (Array.isArray(newValue) || typeof newValue === 'string') {
           element.className = ampClasses.concat(newValue).join(' ');
-        } else if (typeof newValue === 'string') {
-          element.className = ampClasses.join(' ') + ' ' + newValue;
         } else if (newValue === null) {
           element.className = ampClasses.join(' ');
         } else {
@@ -790,6 +807,29 @@ export class Bind {
     }
 
     return false;
+  }
+
+
+  /**
+   * Wait for bind scan to finish for testing.
+   *
+   * @return {?Promise}
+   * @visibleForTesting
+   */
+  initializePromiseForTesting() {
+    return this.initializePromise_;
+  }
+
+
+  /**
+   * Wait for bindings to evaluate and apply for testing. Should
+   * be called once for each event that changes bindings.
+   *
+   * @return {?Promise}
+   * @visibleForTesting
+   */
+  setStatePromiseForTesting() {
+    return this.setStatePromise_;
   }
 
   /**
