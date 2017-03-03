@@ -23,20 +23,17 @@ const TAG = 'amp-auto-ads';
 export class AdStrategy {
 
   /**
-   * @param {string} type
    * @param {!Array<!./placement.Placement>} placements
-   * @param {!Array<!DataAttributeDef>} baseDataAttributes Any data attributes
-   *     that should be added to any inserted ads. These will be combined with
-   *     any additional data atrributes specified by the configuration.
+   * @param {!Object<string, string>} baseAttributes Any attributes that should
+   *     be added to any inserted ads. These will be combined with any
+   *     additional data atrributes specified by the placement.
    * @param {!./ad-tracker.AdTracker} adTracker
    * @param {number} targetAdCount
    */
-  constructor(type, placements, baseDataAttributes, adTracker, targetAdCount) {
-    this.type_ = type;
-
+  constructor(placements, baseAttributes, adTracker, targetAdCount) {
     this.availablePlacements_ = placements.slice(0);
 
-    this.baseDataAttributes_ = baseDataAttributes;
+    this.baseAttributes_ = baseAttributes;
 
     /** @type {!./ad-tracker.AdTracker} */
     this.adTracker_ = adTracker;
@@ -73,8 +70,8 @@ export class AdStrategy {
       dev().warn(TAG, 'unable to fulfill ad strategy');
       return Promise.resolve(false);
     }
-    return nextPlacement.placeAd(this.type_, this.baseDataAttributes_,
-        this.adTracker_).then(state => {
+    return nextPlacement.placeAd(this.baseAttributes_, this.adTracker_)
+        .then(state => {
           if (state == PlacementState.PLACED) {
             this.adTracker_.addAd(nextPlacement.getAdElement());
             return true;
