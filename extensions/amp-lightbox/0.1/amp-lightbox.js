@@ -43,7 +43,7 @@ const A4A_PROTOTYPE_EXPERIMENT = 'amp-lightbox-a4a-proto';
 //   Move this where it makes sense (possibly FriendlyIframeEmbed?)
 function getAdBannerRoot(bodyElement) {
   return dev().assertElement(childElementByTag(
-      /** @type {!Element} */ (bodyElement), 'amp-ad-banner'));
+      dev().assertElement(bodyElement), 'amp-ad-banner'));
 }
 
 
