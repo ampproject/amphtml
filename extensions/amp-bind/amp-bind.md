@@ -197,22 +197,22 @@ key_value:
 #### Whitelisted functions
 
 ```text
-Array.concat
-Array.indexOf
-Array.join
-Array.lastIndexOf
-Array.slice
-String.charAt
-String.charCodeAt
-String.concat
-String.indexOf
-String.lastIndexOf
-String.slice
-String.split
-String.substr
-String.substring
-String.toLowerCase
-String.toUpperCase
+Array.concat()
+Array.indexOf()
+Array.join()
+Array.lastIndexOf()
+Array.slice()
+String.charAt()
+String.charCodeAt()
+String.concat()
+String.indexOf()
+String.lastIndexOf()
+String.slice()
+String.split()
+String.substr()
+String.substring()
+String.toLowerCase()
+String.toUpperCase()
 ```
 
-The full expression implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison).
+The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).

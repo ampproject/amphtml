@@ -155,6 +155,19 @@ export class ViewerForTesting {
     return this.documentLoadedPromise_;
   }
 
+  /**
+   * This is only used for a unit test.
+   */
+  hasCapability() {
+    return false;
+  }
+
+  /**
+   * This is only used for a unit test.
+   */
+  setMessageDeliverer() {
+  }
+
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
     var_args.unshift('[VIEWER]');
