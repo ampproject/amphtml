@@ -506,14 +506,14 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
  * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
 function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
-  dev().assert(!!opt_ctor != !!opt_factory,
+  dev().assert(!opt_ctor != !opt_factory,
       'Only one: a class or a factory must be specified');
   // TODO(kmh287): Investigate removing the opt_instantiate arg after
   // all other services have been refactored.
   registerServiceBuilderForDoc(ampdoc,
                                name,
-                               opt_factory || undefined,
-                               opt_ctor || undefined,
+                               opt_factory,
+                               opt_ctor,
                                /* opt_instantiate */ true);
 }
 

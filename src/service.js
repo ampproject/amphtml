@@ -508,8 +508,8 @@ function getServiceInternal(holder, context, id, opt_factory, opt_constructor) {
  *     Factory function to create the new service. Called with context.
  */
 function registerServiceInternal(holder, context, id, opt_factory, opt_ctor) {
-  dev().assert(!!opt_factory != !!opt_ctor,
-    `Provide a constructor or a factory, but not both for service ${id}`);
+  dev().assert(!opt_factory != !opt_ctor,
+      `Provide a constructor or a factory, but not both for service ${id}`);
   const services = getServices(holder);
   let s = services[id];
   if (s && !s.obj && !s.ctor && !s.factory) {
@@ -577,8 +577,8 @@ function getServicePromiseOrNullInternal(holder, id) {
       return s.promise;
     } else if (s.obj) {
       return s.promise = Promise.resolve(s.obj);
-    } else if (!s.ctor && !s.factory) {
-      dev().assert(false,
+    } else {
+      dev().assert((s.ctor || s.factory),
           'Expected object, promise, ctor, or factory to be present');
     }
   }
