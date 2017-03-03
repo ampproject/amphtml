@@ -236,7 +236,10 @@ export function registerServiceBuilder(win,
                                        opt_instantiate) {
   win = getTopWindow(win);
   registerServiceInternal(win, win, id, opt_factory, opt_constructor);
-  if (opt_instantiate) {
+  // The service may have been requested already, in which case we have a
+  // pending promise we need to fulfill.
+  const p = getServicePromiseOrNullInternal(win, id);
+  if (opt_instantiate || p) {
     getServiceInternal(win, win, id);
   }
 }
@@ -258,7 +261,10 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   registerServiceInternal(holder, ampdoc, id, opt_factory, opt_constructor);
-  if (opt_instantiate) {
+  // The service may have been requested already, in which case we have a
+  // pending promise we need to fulfill.
+  const p = getServicePromiseOrNullInternal(holder, id);
+  if (opt_instantiate || p) {
     getServiceInternal(holder, ampdoc, id);
   }
 }
@@ -512,19 +518,24 @@ function registerServiceInternal(holder, context, id, opt_factory, opt_ctor) {
       `Provide a constructor or a factory, but not both for service ${id}`);
   const services = getServices(holder);
   let s = services[id];
-  if (s && !s.obj && !s.ctor && !s.factory) {
-    // Service promise exists, but no instance nor builder
-    s.ctor = opt_ctor || null;
-    s.factory = opt_factory || null;
-  } else if (!s) {
+
+  if (!s) {
     s = services[id] = {
       obj: null,
       promise: null,
       resolve: null,
-      ctor: opt_ctor || null,
-      factory: opt_factory || null,
+      ctor: null,
+      factory: null,
     };
   }
+
+  if (s.ctor || s.factory) {
+    // Service already registered
+    return;
+  }
+
+  s.ctor = opt_ctor;
+  s.factory = opt_factory;
 }
 
 

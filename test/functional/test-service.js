@@ -174,11 +174,20 @@ describe('service', () => {
       });
     });
 
+    it('should resolve existing service promise on registering service', () => {
+      const p = getServicePromise(window, 'a');
+      registerServiceBuilder(window, 'a', undefined, Class);
+      expect(count).to.equal(1);
+      return p.then(() => {
+        expect(count).to.equal(1);
+      });
+    });
+
     it('should provide promise without clobbering registered services', () => {
-      registerServiceBuilder(window, 'fake service2', undefined, Class);
+      registerServiceBuilder(window, 'a', undefined, Class);
       expect(count).to.equal(0);
-      const p = getServicePromise(window, 'fake service2');
-      expect(getService(window, 'fake service2')).to.not.throw;
+      const p = getServicePromise(window, 'a');
+      expect(getService(window, 'a')).to.not.throw;
       return p.then(() => {
         expect(count).to.equal(1);
       });
