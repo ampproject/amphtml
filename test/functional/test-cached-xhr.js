@@ -18,93 +18,144 @@ import {FetchResponse, fetchPolyfill} from '../../src/service/xhr-impl';
 import {cachedXhrServiceForTesting} from '../../src/service/cached-xhr-impl';
 
 
-describes.realWin('CachedXhr', {}, env => {
-  const location = {href: 'https://acme.com/path'};
-
+describes.sandboxed('CachedXhr', {}, () => {
+  // Since if it's the Native fetch, it won't use the XHR object so
+  // mocking and testing the request becomes not doable.
   function getPolyfillWin() {
     return {
-      location,
+      location: {href: 'https://acme.com/path'},
       fetch: fetchPolyfill,
     };
   }
 
-  // Since if it's the Native fetch, it won't use the XHR object so
-  // mocking and testing the request becomes not doable.
-  const xhr = cachedXhrServiceForTesting(getPolyfillWin());
+  describes.fakeWin('#fetchJson', getPolyfillWin(), env => {
+    const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
+    const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
+    const mockXhr = {
+      status: 200,
+      responseText: TEST_RESPONSE,
+      responseType: 'json',
+    };
+    let xhr;
+    let fetchStub;
 
-  beforeEach(() => {
-    location.href = 'https://acme.com/path';
-  });
-
-  describe('#fetchJson', () => {
-    it('should fetch JSON GET requests with fragments once ' +
-        'for identical URLs', () => {
-      const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
-      const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
-      const mockXhr = {
-        status: 200,
-        responseText: TEST_RESPONSE,
-        responseType: 'json',
-      };
-      const fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
+    beforeEach(() => {
+      xhr = cachedXhrServiceForTesting(env.win);
+      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
           () => Promise.resolve(new FetchResponse(mockXhr)));
+    });
 
+    it('should fetch JSON GET requests once for identical URLs', () => {
       return Promise.all([
         xhr.fetchJson('/get?k=v1'),
         xhr.fetchJson('/get?k=v1'),
       ]).then(results => {
-        expect(fetchStub.calledOnce).to.be.true;
+        expect(fetchStub).to.be.calledOnce;
+        expect(results[0]).to.jsonEqual(TEST_OBJECT);
+        expect(results[1]).to.jsonEqual(TEST_OBJECT);
+      });
+    });
+
+    it('should not be affected by fragments passed in the URL', () => {
+      return Promise.all([
+        xhr.fetchJson('/get?k=v1#a.b[0].c'),
+        xhr.fetchJson('/get?k=v1#a.b[1].d'),
+      ]).then(results => {
+        expect(fetchStub).to.be.calledOnce;
+        expect(results[0]).to.jsonEqual(TEST_OBJECT);
+        expect(results[1]).to.jsonEqual(TEST_OBJECT);
+      });
+    });
+
+    it('should not cache for POST requests', () => {
+      return Promise.all([
+        xhr.fetchJson('/get?k=v1', {method: 'POST', body: {}}),
+        xhr.fetchJson('/get?k=v1', {method: 'POST', body: {}}),
+      ]).then(results => {
+        expect(fetchStub).to.be.calledTwice;
         expect(results[0]).to.jsonEqual(TEST_OBJECT);
         expect(results[1]).to.jsonEqual(TEST_OBJECT);
       });
     });
   });
 
-  describe('#fetchDocument', () => {
-    it('should fetch document GET requests with fragments once ' +
-        'for identical URLs', () => {
-      const doc = env.win.document;
-      const TEST_CONTENT = '<b>Hello, world';
-      const TEST_RESPONSE_TEXT = '<!doctype html><html><body>' + TEST_CONTENT;
-      const TEST_RESPONSE_DOC = doc.implementation.createHTMLDocument();
-      TEST_RESPONSE_DOC.body.innerHTML = TEST_CONTENT;
+  describes.realWin('#fetchDocument', getPolyfillWin(), env => {
+    const TEST_CONTENT = '<b>Hello, world';
+    const TEST_RESPONSE_TEXT = '<!doctype html><html><body>' + TEST_CONTENT;
+    let xhr;
+    let fetchStub;
+    let testResponseDoc;
 
+    beforeEach(() => {
+      const doc = env.win.document;
+      testResponseDoc = doc.implementation.createHTMLDocument();
+      testResponseDoc.body.innerHTML = TEST_CONTENT;
       const mockXhr = {
         status: 200,
         responseText: TEST_RESPONSE_TEXT,
-        responseXML: TEST_RESPONSE_DOC,
+        responseXML: testResponseDoc,
         responseType: 'text/html',
       };
-      const fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
+      xhr = cachedXhrServiceForTesting(env.win);
+      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
           () => Promise.resolve(new FetchResponse(mockXhr)));
+    });
 
+    it('should fetch document GET requests once for identical URLs', () => {
       return Promise.all([
         xhr.fetchDocument('/get?k=v1'),
         xhr.fetchDocument('/get?k=v1'),
       ]).then(results => {
-        expect(fetchStub.calledOnce).to.be.true;
-        expect(results[0].isEqualNode(TEST_RESPONSE_DOC)).to.be.true;
-        expect(results[1].isEqualNode(TEST_RESPONSE_DOC)).to.be.true;
+        expect(fetchStub).to.be.calledOnce;
+        expect(results[0].isEqualNode(testResponseDoc)).to.be.true;
+        expect(results[1].isEqualNode(testResponseDoc)).to.be.true;
+      });
+    });
+
+    it('should not cache for POST requests', () => {
+      return Promise.all([
+        xhr.fetchDocument('/get?k=v1', {method: 'POST', body: {}}),
+        xhr.fetchDocument('/get?k=v1', {method: 'POST', body: {}}),
+      ]).then(results => {
+        expect(fetchStub).to.be.calledTwice;
+        expect(results[0].isEqualNode(testResponseDoc)).to.be.true;
+        expect(results[1].isEqualNode(testResponseDoc)).to.be.true;
       });
     });
   });
 
-  describe('#fetchText', () => {
-    it('should fetch text GET requests with fragments once ' +
-        'for identical URLs', () => {
-      const TEST_RESPONSE = 'Hello, world!';
-      const mockXhr = {
-        status: 200,
-        responseText: TEST_RESPONSE,
-      };
-      const fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
-          () => Promise.resolve(new FetchResponse(mockXhr)));
+  describes.fakeWin('#fetchText', getPolyfillWin(), env => {
+    const TEST_RESPONSE = 'Hello, world!';
+    const mockXhr = {
+      status: 200,
+      responseText: TEST_RESPONSE,
+    };
+    let xhr;
+    let fetchStub;
 
+    beforeEach(() => {
+      xhr = cachedXhrServiceForTesting(env.win);
+      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
+          () => Promise.resolve(new FetchResponse(mockXhr)));
+    });
+
+    it('should fetch text GET requests once for identical URLs', () => {
       return Promise.all([
         xhr.fetchText('/get?k=v1'),
         xhr.fetchText('/get?k=v1'),
       ]).then(results => {
-        expect(fetchStub.calledOnce).to.be.true;
+        expect(fetchStub).to.be.calledOnce;
+        expect(results[0]).to.equal(TEST_RESPONSE);
+        expect(results[1]).to.equal(TEST_RESPONSE);
+      });
+    });
+
+    it('should not cache for POST requests', () => {
+      return Promise.all([
+        xhr.fetchText('/get?k=v1', {method: 'POST', body: {}}),
+        xhr.fetchText('/get?k=v1', {method: 'POST', body: {}}),
+      ]).then(results => {
+        expect(fetchStub).to.be.calledTwice;
         expect(results[0]).to.equal(TEST_RESPONSE);
         expect(results[1]).to.equal(TEST_RESPONSE);
       });
