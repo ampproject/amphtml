@@ -209,7 +209,7 @@ export class ParallaxElement {
  * @return {!ParallaxService}
  */
 export function installParallaxForDoc(nodeOrDoc) {
-  const enabled = isExperimentOn(global, EXPERIMENT);
+  const enabled = isExperimentOn(AMP.win, EXPERIMENT);
   user().assert(enabled, `Experiment "${EXPERIMENT}" is disabled.`);
   return fromClassForDoc(nodeOrDoc, 'amp-fx-parallax', ParallaxService);
 };
