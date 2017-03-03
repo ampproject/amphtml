@@ -17,7 +17,7 @@
 import '../../../amp-carousel/0.1/amp-carousel';
 import {installBindForTesting} from '../bind-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-import {createFixtureIframe} from '../../../../testing/iframe';
+import {createFixturefixture} from '../../../../testing/fixture';
 import {bindForDoc} from '../../../../src/bind';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 
@@ -30,7 +30,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   this.timeout(5000);
 
   beforeEach(() => {
-    return createFixtureIframe(fixtureLocation).then(f => {
+    return createFixturefixture(fixtureLocation).then(f => {
       fixture = f;
       toggleExperiment(fixture, 'amp-bind', true, true);
       return fixture.awaitEvent('amp:load:start', 1);
@@ -38,7 +38,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
       // Bind is installed manually here to get around an issue
-      // toggling experiments on the iframe fixture.
+      // toggling experiments on the fixture fixture.
       bind = installBindForTesting(ampdoc);
       return bind.initializePromiseForTesting();
     });
@@ -186,10 +186,10 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
   describe('amp-selector integration', () => {
     it('should update dependent bindings when selection changes', () => {
-      const selectionText = iframe.doc.getElementById('selectionText');
-      const img1 = iframe.doc.getElementById('selectorImg1');
-      const img2 = iframe.doc.getElementById('selectorImg2');
-      const img3 = iframe.doc.getElementById('selectorImg3');
+      const selectionText = fixture.doc.getElementById('selectionText');
+      const img1 = fixture.doc.getElementById('selectorImg1');
+      const img2 = fixture.doc.getElementById('selectorImg2');
+      const img3 = fixture.doc.getElementById('selectorImg3');
       expect(img1.hasAttribute('selected')).to.be.false;
       expect(img2.hasAttribute('selected')).to.be.false;
       expect(img3.hasAttribute('selected')).to.be.false;
@@ -205,11 +205,11 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should update selection when bound value for selected changes', () => {
       const changeSelectionButton =
-        iframe.doc.getElementById('changeSelectionButton');
-      const selectionText = iframe.doc.getElementById('selectionText');
-      const img1 = iframe.doc.getElementById('selectorImg1');
-      const img2 = iframe.doc.getElementById('selectorImg2');
-      const img3 = iframe.doc.getElementById('selectorImg3');
+        fixture.doc.getElementById('changeSelectionButton');
+      const selectionText = fixture.doc.getElementById('selectionText');
+      const img1 = fixture.doc.getElementById('selectorImg1');
+      const img2 = fixture.doc.getElementById('selectorImg2');
+      const img3 = fixture.doc.getElementById('selectorImg3');
       expect(img1.hasAttribute('selected')).to.be.false;
       expect(img2.hasAttribute('selected')).to.be.false;
       expect(img3.hasAttribute('selected')).to.be.false;
@@ -228,8 +228,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   describe('amp-video integration', () => {
     it('should change src when the src attribute binding changes', () => {
       const changeVidSrcButton =
-        iframe.doc.getElementById('changeVidSrcButton');
-      const vid = iframe.doc.getElementById('video');
+        fixture.doc.getElementById('changeVidSrcButton');
+      const vid = fixture.doc.getElementById('video');
       const originalSrc = 'https://www.google.com/unbound.webm';
       const newSrc = 'https://www.google.com/bound.webm';
       expect(vid.getAttribute('src')).to.equal(originalSrc);;
@@ -241,8 +241,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should NOT change src when new value is a blocked URL', () => {
       const changeVidSrcButton =
-        iframe.doc.getElementById('changeVidSrcButton');
-      const vid = iframe.doc.getElementById('video');
+        fixture.doc.getElementById('changeVidSrcButton');
+      const vid = fixture.doc.getElementById('video');
       const originalSrc = 'https://www.google.com/unbound.webm';
       const newSrc = '__amp_source_origin';
       const blockedURLBinding = `videoSrc="${newSrc}"`;
@@ -256,8 +256,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should NOT change src when new value uses an invalid protocol', () => {
       const changeVidSrcButton =
-      iframe.doc.getElementById('changeVidSrcButton');
-      const vid = iframe.doc.getElementById('video');
+      fixture.doc.getElementById('changeVidSrcButton');
+      const vid = fixture.doc.getElementById('video');
       const originalSrc = 'https://www.google.com/unbound.webm';
       expect(vid.getAttribute('src')).to.equal(originalSrc);
       // Only HTTPS is allowed
@@ -286,8 +286,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should change alt when the alt attribute binding changes', () => {
       const changeVideoAltButton =
-        iframe.doc.getElementById('changeVidAltButton');
-      const vid = iframe.doc.getElementById('video');
+        fixture.doc.getElementById('changeVidAltButton');
+      const vid = fixture.doc.getElementById('video');
       expect(vid.getAttribute('alt')).to.equal('unbound');
       changeVideoAltButton.click();
       return waitForBindApplication().then(() => {
@@ -297,14 +297,14 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should show/hide vid controls when the control binding changes', () => {
       const showControlsButton =
-        iframe.doc.getElementById('showVidControlsButton');
-      const vid = iframe.doc.getElementById('video');
+        fixture.doc.getElementById('showVidControlsButton');
+      const vid = fixture.doc.getElementById('video');
       expect(vid.hasAttribute('controls')).to.be.false;
       showControlsButton.click();
       return waitForBindApplication().then(() => {
         expect(vid.hasAttribute('controls')).to.be.true;
         const hideControlsButton =
-          iframe.doc.getElementById('hideVidControlsButton');
+          fixture.doc.getElementById('hideVidControlsButton');
         hideControlsButton.click();
         return waitForBindApplication();
       }).then(() => {
