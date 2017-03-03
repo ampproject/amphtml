@@ -242,11 +242,11 @@ class AmpLightbox extends AMP.BaseElement {
 
   /** @private */
   maybeEnterFrameFullOverlayMode_() {
-    if (this.isInMainDocument_()) {
+    if (!isExperimentOn(this.getAmpDoc().win, A4A_PROTOTYPE_EXPERIMENT)) {
       return;
     }
 
-    if (!isExperimentOn(this.getAmpDoc().win, A4A_PROTOTYPE_EXPERIMENT)) {
+    if (this.isInMainDocument_()) {
       return;
     }
 
@@ -255,11 +255,11 @@ class AmpLightbox extends AMP.BaseElement {
 
   /** @private */
   maybeLeaveFrameFullOverlayMode_() {
-    if (this.isInMainDocument_()) {
+    if (!isExperimentOn(this.getAmpDoc().win, A4A_PROTOTYPE_EXPERIMENT)) {
       return;
     }
 
-    if (!isExperimentOn(this.getAmpDoc().win, A4A_PROTOTYPE_EXPERIMENT)) {
+    if (this.isInMainDocument_()) {
       return;
     }
 
