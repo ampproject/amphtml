@@ -487,7 +487,8 @@ describe('performance', () => {
                 arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == perf.win.innerWidth &&
-                arg.height == perf.win.innerHeight))
+                arg.height == perf.win.innerHeight),
+            /* inPrerender */ true)
         .returns(Promise.resolve([res1, res2]))
         .once();
 
