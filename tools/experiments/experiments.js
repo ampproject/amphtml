@@ -146,6 +146,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
   {
+    id: 'amp-lightbox-a4a-proto',
+    name: 'Allows the new lightbox experience to be used in A4A (prototype).',
+    spec: 'https://github.com/ampproject/amphtml/issues/7743',
+  },
+  {
     id: 'amp-lightbox-viewer-auto',
     name: 'Allows the new lightbox experience to automatically include some ' +
         'elements without the need to manually add the `lightbox` attribute',
