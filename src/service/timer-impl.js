@@ -150,6 +150,25 @@ export class Timer {
     }
     return Promise.race([delayPromise, opt_racePromise]);
   }
+
+  /**
+   * Returns a promise that resolves after `predicate` returns true.
+   * Polls with interval `delay`
+   * @param {number} delay
+   * @param {function():boolean} predicate
+   * @return {!Promise}
+   */
+  poll(delay, predicate) {
+    return new Promise(resolve => {
+      const interval = this.win.setInterval(() => {
+        if (predicate()) {
+          this.win.clearInterval(interval);
+          resolve();
+        }
+      }, delay);
+    });
+  }
+
 }
 
 /**

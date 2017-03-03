@@ -411,7 +411,7 @@ URI.prototype.setPath = function (newPath) {
 URI.prototype.setRawPath = function (newPath) {
   if (newPath) {
     newPath = String(newPath);
-    this.path_ = 
+    this.path_ =
       // Paths must start with '/' unless this is a path-relative URL.
       (!this.domain_ || /^\//.test(newPath)) ? newPath : '/' + newPath;
   } else {
@@ -1608,7 +1608,7 @@ var html = (function(html4) {
 
   var ATTR_RE = new RegExp(
     '^\\s*' +
-    '([-.:\\w]+)' +             // 1 = Attribute name
+    '(\\[[-.:\\w]+\\]|[-.:\\w]+)'  +    // 1 = Attribute name
     '(?:' + (
       '\\s*(=)\\s*' +           // 2 = Is there a value?
       '(' + (                   // 3 = Attribute value
