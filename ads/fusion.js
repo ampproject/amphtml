@@ -43,9 +43,9 @@ export function fusion(global, data) {
       global.Fusion.apply(container, global.Fusion.loadAds(data, parameters));
 
       global.Fusion.on.warning.run(ev => {
-      if (ev.msg === 'Space not present in response.') {
-        global.context.noContentAvailable();
-      }
-    });
+        if (ev.msg === 'Space not present in response.') {
+          global.context.noContentAvailable();
+        }
+      });
     });
 }
