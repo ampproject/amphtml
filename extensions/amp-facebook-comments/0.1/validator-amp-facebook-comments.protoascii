@@ -16,7 +16,6 @@
 
 tags: {  # amp-facebook-comments
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-facebook-comments extension .js script"
   mandatory_parent: "HEAD"
@@ -54,7 +53,6 @@ tags: {  # amp-facebook-comments
 }
 tags: {  # <amp-facebook-comments>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-FACEBOOK-COMMENTS"
   disallowed_ancestor: "AMP-SIDEBAR"
   satisfies: "amp-facebook-comments"
