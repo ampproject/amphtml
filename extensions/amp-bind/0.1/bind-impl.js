@@ -445,7 +445,6 @@ export class Bind {
 
       if (opt_verifyOnly) {
         this.verify_(results);
-        return Promise.resolve();
       } else {
         return this.apply_(results);
       }
