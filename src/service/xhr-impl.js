@@ -191,7 +191,8 @@ export class Xhr {
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
       init.body = JSON.stringify(init.body);
     }
-    return this.fetch(input, init).then(response => response.json());
+    return this.fetch(input, init)
+        .then(response => response.json());
   }
 
   /**
@@ -207,7 +208,8 @@ export class Xhr {
    */
   fetchText(input, opt_init) {
     const init = setupInit(opt_init, 'text/plain');
-    return this.fetch(input, init).then(response => response.text());
+    return this.fetch(input, init)
+        .then(response => response.text());
   }
 
   /**
@@ -221,7 +223,8 @@ export class Xhr {
   fetchDocument(input, opt_init) {
     const init = setupInit(opt_init, 'text/html');
     init.responseType = 'document';
-    return this.fetch(input, init).then(response => response.document_());
+    return this.fetch(input, init)
+        .then(response => response.document_());
   }
 
   /**
@@ -232,7 +235,7 @@ export class Xhr {
   fetch(input, opt_init) {
     const init = setupInit(opt_init);
     return this.fetchAmpCors_(input, init).then(response =>
-      assertSuccess(response));
+        assertSuccess(response));
   }
 
   /**
@@ -452,6 +455,15 @@ export class FetchResponse {
 
     /** @type {boolean} */
     this.bodyUsed = false;
+  }
+
+  /**
+   * Create a copy of the response and return it.
+   * @return {!FetchResponse}
+   */
+  clone() {
+    dev().assert(!this.bodyUsed, 'Body already used');
+    return new FetchResponse(this.xhr_);
   }
 
   /**

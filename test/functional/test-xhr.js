@@ -663,6 +663,29 @@ describe('XHR', function() {
       });
     });
 
+    it('should be cloneable and each instance should provide text', () => {
+      const response = new FetchResponse(mockXhr);
+      const clone = response.clone();
+      return response.text()
+          .then(result => {
+            const callCloneText = () => clone.text().then(clonedText => {
+              expect(clonedText).to.equal(TEST_TEXT);
+            });
+            expect(callCloneText, 'should not throw').to.not.throw(Error);
+            expect(result).to.equal(TEST_TEXT);
+          });
+    });
+
+    it('should not be cloneable if body is already accessed', () => {
+      const response = new FetchResponse(mockXhr);
+      return response.text()
+          .then(() => {
+            expect(() => response.clone(), 'should throw').to.throw(
+                Error,
+                /Body already used/);
+          });
+    });
+
     scenarios.forEach(test => {
       if (test.desc === 'Polyfill') {
         // FetchRequest is only returned by the Polyfill version of Xhr.

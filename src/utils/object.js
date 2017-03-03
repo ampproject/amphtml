@@ -50,10 +50,9 @@ export function hasOwn(obj, key) {
  * e.g.
  * `getPath({a: {b: [{c: 2}]}}, 'a.b[0].c') === 2`
  *
- * @param {T} obj a map-like value
+ * @param {*} obj a map-like value
  * @param {string} path a dot-separated list of keys to reference a value
  * @return {*}
- * @template T
  */
 export function getPath(obj, path) {
   const arrayIndexRe = /\[(\d+)\]/g;

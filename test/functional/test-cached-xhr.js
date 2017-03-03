@@ -28,6 +28,63 @@ describes.sandboxed('CachedXhr', {}, () => {
     };
   }
 
+  describes.fakeWin('#fetch', getPolyfillWin(), env => {
+    const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
+    const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
+    const mockXhr = {
+      status: 200,
+      responseText: TEST_RESPONSE,
+    };
+    const textInit = {headers: {'Accept': 'text/plain'}};
+    const jsonInit = {headers: {'Accept': 'application/json'}};
+    let xhr;
+    let fetchStub;
+
+    beforeEach(() => {
+      xhr = installCachedXhrService(env.win);
+      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
+          () => Promise.resolve(new FetchResponse(mockXhr)));
+    });
+
+    it('should fetch a generic request once for identical URLs', () => {
+      return Promise.all([
+        xhr.fetch('/get?k=v1').then(response => response.text()),
+        xhr.fetch('/get?k=v1').then(response => response.text()),
+      ]).then(results => {
+        expect(fetchStub).to.be.calledOnce;
+        expect(results[0]).to.equal(TEST_RESPONSE);
+        expect(results[1]).to.equal(TEST_RESPONSE);
+      });
+    });
+
+    it('should separately cache generic fetches with identical URLs' +
+        'but different "Accept" headers', () => {
+      return Promise.all([
+        xhr.fetch('/get?k=v1', textInit).then(response => response.text()),
+        xhr.fetch('/get?k=v1', textInit).then(response => response.text()),
+        xhr.fetch('/get?k=v1', jsonInit).then(response => response.json()),
+        xhr.fetch('/get?k=v1', jsonInit).then(response => response.json()),
+      ]).then(results => {
+        expect(fetchStub).to.be.calledTwice;
+        expect(results[0]).to.equal(TEST_RESPONSE);
+        expect(results[1]).to.equal(TEST_RESPONSE);
+        expect(results[2]).to.jsonEqual(TEST_OBJECT);
+        expect(results[3]).to.jsonEqual(TEST_OBJECT);
+      });
+    });
+
+    it('should cache the same as the convenience methods', () => {
+      return Promise.all([
+        xhr.fetch('/get?k=v1', jsonInit).then(response => response.json()),
+        xhr.fetchJson('/get?k=v1'),
+      ]).then(results => {
+        expect(fetchStub).to.be.calledOnce;
+        expect(results[0]).to.jsonEqual(TEST_OBJECT);
+        expect(results[1]).to.jsonEqual(TEST_OBJECT);
+      });
+    });
+  });
+
   describes.fakeWin('#fetchJson', getPolyfillWin(), env => {
     const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
     const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
