@@ -427,6 +427,27 @@ describe('CustomElement', () => {
     });
   });
 
+  it('Element - re-upgrade to new promised null', () => {
+    const element = new ElementClass();
+    expect(element.isUpgraded()).to.equal(false);
+    const oldImpl = element.implementation_;
+    const promise = Promise.resolve(null);
+    oldImpl.upgradeCallback = () => promise;
+
+    container.appendChild(element);
+    element.attachedCallback();
+    expect(element.implementation_).to.equal(oldImpl);
+    expect(element.isUpgraded()).to.equal(false);
+    expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
+    return promise.then(() => {
+      // Skip a microtask.
+    }).then(() => {
+      expect(element.implementation_).to.equal(oldImpl);
+      expect(element.isUpgraded()).to.equal(true);
+      expect(element.upgradeState_).to.equal(/* UPGRADED */ 2);
+    });
+  });
+
   it('Element - re-upgrade with a failed promised', () => {
     const element = new ElementClass();
     expect(element.isUpgraded()).to.equal(false);

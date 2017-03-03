@@ -17,49 +17,49 @@
 import '../../../amp-carousel/0.1/amp-carousel';
 import {installBindForTesting} from '../bind-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-import {chunkInstanceForTesting} from '../../../../src/chunk';
-import {createFixtureIframe} from '../../../../testing/iframe';
+import {createFixturefixture} from '../../../../testing/fixture';
 import {bindForDoc} from '../../../../src/bind';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 
 describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
-  let iframe;
+  let fixture;
   let ampdoc;
   let bind;
-  const fixture = 'test/fixtures/amp-bind-integrations.html';
+  const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
 
   this.timeout(5000);
 
   beforeEach(() => {
-
-    return createFixtureIframe(fixture).then(i => {
-      iframe = i;
-      toggleExperiment(iframe.win, 'amp-bind', true, true);
-      return iframe.awaitEvent('amp:load:start', 1);
+    return createFixturefixture(fixtureLocation).then(f => {
+      fixture = f;
+      toggleExperiment(fixture, 'amp-bind', true, true);
+      return fixture.awaitEvent('amp:load:start', 1);
     }).then(() => {
-      const ampdocService = ampdocServiceFor(iframe.win);
-      ampdoc = ampdocService.getAmpDoc(iframe.doc);
-      chunkInstanceForTesting(ampdoc);
+      const ampdocService = ampdocServiceFor(fixture.win);
+      ampdoc = ampdocService.getAmpDoc(fixture.doc);
+      // Bind is installed manually here to get around an issue
+      // toggling experiments on the fixture fixture.
       bind = installBindForTesting(ampdoc);
       return bind.initializePromiseForTesting();
     });
   });
 
   function waitForBindApplication() {
+    // Bind should be available, but need to wait for actions to resolve
+    // service promise for bind and call setState
     return bindForDoc(ampdoc).then(() => {
       return bind.setStatePromiseForTesting();
     });
   }
 
-  //TODO(kmh287): Set all 'on' attributes in the test for clarity?
   function setButtonBinding(button, binding) {
     button.setAttribute('on', `tap:AMP.setState(${binding})`);
   }
 
   describe('text integration', () => {
     it('should update text when text attribute binding changes', () => {
-      const textElement = iframe.doc.getElementById('textElement');
-      const button = iframe.doc.getElementById('changeTextButton');
+      const textElement = fixture.doc.getElementById('textElement');
+      const button = fixture.doc.getElementById('changeTextButton');
       expect(textElement.textContent).to.equal('unbound');
       button.click();
       return waitForBindApplication().then(() => {
@@ -68,9 +68,9 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
 
     it('should update CSS class when class binding changes', () => {
-      const textElement = iframe.doc.getElementById('textElement');
+      const textElement = fixture.doc.getElementById('textElement');
       const changeClassButton =
-        iframe.doc.getElementById('changeTextClassButton');
+        fixture.doc.getElementById('changeTextClassButton');
       expect(textElement.className).to.equal('original');
       changeClassButton.click();
       return waitForBindApplication().then(() => {
@@ -81,19 +81,19 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
   describe('amp-carousel integration', () => {
     it('should update dependent bindings on carousel slide changes', () => {
-      const slideNum = iframe.doc.getElementById('slideNum');
-      const carousel = iframe.doc.getElementById('carousel');
+      const slideNum = fixture.doc.getElementById('slideNum');
+      const carousel = fixture.doc.getElementById('carousel');
       const impl = carousel.implementation_;
       expect(slideNum.textContent).to.equal('0');
-      impl.go(1, false /* animate */);
+      impl.go(1, /* animate */ false);
       return waitForBindApplication().then(() => {
         expect(slideNum.textContent).to.equal('1');
       });
     });
 
     it('should change slides when the slide attribute binding changes', () => {
-      const carousel = iframe.doc.getElementById('carousel');
-      const goToSlide1Button = iframe.doc.getElementById('goToSlide1Button');
+      const carousel = fixture.doc.getElementById('carousel');
+      const goToSlide1Button = fixture.doc.getElementById('goToSlide1Button');
       const impl = carousel.implementation_;
       // No previous slide as current slide is 0th side
       expect(impl.hasPrev()).to.be.false;
@@ -108,8 +108,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   describe('amp-img integration', () => {
     it('should change src when the src attribute binding changes', () => {
       const changeImgSrcButton =
-        iframe.doc.getElementById('changeImgSrcButton');
-      const img = iframe.doc.getElementById('image');
+        fixture.doc.getElementById('changeImgSrcButton');
+      const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('src')).to.equal('https://lh3.googleusercontent' +
         '.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no');
       changeImgSrcButton.click();
@@ -122,8 +122,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should NOT change src when new value is a blocked URL', () => {
       const changeImgSrcButton =
-        iframe.doc.getElementById('changeImgSrcButton');
-      const img = iframe.doc.getElementById('image');
+        fixture.doc.getElementById('changeImgSrcButton');
+      const img = fixture.doc.getElementById('image');
       const originalSrc = 'https://lh3.googleusercontent.com/' +
         '5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
       expect(img.getAttribute('src')).to.equal(originalSrc);
@@ -138,8 +138,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should NOT change src when new value uses an invalid protocol', () => {
       const changeImgSrcButton =
-        iframe.doc.getElementById('changeImgSrcButton');
-      const img = iframe.doc.getElementById('image');
+        fixture.doc.getElementById('changeImgSrcButton');
+      const img = fixture.doc.getElementById('image');
       const originalSrc = 'https://lh3.googleusercontent.com/' +
         '5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
       expect(img.getAttribute('src')).to.equal(originalSrc);
@@ -161,8 +161,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should change alt when the alt attribute binding changes', () => {
       const changeImgAltButton =
-        iframe.doc.getElementById('changeImgAltButton');
-      const img = iframe.doc.getElementById('image');
+        fixture.doc.getElementById('changeImgAltButton');
+      const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('alt')).to.equal('unbound');
       changeImgAltButton.click();
       return waitForBindApplication().then(() => {
@@ -172,8 +172,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should change width and height when their bindings change', () => {
       const changeImgDimensButton =
-        iframe.doc.getElementById('changeImgDimensButton');
-      const img = iframe.doc.getElementById('image');
+        fixture.doc.getElementById('changeImgDimensButton');
+      const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('height')).to.equal('200');
       expect(img.getAttribute('width')).to.equal('200');
       changeImgDimensButton.click();
@@ -186,10 +186,10 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
   describe('amp-selector integration', () => {
     it('should update dependent bindings when selection changes', () => {
-      const selectionText = iframe.doc.getElementById('selectionText');
-      const img1 = iframe.doc.getElementById('selectorImg1');
-      const img2 = iframe.doc.getElementById('selectorImg2');
-      const img3 = iframe.doc.getElementById('selectorImg3');
+      const selectionText = fixture.doc.getElementById('selectionText');
+      const img1 = fixture.doc.getElementById('selectorImg1');
+      const img2 = fixture.doc.getElementById('selectorImg2');
+      const img3 = fixture.doc.getElementById('selectorImg3');
       expect(img1.hasAttribute('selected')).to.be.false;
       expect(img2.hasAttribute('selected')).to.be.false;
       expect(img3.hasAttribute('selected')).to.be.false;
@@ -205,11 +205,11 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should update selection when bound value for selected changes', () => {
       const changeSelectionButton =
-        iframe.doc.getElementById('changeSelectionButton');
-      const selectionText = iframe.doc.getElementById('selectionText');
-      const img1 = iframe.doc.getElementById('selectorImg1');
-      const img2 = iframe.doc.getElementById('selectorImg2');
-      const img3 = iframe.doc.getElementById('selectorImg3');
+        fixture.doc.getElementById('changeSelectionButton');
+      const selectionText = fixture.doc.getElementById('selectionText');
+      const img1 = fixture.doc.getElementById('selectorImg1');
+      const img2 = fixture.doc.getElementById('selectorImg2');
+      const img3 = fixture.doc.getElementById('selectorImg3');
       expect(img1.hasAttribute('selected')).to.be.false;
       expect(img2.hasAttribute('selected')).to.be.false;
       expect(img3.hasAttribute('selected')).to.be.false;
