@@ -52,10 +52,6 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
   }
 
-  function setButtonBinding(button, binding) {
-    button.setAttribute('on', `tap:AMP.setState(${binding})`);
-  }
-
   describe('text integration', () => {
     it('should update text when text attribute binding changes', () => {
       const textElement = fixture.doc.getElementById('textElement');
@@ -117,12 +113,10 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
 
     it('should NOT change src when new value is a blocked URL', () => {
-      const changeImgSrcButton =
-        fixture.doc.getElementById('changeImgSrcButton');
+      const button = fixture.doc.getElementById('invalidSrcButton');
       const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
-      setButtonBinding(changeImgSrcButton, 'imageSrc="__amp_source_origin"');
-      changeImgSrcButton.click();
+      button.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('src')).to
             .equal('http://www.google.com/image1');
