@@ -666,14 +666,13 @@ describe('XHR', function() {
     it('should be cloneable and each instance should provide text', () => {
       const response = new FetchResponse(mockXhr);
       const clone = response.clone();
-      return response.text()
-          .then(result => {
-            const callCloneText = () => clone.text().then(clonedText => {
-              expect(clonedText).to.equal(TEST_TEXT);
-            });
-            expect(callCloneText, 'should not throw').to.not.throw(Error);
-            expect(result).to.equal(TEST_TEXT);
-          });
+      return Promise.all([
+        response.text(),
+        clone.text(),
+      ]).then(results => {
+        expect(results[0]).to.equal(TEST_TEXT);
+        expect(results[1]).to.equal(TEST_TEXT);
+      });
     });
 
     it('should not be cloneable if body is already accessed', () => {
