@@ -196,8 +196,9 @@ export class Performance {
   whenViewportLayoutComplete_() {
     const size = viewportForDoc(this.win.document).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
-    return this.resources_.getResourcesInRect(this.win, rect).then(
-        resources => Promise.all(resources.map(r => r.loadedOnce())));
+    return this.resources_.getResourcesInRect(
+            this.win, rect, /* isInPrerender */ true)
+        .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
   }
 
   /**
