@@ -126,7 +126,6 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     }
 
     it('should detect bindings in initial live-list elements', () => {
-      const liveList = fixture.doc.getElementById('liveList');
       const liveListItems = fixture.doc.getElementById('liveListItems');
       expect(liveListItems.children.length).to.equal(1);
 

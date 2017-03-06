@@ -697,6 +697,7 @@ export class Bind {
    * that can add/remove bindings add new elements to their parent, so parent
    * node should be observed for mutations.
    * @param {!Element} element
+   * @private
    */
   observeElementForMutations_(element) {
     const tagName = element.tagName;
