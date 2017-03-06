@@ -252,13 +252,13 @@ function proxyToAmpProxy(req, res, minify) {
 }
 
 
+var liveListUpdateFile = '/examples/live-list-update.amp.html';
+var liveListCtr = 0;
+var itemCtr = 2;
+var liveListDoc = null;
+var doctype = '<!doctype html>\n';
 // Only handle min/max
 app.use('/examples/live-list-update.amp.(min|max).html', function(req, res) {
-  var doctype = '<!doctype html>\n';
-  var liveListUpdateFile = '/examples/live-list-update.amp.html';
-  var itemCtr = 2;
-  var liveListCtr = 0;
-  var liveListDoc = null;
   var filePath = req.baseUrl;
   var mode = getPathMode(filePath);
   // When we already have state in memory and user refreshes page, we flush
@@ -286,11 +286,11 @@ app.use('/examples/live-list-update.amp.(min|max).html', function(req, res) {
       liveListReplace(item1);
 
       if (Math.random() < .5) {
-        liveListTombstone(liveList, itemCtr);
+        liveListTombstone(liveList);
       }
 
       if (Math.random() < .8) {
-        liveListInsert(liveList, item1, itemCtr++);
+        liveListInsert(liveList, item1);
       }
       pagination.textContent = '';
       var liveChildren = [].slice.call(items.children)
@@ -322,18 +322,18 @@ function liveListReplace(item) {
   itemContents[1].textContent = Math.floor(Math.random() * 10);
 }
 
-function liveListInsert(liveList, node, itemCtr) {
+function liveListInsert(liveList, node) {
   var iterCount = Math.floor(Math.random() * 2) + 1;
   console.log(`inserting ${iterCount} item(s)`);
   for (var i = 0; i < iterCount; i++) {
     var child = node.cloneNode(true);
-    child.setAttribute('id', `list-item-${itemCtr}`);
+    child.setAttribute('id', `list-item-${itemCtr++}`);
     child.setAttribute('data-sort-time', Date.now());
     liveList.querySelector('[items]').appendChild(child);
   }
 }
 
-function liveListTombstone(liveList, itemCtr) {
+function liveListTombstone(liveList) {
   var tombstoneId = Math.floor(Math.random() * itemCtr);
   console.log(`trying to tombstone #list-item-${tombstoneId}`);
   // We can tombstone any list item except item-1 since we always do a
@@ -405,6 +405,17 @@ function getLiveBlogItem() {
 
 app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
   function(req, res, next) {
+    if ('amp_latest_update_time' in req.query) {
+      res.setHeader('Content-Type', 'text/html');
+      res.end(getLiveBlogItem());
+      return;
+    }
+    next();
+});
+
+app.use('/examples/bind/live-list.amp.(min.|max.)?html',
+  function(req, res, next) {
+    console.log('test');
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
       res.end(getLiveBlogItem());
