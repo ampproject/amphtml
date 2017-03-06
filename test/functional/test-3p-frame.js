@@ -175,8 +175,7 @@ describe('3p-frame', () => {
           '"_context":{"referrer":"http://acme.org/",' +
           '"ampcontextVersion": "$internalRuntimeVersion$",' +
           '"ampcontextFilepath": "https://cdn.ampproject.org/' +
-          '$internalRuntimeVersion$' +
-          '/ampcontext-v0.js",' +
+          '$internalRuntimeVersion$' + '/ampcontext-v0.js",' +
           '"canonicalUrl":"' + docInfo.canonicalUrl + '",' +
           '"sourceUrl":"' + locationHref + '",' +
           '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
