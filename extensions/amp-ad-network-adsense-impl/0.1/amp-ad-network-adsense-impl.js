@@ -138,6 +138,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'h', value: slotRect.height},
       {name: 'adtest', value: adTestOn},
       {name: 'adk', value: adk},
+      {name: 'raru', value: 1},
       {
         name: 'bc',
         value: global.SVGElement && global.document.createElementNS ?
