@@ -461,7 +461,9 @@ describe('performance', () => {
 
   });
 
-  it('should wait for visible resources', () => {
+  // TODO(dvoytenko, #7815): re-enable once the reporting regression is
+  // confirmed.
+  it.skip('should wait for visible resources', () => {
     function resource() {
       const res = {
         loadedComplete: false,
@@ -531,7 +533,9 @@ describe('performance', () => {
 
       sandbox.stub(viewer, 'whenFirstVisible')
           .returns(whenFirstVisiblePromise);
-      sandbox.stub(perf, 'whenViewportLayoutComplete_')
+      // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
+      // reporting regression is confirmed.
+      sandbox.stub(perf, 'whenViewportLayoutCompleteLegacy_')
           .returns(whenViewportLayoutCompletePromise);
       return viewer.whenMessagingReady();
     });

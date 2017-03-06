@@ -20,7 +20,7 @@ import {fromClass} from '../service';
 import {resourcesForDoc} from '../resources';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
-import {whenDocumentComplete} from '../document-ready';
+import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 import {urls} from '../config';
 
 
@@ -166,7 +166,9 @@ export class Performance {
       });
     }
 
-    this.whenViewportLayoutComplete_().then(() => {
+    // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
+    // reporting regression is confirmed.
+    this.whenViewportLayoutCompleteLegacy_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
             ? (Date.now() - docVisibleTime)
@@ -199,6 +201,27 @@ export class Performance {
     return this.resources_.getResourcesInRect(
             this.win, rect, /* isInPrerender */ true)
         .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
+  }
+
+  /**
+   * TODO(dvoytenko, #7815): remove once the reporting regression is confirmed.
+   * @return {!Promise}
+   * @private
+   */
+  whenViewportLayoutCompleteLegacy_() {
+    const whenReadyToRetrieveResources = whenDocumentReady(this.win.document)
+        .then(() => {
+          // Two fold. First, resolve the promise to undefined.
+          // Second, causes a delay by introducing another async request
+          // (this `#then` block) so that Resources' onDocumentReady event
+          // is guaranteed to fire.
+        });
+    return whenReadyToRetrieveResources.then(() => {
+      return Promise.all(this.resources_.getResourcesInViewportLegacy()
+          .map(r => {
+            return r.loadedOnce();
+          }));
+    });
   }
 
   /**
@@ -357,7 +380,9 @@ export class Performance {
    * @private
    */
   setDocumentInfoParams_() {
-    return this.whenViewportLayoutComplete_().then(() => {
+    // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
+    // reporting regression is confirmed.
+    return this.whenViewportLayoutCompleteLegacy_().then(() => {
       const params = Object.create(null);
       const sourceUrl = documentInfoForDoc(this.win.document).sourceUrl
           .replace(/#.*/, '');
