@@ -21,23 +21,33 @@
 
 <body>
   <p>P TAG TEST</p>
-  <button on="tap:AMP.setState(boundText='hello world', boundClass='new')" id="mutateTextButton">hello world!</button>
+  <button on="tap:AMP.setState(boundText='hello world')" id="changeTextButton"></button>
+  <button on="tap:AMP.setState(boundClass='new')" id="changeTextClassButton"></button>
   <p id="textElement" class="original" [class]="boundClass" [text]="boundText">unbound</p>
 
   <p>CAROUSEL TEST</p>
   <button on="tap:AMP.setState(selectedSlide=1)" id="goToSlide1Button">slide 1!</button>
   <p id="slideNum" [text]="selectedSlide">0</p>
   <amp-carousel width="300" height="100" type="slides"  id="carousel" on="slideChange:AMP.setState(selectedSlide=event.index)" [slide]="selectedSlide">
-    <amp-img
-    src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no"
-    height="200" width="200"></amp-img>
-    <amp-img
-    src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no"
-    height="200" width="200"></amp-img>
-    <amp-img
-    src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no"
-    height="200" width="200"></amp-img>
+    <amp-img src="http://www.google.com/image1" height="200" width="200"></amp-img>
+    <amp-img src="http://www.google.com/image1" height="200" width="200"></amp-img>
+    <amp-img src="http://www.google.com/image1" height="200" width="200"></amp-img>
   </amp-carousel>
+
+  <p>AMP-IMG TEST</p>
+  <button on="tap:AMP.setState(imageSrc='http://www.google.com/image2')" id="changeImgSrcButton"></button>
+  <button on="tap:AMP.setState(imageSrc='__amp_source_origin')" id="invalidSrcButton"></button>
+  <button on="tap:AMP.setState(imageSrc='ftp://foo:bar@192.168.1.1/lol.jpg')" id="ftpSrcButton"></button>
+  <button on="tap:AMP.setState(imageSrc='tel:1-555-867-5309')" id="telSrcButton"></button>
+  <button on="tap:AMP.setState(imageAlt='hello world')" id="changeImgAltButton"></button>
+  <button on="tap:AMP.setState(imageWidth=300, imageHeight=300)" id="changeImgDimensButton"></button>
+
+  <amp-img id="image"
+    src="http://www.google.com/image1" [src]="imageSrc"
+    alt="unbound" [alt]="imageAlt"
+    width="200" [width]="imageWidth"
+    height="200" [height]="imageHeight"
+    layout="responsive">
 
 </body>
 </html>

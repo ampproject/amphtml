@@ -13,6 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+- [Filing issues](#filing-issues)
+  * [Suggestions](#suggestions)
+  * [Bugs](#bugs)
+- [Contributing code](#contributing-code)
+  * [Tips for new open source contributors](#tips-for-new-open-source-contributors)
+  * [How to contribute code](#how-to-contribute-code)
+- [Contributing features](#contributing-features)
+- [Contributing extended components](#contributing-extended-components)
+- [Contributor License Agreement](#contributor-license-agreement)
+- [Ongoing participation](#ongoing-participation)
+  * [Discussion channels](#discussion-channels)
+  * [Weekly status updates](#weekly-status-updates)
+  * [Weekly design reviews](#weekly-design-reviews)
+  * [See Also](#see-also)
 
 # Contributing to AMP HTML
 
