@@ -39,6 +39,7 @@ If publishers want to serve their direct-sold ad formats they must create the ad
 The following adservers support serving AMP ads at the moment:
 1. DoubleClick for Publishers
 2. TripleLift 
+3. Dianomi
 
 
 ## Creative Agencies
