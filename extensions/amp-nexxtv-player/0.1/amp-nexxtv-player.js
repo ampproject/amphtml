@@ -159,7 +159,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   sendCommand_(command) {
-    this.iframe_.contentWindow.postMessage(JSON.stringify({
+    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
       'cmd': command,
     }), '*');
   };
