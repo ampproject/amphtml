@@ -182,7 +182,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
 
     it('should update selection when bound value for selected changes', () => {
-      const button =  fixture.doc.getElementById('changeSelectionButton');
+      const button = fixture.doc.getElementById('changeSelectionButton');
       const selectionText = fixture.doc.getElementById('selectionText');
       const img1 = fixture.doc.getElementById('selectorImg1');
       const img2 = fixture.doc.getElementById('selectorImg2');
