@@ -40,24 +40,3 @@ export function navegg(global, data) {
         });
   });
 }
-
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-function setTargeting(global, data) {
-  if (data.adserver === 'DFP') {
-    const dblParams = {
-      slot: data.slot,
-      targeting: Navegg.ComputeDFPTargetingForAMP(
-        data.cookiename || Navegg.PubTag.RTA.DefaultCrtgRtaCookieName,
-        data.varname || Navegg.PubTag.RTA.DefaultCrtgContentName),
-      width: data.width,
-      height: data.height,
-      type: 'navegg',
-    };
-    doubleclick(global, dblParams);
-  }
-}
-
-

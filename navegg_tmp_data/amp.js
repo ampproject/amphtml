@@ -26,6 +26,7 @@ window.AMPNavegg = function(cnf){
         var qry, parms = {};
         parms['v'] = this.version;
         parms['acc'] = this.acc;
+        parms['wst'] = '0';
         if(this.usr){
             parms['id'] = this.usr;
         }
@@ -76,7 +77,7 @@ window.AMPNavegg = function(cnf){
     this.parsePersona = function(data){
         var k, tmp = data.split(":");
         for(k=0;k<=this.seg.length;k++){
-            if(tmp[k]) this.persona[this.seg[k]] = tmp[k];
+            if(tmp[k]) this.persona[this.seg[k]] = tmp[k].split("-");
         }
     };
 
