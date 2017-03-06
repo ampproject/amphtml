@@ -409,8 +409,10 @@ describes.sandboxed('integration test: Fast Fetch', {}, () => {
     it('nameframe iframe should use same URL as prefetch', () => {
       return env.ampdoc.whenReady().then(() => {
         doc.body.appendChild(a4aElement);
-        expect(a4aElement, `upgradeCallback = ${a4aElement.upgradeCallback}`).to.have.key('upgradeCallback');
-        return a4aElement.upgradeCallback().then(() => {
+        expect(a4aElement.implementation_,
+            `upgradeCallback = ${a4aElement.implementation_.upgradeCallback}`)
+            .to.have.key('upgradeCallback');
+        return a4aElement.implementation_.upgradeCallback().then(() => {
           const impl = a4aElement.implementation_;
           expect(impl).to.have.key('onLayoutMeasure');
         });
