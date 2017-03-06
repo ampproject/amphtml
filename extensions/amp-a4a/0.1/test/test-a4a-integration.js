@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {RENDERING_TYPE_HEADER} from '../amp-a4a';
 import {
     MockA4AImpl,
     SIGNATURE_HEADER,
@@ -37,6 +38,8 @@ import {
 import {utf8Encode} from '../../../../src/utils/bytes';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {loadPromise} from '../../../../src/event-helper';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {getMode} from '../../../../src/mode';
 import * as sinon from 'sinon';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
@@ -317,6 +320,20 @@ describe('integration test: a4a', () => {
         });
       });
 
+  it('nameframe iframe should use same URL as prefetch', () => {
+    delete headers[SIGNATURE_HEADER];  // Force xdom rendering.
+    headers[RENDERING_TYPE_HEADER] = 'nameframe';  // Render via nameframe.
+    return fixture.addElement(a4aElement).then(unusedElement => {
+      const prefetches = fixture.doc.head.querySelectorAll(
+          'link[rel=preconnect][href*=nameframe]');
+      expect(prefetches).to.have.length(1);
+      const prefetchUrl = prefetches[0].href;
+      expect(prefetchUrl).to.have.string('nameframe');
+      expectRenderedInXDomainIframe(a4aElement, 'nameframe.html');
+
+    });
+  });
+
   // TODO(@ampproject/a4a): Need a test that double-checks that thrown errors
   // are propagated out and printed to console and/or sent upstream to error
   // logging systems.  This is a bit tricky, because it's handled by the AMP
@@ -325,4 +342,87 @@ describe('integration test: a4a', () => {
   // all tests, so that we know precisely when errors are being reported and
   // to whom.
   it('should propagate errors out and report them to upstream error log');
+});
+
+describes.sandboxed('integration test: Fast Fetch', {}, () => {
+  describes.fakeWin('render methods', {amp: true}, env => {
+    let xhrMock;
+    let mockResponse;
+    let a4aElement;
+    let headers;
+    let win;
+    let doc;
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      // Fool AMP into thinking that it's not in dev or test mode so that
+      // getDefaultBootstrapBaseUrl will actually randomize, rather than
+      // returning a fixed localhost address.
+      getMode(win).localDev = false;
+      getMode(win).test = false;
+      xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
+      // Expect key set fetches for signing services.
+      const fetchJsonMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+      for (const serviceName in signingServerURLs) {
+        fetchJsonMock.withArgs(signingServerURLs[serviceName],
+          {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(
+            Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+      }
+      // Expect ad request.
+      headers = {};
+      headers[RENDERING_TYPE_HEADER] = 'nameframe';
+      mockResponse = {
+        arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
+        bodyUsed: false,
+        headers: new FetchResponseHeaders({
+          getResponseHeader(name) {
+            return headers[name];
+          },
+        }),
+      };
+      xhrMock.withArgs(TEST_URL, {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      adConfig['mock'] = {};
+      a4aRegistry['mock'] = () => {
+        return true;
+      };
+      // TDRL: Is this necessary?
+      installDocService(win, /* isSingleDoc */ true);
+      upgradeOrRegisterElement(win, 'amp-a4a', MockA4AImpl);
+      a4aElement = doc.createElement('amp-a4a');
+      a4aElement.setAttribute('type', 'mock');
+      // a4aElement = createElementWithAttributes(doc, 'amp-a4a', {
+      //   width: 200,
+      //   height: 50,
+      //   type: 'mock',
+      // });
+    });
+
+    it('nameframe iframe should use same URL as prefetch', () => {
+      return env.ampdoc.whenReady().then(() => {
+        doc.body.appendChild(a4aElement);
+        expect(a4aElement, `upgradeCallback = ${a4aElement.upgradeCallback}`).to.have.key('upgradeCallback');
+        return a4aElement.upgradeCallback().then(() => {
+          const impl = a4aElement.implementation_;
+          expect(impl).to.have.key('onLayoutMeasure');
+        });
+        // return a4aElement.element.layoutCallback().then(() => {
+        //   const prefetches = doc.head.querySelectorAll(
+        //       'link[rel=preconnect][href*=ampproject]');
+        //   expect(prefetches).to.have.length(1);
+        //   const prefetchUrl = prefetches[0].href;
+        //   expect(prefetchUrl).to.have.string('nameframe');
+        //   expectRenderedInXDomainIframe(a4aElement, 'nameframe.html');
+        // });
+      });
+    });
+  });
 });
