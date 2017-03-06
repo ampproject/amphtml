@@ -20,9 +20,7 @@ import {fromClass} from '../service';
 import {resourcesForDoc} from '../resources';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
-import {whenDocumentComplete} from '../document-ready';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
-import {urls} from '../config';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
