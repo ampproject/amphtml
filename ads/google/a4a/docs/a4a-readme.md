@@ -28,21 +28,25 @@ AMP ads are designed to work on both AMP and Non-AMP webpages,  including deskto
 
 # Current status
 
-The AMP ads format spec has been [released](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) and any creative developer can create AMP ads. In order for ads to get preferred treatment on AMP pages, ad server support is required. Advertisers using DoubleClick or  AdSense can  already deliverprogrammatic AMP ads to publisher AMP pages. Publishers using  DFP (DoubleClick for Publishers) can already deliver their own AMP ads. Advertisers or publishers using other ad providers  can implement AMP ads with the help of a signing service like CloudFlare. Cloudflare provides AMP ad verification services, enabling any independent ad provider to deliver faster, lighter, and more engaging ads.
+The AMP ads format spec has been [released](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) and any creative developer can create AMP ads.A number of ad providers are working on automatically converting ads to AMP ads whenever possible. e.g. Adsense
 
- 
-
-Here is how you can participate. If you are a:
+Here is how you can participate. If you are:
 
 ## Publishers
 
 If publishers want to serve their direct-sold ad formats they must create the ads in[ A4A format](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) (or use a creative agency), and deliver them using an AMP ad supported ad server.
 
+The following adservers support serving AMP ads at the moment:
+1. DoubleClick for Publishers
+2. TripleLift 
+
+
 ## Creative Agencies
 
 If you are a creative agency, please reach out to us via Github so we can put you in touch with publishers and advertisers who are interested in developing AMP ads.
 
-## Ad Networks
+## Ad Networks/ Ad Servers
 
 Please refer to the [Network Implementation Guide](./Network-Impl-Guide.md)
+Ad networks and ad servers can integrate with [Cloudflare](https://blog.cloudflare.com/firebolt/) who provide an AMP ad verification services, enabling any independent ad provider to deliver faster, lighter, and more engaging ads.
 
