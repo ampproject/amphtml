@@ -912,6 +912,44 @@ describes.realWin('placement', {
           expect(placements).to.have.lengthOf(1);
           expect(placements[0].anchorElement_).to.eql(anchor);
         });
+
+    it('should not return a placement that\'s inside an amp-sidebar', () => {
+      const anchor = document.createElement('amp-sidebar');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(env.win, {
+        placements: [
+          {
+            anchor: {
+              selector: 'AMP-SIDEBAR#anId',
+            },
+            pos: 2,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.be.empty;
+    });
+
+    it('should get a placement when outside amp-sidebar', () => {
+      const anchor = document.createElement('amp-sidebar');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(env.win, {
+        placements: [
+          {
+            anchor: {
+              selector: 'AMP-SIDEBAR#anId',
+            },
+            pos: 1,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+    });
   });
 
   describe('getPlacementsFromConfigObj, sub-anchors', () => {
