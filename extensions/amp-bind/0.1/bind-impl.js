@@ -696,8 +696,7 @@ export class Bind {
    * Begin observing mutations to element. Presently, all supported elements
    * that can add/remove bindings add new elements to their parent, so parent
    * node should be observed for mutations.
-   * @param {string} tagName
-   * @private {!Element} element
+   * @param {!Element} element
    */
   observeElementForMutations_(element) {
     const tagName = element.tagName;
@@ -708,7 +707,7 @@ export class Bind {
       // TODO(kmh287): What if parent is the body tag?
       elementToObserve = element.parentElement;
     } else if (tagName === 'AMP-LIVE-LIST') {
-      // All elements in AMP-LIVE-LIST are children of a <div> with the
+      // All elements in AMP-LIVE-LIST are children of a <div> with an
       // `items` attribute.
       const childDivs = element.getElementsByTagName('DIV');
       let itemsDiv;
@@ -728,7 +727,12 @@ export class Bind {
            `amp-bind asked to observe unexpected element ${tagName}`);
       elementToObserve = element;
     }
-    this.mutationObserver_.observe(elementToObserve, {childList: true});
+    if (elementToObserve) {
+      this.mutationObserver_.observe(elementToObserve, {childList: true});
+    } else {
+      elementToObserve = dev().assert(false,
+        `Cannot find element to observe for element with tag name ${tagName}`);
+    }
   }
 
   /**
