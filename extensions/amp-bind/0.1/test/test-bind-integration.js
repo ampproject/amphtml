@@ -52,10 +52,6 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
   }
 
-  function setButtonBinding(button, binding) {
-    button.setAttribute('on', `tap:AMP.setState(${binding})`);
-  }
-
   describe('text integration', () => {
     it('should update text when text attribute binding changes', () => {
       const textElement = fixture.doc.getElementById('textElement');
@@ -69,10 +65,9 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should update CSS class when class binding changes', () => {
       const textElement = fixture.doc.getElementById('textElement');
-      const changeClassButton =
-        fixture.doc.getElementById('changeTextClassButton');
+      const button = fixture.doc.getElementById('changeTextClassButton');
       expect(textElement.className).to.equal('original');
-      changeClassButton.click();
+      button.click();
       return waitForBindApplication().then(() => {
         expect(textElement.className).to.equal('new');
       });
@@ -93,11 +88,11 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should change slides when the slide attribute binding changes', () => {
       const carousel = fixture.doc.getElementById('carousel');
-      const goToSlide1Button = fixture.doc.getElementById('goToSlide1Button');
+      const button = fixture.doc.getElementById('goToSlide1Button');
       const impl = carousel.implementation_;
       // No previous slide as current slide is 0th side
       expect(impl.hasPrev()).to.be.false;
-      goToSlide1Button.click();
+      button.click();
       return waitForBindApplication().then(() => {
         // Has previous slide since the index has changed
         expect(impl.hasPrev()).to.be.true;
@@ -107,76 +102,59 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
   describe('amp-img integration', () => {
     it('should change src when the src attribute binding changes', () => {
-      const changeImgSrcButton =
-        fixture.doc.getElementById('changeImgSrcButton');
+      const button = fixture.doc.getElementById('changeImgSrcButton');
       const img = fixture.doc.getElementById('image');
-      expect(img.getAttribute('src')).to.equal('https://lh3.googleusercontent' +
-        '.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no');
-      changeImgSrcButton.click();
+      expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
+      button.click();
       return waitForBindApplication().then(() => {
-        expect(img.getAttribute('src')).to.equal('https://lh3' +
-          '.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9O' +
-          'EIQ_QXcbubWIOdkY=w400-h300-no');
+        expect(img.getAttribute('src')).to
+            .equal('http://www.google.com/image2');
       });
     });
 
     it('should NOT change src when new value is a blocked URL', () => {
-      const changeImgSrcButton =
-        fixture.doc.getElementById('changeImgSrcButton');
+      const button = fixture.doc.getElementById('invalidSrcButton');
       const img = fixture.doc.getElementById('image');
-      const originalSrc = 'https://lh3.googleusercontent.com/' +
-        '5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
-      expect(img.getAttribute('src')).to.equal(originalSrc);
-      const newSrc = '__amp_source_origin';
-      const blockedURLBinding = `imageSrc="${newSrc}"`;
-      setButtonBinding(changeImgSrcButton, blockedURLBinding);
-      changeImgSrcButton.click();
+      expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
+      button.click();
       return waitForBindApplication().then(() => {
-        expect(img.getAttribute('src')).to.equal(originalSrc);
+        expect(img.getAttribute('src')).to
+            .equal('http://www.google.com/image1');
       });
     });
 
     it('should NOT change src when new value uses an invalid protocol', () => {
-      const changeImgSrcButton =
-        fixture.doc.getElementById('changeImgSrcButton');
       const img = fixture.doc.getElementById('image');
-      const originalSrc = 'https://lh3.googleusercontent.com/' +
-        '5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
-      expect(img.getAttribute('src')).to.equal(originalSrc);
-      const ftpSrc = 'ftp://foo:bar@192.168.1.1/lol.jpg';
-      const ftpBinding = `imageSrc="${ftpSrc}"`;
-      setButtonBinding(changeImgSrcButton, ftpBinding);
-      changeImgSrcButton.click();
+      expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
+      const ftpSrcButton = fixture.doc.getElementById('ftpSrcButton');
+      ftpSrcButton.click();
       return waitForBindApplication().then(() => {
-        expect(img.getAttribute('src')).to.equal(originalSrc);
-        const telSrc = 'tel:1-555-867-5309';
-        const telBinding = `imageSrc="${telSrc}"`;
-        setButtonBinding(changeImgSrcButton, telBinding);
-        changeImgSrcButton.click();
+        expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
+        const telSrcButton = fixture.doc.getElementById('telSrcButton');
+        telSrcButton.click();
         return waitForBindApplication();
       }).then(() => {
-        expect(img.getAttribute('src')).to.equal(originalSrc);
+        expect(img.getAttribute('src')).to
+            .equal('http://www.google.com/image1');
       });
     });
 
     it('should change alt when the alt attribute binding changes', () => {
-      const changeImgAltButton =
-        fixture.doc.getElementById('changeImgAltButton');
+      const button = fixture.doc.getElementById('changeImgAltButton');
       const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('alt')).to.equal('unbound');
-      changeImgAltButton.click();
+      button.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('alt')).to.equal('hello world');
       });
     });
 
     it('should change width and height when their bindings change', () => {
-      const changeImgDimensButton =
-        fixture.doc.getElementById('changeImgDimensButton');
+      const button = fixture.doc.getElementById('changeImgDimensButton');
       const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('height')).to.equal('200');
       expect(img.getAttribute('width')).to.equal('200');
-      changeImgDimensButton.click();
+      button.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('height')).to.equal('300');
         expect(img.getAttribute('width')).to.equal('300');
@@ -204,8 +182,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
 
     it('should update selection when bound value for selected changes', () => {
-      const changeSelectionButton =
-        fixture.doc.getElementById('changeSelectionButton');
+      const button =  fixture.doc.getElementById('changeSelectionButton');
       const selectionText = fixture.doc.getElementById('selectionText');
       const img1 = fixture.doc.getElementById('selectorImg1');
       const img2 = fixture.doc.getElementById('selectorImg2');
@@ -215,7 +192,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       expect(img3.hasAttribute('selected')).to.be.false;
       expect(selectionText.textContent).to.equal('None');
       // Changes selection to 2
-      changeSelectionButton.click();
+      button.click();
       return waitForBindApplication().then(() => {
         expect(img1.hasAttribute('selected')).to.be.false;
         expect(img2.hasAttribute('selected')).to.be.true;
@@ -227,30 +204,26 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
   describe('amp-video integration', () => {
     it('should change src when the src attribute binding changes', () => {
-      const changeVidSrcButton =
-        fixture.doc.getElementById('changeVidSrcButton');
+      const button = fixture.doc.getElementById('changeVidSrcButton');
       const vid = fixture.doc.getElementById('video');
-      const originalSrc = 'https://www.google.com/unbound.webm';
-      const newSrc = 'https://www.google.com/bound.webm';
-      expect(vid.getAttribute('src')).to.equal(originalSrc);;
-      changeVidSrcButton.click();
+      expect(vid.getAttribute('src')).to
+          .equal('https://www.google.com/unbound.webm');
+      button.click();
       return waitForBindApplication().then(() => {
-        expect(vid.getAttribute('src')).to.equal(newSrc);
+        expect(vid.getAttribute('src')).to
+            .equal('https://www.google.com/bound.webm');
       });
     });
 
     it('should NOT change src when new value is a blocked URL', () => {
-      const changeVidSrcButton =
-        fixture.doc.getElementById('changeVidSrcButton');
+      const button = fixture.doc.getElementById('changeVidSrcButton');
       const vid = fixture.doc.getElementById('video');
-      const originalSrc = 'https://www.google.com/unbound.webm';
-      const newSrc = '__amp_source_origin';
-      const blockedURLBinding = `videoSrc="${newSrc}"`;
-      setButtonBinding(changeVidSrcButton, blockedURLBinding);
-      expect(vid.getAttribute('src')).to.equal(originalSrc);;
-      changeVidSrcButton.click();
+      expect(vid.getAttribute('src')).to
+          .equal('https://www.google.com/unbound.webm');;
+      button.click();
       return waitForBindApplication().then(() => {
-        expect(vid.getAttribute('src')).to.equal(originalSrc);
+        expect(vid.getAttribute('src')).to
+            .equal('https://www.google.com/unbound.webm');
       });
     });
 
