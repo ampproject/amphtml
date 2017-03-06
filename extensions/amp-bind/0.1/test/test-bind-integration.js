@@ -30,7 +30,6 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   this.timeout(5000);
 
   beforeEach(() => {
-
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
       toggleExperiment(fixture, 'amp-bind', true, true);
@@ -56,7 +55,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   describe('text integration', () => {
     it('should update text when text attribute binding changes', () => {
       const textElement = fixture.doc.getElementById('textElement');
-      const button = fixture.doc.getElementById('mutateTextButton');
+      const button = fixture.doc.getElementById('changeTextButton');
       expect(textElement.textContent).to.equal('unbound');
       button.click();
       return waitForBindApplication().then(() => {
@@ -66,7 +65,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should update CSS class when class binding changes', () => {
       const textElement = fixture.doc.getElementById('textElement');
-      const button = fixture.doc.getElementById('mutateTextButton');
+      const button = fixture.doc.getElementById('changeTextClassButton');
       expect(textElement.className).to.equal('original');
       button.click();
       return waitForBindApplication().then(() => {
@@ -89,14 +88,76 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
     it('should change slides when the slide attribute binding changes', () => {
       const carousel = fixture.doc.getElementById('carousel');
-      const goToSlide1Button = fixture.doc.getElementById('goToSlide1Button');
+      const button = fixture.doc.getElementById('goToSlide1Button');
       const impl = carousel.implementation_;
       // No previous slide as current slide is 0th side
       expect(impl.hasPrev()).to.be.false;
-      goToSlide1Button.click();
+      button.click();
       return waitForBindApplication().then(() => {
         // Has previous slide since the index has changed
         expect(impl.hasPrev()).to.be.true;
+      });
+    });
+  });
+
+  describe('amp-img integration', () => {
+    it('should change src when the src attribute binding changes', () => {
+      const button = fixture.doc.getElementById('changeImgSrcButton');
+      const img = fixture.doc.getElementById('image');
+      expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(img.getAttribute('src')).to
+            .equal('http://www.google.com/image2');
+      });
+    });
+
+    it('should NOT change src when new value is a blocked URL', () => {
+      const button = fixture.doc.getElementById('invalidSrcButton');
+      const img = fixture.doc.getElementById('image');
+      expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(img.getAttribute('src')).to
+            .equal('http://www.google.com/image1');
+      });
+    });
+
+    it('should NOT change src when new value uses an invalid protocol', () => {
+      const img = fixture.doc.getElementById('image');
+      expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
+      const ftpSrcButton = fixture.doc.getElementById('ftpSrcButton');
+      ftpSrcButton.click();
+      return waitForBindApplication().then(() => {
+        expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
+        const telSrcButton = fixture.doc.getElementById('telSrcButton');
+        telSrcButton.click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(img.getAttribute('src')).to
+            .equal('http://www.google.com/image1');
+      });
+    });
+
+    it('should change alt when the alt attribute binding changes', () => {
+      const button = fixture.doc.getElementById('changeImgAltButton');
+      const img = fixture.doc.getElementById('image');
+      expect(img.getAttribute('alt')).to.equal('unbound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(img.getAttribute('alt')).to.equal('hello world');
+      });
+    });
+
+    it('should change width and height when their bindings change', () => {
+      const button = fixture.doc.getElementById('changeImgDimensButton');
+      const img = fixture.doc.getElementById('image');
+      expect(img.getAttribute('height')).to.equal('200');
+      expect(img.getAttribute('width')).to.equal('200');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(img.getAttribute('height')).to.equal('300');
+        expect(img.getAttribute('width')).to.equal('300');
       });
     });
   });
