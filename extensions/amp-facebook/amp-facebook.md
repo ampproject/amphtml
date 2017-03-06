@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Facebook post or video. </td>
+    <td>Displays a Facebook post, video or comments.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -38,9 +38,9 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-facebook/">Annotated code example for amp-facebook</a></td>
   </tr>
 </table>
-## Overview 
+## Overview
 
-You can use the `amp-facebook` component to embed a Facebook post or a Facebook video.
+You can use the `amp-facebook` component to embed a Facebook post, Facebook video or Facebook comments.
 
 **Example: Embedding a post**
 
@@ -61,19 +61,34 @@ You can use the `amp-facebook` component to embed a Facebook post or a Facebook 
 </amp-facebook>
 ```
 
+**Example: Embedding comments**
+
+```html
+<amp-facebook width=486 height=657
+    layout="responsive"
+    data-embed-as="comments"
+    data-href="https://www.ampproject.org/">
+</amp-facebook>
+```
 ## Attributes
 
 **data-href** (required)
 
-The URL of the Facebook post/video. For example: https://www.facebook.com/zuck/posts/10102593740125791.
+The URL of the Facebook post, video or comments page. For example: https://www.facebook.com/zuck/posts/10102593740125791.
 
 **data-embed-as** (optional)
 
-The value is either `post` or `video`.  The default is `post`.
+The value is either `post`, `video` or `comments`. The default is `post`.
 
 Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos only embeds the player of the video, and ignores the accompanying post card with it. This is recommended if you'd like a better aspect ratio management for the video to be responsive.  
 
 Check out the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
+
+**data-numposts** (optional)
+Only when `data-embed-as` is `comments`. See Facebook [documentation](https://developers.facebook.com/docs/plugins/comments/) for usage.
+
+**data-order-by** (optional)
+Only when `data-embed-as` is `comments`. See Facebook [documentation](https://developers.facebook.com/docs/plugins/comments/) for usage.
 
 **common attributes**
 
