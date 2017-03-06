@@ -48,7 +48,7 @@ const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
 const DYNAMIC_TAGS = {
   'TEMPLATE': true,
   'AMP-LIVE-LIST': true,
-}
+};
 
 /**
  * A bound property, e.g. [property]="expression".
@@ -706,13 +706,13 @@ export class Bind {
       // Templates add templated elements as siblings of the template tag
       // so the parent must be observed.
       // TODO(kmh287): What if parent is the body tag?
-      const elementToObserve = element.parentElement;
+      elementToObserve = element.parentElement;
     } else if (tagName === 'AMP-LIVE-LIST') {
       // All elements in AMP-LIVE-LIST are children of a <div> with the
       // `items` attribute.
       const childDivs = element.getElementsByTagName('DIV');
       let itemsDiv;
-      for (int i = 0; i = childDivs.length; i++) {
+      for (let i = 0; i < childDivs.length; i++) {
         const div = childDivs[i];
         if (div.hasAttribute('items')) {
           itemsDiv = div;
