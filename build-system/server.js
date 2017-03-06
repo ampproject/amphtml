@@ -346,16 +346,19 @@ function liveListTombstone(liveList) {
   }
 }
 
+
+// Value is inclusive of both min and max values.
+function range(min, max) {
+  var values = Array.apply(null, Array(max - min + 1)).map((_, i) => min + i);
+  return values[Math.round(Math.random() * (max - min))]
+}
+
+function flip() {
+  return !!Math.floor(Math.random() * 2);
+}
+
 function getLiveBlogItem() {
   var now = Date.now();
-  // Value is inclusive of both min and max values.
-  function range(min, max) {
-    var values = Array.apply(null, Array(max - min + 1)).map((_, i) => min + i);
-    return values[Math.round(Math.random() * (max - min))]
-  }
-  function flip() {
-    return !!Math.floor(Math.random() * 2);
-  }
   // Generate a 3 to 7 worded headline
   var headline = bacon(range(3, 7));
   var numOfParagraphs = range(1, 2);
@@ -403,6 +406,58 @@ function getLiveBlogItem() {
     </amp-live-list></body></html>`;
 }
 
+function getLiveBlogItemWithBindAttributes() {
+  var now = Date.now();
+  // Generate a 3 to 7 worded headline
+  var headline = bacon(range(3, 7));
+  var numOfParagraphs = range(1, 2);
+  var body = Array.apply(null, Array(numOfParagraphs)).map(x => {
+    return `<p>${bacon(range(50, 90))}</p>`;
+  }).join('\n');
+
+  var img =  `<amp-img
+        src="${flip() ? 'https://placekitten.com/300/350' : 'https://baconmockup.com/300/350'}"
+        layout="responsive"
+         height="300" width="350">
+      </amp-img>`;
+  return `<!doctype html>
+    <html amp><body>
+    <amp-live-list id="live-blog-1">
+    <div items>
+      <div id="live-blog-item-${now}" data-sort-time="${now}">
+        <h3 class="headline">
+          <a href="#live-blog-item-${now}">${headline}</a>
+        </h3>
+        <div class="author">
+          <div class="byline">
+            <p>
+              by <span itemscope itemtype="http://schema.org/Person"
+              itemprop="author"><b>Lorem Ipsum</b>
+              <a class="mailto" href="mailto:lorem.ipsum@">
+              lorem.ipsum@</a></span>
+            </p>
+            <p class="brand">PublisherName News Reporter<p>
+            <p><span itemscope itemtype="http://schema.org/Date"
+                itemprop="Date">${Date(now).replace(/ GMT.*$/, '')}<span></p>
+          </div>
+        </div>
+        <div class="article-body">
+          ${body}
+          <p> As you can see, bacon is far superior to <b><span [text]='favoriteFood'>everything!</span></b>!</p>
+        </div>
+        ${img}
+        <div class="social-box">
+          <amp-social-share type="facebook"
+              data-param-text="Hello world"
+              data-param-href="https://example.com/?ref=URL"
+              data-param-app_id="145634995501895"></amp-social-share>
+          <amp-social-share type="twitter"></amp-social-share>
+        </div>
+      </div>
+    </div>
+    </amp-live-list></body></html>`;
+}
+
 app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
   function(req, res, next) {
     if ('amp_latest_update_time' in req.query) {
@@ -418,7 +473,7 @@ app.use('/examples/bind/live-list.amp.(min.|max.)?html',
     console.log('test');
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
-      res.end(getLiveBlogItem());
+      res.end(getLiveBlogItemWithBindAttributes());
       return;
     }
     next();
