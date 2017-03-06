@@ -186,12 +186,12 @@ class AmpSambaPlayer extends AMP.BaseElement {
 
 	/** @override */
 	mute() {
-		this.sendMessage_('setVolume', 0);
+		this.sendMessage_('mute');
 	}
 
 	/** @override */
 	unmute() {
-		this.sendMessage_('setVolume', 75);
+		this.sendMessage_('unmute');
 	}
 
 	/** @override */

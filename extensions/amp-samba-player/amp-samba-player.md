@@ -76,6 +76,10 @@ The SambaTech platform project ID. This is an 32-digit hexadecimal sequence used
 
 The SambaTech platform media ID. This is an 32-digit hexadecimal sequence that identifies media content.
 
+**data-media-protocol**
+
+The SambaPlayer protocol. This is a 4-5 characters sequence which might be HTTP or HTTPS.
+
 **data-param-***
 
 All `data-param-*` attributes will be added as query parameter to the SambaPlayer iframe URL. This may be used to pass custom values through to SambaPlayer, such as whether to show controls, select default output quality, resume from a position, etc.
