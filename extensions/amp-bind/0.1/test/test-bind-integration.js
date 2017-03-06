@@ -140,23 +140,21 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
 
     it('should change alt when the alt attribute binding changes', () => {
-      const changeImgAltButton =
-        fixture.doc.getElementById('changeImgAltButton');
+      const button = fixture.doc.getElementById('changeImgAltButton');
       const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('alt')).to.equal('unbound');
-      changeImgAltButton.click();
+      button.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('alt')).to.equal('hello world');
       });
     });
 
     it('should change width and height when their bindings change', () => {
-      const changeImgDimensButton =
-        fixture.doc.getElementById('changeImgDimensButton');
+      const button = fixture.doc.getElementById('changeImgDimensButton');
       const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('height')).to.equal('200');
       expect(img.getAttribute('width')).to.equal('200');
-      changeImgDimensButton.click();
+      button.click();
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('height')).to.equal('300');
         expect(img.getAttribute('width')).to.equal('300');
