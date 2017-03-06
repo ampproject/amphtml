@@ -27,6 +27,74 @@ function pascalCase(str) {
       function(g) { return g[1].toUpperCase(); });
 }
 
+function getValidatorFile(name) {
+  return `#
+# Copyright ${year} The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {  # ${name}
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "${name} extension .js script"
+  satisfies: "${name} extension .js script"
+  requires: "${name}"
+  mandatory_parent: "HEAD"
+  unique_warning: true
+  extension_unused_unless_tag_present: "${name}"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "${name}"
+    dispatch_key: true
+  }
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_regex: "https://cdn\\.ampproject\\.org/v0/${name}-(latest|0\\.1).js"
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/${name}"
+}
+tags: {  # <${name}>
+  html_format: AMP
+  tag_name: "${name.toUpperCase()}"
+  satisfies: "${name}"
+  requires: "${name} extension .js script"
+  amp_layout: {
+    supported_layouts: CONTAINER
+    supported_layouts: RESPONSIVE
+  }
+}
+`;
+}
+
 function getMarkdownExtensionFile(name) {
 return `<!--
 Copyright ${year} The AMP HTML Authors. All Rights Reserved.
@@ -104,11 +172,8 @@ import {${className}} from '../${name}';
 
 describes.realWin('${name}', {
   amp: {
-    // TODO: ask dima what this does
     runtimeOn: true,
-    // TODO: ask dima what this does
     ampdoc: 'single',
-    // Tells the test to load our extension
     extensions: ['${name}'],
   }
 }, env => {
@@ -158,26 +223,17 @@ export class ${className} extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    // Declare your properties here...
     /** @private {string} */
     this.myText_ = 'hello world';
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    // We declare that this element only supports \`layout="container"\` and
-    // and \`layout="responsive"\`. See "TODO: ADD LINK TO LAYOUT SYSTEM DOCS"
     return layout == Layout.CONTAINER || layout == Layout.RESPONSIVE;
   }
 
   /** @override */
   buildCallback() {
-    // Do initialization here unless they are JavaScript primities
-    // then you can initialize them in constructor.
-
-    // TODO: ask dima if this is an OK example, as i know it is safe to
-    // manipulate direct element but not subtree.
-    // Setup the component
     this.element.textContent = this.myText_;
   }
 }
@@ -222,6 +278,8 @@ function makeExtension() {
       getMarkdownExtensionFile(name));
   fs.writeFileSync(`extensions/${name}/0.1/${name}.js`,
       getJsExtensionFile(name));
+  fs.writeFileSync(`extensions/${name}/0.1/validator-${name}.protoascii`,
+      getValidatorFile(name));
   fs.writeFileSync(`extensions/${name}/0.1/test/test-${name}.js`,
       getJsTestExtensionFile(name));
   fs.writeFileSync(`examples/${name}.amp.html`,
