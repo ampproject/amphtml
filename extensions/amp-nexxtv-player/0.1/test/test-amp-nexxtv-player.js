@@ -98,7 +98,7 @@ describe('amp-nexxtv-player', () => {
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(nexxtv, VideoEvents.MUTE);
+          const p = listenOncePromise(nexxtv, VideoEvents.MUTED);
           sendFakeMessage(nexxtv, iframe, 'mute');
           return p;
         })
@@ -108,7 +108,7 @@ describe('amp-nexxtv-player', () => {
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(nexxtv, VideoEvents.UNMUTE);
+          const p = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
           sendFakeMessage(nexxtv, iframe, 'unmute');
           return p;
         });

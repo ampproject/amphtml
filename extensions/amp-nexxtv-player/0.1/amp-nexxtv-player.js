@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * @implements {../../../src/video-interface.VideoInterface}
- */
-
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {
@@ -30,6 +26,9 @@ import {listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/video-manager';
 
+/**
+ * @implements {../../../src/video-interface.VideoInterface}
+ */
 class AmpNexxtvPlayer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -65,25 +64,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  /** @override */
   buildCallback() {
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
-
-    this.mediaid_ = user().assert(
-      this.element.getAttribute('data-mediaid'),
-      'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
-      this.element);
-
-    this.client_ = user().assert(this.element.getAttribute('data-client'),
-      'The data-client attribute is required for <amp-nexxtv-player> %s',
-      this.element);
-
-    this.start_ = this.element.getAttribute('data-seek-to') || 0;
-    this.mode_ = this.element.getAttribute('data-mode') || 'static';
-    this.streamtype_ = this.element.getAttribute('data-streamtype') || 'video';
-    this.origin_ = this.element.getAttribute('data-origin')
-      || 'https://embed.nexx.cloud/';
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
@@ -103,16 +88,32 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       return this.videoIframeSrc_;
     }
 
-    let src = this.origin_;
+    const mediaId = user().assert(
+      this.element.getAttribute('data-mediaid'),
+      'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
+      this.element);
 
-    if (this.streamtype_ !== 'video') {
-      src += `${encodeURIComponent(this.streamtype_)}/`;
+    const client = user().assert(this.element.getAttribute('data-client'),
+      'The data-client attribute is required for <amp-nexxtv-player> %s',
+      this.element);
+
+    const start = this.element.getAttribute('data-seek-to') || 0;
+    const mode = this.element.getAttribute('data-mode') || 'static';
+    const streamtype = this.element.getAttribute('data-streamtype') || 'video';
+    const origin = this.element.getAttribute('data-origin')
+      || 'https://embed.nexx.cloud/';
+
+    let src = '';
+    src += origin;
+
+    if (streamtype !== 'video') {
+      src += `${encodeURIComponent(streamtype)}/`;
     }
 
-    src += `${encodeURIComponent(this.client_)}/`;
-    src += `${encodeURIComponent(this.mediaid_)}`;
-    src += `?start=${encodeURIComponent(this.start_)}`;
-    src += `&datamode=${encodeURIComponent(this.mode_)}&amp=1`;
+    src += `${encodeURIComponent(client)}/`;
+    src += `${encodeURIComponent(mediaId)}`;
+    src += `?start=${encodeURIComponent(String(start))}`;
+    src += `&datamode=${encodeURIComponent(mode)}&amp=1`;
 
     return this.videoIframeSrc_ = src;
   }
@@ -133,7 +134,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     return this.loadPromise(this.iframe_)
       .then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
-        this.playerReadyPromise_;
+        this.playerReadyResolver_(this.iframe_);
       });
   }
 
@@ -178,57 +179,49 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     } else if (data.cmd == 'pause') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     } else if (data.cmd == 'mute') {
-      this.element.dispatchCustomEvent(VideoEvents.MUTE);
+      this.element.dispatchCustomEvent(VideoEvents.MUTED);
     } else if (data.cmd == 'unmute') {
-      this.element.dispatchCustomEvent(VideoEvents.UNMUTE);
+      this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
     }
   }
 
   // VideoInterface Implementation
   // only send in json format
-  /** @override */
-  play(unusedIsAutoplay) {
+  play() {
     this.playerReadyPromise_.then(() => {
       this.sendCommand_('play');
     });
   }
 
-  /** @override */
   pause() {
     this.playerReadyPromise_.then(() => {
       this.sendCommand_('pause');
     });
   }
 
-  /** @override */
   mute() {
     this.playerReadyPromise_.then(() => {
       this.sendCommand_('mute');
     });
   }
 
-  /** @override */
   unmute() {
     this.playerReadyPromise_.then(() => {
       this.sendCommand_('unmute');
     });
   }
 
-  /** @override */
   supportsPlatform() {
     return true;
   }
 
-  /** @override */
   isInteractive() {
     return true;
   }
 
-  /** @override */
   showControls() {
   }
 
-  /** @override */
   hideControls() {
   }
 }
