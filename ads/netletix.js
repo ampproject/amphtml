@@ -54,7 +54,7 @@ export function netletix(global, data) {
           global.context.renderStart(renderconfig);
           if (event.data.width != data.nxwidth ||
               event.data.height != data.nxheight) {
-            console.log("Requesting resize to: %s x %s.",
+            console.log('Requesting resize to: %s x %s.',
                         event.data.width,
                         event.data.height);
             window.context.requestResize(event.data.width, event.data.height);
