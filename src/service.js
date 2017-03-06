@@ -31,7 +31,7 @@ import {dev} from './log';
  *   promise: (?Promise|undefined),
  *   resolve: (?function(!Object)|undefined),
  *   ctor: (?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc)),
- *   factory: (?function(!Window)|?function(!./service/ampdoc-impl.AmpDoc))
+ *   factory: (?function(!Window):!Object|?function(!./service/ampdoc-impl.AmpDoc):!Object)
  * }}
  */
 let ServiceHolderDef;
@@ -240,6 +240,7 @@ export function registerServiceBuilder(win,
   // pending promise we need to fulfill.
   const p = getServicePromiseOrNullInternal(win, id);
   if (opt_instantiate || p) {
+    /** Force instantiation and resolve service promise if it exists */
     getServiceInternal(win, win, id);
   }
 }
@@ -265,6 +266,7 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
   // pending promise we need to fulfill.
   const p = getServicePromiseOrNullInternal(holder, id);
   if (opt_instantiate || p) {
+    /** Force instantiation and resolve service promise if it exists */
     getServiceInternal(holder, ampdoc, id);
   }
 }

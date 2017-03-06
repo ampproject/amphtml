@@ -183,6 +183,15 @@ describe('service', () => {
       });
     });
 
+    it('should resolve service promise when service is registered', () => {
+      const p = getServicePromise(window, 'a');
+      expect(count).to.equal(0);
+      registerServiceBuilder(window, 'a', undefined, Class);
+      p.then(() => {
+        expect(count).to.equal(1);
+      });
+    });
+
     it('should provide promise without clobbering registered services', () => {
       registerServiceBuilder(window, 'a', undefined, Class);
       expect(count).to.equal(0);
