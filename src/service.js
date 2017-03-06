@@ -240,7 +240,7 @@ export function registerServiceBuilder(win,
   // pending promise we need to fulfill.
   const p = getServicePromiseOrNullInternal(win, id);
   if (opt_instantiate || p) {
-    /** Force instantiation and resolve service promise if it exists */
+    // Force instantiation and resolve service promise if it exists
     getServiceInternal(win, win, id);
   }
 }
@@ -266,7 +266,7 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
   // pending promise we need to fulfill.
   const p = getServicePromiseOrNullInternal(holder, id);
   if (opt_instantiate || p) {
-    /** Force instantiation and resolve service promise if it exists */
+    // Force instantiation and resolve service promise if it exists
     getServiceInternal(holder, ampdoc, id);
   }
 }
