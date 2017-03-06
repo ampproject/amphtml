@@ -177,6 +177,8 @@ describe('3p-frame', () => {
           '"canonicalUrl":"' + docInfo.canonicalUrl + '",' +
           '"sourceUrl":"' + locationHref + '",' +
           '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
+          '"initialIntersection": ' +
+          JSON.stringify(div.getIntersectionChangeEntry()) + ',' +
           '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
           '"mode":{"localDev":true,"development":false,"minified":false,' +
           '"test":false,"version":"$internalRuntimeVersion$"}' +
