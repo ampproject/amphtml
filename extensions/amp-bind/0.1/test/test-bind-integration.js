@@ -17,7 +17,7 @@
 import '../../../amp-carousel/0.1/amp-carousel';
 import {installBindForTesting} from '../bind-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-import {createFixturefixture} from '../../../../testing/fixture';
+import {createFixtureIframe} from '../../../../testing/iframe';
 import {bindForDoc} from '../../../../src/bind';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 
@@ -30,7 +30,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   this.timeout(5000);
 
   beforeEach(() => {
-    return createFixturefixture(fixtureLocation).then(f => {
+    return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
       toggleExperiment(fixture, 'amp-bind', true, true);
       return fixture.awaitEvent('amp:load:start', 1);
@@ -38,7 +38,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
       // Bind is installed manually here to get around an issue
-      // toggling experiments on the fixture fixture.
+      // toggling experiments on the fixture iframe.
       bind = installBindForTesting(ampdoc);
       return bind.initializePromiseForTesting();
     });
@@ -216,7 +216,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
 
     it('should NOT change src when new value is a blocked URL', () => {
-      const button = fixture.doc.getElementById('changeVidSrcButton');
+      const button = fixture.doc.getElementById('disallowedVidUrlButton');
       const vid = fixture.doc.getElementById('video');
       expect(vid.getAttribute('src')).to
           .equal('https://www.google.com/unbound.webm');;
@@ -228,52 +228,33 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
 
     it('should NOT change src when new value uses an invalid protocol', () => {
-      const changeVidSrcButton =
-      fixture.doc.getElementById('changeVidSrcButton');
+      const button = fixture.doc.getElementById('httpVidSrcButton');
       const vid = fixture.doc.getElementById('video');
-      const originalSrc = 'https://www.google.com/unbound.webm';
-      expect(vid.getAttribute('src')).to.equal(originalSrc);
+      expect(vid.getAttribute('src')).to
+          .equal('https://www.google.com/unbound.webm');
       // Only HTTPS is allowed
-      const httpSrc = 'http://www.google.com/justhttp.ogg';
-      const httpBinding = `videoSrc="${httpSrc}"`;
-      setButtonBinding(changeVidSrcButton, httpBinding);
-      changeVidSrcButton.click();
+      button.click();
       return waitForBindApplication().then(() => {
-        expect(vid.getAttribute('src')).to.equal(originalSrc);
-        const ftpSrc = 'ftp://foo:bar@192.168.1.1/lol.mp4';
-        const ftpBinding = `videoSrc="${ftpSrc}"`;
-        setButtonBinding(changeVidSrcButton, ftpBinding);
-        changeVidSrcButton.click();
-        return waitForBindApplication();
-      }).then(() => {
-        expect(vid.getAttribute('src')).to.equal(originalSrc);
-        const telSrc = 'tel:1-555-867-5309';
-        const telBinding = `videoSrc="${telSrc}"`;
-        setButtonBinding(changeVidSrcButton, telBinding);
-        changeVidSrcButton.click();
-        return waitForBindApplication();
-      }).then(() => {
-        expect(vid.getAttribute('src')).to.equal(originalSrc);
+        expect(vid.getAttribute('src')).to
+          .equal('https://www.google.com/unbound.webm');
       });
     });
 
     it('should change alt when the alt attribute binding changes', () => {
-      const changeVideoAltButton =
-        fixture.doc.getElementById('changeVidAltButton');
+      const button = fixture.doc.getElementById('changeVidAltButton');
       const vid = fixture.doc.getElementById('video');
       expect(vid.getAttribute('alt')).to.equal('unbound');
-      changeVideoAltButton.click();
+      button.click();
       return waitForBindApplication().then(() => {
         expect(vid.getAttribute('alt')).to.equal('hello world');
       });
     });
 
     it('should show/hide vid controls when the control binding changes', () => {
-      const showControlsButton =
-        fixture.doc.getElementById('showVidControlsButton');
+      const button = fixture.doc.getElementById('showVidControlsButton');
       const vid = fixture.doc.getElementById('video');
       expect(vid.hasAttribute('controls')).to.be.false;
-      showControlsButton.click();
+      button.click();
       return waitForBindApplication().then(() => {
         expect(vid.hasAttribute('controls')).to.be.true;
         const hideControlsButton =
