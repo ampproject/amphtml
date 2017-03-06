@@ -725,13 +725,9 @@ export class Bind {
     } else {
       dev().assert(false,
            `amp-bind asked to observe unexpected element ${tagName}`);
-      elementToObserve = element;
     }
     if (elementToObserve) {
       this.mutationObserver_.observe(elementToObserve, {childList: true});
-    } else {
-      elementToObserve = dev().assert(false,
-        `Cannot find element to observe for element with tag name ${tagName}`);
     }
   }
 
