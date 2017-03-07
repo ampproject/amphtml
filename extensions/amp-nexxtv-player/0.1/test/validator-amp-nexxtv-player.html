@@ -31,6 +31,7 @@
 </head>
 <body>
 
+    <!-- valid -->
     <amp-nexxtv-player
         data-mediaid="PTPFEC4U184674"
         data-client="583"
@@ -41,8 +42,7 @@
         width="480" height="270"
     ></amp-nexxtv-player>
 
-
-<hr>
+    <!-- valid, with optional data -->
     <amp-nexxtv-player
             data-mediaid="NGJJDJEJ83440L"
             data-client="583"
@@ -54,5 +54,16 @@
             width="480" height="270"
     ></amp-nexxtv-player>
 
+    <!-- invalid, needs data-mediaid -->
+    <amp-nexxtv-player
+            data-client="583"
+            width="480" height="270"
+    ></amp-nexxtv-player>
+
+    <!-- invalid, needs data-client -->
+    <amp-nexxtv-player
+            data-mediaid="PTPFEC4U184674"
+            width="480" height="270"
+    ></amp-nexxtv-player>
 </body>
 </html>
