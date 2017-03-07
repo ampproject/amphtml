@@ -21,14 +21,12 @@ import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
-import {installActionServiceForDoc} from
-    '../../../../src/service/action-impl';
-import {installCidServiceForDocForTesting} from
+import {installActionServiceForDoc} from'../../../../src/service/action-impl';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {installCidServiceForDocForTesting,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {installDocService} from
-    '../../../../src/service/ampdoc-impl';
-import {installPerformanceService} from
-    '../../../../src/service/performance-impl';
+import {installPerformanceService,} from
+ '../../../../src/service/performance-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
