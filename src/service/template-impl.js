@@ -15,7 +15,7 @@
  */
 
 import {childElementByTag} from '../dom';
-import {getService, registerService} from '../service';
+import {getService, registerServiceBuilder} from '../service';
 import {dev, user} from '../log';
 
 
@@ -349,5 +349,5 @@ export function templatesServiceForTesting(window) {
  * @param {!Window} window
  */
 export function installTemplatesService(window) {
-  registerService(window, 'templates', Templates);
+  registerServiceBuilder(window, 'templates', Templates);
 }
