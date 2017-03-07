@@ -28,5 +28,6 @@ export const NETWORKS = /** @type {!JSONType} */ ({
 
   dianomi: {
     base: 'https://www.dianomi.com',
+    src: 'https://www.dianomi.com/smartads.pl?format=a4a',
   },
 });
