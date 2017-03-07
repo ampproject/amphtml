@@ -24,7 +24,7 @@ import {
 import {listenOncePromise} from '../../src/event-helper';
 import {
   installTimerService,
-  timerServiceForTesting
+  timerServiceForTesting,
 } from '../../src/service/timer-impl';
 import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
