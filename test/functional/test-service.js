@@ -32,6 +32,7 @@ import {
   installServiceInEmbedScope,
   isDisposable,
   isEmbeddable,
+  registerService,
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
@@ -122,6 +123,13 @@ describe('service', () => {
       const b2 = fromClass(window, 'b', Class);
       expect(b1).to.equal(b2);
       expect(b1).to.not.equal(a1);
+    });
+
+    it('should not instantiate service when registered', () => {
+      registerService(window, 'fake service', Class);
+      expect(count).to.equal(0);
+      getService(window, 'fake service');
+      expect(count).to.equal(1);
     });
 
     it('should work without a factory', () => {
