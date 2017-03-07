@@ -31,8 +31,9 @@ describe('amp-samba-player', () => {
 
       const sbplayer = iframe.doc.createElement('amp-samba-player');
 
-      for (const key in attributes)
+      for (const key in attributes) {
         sbplayer.setAttribute(key, attributes[key]);
+      }
 
       sbplayer.setAttribute('width', '320');
       sbplayer.setAttribute('height', '180');
@@ -45,7 +46,7 @@ describe('amp-samba-player', () => {
   it('renders', () => {
     return getSambaPlayer({
       'data-project-id': '442189dbff37920ceae523517366b5fd',
-      'data-media-id': '32e56bfe9b1602fea761a26af305325a'
+      'data-media-id': '32e56bfe9b1602fea761a26af305325a',
     }).then(sbplayer => {
       // whether player exists
       expect(sbplayer).to.not.be.null;
@@ -64,7 +65,7 @@ describe('amp-samba-player', () => {
     return getSambaPlayer({
       'data-project-id': '442189dbff37920ceae523517366b5fd',
       'data-media-id': '32e56bfe9b1602fea761a26af305325a',
-      'data-param-enable-controls': false
+      'data-param-enable-controls': false,
     }).then(sbplayer => {
       const url = sbplayer.querySelector('iframe').src;
       expect(url.indexOf('enableControls=false') !== -1).to.be.true;
