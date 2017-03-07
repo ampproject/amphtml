@@ -396,11 +396,11 @@ export function fetchJsFile(cache, request, requestPath, requestVersion) {
       if (!diversions) {
         return;
       }
-      let p = new Promise((resolve) => {
+      let p = new Promise(resolve => {
         // Delay initial diversions requests by 10 seconds.
         // This is because diversions are low priority compared to page
         // content.
-        setTimeout(resolve, 10000)
+        setTimeout(resolve, 10000);
       });
       for (let i = 0; i < diversions.length; i++) {
         p = p.then(() => {

@@ -354,7 +354,7 @@ runner.run('Cache SW', () => {
 
     beforeEach(() => {
       calls = 0;
-      sandbox.stub(response, 'clone', () => response)
+      sandbox.stub(response, 'clone', () => response);
       fetch = sandbox.stub(window, 'fetch', () => {
         calls++;
         if (calls == 1) {
@@ -550,8 +550,8 @@ runner.run('Cache SW', () => {
 
         function waitForDiversions() {
           return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
-            const stub = sandbox.stub(window, 'setTimeout', (callback) => {
-              stub.restore();
+            const setTimeout = sandbox.stub(window, 'setTimeout', callback => {
+              setTimeout.restore();
               callback();
             });
             return sw.diversions(cache);
