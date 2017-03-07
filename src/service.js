@@ -200,7 +200,7 @@ function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
  */
 export function getService(win, id, opt_factory) {
   win = getTopWindow(win);
-  return getServiceInternal(win, win, id,
+  return getServiceInternal(win, win, id, undefined,
       opt_factory ? opt_factory : undefined);
 }
 
@@ -216,24 +216,24 @@ export function getService(win, id, opt_factory) {
  */
 export function fromClass(win, id, constructor) {
   win = getTopWindow(win);
-  return getServiceInternal(win, win, id, undefined, constructor);
+  return getServiceInternal(win, win, id, constructor);
 }
 
 /**
  * Registers a service given a class to be used as implementation.
  * @param {!Window} win
  * @param {string} id of the service.
+ * @param {function(new:Object, !Window)=} opt_constructor
  * @param {function(!Window):!Object=} opt_factory
-  *@param {function(new:Object, !Window)=} opt_constructor
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
 export function registerServiceBuilder(win,
                                        id,
-                                       opt_factory,
                                        opt_constructor,
+                                       opt_factory,
                                        opt_instantiate) {
   win = getTopWindow(win);
-  registerServiceInternal(win, win, id, opt_factory, opt_constructor);
+  registerServiceInternal(win, win, id, opt_constructor, opt_factory);
   if (opt_instantiate) {
     getServiceInternal(win, win, id);
   }
@@ -244,18 +244,18 @@ export function registerServiceBuilder(win,
  * implementation.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
-  *@param {function(!./service/ampdoc-impl.AmpDoc):Object=} opt_factory
  * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_constructor
+ * @param {function(!./service/ampdoc-impl.AmpDoc):Object=} opt_factory
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
 export function registerServiceBuilderForDoc(nodeOrDoc,
                                              id,
-                                             opt_factory,
                                              opt_constructor,
+                                             opt_factory,
                                              opt_instantiate) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
-  registerServiceInternal(holder, ampdoc, id, opt_factory, opt_constructor);
+  registerServiceInternal(holder, ampdoc, id, opt_constructor, opt_factory);
   if (opt_instantiate) {
     getServiceInternal(holder, ampdoc, id);
   }
@@ -306,6 +306,7 @@ export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
       getAmpdocServiceHolder(ampdoc),
       ampdoc,
       id,
+      /* opt_ctor */ undefined,
       opt_factory);
 }
 
@@ -325,7 +326,6 @@ export function fromClassForDoc(nodeOrDoc, id, constructor) {
       getAmpdocServiceHolder(ampdoc),
       ampdoc,
       id,
-      undefined,
       constructor);
 }
 
@@ -450,16 +450,16 @@ function getAmpdocService(win) {
  * @param {!Object} holder Object holding the service instance.
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
+ * @param {function(new:T, ?)=} opt_constructor
+ *     Constructor function to new the service. Called with context.
  * @param {function(?):T=} opt_factory
  *     Should create the service if it does not exist yet. If the factory
  *     is not given, it is an error if the service does not exist yet.
  *     Called with context.
- * @param {function(new:T, ?)=} opt_constructor
- *     Constructor function to new the service. Called with context.
  * @return {*}
  * @template T
  */
-function getServiceInternal(holder, context, id, opt_factory, opt_constructor) {
+function getServiceInternal(holder, context, id, opt_constructor, opt_factory) {
   const services = getServices(holder);
   let s = services[id];
   if (!s) {
@@ -501,7 +501,7 @@ function getServiceInternal(holder, context, id, opt_factory, opt_constructor) {
  * @param {?function(?)=} opt_factory
  *     Factory function to create the new service. Called with context.
  */
-function registerServiceInternal(holder, context, id, opt_factory, opt_ctor) {
+function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
   dev().assert(!opt_factory != !opt_ctor,
       `Provide a constructor or a factory, but not both for service ${id}`);
   const services = getServices(holder);
