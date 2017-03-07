@@ -57,20 +57,20 @@ tags: {  # <amp-nexxtv-player>
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-nexxtv-player extension .js script"
   attrs: {
-    name: "client"
+    name: "data-client"
     mandatory: true
   }
   attrs: {
-      name: "data-mediaid"
-      mandatory: true
-      value_regex: "[^=/?:]+"
-    }
+    name: "data-mediaid"
+    mandatory: true
+    value_regex: "[^=/?:]+"
+  }
   attrs: {
-    name: "mode"
+    name: "data-mode"
     value_regex: "api|static"
   }
   attrs: {
-    name: "origin"
+    name: "data-origin"
     value_url: {
       allow_empty: true
       allow_relative: true
@@ -79,10 +79,10 @@ tags: {  # <amp-nexxtv-player>
     }
   }
   attrs: {
-    name: "seek-to"
+    name: "data-seek-to"
   }
   attrs: {
-    name: "streamtype"
+    name: "data-streamtype"
     value_regex: "album|audio|live|playlist|playlist-marked|video"
   }
   attr_lists: "extended-amp-global"
