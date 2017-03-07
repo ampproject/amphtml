@@ -236,6 +236,25 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     injectActiveViewAmpAnalyticsElement(
       this, this.extensions_, this.ampAnalyticsConfig);
+    this.centerCreative_();
+  }
+
+
+  /**
+   * Centers the outermost creative iframe inside the ad slot.
+   * @private
+   */
+  centerCreative_() {
+    const iframe = this.element.getElementsByTagName('iframe')[0];
+    if (iframe) {
+      setStyles(iframe, {
+        top: '50%',
+        left: '50%',
+        bottom: '',
+        right: '',
+        transform: 'translate(-50%, -50%)',
+      });
+    }
   }
 }
 

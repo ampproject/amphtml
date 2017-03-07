@@ -342,6 +342,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'type': 'adsense',
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
+        doc.body.appendChild(element);
         const extensions = installExtensionsService(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
@@ -359,6 +360,12 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       urls.forEach(url => {
         expect(ampAnalyticsElement.innerHTML.indexOf(url)).to.not.equal(-1);
       });
+    });
+    it('centers iframe in slot', () => {
+      const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
+      impl.onLayoutMeasure();
+      impl.onCreativeRender(false);
+      expect(centerCreativeSpy).to.be.calledOnce;
     });
   });
 
