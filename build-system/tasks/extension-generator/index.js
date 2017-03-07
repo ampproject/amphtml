@@ -172,26 +172,21 @@ import {${className}} from '../${name}';
 
 describes.realWin('${name}', {
   amp: {
-    runtimeOn: true,
-    ampdoc: 'single',
     extensions: ['${name}'],
   }
 }, env => {
 
   let win;
-  let el;
-  let impl;
+  let element;
 
   beforeEach(() => {
     win = env.win;
-    el = win.document.createElement('${name}');
-    impl = new ${className}(el);
+    element = win.document.createElement('${name}');
+    win.document.body.appendChild(element);
   });
 
   it('should have hello world when built', () => {
-    expect(impl.element.textContent).to.equal('');
-    impl.buildCallback();
-    expect(impl.element.textContent).to.equal('hello world');
+    expect(element.textContent).to.equal('hello world');
   });
 });
 `;
