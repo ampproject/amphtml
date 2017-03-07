@@ -16,7 +16,7 @@
 
 import {LayoutDelayMeter} from '../layout-delay-meter';
 import {
-  installPerformanceService,
+  getPerformanceService,
 } from '../../../../src/service/performance-impl';
 import * as lolex from 'lolex';
 
@@ -35,7 +35,7 @@ describes.realWin('layout-delay-meter', {
   beforeEach(() => {
     sandbox = env.sandbox;
     win = env.win;
-    const perf = installPerformanceService(win);
+    const perf = getPerformanceService(win);
     sandbox.stub(perf, 'isPerformanceTrackingOn', () => true);
     clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
     tickSpy = sandbox.spy(perf, 'tickDelta');
