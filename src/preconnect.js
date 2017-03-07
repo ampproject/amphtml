@@ -20,7 +20,7 @@
  */
 
 
-import {registerServiceBuilder} from './service';
+import {getService, registerServiceBuilder} from './service';
 import {parseUrl} from './url';
 import {timerFor} from './timer';
 import {platformFor} from './platform';
