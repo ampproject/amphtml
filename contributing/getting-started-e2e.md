@@ -13,8 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+- [How to get help](#how-to-get-help)
+- [Intro to Git and GitHub](#intro-to-git-and-github)
+- [Set up your GitHub account and Git](#set-up-your-github-account-and-git)
+- [Get a copy of the amphtml code](#get-a-copy-of-the-amphtml-code)
+  * [Understanding repositories](#understanding-repositories)
+  * [Creating your GitHub fork and your local repository](#creating-your-github-fork-and-your-local-repository)
+- [Set up aliases for the remote Git repositories](#set-up-aliases-for-the-remote-git-repositories)
+- [Building AMP and starting a local server](#building-amp-and-starting-a-local-server)
+- [Create a Git branch](#create-a-git-branch)
+- [Pull the latest changes from the amphtml repository](#pull-the-latest-changes-from-the-amphtml-repository)
+- [Edit files and commit them](#edit-files-and-commit-them)
+- [Testing your changes](#testing-your-changes)
+  * [Running tests locally](#running-tests-locally)
+  * [Adding tests for your change](#adding-tests-for-your-change)
+- [Push your changes to your GitHub fork](#push-your-changes-to-your-github-fork)
+- [Send a Pull Request (i.e. request a code review)](#send-a-pull-request-ie-request-a-code-review)
+- [Respond to Pull Request comments](#respond-to-pull-request-comments)
+- [Delete your branch](#delete-your-branch)
+- [See your changes in production](#see-your-changes-in-production)
+- [⚡⚡⚡... (Next steps)](#-next-steps)
+- [Other resources](#other-resources)
 
-# About this guide
+# Getting Started End-to-end
 
 This end-to-end guide will show you how to contribute code to the AMP Project.  It covers everything from creating a GitHub account to getting your code reviewed and merged.
 
@@ -439,7 +460,7 @@ You can verify the AMP version your browser is using for a given page by looking
 
 The [Release Schedule](release-schedule.md) doc has more details on the release process.
 
-# ⚡⚡⚡...
+# ⚡⚡⚡... (Next steps)
 
 Now that you know the process for making changes to the AMP Project you already have most of the heavy lifting done.  **We look forward to seeing your future contributions to the project.** :)
 
