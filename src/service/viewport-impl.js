@@ -21,7 +21,7 @@ import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
     './ios-scrollfreeze-bug';
 import {
   getParentWindowFrameElement,
-  registerServiceForDoc,
+  registerServiceBuilderForDoc,
   getServiceForDoc,
 } from '../service';
 import {layoutRectLtwh} from '../layout-rect';
@@ -1876,7 +1876,7 @@ function getViewportType(win, viewer) {
  * @return {!Viewport}
  */
 export function getViewportServiceForDoc(ampdoc) {
-  registerServiceForDoc(ampdoc, 'viewport', ampdoc => {
+  registerServiceBuilderForDoc(ampdoc, 'viewport', ampdoc => {
     return createViewport(ampdoc);
   });
   return getServiceForDoc(ampdoc, 'viewport');
