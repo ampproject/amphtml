@@ -326,8 +326,9 @@ export function expired(response) {
  *
  * @param {!Cache} cache
  * @return {!Promise<!Array<!RtvVersion>>}
+ * @visibleForTesting
  */
-function diversions(cache) {
+export function diversions(cache) {
   const request = new Request(`${urls.cdn}/diversions`);
 
   return fetchAndCache(cache, request).then(response => {
@@ -395,7 +396,12 @@ export function fetchJsFile(cache, request, requestPath, requestVersion) {
       if (!diversions) {
         return;
       }
-      let p = Promise.resolve();
+      let p = new Promise((resolve) => {
+        // Delay initial diversions requests by 10 seconds.
+        // This is because diversions are low priority compared to page
+        // content.
+        setTimeout(resolve, 10000)
+      });
       for (let i = 0; i < diversions.length; i++) {
         p = p.then(() => {
           const diversionRequest = normalizedRequest(request, diversions[i]);

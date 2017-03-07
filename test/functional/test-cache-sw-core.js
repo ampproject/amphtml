@@ -42,7 +42,8 @@ const cache = {
   match(req) {
     for (let i = 0; i < this.cached.length; i++) {
       if (this.cached[i][0].url === req.url) {
-        return Promise.resolve(this.cached[i][1]);
+        const resp = this.cached[i][1];
+        return Promise.resolve(resp.clone());
       }
     }
 
@@ -355,6 +356,7 @@ runner.run('Cache SW', () => {
 
     beforeEach(() => {
       calls = 0;
+      sandbox.stub(response, 'clone', () => response)
       fetch = sandbox.stub(window, 'fetch', () => {
         calls++;
         if (calls == 1) {
@@ -432,6 +434,7 @@ runner.run('Cache SW', () => {
       });
 
       it('stores response into cache', () => {
+        response.clone.restore();
         const cloned = {};
         sandbox.stub(response, 'clone', () => cloned);
         return sw.fetchAndCache(cache, request).then(() => {
@@ -477,9 +480,9 @@ runner.run('Cache SW', () => {
 
       // "Previous" cached requests
       cache.cached.push(
-        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}, null],
+        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}, new Response('')],
         // A different file
-        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp-0.1.js`}, null],
+        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp-0.1.js`}, new Response('')],
         // A diversion of v0
         [{url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0.js`}, new Response('', {headers: expires})],
         // A diversion of amp-comp
@@ -547,10 +550,18 @@ runner.run('Cache SW', () => {
           fetch.onCall(3).returns(Promise.resolve(new Response('03')));
         });
 
-        it('fetches new diversions', () => {
+        function waitForDiversions() {
           return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
-            return new Promise(resolve => setTimeout(resolve, 25));
-          }).then(() => {
+            const stub = sandbox.stub(window, 'setTimeout', (callback) => {
+              stub.restore();
+              callback();
+            });
+            return sw.diversions(cache);
+          });
+        }
+
+        it('fetches new diversions', () => {
+          return waitForDiversions().then(() => {
             expect(fetch).calledThrice;
             expect(fetch.getCall(2).args[0].url).to.equal(
                 `https://cdn.ampproject.org/rtv/${diversionRtv}/v0.js`);
@@ -558,17 +569,13 @@ runner.run('Cache SW', () => {
         });
 
         it('does not prune new production of new script', () => {
-          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
-            return new Promise(resolve => setTimeout(resolve, 25));
-          }).then(() => {
+          return waitForDiversions().then(() => {
             expect(deleter).to.not.have.been.calledWith(cache.cached[4][0]);
           });
         });
 
         it('does not prune production of any other script', () => {
-          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
-            return new Promise(resolve => setTimeout(resolve, 25));
-          }).then(() => {
+          return waitForDiversions().then(() => {
             expect(deleter).to.not.have.been.calledWith(cache.cached[1][0]);
           });
         });
@@ -577,9 +584,7 @@ runner.run('Cache SW', () => {
           // Remove prevDiversionRtv from diversions response
           fetch.onCall(1).returns(Promise.resolve(
               new Response(`["${diversionRtv}"]`)));
-          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
-            return new Promise(resolve => setTimeout(resolve, 25));
-          }).then(() => {
+          return waitForDiversions().then(() => {
             expect(deleter).to.have.been.calledWith(cache.cached[2][0]);
           });
         });
@@ -588,26 +593,20 @@ runner.run('Cache SW', () => {
           // Remove prevDiversionRtv from diversions response
           fetch.onCall(1).returns(Promise.resolve(
               new Response(`["${diversionRtv}"]`)));
-          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
-            return new Promise(resolve => setTimeout(resolve, 25));
-          }).then(() => {
+          return waitForDiversions().then(() => {
             expect(deleter).to.have.been.calledWith(cache.cached[3][0]);
           });
         });
 
         it('does not prune current diversion of new script', () => {
           // prevDiversionRtv is in diversions response
-          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
-            return new Promise(resolve => setTimeout(resolve, 25));
-          }).then(() => {
+          return waitForDiversions().then(() => {
             expect(deleter).to.not.have.been.calledWith(cache.cached[2][0]);
           });
         });
         it('does not prune current diversion of any other script', () => {
           // prevDiversionRtv is in diversions response
-          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
-            return new Promise(resolve => setTimeout(resolve, 25));
-          }).then(() => {
+          return waitForDiversions().then(() => {
             expect(deleter).to.not.have.been.calledWith(cache.cached[3][0]);
           });
         });
@@ -739,9 +738,7 @@ runner.run('Cache SW', () => {
     function responseFromRequest(req) {
       const res = new Response('');
       Object.defineProperty(res, 'url', {value: req.url});
-      Object.defineProperty(res, 'clone', {value: function() {
-        return this;
-      }});
+      sandbox.stub(res, 'clone', () => res);
       return res;
     }
 
