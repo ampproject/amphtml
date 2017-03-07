@@ -73,7 +73,7 @@ tags: {  # <amp-nexxtv-player>
     name: "origin"
     value_url: {
       allow_empty: true
-      allowed_relative: true
+      allow_relative: true
       allowed_protocol: "https"
       allowed_protocol: "http"
     }
