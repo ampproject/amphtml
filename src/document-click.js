@@ -20,7 +20,7 @@ import {
   escapeCssSelectorIdent,
   isIframed,
 } from './dom';
-import {registerServiceForDoc, getServiceForDoc} from './service';
+import {registerServiceBuilderForDoc, getServiceForDoc} from './service';
 import {dev} from './log';
 import {historyForDoc} from './history';
 import {parseUrl} from './url';
@@ -35,7 +35,7 @@ import {urlReplacementsForDoc} from './url-replacements';
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installGlobalClickListenerForDoc(ampdoc) {
-  registerServiceForDoc(
+  registerServiceBuilderForDoc(
       ampdoc,
       'clickhandler',
       ClickHandler,
