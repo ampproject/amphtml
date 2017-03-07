@@ -18,7 +18,7 @@ import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {platformFor} from '../platform';
-import {registerServiceForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
 import {VideoEvents, VideoAttributes} from '../video-interface';
@@ -486,5 +486,5 @@ export function clearSupportsAutoplayCacheForTesting() {
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
  */
 export function installVideoManagerForDoc(nodeOrDoc) {
-  registerServiceForDoc(nodeOrDoc, 'video-manager', VideoManager);
+  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
 };
