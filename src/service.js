@@ -24,12 +24,12 @@ import {dev} from './log';
  * - obj: Actual service implementation when available.
  * - promise: Promise for the obj.
  * - resolve: Function to resolve the promise with the object.
- * - ctor: Constructor for the service (for lazy creation)
+ * - build: Function that builds and returns the service.
  * @typedef {{
  *   obj: (?Object),
- *   promise: (?Promise|undefined),
- *   resolve: (?function(!Object)|undefined),
- *   ctor: (?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc))
+ *   promise: (?Promise),
+ *   resolve: (?function(!Object)),
+ *   build: (?function():!Object),
  * }}
  */
 let ServiceHolderDef;
@@ -223,12 +223,17 @@ export function fromClass(win, id, constructor) {
  * Registers a service given a class to be used as implementation.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(new:Object, !Window)} constructor
+ * @param {function(!Window):!Object=} opt_factory
+  *@param {function(new:Object, !Window)=} opt_constructor
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
-export function registerService(win, id, constructor, opt_instantiate) {
+export function registerServiceBuilder(win,
+                                       id,
+                                       opt_factory,
+                                       opt_constructor,
+                                       opt_instantiate) {
   win = getTopWindow(win);
-  registerServiceInternal(win, win, id, constructor);
+  registerServiceInternal(win, win, id, opt_factory, opt_constructor);
   if (opt_instantiate) {
     getServiceInternal(win, win, id);
   }
@@ -239,17 +244,18 @@ export function registerService(win, id, constructor, opt_instantiate) {
  * implementation.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} constructor
+  *@param {function(!./service/ampdoc-impl.AmpDoc):Object=} opt_factory
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_constructor
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
-export function registerServiceForDoc(
-  nodeOrDoc,
-  id,
-  constructor,
-  opt_instantiate) {
+export function registerServiceBuilderForDoc(nodeOrDoc,
+                                             id,
+                                             opt_factory,
+                                             opt_constructor,
+                                             opt_instantiate) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
-  registerServiceInternal(holder, ampdoc, id, constructor);
+  registerServiceInternal(holder, ampdoc, id, opt_factory, opt_constructor);
   if (opt_instantiate) {
     getServiceInternal(holder, ampdoc, id);
   }
@@ -453,8 +459,7 @@ function getAmpdocService(win) {
  * @return {*}
  * @template T
  */
-function getServiceInternal(holder, context, id, opt_factory,
-    opt_constructor) {
+function getServiceInternal(holder, context, id, opt_factory, opt_constructor) {
   const services = getServices(holder);
   let s = services[id];
   if (!s) {
@@ -462,26 +467,26 @@ function getServiceInternal(holder, context, id, opt_factory,
       obj: null,
       promise: null,
       resolve: null,
-      ctor: null,
+      build: null,
     };
   }
 
   if (!s.obj) {
-    if (s.ctor) {
-      const ctor = s.ctor;
-      s.obj = new ctor(context);
+    if (s.build) {
+      s.obj = s.build();
     } else {
-      // TODO(kmh287): Replace opt_constructor param with ctor on service
+      // TODO(kmh287): Clean up this code path once all services use the new
+      // registration code path.
       dev().assert(opt_factory || opt_constructor,
           'Factory or class not given and service missing %s', id);
       s.obj = opt_constructor
           ? new opt_constructor(context)
           : opt_factory(context);
-      // The service may have been requested already, in which case we have a
-      // pending promise we need to fulfill.
-      if (s.resolve) {
-        s.resolve(s.obj);
-      }
+    }
+    // The service may have been requested already, in which case we have a
+    // pending promise we need to fulfill.
+    if (s.resolve) {
+      s.resolve(s.obj);
     }
   }
   return s.obj;
@@ -491,23 +496,41 @@ function getServiceInternal(holder, context, id, opt_factory,
  * @param {!Object} holder Object holding the service instance.
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
- * @param {function(new:Object, ?)} constructor
+ * @param {?function(new:Object, ?)=} opt_ctor
  *     Constructor function to new the service. Called with context.
+ * @param {?function(?)=} opt_factory
+ *     Factory function to create the new service. Called with context.
  */
-function registerServiceInternal(holder, context, id, constructor) {
+function registerServiceInternal(holder, context, id, opt_factory, opt_ctor) {
+  dev().assert(!opt_factory != !opt_ctor,
+      `Provide a constructor or a factory, but not both for service ${id}`);
   const services = getServices(holder);
   let s = services[id];
+
   if (!s) {
     s = services[id] = {
       obj: null,
       promise: null,
       resolve: null,
-      ctor: constructor,
+      build: null,
     };
   }
-  // TODO(kmh287) Show a warning if service is already registered AND
-  // the constructor passed in doesn't match the one the service was intiially
-  // registered with?
+
+  if (s.build) {
+    // Service already registered
+    return;
+  }
+
+  s.build = () => {
+    return opt_ctor ? new opt_ctor(context) : opt_factory(context);
+  };
+
+  // The service may have been requested already, in which case there is a
+  // pending promise that needs to fulfilled.
+  if (s.promise && s.resolve) {
+    s.resolve(s.build());
+  }
+
 }
 
 
@@ -521,7 +544,6 @@ function getServicePromiseInternal(holder, id) {
   if (cached) {
     return cached;
   }
-  const services = getServices(holder);
 
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
@@ -529,13 +551,25 @@ function getServicePromiseInternal(holder, id) {
   const p = new Promise(r => {
     resolve = r;
   });
-  services[id] = {
-    obj: null,
-    promise: p,
-    resolve,
-    ctor: null,
-  };
-
+  const services = getServices(holder);
+  let s = services[id];
+  if (s) {
+    // Service is registered, but not yet instantiated.
+    s.promise = p;
+    s.resolve = resolve;
+    // Instantiate service immediately.
+    if (s.build) {
+      s.obj = s.build();
+      s.resolve(s.obj);
+    }
+  } else {
+    s = services[id] = {
+      obj: null,
+      promise: p,
+      resolve,
+      build: null,
+    };
+  }
   return p;
 }
 
@@ -549,14 +583,14 @@ function getServicePromiseOrNullInternal(holder, id) {
   const services = getServices(holder);
   const s = services[id];
   if (s) {
-    const p = s.promise;
-    if (p) {
-      return p;
-    }
-    if (s.obj) {
+    if (s.promise) {
+      return s.promise;
+    } else if (s.obj) {
       return s.promise = Promise.resolve(s.obj);
+    } else {
+      dev().assert((s.build),
+          'Expected object, promise, or builder to be present');
     }
-    dev().assert(false, 'Expected object or promise to be present');
   }
   return null;
 }
