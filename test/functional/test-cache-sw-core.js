@@ -254,15 +254,14 @@ runner.run('Cache SW', () => {
 
     beforeEach(() => {
       clock = sandbox.useFakeTimers();
-      clock.tick();
+      clock.setSystemTime(Date.parse('Mon, 06 Mar 2017 00:00:00 GMT'));
       response = new Response('');
     });
 
     describe('with cache-control and date', () => {
       describe('date in the past', () => {
         beforeEach(() => {
-          response.headers.set('date', new Date(Date.now() - 1000)
-              .toUTCString());
+          response.headers.set('date', 'Sun, 05 Mar 2017 00:00:00 GMT');
         });
 
         it('cache-control no-cache', () => {
@@ -288,7 +287,7 @@ runner.run('Cache SW', () => {
 
       describe('date is now', () => {
         beforeEach(() => {
-          response.headers.set('date', new Date().toUTCString());
+          response.headers.set('date', 'Mon, 06 Mar 2017 00:00:00 GMT');
         });
 
         it('cache-control no-cache', () => {
@@ -314,8 +313,7 @@ runner.run('Cache SW', () => {
 
       describe('date in the future', () => {
         beforeEach(() => {
-          response.headers.set('date', new Date(Date.now() + 1000)
-              .toUTCString());
+          response.headers.set('date', 'Tue, 07 Mar 2017 00:00:00 GMT');
         });
 
         it('cache-control no-cache', () => {
