@@ -20,7 +20,7 @@ import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
 import {documentStateFor} from './document-state';
 
-import {registerService, getService} from '../service';
+import {registerServiceBuilder, getService} from '../service';
 import {installTimerService} from './timer-impl';
 import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
 import {JankMeter} from './jank-meter';
@@ -455,5 +455,5 @@ export function getVsyncService(window) {
  */
 export function installVsyncService(window) {
   installTimerService(window);
-  registerService(window, 'vsync', Vsync);
+  registerServiceBuilder(window, 'vsync', Vsync);
 }
