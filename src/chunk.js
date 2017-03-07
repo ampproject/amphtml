@@ -51,7 +51,7 @@ export function startupChunk(nodeOrAmpDoc, fn) {
     resolved.then(fn);
     return;
   }
-  const service = getChunkServiceForDoc_(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   service.runForStartup_(fn);
 }
 
@@ -74,7 +74,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
     resolved.then(fn);
     return;
   }
-  const service = getChunkServiceForDoc_(nodeOrAmpDoc, 'chunk');
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   service.run(fn, priority);
 }
 
@@ -123,7 +123,7 @@ export function activateChunkingForTesting() {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  */
 export function runChunksForTesting(nodeOrAmpDoc) {
-  const service = getChunkServiceForDoc_(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   const errors = [];
   while (true) {
     try {
