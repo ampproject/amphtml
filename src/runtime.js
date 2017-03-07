@@ -510,8 +510,8 @@ function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
   // all other services have been refactored.
   registerServiceBuilderForDoc(ampdoc,
                                name,
-                               opt_factory,
                                opt_ctor,
+                               opt_factory,
                                /* opt_instantiate */ true);
 }
 
