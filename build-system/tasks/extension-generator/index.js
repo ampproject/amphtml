@@ -279,6 +279,9 @@ function makeExtension() {
       getJsTestExtensionFile(name));
   fs.writeFileSync(`examples/${name}.amp.html`,
       getExamplesFile(name));
+  fs.writeFileSync(`validator/testdata/feature_tests/${name}.html`,
+      getExamplesFile(name));
+  fs.writeFileSync(`validator/testdata/feature_tests/${name}.out`, 'PASS');
 }
 
 gulp.task('make-extension', 'Create an extension skeleton', makeExtension, {
