@@ -67,8 +67,10 @@ export class ViewportBindingInabox {
 
     /**
      * The current layout rect of the iframe box.
-     * To not trigger amp-analytics visibility immediately,
-     * we start with an initial position right below the fold.
+     * TODO(lannka, #7971): The best way to stop visibility from firing
+     * is to move this functionality to the InOb polyfill.
+     * ~To not trigger amp-analytics visibility immediately,
+     * we start with an initial position right below the fold.~
      * @private {!../layout-rect.LayoutRectDef}
      */
     this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
