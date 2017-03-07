@@ -67,7 +67,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           return ['google'];
         });
     element = createAdsenseImplElement({
-      'data-ad-client': 'adsense',
+      'data-ad-client': 'ca-adsense',
       'width': '320',
       'height': '50',
       'data-experiment-id': '8675309',
@@ -89,7 +89,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
 
     const invariantParams = {
-      'client': 'adsense',
+      'client': 'ca-adsense',
       'format': '320x50',
       'w': '320',
       'h': '50',
@@ -114,7 +114,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
             AmpAdNetworkAdsenseImpl);
         const elem = createAdsenseImplElement({
-          'data-ad-client': 'adsense',
+          'data-ad-client': 'ca-adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
@@ -196,19 +196,19 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
             AmpAdNetworkAdsenseImpl);
         const elem1 = createAdsenseImplElement({
-          'data-ad-client': 'adsense',
+          'data-ad-client': 'ca-adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
         }, fixture.doc, 'amp-a4a');
         const elem2 = createAdsenseImplElement({
-          'data-ad-client': 'adsense',
+          'data-ad-client': 'ca-adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
         }, fixture.doc, 'amp-a4a');
         const elem3 = createAdsenseImplElement({
-          'data-ad-client': 'not-adsense',
+          'data-ad-client': 'ca-not-adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
@@ -250,19 +250,18 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       expect(impl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      element = createAdsenseImplElement({'data-ad-client': 'adsense'},
+      element = createAdsenseImplElement({'data-ad-client': 'ca-adsense'},
           document, 'amp-ad-network-adsense-impl');
       impl = new AmpAdNetworkAdsenseImpl(element);
       expect(impl.isValidElement()).to.be.false;
     });
-    it.skip('should be NOT valid (missing ad client)', () => {
-      // TODO(taymonbeal): reenable this test after clarifying validation
+    it('should be NOT valid (missing ad client)', () => {
       element.setAttribute('data-ad-client', '');
       element.setAttribute('type', 'adsense');
       expect(impl.isValidElement()).to.be.false;
     });
     it('should be valid (amp-embed)', () => {
-      element = createAdsenseImplElement({'data-ad-client': 'adsense'},
+      element = createAdsenseImplElement({'data-ad-client': 'ca-adsense'},
           document, 'amp-embed');
       impl = new AmpAdNetworkAdsenseImpl(element);
       expect(impl.isValidElement()).to.be.true;
@@ -364,13 +363,21 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
   });
 
   describe('#getAdUrl', () => {
+    it('formats client properly', () => {
+      element.setAttribute('data-ad-client', 'SoMeClient');
+      new AmpAd(element).upgradeCallback();
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/\\?client=ca-someclient/);
+      });
+    });
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
-          '\\?client=adsense&format=0x0&w=0&h=0&adtest=false' +
+          '\\?client=ca-adsense&format=0x0&w=0&h=0&adtest=false' +
           '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
           '(&asnt=[0-9]+-[0-9]+)?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
