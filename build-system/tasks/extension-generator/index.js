@@ -51,7 +51,7 @@ tags: {  # ${name}
   satisfies: "${name} extension .js script"
   requires: "${name}"
   mandatory_parent: "HEAD"
-  unique_warning: true
+  unique: true
   extension_unused_unless_tag_present: "${name}"
   attrs: {
     name: "async"
@@ -87,8 +87,9 @@ tags: {  # <${name}>
   tag_name: "${name.toUpperCase()}"
   satisfies: "${name}"
   requires: "${name} extension .js script"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
   amp_layout: {
-    supported_layouts: CONTAINER
     supported_layouts: RESPONSIVE
   }
 }
@@ -186,7 +187,8 @@ describes.realWin('${name}', {
   });
 
   it('should have hello world when built', () => {
-    expect(element.textContent).to.equal('hello world');
+    element.build();
+    expect(element.querySelector('div').textContent).to.equal('hello world');
   });
 });
 `;
@@ -220,16 +222,21 @@ export class ${className} extends AMP.BaseElement {
 
     /** @private {string} */
     this.myText_ = 'hello world';
-  }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || layout == Layout.RESPONSIVE;
+    /** @private {!Element} */
+    this.container_ = this.win.document.createElement('div');
   }
 
   /** @override */
   buildCallback() {
-    this.element.textContent = this.myText_;
+    this.container_.textContent = this.myText_;
+    this.element.appendChild(this.container_);
+    this.applyFillContent(this.container_, /* replacedContent */ true);
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.RESPONSIVE;
   }
 }
 
@@ -255,7 +262,7 @@ return `<!doctype html>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <${name} layout="container"></${name}>
+  <${name} layout="responsive" width="150" height="80"></${name}>
 </body>
 </html>
 `;
