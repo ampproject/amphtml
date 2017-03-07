@@ -127,7 +127,7 @@ export function installAmpFreshManagerForDoc(nodeOrDoc) {
 
 /**
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!AmpFreshManager
+ * @return {!AmpFreshManager}
  */
 export function getAmpFreshManagerForDoc(nodeOrDoc) {
   installAmpFreshManagerForDoc(nodeOrDoc);
