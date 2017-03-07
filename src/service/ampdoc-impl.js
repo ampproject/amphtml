@@ -18,6 +18,7 @@ import {Signals} from '../utils/signals';
 import {dev} from '../log';
 import {
   getParentWindowFrameElement,
+  registerServiceBuilder,
   getService,
 } from '../service';
 import {getShadowRootNode} from '../shadow-embed';
@@ -479,7 +480,8 @@ export class AmpDocShadow extends AmpDoc {
  * @return {!AmpDocService}
  */
 export function getDocService(win, isSingleDoc) {
-  return /** @type {!AmpDocService} */ (getService(win, 'ampdoc', () => {
+  registerServiceBuilder(win, 'ampdoc', undefined, () => {
     return new AmpDocService(win, isSingleDoc);
-  }));
+  });
+  return getService(win, 'ampdoc');
 };
