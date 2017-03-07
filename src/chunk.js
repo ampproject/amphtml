@@ -16,7 +16,7 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
-import {registerServiceForDoc, getServiceForDoc} from './service';
+import {registerServiceBuilderForDoc, getServiceForDoc} from './service';
 import {isExperimentOnAllowUrlOverride} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
@@ -99,7 +99,7 @@ function getChunkServiceForDoc_(nodeOrAmpDoc) {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  */
 export function installChunkServiceForDoc_(nodeOrAmpDoc) {
-  registerServiceForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
 }
 
 /**
