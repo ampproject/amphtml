@@ -265,7 +265,9 @@ export function fetchAndCache(cache, request) {
 
   // Batch fetches. Mainly for the /diversions endpoint.
   if (fetchPromises[url]) {
-    return fetchPromises[url];
+    return fetchPromises[url].then(() => {
+      return cache.match(request);
+    });
   }
 
   return fetchPromises[url] = cache.match(request)
