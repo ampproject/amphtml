@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {cidForDoc} from '../../../src/cid';
-import {registerService, getService} from '../../../src/service';
+import {registerServiceBuilder, getService} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {storageForDoc} from '../../../src/storage';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
@@ -446,7 +446,9 @@ export function getUserNotificationManager(window) {
  * @param {!Window} window
  */
 export function installUserNotificationManager(window) {
-  registerService(window, 'userNotificationManager', UserNotificationManager);
+  registerServiceBuilder(window,
+                         'userNotificationManager',
+                         UserNotificationManager);
 }
 
 installUserNotificationManager(AMP.win);
