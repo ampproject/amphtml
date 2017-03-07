@@ -24,7 +24,7 @@ import {viewportForDoc} from '../../../src/viewport';
 import {listen} from '../../../src/event-helper';
 import {
   registerServiceBuilderForDoc,
-  getServiceForDoc
+  getServiceForDoc,
 } from '../../../src/service';
 
 
