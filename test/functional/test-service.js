@@ -127,7 +127,7 @@ describe('service', () => {
     });
 
     it('should not instantiate service when registered', () => {
-      registerServiceBuilder(window, 'fake service', undefined, Class);
+      registerServiceBuilder(window, 'fake service', Class);
       expect(count).to.equal(0);
       getService(window, 'fake service');
       expect(count).to.equal(1);
@@ -176,7 +176,7 @@ describe('service', () => {
 
     it('should resolve existing service promise on registering service', () => {
       const p = getServicePromise(window, 'a');
-      registerServiceBuilder(window, 'a', undefined, Class);
+      registerServiceBuilder(window, 'a', Class);
       expect(count).to.equal(1);
       return p.then(() => {
         expect(count).to.equal(1);
@@ -184,7 +184,7 @@ describe('service', () => {
     });
 
     it('should resolve service promise if service is registered', () => {
-      registerServiceBuilder(window, 'a', undefined, Class);
+      registerServiceBuilder(window, 'a', Class);
       expect(count).to.equal(0);
       return getServicePromise(window, 'a').then(() => {
         expect(count).to.equal(1);
@@ -192,7 +192,7 @@ describe('service', () => {
     });
 
     it('should provide promise without clobbering registered services', () => {
-      registerServiceBuilder(window, 'a', undefined, Class);
+      registerServiceBuilder(window, 'a', Class);
       expect(count).to.equal(0);
       const p = getServicePromise(window, 'a');
       expect(getService(window, 'a')).to.not.throw;
