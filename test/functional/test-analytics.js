@@ -15,6 +15,7 @@
  */
 
 import {
+  getServiceForDoc,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../src/service';
@@ -56,7 +57,7 @@ describe('triggerAnalyticsEvent', () => {
   });
 
   it('should trigger analytics event if analytics is installed', () => {
-    registerServiceForDoc(
+    registerServiceBuilderForDoc(
         ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
     // Force instantiation
     getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
