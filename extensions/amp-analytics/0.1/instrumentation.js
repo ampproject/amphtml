@@ -37,7 +37,7 @@ import {
   getParentWindowFrameElement,
   getServiceForDoc,
   getServicePromiseForDoc,
-  registerServiceForDoc,
+  registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
 import {timerFor} from '../../../src/timer';
@@ -587,7 +587,7 @@ export function instrumentationServicePromiseForDoc(nodeOrDoc) {
  * @return {!InstrumentationService}
  */
 export function instrumentationServiceForDocForTesting(nodeOrDoc) {
-  registerServiceForDoc(
+  registerServiceBuilderForDoc(
       nodeOrDoc, 'amp-analytics-instrumentation', InstrumentationService);
   return getServiceForDoc(nodeOrDoc, 'amp-analytics-instrumentation');
 }

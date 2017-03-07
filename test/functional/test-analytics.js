@@ -15,8 +15,7 @@
  */
 
 import {
-  getServiceForDoc,
-  registerServiceForDoc,
+  registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../src/service';
 import {triggerAnalyticsEvent} from '../../src/analytics';
