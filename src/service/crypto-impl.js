@@ -15,7 +15,7 @@
  */
 
 import {PublicKeyInfoDef} from '../crypto';
-import {registerService, getService} from '../service';
+import {registerServiceBuilder, getService} from '../service';
 import {dev} from '../log';
 import {getExistingServiceForWindow} from '../service';
 import {extensionsFor} from '../extensions';
@@ -284,5 +284,5 @@ export function cryptoServiceForTesting(win) {
  * @return {!Crypto}
  */
 export function installCryptoService(win) {
-  return registerService(win, 'crypto', Crypto);
+  return registerServiceBuilder(win, 'crypto', Crypto);
 }
