@@ -21,13 +21,13 @@ import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
-import {installActionServiceForDoc,} from
+import {installActionServiceForDoc} from
     '../../../../src/service/action-impl';
-import {installCidServiceForDocForTesting,} from
+import {installCidServiceForDocForTesting} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {installDocService,} from
+import {installDocService} from
     '../../../../src/service/ampdoc-impl';
-import {installPerformanceService,} from
+import {installPerformanceService} from
     '../../../../src/service/performance-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {toggleExperiment} from '../../../../src/experiments';
