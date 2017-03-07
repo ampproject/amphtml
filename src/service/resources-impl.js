@@ -1952,6 +1952,10 @@ function elements_(elements) {
  */
 export let SizeDef;
 
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Resources}
+ */
 export function getResourcesServiceForDoc(ampdoc) {
   installResourcesServiceForDoc(ampdoc);
   return getServiceForDoc(ampdoc, 'resources');
@@ -1959,7 +1963,6 @@ export function getResourcesServiceForDoc(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Resources}
  */
 export function installResourcesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
