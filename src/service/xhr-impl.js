@@ -15,7 +15,7 @@
  */
 
 import {dev, user} from '../log';
-import {registerService, getService} from '../service';
+import {registerServiceBuilder, getService} from '../service';
 import {
   getSourceOrigin,
   getCorsUrl,
@@ -558,5 +558,5 @@ export function xhrServiceForTesting(window) {
  * @param {!Window} window
  */
 export function installXhrService(window) {
-  registerService(window, 'xhr', Xhr);
+  registerServiceBuilder(window, 'xhr', Xhr);
 };
