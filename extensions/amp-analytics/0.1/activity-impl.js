@@ -22,7 +22,10 @@
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {listen} from '../../../src/event-helper';
-import {registerServiceForDoc, getServiceForDoc} from '../../../src/service';
+import {
+  registerServiceBuilderForDoc,
+  getServiceForDoc
+} from '../../../src/service';
 
 
 /**
@@ -125,7 +128,7 @@ const ACTIVE_EVENT_TYPES = [
  * @return {Activity}
  */
 export function activityServiceForTesting(ampDoc) {
-  registerServiceForDoc(ampDoc, 'activity', Activity);
+  registerServiceBuilderForDoc(ampDoc, 'activity', Activity);
   return getServiceForDoc(ampDoc, 'activity');
 }
 
