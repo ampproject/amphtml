@@ -157,6 +157,8 @@ exports.rules = [
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->src/service/variable-source.js',
+      'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
+          'src/service/parallax-impl.js',
     ],
   },
   {
