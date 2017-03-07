@@ -20,7 +20,10 @@ import {
   scopedQuerySelector,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
+import {viewportForDoc} from '../../../src/viewport';
 import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
 const TAG = 'amp-analytics';
@@ -314,7 +317,21 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
 
   /** @override */
   whenIniLoaded() {
-    return whenContentIniLoad(this.ampdoc, this.ampdoc.win);
+    const viewport = viewportForDoc(this.ampdoc);
+    let rect;
+    if (getMode(this.ampdoc.win).runtime == 'inabox') {
+      // TODO(dvoytenko, #7971): This is currently addresses incorrect position
+      // calculations in a in-a-box viewport where all elements are offset
+      // to the bottom of the embed. The current approach, even if fixed, still
+      // creates a significant probability of risk condition.
+      // Once address, we can simply switch to the 0/0 approach in the `else`
+      // clause.
+      rect = viewport.getLayoutRect(this.getRootElement());
+    } else {
+      const size = viewport.getSize();
+      rect = layoutRectLtwh(0, 0, size.width, size.height);
+    }
+    return whenContentIniLoad(this.ampdoc, this.ampdoc.win, rect);
   }
 }
 
