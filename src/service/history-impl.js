@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {registerService, getService, getServiceForDoc} from '../service';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+  getService,
+  getServiceForDoc,
+} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {timerFor} from '../timer';
@@ -832,10 +837,9 @@ function createHistory(ampdoc) {
   } else {
     // Only one global "natural" binding is allowed since it works with the
     // global history stack.
-    registerService(
-        ampdoc.win,
-        'global-history-binding',
-        HistoryBindingNatural_);
+    registerServiceBuilder(ampdoc.win,
+                           'global-history-binding',
+                           HistoryBindingNatural_);
     binding = getService(ampdoc.win, 'global-history-binding');
   }
   return new History(ampdoc, binding);
@@ -847,6 +851,8 @@ function createHistory(ampdoc) {
  * @return {!History}
  */
 export function getHistoryServiceForDoc(ampdoc) {
-  return /** @type {!History} */ (getServiceForDoc(ampdoc, 'history',
-      ampdoc => createHistory(ampdoc)));
+  registerServiceBuilderForDoc(ampdoc, 'history', ampdoc => {
+    return createHistory(ampdoc);
+  });
+  return /** @type {!History} */ (getServiceForDoc(ampdoc, 'history'));
 }
