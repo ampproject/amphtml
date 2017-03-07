@@ -809,7 +809,6 @@ export class Bind {
     return false;
   }
 
-
   /**
    * Wait for bind scan to finish for testing.
    *
