@@ -17,7 +17,6 @@
 import {PublicKeyInfoDef} from '../crypto';
 import {registerServiceBuilder, getService} from '../service';
 import {dev} from '../log';
-import {getExistingServiceForWindow} from '../service';
 import {extensionsFor} from '../extensions';
 import {stringToBytes, utf8Encode} from '../utils/bytes';
 import {
@@ -273,6 +272,7 @@ function hashesEqual(signature, keyHash) {
 
 /**
  * @param {!Window} win
+ * @return {!Crypto}
  */
 export function cryptoServiceForTesting(win) {
   installCryptoService(win);
@@ -281,7 +281,6 @@ export function cryptoServiceForTesting(win) {
 
 /**
  * @param {!Window} win
- * @return {!Crypto}
  */
 export function installCryptoService(win) {
   return registerServiceBuilder(win, 'crypto', Crypto);
