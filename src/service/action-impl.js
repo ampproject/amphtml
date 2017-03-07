@@ -15,7 +15,10 @@
  */
 
 import {dev, user} from '../log';
-import {registerServiceForDoc, installServiceInEmbedScope} from '../service';
+import {
+  registerServiceBuilderForDoc,
+  installServiceInEmbedScope,
+} from '../service';
 import {getMode} from '../mode';
 import {isArray} from '../types';
 import {map} from '../utils/object';
@@ -837,9 +840,10 @@ function isNum(c) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installActionServiceForDoc(ampdoc) {
-  registerServiceForDoc(
+  registerServiceBuilderForDoc(
       ampdoc,
       'action',
       ActionService,
+      /* opt_factory */ undefined,
       /* opt_instantiate */ true);
 }
