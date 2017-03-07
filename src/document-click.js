@@ -20,7 +20,7 @@ import {
   escapeCssSelectorIdent,
   isIframed,
 } from './dom';
-import {registerServiceBuilderForDoc, getServiceForDoc} from './service';
+import {registerServiceBuilderForDoc} from './service';
 import {dev} from './log';
 import {historyForDoc} from './history';
 import {parseUrl} from './url';
@@ -39,6 +39,7 @@ export function installGlobalClickListenerForDoc(ampdoc) {
       ampdoc,
       'clickhandler',
       ClickHandler,
+      /* opt_factory */ undefined,
       /* opt_instantiate */ true);
 }
 
