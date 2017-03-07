@@ -52,6 +52,34 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
   }
 
+  describe('detecting bindings under dynamic tags', () => {
+    it('should NOT bind blacklisted attributes', () => {
+      const template = fixture.doc.getElementById('dynamicTemplate');
+      const div = fixture.doc.createElement('div');
+      div.innerHTML = '<p [onclick]="javascript:alert(document.cookie)" ' +
+                         '[onmouseover]="javascript:alert()" ' +
+                         '[style]="background=color:black"></p>';
+      const textElement = div.firstElementChild;
+      template.parentElement.appendChild(textElement);
+      return bind.waitForAllMutationsForTesting().then(() => {
+        expect(textElement.getAttribute('onclick')).to.be.null;
+        expect(textElement.getAttribute('onmouseover')).to.be.null;
+        expect(textElement.getAttribute('style')).to.be.null;
+      });
+    });
+
+    it('should NOT allow unsecure attribute values', () => {
+      const div = fixture.doc.createElement('div');
+      div.innerHTML = '<a [href]="javascript:alert(1)"></a>';
+      aElement = div.firstElementChild;
+      const template = fixture.doc.getElementById('dynamicTemplate');
+      template.parentElement.appendChild(aElement);
+      return bind.waitForAllMutationsForTesting().then(() => {
+        expect(aElement.getAttribute('href')).to.be.null;
+      });
+    });
+  });
+
   describe('text integration', () => {
     it('should update text when text attribute binding changes', () => {
       const textElement = fixture.doc.getElementById('textElement');

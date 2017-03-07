@@ -160,52 +160,6 @@ describes.realWin('amp-bind', {
         expect(bind.boundElements_.length).to.equal(1);
       });
     });
-
-    //TODO(kmh287): Move to integration test
-    it('should NOT bind blacklisted attributes', () => {
-      // Restore real implementations of canBind and isResultValid
-      sandbox.restore();
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      let textElement;
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        const binding = '[onclick]="\'alert(document.cookie)\'" ' +
-          '[onmouseover]="\'alert()\'" ' +
-          '[style]="\'background=color:black\'"';
-        textElement = createElementWithBinding(binding);
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        expect(textElement.getAttribute('onclick')).to.be.null;
-        expect(textElement.getAttribute('onmouseover')).to.be.null;
-        expect(textElement.getAttribute('style')).to.be.null;
-      });
-    });
-
-    //TODO(kmh287): Move to integration test
-    it('should NOT allow unsecure attribute values', () => {
-      // Restore real implementations of canBind and isResultValid
-      sandbox.restore();
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      let aElement;
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        const binding = '[href]="javascript:alert(1)"';
-        const div = env.win.document.createElement('div');
-        div.innerHTML = '<a ' + binding + '></a>';
-        aElement = div.firstElementChild;
-        // Templated HTML is added as a sibling to the template,
-        // not as a child
-        doc.getElementById('parent').appendChild(aElement);
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(aElement.getAttribute('href')).to.be.null;
-      });
-    });
   });
 
 
