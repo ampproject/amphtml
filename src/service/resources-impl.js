@@ -24,7 +24,7 @@ import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
-import {registerServiceForDoc, getServiceForDoc} from '../service';
+import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
 import {inputFor} from '../input';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
@@ -1962,5 +1962,5 @@ export function getResourcesServiceForDoc(ampdoc) {
  * @return {!Resources}
  */
 export function installResourcesServiceForDoc(ampdoc) {
-  registerServiceForDoc(ampdoc, 'resources', Resources);
+  registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
 };
