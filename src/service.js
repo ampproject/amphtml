@@ -159,7 +159,7 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       'Service override can only be installed in embed window: %s', id);
   dev().assert(!getLocalExistingServiceForEmbedWinOrNull(embedWin, id),
       'Service override has already been installed: %s', id);
-  getServiceInternal(embedWin, embedWin, id, () => service);
+  getServiceInternal(embedWin, embedWin, id, undefined, () => service);
 }
 
 
