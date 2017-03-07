@@ -17,7 +17,7 @@
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev} from '../log';
-import {getService, registerService} from '../service';
+import {getService, registerServiceBuilder} from '../service';
 import {getMode} from '../mode';
 import {isExperimentOn} from '../experiments';
 import {xhrFor} from '../xhr';
@@ -34,7 +34,7 @@ let PendingMessageDef;
  * @private
  */
 function installWebWorker(win) {
-  registerService(win, 'amp-worker', AmpWorker);
+  registerServiceBuilder(win, 'amp-worker', AmpWorker);
 }
 
 /**
