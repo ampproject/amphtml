@@ -308,6 +308,7 @@ export function installVariableService(win) {
     win,
     'amp-analytics-variables',
     VariableService,
+    /* opt_factory */ undefined,
     /* opt_instantiate */ true);
 }
 
