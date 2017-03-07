@@ -15,7 +15,6 @@
  */
 
 import {Observable} from '../observable';
-import {fromClass} from '../service';
 import {getVendorJsPropertyName} from '../style';
 import {waitForChild} from '../dom';
 import {registerServiceBuilder, getService} from '../service';
