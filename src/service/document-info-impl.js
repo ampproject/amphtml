@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {fromClassForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {parseUrl, getSourceUrl} from '../url';
 import {map} from '../utils/object';
 import {isArray} from '../types';
@@ -46,7 +46,7 @@ export let DocumentInfoDef;
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
  */
 export function installDocumentInfoServiceForDoc(nodeOrDoc) {
-  return registerServiceForDoc(nodeOrDoc, 'documentInfo', DocInfo);
+  return registerServiceBuilderForDoc(nodeOrDoc, 'documentInfo', DocInfo);
 }
 
 
