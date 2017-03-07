@@ -24,14 +24,12 @@ import {dev} from './log';
  * - obj: Actual service implementation when available.
  * - promise: Promise for the obj.
  * - resolve: Function to resolve the promise with the object.
- * - ctor: Constructor for the service.
- * - factory: Factory to create the service.
+ * - build: Function that builds and returns the service.
  * @typedef {{
  *   obj: (?Object),
- *   promise: (?Promise|undefined),
- *   resolve: (?function(!Object)|undefined),
- *   ctor: (?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc)),
- *   factory: (?function(!Window):!Object|?function(!./service/ampdoc-impl.AmpDoc):!Object)
+ *   promise: (?Promise),
+ *   resolve: (?function(!Object)),
+ *   build: (?function():!Object),
  * }}
  */
 let ServiceHolderDef;
@@ -236,11 +234,7 @@ export function registerServiceBuilder(win,
                                        opt_instantiate) {
   win = getTopWindow(win);
   registerServiceInternal(win, win, id, opt_factory, opt_constructor);
-  // The service may have been requested already, in which case we have a
-  // pending promise we need to fulfill.
-  const p = getServicePromiseOrNullInternal(win, id);
-  if (opt_instantiate || p) {
-    // Force instantiation and resolve service promise if it exists
+  if (opt_instantiate) {
     getServiceInternal(win, win, id);
   }
 }
@@ -262,11 +256,7 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   registerServiceInternal(holder, ampdoc, id, opt_factory, opt_constructor);
-  // The service may have been requested already, in which case we have a
-  // pending promise we need to fulfill.
-  const p = getServicePromiseOrNullInternal(holder, id);
-  if (opt_instantiate || p) {
-    // Force instantiation and resolve service promise if it exists
+  if (opt_instantiate) {
     getServiceInternal(holder, ampdoc, id);
   }
 }
@@ -477,17 +467,13 @@ function getServiceInternal(holder, context, id, opt_factory, opt_constructor) {
       obj: null,
       promise: null,
       resolve: null,
-      ctor: null,
-      factory: null,
+      build: null,
     };
   }
 
   if (!s.obj) {
-    if (s.ctor) {
-      const ctor = s.ctor;
-      s.obj = new ctor(context);
-    } else if (s.factory) {
-      s.obj = s.factory(context);
+    if (s.build) {
+      s.obj = s.build();
     } else {
       // TODO(kmh287): Clean up this code path once all services use the new
       // registration code path.
@@ -526,18 +512,25 @@ function registerServiceInternal(holder, context, id, opt_factory, opt_ctor) {
       obj: null,
       promise: null,
       resolve: null,
-      ctor: null,
-      factory: null,
+      build: null,
     };
   }
 
-  if (s.ctor || s.factory) {
+  if (s.build) {
     // Service already registered
     return;
   }
 
-  s.ctor = opt_ctor || null;
-  s.factory = opt_factory || null;
+  s.build = () => {
+    return opt_ctor ? new opt_ctor(context) : opt_factory(context);
+  };
+
+  // The service may have been requested already, in which case there is a
+  // pending promise that needs to fulfilled.
+  if (s.promise && s.resolve) {
+    s.resolve(s.build());
+  }
+
 }
 
 
@@ -551,7 +544,6 @@ function getServicePromiseInternal(holder, id) {
   if (cached) {
     return cached;
   }
-  const services = getServices(holder);
 
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
@@ -559,18 +551,23 @@ function getServicePromiseInternal(holder, id) {
   const p = new Promise(r => {
     resolve = r;
   });
+  const services = getServices(holder);
   let s = services[id];
   if (s) {
-    // Service is registered, but not yet instantiated
+    // Service is registered, but not yet instantiated.
     s.promise = p;
     s.resolve = resolve;
+    // Instantiate service immediately.
+    if (s.build) {
+      s.obj = s.build();
+      s.resolve(s.obj);
+    }
   } else {
     s = services[id] = {
       obj: null,
       promise: p,
       resolve,
-      ctor: null,
-      factory: null,
+      build: null,
     };
   }
   return p;
@@ -591,8 +588,8 @@ function getServicePromiseOrNullInternal(holder, id) {
     } else if (s.obj) {
       return s.promise = Promise.resolve(s.obj);
     } else {
-      dev().assert((s.ctor || s.factory),
-          'Expected object, promise, ctor, or factory to be present');
+      dev().assert((s.build),
+          'Expected object, promise, or builder to be present');
     }
   }
   return null;
