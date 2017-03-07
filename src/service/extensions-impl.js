@@ -16,7 +16,7 @@
 
 import {
   adoptServiceForEmbed,
-  registerService,
+  registerServiceBuilder,
   getService,
   setParentWindow,
 } from '../service';
@@ -92,9 +92,10 @@ let ExtensionHolderDef;
  * @restricted
  */
 export function installExtensionsService(window) {
-  registerService(
+  registerServiceBuilder(
     window,
     'extensions',
+    /* opt_factory */ undefined,
     Extensions,
     /* opt_instantiate */ true);
 }
