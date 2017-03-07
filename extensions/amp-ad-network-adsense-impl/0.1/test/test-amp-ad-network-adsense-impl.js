@@ -342,7 +342,6 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'type': 'adsense',
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
-        doc.body.appendChild(element);
         const extensions = installExtensionsService(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
@@ -363,7 +362,6 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
     it('centers iframe in slot', () => {
       const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
-      impl.onLayoutMeasure();
       impl.onCreativeRender(false);
       expect(centerCreativeSpy).to.be.calledOnce;
     });
@@ -384,7 +382,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
-          '\\?client=ca-adsense&format=0x0&w=0&h=0&adtest=false' +
+          '\\?client=ca-adsense&format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+&adtest=false' +
           '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
           '(&asnt=[0-9]+-[0-9]+)?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
