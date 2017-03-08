@@ -127,9 +127,18 @@ describe('service', () => {
     });
 
     it('should not instantiate service when registered', () => {
-      registerServiceBuilder(window, 'fake service', Class);
+      registerServiceBuilder(window, 'a', Class);
       expect(count).to.equal(0);
-      getService(window, 'fake service');
+      getService(window, 'a');
+      expect(count).to.equal(1);
+    });
+
+    it('should only instantiate the service once', () => {
+      registerServiceBuilder(window, 'b', Class);
+      expect(count).to.equal(0);
+      for (let i = 0; i < 10; i++) {
+        getService(window, 'b');
+      }
       expect(count).to.equal(1);
     });
 
