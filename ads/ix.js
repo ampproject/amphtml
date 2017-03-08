@@ -102,8 +102,9 @@ function indexAmpRender(doc, targetID, global) {
     const ad = global._IndexRequestData.targetIDToBid[targetID].pop();
     if (ad != null) {
       const admDiv = document.createElement('div');
+      admDiv.setAttribute('style', 'position: absolute; top: 0; left: 0;');
       admDiv./*OK*/innerHTML = ad;
-      doc.body.appendChild(admDiv);
+      document.getElementById('c').appendChild(admDiv);
     } else {
       global.context.noContentAvailable();
     }
