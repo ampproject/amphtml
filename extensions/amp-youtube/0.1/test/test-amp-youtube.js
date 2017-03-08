@@ -301,6 +301,17 @@ describe('amp-youtube', function() {
     });
   });
 
+  it('should remove iframe after unlayoutCallback', (done) => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const placeholder = yt.querySelector('[placeholder]');
+      const obj = yt.implementation_;
+      obj.unlayoutCallback();
+      expect(yt.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(placeholder.style.display).to.be.equal('');
+    });
+  });
+
   function sendFakeInfoDeliveryMessage(yt, iframe, info) {
     yt.implementation_.handleYoutubeMessages_({
       origin: 'https://www.youtube.com',
