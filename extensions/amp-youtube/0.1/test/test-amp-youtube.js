@@ -301,7 +301,7 @@ describe('amp-youtube', function() {
     });
   });
 
-  it('should remove iframe after unlayoutCallback', (done) => {
+  it('should remove iframe after unlayoutCallback', () => {
     return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
       const placeholder = yt.querySelector('[placeholder]');
       const obj = yt.implementation_;
