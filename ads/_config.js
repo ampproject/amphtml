@@ -531,6 +531,12 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
+  sunmedia: {
+    prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
+    preconnect: 'https://static.addevweb.com',
+    renderStartImplemented: true,
+  },
+
   swoop: {
     prefetch: 'https://www.swoop-amp.com/amp.js',
     preconnect: [
