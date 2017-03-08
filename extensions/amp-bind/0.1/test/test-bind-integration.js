@@ -162,4 +162,44 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
   });
 
+  describe('amp-selector integration', () => {
+    it('should update dependent bindings when selection changes', () => {
+      const selectionText = fixture.doc.getElementById('selectionText');
+      const img1 = fixture.doc.getElementById('selectorImg1');
+      const img2 = fixture.doc.getElementById('selectorImg2');
+      const img3 = fixture.doc.getElementById('selectorImg3');
+      expect(img1.hasAttribute('selected')).to.be.false;
+      expect(img2.hasAttribute('selected')).to.be.false;
+      expect(img3.hasAttribute('selected')).to.be.false;
+      expect(selectionText.textContent).to.equal('None');
+      img2.click();
+      return waitForBindApplication().then(() => {
+        expect(img1.hasAttribute('selected')).to.be.false;
+        expect(img2.hasAttribute('selected')).to.be.true;
+        expect(img3.hasAttribute('selected')).to.be.false;
+        expect(selectionText.textContent).to.equal('2');
+      });
+    });
+
+    it('should update selection when bound value for selected changes', () => {
+      const button = fixture.doc.getElementById('changeSelectionButton');
+      const selectionText = fixture.doc.getElementById('selectionText');
+      const img1 = fixture.doc.getElementById('selectorImg1');
+      const img2 = fixture.doc.getElementById('selectorImg2');
+      const img3 = fixture.doc.getElementById('selectorImg3');
+      expect(img1.hasAttribute('selected')).to.be.false;
+      expect(img2.hasAttribute('selected')).to.be.false;
+      expect(img3.hasAttribute('selected')).to.be.false;
+      expect(selectionText.textContent).to.equal('None');
+      // Changes selection to 2
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(img1.hasAttribute('selected')).to.be.false;
+        expect(img2.hasAttribute('selected')).to.be.true;
+        expect(img3.hasAttribute('selected')).to.be.false;
+        expect(selectionText.textContent).to.equal('2');
+      });
+    });
+  });
+
 });
