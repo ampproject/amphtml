@@ -71,7 +71,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     it('should NOT allow unsecure attribute values', () => {
       const div = fixture.doc.createElement('div');
       div.innerHTML = '<a [href]="javascript:alert(1)"></a>';
-      aElement = div.firstElementChild;
+      const aElement = div.firstElementChild;
       const template = fixture.doc.getElementById('dynamicTemplate');
       template.parentElement.appendChild(aElement);
       return bind.waitForAllMutationsForTesting().then(() => {
