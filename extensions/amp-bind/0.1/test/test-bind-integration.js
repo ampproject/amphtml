@@ -232,9 +232,9 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       const vid = fixture.doc.getElementById('video');
       expect(vid.getAttribute('src')).to
           .equal('https://www.google.com/unbound.webm');
-      // Only HTTPS is allowed
       button.click();
       return waitForBindApplication().then(() => {
+      // Only HTTPS is allowed
         expect(vid.getAttribute('src')).to
           .equal('https://www.google.com/unbound.webm');
       });
@@ -251,14 +251,15 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
 
     it('should show/hide vid controls when the control binding changes', () => {
-      const button = fixture.doc.getElementById('showVidControlsButton');
+      const showControlsButton =
+          fixture.doc.getElementById('showVidControlsButton');
+      const hideControlsButton =
+          fixture.doc.getElementById('hideVidControlsButton');
       const vid = fixture.doc.getElementById('video');
       expect(vid.hasAttribute('controls')).to.be.false;
-      button.click();
+      showControlsButton.click();
       return waitForBindApplication().then(() => {
         expect(vid.hasAttribute('controls')).to.be.true;
-        const hideControlsButton =
-          fixture.doc.getElementById('hideVidControlsButton');
         hideControlsButton.click();
         return waitForBindApplication();
       }).then(() => {
