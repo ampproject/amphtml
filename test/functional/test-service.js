@@ -136,9 +136,8 @@ describe('service', () => {
     it('should only instantiate the service once', () => {
       registerServiceBuilder(window, 'b', Class);
       expect(count).to.equal(0);
-      for (let i = 0; i < 10; i++) {
-        getService(window, 'b');
-      }
+      getService(window, 'b');
+      getService(window, 'b');
       expect(count).to.equal(1);
     });
 
