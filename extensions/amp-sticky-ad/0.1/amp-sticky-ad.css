@@ -22,6 +22,11 @@ amp-sticky-ad {
   width: 100% !important;
   z-index: 11;
   max-height: 100px !important;
+  margin-bottom: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
   box-sizing: border-box;
 }
 
@@ -44,6 +49,10 @@ amp-sticky-ad[visible] {
 }
 
 .-amp-sticky-ad-layout > amp-ad {
+  margin-bottom: 0 !important;
+  margin-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-top: 0 !important;
   display: block;
 }
 
