@@ -81,9 +81,9 @@ export class BlankBoxMeter {
    * @return {boolean}
    */
   shouldMeasure_(resource) {
-    //if (!this.perf_ || !this.perf_.isPerformanceTrackingOn()) {
-    //  return false;
-    //}
+    if (!this.perf_ || !this.perf_.isPerformanceTrackingOn()) {
+      return false;
+    }
     if (resource.getPriority() > 0) {
       // For now we only measure content resources.
       // TODO: Consider to exclude FIE resources.
