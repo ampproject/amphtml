@@ -38,7 +38,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
       // Bind is installed manually here to get around an issue
-      // toggling experiments on the iframe fixture.
+      // toggling experiments on the fixture iframe.
       bind = installBindForTesting(ampdoc);
       return bind.initializePromiseForTesting();
     });
@@ -198,6 +198,72 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
         expect(img2.hasAttribute('selected')).to.be.true;
         expect(img3.hasAttribute('selected')).to.be.false;
         expect(selectionText.textContent).to.equal('2');
+      });
+    });
+  });
+
+  describe('amp-video integration', () => {
+    it('should change src when the src attribute binding changes', () => {
+      const button = fixture.doc.getElementById('changeVidSrcButton');
+      const vid = fixture.doc.getElementById('video');
+      expect(vid.getAttribute('src')).to
+          .equal('https://www.google.com/unbound.webm');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.getAttribute('src')).to
+            .equal('https://www.google.com/bound.webm');
+      });
+    });
+
+    it('should NOT change src when new value is a blocked URL', () => {
+      const button = fixture.doc.getElementById('disallowedVidUrlButton');
+      const vid = fixture.doc.getElementById('video');
+      expect(vid.getAttribute('src')).to
+          .equal('https://www.google.com/unbound.webm');;
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.getAttribute('src')).to
+            .equal('https://www.google.com/unbound.webm');
+      });
+    });
+
+    it('should NOT change src when new value uses an invalid protocol', () => {
+      const button = fixture.doc.getElementById('httpVidSrcButton');
+      const vid = fixture.doc.getElementById('video');
+      expect(vid.getAttribute('src')).to
+          .equal('https://www.google.com/unbound.webm');
+      button.click();
+      return waitForBindApplication().then(() => {
+      // Only HTTPS is allowed
+        expect(vid.getAttribute('src')).to
+            .equal('https://www.google.com/unbound.webm');
+      });
+    });
+
+    it('should change alt when the alt attribute binding changes', () => {
+      const button = fixture.doc.getElementById('changeVidAltButton');
+      const vid = fixture.doc.getElementById('video');
+      expect(vid.getAttribute('alt')).to.equal('unbound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.getAttribute('alt')).to.equal('hello world');
+      });
+    });
+
+    it('should show/hide vid controls when the control binding changes', () => {
+      const showControlsButton =
+          fixture.doc.getElementById('showVidControlsButton');
+      const hideControlsButton =
+          fixture.doc.getElementById('hideVidControlsButton');
+      const vid = fixture.doc.getElementById('video');
+      expect(vid.hasAttribute('controls')).to.be.false;
+      showControlsButton.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.hasAttribute('controls')).to.be.true;
+        hideControlsButton.click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(vid.hasAttribute('controls')).to.be.false;
       });
     });
   });
