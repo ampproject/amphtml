@@ -105,6 +105,8 @@ describe('BindEvaluator', () => {
     let {results, errors} = evaluator.evaluateBindings({});
     expect(results[string])
         .to.equal(/* eslint no-script-url: 0 */ 'javascript:alert(1)');
+    expect(errors[string]).to.be.undefined;
+
     // An expression used in a single invalid binding should be removed.
     evaluator.addBindings([{
       tagName: 'A',
