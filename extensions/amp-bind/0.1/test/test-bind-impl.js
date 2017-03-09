@@ -30,16 +30,11 @@ describes.realWin('amp-bind', {
 }, env => {
   let bind;
 
-  // BindValidator method stubs.
-  let canBindStub;
-
   beforeEach(() => {
     installTimerService(env.win);
     toggleExperiment(env.win, 'amp-bind', true);
 
     // Stub validator methods to return true for ease of testing.
-    canBindStub = env.sandbox.stub(
-        BindValidator.prototype, 'canBind').returns(true);
     env.sandbox.stub(
         BindValidator.prototype, 'isResultValid').returns(true);
 
@@ -54,12 +49,14 @@ describes.realWin('amp-bind', {
   });
 
   /**
-   * @param {!string} binding
+   * @param {string} binding
+   * @param {string=} opt_tagName
    * @return {!Element}
    */
-  function createElementWithBinding(binding) {
+  function createElementWithBinding(binding, opt_tagName) {
+    const tag = opt_tagName || 'p';
     const div = env.win.document.createElement('div');
-    div.innerHTML = '<p ' + binding + '></p>';
+    div.innerHTML = `<${tag} ${binding}></${tag}>`;
     const newElement = div.firstElementChild;
     const parent = env.win.document.getElementById('parent');
     parent.appendChild(newElement);
@@ -162,31 +159,8 @@ describes.realWin('amp-bind', {
     });
 
     //TODO(kmh287): Move to integration test
-    it('should NOT bind blacklisted attributes', () => {
-      // Restore real implementations of canBind and isResultValid
-      sandbox.restore();
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      let textElement;
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        const binding = '[onclick]="\'alert(document.cookie)\'" ' +
-          '[onmouseover]="\'alert()\'" ' +
-          '[style]="\'background=color:black\'"';
-        textElement = createElementWithBinding(binding);
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        expect(textElement.getAttribute('onclick')).to.be.null;
-        expect(textElement.getAttribute('onmouseover')).to.be.null;
-        expect(textElement.getAttribute('style')).to.be.null;
-      });
-    });
-
-    //TODO(kmh287): Move to integration test
     it('should NOT allow unsecure attribute values', () => {
-      // Restore real implementations of canBind and isResultValid
+      // Restore real implementation of isResultValid.
       sandbox.restore();
       const doc = env.win.document;
       const template = doc.createElement('template');
@@ -379,12 +353,15 @@ describes.realWin('amp-bind', {
     });
   });
 
-  it('should NOT evaluate expression if binding is NOT allowed', () => {
-    canBindStub.returns(false);
-    const element = createElementWithBinding(`[onePlusOne]="1+1"`);
-    return onBindReadyAndSetState({}).then(() => {
-      expect(canBindStub.calledOnce).to.be.true;
-      expect(element.getAttribute('oneplusone')).to.be.null;
+  it('should rewrite attribute values regardless of result type', () => {
+    const withString = createElementWithBinding(`[href]="foo"`, 'a');
+    const withArray = createElementWithBinding(`[href]="bar"`, 'a');
+    return onBindReadyAndSetState({
+      foo: '?__amp_source_origin',
+      bar: ['?__amp_source_origin'],
+    }).then(() => {
+      expect(withString.getAttribute('href')).to.equal(null);
+      expect(withArray.getAttribute('href')).to.equal(null);
     });
   });
 });

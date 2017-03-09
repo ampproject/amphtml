@@ -16,7 +16,6 @@
 
 import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef, BindEvaluator} from './bind-evaluator';
-import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {fromClassForDoc} from '../../../src/service';
@@ -96,9 +95,6 @@ export class Bind {
      * @private @const {!Object<string, !Array<!Element>>}
      */
     this.expressionToElements_ = Object.create(null);
-
-    /** @const @private {!./bind-validator.BindValidator} */
-    this.validator_ = new BindValidator();
 
     /** @const @private {!Object} */
     this.scope_ = Object.create(null);
@@ -397,7 +393,7 @@ export class Bind {
     const attrs = element.attributes;
     for (let i = 0, numberOfAttrs = attrs.length; i < numberOfAttrs; i++) {
       const attr = attrs[i];
-      const boundProperty = this.scanAttribute_(attr, element);
+      const boundProperty = this.scanAttribute_(attr);
       if (boundProperty) {
         boundProperties.push(boundProperty);
       }
@@ -409,20 +405,14 @@ export class Bind {
    * Returns the bound property and expression string within a given attribute,
    * if it exists. Otherwise, returns null.
    * @param {!Attr} attribute
-   * @param {!Element} element
    * @return {?{property: string, expressionString: string}}
    * @private
    */
-  scanAttribute_(attribute, element) {
+  scanAttribute_(attribute) {
     const name = attribute.name;
     if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
       const property = name.substr(1, name.length - 2);
-      if (this.validator_.canBind(element.tagName, property)) {
-        return {property, expressionString: attribute.value};
-      } else {
-        const err = user().createError(`Binding to [${property}] not allowed.`);
-        reportError(err, element);
-      }
+      return {property, expressionString: attribute.value};
     }
     return null;
   }
@@ -495,7 +485,6 @@ export class Bind {
   apply_(results) {
     const applyPromises = this.boundElements_.map(boundElement => {
       const {element, boundProperties} = boundElement;
-      const tagName = element.tagName;
 
       const applyPromise = this.resources_.mutateElement(element, () => {
         const mutations = {};
@@ -505,13 +494,7 @@ export class Bind {
           const {property, expressionString, previousResult} =
               boundProperty;
 
-          // TODO(choumx): Perform in worker with URL API.
-          // Rewrite attribute value if necessary. This is not done in the
-          // worker since it relies on `url#parseUrl`, which uses DOM APIs.
-          let newValue = results[expressionString];
-          if (typeof newValue === 'string') {
-            newValue = rewriteAttributeValue(tagName, property, newValue);
-          }
+          const newValue = results[expressionString];
 
           // Don't apply if the result hasn't changed or is missing.
           if (newValue === undefined ||
@@ -530,7 +513,7 @@ export class Bind {
             mutations[mutation.name] = mutation.value;
           }
 
-          switch (boundProperty.property) {
+          switch (property) {
             case 'width':
               width = isFiniteNumber(newValue) ? Number(newValue) : width;
               break;
@@ -604,7 +587,12 @@ export class Bind {
             attributeChanged = true;
           }
         } else if (newValue !== oldValue) {
-          element.setAttribute(property, String(newValue));
+          // TODO(choumx): Perform in worker with URL API.
+          // Rewrite attribute value if necessary. This is not done in the
+          // worker since it relies on `url#parseUrl`, which uses DOM APIs.
+          const rewrittenNewValue = rewriteAttributeValue(
+              element.tagName, property, String(newValue));
+          element.setAttribute(property, rewrittenNewValue);
           attributeChanged = true;
         }
 
