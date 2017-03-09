@@ -34,7 +34,7 @@ import {installActionServiceForDoc,} from
     '../../../../src/service/action-impl';
 import {actionServiceForDoc} from '../../../../src/action';
 import {
-    installCidServiceForDocForTesting,
+    cidServiceForDocForTesting,
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {documentInfoForDoc} from '../../../../src/document-info';
 import '../../../amp-selector/0.1/amp-selector';
@@ -55,7 +55,7 @@ describes.realWin('amp-form', {
     installAmpForm(env.win);
     documentInfoForDoc(env.win.document).canonicalUrl = canonical;
     toggleExperiment(env.win, 'amp-form-var-sub', true);
-    installCidServiceForDocForTesting(env.win.document);
+    cidServiceForDocForTesting(env.win.document);
     toggleExperiment(window, 'amp-form-var-sub', true);
     const form = getForm(env.win.document, button1, button2, button3);
     env.win.document.body.appendChild(form);
