@@ -16,7 +16,6 @@
 
 import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef, BindEvaluator} from './bind-evaluator';
-import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {fromClassForDoc} from '../../../src/service';
@@ -96,9 +95,6 @@ export class Bind {
      * @private @const {!Object<string, !Array<!Element>>}
      */
     this.expressionToElements_ = Object.create(null);
-
-    /** @const @private {!./bind-validator.BindValidator} */
-    this.validator_ = new BindValidator();
 
     /** @const @private {!Object} */
     this.scope_ = Object.create(null);
@@ -417,12 +413,7 @@ export class Bind {
     const name = attribute.name;
     if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
       const property = name.substr(1, name.length - 2);
-      if (this.validator_.canBind(element.tagName, property)) {
-        return {property, expressionString: attribute.value};
-      } else {
-        const err = user().createError(`Binding to [${property}] not allowed.`);
-        reportError(err, element);
-      }
+      return {property, expressionString: attribute.value};
     }
     return null;
   }
