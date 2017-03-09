@@ -180,6 +180,12 @@ export class Viewport {
       this.globalDoc_.documentElement.classList.add(
           'i-amphtml-make-body-block');
     }
+
+    // To avoid browser restore scroll position when traverse history
+    if (isIframed(this.ampdoc.win) &&
+        ('scrollRestoration' in this.ampdoc.win.history)) {
+      this.ampdoc.win.history.scrollRestoration = 'manual';
+    }
   }
 
   /** @override */
