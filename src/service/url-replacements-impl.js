@@ -26,7 +26,6 @@ import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityForDoc} from '../activity';
-import {isExperimentOn} from '../experiments';
 import {getTrackImpressionPromise} from '../impression.js';
 import {
   VariableSource,
@@ -760,9 +759,6 @@ export class UrlReplacements {
    * @return {string|undefined} Replaced string for testing
    */
   maybeExpandLink(element) {
-    if (!isExperimentOn(this.ampdoc.win, 'link-url-replace')) {
-      return;
-    }
     dev().assert(element.tagName == 'A');
     const supportedReplacements = {
       'CLIENT_ID': true,
