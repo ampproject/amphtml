@@ -45,6 +45,7 @@ import {twitter} from './twitter';
 
 // 3P Ad Networks - please keep in alphabetic order
 import {_ping_} from '../ads/_ping_';
+import {a8} from '../ads/a8';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
@@ -193,6 +194,7 @@ if (getMode().test || getMode().localDev) {
 }
 
 // Keep the list in alphabetic order
+register('a8', a8);
 register('a9', a9);
 register('accesstrade', accesstrade);
 register('adblade', adblade);
@@ -644,7 +646,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
     hostname = parseUrl(getSourceUrl(window.document.referrer)).hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
-    // Either the hostname is exactly as whitelisted…
+    // Either the hostname is exactly as whitelisted窶ｦ
     if (allowedHostnames[i] == hostname) {
       return;
     }
