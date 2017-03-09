@@ -24,7 +24,6 @@ import {
   setCheckValiditySupportedForTesting,
 } from '../form-validators';
 import * as sinon from 'sinon';
-import {toggleExperiment} from '../../../../src/experiments';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
@@ -54,9 +53,7 @@ describes.realWin('amp-form', {
                       canonical = 'https://example.com/amps.html') {
     installAmpForm(env.win);
     documentInfoForDoc(env.win.document).canonicalUrl = canonical;
-    toggleExperiment(env.win, 'amp-form-var-sub', true);
     cidServiceForDocForTesting(env.win.document);
-    toggleExperiment(window, 'amp-form-var-sub', true);
     const form = getForm(env.win.document, button1, button2, button3);
     env.win.document.body.appendChild(form);
     const ampForm = new AmpForm(form, 'amp-form-test-id');
@@ -100,7 +97,6 @@ describes.realWin('amp-form', {
     installTemplatesService(window);
     const docService = installDocService(window, /* isSingleDoc */ true);
     installActionServiceForDoc(docService.getAmpDoc());
-    toggleExperiment(window, 'amp-form-var-sub', true);
 
     sandbox = env.sandbox;
   });
