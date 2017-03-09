@@ -17,47 +17,51 @@
 import {BindEvaluator, BindingDef} from '../bind-evaluator';
 
 describe('BindEvaluator', () => {
-
   let evaluator;
 
   beforeEach(() => {
     evaluator = new BindEvaluator();
   });
 
+  /** @return {number} */
+  function numberOfBindings() {
+    return evaluator.bindingsForTesting().length;
+  }
+
   it('should allow callers to add bindings multiple times', () => {
-    expect(evaluator.bindingsForTesting().length).to.equal(0);
+    expect(numberOfBindings()).to.equal(0);
     evaluator.addBindings([{
       tagName: 'P',
       property: 'text',
       expressionString: 'oneplusone + 2',
     }]);
-    expect(evaluator.bindingsForTesting().length).to.equal(1);
+    expect(numberOfBindings()).to.equal(1);
     evaluator.addBindings([{
       tagName: 'SPAN',
       property: 'text',
       expressionString: 'oneplusone + 3',
     }]);
-    expect(evaluator.bindingsForTesting().length).to.equal(2);
+    expect(numberOfBindings()).to.equal(2);
   });
 
   it('should allow callers to remove bindings', () => {
-    expect(evaluator.bindingsForTesting().length).to.equal(0);
+    expect(numberOfBindings()).to.equal(0);
     evaluator.addBindings([{
       tagName: 'P',
       property: 'text',
       expressionString: 'oneplusone + 2',
     }]);
-    expect(evaluator.bindingsForTesting().length).to.equal(1);
+    expect(numberOfBindings()).to.equal(1);
     evaluator.addBindings([{
       tagName: 'SPAN',
       property: 'text',
       expressionString: 'oneplusone + 3',
     }]);
-    expect(evaluator.bindingsForTesting().length).to.equal(2);
+    expect(numberOfBindings()).to.equal(2);
     evaluator.removeBindingsWithExpressionStrings(['oneplusone + 2']);
-    expect(evaluator.bindingsForTesting().length).to.equal(1);
+    expect(numberOfBindings()).to.equal(1);
     evaluator.removeBindingsWithExpressionStrings(['oneplusone + 3']);
-    expect(evaluator.bindingsForTesting().length).to.equal(0);
+    expect(numberOfBindings()).to.equal(0);
   });
 
   it('should evaluate expressions given a scope with needed bindings', () => {
@@ -66,35 +70,48 @@ describe('BindEvaluator', () => {
       property: 'text',
       expressionString: 'oneplusone + 2',
     };
-    expect(evaluator.bindingsForTesting().length).to.equal(0);
+    expect(numberOfBindings()).to.equal(0);
     evaluator.addBindings([{
       tagName: 'P',
       property: 'text',
       expressionString: 'oneplusone + 2',
     }]);
-    expect(evaluator.bindingsForTesting().length).to.equal(1);
-    const results = evaluator.evaluateBindings({oneplusone: 2});
-    const evaluated = results['results'];
-    const errors = results['errors'];
+    expect(numberOfBindings()).to.equal(1);
+    const {results, errors} = evaluator.evaluateBindings({oneplusone: 2});
+    expect(results['oneplusone + 2']).to.equal(4);
     expect(errors['oneplusone + 2']).to.be.undefined;
-    expect(evaluated['oneplusone + 2']).to.not.be.undefined;
-    expect(evaluated['oneplusone + 2'] = '4');
   });
 
   it('should treat out-of-scope vars as null', () => {
-    expect(evaluator.bindingsForTesting().length).to.equal(0);
+    expect(numberOfBindings()).to.equal(0);
     evaluator.addBindings([{
       tagName: 'P',
       property: 'text',
       expressionString: 'outOfScope',
     }]);
-    expect(evaluator.bindingsForTesting().length).to.equal(1);
-    const results = evaluator.evaluateBindings({});
-    const evaluated = results['results'];
-    const errors = results['errors'];
+    expect(numberOfBindings()).to.equal(1);
+    const {results, errors} = evaluator.evaluateBindings({});
+    expect(results['outOfScope']).to.be.null;
     expect(errors['outOfScope']).to.be.undefined;
-    expect(evaluated['outOfScope']).to.not.be.undefined;
-    expect(evaluated['outOfScope']).to.be.null;
   });
 
+  it('should validate a common expression on each respective binding', () => {
+    evaluator.addBindings([{
+      tagName: 'P',
+      property: 'text',
+      expressionString: '"javascript:alert(1)"',
+    }]);
+    let {results, errors} = evaluator.evaluateBindings({});
+    expect(results['"javascript:alert(1)"']).to.equal('javascript:alert(1)');
+    // An expression used in a single invalid binding should be removed.
+    evaluator.addBindings([{
+      tagName: 'A',
+      property: 'href',
+      expressionString: '"javascript:alert(1)"'
+    }]);
+    ({results, errors} = evaluator.evaluateBindings({}));
+    expect(results['"javascript:alert(1)"']).to.be.undefined;
+    expect(errors['"javascript:alert(1)"'].message)
+        .to.match(/not a valid result/);
+  });
 });
