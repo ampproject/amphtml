@@ -485,7 +485,6 @@ export class Bind {
   apply_(results) {
     const applyPromises = this.boundElements_.map(boundElement => {
       const {element, boundProperties} = boundElement;
-      const tagName = element.tagName;
 
       const applyPromise = this.resources_.mutateElement(element, () => {
         const mutations = {};
@@ -514,7 +513,7 @@ export class Bind {
             mutations[mutation.name] = mutation.value;
           }
 
-          switch (boundProperty.property) {
+          switch (property) {
             case 'width':
               width = isFiniteNumber(newValue) ? Number(newValue) : width;
               break;

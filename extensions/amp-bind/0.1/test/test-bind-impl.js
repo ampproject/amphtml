@@ -159,29 +159,6 @@ describes.realWin('amp-bind', {
     });
 
     //TODO(kmh287): Move to integration test
-    it('should NOT bind blacklisted attributes', () => {
-      // Restore real implementation of isResultValid.
-      sandbox.restore();
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      let textElement;
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        const binding = '[onclick]="\'alert(document.cookie)\'" ' +
-          '[onmouseover]="\'alert()\'" ' +
-          '[style]="\'background=color:black\'"';
-        textElement = createElementWithBinding(binding);
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        expect(textElement.getAttribute('onclick')).to.be.null;
-        expect(textElement.getAttribute('onmouseover')).to.be.null;
-        expect(textElement.getAttribute('style')).to.be.null;
-      });
-    });
-
-    //TODO(kmh287): Move to integration test
     it('should NOT allow unsecure attribute values', () => {
       // Restore real implementation of isResultValid.
       sandbox.restore();
