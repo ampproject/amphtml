@@ -159,6 +159,9 @@ export class Resource {
     /** @private {boolean} */
     this.isFixed_ = false;
 
+    /** @private {boolean} */
+    this.isInFirstViewport_ = false;
+
     /** @private {!../layout-rect.LayoutRectDef} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
@@ -409,6 +412,8 @@ export class Resource {
 
     if (!this.hasBeenMeasured()) {
       this.initialLayoutBox_ = box;
+      this.isInFirstViewport_ = layoutRectsOverlap(
+          this.initialLayoutBox_, viewport.getFirstViewportRect());
     }
 
     this.element.updateLayoutBox(box);
@@ -506,6 +511,14 @@ export class Resource {
    */
   isFixed() {
     return this.isFixed_;
+  }
+
+  /**
+   * Whether the element is in the first viewport ("above the fold").
+   * @return {boolean}
+   */
+  isInFirstViewport() {
+    return this.isInFirstViewport_;
   }
 
   /**
