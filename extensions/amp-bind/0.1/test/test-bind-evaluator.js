@@ -96,22 +96,23 @@ describe('BindEvaluator', () => {
   });
 
   it('should validate a common expression on each respective binding', () => {
+    const string = /* eslint no-script-url: 0 */ '"javascript:alert(1)"';
     evaluator.addBindings([{
       tagName: 'P',
       property: 'text',
-      expressionString: '"javascript:alert(1)"',
+      expressionString: string,
     }]);
     let {results, errors} = evaluator.evaluateBindings({});
-    expect(results['"javascript:alert(1)"']).to.equal('javascript:alert(1)');
+    expect(results[string])
+        .to.equal(/* eslint no-script-url: 0 */ 'javascript:alert(1)');
     // An expression used in a single invalid binding should be removed.
     evaluator.addBindings([{
       tagName: 'A',
       property: 'href',
-      expressionString: '"javascript:alert(1)"'
+      expressionString: string,
     }]);
     ({results, errors} = evaluator.evaluateBindings({}));
-    expect(results['"javascript:alert(1)"']).to.be.undefined;
-    expect(errors['"javascript:alert(1)"'].message)
-        .to.match(/not a valid result/);
+    expect(results[string]).to.be.undefined;
+    expect(errors[string].message).to.match(/not a valid result/);
   });
 });

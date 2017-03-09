@@ -105,7 +105,7 @@ export class BindEvaluator {
 
     // First, evaluate all of the expression strings in the bindings.
     this.bindings_.forEach(binding => {
-      const {tagName, property, expressionString} = binding;
+      const expressionString = binding.expressionString;
       // Skip if we've already evaluated this expression string.
       if (cache[expressionString] !== undefined || errors[expressionString]) {
         return;
