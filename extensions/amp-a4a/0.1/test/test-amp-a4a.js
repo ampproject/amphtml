@@ -130,6 +130,7 @@ describe('amp-a4a', () => {
     element.getLayoutBox = () => {
       return opt_rect || layoutRectLtwh(0, 0, 200, 50);
     };
+    element.getIntersectionChangeEntry = () => {return null;};
     const signals = new Signals();
     element.signals = () => signals;
     element.renderStarted = () => {
