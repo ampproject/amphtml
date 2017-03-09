@@ -14,30 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Nokta
+# SunMedia
 
 ## Example
 
 ```html
-<amp-ad width="300" height="250" 
-	  type="nokta" 
-	  data-category="izlesene_anasayfa" 
-	  data-site="izlesene:anasayfa" 
-	  data-zone="152541">
-    <div placeholder></div>
-    <div fallback></div>
+<amp-ad width=300 height=1
+	type="sunmedia"
+	layout="responsive"
+	data-cid="sunmedia_test"
+	data-cskp=1
+	data-crst=1>
 </amp-ad>
 ```
 
-
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For further information, please contact [SunMedia](http://sunmedia.tv/#contact).
 
-### Required parameters
+Mandatory parameters:
 
-| Parameter     | Description |
-|:------------- |:-------------|
-| **`data-category`**     | Site category for ad unit |
-| **`data-site`**    | Site descriptor for ad |
-| **`data-zone`**    | Zone id to show related ad  |
+- 	data-cid. Cient Identifier provided by SunMedia
+
+Optional parameters:
+
+-	data-cskp. Skip button enabled
+-	data-crst. Restart option enabled
