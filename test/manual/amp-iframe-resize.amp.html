@@ -19,12 +19,15 @@
       background-color: lightgray;
       padding: 5px;
     }
+    .space {
+      height: 120vh
+    }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 </head>
 <body>
   <h1>Scroll down to see the iframe</h1>
-  <div style="height: 120vh"></div>
+  <div class="space"></div>
   <amp-iframe width=300 height=200
       sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
       layout="responsive"
@@ -34,7 +37,7 @@
       <div overflow tabindex=0 role=button aria-label="Read more">Read more!</div>
       <amp-img layout="fill" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" placeholder></amp-img>
   </amp-iframe>
-  <div style="height: 120vh"></div>
+  <div class="space"></div>
 
   <div id="panel">
     <label for="width">width</label><input id="width" type="number" value="200">
