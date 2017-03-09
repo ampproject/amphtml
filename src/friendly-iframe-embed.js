@@ -387,9 +387,18 @@ export class FriendlyIframeEmbed {
     }
 
     // Initial load signal signal.
+    let rect;
+    if (this.host) {
+      rect = this.host.getLayoutBox();
+    } else {
+      rect = layoutRectLtwh(
+          0, 0,
+          this.win./*OK*/innerWidth,
+          this.win./*OK*/innerHeight);
+    }
     Promise.all([
       this.whenReady(),
-      whenContentIniLoad(this.iframe, this.win),
+      whenContentIniLoad(this.iframe, this.win, rect),
     ]).then(() => {
       this.signals_.signal(CommonSignals.INI_LOAD);
     });
@@ -433,11 +442,10 @@ export class FriendlyIframeEmbed {
  * have been loaded in the initially visible set.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
  * @param {!Window} hostWin
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @return {!Promise}
  */
-export function whenContentIniLoad(context, hostWin) {
-  const width = hostWin./*OK*/innerWidth;
-  const height = hostWin./*OK*/innerHeight;
-  const rect = layoutRectLtwh(0, 0, width, height);
+export function whenContentIniLoad(context, hostWin, rect) {
   return resourcesForDoc(context)
       .getResourcesInRect(hostWin, rect)
       .then(resources => {

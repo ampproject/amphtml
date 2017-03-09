@@ -146,6 +146,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
   {
+    id: 'amp-lightbox-a4a-proto',
+    name: 'Allows the new lightbox experience to be used in A4A (prototype).',
+    spec: 'https://github.com/ampproject/amphtml/issues/7743',
+  },
+  {
     id: 'amp-lightbox-viewer-auto',
     name: 'Allows the new lightbox experience to automatically include some ' +
         'elements without the need to manually add the `lightbox` attribute',
@@ -260,6 +265,12 @@ const EXPERIMENTS = [
     name: 'Load sticky-ad early after user first scroll' +
         'Only apply to 1.0 version',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
+  },
+  {
+    id: 'amp-fx-parallax',
+    name: 'Amp extension for a parallax effect',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
+    spec: 'https://github.com/ampproject/amphtml/issues/1443',
   },
 ];
 
