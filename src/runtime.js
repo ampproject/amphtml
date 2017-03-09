@@ -35,9 +35,8 @@ import {dev, user, initLogConstructor, setReportError} from './log';
 import {reportError} from './error';
 import {
   disposeServicesForDoc,
-  fromClassForDoc,
   getService,
-  getServiceForDoc,
+  registerServiceBuilderForDoc,
 } from './service';
 import {childElementsByTag} from './dom';
 import {
@@ -507,13 +506,13 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
  * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
 function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
-  dev().assert((opt_ctor || opt_factory) && (!opt_ctor || !opt_factory),
-      'Only one: a class or a factory must be specified');
-  if (opt_ctor) {
-    fromClassForDoc(ampdoc, name, opt_ctor);
-  } else {
-    getServiceForDoc(ampdoc, name, opt_factory);
-  }
+  // TODO(kmh287): Investigate removing the opt_instantiate arg after
+  // all other services have been refactored.
+  registerServiceBuilderForDoc(ampdoc,
+                               name,
+                               opt_ctor,
+                               opt_factory,
+                               /* opt_instantiate */ true);
 }
 
 
