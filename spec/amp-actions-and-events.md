@@ -68,9 +68,9 @@ Example: `on="tap:target1.actionA,target2.actionB"`
 ## Globally defined Events and Actions
 Currently AMP defines `tap` event globally that you can listen to on any HTML element (including amp-elements).
 
-AMP also defines `hide`, `show` and `toggle` actions globally that you can trigger on any HTML element.
+AMP also defines `hide`, `show` and `toggleVisibility` actions globally that you can trigger on any HTML element.
 
-{% call callout('Note', type='note') %}Note: {% endcall %} An element can only be shown if it was previously hidden by a `hide` or `toggle` action, or by using the [`hidden`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden) attribute. `show` does not support elements hidden by CSS `display:none` or AMP's `layout=nodisplay`
+{% call callout('Note', type='note') %}Note: {% endcall %} An element can only be shown if it was previously hidden by a `hide` or `toggleVisibility` action, or by using the [`hidden`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden) attribute. `show` does not support elements hidden by CSS `display:none` or AMP's `layout=nodisplay`
 
 For example, the following is possible in AMP.
 
