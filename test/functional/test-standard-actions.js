@@ -203,7 +203,8 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(embedActions.addGlobalMethodHandler.args[0][1]).to.be.function;
       expect(embedActions.addGlobalMethodHandler.args[1][0]).to.equal('show');
       expect(embedActions.addGlobalMethodHandler.args[1][1]).to.be.function;
-      expect(embedActions.addGlobalMethodHandler.args[2][0]).to.equal('toggle');
+      expect(embedActions.addGlobalMethodHandler.args[2][0]).to
+          .equal('toggleVisibility');
       expect(embedActions.addGlobalMethodHandler.args[2][1]).to.be.function;
       embedActions.addGlobalMethodHandler.args[0][1]();
       expect(hideStub).to.be.calledOnce;
