@@ -31,6 +31,13 @@ describes.realWin('placement', {
 
   beforeEach(() => {
     sandbox = env.sandbox.create();
+
+    env.win.frameElement.style.height = '1000px';
+
+    const belowFoldSpacer = document.createElement('div');
+    belowFoldSpacer.style.height = '1000px';
+    env.win.document.body.appendChild(belowFoldSpacer);
+
     container = env.win.document.createElement('div');
     env.win.document.body.appendChild(container);
   });
@@ -905,6 +912,44 @@ describes.realWin('placement', {
           expect(placements).to.have.lengthOf(1);
           expect(placements[0].anchorElement_).to.eql(anchor);
         });
+
+    it('should not return a placement that\'s inside an amp-sidebar', () => {
+      const anchor = document.createElement('amp-sidebar');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(env.win, {
+        placements: [
+          {
+            anchor: {
+              selector: 'AMP-SIDEBAR#anId',
+            },
+            pos: 2,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.be.empty;
+    });
+
+    it('should get a placement when outside amp-sidebar', () => {
+      const anchor = document.createElement('amp-sidebar');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(env.win, {
+        placements: [
+          {
+            anchor: {
+              selector: 'AMP-SIDEBAR#anId',
+            },
+            pos: 1,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+    });
   });
 
   describe('getPlacementsFromConfigObj, sub-anchors', () => {

@@ -67,6 +67,10 @@ export const adConfig = {
     prefetch: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   },
 
+  adhese: {
+    renderStartImplemented: true,
+  },
+
   adition: {},
 
   adman: {},
@@ -525,6 +529,12 @@ export const adConfig = {
 
   sovrn: {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
+  },
+
+  sunmedia: {
+    prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
+    preconnect: 'https://static.addevweb.com',
+    renderStartImplemented: true,
   },
 
   swoop: {
