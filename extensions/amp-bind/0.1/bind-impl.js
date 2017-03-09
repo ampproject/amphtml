@@ -393,7 +393,7 @@ export class Bind {
     const attrs = element.attributes;
     for (let i = 0, numberOfAttrs = attrs.length; i < numberOfAttrs; i++) {
       const attr = attrs[i];
-      const boundProperty = this.scanAttribute_(attr, element);
+      const boundProperty = this.scanAttribute_(attr);
       if (boundProperty) {
         boundProperties.push(boundProperty);
       }
@@ -405,11 +405,10 @@ export class Bind {
    * Returns the bound property and expression string within a given attribute,
    * if it exists. Otherwise, returns null.
    * @param {!Attr} attribute
-   * @param {!Element} element
    * @return {?{property: string, expressionString: string}}
    * @private
    */
-  scanAttribute_(attribute, element) {
+  scanAttribute_(attribute) {
     const name = attribute.name;
     if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
       const property = name.substr(1, name.length - 2);
