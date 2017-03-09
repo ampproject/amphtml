@@ -15,6 +15,7 @@
  */
 
 import {dev} from '../../../src/log';
+import {getAncestorBlacklist} from './ancestor-blacklist';
 import {getAttributesFromConfigObj} from './attributes';
 import {resourcesForDoc} from '../../../src/resources';
 import {
@@ -257,11 +258,10 @@ function getPlacementsFromObject(win, placementObj, placements) {
       };
     }
   }
+  const ancestorBlacklist = getAncestorBlacklist(win);
   anchorElements.forEach(anchorElement => {
-    if ((placementObj['pos'] == Position.BEFORE ||
-         placementObj['pos'] == Position.AFTER) &&
-        !anchorElement.parentNode) {
-      dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
+    if (!isPositionValid(anchorElement, placementObj['pos'],
+        ancestorBlacklist)) {
       return;
     }
     const attributes = getAttributesFromConfigObj(placementObj);
@@ -309,4 +309,31 @@ function getAnchorElements(rootElement, anchorObj) {
     return subElements;
   }
   return elements;
+}
+
+/**
+ * @param {!Element} anchorElement
+ * @param {!Position} position
+ * @param {!./ancestor-blacklist.AncestorBlacklist} ancestorBlacklist
+ * @return {boolean}
+ */
+function isPositionValid(anchorElement, position, ancestorBlacklist) {
+  let ancestorBlacklisted = false;
+  if (position == Position.BEFORE || position == Position.AFTER) {
+    const parent = anchorElement.parentNode;
+    if (!parent) {
+      dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
+      return false;
+    }
+    ancestorBlacklisted =
+        ancestorBlacklist.isOrDescendantOfBlacklistedElement(parent);
+  } else {
+    ancestorBlacklisted =
+        ancestorBlacklist.isOrDescendantOfBlacklistedElement(anchorElement);
+  }
+  if (ancestorBlacklisted) {
+    dev().warn(TAG, 'Placement inside blacklisted ancestor.');
+    return false;
+  }
+  return true;
 }

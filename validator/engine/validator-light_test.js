@@ -145,15 +145,17 @@ function validateString(inputDocContents) {
  * against the golden file content.
  */
 ValidatorTestCase.prototype.run = function() {
-  const observed = validateString(this.ampHtmlFileContents).status;
-  if (observed === this.expectedOutput) {
+  const code = validateString(this.ampHtmlFileContents).status;
+  const observedStatus =
+      ['UNKNOWN', 'PASS', 'FAIL'][/** @type {number} */ (code)];
+  if (observedStatus === this.expectedOutput) {
     return;
   }
   let message = '';
   if (this.expectedOutputFile != null) {
     message = '\n' + this.expectedOutputFile + ':1:0\n';
   }
-  message += 'expected:\n' + this.expectedOutput + '\nsaw:\n' + observed;
+  message += 'expected:\n' + this.expectedOutput + '\nsaw:\n' + observedStatus;
   assert.fail('', '', message, '');
 };
 
