@@ -99,7 +99,8 @@ describes.realWin('blank-box-meter', {
     expect(tickSpy).to.not.be.called;
   });
 
-  function checkCounters(inViewportLayoutCompleteNum, everInViewportResourcesNum) {
+  function checkCounters(
+      inViewportLayoutCompleteNum, everInViewportResourcesNum) {
     expect(meter.inViewportLayoutCompleteNum_)
         .to.equal(inViewportLayoutCompleteNum);
     expect(meter.getEverInViewportResourcesNum_())
