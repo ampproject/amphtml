@@ -148,7 +148,7 @@ export class DocumentState {
 /**
  * @param {!Window} window
  */
-export function installDocumentState(window) {
+export function installDocumentStateService(window) {
   registerServiceBuilder(window, 'documentState', DocumentState);
 }
 
@@ -157,6 +157,6 @@ export function installDocumentState(window) {
  * @return {!DocumentState}
  */
 export function documentStateFor(window) {
-  installDocumentState(window);
+  installDocumentStateService(window);
   return getService(window, 'documentState');
 }
