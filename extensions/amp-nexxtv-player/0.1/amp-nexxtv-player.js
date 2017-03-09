@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {
@@ -115,7 +116,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     src += `?start=${encodeURIComponent(String(start))}`;
     src += `&datamode=${encodeURIComponent(mode)}&amp=1`;
 
-    return this.videoIframeSrc_ = src;
+    this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
+
+    return this.videoIframeSrc_;
   }
 
   /** @override */
