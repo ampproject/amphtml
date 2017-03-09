@@ -26,12 +26,14 @@ import {
   getExistingServiceForWindow,
   getParentWindowFrameElement,
   getService,
-  getServicePromise,
   getServiceForDoc,
+  getServicePromise,
   getServicePromiseForDoc,
   installServiceInEmbedScope,
   isDisposable,
   isEmbeddable,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
@@ -124,6 +126,21 @@ describe('service', () => {
       expect(b1).to.not.equal(a1);
     });
 
+    it('should not instantiate service when registered', () => {
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(0);
+      getService(window, 'a');
+      expect(count).to.equal(1);
+    });
+
+    it('should only instantiate the service once', () => {
+      registerServiceBuilder(window, 'b', Class);
+      expect(count).to.equal(0);
+      getService(window, 'b');
+      getService(window, 'b');
+      expect(count).to.equal(1);
+    });
+
     it('should work without a factory', () => {
       const c1 = getService(window, 'c', factory);
       const c2 = getService(window, 'c');
@@ -150,7 +167,7 @@ describe('service', () => {
       }).to.throw(/not given and service missing not-present/);
     });
 
-    it('should provide a promise that resolves when registered', () => {
+    it('should provide a promise that resolves when instantiated', () => {
       const p1 = getServicePromise(window, 'e1');
       const p2 = getServicePromise(window, 'e1');
       getService(window, 'e1', function() {
@@ -162,6 +179,33 @@ describe('service', () => {
           expect(s2).to.equal(s1);
           expect(factory).to.have.not.been.called;
         });
+      });
+    });
+
+    it('should resolve existing service promise on registering service', () => {
+      const p = getServicePromise(window, 'a');
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(1);
+      return p.then(() => {
+        expect(count).to.equal(1);
+      });
+    });
+
+    it('should resolve service promise if service is registered', () => {
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(0);
+      return getServicePromise(window, 'a').then(() => {
+        expect(count).to.equal(1);
+      });
+    });
+
+    it('should provide promise without clobbering registered services', () => {
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(0);
+      const p = getServicePromise(window, 'a');
+      expect(getService(window, 'a')).to.not.throw;
+      return p.then(() => {
+        expect(count).to.equal(1);
       });
     });
 
@@ -320,6 +364,13 @@ describe('service', () => {
       expect(ampdoc.services['b']).to.exist;
     });
 
+    it('should not instantiate service when registered', () => {
+      registerServiceBuilderForDoc(ampdoc, 'fake service', factory);
+      expect(count).to.equal(0);
+      getServiceForDoc(ampdoc, 'fake service');
+      expect(count).to.equal(1);
+    });
+
     it('should work without a factory', () => {
       const c1 = getServiceForDoc(node, 'c', factory);
       const c2 = getServiceForDoc(node, 'c');
@@ -333,7 +384,7 @@ describe('service', () => {
       }).to.throw(/not given and service missing not-present/);
     });
 
-    it('should provide a promise that resolves when registered', () => {
+    it('should provide a promise that resolves when instantiated', () => {
       const p1 = getServicePromiseForDoc(node, 'e1');
       const p2 = getServicePromiseForDoc(node, 'e1');
       getServiceForDoc(node, 'e1', function() {
