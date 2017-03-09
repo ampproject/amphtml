@@ -30,16 +30,11 @@ describes.realWin('amp-bind', {
 }, env => {
   let bind;
 
-  // BindValidator method stubs.
-  let canBindStub;
-
   beforeEach(() => {
     installTimerService(env.win);
     toggleExperiment(env.win, 'amp-bind', true);
 
     // Stub validator methods to return true for ease of testing.
-    canBindStub = env.sandbox.stub(
-        BindValidator.prototype, 'canBind').returns(true);
     env.sandbox.stub(
         BindValidator.prototype, 'isResultValid').returns(true);
 
@@ -54,12 +49,14 @@ describes.realWin('amp-bind', {
   });
 
   /**
-   * @param {!string} binding
+   * @param {string} binding
+   * @param {string=} opt_tagName
    * @return {!Element}
    */
-  function createElementWithBinding(binding) {
+  function createElementWithBinding(binding, opt_tagName) {
+    const tag = opt_tagName || 'p';
     const div = env.win.document.createElement('div');
-    div.innerHTML = '<p ' + binding + '></p>';
+    div.innerHTML = `<${tag} ${binding}></${tag}>`;
     const newElement = div.firstElementChild;
     const parent = env.win.document.getElementById('parent');
     parent.appendChild(newElement);
@@ -147,21 +144,18 @@ describes.realWin('amp-bind', {
     });
   });
 
-  describe('under dynamic tags', () => {
-    it('should dynamically detect new bindings', () => {
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        createElementWithBinding('[onePlusOne]="1+1"');
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(bind.boundElements_.length).to.equal(1);
-      });
+  it('should dynamically detect new bindings under dynamic tags', () => {
+    const doc = env.win.document;
+    const template = doc.createElement('template');
+    doc.getElementById('parent').appendChild(template);
+    return onBindReady().then(() => {
+      expect(bind.boundElements_.length).to.equal(0);
+      createElementWithBinding('[onePlusOne]="1+1"');
+      return bind.waitForAllMutationsForTesting();
+    }).then(() => {
+      expect(bind.boundElements_.length).to.equal(1);
     });
   });
-
 
   it('should NOT apply expressions on first load', () => {
     const element = createElementWithBinding('[onePlusOne]="1+1"');
@@ -333,12 +327,15 @@ describes.realWin('amp-bind', {
     });
   });
 
-  it('should NOT evaluate expression if binding is NOT allowed', () => {
-    canBindStub.returns(false);
-    const element = createElementWithBinding(`[onePlusOne]="1+1"`);
-    return onBindReadyAndSetState({}).then(() => {
-      expect(canBindStub.calledOnce).to.be.true;
-      expect(element.getAttribute('oneplusone')).to.be.null;
+  it('should rewrite attribute values regardless of result type', () => {
+    const withString = createElementWithBinding(`[href]="foo"`, 'a');
+    const withArray = createElementWithBinding(`[href]="bar"`, 'a');
+    return onBindReadyAndSetState({
+      foo: '?__amp_source_origin',
+      bar: ['?__amp_source_origin'],
+    }).then(() => {
+      expect(withString.getAttribute('href')).to.equal(null);
+      expect(withArray.getAttribute('href')).to.equal(null);
     });
   });
 });

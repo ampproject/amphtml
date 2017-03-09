@@ -243,18 +243,6 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       });
     });
 
-    it('should NOT change src when new value is a blocked URL', () => {
-      const button = fixture.doc.getElementById('disallowedVidUrlButton');
-      const vid = fixture.doc.getElementById('video');
-      expect(vid.getAttribute('src')).to
-          .equal('https://www.google.com/unbound.webm');;
-      button.click();
-      return waitForBindApplication().then(() => {
-        expect(vid.getAttribute('src')).to
-            .equal('https://www.google.com/unbound.webm');
-      });
-    });
-
     it('should NOT change src when new value uses an invalid protocol', () => {
       const button = fixture.doc.getElementById('httpVidSrcButton');
       const vid = fixture.doc.getElementById('video');
