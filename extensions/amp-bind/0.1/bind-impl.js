@@ -495,13 +495,7 @@ export class Bind {
           const {property, expressionString, previousResult} =
               boundProperty;
 
-          // TODO(choumx): Perform in worker with URL API.
-          // Rewrite attribute value if necessary. This is not done in the
-          // worker since it relies on `url#parseUrl`, which uses DOM APIs.
-          let newValue = results[expressionString];
-          if (typeof newValue === 'string') {
-            newValue = rewriteAttributeValue(tagName, property, newValue);
-          }
+          const newValue = results[expressionString];
 
           // Don't apply if the result hasn't changed or is missing.
           if (newValue === undefined ||
@@ -594,7 +588,12 @@ export class Bind {
             attributeChanged = true;
           }
         } else if (newValue !== oldValue) {
-          element.setAttribute(property, String(newValue));
+          // TODO(choumx): Perform in worker with URL API.
+          // Rewrite attribute value if necessary. This is not done in the
+          // worker since it relies on `url#parseUrl`, which uses DOM APIs.
+          const rewrittenNewValue = rewriteAttributeValue(
+              element.tagName, property, String(newValue));
+          element.setAttribute(property, rewrittenNewValue);
           attributeChanged = true;
         }
 

@@ -46,22 +46,16 @@ describe('BindValidator', () => {
           /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
       expect(val.isResultValid('A', 'href',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
-      expect(val.isResultValid('A', 'href',
-        '__amp_source_origin')).to.be.false;
 
       expect(val.isResultValid('SOURCE', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
       expect(val.isResultValid('SOURCE', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
-      expect(val.isResultValid('SOURCE', 'src',
-          '__amp_source_origin')).to.be.false;
 
       expect(val.isResultValid('TRACK', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
       expect(val.isResultValid('TRACK', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
-      expect(val.isResultValid('TRACK', 'src',
-          '__amp_source_origin')).to.be.false;
     });
 
     it('should NOT allow unsupported <input> "type" values', () => {
@@ -82,18 +76,12 @@ describe('BindValidator', () => {
           'AMP-IMG', 'src', 'http://foo.com/bar.jpg')).to.be.true;
       expect(val.isResultValid('AMP-IMG', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
-      expect(val.isResultValid(
-          'AMP-IMG', 'src', '__amp_source_origin')).to.be.false;
 
       // srcset
       expect(val.isResultValid(
           'AMP-IMG',
           'srcset',
           'http://a.com/b.jpg 1x, http://c.com/d.jpg 2x')).to.be.true;
-      expect(val.isResultValid(
-          'AMP-IMG',
-          'srcset',
-          'http://a.com/b.jpg 1x, __amp_source_origin 2x')).to.be.false;
       expect(val.isResultValid(
           'AMP-IMG',
           'srcset',
@@ -108,8 +96,6 @@ describe('BindValidator', () => {
           'AMP-VIDEO', 'src', 'http://foo.com/bar.mp4')).to.be.false;
       expect(val.isResultValid('AMP-VIDEO', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
-      expect(val.isResultValid(
-          'AMP-VIDEO', 'src', '__amp_source_origin')).to.be.false;
     });
   });
 });

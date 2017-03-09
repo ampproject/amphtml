@@ -23,7 +23,6 @@ const TAG = 'amp-bind';
  * @typedef {{
  *   allowedProtocols: (!Object<string,boolean>|undefined),
  *   alternativeName: (string|undefined),
- *   blockedURLs: (Array<string>|undefined),
  * }}
  */
 let PropertyRulesDef;
@@ -142,22 +141,6 @@ export class BindValidator {
       }
     }
 
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blockedURLs = rules.blockedURLs;
-    if (blockedURLs && url) {
-      for (let i = 0; i < blockedURLs.length; i++) {
-        let decodedURL;
-        try {
-          decodedURL = decodeURIComponent(url);
-        } catch (e) {
-          decodedURL = unescape(url);
-        }
-        if (decodedURL.trim() === blockedURLs[i]) {
-          return false;
-        }
-      }
-    }
-
     return true;
   }
 
@@ -199,7 +182,6 @@ function createElementRules_() {
           http: true,
           https: true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
       srcset: {
         alternativeName: 'src',
@@ -210,7 +192,6 @@ function createElementRules_() {
         allowedProtocols: {
           https: true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
     },
     A: {
@@ -232,13 +213,9 @@ function createElementRules_() {
           viber: true,
           whatsapp: true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
     },
     INPUT: {
-      name: {
-        blockedURLs: ['__amp_source_origin'],
-      },
       type: {
         blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
       },
@@ -248,7 +225,6 @@ function createElementRules_() {
         allowedProtocols: {
           https: true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
     },
     TRACK: {
@@ -256,7 +232,6 @@ function createElementRules_() {
         allowedProtocols: {
           https: true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
     },
   };
