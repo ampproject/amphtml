@@ -23,7 +23,6 @@ const TAG = 'amp-bind';
  * @typedef {{
  *   allowedProtocols: (!Object<string,boolean>|undefined),
  *   alternativeName: (string|undefined),
- *   blockedURLs: (Array<string>|undefined),
  * }}
  */
 let PropertyRulesDef;
@@ -36,10 +35,6 @@ const GLOBAL_PROPERTY_RULES = {
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
-  // ARIA accessibility attributes.
-  'aria-describedby': null,
-  'aria-label': null,
-  'aria-labelledby': null,
 };
 
 /**
@@ -68,18 +63,6 @@ const URL_PROPERTIES = {
  */
 export class BindValidator {
   /**
-   * Returns true if (tag, property) binding is allowed.
-   * Otherwise, returns false.
-   * @note `tag` and `property` are case-sensitive.
-   * @param {!string} tag
-   * @param {!string} property
-   * @return {boolean}
-   */
-  canBind(tag, property) {
-    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
-  }
-
-  /**
    * Returns true if `value` is a valid result for a (tag, property) binding.
    * Otherwise, returns false.
    * @param {!string} tag
@@ -95,13 +78,8 @@ export class BindValidator {
       rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
     }
 
-    // If binding to (tag, property) is not allowed, return false.
-    if (rules === undefined) {
-      return false;
-    }
-
-    // If binding is allowed but have no specific rules, return true.
-    if (rules === null) {
+    // If there are no rules governing this binding, return true.
+    if (!rules) {
       return true;
     }
 
@@ -163,22 +141,6 @@ export class BindValidator {
       }
     }
 
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blockedURLs = rules.blockedURLs;
-    if (blockedURLs && url) {
-      for (let i = 0; i < blockedURLs.length; i++) {
-        let decodedURL;
-        try {
-          decodedURL = decodeURIComponent(url);
-        } catch (e) {
-          decodedURL = unescape(url);
-        }
-        if (decodedURL.trim() === blockedURLs[i]) {
-          return false;
-        }
-      }
-    }
-
     return true;
   }
 
@@ -213,42 +175,23 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
-    'AMP-CAROUSEL': {
-      slide: null,
-    },
     'AMP-IMG': {
-      alt: null,
-      referrerpolicy: null,
       src: {
         allowedProtocols: {
           data: true,
           http: true,
           https: true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
       srcset: {
         alternativeName: 'src',
       },
     },
-    'AMP-SELECTOR': {
-      selected: null,
-    },
     'AMP-VIDEO': {
-      alt: null,
-      attribution: null,
-      autoplay: null,
-      controls: null,
-      loop: null,
-      muted: null,
-      placeholder: null,
-      poster: null,
-      preload: null,
       src: {
         allowedProtocols: {
           https: true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
     },
     A: {
@@ -270,141 +213,28 @@ function createElementRules_() {
           viber: true,
           whatsapp: true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
-    },
-    BUTTON: {
-      disabled: null,
-      type: null,
-      value: null,
-    },
-    FIELDSET: {
-      disabled: null,
     },
     INPUT: {
-      accept: null,
-      accesskey: null,
-      autocomplete: null,
-      checked: null,
-      disabled: null,
-      height: null,
-      inputmode: null,
-      max: null,
-      maxlength: null,
-      min: null,
-      minlength: null,
-      multiple: null,
-      name: {
-        blockedURLs: ['__amp_source_origin'],
-      },
-      pattern: null,
-      placeholder: null,
-      readonly: null,
-      required: null,
-      selectiondirection: null,
-      size: null,
-      spellcheck: null,
-      step: null,
       type: {
         blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
       },
-      value: null,
-      width: null,
-    },
-    OPTION: {
-      disabled: null,
-      label: null,
-      selected: null,
-      value: null,
-    },
-    OPTGROUP: {
-      disabled: null,
-      label: null,
-    },
-    SELECT: {
-      disabled: null,
-      multiple: null,
-      name: null,
-      required: null,
-      size: null,
     },
     SOURCE: {
       src: {
         allowedProtocols: {
           https: true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
-      type: null,
     },
     TRACK: {
-      label: null,
       src: {
         allowedProtocols: {
           https: true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
-      srclang: null,
-    },
-    TEXTAREA: {
-      autocomplete: null,
-      cols: null,
-      disabled: null,
-      maxlength: null,
-      minlength: null,
-      name: null,
-      placeholder: null,
-      readonly: null,
-      required: null,
-      rows: null,
-      selectiondirection: null,
-      selectionend: null,
-      selectionstart: null,
-      spellcheck: null,
-      wrap: null,
     },
   };
-
-  // Collate all standard elements that should support [text] binding
-  // and add them to `rules` object.
-  // 4.3 Sections
-  const sectionTags = ['ASIDE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
-      'HEADER', 'FOOTER', 'ADDRESS'];
-  // 4.4 Grouping content
-  const groupingTags = ['P', 'PRE', 'BLOCKQUOTE', 'LI', 'DT', 'DD',
-      'FIGCAPTION', 'DIV'];
-  // 4.5 Text-level semantics
-  const textTags = ['A', 'EM', 'STRONG', 'SMALL', 'S', 'CITE', 'Q',
-      'DFN', 'ABBR', 'DATA', 'TIME', 'CODE', 'VAR', 'SAMP', 'KBD',
-      'SUB', 'SUP', 'I', 'B', 'U', 'MARK', 'RUBY', 'RB', 'RT', 'RTC',
-      'RP', 'BDI', 'BDO', 'SPAN'];
-  // 4.6 Edits
-  const editTags = ['INS', 'DEL'];
-  // 4.9 Tabular data
-  const tabularTags = ['CAPTION', 'THEAD', 'TFOOT', 'TD'];
-  // 4.10 Forms
-  const formTags = ['BUTTON', 'LABEL', 'LEGEND', 'OPTION',
-      'OUTPUT', 'PROGRESS', 'TEXTAREA'];
-  const allTextTags = sectionTags.concat(groupingTags).concat(textTags)
-      .concat(editTags).concat(tabularTags).concat(formTags);
-  allTextTags.forEach(tag => {
-    if (rules[tag] === undefined) {
-      rules[tag] = {};
-    }
-    rules[tag]['text'] = null;
-  });
-
-  // AMP extensions support additional properties.
-  const ampExtensions = ['AMP-IMG'];
-  ampExtensions.forEach(tag => {
-    if (rules[tag] === undefined) {
-      rules[tag] = {};
-    }
-    const tagRule = rules[tag];
-    tagRule['width'] = null;
-    tagRule['height'] = null;
-  });
 
   return rules;
 }
