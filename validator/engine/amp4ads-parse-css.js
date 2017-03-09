@@ -18,11 +18,14 @@
 goog.provide('parse_css.stripVendorPrefix');
 goog.provide('parse_css.validateAmp4AdsCss');
 
+goog.require('amp.validator.LIGHT');
+goog.require('amp.validator.ValidationError');
 goog.require('parse_css.DelimToken');
 goog.require('parse_css.ErrorToken');
 goog.require('parse_css.IdentToken');
 goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.Stylesheet');
+goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
 
 /**
  * Strips vendor prefixes from identifiers, e.g. property names or names
@@ -115,6 +118,10 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
     }
     const ident = firstIdent(declaration.value);
     if (ident === 'fixed' || ident === 'sticky') {
+      if (amp.validator.LIGHT) {
+        this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+        return;
+      }
       this.errors.push(createParseErrorTokenAt(
           declaration, amp.validator.ValidationError.Code
                            .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
@@ -142,6 +149,10 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
             parse_css.stripVendorPrefix(transitionedProperty);
         if (transitionedPropertyStripped !== 'opacity' &&
             transitionedPropertyStripped !== 'transform') {
+          if (amp.validator.LIGHT) {
+            this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+            return;
+          }
           this.errors.push(createParseErrorTokenAt(
               decl, amp.validator.ValidationError.Code
                         .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT,
@@ -155,6 +166,10 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
       // the only properties that may be transitioned are opacity and transform.
       if (this.inKeyframes !== null && name !== 'transform' &&
           name !== 'opacity') {
+        if (amp.validator.LIGHT) {
+          this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+          return;
+        }
         this.errors.push(createParseErrorTokenAt(
             decl, amp.validator.ValidationError.Code
                       .CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,
@@ -178,6 +193,10 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
       if (allowed.indexOf(parse_css.stripVendorPrefix(decl.name)) !== -1) {
         continue;
       }
+      if (amp.validator.LIGHT) {
+        this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+        return;
+      }
       this.errors.push(createParseErrorTokenAt(
           decl, amp.validator.ValidationError.Code
                     .CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH,
@@ -188,6 +207,10 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
     }
     // (2) Check that the rule is qualified with .amp-animate.
     if (!hasAmpAnimate(qualifiedRule)) {
+      if (amp.validator.LIGHT) {
+        this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+        return;
+      }
       this.errors.push(createParseErrorTokenAt(
           qualifiedRule, amp.validator.ValidationError.Code
                              .CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION,
