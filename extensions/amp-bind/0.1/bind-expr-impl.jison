@@ -176,6 +176,11 @@ invocation:
       %{
         $$ = new AstNode(AstNodeType.INVOCATION, [$1, $4], $3);
       %}
+  |
+    NAME args
+      %{
+        $$ = new AstNode(AstNodeType.INVOCATION, [null, $2], $1)
+      %}
   ;
 
 args:
