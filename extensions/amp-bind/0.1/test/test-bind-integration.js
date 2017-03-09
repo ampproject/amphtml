@@ -236,7 +236,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       return waitForBindApplication().then(() => {
       // Only HTTPS is allowed
         expect(vid.getAttribute('src')).to
-          .equal('https://www.google.com/unbound.webm');
+            .equal('https://www.google.com/unbound.webm');
       });
     });
 
