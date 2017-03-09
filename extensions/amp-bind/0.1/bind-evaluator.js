@@ -132,6 +132,9 @@ export class BindEvaluator {
       if (result === undefined) {
         return;
       }
+      // IMPORTANT: We need to validate expression results on each binding
+      // since validity depends on the `tagName` and `property` rather than
+      // just the `result`.
       const resultString = this.stringValueOf_(property, result);
       if (!this.validator_.isResultValid(tagName, property, resultString)) {
         // TODO(choumx): If this expression string is used in another
