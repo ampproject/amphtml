@@ -181,12 +181,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
   },
   {
-    id: 'link-url-replace',
-    name: 'Enables replacing variables in URLs of outgoing links.',
-    spec: 'https://github.com/ampproject/amphtml/issues/4078',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
-  },
-  {
     id: 'alp-for-a4a',
     name: 'Enable redirect to landing page directly for A4A',
     spec: 'https://github.com/ampproject/amphtml/issues/5212',
