@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -265,6 +265,13 @@ const EXPERIMENTS = [
     name: 'Amp extension for a parallax effect',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
     spec: 'https://github.com/ampproject/amphtml/issues/1443',
+  },
+  {
+    id: 'amp-sortable-table',
+    name: 'AMP Sortable Table',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6057',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-sortable-table/amp-sortable-table.md',
   },
 ];
 
