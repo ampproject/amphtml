@@ -83,6 +83,25 @@
   <amp-video src="http://amp-video" width="42" height="42"></amp-video>
   <a href=" j a v a s c r i p t :alert(1)">Invalid protocol</a>
 
+  <!-- Valid ipv6 addresses -->
+  <a href="https://[2001:0db8::85a3]/">Valid</a>
+  <a href="https://[::1]/">Valid</a>
+  <a href="https://[0:0:0:0:0:0:0:1]/">Valid</a>
+  <a href="https://[0:0:0:0:0:0:8.8.8.8]/">Valid</a>
+  <a href="https://[0:0:0:0:0:0:8.124.8.8]/">Valid</a>
+  <a href="https://[0:0:0:0:0:0:8.8.8.22]/">Valid</a>
+  <a href="https://[::8.8.8.8]/">Valid</a>
+  <!-- Invalid ipv6 addresses -->
+  <a href="https://[2001:0db8:85a3]/">Invalid</a>
+  <a href="https://[20012:0db8::85a3]/">Invalid</a>
+  <a href="https://[200g:0db8:85a3]/">Invalid</a>
+  <a href="https://[:::1]/">Invalid</a>
+  <a href="https://[0:0:0:0:0:0:1]/">Invalid</a>
+  <a href="https://[0:0:0:0:0:0:0:0:1]/">Invalid</a>
+  <a href="https://[0:0:0:0:0:0:0:8.8.8.8]/">Invalid</a>
+  <a href="https://[0:0:0:0:0:8.8.8.8]/">Invalid</a>
+  <a href="https://[0:0:0:0:0:8.8.8.8:1]/">Invalid</a>
+
   <!-- __amp_source_origin is not an allowed value for URLs. -->
   <a href="__amp_source_origin">uhm, no</a>
   <amp-ad src="__amp_source_origin" width="42" height="42" type=""></amp-ad>
