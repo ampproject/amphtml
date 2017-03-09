@@ -40,7 +40,7 @@ We hope you'll become an ongoing participant in our open source community but we
 
 The AMP Project is meant to evolve with feedback.  The project and its users appreciate your thoughts on ways to improve the design or features.
 
-To make a suggestion [file an issue](https://github.com/ampproject/amphtml/issues/new) and add the [Type: Feature Request](https://github.com/ampproject/amphtml/labels/Type%3A%20Feature%20Request) label.
+To make a suggestion [file an issue](https://github.com/ampproject/amphtml/issues/new).
 
 If you are suggesting a feature that you are intending to implement, please see the [Contributing features](#contributing-features) section below for next steps.
 
