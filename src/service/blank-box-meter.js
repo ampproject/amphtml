@@ -40,7 +40,7 @@ export class BlankBoxMeter {
   }
 
   /**
-   * @param {!Resource} resource
+   * @param {!./resource.Resource} resource
    */
   enterViewport(resource) {
     if (!this.shouldMeasure_(resource)) {
@@ -67,7 +67,7 @@ export class BlankBoxMeter {
   }
 
   /**
-   * @param {!Resource} resource
+   * @param {!./resource.Resource} resource
    */
   layoutComplete(resource) {
     if (!this.shouldMeasure_(resource)) {
@@ -77,7 +77,7 @@ export class BlankBoxMeter {
   }
 
   /**
-   * @param {!Resource} resource
+   * @param {!./resource.Resource} resource
    * @return {boolean}
    */
   shouldMeasure_(resource) {

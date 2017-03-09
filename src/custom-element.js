@@ -1118,7 +1118,7 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Returns the resource of the element.
-     * @return {!Resource}
+     * @return {!./service/resource.Resource}
      */
     getResource() {
       return this.getResources().getResourceForElement(this);
@@ -1129,7 +1129,7 @@ function createBaseCustomElementClass(win) {
      * @return {number}
      */
     getResourceId() {
-      this.getResource().getId();
+      return this.getResource().getId();
     }
 
     /**
