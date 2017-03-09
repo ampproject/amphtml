@@ -517,7 +517,7 @@ function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
   }
 
   if (s.build) {
-    // Service already registered
+    // Service already registered.
     return;
   }
 
@@ -530,7 +530,6 @@ function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
   if (s.promise && s.resolve) {
     s.resolve(s.build());
   }
-
 }
 
 
