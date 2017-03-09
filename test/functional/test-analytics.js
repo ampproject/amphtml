@@ -15,7 +15,8 @@
  */
 
 import {
-  fromClassForDoc,
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../src/service';
 import {triggerAnalyticsEvent} from '../../src/analytics';
@@ -56,8 +57,10 @@ describe('triggerAnalyticsEvent', () => {
   });
 
   it('should trigger analytics event if analytics is installed', () => {
-    fromClassForDoc(
+    registerServiceBuilderForDoc(
         ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
+    // Force instantiation
+    getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
     triggerAnalyticsEvent(ampdoc, 'hello');
     return timer.promise(50).then(() => {
       expect(triggerEventSpy).to.have.been.called;
