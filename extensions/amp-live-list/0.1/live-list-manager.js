@@ -229,7 +229,7 @@ export function installLiveListManager(win) {
  * @param {!Window} win
  * @return {!LiveListManager}
  */
-export function getLiveListManager(win) {
+export function liveListManagerFor(win) {
   installLiveListManager(win);
   return getService(win, 'liveListManager');
 }
