@@ -343,7 +343,8 @@ HTML5 compatible.
     prohibited.
 
 4.2.5 `<meta>`
-  - Only `<meta charset=utf8>` and `<meta name=viewport>` are allowed.
+  - Only `<meta charset=utf8>`, `<meta name=viewport>` and 
+    `<meta name=amp4ads-id>` are allowed.
 
 4.2.6 `<style>`  
 
