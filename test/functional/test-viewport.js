@@ -180,7 +180,7 @@ describes.fakeWin('Viewport', {}, env => {
     });
   });
 
-  describe.only('zero dimensions', () => {
+  describe('zero dimensions', () => {
     let errorStub;
     let randomValue;
 
