@@ -63,7 +63,7 @@ html.i-amphtml-singledoc.i-amphtml-embedded {
 
 
 /**
- * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amphtml-wrapper`
+ * iOS-Embed Wrapper mode. The `html` is wrapped into `.i-amphtml-ios-embed`
  * element.
  */
 html.i-amphtml-ios-embed {
@@ -73,7 +73,7 @@ html.i-amphtml-ios-embed {
 }
 
 /** Wrapper for iOS-Embed-Wrapper mode. */
-#i-amphtml-wrapper {
+html.i-amphtml-ios-embed > html {
   overflow-x: hidden !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -86,9 +86,9 @@ html.i-amphtml-ios-embed {
   display: block !important;
 }
 
-#i-amphtml-wrapper > body {
+html.i-amphtml-ios-embed > html > body {
   /* Make sure position:absolute elements are positioned relative to the body,
-     not i-amp-html-wrapper */
+     not the wrapper */
   position: relative !important;
   /* `body` must have a 1px transparent border for two purposes:
       (1) to cancel out margin collapse in body's children so that position

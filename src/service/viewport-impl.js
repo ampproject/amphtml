@@ -1511,14 +1511,9 @@ export class ViewportBindingIosEmbedWrapper_ {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
-    const topClasses = this.win.document.documentElement.className;
-    this.win.document.documentElement.className = '';
-    this.win.document.documentElement.classList.add('i-amphtml-ios-embed');
 
     /** @private @const {!Element} */
-    this.wrapper_ = this.win.document.createElement('html');
-    this.wrapper_.id = 'i-amphtml-wrapper';
-    this.wrapper_.className = topClasses;
+    this.html_ = win.document.documentElement;
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -1535,7 +1530,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     // Setup UI.
     /** @private {boolean} */
     this.setupDone_ = false;
-    waitForBody(this.win.document, this.setup_.bind(this));
+    waitForBody(win.document, this.setup_.bind(this));
 
     dev().fine(TAG_, 'initialized ios-embed-wrapper viewport');
   }
@@ -1562,10 +1557,16 @@ export class ViewportBindingIosEmbedWrapper_ {
     // - https://code.google.com/p/chromium/issues/detail?id=157855
     // - https://bugs.webkit.org/show_bug.cgi?id=106133
     // - https://bugs.webkit.org/show_bug.cgi?id=149264
+
     const doc = this.win.document;
     const body = dev().assertElement(doc.body, 'body is not available');
-    doc.documentElement.appendChild(this.wrapper_);
-    this.wrapper_.appendChild(body);
+
+    const wrapper = doc.createElement('html');
+    wrapper.classList.add('i-amphtml-ios-embed');
+
+    wrapper.appendChild(this.html_);
+    doc.appendChild(wrapper);
+
     // Redefine `document.body`, otherwise it'd be `null`.
     Object.defineProperty(doc, 'body', {
       get: () => body,
@@ -1580,13 +1581,13 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   connect() {
     this.win.addEventListener('resize', this.boundResizeEventListener_);
-    this.wrapper_.addEventListener('scroll', this.boundScrollEventListener_);
+    this.html_.addEventListener('scroll', this.boundScrollEventListener_);
   }
 
   /** @override */
   disconnect() {
     this.win.removeEventListener('resize', this.boundResizeEventListener_);
-    this.wrapper_.removeEventListener('scroll', this.boundScrollEventListener_);
+    this.html_.removeEventListener('scroll', this.boundScrollEventListener_);
   }
 
   /** @override */
@@ -1606,7 +1607,7 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    setStyle(this.wrapper_, 'paddingTop', px(paddingTop));
+    setStyle(this.html_, 'paddingTop', px(paddingTop));
   }
 
   /** @override */
@@ -1625,12 +1626,12 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   disableScroll() {
-    this.wrapper_.classList.add('i-amphtml-scroll-disabled');
+    this.html_.classList.add('i-amphtml-scroll-disabled');
   }
 
   /** @override */
   resetScroll() {
-    this.wrapper_.classList.remove('i-amphtml-scroll-disabled');
+    this.html_.classList.remove('i-amphtml-scroll-disabled');
   }
 
   /** @override */
@@ -1648,24 +1649,24 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getScrollTop() {
-    return this.wrapper_./*OK*/scrollTop;
+    return this.html_./*OK*/scrollTop;
   }
 
   /** @override */
   getScrollLeft() {
-    // The wrapper is set to overflow-x: hidden so the document cannot be
+    // The html is set to overflow-x: hidden so the document cannot be
     // scrolled horizontally. The scrollLeft will always be 0.
     return 0;
   }
 
   /** @override */
   getScrollWidth() {
-    return this.wrapper_./*OK*/scrollWidth;
+    return this.html_./*OK*/scrollWidth;
   }
 
   /** @override */
   getScrollHeight() {
-    return this.wrapper_./*OK*/scrollHeight;
+    return this.html_./*OK*/scrollHeight;
   }
 
   /** @override */
@@ -1687,7 +1688,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   setScrollTop(scrollTop) {
     // If scroll top is 0, it's set to 1 to avoid scroll-freeze issue. See
     // `onScrolled_` for more details.
-    this.wrapper_./*OK*/scrollTop = scrollTop || 1;
+    this.html_./*OK*/scrollTop = scrollTop || 1;
   }
 
   /**
@@ -1701,8 +1702,8 @@ export class ViewportBindingIosEmbedWrapper_ {
     // TODO(dvoytenko, #330): Ideally we would do the same for the overscroll
     // on the bottom. Unfortunately, iOS Safari misreports scrollHeight in
     // this case.
-    if (this.wrapper_./*OK*/scrollTop == 0) {
-      this.wrapper_./*OK*/scrollTop = 1;
+    if (this.html_./*OK*/scrollTop == 0) {
+      this.html_./*OK*/scrollTop = 1;
       if (opt_event) {
         opt_event.preventDefault();
       }
