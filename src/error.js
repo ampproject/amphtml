@@ -339,7 +339,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
   if (!detectedJsEngine) {
     detectedJsEngine = detectJsEngineFromStack();
   }
-  url += `&jse=${detectJsEngineFromStack}`;
+  url += `&jse=${detectedJsEngine}`;
 
   if (error) {
     const tagName = error && error.associatedElement
