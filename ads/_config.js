@@ -75,6 +75,8 @@ export const adConfig = {
 
   adman: {},
 
+  admanmedia: {},
+
   adreactor: {},
 
   adsense: {
