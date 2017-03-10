@@ -226,4 +226,4 @@ function sizeTask() {
     .on('end', del.bind(null, [tempFolderName]));
 }
 
-gulp.task('size', 'Runs a report on artifact size', sizeTask);
+gulp.task('size', 'Runs a report on artifact size', ['dist'], sizeTask);
