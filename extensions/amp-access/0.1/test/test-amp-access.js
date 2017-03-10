@@ -27,7 +27,7 @@ import {installActionServiceForDoc,} from
 import {cidServiceForDocForTesting,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {installPerformanceService,} from
- '../../../../src/service/performance-impl';
+    '../../../../src/service/performance-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
