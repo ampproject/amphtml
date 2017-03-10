@@ -35,7 +35,6 @@ describe('amp-image-lightbox component', () => {
       el.setAttribute('layout', 'nodisplay');
       iframe.doc.body.appendChild(el);
       return timerFor(window).promise(16).then(() => {
-        el.implementation_.buildCallback();
         return el;
       });
     });
@@ -51,8 +50,33 @@ describe('amp-image-lightbox component', () => {
     sandbox.restore();
   });
 
+  it('should not render if not activated', () => {
+    return getImageLightbox().then(lightbox => {
+      const container = lightbox
+          .querySelector('.-amp-image-lightbox-container');
+      expect(container).to.equal(null);
+    });
+  });
+
   it('should render correctly', () => {
     return getImageLightbox().then(lightbox => {
+      const impl = lightbox.implementation_;
+      const noop = () => {};
+      impl.getViewport = () => {return {
+        onChanged: noop,
+        enterLightboxMode: noop,
+      };};
+      impl.getHistory_ = () => {
+        return {push: () => {
+          return Promise.resolve();
+        }};
+      };
+      impl.enter_ = noop;
+
+      const ampImage = document.createElement('amp-img');
+      ampImage.setAttribute('src', 'data:');
+      impl.activate({source: ampImage});
+
       const container = lightbox
           .querySelector('.-amp-image-lightbox-container');
       expect(container).to.not.equal(null);
