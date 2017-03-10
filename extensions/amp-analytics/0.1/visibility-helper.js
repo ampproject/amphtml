@@ -108,7 +108,7 @@ export class VisibilityModel {
     /** @const @private {time} */
     this.createdTime_ = Date.now();
 
-    /** @private {number} */
+    /** @private {time} percent value in a [0, 1] range */
     this.ownVisibility_ = opt_iniVisibility || 0;
 
     /** @private {boolean} */
@@ -123,37 +123,37 @@ export class VisibilityModel {
     /** @private {boolean} */
     this.everMatchedVisibility_ = false;
 
-    /** @private {time} */
+    /** @private {time} duration in milliseconds */
     this.continuousTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} duration in milliseconds */
     this.maxContinuousVisibleTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} duration in milliseconds */
     this.totalVisibleTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} milliseconds since epoch */
     this.firstSeenTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} milliseconds since epoch */
     this.lastSeenTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} milliseconds since epoch */
     this.fistVisibleTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} milliseconds since epoch */
     this.lastVisibleTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} percent value in a [0, 1] range */
     this.loadTimeVisibility_ = 0;
 
-    /** @private {number} */
+    /** @private {number} percent value in a [0, 1] range */
     this.minVisiblePercentage_ = 0;
 
-    /** @private {number} */
+    /** @private {number} percent value in a [0, 1] range */
     this.maxVisiblePercentage_ = 0;
 
-    /** @private {time} */
+    /** @private {time} milliseconds since epoch */
     this.lastVisibleUpdateTime_ = 0;
 
     if (this.parent_) {
@@ -191,7 +191,7 @@ export class VisibilityModel {
    * have been met.
    * @param {function()} handler
    */
-  onEvent(handler) {
+  onTriggerEvent(handler) {
     this.eventPromise_.then(handler);
   }
 
@@ -428,15 +428,15 @@ function timeBase(time, baseTime) {
 
 
 /**
- * A base class for `VisibilityRootForDoc` and `VisibilityRootForEmbed`. The
- * instance of this class corresponds 1:1 to `AnalyticsRoot`. It represents a
- * collection of all visibility triggers declared within the `AnalyticsRoot`.
+ * A base class for `VisibilityManagerForDoc` and `VisibilityManagerForEmbed`.
+ * The instance of this class corresponds 1:1 to `AnalyticsRoot`. It represents
+ * a collection of all visibility triggers declared within the `AnalyticsRoot`.
  * @implements {../../../src/service.Disposable}
  * @abstract
  */
-export class VisibilityRoot {
+export class VisibilityManager {
   /**
-   * @param {?VisibilityRoot} parent
+   * @param {?VisibilityManager} parent
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(parent, ampdoc) {
@@ -516,17 +516,17 @@ export class VisibilityRoot {
    * visibility spec. The visibility tracking can be deferred until
    * `readyPromise` is resolved, if specified.
    * @param {!Object<string, *>} spec
-   * @param {?Promise} readySignal
-   * @param {function(!Object<string, *>)} listener
+   * @param {?Promise} readyPromise
+   * @param {function(!Object<string, *>)} callback
    * @return {!UnlistenDef}
    */
-  listenRoot(spec, readySignal, listener) {
+  listenRoot(spec, readyPromise, callback) {
     const model = new VisibilityModel(
         this.getRootModel(),
         spec,
         /* ownVisibility */ 1,
         /* factorParent */ true);
-    return this.listen_(model, spec, listener, readySignal);
+    return this.listen_(model, spec, readyPromise, callback);
   }
 
   /**
@@ -535,35 +535,35 @@ export class VisibilityRoot {
    * `readyPromise` is resolved, if specified.
    * @param {!Element} element
    * @param {!Object<string, *>} spec
-   * @param {?Promise} readySignal
-   * @param {function(!Object<string, *>)} listener
+   * @param {?Promise} readyPromise
+   * @param {function(!Object<string, *>)} callback
    * @return {!UnlistenDef}
    */
-  listenElement(element, spec, readySignal, listener) {
+  listenElement(element, spec, readyPromise, callback) {
     const model = new VisibilityModel(this.getRootModel(), spec);
-    return this.listen_(model, spec, listener, readySignal, element);
+    return this.listen_(model, spec, readyPromise, callback, element);
   }
 
   /**
    * @param {!VisibilityModel} model
    * @param {!Object<string, *>} spec
-   * @param {function(!Object<string, *>)} listener
-   * @param {?Promise} readySignal
+   * @param {?Promise} readyPromise
+   * @param {function(!Object<string, *>)} callback
    * @param {!Element=} opt_element
    * @return {!UnlistenDef}
    * @private
    */
-  listen_(model, spec, listener, readySignal, opt_element) {
+  listen_(model, spec, readyPromise, callback, opt_element) {
     // Block visibility.
-    if (readySignal) {
+    if (readyPromise) {
       model.setReady(false);
-      readySignal.then(() => {
+      readyPromise.then(() => {
         model.setReady(true);
       });
     }
 
     // Process the event.
-    model.onEvent(() => {
+    model.onTriggerEvent(() => {
       const startTime = this.getStartTime();
       const state = model.getState(startTime);
       model.dispose();
@@ -578,13 +578,15 @@ export class VisibilityRoot {
           this.resources_.getResourceForElementOptional(opt_element) : null;
       if (resource) {
         const layoutBox = resource.getLayoutBox();
-        state['elementX'] = layoutBox.left;
-        state['elementY'] = layoutBox.top;
-        state['elementWidth'] = layoutBox.width;
-        state['elementHeight'] = layoutBox.height;
+        Object.assign(state, {
+          'elementX': layoutBox.left,
+          'elementY': layoutBox.top,
+          'elementWidth': layoutBox.width,
+          'elementHeight': layoutBox.height,
+        });
       }
 
-      listener(state);
+      callback(state);
     });
 
     this.models_.push(model);
@@ -623,10 +625,10 @@ export class VisibilityRoot {
 
 
 /**
- * The implementation of `VisibilityRoot` for an AMP document. Two
+ * The implementation of `VisibilityManager` for an AMP document. Two
  * distinct modes are supported: the main AMP doc and a in-a-box doc.
  */
-export class VisibilityRootForDoc extends VisibilityRoot {
+export class VisibilityManagerForDoc extends VisibilityManager {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -780,7 +782,7 @@ export class VisibilityRootForDoc extends VisibilityRoot {
     };
     this.unsubscribe(this.viewport_.onScroll(ticker));
     this.unsubscribe(this.viewport_.onChanged(ticker));
-    setTimeout(ticker, 1);
+    setTimeout(ticker);
     return intersectionObserverPolyfill;
   }
 
@@ -833,12 +835,12 @@ export class VisibilityRootForDoc extends VisibilityRoot {
 
 
 /**
- * The implementation of `VisibilityRoot` for a FIE embed. This visibility
+ * The implementation of `VisibilityManager` for a FIE embed. This visibility
  * root delegates most of tracking functions to its parent, the ampdoc root.
  */
-export class VisibilityRootForEmbed extends VisibilityRoot {
+export class VisibilityManagerForEmbed extends VisibilityManager {
   /**
-   * @param {!VisibilityRoot} parent
+   * @param {!VisibilityManager} parent
    * @param {!../../../src/friendly-iframe-embed.FriendlyIframeEmbed} embed
    */
   constructor(parent, embed) {

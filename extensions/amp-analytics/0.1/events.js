@@ -348,18 +348,18 @@ export class VisibilityTracker extends EventTracker {
   add(context, eventType, config, listener) {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
-    const visibilityRoot = this.root.getVisibilityRoot();
+    const visibilityManager = this.root.getVisibilityManager();
 
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
-      const readySignal = selector ?
+      const readyPromise = selector ?
           this.iniLoadTracker_.getRootSignal() :
           null;
-      return visibilityRoot.listenRoot(
+      return visibilityManager.listenRoot(
           visibilitySpec,
-          readySignal,
+          readyPromise,
           this.onEvent_.bind(
               this, eventType, listener, this.root.getRootElement()));
     }
@@ -375,7 +375,7 @@ export class VisibilityTracker extends EventTracker {
               selector,
               selectionMethod),
           `Element "${selector}" not found`);
-      return visibilityRoot.listenElement(
+      return visibilityManager.listenElement(
           element,
           visibilitySpec,
           this.iniLoadTracker_.getElementSignal(element),

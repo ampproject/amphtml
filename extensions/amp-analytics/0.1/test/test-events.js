@@ -405,7 +405,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
   describe('VisibilityTracker', () => {
     let tracker;
-    let visibilityRootMock;
+    let visibilityManagerMock;
     let iniLoadTrackerMock;
     let targetSignals;
     let eventResolver, eventPromise;
@@ -414,7 +414,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     beforeEach(() => {
       tracker = new VisibilityTracker(root);
-      visibilityRootMock = sandbox.mock(root.getVisibilityRoot());
+      visibilityManagerMock = sandbox.mock(root.getVisibilityManager());
       iniLoadTrackerMock = sandbox.mock(tracker.iniLoadTracker_);
 
       target.classList.add('i-amphtml-element');
@@ -438,7 +438,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     afterEach(() => {
-      visibilityRootMock.verify();
+      visibilityManagerMock.verify();
     });
 
     it('should initalize, add listeners and dispose', () => {
@@ -449,7 +449,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const unlisten = function() {};
       iniLoadTrackerMock.expects('getRootSignal').never();
       iniLoadTrackerMock.expects('getElementSignal').never();
-      visibilityRootMock
+      visibilityManagerMock
           .expects('listenRoot')
           .withExactArgs(
               matchEmptySpec,
@@ -476,7 +476,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .expects('getRootSignal')
           .returns(readyPromise)
           .once();
-      visibilityRootMock
+      visibilityManagerMock
           .expects('listenRoot')
           .withExactArgs(
               matchEmptySpec,
@@ -504,7 +504,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .expects('getRootSignal')
           .returns(readyPromise)
           .once();
-      visibilityRootMock
+      visibilityManagerMock
           .expects('listenRoot')
           .withExactArgs(
               config.visibilitySpec,
@@ -533,7 +533,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(target)
           .returns(readyPromise)
           .once();
-      visibilityRootMock
+      visibilityManagerMock
           .expects('listenElement')
           .withExactArgs(
               target,
@@ -573,7 +573,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(target)
           .returns(readyPromise)
           .once();
-      visibilityRootMock
+      visibilityManagerMock
           .expects('listenElement')
           .withExactArgs(
               target,

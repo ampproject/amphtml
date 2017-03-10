@@ -20,8 +20,8 @@ import {
 } from '../../../../src/intersection-observer-polyfill';
 import {
   VisibilityModel,
-  VisibilityRootForDoc,
-  VisibilityRootForEmbed,
+  VisibilityManagerForDoc,
+  VisibilityManagerForEmbed,
 } from '../visibility-helper';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {documentStateFor} from '../../../../src/service/document-state';
@@ -915,7 +915,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
 });
 
 
-describes.fakeWin('VisibilityRootForDoc', {amp: true}, env => {
+describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   let win;
   let ampdoc;
   let clock;
@@ -974,7 +974,7 @@ describes.fakeWin('VisibilityRootForDoc', {amp: true}, env => {
     startVisibilityHandlerCount =
         viewer.visibilityObservable_.getHandlerCount();
 
-    root = new VisibilityRootForDoc(ampdoc);
+    root = new VisibilityManagerForDoc(ampdoc);
     rootModel = root.getRootModel();
 
     win.IntersectionObserver = IntersectionObserverStub;
@@ -988,7 +988,7 @@ describes.fakeWin('VisibilityRootForDoc', {amp: true}, env => {
 
   it('should initialize correctly backgrounded', () => {
     viewer.setVisibilityState_(VisibilityState.HIDDEN);
-    root = new VisibilityRootForDoc(ampdoc);
+    root = new VisibilityManagerForDoc(ampdoc);
     rootModel = root.getRootModel();
 
     expect(root.parent).to.be.null;
@@ -1041,7 +1041,7 @@ describes.fakeWin('VisibilityRootForDoc', {amp: true}, env => {
 
   it('should switch visibility for in-a-box', () => {
     win.AMP_MODE = {runtime: 'inabox'};
-    root = new VisibilityRootForDoc(ampdoc);
+    root = new VisibilityManagerForDoc(ampdoc);
     rootModel = root.getRootModel();
 
     // Check observer is correctly set.
@@ -1450,15 +1450,15 @@ describes.realWin('EmbedAnalyticsRoot', {
     viewer = parentWin.services.viewer.obj;
     sandbox.stub(viewer, 'getFirstVisibleTime', () => 1);
 
-    parentRoot = new VisibilityRootForDoc(ampdoc);
+    parentRoot = new VisibilityManagerForDoc(ampdoc);
 
-    root = new VisibilityRootForEmbed(parentRoot, embed);
+    root = new VisibilityManagerForEmbed(parentRoot, embed);
     rootModel = root.getRootModel();
   });
 
   it('should initialize correctly backgrounded', () => {
     viewer.setVisibilityState_(VisibilityState.HIDDEN);
-    root = new VisibilityRootForEmbed(parentRoot, embed);
+    root = new VisibilityManagerForEmbed(parentRoot, embed);
     rootModel = root.getRootModel();
 
     expect(root.parent).to.equal(parentRoot);
@@ -1519,7 +1519,7 @@ describes.realWin('EmbedAnalyticsRoot', {
 });
 
 
-describes.realWin('VisibilityRoot integrated', {amp: true}, env => {
+describes.realWin('VisibilityManager integrated', {amp: true}, env => {
   let win, doc;
   let ampdoc;
   let viewer;
@@ -1618,7 +1618,7 @@ describes.realWin('VisibilityRoot integrated', {amp: true}, env => {
 
   it('should execute "visible" trigger with simple spec', () => {
     viewer.setVisibilityState_(VisibilityState.VISIBLE);
-    visibility = new VisibilityRootForDoc(ampdoc);
+    visibility = new VisibilityManagerForDoc(ampdoc);
 
     visibility.listenElement(ampElement, {}, readyPromise, eventResolver);
 
@@ -1650,7 +1650,7 @@ describes.realWin('VisibilityRoot integrated', {amp: true}, env => {
 
   it('should triger "visible" with no duration condition', () => {
     viewer.setVisibilityState_(VisibilityState.VISIBLE);
-    visibility = new VisibilityRootForDoc(ampdoc);
+    visibility = new VisibilityManagerForDoc(ampdoc);
 
     visibility.listenElement(
         ampElement,
@@ -1725,7 +1725,7 @@ describes.realWin('VisibilityRoot integrated', {amp: true}, env => {
 
   it('should trigger "visible" with duration condition', () => {
     viewer.setVisibilityState_(VisibilityState.VISIBLE);
-    visibility = new VisibilityRootForDoc(ampdoc);
+    visibility = new VisibilityManagerForDoc(ampdoc);
 
     visibility.listenElement(
         ampElement,
@@ -1790,7 +1790,7 @@ describes.realWin('VisibilityRoot integrated', {amp: true}, env => {
 
   it('should populate "backgrounded" and "backgroundedAtStart"', () => {
     viewer.setVisibilityState_(VisibilityState.HIDDEN);
-    visibility = new VisibilityRootForDoc(ampdoc);
+    visibility = new VisibilityManagerForDoc(ampdoc);
 
     visibility.listenElement(
         ampElement,

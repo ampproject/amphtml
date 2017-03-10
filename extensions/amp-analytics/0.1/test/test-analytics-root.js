@@ -25,8 +25,8 @@ import {
   CustomEventTracker,
 } from '../events';
 import {
-  VisibilityRootForDoc,
-  VisibilityRootForEmbed,
+  VisibilityManagerForDoc,
+  VisibilityManagerForEmbed,
 } from '../visibility-helper';
 
 
@@ -131,12 +131,12 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   });
 
   it('should create visibility root', () => {
-    const visibilityRoot = root.getVisibilityRoot();
-    expect(visibilityRoot).to.be.instanceOf(VisibilityRootForDoc);
-    expect(visibilityRoot.ampdoc).to.equal(ampdoc);
-    expect(visibilityRoot.parent).to.be.null;
+    const visibilityManager = root.getVisibilityManager();
+    expect(visibilityManager).to.be.instanceOf(VisibilityManagerForDoc);
+    expect(visibilityManager.ampdoc).to.equal(ampdoc);
+    expect(visibilityManager.parent).to.be.null;
     // Ensure the instance is reused.
-    expect(root.getVisibilityRoot()).to.equal(visibilityRoot);
+    expect(root.getVisibilityManager()).to.equal(visibilityManager);
   });
 
 
@@ -451,13 +451,13 @@ describes.realWin('EmbedAnalyticsRoot', {
   });
 
   it('should create visibility root', () => {
-    const visibilityRoot = root.getVisibilityRoot();
-    expect(visibilityRoot).to.be.instanceOf(VisibilityRootForEmbed);
-    expect(visibilityRoot.ampdoc).to.equal(ampdoc);
-    expect(visibilityRoot.embed).to.equal(embed);
-    expect(visibilityRoot.parent).to.equal(parentRoot.getVisibilityRoot());
+    const visibilityManager = root.getVisibilityManager();
+    expect(visibilityManager).to.be.instanceOf(VisibilityManagerForEmbed);
+    expect(visibilityManager.ampdoc).to.equal(ampdoc);
+    expect(visibilityManager.embed).to.equal(embed);
+    expect(visibilityManager.parent).to.equal(parentRoot.getVisibilityManager());
     // Ensure the instance is reused.
-    expect(root.getVisibilityRoot()).to.equal(visibilityRoot);
+    expect(root.getVisibilityManager()).to.equal(visibilityManager);
   });
 
 

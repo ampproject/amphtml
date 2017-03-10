@@ -15,8 +15,8 @@
  */
 
 import {
-  VisibilityRootForDoc,
-  VisibilityRootForEmbed,
+  VisibilityManagerForDoc,
+  VisibilityManagerForEmbed,
 } from './visibility-helper';
 import {
   closestBySelector,
@@ -58,8 +58,8 @@ export class AnalyticsRoot {
     /** @const */
     this.trackers_ = map();
 
-    /** @private {?./visibility-helper.VisibilityRoot} */
-    this.visibilityRoot_ = null;
+    /** @private {?./visibility-helper.VisibilityManager} */
+    this.visibilityManager_ = null;
   }
 
   /** @override */
@@ -68,8 +68,8 @@ export class AnalyticsRoot {
       this.trackers_[k].dispose();
       delete this.trackers_[k];
     }
-    if (this.visibilityRoot_) {
-      this.visibilityRoot_.dispose();
+    if (this.visibilityManager_) {
+      this.visibilityManager_.dispose();
     }
   }
 
@@ -290,21 +290,21 @@ export class AnalyticsRoot {
    * Returns the visibility root corresponding to this analytics root (ampdoc
    * or embed). The visibility root is created lazily as needed and takes
    * care of all visibility tracking functions.
-   * @return {!./visibility-helper.VisibilityRoot}
+   * @return {!./visibility-helper.VisibilityManager}
    */
-  getVisibilityRoot() {
-    if (!this.visibilityRoot_) {
-      this.visibilityRoot_ = this.createVisibilityRoot();
+  getVisibilityManager() {
+    if (!this.visibilityManager_) {
+      this.visibilityManager_ = this.createVisibilityManager();
     }
-    return this.visibilityRoot_;
+    return this.visibilityManager_;
   }
 
   /**
-   * @return {!./visibility-helper.VisibilityRoot}
+   * @return {!./visibility-helper.VisibilityManager}
    * @protected
    * @abstract
    */
-  createVisibilityRoot() {}
+  createVisibilityManager() {}
 }
 
 
@@ -365,8 +365,8 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
   }
 
   /** @override */
-  createVisibilityRoot() {
-    return new VisibilityRootForDoc(this.ampdoc);
+  createVisibilityManager() {
+    return new VisibilityManagerForDoc(this.ampdoc);
   }
 }
 
@@ -417,9 +417,9 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
   }
 
   /** @override */
-  createVisibilityRoot() {
-    return new VisibilityRootForEmbed(
-        this.parent.getVisibilityRoot(),
+  createVisibilityManager() {
+    return new VisibilityManagerForEmbed(
+        this.parent.getVisibilityManager(),
         this.embed);
   }
 }
