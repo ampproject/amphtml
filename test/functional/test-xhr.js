@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {
-  installXhrService,
+  xhrServiceForTesting,
   fetchPolyfill,
   FetchResponse,
   assertSuccess,
@@ -43,10 +43,10 @@ describe('XHR', function() {
 
   const scenarios = [
     {
-      xhr: installXhrService(nativeWin),
+      xhr: xhrServiceForTesting(nativeWin),
       desc: 'Native',
     }, {
-      xhr: installXhrService(polyfillWin),
+      xhr: xhrServiceForTesting(polyfillWin),
       desc: 'Polyfill',
     },
   ];
