@@ -102,7 +102,7 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
 
 Most attributes accepted by the [AMP Validator](https://validator.ampproject.org/) for AMP and non-AMP elements, are bindable.
 
-There are also special bindable attributes without non-bindable siblings:
+There are also special bindable attributes without non-bindable counterparts:
 
 | Component | Attribute | Details | Example |
 | --- | --- | --- | --- |
@@ -117,7 +117,7 @@ There are also special bindable attributes without non-bindable siblings:
 - Expressions do **not** have access to globals like `window` or `document`
 - Only whitelisted functions are allowed
 - Custom functions, classes and control flow statements (e.g. `for`) are disallowed
-- Undefined variables, array-index-out-of-bounds return `null` instead of throwing errors
+- Undefined variables and array-index-out-of-bounds return `null` instead of throwing errors
 
 #### BNF-like grammar
 
