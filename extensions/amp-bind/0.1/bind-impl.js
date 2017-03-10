@@ -764,9 +764,9 @@ export class Bind {
           }
         }
         return Promise.all(removePromises);
-      }).then(() => {
-        return this.digest_();
       });
+      // TODO(kmh287): Come up with a strategy for evaluating new bindings
+      // added here that mitigates FOUC.
       if (getMode().test) {
         this.mutationPromises_.push(mutationPromise);
       }
