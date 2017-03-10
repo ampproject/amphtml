@@ -445,7 +445,7 @@ function callTaskNoInline(callback, state) {
  * @param {!Window} window
  * @return {!Vsync}
  */
-export function getVsyncService(window) {
+export function vsyncForTesting(window) {
   installVsyncService(window);
   return getService(window, 'vsync');
 }
