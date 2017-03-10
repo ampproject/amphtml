@@ -291,6 +291,20 @@ describe('amp-youtube', function() {
     });
   });
 
+  it('should propagate attribute mutations', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const iframe = yt.querySelector('iframe');
+
+      expect(iframe.src).to.contain('mGENRKrdoGY');
+
+      yt.setAttribute('data-videoid', 'lBTCB7yLs8Y');
+      yt.mutatedAttributesCallback({'data-videoid': 'lBTCB7yLs8Y'});
+
+      expect(iframe.src).to.not.contain('mGENRKrdoGY');
+      expect(iframe.src).to.contain('lBTCB7yLs8Y');
+    });
+  });
+
   function sendFakeInfoDeliveryMessage(yt, iframe, info) {
     yt.implementation_.handleYoutubeMessages_({
       origin: 'https://www.youtube.com',
