@@ -455,7 +455,8 @@ describes.realWin('EmbedAnalyticsRoot', {
     expect(visibilityManager).to.be.instanceOf(VisibilityManagerForEmbed);
     expect(visibilityManager.ampdoc).to.equal(ampdoc);
     expect(visibilityManager.embed).to.equal(embed);
-    expect(visibilityManager.parent).to.equal(parentRoot.getVisibilityManager());
+    expect(visibilityManager.parent)
+        .to.equal(parentRoot.getVisibilityManager());
     // Ensure the instance is reused.
     expect(root.getVisibilityManager()).to.equal(visibilityManager);
   });

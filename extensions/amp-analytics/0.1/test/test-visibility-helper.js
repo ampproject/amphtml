@@ -1529,8 +1529,6 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
   let inObCallback;
   let observeSpy;
   let unobserveSpy;
-  let callbackSpy1;
-  let callbackSpy2;
   let visibility;
   let ampElement;
   let eventPromise, eventResolver;
@@ -1564,8 +1562,6 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
 
     observeSpy = sandbox.stub();
     unobserveSpy = sandbox.stub();
-    callbackSpy1 = sandbox.stub();
-    callbackSpy2 = sandbox.stub();
     const inob = callback => {
       inObCallback = callback;
       return {
