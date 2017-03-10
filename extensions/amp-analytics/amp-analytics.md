@@ -156,6 +156,12 @@ Type attribute value: `gemius`
 
 Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provided `prefix` and `identifier` variables must be specified. It's also possible to specify the optional variable `extraparams` (key1=value1|key2=value2). More details can be found at [gemius.com](https://www.gemius.com).
 
+### Google AdWords
+
+Type attribute value: `googleadwords`
+
+Adds support for Google AdWords conversion tracking and remarketing. See more details in the AdWords help center for [conversion tracking](https://support.google.com/adwords/answer/1722054?hl=en) and [remarketing](https://support.google.com/adwords/answer/2453998?hl=en). Both tags can be used independent of each other.
+
 ### Google Analytics
 
 Type attribute value: `googleanalytics`
