@@ -30,7 +30,7 @@ import {Activity} from './activity-impl';
 import {Cid} from './cid-impl';
 import {
     InstrumentationService,
-    instrumentationServiceForDoc,
+    instrumentationServicePromiseForDoc,
 } from './instrumentation';
 import {ExpansionOptions, variableServiceFor} from './variables';
 import {ANALYTICS_CONFIG} from './vendors';
@@ -139,7 +139,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     return this.consentPromise_
         .then(this.fetchRemoteConfig_.bind(this))
-        .then(() => instrumentationServiceForDoc(this.getAmpDoc()))
+        .then(() => instrumentationServicePromiseForDoc(this.getAmpDoc()))
         .then(instrumentation => {
           this.instrumentation_ = instrumentation;
         })
