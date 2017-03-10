@@ -385,7 +385,7 @@ parse: function parse(input) {
             var errStr = '';
             expected = [];
             for (p in table[state]) {
-                if (this.terminals_[p] && p > TERROR) {
+                if (p > TERROR && this.terminals_[p]) {
                     expected.push('\'' + this.terminals_[p] + '\'');
                 }
             }
@@ -428,16 +428,18 @@ parse: function parse(input) {
         case 2:
             len = this.productions_[action[1]][1];
             yyval.$ = vstack[vstack.length - len];
+            const firstYyloc = lstack[lstack.length - (len || 1)];
+            const lastYyloc = lstack[lstack.length - 1];
             yyval._$ = {
-                first_line: lstack[lstack.length - (len || 1)].first_line,
-                last_line: lstack[lstack.length - 1].last_line,
-                first_column: lstack[lstack.length - (len || 1)].first_column,
-                last_column: lstack[lstack.length - 1].last_column
+                first_line: firstYyloc.first_line,
+                last_line: lastYyloc.last_line,
+                first_column: firstYyloc.first_column,
+                last_column: lastYyloc.last_column
             };
             if (ranges) {
                 yyval._$.range = [
-                    lstack[lstack.length - (len || 1)].range[0],
-                    lstack[lstack.length - 1].range[1]
+                    firstYyloc.range[0],
+                    lastYyloc.range[1]
                 ];
             }
             r = this.performAction.apply(yyval, [
@@ -643,8 +645,9 @@ test_match:function (match, indexed_rule) {
                 backup.yylloc.range = this.yylloc.range.slice(0);
             }
         }
-
-        lines = match[0].match(/(?:\r\n?|\n).*/g);
+        if (match[0].indexOf('\n') != -1 || match[0].indexOf('\r\n') != -1) {
+            lines = match[0].match(/(?:\r\n?|\n).*/g);
+        }
         if (lines) {
             this.yylineno += lines.length;
         }
@@ -695,19 +698,20 @@ next:function () {
         var token,
             match,
             tempMatch,
-            index;
+            matchRule;
         if (!this._more) {
             this.yytext = '';
             this.match = '';
         }
         var rules = this._currentRules();
         for (var i = 0, n = rules.length; i < n; i++) {
-            tempMatch = this._input.match(this.rules[rules[i]]);
+            const ruleNum = rules[i];
+            tempMatch = this._input.match(this.rules[ruleNum]);
             if (tempMatch && (!match || tempMatch[0].length > match[0].length)) {
                 match = tempMatch;
-                index = i;
+                matchRule = rules[ruleNum];
                 if (this.options.backtrack_lexer) {
-                    token = this.test_match(tempMatch, rules[i]);
+                    token = this.test_match(tempMatch, ruleNum);
                     if (token !== false) {
                         return token;
                     } else if (this._backtrack) {
@@ -723,12 +727,7 @@ next:function () {
             }
         }
         if (match) {
-            token = this.test_match(match, rules[index]);
-            if (token !== false) {
-                return token;
-            }
-            // else: this is a lexer rule which consumes input without producing a token (e.g. whitespace)
-            return false;
+            return this.test_match(match, matchRule);
         }
         if (this._input === "") {
             return this.EOF;
@@ -743,12 +742,11 @@ next:function () {
 
 // return next match that has a token
 lex:function lex() {
-        var r = this.next();
-        if (r) {
-            return r;
-        } else {
-            return this.lex();
+        let r;
+        while(!r) {
+            r = this.next();
         }
+        return r;
     },
 
 // activates a new lexer condition state (pushes the new lexer condition state onto the condition stack)
