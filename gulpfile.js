@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,6 +92,7 @@ declareExtension('amp-lightbox-viewer', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-list', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-live-list', '0.1', true);
 declareExtension('amp-mustache', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-nexxtv-player', '0.1', false);
 declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-ooyala-player', '0.1', false);
 declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');
@@ -100,6 +101,7 @@ declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-reddit', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true);
+declareExtension('amp-sortable-table', '0.1', true);
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '0.1', true);
