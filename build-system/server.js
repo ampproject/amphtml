@@ -512,12 +512,12 @@ app.use('/a4a(|-3p)/', function(req, res) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
-    const inaboxParam = 'inabox=1';
-    if (adUrl.indexOf('?') == -1) {
-      adUrl += '?' + inaboxParam;
-    } else {
-      adUrl += '&' + inaboxParam;
-    }
+  }
+  const inaboxParam = 'inabox=1';
+  if (adUrl.indexOf('?') == -1) {
+    adUrl += '?' + inaboxParam;
+  } else {
+    adUrl += '&' + inaboxParam;
   }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
