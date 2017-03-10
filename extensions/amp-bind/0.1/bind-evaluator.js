@@ -48,7 +48,7 @@ export class BindEvaluator {
     this.validator_ = new BindValidator();
 
     /** @const @private {!Object<string, !BindExpression>} */
-    this.expressionCache_ = Object.create(null);
+    this.expressions_ = Object.create(null);
   }
 
   /**
@@ -85,7 +85,7 @@ export class BindEvaluator {
     }
 
     filterSplice(this.bindings_, binding =>
-      !expressionsToRemove[binding.expressionString]);
+        !expressionsToRemove[binding.expressionString]);
   }
 
   /**
@@ -99,17 +99,18 @@ export class BindEvaluator {
    */
   evaluateBindings(scope) {
     /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
-    const cache = {};
+    const cache = Object.create(null);
     /** @type {!Object<string, !EvaluatorErrorDef>} */
-    const errors = {};
+    const errors = Object.create(null);
 
+    // First, evaluate all of the expression strings in the bindings.
     this.bindings_.forEach(binding => {
-      const {tagName, property, expressionString} = binding;
+      const expressionString = binding.expressionString;
       // Skip if we've already evaluated this expression string.
       if (cache[expressionString] !== undefined || errors[expressionString]) {
         return;
       }
-      const expression = this.expressionCache_[expressionString];
+      const expression = this.expressions_[expressionString];
       if (!expression) {
         const error =
             new Error(`Expression "${expressionString}"" is not cached.`);
@@ -121,15 +122,30 @@ export class BindEvaluator {
         errors[expressionString] = {message: error.message, stack: error.stack};
         return;
       }
+      cache[expressionString] = result;
+    });
+
+    // Then, validate each binding and delete invalid expression results.
+    this.bindings_.forEach(binding => {
+      const {tagName, property, expressionString} = binding;
+      const result = cache[expressionString];
+      if (result === undefined) {
+        return;
+      }
+      // IMPORTANT: We need to validate expression results on each binding
+      // since validity depends on the `tagName` and `property` rather than
+      // just the `result`.
       const resultString = this.stringValueOf_(property, result);
-      if (this.validator_.isResultValid(tagName, property, resultString)) {
-        cache[expressionString] = result;
-      } else {
+      if (!this.validator_.isResultValid(tagName, property, resultString)) {
+        // TODO(choumx): If this expression string is used in another
+        // tagName/property which is valid, we ought to allow it.
+        delete cache[expressionString];
         const error =
             new Error(`"${result}" is not a valid result for [${property}].`);
         errors[expressionString] = {message: error.message, stack: error.stack};
       }
     });
+
     return {results: cache, errors};
   }
 
@@ -164,12 +180,12 @@ export class BindEvaluator {
    * @private
    */
   parse_(expressionString) {
-    let expression = this.expressionCache_[expressionString];
+    let expression = this.expressions_[expressionString];
     let error = null;
     if (!expression) {
       try {
         expression = new BindExpression(expressionString);
-        this.expressionCache_[expressionString] = expression;
+        this.expressions_[expressionString] = expression;
       } catch (e) {
         error = e;
       }
