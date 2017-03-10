@@ -112,10 +112,7 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.videoid_ = user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-youtube> %s',
-        this.element);
+    this.videoid_ = this.getVideoId_();
 
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
@@ -177,8 +174,7 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // See
-    // https://developers.google.com/youtube/iframe_api_reference
+    // See https://developers.google.com/youtube/iframe_api_reference
     const iframe = this.element.ownerDocument.createElement('iframe');
     const src = this.getVideoIframeSrc_();
 
@@ -189,8 +185,6 @@ class AmpYoutube extends AMP.BaseElement {
     this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
-
-
 
     this.win.addEventListener(
         'message', event => this.handleYoutubeMessages_(event));
@@ -209,6 +203,28 @@ class AmpYoutube extends AMP.BaseElement {
         this.playerState_ == PlayerStates.PLAYING) {
       this.pause();
     }
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    if (mutations['data-videoid'] !== undefined) {
+      this.videoid_ = this.getVideoId_();
+      if (this.iframe_) { // `null` if element hasn't been laid out yet.
+        this.videoIframeSrc_ = null;
+        this.iframe_.src = this.getVideoIframeSrc_();
+      }
+    }
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getVideoId_() {
+    return user().assert(
+        this.element.getAttribute('data-videoid'),
+        'The data-videoid attribute is required for <amp-youtube> %s',
+        this.element);
   }
 
   /**
