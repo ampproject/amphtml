@@ -17,6 +17,7 @@
 import {Animation} from '../animation';
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
+import {VisibilityState} from '../visibility-state';
 import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
     './ios-scrollfreeze-bug';
 import {
@@ -285,7 +286,20 @@ export class Viewport {
     if (this.size_) {
       return this.size_;
     }
-    return this.size_ = this.binding_.getSize();
+    this.size_ = this.binding_.getSize();
+    if (this.size_.width == 0 || this.size_.height == 0) {
+      // Only report when the visibility is "visible" or "prerender".
+      const visibilityState = this.viewer_.getVisibilityState();
+      if (visibilityState == VisibilityState.PRERENDER ||
+          visibilityState == VisibilityState.VISIBLE) {
+        // TODO(dvoytenko, #8044): only report 1% for now until most of cases
+        // are elimitated.
+        if (Math.random() < 0.01) {
+          dev().error(TAG_, 'viewport has zero dimensions');
+        }
+      }
+    }
+    return this.size_;
   }
 
   /**
