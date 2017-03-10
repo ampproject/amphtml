@@ -178,10 +178,10 @@
     "track": "https://api.segment.io/v1/pixel/track?writeKey=$writeKey&context.library.name=amp&anonymousId=_client_id_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&event=$event"
   },
   "snowplow": {
-    "aaVersion": "amp-0.1",
-    "basePrefix": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1",
-    "pageView": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1&e=pv",
-    "structEvent": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1&e=se&se_ca=$structEventCategory&se_ac=$structEventAction&se_la=$structEventLabel&se_pr=$structEventProperty&se_va=$structEventValue"
+    "aaVersion": "amp-0.2",
+    "basePrefix": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&eid=_page_view_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_",
+    "pageView": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&eid=_page_view_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=pv",
+    "structEvent": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&eid=_page_view_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=se&se_ca=$structEventCategory&se_ac=$structEventAction&se_la=$structEventLabel&se_pr=$structEventProperty&se_va=$structEventValue"
   },
   "webtrekk": {
     "trackURL": "https://$trackDomain/$trackId/wt",
