@@ -109,3 +109,13 @@ export function stringHash32(str) {
   // Convert from 32-bit signed to unsigned.
   return String(hash >>> 0);
 };
+
+/*
+ * Converts a string that is in camelCase to one that is in dash-case.
+ *
+ * @param {string} string The string to convert.
+ * @return {string} The string in dash-case.
+ */
+export function camelCaseToDash(string) {
+  return string.replace(/(?!^)([A-Z])/g, match => '-' + match.toLowerCase());
+}

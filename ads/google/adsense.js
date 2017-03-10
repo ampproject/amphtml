@@ -16,6 +16,7 @@
 
 import {validateData} from '../../3p/3p';
 import {setStyles} from '../../src/style';
+import {camelCaseToDash} from '../../src/string';
 
 /**
  * Make an adsense iframe.
@@ -40,22 +41,12 @@ export function adsense(global, data) {
   global.document.body.appendChild(s);
 
   const i = global.document.createElement('ins');
-  i.setAttribute('data-ad-client', data['adClient']);
-  if (data['adChannel']) {
-    i.setAttribute('data-ad-channel', data['adChannel']);
-  }
-  if (data['adSlot']) {
-    i.setAttribute('data-ad-slot', data['adSlot']);
-  }
-  if (data['adHost']) {
-    i.setAttribute('data-ad-host', data['adHost']);
-  }
-  if (data['adtest'] != null) {
-    i.setAttribute('data-adtest', data['adtest']);
-  }
-  if (data['tagOrigin']) {
-    i.setAttribute('data-tag-origin', data['tagOrigin']);
-  }
+  ['adChannel', 'adClient', 'adSlot', 'adHost', 'adTest', 'tagOrigin']
+      .forEach(datum => {
+        if (data[datum]) {
+          i.setAttribute('data-' + camelCaseToDash(datum), data[datum]);
+        }
+      });
   i.setAttribute('data-page-url', global.context.canonicalUrl);
   i.setAttribute('class', 'adsbygoogle');
   setStyles(i, {

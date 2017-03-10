@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {dashToCamelCase, expandTemplate, endsWith} from '../../src/string';
+import {
+  camelCaseToDash,
+  dashToCamelCase,
+  expandTemplate,
+  endsWith
+} from '../../src/string';
 
 describe('dashToCamelCase', () => {
   it('should transform dashes to camel case.', () => {
@@ -100,5 +105,15 @@ describe('expandTemplate', () => {
     expect(expandTemplate('${loop}', testGetter)).to.equal('${loop}');
     expect(expandTemplate('${loop}', testGetter), 10).to.equal('${loop}');
     expect(expandTemplate('${loop1}', testGetter), 10).to.equal('${loop2}');
+  });
+});
+
+describe('camelCaseToDash', () => {
+  it('should convert camelCase strings to dash-case strings', () => {
+    expect(camelCaseToDash('foo')).to.equal('foo');
+    expect(camelCaseToDash('fooBar')).to.equal('foo-bar');
+    expect(camelCaseToDash('fooBarBaz')).to.equal('foo-bar-baz');
+    // Not really valid camel case
+    expect(camelCaseToDash('FooBarBaz')).to.equal('Foo-bar-baz');
   });
 });
