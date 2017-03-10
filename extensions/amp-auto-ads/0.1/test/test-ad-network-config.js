@@ -16,11 +16,17 @@
 
 import {getAdNetworkConfig} from '../ad-network-config';
 
-describe('ad-network-config', () => {
+describes.realWin('ad-network-config', {
+  amp: {
+    canonicalUrl: 'https://foo.bar/baz',
+  },
+}, env => {
 
   let ampAutoAdsElem;
+  let document;
 
   beforeEach(() => {
+    document = env.win.document;
     ampAutoAdsElem = document.createElement('amp-auto-ads');
     document.body.appendChild(ampAutoAdsElem);
   });
