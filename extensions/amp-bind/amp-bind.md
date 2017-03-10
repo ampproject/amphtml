@@ -78,7 +78,7 @@ The state can be initialized with the `amp-state` component:
 
 State can be mutated by the new `AMP.setState()` [action](../../spec/amp-actions-and-events.md).
 
-- `AMP.setState()` performs a *shallow merge* of its arguments with the document state.
+- `AMP.setState()` performs a [shallow merge](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) of its arguments with the document state.
 - `AMP.setState()` can override data initialized by `amp-state`.
 
 ### Binding
@@ -100,14 +100,14 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
 
 #### Element-specific attributes
 
-Most attributes accepted by the [AMP Validator](https://validator.ampproject.org/), for AMP and non-AMP elements, are bindable.
+Most attributes accepted by the [AMP Validator](https://validator.ampproject.org/) for AMP and non-AMP elements, are bindable.
 
-There are a few special bindable attributes without non-bindable siblings:
+There are also special bindable attributes without non-bindable siblings:
 
-| Component | Attribute | Details |
-| --- | --- | --- |
-| amp-carousel[type=slides] | `[slide]` | The currently displayed slide index. |
-| amp-selector | `[selected]` | The `option` attribute values of the currently selected children elements. |
+| Component | Attribute | Details | Example |
+| --- | --- | --- | --- |
+| amp-carousel[type=slides] | `[slide]` | The currently displayed slide index. | [Linked carousels](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind)
+| amp-selector | `[selected]` | The `option` attribute values of the currently selected children elements. | [Linked carousels](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind)
 
 ### Expressions
 
