@@ -93,7 +93,7 @@ In this example, `myState.foo` will evaluate to `"bar"`.
 
 For non-AMP elements, most attributes accepted by the [AMP Validator](https://validator.ampproject.org/) are bindable.
 
-For AMP components, only select attributes are bindable:
+For AMP components, the height and width attributes are bindable along with the following specific attributes:
 
 | Component | Attributes |
 | --- | --- |
@@ -197,22 +197,22 @@ key_value:
 #### Whitelisted functions
 
 ```text
-Array.concat
-Array.indexOf
-Array.join
-Array.lastIndexOf
-Array.slice
-String.charAt
-String.charCodeAt
-String.concat
-String.indexOf
-String.lastIndexOf
-String.slice
-String.split
-String.substr
-String.substring
-String.toLowerCase
-String.toUpperCase
+Array.concat()
+Array.indexOf()
+Array.join()
+Array.lastIndexOf()
+Array.slice()
+String.charAt()
+String.charCodeAt()
+String.concat()
+String.indexOf()
+String.lastIndexOf()
+String.slice()
+String.split()
+String.substr()
+String.substring()
+String.toLowerCase()
+String.toUpperCase()
 ```
 
-The full expression implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison).
+The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).

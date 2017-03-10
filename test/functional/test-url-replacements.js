@@ -22,7 +22,7 @@ import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
 } from '../../src/custom-element';
-import {installCidServiceForDocForTesting,} from
+import {cidServiceForDocForTesting,} from
     '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -35,7 +35,6 @@ import {
 import {getService, fromClassForDoc} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
-import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
 import * as trackPromise from '../../src/impression';
 
@@ -67,7 +66,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       if (opt_options) {
         if (opt_options.withCid) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
-          installCidServiceForDocForTesting(iframe.ampdoc);
+          cidServiceForDocForTesting(iframe.ampdoc);
           installCryptoService(iframe.win);
         }
         if (opt_options.withActivity) {
@@ -455,7 +454,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const validMetric = urlReplacements.expandAsync('?sh=PAGE_LOAD_TIME&s');
       urlReplacements.ampdoc.win.performance.timing.loadEventStart = 109;
       win.document.readyState = 'complete';
-      eventListeners['readystatechange']();
+      loadObservable.fire({type: 'load'});
       return validMetric.then(res => {
         expect(res).to.match(/sh=9&s/);
       });
@@ -987,7 +986,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
       win = getFakeWindow();
       win.location = parseUrl('https://example.com/base?foo=bar&bar=abc');
       urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
-      toggleExperiment(win, 'link-url-replace', true);
     });
 
     it('should replace href', () => {
@@ -1004,14 +1002,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(a.href).to.equal('https://example.com/link?out=bar');
       urlReplacements.maybeExpandLink(a);
       expect(a.href).to.equal('https://example.com/link?out=bar');
-    });
-
-    it('should not do anything with experiment off', () => {
-      toggleExperiment(win, 'link-url-replace', false);
-      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
-      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
-      expect(a.href).to.equal('https://example.com/link?out=QUERY_PARAM(foo)');
     });
 
     it('should replace href 2', () => {

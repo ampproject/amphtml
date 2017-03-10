@@ -15,8 +15,7 @@
  */
 
 import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {UX_EXPERIMENT} from '../../../src/layout';
+import {getAdContainer} from '../../../src/ad-helper';
 
 const TAG = 'AmpAdUIHandler';
 
@@ -73,10 +72,6 @@ export class AmpAdUIHandler {
    * TODO(@zhouyx): Add ad tag to the ad.
    */
   init() {
-    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
-      return;
-    }
-
     if (this.hasPageProvidedFallback_) {
       return;
     }
@@ -118,9 +113,6 @@ export class AmpAdUIHandler {
    * See BaseElement method.
    */
   createPlaceholderCallback() {
-    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
-      return null;
-    }
     return this.addDefaultUiComponent_('placeholder');
   }
 
@@ -150,6 +142,12 @@ export class AmpAdUIHandler {
    * @private
    */
   displayNoContentUI_() {
+    if (getAdContainer(this.baseInstance_.element) == 'AMP-STICKY-AD') {
+      // Special case: force collapse sticky-ad if no content.
+      this.baseInstance_./*OK*/collapse();
+      this.state = AdDisplayState.LOADED_NO_CONTENT;
+      return;
+    }
     // The order here is collapse > user provided fallback > default fallback
     this.baseInstance_.attemptCollapse().then(() => {
       this.state = AdDisplayState.LOADED_NO_CONTENT;

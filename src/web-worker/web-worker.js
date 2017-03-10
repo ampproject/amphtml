@@ -49,9 +49,16 @@ self.addEventListener('message', function(event) {
         throw new Error(`${method}: BindEvaluator is not initialized.`);
       }
       break;
-    case 'bind.evaluate':
+    case 'bind.evaluateBindings':
       if (evaluator_) {
-        returnValue = evaluator_.evaluate.apply(evaluator_, args);
+        returnValue = evaluator_.evaluateBindings.apply(evaluator_, args);
+      } else {
+        throw new Error(`${method}: BindEvaluator is not initialized.`);
+      }
+      break;
+    case 'bind.evaluateExpression':
+      if (evaluator_) {
+        returnValue = evaluator_.evaluateExpression.apply(evaluator_, args);
       } else {
         throw new Error(`${method}: BindEvaluator is not initialized.`);
       }
@@ -62,5 +69,8 @@ self.addEventListener('message', function(event) {
 
   /** @type {FromWorkerMessageDef} */
   const message = {method, returnValue, id};
+  // `message` may only contain values or objects handled by the
+  // structured clone algorithm.
+  // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
   self./*OK*/postMessage(message);
 });

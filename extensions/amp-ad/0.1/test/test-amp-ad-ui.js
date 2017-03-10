@@ -16,8 +16,7 @@
 
 import {AdDisplayState, AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
-import {toggleExperiment} from '../../../../src/experiments';
-import {UX_EXPERIMENT} from '../../../../src/layout';
+import * as adHelper from '../../../../src/ad-helper';
 
 describes.realWin('amp-ad-ui handler', {
   amp: {
@@ -27,6 +26,7 @@ describes.realWin('amp-ad-ui handler', {
   let sandbox;
   let adImpl;
   let uiHandler;
+  let adContainer;
 
   beforeEach(() => {
     sandbox = env.sandbox;
@@ -34,12 +34,22 @@ describes.realWin('amp-ad-ui handler', {
     adImpl = new BaseElement(adElement);
     uiHandler = new AmpAdUIHandler(adImpl);
     uiHandler.setDisplayState(AdDisplayState.LOADING);
-    // Always set to true since this is in PROD.
-    // TODO: clean once experiment flag gets removed.
-    toggleExperiment(window, UX_EXPERIMENT, true);
+    sandbox.stub(adHelper, 'getAdContainer', () => {
+      return adContainer;
+    });
+    adContainer = null;
   });
 
   describe('with state LOADED_NO_CONTENT', () => {
+    it('should force collapse ad in special container', () => {
+      adContainer = 'AMP-STICKY-AD';
+      const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
+      const collapseSpy = sandbox.stub(adImpl, 'collapse', () => {});
+      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      expect(collapseSpy).to.be.calledOnce;
+      expect(attemptCollapseSpy).to.not.be.called;
+    });
+
     it('should try to collapse element first', () => {
       sandbox.stub(adImpl, 'getFallback', () => {
         return true;

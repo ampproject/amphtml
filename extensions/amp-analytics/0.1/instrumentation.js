@@ -33,10 +33,13 @@ import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {
+  getParentWindowFrameElement,
+  getServiceForDoc,
+  getServicePromiseForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
@@ -127,9 +130,6 @@ export class InstrumentationService {
 
     /** @const */
     this.ampdocRoot_ = new AmpdocAnalyticsRoot(this.ampdoc);
-
-    /** @private {boolean} */
-    this.visibilityV2Enabled_ = isExperimentOn(ampdoc.win, 'visibility-v2');
 
     /** @const @private {!./visibility-impl.Visibility} */
     this.visibility_ = new Visibility(this.ampdoc);
@@ -310,11 +310,7 @@ export class InstrumentationService {
         return;
       }
 
-      const listenOnceFunc = this.visibilityV2Enabled_
-          ? this.visibility_.listenOnceV2.bind(this.visibility_)
-          : this.visibility_.listenOnce.bind(this.visibility_);
-
-      listenOnceFunc(spec, vars => {
+      this.visibility_.listenOnce(spec, vars => {
         const el = getElement(this.ampdoc, spec['selector'],
             analyticsElement, spec['selectionMethod']);
         if (el) {
@@ -354,7 +350,7 @@ export class InstrumentationService {
    * Register for a listener to be called when the boundaries specified in
    * config are reached.
    * @param {!JSONType} config the config that specifies the boundaries.
-   * @param {Function} listener
+   * @param {function(!AnalyticsEvent)} listener
    * @private
    */
   registerScrollTrigger_(config, listener) {
@@ -465,7 +461,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!Function} listener
+   * @param {!function(!AnalyticsEvent)} listener
    * @param {JSONType} timerSpec
    * @private
    */
@@ -581,7 +577,17 @@ export class AnalyticsGroup {
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<InstrumentationService>}
  */
-export function instrumentationServiceForDoc(nodeOrDoc) {
+export function instrumentationServicePromiseForDoc(nodeOrDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
       getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
+}
+
+/*
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!InstrumentationService}
+ */
+export function instrumentationServiceForDocForTesting(nodeOrDoc) {
+  registerServiceBuilderForDoc(
+      nodeOrDoc, 'amp-analytics-instrumentation', InstrumentationService);
+  return getServiceForDoc(nodeOrDoc, 'amp-analytics-instrumentation');
 }

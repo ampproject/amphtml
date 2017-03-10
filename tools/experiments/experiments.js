@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,6 +146,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
   {
+    id: 'amp-lightbox-a4a-proto',
+    name: 'Allows the new lightbox experience to be used in A4A (prototype).',
+    spec: 'https://github.com/ampproject/amphtml/issues/7743',
+  },
+  {
     id: 'amp-lightbox-viewer-auto',
     name: 'Allows the new lightbox experience to automatically include some ' +
         'elements without the need to manually add the `lightbox` attribute',
@@ -176,12 +181,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
   },
   {
-    id: 'link-url-replace',
-    name: 'Enables replacing variables in URLs of outgoing links.',
-    spec: 'https://github.com/ampproject/amphtml/issues/4078',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
-  },
-  {
     id: 'alp-for-a4a',
     name: 'Enable redirect to landing page directly for A4A',
     spec: 'https://github.com/ampproject/amphtml/issues/5212',
@@ -204,11 +203,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-animation/amp-animation.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
-  },
-  {
-    id: 'amp-ad-loading-ux',
-    name: 'New default loading UX to amp-ad',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
   },
   {
     id: 'visibility-v2',
@@ -265,6 +259,19 @@ const EXPERIMENTS = [
     name: 'Load sticky-ad early after user first scroll' +
         'Only apply to 1.0 version',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
+  },
+  {
+    id: 'amp-fx-parallax',
+    name: 'Amp extension for a parallax effect',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
+    spec: 'https://github.com/ampproject/amphtml/issues/1443',
+  },
+  {
+    id: 'amp-sortable-table',
+    name: 'AMP Sortable Table',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6057',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-sortable-table/amp-sortable-table.md',
   },
 ];
 

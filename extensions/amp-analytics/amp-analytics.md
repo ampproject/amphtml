@@ -88,6 +88,8 @@ Type attribute value: `acquialift`
 
 Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` must be specified. More information about Acquia Lift can be found at [https://docs.acquia.com/lift](https://docs.acquia.com/lift).
 
+Please consult the documentation from your vendor, which may be linked in the sections below. You can also look at the [vendors.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/0.1/vendors.js) file for further information on each vendor's configuration.
+
 ### Adobe Analytics
 
 Type attribute value: `adobeanalytics`
@@ -153,6 +155,12 @@ Adds support for Eulerian Technologies Analytics. Requires defining *var* `analy
 Type attribute value: `gemius`
 
 Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provided `prefix` and `identifier` variables must be specified. It's also possible to specify the optional variable `extraparams` (key1=value1|key2=value2). More details can be found at [gemius.com](https://www.gemius.com).
+
+### Google AdWords
+
+Type attribute value: `googleadwords`
+
+Adds support for Google AdWords conversion tracking and remarketing. See more details in the AdWords help center for [conversion tracking](https://support.google.com/adwords/answer/1722054?hl=en) and [remarketing](https://support.google.com/adwords/answer/2453998?hl=en). Both tags can be used independent of each other.
 
 ### Google Analytics
 

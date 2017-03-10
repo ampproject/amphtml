@@ -16,11 +16,17 @@
 
 import {getAdNetworkConfig} from '../ad-network-config';
 
-describe('ad-network-config', () => {
+describes.realWin('ad-network-config', {
+  amp: {
+    canonicalUrl: 'https://foo.bar/baz',
+  },
+}, env => {
 
   let ampAutoAdsElem;
+  let document;
 
   beforeEach(() => {
+    document = env.win.document;
     ampAutoAdsElem = document.createElement('amp-auto-ads');
     document.body.appendChild(ampAutoAdsElem);
   });
@@ -44,14 +50,12 @@ describe('ad-network-config', () => {
           AD_CLIENT + '&plah=foo.bar&ama_t=amp');
     });
 
-    it('should generate the data attributes', () => {
+    it('should generate the attributes', () => {
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
-      expect(adNetwork.getDataAttributes()).to.deep.equal([
-        {
-          name: 'ad-client',
-          value: 'ca-pub-1234',
-        },
-      ]);
+      expect(adNetwork.getAttributes()).to.deep.equal({
+        'type': 'adsense',
+        'data-ad-client': 'ca-pub-1234',
+      });
     });
   });
 
