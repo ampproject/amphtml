@@ -19,7 +19,7 @@ tags: {  # amp-facebook-comments
   tag_name: "SCRIPT"
   spec_name: "amp-facebook-comments extension .js script"
   mandatory_parent: "HEAD"
-  unique_warning: true
+  unique: true
   satisfies: "amp-facebook-comments extension .js script"
   requires: "amp-facebook-comments"
   attrs: {
