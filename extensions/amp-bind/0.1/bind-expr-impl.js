@@ -479,7 +479,7 @@ var lexer = ({
 EOF:1,
 
 parseError:function parseError(str, hash) {
-        if (this.yy.parser) {q
+        if (this.yy.parser) {
             this.yy.parser.parseError(str, hash);
         } else {
             throw new Error(str);
