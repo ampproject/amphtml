@@ -52,7 +52,8 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     'analytics.amp.html',
     'analytics-notification.amp.html',
     'everything.amp.html',
-    'facebook.amp.html',
+    // TODO: uncomment when validator is deployed:
+    // 'facebook.amp.html',
     'gfycat.amp.html',
     'instagram.amp.html',
     'ooyalaplayer.amp.html',

@@ -122,6 +122,7 @@ Current list of extended components by category:
 | [`amp-social-share`](amp-social-share/amp-social-share.md) | Displays a social share button. |
 | [`amp-twitter`](amp-twitter/amp-twitter.md) | Displays a Twitter tweet. |
 | [`amp-vine`](amp-vine/amp-vine.md) | Displays a Vine simple embed. |
+| [`amp-facebook-comments`](amp-facebook-comments/amp-facebook-comments.md) | Displays Facebook comments plugin. |
 
 
 ## AMP HTML Extended Templates
