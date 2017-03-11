@@ -176,8 +176,7 @@ export class VisibilityModel {
   /**
    * Sets whether this object is ready. Ready means that visibility is
    * ready to be calculated, e.g. because an element has been
-   * sufficiently rendered. See `getVisibility()` for the final
-   * visibility calculations.
+   * sufficiently rendered.
    * @param {boolean} ready
    */
   setReady(ready) {
