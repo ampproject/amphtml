@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// TODO(dvoytenko): rename file to `visibility.js`.
+// TODO(dvoytenko): split file to `visibility-model.js` and `visibility-manager.js`.
 
 import {
   DEFAULT_THRESHOLD,
@@ -55,21 +55,12 @@ function getElementId(element) {
  */
 export class VisibilityModel {
   /**
-   * @param {?VisibilityModel} parent
    * @param {!Object<string, *>} spec
-   * @param {number=} opt_iniVisibility
-   * @param {boolean=} opt_shouldFactorParent
+   * @param {function():number} calcVisibility
    */
-  constructor(parent, spec, opt_iniVisibility, opt_shouldFactorParent) {
+  constructor(spec, calcVisibility) {
     /** @const @private */
-    this.parent_ = parent;
-
-    /**
-     * Whether this visibility is in the intersection with parent. Thus the
-     * final visibility will be this visibility times parent.
-     * @const @private {boolean}
-     */
-    this.shouldFactorParent_ = opt_shouldFactorParent || false;
+    this.calcVisibility_ = calcVisibility;
 
     /**
      * Spec parameters.
@@ -99,17 +90,11 @@ export class VisibilityModel {
       this.eventResolver_ = resolve;
     });
 
-    /** @private {?Array<!VisibilityModel>} */
-    this.children_ = null;
-
     /** @private {!Array<!UnlistenDef>} */
     this.unsubscribe_ = [];
 
     /** @const @private {time} */
     this.createdTime_ = Date.now();
-
-    /** @private {time} percent value in a [0, 1] range */
-    this.ownVisibility_ = opt_iniVisibility || 0;
 
     /** @private {boolean} */
     this.ready_ = true;
@@ -155,17 +140,10 @@ export class VisibilityModel {
 
     /** @private {time} milliseconds since epoch */
     this.lastVisibleUpdateTime_ = 0;
-
-    if (this.parent_) {
-      this.parent_.addChild_(this);
-    }
   }
 
   /** @override */
   dispose() {
-    if (this.parent_) {
-      this.parent_.removeChild_(this);
-    }
     if (this.scheduledRunId_) {
       clearTimeout(this.scheduledRunId_);
       this.scheduledRunId_ = null;
@@ -196,16 +174,6 @@ export class VisibilityModel {
   }
 
   /**
-   * Sets visibility of this object. See `getVisibility()` for the final
-   * visibility calculations.
-   * @param {number} visibility
-   */
-  setVisibility(visibility) {
-    this.ownVisibility_ = visibility;
-    this.update();
-  }
-
-  /**
    * Sets whether this object is ready. Ready means that visibility is
    * ready to be calculated, e.g. because an element has been
    * sufficiently rendered. See `getVisibility()` for the final
@@ -218,34 +186,11 @@ export class VisibilityModel {
   }
 
   /**
-   * Returns the final visibility. It depends on the following factors:
-   *  1. This object's visibility.
-   *  2. Whether the object is ready.
-   *  3. The parent's visibility.
-   * @return {number}
-   */
-  getVisibility() {
-    const ownVisibility = this.ready_ ? this.ownVisibility_ : 0;
-    if (!this.parent_) {
-      return ownVisibility;
-    }
-    if (this.shouldFactorParent_) {
-      return ownVisibility * this.parent_.getVisibility();
-    }
-    return this.parent_.getVisibility() > 0 ? ownVisibility : 0;
-  }
-
-  /**
    * Runs the calculation cycle.
    */
   update() {
-    const visibility = this.getVisibility();
+    const visibility = this.calcVisibility_();
     this.update_(visibility);
-    if (this.children_) {
-      for (let i = 0; i < this.children_.length; i++) {
-        this.children_[i].update();
-      }
-    }
   }
 
   /**
@@ -389,30 +334,6 @@ export class VisibilityModel {
         waitForContinuousTime || Infinity,
         waitForTotalTime || Infinity);
   }
-
-  /**
-   * @param {!VisibilityModel} child
-   * @private
-   */
-  addChild_(child) {
-    if (!this.children_) {
-      this.children_ = [];
-    }
-    this.children_.push(child);
-  }
-
-  /**
-   * @param {!VisibilityModel} child
-   * @private
-   */
-  removeChild_(child) {
-    if (this.children_) {
-      const index = this.children_.indexOf(child);
-      if (index != -1) {
-        this.children_.splice(index, 1);
-      }
-    }
-  }
 }
 
 
@@ -449,20 +370,53 @@ export class VisibilityManager {
     /** @const @private */
     this.resources_ = resourcesForDoc(ampdoc);
 
+    /** @private {number} */
+    this.rootVisibility_ = 0;
+
     /** @const @private {!Array<!VisibilityModel>}> */
     this.models_ = [];
 
+    /** @private {?Array<!VisibilityManager>} */
+    this.children_ = null;
+
     /** @const @private {!Array<!UnlistenDef>} */
     this.unsubscribe_ = [];
+
+    if (this.parent) {
+      this.parent.addChild_(this);
+    }
+  }
+
+  /**
+   * @param {!VisibilityManager} child
+   * @private
+   */
+  addChild_(child) {
+    if (!this.children_) {
+      this.children_ = [];
+    }
+    this.children_.push(child);
+  }
+
+  /**
+   * @param {!VisibilityManager} child
+   * @private
+   */
+  removeChild_(child) {
+    if (this.children_) {
+      const index = this.children_.indexOf(child);
+      if (index != -1) {
+        this.children_.splice(index, 1);
+      }
+    }
   }
 
   /** @override */
   dispose() {
     // Give the chance for all events to complete.
-    this.getRootModel().setVisibility(0);
+    setRootVisibility(0);
 
     // Dispose all models.
-    this.getRootModel().dispose();
     for (let i = this.models_.length - 1; i >= 0; i--) {
       this.models_[i].dispose();
     }
@@ -472,6 +426,10 @@ export class VisibilityManager {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
+
+    if (this.parent) {
+      this.parent.removeChild_(this);
+    }
   }
 
   /**
@@ -503,13 +461,34 @@ export class VisibilityManager {
   isBackgroundedAtStart() {}
 
   /**
-   * Returns the visibility model for this root. If the root is not visibile,
-   * it returns the value of 0, otherwise the value greater than 0 and less
-   * than 1.
-   * @return {!VisibilityModel}
-   * @abstract
+   * @return {number}
    */
-  getRootModel() {}
+  getRootVisibility() {
+    if (!this.parent) {
+      return this.rootVisibility_;
+    }
+    return this.parent.getRootVisibility() > 0 ? this.rootVisibility_ : 0;
+  }
+
+  /**
+   * @param {number} visibility
+   */
+  setRootVisibility(visibility) {
+    this.rootVisibility_ = visibility;
+    this.updateModels_();
+    if (this.children_) {
+      for (let i = 0; i < this.children_.length; i++) {
+        this.children_[i].updateModels_();
+      }
+    }
+  }
+
+  /** @private */
+  updateModels_() {
+    for (let i = 0; i < this.models_.length; i++) {
+      this.models_[i].update();
+    }
+  }
 
   /**
    * Listens to the visibility events on the root as the whole and the given
@@ -522,10 +501,8 @@ export class VisibilityManager {
    */
   listenRoot(spec, readyPromise, callback) {
     const model = new VisibilityModel(
-        this.getRootModel(),
         spec,
-        /* ownVisibility */ 1,
-        /* factorParent */ true);
+        this.getRootVisibility.bind(this));
     return this.listen_(model, spec, readyPromise, callback);
   }
 
@@ -540,7 +517,9 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    */
   listenElement(element, spec, readyPromise, callback) {
-    const model = new VisibilityModel(this.getRootModel(), spec);
+    const model = new VisibilityModel(
+        spec,
+        this.getElementVisibility.bind(this, element));
     return this.listen_(model, spec, readyPromise, callback, element);
   }
 
@@ -603,7 +582,7 @@ export class VisibilityManager {
       // intersection observer can fire immedidately. Per spec, this should
       // NOT happen. However, all of the existing InOb polyfills, as well as
       // some versions of native implementations, make this mistake.
-      this.observe(opt_element, model);
+      model.unsubscribe(this.observe(opt_element, () => model.update()));
     }
 
     // Start update.
@@ -616,11 +595,19 @@ export class VisibilityManager {
   /**
    * Observes the intersections of the specified element in the viewport.
    * @param {!Element} element
-   * @param {!VisibilityModel} unusedModel
+   * @param {function(number)} unusedListener
+   * @return {!UnlistenDef}
    * @protected
    * @abstract
    */
-  observe(element, unusedModel) {}
+  observe(element, unusedListener) {}
+
+  /**
+   * @param {!Element} element
+   * @return {number}
+   * @abstract
+   */
+  getElementVisibility(element) {}
 }
 
 
@@ -652,7 +639,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
      * @private {!Object<number, {
      *   element: !Element,
      *   intersectionRatio: number,
-     *   models: !Array<!VisibilityModel>
+     *   listeners: !Array<function(number)>
      * }>}
      */
     this.trackedElements_ = map();
@@ -660,30 +647,25 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     /** @private {?IntersectionObserver|?IntersectionObserverPolyfill} */
     this.intersectionObserver_ = null;
 
-    let rootModel;
     if (getMode(this.ampdoc.win).runtime == 'inabox') {
       // In-a-box: visibility depends on the InOb.
       const root = this.ampdoc.getRootNode();
       const rootElement = dev().assertElement(
           root.documentElement || root.body || root);
-      rootModel = new VisibilityModel(/* parent */ null, {});
-      this.observe(rootElement, rootModel);
+      this.unsubscribe(this.observe(
+          rootElement,
+          this.setRootVisibility.bind(this)));
     } else {
       // Main document: visibility is based on the viewer.
-      rootModel = new VisibilityModel(
-          /* parent */ null,
-          {},
-          this.viewer_.isVisible() ? 1 : 0);
+      this.setRootVisibility(this.viewer_.isVisible() ? 1 : 0);
       this.unsubscribe(this.viewer_.onVisibilityChanged(() => {
         const isVisible = this.viewer_.isVisible();
         if (!isVisible) {
           this.backgrounded_ = true;
         }
-        rootModel.setVisibility(isVisible ? 1 : 0);
+        this.setRootVisibility(isVisible ? 1 : 0);
       }));
     }
-    /** @private @const */
-    this.rootModel_ = rootModel;
   }
 
   /** @override */
@@ -711,12 +693,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 
   /** @override */
-  getRootModel() {
-    return this.rootModel_;
-  }
-
-  /** @override */
-  observe(element, model) {
+  observe(element, listener) {
     this.polyfillAmpElementAsRootIfNeeded_(element);
     this.getIntersectionObserver_().observe(element);
 
@@ -726,27 +703,36 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       trackedElement = {
         element,
         intersectionRatio: 0,
-        models: [],
+        listeners: [],
       };
       this.trackedElements_[id] = trackedElement;
     } else if (trackedElement.intersectionRatio > 0) {
       // This has already been tracked and the `intersectionRatio` is fresh.
-      model.setVisibility(trackedElement.intersectionRatio);
+      listener(trackedElement.intersectionRatio);
     }
-    trackedElement.models.push(model);
-    model.unsubscribe(() => {
+    trackedElement.listeners.push(listener);
+    return () => {
       const trackedElement = this.trackedElements_[id];
       if (trackedElement) {
-        const index = trackedElement.models.indexOf(model);
+        const index = trackedElement.listeners.indexOf(listener);
         if (index != -1) {
-          trackedElement.models.splice(index, 1);
+          trackedElement.listeners.splice(index, 1);
         }
-        if (trackedElement.models.length == 0) {
+        if (trackedElement.listeners.length == 0) {
           this.intersectionObserver_.unobserve(element);
           delete this.trackedElements_[id];
         }
       }
-    });
+    };
+  }
+
+  /** @override */
+  getElementVisibility(element) {
+    if (this.getRootVisibility() == 0) {
+      return 0;
+    }
+    const trackedElement = this.trackedElements_[id];
+    return trackedElement && trackedElement.intersectionRatio || 0;
   }
 
   /**
@@ -826,8 +812,8 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     const trackedElement = this.trackedElements_[id];
     if (trackedElement) {
       trackedElement.intersectionRatio = intersectionRatio;
-      for (let i = 0; i < trackedElement.models.length; i++) {
-        trackedElement.models[i].setVisibility(intersectionRatio);
+      for (let i = 0; i < trackedElement.listeners.length; i++) {
+        trackedElement.listeners[i](intersectionRatio);
       }
     }
   }
@@ -852,9 +838,9 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     /** @const @private {boolean} */
     this.backgroundedAtStart_ = this.parent.isBackgrounded();
 
-    /** @private @const */
-    this.rootModel_ = new VisibilityModel(this.parent.getRootModel(), {});
-    this.parent.observe(dev().assertElement(embed.host), this.rootModel_);
+    this.unsubscribe(this.parent.observe(
+        dev().assertElement(embed.host),
+        this.setRootVisibility.bind(this)));
   }
 
   /** @override */
@@ -873,12 +859,15 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   }
 
   /** @override */
-  getRootModel() {
-    return this.rootModel_;
+  observe(element, listener) {
+    return this.parent.observe(element, listener);
   }
 
   /** @override */
-  observe(element, model) {
-    this.parent.observe(element, model);
+  getElementVisibility(element) {
+    if (this.getRootVisibility() == 0) {
+      return 0;
+    }
+    return this.parent.getElementVisibility(element);
   }
 }
