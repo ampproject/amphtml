@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-carousel"></a> `amp-carousel`
+# <a name="amp-slides"></a> `amp-carousel`
 
 <table>
   <tr>

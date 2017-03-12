@@ -1,0 +1,121 @@
+<!---
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS-IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+# <a name="amp-carousel"></a> `amp-carousel`
+
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>A generic Slideshow component for displaying multiple similar pieces of content along a horizontal axis, one at a time; meant to be highly flexible and performant.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-slides-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-carousel/">Annotated code example for amp-carousel.html</a><br /><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/">Annotated code example for Image Galleries with amp-carousel</a></td>
+  </tr>
+</table>
+
+## Behavior
+
+Each of the `amp-slides` component’s immediate children is considered as a side. Each of these nodes may also have arbitrary HTML children.
+
+The `amp-slides` consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
+
+`amp-slides` advances between items if the user swipes, uses arrow keys, or clicks an optional navigation arrow.
+
+**Example**: While the example shows a carousel of images, `amp-slides` supports arbitrary children.
+
+```html
+<amp-slides width=300 height=400>
+  <amp-img src="my-img1.png" width=300 height=400></amp-img>
+  <amp-img src="my-img2.png" width=300 height=400></amp-img>
+  <amp-img src="my-img3.png" width=300 height=400></amp-img>
+</amp-carousel>
+```
+
+## Attributes
+
+**controls**
+
+If present, displays left and right arrows for the user to use in navigation on mobile.
+Visibility of arrows can also be controlled via styling, and a media query can be used to
+only display arrows at certain screen widths. On desktop, arrows will always be displayed
+unless only a single child is present.
+
+Usage example:
+
+```html
+<amp-slides width="100" height="100" controls layout="responsive">
+```
+
+**loop** (type=slides only)
+
+If present, the user may advance past the first item or the final item, provided that there are atleast 3 slides.
+
+**autoplay** (type=slides only)
+
+If present:
+
+- Advances the slide to the next slide without user interaction.
+By default, `autoplay` advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.
+- Attaches the `loop` attribute to `amp-slides` if `loop` is not already present.
+- This requires atleast 3 slides to be present.
+
+**delay**
+
+By default, a slide will advance in 5000 millisecond intervals (5 seconds)
+when `autoplay` is specified and will use the value of the `delay`
+attribute if present (minimum of 1000 ms; an error will be thrown if it's any lower). The value of `delay` must be a number of milliseconds, e.g. `delay=5000`.
+
+## Styling
+- You may use the `amp-slides` element selector to style it freely.
+- You may use the `.amp-carousel-slide` class selector to target individual slides.
+- The visual state of an `amp-slides` button when it's disabled is hidden.
+- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
+
+
+**Example**: Default `.amp-carousel-button` inlined SVG
+
+```css
+.amp-carousel-button-prev {
+  left: 16px;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
+}
+```
+
+**Example**: Overriding the default `.amp-carousel-button` inlined SVG
+
+```css
+.amp-carousel-button-prev {
+  left: 5%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
+}
+```
+
+## Validation
+
+See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/0.1/validator-amp-carousel.protoascii) in the AMP validator specification.

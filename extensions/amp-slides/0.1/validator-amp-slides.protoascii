@@ -47,5 +47,29 @@ tags: {  # amp-slides
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-slides.html"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-carousel.html"
 }
+tags: {  # <amp-slides>
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "AMP-SLIDES"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  also_requires_tag: "amp-slides extension .js script"
+  attrs: { name: "arrows" value: "" }
+  attrs: { name: "autoplay" value: "" }
+  attrs: { name: "controls" }
+  attrs: { name: "delay" value_regex: "[0-9]+" }
+  attrs: { name: "dots" value: "" }
+  attrs: { name: "loop" value: "" }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-carousel.html"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
