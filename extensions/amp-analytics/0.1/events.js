@@ -280,7 +280,7 @@ export class IniLoadTracker extends EventTracker {
     if (selector == ':root' || selector == ':host') {
       // Root selectors are delegated to analytics roots.
       target = this.root.getRootElement();
-      promise = this.root.whenIniLoaded();
+      promise = this.getRootSignal();
     } else {
       // An AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
@@ -293,11 +293,7 @@ export class IniLoadTracker extends EventTracker {
                 selectionMethod),
             `Element "${selector}" not found`);
         target = element;
-        const signals = element.signals();
-        return Promise.race([
-          signals.whenSignal(CommonSignals.INI_LOAD),
-          signals.whenSignal(CommonSignals.LOAD_END),
-        ]);
+        return this.getElementSignal(element);
       });
     }
     // Wait for the target and the event.
@@ -305,5 +301,108 @@ export class IniLoadTracker extends EventTracker {
       listener(new AnalyticsEvent(target, eventType));
     });
     return NO_UNLISTEN;
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  getRootSignal() {
+    return this.root.whenIniLoaded();
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {!Promise}
+   */
+  getElementSignal(element) {
+    if (typeof element.signals != 'function') {
+      return Promise.resolve();
+    }
+    const signals = element.signals();
+    return Promise.race([
+      signals.whenSignal(CommonSignals.INI_LOAD),
+      signals.whenSignal(CommonSignals.LOAD_END),
+    ]);
+  }
+}
+
+
+/**
+ * Tracks visibility events.
+ */
+export class VisibilityTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+    /** @const @private */
+    this.iniLoadTracker_ = new IniLoadTracker(root);
+  }
+
+  /** @override */
+  dispose() {
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const visibilitySpec = config['visibilitySpec'] || {};
+    const selector = config['selector'] || visibilitySpec['selector'];
+    const visibilityManager = this.root.getVisibilityManager();
+
+    // Root selectors are delegated to analytics roots.
+    if (!selector || selector == ':root' || selector == ':host') {
+      // When `selector` is specified, we always use "ini-load" signal as
+      // a "ready" signal.
+      const readyPromise = selector ?
+          this.iniLoadTracker_.getRootSignal() :
+          null;
+      return visibilityManager.listenRoot(
+          visibilitySpec,
+          readyPromise,
+          this.onEvent_.bind(
+              this, eventType, listener, this.root.getRootElement()));
+    }
+
+    // An AMP-element. Wait for DOM to be fully parsed to avoid
+    // false missed searches.
+    const unlistenPromise = this.root.ampdoc.whenReady().then(() => {
+      const selectionMethod = config['selectionMethod'] ||
+          visibilitySpec['selectionMethod'];
+      const element = user().assertElement(
+          this.root.getAmpElement(
+              (context.parentElement || context),
+              selector,
+              selectionMethod),
+          `Element "${selector}" not found`);
+      return visibilityManager.listenElement(
+          element,
+          visibilitySpec,
+          this.iniLoadTracker_.getElementSignal(element),
+          this.onEvent_.bind(this, eventType, listener, element));
+    });
+    return function() {
+      unlistenPromise.then(unlisten => {
+        unlisten();
+      });
+    };
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {function(!AnalyticsEvent)} listener
+   * @param {!Element} target
+   * @param {!Object<string, *>} state
+   * @private
+   */
+  onEvent_(eventType, listener, target, state) {
+    const attr = getDataParamsFromAttributes(
+        target,
+        /* computeParamNameFunc */ undefined,
+        VARIABLE_DATA_ATTRIBUTE_KEY);
+    for (const key in attr) {
+      state[key] = attr[key];
+    }
+    listener(new AnalyticsEvent(target, eventType, state));
   }
 }

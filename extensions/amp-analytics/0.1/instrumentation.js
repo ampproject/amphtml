@@ -24,6 +24,7 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  VisibilityTracker,
 } from './events';
 import {Observable} from '../../../src/observable';
 import {Visibility} from './visibility-impl';
@@ -96,6 +97,11 @@ const EVENT_TRACKERS = {
     name: 'ini-load',
     allowedFor: ALLOWED_FOR_ALL,
     klass: IniLoadTracker,
+  },
+  'visible-v3': {
+    name: 'visible-v3',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: VisibilityTracker,
   },
 };
 

@@ -23,6 +23,7 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  VisibilityTracker,
 } from '../events';
 import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
@@ -212,6 +213,21 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(stub).to.be.calledOnce;
       expect(stub).to.be.calledWith(
           analyticsElement, 'ini-load', config, handler);
+    });
+
+    it('should add "visible-v3" trigger', () => {
+      const config = {on: 'visible-v3'};
+      group.addTrigger(config, handler);
+      const tracker = root.getTrackerOptional('visible-v3');
+      expect(tracker).to.be.instanceOf(VisibilityTracker);
+
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const handler = function() {};
+      group.addTrigger(config, handler);
+      expect(stub).to.be.calledOnce;
+      expect(stub).to.be.calledWith(
+          analyticsElement, 'visible-v3', config, handler);
     });
   });
 });

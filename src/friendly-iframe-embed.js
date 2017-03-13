@@ -312,6 +312,9 @@ export class FriendlyIframeEmbed {
     /** @const {?AmpElement} */
     this.host = spec.host || null;
 
+    /** @const @private {time} */
+    this.startTime_ = Date.now();
+
     /**
      * Starts out as invisible. The interpretation of this flag is up to
      * the emded parent.
@@ -335,6 +338,13 @@ export class FriendlyIframeEmbed {
   destroy() {
     resourcesForDoc(this.iframe).removeForChildWindow(this.win);
     disposeServicesForEmbed(this.win);
+  }
+
+  /**
+   * @return {time}
+   */
+  getStartTime() {
+    return this.startTime_;
   }
 
   /** @return {!Signals} */

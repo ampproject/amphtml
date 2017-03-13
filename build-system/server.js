@@ -246,7 +246,8 @@ function proxyToAmpProxy(req, res, minify) {
             'https://cdn.ampproject.org/')
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
-    body = replaceUrls(minify ? 'min' : 'max', body, getUrlPrefix(req));
+    const inabox = req.query['inabox'] == '1';
+    body = replaceUrls(minify ? 'min' : 'max', body, getUrlPrefix(req), inabox);
     res.status(response.statusCode).send(body);
   });
 }
@@ -512,6 +513,12 @@ app.use('/a4a(|-3p)/', function(req, res) {
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
   }
+  const inaboxParam = 'inabox=1';
+  if (adUrl.indexOf('?') == -1) {
+    adUrl += '?' + inaboxParam;
+  } else {
+    adUrl += '&' + inaboxParam;
+  }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/FORCE3P/g, force3p)
@@ -555,13 +562,14 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   if (!mode) {
     return next();
   }
+  const inabox = req.query['inabox'] == '1';
   filePath = filePath.substr(0, filePath.length - 9) + '.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     if (req.query['amp_js_v']) {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
     }
 
-    file = replaceUrls(mode, file);
+    file = replaceUrls(mode, file, '', inabox);
 
     // Extract amp-ad for the given 'type' specified in URL query.
     if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
@@ -682,18 +690,25 @@ app.get(['/dist/ww.js', '/dist/ww.max.js'], function(req, res) {
  * @param {string} mode
  * @param {string} file
  * @param {string=} hostName
+ * @param {boolean=} inabox
  */
-function replaceUrls(mode, file, hostName) {
+function replaceUrls(mode, file, hostName, inabox) {
   hostName = hostName || '';
   if (mode == 'max') {
     file = file.replace('https://cdn.ampproject.org/v0.js', hostName + '/dist/amp.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.js', hostName + '/dist/amp-inabox.js');
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g, hostName + '/dist/v0/$1.max.js');
+    if (inabox) {
+      file = file.replace('/dist/amp.js', '/dist/amp-inabox.js');
+    }
   } else if (mode == 'min') {
     file = file.replace('https://cdn.ampproject.org/v0.js', hostName + '/dist/v0.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.js', hostName + '/dist/amp4ads-v0.js');
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g, hostName + '/dist/v0/$1.js');
     file = file.replace(/\/dist.3p\/current\/(.*)\.max.html/, hostName + '/dist.3p/current-min/$1.html');
+    if (inabox) {
+      file = file.replace('/dist/v0.js', '/dist/amp4ads-v0.js');
+    }
   }
   return file;
 }

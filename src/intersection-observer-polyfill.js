@@ -210,14 +210,20 @@ export class IntersectionObserverPolyfill {
   }
 
   /**
+   */
+  disconnect() {
+    this.observeEntries_.length = 0;
+  }
+
+  /**
    * Provide a way to observe the intersection change for a specific element
    * Please note IntersectionObserverPolyfill only support AMP element now
    * TODO: Support non AMP element
    * @param {!Element} element
    */
   observe(element) {
-    // Check the element is an AMP element
-    dev().assert(element.isBuilt && element.isBuilt());
+    // Check the element is an AMP element.
+    dev().assert(element.getLayoutBox);
 
     // If the element already exists in current observeEntries, do nothing
     for (let i = 0; i < this.observeEntries_.length; i++) {
