@@ -13,6 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+# Contributing to AMP HTML
+
+The AMP HTML project strongly encourages technical [contributions](https://www.ampproject.org/contribute/)!
+
+We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
+
 - [Filing issues](#filing-issues)
   * [Suggestions](#suggestions)
   * [Bugs](#bugs)
@@ -27,12 +33,6 @@ limitations under the License.
   * [Weekly status updates](#weekly-status-updates)
   * [Weekly design reviews](#weekly-design-reviews)
   * [See Also](#see-also)
-
-# Contributing to AMP HTML
-
-The AMP HTML project strongly encourages technical [contributions](https://www.ampproject.org/contribute/)!
-
-We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
 
 ## Filing issues
 
