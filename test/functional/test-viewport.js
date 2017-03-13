@@ -86,8 +86,10 @@ describes.fakeWin('Viewport', {}, env => {
     const ampdocService = installDocService(windowApi, /* isSingleDoc */ true);
     ampdoc = ampdocService.getAmpDoc();
     installTimerService(windowApi);
+    installVsyncService(windowApi);
     installPlatformService(windowApi);
     installViewerServiceForDoc(ampdoc);
+
     binding = new ViewportBindingDef();
     viewportSize = {width: 111, height: 222};
     binding.getSize = () => {
@@ -1026,6 +1028,7 @@ describe('Viewport META', () => {
           /* isSingleDoc */ true);
       ampdoc = ampdocService.getAmpDoc();
       installTimerService(windowApi);
+      installVsyncService(windowApi);
       installPlatformService(windowApi);
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
@@ -1124,6 +1127,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     viewer = {};
 
     installPlatformService(win);
+    installVsyncService(win);
 
     binding = new ViewportBindingNatural_(win, viewer);
     binding.connect();
@@ -1275,7 +1279,6 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
 
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
-    installVsyncService(win);
 
     binding = new ViewportBindingNaturalIosEmbed_(win, ampdoc);
     return Promise.resolve();
@@ -1695,6 +1698,7 @@ describe('createViewport', () => {
       win = env.win;
       installPlatformService(win);
       installTimerService(win);
+      installVsyncService(win);
     });
 
     it('should bind to "natural" when not iframed', () => {
@@ -1723,6 +1727,7 @@ describe('createViewport', () => {
       win = env.win;
       installPlatformService(win);
       installTimerService(win);
+      installVsyncService(win);
     });
 
     it('should bind to "natural" when not iframed', () => {

@@ -30,6 +30,7 @@ import {
 } from '../../src/service';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {installVsyncService} from '../../src/service/vsync-impl';
 import {platformFor} from '../../src/platform';
 import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
@@ -65,6 +66,7 @@ describes.fakeWin('runtime', {
     ampdocService.getAmpDoc = () => ampdoc;
     installPlatformService(win);
     installTimerService(win);
+    installVsyncService(win);
     installAmpdocServices(ampdoc);
   });
 
