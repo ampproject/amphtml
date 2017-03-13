@@ -193,7 +193,7 @@ export class Messaging {
    * @return {!Promise<*>|undefined}
    */
   sendRequest(messageName, messageData, awaitResponse) {
-    dev().fine(TAG, 'sendRequest, event name: ', messageName);
+    // dev().fine(TAG, 'sendRequest, event name: ', messageName);
     const requestId = ++this.requestIdCounter_;
     let promise = undefined;
     if (awaitResponse) {
