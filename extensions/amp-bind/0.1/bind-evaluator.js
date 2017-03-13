@@ -81,7 +81,10 @@ export class BindEvaluator {
   removeBindingsWithExpressionStrings(expressionStrings) {
     const expressionsToRemove = Object.create(null);
     for (let i = 0; i < expressionStrings.length; i++) {
-      expressionsToRemove[expressionStrings[i]] = true;
+      const expressionString = expressionStrings[i];
+      delete this.expressionCache_[expressionString];
+      // Use a map instead of an array to make filtering bindings_ faster
+      expressionsToRemove[expressionString] = true;
     }
 
     filterSplice(this.bindings_, binding =>
