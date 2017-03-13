@@ -281,6 +281,7 @@ export class AmpForm {
    */
   submit_() {
     let varSubsFields = [];
+    let formData = {};
     // Only allow variable substitutions for inputs if the form action origin
     // is the canonical origin.
     // TODO(mkhatib, #7168): Consider relaxing this.
@@ -292,11 +293,19 @@ export class AmpForm {
       user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
           'origin submit action: %s', this.form_);
     }
+
+    for (let p of new FormData(this.form_)) {
+      formData["formFields[" + p[0] + "]"] = p[1];
+    }
+    formData['formId'] = this.form_.id;
+
     if (this.xhrAction_) {
+      this.analyticsEvent_('amp-form-submit', formData);
       this.handleXhrSubmit_(varSubsFields);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
+      this.analyticsEvent_('amp-form-submit', formData);
       this.handleNonXhrGet_(varSubsFields);
     }
   }

@@ -372,6 +372,31 @@ describes.realWin('amp-form', {
     });
   });
 
+  it('should trigger amp-form-submit analytics event with form data', () => {
+      return getAmpForm().then(ampForm => {
+          sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+          sandbox.stub(ampForm, 'analyticsEvent_');
+          const event = {
+              stopImmediatePropagation: sandbox.spy(),
+              target: ampForm.form_,
+              preventDefault: sandbox.spy(),
+          };
+          ampForm.handleSubmitEvent_(event);
+          expect(event.preventDefault).to.be.calledOnce;
+          expect(ampForm.analyticsEvent_).to.have.been.calledWith('amp-form-submit', {"formId": "", "formFields[name]": "John Miller"});
+          return timer.promise(1).then(() => {
+              expect(ampForm.xhr_.fetch).to.be.calledOnce;
+              expect(ampForm.xhr_.fetch).to.be.calledWith('https://example.com');
+
+              const xhrCall = ampForm.xhr_.fetch.getCall(0);
+              const config = xhrCall.args[1];
+              expect(config.body).to.not.be.null;
+              expect(config.method).to.equal('POST');
+              expect(config.credentials).to.equal('include');
+          });
+      });
+  });
+
   it('should block multiple submissions and disable buttons', () => {
     return getAmpForm(true, true, true).then(ampForm => {
       let fetchResolver;
@@ -1360,6 +1385,39 @@ describes.realWin('amp-form', {
         };
         ampForm.handleSubmitEvent_(event);
         expect(form.submit).to.have.not.been.called;
+      });
+    });
+
+    it('should trigger amp-form-submit analytics event with form data', () => {
+      return getAmpForm().then(ampForm => {
+        const form = ampForm.form_;
+        form.id = "registration";
+
+        const passwordInput = document.createElement('input');
+        passwordInput.setAttribute('name', 'password');
+        passwordInput.setAttribute('type', 'password');
+        passwordInput.setAttribute('value', 'god');
+        form.appendChild(passwordInput);
+
+        const unnamedInput = document.createElement('input');
+        unnamedInput.setAttribute('type', 'text');
+        unnamedInput.setAttribute('value', 'unnamed');
+        form.appendChild(unnamedInput);
+
+        ampForm.method_ = 'GET';
+        ampForm.xhrAction_ = null;
+        sandbox.stub(form, 'submit');
+        sandbox.stub(form, 'checkValidity').returns(true);
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+        sandbox.stub(ampForm, 'analyticsEvent_');
+        ampForm.handleSubmitAction_();
+        let expectedFormData = {
+          "formId": "registration",
+          "formFields[name]": "John Miller",
+          "formFields[password]": "god"
+        };
+        expect(form.submit).to.have.been.called;
+        expect(ampForm.analyticsEvent_).to.have.been.calledWith('amp-form-submit', expectedFormData);
       });
     });
   });
