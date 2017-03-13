@@ -206,7 +206,7 @@ export class IntersectionObserverPolyfill {
     this.lastViewportRect_ = null;
 
     /** @private {./layout-rect.LayoutRectDef|undefined} */
-    this.opt_lastIframeRect_ = undefined;
+    this.lastIframeRect_ = undefined;
 
     /**
      * Store a list of observed elements and their current threshold slot which
@@ -242,7 +242,7 @@ export class IntersectionObserverPolyfill {
     // Get the new observed element's first changeEntry based on last viewport
     if (this.lastViewportRect_) {
       const change = this.getValidIntersectionChangeEntry_(
-          newEntry, this.lastViewportRect_, this.opt_lastIframeRect_);
+          newEntry, this.lastViewportRect_, this.lastIframeRect_);
       if (change) {
         this.callback_([change]);
       }
@@ -286,7 +286,7 @@ export class IntersectionObserverPolyfill {
     }
 
     this.lastViewportRect_ = hostViewport;
-    this.opt_lastIframeRect_ = opt_iframe;
+    this.lastIframeRect_ = opt_iframe;
 
     const changes = [];
 
