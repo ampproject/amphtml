@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -55,11 +55,11 @@ Example:
 
 ## Attributes
 
-**data-widget-id**
+**data-widget-id** (required)
 
 The Graphiq widget id.
 
-**data-href**
+**data-href** (optional)
 
 The `data-href` attribute can optionally be defined to override the default href used for the "See more details" link which appears in the widget. The default behavior is to link to an expanded view of the widget on Graphiq's site.
 

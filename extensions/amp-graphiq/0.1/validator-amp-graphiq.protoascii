@@ -1,5 +1,5 @@
 #
-# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ tags: {  # amp-graphiq
   spec_name: "amp-graphiq extension .js script"
   satisfies: "amp-graphiq extension .js script"
   mandatory_parent: "HEAD"
-  unique_warning: true
+  unique: true
   extension_unused_unless_tag_present: "amp-graphiq"
   attrs: {
     name: "async"
@@ -49,14 +49,13 @@ tags: {  # amp-graphiq
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-graphiq.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-graphiq"
 }
 tags: {  # <amp-graphiq>
   html_format: AMP
   tag_name: "AMP-GRAPHIQ"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-graphiq extension .js script"
-  attrs: { name: "alt" }
   attrs: {
     name: "data-widget-id"
     mandatory: true
@@ -69,7 +68,7 @@ tags: {  # <amp-graphiq>
     }
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-graphiq.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-graphiq"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
