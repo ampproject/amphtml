@@ -471,6 +471,31 @@ app.get('/iframe/*', function(req, res) {
           </html>`);
 });
 
+// Returns a document that echoes any post messages received from parent.
+// An optional `message` query param can be appended for an initial post
+// message sent on document load.
+// Example:
+// http://localhost:8000/iframe-echo-message?message=${payload}
+app.get('/iframe-echo-message', function(req, res) {
+  const message = req.query.message;
+  res.send(
+      `<!doctype html>
+        <body style="background-color: yellow">
+        <script>
+        if (${message}) {
+          echoMessage(${message});
+        }
+        window.addEventListener('message', function(event) {
+          echoMessage(event.data);
+        });
+        function echoMessage(message) {
+          parent.postMessage(message, '*');
+        }
+        </script>
+        </body>
+      </html>`);
+});
+
 // A4A envelope.
 // Examples:
 // http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
