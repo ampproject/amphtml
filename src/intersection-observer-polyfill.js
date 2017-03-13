@@ -118,6 +118,7 @@ export class IntersectionObserverApi {
       }
       this.subscriptionApi_.send('intersection', {changes: entries});
     }, {threshold: DEFAULT_THRESHOLD});
+    this.intersectionObserver_.tick(this.viewport_.getRect());
 
     /** @const {function()} */
     this.fire = () => {
@@ -201,6 +202,12 @@ export class IntersectionObserverPolyfill {
         this.threshold_[this.threshold_.length - 1] <= 1,
         'Threshold should be in the range from "[0, 1]"');
 
+    /** @private {?./layout-rect.LayoutRectDef} */
+    this.lastViewportRect_ = null;
+
+    /** @private {./layout-rect.LayoutRectDef=} */
+    this.opt_lastIframeRect_ = undefined;
+
     /**
      * Store a list of observed elements and their current threshold slot which
      * their intersection ratio fills, range from [0, this.threshold_.length]
@@ -227,11 +234,22 @@ export class IntersectionObserverPolyfill {
       }
     }
 
-    // push new observed element
-    this.observeEntries_.push({
+    const newEntry = {
       element,
       currentThresholdSlot: 0,
-    });
+    };
+
+    // Get the new observed element's first changeEntry based on last viewport
+    if (this.lastViewportRect_) {
+      const change = this.getValidIntersectionChangeEntry_(
+          newEntry, this.lastViewportRect_, this.opt_lastIframeRect_);
+      if (change) {
+        this.callback_({change});
+      }
+    }
+
+    // push new observed element
+    this.observeEntries_.push(newEntry);
   }
 
   /**
@@ -266,6 +284,9 @@ export class IntersectionObserverPolyfill {
       opt_iframe =
           moveLayoutRect(opt_iframe, -opt_iframe.left, -opt_iframe.top);
     }
+
+    this.lastViewportRect_ = hostViewport;
+    this.opt_lastIframeRect_ = opt_iframe;
 
     const changes = [];
 
