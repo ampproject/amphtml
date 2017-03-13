@@ -55,12 +55,6 @@ class AmpGraphiq extends AMP.BaseElement {
     /** @private {!string} */
     this.href_ = '';
 
-    /** @private {!string} */
-    this.initialHeight_ = '';
-
-    /** @private {!string} */
-    this.initialWidth_ = '';
-
     /** @private {?Function} */
     this.unlistenMessage_ = null;
   }
@@ -84,9 +78,7 @@ class AmpGraphiq extends AMP.BaseElement {
         'The data-widget-id attribute is required for <amp-graphiq> %s',
         this.element);
     this.href_ = this.element.getAttribute('data-href') ||
-        'https://www.graphiq.com/vlp/' + this.widgetId_;
-    this.initialHeight_ = this.element.getAttribute('height');
-    this.initialWidth_ = this.element.getAttribute('width');
+        'https://www.graphiq.com/vlp/' + encodeURIComponent(this.widgetId_);
   }
 
   /** @override */
@@ -98,6 +90,8 @@ class AmpGraphiq extends AMP.BaseElement {
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
+    const initialHeight = this.element.getAttribute('height') || '';
+    const initialWidth = this.element.getAttribute('width') || '';
 
     this.unlistenMessage_ = listen(
       this.win,
@@ -110,15 +104,11 @@ class AmpGraphiq extends AMP.BaseElement {
     //Add title to the iframe for better accessibility.
     iframe.setAttribute('title', 'Graphiq: ' +
         this.element.getAttribute('alt') || '');
-    if (this.initialHeight_) {
-      iframe.setAttribute('height', this.initialHeight_);
-    }
-    if (this.initialWidth_) {
-      iframe.setAttribute('width', this.initialWidth_);
-    }
-    iframe.src = 'https://w.graphiq.com/w/' + this.widgetId_ +
-        '?data-width=' + encodeURIComponent(this.initialWidth_) +
-        '&data-height=' + encodeURIComponent(this.initialHeight_) +
+    iframe.setAttribute('height', initialHeight);
+    iframe.setAttribute('width', initialWidth);
+    iframe.src = 'https://w.graphiq.com/w/' + encodeURIComponent(this.widgetId_) +
+        '?data-width=' + encodeURIComponent(initialWidth) +
+        '&data-height=' + encodeURIComponent(initialHeight) +
         '&data-href=' + encodeURIComponent(this.href_);
 
     this.applyFillContent(iframe);
@@ -152,9 +142,7 @@ class AmpGraphiq extends AMP.BaseElement {
     if (data.method == 'resize') {
       const height = data.height;
       this.getVsync().measure(() => {
-        if (this.iframe_./*OK*/offsetHeight !== height) {
-          this.attemptChangeHeight(height).catch(() => {});
-        }
+        this.attemptChangeHeight(height).catch(() => {});
       });
     }
   }
