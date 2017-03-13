@@ -16,7 +16,7 @@
 
 import {
   AmpForm,
-  installAmpForm,
+  AmpFormService,
   onInputInteraction_,
 } from '../amp-form';
 import {
@@ -51,7 +51,7 @@ describes.realWin('amp-form', {
 
   function getAmpForm(button1 = true, button2 = false, button3 = false,
                       canonical = 'https://example.com/amps.html') {
-    installAmpForm(env.win);
+    new AmpFormService(env.ampdoc);
     documentInfoForDoc(env.win.document).canonicalUrl = canonical;
     cidServiceForDocForTesting(env.win.document);
     const form = getForm(env.win.document, button1, button2, button3);

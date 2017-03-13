@@ -18,7 +18,6 @@ import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
 import {documentInfoForDoc} from '../../../src/document-info';
-import {getService} from '../../../src/service';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -748,42 +747,47 @@ function isDisabled_(element) {
 
 
 /**
- * Installs submission handler on all forms in the document.
- * @param {!Window} win
+ * Bootstraps the amp-form elements
  */
-function installSubmissionHandlers(win) {
-  onDocumentReady(win.document, doc => {
-    toArray(doc.forms).forEach((form, index) => {
-      if (!form.classList.contains('i-amphtml-form')) {
-        new AmpForm(form, `amp-form-${index}`);
-      }
+export class AmpFormService {
+  /**
+   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    const doc = ampdoc.win.document;
+    installStyles(doc, CSS, () => {
+      this.installSubmissionHandlers_(doc);
+      this.installGlobalEventListener_(doc);
     });
-  });
-}
+  }
 
-
-/**
- * @param {!Window} win
- * @private visible for testing.
- */
-export function installAmpForm(win) {
-  return getService(win, TAG, () => {
-    installStyles(win.document, CSS, () => {
-      installSubmissionHandlers(win);
+  /**
+   * Installs submission handler on all forms in the document.
+   * @param {!Document} doc
+   * @previousValidityState
+   * @private
+   */
+  installSubmissionHandlers_(doc) {
+    onDocumentReady(doc, () => {
+      toArray(doc.forms).forEach((form, index) => {
+        if (!form.classList.contains('i-amphtml-form')) {
+          new AmpForm(form, `amp-form-${index}`);
+        }
+      });
     });
-    return {};
-  });
+  }
+
+  /**
+   * @param {!Document} doc
+   * @private
+   */
+  installGlobalEventListener_(doc) {
+    doc.addEventListener('amp:dom-update', () => {
+      this.installSubmissionHandlers_(doc);
+    });
+  }
 }
 
-/**
- * @param {!Window} win
- * @private visible for testing.
- */
-export function installGlobalEventListener(win) {
-  win.document.addEventListener('amp:dom-update', function() {
-    installSubmissionHandlers(win);
-  });
-}
 
-installAmpForm(AMP.win);
-installGlobalEventListener(AMP.win);
+
+AMP.registerServiceForDoc(TAG, AmpFormService);
