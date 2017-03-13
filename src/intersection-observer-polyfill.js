@@ -205,7 +205,7 @@ export class IntersectionObserverPolyfill {
     /** @private {?./layout-rect.LayoutRectDef} */
     this.lastViewportRect_ = null;
 
-    /** @private {./layout-rect.LayoutRectDef=} */
+    /** @private {./layout-rect.LayoutRectDef|undefined} */
     this.opt_lastIframeRect_ = undefined;
 
     /**
@@ -244,7 +244,7 @@ export class IntersectionObserverPolyfill {
       const change = this.getValidIntersectionChangeEntry_(
           newEntry, this.lastViewportRect_, this.opt_lastIframeRect_);
       if (change) {
-        this.callback_({change});
+        this.callback_([change]);
       }
     }
 

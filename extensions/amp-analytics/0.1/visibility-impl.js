@@ -298,9 +298,9 @@ export class Visibility {
       } else {
         this.intersectionObserver_ = new IntersectionObserverPolyfill(
             onIntersectionChanges, {threshold: DEFAULT_THRESHOLD});
-        this.intersectionObserver_.tick(viewport.getRect());
         //TODO: eventually this is go into the proposed layoutManager.
         const viewport = viewportForDoc(this.ampdoc);
+        this.intersectionObserver_.tick(viewport.getRect());
         const ticker = () => {
           this.intersectionObserver_.tick(viewport.getRect());
         };
