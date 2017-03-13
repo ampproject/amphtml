@@ -42,6 +42,7 @@ export const adConfig = {
 
   a8: {
     prefetch: 'https://statics.a8.net/amp/ad.js',
+    renderStartImplemented: true,
   },
 
   a9: {
