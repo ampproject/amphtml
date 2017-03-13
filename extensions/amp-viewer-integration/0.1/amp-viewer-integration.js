@@ -52,6 +52,9 @@ export class AmpViewerIntegration {
 
     /** @private {boolean} */
     this.isWebView_ = false;
+
+    /** @private {boolean} */
+    this.isHandShakePoll_ = false;
   }
 
   /**
