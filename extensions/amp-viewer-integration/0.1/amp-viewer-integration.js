@@ -64,6 +64,7 @@ export class AmpViewerIntegration {
     dev().fine(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
     this.isWebView_ = viewer.getParam('webview') == '1';
+    this.isHandShakePoll_ = viewer.hasCapability('handshakepoll');
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
 
     if (!this.isWebView_ && !this.unconfirmedViewerOrigin_) {
@@ -72,7 +73,7 @@ export class AmpViewerIntegration {
 
     const ampdoc = getAmpDoc(this.win.document);
 
-    if (this.isWebView_) {
+    if (this.isWebView_ || this.isHandShakePoll_) {
       let source;
       let origin;
       if (isIframed(this.win)) {
