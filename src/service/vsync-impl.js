@@ -20,7 +20,7 @@ import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
 import {documentStateFor} from './document-state';
 
-import {getService} from '../service';
+import {registerServiceBuilder, getService} from '../service';
 import {installTimerService} from './timer-impl';
 import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
 import {JankMeter} from './jank-meter';
@@ -441,14 +441,19 @@ function callTaskNoInline(callback, state) {
   return true;
 }
 
-
 /**
  * @param {!Window} window
  * @return {!Vsync}
  */
+export function vsyncForTesting(window) {
+  installVsyncService(window);
+  return getService(window, 'vsync');
+}
+
+/**
+ * @param {!Window} window
+ */
 export function installVsyncService(window) {
-  return /** @type {!Vsync} */ (getService(window, 'vsync', () => {
-    installTimerService(window);
-    return new Vsync(window);
-  }));
+  installTimerService(window);
+  registerServiceBuilder(window, 'vsync', Vsync);
 }

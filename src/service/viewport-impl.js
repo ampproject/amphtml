@@ -31,7 +31,7 @@ import {onDocumentReady, whenDocumentReady} from '../document-ready';
 import {platformFor} from '../platform';
 import {px, setStyle, setStyles, computedStyle} from '../style';
 import {timerFor} from '../timer';
-import {installVsyncService} from './vsync-impl';
+import {vsyncFor} from '../vsync';
 import {viewerForDoc} from '../viewer';
 import {isExperimentOn} from '../experiments';
 import {waitForBody, isIframed} from '../dom';
@@ -115,7 +115,7 @@ export class Viewport {
     this.timer_ = timerFor(this.ampdoc.win);
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = installVsyncService(this.ampdoc.win);
+    this.vsync_ = vsyncFor(this.ampdoc.win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
