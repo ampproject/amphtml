@@ -16,7 +16,7 @@
 
 import * as sinon from 'sinon';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import {getService, resetServiceForTesting} from '../../src/service';
+import {resetServiceForTesting} from '../../src/service';
 import {resourcesForDoc} from '../../src/resources';
 import {viewerForDoc} from '../../src/viewer';
 
@@ -413,52 +413,7 @@ describe('performance', () => {
               /* cancelUnsent */true)).to.have.callCount(3);
         });
       });
-
-      it('should setFlushParams', () => {
-        sandbox.stub(perf, 'whenViewportLayoutComplete_')
-            .returns(Promise.resolve());
-        perf.coreServicesAvailable();
-        resetServiceForTesting(window, 'documentInfo');
-        const info = {
-          get: () => {
-            return {
-              canonicalUrl: 'https://foo.bar/baz',
-              pageViewId: 12345,
-              sourceUrl: 'https://hello.world/baz/#development',
-            };
-          },
-        };
-        getService(window, 'documentInfo', () => info);
-
-        const ad1 = document.createElement('amp-ad');
-        ad1.setAttribute('type', 'abc');
-        const ad2 = document.createElement('amp-ad');
-        ad2.setAttribute('type', 'xyz');
-        const ad3 = document.createElement('amp-ad');
-        sandbox.stub(perf.resources_, 'get').returns([
-          {element: document.createElement('amp-img')},
-          {element: document.createElement('amp-img')},
-          {element: document.createElement('amp-anim')},
-          {element: ad1},
-          {element: ad2},
-          {element: ad3},
-        ]);
-
-        return perf.setDocumentInfoParams_().then(() => {
-          expect(viewerSendMessageStub.withArgs('setFlushParams')
-              .lastCall.args[1]).to.be.jsonEqual({
-                sourceUrl: 'https://hello.world/baz/',
-                'amp-img': 2,
-                'amp-anim': 1,
-                'amp-ad': 3,
-                'ad-abc': 1,
-                'ad-xyz': 1,
-                'ad-null': 1,
-              });
-        });
-      });
     });
-
   });
 
   // TODO(dvoytenko, #7815): re-enable once the reporting regression is

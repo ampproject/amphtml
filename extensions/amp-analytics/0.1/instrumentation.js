@@ -33,8 +33,12 @@ import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {
+  getParentWindowFrameElement,
+  getServiceForDoc,
+  getServicePromiseForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
@@ -346,7 +350,7 @@ export class InstrumentationService {
    * Register for a listener to be called when the boundaries specified in
    * config are reached.
    * @param {!JSONType} config the config that specifies the boundaries.
-   * @param {Function} listener
+   * @param {function(!AnalyticsEvent)} listener
    * @private
    */
   registerScrollTrigger_(config, listener) {
@@ -457,7 +461,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!Function} listener
+   * @param {!function(!AnalyticsEvent)} listener
    * @param {JSONType} timerSpec
    * @private
    */
@@ -573,7 +577,17 @@ export class AnalyticsGroup {
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<InstrumentationService>}
  */
-export function instrumentationServiceForDoc(nodeOrDoc) {
+export function instrumentationServicePromiseForDoc(nodeOrDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
       getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
+}
+
+/*
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!InstrumentationService}
+ */
+export function instrumentationServiceForDocForTesting(nodeOrDoc) {
+  registerServiceBuilderForDoc(
+      nodeOrDoc, 'amp-analytics-instrumentation', InstrumentationService);
+  return getServiceForDoc(nodeOrDoc, 'amp-analytics-instrumentation');
 }
