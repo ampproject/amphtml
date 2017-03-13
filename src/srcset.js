@@ -209,7 +209,12 @@ export class Srcset {
         // that is closer with a slight preference toward higher numbers.
         const delta = sourceWidth - width;
         const prevDelta = (width - prevWidth) * 1.1;
-        return (delta < prevDelta) ? i : i + 1;
+        // If smaller size is closer, enfore minimum ratio between
+        // requested width and prevWidth to ensure image isn't too distorted.
+        if (prevDelta < delta && width / prevWidth <= 1.2) {
+          return i + 1;
+        }
+        return i;
       }
       prevWidth = sourceWidth;
     }
