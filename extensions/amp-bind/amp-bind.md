@@ -43,27 +43,25 @@ limitations under the License.
 
 ## Overview
 
-`amp-bind` allows you to add custom interactivity to your pages beyond using AMP's pre-built components.
-It works by mutating elements in response to user actions via data binding and JS-like expressions.
-
-A data binding is a special attribute that links an element to a custom [expression](#expressions). Expressions may reference an implicit mutable JSON state. When that state is changed, expressions
-are re-evaluated and elements with bindings are updated with the new results.
+`amp-bind` allows you to add custom stateful interactivity to your AMP pages via data binding and JS-like expressions.
 
 A simple example:
 
 ```html
 <p [text]="message">Hello amp-bind</p>
 
-<button on="tap:AMP.setState(message='Hello World')">
+<button on="tap:AMP.setState({message: 'Hello World'})">
 ```
 
-1. When the button is tapped, the implicit state is updated with `{message: 'Hello World'}`.
-2. The state update causes the &lt;p&gt;'s binding expression `message` to be re-evaluated.
-3. The &lt;p&gt;'s text changes to show "Hello World".
+Tapping the button causes the `<p>` element's text to change to "Hello World".
 
-### Initializing state
+## Details
 
-The implicit state can be initialized at page load with custom JSON. For example:
+### State
+
+Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or **state**.
+
+The state can be initialized with the `amp-state` component:
 
 ```html
 <amp-state id="myState">
@@ -73,10 +71,21 @@ The implicit state can be initialized at page load with custom JSON. For example
 </amp-state>
 ```
 
-Binding expressions can reference the data in this `<amp-state>` component via dot syntax.
-In this example, `myState.foo` will evaluate to `"bar"`.
+[Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
 
-## Data binding
+
+##### AMP.setState()
+
+State can be mutated by the new `AMP.setState()` [action](../../spec/amp-actions-and-events.md).
+
+- `AMP.setState()` performs a [shallow merge](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) of its arguments with the document state.
+- `AMP.setState()` can override data initialized by `amp-state`.
+
+### Binding
+
+A binding is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions).
+
+When the **state** changes, expressions are re-evaluated and the bound elements' properties are updated with the new expression results.
 
 `amp-bind` supports data bindings on three types of element state:
 
@@ -89,31 +98,26 @@ In this example, `myState.foo` will evaluate to `"bar"`.
 - For security reasons, binding to `innerHTML` is disallowed
 - All attribute bindings are sanitized for unsafe URL protocols (e.g. `javascript:`)
 
-### Bindable attributes
+#### Element-specific attributes
 
-For non-AMP elements, most attributes accepted by the [AMP Validator](https://validator.ampproject.org/) are bindable.
+Most attributes accepted by the [AMP Validator](https://validator.ampproject.org/) for AMP and non-AMP elements, are bindable.
 
-For AMP components, the height and width attributes are bindable along with the following specific attributes:
+There are also special bindable attributes without non-bindable counterparts:
 
-| Component | Attributes |
-| --- | --- |
-| amp-carousel | slide |
-| amp-img | src, srcset, alt |
-| amp-selector | selected |
-| amp-video | src, srcset, alt, controls, loop, poster |
+| Component | Attribute | Details | Example |
+| --- | --- | --- | --- |
+| amp-carousel[type=slides] | `[slide]` | The currently displayed slide index. | [Linked carousels](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind)
+| amp-selector | `[selected]` | The `option` attribute values of the currently selected children elements. | [Linked carousels](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind)
 
-See [BindValidator](./0.1/bind-validator.js) for the canonical set of bindable
-elements and attributes.
-
-## Expressions
+### Expressions
 
 `amp-bind` expressions are JS-like with some important differences:
 
-- Expressions may only access the implicit JSON state
-- Expressions do not have access to globals like `window` or `document`
+- Expressions may only access the document [state](#state)
+- Expressions do **not** have access to globals like `window` or `document`
 - Only whitelisted functions are allowed
-- Custom functions and control flow statements (e.g. `for`, `if`) are disallowed
-- Undefined variables, array-index-out-of-bounds return `null` instead of throwing errors
+- Custom functions, classes and control flow statements (e.g. `for`) are disallowed
+- Undefined variables and array-index-out-of-bounds return `null` instead of throwing errors
 
 #### BNF-like grammar
 
