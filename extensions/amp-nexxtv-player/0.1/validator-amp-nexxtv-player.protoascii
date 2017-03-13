@@ -1,0 +1,98 @@
+#
+# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {  # amp-nexxtv-player
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-nexxtv-player extension .js script"
+  satisfies: "amp-nexxtv-player extension .js script"
+  mandatory_parent: "HEAD"
+  unique: true
+  extension_unused_unless_tag_present: "amp-nexxtv-player"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "amp-nexxtv-player"
+    dispatch_key: true
+  }
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-nexxtv-player-(latest|0\\.1)\\.js"
+  }
+  attrs: {
+    name: "type"
+    value_casei: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://github.com/nexxtv/amphtml/blob/nexxtv-player/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
+}
+tags: {  # <amp-nexxtv-player>
+  html_format: AMP
+  tag_name: "AMP-NEXXTV-PLAYER"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires: "amp-nexxtv-player extension .js script"
+  attrs: {
+    name: "data-client"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-mediaid"
+    mandatory: true
+    value_regex: "[^=/?:]+"
+  }
+  attrs: {
+    name: "data-mode"
+    value_regex: "api|static"
+  }
+  attrs: {
+    name: "data-origin"
+    value_url: {
+      allow_empty: true
+      allow_relative: true
+      allowed_protocol: "https"
+      allowed_protocol: "http"
+    }
+  }
+  attrs: {
+    name: "data-seek-to"
+  }
+  attrs: {
+    name: "data-streamtype"
+    value_regex: "album|audio|live|playlist|playlist-marked|video"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://github.com/nexxtv/amphtml/blob/nexxtv-player/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
