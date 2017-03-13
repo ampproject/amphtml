@@ -238,7 +238,8 @@
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
 
-      this.awaitHandshake_();
+      // this.awaitHandshake_();
+      this.ampViewerHost_ = new AmpViewerHost(window, this.iframe, this.frameOrigin_, false /* startPolling */);
 
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Messaging} from '../messaging';
+import {APP, Messaging, MessageType, WindowPortEmulator} from '../messaging';
+import {dev} from '../../../../src/log';
 
 /**
  * @fileoverview This is an example of how the viewer host can be implemented
@@ -23,20 +24,66 @@ import {Messaging} from '../messaging';
 export class AmpViewerHost {
 
   /**
+   * @param {!Window} win
    * @param {!HTMLIFrameElement} ampIframe
+   * @param {string} viewerOrigin
+   * @param {boolean} startPolling
    */
-  constructor(ampIframe) {
+  constructor(win, ampIframe, viewerOrigin, startPolling) {
+    /** @const {!Window} win */
+    this.win = win;
     /** @const {!HTMLIFrameElement} */
     this.ampIframe_ = ampIframe;
+
+    this.waitForHandshake_(viewerOrigin, startPolling);
   }
 
   /**
+   * @param {string} viewerOrigin
    * @param {boolean} startPolling
    * @return {!Promise}
    */
-  waitForHandshake(startPolling) {
-    const messaging = new Messaging(
-      null, null, '');
+  waitForHandshake_(viewerOrigin, startPolling) {
+    // const messaging = new Messaging(null, null, '');
+    console.log('Viewer.prototype.awaitHandshake_');
+    const targetId = this.ampIframe_.id;
+    const target = this.ampIframe_.contentWindow;
+    const targetOrigin = this.frameOrigin_;
+    const listener = function(event) {
+      if (event.origin == targetOrigin &&
+              this.isChannelOpen_(event.data) &&
+              (!event.source || event.source == target)) {
+        console.log('event: ',event);
+        console.log('Viewer ' + this.id + ' messaging established with ',
+            targetOrigin);
+        window.removeEventListener('message', listener, false);
+
+        const message = {
+          app: APP,
+          requestid: event.data.requestid,
+          data: {},
+          type: MessageType.RESPONSE,
+        };
+        target./*OK*/postMessage(message, targetOrigin);
+
+        const port = new WindowPortEmulator(
+          this.win, dev().assertString(viewerOrigin));
+        this.messaging_ = new Messaging(this.win, port);
+
+        this.sendRequest_('visibilitychange', {
+          state: this.visibilityState_,
+          prerenderSize: this.prerenderSize,
+        }, true);
+      }
+    }.bind(this);
+    window.addEventListener('message', listener, false);
+
     return new Promise().resolve(startPolling);
   }
+
+  isChannelOpen_(eventData) {
+    return eventData.app == APP && eventData.name == 'channelOpen';
+  };
 }
+
+self.AmpViewerHost = AmpViewerHost;

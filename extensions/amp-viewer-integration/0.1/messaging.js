@@ -25,7 +25,7 @@ const APP = '__AMPHTML__';
 /**
  * @enum {string}
  */
-const MessageType = {
+export const MessageType = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
