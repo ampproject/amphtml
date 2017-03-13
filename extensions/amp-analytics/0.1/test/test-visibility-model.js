@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {VisibilityHelper} from '../visibility-helper';
+import {VisibilityModel} from '../visibility-model';
 
-const NO_PARENT = null;
 const NO_SPEC = {};
+const NO_CALC = () => 0;
 
 
-describes.sandboxed('VisibilityHelper', {}, () => {
+describes.sandboxed('VisibilityModel', {}, () => {
   let startTime;
   let clock;
 
@@ -34,7 +34,7 @@ describes.sandboxed('VisibilityHelper', {}, () => {
   describe('config', () => {
 
     function config(spec) {
-      return new VisibilityHelper(NO_PARENT, spec, 0).spec_;
+      return new VisibilityModel(spec, NO_CALC).spec_;
     }
 
     it('should parse visiblePercentageMin', () => {
@@ -148,11 +148,16 @@ describes.sandboxed('VisibilityHelper', {}, () => {
 
 
   describe('structure', () => {
+    let visibility;
+    let calcVisibility;
+
     beforeEach(() => {
+      visibility = 0;
+      calcVisibility = () => visibility;
     });
 
     it('should dispose fully', () => {
-      const vh = new VisibilityHelper(NO_PARENT, NO_SPEC, 0);
+      const vh = new VisibilityModel(NO_SPEC, calcVisibility);
       vh.scheduledRunId_ = 1;
       const unsubscribeSpy = sandbox.spy();
       vh.unsubscribe(unsubscribeSpy);
@@ -164,128 +169,54 @@ describes.sandboxed('VisibilityHelper', {}, () => {
       expect(vh.eventResolver_).to.be.null;
     });
 
-    it('should dispose with parent', () => {
-      const parent = new VisibilityHelper(NO_PARENT, NO_SPEC, 0);
-      const vh = new VisibilityHelper(parent, NO_SPEC, 0);
-      expect(parent.children_).to.have.length(1);
-      expect(parent.children_[0]).to.equal(vh);
-
-      vh.dispose();
-      expect(parent.children_).to.have.length(0);
-    });
-
     it('should update on any visibility event', () => {
-      const updateStub = sandbox.stub(VisibilityHelper.prototype, 'update');
-      const vh = new VisibilityHelper(NO_PARENT, NO_SPEC, 0);
-      vh.setVisibility(0);
-      vh.setVisibility(1);
-      vh.setBlocked(false);
-      vh.setBlocked(true);
-      expect(updateStub.callCount).to.equal(4);
+      const updateStub = sandbox.stub(VisibilityModel.prototype, 'update');
+      const vh = new VisibilityModel(NO_SPEC, calcVisibility);
+      vh.setReady(true);
+      vh.setReady(false);
+      expect(updateStub.callCount).to.equal(2);
     });
 
-    it('should update when started visible', () => {
-      const updateStub = sandbox.stub(VisibilityHelper.prototype, 'update');
-      new VisibilityHelper(NO_PARENT, NO_SPEC, 1);
+    it('should NOT update when started visible', () => {
+      const updateStub = sandbox.stub(VisibilityModel.prototype, 'update_');
+      visibility = 1;
+      const vh = new VisibilityModel(NO_SPEC, calcVisibility);
+      expect(updateStub).to.not.be.called;
+
+      vh.update();
       expect(updateStub).to.be.calledOnce;
+      expect(updateStub).to.be.calledWith(1);
     });
 
     it('should NOT update when started invisible', () => {
-      const updateStub = sandbox.stub(VisibilityHelper.prototype, 'update');
-      new VisibilityHelper(NO_PARENT, NO_SPEC, 0);
+      const updateStub = sandbox.stub(VisibilityModel.prototype, 'update_');
+      visibility = 0;
+      const vh = new VisibilityModel(NO_SPEC, calcVisibility);
       expect(updateStub).to.not.be.called;
+
+      vh.update();
+      expect(updateStub).to.be.calledOnce;
+      expect(updateStub).to.be.calledWith(0);
     });
 
-    it('should work w/o parent', () => {
-      const vh = new VisibilityHelper(NO_PARENT, NO_SPEC, 0);
-      expect(vh.children_).to.be.null;  // Don't take extra memory.
+    it('should update visibility and ready', () => {
+      const updateStub = sandbox.stub(VisibilityModel.prototype, 'update_');
+      visibility = 0;
+      const vh = new VisibilityModel(NO_SPEC, calcVisibility);
 
-      vh.setVisibility(0.5);
-      expect(vh.getVisibility()).to.equal(0.5);
+      visibility = 0.5;
+      vh.update();
+      expect(updateStub.args[0][0]).to.equal(0.5);
 
-      vh.setBlocked(true);
-      expect(vh.getVisibility()).to.equal(0);
+      vh.setReady(false);
+      expect(updateStub.args[1][0]).to.equal(0);
 
-      vh.setBlocked(false);
-      expect(vh.getVisibility()).to.equal(0.5);
-    });
-
-    it('should work w/children', () => {
-      const parent = new VisibilityHelper(NO_PARENT, NO_SPEC, 0);
-      const child1 = new VisibilityHelper(parent, NO_SPEC, 0);
-      const child2 = new VisibilityHelper(parent, NO_SPEC, 0,
-          /* factorParent */ true);
-      expect(parent.children_).to.deep.equal([child1, child2]);
-      expect(child1.parent_).to.equal(parent);
-      expect(child2.parent_).to.equal(parent);
-
-      // Visibility blocked by parent.
-      child1.setVisibility(0.5);
-      child2.setVisibility(0.5);
-      expect(child1.getVisibility()).to.equal(0);
-      expect(child2.getVisibility()).to.equal(0);
-
-      // Visibility unblocked by parent.
-      parent.setVisibility(0.7);
-      expect(child1.getVisibility()).to.equal(0.5);
-      expect(child2.getVisibility()).to.equal(0.35);  // 0.5 * 0.7 = 0.35
-
-      // Block parent.
-      parent.setBlocked(true);
-      expect(child1.getVisibility()).to.equal(0);
-      expect(child2.getVisibility()).to.equal(0);
-
-      // Unlock parent.
-      parent.setBlocked(false);
-      expect(child1.getVisibility()).to.equal(0.5);
-      expect(child2.getVisibility()).to.equal(0.35);  // 0.5 * 0.7 = 0.35
-
-      // Block children.
-      child1.setBlocked(true);
-      child2.setBlocked(true);
-      expect(child1.getVisibility()).to.equal(0);
-      expect(child2.getVisibility()).to.equal(0);
-
-      // Unblock children.
-      child1.setBlocked(false);
-      child2.setBlocked(false);
-      expect(child1.getVisibility()).to.equal(0.5);
-      expect(child2.getVisibility()).to.equal(0.35);  // 0.5 * 0.7 = 0.35
-
-      // Invisible again.
-      parent.setVisibility(0);
-      expect(child1.getVisibility()).to.equal(0);
-      expect(child2.getVisibility()).to.equal(0);
-    });
-
-    it('should update on visibility change', () => {
-      const parent = new VisibilityHelper(NO_PARENT, NO_SPEC, 0);
-      const child1 = new VisibilityHelper(parent, NO_SPEC, 0);
-      const child2 = new VisibilityHelper(parent, NO_SPEC, 0);
-      child1.setVisibility(0.2);
-      sandbox.stub(parent, 'update_');
-      sandbox.stub(child1, 'update_');
-      sandbox.stub(child2, 'update_');
-
-      parent.setVisibility(0.1);
-      expect(parent.update_).to.be.calledOnce;
-      expect(child1.update_).to.be.calledOnce;
-      expect(child2.update_).to.be.calledOnce;
-      expect(parent.update_.args[0][0]).to.equal(0.1);
-      expect(child1.update_.args[0][0]).to.equal(0.2);
-      expect(child2.update_.args[0][0]).to.equal(0);
-
-      parent.update();
-      expect(parent.update_).to.be.calledTwice;
-      expect(child1.update_).to.be.calledTwice;
-      expect(child2.update_).to.be.calledTwice;
-      expect(parent.update_.args[1][0]).to.equal(0.1);
-      expect(child1.update_.args[1][0]).to.equal(0.2);
-      expect(child2.update_.args[1][0]).to.equal(0);
+      vh.setReady(true);
+      expect(updateStub.args[2][0]).to.equal(0.5);
     });
 
     it('should default export var state', () => {
-      const vh = new VisibilityHelper(NO_PARENT, NO_SPEC, 0);
+      const vh = new VisibilityModel(NO_SPEC, calcVisibility);
       expect(vh.getState(0)).to.contains({
         firstSeenTime: 0,
         lastSeenTime: 0,
@@ -300,7 +231,7 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should export full state', () => {
-      const vh = new VisibilityHelper(NO_PARENT, NO_SPEC, 0);
+      const vh = new VisibilityModel(NO_SPEC, calcVisibility);
       vh.firstSeenTime_ = 2;
       vh.lastSeenTime_ = 3;
       vh.lastVisibleTime_ = 4;
@@ -334,11 +265,11 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     let eventSpy;
 
     beforeEach(() => {
-      vh = new VisibilityHelper(NO_PARENT, {
+      vh = new VisibilityModel({
         minVisiblePercentage: 25,
         totalTimeMin: 10,
         continuousTimeMin: 10,
-      }, 0);
+      }, NO_CALC);
       updateStub = sandbox.stub(vh, 'update');
       eventSpy = vh.eventResolver_ = sandbox.spy();
     });
@@ -445,7 +376,7 @@ describes.sandboxed('VisibilityHelper', {}, () => {
   describe('tracking math', () => {
 
     it('should register "seen" values', () => {
-      const vh = new VisibilityHelper(NO_PARENT, NO_SPEC);
+      const vh = new VisibilityModel(NO_SPEC, NO_CALC);
 
       // Not yet visible: nothing is registered.
       vh.updateCounters_(0);
@@ -475,7 +406,7 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should ignore "load visibility" after timeout', () => {
-      const vh = new VisibilityHelper(NO_PARENT, NO_SPEC);
+      const vh = new VisibilityModel(NO_SPEC, NO_CALC);
       clock.tick(500);
       vh.updateCounters_(0.1);
       expect(vh.getState(startTime)).to.contains({
@@ -486,7 +417,7 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should match default visibility position', () => {
-      const vh = new VisibilityHelper(NO_PARENT, NO_SPEC);
+      const vh = new VisibilityModel(NO_SPEC, NO_CALC);
       vh.updateCounters_(0);
       expect(vh.matchesVisibility_).to.be.false;
 
@@ -507,10 +438,10 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should match custom visibility position', () => {
-      const vh = new VisibilityHelper(NO_PARENT, {
+      const vh = new VisibilityModel({
         visiblePercentageMin: 10,
         visiblePercentageMax: 90,
-      });
+      }, NO_CALC);
       vh.updateCounters_(0);
       expect(vh.matchesVisibility_).to.be.false;
 
@@ -537,7 +468,7 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should transition to visible and stay visible', () => {
-      const vh = new VisibilityHelper(NO_PARENT, NO_SPEC);
+      const vh = new VisibilityModel(NO_SPEC, NO_CALC);
       clock.tick(100);
       vh.updateCounters_(0.1);
       expect(vh.getState(startTime)).to.contains({
@@ -578,7 +509,7 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should transition to invisible and back to visible', () => {
-      const vh = new VisibilityHelper(NO_PARENT, NO_SPEC);
+      const vh = new VisibilityModel(NO_SPEC, NO_CALC);
       clock.tick(100);
       vh.updateCounters_(0.1);
       expect(vh.getState(startTime)).to.contains({
@@ -663,10 +594,10 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should yield based on position only', () => {
-      const vh = new VisibilityHelper(NO_PARENT, {
+      const vh = new VisibilityModel({
         visiblePercentageMin: 10,
         visiblePercentageMax: 90,
-      });
+      }, NO_CALC);
       clock.tick(100);
       expect(vh.updateCounters_(0)).to.be.false;
       expect(vh.updateCounters_(0.1)).to.be.false;
@@ -676,10 +607,10 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should yield based on total time only', () => {
-      const vh = new VisibilityHelper(NO_PARENT, {
+      const vh = new VisibilityModel({
         totalTimeMin: 10,
         totalTimeMax: 90,
-      });
+      }, NO_CALC);
       expect(vh.updateCounters_(0.1)).to.be.false;
       clock.tick(5);
       expect(vh.updateCounters_(0)).to.be.false;
@@ -692,10 +623,10 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should yield based on continuous time only', () => {
-      const vh = new VisibilityHelper(NO_PARENT, {
+      const vh = new VisibilityModel({
         continuousTimeMin: 10,
         continuousTimeMax: 90,
-      });
+      }, NO_CALC);
       expect(vh.updateCounters_(0.1)).to.be.false;
       clock.tick(5);
       expect(vh.updateCounters_(0)).to.be.false;
@@ -712,15 +643,23 @@ describes.sandboxed('VisibilityHelper', {}, () => {
 
 
   describe('end-to-end events', () => {
+    let visibility;
+    let calcVisibility;
+
+    beforeEach(() => {
+      visibility = 0;
+      calcVisibility = () => visibility;
+    });
 
     it('should trigger for visibility percent only', () => {
-      const vh = new VisibilityHelper(NO_PARENT, {
+      const vh = new VisibilityModel({
         visiblePercentageMin: 49,
         visiblePercentageMax: 80,
-      }, 0);
+      }, calcVisibility);
       const eventSpy = vh.eventResolver_ = sandbox.spy();
 
-      vh.setVisibility(0.63);
+      visibility = 0.63;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({
         minVisiblePercentage: 63,
         maxVisiblePercentage: 63,
@@ -730,14 +669,16 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should only update load-time visibility once', () => {
-      const vh = new VisibilityHelper(NO_PARENT, {
+      const vh = new VisibilityModel({
         visiblePercentageMin: 49,
         visiblePercentageMax: 80,
-      }, 0);
+      }, calcVisibility);
       const eventSpy = vh.eventResolver_ = sandbox.spy();
 
-      vh.setVisibility(0.49);
-      vh.setVisibility(0.63);
+      visibility = 0.49;
+      vh.update();
+      visibility = 0.63;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({
         minVisiblePercentage: 63,
         maxVisiblePercentage: 63,
@@ -747,22 +688,25 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should fire with totalTimeMin condition', () => {
-      const vh = new VisibilityHelper(NO_PARENT, {
+      const vh = new VisibilityModel({
         totalTimeMin: 1000,
-      }, 0);
+      }, calcVisibility);
       const eventSpy = vh.eventResolver_ = sandbox.spy();
 
-      vh.setVisibility(0.63);
+      visibility = 0.63;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 63});
       expect(eventSpy).to.not.be.called;
 
       clock.tick(999);
-      vh.setVisibility(0);
+      visibility = 0;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 63});
       expect(eventSpy).to.not.be.called;
 
       clock.tick(1000);
-      vh.setVisibility(0.64);
+      visibility = 0.64;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 64});
       expect(eventSpy).to.not.be.called;
 
@@ -775,27 +719,31 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should fire with continuousTimeMin condition', () => {
-      const vh = new VisibilityHelper(NO_PARENT, {
+      const vh = new VisibilityModel({
         continuousTimeMin: 1000,
-      }, 0);
+      }, calcVisibility);
       const eventSpy = vh.eventResolver_ = sandbox.spy();
 
-      vh.setVisibility(0.63);
+      visibility = 0.63;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 63});
       expect(eventSpy).to.not.be.called;
 
       clock.tick(999);
-      vh.setVisibility(0);
+      visibility = 0;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 63});
       expect(eventSpy).to.not.be.called;
 
       clock.tick(1000);
-      vh.setVisibility(0.64);
+      visibility = 0.64;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 64});
       expect(eventSpy).to.not.be.called;
 
       clock.tick(1);
-      vh.setVisibility(0.65);
+      visibility = 0.65;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({
         maxVisiblePercentage: 65,
         totalVisibleTime: 1000,
@@ -811,13 +759,14 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should fire with totalTimeMin and visiblePercentageMin', () => {
-      const vh = new VisibilityHelper(NO_PARENT, {
+      const vh = new VisibilityModel({
         totalTimeMin: 1000,
         visiblePercentageMin: 10,
-      }, 0);
+      }, calcVisibility);
       const eventSpy = vh.eventResolver_ = sandbox.spy();
 
-      vh.setVisibility(0.05);
+      visibility = 0.05;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 0});
       expect(eventSpy).to.not.be.called;
 
@@ -825,7 +774,8 @@ describes.sandboxed('VisibilityHelper', {}, () => {
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 0});
       expect(eventSpy).to.not.be.called;
 
-      vh.setVisibility(0.11);
+      visibility = 0.11;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 11});
       expect(eventSpy).to.not.be.called;
 
@@ -843,18 +793,20 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should fire with continuousTimeMin=1k and totalTimeMin=2k', () => {
-      const vh = new VisibilityHelper(NO_PARENT, {
+      const vh = new VisibilityModel({
         totalTimeMin: 2000,
         continuousTimeMin: 1000,
-      }, 0);
+      }, calcVisibility);
       const eventSpy = vh.eventResolver_ = sandbox.spy();
 
-      vh.setVisibility(0.05);
+      visibility = 0.05;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 5});
       expect(eventSpy).to.not.be.called;
 
       clock.tick(1000);
-      vh.setVisibility(0.1);
+      visibility = 0.1;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 10});
       expect(eventSpy).to.not.be.called;
 
@@ -872,19 +824,21 @@ describes.sandboxed('VisibilityHelper', {}, () => {
     });
 
     it('should fire with continuousTimeMin=1k and visPercentageMin=50', () => {
-      const vh = new VisibilityHelper(NO_PARENT, {
+      const vh = new VisibilityModel({
         continuousTimeMin: 1000,
         visiblePercentageMin: 49,
-      }, 0);
+      }, calcVisibility);
       const eventSpy = vh.eventResolver_ = sandbox.spy();
 
       clock.tick(999);
-      vh.setVisibility(0);
+      visibility = 0;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 0});
       expect(eventSpy).to.not.be.called;
 
       clock.tick(1000);
-      vh.setVisibility(0.5);
+      visibility = 0.5;
+      vh.update();
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 50});
       expect(eventSpy).to.not.be.called;
 

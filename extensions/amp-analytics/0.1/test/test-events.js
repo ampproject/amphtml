@@ -21,8 +21,10 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  VisibilityTracker,
 } from '../events';
 import {Signals} from '../../../../src/utils/signals';
+import * as sinon from 'sinon';
 
 
 describes.realWin('Events', {amp: 1}, env => {
@@ -396,6 +398,197 @@ describes.realWin('Events', {amp: 1}, env => {
         expect(event.target).to.equal(target);
         expect(event.type).to.equal('ini-load');
         expect(spy).to.be.calledWith('load-end');
+      });
+    });
+  });
+
+
+  describe('VisibilityTracker', () => {
+    let tracker;
+    let visibilityManagerMock;
+    let iniLoadTrackerMock;
+    let targetSignals;
+    let eventResolver, eventPromise;
+    let saveCallback;
+    let matchEmptySpec;
+
+    beforeEach(() => {
+      tracker = new VisibilityTracker(root);
+      visibilityManagerMock = sandbox.mock(root.getVisibilityManager());
+      iniLoadTrackerMock = sandbox.mock(tracker.iniLoadTracker_);
+
+      target.classList.add('i-amphtml-element');
+      targetSignals = new Signals();
+      target.signals = () => targetSignals;
+
+      eventPromise = new Promise(resolve => {
+        eventResolver = resolve;
+      });
+
+      matchEmptySpec = sinon.match(arg => {
+        return Object.keys(arg).length == 0;
+      });
+      saveCallback = sinon.match(arg => {
+        if (typeof arg == 'function') {
+          saveCallback.callback = arg;
+          return true;
+        }
+        return false;
+      });
+    });
+
+    afterEach(() => {
+      visibilityManagerMock.verify();
+    });
+
+    it('should initalize, add listeners and dispose', () => {
+      expect(tracker.root).to.equal(root);
+    });
+
+    it('should add doc listener', () => {
+      const unlisten = function() {};
+      iniLoadTrackerMock.expects('getRootSignal').never();
+      iniLoadTrackerMock.expects('getElementSignal').never();
+      visibilityManagerMock
+          .expects('listenRoot')
+          .withExactArgs(
+              matchEmptySpec,
+              /* readyPromise */ null,
+              saveCallback)
+          .returns(unlisten)
+          .once();
+      const res = tracker.add(analyticsElement, 'visible', {}, eventResolver);
+      expect(res).to.equal(unlisten);
+      saveCallback.callback({totalVisibleTime: 10});
+      return eventPromise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('visible');
+        expect(event.vars.totalVisibleTime).to.equal(10);
+      });
+    });
+
+    it('should add root listener', () => {
+      const config = {selector: ':root'};
+      const unlisten = function() {};
+      iniLoadTrackerMock.expects('getElementSignal').never();
+      const readyPromise = Promise.resolve();
+      iniLoadTrackerMock
+          .expects('getRootSignal')
+          .returns(readyPromise)
+          .once();
+      visibilityManagerMock
+          .expects('listenRoot')
+          .withExactArgs(
+              matchEmptySpec,
+              readyPromise,
+              saveCallback)
+          .returns(unlisten)
+          .once();
+      const res = tracker.add(analyticsElement,
+          'visible', config, eventResolver);
+      expect(res).to.equal(unlisten);
+      saveCallback.callback({totalVisibleTime: 10});
+      return eventPromise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('visible');
+        expect(event.vars.totalVisibleTime).to.equal(10);
+      });
+    });
+
+    it('should add host listener and spec', () => {
+      const config = {visibilitySpec: {selector: ':host'}};
+      const unlisten = function() {};
+      iniLoadTrackerMock.expects('getElementSignal').never();
+      const readyPromise = Promise.resolve();
+      iniLoadTrackerMock
+          .expects('getRootSignal')
+          .returns(readyPromise)
+          .once();
+      visibilityManagerMock
+          .expects('listenRoot')
+          .withExactArgs(
+              config.visibilitySpec,
+              readyPromise,
+              saveCallback)
+          .returns(unlisten)
+          .once();
+      const res = tracker.add(analyticsElement,
+          'visible', config, eventResolver);
+      expect(res).to.equal(unlisten);
+      saveCallback.callback({totalVisibleTime: 10});
+      return eventPromise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('visible');
+        expect(event.vars.totalVisibleTime).to.equal(10);
+      });
+    });
+
+    it('should add target listener', () => {
+      const config = {visibilitySpec: {selector: '.target'}};
+      const unlisten = sandbox.spy();
+      iniLoadTrackerMock.expects('getRootSignal').never();
+      const readyPromise = Promise.resolve();
+      iniLoadTrackerMock
+          .expects('getElementSignal')
+          .withExactArgs(target)
+          .returns(readyPromise)
+          .once();
+      visibilityManagerMock
+          .expects('listenElement')
+          .withExactArgs(
+              target,
+              config.visibilitySpec,
+              readyPromise,
+              saveCallback)
+          .returns(unlisten)
+          .once();
+      const res = tracker.add(analyticsElement,
+          'visible', config, eventResolver);
+      expect(res).to.be.function;
+      return root.ampdoc.whenReady().then(() => {
+        saveCallback.callback({totalVisibleTime: 10});
+        return eventPromise.then(event => {
+          expect(event.target).to.equal(target);
+          expect(event.type).to.equal('visible');
+          expect(event.vars.totalVisibleTime).to.equal(10);
+
+          // Test unlisten.
+          expect(unlisten).to.not.be.called;
+          res();
+        }).then(() => {
+          expect(unlisten).to.be.calledOnce;
+        });
+      });
+    });
+
+    it('should expand data params', () => {
+      target.setAttribute('data-vars-foo', 'bar');
+
+      const config = {selector: '.target'};
+      const unlisten = sandbox.spy();
+      iniLoadTrackerMock.expects('getRootSignal').never();
+      const readyPromise = Promise.resolve();
+      iniLoadTrackerMock
+          .expects('getElementSignal')
+          .withExactArgs(target)
+          .returns(readyPromise)
+          .once();
+      visibilityManagerMock
+          .expects('listenElement')
+          .withExactArgs(
+              target,
+              matchEmptySpec,
+              readyPromise,
+              saveCallback)
+          .returns(unlisten)
+          .once();
+      tracker.add(analyticsElement, 'visible', config, eventResolver);
+      return root.ampdoc.whenReady().then(() => {
+        saveCallback.callback({totalVisibleTime: 10});
+        return eventPromise.then(event => {
+          expect(event.vars.totalVisibleTime).to.equal(10);
+          expect(event.vars.foo).to.equal('bar');
+        });
       });
     });
   });
