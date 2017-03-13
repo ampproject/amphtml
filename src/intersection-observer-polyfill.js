@@ -43,7 +43,7 @@ export const DEFAULT_THRESHOLD =
  *    currentThresholdSlot: number,
  *  }}
  */
-let IntersectionStateDef;
+let ElementIntersectionStateDef;
 
 /** @const @private */
 const TAG = 'INTERSECTION-OBSERVER';
@@ -211,7 +211,7 @@ export class IntersectionObserverPolyfill {
     /**
      * Store a list of observed elements and their current threshold slot which
      * their intersection ratio fills, range from [0, this.threshold_.length]
-     * @private {Array<!IntersectionStateDef>}
+     * @private {Array<!ElementIntersectionStateDef>}
      */
     this.observeEntries_ = [];
   }
@@ -234,7 +234,7 @@ export class IntersectionObserverPolyfill {
       }
     }
 
-    const newEntry = {
+    const newState = {
       element,
       currentThresholdSlot: 0,
     };
@@ -242,14 +242,14 @@ export class IntersectionObserverPolyfill {
     // Get the new observed element's first changeEntry based on last viewport
     if (this.lastViewportRect_) {
       const change = this.getValidIntersectionChangeEntry_(
-          newEntry, this.lastViewportRect_, this.lastIframeRect_);
+          newState, this.lastViewportRect_, this.lastIframeRect_);
       if (change) {
         this.callback_([change]);
       }
     }
 
     // push new observed element
-    this.observeEntries_.push(newEntry);
+    this.observeEntries_.push(newState);
   }
 
   /**
@@ -309,14 +309,14 @@ export class IntersectionObserverPolyfill {
    * When the new intersection ratio doesn't cross one of a threshold value,
    * the function will return null.
    *
-   * @param {!IntersectionStateDef} entry
+   * @param {!ElementIntersectionStateDef} state
    * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
    * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
    * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
    * @private
    */
-  getValidIntersectionChangeEntry_(entry, hostViewport, opt_iframe) {
-    const element = entry.element;
+  getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
+    const element = state.element;
 
     // Normalize container LayoutRect to be relative to page
     let elementRect;
@@ -339,10 +339,10 @@ export class IntersectionObserverPolyfill {
     const ratio = intersectionRatio(intersectionRect, elementRect);
     const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
 
-    if (newThresholdSlot == entry.currentThresholdSlot) {
+    if (newThresholdSlot == state.currentThresholdSlot) {
       return null;
     }
-    entry.currentThresholdSlot = newThresholdSlot;
+    state.currentThresholdSlot = newThresholdSlot;
 
     // To get same behavior as native IntersectionObserver set hostViewport null
     // if inside an iframe
