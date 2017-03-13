@@ -196,6 +196,27 @@ describes.realWin('amp-form', {
     document.body.removeChild(form);
   });
 
+  it('should not trigger amp-form-submit analytics event', () => {
+    const form = getForm();
+    document.body.appendChild(form);
+    form.removeAttribute('action-xhr');
+    document.body.appendChild(form);
+    const ampForm = new AmpForm(form);
+    const event = {
+      stopImmediatePropagation: sandbox.spy(),
+      target: form,
+      preventDefault: sandbox.spy(),
+    };
+    sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+    sandbox.stub(ampForm, 'analyticsEvent_');
+    sandbox.spy(form, 'checkValidity');
+    expect(() => ampForm.handleSubmitEvent_(event)).to.throw(
+        /Only XHR based \(via action-xhr attribute\) submissions are support/);
+    expect(event.preventDefault).to.be.called;
+    expect(ampForm.analyticsEvent_).to.have.not.been.called;
+    document.body.removeChild(form);
+  });
+
   it('should respect novalidate on a form', () => {
     setReportValiditySupportedForTesting(true);
     const form = getForm();
