@@ -93,18 +93,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
-    id: 'amp-form-var-sub',
-    name: 'Variable Substitutions in AMP Form inputs for POST/GET submits',
-    spec: 'https://github.com/ampproject/amphtml/issues/5654',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
-  },
-  {
-    id: 'amp-form-var-sub-for-post',
-    name: 'Variable Substitutions in AMP Form inputs for POST submits only',
-    spec: 'https://github.com/ampproject/amphtml/issues/5654',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
-  },
-  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
