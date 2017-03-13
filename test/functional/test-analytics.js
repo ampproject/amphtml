@@ -16,17 +16,14 @@
 
 import {fromClassForDoc} from '../../src/service';
 import {
-<<<<<<< HEAD
   getServiceForDoc,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../src/service';
-import {triggerAnalyticsEvent} from '../../src/analytics';
-=======
+import {
   triggerAnalyticsEvent,
-  createAnalyticsForExtension,
+  insertAnalyticsElement,
 } from '../../src/analytics';
->>>>>>> create analytics element
 import {timerFor} from '../../src/timer';
 import {BaseElement} from '../../src/base-element';
 import * as sinon from 'sinon';
@@ -76,7 +73,7 @@ describes.realWin('analytics', {amp: 1}, env => {
     });
   });
 
-  describe('createAnalyticsForExtension', () => {
+  describe('insertAnalyticsElement', () => {
     class MockInstrumentation {
     };
 
@@ -104,10 +101,11 @@ describes.realWin('analytics', {amp: 1}, env => {
         },
       };
       expect(baseEle.element.querySelector('amp-analytics')).to.be.null;
-      createAnalyticsForExtension(baseEle, config);
+      insertAnalyticsElement(baseEle.element, config);
       return timer.promise(50).then(() => {
         const analyticsEle = baseEle.element.querySelector('amp-analytics');
         expect(analyticsEle).to.not.be.null;
+        expect(analyticsEle.getAttribute('scoped')).to.equal.true;
         const script = (analyticsEle).querySelector('script');
         expect(script.textContent).to.jsonEqual(JSON.stringify(config));
       });
