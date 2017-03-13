@@ -17,7 +17,7 @@
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
-} from './visibility-helper';
+} from './visibility-manager';
 import {
   closestBySelector,
   matches,
@@ -58,7 +58,7 @@ export class AnalyticsRoot {
     /** @const */
     this.trackers_ = map();
 
-    /** @private {?./visibility-helper.VisibilityManager} */
+    /** @private {?./visibility-manager.VisibilityManager} */
     this.visibilityManager_ = null;
   }
 
@@ -290,7 +290,7 @@ export class AnalyticsRoot {
    * Returns the visibility root corresponding to this analytics root (ampdoc
    * or embed). The visibility root is created lazily as needed and takes
    * care of all visibility tracking functions.
-   * @return {!./visibility-helper.VisibilityManager}
+   * @return {!./visibility-manager.VisibilityManager}
    */
   getVisibilityManager() {
     if (!this.visibilityManager_) {
@@ -300,7 +300,7 @@ export class AnalyticsRoot {
   }
 
   /**
-   * @return {!./visibility-helper.VisibilityManager}
+   * @return {!./visibility-manager.VisibilityManager}
    * @protected
    * @abstract
    */

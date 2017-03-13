@@ -238,8 +238,7 @@ function proxyToAmpProxy(req, res, minify) {
   var url = 'https://cdn.ampproject.org/'
       + (req.query['amp_js_v'] ? 'v' : 'c')
       + req.url;
-  const inabox = req.query['inabox'] == '1';
-  console.log('Fetching URL: ' + url, inabox);
+  console.log('Fetching URL: ' + url);
   request(url, function(error, response, body) {
     body = body
         // Unversion URLs.
@@ -247,6 +246,7 @@ function proxyToAmpProxy(req, res, minify) {
             'https://cdn.ampproject.org/')
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
+    const inabox = req.query['inabox'] == '1';
     body = replaceUrls(minify ? 'min' : 'max', body, getUrlPrefix(req), inabox);
     res.status(response.statusCode).send(body);
   });

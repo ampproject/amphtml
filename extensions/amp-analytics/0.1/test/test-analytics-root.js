@@ -27,7 +27,7 @@ import {
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
-} from '../visibility-helper';
+} from '../visibility-manager';
 
 
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
