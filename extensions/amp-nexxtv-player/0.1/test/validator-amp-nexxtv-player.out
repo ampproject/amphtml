@@ -1,3 +1,4 @@
 FAIL
-amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:59:4 The mandatory attribute 'data-mediaid' is missing in tag 'amp-nexxtv-player'. (see https://github.com/nexxtv/amphtml/blob/nexxtv-player/extensions/amp-nexxtv-player/amp-nexxtv-player.md) [AMP_TAG_PROBLEM]
-amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:65:4 The mandatory attribute 'data-client' is missing in tag 'amp-nexxtv-player'. (see https://github.com/nexxtv/amphtml/blob/nexxtv-player/extensions/amp-nexxtv-player/amp-nexxtv-player.md) [AMP_TAG_PROBLEM]
+amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:59:4 The mandatory attribute 'data-mediaid' is missing in tag 'amp-nexxtv-player'. (see https://www.ampproject.org/docs/reference/components/amp-nexxtv-player) [AMP_TAG_PROBLEM]
+amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:65:4 The mandatory attribute 'data-client' is missing in tag 'amp-nexxtv-player'. (see https://www.ampproject.org/docs/reference/components/amp-nexxtv-player) [AMP_TAG_PROBLEM]
+amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:70:7 The tag 'amp-nexxtv-player' is missing or incorrect, but required by 'amp-nexxtv-player extension .js script'. (see https://www.ampproject.org/docs/reference/components/amp-nexxtv-player) [AMP_TAG_PROBLEM]

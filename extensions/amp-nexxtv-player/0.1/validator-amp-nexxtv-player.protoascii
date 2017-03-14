@@ -21,7 +21,7 @@ tags: {  # amp-nexxtv-player
   satisfies: "amp-nexxtv-player extension .js script"
   mandatory_parent: "HEAD"
   unique: true
-  extension_unused_unless_tag_present: "amp-nexxtv-player"
+  requires: "amp-nexxtv-player"
   attrs: {
     name: "async"
     mandatory: true
@@ -49,7 +49,7 @@ tags: {  # amp-nexxtv-player
       error_message: "contents"
     }
   }
-  spec_url: "https://github.com/nexxtv/amphtml/blob/nexxtv-player/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-nexxtv-player"
 }
 tags: {  # <amp-nexxtv-player>
   html_format: AMP
@@ -85,7 +85,7 @@ tags: {  # <amp-nexxtv-player>
     value_regex: "album|audio|live|playlist|playlist-marked|video"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/nexxtv/amphtml/blob/nexxtv-player/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-nexxtv-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
