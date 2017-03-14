@@ -208,11 +208,8 @@ export class AnalyticsRoot {
   getAmpElement(context, selector, selectionMethod) {
     const element = this.getElement(context, selector, selectionMethod);
     if (element) {
-      // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
-      // form is in PROD for 1-2 weeks.
       user().assert(
-          (element.classList.contains('-amp-element')
-            || element.classList.contains('i-amphtml-element')),
+          element.classList.contains('i-amphtml-element'),
           'Element "%s" is required to be an AMP element', selector);
     }
     return element;

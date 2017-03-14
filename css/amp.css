@@ -155,9 +155,6 @@ i-amphtml-sizer {
   display: block !important;
 }
 
-/* TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-   form is in PROD for 1-2 weeks. */
-.-amp-fill-content,
 .i-amphtml-fill-content {
   display: block;
   width: 1px;          /* These lines are a work around to this issue in iOS: */
@@ -167,9 +164,6 @@ i-amphtml-sizer {
   margin: auto;
 }
 
-/* TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-   form is in PROD for 1-2 weeks. */
-.i-amphtml-layout-size-defined .-amp-fill-content,
 .i-amphtml-layout-size-defined .i-amphtml-fill-content {
   position: absolute;
   top: 0;
@@ -178,9 +172,6 @@ i-amphtml-sizer {
   right: 0;
 }
 
-/* TODO(dvoytenko, #6794): Remove old `-amp-replaced-content` form after the new
-   form is in PROD for 1-2 weeks. */
-.-amp-replaced-content,
 .i-amphtml-replaced-content {
   padding: 0 !important;
   border: none !important;
