@@ -86,10 +86,12 @@ amp-carousel .amp-carousel-button.amp-disabled {
   visibility: hidden;
 }
 
-/* Begin SlideScroll */
-.-amp-slidescroll {
+.-amp-carousel-a11-prev.amp-disabled,
+.-amp-carousel-a11-next.amp-disabled {
+  display: none !important;
 }
 
+/* Begin SlideScroll */
 .-amp-slides-container {
   display: flex !important;
   flex-wrap: nowrap;
