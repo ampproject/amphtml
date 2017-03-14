@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {documentInfoForDoc} from '../document-info';
 import {layoutRectLtwh} from '../layout-rect';
 import {fromClass} from '../service';
 import {resourcesForDoc} from '../resources';
@@ -139,8 +138,6 @@ export class Performance {
     return channelPromise.then(() => {
       this.isMessagingReady_ = true;
 
-      // This task is async
-      this.setDocumentInfoParams_();
       // forward all queued ticks to the viewer since messaging
       // is now ready.
       this.flushQueuedTicks_();
@@ -222,17 +219,6 @@ export class Performance {
             return r.loadedOnce();
           }));
     });
-  }
-
-  /**
-   * Forward an object to be appended as search params to the external
-   * intstrumentation library.
-   * @param {!Object} params
-   * @private
-   */
-  setFlushParams_(params) {
-    this.viewer_.sendMessage('setFlushParams', params,
-        /* cancelUnsent */true);
   }
 
   /**
@@ -371,35 +357,6 @@ export class Performance {
       this.viewer_.sendMessage('tick', tickEvent);
     });
     this.events_.length = 0;
-  }
-
-
-  /**
-   * Calls "setFlushParams_" with relevant document information.
-   * @return {!Promise}
-   * @private
-   */
-  setDocumentInfoParams_() {
-    // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
-    // reporting regression is confirmed.
-    return this.whenViewportLayoutCompleteLegacy_().then(() => {
-      const params = Object.create(null);
-      const sourceUrl = documentInfoForDoc(this.win.document).sourceUrl
-          .replace(/#.*/, '');
-      params['sourceUrl'] = sourceUrl;
-
-      this.resources_.get().forEach(r => {
-        const el = r.element;
-        const name = el.tagName.toLowerCase();
-        incOrDef(params, name);
-        if (name == 'amp-ad') {
-          incOrDef(params, `ad-${el.getAttribute('type')}`);
-        }
-      });
-
-      this.setFlushParams_(params);
-      this.flush();
-    });
   }
 
   /**
