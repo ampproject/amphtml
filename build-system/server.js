@@ -348,12 +348,14 @@ function liveListTombstone(liveList) {
 }
 
 
+// Generate a random number between min and max
 // Value is inclusive of both min and max values.
 function range(min, max) {
   var values = Array.apply(null, Array(max - min + 1)).map((_, i) => min + i);
   return values[Math.round(Math.random() * (max - min))]
 }
 
+// Returns the result of a coin flip, true or false
 function flip() {
   return !!Math.floor(Math.random() * 2);
 }
@@ -426,9 +428,6 @@ function getLiveBlogItemWithBindAttributes() {
     <amp-live-list id="live-blog-1">
     <div items>
       <div id="live-blog-item-${now}" data-sort-time="${now}">
-        <h3 class="headline">
-          <a href="#live-blog-item-${now}">${headline}</a>
-        </h3>
         <div class="author">
           <div class="byline">
             <p>
@@ -447,13 +446,6 @@ function getLiveBlogItemWithBindAttributes() {
           <p> As you can see, bacon is far superior to <b><span [text]='favoriteFood'>everything!</span></b>!</p>
         </div>
         ${img}
-        <div class="social-box">
-          <amp-social-share type="facebook"
-              data-param-text="Hello world"
-              data-param-href="https://example.com/?ref=URL"
-              data-param-app_id="145634995501895"></amp-social-share>
-          <amp-social-share type="twitter"></amp-social-share>
-        </div>
       </div>
     </div>
     </amp-live-list></body></html>`;
