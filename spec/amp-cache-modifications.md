@@ -277,6 +277,8 @@ Remove any `<meta>` tags except for those that:
  - have attribute `property` with prefix "al:"
  - have attribute `property` with prefix "fb:"
  - have attribute `property` with prefix "og:"
+ 
+Note that all attribute values are case-insensitive.
 
 <details>
 <summary>example</summary>
