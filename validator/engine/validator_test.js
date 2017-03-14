@@ -238,7 +238,7 @@ describe('ValidatorCssLengthValidation', () => {
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
         'in tag \'style amp-custom\' is too long - we saw 50001 bytes ' +
         'whereas the limit is 50000 bytes. ' +
-        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '(see https://www.ampproject.org/docs/reference/spec' +
         '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
@@ -254,7 +254,7 @@ describe('ValidatorCssLengthValidation', () => {
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
         'in tag \'style amp-custom\' is too long - we saw 50002 bytes ' +
         'whereas the limit is 50000 bytes. ' +
-        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '(see https://www.ampproject.org/docs/reference/spec' +
         '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });

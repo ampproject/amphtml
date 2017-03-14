@@ -50,7 +50,7 @@ tags: {  # amp-experiment
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-experiment.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"
 }
 tags: {  # amp-experiment (json)
   html_format: AMP
@@ -70,7 +70,7 @@ tags: {  # amp-experiment (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-experiment.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"
 }
 tags: {  # <amp-experiment>
   html_format: AMP
@@ -78,5 +78,5 @@ tags: {  # <amp-experiment>
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-experiment extension .js script"
   unique: true
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-experiment.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"
 }

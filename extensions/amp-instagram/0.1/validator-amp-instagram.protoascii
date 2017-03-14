@@ -49,7 +49,7 @@ tags: {  # amp-instagram
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-instagram.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-instagram"
 }
 tags: {  # <amp-instagram>
   html_format: AMP
@@ -62,7 +62,7 @@ tags: {  # <amp-instagram>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-instagram.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-instagram"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

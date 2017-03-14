@@ -49,7 +49,7 @@ tags: {  # amp-user-notification
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-user-notification.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-user-notification"
 }
 tags: {  # <amp-user-notification>
   html_format: AMP
@@ -58,7 +58,7 @@ tags: {  # <amp-user-notification>
   requires: "amp-analytics extension .js script"
   requires: "amp-user-notification extension .js script"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-user-notification.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-user-notification"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

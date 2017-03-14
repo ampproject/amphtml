@@ -48,7 +48,7 @@ tags: {  # amp-anim
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-anim.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
 }
 tags: {  # <amp-anim>
   tag_name: "AMP-ANIM"
@@ -59,7 +59,7 @@ tags: {  # <amp-anim>
   attrs: { name: "controls" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-anim.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

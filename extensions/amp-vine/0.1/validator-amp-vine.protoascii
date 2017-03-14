@@ -49,7 +49,7 @@ tags: {  # amp-vine
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vine.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-vine"
 }
 tags: {  # <amp-vine>
   html_format: AMP
@@ -62,7 +62,7 @@ tags: {  # <amp-vine>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vine.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-vine"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

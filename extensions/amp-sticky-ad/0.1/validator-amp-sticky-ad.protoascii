@@ -48,7 +48,7 @@ tags: {  # <script custom-element="amp-sticky-ad">
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sticky-ad.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sticky-ad"
 }
 tags: {  # <amp-sticky-ad>
   html_format: AMP
@@ -62,7 +62,7 @@ tags: {  # <amp-sticky-ad>
     mandatory_num_child_tags: 1
     first_child_tag_name_oneof: "AMP-AD"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sticky-ad.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sticky-ad"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

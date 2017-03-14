@@ -48,7 +48,7 @@ tags: {  # amp-fit-text
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-fit-text.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-fit-text"
 }
 # TODO(greggrothaus): amp-fit-text's attribute spec need flushing
 # out now that the spec is available.
@@ -60,7 +60,7 @@ tags: {  # <amp-fit-text>
   attrs: { name: "max-font-size" }
   attrs: { name: "min-font-size" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-fit-text.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-fit-text"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

@@ -49,7 +49,7 @@ tags: {  # amp-reach-player
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-reach-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-reach-player"
 }
 tags: {  # <amp-reach-player>
   html_format: AMP
@@ -63,7 +63,7 @@ tags: {  # <amp-reach-player>
     value_regex: "[0-9a-z-]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-reach-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-reach-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

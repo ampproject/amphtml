@@ -49,7 +49,7 @@ tags: {  # amp-kaltura-player
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-kaltura-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-kaltura-player"
 }
 # amp-kaltura-player either comes with a video-id attribute, or with
 # a data-videoid attribute.
@@ -63,7 +63,7 @@ tags: {  # <amp-kaltura-player>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-kaltura-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-kaltura-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

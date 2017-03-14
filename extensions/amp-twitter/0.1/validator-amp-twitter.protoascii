@@ -49,7 +49,7 @@ tags: {  # amp-twitter
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-twitter.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-twitter"
 }
 tags: {  # <amp-twitter>
   html_format: AMP
@@ -61,7 +61,7 @@ tags: {  # <amp-twitter>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-twitter.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-twitter"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

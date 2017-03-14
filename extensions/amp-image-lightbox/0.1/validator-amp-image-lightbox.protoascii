@@ -48,7 +48,7 @@ tags: {  # amp-image-lightbox
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-image-lightbox.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-lightbox"
 }
 tags: {  # <amp-image-lightbox>
   html_format: AMP
@@ -58,7 +58,7 @@ tags: {  # <amp-image-lightbox>
   # Support dimensions / sizes / etc. like an amp-lightbox.
   attrs: { name: "controls" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-image-lightbox.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-lightbox"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

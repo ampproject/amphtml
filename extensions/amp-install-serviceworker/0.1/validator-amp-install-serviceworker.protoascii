@@ -49,7 +49,7 @@ tags: {  # amp-install-serviceworker
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-install-serviceworker.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-install-serviceworker"
 }
 tags: {  # <amp-install-serviceworker>
   html_format: AMP  # Ads cannot install serviceworkers
@@ -74,7 +74,7 @@ tags: {  # <amp-install-serviceworker>
     blacklisted_value_regex: "__amp_source_origin"
   }
 
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-install-serviceworker.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-install-serviceworker"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

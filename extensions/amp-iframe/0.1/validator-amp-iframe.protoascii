@@ -49,7 +49,7 @@ tags: {  # amp-iframe
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-iframe.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-iframe"
 }
 tags: {  # <amp-iframe>
   html_format: AMP  # Iframes not allowed in ads.
@@ -97,7 +97,7 @@ tags: {  # <amp-iframe>
     mandatory_oneof: "['src', 'srcdoc']"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-iframe.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-iframe"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
