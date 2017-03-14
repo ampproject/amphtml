@@ -188,12 +188,12 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
 
       const impl = liveList.implementation_;
       const update = document.createElement('div');
-      update.innerHTML = 
+      update.innerHTML =
           `<div items>` +
           ` <div id="liveListItem2" data-sort-time=${Date.now()}>` +
           `    <p [text]="liveListText">unbound</p>` +
           ` </div>` +
-          `</div>`
+          `</div>`;
       impl.update(update);
       fixture.doc.getElementById('liveListUpdateButton').click();
 
