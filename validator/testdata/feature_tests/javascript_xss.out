@@ -1,5 +1,5 @@
 FAIL
-feature_tests/javascript_xss.html:27:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec.html#links) [DISALLOWED_HTML]
-feature_tests/javascript_xss.html:28:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec.html#links) [DISALLOWED_HTML]
-feature_tests/javascript_xss.html:29:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec.html#links) [DISALLOWED_HTML]
-feature_tests/javascript_xss.html:30:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec.html#links) [DISALLOWED_HTML]
+feature_tests/javascript_xss.html:27:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/javascript_xss.html:28:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/javascript_xss.html:29:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/javascript_xss.html:30:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]

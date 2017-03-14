@@ -340,10 +340,11 @@ def ValueToString(descriptor, field_desc, value):
 SKIP_FIELDS_FOR_LIGHT = [
     'also_requires_tag_warning',
     'deprecation_url',
+    'deprecated_versions',
     'error_formats',
     'error_specificity',
     'errors',
-    'extension_unused_unless_tag_present',
+    'deprecated_recommends_usage_of_tag',
     'html_format',
     'max_bytes_spec_url',
     'min_validator_revision_required',
@@ -379,6 +380,7 @@ CONSTRUCTOR_ARG_FIELDS = [
 # See TagSpecName for how it's computed. This is a string, and this
 # code generator replaces these fields with tag ids, which are numbers.
 TAG_SPEC_NAME_REFERENCE_FIELD = [
+    'amp.validator.ExtensionSpec.deprecated_recommends_usage_of_tag',
     'amp.validator.ReferencePoint.tag_spec_name',
     'amp.validator.TagSpec.also_requires_tag_warning',
     'amp.validator.TagSpec.extension_unused_unless_tag_present',
