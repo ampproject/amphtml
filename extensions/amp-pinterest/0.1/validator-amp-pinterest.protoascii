@@ -49,7 +49,7 @@ tags: {  # amp-pinterest
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-pinterest.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-pinterest"
 }
 # TODO: Enforce mandatory attributes depending on the value of another
 # attribute. In this case, depending on the value of data-do, data-media and
@@ -65,7 +65,7 @@ tags: {  # <amp-pinterest>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-pinterest.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-pinterest"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

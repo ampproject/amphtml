@@ -49,7 +49,7 @@ tags: {  # amp-sidebar
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sidebar.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
 }
 tags: {  # <amp-sidebar>
   html_format: AMP
@@ -63,7 +63,7 @@ tags: {  # <amp-sidebar>
     value_regex: "(left|right)"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sidebar.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

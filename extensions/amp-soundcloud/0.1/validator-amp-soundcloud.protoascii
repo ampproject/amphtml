@@ -49,7 +49,7 @@ tags: {  # amp-soundcloud
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-soundcloud"
 }
 tags: {  # <amp-soundcloud>
   html_format: AMP
@@ -74,7 +74,7 @@ tags: {  # <amp-soundcloud>
     value_regex: "true|false"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-soundcloud"
   amp_layout: {
     supported_layouts: FIXED_HEIGHT
   }

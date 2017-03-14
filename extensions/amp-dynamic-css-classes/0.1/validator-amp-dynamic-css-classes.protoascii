@@ -47,5 +47,5 @@ tags: {  # amp-dynamic-css-classes
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-dynamic-css-classes.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes"
 }

@@ -49,7 +49,7 @@ tags: {  # amp-list
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-list.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-list"
 }
 tags: {  # <amp-list>
   html_format: AMP
@@ -70,7 +70,7 @@ tags: {  # <amp-list>
   # to reference the id of an existing template element.
   attrs: { name: "template" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-list.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-list"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

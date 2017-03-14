@@ -49,7 +49,7 @@ tags: {  # amp-ooyala-player
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-ooyala-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ooyala-player"
 }
 tags: {  # <amp-ooyala-player>
   html_format: AMP
@@ -69,7 +69,7 @@ tags: {  # <amp-ooyala-player>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-ooyala-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ooyala-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

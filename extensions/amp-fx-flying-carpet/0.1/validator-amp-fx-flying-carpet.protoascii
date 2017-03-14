@@ -48,7 +48,7 @@ tags: {  # <script custom-element="amp-fx-flying-carpet">
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-fx-flying-carpet.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-fx-flying-carpet"
 }
 tags: {  # <amp-fx-flying-carpet>
   html_format: AMP
@@ -60,5 +60,5 @@ tags: {  # <amp-fx-flying-carpet>
     name: "height"
     mandatory: true
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-fx-flying-carpet.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-fx-flying-carpet"
 }

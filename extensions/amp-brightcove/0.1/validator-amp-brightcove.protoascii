@@ -49,7 +49,7 @@ tags: {  # amp-brightcove
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brightcove.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-brightcove"
 }
 tags: {  # <amp-brightcove>
   html_format: AMP
@@ -61,7 +61,7 @@ tags: {  # <amp-brightcove>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brightcove.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-brightcove"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

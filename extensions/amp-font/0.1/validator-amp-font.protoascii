@@ -48,7 +48,7 @@ tags: {  # amp-font
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-font.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-font"
 }
 tags: {  # <amp-font>
   tag_name: "AMP-FONT"
@@ -70,7 +70,7 @@ tags: {  # <amp-font>
   attrs: { name: "on-load-add-class" }
   attrs: { name: "on-load-remove-class" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-font.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-font"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

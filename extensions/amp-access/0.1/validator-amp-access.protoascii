@@ -48,7 +48,7 @@ tags: {  # amp-access
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-access"
 }
 tags: {  # amp-access (json)
   html_format: AMP
@@ -77,5 +77,5 @@ tags: {  # amp-access (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access-spec.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-access"
 }

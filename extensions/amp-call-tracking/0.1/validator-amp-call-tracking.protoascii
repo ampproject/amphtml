@@ -49,7 +49,7 @@ tags: {  # amp-call-tracking
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-call-tracking.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-call-tracking"
 }
 tags: {  # <amp-call-tracking>
   html_format: AMP
@@ -69,7 +69,7 @@ tags: {  # <amp-call-tracking>
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "A"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-call-tracking.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-call-tracking"
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: FILL

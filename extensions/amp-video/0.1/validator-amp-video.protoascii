@@ -47,7 +47,7 @@ tags: {  # amp-video
        error_message: "contents"
      }
    }
-   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-video.html"
+   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
  }
 tags: {  # <amp-video>
   tag_name: "AMP-VIDEO"
@@ -86,7 +86,7 @@ tags: {  # <amp-video>
     blacklisted_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

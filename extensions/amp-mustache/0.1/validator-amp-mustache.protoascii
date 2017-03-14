@@ -17,7 +17,7 @@
 # Specific URL to reference for violations having to do with mustache
 # templates. These are specific to any particular tag, so must live at
 # the top level of this rules file.
-template_spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
+template_spec_url: "https://www.ampproject.org/docs/reference/components/amp-mustache"
 
 tags: {  # amp-mustache
   html_format: AMP
@@ -54,7 +54,7 @@ tags: {  # amp-mustache
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-mustache"
 }
 
 # HTML5, 4.11.3 The template element
@@ -68,5 +68,5 @@ tags: {
     mandatory: true
     value: "amp-mustache"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-mustache"
 }

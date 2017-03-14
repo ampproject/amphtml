@@ -47,7 +47,7 @@ tags: {  # amp-accordion
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-accordion.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-accordion"
 }
 tags: {  # <amp-accordion>
   tag_name: "AMP-ACCORDION"
@@ -56,7 +56,7 @@ tags: {  # <amp-accordion>
   child_tags: {
     child_tag_name_oneof: "SECTION"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-accordion.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-accordion"
   amp_layout: {
     supported_layouts: CONTAINER
   }

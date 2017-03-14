@@ -49,7 +49,7 @@ tags: {  # amp-lightbox
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-lightbox.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-lightbox"
 }
 tags: {  # <amp-lightbox>
   html_format: AMP
@@ -60,7 +60,7 @@ tags: {  # <amp-lightbox>
   attrs: { name: "from" }
   attrs: { name: "scrollable" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-lightbox.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-lightbox"
   amp_layout: {
     supported_layouts: NODISPLAY
   }
