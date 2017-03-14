@@ -25,6 +25,10 @@ import {
 } from '../../src/error';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
+import {
+  resetExperimentTogglesForTesting,
+  toggleExperiment,
+} from '../../src/experiments';
 import * as sinon from 'sinon';
 
 
@@ -342,6 +346,21 @@ describe('reportErrorToServer', () => {
           true));
     const query = parseQueryString(url.search);
     expect(query.s).to.be.undefined;
+  });
+
+  it('should report experiments', () => {
+    resetExperimentTogglesForTesting();
+    toggleExperiment(win, 'test-exp', true);
+    toggleExperiment(win, 'disabled-exp', true);
+    const e = user().createError('123');
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
+          true));
+    const query = parseQueryString(url.search);
+    expect(JSON.parse(query.exps)).to.jsonEqual({
+      'test-exp': true,
+      'disabled-exp': false,
+    });
   });
 
   describe('detectNonAmpJs', () => {

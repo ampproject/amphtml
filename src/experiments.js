@@ -148,6 +148,15 @@ export function experimentToggles(win) {
 }
 
 /**
+ * Returns the cached experiments toggles, or null if they have not been
+ * computed yet.
+ * @return {Object<string, boolean>}
+ */
+export function experimentTogglesOrNull() {
+  return toggles_;
+}
+
+/**
  * Returns a set of experiment IDs currently on.
  * @param {!Window} win
  * @return {!Object<string, boolean>}
