@@ -469,6 +469,49 @@ describes.realWin('meta override', {}, env => {
   });
 });
 
+describes.fakeWin('url override', {}, env => {
+
+  let win;
+
+  beforeEach(() => {
+    win = env.win;
+  });
+
+  it('should allow override iff the experiment is whitelisted', () => {
+    win.AMP_CONFIG = {
+      'allow-url-opt-in': ['e1', 'e3', 'e4', 'e6'],
+      e1: 0,
+      e2: 0,
+      e4: 1,
+      e5: 1,
+    };
+    delete win.location.originalHash;
+    win.location.hash = '#e1=1&e2=1&e3=1&e4=0&e5=0&e6=0'
+
+    resetExperimentTogglesForTesting();
+
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
+    expect(isExperimentOn(win, 'e3')).to.be.true;
+    expect(isExperimentOn(win, 'e4')).to.be.false;
+    expect(isExperimentOn(win, 'e5')).to.be.true; // e5 is not whitelisted
+    expect(isExperimentOn(win, 'e6')).to.be.false;
+
+    toggleExperiment(win, 'e1', false);
+    toggleExperiment(win, 'e2', true);
+    toggleExperiment(win, 'e3', false);
+    toggleExperiment(win, 'e1', true);
+    toggleExperiment(win, 'e2', false);
+    toggleExperiment(win, 'e3', true);
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+    expect(isExperimentOn(win, 'e2')).to.be.true;
+    expect(isExperimentOn(win, 'e3')).to.be.false;
+    expect(isExperimentOn(win, 'e4')).to.be.true;
+    expect(isExperimentOn(win, 'e5')).to.be.false;
+    expect(isExperimentOn(win, 'e6')).to.be.true;
+  });
+});
+
 describe('isCanary', () => {
 
   it('should return value based on binary version', () => {
