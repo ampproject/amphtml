@@ -17,39 +17,14 @@
 tags: {  # amp-ooyala-player
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-ooyala-player extension .js script"
   satisfies: "amp-ooyala-player extension .js script"
-  mandatory_parent: "HEAD"
   requires: "amp-ooyala-player"
-  unique: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-ooyala-player"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-ooyala-player"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-ooyala-player-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-ooyala-player.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-ooyala-player>
   html_format: AMP
@@ -69,7 +44,7 @@ tags: {  # <amp-ooyala-player>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-ooyala-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ooyala-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

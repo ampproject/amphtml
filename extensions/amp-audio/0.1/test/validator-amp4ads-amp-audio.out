@@ -1,2 +1,2 @@
 FAIL
-amp-audio/0.1/test/validator-amp4ads-amp-audio.html:41:2 The attribute 'autoplay' may not appear in tag 'amp-audio (A4A)'. (see https://www.ampproject.org/docs/reference/extended/amp-audio.html) [AMP_TAG_PROBLEM]
+amp-audio/0.1/test/validator-amp4ads-amp-audio.html:41:2 The attribute 'autoplay' may not appear in tag 'amp-audio (A4A)'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
