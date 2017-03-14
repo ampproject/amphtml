@@ -20,6 +20,7 @@ import {loadScript, validateData} from '../3p/3p';
 __kxamp: false,
 __kx_ad_slots: false,
 __kx_ad_start: false,
+__kx_viewability: false,
 */
 
 /**
@@ -44,6 +45,17 @@ export function kixer(global, data) {
     }
   };
   d.addEventListener('load', kxload, false);
+
+  const unlisten = global.context.observeIntersection(function(changes) {
+    changes.forEach(function(c) {
+      if (c.intersectionRect.height > 0) {
+        if (typeof __kx_viewability.process_locked === 'function') {
+          __kx_viewability.process_locked(data.adslot);
+        }
+        unlisten();
+      }
+    });
+  });
 
   loadScript(global, 'https://cdn.kixer.com/ad/load.js', () => {
     __kxamp[data.adslot] = 1;
