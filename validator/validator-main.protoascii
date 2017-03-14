@@ -25,7 +25,7 @@ min_validator_revision_required: 217
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 386
+spec_file_revision: 387
 
 # Validator extensions.
 # =====================
@@ -382,6 +382,99 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
+# AMP & AMP4ADS metadata, name=amp-experiments-opt-in
+# https://github.com/lannka/amphtml/blob/master/tools/experiments/README.md
+tags: {
+  tag_name: "META"
+  spec_name: "meta name=amp-experiments-opt-in"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-experiments-opt-in"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
+# AMP metadata, name=amp-3p-iframe-src
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-3p-iframe-src"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-3p-iframe-src"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-ad"
+}
+# AMP metadata, name=amp-access-state
+# https://www.ampproject.org/docs/reference/components/dynamic/amp-access
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-access-state"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-access-state"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-access"
+}
+# AMP metadata, name=amp-link-variable-allowed-origin
+# https://github.com/ampproject/amphtml/issues/8132
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-link-variable-allowed-origin"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-link-variable-allowed-origin"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
+# AMP4ADS metadata, name=amp4ads-id
+# https://github.com/ampproject/amphtml/issues/7730
+tags: {
+  html_format: AMP4ADS
+  tag_name: "META"
+  spec_name: "meta name=amp4ads-id"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp4ads-id"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
 tags: {
   tag_name: "META"
   spec_name: "meta name= and content="
@@ -390,12 +483,19 @@ tags: {
   # are altogether disallowed.
   attrs: {
     name: "name"
-    blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after|apple-itunes-app)(\\s|$)"
+    blacklisted_value_regex: "(^|\\s)("
+        "amp-.*|"
+        "amp4ads-.*|"
+        "apple-itunes-app|"
+        "content-disposition|"
+        "revisit-after|"
+        "viewport"
+        ")(\\s|$)"
   }
   attrs: { name: "content" }
-  # property / content is non-standard, but commonly seen.
-  attrs: { name: "property" }
+  # itemprop / property is non-standard, but commonly seen.
   attrs: { name: "itemprop" }
+  attrs: { name: "property" }
 }
 # This is redundant with meta charset, but also harmless as long as it's
 # set to utf-8.
