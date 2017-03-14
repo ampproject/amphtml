@@ -399,17 +399,20 @@ describe('performance', () => {
       });
 
       it('should call the flush callback', () => {
-        expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+        const payload = {
+          ampexp: '$internalRuntimeVersion$',
+        };
+        expect(viewerSendMessageStub.withArgs('sendCsi', payload,
             /* cancelUnsent */true)).to.have.callCount(0);
         // coreServicesAvailable calls flush once.
         return perf.coreServicesAvailable().then(() => {
-          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
               /* cancelUnsent */true)).to.have.callCount(1);
           perf.flush();
-          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
               /* cancelUnsent */true)).to.have.callCount(2);
           perf.flush();
-          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
               /* cancelUnsent */true)).to.have.callCount(3);
         });
       });
@@ -625,8 +628,9 @@ describes.fakeWin('performance with experiment', {amp: true}, env => {
     sandbox.stub(perf, 'getHostname_', () => 'cdn.ampproject.org');
     return perf.coreServicesAvailable().then(() => {
       perf.flush();
-      expect(viewerSendMessageStub)
-          .to.be.calledWith('sendCsi', {ampexp: 'legacy-cdn-domain'});
+      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
+        ampexp: '$internalRuntimeVersion$,legacy-cdn-domain',
+      });
     });
   });
 
@@ -634,7 +638,9 @@ describes.fakeWin('performance with experiment', {amp: true}, env => {
     sandbox.stub(perf, 'getHostname_', () => 'curls.cdn.ampproject.org');
     return perf.coreServicesAvailable().then(() => {
       perf.flush();
-      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', undefined);
+      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
+        ampexp: '$internalRuntimeVersion$',
+      });
     });
   });
 });
