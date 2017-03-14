@@ -22,7 +22,7 @@ import {viewportForDoc} from '../viewport';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 import {urls} from '../config';
 import {getMode} from '../mode';
-
+import {isCanary} from '../experiments';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -306,6 +306,9 @@ export class Performance {
     // Add RTV version as experiment ID, so we can slice the data by version.
     if (getMode(this.win).rtvVersion) {
       experiments.push(getMode(this.win).rtvVersion);
+    }
+    if (isCanary(this.win)) {
+      experiments.push('canary');
     }
     // Check if it's the legacy CDN domain.
     if (this.getHostname_() == urls.cdn.split('://')[1]) {
