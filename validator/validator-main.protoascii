@@ -25,7 +25,7 @@ min_validator_revision_required: 217
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 382
+spec_file_revision: 383
 
 # Validator extensions.
 # =====================
@@ -1264,6 +1264,53 @@ tags: {
   attrs: { name: "border" }
   attrs: { name: "height" }
   attrs: { name: "width" }
+}
+# 4.7.2 The iframe element
+tags: {
+  html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
+  tag_name: "IFRAME"
+  mandatory_ancestor: "NOSCRIPT"
+  mandatory_ancestor_suggested_alternative: "AMP-IFRAME"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-iframe"
+  attrs: {
+    name: "name"
+  }
+  attrs: {
+    name: "frameborder"
+    value_regex: "0|1"
+  }
+  attrs: { name: "referrerpolicy" }
+  attrs: {
+    name: "resizable"
+    value: ""
+  }
+  attrs: {
+    name: "height"
+  }
+  attrs: {
+    name: "sandbox"
+  }
+  attrs: {
+    name: "scrolling"
+    value_regex: "auto|yes|no"
+  }
+  attrs: {
+    name: "src"
+    mandatory_oneof: "['src', 'srcdoc']"
+    value_url: {
+      allowed_protocol: "data"
+      allowed_protocol: "https"
+      allow_relative: false
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "srcdoc"
+    mandatory_oneof: "['src', 'srcdoc']"
+  }
+  attrs: {
+    name: "width"
+  }
 }
 # 4.7.6 The video element
 # Only allowed in noscript tags. Otherwise use amp-video.
