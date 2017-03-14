@@ -28,6 +28,7 @@ import {
   parseUrl,
 } from '../../../src/url';
 import {dev, user, rethrowAsync} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
@@ -382,7 +383,9 @@ export class AmpForm {
         return error;
       });
     });
-    this.xhrSubmitPromise_ = p;
+    if (getMode().test) {
+      this.xhrSubmitPromise_ = p;
+    }
   }
 
   /** @private */
