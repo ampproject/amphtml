@@ -41,6 +41,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
@@ -531,6 +532,10 @@ export class AnalyticsGroup {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.listeners_ = [];
+
+    // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
+    /** @private @const {boolean} */
+    this.visibilityV3_ = isExperimentOn(root.ampdoc.win, 'visibility-v3');
   }
 
   /** @override */
@@ -551,7 +556,11 @@ export class AnalyticsGroup {
    * @param {function(!AnalyticsEvent)} handler
    */
   addTrigger(config, handler) {
-    const eventType = dev().assertString(config['on']);
+    let eventType = dev().assertString(config['on']);
+    // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
+    if (eventType == 'visible' && this.visibilityV3_) {
+      eventType = 'visible-v3';
+    }
     let trackerProfile = EVENT_TRACKERS[eventType];
     if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
       trackerProfile = EVENT_TRACKERS['custom'];
