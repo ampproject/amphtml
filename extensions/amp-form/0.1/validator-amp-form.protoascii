@@ -48,5 +48,5 @@ tags: {  # amp-form
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }

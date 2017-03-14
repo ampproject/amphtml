@@ -47,5 +47,5 @@ tags: {  # amp-slides
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-slides.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-slides"
 }

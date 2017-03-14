@@ -48,7 +48,7 @@ tags: {  # <script custom-element="amp-sticky-ad">
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-app-banner.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-app-banner"
 }
 tags: {  # <amp-app-banner>
   html_format: AMP
@@ -68,7 +68,7 @@ tags: {  # <amp-app-banner>
   }
   attr_lists: "extended-amp-global"
   unique: true
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-add-banner.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-add-banner"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

@@ -49,7 +49,7 @@ tags: {  # amp-vimeo
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vimeo.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-vimeo"
 }
 tags: {  # <amp-vimeo>
   html_format: AMP
@@ -62,7 +62,7 @@ tags: {  # <amp-vimeo>
     value_regex: "[0-9]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vimeo.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-vimeo"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

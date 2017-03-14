@@ -49,7 +49,7 @@ tags: {  # amp-youtube
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-youtube"
 }
 tags: {  # <amp-youtube>
   html_format: AMP
@@ -63,7 +63,7 @@ tags: {  # <amp-youtube>
     value_regex: "[^=/?:]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-youtube"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

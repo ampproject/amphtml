@@ -49,7 +49,7 @@ tags: {  # amp-gfycat
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-gfycat.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-gfycat"
 }
 tags: {  # <amp-gfycat>
   html_format: AMP
@@ -65,7 +65,7 @@ tags: {  # <amp-gfycat>
     value: ""
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-gfycat.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-gfycat"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

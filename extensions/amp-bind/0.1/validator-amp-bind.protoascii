@@ -48,7 +48,7 @@ tags: {  # amp-bind
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-bind.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
 }
 tags: {  # <amp-state>
   html_format: AMP
@@ -60,7 +60,7 @@ tags: {  # <amp-state>
     name: "id"
     mandatory: true
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-bind.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
 }
 tags: {  # <amp-state> (json)
   html_format: AMP
@@ -80,5 +80,5 @@ tags: {  # <amp-state> (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-bind.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
 }

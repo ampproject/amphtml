@@ -49,7 +49,7 @@ tags: {  # amp-o2-player
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-o2-player"
 }
 tags: {  # <amp-o2-player>
   html_format: AMP
@@ -65,7 +65,7 @@ tags: {  # <amp-o2-player>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-o2-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
