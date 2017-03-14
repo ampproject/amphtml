@@ -55,6 +55,7 @@ tags: {  # <amp-nexxtv-player>
   html_format: AMP
   tag_name: "AMP-NEXXTV-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
+  satisfies: "amp-nexxtv-player"
   requires: "amp-nexxtv-player extension .js script"
   attrs: {
     name: "data-client"
