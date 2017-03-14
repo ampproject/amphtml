@@ -3129,7 +3129,8 @@ function validateAttributes(
       attrsByKey[encounteredAttrs[i]] = encounteredAttrs[i + 1];
     }
     validateLayout(parsedTagSpec, context, attrsByKey, result);
-    if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+    if (result.status === amp.validator.ValidationResult.Status.FAIL &&
+        amp.validator.LIGHT) {
       return;
     }
   }
@@ -3171,13 +3172,19 @@ function validateAttributes(
 
       validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result);
       if (result.status === amp.validator.ValidationResult.Status.FAIL) {
-        return;
+        if (amp.validator.LIGHT)
+          return;
+        else
+          continue;
       }
       if (hasTemplateAncestor) {
         validateAttrValueBelowTemplateTag(
             parsedTagSpec, context, attrName, attrValue, result);
         if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+        if (amp.validator.LIGHT)
           return;
+        else
+          continue;
         }
       }
       continue;
@@ -3186,7 +3193,10 @@ function validateAttributes(
       validateAttrValueBelowTemplateTag(
           parsedTagSpec, context, attrName, attrValue, result);
       if (result.status === amp.validator.ValidationResult.Status.FAIL) {
-        return;
+        if (amp.validator.LIGHT)
+          return;
+        else
+          continue;
       }
     }
     const attrId = attrsByName[attrName];
@@ -3211,7 +3221,10 @@ function validateAttributes(
       validateNonTemplateAttrValueAgainstSpec(
           parsedAttrSpec, context, attrName, attrValue, spec, result);
       if (result.status === amp.validator.ValidationResult.Status.FAIL) {
-        return;
+        if (amp.validator.LIGHT)
+          return;
+        else
+          continue;
       }
     }
     if (parsedAttrSpec.hasBlacklistedValueRegex()) {
@@ -3220,6 +3233,7 @@ function validateAttributes(
           parsedAttrSpec.getBlacklistedValueRegex().test(decodedAttrValue)) {
         if (amp.validator.LIGHT) {
           result.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
         } else {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -3227,8 +3241,8 @@ function validateAttributes(
               context.getDocLocator(),
               /* params */[attrName, getTagSpecName(spec), attrValue],
               spec.specUrl, result);
+          continue;
         }
-        return;
       }
     }
     if (parsedAttrSpec.getSpec().mandatory) {
@@ -3238,14 +3252,15 @@ function validateAttributes(
         context.hasSeenUrl()) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
       } else {
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.BASE_TAG_MUST_PRECEED_ALL_URLS,
             context.getDocLocator(),
             /* params */[context.firstSeenUrlTagName()], spec.specUrl, result);
+        continue;
       }
-      return;
     }
     // The "at most 1" part of mandatory_oneof: mandatory_oneof
     // wants exactly one of the alternatives, so here
@@ -3255,6 +3270,7 @@ function validateAttributes(
             parsedAttrSpec.getSpec().mandatoryOneof)) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
       } else {
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
@@ -3263,8 +3279,8 @@ function validateAttributes(
             /* params */
             [getTagSpecName(spec), parsedAttrSpec.getSpec().mandatoryOneof],
             spec.specUrl, result);
+        continue;
       }
-      return;
     }
     const mandatoryOneof = parsedAttrSpec.getSpec().mandatoryOneof;
     if (mandatoryOneof !== null) {
@@ -3281,6 +3297,8 @@ function validateAttributes(
     }
     attrspecsValidated[parsedAttrSpec.getId()] = 0;
   }
+  if (result.status == amp.validator.ValidationResult.Status.FAIL)
+    return;
   // The "at least 1" part of mandatory_oneof: If none of the
   // alternatives were present, we report that an attribute is missing.
   for (const mandatoryOneof of parsedTagSpec.getMandatoryOneofs()) {
