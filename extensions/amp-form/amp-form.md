@@ -201,7 +201,7 @@ You can configure your analytics to send these events as in the example below.
 </amp-analytics>
 ```
 
-`amp-form-submit` is fired before a request is sent. For this event, a set of variables is generated that reflects your form's fields. For an example, consider the following form:
+`amp-form-submit` is fired before a request is sent. For this event, a set of variables that reflects your form's fields is generated. For an example, consider the following form:
 
 ```
 <form action-xhr="/register" method="POST" id="registration_form">
