@@ -526,29 +526,16 @@ describes.realWin('amp-form', {
         target: form,
         preventDefault: sandbox.spy(),
       };
-
-      const errors = [];
-      const realSetTimeout = window.setTimeout;
-      sandbox.stub(window, 'setTimeout', (callback, delay) => {
-        realSetTimeout(() => {
-          try {
-            callback();
-          } catch (e) {
-            errors.push(e);
-          }
-        }, delay);
-      });
       ampForm.handleSubmitEvent_(event);
       const findTemplateStub = ampForm.templates_.findAndRenderTemplate;
-      return timer.promise(5).then(() => {
+      return ampForm.xhrSubmitPromiseForTesting().then(() => {
         expect(findTemplateStub).to.be.called;
+        // Template should have rendered an error
         expect(findTemplateStub).to.have.been.calledWith(
             errorContainer, {message: 'hello there'});
         // Check that form has a rendered div with class .submit-error-message.
         renderedTemplate = form.querySelector('[i-amp-rendered]');
         expect(renderedTemplate).to.not.be.null;
-        expect(errors.length).to.be.equal(1);
-        expect(errors[0].message).to.match(/Form submission failed/);
       });
     });
   });
