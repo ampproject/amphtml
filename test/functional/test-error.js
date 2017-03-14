@@ -352,15 +352,13 @@ describe('reportErrorToServer', () => {
   it('should report experiments', () => {
     resetExperimentTogglesForTesting();
     toggleExperiment(window, 'test-exp', true);
-    toggleExperiment(window, 'disabled-exp', true);
+    toggleExperiment(window, 'disabled-exp', false);
     const e = user().createError('123');
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
           true));
     const query = parseQueryString(url.search);
-    expect(query.exps).to.equal(encodeURIComponent(
-      'test-exp=1,disabled-exp=0'
-    ));
+    expect(query.exps).to.equal('test-exp=1,disabled-exp=0');
   });
 
   describe('detectNonAmpJs', () => {

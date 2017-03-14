@@ -17,7 +17,6 @@
 import {
   isCanary,
   isExperimentOn,
-  isExperimentOnAllowUrlOverride,
   experimentToggles,
   toggleExperiment,
   resetExperimentTogglesForTesting,
@@ -164,25 +163,6 @@ describe('isExperimentOn', () => {
 
       expectExperiment('', 'e1').to.be.true;
       expectExperiment('', 'e2').to.be.false;
-    });
-  });
-
-  describe('isExperimentOnAllowUrlOverride', () => {
-
-    function expectUrlExperiment(hashOverride, cookieString, experimentId) {
-      win.document.cookie = cookieString;
-      win.location.hash = hashOverride;
-      return expect(isExperimentOnAllowUrlOverride(win, experimentId));
-    }
-
-    it('should accept override', () => {
-      const cookie = 'AMP_EXP=e2,e4';
-      const url = '#e-e1=1&e-e2=0&e-complexName=1';
-      expectUrlExperiment(url, cookie, 'e1').to.be.true;
-      expectUrlExperiment(url, cookie, 'e2').to.be.false;
-      expectUrlExperiment(url, cookie, 'e4').to.be.true;
-      expectUrlExperiment(url, cookie, 'unknown').to.be.false;
-      expectUrlExperiment(url, cookie, 'complexName').to.be.true;
     });
   });
 });
@@ -503,9 +483,11 @@ describes.fakeWin('url override', {}, env => {
     toggleExperiment(win, 'e1', false);
     toggleExperiment(win, 'e2', true);
     toggleExperiment(win, 'e3', false);
-    toggleExperiment(win, 'e1', true);
-    toggleExperiment(win, 'e2', false);
-    toggleExperiment(win, 'e3', true);
+    toggleExperiment(win, 'e4', true);
+    toggleExperiment(win, 'e5', false);
+    toggleExperiment(win, 'e6', true);
+    toggleExperiment(win, 'e7', false);
+    toggleExperiment(win, 'e8', true);
     expect(isExperimentOn(win, 'e1')).to.be.false;
     expect(isExperimentOn(win, 'e2')).to.be.true;
     expect(isExperimentOn(win, 'e3')).to.be.false;
