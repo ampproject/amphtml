@@ -47,6 +47,7 @@ describes.realWin('analytics', {amp: 1}, env => {
       timer = timerFor(env.win);
       ampdoc = env.ampdoc;
       triggerEventSpy = sandbox.spy();
+      resetServiceForTesting(window, 'amp-analytics-instrumentation');
     });
 
     afterEach(() => {
