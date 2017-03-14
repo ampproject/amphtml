@@ -41,7 +41,10 @@ describe('vsync', () => {
       },
       services: {},
       setTimeout: (fn, t) => {
-        window.setTimeout(fn, t);
+        return window.setTimeout(fn, t);
+      },
+      clearTimeout: index => {
+        window.clearTimeout(index);
       },
       requestAnimationFrame: window.requestAnimationFrame.bind(window),
     };
@@ -272,13 +275,15 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.exist;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+      expect(vsync.backupPass_.isPending()).to.be.true;
 
       rafHandler();
       expect(result).to.equal('mu1');
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+      expect(vsync.backupPass_.isPending()).to.be.false;
     });
 
     it('should schedule via timer frames when doc is not visible', () => {
@@ -296,13 +301,48 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       clock.tick(17);
       expect(result).to.equal('mu1');
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+    });
+
+    it('should run via backup timer if rAF somehow doesnt fire', () => {
+      let rafHandler;
+      vsync.raf_ = function() {
+        // intentionally empty
+      };
+      viewer.isVisible = () => true;
+
+      let result = '';
+      vsync.run({
+        mutate: () => {
+          result += 'mu1';
+        },
+      });
+
+      expect(vsync.tasks_).to.have.length(1);
+      expect(vsync.scheduled_).to.be.true;
+      expect(rafHandler).to.be.undefined;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+      expect(vsync.backupPass_.isPending()).to.be.true;
+
+      clock.tick(17);
+      expect(result).to.equal('');
+      expect(vsync.tasks_).to.have.length(1);
+      expect(vsync.scheduled_).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+      expect(vsync.backupPass_.isPending()).to.be.true;
+
+      clock.tick(240);
+      expect(result).to.equal('mu1');
+      expect(vsync.tasks_).to.have.length(0);
+      expect(vsync.scheduled_).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+      expect(vsync.backupPass_.isPending()).to.be.false;
     });
 
     it('should re-schedule when doc goes invisible', () => {
@@ -320,20 +360,20 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.exist;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
 
       viewer.isVisible = () => false;
       viewerVisibilityChangedHandler();
 
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       clock.tick(17);
       expect(result).to.equal('mu1');
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
     });
 
     it('should re-schedule when doc goes visible', () => {
@@ -351,7 +391,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       viewer.isVisible = () => true;
       viewerVisibilityChangedHandler();
@@ -374,7 +414,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
 
       viewer.isVisible = () => false;
       viewerVisibilityChangedHandler();
@@ -382,7 +422,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
     });
 
     it('should run anim task when visible', () => {
@@ -549,7 +589,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.exist;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
 
       rafHandler();
       expect(result).to.equal('mu1');
@@ -572,13 +612,13 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       clock.tick(17);
       expect(result).to.equal('mu1');
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
     });
 
     it('should re-schedule when doc goes invisible', () => {
@@ -596,20 +636,20 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.exist;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
 
       docState.isHidden = () => true;
       docVisibilityHandler();
 
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       clock.tick(17);
       expect(result).to.equal('mu1');
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
     });
 
     it('should re-schedule when doc goes visible', () => {
@@ -627,7 +667,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       docState.isHidden = () => false;
       docVisibilityHandler();
@@ -650,7 +690,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
 
       docState.isHidden = () => true;
       docVisibilityHandler();
@@ -658,7 +698,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
     });
 
     it('should run anim task when visible', () => {
