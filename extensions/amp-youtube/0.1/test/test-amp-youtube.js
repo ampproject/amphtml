@@ -293,7 +293,6 @@ describe('amp-youtube', function() {
 
   it('should propagate attribute mutations', () => {
     return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
-      const iframe = yt.querySelector('iframe');
       const spy = sandbox.spy(yt.implementation_, 'sendCommand_');
       yt.setAttribute('data-videoid', 'lBTCB7yLs8Y');
       yt.mutatedAttributesCallback({'data-videoid': 'lBTCB7yLs8Y'});
