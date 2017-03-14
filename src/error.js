@@ -347,7 +347,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
     const on = experiments[exp];
     exps.push(`${exp}=${on ? '1' : '0'}`);
   }
-  url += `&exps=${encodeURIComponent(exps)}`;
+  url += `&exps=${encodeURIComponent(exps.join(','))}`;
 
   if (error) {
     const tagName = error && error.associatedElement
