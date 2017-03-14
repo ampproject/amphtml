@@ -135,7 +135,7 @@ export function experimentToggles(win) {
     const hash = win.location.originalHash || win.location.hash;
     const params = parseQueryString(hash);
     for (let i = 0; i < allowed.length; i++) {
-      const param = params[`e-${allowed[i]}`]
+      const param = params[`e-${allowed[i]}`];
       if (param == '1') {
         toggles_[allowed[i]] = true;
       }

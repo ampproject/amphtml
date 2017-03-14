@@ -98,6 +98,7 @@ describe('reportErrorToServer', () => {
     window.onerror = onError;
     sandbox.restore();
     window.viewerState = undefined;
+    resetExperimentTogglesForTesting();
   });
 
   it('reportError with error object', () => {
@@ -350,17 +351,16 @@ describe('reportErrorToServer', () => {
 
   it('should report experiments', () => {
     resetExperimentTogglesForTesting();
-    toggleExperiment(win, 'test-exp', true);
-    toggleExperiment(win, 'disabled-exp', true);
+    toggleExperiment(window, 'test-exp', true);
+    toggleExperiment(window, 'disabled-exp', true);
     const e = user().createError('123');
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
           true));
     const query = parseQueryString(url.search);
-    expect(JSON.parse(query.exps)).to.jsonEqual({
-      'test-exp': true,
-      'disabled-exp': false,
-    });
+    expect(query.exps).to.equal(encodeURIComponent(
+      'test-exp=1,disabled-exp=0'
+    ));
   });
 
   describe('detectNonAmpJs', () => {

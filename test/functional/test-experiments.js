@@ -486,8 +486,8 @@ describes.fakeWin('url override', {}, env => {
       e5: 1,
     };
     delete win.location.originalHash;
-    win.location.hash = '#e1=1&e2=1&e3=1&e4=0&e5=0&e6=0&e7=1&e8=0'
-    win.cookie = 'AMP_EXP=-e7,e8'
+    win.location.hash = '#e1=1&e2=1&e3=1&e4=0&e5=0&e6=0&e7=1&e8=0';
+    win.cookie = 'AMP_EXP=-e7,e8';
 
     resetExperimentTogglesForTesting();
 
