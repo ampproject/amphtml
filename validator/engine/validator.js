@@ -4528,16 +4528,8 @@ amp.validator.categorizeError = function(error) {
           amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
-  // E.g. "The tag 'img' may only appear as a descendant of tag
-  // 'noscript'. Did you mean 'amp-img'?"
+  // E.g. "The tag 'picture' is disallowed."
   if (error.code === amp.validator.ValidationError.Code.DISALLOWED_TAG) {
-    if (error.params[0] === 'img' || error.params[0] === 'video' ||
-        error.params[0] === 'audio' || error.params[0] === 'iframe' ||
-        error.params[0] === 'font') {
-      return amp.validator.ErrorCategory.Code
-          .DISALLOWED_HTML_WITH_AMP_EQUIVALENT;
-    }
-    // E.g. "The tag 'picture' is disallowed."
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   // E.g. "tag 'img' may only appear as a descendant of tag
