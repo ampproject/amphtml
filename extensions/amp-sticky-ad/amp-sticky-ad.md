@@ -37,7 +37,7 @@ limitations under the License.
 
 ## Behavior
 
-- There can be only one `<amp-sticky-ad>` in an AMP document. The `<amp-sticky-ad>` should only have one direct child of `<amp-ad>`.
+- There can be only one `<amp-sticky-ad>` in an AMP document. The `<amp-sticky-ad>` should only have one direct child: `<amp-ad>`. **Note**: Make sure you include any required scripts for the `<amp-ad>` component.
 - The sticky ad appears at the bottom of a page.
 - The sticky ad introduces a full-width blank container and then fills the sticky ad based on the width and height of the `<amp-ad>`.
 - The height of the sticky-ad is whatever its child needs up to its max-height.
