@@ -479,14 +479,15 @@ describes.fakeWin('url override', {}, env => {
 
   it('should allow override iff the experiment is whitelisted', () => {
     win.AMP_CONFIG = {
-      'allow-url-opt-in': ['e1', 'e3', 'e4', 'e6'],
+      'allow-url-opt-in': ['e1', 'e3', 'e4', 'e6', 'e7', 'e8'],
       e1: 0,
       e2: 0,
       e4: 1,
       e5: 1,
     };
     delete win.location.originalHash;
-    win.location.hash = '#e1=1&e2=1&e3=1&e4=0&e5=0&e6=0'
+    win.location.hash = '#e1=1&e2=1&e3=1&e4=0&e5=0&e6=0&e7=1&e8=0'
+    win.cookie = 'AMP_EXP=-e7,e8'
 
     resetExperimentTogglesForTesting();
 
@@ -496,6 +497,8 @@ describes.fakeWin('url override', {}, env => {
     expect(isExperimentOn(win, 'e4')).to.be.false;
     expect(isExperimentOn(win, 'e5')).to.be.true; // e5 is not whitelisted
     expect(isExperimentOn(win, 'e6')).to.be.false;
+    expect(isExperimentOn(win, 'e7')).to.be.true; // overrides cookies
+    expect(isExperimentOn(win, 'e8')).to.be.false; // overrides cookies
 
     toggleExperiment(win, 'e1', false);
     toggleExperiment(win, 'e2', true);
@@ -509,6 +512,8 @@ describes.fakeWin('url override', {}, env => {
     expect(isExperimentOn(win, 'e4')).to.be.true;
     expect(isExperimentOn(win, 'e5')).to.be.false;
     expect(isExperimentOn(win, 'e6')).to.be.true;
+    expect(isExperimentOn(win, 'e7')).to.be.false;
+    expect(isExperimentOn(win, 'e8')).to.be.true;
   });
 });
 
