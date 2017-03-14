@@ -930,43 +930,63 @@ tags: {
 # 4.3.5 The aside element
 tags: {
   tag_name: "ASIDE"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.3.6 The h1, h2, h3, h4, h5, and h6 elements
 tags: {
   tag_name: "H1"
   attrs: { name: "align" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 tags: {
   tag_name: "H2"
   attrs: { name: "align" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 tags: {
   tag_name: "H3"
   attrs: { name: "align" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 tags: {
   tag_name: "H4"
   attrs: { name: "align" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 tags: {
   tag_name: "H5"
   attrs: { name: "align" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 tags: {
   tag_name: "H6"
   attrs: { name: "align" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.3 7 The header element
 tags: {
   tag_name: "HEADER"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.3 7 The footer element
 tags: {
   tag_name: "FOOTER"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.3 7 The address element
 tags: {
   tag_name: "ADDRESS"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 
 # 4.4 Grouping Content
@@ -974,6 +994,8 @@ tags: {
 tags: {
   tag_name: "P"
   attrs: { name: "align" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.4.2 The hr element
 tags: {
@@ -982,6 +1004,8 @@ tags: {
 # 4.4.3 The pre element
 tags: {
   tag_name: "PRE"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.4.4 The blockquote element
 attr_lists: {
@@ -1018,6 +1042,8 @@ tags: {
   tag_name: "BLOCKQUOTE"
   attrs: { name: "align" }
   attr_lists: "cite-attr"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.4.5 The ol element
 tags: {
@@ -1046,6 +1072,8 @@ tags: {
     name: "value"
     value_regex: "[0-9]*"
   }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.4.8 The dl element
 tags: {
@@ -1054,10 +1082,14 @@ tags: {
 # 4.4.9 The dt element
 tags: {
   tag_name: "DT"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.4.10 The dd element
 tags: {
   tag_name: "DD"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.4.11 The figure element
 tags: {
@@ -1066,11 +1098,15 @@ tags: {
 # 4.4.12 The figcaption element
 tags: {
   tag_name: "FIGCAPTION"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.4.13 The div element
 tags: {
   tag_name: "DIV"
   attrs: { name: "align" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.4.14 The main element
 tags: {
@@ -1160,44 +1196,65 @@ tags: {
   # major browsers.
   attrs: { name: "border" }
   attrs: { name: "name" }
+  # <amp-bind>
+  attrs: { name: "[href]" }
+  attrs: { name: "[text]" }
   spec_url: "https://www.ampproject.org/docs/reference/spec#links"
 }
 # 4.5.2 The em element
 tags: {
   tag_name: "EM"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.3 The strong element
 tags: {
   tag_name: "STRONG"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.4 The small element
 tags: {
   tag_name: "SMALL"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.5 The s element
 tags: {
   tag_name: "S"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.6 The cite element
 tags: {
   tag_name: "CITE"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.7 The q element
 tags: {
   tag_name: "Q"
   attr_lists: "cite-attr"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.8 The dfn element
 tags: {
   tag_name: "DFN"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.9 The abbr element
 tags: {
   tag_name: "ABBR"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.10 The data element
 tags: {
   tag_name: "DATA"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.11 The time element
 tags: {
@@ -1205,78 +1262,116 @@ tags: {
   attrs: {
     name: "datetime"
   }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.12 The code element
 tags: {
   tag_name: "CODE"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.13 The var element
 tags: {
   tag_name: "VAR"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.14 The samp element
 tags: {
   tag_name: "SAMP"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.15 The kbd element
 tags: {
   tag_name: "KBD"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.16 The sub and sup elements
 tags: {
   tag_name: "SUB"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 tags: {
   tag_name: "SUP"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.17 The i element
 tags: {
   tag_name: "I"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.18 The b element
 tags: {
   tag_name: "B"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.19 The u element
 tags: {
   tag_name: "U"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.20 The mark element
 tags: {
   tag_name: "MARK"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.21 The ruby element
 tags: {
   tag_name: "RUBY"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.22 The rb element
 tags: {
   tag_name: "RB"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.23 The rt element
 tags: {
   tag_name: "RT"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.24 The rtc element
 tags: {
   tag_name: "RTC"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.25 The rp element
 tags: {
   tag_name: "RP"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.26 The bdi element
 tags: {
   tag_name: "BDI"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.27 The bdo element
 tags: {
   tag_name: "BDO"
   attrs: { name: "dir" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.28 The span element
 tags: {
   tag_name: "SPAN"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.5.29 The br element
 tags: {
@@ -1296,6 +1391,8 @@ tags: {
   # that can't hurt performance, rendering or security, we don't validate
   # the values.
   attrs { name: "datetime" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
   attr_lists: "cite-attr"
 }
 # 4.6.2 The del element
@@ -1306,6 +1403,8 @@ tags: {
   # that can't hurt performance, rendering or security, we don't validate
   # the values.
   attrs { name: "datetime" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
   attr_lists: "cite-attr"
 }
 
@@ -1464,6 +1563,9 @@ tags: {
   }
   attrs: { name: "media" }
   attrs: { name: "type" }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  attrs: { name: "[type]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
 }
 tags: {
@@ -1480,6 +1582,9 @@ tags: {
   }
   attrs: { name: "media" }
   attrs: { name: "type" }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  attrs: { name: "[type]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
 }
 tags: {
@@ -1599,24 +1704,40 @@ tags: {
   spec_name: "amp-audio > track"
   mandatory_parent: "AMP-AUDIO"
   attr_lists: "track-attrs-no-subtitles"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
 }
 tags: {
   tag_name: "TRACK"
   spec_name: "amp-audio > track[kind=subtitles]"
   mandatory_parent: "AMP-AUDIO"
   attr_lists: "track-attrs-subtitles"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
 }
 tags: {
   tag_name: "TRACK"
   spec_name: "amp-video > track"
   mandatory_parent: "AMP-VIDEO"
   attr_lists: "track-attrs-no-subtitles"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
 }
 tags: {
   tag_name: "TRACK"
   spec_name: "amp-video > track[kind=subtitles]"
   mandatory_parent: "AMP-VIDEO"
   attr_lists: "track-attrs-subtitles"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
 }
 
 # 4.7.15 SVG
@@ -2316,6 +2437,8 @@ tags: {
 # 4.9.2 The caption element
 tags: {
   tag_name: "CAPTION"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.9.3 The colgroup element
 tags: {
@@ -2334,10 +2457,14 @@ tags: {
 # 4.9.6 The thead element
 tags: {
   tag_name: "THEAD"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.9.7 The tfoot element
 tags: {
   tag_name: "TFOOT"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.9.8 The tr element
 tags: {
@@ -2362,6 +2489,8 @@ tags: {
   attrs: { name: "height" }
   attrs: { name: "valign" }
   attrs: { name: "width" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 # 4.9.10 The th element
 tags: {
@@ -2624,6 +2753,8 @@ attr_lists: {
 tags: {
   tag_name: "LABEL"
   attrs: { name: "for" }
+  # <amp-bind>
+  attrs: { name: "[text]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.5 The input element
@@ -2663,6 +2794,30 @@ tags: {
   }
   attrs: { name: "value" }
   attrs: { name: "width" }
+  # <amp-bind>
+  attrs: { name: "[accept]" }
+  attrs: { name: "[accesskey]" }
+  attrs: { name: "[autocomplete]" }
+  attrs: { name: "[checked]" }
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[height]" }
+  attrs: { name: "[inputmode]" }
+  attrs: { name: "[max]" }
+  attrs: { name: "[maxlength]" }
+  attrs: { name: "[min]" }
+  attrs: { name: "[minlength]" }
+  attrs: { name: "[multiple]" }
+  attrs: { name: "[pattern]" }
+  attrs: { name: "[placeholder]" }
+  attrs: { name: "[readonly]" }
+  attrs: { name: "[required]" }
+  attrs: { name: "[selectiondirection]" }
+  attrs: { name: "[size]" }
+  attrs: { name: "[spellcheck]" }
+  attrs: { name: "[step]" }
+  attrs: { name: "[type]" }
+  attrs: { name: "[value]" }
+  attrs: { name: "[width]" }
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
@@ -2683,6 +2838,11 @@ tags: {
   }
   attrs: { name: "type" }
   attrs: { name: "value" }
+  # <amp-bind>
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[text]" }
+  attrs: { name: "[type]" }
+  attrs: { name: "[value]" }
   attr_lists: "input-name-attr"
 }
 # Button variant specifically supporting <amp-app-banner> tag with the
@@ -2716,6 +2876,12 @@ tags: {
   attrs: { name: "multiple" }
   attrs: { name: "required" }
   attrs: { name: "size" }
+  # <amp-bind>
+  attrs: { name: "[autofocus]" }
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[multiple]" }
+  attrs: { name: "[required]" }
+  attrs: { name: "[size]" }
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
@@ -2730,6 +2896,9 @@ tags: {
   mandatory_parent: "SELECT"
   attrs: { name: "disabled" }
   attrs: { name: "label" }
+  # <amp-bind>
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[label]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.10 The option element
@@ -2739,6 +2908,12 @@ tags: {
   attrs: { name: "label" }
   attrs: { name: "selected" }
   attrs: { name: "value" }
+  # <amp-bind>
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[label]" }
+  attrs: { name: "[selected]" }
+  attrs: { name: "[text]" }
+  attrs: { name: "[value]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.11 The textarea element
@@ -2758,7 +2933,24 @@ tags: {
   attrs: { name: "selectionend" }
   attrs: { name: "selectionstart" }
   attrs: { name: "spellcheck" }
-  attrs: { name: "wrap"}
+  attrs: { name: "wrap" }
+  # <amp-bind>
+  attrs: { name: "[autocomplete]" }
+  attrs: { name: "[autofocus]" }
+  attrs: { name: "[cols]" }
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[maxlength]" }
+  attrs: { name: "[minlength]" }
+  attrs: { name: "[placeholder]" }
+  attrs: { name: "[readonly]" }
+  attrs: { name: "[required]" }
+  attrs: { name: "[rows]" }
+  attrs: { name: "[selectiondirection]" }
+  attrs: { name: "[selectionend]" }
+  attrs: { name: "[selectionstart]" }
+  attrs: { name: "[spellcheck]" }
+  attrs: { name: "[text]" }
+  attrs: { name: "[wrap]" }
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
@@ -2789,11 +2981,15 @@ tags: {
 tags: {
   tag_name: "FIELDSET"
   attrs: { name: "disabled" }
+  # <amp-bind>
+  attrs: { name: "[disabled]" }
   attr_lists: "input-name-attr"
 }
 # 4.10.17 The legend element
 tags: {
   tag_name: "LEGEND"
+  # <amp-bind>
+  attrs: { name: "[text]" }
 }
 
 # 4.11 Scripting
@@ -2999,6 +3195,11 @@ tags: {  # <amp-img>
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
+  # <amp-bind>
+  attrs: { name: "[alt]" }
+  attrs: { name: "[attribution]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srcset]" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
   spec_url: "https://www.ampproject.org/docs/reference/amp-img"
@@ -3045,6 +3246,9 @@ attr_lists: {
   attrs: { name: "layout" }
   attrs: { name: "sizes" }
   attrs: { name: "width" }
+  # <amp-bind>
+  attrs: { name: "[height]" }
+  attrs: { name: "[width]" }
 }
 
 # AMP Extension attributes. These attributes are used in every AMP
@@ -3311,6 +3515,8 @@ attr_lists: {
       also_requires_attr: "validation-for"
     }
   }
+  # <amp-bind>
+  attrs: { name: "[class]" }
 }
 
 # Error Specificity: Used in the verbose validator to select between multiple

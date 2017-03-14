@@ -42,6 +42,8 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
     name: "multiple"
     value: ""
   }
+  # <amp-bind>
+  attrs: { name: "[selected]" }
   reference_points: {
     tag_spec_name: "AMP-SELECTOR option"
   }

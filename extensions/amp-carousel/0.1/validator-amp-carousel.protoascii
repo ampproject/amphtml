@@ -55,6 +55,8 @@ tags: {  # <amp-carousel>
     name: "type"
     value_regex: "slides|carousel"
   }
+  # <amp-bind>
+  attrs: { name: "[slide]" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
   amp_layout: {
