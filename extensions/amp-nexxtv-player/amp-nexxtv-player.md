@@ -55,17 +55,17 @@ With the responsive layout, the width and height from the example should yield c
 
 ## Attributes
 
-**mediaid**
+**data-mediaid**
 
 * Required
 * ID of your media you want to play
 
-**client**
+**data-client**
 
 * Required
 * your domain ID
 
-**streamtype**
+**data-streamtype**
 
 * optional
 * default: video
@@ -73,20 +73,20 @@ With the responsive layout, the width and height from the example should yield c
 * playlist-masked: playlist without possibility to skip or choose video
 * album: is an audio playlist
 
-**seek-to**
+**data-seek-to**
 
 Starting point of your media in seconds e.g. video starting 1:30min
 
 * optional
 
-**mode**
+**data-mode**
 
 * optional
 * default: static
 * possible values: [static | api]
 
 
-**origin**
+**data-origin**
 
 Source from which embed domain media is played.
 
