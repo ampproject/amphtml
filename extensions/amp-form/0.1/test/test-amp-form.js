@@ -394,28 +394,35 @@ describes.realWin('amp-form', {
   });
 
   it('should trigger amp-form-submit analytics event with form data', () => {
-      return getAmpForm().then(ampForm => {
-          sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
-          sandbox.stub(ampForm, 'analyticsEvent_');
-          const event = {
-              stopImmediatePropagation: sandbox.spy(),
-              target: ampForm.form_,
-              preventDefault: sandbox.spy(),
-          };
-          ampForm.handleSubmitEvent_(event);
-          expect(event.preventDefault).to.be.calledOnce;
-          expect(ampForm.analyticsEvent_).to.have.been.calledWith('amp-form-submit', {"formId": "", "formFields[name]": "John Miller"});
-          return timer.promise(1).then(() => {
-              expect(ampForm.xhr_.fetch).to.be.calledOnce;
-              expect(ampForm.xhr_.fetch).to.be.calledWith('https://example.com');
+    return getAmpForm().then(ampForm => {
+      sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+      sandbox.stub(ampForm, 'analyticsEvent_');
+      const event = {
+        stopImmediatePropagation: sandbox.spy(),
+        target: ampForm.form_,
+        preventDefault: sandbox.spy(),
+      };
+      const expectedFormData = {
+        'formId': '',
+        'formFields[name]': 'John Miller',
+      };
+      ampForm.handleSubmitEvent_(event);
+      expect(event.preventDefault).to.be.calledOnce;
+      expect(ampForm.analyticsEvent_).to.be.calledWith(
+        'amp-form-submit',
+        expectedFormData
+      );
+      return timer.promise(1).then(() => {
+        expect(ampForm.xhr_.fetch).to.be.calledOnce;
+        expect(ampForm.xhr_.fetch).to.be.calledWith('https://example.com');
 
-              const xhrCall = ampForm.xhr_.fetch.getCall(0);
-              const config = xhrCall.args[1];
-              expect(config.body).to.not.be.null;
-              expect(config.method).to.equal('POST');
-              expect(config.credentials).to.equal('include');
-          });
+        const xhrCall = ampForm.xhr_.fetch.getCall(0);
+        const config = xhrCall.args[1];
+        expect(config.body).to.not.be.null;
+        expect(config.method).to.equal('POST');
+        expect(config.credentials).to.equal('include');
       });
+    });
   });
 
   it('should block multiple submissions and disable buttons', () => {
@@ -1412,7 +1419,7 @@ describes.realWin('amp-form', {
     it('should trigger amp-form-submit analytics event with form data', () => {
       return getAmpForm().then(ampForm => {
         const form = ampForm.form_;
-        form.id = "registration";
+        form.id = 'registration';
 
         const passwordInput = document.createElement('input');
         passwordInput.setAttribute('name', 'password');
@@ -1432,13 +1439,16 @@ describes.realWin('amp-form', {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         sandbox.stub(ampForm, 'analyticsEvent_');
         ampForm.handleSubmitAction_();
-        let expectedFormData = {
-          "formId": "registration",
-          "formFields[name]": "John Miller",
-          "formFields[password]": "god"
+        const expectedFormData = {
+          'formId': 'registration',
+          'formFields[name]': 'John Miller',
+          'formFields[password]': 'god',
         };
         expect(form.submit).to.have.been.called;
-        expect(ampForm.analyticsEvent_).to.have.been.calledWith('amp-form-submit', expectedFormData);
+        expect(ampForm.analyticsEvent_).to.be.calledWith(
+          'amp-form-submit',
+          expectedFormData
+        );
       });
     });
   });
