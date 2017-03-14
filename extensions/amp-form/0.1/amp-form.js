@@ -370,7 +370,6 @@ export class AmpForm {
             /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
                 error));
         rethrowAsync('Form submission failed:', error);
-        return error;
       });
     });
     if (getMode().test) {
