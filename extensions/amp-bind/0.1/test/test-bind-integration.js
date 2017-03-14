@@ -33,7 +33,8 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
       toggleExperiment(fixture, 'amp-bind', true, true);
-      return fixture.awaitEvent('amp:load:start', 1);
+      const numberOfExtensionElements = 4;
+      return fixture.awaitEvent('amp:load:start', numberOfExtensionElements);
     }).then(() => {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
@@ -268,4 +269,18 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
   });
 
+  describe('amp-brightcove', () => {
+    it('should support binding to data-account', () => {
+      const button = fixture.doc.getElementById('brightcoveButton');
+      const bc = fixture.doc.getElementById('brightcove');
+      // Force layout in case element is not in viewport.
+      bc.implementation_.layoutCallback();
+      const iframe = bc.querySelector('iframe');
+      expect(iframe.src).to.not.contain('bound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(iframe.src).to.contain('bound');
+      });
+    });
+  });
 });
