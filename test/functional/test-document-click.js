@@ -22,7 +22,6 @@ import {
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
 import * as sinon from 'sinon';
-import {toggleExperiment} from '../../src/experiments';
 
 describe('test-document-click onDocumentElementClick_', () => {
   let sandbox;
@@ -387,7 +386,6 @@ describe('test-document-click onDocumentElementClick_', () => {
       querySelectorSpy.returns({
         href: 'https://www.google.com',
       });
-      toggleExperiment(win, 'link-url-replace', true);
       tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
       tgt.setAttribute('data-amp-replace', 'QUERY_PARAM');
       onDocumentElementClick_(evt, ampdoc, viewport, history);
@@ -399,20 +397,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       querySelectorSpy.returns({
         href: 'https://www.google.com',
       });
-      toggleExperiment(win, 'link-url-replace', true);
       tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
-      onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(tgt.href).to.equal(
-           'https://www.google.com/link?out=QUERY_PARAM(hello)');
-    });
-
-    it('should not expand a link with experiment off', () => {
-      querySelectorSpy.returns({
-        href: 'https://www.google.com',
-      });
-      toggleExperiment(win, 'link-url-replace', false);
-      tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
-      tgt.setAttribute('data-amp-replace', 'QUERY_PARAM');
       onDocumentElementClick_(evt, ampdoc, viewport, history);
       expect(tgt.href).to.equal(
            'https://www.google.com/link?out=QUERY_PARAM(hello)');

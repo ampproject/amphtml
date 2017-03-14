@@ -37,7 +37,7 @@ The AMP Cache parses and re-serializes all documents to remove any ambiguities i
 
 | before | after |
 | --- | --- |
-| `<p data-foo=’< >’>` | `<p data-foo="&lt; &gt">` |
+| `<p data-foo='< >'>` | `<p data-foo="&lt; &gt">` |
 
 </details>
 

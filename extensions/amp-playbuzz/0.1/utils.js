@@ -82,7 +82,7 @@ export function handleMessageByName(element, event, messageName, handler) {
 /**
  * @param {Object} event
  * @param {String} eventName
- * @param {Function} handler
+ * @param {function} handler
  */
 function handlePlaybuzzItemEvent(event, eventName, handler) {
   const data = parsePlaybuzzEventData(event.data);

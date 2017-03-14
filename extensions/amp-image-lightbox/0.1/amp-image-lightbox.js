@@ -716,8 +716,14 @@ class AmpImageLightbox extends AMP.BaseElement {
     return layout == Layout.NODISPLAY;
   }
 
-  /** @override */
-  buildCallback() {
+  /**
+  * Lazily builds the image-lightbox DOM on the first open.
+  * @private
+  * */
+  buildLightbox_() {
+    if (this.container_) {
+      return;
+    }
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('-amp-image-lightbox-container');
     this.element.appendChild(this.container_);
@@ -772,6 +778,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (this.active_) {
       return;
     }
+    this.buildLightbox_();
 
     const source = invocation.source;
     user().assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],

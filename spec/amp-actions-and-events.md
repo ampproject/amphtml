@@ -314,6 +314,6 @@ actions that apply to the whole document.
   </tr>
   <tr>
     <td>setState</td>
-    <td>Updates local bindable state. Requires <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>.</td>
+    <td>Updates <code>amp-bind</code>'s state. See <a href="../extensions/amp-bind/amp-bind.md#ampsetstate">details</a>.</td>
   </tr>
 </table>
