@@ -163,17 +163,6 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   });
 
   describe('amp-live-list integration', () => {
-    function createFromServer() {
-      const parent = document.createElement('div');
-      parent.innerHTML = 
-          `<div items>` + 
-          ` <div id="2" data-sort-time=${Date.now()}>` + 
-          `    <p [text]="liveListTet">unbound</p>` + 
-          ` </div>` +
-          `</div>`
-      return parent;
-    }
-
     it('should detect bindings in initial live-list elements', () => {
       const liveListItems = fixture.doc.getElementById('liveListItems');
       expect(liveListItems.children.length).to.equal(1);
@@ -198,7 +187,13 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       expect(liveListItem1.firstElementChild.textContent).to.equal('unbound');
 
       const impl = liveList.implementation_;
-      const update = createFromServer();
+      const update = document.createElement('div');
+      update.innerHTML = 
+          `<div items>` +
+          ` <div id="liveListItem2" data-sort-time=${Date.now()}>` +
+          `    <p [text]="liveListText">unbound</p>` +
+          ` </div>` +
+          `</div>`
       impl.update(update);
       fixture.doc.getElementById('liveListUpdateButton').click();
 
