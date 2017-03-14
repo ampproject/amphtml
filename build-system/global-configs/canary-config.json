@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["visibility-v2"],
+  "allow-doc-opt-in": ["visibility-v2", "visibility-v3"],
 
   "canary": 1,
   "amp-experiment": 1,
