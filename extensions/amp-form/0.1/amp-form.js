@@ -17,6 +17,10 @@
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
+import {
+  installStylesForShadowRoot,
+  isShadowRoot,
+} from '../../../src/shadow-embed';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {
   assertAbsoluteHttpOrHttpsUrl,
@@ -754,26 +758,57 @@ export class AmpFormService {
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    const doc = ampdoc.win.document;
-    installStyles(doc, CSS, () => {
-      this.installSubmissionHandlers_(doc);
+
+    /** @const {!Document|!ShadowRoot} */
+    this.rootNode_ = ampdoc.getRootNode();
+
+    /** @const {boolean} */
+    this.isShadow_ = isShadowRoot(this.rootNode_);
+
+    this.initialize_();
+  }
+
+  /**
+   * Install the amp-form CSS and handlers on the ampdoc.
+   */
+  initialize_() {
+    if (this.isShadow_) {
+      const root = /** @type {!ShadowRoot} */ (this.rootNode_);
+      installStylesForShadowRoot(root, CSS);
+      this.install_();
+    } else {
+      const root = /** @type {!Document} */ (this.rootNode_);
+      installStyles(root, CSS, () => this.install_());
+    }
+  }
+
+  /**
+   * Install the appropriate handlers depending on the type of ampdoc.
+   */
+  install_() {
+    if (this.isShadow_) {
+      this.installSubmissionHandlers_(
+          this.rootNode_.getElementsByTagName('form'));
+    } else {
+      const doc = /** @type {!Document} */ (this.rootNode_);
+      onDocumentReady(doc, () => {
+        this.installSubmissionHandlers_(doc.forms);
+      });
       this.installGlobalEventListener_(doc);
-    });
+    }
   }
 
   /**
    * Installs submission handler on all forms in the document.
-   * @param {!Document} doc
+   * @param {?IArrayLike} forms
    * @previousValidityState
    * @private
    */
-  installSubmissionHandlers_(doc) {
-    onDocumentReady(doc, () => {
-      toArray(doc.forms).forEach((form, index) => {
-        if (!form.classList.contains('i-amphtml-form')) {
-          new AmpForm(form, `amp-form-${index}`);
-        }
-      });
+  installSubmissionHandlers_(forms) {
+    toArray(forms).forEach((form, index) => {
+      if (!form.classList.contains('i-amphtml-form')) {
+        new AmpForm(form, `amp-form-${index}`);
+      }
     });
   }
 
@@ -783,7 +818,7 @@ export class AmpFormService {
    */
   installGlobalEventListener_(doc) {
     doc.addEventListener('amp:dom-update', () => {
-      this.installSubmissionHandlers_(doc);
+      this.installSubmissionHandlers_(doc.forms);
     });
   }
 }
