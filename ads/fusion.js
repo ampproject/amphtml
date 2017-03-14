@@ -17,8 +17,8 @@
 import {writeScript, validateData} from '../3p/3p';
 
 function queryParametersToObject(input) {
-  if (!input) { 
-    return undefined; 
+  if (!input) {
+    return undefined;
   }
   return input.split('&').filter(_ => _).reduce((obj, val) => {
     const kv = val.split('=');
