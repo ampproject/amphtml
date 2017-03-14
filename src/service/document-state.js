@@ -15,10 +15,9 @@
  */
 
 import {Observable} from '../observable';
-import {fromClass} from '../service';
 import {getVendorJsPropertyName} from '../style';
 import {waitForChild} from '../dom';
-
+import {registerServiceBuilder, getService} from '../service';
 
 /**
  */
@@ -148,8 +147,16 @@ export class DocumentState {
 
 /**
  * @param {!Window} window
+ */
+export function installDocumentStateService(window) {
+  registerServiceBuilder(window, 'documentState', DocumentState);
+}
+
+/**
+ * @param {!Window} window
  * @return {!DocumentState}
  */
 export function documentStateFor(window) {
-  return fromClass(window, 'documentState', DocumentState);
+  installDocumentStateService(window);
+  return getService(window, 'documentState');
 }
