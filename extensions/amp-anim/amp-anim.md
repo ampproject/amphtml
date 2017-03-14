@@ -41,9 +41,7 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-anim` component is very similar to the `amp-img` element, and provides additional functionality to manage loading and playing of animated images such as GIFs.
-
-The `amp-anim` component can also have an optional placeholder child, to display while the `src` file is loading. The placeholder is specified via the `placeholder` attribute:
+The `amp-anim` component is very similar to the `amp-img` element, and provides additional functionality to manage loading and playing of animated images such as GIFs: it can have an optional placeholder child, to display while the `src` file is loading. The placeholder is specified via the `placeholder` attribute:
 
 ```html
 <amp-anim width=400 height=300 src="my-gif.gif">
