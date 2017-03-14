@@ -21,7 +21,7 @@ import {Crypto} from '../../../../src/service/crypto-impl';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
 import {variableServiceFor} from '../variables';
 import {
-  getUserNotificationManager,
+  userNotificationManagerFor,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -97,7 +97,7 @@ describe('amp-analytics', function() {
       windowApi = iframe.win;
       ampdoc = new AmpDocSingle(windowApi);
       cidServiceForDocForTesting(ampdoc);
-      uidService = getUserNotificationManager(iframe.win);
+      uidService = userNotificationManagerFor(iframe.win);
       ins = instrumentationServiceForDocForTesting(ampdoc);
     });
   });
