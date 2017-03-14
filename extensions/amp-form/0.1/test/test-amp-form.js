@@ -198,7 +198,6 @@ describes.realWin('amp-form', {
 
   it('should not trigger amp-form-submit analytics event', () => {
     const form = getForm();
-    document.body.appendChild(form);
     form.removeAttribute('action-xhr');
     document.body.appendChild(form);
     const ampForm = new AmpForm(form);
