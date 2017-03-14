@@ -19,37 +19,13 @@ tags: {  # amp-nexxtv-player
   tag_name: "SCRIPT"
   spec_name: "amp-nexxtv-player extension .js script"
   satisfies: "amp-nexxtv-player extension .js script"
-  mandatory_parent: "HEAD"
-  unique: true
   requires: "amp-nexxtv-player"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-nexxtv-player"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-nexxtv-player"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-nexxtv-player-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-nexxtv-player"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-nexxtv-player>
   html_format: AMP
@@ -57,6 +33,7 @@ tags: {  # <amp-nexxtv-player>
   disallowed_ancestor: "AMP-SIDEBAR"
   satisfies: "amp-nexxtv-player"
   requires: "amp-nexxtv-player extension .js script"
+  satisfies: "amp-nexxtv-player"
   attrs: {
     name: "data-client"
     mandatory: true

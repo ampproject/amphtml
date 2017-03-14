@@ -28,6 +28,8 @@ goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AmpLayout');
 goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
+goog.require('amp.validator.BlackListedCDataRegex');
+goog.require('amp.validator.CdataSpec');
 goog.require('amp.validator.CssSpec');
 goog.require('amp.validator.ErrorCategory');
 goog.require('amp.validator.LIGHT');
@@ -615,6 +617,33 @@ class ParsedTagSpec {
       this.mergeAttrs(parsedAttrSpecs.globalAttrs, parsedAttrSpecs);
     }
     sortAndUniquify(this.mandatoryOneofs_);
+
+    if (tagSpec.extensionSpec !== null) {
+      this.expandExtensionSpec();
+    }
+  }
+
+  /**
+   * Called on a TagSpec which contains an ExtensionSpec, expands several
+   * fields in the tag spec.
+   */
+  expandExtensionSpec() {
+    const extensionSpec = this.spec_.extensionSpec;
+    this.spec_.specName = extensionSpec.name + ' extension .js script';
+    this.spec_.mandatoryParent = 'HEAD';
+    if (this.spec_.extensionSpec.deprecatedAllowDuplicates)
+      this.spec_.uniqueWarning = true;
+    else
+      this.spec_.unique = true;
+    this.spec_.specUrl =
+        ('https://www.ampproject.org/docs/reference/components/' +
+         extensionSpec.name);
+
+    if (amp.validator.VALIDATE_CSS) {
+      this.spec_.cdata = new amp.validator.CdataSpec();
+      this.spec_.cdata.blacklistedCdataRegex =
+          [new amp.validator.BlackListedCDataRegex('.', 'contents')];
+    }
   }
 
   /**
@@ -694,7 +723,10 @@ class ParsedTagSpec {
     if (amp.validator.LIGHT) {
       return [];
     }
-    return this.spec_.extensionUnusedUnlessTagPresent;
+    if (this.spec_.extensionSpec === null) {
+      return [];
+    }
+    return this.spec_.extensionSpec.deprecatedRecommendsUsageOfTag;
   }
 
   /**
@@ -3104,10 +3136,75 @@ function validateAttrValueBelowTemplateTag(
 }
 
 /**
+ * Validates whether an encountered attribute is validated by an ExtensionSpec.
+ * ExtensionSpec's validate the 'custom-element', 'custom-template', and 'src'
+ * attributes. If an error is found, it is added to the |result|. The return
+ * value indicates whether or not the provided attribute is explained by this
+ * validation function.
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!Context} context
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @param {!amp.validator.ValidationResult} result
+ * @return {boolean}
+ */
+function validateAttributeInExtension(
+    tagSpec, context, attrName, attrValue, result) {
+  goog.asserts.assert(tagSpec.extensionSpec !== null);
+
+  const extensionSpec = tagSpec.extensionSpec;
+  // TagSpecs with extensions will only be evaluated if their dispatch_key
+  // matches, which is based on this custom-element field.
+  if (!extensionSpec.isCustomTemplate && attrName === 'custom-element') {
+    goog.asserts.assert(extensionSpec.name === attrValue);
+    return true;
+  } else if (extensionSpec.isCustomTemplate && attrName === 'custom-template') {
+    goog.asserts.assert(extensionSpec.name === attrValue);
+    return true;
+  } else if (attrName === 'src') {
+    const srcUrlRe =
+        /^https:\/\/cdn\.ampproject\.org\/v0\/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.js$/;
+    let reResult = srcUrlRe.exec(attrValue);
+    // If the src URL matches this regex and the base name of the file matches
+    // the extension, look to see if the version matches.
+    if (reResult !== null && reResult[1] === extensionSpec.name) {
+      const encounteredVersion = reResult[2];
+      if (!amp.validator.LIGHT) {
+        if (extensionSpec.deprecatedVersions.indexOf(encounteredVersion) !==
+            -1) {
+          context.addError(
+              amp.validator.ValidationError.Severity.WARNING,
+              amp.validator.ValidationError.Code
+                  .WARNING_EXTENSION_DEPRECATED_VERSION,
+              context.getDocLocator(),
+              /* params */[extensionSpec.name, encounteredVersion],
+              tagSpec.specUrl, result);
+          return true;
+        }
+      }
+      if (extensionSpec.allowedVersions.indexOf(encounteredVersion) !== -1)
+        return true;
+    }
+    if (amp.validator.LIGHT) {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    } else {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getDocLocator(),
+          /* params */[attrName, getTagSpecName(tagSpec), attrValue],
+          tagSpec.specUrl, result);
+    }
+    return true;
+  }
+  return false;
+}
+
+/**
  * Validates whether the attributes set on |encountered_tag| conform to this
  * tag specification. All mandatory attributes must appear. Only attributes
  * explicitly mentioned by this tag spec may appear.
- *  Returns true iff the validation is successful.
+ * Returns true iff the validation is successful.
  * @param {!ParsedAttrSpecs} parsedAttrSpecs
  * @param {!ParsedTagSpec} parsedTagSpec
  * @param {!Context} context
@@ -3134,6 +3231,9 @@ function validateAttributes(
       return;
     }
   }
+  // For extension TagSpecs, we track if we've validated a src attribute.
+  // We must have done so for the extension to be valid.
+  let seenExtensionSrcAttr = false;
   const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
   /** @type {!Array<boolean>} */
   let mandatoryAttrsSeen = [];  // This is a set of attr ids.
@@ -3170,6 +3270,16 @@ function validateAttributes(
           reference_point_matcher.explainsAttribute(attrName))
         continue;
 
+      // If |spec| is an extension, then we ad-hoc validate 'custom-element',
+      // 'custom-templa'te, and 'src' attributes by calling this method.
+      // For 'src', we also keep track whether we validated it this way,
+      // (seen_src_attr), since it's a mandatory attr.
+      if (spec.extensionSpec !== null &&
+          validateAttributeInExtension(
+              spec, context, attrName, attrValue, result)) {
+        if (attrName === 'src') seenExtensionSrcAttr = true;
+        continue;
+      }
       validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result);
       if (result.status === amp.validator.ValidationResult.Status.FAIL) {
         if (amp.validator.LIGHT)
@@ -3356,6 +3466,18 @@ function validateAttributes(
             ],
             spec.specUrl, result);
       }
+    }
+  }
+  // Extension specs mandate the 'src' attribute.
+  if (spec.extensionSpec !== null && !seenExtensionSrcAttr) {
+    if (amp.validator.LIGHT) {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    } else {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+          context.getDocLocator(),
+          /* params */['src', getTagSpecName(spec)], spec.specUrl, result);
     }
   }
 }
@@ -3672,11 +3794,13 @@ class ParsedValidatorRules {
         for (const otherTag of tag.alsoRequiresTagWarning) {
           this.tagSpecIdsToTrack_[otherTag] = true;
         }
-        if (tag.extensionUnusedUnlessTagPresent.length > 0) {
+        if (tag.extensionSpec !== null &&
+            tag.extensionSpec.deprecatedRecommendsUsageOfTag !== null) {
           this.tagSpecIdsToTrack_[tagSpecId] = true;
-        }
-        for (const otherTag of tag.extensionUnusedUnlessTagPresent) {
-          this.tagSpecIdsToTrack_[otherTag] = true;
+          for (const otherTag of
+                   tag.extensionSpec.deprecatedRecommendsUsageOfTag) {
+            this.tagSpecIdsToTrack_[otherTag] = true;
+          }
         }
       }
       if (tag.tagName !== '$REFERENCE_POINT') {
@@ -3684,11 +3808,27 @@ class ParsedValidatorRules {
           this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
         }
         const tagnameDispatch = this.tagSpecByTagName_[tag.tagName];
-        const dispatchKey = this.rules_.dispatchKeyByTagSpecId[tagSpecId];
-        if (dispatchKey === undefined) {
-          tagnameDispatch.registerTagSpec(tagSpecId);
-        } else {
+        if (tag.extensionSpec !== null) {
+          // This tag is an extension. Compute and register a dispatch key
+          // for it.
+          var dispatchKey;
+          if (tag.extensionSpec.isCustomTemplate) {
+            dispatchKey = makeDispatchKey(
+                'custom-template',
+                /** @type {string} */ (tag.extensionSpec.name), 'HEAD');
+          } else {
+            dispatchKey = makeDispatchKey(
+                'custom-element',
+                /** @type {string} */ (tag.extensionSpec.name), 'HEAD');
+          }
           tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
+        } else {
+          const dispatchKey = this.rules_.dispatchKeyByTagSpecId[tagSpecId];
+          if (dispatchKey === undefined) {
+            tagnameDispatch.registerTagSpec(tagSpecId);
+          } else {
+            tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
+          }
         }
       }
       if (tag.mandatory) {
@@ -4759,6 +4899,10 @@ amp.validator.categorizeError = function(error) {
       error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG ||
       error.code ===
           amp.validator.ValidationError.Code.WARNING_EXTENSION_UNUSED ||
+      error.code ===
+          amp.validator.ValidationError.Code
+              .WARNING_EXTENSION_DEPRECATED_VERSION ||
+
       error.code ===
           amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING) {
     return amp.validator.ErrorCategory.Code.DEPRECATION;
