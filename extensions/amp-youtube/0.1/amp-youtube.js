@@ -210,8 +210,7 @@ class AmpYoutube extends AMP.BaseElement {
     if (mutations['data-videoid'] !== undefined) {
       this.videoid_ = this.getVideoId_();
       if (this.iframe_) { // `null` if element hasn't been laid out yet.
-        this.videoIframeSrc_ = null;
-        this.iframe_.src = this.getVideoIframeSrc_();
+        this.sendCommand_('loadVideoById', [this.videoid_]);
       }
     }
   }
@@ -230,15 +229,18 @@ class AmpYoutube extends AMP.BaseElement {
   /**
    * Sends a command to the player through postMessage.
    * @param {string} command
-   * @param {Object=} opt_args
+   * @param {Array=} opt_args
    * @private
    * */
   sendCommand_(command, opt_args) {
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
-      'event': 'command',
-      'func': command,
-      'args': opt_args || '',
-    }), '*');
+    this.playerReadyPromise_.then(() => {
+      const message = JSON.stringify({
+        'event': 'command',
+        'func': command,
+        'args': opt_args || '',
+      });
+      this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+    });
   }
 
   /** @private */
@@ -354,36 +356,28 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('playVideo');
-    });
+    this.sendCommand_('playVideo');
   }
 
   /**
    * @override
    */
   pause() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('pauseVideo');
-    });
+    this.sendCommand_('pauseVideo');
   }
 
   /**
    * @override
    */
   mute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('mute');
-    });
+    this.sendCommand_('mute');
   }
 
   /**
    * @override
    */
   unmute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('unMute');
-    });
+    this.sendCommand_('unMute');
   }
 
   /**
