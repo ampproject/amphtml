@@ -15,7 +15,7 @@
  */
 
 import {assertHttpsUrl, getFragment} from '../../../src/url';
-import {cachedXhrFor} from '../../../src/cached-xhr';
+import {xhrFor} from '../../../src/xhr';
 import {getPath} from '../../../src/utils/object';
 import {getValueForExpr} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -65,7 +65,7 @@ export class AmpList extends AMP.BaseElement {
           if (!opts.credentials) {
             opts.requireAmpResponseSourceOrigin = false;
           }
-          const fetchPromise = cachedXhrFor(this.win).fetchJson(src, opts);
+          const fetchPromise = xhrFor(this.win).fetchJson(src, opts);
           const fragment = getFragment(src).slice(1);
           return fragment ?
               fetchPromise.then(json => getPath(json, fragment)) :
