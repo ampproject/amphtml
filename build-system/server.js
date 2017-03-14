@@ -463,7 +463,6 @@ app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
 
 app.use('/examples/bind/live-list.amp.(min.|max.)?html',
   function(req, res, next) {
-    console.log('test');
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
       res.end(getLiveBlogItemWithBindAttributes());
