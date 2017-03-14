@@ -238,6 +238,11 @@ export class IntersectionObserverPolyfill {
       element,
       currentThresholdSlot: 0,
     });
+
+    // DO NOT SUBMIT: QQQ(lannka): shouldn't it tick somem time soon? Maybe
+    // just for this one element as optimization?
+    // Per spec:
+    // "Schedule an iteration of the event loop in the root's browsing context."
   }
 
   /**
