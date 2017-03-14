@@ -88,6 +88,7 @@ export function openx(global, data) {
           const oxAnchor = global.document.createElement('div');
           global.document.body.appendChild(oxAnchor);
           /*eslint "google-camelcase/google-camelcase": 0*/
+          OX._requestArgs['bc'] = 'amp';
           oxRequest.addAdUnit(data.auid);
           oxRequest.setAdSizes([data.width + 'x' + data.height]);
           if (data.openx && data.openx.customVars) {
