@@ -676,15 +676,9 @@ export class BaseElement {
    * @public @final
    */
   applyFillContent(element, opt_replacedContent) {
-    // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-    // form is in PROD for 1-2 weeks.
     element.classList.add('i-amphtml-fill-content');
-    element.classList.add('-amp-fill-content');
     if (opt_replacedContent) {
-      // TODO(dvoytenko, #6794): Remove old `-amp-replaced-content` form after the new
-      // form is in PROD for 1-2 weeks.
       element.classList.add('i-amphtml-replaced-content');
-      element.classList.add('-amp-replaced-content');
     }
   }
 

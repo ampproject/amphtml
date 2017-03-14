@@ -363,10 +363,7 @@ class VideoEntry {
   createAutoplayMask_() {
     const doc = this.ampdoc_.win.document;
     const mask = doc.createElement('i-amp-video-mask');
-    // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-    // form is in PROD for 1-2 weeks.
     mask.classList.add('i-amphtml-fill-content');
-    mask.classList.add('-amp-fill-content');
     return mask;
   }
 
