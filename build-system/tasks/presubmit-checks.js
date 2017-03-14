@@ -688,6 +688,7 @@ var forbiddenTermsSrcInclusive = {
       'tools/errortracker/errortracker.go',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
+      'build-system/tasks/extension-generator/index.js',
     ],
   },
 };
