@@ -21,6 +21,7 @@ import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 import {urls} from '../config';
+import {getMode} from '../mode';
 
 
 /**
@@ -302,6 +303,10 @@ export class Performance {
       return this.enabledExperiments_;
     }
     const experiments = [];
+    // Add RTV version as experiment ID, so we can slice the data by version.
+    if (getMode(this.win).rtvVersion) {
+      experiments.push(getMode(this.win).rtvVersion);
+    }
     // Check if it's the legacy CDN domain.
     if (this.getHostname_() == urls.cdn.split('://')[1]) {
       experiments.push('legacy-cdn-domain');
