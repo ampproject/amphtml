@@ -163,26 +163,14 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   });
 
   describe('amp-live-list integration', () => {
-    function createFromServer(childAttrs = []) {
+    function createFromServer() {
       const parent = document.createElement('div');
-      const itemsCont = document.createElement('div');
-      itemsCont.setAttribute('items', '');
-      parent.appendChild(itemsCont);
-      for (let i = 0; i < childAttrs.length; i++) {
-        const childAttr = childAttrs[i];
-        const child = document.createElement('div');
-        child.setAttribute('id', `${childAttr.id}`);
-        child.setAttribute('data-sort-time',
-            `${childAttr.sortTime || Date.now()}`);
-        if ('updateTime' in childAttr) {
-          child.setAttribute('data-update-time', `${childAttr.updateTime}`);
-        }
-        if ('tombstone' in childAttr) {
-          child.setAttribute('data-tombstone', '');
-        }
-        child.innerHTML = '<p [text]="liveListText">unbound</p>';
-        itemsCont.appendChild(child);
-      }
+      parent.innerHTML = 
+          `<div items>` + 
+          ` <div id="2" data-sort-time=${Date.now()}>` + 
+          `    <p [text]="liveListTet">unbound</p>` + 
+          ` </div>` +
+          `</div>`
       return parent;
     }
 
@@ -210,7 +198,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
       expect(liveListItem1.firstElementChild.textContent).to.equal('unbound');
 
       const impl = liveList.implementation_;
-      const update = createFromServer([{id: 'liveListItem2'}]);
+      const update = createFromServer();
       impl.update(update);
       fixture.doc.getElementById('liveListUpdateButton').click();
 

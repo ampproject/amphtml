@@ -30,6 +30,7 @@ import {resourcesForDoc} from '../../../src/resources';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {timerFor} from '../../../src/timer';
+import {childElementByAttr} from '../../../src/dom';
 
 const TAG = 'amp-bind';
 
@@ -710,15 +711,7 @@ export class Bind {
     } else if (tagName === 'AMP-LIVE-LIST') {
       // All elements in AMP-LIVE-LIST are children of a <div> with an
       // `items` attribute.
-      const childDivs = element.getElementsByTagName('DIV');
-      let itemsDiv;
-      for (let i = 0; i < childDivs.length; i++) {
-        const div = childDivs[i];
-        if (div.hasAttribute('items')) {
-          itemsDiv = div;
-          break;
-        }
-      }
+      const itemsDiv = childElementByAttr(element, 'items');
       // Should not happen on any page that passes the AMP validator
       // as <div items> is required.
       elementToObserve = dev().assert(itemsDiv,
