@@ -1,4 +1,4 @@
 FAIL
-amp-dailymotion/0.1/test/validator-amp-dailymotion.html:48:0 The attribute 'data-videoid' in tag 'amp-dailymotion' is set to the invalid value 'i don't think so'. (see https://www.ampproject.org/docs/reference/extended/amp-dailymotion.html) [AMP_TAG_PROBLEM]
-amp-dailymotion/0.1/test/validator-amp-dailymotion.html:52:0 The mandatory attribute 'data-videoid' is missing in tag 'amp-dailymotion'. (see https://www.ampproject.org/docs/reference/extended/amp-dailymotion.html) [AMP_TAG_PROBLEM]
-amp-dailymotion/0.1/test/validator-amp-dailymotion.html:55:0 The attribute 'data-ui-highlight' in tag 'amp-dailymotion' is set to the invalid value 'blue'. (see https://www.ampproject.org/docs/reference/extended/amp-dailymotion.html) [AMP_TAG_PROBLEM]
+amp-dailymotion/0.1/test/validator-amp-dailymotion.html:48:0 The attribute 'data-videoid' in tag 'amp-dailymotion' is set to the invalid value 'i don't think so'. (see https://www.ampproject.org/docs/reference/components/amp-dailymotion) [AMP_TAG_PROBLEM]
+amp-dailymotion/0.1/test/validator-amp-dailymotion.html:52:0 The mandatory attribute 'data-videoid' is missing in tag 'amp-dailymotion'. (see https://www.ampproject.org/docs/reference/components/amp-dailymotion) [AMP_TAG_PROBLEM]
+amp-dailymotion/0.1/test/validator-amp-dailymotion.html:55:0 The attribute 'data-ui-highlight' in tag 'amp-dailymotion' is set to the invalid value 'blue'. (see https://www.ampproject.org/docs/reference/components/amp-dailymotion) [AMP_TAG_PROBLEM]
