@@ -42,4 +42,4 @@ Supported parameters:
 - data-parameters
 
 Parameters should be passed as key&value pairs '&' separated. Missing value equals 'true'. 
-So '...&isMobile&...' from example above stands for '...&isMobile=true&...'.
+So '...&isMobile&...' from example above stands for '...&isMobile=true&...'. 
