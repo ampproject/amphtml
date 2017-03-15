@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Coming Soon; Available on <a href="https://www.ampproject.org/docs/reference/experimental#opt-into-the-amp-dev-channel">Dev Channel</a></td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
