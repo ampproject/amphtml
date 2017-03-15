@@ -15,16 +15,13 @@
  */
 
 import '../../../amp-carousel/0.1/amp-carousel';
-import {installBindForTesting} from '../bind-impl';
-import {toggleExperiment} from '../../../../src/experiments';
 import {createFixtureIframe} from '../../../../testing/iframe';
 import {bindForDoc} from '../../../../src/bind';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 
-describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
+describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   let fixture;
   let ampdoc;
-  let bind;
   const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
 
   this.timeout(5000);
@@ -32,25 +29,21 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
   beforeEach(() => {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
-      toggleExperiment(fixture, 'amp-bind', true, true);
       const numberOfExtensionElements = 4;
       return fixture.awaitEvent('amp:load:start', numberOfExtensionElements);
     }).then(() => {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
-      // Bind is installed manually here to get around an issue
-      // toggling experiments on the fixture iframe.
-      bind = installBindForTesting(ampdoc);
+      return bindForDoc(ampdoc);
+    }).then(bind => {
       return bind.initializePromiseForTesting();
     });
   });
 
   function waitForBindApplication() {
     // Bind should be available, but need to wait for actions to resolve
-    // service promise for bind and call setState
-    return bindForDoc(ampdoc).then(() => {
-      return bind.setStatePromiseForTesting();
-    });
+    // service promise for bind and call setState.
+    return bindForDoc(ampdoc).then(bind => bind.setStatePromiseForTesting());
   }
 
   describe('text integration', () => {

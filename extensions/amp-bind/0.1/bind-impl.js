@@ -60,14 +60,6 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
- * @return {!Bind}
- */
-export function installBindForTesting(nodeOrAmpDoc) {
-  return fromClassForDoc(nodeOrAmpDoc, 'bind', Bind);
-}
-
-/**
  * Bind is the service that handles the Bind lifecycle, from identifying
  * bindings in the document to scope mutations to reevaluating expressions
  * during a digest.
@@ -75,10 +67,14 @@ export function installBindForTesting(nodeOrAmpDoc) {
 export class Bind {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {Object=} opt_mode
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, opt_mode) {
+    /** @const @private {!Object} */
+    this.mode_ = opt_mode || getMode(ampdoc.win);
+
     /** @const @private {boolean} */
-    this.enabled_ = isExperimentOn(ampdoc.win, TAG);
+    this.enabled_ = this.mode_.test || isExperimentOn(ampdoc.win, TAG);
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
@@ -133,7 +129,7 @@ export class Bind {
     this.setStatePromise_ = null;
 
     // Expose for testing on dev.
-    if (getMode().localDev) {
+    if (this.mode_.localDev) {
       AMP.reinitializeBind = this.initialize_.bind(this);
     }
   }
@@ -170,6 +166,8 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
+    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
+
     this.setStatePromise_ = this.initializePromise_.then(() => {
       // Allow expression to reference current scope in addition to event scope.
       Object.assign(scope, this.scope_);
@@ -246,7 +244,7 @@ export class Bind {
           `${Object.keys(parseErrors).length} errors.`);
 
       // Trigger verify-only digest in development.
-      if (getMode().development) {
+      if (this.mode_.development) {
         this.digest_(/* opt_verifyOnly */ true);
       }
     });
@@ -590,10 +588,18 @@ export class Bind {
           // TODO(choumx): Perform in worker with URL API.
           // Rewrite attribute value if necessary. This is not done in the
           // worker since it relies on `url#parseUrl`, which uses DOM APIs.
-          const rewrittenNewValue = rewriteAttributeValue(
-              element.tagName, property, String(newValue));
-          element.setAttribute(property, rewrittenNewValue);
-          attributeChanged = true;
+          let rewrittenNewValue;
+          try {
+            rewrittenNewValue = rewriteAttributeValue(
+                element.tagName, property, String(newValue));
+          } catch (e) {
+            reportError(user().createError(e), element);
+          }
+          // Rewriting can fail due to e.g. invalid URL.
+          if (rewrittenNewValue !== undefined) {
+            element.setAttribute(property, rewrittenNewValue);
+            attributeChanged = true;
+          }
         }
 
         if (attributeChanged) {
@@ -720,7 +726,7 @@ export class Bind {
       }).then(() => {
         return this.digest_();
       });
-      if (getMode().test) {
+      if (this.mode_.test) {
         this.mutationPromises_.push(mutationPromise);
       }
     });
@@ -817,6 +823,14 @@ export class Bind {
    */
   setStatePromiseForTesting() {
     return this.setStatePromise_;
+  }
+
+  /**
+   * @param {!Object} mode
+   * @visibleForTesting
+   */
+  setModeForTesting(mode) {
+    this.mode_ = mode;
   }
 
   /**
