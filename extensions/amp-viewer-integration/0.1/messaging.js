@@ -159,12 +159,11 @@ export class Messaging {
    */
   handleMessage_(event) {
     dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
-    /** @type {Message} */
     const message = this.isWebview_ ? JSON.parse(event.data) : event.data;
     if (message.type == MessageType.REQUEST) {
-      this.handleRequest_(message);
+      this.handleRequest_(/** @type {Message} */(message));
     } else if (message.type == MessageType.RESPONSE) {
-      this.handleResponse_(message);
+      this.handleResponse_(/** @type {Message} */(message));
     }
   }
 
@@ -238,10 +237,8 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
-    if (this.isWebview_) {
-      message = JSON.stringify(message);
-    }
-    this.port_./*OK*/postMessage(message);
+    this.port_./*OK*/postMessage(
+      this.isWebview_ ? JSON.stringify(message) : message);
   }
 
   /**

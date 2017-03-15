@@ -92,7 +92,7 @@ export class AmpViewerIntegration {
     const port = new WindowPortEmulator(
       this.win, dev().assertString(this.unconfirmedViewerOrigin_));
     return this.openChannelAndStart_(
-      viewer, ampdoc, new Messaging(this.win, port));
+      viewer, ampdoc, new Messaging(this.win, port, this.isWebView_));
   }
 
   /**
