@@ -100,12 +100,15 @@ export class Messaging {
    * Conversation (messaging protocol) between me and Bob.
    * @param {!Window} win
    * @param {!MessagePort|!WindowPortEmulator} port
+   * @param {boolean} opt_isWebview
    */
-  constructor(win, port) {
+  constructor(win, port, opt_isWebview) {
     /** @const {!Window} */
     this.win = win;
     /** @const @private {!MessagePort|!WindowPortEmulator} */
     this.port_ = port;
+    /** @const @private */
+    this.isWebview_ = !!opt_isWebview;
     /** @private {!number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
@@ -157,7 +160,7 @@ export class Messaging {
   handleMessage_(event) {
     dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
     /** @type {Message} */
-    const message = event.data;
+    const message = this.isWebview_ ? JSON.parse(event.data) : event.data;
     if (message.type == MessageType.REQUEST) {
       this.handleRequest_(message);
     } else if (message.type == MessageType.RESPONSE) {
@@ -235,6 +238,9 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
+    if (this.isWebview_) {
+      message = JSON.stringify(message);
+    }
     this.port_./*OK*/postMessage(message);
   }
 

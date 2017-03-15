@@ -84,8 +84,8 @@ export class AmpViewerIntegration {
       }
       return this.webviewPreHandshakePromise_(source, origin)
           .then(receivedPort => {
-            return this.openChannelAndStart_(
-              viewer, ampdoc, new Messaging(this.win, receivedPort));
+            return this.openChannelAndStart_(viewer, ampdoc,
+              new Messaging(this.win, receivedPort, this.isWebView_));
           });
     }
 

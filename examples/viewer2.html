@@ -290,7 +290,8 @@
       this.messaging_ = new ViewerMessaging('', '', 
         this.processRequest_.bind(this), 
         this.iframe.id,
-        new WindowPortEmulator(this.messageHandlers_, this.id, channel.port1)
+        new WindowPortEmulator(this.messageHandlers_, this.id, channel.port1, true /* isWebview */),
+        true /* isWebview */
       );
 
       this.sendRequest_('visibilitychange', {
