@@ -418,34 +418,15 @@ function getLiveBlogItemWithBindAttributes() {
     return `<p>${bacon(range(50, 90))}</p>`;
   }).join('\n');
 
-  var img =  `<amp-img
-        src="${flip() ? 'https://placekitten.com/300/350' : 'https://baconmockup.com/300/350'}"
-        layout="responsive"
-         height="300" width="350">
-      </amp-img>`;
   return `<!doctype html>
     <html amp><body>
     <amp-live-list id="live-blog-1">
     <div items>
       <div id="live-blog-item-${now}" data-sort-time="${now}">
-        <div class="author">
-          <div class="byline">
-            <p>
-              by <span itemscope itemtype="http://schema.org/Person"
-              itemprop="author"><b>Lorem Ipsum</b>
-              <a class="mailto" href="mailto:lorem.ipsum@">
-              lorem.ipsum@</a></span>
-            </p>
-            <p class="brand">PublisherName News Reporter<p>
-            <p><span itemscope itemtype="http://schema.org/Date"
-                itemprop="Date">${Date(now).replace(/ GMT.*$/, '')}<span></p>
-          </div>
-        </div>
         <div class="article-body">
           ${body}
           <p> As you can see, bacon is far superior to <b><span [text]='favoriteFood'>everything!</span></b>!</p>
         </div>
-        ${img}
       </div>
     </div>
     </amp-live-list></body></html>`;
