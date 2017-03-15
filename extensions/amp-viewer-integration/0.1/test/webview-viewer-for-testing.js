@@ -158,8 +158,8 @@ export class WebviewViewerForTesting {
       requestid: requestId,
       type: MessageType.RESPONSE,
     };
-    this.log('############## viewer posting Message', message);
-    channel.port1./*OK*/postMessage(message);
+    this.log('############## viewer posting1 Message', message);
+    channel.port1./*OK*/postMessage(JSON.stringify(message));
 
     class WindowPortEmulator {
       constructor(messageHandlers, id, log) {
@@ -172,8 +172,8 @@ export class WebviewViewerForTesting {
         this.messageHandlers_[this.id_] = messageHandler;
       }
       postMessage(data) {
-        this.log_('############## viewer posting Message', data);
-        channel.port1./*OK*/postMessage(data);
+        this.log_('############## viewer posting2 Message', data);
+        channel.port1./*OK*/postMessage(JSON.stringify(data));
       }
       start() {}
     }

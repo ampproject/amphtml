@@ -105,12 +105,13 @@ export class AmpViewerIntegration {
     return new Promise(resolve => {
       const unlisten = listen(this.win, 'message', e => {
         dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type, e.data);
+        const data = this.isWebView_ ? JSON.parse(e.data) : data;
         // Viewer says: "I'm ready for you"
         if (
             e.origin === origin &&
             e.source === source &&
-            e.data.app == APP &&
-            e.data.name == 'handshake-poll') {
+            data.app == APP &&
+            data.name == 'handshake-poll') {
           if (!e.ports || !e.ports.length) {
             throw new Error(
               'Did not receive communication port from the Viewer!');
