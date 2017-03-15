@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import {resetServiceForTesting} from '../../src/service';
 import {resourcesForDoc} from '../../src/resources';
 import {viewerForDoc} from '../../src/viewer';
+import * as lolex from 'lolex';
 
 
-describe('performance', () => {
+describes.realWin('performance', {amp: true}, env => {
   let sandbox;
   let perf;
   let clock;
+  let window;
+  let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
+    window = env.win;
+    sandbox = env.sandbox;
+    ampdoc = env.ampdoc;
+    clock = lolex.install(window, 0, ['Date', 'setTimeout', 'clearTimeout']);
     perf = installPerformanceService(window);
-  });
-
-  afterEach(() => {
-    resetServiceForTesting(window, 'performance');
-    sandbox.restore();
   });
 
   describe('when viewer is not ready', () => {
@@ -137,7 +135,7 @@ describe('performance', () => {
     let viewerSendMessageStub;
 
     beforeEach(() => {
-      viewer = viewerForDoc(window.document);
+      viewer = viewerForDoc(ampdoc);
       viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     });
 
@@ -432,7 +430,7 @@ describe('performance', () => {
       return res;
     }
 
-    const resources = resourcesForDoc(window.document);
+    const resources = resourcesForDoc(ampdoc);
     const resourcesMock = sandbox.mock(resources);
     perf.resources_ = resources;
 
@@ -473,7 +471,7 @@ describe('performance', () => {
     }
 
     beforeEach(() => {
-      viewer = viewerForDoc(window.document);
+      viewer = viewerForDoc(ampdoc);
       sandbox.stub(viewer, 'whenMessagingReady')
           .returns(Promise.resolve());
       viewerSendMessageStub = sandbox.stub(viewer,
@@ -494,6 +492,8 @@ describe('performance', () => {
       // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
       // reporting regression is confirmed.
       sandbox.stub(perf, 'whenViewportLayoutCompleteLegacy_')
+          .returns(whenViewportLayoutCompletePromise);
+      sandbox.stub(perf, 'whenViewportLayoutComplete_')
           .returns(whenViewportLayoutCompletePromise);
       return viewer.whenMessagingReady();
     });
@@ -608,7 +608,7 @@ describe('performance', () => {
   });
 });
 
-describes.fakeWin('performance with experiment', {amp: true}, env => {
+describes.realWin('performance with experiment', {amp: true}, env => {
 
   let win;
   let perf;
