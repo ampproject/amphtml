@@ -123,16 +123,20 @@ export class WebviewViewerForTesting {
     this.log('pollAMPDoc_');
     if (this.iframe) {
       const channel = new MessageChannel();
-      const message = {
+      let message = {
         app: APP,
         name: 'handshake-poll',
       };
+      console.log('message before json stringify:', message);
+      message = JSON.stringify(message);
+      console.log('***** viewer gonna send this message:', message);
       this.iframe.contentWindow./*OK*/postMessage(
           message, '*', [channel.port2]);
       channel.port1.onmessage = function(e) {
         if (this.isChannelOpen_(e)) {
           window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
-          this.completeHandshake_(channel, e.data.requestid);
+          const data = JSON.parse(e.data);
+          this.completeHandshake_(channel, data.requestid);
         } else {
           this.handleMessage_(e);
         }
@@ -141,8 +145,9 @@ export class WebviewViewerForTesting {
   }
 
   isChannelOpen_(e) {
-    return e.type == 'message' && e.data.app == APP &&
-      e.data.name == 'channelOpen';
+    const data = JSON.parse(e.data);
+    return e.type == 'message' && data.app == APP &&
+      data.name == 'channelOpen';
   };
 
 
@@ -175,8 +180,6 @@ export class WebviewViewerForTesting {
     this.messaging_ = new Messaging(this.win,
       new WindowPortEmulator(this.messageHandlers_, this.id, this.log));
 
-
-    // const handleMessage = this.handleMessage_;
     this.messaging_.setDefaultHandler((type, payload, awaitResponse) => {
       console/*OK*/.log(
         'viewer receiving message: ', type, payload, awaitResponse);
@@ -216,7 +219,8 @@ export class WebviewViewerForTesting {
     return this.documentLoadedPromise_;
   }
 
-  processRequest_(data) {
+  processRequest_(eventData) {
+    const data = JSON.parse(eventData);
     const type = data.name;
     switch (type) {
       case 'documentLoaded':

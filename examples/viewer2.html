@@ -261,15 +261,16 @@
         var message = {
             app: APP,
             name: 'handshake-poll',
-          };
-         this.iframe.contentWindow./*OK*/postMessage(message, '*', [channel.port2]);
-         channel.port1.onmessage = function(e) {
-           if (this.isChannelOpen_(e)) {
-            window.clearInterval(this.pollingIntervalIds_[intervalCtr]); //stop polling
-            this.completeHandshake_(channel, e.data.requestid);
-           }
-           this.handleMessage_(e, channel);
-         }.bind(this);
+        };
+        message = JSON.stringify(message);
+        this.iframe.contentWindow./*OK*/postMessage(message, '*', [channel.port2]);
+        channel.port1.onmessage = function(e) {
+          if (this.isChannelOpen_(e)) {
+           window.clearInterval(this.pollingIntervalIds_[intervalCtr]); //stop polling
+           this.completeHandshake_(channel, e.data.requestid);
+          }
+          this.handleMessage_(e, channel);
+        }.bind(this);
        }
      };
 
