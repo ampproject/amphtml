@@ -33,6 +33,7 @@ import {installTimerService} from '../../src/service/timer-impl';
 import {platformFor} from '../../src/platform';
 import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
+import {extensionsFor} from '../../src/extensions';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
@@ -225,7 +226,8 @@ describes.fakeWin('runtime', {
 
         expect(progress).to.equal('1HIGHAB2');
 
-        const extensions = ext.getExtensionsService(win);
+        ext.installExtensionsService(win);
+        const extensions = extensionsFor(win);
         const ext1 = extensions.waitForExtension('ext1');
         const ext2 = extensions.waitForExtension('ext2');
         return Promise.all([ext1, ext2]);
@@ -367,7 +369,8 @@ describes.fakeWin('runtime', {
 
     beforeEach(() => {
       adopt(win);
-      extensions = ext.getExtensionsService(win);
+      ext.installExtensionsService(win);
+      extensions = extensionsFor(win);
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 
@@ -516,7 +519,8 @@ describes.fakeWin('runtime', {
 
     beforeEach(() => {
       adoptShadowMode(win);
-      extensions = ext.getExtensionsService(win);
+      ext.installExtensionsService(win);
+      extensions = extensionsFor(win);
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 

@@ -23,9 +23,10 @@ import {
   addElementToExtension,
   addShadowRootFactoryToExtension,
   installExtensionsInShadowDoc,
-  getExtensionsService,
+  installExtensionsService,
   registerExtension,
 } from '../../src/service/extensions-impl';
+import {extensionsFor} from '../../src/extensions';
 import {resetScheduledElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 
@@ -391,7 +392,8 @@ describes.sandboxed('Extensions', {}, () => {
     beforeEach(() => {
       parentWin = env.win;
       resetScheduledElementForTesting(parentWin, 'amp-test');
-      extensions = getExtensionsService(parentWin);
+      installExtensionsService(parentWin);
+      extensions = extensionsFor(parentWin);
       extensionsMock = sandbox.mock(extensions);
 
       iframe = parentWin.document.createElement('iframe');

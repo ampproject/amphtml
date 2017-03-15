@@ -32,8 +32,11 @@ import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {
-  getExtensionsService,
+  installExtensionsService,
 } from '../../src/service/extensions-impl';
+import {
+  extensionsFor,
+} from '../../src/extensions';
 import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
@@ -102,8 +105,9 @@ describe('cid', () => {
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
 
+    installExtensionsService(fakeWin);
+    const extensions = extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
-    const extensions = getExtensionsService(fakeWin);
     sandbox.stub(extensions, 'loadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(fakeWin);

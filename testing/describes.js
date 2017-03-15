@@ -37,9 +37,10 @@ import {createAmpElementProto} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {
   installBuiltinElements,
-  getExtensionsService,
+  installExtensionsService,
   registerExtension,
 } from '../src/service/extensions-impl';
+import {extensionsFor} from '../src/extensions';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
@@ -474,7 +475,8 @@ class AmpFixture {
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
     const ampdocService = installDocService(win, singleDoc);
     env.ampdocService  = ampdocService;
-    env.extensions = getExtensionsService(win);
+    installExtensionsService(win);
+    env.extensions = extensionsFor(win);
     installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {

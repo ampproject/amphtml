@@ -17,7 +17,6 @@
 import {
   adoptServiceForEmbed,
   registerServiceBuilder,
-  getService,
   setParentWindow,
 } from '../service';
 import {
@@ -98,16 +97,6 @@ export function installExtensionsService(window) {
                          /* opt_factory */ undefined,
                          /* opt_instantiate */ true);
 }
-
-/**
- * @param {!Window} window
- * @return {!Extensions}
- */
-export function getExtensionsService(window) {
-  installExtensionsService(window);
-  return getService(window, 'extensions');
-}
-
 
 /**
  * Register and process the specified extension. The factory is called
