@@ -123,15 +123,12 @@ export class WebviewViewerForTesting {
     this.log('pollAMPDoc_');
     if (this.iframe) {
       const channel = new MessageChannel();
-      let message = {
+      const message = {
         app: APP,
         name: 'handshake-poll',
       };
-      console.log('message before json stringify:', message);
-      message = JSON.stringify(message);
-      console.log('***** viewer gonna send this message:', message);
       this.iframe.contentWindow./*OK*/postMessage(
-          message, '*', [channel.port2]);
+          JSON.stringify(message), '*', [channel.port2]);
       channel.port1.onmessage = function(e) {
         if (this.isChannelOpen_(e)) {
           window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
@@ -221,8 +218,7 @@ export class WebviewViewerForTesting {
 
   processRequest_(eventData) {
     const data = JSON.parse(eventData);
-    const type = data.name;
-    switch (type) {
+    switch (data.name) {
       case 'documentLoaded':
         this.log('documentLoaded!');
         this.documentLoadedResolve_();
@@ -241,7 +237,7 @@ export class WebviewViewerForTesting {
       case 'visibilitychange':
         return;
       default:
-        return Promise.reject('request not supported: ' + type);
+        return Promise.reject('request not supported: ' + data.name);
     }
   };
 

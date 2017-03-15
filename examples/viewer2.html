@@ -262,8 +262,7 @@
             app: APP,
             name: 'handshake-poll',
         };
-        message = JSON.stringify(message);
-        this.iframe.contentWindow./*OK*/postMessage(message, '*', [channel.port2]);
+        this.iframe.contentWindow./*OK*/postMessage(JSON.stringify(message), '*', [channel.port2]);
         channel.port1.onmessage = function(e) {
           if (this.isChannelOpen_(e)) {
            window.clearInterval(this.pollingIntervalIds_[intervalCtr]); //stop polling

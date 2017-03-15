@@ -105,7 +105,7 @@ export class AmpViewerIntegration {
     return new Promise(resolve => {
       const unlisten = listen(this.win, 'message', e => {
         dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type, e.data);
-        const data = this.isWebView_ ? JSON.parse(e.data) : data;
+        const data = this.isWebView_ ? JSON.parse(e.data) : e.data;
         // Viewer says: "I'm ready for you"
         if (
             e.origin === origin &&
