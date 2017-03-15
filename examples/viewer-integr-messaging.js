@@ -42,11 +42,8 @@ class WindowPortEmulator {
     this.messageHandlers_[this.id_] = messageHandler;
   }
   postMessage(data) {
-    if (this.isWebview_) {
-      data = JSON.stringify(data);
-    }
     console.log('############## viewer posting Message', data);
-    this.port_./*OK*/postMessage(data);
+    this.port_./*OK*/postMessage(this.isWebview_ ? JSON.stringify(data) : data);
   }
   start() {}
 }
