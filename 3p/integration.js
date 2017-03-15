@@ -646,7 +646,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
     hostname = parseUrl(getSourceUrl(window.document.referrer)).hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
-    // Either the hostname is exactly as whitelisted...
+    // Either the hostname is exactly as whitelisted…
     if (allowedHostnames[i] == hostname) {
       return;
     }
