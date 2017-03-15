@@ -576,3 +576,37 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     return this.parent.getElementVisibility(element);
   }
 }
+
+export class VisibilityManagerForAmpScoped extends VisibilityManager {
+  constructor(parent) {
+    super(parent, parent.ampdoc);
+
+    /** @const @private {boolean} */
+    this.backgroundedAtStart_ = this.parent.isBackgrounded();
+  }
+
+  getStartTime() {
+    // QQ parent element build time???
+    return this.parent.getStartTime();
+  }
+
+  isBackgrounded() {
+    // AND parent element visibility?
+    return this.parent.isBackgrounded();
+  }
+
+  isBackgroundedAtStart() {
+    return this.backgroundedAtStart_;
+  }
+
+  observe(element, listener) {
+    return this.parent.observe(element, listener);
+  }
+
+  getElementVisibility(element) {
+    if (this.getRootVisibility() == 0) {
+      return 0;
+    }
+    return this.parent.getElementVisibility(element);
+  }
+}

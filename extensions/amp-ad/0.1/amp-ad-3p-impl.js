@@ -36,6 +36,8 @@ import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
+import {insertAnalyticsElement} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -74,6 +76,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {?../../../src/layout-rect.LayoutRectDef}
      */
     this.iframeLayoutBox_ = null;
+
+    this.p = null;
 
     /**
      * Call to stop listening to viewport changes.
@@ -122,6 +126,25 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.p = insertAnalyticsElement(this.element, {
+      'vars': {
+        'server': 'www',
+        'websiteid': 'xxxxxxxx',
+        'event': 'click',
+        'clicklabel': 'clicked from AMP page',
+      },
+      'requests': {
+        'host': '//${server}.afsanalytics.com',
+        'base': '${host}/cgi_bin/',
+        'pageview': '${base}connect.cgi?usr=${websiteid}Pauto',
+      },
+      'triggers': {
+        'custom': {
+          'on': 'aaa',
+          'request': 'host',
+        },
+      },
+    });
     this.placeholder_ = this.getPlaceholder();
     this.fallback_ = this.getFallback();
 
@@ -218,6 +241,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.p.then(analyticsEle => {
+      triggerAnalyticsEvent(this.getAmpDoc(), 'aaa', 5);
+    });
     this.layoutDelayMeter_.startLayout();
 
     if (this.layoutPromise_) {

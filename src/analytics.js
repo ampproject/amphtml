@@ -18,6 +18,8 @@ import {
   getElementServiceForDoc,
   getElementServiceIfAvailableForDoc,
 } from './element-service';
+import {createElementWithAttributes} from './dom';
+import {getAmpDoc} from './ampdoc';
 
 
 /**
@@ -53,6 +55,36 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
     if (!analytics) {
       return;
     }
-    analytics.triggerEvent(eventType, opt_vars);
+    analytics.triggerEventForTarget(nodeOrDoc, eventType, opt_vars);
+  });
+}
+
+/**
+ * Helper method to create analytics element for specific root.
+ * @param {!Element} element
+ * @param {!JSONType} config
+ * @param {Document=} parentDoc
+ * @return {!Promise}
+ */
+export function insertAnalyticsElement(element, config, parentDoc) {
+  // Note: Require including analytics script
+  return analyticsForDocOrNull(element).then(analytics => {
+    if (!analytics) {
+      return;
+    }
+    // Create analytics element;
+    parentDoc = parentDoc || getAmpDoc(element).win.document;
+    const analyticsElem = parentDoc.createElement('amp-analytics');
+    analyticsElem.setAttribute('scoped', 'true');
+    const scriptElem = createElementWithAttributes(parentDoc,
+        'script', {
+          'type': 'application/json',
+        });
+    scriptElem.textContent = JSON.stringify(config);
+    analyticsElem.appendChild(scriptElem);
+    element.appendChild(analyticsElem);
+    console.log('asdfw');
+    return analyticsElem;
+    // TODO: create analytics root to scope analytics in this specifc node.
   });
 }

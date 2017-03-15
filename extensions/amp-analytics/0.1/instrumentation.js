@@ -17,6 +17,7 @@
 import {
   AmpdocAnalyticsRoot,
   EmbedAnalyticsRoot,
+  AmpScopedAnalyticsRoot,
 } from './analytics-root';
 import {
   AnalyticsEvent,
@@ -68,7 +69,7 @@ export const AnalyticsEventType = {
   HIDDEN: 'hidden',
 };
 
-const ALLOWED_FOR_ALL = ['ampdoc', 'embed'];
+const ALLOWED_FOR_ALL = ['ampdoc', 'embed', 'scoped'];
 
 /**
  * Events that can result in analytics data to be sent.
@@ -168,6 +169,7 @@ export class InstrumentationService {
    * @return {!AnalyticsGroup}
    */
   createAnalyticsGroup(analyticsElement) {
+    // If element is scoped, create new analytics root for it
     const root = this.findRoot_(analyticsElement);
     return new AnalyticsGroup(root, analyticsElement, this);
   }
@@ -216,6 +218,16 @@ export class InstrumentationService {
               this.ampdocRoot_);
         });
       }
+    }
+
+    // Scoped
+    // NOTE: Need to add support to scoped root in  FIE.
+    if (context.nodeType == 1 && context.tagName == 'AMP-ANALYTICS'
+        && context.getAttribute('scoped')) {
+      return this.getOrCreateRoot_(context, () => {
+        return new AmpScopedAnalyticsRoot(this.ampdoc, this.ampdocRoot_,
+            context.parentNode);
+      });
     }
 
     // Ampdoc root
