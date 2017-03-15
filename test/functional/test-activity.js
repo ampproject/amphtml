@@ -16,13 +16,14 @@
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
-  activityServiceForTesting,
+  installActivityServiceForTesting,
 } from '../../extensions/amp-analytics/0.1/activity-impl';
 import {activityForDoc} from '../../src/activity';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
+import {markElementScheduledForTesting} from '../../src/custom-element';
 import {viewportForDoc} from '../../src/viewport';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
@@ -115,7 +116,8 @@ describe('Activity getTotalEngagedTime', () => {
       scrollObservable.add(handler);
     });
 
-    activityServiceForTesting(ampdoc);
+    markElementScheduledForTesting(fakeWin, 'amp-analytics');
+    installActivityServiceForTesting(ampdoc);
 
     return activityForDoc(ampdoc).then(a => {
       activity = a;

@@ -29,7 +29,7 @@ import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
 import {
-  activityServiceForTesting,
+  installActivityServiceForTesting,
 } from '../../extensions/amp-analytics/0.1/activity-impl';
 import {
   installUrlReplacementsServiceForDoc,
@@ -73,7 +73,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         }
         if (opt_options.withActivity) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
-          activityServiceForTesting(iframe.ampdoc);
+          installActivityServiceForTesting(iframe.ampdoc);
         }
         if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');

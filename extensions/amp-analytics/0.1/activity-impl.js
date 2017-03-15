@@ -22,10 +22,7 @@
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {listen} from '../../../src/event-helper';
-import {
-  registerServiceBuilderForDoc,
-  getServiceForDoc,
-} from '../../../src/service';
+import {registerServiceBuilderForDoc} from '../../../src/service';
 
 
 /**
@@ -125,11 +122,9 @@ const ACTIVE_EVENT_TYPES = [
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
- * @return {Activity}
  */
-export function activityServiceForTesting(ampDoc) {
+export function installActivityServiceForTesting(ampDoc) {
   registerServiceBuilderForDoc(ampDoc, 'activity', Activity);
-  return getServiceForDoc(ampDoc, 'activity');
 }
 
 export class Activity {
