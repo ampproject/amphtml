@@ -18,7 +18,6 @@ import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
-import {fromClassForDoc} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -70,7 +69,7 @@ export class Bind {
    * @param {Object=} opt_mode
    */
   constructor(ampdoc, opt_mode) {
-    /** @const @private {!Object} */
+    /** @private {!Object} */
     this.mode_ = opt_mode || getMode(ampdoc.win);
 
     /** @const @private {boolean} */
