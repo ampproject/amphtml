@@ -60,7 +60,7 @@ const EXPERIMENTS = [
   {
     id: 'ad-type-custom',
     name: 'Activates support for custom (self-serve) advertisements',
-    spec: 'https://github.com/ampproject/amphtml/ads/custom.md',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
   },
   {
     id: 'alp',
