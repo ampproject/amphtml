@@ -101,10 +101,19 @@ function indexAmpRender(doc, targetID, global) {
   try {
     const ad = global._IndexRequestData.targetIDToBid[targetID].pop();
     if (ad != null) {
-      const admDiv = document.createElement('div');
-      admDiv.setAttribute('style', 'position: absolute; top: 0; left: 0;');
-      admDiv./*OK*/innerHTML = ad;
-      document.getElementById('c').appendChild(admDiv);
+      const admFrame = document.createElement('iframe');
+      const w = global.IndexArgs.slots[0].width;
+      const h = global.IndexArgs.slots[0].height;
+      let style = 'position:absolute;top:0;left:0;border:none;';
+      style += 'width:' + w + 'px;height:' + h + 'px;';
+      admFrame.setAttribute('style', style);
+      admFrame.setAttribute('scrolling', 'no');
+      document.getElementById('c').appendChild(admFrame);
+      const ifdoc = admFrame.contentWindow.document;
+      ifdoc.open();
+      ifdoc.write('<html><head><base target="_top"></head>');
+      ifdoc.write('<body style="margin:0;">' + ad + '</body></html>');
+      ifdoc.close();
     } else {
       global.context.noContentAvailable();
     }
