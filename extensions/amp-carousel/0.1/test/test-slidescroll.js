@@ -95,6 +95,23 @@ describe('SlideScroll', () => {
     });
   });
 
+  it('should create start/end markers when scroll-snap is available', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      ampSlideScroll.style['scrollSnapType'] = '';
+      ampSlideScroll.style['webkitScrollSnapType'] = '';
+      ampSlideScroll.style['msScrollSnapType'] = '';
+      impl.buildCarousel();
+      expect(
+          ampSlideScroll.getElementsByClassName(
+              '-amp-carousel-start-marker').length).to.be.at.least(1);
+      expect(
+          ampSlideScroll.getElementsByClassName(
+              '-amp-carousel-end-marker').length).to.be.at.least(1);
+    });
+  });
+
   it('should go to the correct slide on button click', () => {
     return getAmpSlideScroll().then(obj => {
       const ampSlideScroll = obj.ampSlideScroll;

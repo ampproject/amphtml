@@ -20,7 +20,7 @@ import {actionServiceForDoc} from '../../../src/action';
 import {bezierCurve} from '../../../src/curve';
 import {dev, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyle} from '../../../src/style';
+import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
 import {platformFor} from '../../../src/platform';
 import {timerFor} from '../../../src/timer';
@@ -124,6 +124,8 @@ export class AmpSlideScroll extends BaseSlides {
     this.vsync_ = this.getVsync();
     this.action_ = actionServiceForDoc(this.element);
 
+    this.hasNativeSnapPoints_ = (
+        getStyle(this.element, 'scrollSnapType') != undefined);
     this.element.classList.add('-amp-slidescroll');
 
     this.slides_ = this.getRealChildren();
@@ -306,7 +308,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
-    if (!this.isIos_ && !this.snappingInProgress_) {
+    if (!this.hasNativeSnapPoints_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
 
