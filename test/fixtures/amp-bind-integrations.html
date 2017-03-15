@@ -19,6 +19,7 @@
   <script custom-element="amp-brightcove" src="/dist/v0/amp-brightcove-0.1.js"></script>
   <script custom-element="amp-carousel" src="/dist/v0/amp-carousel-0.1.js"></script>
   <script custom-element="amp-selector" src="/dist/v0/amp-selector-0.1.js"></script>
+  <script custom-element="amp-youtube" src="/dist/v0/amp-youtube-0.1.js"></script>
 </head>
 
 <body>
@@ -81,6 +82,12 @@
     [height]="videoHeight"
     [controls]="videoControls">
   </amp-video>
+
+  <p>AMP-YOUTUBE</p>
+  <button on="tap:AMP.setState(youtube='bound')" id="youtubeButton"></button>
+  <amp-youtube width=480 height=270 id="youtube" data-videoid="unbound"
+      [data-videoid]="youtube">
+  </amp-youtube>
 
   <p>AMP-BRIGHTCOVE</p>
   <button id="brightcoveButton" on="tap:AMP.setState(brightcove='bound')">Change amp-brightcove</button>

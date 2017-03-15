@@ -269,6 +269,18 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
   });
 
+  describe('amp-youtube', () => {
+    it('should support binding to data-video-id', () => {
+      const button = fixture.doc.getElementById('youtubeButton');
+      const yt = fixture.doc.getElementById('youtube');
+      expect(yt.getAttribute('data-videoid')).to.equal('unbound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(yt.getAttribute('data-videoid')).to.equal('bound');
+      });
+    });
+  });
+
   describe('amp-brightcove', () => {
     it('should support binding to data-account', () => {
       const button = fixture.doc.getElementById('brightcoveButton');
