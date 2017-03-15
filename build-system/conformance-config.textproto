@@ -1,6 +1,156 @@
+# Custom Rules
+
 requirement: {
   rule_id: 'closure:throwOfNonErrorTypes'
   type: CUSTOM
   java_class: 'com.google.javascript.jscomp.ConformanceRules$BanThrowOfNonErrorTypes'
   error_message: 'Should not throw a non-Error object.'
+}
+
+# Strings
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'String.prototype.padStart is not allowed'
+  value: 'String.prototype.padStart'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'String.prototype.padEnd is not allowed'
+  value: 'String.prototype.padEnd'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'String.prototype.startsWith is not allowed'
+  value: 'String.prototype.startsWith'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'String.prototype.endsWith is not allowed'
+  value: 'String.prototype.endsWith'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'String.prototype.includes is not allowed'
+  value: 'String.prototype.includes'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'String.prototype.repeat is not allowed'
+  value: 'String.prototype.repeat'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'String.prototype.normalize is not allowed'
+  value: 'String.prototype.normalize'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'String.prototype.codePointAt is not allowed'
+  value: 'String.prototype.codePointAt'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'String.fromCodePoint is not allowed'
+  value: 'Sring.fromCodePoint'
+}
+
+# Array
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Array.from is not allowed'
+  value: 'Array.from'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Array.of is not allowed'
+  value: 'Array.of'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.find is not allowed'
+  value: 'Array.prototype.find'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.findIndex is not allowed'
+  value: 'Array.prototype.findIndex'
+}
+
+# Math
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Math.trunc is not allowed'
+  value: 'Math.trunc'
+}
+
+# Number
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.isSafeInteger is not allowed'
+  value: 'Number.isSafeInteger'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.isNaN is not allowed'
+  value: 'Number.isNaN'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.isFinite is not allowed'
+  value: 'Number.isFinite'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.EPSILON is not allowed'
+  value: 'Number.EPSILON'
+}
+
+# Structures
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Map is not allowed'
+  value: 'Map'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'WeakMap is not allowed'
+  value: 'WeakMap'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Set is not allowed'
+  value: 'Set'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'WeakSet is not allowed'
+  value: 'WeakSet'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Symbol is not allowed'
+  value: 'Symbol'
 }

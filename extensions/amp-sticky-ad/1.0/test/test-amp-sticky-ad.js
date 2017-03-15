@@ -16,6 +16,8 @@
 
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
+import {poll} from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-sticky-ad 1.0 version', {
   win: { /* window spec */
@@ -66,10 +68,9 @@ describes.realWin('amp-sticky-ad 1.0 version', {
         getScrollHeightSpy();
         return 300;
       };
-      impl.displayAfterScroll_();
+      impl.onScroll_();
       expect(getScrollTopSpy).to.have.been.called;
       expect(getSizeSpy).to.have.been.called;
-      expect(getScrollHeightSpy).to.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
       expect(removeOnScrollListenerSpy).to.not.have.been.called;
       done();
@@ -103,34 +104,30 @@ describes.realWin('amp-sticky-ad 1.0 version', {
         callback();
       };
 
-      impl.displayAfterScroll_();
+      impl.onScroll_();
       expect(getScrollTopSpy).to.have.been.called;
       expect(getSizeSpy).to.have.been.called;
-      expect(getScrollHeightSpy).to.have.been.called;
       expect(scheduleLayoutSpy).to.have.been.called;
       expect(removeOnScrollListenerSpy).to.have.been.called;
     });
 
-    it('should not build if less than one viewport height ahead', () => {
-      const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
+    it('experiment version, should display once user scroll', () => {
+      toggleExperiment(win, 'sticky-ad-early-load');
+      const scheduleLayoutSpy = sandbox.stub(impl, 'scheduleLayoutForAd_',
+          () => {});
       const removeOnScrollListenerSpy =
           sandbox.spy(impl, 'removeOnScrollListener_');
-      const getScrollTopSpy = sandbox.spy();
-      const getSizeSpy = sandbox.spy();
-      const getScrollHeightSpy = sandbox.spy();
 
-      impl.viewport_.getScrollTop = function() {
-        getScrollTopSpy();
-        return 150;
-      };
-      impl.viewport_.getSize = function() {
-        getSizeSpy();
-        return {height: 100};
-      };
-      impl.viewport_.getScrollHeight = function() {
-        getScrollHeightSpy();
-        return 180;
-      };
+      const getScrollTopStub = sandbox.stub(impl.viewport_, 'getScrollTop');
+      getScrollTopStub.returns(1);
+      const getSizeStub = sandbox.stub(impl.viewport_, 'getSize');
+      getSizeStub.returns({
+        height: 50,
+      });
+      const getScrollHeightStub =
+          sandbox.stub(impl.viewport_, 'getScrollHeight');
+      getScrollHeightStub.returns(300);
+
       impl.deferMutate = function(callback) {
         callback();
       };
@@ -138,12 +135,10 @@ describes.realWin('amp-sticky-ad 1.0 version', {
         callback();
       };
 
-      impl.displayAfterScroll_();
-      expect(getScrollTopSpy).to.have.been.called;
-      expect(getSizeSpy).to.have.been.called;
-      expect(getScrollHeightSpy).to.have.been.called;
-      expect(scheduleLayoutSpy).to.not.have.been.called;
+      impl.onScroll_();
+      expect(scheduleLayoutSpy).to.have.been.called;
       expect(removeOnScrollListenerSpy).to.have.been.called;
+      toggleExperiment(win, 'sticky-ad-early-load');
     });
 
     it('should set body borderBottom correctly', () => {
@@ -185,7 +180,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
         callback();
       };
 
-      impl.displayAfterScroll_();
+      impl.display_();
       expect(addCloseButtonSpy).to.be.called;
       expect(impl.element.children[0]).to.be.not.null;
       expect(impl.element.children[0].tagName).to.equal(
@@ -194,20 +189,42 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       expect(impl.element.children[2].tagName).to.equal('BUTTON');
     });
 
-    it('should listen to amp:built, amp:load:end', () => {
-      impl.ad_.isBuilt = () => {
-        return false;
-      };
+    it('should wait for built and load-end signals', () => {
+      impl.ad_.isBuilt = () => false;
       impl.vsync_.mutate = function(callback) {
         callback();
       };
       const layoutAdSpy = sandbox.spy(impl, 'layoutAd_');
       impl.scheduleLayoutForAd_();
       expect(layoutAdSpy).to.not.been.called;
-      impl.ad_.dispatchEvent(new Event('amp:built'));
-      expect(layoutAdSpy).to.be.called;
-      impl.ad_.dispatchEvent(new Event('amp:load:end'));
-      expect(ampStickyAd).to.have.attribute('visible');
+      impl.ad_.signals().signal('built');
+      return impl.ad_.signals().whenSignal('built').then(() => {
+        expect(layoutAdSpy).to.be.called;
+        expect(ampStickyAd).to.not.have.attribute('visible');
+        impl.ad_.signals().signal('load-end');
+        return poll('visible attribute must be set', () => {
+          return ampStickyAd.hasAttribute('visible');
+        });
+      });
+    });
+
+    it('should wait for built and render-start signals', () => {
+      impl.ad_.isBuilt = () => false;
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
+      const layoutAdSpy = sandbox.spy(impl, 'layoutAd_');
+      impl.scheduleLayoutForAd_();
+      expect(layoutAdSpy).to.not.been.called;
+      impl.ad_.signals().signal('built');
+      return impl.ad_.signals().whenSignal('built').then(() => {
+        expect(layoutAdSpy).to.be.called;
+        expect(ampStickyAd).to.not.have.attribute('visible');
+        impl.ad_.signals().signal('render-start');
+        return poll('visible attribute must be set', () => {
+          return ampStickyAd.hasAttribute('visible');
+        });
+      });
     });
 
     it('should not allow container to be set semi-transparent', () => {
@@ -216,10 +233,13 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.vsync_.mutate = function(callback) {
         callback();
       };
-      impl.layoutAd_();
-      impl.ad_.dispatchEvent(new Event('amp:load:end'));
-      expect(window.getComputedStyle(ampStickyAd)
-          .getPropertyValue('background-color')).to.equal('rgb(55, 55, 55)');
+      const layoutPromise = impl.layoutAd_();
+      impl.ad_.signals().signal('render-start');
+      return layoutPromise.then(() => {
+        const bg = window.getComputedStyle(ampStickyAd)
+            .getPropertyValue('background-color');
+        return bg == 'rgb(55, 55, 55)';
+      });
     });
 
     it('should not allow container to be set to transparent', () => {
@@ -228,10 +248,13 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.vsync_.mutate = function(callback) {
         callback();
       };
-      impl.layoutAd_();
-      impl.ad_.dispatchEvent(new Event('amp:load:end'));
-      expect(window.getComputedStyle(ampStickyAd)
-          .getPropertyValue('background-color')).to.equal('rgb(0, 0, 0)');
+      const layoutPromise = impl.layoutAd_();
+      impl.ad_.signals().signal('render-start');
+      return layoutPromise.then(() => {
+        const bg = window.getComputedStyle(ampStickyAd)
+            .getPropertyValue('background-color');
+        return bg == 'rgb(0, 0, 0)';
+      });
     });
   });
 
@@ -332,8 +355,11 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
       return 20;
     };
 
-    impl.displayAfterScroll_();
-    return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
+    impl.display_();
+    impl.ad_.signals().signal('load-end');
+    const layoutPromise = impl.layoutAd_();
+    const bodyPromise = impl.viewport_.ampdoc.whenBodyAvailable();
+    return Promise.all([layoutPromise, bodyPromise]).then(() => {
       let borderWidth = win.getComputedStyle(win.document.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('54px');
@@ -367,8 +393,11 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
       return 20;
     };
 
-    impl.displayAfterScroll_();
-    return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
+    impl.display_();
+    impl.ad_.signals().signal('load-end');
+    const layoutPromise = impl.layoutAd_();
+    const bodyPromise = impl.viewport_.ampdoc.whenBodyAvailable();
+    return Promise.all([layoutPromise, bodyPromise]).then(() => {
       let borderWidth = win.getComputedStyle(win.document.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('54px');

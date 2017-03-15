@@ -116,6 +116,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// docs) we log as "ERROR".
 	isCdn := false
 	if strings.HasPrefix(r.Referer(), "https://cdn.ampproject.org/") ||
+			strings.Contains(r.Referer(), ".cdn.ampproject.org/") ||
 			strings.Contains(r.Referer(), ".ampproject.net/") {
 		severity = "ERROR"
 		level = logging.Error
@@ -125,16 +126,31 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		errorType += "-origin"
 	}
 	is3p := false
-	if r.URL.Query().Get("3p") == "1" {
-		is3p = true
-		errorType += "-3p"
+	runtime := r.URL.Query().Get("rt")
+	if runtime != "" {
+		errorType += "-" + runtime;
+		if runtime == "inabox" {
+			severity = "ERROR"
+			level = logging.Error
+		}
+		if runtime == "3p" {
+			is3p = true
+		}
 	} else {
-		errorType += "-1p"
+		if r.URL.Query().Get("3p") == "1" {
+			is3p = true
+			errorType += "-3p"
+		} else {
+			errorType += "-1p"
+		}
 	}
 	isCanary := false;
 	if r.URL.Query().Get("ca") == "1" {
 		errorType += "-canary"
 		isCanary = true;
+	}
+	if r.URL.Query().Get("ex") == "1" {
+		errorType += "-expected"
 	}
 	sample := rand.Float64()
 	throttleRate := 0.01

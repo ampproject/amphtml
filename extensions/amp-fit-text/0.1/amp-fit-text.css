@@ -15,7 +15,7 @@
  */
 
 .-amp-fit-text-content,
-.-amp-fit-text-content.-amp-fill-content {
+.-amp-fit-text-content.i-amphtml-fill-content {
   display: block;
   /* @alternative */ display: flex;
   flex-direction: column;

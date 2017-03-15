@@ -16,44 +16,22 @@
 
 tags: {  # amp-hulu
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-hulu extension .js script"
-  mandatory_parent: "HEAD"
-  unique: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-hulu extension .js script"
+  requires: "amp-hulu"
+  extension_spec: {
+    name: "amp-hulu"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-hulu"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-hulu-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-hulu>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-HULU"
+  satisfies: "amp-hulu"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-hulu extension .js script"
+  requires: "amp-hulu extension .js script"
   attrs: {
     name: "data-eid"
     mandatory: true

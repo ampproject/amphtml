@@ -20,6 +20,12 @@ import {registerElement} from '../src/custom-element';
 import {srcsetFromElement} from '../src/srcset';
 import {user} from '../src/log';
 
+/**
+ * Attributes to propagate to internal image when changed externally.
+ * @type {!Array<string>}
+ */
+const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
+      'aria-describedby', 'aria-labelledby'];
 
 export class AmpImg extends BaseElement {
 
@@ -38,6 +44,24 @@ export class AmpImg extends BaseElement {
 
     /** @private {?../src/srcset.Srcset} */
     this.srcset_ = null;
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    if (mutations['src'] !== undefined || mutations['srcset'] !== undefined) {
+      this.srcset_ = srcsetFromElement(this.element);
+      // This element may not have been laid out yet.
+      if (this.img_) {
+        this.updateImageSrc_();
+      }
+    }
+
+    if (this.img_) {
+      const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
+          value => mutations[value] !== undefined);
+      this.propagateAttributes(
+          attrs, this.img_, /* opt_removeMissingAttrs */ true);
+    }
   }
 
   /** @override */
@@ -81,8 +105,7 @@ export class AmpImg extends BaseElement {
         'be correctly propagated for the underlying <img> element.');
     }
 
-    this.propagateAttributes(['alt', 'referrerpolicy', 'aria-label',
-      'aria-describedby', 'aria-labelledby'], this.img_);
+    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
@@ -96,6 +119,11 @@ export class AmpImg extends BaseElement {
   /** @override */
   isRelayoutNeeded() {
     return true;
+  }
+
+  /** @override */
+  reconstructWhenReparented() {
+    return false;
   }
 
   /** @override */

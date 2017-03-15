@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import {documentInfoForDoc} from '../document-info';
-import {whenDocumentReady, whenDocumentComplete} from '../document-ready';
+import {layoutRectLtwh} from '../layout-rect';
 import {fromClass} from '../service';
 import {resourcesForDoc} from '../resources';
 import {viewerForDoc} from '../viewer';
+import {viewportForDoc} from '../viewport';
+import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
+import {urls} from '../config';
+import {getMode} from '../mode';
 
 
 /**
@@ -88,15 +91,8 @@ export class Performance {
     /** @private {boolean} */
     this.isPerformanceTrackingOn_ = false;
 
-    /** @private @const {!Promise} */
-    this.whenReadyToRetrieveResourcesPromise_ =
-        whenDocumentReady(this.win.document)
-        .then(() => {
-          // Two fold. First, resolve the promise to undefined.
-          // Second, causes a delay by introducing another async request
-          // (this `#then` block) so that Resources' onDocumentReady event
-          // is guaranteed to fire.
-        });
+    /** @private {?string} */
+    this.enabledExperiments_ = null;
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => {
@@ -143,8 +139,6 @@ export class Performance {
     return channelPromise.then(() => {
       this.isMessagingReady_ = true;
 
-      // This task is async
-      this.setDocumentInfoParams_();
       // forward all queued ticks to the viewer since messaging
       // is now ready.
       this.flushQueuedTicks_();
@@ -170,7 +164,9 @@ export class Performance {
       });
     }
 
-    this.whenViewportLayoutComplete_().then(() => {
+    // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
+    // reporting regression is confirmed.
+    this.whenViewportLayoutCompleteLegacy_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
             ? (Date.now() - docVisibleTime)
@@ -198,37 +194,40 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    return this.whenReadyToRetrieveResources_().then(() => {
-      return Promise.all(this.resources_.getResourcesInViewport().map(r => {
-        return r.loadedOnce();
-      }));
-    });
+    const size = viewportForDoc(this.win.document).getSize();
+    const rect = layoutRectLtwh(0, 0, size.width, size.height);
+    return this.resources_.getResourcesInRect(
+            this.win, rect, /* isInPrerender */ true)
+        .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
   }
 
   /**
-   * Returns a promise that is resolved when the document is ready and
-   * after a microtask delay.
+   * TODO(dvoytenko, #7815): remove once the reporting regression is confirmed.
    * @return {!Promise}
-   */
-  whenReadyToRetrieveResources_() {
-    return this.whenReadyToRetrieveResourcesPromise_;
-  }
-
-  /**
-   * Forward an object to be appended as search params to the external
-   * intstrumentation library.
-   * @param {!Object} params
    * @private
    */
-  setFlushParams_(params) {
-    this.viewer_.sendMessageCancelUnsent('setFlushParams', params,
-        /* awaitResponse */false);
+  whenViewportLayoutCompleteLegacy_() {
+    const whenReadyToRetrieveResources = whenDocumentReady(this.win.document)
+        .then(() => {
+          // Two fold. First, resolve the promise to undefined.
+          // Second, causes a delay by introducing another async request
+          // (this `#then` block) so that Resources' onDocumentReady event
+          // is guaranteed to fire.
+        });
+    return whenReadyToRetrieveResources.then(() => {
+      return Promise.all(this.resources_.getResourcesInViewportLegacy()
+          .map(r => {
+            return r.loadedOnce();
+          }));
+    });
   }
 
   /**
    * Ticks a timing event.
    *
    * @param {string} label The variable name as it will be reported.
+   *     See TICKEVENTS.md for available metrics, and edit this file
+   *     when adding a new metric.
    * @param {?string=} opt_from The label of a previous tick to use as a
    *    relative start for this tick.
    * @param {number=} opt_value The time to record the tick at. Optional, if
@@ -244,7 +243,7 @@ export class Performance {
         label,
         from: opt_from,
         value: opt_value,
-      }, /* awaitResponse */false);
+      });
     } else {
       this.queueTick_(label, opt_from, opt_value);
     }
@@ -287,11 +286,37 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.sendMessageCancelUnsent('sendCsi', undefined,
-          /* awaitResponse */false);
+      const experiments = this.getEnabledExperiments_();
+      const payload = experiments === '' ? undefined : {
+        ampexp: experiments,
+      };
+      this.viewer_.sendMessage('sendCsi', payload, /* cancelUnsent */true);
     }
   }
 
+  /**
+   * @returns {string} comma-separated list of experiment IDs
+   * @private
+   */
+  getEnabledExperiments_() {
+    if (this.enabledExperiments_ !== null) {
+      return this.enabledExperiments_;
+    }
+    const experiments = [];
+    // Add RTV version as experiment ID, so we can slice the data by version.
+    if (getMode(this.win).rtvVersion) {
+      experiments.push(getMode(this.win).rtvVersion);
+    }
+    // Check if it's the legacy CDN domain.
+    if (this.getHostname_() == urls.cdn.split('://')[1]) {
+      experiments.push('legacy-cdn-domain');
+    }
+    return this.enabledExperiments_ = experiments.join(',');
+  }
+
+  getHostname_() {
+    return this.win.location.hostname;
+  }
 
   /**
    * Queues the events to be flushed when tick function is set.
@@ -334,36 +359,9 @@ export class Performance {
     }
 
     this.events_.forEach(tickEvent => {
-      this.viewer_.sendMessage('tick', tickEvent, /* awaitResponse */false);
+      this.viewer_.sendMessage('tick', tickEvent);
     });
     this.events_.length = 0;
-  }
-
-
-  /**
-   * Calls "setFlushParams_" with relevant document information.
-   * @return {!Promise}
-   * @private
-   */
-  setDocumentInfoParams_() {
-    return this.whenViewportLayoutComplete_().then(() => {
-      const params = Object.create(null);
-      const sourceUrl = documentInfoForDoc(this.win.document).sourceUrl
-          .replace(/#.*/, '');
-      params['sourceUrl'] = sourceUrl;
-
-      this.resources_.get().forEach(r => {
-        const el = r.element;
-        const name = el.tagName.toLowerCase();
-        incOrDef(params, name);
-        if (name == 'amp-ad') {
-          incOrDef(params, `ad-${el.getAttribute('type')}`);
-        }
-      });
-
-      this.setFlushParams_(params);
-      this.flush();
-    });
   }
 
   /**
@@ -372,8 +370,8 @@ export class Performance {
    */
   prerenderComplete_(value) {
     if (this.viewer_) {
-      this.viewer_.sendMessageCancelUnsent('prerenderComplete', {value},
-          /* awaitResponse */false);
+      this.viewer_.sendMessage('prerenderComplete', {value},
+          /* cancelUnsent */true);
     }
   }
 

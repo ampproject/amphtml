@@ -21,9 +21,12 @@ process.end.NODE_ENV;
 
 // Exposed to ads.
 window.context = {};
+window.context.sentinel;
 window.context.amp3pSentinel;
 window.context.clientId;
 window.context.initialIntersection;
+window.context.sourceUrl;
+window.context.experimentToggles;
 
 // Service Holder
 window.services;
@@ -101,7 +104,9 @@ data.pageHidden;
 data.changes;
 data._context;
 data.inViewport;
-
+data.numposts;
+data.orderBy;
+data.colorscheme;
 
 // 3p code
 var twttr;

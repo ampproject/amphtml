@@ -24,7 +24,7 @@
 
 import {dev, user} from '../src/log';
 import {isArray} from '../src/types';
-import {map} from '../src/types';
+import {map} from '../src/utils/object';
 import {rethrowAsync} from '../src/log';
 
 
@@ -284,4 +284,24 @@ function validateAllowedFields(data, allowedFields) {
       rethrowAsync(new Error(`Unknown attribute for ${data.type}: ${field}.`));
     }
   }
+}
+
+/** @private {!Object<string, boolean>} */
+let experimentToggles = {};
+
+/**
+ * Returns true if an experiment is enabled.
+ * @param {string} experimentId
+ * @return {boolean}
+ */
+export function isExperimentOn(experimentId) {
+  return !!experimentToggles[experimentId];
+}
+
+/**
+ * Set experiment toggles.
+ * @param {!Object<string, boolean>} toggles
+ */
+export function setExperimentToggles(toggles) {
+  experimentToggles = toggles;
 }

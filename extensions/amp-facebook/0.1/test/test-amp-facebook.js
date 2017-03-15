@@ -23,8 +23,11 @@ import {adopt} from '../../../../src/runtime';
 import {facebook} from '../../../../3p/facebook';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 import {resetServiceForTesting} from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
+
+const scenarios = ['sentinel', 'amp3pSentinel'];
 
 describe('amp-facebook', function() {
   this.timeout(5000);
@@ -53,12 +56,16 @@ describe('amp-facebook', function() {
     });
   }
 
+  afterEach(() => {
+    toggleExperiment(window, 'sentinel-name-change', false);
+  });
+
   it('renders iframe in amp-facebook', () => {
     return getAmpFacebook(fbPostHref).then(ampFB => {
       const iframe = ampFB.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 
@@ -67,7 +74,7 @@ describe('amp-facebook', function() {
       const iframe = ampFB.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 
@@ -76,6 +83,9 @@ describe('amp-facebook', function() {
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       iframe.doc.body.appendChild(div);
+      iframe.win.context = {
+        tagName: 'AMP-FACEBOOK',
+      };
 
       facebook(iframe.win, {
         href: fbPostHref,
@@ -93,6 +103,9 @@ describe('amp-facebook', function() {
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       iframe.doc.body.appendChild(div);
+      iframe.win.context = {
+        tagName: 'AMP-FACEBOOK',
+      };
 
       facebook(iframe.win, {
         href: fbVideoHref,
@@ -106,29 +119,35 @@ describe('amp-facebook', function() {
     });
   });
 
-  it('resizes facebook posts', () => {
-    const iframeSrc = 'http://ads.localhost:' + location.port +
-        '/test/fixtures/served/iframe.html';
-    resetServiceForTesting(window, 'bootstrapBaseUrl');
-    setDefaultBootstrapBaseUrlForTesting(iframeSrc);
-    return getAmpFacebook(fbPostHref, undefined,
-        /* opt_noFakeResources */ true).then(ampFB => {
-          return new Promise((resolve, unusedReject) => {
-            const iframe = ampFB.firstChild;
-            const impl = ampFB.implementation_;
-            impl.changeHeight = newHeight => {
-              expect(newHeight).to.equal(666);
-              resolve(ampFB);
-            };
-            iframe.contentWindow.postMessage({
-              sentinel: 'amp-test',
-              type: 'requestHeight',
-              is3p: true,
-              height: 666,
-              amp3pSentinel: iframe.getAttribute('data-amp-3p-sentinel'),
-            }, '*');
+  scenarios.forEach(sentinelName => {
+    it('resizes facebook posts', () => {
+      if (sentinelName == 'sentinel') {
+        toggleExperiment(window, 'sentinel-name-change', true);
+      }
+      const iframeSrc = 'http://ads.localhost:' + location.port +
+          '/test/fixtures/served/iframe.html';
+      resetServiceForTesting(window, 'bootstrapBaseUrl');
+      setDefaultBootstrapBaseUrlForTesting(iframeSrc);
+      return getAmpFacebook(
+          fbPostHref, undefined, /* opt_noFakeResources */ true).then(ampFB => {
+            return new Promise((resolve, unusedReject) => {
+              const iframe = ampFB.firstChild;
+              const impl = ampFB.implementation_;
+              impl.changeHeight = newHeight => {
+                expect(newHeight).to.equal(666);
+                resolve(ampFB);
+              };
+              const message = {
+                type: 'requestHeight',
+                is3p: true,
+                height: 666,
+              };
+              message[sentinelName] = iframe.getAttribute(
+                  'data-amp-3p-sentinel');
+              iframe.contentWindow.postMessage(message, '*');
+            });
           });
-        });
+    });
   });
 
   it('removes iframe after unlayoutCallback', () => {

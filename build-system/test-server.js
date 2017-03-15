@@ -22,7 +22,6 @@ var bodyParser = require('body-parser');
 var morgan = require('morgan');
 
 app.use(bodyParser.json());
-app.use(morgan('dev'));
 
 function setCorsHeaders(req, res, next) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -81,7 +80,36 @@ app.use('/post', function(req, res) {
   delete req.query.__amp_source_origin;
   res.json({
     json: req.body,
-  })
+  });
 });
+
+app.use('/form/post/success', function(req, res) {
+  delete req.query.__amp_source_origin;
+  res.json({
+    name: 'John Miller',
+    interests: [
+      {title: 'Football'},
+      {title: 'Basketball'},
+      {title: 'Writing'},
+    ],
+  });
+});
+
+app.use('/form/post/error', function(req, res) {
+  delete req.query.__amp_source_origin;
+  res.status(500).json({
+    error: 'alreadySubscribed',
+    name: 'John Miller',
+    email: 'john@miller.what',
+  });
+});
+
+app.use('/form/post', function(req, res) {
+  delete req.query.__amp_source_origin;
+  res.json({
+    json: req.body,
+  });
+});
+
 
 exports.app = app;

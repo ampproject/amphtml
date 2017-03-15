@@ -14,91 +14,61 @@
  * limitations under the License.
  */
 import './polyfills';
-import {dev, user} from '../src/log';
+import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
+import {MessageType} from '../src/3p-frame';
+import {tryParseJson} from '../src/json';
 
-/**
-   Enum for the different postmessage types for the window.context
-   postmess api.
-*/
-export const MessageType_ = {
-  SEND_EMBED_STATE: 'send-embed-state',
-  EMBED_STATE: 'embed-state',
-  SEND_EMBED_CONTEXT: 'send-embed-context',
-  EMBED_CONTEXT: 'embed-context',
-  SEND_INTERSECTIONS: 'send-intersections',
-  INTERSECTION: 'intersection',
-  EMBED_SIZE: 'embed-size',
-  EMBED_SIZE_CHANGED: 'embed-size-changed',
-  EMBED_SIZE_DENIED: 'embed-size-denied',
-};
-
-export class AmpContext extends IframeMessagingClient {
+export class AmpContext {
 
   /**
    *  @param {Window} win The window that the instance is built inside.
    */
   constructor(win) {
-    super(win);
-    this.setupMetadata_();
-  }
+    this.win_ = win;
 
-  /** @override */
-  registerCallback_(messageType, callback) {
-    user().assertEnumValue(MessageType_, messageType);
-    this.callbackFor_[messageType] = callback;
-    return () => { delete this.callbackFor_[messageType]; };
+    this.findAndSetMetadata_();
+    this.client_ = new IframeMessagingClient(win);
+    this.client_.setHostWindow(this.getHostWindow_());
+    this.client_.setSentinel(this.sentinel);
   }
 
   /**
    *  Send message to runtime to start sending page visibility messages.
-   *  @param {function(Object)} callback Function to call every time we receive a
-   *    page visibility message.
+   *  @param {function(Object)} callback Function to call every time we receive
+   *    a page visibility message.
    *  @returns {function()} that when called stops triggering the callback
    *    every time we receive a page visibility message.
    */
   observePageVisibility(callback) {
-    const stopObserveFunc = this.registerCallback_(
-        MessageType_.EMBED_STATE, callback);
-    this.messageHost_({
-      sentinel: this.sentinel,
-      type: MessageType_.SEND_EMBED_STATE,
-    });
-
-    return stopObserveFunc;
+    return this.client_.makeRequest(
+        MessageType.SEND_EMBED_STATE,
+        MessageType.EMBED_STATE,
+        callback);
   };
 
   /**
    *  Send message to runtime to start sending intersection messages.
-   *  @param {function(Object)} callback Function to call every time we receive an
-   *    intersection message.
+   *  @param {function(Object)} callback Function to call every time we receive
+   *  an intersection message.
    *  @returns {function()} that when called stops triggering the callback
    *    every time we receive an intersection message.
-
    */
   observeIntersection(callback) {
-    const stopObserveFunc = this.registerCallback_(
-        MessageType_.INTERSECTION, callback);
-    this.messageHost_({
-      sentinel: this.getSentinel(),
-      type: MessageType_.SEND_INTERSECTIONS});
-
-    return stopObserveFunc;
+    return this.client_.makeRequest(
+        MessageType.SEND_INTERSECTIONS,
+        MessageType.INTERSECTION,
+        callback);
   };
 
   /**
    *  Send message to runtime requesting to resize ad to height and width.
    *    This is not guaranteed to succeed. All this does is make the request.
-   *  @param {int} height The new height for the ad we are requesting.
    *  @param {int} width The new width for the ad we are requesting.
+   *  @param {int} height The new height for the ad we are requesting.
    */
-  requestResize(height, width) {
-    this.messageHost_({
-      sentinel: this.sentinel,
-      type: MessageType_.EMBED_SIZE,
-      width,
-      height,
-    });
+  requestResize(width, height) {
+    this.client_.sendMessage(MessageType.EMBED_SIZE, {width, height});
   };
 
   /**
@@ -109,7 +79,7 @@ export class AmpContext extends IframeMessagingClient {
    *    to call if the resize request succeeds.
    */
   onResizeSuccess(callback) {
-    this.registerCallback_(MessageType_.EMBED_SIZE_CHANGED, function(obj) {
+    this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
       callback(obj.requestedHeight, obj.requestedWidth); });
   };
 
@@ -121,8 +91,9 @@ export class AmpContext extends IframeMessagingClient {
    *    to call if the resize request is denied.
    */
   onResizeDenied(callback) {
-    this.registerCallback_(MessageType_.EMBED_SIZE_DENIED, function(obj) {
-      callback(obj.requestedHeight, obj.requestedWidth); });
+    this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
+      callback(obj.requestedHeight, obj.requestedWidth);
+    });
   };
 
   /**
@@ -137,29 +108,28 @@ export class AmpContext extends IframeMessagingClient {
   /**
    *  Parse the metadata attributes from the name and add them to
    *  the class instance.
+   *  @param {!Object|string} contextData
    *  @private
    */
-  setupMetadata_() {
-    try {
-      const data = JSON.parse(decodeURI(this.win_.name));
-      const context = data._context;
-      this.location = context.location;
-      this.canonicalUrl = context.canonicalUrl;
-      this.pageViewId = context.pageViewId;
-      this.sentinel = context.sentinel;
-      this.startTime = context.startTime;
-      this.referrer = context.referrer;
-    } catch (err) {
-      user().error('AMPCONTEXT', '- Could not parse metadata.');
-      throw new Error('Could not parse metadata.');
+  setupMetadata_(data) {
+    data = tryParseJson(data);
+    if (!data) {
+      throw new Error('Could not setup metadata.');
     }
+    const context = data._context;
+    this.location = context.location;
+    this.canonicalUrl = context.canonicalUrl;
+    this.pageViewId = context.pageViewId;
+    this.sentinel = context.sentinel || context.amp3pSentinel;
+    this.startTime = context.startTime;
+    this.referrer = context.referrer;
   }
 
   /**
    *  Calculate the hostWindow
    *  @private
    */
-  generateWindow_() {
+  getHostWindow_() {
     const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
     dev().assert(sentinelMatch, 'Incorrect sentinel format');
     const depth = Number(sentinelMatch[2]);
@@ -171,4 +141,20 @@ export class AmpContext extends IframeMessagingClient {
     return ancestors[(ancestors.length - 1) - depth];
   }
 
-};
+  /**
+   *  Checks to see if there is a window variable assigned with the
+   *  sentinel value, sets it, and returns true if so.
+   *  @private
+   */
+  findAndSetMetadata_() {
+    // If the context data is set on window, that means we don't need
+    // to check the name attribute as it has been bypassed.
+    if (!this.win_.AMP_CONTEXT_DATA) {
+      this.setupMetadata_(this.win_.name);
+    } else if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
+      this.sentinel = this.win_.AMP_CONTEXT_DATA;
+    } else {
+      this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
+    }
+  }
+}

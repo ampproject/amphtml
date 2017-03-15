@@ -19,6 +19,7 @@ import '../polyfills';
 
 import {user} from '../log';
 import {fromClass} from '../service';
+import {reportError} from '../error';
 
 /**
  * Helper with all things Timer.
@@ -72,10 +73,18 @@ export class Timer {
           return;
         }
         callback();
-      });
+      }).catch(reportError);
       return id;
     }
-    return this.win.setTimeout(callback, opt_delay);
+    const wrapped = () => {
+      try {
+        callback();
+      } catch (e) {
+        reportError(e);
+        throw e;
+      }
+    };
+    return this.win.setTimeout(wrapped, opt_delay);
   }
 
   /**
@@ -100,10 +109,15 @@ export class Timer {
    */
   promise(opt_delay, opt_result) {
     return new Promise(resolve => {
-      const timerKey = this.delay(() => {
-        resolve(opt_result);
-      }, opt_delay);
-
+      let timerKey;
+      if (opt_result === undefined) {
+        // Avoid wrapping in closure if no specific result is produced.
+        timerKey = this.delay(resolve, opt_delay);
+      } else {
+        timerKey = this.delay(() => {
+          resolve(opt_result);
+        }, opt_delay);
+      }
       if (timerKey == -1) {
         throw new Error('Failed to schedule timer.');
       }
@@ -136,6 +150,25 @@ export class Timer {
     }
     return Promise.race([delayPromise, opt_racePromise]);
   }
+
+  /**
+   * Returns a promise that resolves after `predicate` returns true.
+   * Polls with interval `delay`
+   * @param {number} delay
+   * @param {function():boolean} predicate
+   * @return {!Promise}
+   */
+  poll(delay, predicate) {
+    return new Promise(resolve => {
+      const interval = this.win.setInterval(() => {
+        if (predicate()) {
+          this.win.clearInterval(interval);
+          resolve();
+        }
+      }, delay);
+    });
+  }
+
 }
 
 /**

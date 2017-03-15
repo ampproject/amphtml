@@ -17,34 +17,11 @@
 tags: {  # amp-dynamic-css-classes
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-dynamic-css-classes extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-dynamic-css-classes"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-dynamic-css-classes"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-dynamic-css-classes-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-dynamic-css-classes.html"
+  attr_lists: "common-extension-attrs"
 }

@@ -16,7 +16,8 @@
 
 import * as sinon from 'sinon';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import {getService, resetServiceForTesting} from '../../src/service';
+import {resetServiceForTesting} from '../../src/service';
+import {resourcesForDoc} from '../../src/resources';
 import {viewerForDoc} from '../../src/viewer';
 
 
@@ -134,13 +135,10 @@ describe('performance', () => {
   describe('when viewer is ready,', () => {
     let viewer;
     let viewerSendMessageStub;
-    let viewerSendMessageCancelUnsentStub;
 
     beforeEach(() => {
       viewer = viewerForDoc(window.document);
       viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
-      viewerSendMessageCancelUnsentStub = sandbox.stub(viewer,
-          'sendMessageCancelUnsent');
     });
 
 
@@ -314,8 +312,8 @@ describe('performance', () => {
           expect(perf.events_.length).to.equal(0);
 
           expect(viewerSendMessageStub.withArgs('tick')).to.not.be.called;
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-              .to.not.be.called;
+          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+              /* cancelUnsent */true)).to.not.be.called;
         });
       });
 
@@ -330,8 +328,8 @@ describe('performance', () => {
         perf.tick('start0');
         perf.flush();
         return perf.coreServicesAvailable().then(() => {
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-              .to.not.be.called;
+          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+              /* cancelUnsent */true)).to.not.be.called;
         });
       });
     });
@@ -401,76 +399,71 @@ describe('performance', () => {
       });
 
       it('should call the flush callback', () => {
-        expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-            .to.have.callCount(0);
+        const payload = {
+          ampexp: '$internalRuntimeVersion$',
+        };
+        expect(viewerSendMessageStub.withArgs('sendCsi', payload,
+            /* cancelUnsent */true)).to.have.callCount(0);
         // coreServicesAvailable calls flush once.
         return perf.coreServicesAvailable().then(() => {
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-              .to.have.callCount(1);
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
+              /* cancelUnsent */true)).to.have.callCount(1);
           perf.flush();
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-              .to.have.callCount(2);
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
+              /* cancelUnsent */true)).to.have.callCount(2);
           perf.flush();
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-              .to.have.callCount(3);
-        });
-      });
-
-      it('should setFlushParams', () => {
-        sandbox.stub(perf, 'whenViewportLayoutComplete_')
-            .returns(Promise.resolve());
-        perf.coreServicesAvailable();
-        resetServiceForTesting(window, 'documentInfo');
-        const info = {
-          get: () => {
-            return {
-              canonicalUrl: 'https://foo.bar/baz',
-              pageViewId: 12345,
-              sourceUrl: 'https://hello.world/baz/#development',
-            };
-          },
-        };
-        getService(window, 'documentInfo', () => info);
-
-        const ad1 = document.createElement('amp-ad');
-        ad1.setAttribute('type', 'abc');
-        const ad2 = document.createElement('amp-ad');
-        ad2.setAttribute('type', 'xyz');
-        const ad3 = document.createElement('amp-ad');
-        sandbox.stub(perf.resources_, 'get').returns([
-          {element: document.createElement('amp-img')},
-          {element: document.createElement('amp-img')},
-          {element: document.createElement('amp-anim')},
-          {element: ad1},
-          {element: ad2},
-          {element: ad3},
-        ]);
-
-        return perf.setDocumentInfoParams_().then(() => {
-          expect(viewerSendMessageCancelUnsentStub.withArgs('setFlushParams')
-              .lastCall.args[1]).to.be.jsonEqual({
-                sourceUrl: 'https://hello.world/baz/',
-                'amp-img': 2,
-                'amp-anim': 1,
-                'amp-ad': 3,
-                'ad-abc': 1,
-                'ad-xyz': 1,
-                'ad-null': 1,
-              });
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
+              /* cancelUnsent */true)).to.have.callCount(3);
         });
       });
     });
+  });
 
+  // TODO(dvoytenko, #7815): re-enable once the reporting regression is
+  // confirmed.
+  it.skip('should wait for visible resources', () => {
+    function resource() {
+      const res = {
+        loadedComplete: false,
+      };
+      res.loadedOnce = () => Promise.resolve().then(() => {
+        res.loadedComplete = true;
+      });
+      return res;
+    }
+
+    const resources = resourcesForDoc(window.document);
+    const resourcesMock = sandbox.mock(resources);
+    perf.resources_ = resources;
+
+    const res1 = resource();
+    const res2 = resource();
+
+    resourcesMock
+        .expects('getResourcesInRect')
+        .withExactArgs(
+            perf.win,
+            sinon.match(arg =>
+                arg.left == 0 &&
+                arg.top == 0 &&
+                arg.width == perf.win.innerWidth &&
+                arg.height == perf.win.innerHeight),
+            /* inPrerender */ true)
+        .returns(Promise.resolve([res1, res2]))
+        .once();
+
+    return perf.whenViewportLayoutComplete_().then(() => {
+      expect(res1.loadedComplete).to.be.true;
+      expect(res2.loadedComplete).to.be.true;
+    });
   });
 
   describe('coreServicesAvailable', () => {
     let tickSpy;
     let viewer;
-    let viewerSendMessageCancelUnsentStub;
+    let viewerSendMessageStub;
     let whenFirstVisiblePromise;
     let whenFirstVisibleResolve;
-    let whenReadyToRetrieveResourcesPromise;
-    let whenReadyToRetrieveResourcesResolve;
     let whenViewportLayoutCompletePromise;
     let whenViewportLayoutCompleteResolve;
 
@@ -483,17 +476,13 @@ describe('performance', () => {
       viewer = viewerForDoc(window.document);
       sandbox.stub(viewer, 'whenMessagingReady')
           .returns(Promise.resolve());
-      viewerSendMessageCancelUnsentStub = sandbox.stub(viewer,
-          'sendMessageCancelUnsent');
+      viewerSendMessageStub = sandbox.stub(viewer,
+          'sendMessage');
 
       tickSpy = sandbox.spy(perf, 'tick');
 
       whenFirstVisiblePromise = new Promise(resolve => {
         whenFirstVisibleResolve = resolve;
-      });
-
-      whenReadyToRetrieveResourcesPromise = new Promise(resolve => {
-        whenReadyToRetrieveResourcesResolve = resolve;
       });
 
       whenViewportLayoutCompletePromise = new Promise(resolve => {
@@ -502,9 +491,9 @@ describe('performance', () => {
 
       sandbox.stub(viewer, 'whenFirstVisible')
           .returns(whenFirstVisiblePromise);
-      sandbox.stub(perf, 'whenReadyToRetrieveResources_')
-          .returns(whenReadyToRetrieveResourcesPromise);
-      sandbox.stub(perf, 'whenViewportLayoutComplete_')
+      // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
+      // reporting regression is confirmed.
+      sandbox.stub(perf, 'whenViewportLayoutCompleteLegacy_')
           .returns(whenViewportLayoutCompletePromise);
       return viewer.whenMessagingReady();
     });
@@ -524,10 +513,9 @@ describe('performance', () => {
         sandbox.stub(viewer, 'isEmbedded').returns(true);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
-          whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(viewerSendMessageCancelUnsentStub.withArgs(
+            expect(viewerSendMessageStub.withArgs(
                 'prerenderComplete').firstCall.args[1].value).to.equal(400);
           });
         });
@@ -540,10 +528,9 @@ describe('performance', () => {
         sandbox.stub(viewer, 'getParam').withArgs('csi').returns(null);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
-          whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(viewerSendMessageCancelUnsentStub.withArgs(
+            expect(viewerSendMessageStub.withArgs(
                 'prerenderComplete').firstCall.args[1].value).to.equal(400);
           });
         });
@@ -557,7 +544,6 @@ describe('performance', () => {
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
           expect(tickSpy).to.have.callCount(2);
-          whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
             expect(tickSpy).to.have.callCount(4);
@@ -575,7 +561,6 @@ describe('performance', () => {
       it('should tick `pc` with `opt_value=0` when viewport is complete ' +
          'before user request document to be visible', () => {
         clock.tick(300);
-        whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(tickSpy).to.have.callCount(3);
@@ -601,10 +586,9 @@ describe('performance', () => {
         sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
         sandbox.stub(viewer, 'isEmbedded').returns(true);
         clock.tick(300);
-        whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(viewerSendMessageCancelUnsentStub.withArgs(
+          expect(viewerSendMessageStub.withArgs(
               'prerenderComplete').firstCall.args[1].value).to.equal(300);
         });
       });
@@ -612,7 +596,6 @@ describe('performance', () => {
       it('should tick `pc` with `opt_value=undefined` when user requests ' +
          'document to be visible', () => {
         clock.tick(300);
-        whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(tickSpy).to.have.callCount(2);
@@ -623,6 +606,41 @@ describe('performance', () => {
       });
     });
   });
+});
 
+describes.fakeWin('performance with experiment', {amp: true}, env => {
 
+  let win;
+  let perf;
+  let viewerSendMessageStub;
+
+  beforeEach(() => {
+    win = env.win;
+    const viewer = viewerForDoc(win.document);
+    viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
+    sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
+    sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
+    sandbox.stub(viewer, 'isEmbedded').returns(true);
+    perf = installPerformanceService(win);
+  });
+
+  it('legacy-cdn-domain experiment enabled', () => {
+    sandbox.stub(perf, 'getHostname_', () => 'cdn.ampproject.org');
+    return perf.coreServicesAvailable().then(() => {
+      perf.flush();
+      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
+        ampexp: '$internalRuntimeVersion$,legacy-cdn-domain',
+      });
+    });
+  });
+
+  it('no experiment', () => {
+    sandbox.stub(perf, 'getHostname_', () => 'curls.cdn.ampproject.org');
+    return perf.coreServicesAvailable().then(() => {
+      perf.flush();
+      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
+        ampexp: '$internalRuntimeVersion$',
+      });
+    });
+  });
 });

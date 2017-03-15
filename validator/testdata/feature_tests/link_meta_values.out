@@ -1,4 +1,6 @@
 FAIL
-feature_tests/link_meta_values.html:29:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'manifest foo'. (see https://www.ampproject.org/docs/reference/spec.html#html-tags) [DISALLOWED_HTML]
+feature_tests/link_meta_values.html:29:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'manifest foo'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
 feature_tests/link_meta_values.html:34:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'content-disposition'. [DISALLOWED_HTML]
-feature_tests/link_meta_values.html:45:2 The mandatory attribute 'rel' is missing in tag 'link rel='. (see https://www.ampproject.org/docs/reference/spec.html#html-tags) [DISALLOWED_HTML]
+feature_tests/link_meta_values.html:35:2 The property 'minimum-scale' is missing from attribute 'content' in tag 'meta name=viewport'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/link_meta_values.html:35:2 The property 'width' is missing from attribute 'content' in tag 'meta name=viewport'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/link_meta_values.html:46:2 The mandatory attribute 'rel' is missing in tag 'link rel='. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]

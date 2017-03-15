@@ -28,8 +28,16 @@ gulp.task('compile-bind-expr', function() {
 
   var license = fs.readFileSync(
       'build-system/tasks/js-license.txt', 'utf8');
+  var suppressCheckTypes = '/** @fileoverview ' +
+      '@suppress {checkTypes, suspiciousCode, uselessCode} */';
+  var imports = 'import {AstNode, AstNodeType} from \'./bind-expr-defines\';';
   var jsExports = 'exports.parser = parser;';
 
-  var out = license + '\n\n' + jsModule + '\n\n' + jsExports + '\n';
+  var out = [
+      license,
+      suppressCheckTypes,
+      imports,
+      jsModule,
+      jsExports].join('\n\n') + '\n';
   fs.writeFileSync(path + 'bind-expr-impl.js', out);
 });

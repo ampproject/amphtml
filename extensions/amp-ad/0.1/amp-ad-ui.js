@@ -15,9 +15,7 @@
  */
 
 import {dev} from '../../../src/log';
-import {createElementWithAttributes} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {UX_EXPERIMENT} from '../../../src/layout';
+import {getAdContainer} from '../../../src/ad-helper';
 
 const TAG = 'AmpAdUIHandler';
 
@@ -60,8 +58,11 @@ export class AmpAdUIHandler {
     /** @private {!AMP.BaseElement} */
     this.baseInstance_ = baseInstance;
 
+    /** @private @const {!Document} */
+    this.doc_ = baseInstance.win.document;
+
     /** {number} */
-    this.state = AdDisplayState.NOT_LAID_OUT;;
+    this.state = AdDisplayState.NOT_LAID_OUT;
 
     /** {!boolean} */
     this.hasPageProvidedFallback_ = !!baseInstance.getFallback();
@@ -71,20 +72,12 @@ export class AmpAdUIHandler {
    * TODO(@zhouyx): Add ad tag to the ad.
    */
   init() {
-    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
-      return;
-    }
-
     if (this.hasPageProvidedFallback_) {
       return;
     }
 
     // Apply default fallback div when there's no default one
-    const holder = createElementWithAttributes(document, 'div', {
-      'fallback': '',
-    });
-    holder.classList.add('amp-ad-default-fallback');
-    this.baseInstance_.element.appendChild(holder);
+    this.addDefaultUiComponent_('fallback');
   }
 
   /**
@@ -117,6 +110,13 @@ export class AmpAdUIHandler {
   }
 
   /**
+   * See BaseElement method.
+   */
+  createPlaceholderCallback() {
+    return this.addDefaultUiComponent_('placeholder');
+  }
+
+  /**
    * TODO(@zhouyx): apply placeholder, add ad loading indicator
    * @private
    */
@@ -142,28 +142,26 @@ export class AmpAdUIHandler {
    * @private
    */
   displayNoContentUI_() {
-    // The order here is user provided fallback > collapse > default fallback
-    if (this.hasPageProvidedFallback_) {
+    if (getAdContainer(this.baseInstance_.element) == 'AMP-STICKY-AD') {
+      // Special case: force collapse sticky-ad if no content.
+      this.baseInstance_./*OK*/collapse();
+      this.state = AdDisplayState.LOADED_NO_CONTENT;
+      return;
+    }
+    // The order here is collapse > user provided fallback > default fallback
+    this.baseInstance_.attemptCollapse().then(() => {
+      this.state = AdDisplayState.LOADED_NO_CONTENT;
+    }, () => {
       this.baseInstance_.deferMutate(() => {
         if (this.state == AdDisplayState.NOT_LAID_OUT) {
-          // If already unlaid out, do not replace current placeholder then.
+          // If already unlaid out, do not replace current placeholder.
           return;
         }
         this.baseInstance_.togglePlaceholder(false);
         this.baseInstance_.toggleFallback(true);
         this.state = AdDisplayState.LOADED_NO_CONTENT;
       });
-    } else {
-      this.baseInstance_.attemptChangeHeight(0).then(() => {
-        this.baseInstance_./*OK*/collapse();
-        this.state = AdDisplayState.LOADED_NO_CONTENT;
-      }, () => {
-        // Apply default fallback when resize fail.
-        this.baseInstance_.togglePlaceholder(false);
-        this.baseInstance_.toggleFallback(true);
-        this.state = AdDisplayState.LOADED_NO_CONTENT;
-      });
-    }
+    });
   }
 
   /**
@@ -182,6 +180,23 @@ export class AmpAdUIHandler {
       this.baseInstance_.togglePlaceholder(true);
       this.baseInstance_.toggleFallback(false);
     });
+  }
+
+  /**
+   * @param {string} name
+   * @return {!Element}
+   * @private
+   */
+  addDefaultUiComponent_(name) {
+    const uiComponent = this.doc_.createElement('div');
+    uiComponent.setAttribute(name, '');
+
+    const content = this.doc_.createElement('div');
+    content.classList.add('-amp-ad-default-holder');
+    uiComponent.appendChild(content);
+
+    this.baseInstance_.element.appendChild(uiComponent);
+    return uiComponent;
   }
 }
 

@@ -15,18 +15,17 @@
  */
 
 import {accessServiceForOrNull} from '../access-service';
-import {cidFor} from '../cid';
+import {cidForDoc} from '../cid';
 import {variantForOrNull} from '../variant-service';
 import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoForDoc} from '../document-info';
 import {getServiceForDoc, installServiceInEmbedScope} from '../service';
-import {parseUrl, removeFragment, parseQueryString} from '../url';
+import {isSecureUrl, parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityForDoc} from '../activity';
-import {isExperimentOn} from '../experiments';
 import {getTrackImpressionPromise} from '../impression.js';
 import {
   VariableSource,
@@ -44,6 +43,7 @@ const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
+const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
 /**
  * Returns a encoded URI Component, or an empty string if the value is nullish.
@@ -236,7 +236,7 @@ export class GlobalVariableSource extends VariableSource {
                 return service.get(opt_userNotificationId);
               });
       }
-      return cidFor(this.ampdoc.win).then(cid => {
+      return cidForDoc(this.ampdoc).then(cid => {
         return cid.get({
           scope: dev().assertString(scope),
           createCookieIfNotPresent: true,
@@ -645,6 +645,113 @@ export class UrlReplacements {
   }
 
   /**
+   * Expands an input element value attribute with variable substituted.
+   * @param {!HTMLInputElement} element
+   * @return {!Promise<string>}
+   */
+  expandInputValueAsync(element) {
+    return /** @type {!Promise<string>} */ (
+        this.expandInputValue_(element, /*opt_sync*/ false));
+  }
+
+  /**
+   * Expands an input element value attribute with variable substituted.
+   * @param {!HTMLInputElement} element
+   * @return {string} Replaced string for testing
+   */
+  expandInputValueSync(element) {
+    return /** @type {string} */ (
+        this.expandInputValue_(element, /*opt_sync*/ true));
+  }
+
+  /**
+   * Expands in input element value attribute with variable substituted.
+   * @param {!HTMLInputElement} element
+   * @param {boolean=} opt_sync
+   * @return {string|!Promise<string>}
+   */
+  expandInputValue_(element, opt_sync) {
+    dev().assert(element.tagName == 'INPUT' &&
+        (element.getAttribute('type') || '').toLowerCase() == 'hidden',
+        'Input value expansion only works on hidden input fields: %s', element);
+
+    const whitelist = this.getWhitelistForElement_(element);
+    if (!whitelist) {
+      return opt_sync ? element.value : Promise.resolve(element.value);
+    }
+    if (element[ORIGINAL_VALUE_PROPERTY] === undefined) {
+      element[ORIGINAL_VALUE_PROPERTY] = element.value;
+    }
+    const result = this.expand_(
+        element[ORIGINAL_VALUE_PROPERTY] || element.value,
+        /* opt_bindings */ undefined,
+        /* opt_collectVars */ undefined,
+        /* opt_sync */ opt_sync,
+        /* opt_whitelist */ whitelist);
+
+    if (opt_sync) {
+      return element.value = result;
+    }
+    return result.then(newValue => {
+      element.value = newValue;
+      return newValue;
+    });
+  }
+
+  /**
+   * Returns a replacement whitelist from elements' data-amp-replace attribute.
+   * @param {!Element} element.
+   * @param {!Object<string, boolean>=} opt_supportedReplacement Optional supported
+   * replacement that filters whitelist to a subset.
+   * @return {!Object<string, boolean>|undefined}
+   */
+  getWhitelistForElement_(element, opt_supportedReplacement) {
+    const whitelist = element.getAttribute('data-amp-replace');
+    if (!whitelist) {
+      return;
+    }
+    const requestedReplacements = {};
+    whitelist.trim().split(/\s+/).forEach(replacement => {
+      if (!opt_supportedReplacement ||
+          (opt_supportedReplacement &&
+           opt_supportedReplacement.hasOwnProperty(replacement))) {
+        requestedReplacements[replacement] = true;
+      } else if (opt_supportedReplacement) {
+        user().warn('URL', 'Ignoring unsupported replacement', replacement);
+      }
+    });
+    return requestedReplacements;
+  }
+
+  /**
+    * Returns whether variable substitution is allowed for given url.
+    * @param {!Location} url.
+    * @return {boolean}
+    */
+  isAllowedOrigin_(url) {
+    const docInfo = documentInfoForDoc(this.ampdoc);
+
+    if (url.origin == parseUrl(docInfo.canonicalUrl).origin ||
+        url.origin == parseUrl(docInfo.sourceUrl).origin) {
+      return true;
+    }
+
+    const meta = this.ampdoc.getRootNode().querySelector(
+      'meta[name=amp-link-variable-allowed-origin]');
+
+    if (meta && meta.hasAttribute('content')) {
+      const whitelist = meta.getAttribute('content').trim().split(/\s+/);
+      for (let i = 0; i < whitelist.length; i++) {
+        if (url.origin == parseUrl(whitelist[i]).origin) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Replaces values in the link of an anchor tag if
    * - the link opts into it (via data-amp-replace argument)
    * - the destination is the source or canonical origin of this doc.
@@ -652,49 +759,41 @@ export class UrlReplacements {
    * @return {string|undefined} Replaced string for testing
    */
   maybeExpandLink(element) {
-    if (!isExperimentOn(this.ampdoc.win, 'link-url-replace')) {
-      return;
-    }
     dev().assert(element.tagName == 'A');
-    const whitelist = element.getAttribute('data-amp-replace');
+    const supportedReplacements = {
+      'CLIENT_ID': true,
+      'QUERY_PARAM': true,
+    };
+    const whitelist = this.getWhitelistForElement_(
+        element, supportedReplacements);
     if (!whitelist) {
       return;
     }
-    const docInfo = documentInfoForDoc(this.ampdoc);
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
     // We set this to the original value before doing any work and use it
     // on subsequent replacements, so that each run gets a fresh value.
     const href = dev().assertString(
         element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
     const url = parseUrl(href);
-    if (url.origin != parseUrl(docInfo.canonicalUrl).origin &&
-        url.origin != parseUrl(docInfo.sourceUrl).origin) {
+    if (!this.isAllowedOrigin_(url)) {
       user().warn('URL', 'Ignoring link replacement', href,
           ' because the link does not go to the document\'s' +
-          ' source or canonical origin.');
+          ' source, canonical, or whitelisted origin.');
+      return;
+    }
+    if (!isSecureUrl(href)) {
+      user().warn('URL', 'Ignoring link replacement', href,
+          ' because it is only supported for secure links.');
       return;
     }
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
-    const supportedReplacements = {
-      'CLIENT_ID': true,
-      'QUERY_PARAM': true,
-    };
-    const requestedReplacements = {};
-    whitelist.trim().split(/\s*,\s*/).forEach(replacement => {
-      if (supportedReplacements.hasOwnProperty(replacement)) {
-        requestedReplacements[replacement] = true;
-      } else {
-        user().warn('URL', 'Ignoring unsupported link replacement',
-            replacement);
-      }
-    });
     return element.href = this.expandSync(
         href,
         /* opt_bindings */ undefined,
         /* opt_collectVars */ undefined,
-        requestedReplacements);
+        /* opt_whitelist */ whitelist);
   }
 
   /**

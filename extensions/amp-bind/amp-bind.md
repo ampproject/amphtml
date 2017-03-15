@@ -21,7 +21,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td><code>amp-bind</code> allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.</td>
+    <td><code>amp-bind</code> allows adding custom interactivity with data binding and expressions.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
@@ -37,73 +37,91 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>TBD</td>
+    <td><a href="https://ampbyexample.com/components/amp-bind/">Annotated code example for amp-bind</a></td>
   </tr>
 </table>
 
 ## Overview
 
-Once installed, `amp-bind` scans the DOM for bindings -- an element may have attributes, CSS classes or textContent bound to a JS-like expression (see [Expressions](#expressions) below).
-
-The **scope** is mutable implicit document state that binding expressions may reference. The scope may be initialized with a new AMP component `<amp-bind-state>`. Changes to the scope happen through user actions, e.g. clicking a `<button>` or switching slides on an `<amp-carousel>`.
-
-A **digest** is an evaluation of all binding expressions. Since scope is mutable and expressions can reference the scope, the evaluated result of expressions may change over time. Bound elements are updated as a result of a digest.
+`amp-bind` allows you to add custom stateful interactivity to your AMP pages via data binding and JS-like expressions.
 
 A simple example:
 
 ```html
-<amp-bind-state id=”foo”>
-  <script type=”application/json”>{ message: “Hello World” }</script>
-</amp-bind-state>
+<p [text]="message">Hello amp-bind</p>
 
-<p [text]=”foo.message”>Placeholder text</p>
+<button on="tap:AMP.setState({message: 'Hello World'})">
 ```
 
-1. `amp-bind` scans the DOM and finds the `<p>` element’s `[text]` binding.
-2. During the next digest, `amp-bind` reevaluates the expression `foo.message`.
-3. On the next frame, `amp-bind` updates the `<p>` element's textContent from "Placeholder text" to "Hello World".
+Tapping the button causes the `<p>` element's text to change to "Hello World".
 
-## Binding
+## Details
 
-`amp-bind` supports binding to three types of data on an element:
+### State
+
+Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or **state**.
+
+The state can be initialized with the `amp-state` component:
+
+```html
+<amp-state id="myState">
+  <script type="application/json">
+    {"foo": "bar"}
+  </script>
+</amp-state>
+```
+
+[Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
+
+
+##### AMP.setState()
+
+State can be mutated by the new `AMP.setState()` [action](../../spec/amp-actions-and-events.md).
+
+- `AMP.setState()` performs a [shallow merge](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) of its arguments with the document state.
+- `AMP.setState()` can override data initialized by `amp-state`.
+
+### Binding
+
+A binding is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions).
+
+When the **state** changes, expressions are re-evaluated and the bound elements' properties are updated with the new expression results.
+
+`amp-bind` supports data bindings on three types of element state:
 
 | Type | Syntax | Details |
 | --- | --- | --- |
-| Attribute | `[<attr>]` | Only whitelisted attributes are supported.<br>Boolean expression results toggle boolean attributes.
-| CSS Classes | `[class]` | Expression result must be a space-delimited string.
-| Node.textContent | `[text]` | For applicable elements.
-
-**Caveats:**
+| [Node.textContent](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) | `[text]` | Supported on most text elements.
+| [CSS Classes](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class) | `[class]` | Expression result must be a space-delimited string.
+| Element-specific attribute | `[<attr>]` | Only whitelisted attributes are supported.<br>Boolean expression results toggle boolean attributes.
 
 - For security reasons, binding to `innerHTML` is disallowed
 - All attribute bindings are sanitized for unsafe URL protocols (e.g. `javascript:`)
 
-### Bindable attributes
+#### Element-specific attributes
 
-For non-AMP elements, generally all attributes are bindable.
+Most attributes accepted by the [AMP Validator](https://validator.ampproject.org/) for AMP and non-AMP elements, are bindable.
 
-For AMP components, only a subset of attributes are bindable:
+There are also special bindable attributes without non-bindable counterparts:
 
-| Component | Attributes |
-| --- | --- |
-| amp-img | src |
-| amp-video | src |
-| amp-pixel | src |
+| Component | Attribute | Details | Example |
+| --- | --- | --- | --- |
+| amp-carousel[type=slides] | `[slide]` | The currently displayed slide index. | [Linked carousels](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind)
+| amp-selector | `[selected]` | The `option` attribute values of the currently selected children elements. | [Linked carousels](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind)
 
-Note that the set of bindable attributes will grow over time as development progresses.
-
-## Expressions
+### Expressions
 
 `amp-bind` expressions are JS-like with some important differences:
 
-- Expressions only have access to the **scope**, not globals like `window` or `document`
+- Expressions may only access the document [state](#state)
+- Expressions do **not** have access to globals like `window` or `document`
 - Only whitelisted functions are allowed
-- Custom functions and control flow statements (e.g. `for`, `if`) are disallowed
-- Undefined variables, array-index-out-of-bounds return `null` instead of throwing errors
+- Custom functions, classes and control flow statements (e.g. `for`) are disallowed
+- Undefined variables and array-index-out-of-bounds return `null` instead of throwing errors
 
 #### BNF-like grammar
 
-```
+```text
 expr:
     operation
   | invocation
@@ -182,23 +200,23 @@ key_value:
 
 #### Whitelisted functions
 
-```
-Array.concat
-Array.indexOf
-Array.join
-Array.lastIndexOf
-Array.slice
-String.charAt
-String.charCodeAt
-String.concat
-String.indexOf
-String.lastIndexOf
-String.slice
-String.split
-String.substr
-String.substring
-String.toLowerCase
-String.toUpperCase
+```text
+Array.concat()
+Array.indexOf()
+Array.join()
+Array.lastIndexOf()
+Array.slice()
+String.charAt()
+String.charCodeAt()
+String.concat()
+String.indexOf()
+String.lastIndexOf()
+String.slice()
+String.split()
+String.substr()
+String.substring()
+String.toLowerCase()
+String.toUpperCase()
 ```
 
-The full expression implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison).
+The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).

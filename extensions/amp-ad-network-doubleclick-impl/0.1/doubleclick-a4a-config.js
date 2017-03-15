@@ -22,9 +22,9 @@
 
 import {
   googleAdsIsA4AEnabled,
-  EXPERIMENT_ATTRIBUTE,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {EXPERIMENT_ATTRIBUTE} from '../../../ads/google/a4a/utils';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 
@@ -78,9 +78,6 @@ export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
-  if (!!win.document.querySelector('meta[name=amp-3p-iframe-src]')) {
-    return false;
-  }
   const a4aRequested = element.hasAttribute(BETA_ATTRIBUTE);
   // Note: Under this logic, a4aRequested shortcuts googleAdsIsA4AEnabled and,
   // therefore, carves out of the experiment branches.  Any publisher using this

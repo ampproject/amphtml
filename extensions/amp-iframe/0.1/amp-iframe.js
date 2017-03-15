@@ -23,7 +23,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {removeFragment, parseUrl} from '../../../src/url';
+import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
 import {timerFor} from '../../../src/timer';
 import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
@@ -33,6 +33,16 @@ import {setStyle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
+
+/** @const {!Array<string>} */
+const ATTRIBUTES_TO_PROPAGATE = [
+  'allowfullscreen',
+  'allowpaymentrequest',
+  'allowtransparency',
+  'frameborder',
+  'referrerpolicy',
+  'scrolling',
+];
 
 /** @type {number}  */
 let count = 0;
@@ -55,9 +65,7 @@ export class AmpIframe extends AMP.BaseElement {
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
     user().assert(
-        url.protocol == 'https:' ||
-        url.protocol == 'data:' ||
-        url.origin.indexOf('http://iframe.localhost:') == 0,
+        isSecureUrl(url) || url.protocol == 'data:',
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
     const containerUrl = parseUrl(containerSrc);
@@ -312,10 +320,7 @@ export class AmpIframe extends AMP.BaseElement {
       setStyle(iframe, 'zIndex', -1);
     }
 
-    this.propagateAttributes(
-        ['frameborder', 'allowfullscreen', 'allowtransparency',
-         'scrolling', 'referrerpolicy'],
-         iframe);
+    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, iframe);
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
 

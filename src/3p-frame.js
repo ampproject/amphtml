@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-
 import {dev, user} from './log';
-import {documentInfoForDoc} from './document-info';
-import {getLengthNumeral} from '../src/layout';
+import {isExperimentOn} from './experiments';
+import {getContextMetadata} from '../src/iframe-attributes';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
-import {getModeObject} from './mode-object';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
-import {viewerForDoc} from './viewer';
 import {urls} from './config';
 import {setStyle} from './style';
-import {domFingerprint} from './utils/dom-fingerprint';
-
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -48,48 +43,16 @@ let overrideBootstrapBaseUrl;
  *     - A _context object for internal use.
  */
 function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
-  const startTime = Date.now();
-  const width = element.getAttribute('width');
-  const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
   user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
-  const attributes = {};
+  const sentinel = generateSentinel(parentWindow);
+  let attributes = {};
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
-  attributes.width = getLengthNumeral(width);
-  attributes.height = getLengthNumeral(height);
+  attributes = getContextMetadata(parentWindow, element, sentinel,
+      attributes);
   attributes.type = type;
-  const docInfo = documentInfoForDoc(element);
-  const viewer = viewerForDoc(element);
-  let locationHref = parentWindow.location.href;
-  // This is really only needed for tests, but whatever. Children
-  // see us as the logical origin, so telling them we are about:srcdoc
-  // will fail ancestor checks.
-  if (locationHref == 'about:srcdoc') {
-    locationHref = parentWindow.parent.location.href;
-  }
-  attributes._context = {
-    referrer: viewer.getUnconfirmedReferrerUrl(),
-    canonicalUrl: docInfo.canonicalUrl,
-    sourceUrl: docInfo.sourceUrl,
-    pageViewId: docInfo.pageViewId,
-    location: {
-      href: locationHref,
-    },
-    tagName: element.tagName,
-    mode: getModeObject(),
-    canary: !!(parentWindow.AMP_CONFIG && parentWindow.AMP_CONFIG.canary),
-    hidden: !viewer.isVisible(),
-    amp3pSentinel: generateSentinel(parentWindow),
-    initialIntersection: element.getIntersectionChangeEntry(),
-    domFingerprint: domFingerprint(element),
-    startTime,
-  };
   Object.assign(attributes._context, opt_context);
-  const adSrc = element.getAttribute('src');
-  if (adSrc) {
-    attributes.src = adSrc;
-  }
   return attributes;
 }
 
@@ -112,19 +75,31 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   const attributes =
       getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
   const iframe = parentWindow.document.createElement('iframe');
+  const sentinelNameChange = isExperimentOn(
+      parentWindow, 'sentinel-name-change');
+
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
   }
+  count[attributes.type] += 1;
 
   const baseUrl = getBootstrapBaseUrl(parentWindow);
   const host = parseUrl(baseUrl).hostname;
-  // Pass ad attributes to iframe via the fragment.
-  const src = baseUrl + '#' + JSON.stringify(attributes);
-  const name = host + '_' + attributes.type + '_' + count[attributes.type]++;
+  // This name attribute may be overwritten if this frame is chosen to
+  // be the master frame. That is ok, as we will read the name off
+  // for our uses before that would occur.
+  // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
+  const name = JSON.stringify({
+    host,
+    type: attributes.type,
+    // https://github.com/ampproject/amphtml/pull/2955
+    count: count[attributes.type],
+    attributes,
+  });
 
-  iframe.src = src;
+  iframe.src = baseUrl;
+  iframe.ampLocation = parseUrl(baseUrl);
   iframe.name = name;
-  iframe.ampLocation = parseUrl(src);
   iframe.width = attributes.width;
   iframe.height = attributes.height;
   iframe.setAttribute('scrolling', 'no');
@@ -134,8 +109,8 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  iframe.setAttribute(
-      'data-amp-3p-sentinel', attributes._context.amp3pSentinel);
+  iframe.setAttribute('data-amp-3p-sentinel', attributes._context[
+    sentinelNameChange ? 'sentinel' : 'amp3pSentinel']);
   return iframe;
 }
 
@@ -321,9 +296,92 @@ export function generateSentinel(parentWindow) {
 }
 
 /**
+ * Generates sentinel, and context, and returns context
+ * @param {!Element} iframe
+ * @param {!Window} window The parent window of the iframe.
+ * @return {Object}
+ */
+export function generateSentinelAndContext(iframe, window) {
+  const sentinel = generateSentinel(window);
+  const context = getContextMetadata(window, iframe, sentinel)._context;
+  return context;
+}
+
+/**
  * Resets the count of each 3p frame type
  * @visibleForTesting
  */
 export function resetCountForTesting() {
   count = {};
+}
+
+
+/** @const */
+const AMP_MESSAGE_PREFIX = 'amp-';
+
+/** @enum {string} */
+export const MessageType = {
+  // For amp-ad
+  SEND_EMBED_STATE: 'send-embed-state',
+  EMBED_STATE: 'embed-state',
+  SEND_EMBED_CONTEXT: 'send-embed-context',
+  EMBED_CONTEXT: 'embed-context',
+  SEND_INTERSECTIONS: 'send-intersections',
+  INTERSECTION: 'intersection',
+  EMBED_SIZE: 'embed-size',
+  EMBED_SIZE_CHANGED: 'embed-size-changed',
+  EMBED_SIZE_DENIED: 'embed-size-denied',
+
+  // For amp-inabox
+  SEND_POSITIONS: 'send-positions',
+  POSITION: 'position',
+};
+
+/**
+ * Serialize an AMP post message. Output looks like:
+ * 'amp-011481323099490{"type":"position","sentinel":"12345","foo":"bar"}'
+ * @param {string} type
+ * @param {string} sentinel
+ * @param {Object=} data
+ * @param {?string=} rtvVersion
+ * @returns {string}
+ */
+export function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
+  // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
+  const message = data;
+  message.type = type;
+  message.sentinel = sentinel;
+  return AMP_MESSAGE_PREFIX + (rtvVersion || '') + JSON.stringify(message);
+}
+
+/**
+ * Deserialize an AMP post message.
+ * Returns null if it's not valid AMP message format.
+ *
+ * @param {*} message
+ * @returns {?JSONType}
+ */
+export function deserializeMessage(message) {
+  if (!isAmpMessage(message)) {
+    return null;
+  }
+  const startPos = message.indexOf('{');
+  dev().assert(startPos != -1, 'JSON missing in %s', message);
+  try {
+    return /** @type {!JSONType} */ (JSON.parse(message.substr(startPos)));
+  } catch (e) {
+    dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
+    return null;
+  }
+}
+
+/**
+ *  Returns true if message looks like it is an AMP postMessage
+ *  @param {*} message
+ *  @return {!boolean}
+ */
+export function isAmpMessage(message) {
+  return (typeof message == 'string' &&
+      message.indexOf(AMP_MESSAGE_PREFIX) == 0 &&
+      message.indexOf('{') != -1);
 }

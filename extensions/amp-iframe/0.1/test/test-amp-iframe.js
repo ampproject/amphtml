@@ -166,6 +166,7 @@ describe('amp-iframe', () => {
       width: 100,
       height: 100,
       allowfullscreen: '',
+      allowpaymentrequest: '',
       allowtransparency: '',
       referrerpolicy: 'no-referrer',
       frameborder: 3,
@@ -173,6 +174,7 @@ describe('amp-iframe', () => {
       marginwidth: 5,
     }).then(amp => {
       expect(amp.iframe.getAttribute('allowfullscreen')).to.equal('');
+      expect(amp.iframe.getAttribute('allowpaymentrequest')).to.equal('');
       expect(amp.iframe.getAttribute('allowtransparency')).to.equal('');
       expect(amp.iframe.getAttribute('referrerpolicy')).to.equal('no-referrer');
       expect(amp.iframe.getAttribute('frameborder')).to.equal('3');
@@ -249,9 +251,7 @@ describe('amp-iframe', () => {
 
   it('should deny http', () => {
     return getAmpIframe({
-      // ads. is not whitelisted for http iframes.
-      src: 'http://ads.localhost:' + location.port +
-          '/test/fixtures/served/iframe.html',
+      src: 'http://google.com/fpp',
       sandbox: 'allow-scripts',
       width: 100,
       height: 100,
@@ -364,8 +364,8 @@ describe('amp-iframe', () => {
       }).to.throw(/Must start with https/);
 
       expect(() => {
-        amp.assertSource('./foo', 'https://foo.com', '');
-      }).to.throw(/Must start with https/);
+        amp.assertSource('./foo', location.href, 'allow-same-origin');
+      }).to.throw(/must not be equal to container/);
 
       amp.assertSource('http://iframe.localhost:123/foo',
           'https://foo.com', '');
@@ -465,7 +465,7 @@ describe('amp-iframe', () => {
       const impl = amp.container.implementation_;
       const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
       impl.updateSize_(217);
-      expect(attemptChangeSize.callCount).to.equal(1);
+      expect(attemptChangeSize).to.be.calledOnce;
       expect(attemptChangeSize.firstCall.args[0]).to.equal(217);
       expect(attemptChangeSize.firstCall.args[1]).to.be.undefined;
     });
@@ -482,7 +482,7 @@ describe('amp-iframe', () => {
       const impl = amp.container.implementation_;
       const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
       impl.updateSize_(50, 114);
-      expect(attemptChangeSize.callCount).to.equal(0);
+      expect(attemptChangeSize).to.have.not.been.called;
     });
   });
 
@@ -496,7 +496,7 @@ describe('amp-iframe', () => {
       const impl = amp.container.implementation_;
       const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
       impl.updateSize_(217, 114);
-      expect(attemptChangeSize.callCount).to.equal(0);
+      expect(attemptChangeSize).to.have.not.been.called;
     });
   });
 
@@ -513,7 +513,7 @@ describe('amp-iframe', () => {
       const impl = amp.container.implementation_;
       return timer.promise(100).then(() => {
         expect(impl.iframe_.style.zIndex).to.equal('0');
-        expect(activateIframeSpy_.callCount).to.equal(2);
+        expect(activateIframeSpy_).to.have.callCount(2);
       });
     });
   });

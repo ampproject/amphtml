@@ -197,29 +197,29 @@ export class Srcset {
    * @private
    */
   selectByWidth_(width, dpr) {
-    let minIndex = -1;
-    let minWidth = 1000000;
-    let minScore = 1000000;
-    for (let i = 0; i < this.sources_.length; i++) {
+    const length = this.sources_.length;
+    let prevWidth = -Infinity;
+    for (let i = length - 1; i >= 0; i--) {
       const source = this.sources_[i];
-      let sourceWidth;
-      if (source.width) {
-        sourceWidth = source.width / dpr;
-      } else {
-        // Default source: no width: assume values are half of of the
-        // minimum values seen.
-        sourceWidth = minWidth / 2;
+      const sourceWidth = source.width / dpr;
+      // First candidate width that's equal or higher than the requested width
+      // will stop the search.
+      if (sourceWidth >= width) {
+        // The right value is now between `i` and `i + 1` - select the one
+        // that is closer with a slight preference toward higher numbers.
+        const delta = sourceWidth - width;
+        const prevDelta = (width - prevWidth) * 1.1;
+        // If smaller size is closer, enfore minimum ratio between
+        // requested width and prevWidth to ensure image isn't too distorted.
+        if (prevDelta < delta && width / prevWidth <= 1.2) {
+          return i + 1;
+        }
+        return i;
       }
-      minWidth = Math.min(minWidth, sourceWidth);
-      // The calculation is slightly biased toward higher width by offsetting
-      // score by negative 0.2.
-      const score = Math.abs((sourceWidth - width) / width - 0.2);
-      if (score < minScore) {
-        minScore = score;
-        minIndex = i;
-      }
+      prevWidth = sourceWidth;
     }
-    return minIndex;
+    // Use the first (maximum) value.
+    return 0;
   }
 
   /**

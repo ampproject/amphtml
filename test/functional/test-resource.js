@@ -53,9 +53,19 @@ describe('Resource', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
+      disconnectedCallback: () => {},
       togglePlaceholder: () => sandbox.spy(),
       getPriority: () => 2,
       dispatchCustomEvent: () => {},
+      fakeComputedStyle: {
+        marginTop: '1px',
+        marginRight: '2px',
+        marginBottom: '3px',
+        marginLeft: '4px',
+      },
+      nodeType: 1,
+      removeAttribute: () => {},
+      setAttribute: () => {},
     };
     elementMock = sandbox.mock(element);
 
@@ -64,6 +74,14 @@ describe('Resource', () => {
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     viewportMock = sandbox.mock(resources.viewport_);
+
+    resources.win = {
+      document,
+      getComputedStyle: el => {
+        return el.fakeComputedStyle ?
+            el.fakeComputedStyle : window.getComputedStyle(el);
+      },
+    };
   });
 
   afterEach(() => {
@@ -140,10 +158,7 @@ describe('Resource', () => {
         return false;
       },
     };
-    resource.resources_ = {
-      win: window,
-      getViewport: () => viewport,
-    };
+    resource.resources_.getViewport = () => viewport;
     expect(() => {
       resource.measure();
     }).to.not.throw();
@@ -313,12 +328,40 @@ describe('Resource', () => {
           return data.width == 0 && data.height == 0;
         }))
         .once();
-
+    const owner = {
+      collapsedCallback: sandbox.spy(),
+    };
+    sandbox.stub(resource, 'getOwner', () => {
+      return owner;
+    });
     resource.completeCollapse();
     expect(resource.element.style.display).to.equal('none');
     expect(resource.getLayoutBox().width).to.equal(0);
     expect(resource.getLayoutBox().height).to.equal(0);
     expect(resource.isFixed()).to.be.false;
+    expect(owner.collapsedCallback).to.be.calledOnce;
+  });
+
+  it('should show and request measure on expand', () => {
+    resource.element.style.display = 'none';
+    resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
+    resource.isFixed_ = false;
+    resource.requestMeasure = sandbox.stub();
+
+    resource.completeExpand();
+    expect(resource.element.style.display).to.not.equal('none');
+    expect(resource.requestMeasure).to.be.calledOnce;
+  });
+
+  it('should show and request measure on expand', () => {
+    resource.element.style.display = 'none';
+    resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
+    resource.isFixed_ = false;
+    resource.requestMeasure = sandbox.stub();
+
+    resource.completeExpand();
+    expect(resource.element.style.display).to.not.equal('none');
+    expect(resource.requestMeasure).to.be.calledOnce;
   });
 
 
@@ -490,16 +533,34 @@ describe('Resource', () => {
 
   it('should change size and update state', () => {
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    elementMock.expects('changeSize').withExactArgs(111, 222).once();
-    resource.changeSize(111, 222);
+    elementMock.expects('changeSize').withExactArgs(111, 222,
+        {top: 1, right: 2, bottom: 3, left: 4}).once();
+    resource.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
     expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
   });
 
   it('should change size but not state', () => {
     resource.state_ = ResourceState.NOT_BUILT;
-    elementMock.expects('changeSize').withExactArgs(111, 222).once();
-    resource.changeSize(111, 222);
+    elementMock.expects('changeSize').withExactArgs(111, 222,
+        {top: 1, right: 2, bottom: 3, left: 4}).once();
+    resource.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+  });
+
+  it('should update priority', () => {
+    expect(resource.getPriority()).to.equal(2);
+
+    resource.updatePriority(2);
+    expect(resource.getPriority()).to.equal(2);
+
+    resource.updatePriority(3);
+    expect(resource.getPriority()).to.equal(3);
+
+    resource.updatePriority(1);
+    expect(resource.getPriority()).to.equal(1);
+
+    resource.updatePriority(0);
+    expect(resource.getPriority()).to.equal(0);
   });
 
 
@@ -724,6 +785,14 @@ describe('Resource', () => {
         expect(resource.isInViewport_).to.equal(false);
         expect(resource.paused_).to.equal(true);
       });
+
+      it('should call disconnectedCallback on remove for built ele', () => {
+        expect(Resource.forElementOptional(resource.element))
+            .to.equal(resource);
+        elementMock.expects('disconnectedCallback').once();
+        resource.disconnect();
+        expect(Resource.forElementOptional(resource.element)).to.not.exist;
+      });
     });
   });
 
@@ -745,43 +814,6 @@ describe('Resource', () => {
       resource.paused_ = true;
       elementMock.expects('resumeCallback').once();
       resource.resume();
-    });
-  });
-
-  describe('getResourcesInViewport', () => {
-    let resource1;
-    let resource2;
-
-    beforeEach(() => {
-      resource1 = {
-        hasOwner: () => false,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        prerenderAllowed: () => true,
-        overlaps: () => true,
-      };
-      resource2 = {
-        hasOwner: () => false,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        prerenderAllowed: () => true,
-        overlaps: () => false,
-      };
-      resources.resources_ = [resource1, resource2];
-    });
-
-    it('should return a subset of resources that are currently ' +
-       'in the viewport', () => {
-      expect(resources.get().length).to.equal(2);
-      expect(resources.getResourcesInViewport().length).to.equal(1);
-    });
-
-    it('should not return resources that are not allowed to prerender if ' +
-       'in prerender mode', () => {
-      resource1.prerenderAllowed = () => false;
-      expect(resources.get().length).to.equal(2);
-      expect(resources.getResourcesInViewport(false).length).to.equal(1);
-      expect(resources.getResourcesInViewport(true).length).to.equal(0);
     });
   });
 });

@@ -39,7 +39,7 @@ Reasons include:
 
 ## The iframe sandbox
 
-The ad itself is hosted within a document that has an origin different from the primary page.
+The ad itself is hosted within a document that has an origin different from the primary page. The iframe by default loads a [bootstrap HTML](../3p/frame.max.html), which provides a container `div` to hold your content together with a set of APIs. Note that the container `div` (with `id="c"`) is absolute positioned and takes the whole space of the iframe, so you will want to append your content as a child of the container (don't append to `body`).  
 
 ### Available information
 We will provide the following information to the ad:
@@ -67,6 +67,7 @@ More information can be provided in a similar fashion if needed (Please file an 
 - `window.context.renderStart(opt_data)` is a method to inform AMP runtime when the ad starts rendering. The ad will then become visible to user. The optional param `opt_data` is an object of form `{width, height}` to request an [ad resize](#ad-resizing) if the size of the returned ad doesn't match the ad slot. To enable this method, add a line `renderStartImplemented=true` to the corresponding ad config in [_config.js](./_config.js).
 - `window.context.noContentAvailable()` is a method to inform AMP runtime that the ad slot cannot be filled. The ad slot will then display the fallback content if provided, otherwise try to collapse.
 - `window.context.reportRenderedEntityIdentifier()` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
+- `window.context.getHtml (selector, attrs, callback)` is a method that retrieves specified node's content from the parent window which cannot be accessed directly because of security restrictions caused by AMP rules and iframe's usage. `selector` is a CSS selector of the node to take content from. `attrs` takes an array of tag attributes to be left in the stringified HTML representation (for instance, ['id', 'class']). All not specified attributes will be cut off from the result string. `callback` takes a function to be called when the content is ready. `getHtml` invokes callback with the only argument of type string.
 
 ### Exceptions to available APIs and information
 Depending on the ad server / provider some methods of rendering ads involve a second iframe inside the AMP iframe. In these cases, the iframe sandbox methods and information will be unavailable to the ad. We are working on a creative level API that will enable this information to be accessible in such iframed cases and this README will be updated when that is available. Refer to the documentation for the relevant ad servers / providers (e.g., [doubleclick.md](./google/doubleclick.md)) for more details on how to handle such cases.
@@ -215,7 +216,8 @@ Access to a publishers 1st party cookies may be achieved through a custom ad boo
 If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on https://nytimes.com, then the remote file should be hosted on something similar to https://sub-domain.nytimes.com for the custom JavaScript to have the abiity to read or write cookies for nytimes.com.
 
 ## Developer guidelines for a pull request
-Please read through [DEVELOPING.md](../DEVELOPING.md) before contributing to this code repository.
+
+Please read through [DEVELOPING.md](../contributing/DEVELOPING.md) before contributing to this code repository.
 
 ### Files to change
 
@@ -226,7 +228,7 @@ If you're adding support for a new 3P ad service, changes to the following files
 - `/ads/_config.js` - add service specific configuration here.
 - `/3p/integration.js` - register your service here.
 - `/extensions/amp-ad/amp-ad.md` - add a link that points to your publisher doc.
-- `/examples/ads.amp.html` - add publisher examples here.
+- `/examples/ads.amp.html` - add publisher examples here. Since real ad isn't guaranteed to fill, a consistently displayed fake ad is highly recommended here to help AMP developers confidently identify new bugs.
 
 ### Verify your examples
 
@@ -235,6 +237,8 @@ To verify the examples that you have put in `/examples/ads.amp.html`, you will n
 Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only it will be a more confident example for publishers to follow, but also for us to catch any regression bug during our releases.
 
 It's encouraged to have multiple examples to cover different use cases.
+
+Please verify your ad is fully functioning, for example, by clicking on an ad. We have seen bugs reported for ads not being clickable, which was due to incorrectly appended content divs.
 
 ### Tests
 

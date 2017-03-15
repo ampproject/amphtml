@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
-import {getVendorJsPropertyName} from '../../../src/style';
+import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
 import {isArray, isObject} from '../../../src/types';
 import {
   WebAnimationDef,
+  WebAnimationPlayState,
   WebAnimationTimingDef,
   WebAnimationTimingDirection,
   WebAnimationTimingFill,
@@ -27,6 +29,11 @@ import {
   WebMultiAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {dashToCamelCase} from '../../../src/string';
+
+
+/** @const {string} */
+const TAG = 'amp-animation';
 
 
 /**
@@ -62,16 +69,120 @@ export class WebAnimationRunner {
     /** @const @private */
     this.requests_ = requests;
 
-    /** @private {!Array<!Animation>} */
-    this.players_ = [];
+    /** @private {?Array<!Animation>} */
+    this.players_ = null;
+
+    /** @private {number} */
+    this.runningCount_ = 0;
+
+    /** @private {!WebAnimationPlayState} */
+    this.playState_ = WebAnimationPlayState.IDLE;
+
+    /** @private {!Observable} */
+    this.playStateChangedObservable_ = new Observable();
+  }
+
+  /**
+   * @return {!WebAnimationPlayState}
+   */
+  getPlayState() {
+    return this.playState_;
+  }
+
+  /**
+   * @param {function(!WebAnimationPlayState)} handler
+   * @return {!UnlistenDef}
+   */
+  onPlayStateChanged(handler) {
+    return this.playStateChangedObservable_.add(handler);
   }
 
   /**
    */
-  play() {
+  start() {
+    dev().assert(!this.players_);
+    this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.players_ = this.requests_.map(request => {
       return request.target.animate(request.keyframes, request.timing);
     });
+    this.runningCount_ = this.players_.length;
+    this.players_.forEach(player => {
+      player.onfinish = () => {
+        this.runningCount_--;
+        if (this.runningCount_ == 0) {
+          this.setPlayState_(WebAnimationPlayState.FINISHED);
+        }
+      };
+    });
+  }
+
+  /**
+   */
+  pause() {
+    dev().assert(this.players_);
+    this.setPlayState_(WebAnimationPlayState.PAUSED);
+    this.players_.forEach(player => {
+      player.pause();
+    });
+  }
+
+  /**
+   */
+  resume() {
+    dev().assert(this.players_);
+    if (this.playState_ == WebAnimationPlayState.RUNNING) {
+      return;
+    }
+    this.setPlayState_(WebAnimationPlayState.RUNNING);
+    this.players_.forEach(player => {
+      player.play();
+    });
+  }
+
+  /**
+   */
+  reverse() {
+    dev().assert(this.players_);
+    this.players_.forEach(player => {
+      player.reverse();
+    });
+  }
+
+  /**
+   */
+  finish() {
+    if (!this.players_) {
+      return;
+    }
+    const players = this.players_;
+    this.players_ = null;
+    this.setPlayState_(WebAnimationPlayState.FINISHED);
+    players.forEach(player => {
+      player.finish();
+    });
+  }
+
+  /**
+   */
+  cancel() {
+    if (!this.players_) {
+      return;
+    }
+    this.setPlayState_(WebAnimationPlayState.IDLE);
+    this.players_.forEach(player => {
+      player.cancel();
+    });
+  }
+
+  /**
+   * @param {!WebAnimationPlayState} playState
+   * @private
+   */
+  setPlayState_(playState) {
+    if (this.playState_ != playState) {
+      this.playState_ = playState;
+      this.playStateChangedObservable_.fire(this.playState_);
+    }
   }
 }
 
@@ -92,6 +203,11 @@ class Scanner {
       return;
     }
 
+    // Check whether the animation is enabled.
+    if (!this.isEnabled(/** @type {!WebAnimationDef} */ (spec))) {
+      return;
+    }
+
     // WebAnimationDef: (!WebMultiAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
@@ -100,6 +216,15 @@ class Scanner {
     } else {
       this.onUnknownAnimation(spec);
     }
+  }
+
+  /**
+   * Whether the animation spec is enabled.
+   * @param {!WebAnimationDef} unusedSpec
+   * @return {boolean}
+   */
+  isEnabled(unusedSpec) {
+    return true;
   }
 
   /**
@@ -165,7 +290,7 @@ export class MeasureScanner extends Scanner {
     /** @private {!Array<!Element> } */
     this.targets_ = [];
 
-    /** @private {!Array<!CSSStyleDeclaration>} */
+    /** @private {!Array<!Object<string, string>>} */
     this.computedStyleCache_ = [];
   }
 
@@ -188,12 +313,20 @@ export class MeasureScanner extends Scanner {
     const promises = [];
     for (let i = 0; i < this.targets_.length; i++) {
       const element = this.targets_[i];
-      if (element.classList.contains('-amp-element')) {
+      if (element.classList.contains('i-amphtml-element')) {
         const resource = resources.getResourceForElement(element);
         promises.push(resource.loadedOnce());
       }
     }
     return Promise.all(promises);
+  }
+
+  /** @override */
+  isEnabled(spec) {
+    if (spec.media) {
+      return this.win.matchMedia(spec.media).matches;
+    }
+    return true;
   }
 
   /** @override */
@@ -335,12 +468,11 @@ export class MeasureScanner extends Scanner {
   measure_(target, prop) {
     const index = this.targets_.indexOf(target);
     if (!this.computedStyleCache_[index]) {
-      this.computedStyleCache_[index] = /** @type {!CSSStyleDeclaration} */ (
-          this.win./*OK*/getComputedStyle(target));
+      this.computedStyleCache_[index] = computedStyle(this.win, target);
     }
-    const vendorName = getVendorJsPropertyName(
-        this.computedStyleCache_[index], prop);
-    return this.computedStyleCache_[index].getPropertyValue(vendorName);
+    const vendorName = getVendorJsPropertyName(this.computedStyleCache_[index],
+        dashToCamelCase(prop));
+    return this.computedStyleCache_[index][vendorName];
   }
 
   /**
@@ -370,12 +502,9 @@ export class MeasureScanner extends Scanner {
 
     // Validate.
     if (this.validate_) {
-      user().assert(duration >= 0,
-          '"duration" is invalid: %s', newTiming.duration);
-      user().assert(delay >= 0,
-          '"delay" is invalid: %s', newTiming.delay);
-      user().assert(endDelay >= 0,
-          '"endDelay" is invalid: %s', newTiming.endDelay);
+      this.validateTime_(duration, newTiming.duration, 'duration');
+      this.validateTime_(delay, newTiming.delay, 'delay');
+      this.validateTime_(endDelay, newTiming.endDelay, 'endDelay');
       user().assert(iterations >= 0,
           '"iterations" is invalid: %s', newTiming.iterations);
       user().assert(iterationStart >= 0,
@@ -395,6 +524,25 @@ export class MeasureScanner extends Scanner {
       direction,
       fill,
     };
+  }
+
+  /**
+   * @param {number|undefined} value
+   * @param {*} newValue
+   * @param {string} field
+   * @private
+   */
+  validateTime_(value, newValue, field) {
+    // Ensure that positive or zero values are only allowed.
+    user().assert(value >= 0,
+        '"%s" is invalid: %s', field, newValue);
+    // Make sure that the values are in milliseconds: show a warning if
+    // time is fractional.
+    if (newValue != null && Math.floor(value) != value) {
+      user().warn(TAG,
+          `"${field}" is fractional.`
+          + ' Note that all times are in milliseconds.');
+    }
   }
 }
 

@@ -13,25 +13,37 @@
 </head>
 <body>
 
-<amp-animation id="anim1" layout="nodisplay">
+<amp-animation id="anim1" layout="nodisplay" trigger="visibility">
 <script type="application/json">
-[
-  {
-    "target": "image1",
-    "duration": 1000,
-    "iterations": 4,
-    "fill": "both",
-    "direction": "alternate",
-    "keyframes": {
-      "transform": "rotate(45deg)"
+{
+  "duration": 1000,
+  "iterations": 5,
+  "fill": "both",
+  "direction": "alternate",
+  "animations": [
+    {
+      "media": "(max-width: 320px)",
+      "target": "image1",
+      "easing": "cubic-bezier(0,0,.21,1)",
+      "keyframes": {
+        "transform": "rotate(45deg)"
+      }
+    },
+    {
+      "media": "(min-width: 321px)",
+      "target": "image1",
+      "easing": "cubic-bezier(0,0,.21,1)",
+      "keyframes": {
+        "transform": "rotate(-45deg)"
+      }
     }
-  }
-]
+  ]
+}
 </script>
 </amp-animation>
 
 <amp-img id="image1"
-    src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg"
+    src="img/sea@2x.jpg"
     width=527 height=193 layout="responsive"
     on="tap:anim1.activate"></amp-img>
 

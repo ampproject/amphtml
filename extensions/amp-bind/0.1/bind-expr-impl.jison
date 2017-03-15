@@ -1,60 +1,6 @@
 /** shared vars and functions */
 
 %{
-// Shortcuts for common functions.
-const toString = Object.prototype.toString;
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-
-// For security reasons, must not contain functions that mutate the caller.
-const functionWhitelist = (() => {
-  const whitelist = {
-    '[object Array]':
-      [
-        Array.prototype.concat,
-        Array.prototype.indexOf,
-        Array.prototype.join,
-        Array.prototype.lastIndexOf,
-        Array.prototype.slice,
-      ],
-    '[object String]':
-      [
-        String.prototype.charAt,
-        String.prototype.charCodeAt,
-        String.prototype.concat,
-        String.prototype.indexOf,
-        String.prototype.lastIndexOf,
-        String.prototype.slice,
-        String.prototype.split,
-        String.prototype.substr,
-        String.prototype.substring,
-        String.prototype.toLowerCase,
-        String.prototype.toUpperCase,
-      ],
-  };
-  // Creates a prototype-less map of function name to the function itself.
-  // This makes function lookups faster (compared to Array.indexOf).
-  const out = Object.create(null);
-  Object.keys(whitelist).forEach(type => {
-    out[type] = Object.create(null);
-
-    const functions = whitelist[type];
-    for (let i = 0; i < functions.length; i++) {
-      const f = functions[i];
-      out[type][f.name] = f;
-    }
-  });
-  return out;
-})();
-
-/** @return {bool} Returns false if args contains an invalid type. */
-function typeCheckArgs(args) {
-  for (let i = 0; i < args.length; i++) {
-    if (toString.call(args[i]) === '[object Object]') {
-      return false;
-    }
-  }
-  return true;
-}
 %}
 
 /* lexical grammar */
@@ -63,40 +9,37 @@ function typeCheckArgs(args) {
 
 %%
 \s+                       /* skip whitespace */
-"+"                       return '+'
-"-"                       return '-'
-"*"                       return '*'
-"/"                       return '/'
-"%"                       return '%'
-"&&"                      return '&&'
-"||"                      return '||'
-"<="                      return '<='
-"<"                       return '<'
-">="                      return '>='
-">"                       return '>'
-"!="                      return '!='
-"=="                      return '=='
-"("                       return '('
-")"                       return ')'
-"["                       return '['
-"]"                       return ']'
-"{"                       return '{'
-"}"                       return '}'
-","                       return ','
-\.                        return '.'
-":"                       return ':'
-"?"                       return '?'
-"!"                       return '!'
 "null"                    return 'NULL'
-"NULL"                    return 'NULL'
-"TRUE"                    return 'TRUE'
 "true"                    return 'TRUE'
-"FALSE"                   return 'FALSE'
 "false"                   return 'FALSE'
 [0-9]+("."[0-9]+)?\b      return 'NUMBER'
 [a-zA-Z_][a-zA-Z0-9_]*    return 'NAME'
 \'[^\']*\'                return 'STRING'
 \"[^\"]*\"                return 'STRING'
+"+"                       return '+'
+"-"                       return '-'
+"*"                       return '*'
+"/"                       return '/'
+"&&"                      return '&&'
+"||"                      return '||'
+"!="                      return '!='
+"=="                      return '=='
+"<="                      return '<='
+"<"                       return '<'
+">="                      return '>='
+">"                       return '>'
+"!"                       return '!'
+"?"                       return '?'
+":"                       return ':'
+"%"                       return '%'
+"["                       return '['
+"]"                       return ']'
+"{"                       return '{'
+"}"                       return '}'
+"("                       return '('
+")"                       return ')'
+","                       return ','
+\.                        return '.'
 .                         return 'INVALID'
 <<EOF>>                   return 'EOF'
 
@@ -138,6 +81,7 @@ result:
       {return '';}
   ;
 
+/* Don't bother creating AST nodes for direct references in `expr`. */
 expr:
     operation
       {$$ = $1;}
@@ -155,147 +99,222 @@ expr:
 
 operation:
     '!' expr
-      {$$ = !$2;}
+      %{
+        $$ = new AstNode(AstNodeType.NOT, [$2]);
+      %}
   | '-' expr %prec UMINUS
-      {$$ = -$2;}
+      %{
+        $$ = new AstNode(AstNodeType.UNARY_MINUS, [$2]);
+      %}
   | '+' expr %prec UPLUS
-      {$$ = +$2;}
+      %{
+        $$ = new AstNode(AstNodeType.UNARY_PLUS, [$2]);
+      %}
   |  expr '+' expr
-      {$$ = $1 + $3;}
+      %{
+        $$ = new AstNode(AstNodeType.PLUS, [$1, $3]);
+      %}
   | expr '-' expr
-      {$$ = $1 - $3;}
+      %{
+        $$ = new AstNode(AstNodeType.MINUS, [$1, $3]);
+      %}
   | expr '*' expr
-      {$$ = $1 * $3;}
+      %{
+        $$ = new AstNode(AstNodeType.MULTIPLY, [$1, $3]);
+      %}
   | expr '/' expr
-      {$$ = $1 / $3;}
+      %{
+        $$ = new AstNode(AstNodeType.DIVIDE, [$1, $3]);
+      %}
   | expr '%' expr
-      {$$ = $1 % $3;}
+      %{
+        $$ = new AstNode(AstNodeType.MODULO, [$1, $3]);
+      %}
   | expr '&&' expr
-      {$$ = $1 && $3;}
+      %{
+        $$ = new AstNode(AstNodeType.LOGICAL_AND, [$1, $3]);
+      %}
   | expr '||' expr
-      {$$ = $1 || $3;}
+      %{
+        $$ = new AstNode(AstNodeType.LOGICAL_OR, [$1, $3]);
+      %}
   | expr '<=' expr
-      {$$ = $1 <= $3;}
+      %{
+        $$ = new AstNode(AstNodeType.LESS_OR_EQUAL, [$1, $3]);
+      %}
   | expr '<' expr
-      {$$ = $1 < $3;}
+      %{
+        $$ = new AstNode(AstNodeType.LESS, [$1, $3]);
+      %}
   | expr '>=' expr
-      {$$ = $1 >= $3;}
+      %{
+        $$ = new AstNode(AstNodeType.GREATER_OR_EQUAL, [$1, $3]);
+      %}
   | expr '>' expr
-      {$$ = $1 > $3;}
+      %{
+        $$ = new AstNode(AstNodeType.GREATER, [$1, $3]);
+      %}
   | expr '!=' expr
-      {$$ = $1 != $3;}
+      %{
+        $$ = new AstNode(AstNodeType.NOT_EQUAL, [$1, $3]);
+      %}
   | expr '==' expr
-      {$$ = $1 == $3;}
+      %{
+        $$ = new AstNode(AstNodeType.EQUAL, [$1, $3]);
+      %}
   | expr '?' expr ':' expr
-      {$$ = $1 ? $3 : $5;}
+      %{
+        $$ = new AstNode(AstNodeType.TERNARY, [$1, $3, $5]);
+      %}
   ;
 
 invocation:
     expr '.' NAME args
       %{
-        $$ = null;
-
-        const obj = toString.call($1);
-
-        const whitelist = functionWhitelist[obj];
-        if (whitelist) {
-          const fn = $1[$3];
-          if (fn && fn === whitelist[$3]) {
-            if (typeCheckArgs($4)) {
-              $$ = fn.apply($1, $4);
-            } else {
-              throw new Error('Unexpected argument type in ' + $3 + '()');
-            }
-            return;
-          }
-        }
-
-        throw new Error($3 + '() is not a supported function.');
+        $$ = new AstNode(AstNodeType.INVOCATION, [$1, $4], $3);
+      %}
+  |
+    NAME args
+      %{
+        $$ = new AstNode(AstNodeType.INVOCATION, [null, $2], $1)
       %}
   ;
 
 args:
     '(' ')'
-      {$$ = [];}
+      %{
+        $$ = new AstNode(AstNodeType.ARGS, []);
+      %}
   | '(' array ')'
-      {$$ = $2;}
+      %{
+        $$ = new AstNode(AstNodeType.ARGS, [$2]);
+      %}
   ;
 
 member_access:
     expr member
       %{
-        $$ = null;
-
-        if ($1 === null || $2 === null) {
-          return;
-        }
-
-        const type = typeof $2;
-        const isCorrectType = type === 'string' || type === 'number';
-        if (isCorrectType && hasOwnProperty.call($1, $2)) {
-          $$ = $1[$2];
-        }
+        $$ = new AstNode(AstNodeType.MEMBER_ACCESS, [$1, $2]);
       %}
   ;
 
 member:
     '.' NAME
-      {$$ = $2;}
+      %{
+        $$ = new AstNode(AstNodeType.MEMBER, null, $2);
+      %}
   | '[' expr ']'
-      {$$ = $2;}
+      %{
+        $$ = new AstNode(AstNodeType.MEMBER, [$2]);
+      %}
   ;
 
 variable:
     NAME
-      {$$ = hasOwnProperty.call(yy, $1) ? yy[$1] : null;}
+      %{
+        $$ = new AstNode(AstNodeType.VARIABLE, null, $1);
+      %}
   ;
 
 literal:
-    STRING
-      {$$ = yytext.substr(1, yyleng - 2);}
-  | NUMBER
-      {$$ = Number(yytext);}
-  | TRUE
-      {$$ = true;}
-  | FALSE
-      {$$ = false;}
-  | NULL
-      {$$ = null;}
+    primitive
+      ${
+        $$ = $1;
+      }
   | object_literal
-      {$$ = $1;}
+      %{
+        $$ = $1;
+      %}
   | array_literal
-      {$$ = $1;}
+      %{
+        $$ = $1;
+      %}
+  ;
+
+primitive:
+    STRING
+      %{
+        const string = yytext.substr(1, yyleng - 2);
+        $$ = new AstNode(AstNodeType.LITERAL, null, string);
+      %}
+  | NUMBER
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, Number(yytext));
+      %}
+  | TRUE
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, true);
+      %}
+  | FALSE
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, false);
+      %}
+  | NULL
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, null);
+      %}
   ;
 
 array_literal:
     '[' ']'
-      {$$ = [];}
+      %{
+        $$ = new AstNode(AstNodeType.ARRAY_LITERAL, []);
+      %}
   | '[' array ']'
-      {$$ = $2;}
+      %{
+        $$ = new AstNode(AstNodeType.ARRAY_LITERAL, [$2]);
+      %}
   ;
 
 array:
     expr
-      {$$ = [$1];}
+      %{
+        $$ = new AstNode(AstNodeType.ARRAY, [$1]);
+      %}
   | array ',' expr
-      {$$ = $1; Array.prototype.push.call($1, $3);}
+      %{
+        $$ = $1;
+        $$.args.push($3);
+      %}
   ;
 
 object_literal:
     '{' '}'
-      {$$ = Object.create(null);}
+      %{
+        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, []);
+      %}
   | '{' object '}'
-      {$$ = $2;}
+      %{
+        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$2]);
+      %}
   ;
 
 object:
     key_value
-      {$$ = Object.create(null); $$[$1[0]] = $1[1];}
+      %{
+        $$ = new AstNode(AstNodeType.OBJECT, [$1]);
+      %}
   | object ',' key_value
-      {$$ = $1; $$[$3[0]] = $3[1];}
+      %{
+        $$ = $1;
+        $$.args.push($3);
+      %}
   ;
 
 key_value:
-  expr ':' expr
-      {$$ = [$1, $3];}
+  key ':' expr
+      %{
+        $$ = new AstNode(AstNodeType.KEY_VALUE, [$1, $3]);
+      %}
+  ;
+
+key:
+    NAME
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, $1);
+      %}
+  | primitive
+      %{
+        $$ = $1;
+      %}
   ;

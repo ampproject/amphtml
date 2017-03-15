@@ -96,11 +96,9 @@ AMP HTML documents MUST
 - <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML). [🔗](#crps)
 - <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
-- <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommended to include `initial-scale=1` (1). [🔗](#vprt)
+- <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommended to include `initial-scale=1`. [🔗](#vprt)
 - <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
 - <a name="boilerplate"></a>contain the [AMP boilerplate code](amp-boilerplate.md) (`head > style[amp-boilerplate]` and `noscript > style[amp-boilerplate]`) in their head tag. [🔗](#boilerplate)
-
-(1) `width=device-width,minimum-scale=1` is required to ensure [GPU rasterization](https://www.chromium.org/developers/design-documents/chromium-graphics/how-to-get-gpu-rasterization) is enabled.
 
 ### Metadata
 
@@ -122,25 +120,29 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
     <td>Prohibited unless the type is <code>application/ld+json</code>. (Other non-executable values may be added as needed.) Exception is the mandatory script tag to load the AMP runtime and the script tags to load extended components.</td>
   </tr>
   <tr>
+    <td width="30%">noscript</td>
+    <td>Allowed. Can be used anywhere in the document. If specified, the content inside the <code>&lt;noscript&gt;</code> element displays if JavaScript is disabled by the user.</td>
+  </tr>
+  <tr>
     <td width="30%">base</td>
-    <td>Prohibited</td>
+    <td>Prohibited.</td>
   </tr>
   <tr>
     <td width="30%">img</td>
-    <td>Replaced with `amp-img`.<br>
+    <td>Replaced with <code>amp-img</code>.<br>
         Please note: <code>&lt;img&gt;</code> is a <a href="https://www.w3.org/TR/html5/syntax.html#void-elements">Void Element according to HTML5</a>, so it does not have an end tag. However, <code>&lt;amp-img&gt;</code> does have an end tag <code>&lt;/amp-img&gt;</code>.</td>
   </tr>
   <tr>
     <td width="30%">video</td>
-    <td>Replaced with `amp-video`.</td>
+    <td>Replaced with <code>amp-video</code>.</td>
   </tr>
   <tr>
     <td width="30%">audio</td>
-    <td>Replaced with `amp-audio`.</td>
+    <td>Replaced with <code>amp-audio</code>.</td>
   </tr>
   <tr>
     <td width="30%">iframe</td>
-    <td>Replaced with `amp-iframe`.</td>
+    <td>Replaced with <code>amp-iframe</code>.</td>
   </tr>
     <tr>
     <td width="30%">frame</td>
@@ -168,11 +170,11 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">form</td>
-    <td>Allowed. Require including [amp-form extension](../extensions/amp-form/amp-form.md).</td>
+    <td>Allowed. Require including <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md">amp-form extension</a>.</td>
   </tr>
   <tr>
     <td width="30%">input elements</td>
-    <td>Mostly Allowed with [exception of some input types](../extensions/amp-form/amp-form.md#inputs), namely, `input[type=image]`, `input[type=button]`, `input[type=password]`, `input[type=file]` are invalid. Related tags are also allowed: `fieldset`, `label`</td>
+    <td>Mostly allowed with <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#inputs">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
   </tr>
   <tr>
     <td width="30%">button</td>
@@ -402,10 +404,7 @@ https://cdn.ampproject.org/$RUNTIME_VERSION/$ELEMENT_NAME-$ELEMENT_VERSION.js
 
 ##### Versioning
 
-Extended components are versioned via [semver](http://semver.org/). The version is referenced explicitly (See $ELEMENT_VERSION above) when loading the component in the URL. It may have the value “latest”.
-Changes to the PATCH version component (x in 1.1.x) must strictly maintain backward compatibility or fix urgent security issues.
-
-AMP documents may only reference versions with one or two components. Version “1” states “I accept every version of this component with major version 1”. Version “1.1” states “I accept every PATCH level of 1.1”. It is not allowed to explicitly reference the PATCH level in the version string.
+See the [AMP versioning policy](amp-versioning-policy.md).
 
 
 ### Extended templates
@@ -433,7 +432,7 @@ The templates are declared in the document as following:
 </template>
 ```
 
-The `type` attribute is required and must reference a declared `custom-element` script.
+The `type` attribute is required and must reference a declared `custom-template` script.
 
 The `id` attribute is optional. Individual AMP elements discover their own templates. Typical scenarios would involve an AMP element looking for a `<template>` either among its children or referenced by ID.
 

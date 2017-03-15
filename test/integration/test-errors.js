@@ -32,7 +32,6 @@ describe.configure().retryOnSaucelabs().run('error page', function() {
         // Some browsers do not allow this.
         win.AMP_DEV_MODE = true;
       }
-      console.error('updated', win.location.hash);
     }).then(f => {
       fixture = f;
       return poll('errors to happen', () => {
@@ -57,7 +56,7 @@ describe.configure().retryOnSaucelabs().run('error page', function() {
           e.getAttribute('data-expectederror'));
       expect(e.getAttribute('error-message')).to.contain(
           e.getAttribute('data-expectederror'));
-      expect(e.className).to.contain('-amp-element-error');
+      expect(e.className).to.contain('i-amphtml-element-error');
     });
   }
 
