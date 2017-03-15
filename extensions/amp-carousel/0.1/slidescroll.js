@@ -102,8 +102,8 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {number} */
     this.slideWidth_ = 0;
 
-    /** @private {number} */
-    this.previousScrollLeft_ = 0;
+    /** @private {?number} */
+    this.previousScrollLeft_ = null;
 
     /** @private {!Array<?string>} */
     this.dataSlideIdArr_ = [];
@@ -117,9 +117,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.action_ = null;
 
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = isExperimentOn(this.win,
-        'slidescroll-disable-css-snap') &&
-        startsWith(platformFor(this.win).getIosVersionString(), '10.3');
+    this.shouldDisableCssSnap_ = true;
   }
 
   /** @override */
@@ -135,7 +133,6 @@ export class AmpSlideScroll extends BaseSlides {
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
 
-    // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
     if (this.shouldDisableCssSnap_) {
       this.hasNativeSnapPoints_ = false;
     }
@@ -154,12 +151,13 @@ export class AmpSlideScroll extends BaseSlides {
     this.slidesContainer_.setAttribute('aria-live', 'polite');
 
     // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
+    // https://bugs.webkit.org/show_bug.cgi?id=169800
     if (this.shouldDisableCssSnap_) {
       this.slidesContainer_.classList.add('-amp-slidescroll-no-snap');
     }
 
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
-    if (this.hasNativeSnapPoints_) {
+    if (this.hasNativeSnapPoints_ && this.noOfSlides_ == 2) {
       const start = this.win.document.createElement('div');
       start.classList.add('-amp-carousel-start-marker');
       this.slidesContainer_.appendChild(start);
@@ -178,11 +176,6 @@ export class AmpSlideScroll extends BaseSlides {
       slideWrapper.appendChild(slide);
       slideWrapper.classList.add('-amp-slide-item');
 
-      // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
-      if (this.shouldDisableCssSnap_) {
-        slideWrapper.classList.add('-amp-slidescroll-no-snap');
-      }
-
       this.slidesContainer_.appendChild(slideWrapper);
       this.slideWrappers_.push(slideWrapper);
     });
@@ -197,10 +190,8 @@ export class AmpSlideScroll extends BaseSlides {
     this.slidesContainer_.addEventListener(
         'touchmove', this.touchMoveHandler_.bind(this));
 
-    if (this.hasNativeSnapPoints_) {
-      this.slidesContainer_.addEventListener(
-          'touchend', this.touchEndHandler_.bind(this));
-    }
+    this.slidesContainer_.addEventListener(
+        'touchend', this.touchEndHandler_.bind(this));
 
     this.registerAction('goToSlide', invocation => {
       const args = invocation.args;
@@ -339,11 +330,12 @@ export class AmpSlideScroll extends BaseSlides {
 
     if (!this.touchEndTimeout_) {
       const timeout =
-          this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT;
+          this.hasNativeSnapPoints_ || this.isIos_ ?
+              NATIVE_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = timerFor(this.win).delay(() => {
 
-        if (this.snappingInProgress_) {
+        if (this.snappingInProgress_ || this.previousScrollLeft_ == null) {
           return;
         }
         if (this.hasNativeSnapPoints_) {
@@ -362,7 +354,9 @@ export class AmpSlideScroll extends BaseSlides {
    */
   handleCustomElasticScroll_(currentScrollLeft) {
     const scrollWidth = this.slidesContainer_./*OK*/scrollWidth;
-    if (this.elasticScrollState_ == -1 &&
+    if (this.previousScrollLeft_ == null) {
+      this.elasticScrollState_ = 0
+    } else if (this.elasticScrollState_ == -1 &&
         currentScrollLeft >= this.previousScrollLeft_) {
       // Elastic Scroll is reversing direction take control.
       this.customSnap_(currentScrollLeft).then(() => {
@@ -414,7 +408,6 @@ export class AmpSlideScroll extends BaseSlides {
       // Move backward.
       toScrollLeft = 0;
     }
-
     return this.animateScrollLeft_(currentScrollLeft, toScrollLeft).then(() => {
       this.updateOnScroll_(toScrollLeft);
     });
@@ -480,6 +473,7 @@ export class AmpSlideScroll extends BaseSlides {
           // Make the container scrollable again to enable user swiping.
           this.slidesContainer_.classList.remove('-amp-no-scroll');
         }
+        this.previousScrollLeft_ = null;
         this.snappingInProgress_ = false;
       });
     });
