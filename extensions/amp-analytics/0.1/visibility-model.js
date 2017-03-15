@@ -18,27 +18,18 @@ import {dev} from '../../../src/log';
 
 
 /**
- * A helper class that implements visibility calculations based on the
+ * This class implements visibility calculations based on the
  * visibility ratio. It's used for documents, embeds and individual element.
  * @implements {../../../src/service.Disposable}
  */
-export class VisibilityHelper {
+export class VisibilityModel {
   /**
-   * @param {?VisibilityHelper} parent
    * @param {!Object<string, *>} spec
-   * @param {number=} opt_iniVisibility
-   * @param {boolean=} opt_shouldFactorParent
+   * @param {function():number} calcVisibility
    */
-  constructor(parent, spec, opt_iniVisibility, opt_shouldFactorParent) {
+  constructor(spec, calcVisibility) {
     /** @const @private */
-    this.parent_ = parent;
-
-    /**
-     * Whether this visibility is in the intersection with parent. Thus the
-     * final visibility will be this visibility times parent.
-     * @const @private {boolean}
-     */
-    this.shouldFactorParent_ = opt_shouldFactorParent || false;
+    this.calcVisibility_ = calcVisibility;
 
     /**
      * Spec parameters.
@@ -68,20 +59,14 @@ export class VisibilityHelper {
       this.eventResolver_ = resolve;
     });
 
-    /** @private {?Array<!VisibilityHelper>} */
-    this.children_ = null;
-
-    /** @private {!Array<!UnsubscribeDef>} */
+    /** @private {!Array<!UnlistenDef>} */
     this.unsubscribe_ = [];
 
     /** @const @private {time} */
     this.createdTime_ = Date.now();
 
-    /** @private {number} */
-    this.ownVisibility_ = opt_iniVisibility || 0;
-
     /** @private {boolean} */
-    this.blocked_ = false;
+    this.ready_ = true;
 
     /** @private {?number} */
     this.scheduledRunId_ = null;
@@ -89,53 +74,45 @@ export class VisibilityHelper {
     /** @private {boolean} */
     this.matchesVisibility_ = false;
 
-    /** @private {time} */
+    /** @private {boolean} */
+    this.everMatchedVisibility_ = false;
+
+    /** @private {time} duration in milliseconds */
     this.continuousTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} duration in milliseconds */
     this.maxContinuousVisibleTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} duration in milliseconds */
     this.totalVisibleTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} milliseconds since epoch */
     this.firstSeenTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} milliseconds since epoch */
     this.lastSeenTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} milliseconds since epoch */
     this.fistVisibleTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} milliseconds since epoch */
     this.lastVisibleTime_ = 0;
 
-    /** @private {time} */
+    /** @private {time} percent value in a [0, 1] range */
     this.loadTimeVisibility_ = 0;
 
-    /** @private {number} */
+    /** @private {number} percent value in a [0, 1] range */
     this.minVisiblePercentage_ = 0;
 
-    /** @private {number} */
+    /** @private {number} percent value in a [0, 1] range */
     this.maxVisiblePercentage_ = 0;
 
-    /** @private {time} */
+    /** @private {time} milliseconds since epoch */
     this.lastVisibleUpdateTime_ = 0;
-
-    if (this.parent_) {
-      this.parent_.addChild_(this);
-    }
-
-    if (this.getVisibility() > 0) {
-      this.update();
-    }
   }
 
   /** @override */
   dispose() {
-    if (this.parent_) {
-      this.parent_.removeChild_(this);
-    }
     if (this.scheduledRunId_) {
       clearTimeout(this.scheduledRunId_);
       this.scheduledRunId_ = null;
@@ -149,8 +126,8 @@ export class VisibilityHelper {
 
   /**
    * Adds the unsubscribe handler that will be called when this visibility
-   * helper is destroyed.
-   * @param {!UnsubscribeDef} handler
+   * model is destroyed.
+   * @param {!UnlistenDef} handler
    */
   unsubscribe(handler) {
     this.unsubscribe_.push(handler);
@@ -161,61 +138,34 @@ export class VisibilityHelper {
    * have been met.
    * @param {function()} handler
    */
-  onEvent(handler) {
+  onTriggerEvent(handler) {
     this.eventPromise_.then(handler);
   }
 
   /**
-   * Sets visibility of this object. See `getVisibility()` for the final
-   * visibility calculations.
-   * @param {number} visibility
+   * Sets whether this object is ready. Ready means that visibility is
+   * ready to be calculated, e.g. because an element has been
+   * sufficiently rendered.
+   * @param {boolean} ready
    */
-  setVisibility(visibility) {
-    this.ownVisibility_ = visibility;
+  setReady(ready) {
+    this.ready_ = ready;
     this.update();
   }
 
   /**
-   * Sets whether this object is blocked. Blocking means that visibility is
-   * not ready to be calculated, e.g. because an element has not yet
-   * sufficiently rendered. See `getVisibility()` for the final
-   * visibility calculations.
-   * @param {boolean} blocked
-   */
-  setBlocked(blocked) {
-    this.blocked_ = blocked;
-    this.update();
-  }
-
-  /**
-   * Returns the final visibility. It depends on the following factors:
-   *  1. This object's visibility.
-   *  2. Whether the object is blocked.
-   *  3. The parent's visibility.
    * @return {number}
+   * @private
    */
-  getVisibility() {
-    const ownVisibility = this.blocked_ ? 0 : this.ownVisibility_;
-    if (!this.parent_) {
-      return ownVisibility;
-    }
-    if (this.shouldFactorParent_) {
-      return ownVisibility * this.parent_.getVisibility();
-    }
-    return this.parent_.getVisibility() > 0 ? ownVisibility : 0;
+  getVisibility_() {
+    return this.ready_ ? this.calcVisibility_() : 0;
   }
 
   /**
    * Runs the calculation cycle.
    */
   update() {
-    const visibility = this.getVisibility();
-    this.update_(visibility);
-    if (this.children_) {
-      for (let i = 0; i < this.children_.length; i++) {
-        this.children_[i].update();
-      }
-    }
+    this.update_(this.getVisibility_());
   }
 
   /**
@@ -300,6 +250,7 @@ export class VisibilityHelper {
         visibility <= this.spec_.visiblePercentageMax);
 
     if (this.matchesVisibility_) {
+      this.everMatchedVisibility_ = true;
       if (prevMatchesVisibility) {
         // Keep counting.
         this.totalVisibleTime_ += timeSinceLastUpdate;
@@ -334,7 +285,7 @@ export class VisibilityHelper {
       this.lastVisibleTime_ = now;
     }
 
-    return this.matchesVisibility_ &&
+    return this.everMatchedVisibility_ &&
         (this.totalVisibleTime_ >= this.spec_.totalTimeMin) &&
         (this.totalVisibleTime_ <= this.spec_.totalTimeMax) &&
         (this.maxContinuousVisibleTime_ >= this.spec_.continuousTimeMin) &&
@@ -357,30 +308,6 @@ export class VisibilityHelper {
         maxWaitTime,
         waitForContinuousTime || Infinity,
         waitForTotalTime || Infinity);
-  }
-
-  /**
-   * @param {!VisibilityHelper} child
-   * @private
-   */
-  addChild_(child) {
-    if (!this.children_) {
-      this.children_ = [];
-    }
-    this.children_.push(child);
-  }
-
-  /**
-   * @param {!VisibilityHelper} child
-   * @private
-   */
-  removeChild_(child) {
-    if (this.children_) {
-      const index = this.children_.indexOf(child);
-      if (index != -1) {
-        this.children_.splice(index, 1);
-      }
-    }
   }
 }
 

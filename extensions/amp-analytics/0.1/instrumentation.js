@@ -24,6 +24,7 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  VisibilityTracker,
 } from './events';
 import {Observable} from '../../../src/observable';
 import {Visibility} from './visibility-impl';
@@ -40,6 +41,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
@@ -96,6 +98,11 @@ const EVENT_TRACKERS = {
     name: 'ini-load',
     allowedFor: ALLOWED_FOR_ALL,
     klass: IniLoadTracker,
+  },
+  'visible-v3': {
+    name: 'visible-v3',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: VisibilityTracker,
   },
 };
 
@@ -525,6 +532,10 @@ export class AnalyticsGroup {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.listeners_ = [];
+
+    // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
+    /** @private @const {boolean} */
+    this.visibilityV3_ = isExperimentOn(root.ampdoc.win, 'visibility-v3');
   }
 
   /** @override */
@@ -545,7 +556,11 @@ export class AnalyticsGroup {
    * @param {function(!AnalyticsEvent)} handler
    */
   addTrigger(config, handler) {
-    const eventType = dev().assertString(config['on']);
+    let eventType = dev().assertString(config['on']);
+    // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
+    if (eventType == 'visible' && this.visibilityV3_) {
+      eventType = 'visible-v3';
+    }
     let trackerProfile = EVENT_TRACKERS[eventType];
     if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
       trackerProfile = EVENT_TRACKERS['custom'];

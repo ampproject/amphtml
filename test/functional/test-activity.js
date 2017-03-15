@@ -24,6 +24,7 @@ import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
 import {markElementScheduledForTesting} from '../../src/custom-element';
+import {installVsyncService} from '../../src/service/vsync-impl';
 import {viewportForDoc} from '../../src/viewport';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
@@ -98,6 +99,7 @@ describe('Activity getTotalEngagedTime', () => {
     }};
 
     installTimerService(fakeWin);
+    installVsyncService(fakeWin);
     installPlatformService(fakeWin);
     viewer = installViewerServiceForDoc(ampdoc);
 
@@ -128,7 +130,7 @@ describe('Activity getTotalEngagedTime', () => {
     sandbox.restore();
   });
 
-  it('should use the stubed viewer in tests', () => {
+  it('should use the stubbed viewer in tests', () => {
     return expect(activity.viewer_).to.equal(viewer);
   });
 
