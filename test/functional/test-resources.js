@@ -497,6 +497,9 @@ describe('Resources pause/resume/unlayout scheduling', () => {
       getAttribute() {
         return null;
       },
+      hasAttribute() {
+        return false;
+      },
       contains() {
         return true;
       },
@@ -680,6 +683,9 @@ describe('Resources schedulePreload', () => {
       getAttribute() {
         return null;
       },
+      hasAttribute() {
+        return false;
+      },
       contains() {
         return true;
       },
@@ -807,6 +813,7 @@ describe('Resources discoverWork', () => {
       getAttribute: () => {
         return null;
       },
+      hasAttribute: () => false,
       getBoundingClientRect: () => rect,
       updateLayoutBox: () => {},
       applySizesAndMediaQuery: () => {},
@@ -1320,6 +1327,7 @@ describe('Resources changeSize', () => {
       getAttribute: () => {
         return null;
       },
+      hasAttribute: () => false,
       getBoundingClientRect: () => rect,
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
@@ -1959,6 +1967,7 @@ describe('Resources mutateElement and collapse', () => {
       getAttribute: () => {
         return null;
       },
+      hasAttribute: () => null,
       getBoundingClientRect: () => rect,
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
@@ -2214,6 +2223,9 @@ describe('Resources.add/remove', () => {
     const element = {
       ownerDocument: {defaultView: window},
       tagName: 'amp-test',
+      hasAttribute() {
+        return false;
+      },
       isBuilt() {
         return true;
       },
