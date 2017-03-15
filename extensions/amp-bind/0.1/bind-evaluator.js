@@ -80,9 +80,11 @@ export class BindEvaluator {
    */
   removeBindingsWithExpressionStrings(expressionStrings) {
     const expressionsToRemove = Object.create(null);
-    for (let i = 0; i < expressionStrings.length; i++) {
-      expressionsToRemove[expressionStrings[i]] = true;
-    }
+
+    expressionStrings.forEach(expressionString => {
+      delete this.expressions_[expressionString];
+      expressionsToRemove[expressionString] = true;
+    });
 
     filterSplice(this.bindings_, binding =>
         !expressionsToRemove[binding.expressionString]);
@@ -220,6 +222,15 @@ export class BindEvaluator {
    */
   bindingsForTesting() {
     return this.bindings_;
+  }
+
+  /**
+   * Returns the expression cache for testing.
+   * @return {!Object<string, !BindExpression>}
+   * @visibleForTesting
+   */
+  expressionsForTesting() {
+    return this.expressions_;
   }
 
   /**
