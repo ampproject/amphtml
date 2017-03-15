@@ -17,8 +17,11 @@
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
-  getExtensionsService,
+  installExtensionsService,
 } from '../../../../src/service/extensions-impl';
+import {
+  extensionsFor,
+} from '../../../../src/extensions';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
@@ -157,7 +160,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'type': 'adsense',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
-        const extensions = getExtensionsService(impl.win);
+        installExtensionsService(impl.win);
+        const extensions = extensionsFor(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });

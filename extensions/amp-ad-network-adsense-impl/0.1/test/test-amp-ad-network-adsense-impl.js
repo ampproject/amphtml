@@ -20,8 +20,9 @@ import {
   resetSharedState,
 } from '../amp-ad-network-adsense-impl';
 import {
-  getExtensionsService,
+  installExtensionsService,
 } from '../../../../src/service/extensions-impl';
+import {extensionsFor} from '../../../../src/extensions';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
@@ -341,7 +342,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'height': '50',
           'type': 'adsense',
         });
-        const extensions = getExtensionsService(fixture.win);
+        installExtensionsService(fixture.win);
+        const extensions = extensionsFor(fixture.win);
         impl = new AmpAdNetworkAdsenseImpl(element);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
