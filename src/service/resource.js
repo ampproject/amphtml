@@ -371,6 +371,8 @@ export class Resource {
     // by whether a resource has been attached to it.
     if (this.isPlaceholder_ &&
         this.element.parentElement &&
+        // Use prefix to recognize AMP element. This is necessary because stub
+        // may not be attached yet.
         startsWith(this.element.parentElement.tagName, 'AMP-') &&
         !(RESOURCE_PROP_ in this.element.parentElement)) {
       return;
