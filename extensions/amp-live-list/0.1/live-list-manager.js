@@ -17,7 +17,7 @@
 import {Poller} from './poller';
 import {addParamToUrl} from '../../../src/url';
 import {getMode} from '../../../src/mode';
-import {fromClass} from '../../../src/service';
+import {registerServiceBuilder, getService} from '../../../src/service';
 import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
@@ -220,8 +220,16 @@ export class LiveListManager {
 
 /**
  * @param {!Window} win
- * @return {!LiveListManager}
  */
 export function installLiveListManager(win) {
-  return fromClass(win, 'liveListManager', LiveListManager);
+  registerServiceBuilder(win, 'liveListManager', LiveListManager);
+}
+
+/**
+ * @param {!Window} win
+ * @return {!LiveListManager}
+ */
+export function liveListManagerFor(win) {
+  installLiveListManager(win);
+  return getService(win, 'liveListManager');
 }
