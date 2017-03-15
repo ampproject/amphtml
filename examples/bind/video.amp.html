@@ -12,6 +12,7 @@
 
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
   <script async custom-element="amp-brightcove" src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
 
   <style amp-custom>
     button {
@@ -24,7 +25,6 @@
   <button onclick="AMP.toggleExperiment('amp-bind');window.location.href=window.location.href;">Toggle &lt;amp-bind&gt; experiment</button>
 
   <h2>amp-video</h2>
-
   <amp-video width=480 height=270 autoplay src="https://ampbyexample.com/video/tokyo.mp4"
       [src]="videoSrc || 'https://ampbyexample.com/video/tokyo.mp4'"
       [controls]="videoControls || false">
@@ -36,8 +36,17 @@
     })">Change amp-video</button>
   </p>
 
-  <h2>amp-brightcove</h2>
+  <h2>amp-youtube</h2>
+  <amp-youtube width=480 height=270 data-videoid="lBTCB7yLs8Y"
+      [data-videoid]="youtubeId || 'lBTCB7yLs8Y'">
+  </amp-youtube>
+  <p>
+    <button on="tap:AMP.setState({
+        youtubeId: 'WrpkFROqR0Q'
+    })">Change amp-youtube</button>
+  </p>
 
+  <h2>amp-brightcove</h2>
   <amp-brightcove width=480 height=270
     data-account="906043040001" data-player-id="180a5658-8be8-4f33-8eba-d562ab41b40c" data-video-id="1401169490001"
     [data-account]="brightcoveAccountId" [data-player-id]="brightcovePlayerId">
