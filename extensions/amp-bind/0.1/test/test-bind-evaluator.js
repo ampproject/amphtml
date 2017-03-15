@@ -69,7 +69,7 @@ describe('BindEvaluator', () => {
     expect(numberOfBindings()).to.equal(0);
   });
 
-  it('should NOT cache expressions that have been removed', () => {
+  it('should clean up removed expressions from its cache', () => {
     expect(numberOfCachedExpressions()).to.equal(0);
     evaluator.addBindings([{
       tagName: 'P',
