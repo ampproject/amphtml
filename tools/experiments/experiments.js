@@ -266,6 +266,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-sortable-table/amp-sortable-table.md',
   },
+  {
+    id: 'slidescroll-ios-beta',
+    name: 'Slidescroll IOS beta',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
+  },
 ];
 
 if (getMode().localDev) {

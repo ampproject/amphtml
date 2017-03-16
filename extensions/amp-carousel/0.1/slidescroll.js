@@ -25,6 +25,8 @@ import {numeric} from '../../../src/transition';
 import {platformFor} from '../../../src/platform';
 import {timerFor} from '../../../src/timer';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {isExperimentOn} from '../../../src/experiments';
+import {startsWith} from '../../../src/string';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = '-amp-slide-item-show';
@@ -112,6 +114,14 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
+
+    /** @private {boolean} */
+    this.isIosBetaExperimentOn_ = isExperimentOn(this.win,
+        'slidescroll-ios-beta');
+
+    /** @private {boolean} */
+    this.isIosBeta_ = startsWith(platformFor(this.win).getIosVersionString(),
+        '10.3');
   }
 
   /** @override */
@@ -126,6 +136,12 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
+
+    // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
+    if (this.isIosBetaExperimentOn_ && this.isIosBeta_) {
+      this.hasNativeSnapPoints_ = false;
+    }
+
     this.element.classList.add('-amp-slidescroll');
 
     this.slides_ = this.getRealChildren();
@@ -138,6 +154,11 @@ export class AmpSlideScroll extends BaseSlides {
     // to it (such after pressing next) should be announced to the
     // user.
     this.slidesContainer_.setAttribute('aria-live', 'polite');
+
+    // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
+    if (this.isIosBetaExperimentOn_ && this.isIosBeta_) {
+      this.slidesContainer_.classList.add('-amp-disable-snap-type');
+    }
 
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
@@ -158,6 +179,12 @@ export class AmpSlideScroll extends BaseSlides {
       slide.classList.add('amp-carousel-slide');
       slideWrapper.appendChild(slide);
       slideWrapper.classList.add('-amp-slide-item');
+
+      // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
+      if (this.isIosBetaExperimentOn_ && this.isIosBeta_) {
+        slideWrapper.classList.add('-amp-disable-snap-coordinate');
+      }
+
       this.slidesContainer_.appendChild(slideWrapper);
       this.slideWrappers_.push(slideWrapper);
     });
@@ -308,7 +335,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
-    if (!this.hasNativeSnapPoints_) {
+    if (!this.isIos_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
 
