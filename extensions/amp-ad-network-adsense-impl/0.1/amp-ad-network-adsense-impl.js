@@ -105,8 +105,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    return !!this.element.getAttribute('data-ad-client') &&
-        isGoogleAdsA4AValidEnvironment(this.win) && this.isAmpAdElement();
+    return isGoogleAdsA4AValidEnvironment(this.win) && this.isAmpAdElement();
   }
 
   /** @override */
@@ -115,12 +114,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
     const global = this.win;
-    let adClientId = this.element.getAttribute('data-ad-client');
-    // Ensure client id format: lower case with 'ca-' prefix.
-    adClientId = adClientId.toLowerCase();
-    if (adClientId.substring(0, 3) != 'ca-') {
-      adClientId = 'ca-' + adClientId;
-    }
+    const adClientId = this.element.getAttribute('data-ad-client');
     const slotRect = this.getIntersectionElementLayoutBox();
     const visibilityState = viewerForDoc(this.getAmpDoc())
         .getVisibilityState();

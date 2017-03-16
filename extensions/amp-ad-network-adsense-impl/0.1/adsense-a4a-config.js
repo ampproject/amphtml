@@ -66,9 +66,8 @@ export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element) {
-  return !!element.getAttribute('data-ad-client') &&
-      googleAdsIsA4AEnabled(
-        win, element, ADSENSE_A4A_EXPERIMENT_NAME,
-        ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-        ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES);
+  return googleAdsIsA4AEnabled(
+      win, element, ADSENSE_A4A_EXPERIMENT_NAME,
+      ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+      ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES);
 }
