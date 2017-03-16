@@ -91,11 +91,7 @@ let ExtensionHolderDef;
  * @restricted
  */
 export function installExtensionsService(window) {
-  registerServiceBuilder(window,
-                         'extensions',
-                         Extensions,
-                         /* opt_factory */ undefined,
-                         /* opt_instantiate */ true);
+  registerServiceBuilder(window, 'extensions', Extensions);
 }
 
 /**

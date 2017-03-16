@@ -34,9 +34,7 @@ import {
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
-import {
-  extensionsFor,
-} from '../../src/extensions';
+import {extensionsFor} from '../../src/extensions';
 import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
