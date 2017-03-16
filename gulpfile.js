@@ -117,6 +117,7 @@ declareExtension('amp-selector', '0.1', true);
  */
 declareExtension('amp-slides', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-social-share', '0.1', true);
+declareExtension('amp-timeago', '0.1', false);
 declareExtension('amp-twitter', '0.1', false);
 declareExtension('amp-user-notification', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-vimeo', '0.1', false, 'NO_TYPE_CHECK');
