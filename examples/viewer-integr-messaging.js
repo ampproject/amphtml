@@ -31,11 +31,10 @@ var APP = '__AMPHTML__';
  * https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API
  */
 class WindowPortEmulator {
-  constructor(messageHandlers, id, port, opt_isWebview) {
+  constructor(messageHandlers, id, port) {
     this.messageHandlers_ = messageHandlers;
     this.id_ = id;
     this.port_ = port;
-    this.isWebview_ = !!opt_isWebview;
   }
   addEventListener(messageType, messageHandler) {
     console.log('messageHandler', messageHandler);
@@ -43,7 +42,7 @@ class WindowPortEmulator {
   }
   postMessage(data) {
     console.log('############## viewer posting Message', data);
-    this.port_./*OK*/postMessage(this.isWebview_ ? JSON.stringify(data) : data);
+    this.port_./*OK*/postMessage(data);
   }
   start() {}
 }

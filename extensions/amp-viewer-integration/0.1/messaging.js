@@ -163,6 +163,7 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
+    console.log('@@@@@@@@@ AMPDOC got a message', event.type, event.data);
     dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
     const message = this.isWebview_ ? JSON.parse(event.data) : event.data;
     if (message.type == MessageType.REQUEST) {
