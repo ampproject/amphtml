@@ -33,12 +33,13 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
       toggleExperiment(fixture, 'amp-bind', true, true);
-      return fixture.awaitEvent('amp:load:start', 1);
+      const numberOfExtensionElements = 4;
+      return fixture.awaitEvent('amp:load:start', numberOfExtensionElements);
     }).then(() => {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
       // Bind is installed manually here to get around an issue
-      // toggling experiments on the iframe fixture.
+      // toggling experiments on the fixture iframe.
       bind = installBindForTesting(ampdoc);
       return bind.initializePromiseForTesting();
     });
@@ -162,4 +163,136 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
   });
 
+  describe('amp-selector integration', () => {
+    it('should update dependent bindings when selection changes', () => {
+      const selectionText = fixture.doc.getElementById('selectionText');
+      const img1 = fixture.doc.getElementById('selectorImg1');
+      const img2 = fixture.doc.getElementById('selectorImg2');
+      const img3 = fixture.doc.getElementById('selectorImg3');
+      expect(img1.hasAttribute('selected')).to.be.false;
+      expect(img2.hasAttribute('selected')).to.be.false;
+      expect(img3.hasAttribute('selected')).to.be.false;
+      expect(selectionText.textContent).to.equal('None');
+      img2.click();
+      return waitForBindApplication().then(() => {
+        expect(img1.hasAttribute('selected')).to.be.false;
+        expect(img2.hasAttribute('selected')).to.be.true;
+        expect(img3.hasAttribute('selected')).to.be.false;
+        expect(selectionText.textContent).to.equal('2');
+      });
+    });
+
+    it('should update selection when bound value for selected changes', () => {
+      const button = fixture.doc.getElementById('changeSelectionButton');
+      const selectionText = fixture.doc.getElementById('selectionText');
+      const img1 = fixture.doc.getElementById('selectorImg1');
+      const img2 = fixture.doc.getElementById('selectorImg2');
+      const img3 = fixture.doc.getElementById('selectorImg3');
+      expect(img1.hasAttribute('selected')).to.be.false;
+      expect(img2.hasAttribute('selected')).to.be.false;
+      expect(img3.hasAttribute('selected')).to.be.false;
+      expect(selectionText.textContent).to.equal('None');
+      // Changes selection to 2
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(img1.hasAttribute('selected')).to.be.false;
+        expect(img2.hasAttribute('selected')).to.be.true;
+        expect(img3.hasAttribute('selected')).to.be.false;
+        expect(selectionText.textContent).to.equal('2');
+      });
+    });
+  });
+
+  describe('amp-video integration', () => {
+    it('should change src when the src attribute binding changes', () => {
+      const button = fixture.doc.getElementById('changeVidSrcButton');
+      const vid = fixture.doc.getElementById('video');
+      expect(vid.getAttribute('src')).to
+          .equal('https://www.google.com/unbound.webm');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.getAttribute('src')).to
+            .equal('https://www.google.com/bound.webm');
+      });
+    });
+
+    it('should NOT change src when new value is a blocked URL', () => {
+      const button = fixture.doc.getElementById('disallowedVidUrlButton');
+      const vid = fixture.doc.getElementById('video');
+      expect(vid.getAttribute('src')).to
+          .equal('https://www.google.com/unbound.webm');;
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.getAttribute('src')).to
+            .equal('https://www.google.com/unbound.webm');
+      });
+    });
+
+    it('should NOT change src when new value uses an invalid protocol', () => {
+      const button = fixture.doc.getElementById('httpVidSrcButton');
+      const vid = fixture.doc.getElementById('video');
+      expect(vid.getAttribute('src')).to
+          .equal('https://www.google.com/unbound.webm');
+      button.click();
+      return waitForBindApplication().then(() => {
+      // Only HTTPS is allowed
+        expect(vid.getAttribute('src')).to
+            .equal('https://www.google.com/unbound.webm');
+      });
+    });
+
+    it('should change alt when the alt attribute binding changes', () => {
+      const button = fixture.doc.getElementById('changeVidAltButton');
+      const vid = fixture.doc.getElementById('video');
+      expect(vid.getAttribute('alt')).to.equal('unbound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.getAttribute('alt')).to.equal('hello world');
+      });
+    });
+
+    it('should show/hide vid controls when the control binding changes', () => {
+      const showControlsButton =
+          fixture.doc.getElementById('showVidControlsButton');
+      const hideControlsButton =
+          fixture.doc.getElementById('hideVidControlsButton');
+      const vid = fixture.doc.getElementById('video');
+      expect(vid.hasAttribute('controls')).to.be.false;
+      showControlsButton.click();
+      return waitForBindApplication().then(() => {
+        expect(vid.hasAttribute('controls')).to.be.true;
+        hideControlsButton.click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(vid.hasAttribute('controls')).to.be.false;
+      });
+    });
+  });
+
+  describe('amp-youtube', () => {
+    it('should support binding to data-video-id', () => {
+      const button = fixture.doc.getElementById('youtubeButton');
+      const yt = fixture.doc.getElementById('youtube');
+      expect(yt.getAttribute('data-videoid')).to.equal('unbound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(yt.getAttribute('data-videoid')).to.equal('bound');
+      });
+    });
+  });
+
+  describe('amp-brightcove', () => {
+    it('should support binding to data-account', () => {
+      const button = fixture.doc.getElementById('brightcoveButton');
+      const bc = fixture.doc.getElementById('brightcove');
+      // Force layout in case element is not in viewport.
+      bc.implementation_.layoutCallback();
+      const iframe = bc.querySelector('iframe');
+      expect(iframe.src).to.not.contain('bound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(iframe.src).to.contain('bound');
+      });
+    });
+  });
 });
