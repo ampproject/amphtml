@@ -15,42 +15,53 @@
  */
 
 import '../../../amp-carousel/0.1/amp-carousel';
-import {installBindForTesting} from '../bind-impl';
-import {toggleExperiment} from '../../../../src/experiments';
 import {createFixtureIframe} from '../../../../testing/iframe';
 import {bindForDoc} from '../../../../src/bind';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 
-describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
+describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   let fixture;
   let ampdoc;
-  let bind;
   const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
 
   this.timeout(5000);
 
   beforeEach(() => {
+    let bindInitPromise;
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
-      toggleExperiment(fixture, 'amp-bind', true, true);
+      bindInitPromise = waitForEvent('amp:bind:initialize');
       const numberOfExtensionElements = 4;
       return fixture.awaitEvent('amp:load:start', numberOfExtensionElements);
     }).then(() => {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
-      // Bind is installed manually here to get around an issue
-      // toggling experiments on the fixture iframe.
-      bind = installBindForTesting(ampdoc);
-      return bind.initializePromiseForTesting();
+      return bindForDoc(ampdoc);
+    }).then(unusedBind => {
+      return bindInitPromise;
     });
   });
 
+  /**
+   * @param {string} name
+   * @return {!Promise}
+   */
+  function waitForEvent(name) {
+    return new Promise(resolve => {
+      function callback() {
+        resolve();
+        fixture.win.removeEventListener(callback);
+      };
+      fixture.win.addEventListener(name, callback);
+    });
+  }
+
+  /** @return {!Promise} */
   function waitForBindApplication() {
     // Bind should be available, but need to wait for actions to resolve
-    // service promise for bind and call setState
-    return bindForDoc(ampdoc).then(() => {
-      return bind.setStatePromiseForTesting();
-    });
+    // service promise for bind and call setState.
+    return bindForDoc(ampdoc).then(unusedBind =>
+        waitForEvent('amp:bind:setState'));
   }
 
   describe('text integration', () => {
@@ -235,7 +246,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
           .equal('https://www.google.com/unbound.webm');
       button.click();
       return waitForBindApplication().then(() => {
-      // Only HTTPS is allowed
+        // Only HTTPS is allowed
         expect(vid.getAttribute('src')).to
             .equal('https://www.google.com/unbound.webm');
       });

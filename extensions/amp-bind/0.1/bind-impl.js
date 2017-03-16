@@ -18,7 +18,6 @@ import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
-import {fromClassForDoc} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -60,14 +59,6 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
- * @return {!Bind}
- */
-export function installBindForTesting(nodeOrAmpDoc) {
-  return fromClassForDoc(nodeOrAmpDoc, 'bind', Bind);
-}
-
-/**
  * Bind is the service that handles the Bind lifecycle, from identifying
  * bindings in the document to scope mutations to reevaluating expressions
  * during a digest.
@@ -77,8 +68,9 @@ export class Bind {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    // Allow integration test to access this class in testing mode.
     /** @const @private {boolean} */
-    this.enabled_ = isExperimentOn(ampdoc.win, TAG);
+    this.enabled_ = getMode().test || isExperimentOn(ampdoc.win, TAG);
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
@@ -156,6 +148,11 @@ export class Bind {
         user().fine(TAG, 'State updated; re-evaluating expressions...');
         return this.digest_();
       });
+      if (getMode().test) {
+        this.setStatePromise_.then(() => {
+          this.dispatchEventForTesting_('amp:bind:setState');
+        });
+      }
       return this.setStatePromise_;
     } else {
       return Promise.resolve();
@@ -170,6 +167,8 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
+    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
+
     this.setStatePromise_ = this.initializePromise_.then(() => {
       // Allow expression to reference current scope in addition to event scope.
       Object.assign(scope, this.scope_);
@@ -198,7 +197,13 @@ export class Bind {
    */
   initialize_() {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    return this.addBindingsForNode_(this.ampdoc.getBody());
+    const promise = this.addBindingsForNode_(this.ampdoc.getBody());
+    if (getMode().test) {
+      promise.then(() => {
+        this.dispatchEventForTesting_('amp:bind:initialize');
+      });
+    }
+    return promise;
   }
 
   /**
@@ -590,10 +595,18 @@ export class Bind {
           // TODO(choumx): Perform in worker with URL API.
           // Rewrite attribute value if necessary. This is not done in the
           // worker since it relies on `url#parseUrl`, which uses DOM APIs.
-          const rewrittenNewValue = rewriteAttributeValue(
-              element.tagName, property, String(newValue));
-          element.setAttribute(property, rewrittenNewValue);
-          attributeChanged = true;
+          let rewrittenNewValue;
+          try {
+            rewrittenNewValue = rewriteAttributeValue(
+                element.tagName, property, String(newValue));
+          } catch (e) {
+            reportError(user().createError(e), element);
+          }
+          // Rewriting can fail due to e.g. invalid URL.
+          if (rewrittenNewValue !== undefined) {
+            element.setAttribute(property, rewrittenNewValue);
+            attributeChanged = true;
+          }
         }
 
         if (attributeChanged) {
@@ -807,7 +820,6 @@ export class Bind {
     return this.initializePromise_;
   }
 
-
   /**
    * Wait for bindings to evaluate and apply for testing. Should
    * be called once for each event that changes bindings.
@@ -837,4 +849,13 @@ export class Bind {
     });
   }
 
+  /**
+   * @param {string} name
+   * @private
+   */
+  dispatchEventForTesting_(name) {
+    if (getMode().test) {
+      this.win_.dispatchEvent(new Event(name));
+    }
+  }
 }
