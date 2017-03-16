@@ -35,8 +35,8 @@ class AmpNgageLiveChat extends AMP.BaseElement {
     x.appendChild(B);
     const A = document.createElement('div');
     A.className = 'ngageMobilePicContainer';
-    A.style.borderRadius = '0px';
-    A.style.border = '0px';
+    A.style.setProperty('border-radius','0px');
+    A.style.setProperty('border','0px');
     B.appendChild(A);
     const z = document.createElement('amp-img');
     z.setAttribute('height','60');
