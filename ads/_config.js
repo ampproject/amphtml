@@ -525,6 +525,7 @@ export const adConfig = {
       'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
     ],
+    renderStartImplemented: true,
   },
 
   sovrn: {
