@@ -15,7 +15,6 @@
  */
 
 import {isDocumentReady} from './document-ready';
-import {timerFor} from './timer';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,
@@ -48,7 +47,8 @@ export function fontStylesheetTimeout(win) {
   }
   const timeout = Math.max(1, 1000 - timeSinceResponseStart);
 
-  timerFor(win).delay(() => {
+  // Avoid timer dependency since this runs very early in execution.
+  win.setTimeout(() => {
     // We waited for the timeout period. There is no way to check whether
     // the stylesheet actually loaded. For that reason we check whether
     // the document is ready instead. The link tags block the readiness
