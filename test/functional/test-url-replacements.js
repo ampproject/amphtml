@@ -28,11 +28,13 @@ import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
-import {Activity} from '../../extensions/amp-analytics/0.1/activity-impl';
+import {
+  installActivityServiceForTesting,
+} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
-import {getService, fromClassForDoc} from '../../src/service';
+import {getService} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import {viewerForDoc} from '../../src/viewer';
@@ -71,7 +73,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         }
         if (opt_options.withActivity) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
-          fromClassForDoc(iframe.ampdoc, 'activity', Activity);
+          installActivityServiceForTesting(iframe.ampdoc);
         }
         if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');
