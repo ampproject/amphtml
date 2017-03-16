@@ -15,6 +15,7 @@
  */
 
 import {BindExpressionResultDef} from './bind-expression';
+import {childElementByAttr} from '../../../src/dom';
 import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
@@ -24,12 +25,12 @@ import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
+import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {timerFor} from '../../../src/timer';
-import {childElementByAttr} from '../../../src/dom';
 
 const TAG = 'amp-bind';
 
@@ -44,11 +45,12 @@ const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
  * Tags under which bind should observe mutaitons to detect added/removed
  * bindings.
  * @type {!Object<string, boolean>}
+ * @private
  */
-const DYNAMIC_TAGS = {
+const DYNAMIC_TAGS = map({
   'TEMPLATE': true,
   'AMP-LIVE-LIST': true,
-};
+});
 
 /**
  * A bound property, e.g. [property]="expression".
