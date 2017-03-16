@@ -291,22 +291,6 @@ Remove any `<meta>` tags except for those that:
 
 This is discussed in detail at [Server side filtering for `amp-live-list`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
 
-#### Remove `amp-access-hide` sections when `amp-access` JSON is `"type": "server"`
-
-If the document is using `amp-access` type of `server` then the AMP Cache removes any section with the attribute `amp-access-hide` from the document.
-
-*Condition*:
-`<script id=amp-access type=application/json>...</script>` contains `"type": "server"`
-
-<details>
-<summary>example</summary>
-
-| before | after |
-| --- | --- |
-| `<script id=amp-access type=application/json>`<br>`{`<br>`...`<br>`"type": "server"`<br>`}`<br>`</script>`<br>`...`<br>`<div amp-access-hide ...>`<br>`Content`<br>`</div>` | `<script id=amp-access type=application/json>`<br>`{`<br>`...`<br>`"type": "server"`<br>`}`<br>`</script>`<br>`...` |
-
-</details>
-
 #### Remove attribute `nonce`
 
 *Condition*:
