@@ -352,6 +352,8 @@ describe('reportErrorToServer', () => {
   it('should report experiments', () => {
     resetExperimentTogglesForTesting();
     toggleExperiment(window, 'test-exp', true);
+    // Toggle on then off, so it's stored
+    toggleExperiment(window, 'disabled-exp', true);
     toggleExperiment(window, 'disabled-exp', false);
     const e = user().createError('123');
     const url = parseUrl(
