@@ -146,6 +146,8 @@ export class Bind {
       this.setStatePromise_ = this.initializePromise_.then(() => {
         user().fine(TAG, 'State updated; re-evaluating expressions...');
         return this.digest_();
+      }).then(() => {
+        this.dispatchEventForTesting_('amp:bind:setState');
       });
       return this.setStatePromise_;
     } else {
@@ -191,7 +193,9 @@ export class Bind {
    */
   initialize_() {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    return this.addBindingsForNode_(this.ampdoc.getBody());
+    return this.addBindingsForNode_(this.ampdoc.getBody()).then(() => {
+      this.dispatchEventForTesting_('amp:bind:initialize');
+    });
   }
 
   /**
@@ -808,7 +812,6 @@ export class Bind {
     return this.initializePromise_;
   }
 
-
   /**
    * Wait for bindings to evaluate and apply for testing. Should
    * be called once for each event that changes bindings.
@@ -838,4 +841,13 @@ export class Bind {
     });
   }
 
+  /**
+   * @param {string} name
+   * @private
+   */
+  dispatchEventForTesting_(name) {
+    if (getMode().test) {
+      this.win_.dispatchEvent(new Event(name));
+    }
+  }
 }

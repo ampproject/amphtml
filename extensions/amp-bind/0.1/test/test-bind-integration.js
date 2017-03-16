@@ -27,23 +27,41 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   this.timeout(5000);
 
   beforeEach(() => {
+    let bindInitPromise;
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
+      bindInitPromise = waitForEvent('amp:bind:initialize');
       const numberOfExtensionElements = 4;
       return fixture.awaitEvent('amp:load:start', numberOfExtensionElements);
     }).then(() => {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
       return bindForDoc(ampdoc);
-    }).then(bind => {
-      return bind.initializePromiseForTesting();
+    }).then(unusedBind => {
+      return bindInitPromise;
     });
   });
 
+  /**
+   * @param {string} name
+   * @return {!Promise}
+   */
+  function waitForEvent(name) {
+    return new Promise(resolve => {
+      function callback() {
+        resolve();
+        fixture.win.removeEventListener(callback);
+      };
+      fixture.win.addEventListener(name, callback);
+    });
+  }
+
+  /** @return {!Promise} */
   function waitForBindApplication() {
     // Bind should be available, but need to wait for actions to resolve
     // service promise for bind and call setState.
-    return bindForDoc(ampdoc).then(bind => bind.setStatePromiseForTesting());
+    return bindForDoc(ampdoc).then(unusedBind =>
+        waitForEvent('amp:bind:setState'));
   }
 
   describe('text integration', () => {
@@ -228,7 +246,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
           .equal('https://www.google.com/unbound.webm');
       button.click();
       return waitForBindApplication().then(() => {
-      // Only HTTPS is allowed
+        // Only HTTPS is allowed
         expect(vid.getAttribute('src')).to
             .equal('https://www.google.com/unbound.webm');
       });
