@@ -188,6 +188,14 @@ class PreconnectService {
     const command = this.features_.preload ? 'preload' : 'prefetch';
     this.urls_[url] = true;
     this.url(viewer, url, /* opt_alsoConnecting */ true);
+    if (opt_preloadAs == 'document' && this.platform_.isSafari()) {
+      // Preloading documents currently does not work in Safari,
+      // because it
+      // - does not support preloading iframes
+      // - and uses a different cache for iframes (when loaded without
+      //   as attribute).
+      return;
+    }
     viewer.whenFirstVisible().then(() => {
       const preload = this.document_.createElement('link');
       preload.setAttribute('rel', command);
