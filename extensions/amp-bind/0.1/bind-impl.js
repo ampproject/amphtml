@@ -68,6 +68,7 @@ export class Bind {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    // Allow integration test to access this class in testing mode.
     /** @const @private {boolean} */
     this.enabled_ = getMode().test || isExperimentOn(ampdoc.win, TAG);
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);

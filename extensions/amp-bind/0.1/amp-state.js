@@ -49,6 +49,7 @@ export class AmpState extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // Allow integration test to access this class in testing mode.
     if (!getMode().test) {
       user().assert(isExperimentOn(this.win, 'amp-bind'),
           `Experiment "amp-bind" is disabled.`);

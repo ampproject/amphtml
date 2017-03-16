@@ -115,6 +115,7 @@ describes.realWin('amp-bind', {
 
   it('should throw error if experiment is not enabled', () => {
     toggleExperiment(env.win, 'amp-bind', false);
+    // Experiment check is bypassed on test mode -- make sure it isn't.
     env.sandbox.stub(getMode(), 'test', false);
     expect(() => {
       new Bind(env.ampdoc);
