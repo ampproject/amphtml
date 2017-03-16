@@ -98,7 +98,7 @@ describe('reportErrorToServer', () => {
     window.onerror = onError;
     sandbox.restore();
     window.viewerState = undefined;
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
   });
 
   it('reportError with error object', () => {
@@ -350,7 +350,7 @@ describe('reportErrorToServer', () => {
   });
 
   it('should report experiments', () => {
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
     toggleExperiment(window, 'test-exp', true);
     // Toggle on then off, so it's stored
     toggleExperiment(window, 'disabled-exp', true);

@@ -39,7 +39,7 @@ describe('experimentToggles', () => {
         v: '12345667',
       },
     };
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
     expect(experimentToggles(win)).to.deep.equal({
       exp1: true,
       exp2: false,
@@ -73,7 +73,7 @@ describe('isExperimentOn', () => {
   });
 
   function expectExperiment(cookieString, experimentId) {
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
     win.document.cookie = cookieString;
     return expect(isExperimentOn(win, experimentId));
   }
@@ -182,14 +182,14 @@ describe('toggleExperiment', () => {
 
   afterEach(() => {
     sandbox.restore();
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
   });
 
   function expectToggle(cookiesString, experimentId, opt_on) {
     const doc = {
       cookie: cookiesString,
     };
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
     const on = toggleExperiment({
       document: doc,
       location: {
@@ -393,19 +393,19 @@ describe('toggleExperiment', () => {
 
     // The new setting should be persisted in cookie, so cache reset should not
     // affect its status.
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
     expect(isExperimentOn(win, 'e1')).to.be.false;
 
     // Now let's explicitly toggle to true
     expect(toggleExperiment(win, 'e1', true)).to.be.true;
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Toggle transiently should still work
     expect(toggleExperiment(win, 'e1', false, true)).to.be.false;
     expect(isExperimentOn(win, 'e1')).to.be.false;
-    resetExperimentTogglesForTesting(); // cache reset should bring it back to true
+    resetExperimentTogglesForTesting(window); // cache reset should bring it back to true
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Sanity check, the global setting should never be changed.
@@ -434,7 +434,7 @@ describes.realWin('meta override', {}, env => {
           content: 'e1,e2,e3',
         }));
 
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
 
     expect(isExperimentOn(win, 'e1')).to.be.true;
     expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
@@ -470,7 +470,7 @@ describes.fakeWin('url override', {}, env => {
         '&e-e8=0';
     win.document.cookie = 'AMP_EXP=-e7,e8';
 
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
 
     expect(isExperimentOn(win, 'e1')).to.be.true;
     expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
