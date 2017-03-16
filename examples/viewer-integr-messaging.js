@@ -55,9 +55,10 @@ class WindowPortEmulator {
  *    requestProcessor
  * @param {string=} opt_targetId
  * @param {WindowPortEmulator} opt_port
+ * @param {boolean} opt_isWebview
  * @constructor
  */
-function ViewerMessaging(target, targetOrigin, requestProcessor, opt_targetId, opt_port) {
+function ViewerMessaging(target, targetOrigin, requestProcessor, opt_targetId, opt_port, opt_isWebview) {
   this.requestIdCounter_ = 0;
   this.waitingForResponse_ = {};
 
@@ -71,6 +72,8 @@ function ViewerMessaging(target, targetOrigin, requestProcessor, opt_targetId, o
   this.requestProcessor_ = requestProcessor;
   /** @private {WindowPortEmulator} */
   this.port_ = opt_port;
+  /** @private {boolean} */
+  this.isWebview_ = !!opt_isWebview;
 
   if (this.targetOrigin_ == null) {
     throw new Error('Target origin must be specified');
@@ -126,7 +129,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
  * @private
  */
 ViewerMessaging.prototype.onMessage_ = function(event) {
-  var message = event.data;
+  var message = this.isWebview_ ? JSON.parse(event.data) : event.data;
   if (!message || message.app != APP) {
     return;
   }
@@ -184,6 +187,9 @@ ViewerMessaging.prototype.onResponse_ = function(message) {
  * @private
  */
 ViewerMessaging.prototype.sendMessage_ = function(message) {
+  if (this.isWebview_) {
+    message = JSON.stringify(message);
+  }
   if (this.targetOrigin_) {
     this.target_./*OK*/postMessage(message, this.targetOrigin_);
   } else {
