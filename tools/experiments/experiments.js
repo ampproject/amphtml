@@ -267,9 +267,10 @@ const EXPERIMENTS = [
         'amp-sortable-table/amp-sortable-table.md',
   },
   {
-    id: 'slidescroll-ios-beta',
-    name: 'Slidescroll IOS beta',
+    id: 'slidescroll-disable-css-snap',
+    name: 'Slidescroll disable css snap',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
+    spec: 'https://github.com/ampproject/amphtml/issues/7670',
   },
 ];
 

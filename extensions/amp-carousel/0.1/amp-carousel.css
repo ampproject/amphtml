@@ -181,11 +181,11 @@ amp-carousel .amp-carousel-button.amp-disabled {
   -webkit-overflow-scrolling: touch !important;
 }
 
-.-amp-disable-snap-type {
+.-amp-slidescroll-no-snap.-amp-slides-container {
   scroll-snap-type: none !important;
 }
 
-.-amp-disable-snap-coordinate {
+.-amp-slidescroll-no-snap.-amp-slide-item {
   scroll-snap-coordinate: none !important;
 }
 /* End ScrollableCarousel */
