@@ -37,6 +37,15 @@ let deactivated = /nochunking=1/.test(self.location.hash);
 const resolved = Promise.resolve();
 
 /**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @return {!Chunks}
+ */
+function getChunkServiceForDoc_(nodeOrAmpDoc) {
+  registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
+}
+
+/**
  * Run the given function. For visible documents the function will be
  * called in a micro task (Essentially ASAP). If the document is
  * not visible, tasks will yield to the event loop (to give the browser
@@ -87,22 +96,6 @@ export function chunkInstanceForTesting(nodeOrAmpDoc) {
 }
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
- * @return {!Chunks}
- */
-function getChunkServiceForDoc_(nodeOrAmpDoc) {
-  installChunkServiceForDoc_(nodeOrAmpDoc);
-  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
-}
-
-/**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
- */
-export function installChunkServiceForDoc_(nodeOrAmpDoc) {
-  registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-}
-
-/**
  * Use a standard micro task for every invocation. This should only
  * be called from the AMP bootstrap script if it is known that
  * chunking makes no sense. In particular this is the case when
@@ -123,7 +116,7 @@ export function activateChunkingForTesting() {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  */
 export function runChunksForTesting(nodeOrAmpDoc) {
-  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
+  const service = chunkInstanceForTesting(nodeOrAmpDoc);
   const errors = [];
   while (true) {
     try {
