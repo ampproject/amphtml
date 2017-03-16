@@ -147,9 +147,12 @@ export class Bind {
       this.setStatePromise_ = this.initializePromise_.then(() => {
         user().fine(TAG, 'State updated; re-evaluating expressions...');
         return this.digest_();
-      }).then(() => {
-        this.dispatchEventForTesting_('amp:bind:setState');
       });
+      if (getMode().test) {
+        this.setStatePromise_.then(() => {
+          this.dispatchEventForTesting_('amp:bind:setState');
+        });
+      }
       return this.setStatePromise_;
     } else {
       return Promise.resolve();
@@ -194,9 +197,13 @@ export class Bind {
    */
   initialize_() {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    return this.addBindingsForNode_(this.ampdoc.getBody()).then(() => {
-      this.dispatchEventForTesting_('amp:bind:initialize');
-    });
+    const promise = this.addBindingsForNode_(this.ampdoc.getBody());
+    if (getMode().test) {
+      promise.then(() => {
+        this.dispatchEventForTesting_('amp:bind:initialize');
+      });
+    }
+    return promise;
   }
 
   /**
