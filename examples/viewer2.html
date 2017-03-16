@@ -261,20 +261,23 @@
         var message = {
             app: APP,
             name: 'handshake-poll',
-          };
-         this.iframe.contentWindow./*OK*/postMessage(message, '*', [channel.port2]);
-         channel.port1.onmessage = function(e) {
-           if (this.isChannelOpen_(e)) {
-            window.clearInterval(this.pollingIntervalIds_[intervalCtr]); //stop polling
-            this.completeHandshake_(channel, e.data.requestid);
-           }
-           this.handleMessage_(e, channel);
-         }.bind(this);
+        };
+        this.iframe.contentWindow./*OK*/postMessage(JSON.stringify(message), '*', [channel.port2]);
+        channel.port1.onmessage = function(e) {
+          if (this.isChannelOpen_(e)) {
+           window.clearInterval(this.pollingIntervalIds_[intervalCtr]); //stop polling
+           var data = JSON.parse(e.data);
+           this.completeHandshake_(channel, data.requestid);
+          } else {
+            this.handleMessage_(e, channel);
+          }
+        }.bind(this);
        }
      };
 
     Viewer.prototype.isChannelOpen_ = function(e) {
-      return e.data.app == APP && e.data.name == 'channelOpen';
+      var data = JSON.parse(e.data);
+      return data.app == APP && data.name == 'channelOpen';
     };
 
     Viewer.prototype.completeHandshake_ = function(channel, requestId) {
@@ -285,12 +288,13 @@
           type: MessageType.RESPONSE,
       };
       console.log('############## viewer posting Message', message);
-      channel.port1./*OK*/postMessage(message);
+      channel.port1./*OK*/postMessage(JSON.stringify(message));
 
       this.messaging_ = new ViewerMessaging('', '', 
         this.processRequest_.bind(this), 
         this.iframe.id,
-        new WindowPortEmulator(this.messageHandlers_, this.id, channel.port1)
+        new WindowPortEmulator(this.messageHandlers_, this.id, channel.port1),
+        true /* isWebview */
       );
 
       this.sendRequest_('visibilitychange', {

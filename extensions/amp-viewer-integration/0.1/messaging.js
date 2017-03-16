@@ -82,6 +82,8 @@ export class WindowPortEmulator {
    */
   postMessage(data) {
     this.win.parent./*OK*/postMessage(data, this.origin_);
+    // this.win.parent./*OK*/postMessage(
+      // this.isWebview_ ? JSON.stringify(data) : data, this.origin_);
   }
   start() {
   }
@@ -100,12 +102,15 @@ export class Messaging {
    * Conversation (messaging protocol) between me and Bob.
    * @param {!Window} win
    * @param {!MessagePort|!WindowPortEmulator} port
+   * @param {boolean} opt_isWebview
    */
-  constructor(win, port) {
+  constructor(win, port, opt_isWebview) {
     /** @const {!Window} */
     this.win = win;
     /** @const @private {!MessagePort|!WindowPortEmulator} */
     this.port_ = port;
+    /** @const @private */
+    this.isWebview_ = !!opt_isWebview;
     /** @private {!number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
@@ -156,8 +161,8 @@ export class Messaging {
    */
   handleMessage_(event) {
     dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
-    /** @type {Message} */
-    const message = event.data;
+    const message = /** @type {Message} */ (
+      this.isWebview_ ? JSON.parse(event.data) : event.data);
     if (message.type == MessageType.REQUEST) {
       this.handleRequest_(message);
     } else if (message.type == MessageType.RESPONSE) {
@@ -235,7 +240,8 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
-    this.port_./*OK*/postMessage(message);
+    this.port_./*OK*/postMessage(
+      this.isWebview_ ? JSON.stringify(message) : message);
   }
 
   /**
@@ -291,7 +297,7 @@ export class Messaging {
         pending.reject(
           new Error(`Request ${message.name} failed: ${message.error}`));
       } else {
-        pending.resolve(message.data);
+        pending.resolve(message);
       }
     }
   }

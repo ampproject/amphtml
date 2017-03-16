@@ -84,15 +84,15 @@ export class AmpViewerIntegration {
       }
       return this.webviewPreHandshakePromise_(source, origin)
           .then(receivedPort => {
-            return this.openChannelAndStart_(
-              viewer, ampdoc, new Messaging(this.win, receivedPort));
+            return this.openChannelAndStart_(viewer, ampdoc,
+              new Messaging(this.win, receivedPort, this.isWebView_));
           });
     }
 
     const port = new WindowPortEmulator(
       this.win, dev().assertString(this.unconfirmedViewerOrigin_));
     return this.openChannelAndStart_(
-      viewer, ampdoc, new Messaging(this.win, port));
+      viewer, ampdoc, new Messaging(this.win, port, this.isWebView_));
   }
 
   /**
@@ -105,12 +105,13 @@ export class AmpViewerIntegration {
     return new Promise(resolve => {
       const unlisten = listen(this.win, 'message', e => {
         dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type, e.data);
+        const data = this.isWebView_ ? JSON.parse(e.data) : e.data;
         // Viewer says: "I'm ready for you"
         if (
             e.origin === origin &&
             e.source === source &&
-            e.data.app == APP &&
-            e.data.name == 'handshake-poll') {
+            data.app == APP &&
+            data.name == 'handshake-poll') {
           if (!e.ports || !e.ports.length) {
             throw new Error(
               'Did not receive communication port from the Viewer!');
