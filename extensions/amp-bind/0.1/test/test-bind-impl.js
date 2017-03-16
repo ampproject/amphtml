@@ -18,6 +18,7 @@ import {Bind} from '../bind-impl';
 import {BindExpression} from '../bind-expression';
 import {BindValidator} from '../bind-validator';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
+import {getMode} from '../../../../src/mode';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
@@ -41,7 +42,7 @@ describes.realWin('amp-bind', {
     // Make sure we have a chunk instance for testing.
     chunkInstanceForTesting(env.ampdoc);
 
-    bind = new Bind(env.ampdoc, {test: true});
+    bind = new Bind(env.ampdoc);
   });
 
   afterEach(() => {
@@ -114,8 +115,9 @@ describes.realWin('amp-bind', {
 
   it('should throw error if experiment is not enabled', () => {
     toggleExperiment(env.win, 'amp-bind', false);
+    env.sandbox.stub(getMode(), 'test', false);
     expect(() => {
-      new Bind(env.ampdoc, {test: false});
+      new Bind(env.ampdoc);
     }).to.throw('Experiment "amp-bind" is disabled.');
   });
 
@@ -192,7 +194,7 @@ describes.realWin('amp-bind', {
   });
 
   it('should verify string attribute bindings in dev mode', () => {
-    bind.setModeForTesting({development: true});
+    env.sandbox.stub(getMode(), 'development', true);
     // Only the initial value for [a] binding does not match.
     createElementWithBinding('[a]="a" [b]="b" b="b"');
     const errorStub = env.sandbox.stub(user(), 'createError');
@@ -202,7 +204,7 @@ describes.realWin('amp-bind', {
   });
 
   it('should verify boolean attribute bindings in dev mode', () => {
-    bind.setModeForTesting({development: true});
+    env.sandbox.stub(getMode(), 'development', true);
     // Only the initial value for [c] binding does not match.
     createElementWithBinding(`a [a]="true" [b]="false" c="false" [c]="false"`);
     const errorStub = env.sandbox.stub(user(), 'createError');

@@ -66,14 +66,10 @@ let BoundElementDef;
 export class Bind {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {Object=} opt_mode
    */
-  constructor(ampdoc, opt_mode) {
-    /** @private {!Object} */
-    this.mode_ = opt_mode || getMode(ampdoc.win);
-
+  constructor(ampdoc) {
     /** @const @private {boolean} */
-    this.enabled_ = this.mode_.test || isExperimentOn(ampdoc.win, TAG);
+    this.enabled_ = getMode().test || isExperimentOn(ampdoc.win, TAG);
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
@@ -128,7 +124,7 @@ export class Bind {
     this.setStatePromise_ = null;
 
     // Expose for testing on dev.
-    if (this.mode_.localDev) {
+    if (getMode().localDev) {
       AMP.reinitializeBind = this.initialize_.bind(this);
     }
   }
@@ -243,7 +239,7 @@ export class Bind {
           `${Object.keys(parseErrors).length} errors.`);
 
       // Trigger verify-only digest in development.
-      if (this.mode_.development) {
+      if (getMode().development) {
         this.digest_(/* opt_verifyOnly */ true);
       }
     });
@@ -725,7 +721,7 @@ export class Bind {
       }).then(() => {
         return this.digest_();
       });
-      if (this.mode_.test) {
+      if (getMode().test) {
         this.mutationPromises_.push(mutationPromise);
       }
     });
@@ -822,14 +818,6 @@ export class Bind {
    */
   setStatePromiseForTesting() {
     return this.setStatePromise_;
-  }
-
-  /**
-   * @param {!Object} mode
-   * @visibleForTesting
-   */
-  setModeForTesting(mode) {
-    this.mode_ = mode;
   }
 
   /**
