@@ -25,12 +25,12 @@ import {reportError} from '../../src/error';
 import {InaboxMessagingHost} from './inabox-messaging-host';
 
 const TAG = 'inabox-host';
-run(self);
+self.installAmpInaboxHost = installAmpInaboxHost;
 
 /**
  * @param win {!Window}
  */
-function run(win) {
+function installAmpInaboxHost(win) {
   // Prevent double initialization
   if (win['ampInaboxInitialized']) {
     dev().info(TAG, 'Skip a 2nd attempt of initializing AMP inabox host.');
