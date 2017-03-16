@@ -353,23 +353,23 @@ export function draw3p(win, data, configCallback) {
  * @return {!Window}
  */
 function masterSelection(type) {
-  // The master has a special name.
-  const masterName = 'frame_' + type + '_master';
-  let master;
+  const masterName = `frame_${type}_master`;
   try {
-    // Try to get the master from the parent. If it does not
-    // exist yet we get a security exception that we catch
-    // and ignore.
-    master = window.parent.frames[masterName];
-  } catch (expected) {
-    /* ignore */
-  }
-  if (!master) {
-    // No master yet, rename ourselves to be master. Yaihh.
-    window.name = masterName;
-    master = window;
-  }
-  return master;
+    // Attempt to find parent friendly child frame and see if it is master.
+    for (let idx = 0; idx < window.parent.frames.length; idx++) {
+      try {
+        const master = window.parent.frames[idx];
+        if (!!master[masterName]) {
+          return master;
+        }
+      } catch (err) {
+        /* will throw if frame is not friendly */
+      }
+    }
+  } catch (err) {}
+  // If we get here, then we couldn't find a master so we're it.
+  window[masterName] = true;
+  return window;
 }
 
 /**
