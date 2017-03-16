@@ -318,6 +318,7 @@ var forbiddenTerms = {
       'build-system/test-server.js',
       'src/cookies.js',
       'extensions/amp-analytics/0.1/cid-impl.js',
+      'testing/fake-dom.js',
     ],
   },
   'getCookie\\W': {
@@ -688,6 +689,7 @@ var forbiddenTermsSrcInclusive = {
       'tools/errortracker/errortracker.go',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
+      'build-system/tasks/extension-generator/index.js',
     ],
   },
 };

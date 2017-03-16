@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {map} from '../../../src/utils/object';
 import {parseSrcset} from '../../../src/srcset';
 import {user} from '../../../src/log';
 
@@ -31,11 +32,11 @@ let PropertyRulesDef;
  * Property rules that apply to any and all tags.
  * @private {Object<string, ?PropertyRulesDef>}
  */
-const GLOBAL_PROPERTY_RULES = {
+const GLOBAL_PROPERTY_RULES = map({
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
-};
+});
 
 /**
  * Maps tag names to property names to PropertyRulesDef.
@@ -49,11 +50,11 @@ const ELEMENT_RULES = createElementRules_();
  * Map whose keys comprise all properties that contain URLs.
  * @private {Object<string, boolean>}
  */
-const URL_PROPERTIES = {
+const URL_PROPERTIES = map({
   'src': true,
   'srcset': true,
   'href': true,
-};
+});
 
 /**
  * BindValidator performs runtime validation of Bind expression results.
@@ -84,7 +85,7 @@ export class BindValidator {
     }
 
     // Validate URL(s) if applicable.
-    if (value && URL_PROPERTIES.hasOwnProperty(property)) {
+    if (value && URL_PROPERTIES[property]) {
       let urls;
       if (property === 'srcset') {
         let srcset;
@@ -132,9 +133,9 @@ export class BindValidator {
     if (allowedProtocols && url) {
       const re = /^([^:\/?#.]+):[\s\S]*$/;
       const match = re.exec(url);
-
       if (match !== null) {
         const protocol = match[1].toLowerCase().trimLeft();
+        // hasOwnProperty() needed since nested objects are not prototype-less.
         if (!allowedProtocols.hasOwnProperty(protocol)) {
           return false;
         }
@@ -152,14 +153,12 @@ export class BindValidator {
    * @private
    */
   rulesForTagAndProperty_(tag, property) {
-    if (GLOBAL_PROPERTY_RULES.hasOwnProperty(property)) {
-      return GLOBAL_PROPERTY_RULES[property];
+    const globalRules = GLOBAL_PROPERTY_RULES[property];
+    if (globalRules) {
+      return globalRules;
     }
-
-    let tagRules;
-    if (ELEMENT_RULES.hasOwnProperty(tag)) {
-      tagRules = ELEMENT_RULES[tag];
-    }
+    const tagRules = ELEMENT_RULES[tag];
+    // hasOwnProperty() needed since nested objects are not prototype-less.
     if (tagRules && tagRules.hasOwnProperty(property)) {
       return tagRules[property];
     }
@@ -174,67 +173,66 @@ export class BindValidator {
  */
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
-  const rules = {
+  const rules = map({
     'AMP-IMG': {
-      src: {
-        allowedProtocols: {
-          data: true,
-          http: true,
-          https: true,
+      'src': {
+        'allowedProtocols': {
+          'data': true,
+          'http': true,
+          'https': true,
         },
       },
-      srcset: {
-        alternativeName: 'src',
+      'srcset': {
+        'alternativeName': 'src',
       },
     },
     'AMP-VIDEO': {
-      src: {
-        allowedProtocols: {
-          https: true,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
         },
       },
     },
-    A: {
-      href: {
-        allowedProtocols: {
-          ftp: true,
-          http: true,
-          https: true,
-          mailto: true,
+    'A': {
+      'href': {
+        'allowedProtocols': {
+          'ftp': true,
+          'http': true,
+          'https': true,
+          'mailto': true,
           'fb-messenger': true,
-          intent: true,
-          skype: true,
-          sms: true,
-          snapchat: true,
-          tel: true,
-          tg: true,
-          threema: true,
-          twitter: true,
-          viber: true,
-          whatsapp: true,
+          'intent': true,
+          'skype': true,
+          'sms': true,
+          'snapchat': true,
+          'tel': true,
+          'tg': true,
+          'threema': true,
+          'twitter': true,
+          'viber': true,
+          'whatsapp': true,
         },
       },
     },
-    INPUT: {
-      type: {
-        blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
+    'INPUT': {
+      'type': {
+        'blacklistedValueRegex': '(^|\\s)(button|file|image|password|)(\\s|$)',
       },
     },
-    SOURCE: {
-      src: {
-        allowedProtocols: {
-          https: true,
+    'SOURCE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
         },
       },
     },
-    TRACK: {
-      src: {
-        allowedProtocols: {
-          https: true,
+    'TRACK': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
         },
       },
     },
-  };
-
+  });
   return rules;
 }

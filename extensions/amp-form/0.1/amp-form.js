@@ -27,6 +27,7 @@ import {
   parseUrl,
 } from '../../../src/url';
 import {dev, user, rethrowAsync} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
@@ -182,6 +183,9 @@ export class AmpForm {
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this));
     this.installEventHandlers_();
+
+    /** @private {?Promise} */
+    this.xhrSubmitPromise_ = null;
   }
 
   /**
@@ -327,7 +331,7 @@ export class AmpForm {
           this.urlReplacement_.expandInputValueAsync(varSubsFields[i]));
     }
     // Wait until all variables have been substituted or 100ms timeout.
-    this.waitOnPromisesOrTimeout_(varSubPromises, 100).then(() => {
+    const p = this.waitOnPromisesOrTimeout_(varSubPromises, 100).then(() => {
       let xhrUrl, body;
       if (isHeadOrGet) {
         xhrUrl = addParamsToUrl(
@@ -368,6 +372,9 @@ export class AmpForm {
         rethrowAsync('Form submission failed:', error);
       });
     });
+    if (getMode().test) {
+      this.xhrSubmitPromise_ = p;
+    }
   }
 
   /** @private */
@@ -551,6 +558,15 @@ export class AmpForm {
     if (previousRender) {
       removeElement(previousRender);
     }
+  }
+
+  /**
+   * Returns a promise that resolves when xhr submit finishes. the promise
+   * will be null if xhr submit has not started.
+   * @visibleForTesting
+   */
+  xhrSubmitPromiseForTesting() {
+    return this.xhrSubmitPromise_;
   }
 }
 

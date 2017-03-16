@@ -60,7 +60,7 @@ const EXPERIMENTS = [
   {
     id: 'ad-type-custom',
     name: 'Activates support for custom (self-serve) advertisements',
-    spec: 'https://github.com/ampproject/amphtml/ads/custom.md',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
   },
   {
     id: 'alp',
@@ -196,6 +196,11 @@ const EXPERIMENTS = [
     id: 'visibility-v2',
     name: 'New visibility tracking using native IntersectionObserver',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
+  },
+  {
+    id: 'visibility-v3',
+    name: 'Visibility tracking with FIE and in-a-box support',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8121',
   },
   {
     id: 'amp-accordion-session-state-optout',
