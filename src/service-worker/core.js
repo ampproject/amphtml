@@ -29,6 +29,12 @@ export let AmpVersion;
  */
 export let RtvVersion;
 
+/**
+ * An environment of the RTV version.
+ * @typedef {string}
+ */
+export let RtvEnvironment;
+
 /** @const */
 const TAG = 'cache-service-worker';
 
@@ -48,6 +54,13 @@ const BLACKLIST = self.AMP_CONFIG[`${TAG}-blacklist`] || [];
 const BASE_RTV_VERSION = self.AMP_CONFIG.v;
 
 /**
+ * The SW's current environment.
+ * @const
+ * @type {RtvEnvironment}
+ */
+const BASE_RTV_ENVIRONMENT = BASE_RTV_VERSION.substr(0, 2);
+
+/**
  * Our cache of CDN JS files.
  *
  * @type {!Cache}
@@ -58,7 +71,7 @@ let cache;
  * A mapping from a Client's (unique per tab _and_ refresh) ID to the AMP
  * release version we are serving it.
  *
- * @type {!Object<string, !Promise<RtvVersion>>}
+ * @type {!Object<string, !Promise<!RtvVersion>>}
  */
 const clientsVersion = Object.create(null);
 
@@ -73,6 +86,15 @@ const clientsVersion = Object.create(null);
  * @type {!Object<string, number>}
  */
 const referrersLastRequestTime = Object.create(null);
+
+/**
+ * A mapping from a URL to a fetch request for that URL. This is used to batch
+ * repeated requests into a single fetch. This batching is deleted after the
+ * fetch completes.
+ *
+ * @type {!Object<string, !Promise<!Response>>}
+ */
+const fetchPromises = Object.create(null);
 
 
 /**
@@ -96,7 +118,7 @@ const CDN_JS_REGEX = new RegExp(
     // Require the CDN URL origin at the beginning.
     `^${urls.cdn.replace(/\./g, '\\.')}` +
     // Allow, but don't require, RTV.
-    `(?:/rtv/(\\d{2}\\d{13,}))?` +
+    `(?:/rtv/((\\d{2})\\d{13,}))?` +
     // Require text "/v0"
     `(/v0` +
       // Allow, but don't require, an extension under the v0 directory.
@@ -105,46 +127,59 @@ const CDN_JS_REGEX = new RegExp(
     // Require text ".js" at the end.
     `\\.js)$`);
 
+
 /**
- * Returns the version of a given versioned JS file.
- *
+ * Determines if a URL is a request to a CDN JS file.
  * @param {string} url
- * @return {RtvVersion}
+ * @return {boolean}
  * @visibleForTesting
  */
-export function rtvVersion(url) {
-  // RTVs are 2 digit prefixes followed by the timestamp of the release.
-  const match = CDN_JS_REGEX.exec(url);
-  return (match && match[1]) || '';
+export function isCdnJsFile(url) {
+  return CDN_JS_REGEX.test(url);
 }
 
 /**
- * Returns the pathname of a url, used to key a url (since
- * our JS filenames are unique).
- *
+ * Extracts the data from the request URL.
  * @param {string} url
- * @return {string}
+ * @return {{
+ *   environment: !RtvEnvironment,
+ *   explicitRtv: !RtvVersion,
+ *   pathname: string,
+ *   rtv: !RtvVersion,
+ * }|null}
+ * @visibleForTesting
  */
-function pathname(url) {
+export function requestData(url) {
   const match = CDN_JS_REGEX.exec(url);
-  return match ? match[2] : '';
+  if (!match) {
+    return null;
+  }
+  return {
+    environment: match[2] || BASE_RTV_ENVIRONMENT,
+    explicitRtv: match[1] || '',
+    pathname: match[3],
+    rtv: match[1] || BASE_RTV_VERSION,
+  };
 }
 
 /**
- * Returns the url with the requested version changed to `version`.
+ * Returns the URL with the requested version changed to `version`.
  *
  * @param {string} url
- * @param {RtvVersion} version
+ * @param {!RtvVersion} version
  * @return {string}
  * @visibleForTesting
  */
 export function urlWithVersion(url, version) {
-  const currentVersion = rtvVersion(url);
-  if (currentVersion) {
-    return url.replace(currentVersion, version);
+  const data = requestData(url);
+  if (!data) {
+    return url;
   }
-  const oldPath = pathname(url);
-  return url.replace(oldPath, `/rtv/${version}${oldPath}`);
+  const {explicitRtv, pathname} = data;
+  if (explicitRtv) {
+    return url.replace(explicitRtv, version);
+  }
+  return url.replace(pathname, `/rtv/${version}${pathname}`);
 }
 
 /**
@@ -153,12 +188,13 @@ export function urlWithVersion(url, version) {
  * a versioned.
  *
  * @param {!Request} request
- * @param {RtvVersion} version
+ * @param {!RtvVersion} version
  * @return {!Request}
  */
 function normalizedRequest(request, version) {
   const url = request.url;
-  if (rtvVersion(url) === version) {
+  const data = requestData(url);
+  if (data && data.explicitRtv === version) {
     return request;
   }
 
@@ -177,18 +213,8 @@ function normalizedRequest(request, version) {
 }
 
 /**
- * Determines if a url is a request to a CDN JS file.
- * @param {string} url
- * @return {boolean}
- * @visibleForTesting
- */
-export function isCdnJsFile(url) {
-  return CDN_JS_REGEX.test(url);
-}
-
-/**
  * Determines if a AMP version is blacklisted.
- * @param {RtvVersion} version
+ * @param {!RtvVersion} version
  * @return {boolean}
  * @visibleForTesting
  */
@@ -225,6 +251,115 @@ export function generateFallbackClientId(referrer) {
 }
 
 /**
+ * Fetches a URL, and stores it into the cache if the response is valid.
+ * Repeated fetches of the same URL will be batched into a single request while
+ * the first is still fetching.
+ *
+ * @param {!Cache} cache
+ * @param {!Request} request
+ * @return {!Promise<!Response>}
+ * @visibleForTesting
+ */
+export function fetchAndCache(cache, request) {
+  const url = request.url;
+
+  // Batch fetches. Mainly for the /diversions endpoint.
+  if (fetchPromises[url]) {
+    return fetchPromises[url].then(() => {
+      return cache.match(request);
+    });
+  }
+
+  return fetchPromises[url] = cache.match(request)
+      .then(response => {
+        if (response && !expired(response)) {
+          delete fetchPromises[url];
+          return response;
+        }
+
+        return fetch(request).then(response => {
+          delete fetchPromises[url];
+
+          // Did we receive a invalid response?
+          if (!response.ok) {
+            throw new Error(`fetching ${url} failed with statusCode ` +
+                `${response.status}.`);
+          }
+
+          // Override the Date header, to avoid time skew between the server
+          // and the client (ie, a client with set to an incorrect date int the
+          // future).
+          response.headers.set('date', new Date().toUTCString());
+
+          // You must clone to prevent double reading the body.
+          cache.put(request, response.clone());
+          return response;
+        }, err => {
+          delete fetchPromises[url];
+          throw err;
+        });
+      });
+}
+
+/**
+ * Checks if a (valid) response has expired.
+ *
+ * @param {!Response} response
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function expired(response) {
+  const {headers} = response;
+
+  if (!headers.has('date') || !headers.has('cache-control')) {
+    return true;
+  }
+
+  const maxAge = /max-age=(\d+)/i.exec(headers.get('cache-control'));
+  const date = headers.get('date');
+  const age = maxAge ? maxAge[1] * 1000 : -Infinity;
+  return Date.now() >= Number(new Date(date)) + age;
+}
+
+/**
+ * Returns the active percent diversions.
+ *
+ * @param {!Cache} cache
+ * @return {!Promise<!Array<!RtvVersion>>}
+ * @visibleForTesting
+ */
+export function diversions(cache) {
+  const request = new Request(`${urls.cdn}/diversions`);
+
+  return fetchAndCache(cache, request).then(response => {
+    return response.json();
+  }).then(diversions => {
+    if (!Array.isArray(diversions)) {
+      return null;
+    }
+
+    return diversions;
+  }, () => null);
+}
+
+/*
+ * Resets clientsVersion, referrersLastRequestTime, and fetchPromises.
+ * @visibleForTesting
+ */
+export function resetMemosForTesting() {
+  for (const key in clientsVersion) {
+    delete clientsVersion[key];
+  }
+  for (const key in referrersLastRequestTime) {
+    delete referrersLastRequestTime[key];
+  }
+  for (const key in fetchPromises) {
+    delete fetchPromises[key];
+  }
+}
+
+
+/**
  * A promise to open up our CDN JS cache, which will be resolved before any
  * requests are intercepted by the SW.
  *
@@ -241,40 +376,108 @@ const cachePromise = self.caches.open('cdn-js').then(result => {
  * @param {!Cache} cache
  * @param {!Request} request
  * @param {string} requestPath the pathname of the request
- * @param {RtvVersion} requestVersion the version of the request
+ * @param {!RtvVersion} requestVersion the version of the request
  * @return {!Promise<!Response>}
  * @visibleForTesting
  */
-export function fetchAndCache(cache, request, requestPath, requestVersion) {
+export function fetchJsFile(cache, request, requestPath, requestVersion) {
   // TODO(jridgewell): we should also fetch this requestVersion for all files
   // we know about.
-  return fetch(request).then(response => {
-    // Did we receive a valid response (200 <= status < 300)?
-    if (response && response.ok) {
-      // You must clone to prevent double reading the body.
-      cache.put(request, response.clone());
+  return fetchAndCache(cache, request).then(response => {
+    // Fetch all diversions of this file.
+    // This intentionally does not block the request resolution to speed
+    // things up.
+    diversions(cache).then(diversions => {
+      // Prune old versions from the cache.
+      // This also prunes old diversions of other scripts, see purge for
+      // detailed information.
+      purge(cache, requestPath, requestVersion, diversions);
 
-      // Prune old versions of this file from the cache.
-      // This intentionally does not block the request resolution to speed
-      // things up. This is likely fine since you don't have multiple
-      // `<script>`s with the same `src` on a page.
-      cache.keys().then(requests => {
-        for (let i = 0; i < requests.length; i++) {
-          const request = requests[i];
-          const url = request.url;
-          if (requestPath !== pathname(url)) {
-            continue;
-          }
-          if (requestVersion === rtvVersion(url)) {
-            continue;
-          }
-
-          cache.delete(request);
-        }
+      if (!diversions) {
+        return;
+      }
+      let p = new Promise(resolve => {
+        // Delay initial diversions requests by 10 seconds.
+        // This is because diversions are low priority compared to page
+        // content.
+        setTimeout(resolve, 10000);
       });
-    }
+      for (let i = 0; i < diversions.length; i++) {
+        p = p.then(() => {
+          const diversionRequest = normalizedRequest(request, diversions[i]);
+          return fetchAndCache(cache, diversionRequest);
+        });
+      }
+    });
 
     return response;
+  });
+}
+
+/**
+ * Purges our cache of old files.
+ * - If path and version are given, then we will only delete files that match
+ *   path but are not version. I.e., we we clean up old versions of path.
+ * - Else, we cleanup any non-production script that's not a current diversion.
+ *
+ * @param {!Cache} cache
+ * @param {string} path
+ * @param {string} version
+ * @param {?Array<!RtvVersion>} diversions
+ * @return {!Promise<undefined>}
+ */
+function purge(cache, path, version, diversions) {
+  return cache.keys().then(requests => {
+    for (let i = 0; i < requests.length; i++) {
+      const request = requests[i];
+      const url = request.url;
+      const cachedData = requestData(url);
+      if (!cachedData) {
+        continue;
+      }
+
+      if (path === cachedData.pathname) {
+        // This is case 1.
+        if (version === cachedData.rtv) {
+          continue;
+        }
+      } else {
+        // This is case 2.
+        if (BASE_RTV_ENVIRONMENT === cachedData.environment) {
+          continue;
+        }
+      }
+
+      if (diversions) {
+        // This is case 3.
+        if (diversions.indexOf(cachedData.rtv) > -1) {
+          continue;
+        }
+      } else {
+        // This is case 4.
+        if (BASE_RTV_ENVIRONMENT !== cachedData.environment) {
+          continue;
+        }
+      }
+
+      // At this point, we know the cached file is either:
+      // - An old production env of newly fetched script (falls through case
+      //   1 and 3).
+      // - An old diversion of newly fetched script (falls through case 1 and
+      //   3).
+      // - An old diversion of any other script (falls through case 2 and  3).
+      // Importantly, it CANNOT be one of the following:
+      // - The newly fetched version script (case 1)
+      // - Any production env of any other script (case 2)
+      // - A current diversion the newly fetched script (case 3)
+      // - A current diversion of any other script (case 3)
+      // - Any suspected diversion of the newly fetched script (case 4)
+      // - Any suspected diversion of any other script (case 4)
+      //
+      // Note case 2 and 4 guarantee truthiness, so other scripts won't be
+      // deleted unless they're guaranteed old diversions.
+      cache.delete(request);
+    }
   });
 }
 
@@ -285,14 +488,24 @@ export function fetchAndCache(cache, request, requestPath, requestVersion) {
  *
  * @param {!Cache} cache
  * @param {string} requestPath
- * @param {RtvVersion} requestVersion
- * @return {!Promise<RtvVersion>}
+ * @param {!RtvVersion} requestVersion
+ * @param {!RtvEnvironment} requestEnv
+ * @return {!Promise<!RtvVersion>}
  * @visibleForTesting
  */
-export function getCachedVersion(cache, requestPath, requestVersion) {
+export function getCachedVersion(cache, requestPath, requestVersion,
+    requestEnv) {
+
+  // If a request comes in for a version that does not match the SW's
+  // environment (eg, a percent diversion when the SW is using the production
+  // env), we must serve with the requested version.
+  if (requestEnv !== BASE_RTV_ENVIRONMENT) {
+    return Promise.resolve(requestVersion);
+  }
+
+  // TODO(jridgewell): Maybe we should add a very short delay (~5ms) to collect
+  // several requests. Then, use all requests to determine what to serve.
   return cache.keys().then(requests => {
-    // TODO(jridgewell): This should really count the bytes of the response,
-    // but there's no efficient way to do that.
     const counts = {};
     let most = requestVersion;
     let mostCount = 0;
@@ -302,35 +515,46 @@ export function getCachedVersion(cache, requestPath, requestVersion) {
     // it is, and increment the number of files we have for that version.
     for (let i = 0; i < requests.length; i++) {
       const url = requests[i].url;
-      const path = pathname(url);
-      const version = rtvVersion(url);
-
-      // We do not want to stale serve blacklisted files. If nothing else is
-      // cached, we will end up serving whatever version is requested.
-      if (isBlacklisted(version)) {
+      const data = requestData(url);
+      if (!data) {
         continue;
       }
 
-      let count = counts[version] || 0;
+      const {pathname, rtv, environment} = data;
+
+      // We will not stale serve a version that does not match the request's
+      // environment. This is so cached percent diversions will not be "stale"
+      // served when requesting a production script.
+      if (requestEnv !== environment) {
+        continue;
+      }
+
+      // We do not want to stale serve blacklisted files. If nothing else is
+      // cached, we will end up serving whatever version is requested.
+      if (isBlacklisted(rtv)) {
+        continue;
+      }
+
+      let count = counts[rtv] || 0;
 
       // Incrementing the number of "files" that have this version with a
       // weight.
       // The main binary (arguably the most important file to cache) is given a
       // heavy weight, while the first requested file is given a slight weight.
       // Everything else increments normally.
-      if (path.indexOf('/', 1) === -1) {
+      if (pathname.indexOf('/', 1) === -1) {
         // Main binary
         count += 5;
-      } else if (requestPath === path) {
+      } else if (requestPath === pathname) {
         // Give a little precedence to the requested file
         count += 2;
       } else {
         count++;
       }
 
-      counts[version] = count;
+      counts[rtv] = count;
       if (count > mostCount) {
-        most = version;
+        most = rtv;
         mostCount = count;
       }
     }
@@ -354,20 +578,20 @@ export function getCachedVersion(cache, requestPath, requestVersion) {
  */
 export function handleFetch(request, maybeClientId) {
   const url = request.url;
-
   // We only cache CDN JS files, and we need a clientId to do our magic.
-  if (!maybeClientId || !isCdnJsFile(url)) {
+  const data = requestData(url);
+
+  if (!maybeClientId || !data) {
     return null;
   }
 
   // Closure Compiler!
   const clientId = /** @type {string} */(maybeClientId);
+  const {pathname, rtv, environment} = data;
 
-  const requestPath = pathname(url);
-  const requestVersion = rtvVersion(url) || BASE_RTV_VERSION;
   // Rewrite unversioned requests to the versioned RTV URL. This is a noop if
   // it's already versioned.
-  request = normalizedRequest(request, requestVersion);
+  request = normalizedRequest(request, rtv);
 
   // Wait for the cachePromise to resolve. This is necessary
   // since the SW thread may be killed and restarted at any time.
@@ -379,8 +603,8 @@ export function handleFetch(request, maybeClientId) {
     }
 
     // If not, let's find the version to serve up.
-    return clientsVersion[clientId] = getCachedVersion(cache, requestPath,
-        requestVersion);
+    return clientsVersion[clientId] = getCachedVersion(cache, pathname, rtv,
+        environment);
   }).then(version => {
     const versionedRequest = normalizedRequest(request, version);
 
@@ -390,15 +614,15 @@ export function handleFetch(request, maybeClientId) {
         // Now, was it because we served an old cached version or because
         // they requested this exact version; If we served an old version,
         // let's get the new one.
-        if (version !== requestVersion && requestVersion == BASE_RTV_VERSION) {
-          fetchAndCache(cache, request, requestPath, requestVersion);
+        if (version !== rtv && rtv == BASE_RTV_VERSION) {
+          fetchJsFile(cache, request, pathname, rtv);
         }
 
         return response;
       }
 
       // If not, let's fetch and cache the request.
-      return fetchAndCache(cache, versionedRequest, requestPath, version);
+      return fetchJsFile(cache, versionedRequest, pathname, version);
     });
   });
 }
