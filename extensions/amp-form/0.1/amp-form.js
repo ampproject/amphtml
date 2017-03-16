@@ -17,10 +17,7 @@
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
-import {
-  installStylesForShadowRoot,
-  isShadowRoot,
-} from '../../../src/shadow-embed';
+import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {
   assertAbsoluteHttpOrHttpsUrl,
@@ -32,7 +29,6 @@ import {
 } from '../../../src/url';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
 import {templatesFor} from '../../../src/template';
@@ -758,50 +754,47 @@ export class AmpFormService {
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
-    /** @const {!Document|!ShadowRoot} */
-    this.rootNode_ = ampdoc.getRootNode();
-
-    /** @const {boolean} */
-    this.isShadow_ = isShadowRoot(this.rootNode_);
-
-    this.initialize_();
+    this.installStyles_(ampdoc).then(() => this.installHandlers_(ampdoc));
   }
 
   /**
-   * Install the amp-form CSS and handlers on the ampdoc.
+   * Install the amp-form CSS
+   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {!Promise}
+   * @private
    */
-  initialize_() {
-    if (this.isShadow_) {
-      const root = /** @type {!ShadowRoot} */ (this.rootNode_);
-      installStylesForShadowRoot(root, CSS);
-      this.install_();
-    } else {
-      const root = /** @type {!Document} */ (this.rootNode_);
-      installStyles(root, CSS, () => this.install_());
-    }
+  installStyles_(ampdoc) {
+    return new Promise(resolve => {
+      if (ampdoc.isSingleDoc()) {
+        const root = /** @type {!Document} */ (ampdoc.getRootNode());
+        installStyles(root, CSS, resolve);
+      } else {
+        const root = /** @type {!ShadowRoot} */ (ampdoc.getRootNode());
+        installStylesForShadowRoot(root, CSS);
+        resolve();
+      }
+    });
   }
 
   /**
-   * Install the appropriate handlers depending on the type of ampdoc.
+   * Install the event handlers
+   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {!Promise}
+   * @private
    */
-  install_() {
-    if (this.isShadow_) {
+  installHandlers_(ampdoc) {
+    return ampdoc.whenReady().then(() => {
       this.installSubmissionHandlers_(
-          this.rootNode_.getElementsByTagName('form'));
-    } else {
-      const doc = /** @type {!Document} */ (this.rootNode_);
-      onDocumentReady(doc, () => {
-        this.installSubmissionHandlers_(doc.forms);
-      });
-      this.installGlobalEventListener_(doc);
-    }
+          ampdoc.getRootNode().querySelectorAll('form'));
+      this.installGlobalEventListener_(ampdoc.win.document);
+    });
   }
 
   /**
-   * Installs submission handler on all forms in the document.
-   * @param {?IArrayLike} forms
+   * Install submission handler on all forms in the document.
+   * @param {?IArrayLike<T>} forms
    * @previousValidityState
+   * @template T
    * @private
    */
   installSubmissionHandlers_(forms) {
@@ -813,6 +806,7 @@ export class AmpFormService {
   }
 
   /**
+   * Listen for DOM updated messages sent to the document.
    * @param {!Document} doc
    * @private
    */
@@ -822,7 +816,6 @@ export class AmpFormService {
     });
   }
 }
-
 
 
 AMP.registerServiceForDoc(TAG, AmpFormService);

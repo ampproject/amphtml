@@ -26,22 +26,17 @@ import {
 import * as sinon from 'sinon';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
-import {installTemplatesService} from '../../../../src/service/template-impl';
-import {installDocService,} from
-    '../../../../src/service/ampdoc-impl';
-import {installActionServiceForDoc,} from
-    '../../../../src/service/action-impl';
 import {actionServiceForDoc} from '../../../../src/action';
 import {
-    cidServiceForDocForTesting,
+  cidServiceForDocForTesting,
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {documentInfoForDoc} from '../../../../src/document-info';
 import '../../../amp-selector/0.1/amp-selector';
 
-describes.repeated('amp-form for', {
+describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},
   'fie ampdoc': {ampdoc: 'fie'},
-  // 'shadow ampdoc': {ampdoc: 'multi'},
+  'shadow ampdoc': {ampdoc: 'shadow'},
 }, (name, variant) => {
 
 describes.realWin('amp-form', {
@@ -58,10 +53,10 @@ describes.realWin('amp-form', {
   function getAmpForm(button1 = true, button2 = false, button3 = false,
                       canonical = 'https://example.com/amps.html') {
     new AmpFormService(env.ampdoc);
-    documentInfoForDoc(env.win.document).canonicalUrl = canonical;
-    cidServiceForDocForTesting(env.win.document);
-    const form = getForm(env.win.document, button1, button2, button3);
-    env.win.document.body.appendChild(form);
+    documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
+    cidServiceForDocForTesting(env.ampdoc);
+    const form = getForm(env.ampdoc.win.document, button1, button2, button3);
+    env.ampdoc.getBody().appendChild(form);
     const ampForm = new AmpForm(form, 'amp-form-test-id');
     return Promise.resolve(ampForm);
   }

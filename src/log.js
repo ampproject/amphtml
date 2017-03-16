@@ -398,10 +398,10 @@ export class Log {
    * @private
    */
   toString_(val) {
-    if (val instanceof this.win.Element) {
+    if (val.nodeType == 1) { // check if it's an Element instance
       return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
     }
-    return val;
+    return /** @type {string} */ (val);
   }
 
 }
