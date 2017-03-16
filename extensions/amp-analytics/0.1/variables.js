@@ -304,9 +304,7 @@ export class VariableService {
  * @param {!Window} win
  */
 export function installVariableService(win) {
-  registerServiceBuilder(win,
-                         'amp-analytics-variables',
-                         VariableService);
+  registerServiceBuilder(win, 'amp-analytics-variables', VariableService);
 }
 
 /**
