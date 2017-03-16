@@ -15,14 +15,30 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
+import {doubleclick} from './google/doubleclick';
+import {adsense} from './google/adsense';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function sortable(global, data) {
-  validateData(data, ['site', 'name']);
+  /**
+   * For A/B testing our tags against doubleclick or adsense in AMP ads.
+   * See https://github.com/ampproject/amphtml/blob/master/ads/sortable.md for examples.
+   */
+  if (data.abType && data.abType === 'doubleclick' && data.abPct &&
+      Math.random() * 100 < parseInt(data.abPct, 10)) {
+    doubleclick(global, data);
+    return;
+  }
+  if (data.abType && data.abType === 'adsense' && data.abPct &&
+      Math.random() * 100 < parseInt(data.abPct, 10)) {
+    adsense(global, data);
+    return;
+  }
 
+  validateData(data, ['site', 'name']);
   const slot = global.document.getElementById('c');
   const ad = global.document.createElement('div');
   ad.className = 'ad-tag';
