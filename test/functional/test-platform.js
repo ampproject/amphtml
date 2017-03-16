@@ -53,7 +53,7 @@ describe('Platform', () => {
     expect(platform.isEdge()).to.equal(isEdge);
     expect(platform.isWebKit()).to.equal(isWebKit);
     expect(platform.getMajorVersion()).to.equal(majorVersion);
-    expect(platform.getIosVersion()).to.equal(iosVersion);
+    expect(platform.getIosVersionString()).to.equal(iosVersion);
   }
 
   it('should tolerate empty or null', () => {

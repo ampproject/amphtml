@@ -143,8 +143,11 @@ export class Platform {
    * Direct string equality check is not suggested, use startWith instead.
    * @returns {string}
    */
-  getIosVersion() {
+  getIosVersionString() {
     if (!this.navigator_.userAgent) {
+      return '';
+    }
+    if (!this.isIos()) {
       return '';
     }
     let version = this.navigator_.userAgent
