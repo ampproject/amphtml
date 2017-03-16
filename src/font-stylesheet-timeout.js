@@ -50,7 +50,7 @@ export function fontStylesheetTimeout(win) {
 
   timerFor(win).delay(() => {
     // We waited for the timeout period. There is no way to check whether
-    // the stylesheets actually loaded. For that reason we check whether
+    // the stylesheet actually loaded. For that reason we check whether
     // the document is ready instead. The link tags block the readiness
     // and they are the only external resource that does, so if the doc
     // isn't ready yet it is probably the stylesheet's fault.
@@ -78,9 +78,9 @@ export function fontStylesheetTimeout(win) {
       // Insert the stylesheet. We do it right before the existing one,
       // so that
       // - we pick up its HTTP request.
-      // - CSS evaluation order doen't change.
+      // - CSS evaluation order doesn't change.
       parent.insertBefore(newLink, existingLink);
-      // And remove the blocking stylsheet.
+      // And remove the blocking stylesheet.
       parent.removeChild(existingLink);
     }
   }, timeout);
