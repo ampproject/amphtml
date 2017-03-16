@@ -290,7 +290,7 @@ export class Log {
         const nextConstant = splitMessage.shift();
         messageArray.push(val);
         pushIfNonEmpty(messageArray, nextConstant.trim());
-        formatted += toString(val) + nextConstant;
+        formatted += this.toString_(val) + nextConstant;
       }
       const e = new Error(formatted);
       e.fromAssert = true;
@@ -391,20 +391,20 @@ export class Log {
       error.message = error.message.replace(USER_ERROR_SENTINEL, '');
     }
   }
-}
 
-
-/**
- * @param {string|!Element} val
- * @return {string}
- */
-function toString(val) {
-  if (val instanceof Element) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  /**
+   * @param {string|!Element} val
+   * @return {string}
+   * @private
+   */
+  toString_(val) {
+    if (val instanceof this.win.Element) {
+      return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+    }
+    return val;
   }
-  return val;
-}
 
+}
 
 /**
  * @param {!Array} array

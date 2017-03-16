@@ -38,10 +38,16 @@ import {
 import {documentInfoForDoc} from '../../../../src/document-info';
 import '../../../amp-selector/0.1/amp-selector';
 
+describes.repeated('amp-form for', {
+  'single ampdoc': {ampdoc: 'single'},
+  'fie ampdoc': {ampdoc: 'fie'},
+  // 'shadow ampdoc': {ampdoc: 'multi'},
+}, (name, variant) => {
+
 describes.realWin('amp-form', {
   amp: {
     runtimeOn: false,
-    ampdoc: 'single',
+    ampdoc: variant.ampdoc,
     extensions: ['amp-selector'],  // amp-form is installed as service.
   },
 }, env => {
@@ -94,10 +100,6 @@ describes.realWin('amp-form', {
   }
 
   beforeEach(() => {
-    installTemplatesService(window);
-    const docService = installDocService(window, /* isSingleDoc */ true);
-    installActionServiceForDoc(docService.getAmpDoc());
-
     sandbox = env.sandbox;
   });
 
@@ -1552,4 +1554,6 @@ describes.realWin('amp-form', {
       });
     });
   });
+});
+
 });
