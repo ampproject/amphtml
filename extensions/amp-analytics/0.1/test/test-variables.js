@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {ExpansionOptions, variableServiceFor} from '../variables';
+import {
+  ExpansionOptions,
+  installVariableService,
+  variableServiceFor,
+} from '../variables';
 import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
 
@@ -25,6 +29,7 @@ describe('amp-analytics.VariableService', function() {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    installVariableService(window);
     variables = variableServiceFor(window);
   });
 
