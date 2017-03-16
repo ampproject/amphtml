@@ -106,6 +106,18 @@ describe('Platform', () => {
         ' Mobile/14D27 Safari/602.1');
   });
 
+  it('iPhone ios 9.3 afterIosMajorVersion', () => {
+    const uaString = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
+        ' AppleWebKit/601.1.46 (KHTML, like Gecko)' +
+        ' Mobile/13E230 Safari/601.1';
+    const platform = new Platform({navigator: {userAgent: uaString}});
+    expect(platform.getIosVersionString()).to.equal('9.3');
+    expect(platform.afterIosMajorVersion(7)).to.be.true;
+    expect(platform.afterIosMajorVersion(8)).to.be.true;
+    expect(platform.afterIosMajorVersion(9)).to.be.false;
+    expect(platform.afterIosMajorVersion(10)).to.be.false;
+  });
+
   it('iPad 2', () => {
     isIos = true;
     isSafari = true;
@@ -115,6 +127,17 @@ describe('Platform', () => {
     testUserAgent('Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X)' +
         ' AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0' +
         ' Mobile/11A465 Safari/9537.53');
+  });
+
+  it('iPhone ios 10.2, Chrome ios', () => {
+    isIos = true;
+    isChrome = true;
+    isWebKit = true;
+    majorVersion = 56;
+    iosVersion = '10.2';
+    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 10_2 like Mac OS X)' +
+        ' AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.73' +
+        ' Mobile/16D32 Safari/602.1');
   });
 
   it('Desktop Safari', () => {
