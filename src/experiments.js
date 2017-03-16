@@ -215,7 +215,7 @@ export function getExperimentToglesFromCookieForTesting(win) {
  */
 export function resetExperimentTogglesForTesting(win) {
   setCookie(win, COOKIE_NAME, '', 0, {
-    domain: win.location.hostname
+    domain: win.location.hostname,
   });
   toggles_ = null;
 }
