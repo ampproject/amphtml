@@ -66,7 +66,7 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
  * @param {Document=} parentDoc
  */
 export function insertAnalyticsElement(element, config, parentDoc) {
-  // Note: Require including analytics script
+  // TODO(zhouyx): Take extra param to force load analytics extension
   analyticsForDocOrNull(element).then(analytics => {
     if (!analytics) {
       return;
@@ -74,14 +74,8 @@ export function insertAnalyticsElement(element, config, parentDoc) {
     // Create analytics element;
     parentDoc = parentDoc || getAmpDoc(element).win.document;
     const analyticsElem = parentDoc.createElement('amp-analytics');
-    analyticsElem.setAttribute('scoped', 'true');
-    const scriptElem = createElementWithAttributes(parentDoc,
-        'script', {
-          'type': 'application/json',
-        });
-    scriptElem.textContent = JSON.stringify(config);
-    analyticsElem.appendChild(scriptElem);
+    analyticsElem.setAttribute('scoped', true);
+    analyticsElem.CONFIG = config;
     element.appendChild(analyticsElem);
-    // TODO: create analytics root to scope analytics in this specifc node.
   });
 }

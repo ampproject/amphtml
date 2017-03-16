@@ -347,6 +347,10 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @private */
   getInlineConfigNoInline() {
+    if (this.element.CONFIG) {
+      // If the analytics element is created by runtime, return cached config.
+      return this.element.CONFIG;
+    }
     let inlineConfig = {};
     const TAG = this.getName_();
     try {

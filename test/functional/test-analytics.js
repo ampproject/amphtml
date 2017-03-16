@@ -106,9 +106,7 @@ describes.realWin('analytics', {amp: 1}, env => {
       return timer.promise(50).then(() => {
         const analyticsEle = baseEle.element.querySelector('amp-analytics');
         expect(analyticsEle).to.not.be.null;
-        expect(analyticsEle.getAttribute('scoped')).to.equal.true;
-        const script = (analyticsEle).querySelector('script');
-        expect(script.textContent).to.jsonEqual(JSON.stringify(config));
+        expect(analyticsEle.CONFIG).to.jsonEqual(config);
       });
     });
   });
