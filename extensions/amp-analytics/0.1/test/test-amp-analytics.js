@@ -19,7 +19,10 @@ import {AmpAnalytics} from '../amp-analytics';
 import {ClickEventTracker} from '../events';
 import {Crypto} from '../../../../src/service/crypto-impl';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {variableServiceFor} from '../variables';
+import {
+  installVariableService,
+  variableServiceFor,
+} from '../variables';
 import {
   installUserNotificationManager,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
@@ -85,8 +88,6 @@ describe('amp-analytics', function() {
         }};
       });
 
-
-
       resetServiceForTesting(iframe.win, 'crypto');
       crypto = new Crypto(iframe.win);
       getService(iframe.win, 'crypto', () => crypto);
@@ -98,8 +99,8 @@ describe('amp-analytics', function() {
       ampdoc = new AmpDocSingle(windowApi);
       cidServiceForDocForTesting(ampdoc);
       uidService = installUserNotificationManager(iframe.win);
-
       ins = instrumentationServiceForDocForTesting(ampdoc);
+      installVariableService(iframe.win);
     });
   });
 
