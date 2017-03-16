@@ -420,25 +420,6 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-ad"
 }
-# AMP metadata, name=amp-access-state
-# https://www.ampproject.org/docs/reference/components/dynamic/amp-access
-tags: {
-  html_format: AMP
-  tag_name: "META"
-  spec_name: "meta name=amp-access-state"
-  mandatory_parent: "HEAD"
-  attrs: {
-    name: "name"
-    mandatory: true
-    value_casei: "amp-access-state"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-access"
-}
 # AMP metadata, name=amp-link-variable-allowed-origin
 # https://github.com/ampproject/amphtml/issues/8132
 tags: {
