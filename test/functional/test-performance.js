@@ -15,7 +15,10 @@
  */
 
 import * as sinon from 'sinon';
-import {getPerformanceService} from '../../src/service/performance-impl';
+import {
+  installPerformanceService,
+  performanceFor,
+} from '../../src/service/performance-impl';
 import {getService, resetServiceForTesting} from '../../src/service';
 import {resourcesForDoc} from '../../src/resources';
 import {viewerForDoc} from '../../src/viewer';
@@ -29,7 +32,8 @@ describe('performance', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    perf = getPerformanceService(window);
+    installPerformanceService(window);
+    perf = performanceFor(window);
   });
 
   afterEach(() => {
@@ -663,7 +667,8 @@ describes.fakeWin('performance with experiment', {amp: true}, env => {
     sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
     sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
     sandbox.stub(viewer, 'isEmbedded').returns(true);
-    perf = getPerformanceService(win);
+    installPerformanceService(win);
+    perf = performanceFor(win);
   });
 
   it('legacy-cdn-domain experiment enabled', () => {

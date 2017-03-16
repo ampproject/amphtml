@@ -436,7 +436,6 @@ export function installPerformanceService(window) {
  * @param {!Window} window
  * @return {!Performance}
  */
-export function getPerformanceService(window) {
-  installPerformanceService(window);
+export function performanceFor(window) {
   return getService(window, 'performance');
 }
