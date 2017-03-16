@@ -737,7 +737,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
   let eventPromise2, eventResolver2;
   let readyPromise, readyResolver;
 
-  beforeEach(() => {
+  beforeEach(function() {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
@@ -774,7 +774,9 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     if (nativeIntersectionObserverSupported(ampdoc.win)) {
       sandbox.stub(win, 'IntersectionObserver', inob);
     } else {
-      win.IntersectionObserver = inob;
+      // TODO(aghassemi, #5286) Not possible to stub the polyfill until we have
+      // support for dependency mocking (#5286)
+      this.skip();
     }
 
     readyPromise = new Promise(resolve => {
