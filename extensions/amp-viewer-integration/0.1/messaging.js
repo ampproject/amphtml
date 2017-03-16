@@ -56,15 +56,12 @@ export class WindowPortEmulator {
   /**
    * @param {!Window} win
    * @param {string} origin
-   * @param {boolean} opt_isWebview
    */
-  constructor(win, origin, opt_isWebview) {
+  constructor(win, origin) {
     /** @const {!Window} */
     this.win = win;
     /** @private {string} */
     this.origin_ = origin;
-    /** @private {boolean} */
-    this.isWebview_ = !!opt_isWebview;
   }
 
   /**
@@ -73,9 +70,8 @@ export class WindowPortEmulator {
    */
   addEventListener(eventType, handler) {
     listen(this.win, 'message', e => {
-      const data = this.isWebview_ ? JSON.parse(e.data) : e.data;
       if (e.origin == this.origin_ &&
-          e.source == this.win.parent && data.app == APP) {
+          e.source == this.win.parent && e.data.app == APP) {
         handler(e);
       }
     });
@@ -85,8 +81,9 @@ export class WindowPortEmulator {
    * @param {Object} data
    */
   postMessage(data) {
-    this.win.parent./*OK*/postMessage(
-      this.isWebview_ ? JSON.stringify(data) : data, this.origin_);
+    this.win.parent./*OK*/postMessage(data, this.origin_);
+    // this.win.parent./*OK*/postMessage(
+      // this.isWebview_ ? JSON.stringify(data) : data, this.origin_);
   }
   start() {
   }
@@ -165,11 +162,12 @@ export class Messaging {
   handleMessage_(event) {
     console.log('@@@@@@@@@ AMPDOC got a message', event.type, event.data);
     dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
-    const message = this.isWebview_ ? JSON.parse(event.data) : event.data;
+    const message = /** @type {Message} */ (
+      this.isWebview_ ? JSON.parse(event.data) : event.data);
     if (message.type == MessageType.REQUEST) {
-      this.handleRequest_(/** @type {Message} */(message));
+      this.handleRequest_(message);
     } else if (message.type == MessageType.RESPONSE) {
-      this.handleResponse_(/** @type {Message} */(message));
+      this.handleResponse_(message);
     }
   }
 
