@@ -218,6 +218,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
           return {
             observe: observeSpy,
             unobserve: unobserveSpy,
+            tick: sandbox.stub(),
           };
         });
       }
