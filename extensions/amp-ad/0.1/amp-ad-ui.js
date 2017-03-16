@@ -230,18 +230,18 @@ export class AmpAdUIHandler {
     };
 
     if (!newHeight && !newWidth) {
-      return Promise.reject(sizes);
+      return Promise.resolve(sizes);
     }
 
     if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {
       // Special case: force collapse sticky-ad if no content.
-      return Promise.reject(sizes);
+      return Promise.reject(Error('Cannot resize ad in AMP-STICKY-AD'));
     }
     return this.baseInstance_.attemptChangeSize(
         newHeight, newWidth).then(() => {
           return Promise.resolve(sizes);
         }, () => {
-          return Promise.reject(sizes);
+          return Promise.reject();
         });
   }
 }

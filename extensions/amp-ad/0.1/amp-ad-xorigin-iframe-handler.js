@@ -301,17 +301,19 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   handleResize_(height, width, source, origin) {
-    this.uiHandler_.updateSize(height, width, this.iframe./*OK*/offsetHeight,
+    this.baseInstance_.vsyn(() => {
+      this.uiHandler_.updateSize(height, width, this.iframe./*OK*/offsetHeight,
         this.iframe./*OK*/offsetWidth).then(sizes => {
-          this.sendEmbedSizeResponse_(true /* success */,
-              sizes.newWidth, sizes.newHeight, source, origin);
-        }, sizes => {
           if (sizes.newWidth === undefined && sizes.newHeight === undefined) {
             return;
           }
+          this.sendEmbedSizeResponse_(true /* success */,
+              sizes.newWidth, sizes.newHeight, source, origin);
+        }, sizes => {
           this.sendEmbedSizeResponse_(false /* success */,
               sizes.newWidth, sizes.newHeight, source, origin);
         });
+    });
   }
 
   /**
