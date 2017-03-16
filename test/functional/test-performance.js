@@ -18,7 +18,7 @@ import {installPerformanceService} from '../../src/service/performance-impl';
 import {resourcesForDoc} from '../../src/resources';
 import {viewerForDoc} from '../../src/viewer';
 import * as lolex from 'lolex';
-
+import {getMode} from '../../src/mode';
 
 describes.realWin('performance', {amp: true}, env => {
   let sandbox;
@@ -398,7 +398,7 @@ describes.realWin('performance', {amp: true}, env => {
 
       it('should call the flush callback', () => {
         const payload = {
-          ampexp: '$internalRuntimeVersion$',
+          ampexp: getMode(win).rtvVersion,
         };
         expect(viewerSendMessageStub.withArgs('sendCsi', payload,
             /* cancelUnsent */true)).to.have.callCount(0);
@@ -613,10 +613,12 @@ describes.realWin('performance with experiment', {amp: true}, env => {
   let win;
   let perf;
   let viewerSendMessageStub;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
-    const viewer = viewerForDoc(win.document);
+    sandbox = env.sandbox;
+    const viewer = viewerForDoc(env.ampdoc);
     viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
     sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
@@ -629,7 +631,7 @@ describes.realWin('performance with experiment', {amp: true}, env => {
     return perf.coreServicesAvailable().then(() => {
       perf.flush();
       expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
-        ampexp: '$internalRuntimeVersion$,legacy-cdn-domain',
+        ampexp: getMode(win).rtvVersion + ',legacy-cdn-domain',
       });
     });
   });
@@ -639,7 +641,7 @@ describes.realWin('performance with experiment', {amp: true}, env => {
     return perf.coreServicesAvailable().then(() => {
       perf.flush();
       expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
-        ampexp: '$internalRuntimeVersion$',
+        ampexp: getMode(win).rtvVersion,
       });
     });
   });
