@@ -24,7 +24,6 @@ import {
   setCheckValiditySupportedForTesting,
 } from '../form-validators';
 import * as sinon from 'sinon';
-import {toggleExperiment} from '../../../../src/experiments';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
@@ -34,7 +33,7 @@ import {installActionServiceForDoc,} from
     '../../../../src/service/action-impl';
 import {actionServiceForDoc} from '../../../../src/action';
 import {
-    installCidServiceForDocForTesting,
+    cidServiceForDocForTesting,
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {documentInfoForDoc} from '../../../../src/document-info';
 import '../../../amp-selector/0.1/amp-selector';
@@ -54,9 +53,7 @@ describes.realWin('amp-form', {
                       canonical = 'https://example.com/amps.html') {
     installAmpForm(env.win);
     documentInfoForDoc(env.win.document).canonicalUrl = canonical;
-    toggleExperiment(env.win, 'amp-form-var-sub', true);
-    installCidServiceForDocForTesting(env.win.document);
-    toggleExperiment(window, 'amp-form-var-sub', true);
+    cidServiceForDocForTesting(env.win.document);
     const form = getForm(env.win.document, button1, button2, button3);
     env.win.document.body.appendChild(form);
     const ampForm = new AmpForm(form, 'amp-form-test-id');
@@ -100,7 +97,6 @@ describes.realWin('amp-form', {
     installTemplatesService(window);
     const docService = installDocService(window, /* isSingleDoc */ true);
     installActionServiceForDoc(docService.getAmpDoc());
-    toggleExperiment(window, 'amp-form-var-sub', true);
 
     sandbox = env.sandbox;
   });
@@ -530,29 +526,16 @@ describes.realWin('amp-form', {
         target: form,
         preventDefault: sandbox.spy(),
       };
-
-      const errors = [];
-      const realSetTimeout = window.setTimeout;
-      sandbox.stub(window, 'setTimeout', (callback, delay) => {
-        realSetTimeout(() => {
-          try {
-            callback();
-          } catch (e) {
-            errors.push(e);
-          }
-        }, delay);
-      });
       ampForm.handleSubmitEvent_(event);
       const findTemplateStub = ampForm.templates_.findAndRenderTemplate;
-      return timer.promise(5).then(() => {
+      return ampForm.xhrSubmitPromiseForTesting().then(() => {
         expect(findTemplateStub).to.be.called;
+        // Template should have rendered an error
         expect(findTemplateStub).to.have.been.calledWith(
             errorContainer, {message: 'hello there'});
         // Check that form has a rendered div with class .submit-error-message.
         renderedTemplate = form.querySelector('[i-amp-rendered]');
         expect(renderedTemplate).to.not.be.null;
-        expect(errors.length).to.be.equal(1);
-        expect(errors[0].message).to.match(/Form submission failed/);
       });
     });
   });

@@ -187,8 +187,8 @@ export class AmpAdXOriginIframeHandler {
     // used to resolve the final layout promise because iframe may still be
     // consuming significant network and CPU resources.
     listenForOncePromise(this.iframe, CommonSignals.INI_LOAD, true).then(() => {
-      // TODO(dvoytenko): ensure that in-a-box "ini-load" message is received
-      // here as well.
+      // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
+      // received here as well.
       this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
     });
 
