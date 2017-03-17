@@ -71,7 +71,12 @@ startupChunk(self.document, function initial() {
   /** @const {!../service/performance-impl.Performance} */
   const perf = installPerformanceService(self);
   perf.tick('is');
-  installStyles(self.document, cssText, () => {
+
+  self.document.documentElement.classList.add('i-amphtml-inabox');
+  const fullCss = cssText
+      + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}'
+      + 'html.i-amphtml-inabox>body{position:initial!important}';
+  installStyles(self.document, fullCss, () => {
     startupChunk(self.document, function services() {
       // Core services.
       installRuntimeServices(self);
