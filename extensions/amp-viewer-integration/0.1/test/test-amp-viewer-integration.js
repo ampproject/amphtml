@@ -316,7 +316,6 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     it.only('should parseMessage correctly', () => {
       const obj = {bla: 'la'};
       const json = JSON.stringify(obj);
-      console.log(obj);
       let parsedCorrectly;
       parsedCorrectly = parseMessage(json, true /* isWebView */);
       expect(parsedCorrectly.bla).to.equal('la');
