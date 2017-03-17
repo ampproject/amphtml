@@ -575,14 +575,14 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
 }
 ```
 
-#### Hidden trigger (`"on": "hidden"`)
-Use this configuration to fire a request when the page becomes hidden.
+#### Unload trigger (`"on": "unload"`)
+Use this configuration to fire a request when the page unloads / enters into background.
 
 ```javascript
 "triggers": {
   "defaultPageview": {
-    "on": "hidden",
-    "request": "pagehide",
+    "on": "unload",
+    "request": "pageunload",
   }
 }
 ```
@@ -591,8 +591,8 @@ A [`visibilitySpec`](#visibility-spec) can be included so that a request is only
 ```json
 "triggers": {
   "defaultPageview": {
-    "on": "hidden",
-    "request": "pagehide",
+    "on": "unload",
+    "request": "pageunload",
     "visibilitySpec": {
       "selector": "#anim-id",
       "visiblePercentageMin": 20,
@@ -602,7 +602,7 @@ A [`visibilitySpec`](#visibility-spec) can be included so that a request is only
 }
 ```
 The above configuration translates to:
-> When page becomes hidden, fire a request if the element #anim-id has been visible (more than 20% area in viewport) for more than 3s in total.
+> When page unloads / enters into background, fire a request if the element #anim-id has been visible (more than 20% area in viewport) for more than 3s in total.
 
 #### Access triggers (`"on": "amp-access-*"`)
 
