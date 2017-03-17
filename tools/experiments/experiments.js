@@ -60,7 +60,7 @@ const EXPERIMENTS = [
   {
     id: 'ad-type-custom',
     name: 'Activates support for custom (self-serve) advertisements',
-    spec: 'https://github.com/ampproject/amphtml/ads/custom.md',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
   },
   {
     id: 'alp',
@@ -91,18 +91,6 @@ const EXPERIMENTS = [
     name: 'AMP Auto Ads',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
-  },
-  {
-    id: 'amp-form-var-sub',
-    name: 'Variable Substitutions in AMP Form inputs for POST/GET submits',
-    spec: 'https://github.com/ampproject/amphtml/issues/5654',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
-  },
-  {
-    id: 'amp-form-var-sub-for-post',
-    name: 'Variable Substitutions in AMP Form inputs for POST submits only',
-    spec: 'https://github.com/ampproject/amphtml/issues/5654',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
   },
   {
     id: 'amp-google-vrview-image',
@@ -210,6 +198,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
   },
   {
+    id: 'visibility-v3',
+    name: 'Visibility tracking with FIE and in-a-box support',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8121',
+  },
+  {
     id: 'amp-accordion-session-state-optout',
     name: 'AMP Accordion attribute to opt out of preserved state.',
     Spec: 'https://github.com/ampproject/amphtml/issues/3813',
@@ -272,6 +265,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6057',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-sortable-table/amp-sortable-table.md',
+  },
+  {
+    id: 'slidescroll-disable-css-snap',
+    name: 'Slidescroll disable css snap',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
+    spec: 'https://github.com/ampproject/amphtml/issues/7670',
   },
 ];
 
