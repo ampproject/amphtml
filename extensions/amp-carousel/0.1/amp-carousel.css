@@ -180,4 +180,12 @@ amp-carousel .amp-carousel-button.amp-disabled {
   overflow-y: hidden !important;
   -webkit-overflow-scrolling: touch !important;
 }
+
+.-amp-slidescroll-no-snap.-amp-slides-container {
+  scroll-snap-type: none !important;
+}
+
+.-amp-slidescroll-no-snap.-amp-slide-item {
+  scroll-snap-coordinate: none !important;
+}
 /* End ScrollableCarousel */
