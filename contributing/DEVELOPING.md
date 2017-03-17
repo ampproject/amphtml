@@ -122,13 +122,14 @@ Additionally, the following query parameters can be provided:
 
 - `width` - the width of the `amp-ad` (default "300")
 - `height` - the height of the `amp-ad` (default "250")
+- `offset` - the offset to push the `amp-ad` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
 
 
 ### In-a-box envelope (/inabox/)
 
 If you are working on AMP In-a-box Ads, you can use the local in-a-box envelope for testing local and production AMP documents with the local JS version.
 
-Make sure to run gulp with `--with_inabox`.
+Make sure to run gulp with `--with_inabox` flag.
 
 The following forms are supported:
 
@@ -138,8 +139,9 @@ The following forms are supported:
 
 Additionally, the following query parameters can be provided:
 
-- `width` - the width of the `amp-ad` (default "300")
-- `height` - the height of the `amp-ad` (default "250")
+- `width` - the width of the `iframe` (default "300")
+- `height` - the height of the `iframe` (default "250")
+- `offset` - the offset to push the `iframe` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
 
 
 ### Chrome extension

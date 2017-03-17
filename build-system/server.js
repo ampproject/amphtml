@@ -522,6 +522,7 @@ app.use('/a4a(|-3p)/', function(req, res) {
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/FORCE3P/g, force3p)
+        .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_URL/g, adUrl)
         .replace(/AD_WIDTH/g, req.query.width || '300')
         .replace(/AD_HEIGHT/g, req.query.height || '250');
@@ -553,6 +554,7 @@ app.use('/inabox/', function(req, res) {
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/AD_URL/g, adUrl)
+        .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_WIDTH/g, req.query.width || '300')
         .replace(/AD_HEIGHT/g, req.query.height || '250');
     res.end(result);
