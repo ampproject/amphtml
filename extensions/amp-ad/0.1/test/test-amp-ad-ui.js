@@ -151,6 +151,7 @@ describes.realWin('amp-ad-ui handler', {
         });
         return uiHandler.updateSize(100, 400, 50, 300).then(sizes => {
           expect(sizes).to.deep.equal({
+            success: true,
             newWidth: 450,
             newHeight: 100,
           });
@@ -165,6 +166,7 @@ describes.realWin('amp-ad-ui handler', {
         });
         return uiHandler.updateSize('100', 400, 0, 0).then(sizes => {
           expect(sizes).to.deep.equal({
+            success: true,
             newWidth: 400,
             newHeight: 100,
           });
@@ -173,11 +175,8 @@ describes.realWin('amp-ad-ui handler', {
 
       it('should reject on special case undefined sizes', () => {
         const attemptChangeSizeSpy = sandbox.spy(adImpl, 'attemptChangeSize');
-        return uiHandler.updateSize(undefined, undefined, 0, 0).catch(sizes => {
-          expect(sizes).to.deep.equal({
-            newWidth: undefined,
-            newHeight: undefined,
-          });
+        return uiHandler.updateSize(undefined, undefined, 0, 0).catch(e => {
+          expect(e).to.equal('undefined width and height');
           expect(attemptChangeSizeSpy).to.not.be.called;
         });
       });
@@ -185,8 +184,9 @@ describes.realWin('amp-ad-ui handler', {
       it('should reject on special case inside sticky ad', () => {
         adContainer = 'AMP-STICKY-AD';
         const attemptChangeSizeSpy = sandbox.spy(adImpl, 'attemptChangeSize');
-        return uiHandler.updateSize(100, 400, 0, 0).catch(sizes => {
+        return uiHandler.updateSize(100, 400, 0, 0).then(sizes => {
           expect(sizes).to.deep.equal({
+            success: false,
             newWidth: 400,
             newHeight: 100,
           });
@@ -198,8 +198,9 @@ describes.realWin('amp-ad-ui handler', {
         sandbox.stub(adImpl, 'attemptChangeSize', () => {
           return Promise.reject();
         });
-        return uiHandler.updateSize(100, 400, 0, 0).catch(sizes => {
+        return uiHandler.updateSize(100, 400, 0, 0).then(sizes => {
           expect(sizes).to.deep.equal({
+            success: false,
             newWidth: 400,
             newHeight: 100,
           });

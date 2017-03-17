@@ -81,6 +81,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         adImpl.config = {renderStartImplemented: true};
         sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
           return Promise.resolve({
+            success: true,
             newWidth: 114,
             newHeight: 217,
           });
@@ -272,7 +273,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
     it('should be able to use embed-size API, change size deny', () => {
       sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
-        return Promise.reject({
+        return Promise.resolve({
+          success: false,
           newWidth: 114,
           newHeight: 217,
         });
@@ -294,6 +296,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     it('should be able to use embed-size API, change size succeed', () => {
       sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
         return Promise.resolve({
+          success: true,
           newWidth: 114,
           newHeight: 217,
         });
@@ -315,6 +318,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     it('should be able to use embed-size API to resize height only', () => {
       sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
         return Promise.resolve({
+          success: true,
           newWidth: undefined,
           newHeight: 217,
         });

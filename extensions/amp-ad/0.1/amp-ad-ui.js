@@ -207,7 +207,7 @@ export class AmpAdUIHandler {
    * @param {number|string|undefined} width
    * @param {number} iframeHeight
    * @param {number} iframeWidth
-   * @return {!Promise<Object>}
+   * @return {!Promise<!Object>}
    */
   updateSize(height, width, iframeHeight, iframeWidth) {
     // Calculate new width and height of the container to include the padding.
@@ -224,24 +224,28 @@ export class AmpAdUIHandler {
           width - iframeWidth, width);
     }
 
-    const sizes = {
+    /** @type {!Object<!boolean, number|undefined, number|undefined>} */
+    const resizeInfo = {
+      success: true,
       newWidth,
       newHeight,
     };
 
     if (!newHeight && !newWidth) {
-      return Promise.resolve(sizes);
+      return Promise.reject('undefined width and height');
     }
 
     if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {
       // Special case: force collapse sticky-ad if no content.
-      return Promise.reject(Error('Cannot resize ad in AMP-STICKY-AD'));
+      resizeInfo.success = false;
+      return Promise.resolve(resizeInfo);
     }
     return this.baseInstance_.attemptChangeSize(
         newHeight, newWidth).then(() => {
-          return Promise.resolve(sizes);
+          return resizeInfo;
         }, () => {
-          return Promise.reject();
+          resizeInfo.success = false;
+          return resizeInfo;
         });
   }
 }
