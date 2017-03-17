@@ -1128,7 +1128,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
           'res=${screenWidth}x${screenHeight}&stm=${timestamp}&' +
           'tz=${timezone}&aid=${appId}&p=web&tv=${aaVersion}&' +
           'cd=${screenColorDepth}&cs=${documentCharset}&' +
-          'duid=${clientId}&eid=${pageViewId}&' +
+          'duid=${clientId}&' +
           'lang=${browserLanguage}&refr=${documentReferrer}&stm=${timezone}&' +
           'vp=${viewportWidth}x${viewportHeight}',
       'pageView': '${basePrefix}&e=pv',
