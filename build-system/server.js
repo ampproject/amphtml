@@ -529,6 +529,36 @@ app.use('/a4a(|-3p)/', function(req, res) {
   });
 });
 
+// In-a-box envelope.
+// Examples:
+// http://localhost:8000/inabox/examples/animations.amp.max.html
+// http://localhost:8000/inabox/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+// http://localhost:8000/inabox/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+app.use('/inabox/', function(req, res) {
+  var adUrl = req.url;
+  var templatePath = '/build-system/server-inabox-template.html';
+  var urlPrefix = getUrlPrefix(req);
+  if (!adUrl.startsWith('/m') &&
+      urlPrefix.indexOf('//localhost') != -1) {
+    // This is a special case for testing. `localhost` URLs are transformed to
+    // `ads.localhost` to ensure that the iframe is fully x-origin.
+    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
+  }
+  const inaboxParam = 'inabox=1';
+  if (adUrl.indexOf('?') == -1) {
+    adUrl += '?' + inaboxParam;
+  } else {
+    adUrl += '&' + inaboxParam;
+  }
+  fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
+    var result = template
+        .replace(/AD_URL/g, adUrl)
+        .replace(/AD_WIDTH/g, req.query.width || '300')
+        .replace(/AD_HEIGHT/g, req.query.height || '250');
+    res.end(result);
+  });
+});
+
 app.use('/examples/analytics.config.json', function(req, res, next) {
   res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
   next();

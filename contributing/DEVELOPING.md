@@ -22,8 +22,8 @@ Before you start developing in AMP, check out these resources:
 * [CONTRIBUTING.md](../CONTRIBUTING.md) has details on various ways you can contribute to the AMP Project.
   * If you're developing in AMP, you should read the [Contributing code](../CONTRIBUTING.md#contributing-code) and [Contributing features](../CONTRIBUTING.md#contributing-features) sections.
   * The [Ongoing participation](../CONTRIBUTING.md#ongoing-participation) section has details on various ways of getting in touch with others in the community including email and Slack.
-  * **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](../CONTRIBUTING.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on. 
-* The [Getting Started Quick Start Guide](getting-started-quick.md) has installation steps and basic instructions for [one-time setup](getting-started-quick.md#one-time-setup), how to [build AMP & run a local server](getting-started-quick.md#build-amp--run-a-local-server) and how to [test AMP](getting-started-quick.md#test-amp). 
+  * **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](../CONTRIBUTING.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on.
+* The [Getting Started Quick Start Guide](getting-started-quick.md) has installation steps and basic instructions for [one-time setup](getting-started-quick.md#one-time-setup), how to [build AMP & run a local server](getting-started-quick.md#build-amp--run-a-local-server) and how to [test AMP](getting-started-quick.md#test-amp).
 
 
 ## Build & Test
@@ -94,7 +94,7 @@ code elimination to trim down the file size for the file we deploy to production
 If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/min/s/output.jsbin.com/pegizoq/quiet
 
 
-### A4A envelope
+### A4A envelope (/a4a/, /a4a-3p/)
 
 If you are working on AMP 4 Ads (A4A), you can use the local A4A envelope for testing local and production AMP documents with the local JS version.
 
@@ -117,6 +117,24 @@ If the origin resource is on HTTPS, the URLs are http://localhost:8000/a4a[-3p]/
 
 Notice that all documents are assumed to have a "fake" signature. Thus, this functionality is only available in the
 `localDev` mode.
+
+Additionally, the following query parameters can be provided:
+
+- `width` - the width of the `amp-ad` (default "300")
+- `height` - the height of the `amp-ad` (default "250")
+
+
+### In-a-box envelope (/inabox/)
+
+If you are working on AMP In-a-box Ads, you can use the local in-a-box envelope for testing local and production AMP documents with the local JS version.
+
+Make sure to run gulp with `--with_inabox`.
+
+The following forms are supported:
+
+- local document: http://localhost:8000/inabox/examples/animations.amp.max.html
+- proxied document with normal sources: http://localhost:8000/inabox/max/output.jsbin.com/pegizoq/quiet
+- proxied document with minified sources: http://localhost:8000/inabox/min/output.jsbin.com/pegizoq/quiet
 
 Additionally, the following query parameters can be provided:
 
@@ -151,8 +169,8 @@ To run the tests on Sauce Labs:
 
    # after seeing the "Sauce Connect is up" msg, run the tests
    gulp test --saucelabs
-   ``` 
-* It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard. 
+   ```
+* It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
 ## Deploying AMP on Cloud for testing on devices
 

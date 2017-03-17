@@ -1,62 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
+  <title>In-a-box Envelope</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <title>amp-inabox-host example</title>
   <style>
     body {
-      font-size: 1.2em;
+      margin: 0;
+    }
+    iframe {
+      border: 1px solid gray;
     }
   </style>
 </head>
 <body>
-  <h2>
-    This page tests amp-inabox. Follow the instructions and check points.
-  </h2>
-  <hr>
-  <h3>Inabox above the fold</h3>
+  <h1>In-a-box Envelope</h1>
+  <div>url: AD_URL</div>
+  <div>size: AD_WIDTHxAD_HEIGHT</div>
+
   <iframe
       name="inabox-atf"
-      src="//ads.localhost:8000/examples/inabox.amp.max.html"
-      scrolling="no"
-      width="300" height="200">
-  </iframe>
-  <div>
-    <strong>Check Point 1: Above the fold visibility tracking</strong><br/>
-    Before any scrolling, you should see 3 failed network requests: <code>visible</code>, <code>rootVisible</code> and <code>img2Visible</code>. Also check their URL params.
-  </div>
-  <hr>
-  <h3>Inabox below the fold, and nested in friendly iframe </h3>
-  <div>
-    Now scroll slowly...
-  </div>
-  <div style="height: 100vh"></div>
-  <iframe
-      name="inabox-btf"
-      srcdoc="<iframe src='//ads.localhost:8000/examples/inabox.amp.max.html' width='300' height='200' scrolling='no' frameborder=0></iframe>"
+      src="AD_URL"
+      width="AD_WIDTH" height="AD_HEIGHT"
       scrolling="no"
       marginwidth="0"
       marginheight="0"
-      width="300" height="200">
-  </iframe>
-  <div>
-    <strong>Check Point 2: Below the fold visibility tracking</strong><br/>
-    You should have seen another 2 failed network requests: <code>visible</code>, <code>rootVisible</code> when the 2nd iframe enters viewport.
-    Then followed by <code>img2Visible</code> when the 2nd image in this iframe enters viewport.
-  </div>
-  <div style="height: 20vh"></div>
-  <hr>
-  <h3>Everything inabox</h3>
-  <div>
-    <strong>Check Point 3: AMP elements rendering for inabox</strong><br/>
-    This is a long AMP document. You should see everything renders correctly. All check console errors.
-  </div>
-  <iframe
-      name="inabox-article"
-      src="//ads.localhost:8000/examples/inabox-more.amp.max.html"
-      scrolling="no"
-      width="300" height="1000">
+      frameborder="0">
   </iframe>
 
   <script>
@@ -116,7 +86,6 @@
     }
 
     function loadScript(win, url, callback) {
-      console.log('QQQ: loadScript: ', url);
       const script = win.document.createElement('script');
       script.src = url;
       script.onload = callback;
