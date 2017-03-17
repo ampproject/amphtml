@@ -17,7 +17,6 @@
 import * as sinon from 'sinon';
 import '../amp-carousel';
 import {createIframePromise} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describe('SlideScroll', () => {
   const SHOW_CLASS = '-amp-slide-item-show';
@@ -34,7 +33,6 @@ describe('SlideScroll', () => {
   function getAmpSlideScroll(
       opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true) {
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-slidescroll', true);
       iframe.width = '1000';
       iframe.height = '1000';
       const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
@@ -566,7 +564,6 @@ describe('SlideScroll', () => {
 
   describe('Looping', () => {
     beforeEach(() => {
-      toggleExperiment(window, 'amp-slidescroll', true);
       sandbox = sinon.sandbox.create();
     });
 

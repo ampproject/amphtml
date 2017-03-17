@@ -266,6 +266,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-sortable-table/amp-sortable-table.md',
   },
+  {
+    id: 'slidescroll-disable-css-snap',
+    name: 'Slidescroll disable css snap',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
+    spec: 'https://github.com/ampproject/amphtml/issues/7670',
+  },
 ];
 
 if (getMode().localDev) {
