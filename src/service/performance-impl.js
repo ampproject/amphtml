@@ -215,7 +215,8 @@ export class Performance {
           // is guaranteed to fire.
         });
     return whenReadyToRetrieveResources.then(() => {
-      return Promise.all(this.resources_.getResourcesInViewportLegacy()
+      return Promise.all(this.resources_.getResourcesInViewportLegacy(
+              /* isInPrerender */ true)
           .map(r => {
             return r.loadedOnce();
           }));
