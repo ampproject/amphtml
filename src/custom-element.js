@@ -935,7 +935,13 @@ function createBaseCustomElementClass(win) {
       }
       this.getResources().add(this);
 
-      if (!this.everAttached) {
+      if (this.everAttached) {
+        if (this.reconstructWhenReparented()) {
+          this.reset_();
+          this.getResources().upgraded(this);
+        }
+        this.dispatchCustomEventForTesting('amp:attached');
+      } else {
         this.everAttached = true;
 
         try {
@@ -953,8 +959,6 @@ function createBaseCustomElementClass(win) {
           // replayed the firstAttachedCallback call.
           this.dispatchCustomEventForTesting('amp:stubbed');
         }
-      } else if (this.reconstructWhenReparented()) {
-        this.reset_();
       }
     }
 
