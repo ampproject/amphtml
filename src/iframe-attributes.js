@@ -15,7 +15,7 @@
  */
 import {urls} from './config';
 import {documentInfoForDoc} from './document-info';
-import {isExperimentOn, experimentToggles, isCanary} from './experiments';
+import {experimentToggles, isCanary} from './experiments';
 import {viewerForDoc} from './viewer';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';

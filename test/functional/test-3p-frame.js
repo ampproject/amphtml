@@ -41,8 +41,6 @@ describe('3p-frame', () => {
   let container;
   let preconnect;
 
-  const sentinelNames = ['sentinel', 'amp3pSentinel'];
-
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();

@@ -15,7 +15,6 @@
  */
 
 import {dev, user} from './log';
-import {isExperimentOn} from './experiments';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
