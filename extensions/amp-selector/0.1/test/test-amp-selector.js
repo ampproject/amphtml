@@ -125,6 +125,7 @@ describes.realWin('amp-selector', {
 
       let ampSelector = getSelector({});
       let impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
       let setInputsSpy = sandbox.spy(impl, 'setInputs_');
       let initSpy = sandbox.spy(impl, 'init_');
       ampSelector.build();
@@ -408,6 +409,7 @@ describes.realWin('amp-selector', {
         },
       });
       let impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
       ampSelector.build();
       let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
@@ -450,6 +452,7 @@ describes.realWin('amp-selector', {
       });
 
       impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
       ampSelector.build();
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
@@ -492,6 +495,7 @@ describes.realWin('amp-selector', {
       });
 
       impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
       ampSelector.build();
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
@@ -543,6 +547,7 @@ describes.realWin('amp-selector', {
       });
       ampSelector.build();
       const impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
       const triggerSpy = sandbox.spy(impl.action_, 'trigger');
 
       impl.clickHandler_({target: impl.options_[3]});
