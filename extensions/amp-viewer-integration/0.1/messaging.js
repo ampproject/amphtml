@@ -179,9 +179,9 @@ export class Messaging {
       return;
     }
     if (message.type == MessageType.REQUEST) {
-      this.handleRequest_(dev().assert(message));
+      this.handleRequest_(message);
     } else if (message.type == MessageType.RESPONSE) {
-      this.handleResponse_(dev().assert(message));
+      this.handleResponse_(message);
     }
   }
 
