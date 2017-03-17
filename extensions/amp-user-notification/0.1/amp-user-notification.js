@@ -109,7 +109,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     if (!this.userNotificationManager_) {
       installUserNotificationManager(window);
       this.userNotificationManager_ = getService(window,
-                                                 'userNotificationManager');
+          'userNotificationManager');
     }
 
     /** @private {?string} */
@@ -440,8 +440,8 @@ export class UserNotificationManager {
  */
 export function installUserNotificationManager(window) {
   registerServiceBuilder(window,
-                         'userNotificationManager',
-                         UserNotificationManager);
+      'userNotificationManager',
+      UserNotificationManager);
 }
 
 installUserNotificationManager(AMP.win);
