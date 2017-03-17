@@ -232,21 +232,26 @@ export class Performance {
    * @param {?string=} opt_from The label of a previous tick to use as a
    *    relative start for this tick.
    * @param {number=} opt_value The time to record the tick at. Optional, if
-   *    not provided, use the current time. You probably want to use
-   *    `tickDelta` instead.
+   *    not provided, use the current time.
+   * @param {number=} tickDelta The delta. Call tickDelta instead of setting
+   *     this directly.
    */
-  tick(label, opt_from, opt_value) {
+  tick(label, opt_from, opt_value, opt_delta) {
     opt_from = opt_from == undefined ? null : opt_from;
-    opt_value = opt_value == undefined ? this.win.Date.now() : opt_value;
+    opt_value = (opt_value == undefined && opt_delta == undefined)
+        ? this.win.Date.now()
+        : opt_value;
 
+    const data = {
+      label,
+      from: opt_from,
+      value: opt_value,
+      delta: opt_delta,
+    };
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.sendMessage('tick', {
-        label,
-        from: opt_from,
-        value: opt_value,
-      });
+      this.viewer_.sendMessage('tick', data);
     } else {
-      this.queueTick_(label, opt_from, opt_value);
+      this.queueTick_(data);
     }
     // Add browser performance timeline entries for simple ticks.
     // These are for example exposed in WPT.
@@ -264,10 +269,7 @@ export class Performance {
    * @param {number} value The value in milliseconds that should be ticked.
    */
   tickDelta(label, value) {
-    // initTime_ Is added instead of non-zero, because the underlying
-    // library doesn't like 0 values.
-    this.tick('_' + label, undefined, this.initTime_);
-    this.tick(label, '_' + label, Math.round(value + this.initTime_));
+    this.tick(label, undefined, undefined, value);
   }
 
   /**
@@ -325,27 +327,18 @@ export class Performance {
   /**
    * Queues the events to be flushed when tick function is set.
    *
-   * @param {string} label The variable name as it will be reported.
-   * @param {?string=} opt_from The label of a previous tick to use as a
-   *    relative start for this tick.
-   * @param {number=} opt_value The time to record the tick at. Optional, if
-   *    not provided, use the current time.
+   * @param {!Object} data Tick data to be queued.
    * @private
    */
-  queueTick_(label, opt_from, opt_value) {
+  queueTick_(data) {
     // Start dropping the head of the queue if we've reached the limit
     // so that we don't take up too much memory in the runtime.
     if (this.events_.length >= QUEUE_LIMIT) {
       this.events_.shift();
     }
 
-    this.events_.push({
-      label,
-      from: opt_from,
-      value: opt_value,
-    });
+    this.events_.push(data);
   }
-
 
   /**
    * Forwards all queued ticks to the viewer tick method.

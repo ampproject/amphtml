@@ -50,18 +50,13 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_.length).to.equal(0);
 
       perf.tickDelta('test', 99);
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(1);
       expect(perf.events_[0])
           .to.be.jsonEqual({
-            label: '_test',
+            label: 'test',
             from: null,
-            value: perf.initTime_,
+            delta: 99,
           });
-      expect(perf.events_[1]).to.be.jsonEqual({
-        label: 'test',
-        from: '_test',
-        value: perf.initTime_ + 99,
-      });
     });
 
     it('should have max 50 queued events', () => {
@@ -536,7 +531,7 @@ describes.realWin('performance', {amp: true}, env => {
         });
       });
 
-      it('should tick `pc` with opt_value=400 when user request document ' +
+      it('should tick `pc` with delta=400 when user request document ' +
          'to be visible before before first viewport completion', () => {
         clock.tick(100);
         whenFirstVisibleResolve();
@@ -546,31 +541,23 @@ describes.realWin('performance', {amp: true}, env => {
           expect(tickSpy).to.have.callCount(2);
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy).to.have.callCount(4);
+            expect(tickSpy).to.have.callCount(3);
             expect(tickSpy.getCall(1).args[0]).to.equal('ofv');
-            expect(tickSpy.getCall(2).args[0]).to.equal('_pc');
-            expect(tickSpy.getCall(3).args[0]).to.equal('pc');
-            expect(tickSpy.getCall(3).args[1]).to.equal('_pc');
-            expect(Number(tickSpy.getCall(2).args[2])).to.equal(perf.initTime_);
-            expect(Number(tickSpy.getCall(3).args[2]))
-                .to.equal(perf.initTime_ + 400);
+            expect(tickSpy.getCall(2).args[0]).to.equal('pc');
+            expect(Number(tickSpy.getCall(2).args[3])).to.equal(400);
           });
         });
       });
 
-      it('should tick `pc` with `opt_value=0` when viewport is complete ' +
+      it('should tick `pc` with `delta=1` when viewport is complete ' +
          'before user request document to be visible', () => {
         clock.tick(300);
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(tickSpy).to.have.callCount(3);
+          expect(tickSpy).to.have.callCount(2);
           expect(tickSpy.firstCall.args[0]).to.equal('ol');
-          expect(tickSpy.secondCall.args[0]).to.equal('_pc');
-          expect(tickSpy.thirdCall.args[0]).to.equal('pc');
-          expect(tickSpy.thirdCall.args[1]).to.equal('_pc');
-          expect(Number(tickSpy.secondCall.args[2])).to.equal(perf.initTime_);
-          expect(Number(tickSpy.thirdCall.args[2])).to.equal(
-              perf.initTime_ + 1);
+          expect(tickSpy.secondCall.args[0]).to.equal('pc');
+          expect(Number(tickSpy.secondCall.args[3])).to.equal(1);
         });
       });
     });
