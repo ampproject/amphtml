@@ -316,7 +316,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     it('should parseMessage correctly', () => {
       const obj = {bla: 'la'};
       const json = JSON.stringify(obj);
-      const badJson = "{a:b";
+      const badJson = '{a:b';
       let parsedCorrectly;
       parsedCorrectly = parseMessage(json);
       expect(parsedCorrectly.bla).to.equal('la');
