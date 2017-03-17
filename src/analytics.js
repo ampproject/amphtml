@@ -18,8 +18,7 @@ import {
   getElementServiceForDoc,
   getElementServiceIfAvailableForDoc,
 } from './element-service';
-import {createElementWithAttributes} from './dom';
-import {getAmpDoc} from './ampdoc';
+import {extensionsFor} from './extensions';
 
 
 /**
@@ -60,22 +59,29 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
 }
 
 /**
- * Helper method to create analytics element for specific root.
+ * Method to create scoped analytics element for any element.
  * @param {!Element} element
  * @param {!JSONType} config
- * @param {Document=} parentDoc
+ * @param {boolean=} force
  */
-export function insertAnalyticsElement(element, config, parentDoc) {
-  // TODO(zhouyx): Take extra param to force load analytics extension
+export function insertAnalyticsElement(element, config, force = false) {
+  const analyticsElem = element.ownerDocument.createElement('amp-analytics');
+  analyticsElem.setAttribute('scoped', true);
+  analyticsElem.CONFIG = config;
+
+  // Force load analytics extension if script not included in page.
+  if (force) {
+    // Get Extensions service and force load analytics extension.
+    const extensions = extensionsFor(element.ownerDocument.defaultView);
+    extensions./*OK*/loadExtension('amp-analytics');
+    element.appendChild(analyticsElem);
+    return;
+  }
+
   analyticsForDocOrNull(element).then(analytics => {
     if (!analytics) {
       return;
     }
-    // Create analytics element;
-    parentDoc = parentDoc || getAmpDoc(element).win.document;
-    const analyticsElem = parentDoc.createElement('amp-analytics');
-    analyticsElem.setAttribute('scoped', true);
-    analyticsElem.CONFIG = config;
     element.appendChild(analyticsElem);
   });
 }
