@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {documentInfoForDoc} from '../document-info';
 import {layoutRectLtwh} from '../layout-rect';
 import {fromClass} from '../service';
 import {resourcesForDoc} from '../resources';
@@ -22,7 +21,8 @@ import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 import {urls} from '../config';
-
+import {getMode} from '../mode';
+import {isCanary} from '../experiments';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -74,7 +74,7 @@ export class Performance {
     this.win = win;
 
     /** @private @const {number} */
-    this.initTime_ = Date.now();
+    this.initTime_ = this.win.Date.now();
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -139,8 +139,6 @@ export class Performance {
     return channelPromise.then(() => {
       this.isMessagingReady_ = true;
 
-      // This task is async
-      this.setDocumentInfoParams_();
       // forward all queued ticks to the viewer since messaging
       // is now ready.
       this.flushQueuedTicks_();
@@ -162,7 +160,7 @@ export class Performance {
     // (hasn't been visible yet, ever at this point)
     if (didStartInPrerender) {
       this.viewer_.whenFirstVisible().then(() => {
-        docVisibleTime = Date.now();
+        docVisibleTime = this.win.Date.now();
       });
     }
 
@@ -171,7 +169,7 @@ export class Performance {
     this.whenViewportLayoutCompleteLegacy_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-            ? (Date.now() - docVisibleTime)
+            ? (this.win.Date.now() - docVisibleTime)
             : 1 /* MS (magic number for prerender was complete
                    by the time the user opened the page) */;
         this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
@@ -183,7 +181,7 @@ export class Performance {
         this.tick('pc');
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
-        this.prerenderComplete_(Date.now() - docVisibleTime);
+        this.prerenderComplete_(this.win.Date.now() - docVisibleTime);
       }
       this.flush();
     });
@@ -225,17 +223,6 @@ export class Performance {
   }
 
   /**
-   * Forward an object to be appended as search params to the external
-   * intstrumentation library.
-   * @param {!Object} params
-   * @private
-   */
-  setFlushParams_(params) {
-    this.viewer_.sendMessage('setFlushParams', params,
-        /* cancelUnsent */true);
-  }
-
-  /**
    * Ticks a timing event.
    *
    * @param {string} label The variable name as it will be reported.
@@ -249,7 +236,7 @@ export class Performance {
    */
   tick(label, opt_from, opt_value) {
     opt_from = opt_from == undefined ? null : opt_from;
-    opt_value = opt_value == undefined ? Date.now() : opt_value;
+    opt_value = opt_value == undefined ? this.win.Date.now() : opt_value;
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', {
@@ -287,7 +274,7 @@ export class Performance {
    * @param {string} label The variable name as it will be reported.
    */
   tickSinceVisible(label) {
-    const now = Date.now();
+    const now = this.win.Date.now();
     const visibleTime = this.viewer_ ? this.viewer_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);
@@ -316,6 +303,13 @@ export class Performance {
       return this.enabledExperiments_;
     }
     const experiments = [];
+    // Add RTV version as experiment ID, so we can slice the data by version.
+    if (getMode(this.win).rtvVersion) {
+      experiments.push(getMode(this.win).rtvVersion);
+    }
+    if (isCanary(this.win)) {
+      experiments.push('canary');
+    }
     // Check if it's the legacy CDN domain.
     if (this.getHostname_() == urls.cdn.split('://')[1]) {
       experiments.push('legacy-cdn-domain');
@@ -371,35 +365,6 @@ export class Performance {
       this.viewer_.sendMessage('tick', tickEvent);
     });
     this.events_.length = 0;
-  }
-
-
-  /**
-   * Calls "setFlushParams_" with relevant document information.
-   * @return {!Promise}
-   * @private
-   */
-  setDocumentInfoParams_() {
-    // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
-    // reporting regression is confirmed.
-    return this.whenViewportLayoutCompleteLegacy_().then(() => {
-      const params = Object.create(null);
-      const sourceUrl = documentInfoForDoc(this.win.document).sourceUrl
-          .replace(/#.*/, '');
-      params['sourceUrl'] = sourceUrl;
-
-      this.resources_.get().forEach(r => {
-        const el = r.element;
-        const name = el.tagName.toLowerCase();
-        incOrDef(params, name);
-        if (name == 'amp-ad') {
-          incOrDef(params, `ad-${el.getAttribute('type')}`);
-        }
-      });
-
-      this.setFlushParams_(params);
-      this.flush();
-    });
   }
 
   /**
