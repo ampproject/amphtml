@@ -24,7 +24,8 @@ limitations under the License.
     data-ad-server="bn-01d.adtomafusion.com"
     data-media-zone="adtomatest.apica"
     data-layout="apicaping"
-    data-space="apicaAd">
+    data-space="apicaAd"
+    data-parameters="age=99&isMobile&gender=male">
 </amp-ad>
 ```
 
@@ -38,3 +39,7 @@ Supported parameters:
 - data-media-zone
 - data-layout
 - data-space
+- data-parameters
+
+Parameters should be passed as key&value pairs '&' separated. Missing value equals 'true'. 
+So '...&isMobile&...' from example above stands for '...&isMobile=true&...'. 
