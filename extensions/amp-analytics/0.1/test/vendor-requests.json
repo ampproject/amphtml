@@ -183,4 +183,9 @@
     "pageload": "https://pp.lp4.io/pl?i=$id&ct=_dom_interactive_time_&rt=_page_download_time_&pt=_page_load_time_&p=_canonical_url_&c=amp&t=$type&s=$section&_t=amp&_r=_random_",
     "ping": "https://pp.lp4.io/u?i=$id&u=_client_id_&p=_canonical_url_&uActive=true&isPing=yes&c=amp&t=$type&s=$section&_t=amp&_r=_random_",
   },
+   "ibeatanalytics": {
+    "host": "https://ibeats.indiatimes.com",
+    "base": "https://ibeats.indiatimes.com/ibeat/pageTrendlogAmp.html",
+    "pageview": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html?h=${h}&d=${d}&url=${url}&k=${k}&ts=${ts}&ch=${ch}&sid=${sid}&at=${at}&ref=${ref}&aid=${aid}&loc=${loc}&ct=${ct}&cat=${cat}&scat=${scat}&ac=${ac}&tg=${tg}&ctids=${ctids}&pts=${pts}&auth=${auth}&pos=${pos}&utmvsi=${utmvsi}&utmcsr=${utmcsr}&utmccn=${utmccn}&utmcmd=${utmcmd}&utma=${utma}&iBeatField=${iBeatField}"
+  },
 }

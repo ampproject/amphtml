@@ -1146,6 +1146,47 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'image': true,
     },
   },
+  
+  'ibeatanalytics': {
+	    'requests': {
+	      'host': 'https://ibeats.indiatimes.com',
+	      'base': '${host}/ibeat/pageTrendlogAmp.html',
+	      'pageview': '${base}?' +
+	      '&h=${host}' +
+	      '&d=${host}'+
+	      '&url=${url}'+
+	      '&k=${key}'+
+	      '&ts=${time}'+
+	      '&ch=${channel}'+
+	      '&sid=${uid}'+
+	      '&at=${agentType}'+
+	      '&ref=${documentReferrer}'+
+	      '&aid=${aid}'+
+	      '&loc=1'+
+	      '&ct=1'+
+	      '&cat=${cat}'+
+	      '&scat=${scat}'+
+	      '&ac=1'+
+	      '&tg=${tags}'+
+	      '&ctids=${catIds}'+
+	      '&pts=${pagePublishTime}'+
+	      '&auth=${author}'+
+	      '&pos=${position}'+
+	      '&iBeatField=${ibeatFields}'
+	      ,
+	    },
+	    'triggers': {
+	      'defaultPageview': {
+	        'on': 'visible',
+	        'request': 'pageview',
+	      },
+	    },
+	    'transport': {
+	      'beacon': false,
+	      'xhrpost': false,
+	      'image': true,
+	    },
+	  },
 });
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
