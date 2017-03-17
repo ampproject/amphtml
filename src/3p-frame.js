@@ -15,7 +15,6 @@
  */
 
 import {dev, user} from './log';
-import {isExperimentOn} from './experiments';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
@@ -75,8 +74,6 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   const attributes =
       getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
   const iframe = parentWindow.document.createElement('iframe');
-  const sentinelNameChange = isExperimentOn(
-      parentWindow, 'sentinel-name-change');
 
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
@@ -109,8 +106,7 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  iframe.setAttribute('data-amp-3p-sentinel', attributes._context[
-    sentinelNameChange ? 'sentinel' : 'amp3pSentinel']);
+  iframe.setAttribute('data-amp-3p-sentinel', attributes._context['sentinel']);
   return iframe;
 }
 
