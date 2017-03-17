@@ -1055,7 +1055,6 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderNonAmpCreative_() {
     this.promiseErrorHandler_(new Error('fallback to 3p'));
-    this.protectedEmitLifecycleEvent_('preAdThrottle');
     incrementLoadingAds(this.win);
     // Haven't rendered yet, so try rendering via one of our
     // cross-domain iframe solutions.
