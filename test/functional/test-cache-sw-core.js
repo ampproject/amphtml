@@ -558,7 +558,8 @@ runner.run('Cache SW', () => {
           });
         }
 
-        it('fetches new diversions', () => {
+        // TODO(jridgewell, #8207): Unskip.
+        it.skip('fetches new diversions', () => {
           return waitForDiversions().then(() => {
             expect(fetch).calledThrice;
             expect(fetch.getCall(2).args[0].url).to.equal(
