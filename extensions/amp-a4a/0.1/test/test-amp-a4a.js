@@ -212,10 +212,7 @@ describe('amp-a4a', () => {
     expect(() => {attributes = JSON.parse(nameData);}).not.to.throw(Error);
     expect(attributes).to.be.ok;
     expect(attributes._context).to.be.ok;
-    expect(attributes._context).not.to.contain.all.keys(
-        'sentinel', 'amp3pSentinel');
-    const sentinel = attributes._context.amp3pSentinel ||
-        attributes._context.sentinel;
+    const sentinel = attributes._context.sentinel;
     expect(sentinel).to.be.ok;
     expect(sentinel).to.match(/((\d+)-\d+)/);
   }

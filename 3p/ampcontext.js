@@ -120,7 +120,7 @@ export class AmpContext {
     this.location = context.location;
     this.canonicalUrl = context.canonicalUrl;
     this.pageViewId = context.pageViewId;
-    this.sentinel = context.sentinel || context.amp3pSentinel;
+    this.sentinel = context.sentinel;
     this.startTime = context.startTime;
     this.referrer = context.referrer;
   }
