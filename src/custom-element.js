@@ -933,6 +933,8 @@ function createBaseCustomElementClass(win) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = resourcesForDoc(this.ampdoc_);
       }
+      this.getResources().add(this);
+
       if (!this.everAttached) {
         this.everAttached = true;
 
@@ -954,7 +956,6 @@ function createBaseCustomElementClass(win) {
       } else if (this.reconstructWhenReparented()) {
         this.reset_();
       }
-      this.getResources().add(this);
     }
 
     /** The Custom Elements V0 sibling to `connectedCallback`. */
