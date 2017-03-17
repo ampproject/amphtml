@@ -58,6 +58,9 @@ export class AmpAdUIHandler {
     /** @private {!AMP.BaseElement} */
     this.baseInstance_ = baseInstance;
 
+    /** @private {!Element} */
+    this.element_ = baseInstance.element;
+
     /** @private @const {!Document} */
     this.doc_ = baseInstance.win.document;
 
@@ -142,7 +145,7 @@ export class AmpAdUIHandler {
    * @private
    */
   displayNoContentUI_() {
-    if (getAdContainer(this.baseInstance_.element) == 'AMP-STICKY-AD') {
+    if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {
       // Special case: force collapse sticky-ad if no content.
       this.baseInstance_./*OK*/collapse();
       this.state = AdDisplayState.LOADED_NO_CONTENT;
@@ -197,6 +200,53 @@ export class AmpAdUIHandler {
 
     this.baseInstance_.element.appendChild(uiComponent);
     return uiComponent;
+  }
+
+  /**
+   * @param {number|string|undefined} height
+   * @param {number|string|undefined} width
+   * @param {number} iframeHeight
+   * @param {number} iframeWidth
+   * @return {!Promise<!Object>}
+   */
+  updateSize(height, width, iframeHeight, iframeWidth) {
+    // Calculate new width and height of the container to include the padding.
+    // If padding is negative, just use the requested width and height directly.
+    let newHeight, newWidth;
+    height = parseInt(height, 10);
+    if (!isNaN(height)) {
+      newHeight = Math.max(this.element_./*OK*/offsetHeight +
+          height - iframeHeight, height);
+    }
+    width = parseInt(width, 10);
+    if (!isNaN(width)) {
+      newWidth = Math.max(this.element_./*OK*/offsetWidth +
+          width - iframeWidth, width);
+    }
+
+    /** @type {!Object<!boolean, number|undefined, number|undefined>} */
+    const resizeInfo = {
+      success: true,
+      newWidth,
+      newHeight,
+    };
+
+    if (!newHeight && !newWidth) {
+      return Promise.reject(new Error('undefined width and height'));
+    }
+
+    if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {
+      // Special case: force collapse sticky-ad if no content.
+      resizeInfo.success = false;
+      return Promise.resolve(resizeInfo);
+    }
+    return this.baseInstance_.attemptChangeSize(
+        newHeight, newWidth).then(() => {
+          return resizeInfo;
+        }, () => {
+          resizeInfo.success = false;
+          return resizeInfo;
+        });
   }
 }
 
