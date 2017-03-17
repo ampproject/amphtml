@@ -27,6 +27,7 @@ describe('Platform', () => {
   let isEdge;
   let isWebKit;
   let majorVersion;
+  let iosVersion;
 
   beforeEach(() => {
     isIos = false;
@@ -38,6 +39,7 @@ describe('Platform', () => {
     isEdge = false;
     isWebKit = false;
     majorVersion = 0;
+    iosVersion = '';
   });
 
   function testUserAgent(userAgentString) {
@@ -51,6 +53,7 @@ describe('Platform', () => {
     expect(platform.isEdge()).to.equal(isEdge);
     expect(platform.isWebKit()).to.equal(isWebKit);
     expect(platform.getMajorVersion()).to.equal(majorVersion);
+    expect(platform.getIosVersionString()).to.equal(iosVersion);
   }
 
   it('should tolerate empty or null', () => {
@@ -64,6 +67,7 @@ describe('Platform', () => {
     isSafari = true;
     isWebKit = true;
     majorVersion = 8;
+    iosVersion = '8.0';
     testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X)' +
         ' AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0' +
         ' Mobile/12A4345d Safari/600.1.4');
@@ -74,6 +78,7 @@ describe('Platform', () => {
     isSafari = true;
     isWebKit = true;
     majorVersion = 9;
+    iosVersion = '9.3';
     testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
         ' AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0' +
         ' Mobile/13E230 Safari/601.1');
@@ -84,9 +89,21 @@ describe('Platform', () => {
     isSafari = true;
     isWebKit = true;
     majorVersion = 0;
+    iosVersion = '9.3';
     testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
         ' AppleWebKit/601.1.46 (KHTML, like Gecko)' +
         ' Mobile/13E230 Safari/601.1');
+  });
+
+  it('iPhone ios 10.2.1', () => {
+    isIos = true;
+    isSafari = true;
+    isWebKit = true;
+    majorVersion = 10;
+    iosVersion = '10.2.1';
+    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 10_2_1 like Mac OS X)' +
+        ' AppleWebKit/602.4.6 (KHTML, like Gecko) Version/10.0' +
+        ' Mobile/14D27 Safari/602.1');
   });
 
   it('iPad 2', () => {
@@ -94,6 +111,7 @@ describe('Platform', () => {
     isSafari = true;
     isWebKit = true;
     majorVersion = 7;
+    iosVersion = '7.0';
     testUserAgent('Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X)' +
         ' AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0' +
         ' Mobile/11A465 Safari/9537.53');
