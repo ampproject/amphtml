@@ -116,12 +116,9 @@ export class AmpSlideScroll extends BaseSlides {
     this.action_ = null;
 
     /** @private {boolean} */
-    this.isDisableCssSnapExperimentOn_ = isExperimentOn(this.win,
-        'slidescroll-disable-css-snap');
-
-    /** @private {boolean} */
-    this.shouldDisableCssSnap_ = startsWith(
-        platformFor(this.win).getIosVersionString(), '10.3');
+    this.shouldDisableCssSnap_ = isExperimentOn(this.win,
+        'slidescroll-disable-css-snap') &&
+        startsWith(platformFor(this.win).getIosVersionString(), '10.3');
   }
 
   /** @override */
@@ -138,7 +135,7 @@ export class AmpSlideScroll extends BaseSlides {
         getStyle(this.element, 'scrollSnapType') != undefined);
 
     // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
-    if (this.isDisableCssSnapExperimentOn_ && this.shouldDisableCssSnap_) {
+    if (this.shouldDisableCssSnap_) {
       this.hasNativeSnapPoints_ = false;
     }
 
@@ -156,7 +153,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.slidesContainer_.setAttribute('aria-live', 'polite');
 
     // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
-    if (this.isDisableCssSnapExperimentOn_ && this.shouldDisableCssSnap_) {
+    if (this.shouldDisableCssSnap_) {
       this.slidesContainer_.classList.add('-amp-slidescroll-no-snap');
     }
 
@@ -181,7 +178,7 @@ export class AmpSlideScroll extends BaseSlides {
       slideWrapper.classList.add('-amp-slide-item');
 
       // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
-      if (this.isDisableCssSnapExperimentOn_ && this.shouldDisableCssSnap_) {
+      if (this.shouldDisableCssSnap_) {
         slideWrapper.classList.add('-amp-slidescroll-no-snap');
       }
 
