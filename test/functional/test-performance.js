@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import {resetServiceForTesting} from '../../src/service';
 import {resourcesForDoc} from '../../src/resources';
 import {viewerForDoc} from '../../src/viewer';
+import * as lolex from 'lolex';
+import {getMode} from '../../src/mode';
 
-
-describe('performance', () => {
+describes.realWin('performance', {amp: true}, env => {
   let sandbox;
   let perf;
   let clock;
+  let win;
+  let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
-    perf = installPerformanceService(window);
-  });
-
-  afterEach(() => {
-    resetServiceForTesting(window, 'performance');
-    sandbox.restore();
+    win = env.win;
+    sandbox = env.sandbox;
+    ampdoc = env.ampdoc;
+    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    perf = installPerformanceService(win);
   });
 
   describe('when viewer is not ready', () => {
@@ -137,7 +135,7 @@ describe('performance', () => {
     let viewerSendMessageStub;
 
     beforeEach(() => {
-      viewer = viewerForDoc(window.document);
+      viewer = viewerForDoc(ampdoc);
       viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     });
 
@@ -400,7 +398,7 @@ describe('performance', () => {
 
       it('should call the flush callback', () => {
         const payload = {
-          ampexp: '$internalRuntimeVersion$',
+          ampexp: getMode(win).rtvVersion,
         };
         expect(viewerSendMessageStub.withArgs('sendCsi', payload,
             /* cancelUnsent */true)).to.have.callCount(0);
@@ -432,7 +430,7 @@ describe('performance', () => {
       return res;
     }
 
-    const resources = resourcesForDoc(window.document);
+    const resources = resourcesForDoc(ampdoc);
     const resourcesMock = sandbox.mock(resources);
     perf.resources_ = resources;
 
@@ -473,7 +471,7 @@ describe('performance', () => {
     }
 
     beforeEach(() => {
-      viewer = viewerForDoc(window.document);
+      viewer = viewerForDoc(ampdoc);
       sandbox.stub(viewer, 'whenMessagingReady')
           .returns(Promise.resolve());
       viewerSendMessageStub = sandbox.stub(viewer,
@@ -494,6 +492,8 @@ describe('performance', () => {
       // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
       // reporting regression is confirmed.
       sandbox.stub(perf, 'whenViewportLayoutCompleteLegacy_')
+          .returns(whenViewportLayoutCompletePromise);
+      sandbox.stub(perf, 'whenViewportLayoutComplete_')
           .returns(whenViewportLayoutCompletePromise);
       return viewer.whenMessagingReady();
     });
@@ -608,15 +608,17 @@ describe('performance', () => {
   });
 });
 
-describes.fakeWin('performance with experiment', {amp: true}, env => {
+describes.realWin('performance with experiment', {amp: true}, env => {
 
   let win;
   let perf;
   let viewerSendMessageStub;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
-    const viewer = viewerForDoc(win.document);
+    sandbox = env.sandbox;
+    const viewer = viewerForDoc(env.ampdoc);
     viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
     sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
@@ -629,7 +631,7 @@ describes.fakeWin('performance with experiment', {amp: true}, env => {
     return perf.coreServicesAvailable().then(() => {
       perf.flush();
       expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
-        ampexp: '$internalRuntimeVersion$,legacy-cdn-domain',
+        ampexp: getMode(win).rtvVersion + ',legacy-cdn-domain',
       });
     });
   });
@@ -639,7 +641,7 @@ describes.fakeWin('performance with experiment', {amp: true}, env => {
     return perf.coreServicesAvailable().then(() => {
       perf.flush();
       expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
-        ampexp: '$internalRuntimeVersion$',
+        ampexp: getMode(win).rtvVersion,
       });
     });
   });
