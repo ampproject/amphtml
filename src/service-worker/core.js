@@ -380,7 +380,7 @@ const cachePromise = self.caches.open('cdn-js').then(result => {
 
 /**
  * Fetches the request, and stores it in the cache. Since we only store one
- * version of each file, we'll prune all older versions after we cache this.
+ * version of each file, we'll purge all older versions after we cache this.
  *
  * @param {!Cache} cache
  * @param {!Request} request
@@ -398,9 +398,9 @@ export function fetchJsFile(cache, request, requestPath, requestVersion) {
     // things up.
     diversions(cache).then(diversions => {
       // Prune old versions from the cache.
-      // This also prunes old diversions of other scripts, see purge for
+      // This also purges old diversions of other scripts, see `purge` for
       // detailed information.
-      purge(cache, requestPath, requestVersion, diversions);
+      purge(cache, requestVersion, diversions);
 
       if (!diversions) {
         return;
@@ -425,18 +425,16 @@ export function fetchJsFile(cache, request, requestPath, requestVersion) {
 
 /**
  * Purges our cache of old files.
- * - If path and version are given, then we will only delete files that match
- *   path but are not version. I.e., we we clean up old versions of path.
- * - Else, we cleanup any non-production script that's not a current diversion.
  *
  * @param {!Cache} cache
- * @param {string} path
  * @param {string} version
  * @param {?Array<!RtvVersion>} diversions
  * @return {!Promise<undefined>}
  */
-function purge(cache, path, version, diversions) {
+function purge(cache, version, diversions) {
   return cache.keys().then(requests => {
+    const downloadedEnv = rtvEnvironment(version);
+
     for (let i = 0; i < requests.length; i++) {
       const request = requests[i];
       const url = request.url;
@@ -445,46 +443,39 @@ function purge(cache, path, version, diversions) {
         continue;
       }
 
-      if (path === cachedData.pathname) {
-        // This is case 1.
-        if (version === cachedData.rtv) {
-          continue;
-        }
-      } else {
-        // This is case 2.
-        if (BASE_RTV_ENVIRONMENT === rtvEnvironment(cachedData.rtv)) {
-          continue;
-        }
+      // We never delete files that match the version we just downloaded.
+      if (version === cachedData.rtv) {
+        continue;
       }
 
-      if (diversions) {
-        // This is case 3.
-        if (diversions.indexOf(cachedData.rtv) > -1) {
+      const cachedEnv = rtvEnvironment(cachedData.rtv);
+      const cachedIsProd = BASE_RTV_ENVIRONMENT === cachedEnv;
+
+
+      if (cachedIsProd) {
+        // We prune production environments based on the downloaded version.
+        // But, if we downloaded a diversion, we have no information on what
+        // the current production version is. So, don't delete the production
+        // script.
+        if (BASE_RTV_ENVIRONMENT !== downloadedEnv) {
           continue;
         }
       } else {
-        // This is case 4.
-        if (BASE_RTV_ENVIRONMENT !== rtvEnvironment(cachedData.rtv)) {
+        // We will only delete a diversion if we know for certain the versions
+        // that are diversions.
+        if (!diversions || diversions.indexOf(cachedData.rtv) > -1) {
           continue;
         }
       }
 
       // At this point, we know the cached file is either:
-      // - An old production env of newly fetched script (falls through case
-      //   1 and 3).
-      // - An old diversion of newly fetched script (falls through case 1 and
-      //   3).
-      // - An old diversion of any other script (falls through case 2 and  3).
+      // - An old production env.
+      // - An old diversion.
       // Importantly, it CANNOT be one of the following:
-      // - The newly fetched version script (case 1)
-      // - Any production env of any other script (case 2)
-      // - A current diversion the newly fetched script (case 3)
-      // - A current diversion of any other script (case 3)
-      // - Any suspected diversion of the newly fetched script (case 4)
-      // - Any suspected diversion of any other script (case 4)
-      //
-      // Note case 2 and 4 guarantee truthiness, so other scripts won't be
-      // deleted unless they're guaranteed old diversions.
+      // - The same version as the newly fetched script (This is the current
+      //   production version or a current diversion).
+      // - Any production version when we downloaded a diversion.
+      // - A current diversion, or a suspected diversion.
       cache.delete(request);
     }
   });
