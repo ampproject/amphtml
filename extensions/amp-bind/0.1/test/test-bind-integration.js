@@ -64,6 +64,12 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
         waitForEvent('amp:bind:setState'));
   }
 
+  function waitForAllMutations() {
+    return bindForDoc(ampdoc).then(bind => {
+      return bind.waitForAllMutationsForTesting();
+    });
+  }
+
   describe('detecting bindings under dynamic tags', () => {
     it('should NOT bind blacklisted attributes', () => {
       const template = fixture.doc.getElementById('dynamicTemplate');
@@ -73,7 +79,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
                          '[style]="background=color:black"></p>';
       const textElement = div.firstElementChild;
       template.parentElement.appendChild(textElement);
-      return bind.waitForAllMutationsForTesting().then(() => {
+      return waitForAllMutations().then(() => {
         expect(textElement.getAttribute('onclick')).to.be.null;
         expect(textElement.getAttribute('onmouseover')).to.be.null;
         expect(textElement.getAttribute('style')).to.be.null;
@@ -86,7 +92,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       const aElement = div.firstElementChild;
       const template = fixture.doc.getElementById('dynamicTemplate');
       template.parentElement.appendChild(aElement);
-      return bind.waitForAllMutationsForTesting().then(() => {
+      return waitForAllMutations().then(() => {
         expect(aElement.getAttribute('href')).to.be.null;
       });
     });
