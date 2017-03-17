@@ -42,6 +42,13 @@ function networkImplementationTag(type) {
 export class AmpAd extends AMP.BaseElement {
 
   /** @override */
+  isLayoutSupported(unusedLayout) {
+    // TODO(jridgewell, #5980, #8218): ensure that unupgraded calls are not
+    // done for `isLayoutSupported`.
+    return true;
+  }
+
+  /** @override */
   upgradeCallback() {
     // Block whole ad load if a consent is needed.
     /** @const {string} */

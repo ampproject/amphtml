@@ -208,12 +208,6 @@ const EXPERIMENTS = [
     Spec: 'https://github.com/ampproject/amphtml/issues/3813',
   },
   {
-    id: 'sentinel-name-change',
-    name: 'Changed sentinel name from amp3pSentinel to sentinel',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6990',
-    Spec: '',
-  },
-  {
     id: 'variable-filters',
     name: 'Format to apply filters to analytics variables',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
@@ -265,6 +259,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6057',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-sortable-table/amp-sortable-table.md',
+  },
+  {
+    id: 'slidescroll-disable-css-snap',
+    name: 'Slidescroll disable css snap',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
+    spec: 'https://github.com/ampproject/amphtml/issues/7670',
   },
 ];
 
