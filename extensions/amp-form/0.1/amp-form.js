@@ -282,6 +282,8 @@ export class AmpForm {
   submit_() {
     let varSubsFields = [];
     const formData = {};
+    const formObject = this.getFormAsObject_();
+
     // Only allow variable substitutions for inputs if the form action origin
     // is the canonical origin.
     // TODO(mkhatib, #7168): Consider relaxing this.
@@ -294,9 +296,9 @@ export class AmpForm {
           'origin submit action: %s', this.form_);
     }
 
-    new FormData(this.form_).forEach((fieldValue, fieldName) => {
-      formData['formFields[' + fieldName + ']'] = fieldValue;
-    });
+    for (const k in formObject) {
+      formData['formFields[' + k + ']'] = formObject[k][0];
+    }
     formData['formId'] = this.form_.id;
 
     if (this.xhrAction_) {
