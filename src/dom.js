@@ -536,6 +536,17 @@ export function ancestorElementsByTag(child, tagName) {
   });
 }
 
+/**
+ * Iterate over an array-like
+ * @param {!IArrayLike<T>} iterable
+ * @param {!function(T, number)} cb
+ * @template T
+ */
+export function iterateCursor(iterable, cb) {
+  for (let i = 0; i < iterable.length; i++) {
+    cb(iterable[i], i);
+  }
+}
 
 /**
  * This method wraps around window's open method. It first tries to execute

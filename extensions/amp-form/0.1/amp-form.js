@@ -19,6 +19,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
 import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {documentInfoForDoc} from '../../../src/document-info';
+import {iterateCursor} from '../../../src/dom';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -798,7 +799,11 @@ export class AmpFormService {
    * @private
    */
   installSubmissionHandlers_(forms) {
-    toArray(forms).forEach((form, index) => {
+    if (!forms) {
+      return;
+    }
+
+    iterateCursor(forms, (form, index) => {
       if (!form.classList.contains('i-amphtml-form')) {
         new AmpForm(form, `amp-form-${index}`);
       }

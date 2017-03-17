@@ -44,7 +44,7 @@ export class ValidationBubble {
     /** @private {?Element} */
     this.currentTargetElement_ = null;
 
-    /** @private {string} *///
+    /** @private {string} */
     this.currentMessage_ = '';
 
     /** @private {boolean} */

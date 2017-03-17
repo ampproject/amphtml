@@ -290,7 +290,7 @@ export class Log {
         const nextConstant = splitMessage.shift();
         messageArray.push(val);
         pushIfNonEmpty(messageArray, nextConstant.trim());
-        formatted += this.toString_(val) + nextConstant;
+        formatted += toString(val) + nextConstant;
       }
       const e = new Error(formatted);
       e.fromAssert = true;
@@ -391,20 +391,21 @@ export class Log {
       error.message = error.message.replace(USER_ERROR_SENTINEL, '');
     }
   }
-
-  /**
-   * @param {string|!Element} val
-   * @return {string}
-   * @private
-   */
-  toString_(val) {
-    if (val.nodeType == 1) { // check if it's an Element instance
-      return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-    }
-    return /** @type {string} */ (val);
-  }
-
 }
+
+
+/**
+ * @param {string|!Element} val
+ * @return {string}
+ */
+function toString(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
+
 
 /**
  * @param {!Array} array
