@@ -938,8 +938,6 @@ function createBaseCustomElementClass(win) {
 
         try {
           this.layout_ = applyLayout_(this);
-          this.assertLayout_();
-          this.implementation_.layout_ = this.layout_;
         } catch (e) {
           reportError(e, this);
         }
