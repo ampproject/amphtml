@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {cidForDoc} from '../../../src/cid';
-import {fromClass} from '../../../src/service';
+import {registerServiceBuilder, getService} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {storageForDoc} from '../../../src/storage';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
@@ -107,7 +107,9 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
     this.storagePromise_ = storageForDoc(ampdoc);
     if (!this.userNotificationManager_) {
-      this.userNotificationManager_ = getUserNotificationManager_(this.win);
+      installUserNotificationManager(window);
+      this.userNotificationManager_ = getService(window,
+          'userNotificationManager');
     }
 
     /** @private {?string} */
@@ -435,21 +437,11 @@ export class UserNotificationManager {
 
 /**
  * @param {!Window} window
- * @return {!UserNotificationManager}
- * @private
- */
-function getUserNotificationManager_(window) {
-  return fromClass(window, 'userNotificationManager',
-      UserNotificationManager);
-}
-
-/**
- * @param {!Window} window
- * @return {!UserNotificationManager}
- * @private
  */
 export function installUserNotificationManager(window) {
-  return getUserNotificationManager_(window);
+  registerServiceBuilder(window,
+      'userNotificationManager',
+      UserNotificationManager);
 }
 
 installUserNotificationManager(AMP.win);
