@@ -39,6 +39,7 @@ const resolved = Promise.resolve();
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  * @return {!Chunks}
+ * @private
  */
 function getChunkServiceForDoc_(nodeOrAmpDoc) {
   registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
