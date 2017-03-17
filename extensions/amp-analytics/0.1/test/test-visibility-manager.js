@@ -720,185 +720,110 @@ describes.realWin('EmbedAnalyticsRoot', {
   });
 });
 
+// TODO(aghassemi, #5286) Not possible to stub the IntersectionObserver polyfill
+// until we have support for dependency mocking (#5286)
+describe.configure()
+.skip(() => !nativeIntersectionObserverSupported(window))
+.run('', () => {
+  describes.realWin('VisibilityManager integrated', {amp: true}, env => {
+    let win, doc;
+    let ampdoc;
+    let viewer;
+    let resources;
+    let clock, startTime;
+    let scrollTop;
+    let inObCallback;
+    let observeSpy;
+    let unobserveSpy;
+    let visibility;
+    let ampElement;
+    let eventPromise, eventResolver;
+    let eventPromise2, eventResolver2;
+    let readyPromise, readyResolver;
 
-describes.realWin('VisibilityManager integrated', {amp: true}, env => {
-  let win, doc;
-  let ampdoc;
-  let viewer;
-  let resources;
-  let clock, startTime;
-  let scrollTop;
-  let inObCallback;
-  let observeSpy;
-  let unobserveSpy;
-  let visibility;
-  let ampElement;
-  let eventPromise, eventResolver;
-  let eventPromise2, eventResolver2;
-  let readyPromise, readyResolver;
+    beforeEach(function() {
+      win = env.win;
+      doc = win.document;
+      ampdoc = env.ampdoc;
+      viewer = win.services.viewer.obj;
+      resources = win.services.resources.obj;
 
-  beforeEach(function() {
-    win = env.win;
-    doc = win.document;
-    ampdoc = env.ampdoc;
-    viewer = win.services.viewer.obj;
-    resources = win.services.resources.obj;
+      clock = sandbox.useFakeTimers();
+      startTime = 10000;
+      clock.tick(startTime);
 
-    clock = sandbox.useFakeTimers();
-    startTime = 10000;
-    clock.tick(startTime);
+      const docState = documentStateFor(win);
+      sandbox.stub(docState, 'isHidden', () => false);
+      sandbox.stub(viewer, 'getFirstVisibleTime', () => startTime);
 
-    const docState = documentStateFor(win);
-    sandbox.stub(docState, 'isHidden', () => false);
-    sandbox.stub(viewer, 'getFirstVisibleTime', () => startTime);
+      ampElement = doc.createElement('amp-img');
+      ampElement.id = 'abc';
+      ampElement.setAttribute('width', '100');
+      ampElement.setAttribute('height', '100');
+      doc.body.appendChild(ampElement);
+      const resource = resources.getResourceForElement(ampElement);
+      scrollTop = 10;
+      sandbox.stub(resource, 'getLayoutBox',
+          () => layoutRectLtwh(0, scrollTop, 100, 100));
 
-    ampElement = doc.createElement('amp-img');
-    ampElement.id = 'abc';
-    ampElement.setAttribute('width', '100');
-    ampElement.setAttribute('height', '100');
-    doc.body.appendChild(ampElement);
-    const resource = resources.getResourceForElement(ampElement);
-    scrollTop = 10;
-    sandbox.stub(resource, 'getLayoutBox',
-        () => layoutRectLtwh(0, scrollTop, 100, 100));
-
-    observeSpy = sandbox.stub();
-    unobserveSpy = sandbox.stub();
-    const inob = callback => {
-      inObCallback = callback;
-      return {
-        observe: observeSpy,
-        unobserve: unobserveSpy,
+      observeSpy = sandbox.stub();
+      unobserveSpy = sandbox.stub();
+      const inob = callback => {
+        inObCallback = callback;
+        return {
+          observe: observeSpy,
+          unobserve: unobserveSpy,
+        };
       };
-    };
-    if (nativeIntersectionObserverSupported(ampdoc.win)) {
       sandbox.stub(win, 'IntersectionObserver', inob);
-    } else {
-      // TODO(aghassemi, #5286) Not possible to stub the polyfill until we have
-      // support for dependency mocking (#5286)
-      this.skip();
-    }
-
-    readyPromise = new Promise(resolve => {
-      readyResolver = resolve;
-    });
-    eventPromise = new Promise(resolve => {
-      eventResolver = resolve;
-    });
-    eventPromise2 = new Promise(resolve => {
-      eventResolver2 = resolve;
-    });
-  });
-
-  function fireIntersect(intersectPercent) {
-    scrollTop = 100 - intersectPercent;
-    const entry = makeIntersectionEntry(
-        [0, scrollTop, 100, 100], [0, 0, 100, 100]);
-    inObCallback([entry]);
-  }
-
-  function makeIntersectionEntry(boundingClientRect, rootBounds) {
-    boundingClientRect = layoutRectLtwh.apply(null, boundingClientRect);
-    rootBounds = layoutRectLtwh.apply(null, rootBounds);
-    const intersect = rectIntersection(boundingClientRect, rootBounds);
-    const ratio = (intersect.width * intersect.height) /
-        (boundingClientRect.width * boundingClientRect.height);
-    return {
-      intersectionRect: intersect,
-      boundingClientRect,
-      rootBounds,
-      intersectionRatio: ratio,
-      target: ampElement,
-    };
-  }
-
-  function isModelResolved(model) {
-    return !model.eventResolver_;
-  }
-
-  it('should execute "visible" trigger with simple spec', () => {
-    viewer.setVisibilityState_(VisibilityState.VISIBLE);
-    visibility = new VisibilityManagerForDoc(ampdoc);
-
-    visibility.listenElement(ampElement, {}, readyPromise, eventResolver);
-
-    return Promise.resolve().then(() => {
-      clock.tick(100);
-      fireIntersect(25); // visible
-      readyResolver();
-      return eventPromise;
-    }).then(state => {
-      expect(state).to.contains({
-        backgrounded: 0,
-        backgroundedAtStart: 0,
-        elementHeight: 100,
-        elementWidth: 100,
-        elementX: 0,
-        elementY: 75,
-        firstSeenTime: 100,
-        fistVisibleTime: 100,
-        lastSeenTime: 100,
-        lastVisibleTime: 100,
-        loadTimeVisibility: 25,
-        maxVisiblePercentage: 25,
-        minVisiblePercentage: 25,
-        totalVisibleTime: 0,
-        maxContinuousVisibleTime: 0,
+      readyPromise = new Promise(resolve => {
+        readyResolver = resolve;
+      });
+      eventPromise = new Promise(resolve => {
+        eventResolver = resolve;
+      });
+      eventPromise2 = new Promise(resolve => {
+        eventResolver2 = resolve;
       });
     });
-  });
 
-  it('should triger "visible" with no duration condition', () => {
-    viewer.setVisibilityState_(VisibilityState.VISIBLE);
-    visibility = new VisibilityManagerForDoc(ampdoc);
+    function fireIntersect(intersectPercent) {
+      scrollTop = 100 - intersectPercent;
+      const entry = makeIntersectionEntry(
+          [0, scrollTop, 100, 100], [0, 0, 100, 100]);
+      inObCallback([entry]);
+    }
 
-    visibility.listenElement(
-        ampElement,
-        {visiblePercentageMin: 20},
-        readyPromise,
-        eventResolver);
+    function makeIntersectionEntry(boundingClientRect, rootBounds) {
+      boundingClientRect = layoutRectLtwh.apply(null, boundingClientRect);
+      rootBounds = layoutRectLtwh.apply(null, rootBounds);
+      const intersect = rectIntersection(boundingClientRect, rootBounds);
+      const ratio = (intersect.width * intersect.height) /
+          (boundingClientRect.width * boundingClientRect.height);
+      return {
+        intersectionRect: intersect,
+        boundingClientRect,
+        rootBounds,
+        intersectionRatio: ratio,
+        target: ampElement,
+      };
+    }
 
-    // add multiple triggers on the same element
-    visibility.listenElement(
-        ampElement,
-        {visiblePercentageMin: 30},
-        readyPromise,
-        eventResolver2);
+    function isModelResolved(model) {
+      return !model.eventResolver_;
+    }
 
-    // "observe" should not have been called since resource not loaded yet.
-    expect(observeSpy).to.be.called;
-    readyResolver();
-    return Promise.resolve().then(() => {
-      expect(observeSpy).to.be.calledWith(ampElement);
+    it('should execute "visible" trigger with simple spec', () => {
+      viewer.setVisibilityState_(VisibilityState.VISIBLE);
+      visibility = new VisibilityManagerForDoc(ampdoc);
 
-      clock.tick(135);
-      fireIntersect(5); // below visiblePercentageMin, no trigger
+      visibility.listenElement(ampElement, {}, readyPromise, eventResolver);
 
-      clock.tick(100);
-      fireIntersect(25); // above spec 1 min visible, trigger callback 1
-      return eventPromise.then(state => {
-        expect(state).to.contains({
-          backgrounded: 0,
-          backgroundedAtStart: 0,
-          elementHeight: 100,
-          elementWidth: 100,
-          elementX: 0,
-          elementY: 75,
-          firstSeenTime: 135,
-          fistVisibleTime: 235,  // 135 + 100
-          lastSeenTime: 235,
-          lastVisibleTime: 235,
-          loadTimeVisibility: 5,
-          maxVisiblePercentage: 25,
-          minVisiblePercentage: 25,
-          totalVisibleTime: 0,  // duration metrics are always 0
-          maxContinuousVisibleTime: 0,  // as it triggers immediately
-        });
-        expect(unobserveSpy).to.not.be.called;
-
+      return Promise.resolve().then(() => {
         clock.tick(100);
-        fireIntersect(35); // above spec 2 min visible, trigger callback 2
-        return eventPromise2;
+        fireIntersect(25); // visible
+        readyResolver();
+        return eventPromise;
       }).then(state => {
         expect(state).to.contains({
           backgrounded: 0,
@@ -906,109 +831,182 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
           elementHeight: 100,
           elementWidth: 100,
           elementX: 0,
-          elementY: 65,
-          firstSeenTime: 135,
-          fistVisibleTime: 335,  // 235 + 100
-          lastSeenTime: 335,
-          lastVisibleTime: 335,
-          loadTimeVisibility: 5,
-          maxVisiblePercentage: 35,
-          minVisiblePercentage: 35,
-          totalVisibleTime: 0,  // duration metrics is always 0
-          maxContinuousVisibleTime: 0,  // as it triggers immediately
-        });
-      });
-    }).then(() => {
-      expect(unobserveSpy).to.be.called; // unobserve when all callback fired
-    });
-  });
-
-  it('should trigger "visible" with duration condition', () => {
-    viewer.setVisibilityState_(VisibilityState.VISIBLE);
-    visibility = new VisibilityManagerForDoc(ampdoc);
-
-    visibility.listenElement(
-        ampElement,
-        {continuousTimeMin: 1000},
-        readyPromise,
-        eventResolver);
-    const model = visibility.models_[0];
-
-    readyResolver();
-    return Promise.resolve().then(() => {
-      expect(observeSpy).to.be.calledWith(ampElement);
-
-      clock.tick(100);
-      fireIntersect(25); // visible
-      expect(isModelResolved(model)).to.be.false;
-
-      clock.tick(999);
-      fireIntersect(0); // this will reset the timer for continuous time
-      expect(isModelResolved(model)).to.be.false;
-
-      clock.tick(100);
-      fireIntersect(5); // visible again.
-      expect(isModelResolved(model)).to.be.false;
-
-      clock.tick(100);
-      // Enters background. this will reset the timer for continuous time
-      viewer.setVisibilityState_(VisibilityState.HIDDEN);
-      expect(isModelResolved(model)).to.be.false;
-
-      clock.tick(2000); // this 2s should not be counted in visible time
-      expect(isModelResolved(model)).to.be.false;
-      viewer.setVisibilityState_(VisibilityState.VISIBLE); // now we're back
-
-      clock.tick(100);
-      fireIntersect(35); // keep being visible
-      expect(isModelResolved(model)).to.be.false;
-      clock.tick(899); // not yet!
-      expect(isModelResolved(model)).to.be.false;
-      clock.tick(1);  // now fire
-      expect(isModelResolved(model)).to.be.true;
-      return eventPromise.then(state => {
-        expect(state).to.contains({
-          backgrounded: 1,
-          backgroundedAtStart: 0,
-          elementHeight: 100,
-          elementWidth: 100,
-          elementX: 0,
-          elementY: 65,
+          elementY: 75,
           firstSeenTime: 100,
           fistVisibleTime: 100,
-          lastSeenTime: 4299,
-          lastVisibleTime: 4299,
+          lastSeenTime: 100,
+          lastVisibleTime: 100,
           loadTimeVisibility: 25,
-          maxVisiblePercentage: 35,
-          minVisiblePercentage: 5,
-          totalVisibleTime: 2099,
-          maxContinuousVisibleTime: 1000,
+          maxVisiblePercentage: 25,
+          minVisiblePercentage: 25,
+          totalVisibleTime: 0,
+          maxContinuousVisibleTime: 0,
         });
       });
     });
-  });
 
-  it('should populate "backgrounded" and "backgroundedAtStart"', () => {
-    viewer.setVisibilityState_(VisibilityState.HIDDEN);
-    visibility = new VisibilityManagerForDoc(ampdoc);
+    it('should triger "visible" with no duration condition', () => {
+      viewer.setVisibilityState_(VisibilityState.VISIBLE);
+      visibility = new VisibilityManagerForDoc(ampdoc);
 
-    visibility.listenElement(
-        ampElement,
-        {},
-        readyPromise,
-        eventResolver);
+      visibility.listenElement(
+          ampElement,
+          {visiblePercentageMin: 20},
+          readyPromise,
+          eventResolver);
 
-    viewer.setVisibilityState_(VisibilityState.VISIBLE);
-    readyResolver();
-    return Promise.resolve().then(() => {
-      expect(observeSpy).to.be.calledWith(ampElement);
+      // add multiple triggers on the same element
+      visibility.listenElement(
+          ampElement,
+          {visiblePercentageMin: 30},
+          readyPromise,
+          eventResolver2);
 
-      clock.tick(100);
-      fireIntersect(25); // visible
-      return eventPromise.then(state => {
-        expect(state).to.contains({
-          backgroundedAtStart: 1,
-          backgrounded: 1,
+      // "observe" should not have been called since resource not loaded yet.
+      expect(observeSpy).to.be.called;
+      readyResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(135);
+        fireIntersect(5); // below visiblePercentageMin, no trigger
+
+        clock.tick(100);
+        fireIntersect(25); // above spec 1 min visible, trigger callback 1
+        return eventPromise.then(state => {
+          expect(state).to.contains({
+            backgrounded: 0,
+            backgroundedAtStart: 0,
+            elementHeight: 100,
+            elementWidth: 100,
+            elementX: 0,
+            elementY: 75,
+            firstSeenTime: 135,
+            fistVisibleTime: 235,  // 135 + 100
+            lastSeenTime: 235,
+            lastVisibleTime: 235,
+            loadTimeVisibility: 5,
+            maxVisiblePercentage: 25,
+            minVisiblePercentage: 25,
+            totalVisibleTime: 0,  // duration metrics are always 0
+            maxContinuousVisibleTime: 0,  // as it triggers immediately
+          });
+          expect(unobserveSpy).to.not.be.called;
+
+          clock.tick(100);
+          fireIntersect(35); // above spec 2 min visible, trigger callback 2
+          return eventPromise2;
+        }).then(state => {
+          expect(state).to.contains({
+            backgrounded: 0,
+            backgroundedAtStart: 0,
+            elementHeight: 100,
+            elementWidth: 100,
+            elementX: 0,
+            elementY: 65,
+            firstSeenTime: 135,
+            fistVisibleTime: 335,  // 235 + 100
+            lastSeenTime: 335,
+            lastVisibleTime: 335,
+            loadTimeVisibility: 5,
+            maxVisiblePercentage: 35,
+            minVisiblePercentage: 35,
+            totalVisibleTime: 0,  // duration metrics is always 0
+            maxContinuousVisibleTime: 0,  // as it triggers immediately
+          });
+        });
+      }).then(() => {
+        expect(unobserveSpy).to.be.called; // unobserve when all callback fired
+      });
+    });
+
+    it('should trigger "visible" with duration condition', () => {
+      viewer.setVisibilityState_(VisibilityState.VISIBLE);
+      visibility = new VisibilityManagerForDoc(ampdoc);
+
+      visibility.listenElement(
+          ampElement,
+          {continuousTimeMin: 1000},
+          readyPromise,
+          eventResolver);
+      const model = visibility.models_[0];
+
+      readyResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(100);
+        fireIntersect(25); // visible
+        expect(isModelResolved(model)).to.be.false;
+
+        clock.tick(999);
+        fireIntersect(0); // this will reset the timer for continuous time
+        expect(isModelResolved(model)).to.be.false;
+
+        clock.tick(100);
+        fireIntersect(5); // visible again.
+        expect(isModelResolved(model)).to.be.false;
+
+        clock.tick(100);
+        // Enters background. this will reset the timer for continuous time
+        viewer.setVisibilityState_(VisibilityState.HIDDEN);
+        expect(isModelResolved(model)).to.be.false;
+
+        clock.tick(2000); // this 2s should not be counted in visible time
+        expect(isModelResolved(model)).to.be.false;
+        viewer.setVisibilityState_(VisibilityState.VISIBLE); // now we're back
+
+        clock.tick(100);
+        fireIntersect(35); // keep being visible
+        expect(isModelResolved(model)).to.be.false;
+        clock.tick(899); // not yet!
+        expect(isModelResolved(model)).to.be.false;
+        clock.tick(1);  // now fire
+        expect(isModelResolved(model)).to.be.true;
+        return eventPromise.then(state => {
+          expect(state).to.contains({
+            backgrounded: 1,
+            backgroundedAtStart: 0,
+            elementHeight: 100,
+            elementWidth: 100,
+            elementX: 0,
+            elementY: 65,
+            firstSeenTime: 100,
+            fistVisibleTime: 100,
+            lastSeenTime: 4299,
+            lastVisibleTime: 4299,
+            loadTimeVisibility: 25,
+            maxVisiblePercentage: 35,
+            minVisiblePercentage: 5,
+            totalVisibleTime: 2099,
+            maxContinuousVisibleTime: 1000,
+          });
+        });
+      });
+    });
+
+    it('should populate "backgrounded" and "backgroundedAtStart"', () => {
+      viewer.setVisibilityState_(VisibilityState.HIDDEN);
+      visibility = new VisibilityManagerForDoc(ampdoc);
+
+      visibility.listenElement(
+          ampElement,
+          {},
+          readyPromise,
+          eventResolver);
+
+      viewer.setVisibilityState_(VisibilityState.VISIBLE);
+      readyResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(100);
+        fireIntersect(25); // visible
+        return eventPromise.then(state => {
+          expect(state).to.contains({
+            backgroundedAtStart: 1,
+            backgrounded: 1,
+          });
         });
       });
     });
