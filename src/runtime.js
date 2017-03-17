@@ -70,6 +70,7 @@ import {installViewerServiceForDoc, setViewerVisibilityState,} from
 import {installViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
+import {installBatchedXhrService} from './service/batched-xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {parseUrl} from './url';
 import {platformFor} from './platform';
@@ -118,6 +119,7 @@ export function installRuntimeServices(global) {
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
+  installBatchedXhrService(global);
   installTemplatesService(global);
 }
 
