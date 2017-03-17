@@ -940,7 +940,6 @@ function createBaseCustomElementClass(win) {
           this.layout_ = applyLayout_(this);
           this.assertLayout_();
           this.implementation_.layout_ = this.layout_;
-          this.implementation_.firstAttachedCallback();
         } catch (e) {
           reportError(e, this);
         }
