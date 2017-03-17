@@ -17,7 +17,6 @@
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
 import {fromClassForDoc, getExistingServiceForDoc} from './service';
-import {isExperimentOnAllowUrlOverride} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
 
@@ -229,12 +228,6 @@ class StartupTask extends Task {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private @const {boolean} */
-    this.active_ = isExperimentOnAllowUrlOverride(this.win_, 'chunked-amp');
-    if (!this.active_) {
-      return;
-    }
-
     /** @private {?./service/viewer-impl.Viewer} */
     this.viewer_ = null;
 
@@ -262,7 +255,7 @@ class StartupTask extends Task {
   immediateTriggerCondition_() {
     // Run in a micro task when the doc is visible. Otherwise, run after
     // having yielded to the event queue once.
-    return !this.active_ || this.isVisible_();
+    return this.isVisible_();
   }
 
   /** @override */
