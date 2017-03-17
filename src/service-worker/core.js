@@ -591,7 +591,7 @@ export function handleFetch(request, maybeClientId) {
 
   // Rewrite unversioned requests to the versioned RTV URL. This is a noop if
   // it's already versioned.
-  request = normalizedRequest(request, rtv);
+  const rtvRequest = normalizedRequest(request, rtv);
 
   // Wait for the cachePromise to resolve. This is necessary
   // since the SW thread may be killed and restarted at any time.
@@ -606,7 +606,7 @@ export function handleFetch(request, maybeClientId) {
     return clientsVersion[clientId] = getCachedVersion(cache, pathname, rtv,
         environment);
   }).then(version => {
-    const versionedRequest = normalizedRequest(request, version);
+    const versionedRequest = normalizedRequest(rtvRequest, version);
 
     return cache.match(versionedRequest).then(response => {
       // Cache hit!
@@ -615,7 +615,7 @@ export function handleFetch(request, maybeClientId) {
         // they requested this exact version; If we served an old version,
         // let's get the new one.
         if (version !== rtv && rtv == BASE_RTV_VERSION) {
-          fetchJsFile(cache, request, pathname, rtv);
+          fetchJsFile(cache, rtvRequest, pathname, rtv);
         }
 
         return response;
@@ -624,6 +624,12 @@ export function handleFetch(request, maybeClientId) {
       // If not, let's fetch and cache the request.
       return fetchJsFile(cache, versionedRequest, pathname, version);
     });
+  }).catch((err) => {
+    // Throw error out of band.
+    Promise.reject(err);
+
+    // Something went wrong. Fall back to fetching the original request.
+    return fetch(request);
   });
 }
 
