@@ -228,7 +228,10 @@ var Fusion;
 Fusion.on;
 Fusion.on.warning;
 Fusion.loadAds;
+data.mediaZone;
+data.layout;
 data.space;
+data.parameters;
 
 // holder.js
 data.queue;
