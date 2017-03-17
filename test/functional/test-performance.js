@@ -19,26 +19,25 @@ import {
   installPerformanceService,
   performanceFor,
 } from '../../src/service/performance-impl';
-import {getService, resetServiceForTesting} from '../../src/service';
 import {resourcesForDoc} from '../../src/resources';
 import {viewerForDoc} from '../../src/viewer';
+import * as lolex from 'lolex';
+import {getMode} from '../../src/mode';
 
-
-describe('performance', () => {
+describes.realWin('performance', {amp: true}, env => {
   let sandbox;
   let perf;
   let clock;
+  let win;
+  let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
+    win = env.win;
+    sandbox = env.sandbox;
+    ampdoc = env.ampdoc;
+    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
     installPerformanceService(window);
     perf = performanceFor(window);
-  });
-
-  afterEach(() => {
-    resetServiceForTesting(window, 'performance');
-    sandbox.restore();
   });
 
   describe('when viewer is not ready', () => {
@@ -141,7 +140,7 @@ describe('performance', () => {
     let viewerSendMessageStub;
 
     beforeEach(() => {
-      viewer = viewerForDoc(window.document);
+      viewer = viewerForDoc(ampdoc);
       viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     });
 
@@ -403,66 +402,24 @@ describe('performance', () => {
       });
 
       it('should call the flush callback', () => {
-        expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+        const payload = {
+          ampexp: getMode(win).rtvVersion,
+        };
+        expect(viewerSendMessageStub.withArgs('sendCsi', payload,
             /* cancelUnsent */true)).to.have.callCount(0);
         // coreServicesAvailable calls flush once.
         return perf.coreServicesAvailable().then(() => {
-          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
               /* cancelUnsent */true)).to.have.callCount(1);
           perf.flush();
-          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
               /* cancelUnsent */true)).to.have.callCount(2);
           perf.flush();
-          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
               /* cancelUnsent */true)).to.have.callCount(3);
         });
       });
-
-      it('should setFlushParams', () => {
-        sandbox.stub(perf, 'whenViewportLayoutComplete_')
-            .returns(Promise.resolve());
-        perf.coreServicesAvailable();
-        resetServiceForTesting(window, 'documentInfo');
-        const info = {
-          get: () => {
-            return {
-              canonicalUrl: 'https://foo.bar/baz',
-              pageViewId: 12345,
-              sourceUrl: 'https://hello.world/baz/#development',
-            };
-          },
-        };
-        getService(window, 'documentInfo', () => info);
-
-        const ad1 = document.createElement('amp-ad');
-        ad1.setAttribute('type', 'abc');
-        const ad2 = document.createElement('amp-ad');
-        ad2.setAttribute('type', 'xyz');
-        const ad3 = document.createElement('amp-ad');
-        sandbox.stub(perf.resources_, 'get').returns([
-          {element: document.createElement('amp-img')},
-          {element: document.createElement('amp-img')},
-          {element: document.createElement('amp-anim')},
-          {element: ad1},
-          {element: ad2},
-          {element: ad3},
-        ]);
-
-        return perf.setDocumentInfoParams_().then(() => {
-          expect(viewerSendMessageStub.withArgs('setFlushParams')
-              .lastCall.args[1]).to.be.jsonEqual({
-                sourceUrl: 'https://hello.world/baz/',
-                'amp-img': 2,
-                'amp-anim': 1,
-                'amp-ad': 3,
-                'ad-abc': 1,
-                'ad-xyz': 1,
-                'ad-null': 1,
-              });
-        });
-      });
     });
-
   });
 
   // TODO(dvoytenko, #7815): re-enable once the reporting regression is
@@ -478,7 +435,7 @@ describe('performance', () => {
       return res;
     }
 
-    const resources = resourcesForDoc(window.document);
+    const resources = resourcesForDoc(ampdoc);
     const resourcesMock = sandbox.mock(resources);
     perf.resources_ = resources;
 
@@ -519,7 +476,7 @@ describe('performance', () => {
     }
 
     beforeEach(() => {
-      viewer = viewerForDoc(window.document);
+      viewer = viewerForDoc(ampdoc);
       sandbox.stub(viewer, 'whenMessagingReady')
           .returns(Promise.resolve());
       viewerSendMessageStub = sandbox.stub(viewer,
@@ -540,6 +497,8 @@ describe('performance', () => {
       // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
       // reporting regression is confirmed.
       sandbox.stub(perf, 'whenViewportLayoutCompleteLegacy_')
+          .returns(whenViewportLayoutCompletePromise);
+      sandbox.stub(perf, 'whenViewportLayoutComplete_')
           .returns(whenViewportLayoutCompletePromise);
       return viewer.whenMessagingReady();
     });
@@ -654,15 +613,17 @@ describe('performance', () => {
   });
 });
 
-describes.fakeWin('performance with experiment', {amp: true}, env => {
+describes.realWin('performance with experiment', {amp: true}, env => {
 
   let win;
   let perf;
   let viewerSendMessageStub;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
-    const viewer = viewerForDoc(win.document);
+    sandbox = env.sandbox;
+    const viewer = viewerForDoc(env.ampdoc);
     viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
     sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
@@ -675,8 +636,9 @@ describes.fakeWin('performance with experiment', {amp: true}, env => {
     sandbox.stub(perf, 'getHostname_', () => 'cdn.ampproject.org');
     return perf.coreServicesAvailable().then(() => {
       perf.flush();
-      expect(viewerSendMessageStub)
-          .to.be.calledWith('sendCsi', {ampexp: 'legacy-cdn-domain'});
+      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
+        ampexp: getMode(win).rtvVersion + ',legacy-cdn-domain',
+      });
     });
   });
 
@@ -684,7 +646,9 @@ describes.fakeWin('performance with experiment', {amp: true}, env => {
     sandbox.stub(perf, 'getHostname_', () => 'curls.cdn.ampproject.org');
     return perf.coreServicesAvailable().then(() => {
       perf.flush();
-      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', undefined);
+      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
+        ampexp: getMode(win).rtvVersion,
+      });
     });
   });
 });

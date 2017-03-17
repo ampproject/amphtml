@@ -71,12 +71,12 @@ startupChunk(self.document, function initial() {
   installPerformanceService(self);
   /** @const {!./service/performance-impl.Performance} */
   const perf = performanceFor(self);
+  fontStylesheetTimeout(self);
   perf.tick('is');
   installStyles(self.document, cssText, () => {
     startupChunk(self.document, function services() {
       // Core services.
       installRuntimeServices(self);
-      fontStylesheetTimeout(self);
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
