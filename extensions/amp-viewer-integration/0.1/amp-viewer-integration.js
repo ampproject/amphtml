@@ -116,11 +116,13 @@ export class AmpViewerIntegration {
             e.source === source &&
             data.app == APP &&
             data.name == 'handshake-poll') {
-          if (!e.ports || !e.ports.length) {
+          if (this.isWebView_ && (!e.ports || !e.ports.length)) {
             throw new Error(
               'Did not receive communication port from the Viewer!');
           }
-          resolve(e.ports[0]);
+          const port = this.isWebView_ ? e.ports[0] : new WindowPortEmulator(
+            this.win, dev().assertString(this.unconfirmedViewerOrigin_));
+          resolve(port);
           unlisten();
         }
       });
