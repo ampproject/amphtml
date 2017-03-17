@@ -120,8 +120,9 @@ export class AmpViewerIntegration {
             throw new Error(
               'Did not receive communication port from the Viewer!');
           }
-          const port = this.isWebView_ ? e.ports[0] : new WindowPortEmulator(
-            this.win, dev().assertString(this.unconfirmedViewerOrigin_));
+          const port = e.ports && e.ports.length > 0 ? e.ports[0] :
+            new WindowPortEmulator(
+              this.win, dev().assertString(this.unconfirmedViewerOrigin_));
           resolve(port);
           unlisten();
         }
