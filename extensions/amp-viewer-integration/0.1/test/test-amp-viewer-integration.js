@@ -316,13 +316,14 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     it('should parseMessage correctly', () => {
       const obj = {bla: 'la'};
       const json = JSON.stringify(obj);
+      const badJson = "{a:b";
       let parsedCorrectly;
-      parsedCorrectly = parseMessage(json, true /* isWebView */);
+      parsedCorrectly = parseMessage(json);
       expect(parsedCorrectly.bla).to.equal('la');
-      parsedCorrectly = parseMessage(obj, false /* isWebView */);
+      parsedCorrectly = parseMessage(obj);
       expect(parsedCorrectly.bla).to.equal('la');
-      expect(
-        parseMessage('should return null', true /* isWebView */)).to.be.null;
+      expect(parseMessage('should return null')).to.be.null;
+      expect(parseMessage(badJson)).to.be.null;
     });
   });
 });

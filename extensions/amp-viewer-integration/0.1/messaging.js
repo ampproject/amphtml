@@ -52,14 +52,14 @@ export let RequestHandler;
   * @param {*} message
   * @return {?Message}
   */
-export function parseMessage(message, isWebview_) {
-  if (!isWebview_) {
-    return message;
+export function parseMessage(message) {
+  if (typeof message != 'string') {
+    return /** @type {Message} */(message);
   }
-  if (!(typeof message == 'string') || message.charAt(0) != '{') {
+  if (message.charAt(0) != '{') {
     return null;
   }
-  return tryParseJson(message);
+  return /** @type {?Message} */ (tryParseJson(message) || null);
 }
 
 /**
@@ -174,14 +174,14 @@ export class Messaging {
    */
   handleMessage_(event) {
     dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
-    const message = parseMessage(event.data, this.isWebview_);
+    const message = parseMessage(event.data);
     if (!message) {
       return;
     }
     if (message.type == MessageType.REQUEST) {
-      this.handleRequest_(message);
+      this.handleRequest_(dev().assert(message));
     } else if (message.type == MessageType.RESPONSE) {
-      this.handleResponse_(message);
+      this.handleResponse_(dev().assert(message));
     }
   }
 
