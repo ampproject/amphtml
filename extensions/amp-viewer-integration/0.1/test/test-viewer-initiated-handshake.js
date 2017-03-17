@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpViewerIntegration} from '../amp-viewer-integration';
-import {WebviewViewerForTesting} from './viewer-initiated-handshake-viewer-for-testing';
+import {
+    WebviewViewerForTesting,
+} from './viewer-initiated-handshake-viewer-for-testing';
 
 
 describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
