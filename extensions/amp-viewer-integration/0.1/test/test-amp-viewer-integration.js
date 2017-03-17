@@ -313,7 +313,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       });
     });
 
-    it.only('should parseMessage correctly', () => {
+    it('should parseMessage correctly', () => {
       const obj = {bla: 'la'};
       const json = JSON.stringify(obj);
       let parsedCorrectly;
