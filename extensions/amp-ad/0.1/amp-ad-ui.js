@@ -232,7 +232,7 @@ export class AmpAdUIHandler {
     };
 
     if (!newHeight && !newWidth) {
-      return Promise.reject('undefined width and height');
+      return Promise.reject(new Error('undefined width and height'));
     }
 
     if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {

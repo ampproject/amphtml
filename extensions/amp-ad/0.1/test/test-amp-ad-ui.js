@@ -176,7 +176,7 @@ describes.realWin('amp-ad-ui handler', {
       it('should reject on special case undefined sizes', () => {
         const attemptChangeSizeSpy = sandbox.spy(adImpl, 'attemptChangeSize');
         return uiHandler.updateSize(undefined, undefined, 0, 0).catch(e => {
-          expect(e).to.equal('undefined width and height');
+          expect(e.message).to.equal('undefined width and height');
           expect(attemptChangeSizeSpy).to.not.be.called;
         });
       });
