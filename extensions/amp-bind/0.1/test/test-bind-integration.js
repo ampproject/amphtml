@@ -65,9 +65,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   }
 
   function waitForAllMutations() {
-    return bindForDoc(ampdoc).then(bind => {
-      return bind.waitForAllMutationsForTesting();
-    });
+    return bindForDoc(ampdoc).then(unusedBind =>
+        waitForEvent('amp:bind:mutated'));
   }
 
   describe('detecting bindings under dynamic tags', () => {
