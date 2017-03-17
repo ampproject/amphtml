@@ -30,9 +30,13 @@ import {Activity} from './activity-impl';
 import {Cid} from './cid-impl';
 import {
     InstrumentationService,
-    instrumentationServiceForDoc,
+    instrumentationServicePromiseForDoc,
 } from './instrumentation';
-import {ExpansionOptions, variableServiceFor} from './variables';
+import {
+  ExpansionOptions,
+  installVariableService,
+  variableServiceFor,
+} from './variables';
 import {ANALYTICS_CONFIG} from './vendors';
 
 // Register doc-service factory.
@@ -41,7 +45,7 @@ AMP.registerServiceForDoc(
 AMP.registerServiceForDoc('activity', Activity);
 AMP.registerServiceForDoc('cid', Cid);
 
-variableServiceFor(AMP.win);
+installVariableService(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
@@ -139,7 +143,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     return this.consentPromise_
         .then(this.fetchRemoteConfig_.bind(this))
-        .then(() => instrumentationServiceForDoc(this.getAmpDoc()))
+        .then(() => instrumentationServicePromiseForDoc(this.getAmpDoc()))
         .then(instrumentation => {
           this.instrumentation_ = instrumentation;
         })
