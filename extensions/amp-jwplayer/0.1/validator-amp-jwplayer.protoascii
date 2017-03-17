@@ -17,39 +17,15 @@
 tags: {  # amp-jwplayer
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-jwplayer extension .js script"
   satisfies: "amp-jwplayer extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-jwplayer"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-jwplayer"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-jwplayer"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    value: "amp-jwplayer"
-    mandatory: true
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-jwplayer-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-jwplayer.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-jwplayer>
   html_format: AMP
@@ -71,8 +47,8 @@ tags: {  # <amp-jwplayer>
     mandatory_oneof: "data-media-id or data-playlist-id"
     value_regex_casei: "[0-9a-z]{8}"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-jwplayer.html"
- amp_layout: {
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-jwplayer"
+  amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
