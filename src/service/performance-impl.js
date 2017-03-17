@@ -34,8 +34,8 @@ const QUEUE_LIMIT = 50;
 /**
  * @typedef {{
  *   label: string,
- *   opt_from: (string|null|undefined),
- *   opt_value: (number|undefined)
+ *   delta: (number|null|undefined),
+ *   value: (number|null|undefined)
  * }}
  */
 let TickEventDef;
@@ -229,23 +229,15 @@ export class Performance {
    * @param {string} label The variable name as it will be reported.
    *     See TICKEVENTS.md for available metrics, and edit this file
    *     when adding a new metric.
-   * @param {?string=} opt_from The label of a previous tick to use as a
-   *    relative start for this tick.
-   * @param {number=} opt_value The time to record the tick at. Optional, if
-   *    not provided, use the current time.
-   * @param {number=} tickDelta The delta. Call tickDelta instead of setting
+   * @param {number=} opt_delta The delta. Call tickDelta instead of setting
    *     this directly.
    */
-  tick(label, opt_from, opt_value, opt_delta) {
-    opt_from = opt_from == undefined ? null : opt_from;
-    opt_value = (opt_value == undefined && opt_delta == undefined)
-        ? this.win.Date.now()
-        : opt_value;
+  tick(label, opt_delta) {
+    const value = (opt_delta == undefined) ? this.win.Date.now() : undefined;
 
     const data = {
       label,
-      from: opt_from,
-      value: opt_value,
+      value,
       delta: opt_delta,
     };
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
@@ -269,7 +261,7 @@ export class Performance {
    * @param {number} value The value in milliseconds that should be ticked.
    */
   tickDelta(label, value) {
-    this.tick(label, undefined, undefined, value);
+    this.tick(label, value);
   }
 
   /**
@@ -327,7 +319,7 @@ export class Performance {
   /**
    * Queues the events to be flushed when tick function is set.
    *
-   * @param {!Object} data Tick data to be queued.
+   * @param {TickEventDef} data Tick data to be queued.
    * @private
    */
   queueTick_(data) {

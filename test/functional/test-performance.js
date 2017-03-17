@@ -54,7 +54,6 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_[0])
           .to.be.jsonEqual({
             label: 'test',
-            from: null,
             delta: 99,
           });
     });
@@ -76,19 +75,7 @@ describes.realWin('performance', {amp: true}, env => {
 
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        from: null,
         value: 150,
-      });
-    });
-
-    it('should save all 3 arguments as queued tick event if present', () => {
-      clock.tick(150);
-      perf.tick('start0', 'start1', 300);
-
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'start0',
-        from: 'start1',
-        value: 300,
       });
     });
 
@@ -105,7 +92,6 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_.length).to.equal(50);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        from: null,
         value: tickTime,
       });
 
@@ -114,12 +100,10 @@ describes.realWin('performance', {amp: true}, env => {
 
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start1',
-        from: null,
         value: tickTime,
       });
       expect(perf.events_[49]).to.be.jsonEqual({
         label: 'start50',
-        from: null,
         value: tickTime + 1,
       });
     });
@@ -339,7 +323,7 @@ describes.realWin('performance', {amp: true}, env => {
       it('should forward all queued tick events', () => {
         perf.tick('start0');
         clock.tick(1);
-        perf.tick('start1', 'start0');
+        perf.tick('start1');
 
         expect(perf.events_.length).to.equal(2);
 
@@ -347,13 +331,11 @@ describes.realWin('performance', {amp: true}, env => {
           expect(viewerSendMessageStub.withArgs('tick').getCall(0).args[1])
               .to.be.jsonEqual({
                 label: 'start0',
-                from: null,
                 value: 0,
               });
           expect(viewerSendMessageStub.withArgs('tick').getCall(1).args[1])
               .to.be.jsonEqual({
                 label: 'start1',
-                from: 'start0',
                 value: 1,
               });
         });
@@ -374,19 +356,17 @@ describes.realWin('performance', {amp: true}, env => {
         return perf.coreServicesAvailable().then(() => {
           clock.tick(100);
           perf.tick('start0');
-          perf.tick('start1', 'start0', 300);
+          perf.tick('start1', 300);
 
           expect(viewerSendMessageStub.withArgs('tick').getCall(2).args[1])
               .to.be.jsonEqual({
                 label: 'start0',
-                from: null,
                 value: 100,
               });
           expect(viewerSendMessageStub.withArgs('tick').getCall(3).args[1])
               .to.be.jsonEqual({
                 label: 'start1',
-                from: 'start0',
-                value: 300,
+                delta: 300,
               });
         });
       });
@@ -544,7 +524,7 @@ describes.realWin('performance', {amp: true}, env => {
             expect(tickSpy).to.have.callCount(3);
             expect(tickSpy.getCall(1).args[0]).to.equal('ofv');
             expect(tickSpy.getCall(2).args[0]).to.equal('pc');
-            expect(Number(tickSpy.getCall(2).args[3])).to.equal(400);
+            expect(Number(tickSpy.getCall(2).args[1])).to.equal(400);
           });
         });
       });
@@ -557,7 +537,7 @@ describes.realWin('performance', {amp: true}, env => {
           expect(tickSpy).to.have.callCount(2);
           expect(tickSpy.firstCall.args[0]).to.equal('ol');
           expect(tickSpy.secondCall.args[0]).to.equal('pc');
-          expect(Number(tickSpy.secondCall.args[3])).to.equal(1);
+          expect(Number(tickSpy.secondCall.args[1])).to.equal(1);
         });
       });
     });
