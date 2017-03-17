@@ -36,8 +36,8 @@ describes.realWin('performance', {amp: true}, env => {
     sandbox = env.sandbox;
     ampdoc = env.ampdoc;
     clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
-    installPerformanceService(window);
-    perf = performanceFor(window);
+    installPerformanceService(env.win);
+    perf = performanceFor(env.win);
   });
 
   describe('when viewer is not ready', () => {
