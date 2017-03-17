@@ -58,7 +58,7 @@ const BASE_RTV_VERSION = self.AMP_CONFIG.v;
  * @const
  * @type {RtvEnvironment}
  */
-const BASE_RTV_ENVIRONMENT = BASE_RTV_VERSION.substr(0, 2);
+const BASE_RTV_ENVIRONMENT = rtvEnvironment(BASE_RTV_VERSION);
 
 /**
  * Our cache of CDN JS files.
@@ -118,7 +118,7 @@ const CDN_JS_REGEX = new RegExp(
     // Require the CDN URL origin at the beginning.
     `^${urls.cdn.replace(/\./g, '\\.')}` +
     // Allow, but don't require, RTV.
-    `(?:/rtv/((\\d{2})\\d{13,}))?` +
+    `(?:/rtv/(\\d{2}\\d{13,}))?` +
     // Require text "/v0"
     `(/v0` +
       // Allow, but don't require, an extension under the v0 directory.
@@ -130,6 +130,7 @@ const CDN_JS_REGEX = new RegExp(
 
 /**
  * Determines if a URL is a request to a CDN JS file.
+ *
  * @param {string} url
  * @return {boolean}
  * @visibleForTesting
@@ -139,10 +140,18 @@ export function isCdnJsFile(url) {
 }
 
 /**
+ * Returns the environment of the RTV.
+ * @param {!RtvVersion} rtv
+ * @return {!RtvEnvironment}
+ */
+function rtvEnvironment(rtv) {
+  return rtv.substr(0, 2);
+}
+
+/**
  * Extracts the data from the request URL.
  * @param {string} url
  * @return {{
- *   environment: !RtvEnvironment,
  *   explicitRtv: !RtvVersion,
  *   pathname: string,
  *   rtv: !RtvVersion,
@@ -154,12 +163,12 @@ export function requestData(url) {
   if (!match) {
     return null;
   }
-  return {
-    environment: match[2] || BASE_RTV_ENVIRONMENT,
+  const data = {
     explicitRtv: match[1] || '',
-    pathname: match[3],
+    pathname: match[2],
     rtv: match[1] || BASE_RTV_VERSION,
   };
+  return data;
 }
 
 /**
@@ -443,7 +452,7 @@ function purge(cache, path, version, diversions) {
         }
       } else {
         // This is case 2.
-        if (BASE_RTV_ENVIRONMENT === cachedData.environment) {
+        if (BASE_RTV_ENVIRONMENT === rtvEnvironment(cachedData.rtv)) {
           continue;
         }
       }
@@ -455,7 +464,7 @@ function purge(cache, path, version, diversions) {
         }
       } else {
         // This is case 4.
-        if (BASE_RTV_ENVIRONMENT !== cachedData.environment) {
+        if (BASE_RTV_ENVIRONMENT !== rtvEnvironment(cachedData.rtv)) {
           continue;
         }
       }
@@ -487,15 +496,13 @@ function purge(cache, path, version, diversions) {
  * main binary and the first requested file.
  *
  * @param {!Cache} cache
- * @param {string} requestPath
  * @param {!RtvVersion} requestVersion
- * @param {!RtvEnvironment} requestEnv
+ * @param {string} requestPath
  * @return {!Promise<!RtvVersion>}
  * @visibleForTesting
  */
-export function getCachedVersion(cache, requestPath, requestVersion,
-    requestEnv) {
-
+export function getCachedVersion(cache, requestVersion, requestPath) {
+  const requestEnv = rtvEnvironment(requestVersion);
   // If a request comes in for a version that does not match the SW's
   // environment (eg, a percent diversion when the SW is using the production
   // env), we must serve with the requested version.
@@ -520,12 +527,12 @@ export function getCachedVersion(cache, requestPath, requestVersion,
         continue;
       }
 
-      const {pathname, rtv, environment} = data;
+      const {pathname, rtv} = data;
 
       // We will not stale serve a version that does not match the request's
       // environment. This is so cached percent diversions will not be "stale"
       // served when requesting a production script.
-      if (requestEnv !== environment) {
+      if (requestEnv !== rtvEnvironment(rtv)) {
         continue;
       }
 
@@ -587,7 +594,7 @@ export function handleFetch(request, maybeClientId) {
 
   // Closure Compiler!
   const clientId = /** @type {string} */(maybeClientId);
-  const {pathname, rtv, environment} = data;
+  const {pathname, rtv} = data;
 
   // Rewrite unversioned requests to the versioned RTV URL. This is a noop if
   // it's already versioned.
@@ -603,8 +610,7 @@ export function handleFetch(request, maybeClientId) {
     }
 
     // If not, let's find the version to serve up.
-    return clientsVersion[clientId] = getCachedVersion(cache, pathname, rtv,
-        environment);
+    return clientsVersion[clientId] = getCachedVersion(cache, rtv, pathname);
   }).then(version => {
     const versionedRequest = normalizedRequest(request, version);
 

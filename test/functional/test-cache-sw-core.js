@@ -637,14 +637,14 @@ runner.run('Cache SW', () => {
     });
 
     it('returns cached rtv version, if file is cached', () => {
-      return sw.getCachedVersion(cache, '/v0.js', rtv, '01').then(version => {
+      return sw.getCachedVersion(cache, rtv, '/v0.js').then(version => {
         expect(version).to.equal(prevRtv);
       });
     });
 
     it('defaults to requested version, if file no files are cached', () => {
       keys.length = 0;
-      return sw.getCachedVersion(cache, '/v0.js', prevRtv, '01')
+      return sw.getCachedVersion(cache, prevRtv, '/v0.js')
         .then(version => {
           expect(version).to.equal(prevRtv);
         });
@@ -655,7 +655,7 @@ runner.run('Cache SW', () => {
           {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-1-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-2-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-3-0.1.js`});
-      return sw.getCachedVersion(cache, '/v0.js', rtv, '01').then(version => {
+      return sw.getCachedVersion(cache, rtv, '/v0.js').then(version => {
         expect(version).to.equal(prevRtv);
       });
     });
@@ -667,7 +667,7 @@ runner.run('Cache SW', () => {
           {url: `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-3-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-4-0.1.js`});
 
-      return sw.getCachedVersion(cache, '/v0/amp-4-0.1.js', '01123', '01')
+      return sw.getCachedVersion(cache, '01123', '/v0/amp-4-0.1.js')
         .then(version => {
           expect(version).to.equal(rtv);
         });
@@ -679,7 +679,7 @@ runner.run('Cache SW', () => {
           {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-2-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-3-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${rtv}/v0.js`});
-      return sw.getCachedVersion(cache, '/v0.js', '01123', '01')
+      return sw.getCachedVersion(cache, '01123', '/v0.js')
         .then(version => {
           expect(version).to.equal(rtv);
         });
@@ -690,7 +690,7 @@ runner.run('Cache SW', () => {
           {url: `https://cdn.ampproject.org/rtv/${blacklistedRtv}/v0.js`},
           {url: `https://cdn.ampproject.org/rtv/${blacklistedRtv}/v0/amp-2-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-3-0.1.js`});
-      return sw.getCachedVersion(cache, '/v0.js', rtv, '01').then(version => {
+      return sw.getCachedVersion(cache, rtv, '/v0.js').then(version => {
         expect(version).to.equal(prevRtv);
       });
     });
@@ -700,14 +700,14 @@ runner.run('Cache SW', () => {
           {url: `https://cdn.ampproject.org/rtv/${diversionRtv}/v0.js`},
           {url: `https://cdn.ampproject.org/rtv/${diversionRtv}/v0/amp-2-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-3-0.1.js`});
-      return sw.getCachedVersion(cache, '/v0.js', rtv, '01').then(version => {
+      return sw.getCachedVersion(cache, rtv, '/v0.js').then(version => {
         expect(version).to.equal(prevRtv);
       });
     });
 
     describe('when requesting diversion', () => {
       it('returns diversion explicitly', () => {
-        return sw.getCachedVersion(cache, '/v0.js', diversionRtv, '02')
+        return sw.getCachedVersion(cache, diversionRtv, '/v0.js')
           .then(version => {
             expect(version).to.equal(diversionRtv);
           });
@@ -716,7 +716,7 @@ runner.run('Cache SW', () => {
       it('returns diversion explicitly, even with previous diversion', () => {
         keys.splice(0, 1,
             {url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0.js`});
-        return sw.getCachedVersion(cache, '/v0.js', diversionRtv, '02')
+        return sw.getCachedVersion(cache, diversionRtv, '/v0.js')
           .then(version => {
             expect(version).to.equal(diversionRtv);
           });
