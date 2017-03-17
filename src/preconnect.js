@@ -330,20 +330,11 @@ export class Preconnect {
 }
 
 /**
- * @param {!Window} window
- * @return {!PreconnectService}
- */
-function preconnectFor(window) {
-  registerServiceBuilder(window, 'preconnect', PreconnectService);
-  return getService(window, 'preconnect');
-}
-
-
-/**
  * @param {!Element} element
  * @return {!Preconnect}
  */
 export function preconnectForElement(element) {
-  const preconnectService = preconnectFor(element.ownerDocument.defaultView);
+  registerServiceBuilder(self, 'preconnect', PreconnectService);
+  const preconnectService = getService(self, 'preconnect');
   return new Preconnect(preconnectService, element);
 }
