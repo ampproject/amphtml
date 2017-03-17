@@ -52,6 +52,9 @@ export class AmpViewerIntegration {
 
     /** @private {boolean} */
     this.isWebView_ = false;
+
+    /** @private {boolean} */
+    this.isHandShakePoll_ = false;
   }
 
   /**
@@ -64,6 +67,7 @@ export class AmpViewerIntegration {
     dev().fine(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
     this.isWebView_ = viewer.getParam('webview') == '1';
+    this.isHandShakePoll_ = viewer.hasCapability('handshakepoll');
     this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
 
     if (!this.isWebView_ && !this.unconfirmedViewerOrigin_) {
@@ -72,7 +76,7 @@ export class AmpViewerIntegration {
 
     const ampdoc = getAmpDoc(this.win.document);
 
-    if (this.isWebView_) {
+    if (this.isWebView_ || this.isHandShakePoll_) {
       let source;
       let origin;
       if (isIframed(this.win)) {
@@ -112,11 +116,14 @@ export class AmpViewerIntegration {
             e.source === source &&
             data.app == APP &&
             data.name == 'handshake-poll') {
-          if (!e.ports || !e.ports.length) {
+          if (this.isWebView_ && (!e.ports || !e.ports.length)) {
             throw new Error(
               'Did not receive communication port from the Viewer!');
           }
-          resolve(e.ports[0]);
+          const port = e.ports && e.ports.length > 0 ? e.ports[0] :
+            new WindowPortEmulator(
+              this.win, dev().assertString(this.unconfirmedViewerOrigin_));
+          resolve(port);
           unlisten();
         }
       });
