@@ -25,6 +25,8 @@ import {numeric} from '../../../src/transition';
 import {platformFor} from '../../../src/platform';
 import {timerFor} from '../../../src/timer';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {isExperimentOn} from '../../../src/experiments';
+import {startsWith} from '../../../src/string';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = '-amp-slide-item-show';
@@ -112,6 +114,11 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
+
+    /** @private {boolean} */
+    this.shouldDisableCssSnap_ = isExperimentOn(this.win,
+        'slidescroll-disable-css-snap') &&
+        startsWith(platformFor(this.win).getIosVersionString(), '10.3');
   }
 
   /** @override */
@@ -126,6 +133,12 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
+
+    // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
+    if (this.shouldDisableCssSnap_) {
+      this.hasNativeSnapPoints_ = false;
+    }
+
     this.element.classList.add('-amp-slidescroll');
 
     this.slides_ = this.getRealChildren();
@@ -138,6 +151,11 @@ export class AmpSlideScroll extends BaseSlides {
     // to it (such after pressing next) should be announced to the
     // user.
     this.slidesContainer_.setAttribute('aria-live', 'polite');
+
+    // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
+    if (this.shouldDisableCssSnap_) {
+      this.slidesContainer_.classList.add('-amp-slidescroll-no-snap');
+    }
 
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
@@ -158,6 +176,12 @@ export class AmpSlideScroll extends BaseSlides {
       slide.classList.add('amp-carousel-slide');
       slideWrapper.appendChild(slide);
       slideWrapper.classList.add('-amp-slide-item');
+
+      // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
+      if (this.shouldDisableCssSnap_) {
+        slideWrapper.classList.add('-amp-slidescroll-no-snap');
+      }
+
       this.slidesContainer_.appendChild(slideWrapper);
       this.slideWrappers_.push(slideWrapper);
     });
@@ -170,7 +194,7 @@ export class AmpSlideScroll extends BaseSlides {
         'scroll', this.scrollHandler_.bind(this));
 
     this.slidesContainer_.addEventListener(
-          'touchmove', this.touchMoveHandler_.bind(this));
+        'touchmove', this.touchMoveHandler_.bind(this));
 
     if (this.hasNativeSnapPoints_) {
       this.slidesContainer_.addEventListener(
@@ -308,7 +332,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
-    if (!this.hasNativeSnapPoints_) {
+    if (!this.isIos_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
 
@@ -344,7 +368,7 @@ export class AmpSlideScroll extends BaseSlides {
         this.elasticScrollState_ = 0;
       });
     } else if (this.elasticScrollState_ == 1 &&
-          currentScrollLeft <= this.previousScrollLeft_) {
+        currentScrollLeft <= this.previousScrollLeft_) {
       // Elastic Scroll is reversing direction take control.
       this.customSnap_(currentScrollLeft).then(() => {
         this.elasticScrollState_ = 0;
@@ -382,7 +406,7 @@ export class AmpSlideScroll extends BaseSlides {
       // Snap and stay.
       toScrollLeft = hasPrev ? this.slideWidth_ : 0;
     } else if (diff == 1 ||
-          (diff != -1 && diff == -1 * (this.noOfSlides_ - 1))) {
+        (diff != -1 && diff == -1 * (this.noOfSlides_ - 1))) {
       // Move fwd.
       toScrollLeft = hasPrev ? this.slideWidth_ * 2 : this.slideWidth_;
     } else if (diff == -1 || diff == this.noOfSlides_ - 1) {
@@ -490,8 +514,8 @@ export class AmpSlideScroll extends BaseSlides {
   showSlide_(newIndex) {
     const noOfSlides_ = this.noOfSlides_;
     if (newIndex < 0 ||
-      newIndex >= noOfSlides_ ||
-      this.slideIndex_ == newIndex) {
+        newIndex >= noOfSlides_ ||
+        this.slideIndex_ == newIndex) {
       return;
     }
     const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
