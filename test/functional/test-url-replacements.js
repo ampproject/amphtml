@@ -22,20 +22,21 @@ import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
 } from '../../src/custom-element';
-import {installCidServiceForDocForTesting,} from
+import {cidServiceForDocForTesting,} from
     '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {getDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
-import {Activity} from '../../extensions/amp-analytics/0.1/activity-impl';
+import {
+  installActivityServiceForTesting,
+} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
-import {getService, fromClassForDoc} from '../../src/service';
+import {getService} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
-import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
 import * as trackPromise from '../../src/impression';
 
@@ -67,12 +68,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
       if (opt_options) {
         if (opt_options.withCid) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
-          installCidServiceForDocForTesting(iframe.ampdoc);
+          cidServiceForDocForTesting(iframe.ampdoc);
           installCryptoService(iframe.win);
         }
         if (opt_options.withActivity) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
-          fromClassForDoc(iframe.ampdoc, 'activity', Activity);
+          installActivityServiceForTesting(iframe.ampdoc);
         }
         if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');
@@ -987,7 +988,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
       win = getFakeWindow();
       win.location = parseUrl('https://example.com/base?foo=bar&bar=abc');
       urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
-      toggleExperiment(win, 'link-url-replace', true);
     });
 
     it('should replace href', () => {
@@ -1004,14 +1004,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(a.href).to.equal('https://example.com/link?out=bar');
       urlReplacements.maybeExpandLink(a);
       expect(a.href).to.equal('https://example.com/link?out=bar');
-    });
-
-    it('should not do anything with experiment off', () => {
-      toggleExperiment(win, 'link-url-replace', false);
-      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
-      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
-      expect(a.href).to.equal('https://example.com/link?out=QUERY_PARAM(foo)');
     });
 
     it('should replace href 2', () => {

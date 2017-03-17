@@ -188,31 +188,34 @@ export class AmpSelector extends AMP.BaseElement {
     if (!el || el.hasAttribute('disabled')) {
       return;
     }
-    /** @type {?Array<string>} */
-    let selectedValues;
-    if (el.hasAttribute('selected')) {
-      if (this.isMultiple_) {
-        this.clearSelection_(el);
+
+    this.mutateElement(() => {
+      /** @type {?Array<string>} */
+      let selectedValues;
+      if (el.hasAttribute('selected')) {
+        if (this.isMultiple_) {
+          this.clearSelection_(el);
+          selectedValues = this.setInputs_();
+        }
+      } else {
+        this.setSelection_(el);
         selectedValues = this.setInputs_();
       }
-    } else {
-      this.setSelection_(el);
-      selectedValues = this.setInputs_();
-    }
 
-    // Don't trigger action if selected values haven't changed.
-    if (selectedValues) {
-      // Trigger 'select' event with two data params:
-      // 'targetOption' - option value of the selected or deselected element.
-      // 'selectedOptions' - array of option values of selected elements.
-      const name = 'select';
-      const detail = {
-        targetOption: el.getAttribute('option'),
-        selectedOptions: selectedValues,
-      };
-      const selectEvent = new CustomEvent(`amp-selector.${name}`, {detail});
-      this.action_.trigger(this.element, name, selectEvent);
-    }
+      // Don't trigger action if selected values haven't changed.
+      if (selectedValues) {
+        // Trigger 'select' event with two data params:
+        // 'targetOption' - option value of the selected or deselected element.
+        // 'selectedOptions' - array of option values of selected elements.
+        const name = 'select';
+        const detail = {
+          targetOption: el.getAttribute('option'),
+          selectedOptions: selectedValues,
+        };
+        const selectEvent = new CustomEvent(`amp-selector.${name}`, {detail});
+        this.action_.trigger(this.element, name, selectEvent);
+      }
+    });
   }
 
   /**

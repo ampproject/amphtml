@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["visibility-v2"],
+  "allow-doc-opt-in": ["visibility-v2", "visibility-v3"],
 
   "canary": 0,
   "amp-experiment": 1,
@@ -8,7 +8,6 @@
   "expDoubleclickA4A": 0.1,
   "a4aProfilingRate": 1,
   "amp-form-custom-validations": 1,
-  "link-url-replace": 1,
   "amp-form-var-sub": 1,
   "amp-form-var-sub-for-post": 1,
   "ad-type-custom": 1,
@@ -23,5 +22,6 @@
   "chunked-amp": 1,
   "visibility-v2": 1,
   "amp-selector": 1,
-  "sentinel-name-change": 1
+  "sentinel-name-change": 1,
+  "amp-auto-ads": 1
 }
