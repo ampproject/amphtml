@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Messaging, WindowPortEmulator} from './messaging';
+import {Messaging, WindowPortEmulator, parseMessage} from './messaging';
 import {TouchHandler} from './touch-handler';
 import {getAmpDoc} from '../../../src/ampdoc';
 import {isIframed} from '../../../src/dom';
@@ -109,7 +109,10 @@ export class AmpViewerIntegration {
     return new Promise(resolve => {
       const unlisten = listen(this.win, 'message', e => {
         dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type, e.data);
-        const data = this.isWebView_ ? JSON.parse(e.data) : e.data;
+        const data = parseMessage(e.data);
+        if (!data) {
+          return;
+        }
         // Viewer says: "I'm ready for you"
         if (
             e.origin === origin &&
