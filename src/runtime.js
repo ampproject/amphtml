@@ -310,18 +310,17 @@ function adoptShared(global, opts, callback) {
     }
   }
 
-  /**
-   * Registers a new custom element.
-   * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
-   */
-  global.AMP.push = function(fnOrStruct) {
-    if (maybeLoadCorrectVersion(global, fnOrStruct)) {
-      return;
-    }
-    installExtension(fnOrStruct);
-  };
-
   maybePumpEarlyFrame(global, () => {
+    /**
+     * Registers a new custom element.
+     * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+     */
+    global.AMP.push = function(fnOrStruct) {
+      if (maybeLoadCorrectVersion(global, fnOrStruct)) {
+        return;
+      }
+      installExtension(fnOrStruct);
+    };
     // Execute asynchronously scheduled elements.
     for (let i = 0; i < preregisteredExtensions.length; i++) {
       const fnOrStruct = preregisteredExtensions[i];
@@ -341,6 +340,12 @@ function adoptShared(global, opts, callback) {
     // go out of scope here, but just making sure.
     preregisteredExtensions.length = 0;
   });
+  // If the closure passed to maybePumpEarlyFrame didn't execute
+  // immediately we need to keep pushing onto preregisteredExtensions
+  if (!global.AMP.push) {
+    global.AMP.push = preregisteredExtensions.push.bind(
+      preregisteredExtensions);
+  }
 
   installAutoLoadExtensions();
 
@@ -971,7 +976,8 @@ function maybePumpEarlyFrame(win, cb) {
     cb();
     return;
   }
-  // There is definitely nothing to draw yet
+  // There is definitely nothing to draw yet, so we might as well
+  // proceed.
   if (!win.document.body) {
     cb();
     return;
