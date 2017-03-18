@@ -34,7 +34,7 @@ __Optional:__
 
 - `json` - Additional json options.
 
-  `customVars` field - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html).
+  - `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html).
 
 ```
 <amp-ad width="728" height="90"
@@ -64,7 +64,7 @@ __Optional:__
 
 - `json` - Additional json options.
 
-  `customVars` field - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html).  Also note that OpenX bidder limits these keys by the __whitelisted keys__ set on your publisher settings.
+  - `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html).  Also note that OpenX bidder limits these keys by the __whitelisted keys__ set on your publisher settings.
 
 ```
 <amp-ad width="728" height="90"
