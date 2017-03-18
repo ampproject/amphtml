@@ -60,28 +60,29 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
 
 /**
  * Method to create scoped analytics element for any element.
- * @param {!Element} element
+ * @param {!Element} parentElement
  * @param {!JSONType} config
- * @param {boolean=} force
+ * @param {boolean=} loadAnalytics
  */
-export function insertAnalyticsElement(element, config, force = false) {
-  const analyticsElem = element.ownerDocument.createElement('amp-analytics');
-  analyticsElem.setAttribute('scoped', true);
+export function insertAnalyticsElement(
+    parentElement, config, loadAnalytics = false) {
+  const analyticsElem =
+      parentElement.ownerDocument.createElement('amp-analytics');
   analyticsElem.CONFIG = config;
 
   // Force load analytics extension if script not included in page.
-  if (force) {
+  if (loadAnalytics) {
     // Get Extensions service and force load analytics extension.
-    const extensions = extensionsFor(element.ownerDocument.defaultView);
+    const extensions = extensionsFor(parentElement.ownerDocument.defaultView);
     extensions./*OK*/loadExtension('amp-analytics');
-    element.appendChild(analyticsElem);
+    parentElement.appendChild(analyticsElem);
     return;
   }
 
-  analyticsForDocOrNull(element).then(analytics => {
+  analyticsForDocOrNull(parentElement).then(analytics => {
     if (!analytics) {
       return;
     }
-    element.appendChild(analyticsElem);
+    parentElement.appendChild(analyticsElem);
   });
 }

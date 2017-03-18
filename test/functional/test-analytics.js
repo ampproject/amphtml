@@ -28,7 +28,11 @@ import {timerFor} from '../../src/timer';
 import {BaseElement} from '../../src/base-element';
 import * as sinon from 'sinon';
 
-describes.realWin('analytics', {amp: 1}, env => {
+describes.realWin('analytics', {
+  amp: {
+    extensions: ['amp-analytics'],
+  },
+}, env => {
   let sandbox;
   let timer;
   let ampdoc;
