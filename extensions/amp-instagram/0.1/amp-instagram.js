@@ -93,7 +93,7 @@ class AmpInstagram extends AMP.BaseElement {
       'The data-shortcode attribute is required for <amp-instagram> %s',
       this.element);
     this.captioned_ = this.element.hasAttribute('data-captioned') ?
-      'captioned' : '';
+      'captioned/' : '';
   }
 
   /** @override */
