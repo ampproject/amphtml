@@ -65,6 +65,9 @@ class AmpInstagram extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private {string}  */
+    this.captioned_ = '';
   }
  /**
   * @param {boolean=} opt_onLayout
