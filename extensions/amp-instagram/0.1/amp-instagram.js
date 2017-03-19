@@ -66,10 +66,10 @@ class AmpInstagram extends AMP.BaseElement {
     /** @private {?Function} */
     this.unlistenMessage_ = null;
   }
-  /**
-   * @param {boolean=} opt_onLayout
-   * @override
-   */
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
   preconnectCallback(opt_onLayout) {
     // See
     // https://instagram.com/developer/embedding/?hl=en
