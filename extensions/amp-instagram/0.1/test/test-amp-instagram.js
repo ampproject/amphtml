@@ -19,7 +19,7 @@ import {
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
 import '../amp-instagram';
-import {adopt} from '../../../../src/runtime';
+import { adopt } from '../../../../src/runtime';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -36,7 +36,7 @@ describe('amp-instagram', () => {
     sandbox.restore();
   });
 
-  function getIns(shortcode, opt_responsive, opt_beforeLayoutCallback) {
+  function getIns(shortcode, opt_responsive, opt_beforeLayoutCallback, opt_captioned) {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-instagram');
@@ -46,6 +46,9 @@ describe('amp-instagram', () => {
       ins.setAttribute('alt', 'Testing');
       if (opt_responsive) {
         ins.setAttribute('layout', 'responsive');
+      }
+      if (opt_captioned) {
+        ins.setAttribute('data-captioned', '');
       }
       ins.implementation_.getVsync = () => {
         return {
@@ -69,7 +72,7 @@ describe('amp-instagram', () => {
   function testImage(image) {
     expect(image).to.not.be.null;
     expect(image.getAttribute('src')).to.equal(
-        'https://www.instagram.com/p/fBwFP/media/?size=l');
+      'https://www.instagram.com/p/fBwFP/media/?size=l');
     expect(image.getAttribute('layout')).to.equal('fill');
     expect(image.getAttribute('alt')).to.equal('Testing');
     expect(image.getAttribute('referrerpolicy')).to.equal('origin');
@@ -82,6 +85,13 @@ describe('amp-instagram', () => {
     expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
+  function testIframeCaptioned(iframe) {
+    expect(iframe).to.not.be.null;
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/captioned/?v=4');
+    expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
+  }
+
   it('renders', () => {
     return getIns('fBwFP').then(ins => {
       testIframe(ins.querySelector('iframe'));
@@ -89,10 +99,17 @@ describe('amp-instagram', () => {
     });
   });
 
+  it('renders captioned', () => {
+    return getIns('fBwFP', undefined, undefined, true).then(ins => {
+      testIframeCaptioned(ins.querySelector('iframe'));
+      testImage(ins.querySelector('amp-img'));
+    });
+  });
+
   it('sets noprerender on amp-img', () => {
     return getIns('fBwFP').then(ins => {
       expect(ins.querySelector('amp-img').hasAttribute('noprerender'))
-          .to.be.true;
+        .to.be.true;
     });
   });
 
@@ -140,7 +157,7 @@ describe('amp-instagram', () => {
 
   it('requires data-shortcode', () => {
     expect(getIns('')).to.be.rejectedWith(
-        /The data-shortcode attribute is required for/);
+      /The data-shortcode attribute is required for/);
   });
 
   it('resizes in response to messages from Instagram iframe', () => {

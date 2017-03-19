@@ -35,13 +35,13 @@
  * the example above and will produce the correct aspect ratio.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
-import {tryParseJson} from '../../../src/json';
-import {isObject} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
+import { isLayoutSizeDefined } from '../../../src/layout';
+import { setStyles } from '../../../src/style';
+import { removeElement } from '../../../src/dom';
+import { user } from '../../../src/log';
+import { tryParseJson } from '../../../src/json';
+import { isObject } from '../../../src/types';
+import { listen } from '../../../src/event-helper';
 
 const PADDING_LEFT = 8;
 const PADDING_RIGHT = 8;
@@ -52,24 +52,24 @@ class AmpInstagram extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
-    super(element);
+      super(element);
 
-    /** @private {?Element} */
-    this.iframe_ = null;
+      /** @private {?Element} */
+      this.iframe_ = null;
 
-    /** @private {?Promise} */
-    this.iframePromise_ = null;
+      /** @private {?Promise} */
+      this.iframePromise_ = null;
 
-    /** @private {?string} */
-    this.shortcode_ = '';
+      /** @private {?string} */
+      this.shortcode_ = '';
 
-    /** @private {?Function} */
-    this.unlistenMessage_ = null;
-  }
- /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+      /** @private {?Function} */
+      this.unlistenMessage_ = null;
+    }
+    /**
+     * @param {boolean=} opt_onLayout
+     * @override
+     */
   preconnectCallback(opt_onLayout) {
     // See
     // https://instagram.com/developer/embedding/?hl=en
@@ -77,7 +77,7 @@ class AmpInstagram extends AMP.BaseElement {
     // Host instagram used for image serving. While the host name is
     // funky this appears to be stable in the post-domain sharding era.
     this.preconnect.url('https://instagram.fsnc1-1.fna.fbcdn.net',
-        opt_onLayout);
+      opt_onLayout);
   }
 
   /** @override */
@@ -88,10 +88,12 @@ class AmpInstagram extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.shortcode_ = user().assert(
-        (this.element.getAttribute('data-shortcode') ||
+      (this.element.getAttribute('data-shortcode') ||
         this.element.getAttribute('shortcode')),
-        'The data-shortcode attribute is required for <amp-instagram> %s',
-        this.element);
+      'The data-shortcode attribute is required for <amp-instagram> %s',
+      this.element);
+    this.captioned_ = this.element.hasAttribute('data-captioned') ?
+      'captioned' : '';
   }
 
   /** @override */
@@ -103,7 +105,7 @@ class AmpInstagram extends AMP.BaseElement {
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
     image.setAttribute('src', 'https://www.instagram.com/p/' +
-        encodeURIComponent(this.shortcode_) + '/media/?size=l');
+      encodeURIComponent(this.shortcode_) + '/media/?size=l');
     image.setAttribute('layout', 'fill');
     image.setAttribute('referrerpolicy', 'origin');
 
@@ -141,9 +143,10 @@ class AmpInstagram extends AMP.BaseElement {
     iframe.setAttribute('allowtransparency', 'true');
     //Add title to the iframe for better accessibility.
     iframe.setAttribute('title', 'Instagram: ' +
-        this.element.getAttribute('alt'));
+      this.element.getAttribute('alt'));
     iframe.src = 'https://www.instagram.com/p/' +
-        encodeURIComponent(this.shortcode_) + '/embed/?v=4';
+      encodeURIComponent(this.shortcode_) + '/embed/' +
+      this.captioned_ + '?v=4';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     setStyles(iframe, {
@@ -161,12 +164,12 @@ class AmpInstagram extends AMP.BaseElement {
   /** @private */
   handleInstagramMessages_(event) {
     if (event.origin != 'https://www.instagram.com' ||
-        event.source != this.iframe_.contentWindow) {
+      event.source != this.iframe_.contentWindow) {
       return;
     }
     if (!event.data ||
-        !(isObject(event.data) || event.data.indexOf('{') == 0)) {
-      return;  // Doesn't look like JSON.
+      !(isObject(event.data) || event.data.indexOf('{') == 0)) {
+      return; // Doesn't look like JSON.
     }
     const data = isObject(event.data) ? event.data : tryParseJson(event.data);
     if (data === undefined) {
@@ -175,7 +178,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (data.type == 'MEASURE' && data.details) {
       const height = data.details.height;
       this.getVsync().measure(() => {
-        if (this.iframe_./*OK*/offsetHeight !== height) {
+        if (this.iframe_. /*OK*/ offsetHeight !== height) {
           // Height returned by Instagram includes header, so
           // subtract 48px top padding
           this.attemptChangeHeight(height - PADDING_TOP).catch(() => {});
@@ -199,7 +202,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 };
 
