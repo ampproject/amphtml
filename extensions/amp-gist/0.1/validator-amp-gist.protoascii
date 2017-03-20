@@ -58,8 +58,13 @@ tags: {  # <amp-gist>
   satisfies: "amp-gist"
   requires: "amp-gist extension .js script"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-gist"
   amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
 }
