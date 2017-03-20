@@ -53,7 +53,7 @@ export const adPrefetch = {
   colombia: 'https://static.clmbtech.com/ctn/commons/js/colombia-amp.js',
 };
 
-/**
+/** 
  * URLs to connect to for a given ad type.
  *
  * This MUST be kept in sync with actual implementation.
