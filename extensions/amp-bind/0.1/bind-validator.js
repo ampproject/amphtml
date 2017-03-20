@@ -314,7 +314,6 @@ function createElementRules_() {
     'SELECT': {
       'disabled': null,
       'multiple': null,
-      'name': null,
       'required': null,
       'size': null,
     },
@@ -341,7 +340,6 @@ function createElementRules_() {
       'disabled': null,
       'maxlength': null,
       'minlength': null,
-      'name': null,
       'placeholder': null,
       'readonly': null,
       'required': null,
