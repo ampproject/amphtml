@@ -1141,7 +1141,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       },
     },
     'transport': {
-     'beacon': false,
+      'beacon': false,
       'xhrpost': false,
       'image': true,
     },
@@ -1184,9 +1184,9 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'beacon': false,
       'xhrpost': false,
       'image': true,
-      },
     },
-  });
+  },
+});
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
