@@ -209,6 +209,14 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = map({
+    'AMP-BRIGHTCOVE': {
+      'data-account': null,
+      'data-embed': null,
+      'data-player': null,
+      'data-player-id': null,
+      'data-playlist-id': null,
+      'data-video-id': null,
+    },
     'AMP-CAROUSEL': {
       'slide': null,
     },
@@ -244,6 +252,9 @@ function createElementRules_() {
           'https': true,
         },
       },
+    },
+    'AMP-YOUTUBE': {
+      'data-videoid': null,
     },
     'A': {
       'href': {
