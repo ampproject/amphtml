@@ -67,7 +67,7 @@ The following table lists the features that enable variable substitutions, as we
         <li>An origin whitelisted via the <code>amp-link-variable-allowed-origin</code> <code>meta</code> tag</li>
       </ul>
     </td>
-    <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code> (see below)</td>
+    <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
     <td width="25%">Only these variables are supported: <code>CLIENT_ID</code> and <code>QUERY_PARAM</code>.<br>See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes.</td>
   </tr>
   <tr>
