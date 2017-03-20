@@ -64,14 +64,19 @@ export function getMultiSizeDimensions(
       return;
     }
 
-    // Check that secondary size is not larger than primary size.
+   /*   
+This check renders makes it only possible to do a GCD size for the primary unit. Without the ability to put a creative wrapper on AdX demand we cannot resize the container back down to 300x250.
+By removing this requirement we set the defaut size to 300x250 for AdX support and allow the amp-ad comtainer to resize up to accomadate our direct sold sponsorhip larger ad sizes. The container will only resize downward when BTF so there is no negative effect on user experience that I've seen.
+Perhaps the better way to solve this is to include a new attribute in the amp-ad tag that allows for this option as an override. Thanks Sam smansour@hearst
+
+     // Check that secondary size is not larger than primary size.
     if (!validateDimensions(width, height,
           w => w > primaryWidth,
-          h => h > primaryHeight,
-          ({badDim, badVal}) => `Secondary ${badDim} ${badVal} ` +
-          `can't be larger than the primary ${badDim}.`)) {
-      return;
-    }
+         h => h > primaryHeight,
+         ({badDim, badVal}) => `Secondary ${badDim} ${badVal} ` +
+         `can't be larger than the primary ${badDim}.`)) {
+     return;
+   }*/
 
     // Check that if multi-size-validation is on, that the secondary sizes
     // are at least minRatio of the primary size.
