@@ -64,6 +64,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
         waitForEvent('amp:bind:setState'));
   }
 
+  /** @return {!Promise} */
   function waitForAllMutations() {
     return bindForDoc(ampdoc).then(unusedBind =>
         waitForEvent('amp:bind:mutated'));
