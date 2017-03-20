@@ -17,7 +17,7 @@
 import {loadScript, validateDataExists} from '../src/3p';
 
 /**
- * @param {!Window}  global
+ * @param {!Window} global
  * @param {!Object} data
  */
 export function colombia(global, data) {
