@@ -20,10 +20,8 @@
 var path = require('path');
 var fs = require('fs');
 
-if (process.env.OS !== 'Windows_NT') {
-  console./*OK*/ error(
-      'postinstall-windows.js: This script is for Windows only.');
-  process.exit(1);
+if (fs.existsSync('postinstall.DELETEME')) {
+	fs.unlinkSync('postinstall.DELETEME');
 }
 
 // We only want to modify the .cmd shim - this is what would run on a
