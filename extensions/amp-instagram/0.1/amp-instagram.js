@@ -16,14 +16,14 @@
 
 
 /**
- * @fileoverview Embeds an instagram photo. Captions are currently
- * not supported.
+ * @fileoverview Embeds an instagram photo.
  * The data-shortcode attribute can be easily copied from a normal instagram
  * URL.
  * Example:
  * <code>
  * <amp-instagram
  *   data-shortcode="fBwFP"
+ *   data-captioned
  *   alt="Fastest page in the west."
  *   width="320"
  *   height="392"
@@ -32,7 +32,11 @@
  * </code>
  *
  * For responsive embedding the width and height can be left unchanged from
- * the example above and will produce the correct aspect ratio.
+ * the example above and should produce the correct aspect ratio. amp-instagram
+ * will attempt to resize on load based on the height reported by the embedded
+ * frame. If captions are specified (data-captioned) then a resize will be
+ * requested every time due to the fact that it's no possible to know the height
+ * of the caption in advance.
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
