@@ -575,7 +575,7 @@ class ParsedTagSpec {
      */
     this.mandatoryAttrIds_ = [];
     /**
-     * @type {!Array<string>}
+     * @type {!Array<number>}
      * @private
      */
     this.mandatoryOneofs_ = [];
@@ -787,7 +787,7 @@ class ParsedTagSpec {
   }
 
   /**
-   * @return {!Array<string>}
+   * @return {!Array<number>}
    */
   getMandatoryOneofs() {
     return this.mandatoryOneofs_;
@@ -3243,8 +3243,8 @@ function validateAttributes(
   const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
   /** @type {!Array<boolean>} */
   let mandatoryAttrsSeen = [];  // This is a set of attr ids.
-  /** @type {!Object<string, ?>} */
-  const mandatoryOneofsSeen = Object.create(null);
+  /** @type {!Array<number>} */
+  const mandatoryOneofsSeen = [];  // This is a (small) list of interned strings.
   let parsedTriggerSpecs = [];
   /**
    * If a tag has implicit attributes, we then add these attributes as
@@ -3378,28 +3378,27 @@ function validateAttributes(
         continue;
       }
     }
-    // The "at most 1" part of mandatory_oneof: mandatory_oneof
-    // wants exactly one of the alternatives, so here
-    // we check whether we already saw another alternative
-    if (parsedAttrSpec.getSpec().mandatoryOneof &&
-        parsedAttrSpec.getSpec().mandatoryOneof in mandatoryOneofsSeen) {
-      if (amp.validator.LIGHT) {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-        return;
-      } else {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
-            context.getDocLocator(),
-            /* params */
-            [getTagSpecName(spec), parsedAttrSpec.getSpec().mandatoryOneof],
-            spec.specUrl, result);
-        continue;
-      }
-    }
     const mandatoryOneof = parsedAttrSpec.getSpec().mandatoryOneof;
     if (mandatoryOneof !== null) {
-      mandatoryOneofsSeen[mandatoryOneof] = 0;
+      // The "at most 1" part of mandatory_oneof: mandatory_oneof
+      // wants exactly one of the alternatives, so here
+      // we check whether we already saw another alternative
+      if (mandatoryOneofsSeen.indexOf(mandatoryOneof) !== -1) {
+        if (amp.validator.LIGHT) {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
+        } else {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
+              context.getDocLocator(),
+              /* params */
+              [getTagSpecName(spec), context.getInternedString(mandatoryOneof)],
+              spec.specUrl, result);
+          continue;
+        }
+      }
+      mandatoryOneofsSeen.push(mandatoryOneof);
     }
     // If the trigger does not have an if_value_regex, then proceed to add the
     // spec. If it does have an if_value_regex, then test the regex to see
@@ -3416,16 +3415,18 @@ function validateAttributes(
   // The "at least 1" part of mandatory_oneof: If none of the
   // alternatives were present, we report that an attribute is missing.
   for (const mandatoryOneof of parsedTagSpec.getMandatoryOneofs()) {
-    if (!(mandatoryOneof in mandatoryOneofsSeen)) {
+    if (mandatoryOneofsSeen.indexOf(mandatoryOneof) === -1) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
       } else {
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
             context.getDocLocator(),
-            /* params */[getTagSpecName(spec), mandatoryOneof], spec.specUrl,
-            result);
+            /* params */
+            [getTagSpecName(spec), context.getInternedString(mandatoryOneof)],
+            spec.specUrl, result);
       }
     }
   }
