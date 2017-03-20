@@ -65,5 +65,4 @@ describe('amp-gist', () => {
     expect(getIns('')).to.be.rejectedWith(
       /The data-gistid attribute is required for/);
   });
-
 });
