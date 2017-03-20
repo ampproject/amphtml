@@ -73,6 +73,17 @@ export function kixer(global, data) {
     });
   });
 
+  const unlisten = global.context.observeIntersection(function(changes) {
+    changes.forEach(function(c) {
+      if (c.intersectionRect.height > 0) {
+        if (typeof __kx_viewability.process_locked === 'function') {
+          __kx_viewability.process_locked(data.adslot);
+        }
+        unlisten();
+      }
+    });
+  });
+
   loadScript(global, 'https://cdn.kixer.com/ad/load.js', () => {
     __kxamp[data.adslot] = 1;
     __kx_ad_slots.push(data.adslot);
