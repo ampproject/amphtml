@@ -32,6 +32,10 @@ export function kixer(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
   validateData(data, ['adslot'], []);
 
+  let coords;
+  let in_view = false;
+  let view_interval;
+
   const d = global.document.createElement('div');
   d.id = '__kx_ad_' + data.adslot;
   global.document.getElementById('c').appendChild(d);
@@ -40,20 +44,32 @@ export function kixer(global, data) {
     d.removeEventListener('load', kxload, false);
     if (d.childNodes.length > 0) {
       global.context.renderStart();
+      view_interval = setInterval(function() {
+        kxview_check(); // Once the ad has loaded, start checking for an ad view
+      }, 900);
     } else {
       global.context.noContentAvailable();
     }
   };
-  d.addEventListener('load', kxload, false);
+  d.addEventListener('load', kxload, false); // Listen for the kixer load event
 
-  const unlisten = global.context.observeIntersection(function(changes) {
-    changes.forEach(function(c) {
-      if (c.intersectionRect.height > 0) {
+  const kxview_check = function() {
+    if (coords.intersectionRect.height > coords.boundingClientRect.height / 2) {
+      if (in_view === true) { // if the ad was in view on the previous interval
+        clearInterval(view_interval);
         if (typeof __kx_viewability.process_locked === 'function') {
           __kx_viewability.process_locked(data.adslot);
         }
-        unlisten();
       }
+      in_view = true;
+    } else {
+      in_view = false;
+    }
+  };
+
+  global.context.observeIntersection(function(changes) {
+    changes.forEach(function(c) {
+      coords = c;
     });
   });
 
