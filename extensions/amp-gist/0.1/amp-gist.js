@@ -14,7 +14,24 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
+/**
+ * @fileoverview Embeds a Github gist
+ *
+ * Example:
+ * <code>
+ * <amp-gist
+ *   layout="responsive"
+ *   data-gistid="a19e811dcd7df10c4da0931641538497"
+ *   width="100"
+ *   height="100">
+ * </amp-gist>
+ * </code>
+ */
+
+import {getIframe} from '../../../src/3p-frame';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 export class AmpGist extends AMP.BaseElement {
 
@@ -22,23 +39,58 @@ export class AmpGist extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {string} */
-    this.myText_ = 'hello world';
-
-    /** @private {!Element} */
-    this.container_ = this.win.document.createElement('div');
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
   }
 
-  /** @override */
-  buildCallback() {
-    this.container_.textContent = this.myText_;
-    this.element.appendChild(this.container_);
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+  /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://gist.github.com/', opt_onLayout);
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    return isLayoutSizeDefined(layout);
+  }
+
+  /**@override*/
+  layoutCallback() {
+    const gistid = user().assert(
+        this.element.getAttribute('data-gistid'),
+          'The data-gistid attribute is required for <amp-gist> %s',
+        this.element);
+    const width = this.element.getAttribute('width');
+    const height = this.element.getAttribute('height');
+    const url = 'https://gist.github.com/';
+
+    const iframe = getIframe(this.win, this.element, 'gist');
+
+    iframe.setAttribute('frameborder', 'no');
+    iframe.setAttribute('scrolling', 'no');
+
+    const src = url + encodeURIComponent(gistid) + '.pibb';
+
+    iframe.src = src;
+
+    this.applyFillContent(iframe);
+    iframe.width = width;
+    iframe.height = height;
+    this.element.appendChild(iframe);
+
+    this.iframe_ = iframe;
+
+    return this.loadPromise(iframe);
+  }
+
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
   }
 }
 
