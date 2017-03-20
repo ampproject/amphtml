@@ -3088,6 +3088,12 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
         context.getDocLocator(),
         /* params */[attrName, getTagSpecName(parsedTagSpec.getSpec())],
         context.getRules().templateSpecUrl, result);
+  } else if (attrName == 'style') {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.DISALLOWED_STYLE_ATTR,
+        context.getDocLocator(), /* params */[],
+        context.getRules().stylesSpecUrl, result);
   } else {
     context.addError(
         amp.validator.ValidationError.Severity.ERROR,
@@ -4298,12 +4304,15 @@ amp.validator.ValidationHandler =
         this.validationResult_.status =
             amp.validator.ValidationResult.Status.FAIL;
       } else {
+        let specUrl = '';
+        if (tagName === 'FONT')
+          specUrl = this.context_.getRules().stylesSpecUrl;
         this.context_.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DISALLOWED_TAG,
             this.context_.getDocLocator(),
-            /* params */[tagName.toLowerCase()],
-            /* specUrl */ '', this.validationResult_);
+            /* params */[tagName.toLowerCase()], specUrl,
+            this.validationResult_);
       }
       return;
     }
@@ -4668,6 +4677,8 @@ amp.validator.categorizeError = function(error) {
   }
   // E.g. "The tag 'picture' is disallowed."
   if (error.code === amp.validator.ValidationError.Code.DISALLOWED_TAG) {
+    if (error.params[0] === 'font')
+      return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   // E.g. "tag 'img' may only appear as a descendant of tag
@@ -4729,6 +4740,12 @@ amp.validator.categorizeError = function(error) {
       isAuthorStylesheet(error.params[0])) {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
+
+  // E.g. "The inline 'style' attribute is not allowed in AMP documents. Use
+  // 'style amp-custom' tag instead."
+  if (error.code == amp.validator.ValidationError.Code.DISALLOWED_STYLE_ATTR)
+    return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
+
   // E.g. "CSS syntax error in tag 'style amp-custom' - unterminated string."
   if ((error.code ===
            amp.validator.ValidationError.Code
