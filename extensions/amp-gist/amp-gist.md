@@ -19,11 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Displays a <a href="https://gist.github.com/">GitHub Gist</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -31,21 +31,35 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
+    <td><a href="https://ampbyexample.com/components/amp-gist/">Annotated code example for amp-gist</a></td>
   </tr>
 </table>
 
+## Example
+
+The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
+
+Example:
+
+```html
+<amp-gist
+    data-gistid="b9bb35bc68df68259af94430f012425f"
+    layout="responsive"
+    width="480" height="270">
+</amp-gist>
+```
+
 ## Behavior
 
-FILL THIS IN. What does this extension do?
+This extension creates an iframe and displays the gist from GitHub.
 
 ## Attributes
 
-FILL THIS IN. Does this extension allow for properties to configure?
+It requires the `data-gistid` attribute of the gist.
 
 ## Validation
 See [amp-gist rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gist/0.1/validator-amp-gist.protoascii) in the AMP validator specification.
