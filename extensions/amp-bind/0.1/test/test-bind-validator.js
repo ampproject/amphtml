@@ -29,17 +29,9 @@ describe('BindValidator', () => {
       expect(val.canBind('ANY-TAG-REAL-OR-FAKE', 'class')).to.be.true;
     });
 
-    it('should allow binding to "text" for whitelisted elements', () => {
-      expect(val.canBind('H1', 'text')).to.be.true;
+    it('should allow binding to "text" for any elements', () => {
       expect(val.canBind('P', 'text')).to.be.true;
-      expect(val.canBind('SPAN', 'text')).to.be.true;
-      expect(val.canBind('A', 'text')).to.be.true;
-      expect(val.canBind('BUTTON', 'text')).to.be.true;
-      expect(val.canBind('CAPTION', 'text')).to.be.true;
-
-      expect(val.canBind('HEAD', 'text')).to.be.false;
-      expect(val.canBind('FORM', 'text')).to.be.false;
-      expect(val.canBind('AMP-IMG', 'text')).to.be.false;
+      expect(val.canBind('ANY-TAG-REAL-OR-FAKE', 'text')).to.be.true;
     });
 
     it('should NOT allow binding to "style"', () => {
@@ -171,14 +163,17 @@ describe('BindValidator', () => {
   });
 
   describe('AMP extensions', () => {
+    it('should support width/height for all AMP elements', () => {
+      expect(val.canBind('AMP-FOO', 'width')).to.be.true;
+      expect(val.canBind('AMP-FOO', 'height')).to.be.true;
+    });
+
     it('should support <amp-carousel>', () => {
       expect(val.canBind('AMP-CAROUSEL', 'slide')).to.be.true;
     });
 
     it('should support <amp-img>', () => {
       expect(val.canBind('AMP-IMG', 'src')).to.be.true;
-      expect(val.canBind('AMP-IMG', 'width')).to.be.true;
-      expect(val.canBind('AMP-IMG', 'height')).to.be.true;
 
       // src
       expect(val.isResultValid(
