@@ -68,13 +68,13 @@ The following table lists the features that enable variable substitutions, as we
       </ul>
     </td>
     <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code> (see below)</td>
-    <td width="25%">Only these variables are supported: <code>CLIENT_ID</code> and <code>QUERY_PARAM</code>.<br>See the section on [“substitution timing”](#substitution-timing) for further notes.</td>
+    <td width="25%">Only these variables are supported: <code>CLIENT_ID</code> and <code>QUERY_PARAM</code>.<br>See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes.</td>
   </tr>
   <tr>
     <td width="25%">Form inputs<br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#variable-substitutions">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
     <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code> (see below)</td>
-    <td width="25%">See the section on [“substitution timing”](#substitution-timing) for further notes.</td>
+    <td width="25%">See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes.</td>
   </tr>
 </table>
 
