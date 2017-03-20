@@ -325,7 +325,7 @@ describes.repeated('', {
           },
         };
 
-        const bubbleEl = ampForm.win_.document.querySelector(
+        const bubbleEl = env.ampdoc.getRootNode().querySelector(
             '.-amp-validation-bubble');
         const validationBubble = bubbleEl['__BUBBLE_OBJ'];
         sandbox.spy(validationBubble, 'show');

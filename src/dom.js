@@ -537,7 +537,11 @@ export function ancestorElementsByTag(child, tagName) {
 }
 
 /**
- * Iterate over an array-like
+ * Iterate over an array-like. Some collections like NodeList are
+ * lazily evaluated in some browsers, and accessing `length` forces full
+ * evaluation. We can improve performance by iterating until an element is
+ * `undefined` to avoid checking the `length` property.
+ * Test cases: https://jsperf.com/iterating-over-collections-of-elements
  * @param {!IArrayLike<T>} iterable
  * @param {!function(T, number)} cb
  * @template T

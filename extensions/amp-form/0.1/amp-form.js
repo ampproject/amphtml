@@ -787,7 +787,7 @@ export class AmpFormService {
     return ampdoc.whenReady().then(() => {
       this.installSubmissionHandlers_(
           ampdoc.getRootNode().querySelectorAll('form'));
-      this.installGlobalEventListener_(ampdoc.win.document);
+      this.installGlobalEventListener_(ampdoc.getRootNode());
     });
   }
 
