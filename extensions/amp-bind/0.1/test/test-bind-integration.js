@@ -390,4 +390,19 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       });
     });
   });
+
+  describe('amp-iframe', () => {
+    it('should support binding to src', () => {
+      const button = fixture.doc.getElementById('iframeButton');
+      const ampIframe = fixture.doc.getElementById('iframe');
+      // Force layout in case element is not in viewport.
+      ampIframe.implementation_.layoutCallback();
+      const iframe = ampIframe.querySelector('iframe');
+      expect(iframe.src).to.not.contain('bound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(iframe.src).to.contain('bound');
+      });
+    });
+  });
 });
