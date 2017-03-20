@@ -294,7 +294,6 @@ Type attribute value: `ibeatanalytics`
 
 Adds support for Ibeat Analytics. Additionally, you must specify a value for `aid`.
 
-
 ## Attributes
 
 **type**
