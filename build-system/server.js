@@ -513,12 +513,7 @@ app.use('/a4a(|-3p)/', function(req, res) {
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
   }
-  const inaboxParam = 'inabox=1';
-  if (adUrl.indexOf('?') == -1) {
-    adUrl += '?' + inaboxParam;
-  } else {
-    adUrl += '&' + inaboxParam;
-  }
+  adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/FORCE3P/g, force3p)
@@ -539,18 +534,13 @@ app.use('/inabox/', function(req, res) {
   var adUrl = req.url;
   var templatePath = '/build-system/server-inabox-template.html';
   var urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/m') &&
+  if (!adUrl.startsWith('/m') &&  // Ignore /min and /max
       urlPrefix.indexOf('//localhost') != -1) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
   }
-  const inaboxParam = 'inabox=1';
-  if (adUrl.indexOf('?') == -1) {
-    adUrl += '?' + inaboxParam;
-  } else {
-    adUrl += '&' + inaboxParam;
-  }
+  adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/AD_URL/g, adUrl)
@@ -793,8 +783,25 @@ function getPathMode(path) {
   }
 }
 
-exports.app = app;
-
 function getUrlPrefix(req) {
   return req.protocol + '://' + req.headers.host;
 }
+
+/**
+ * @param {string} url
+ * @param {string} param
+ * @param {*} value
+ * @return {string}
+ */
+function addQueryParam(url, param, value) {
+  const paramValue =
+      encodeURIComponent(param) + '=' + encodeURIComponent(value);
+  if (url.indexOf('?') == -1) {
+    url += '?' + paramValue;
+  } else {
+    url += '&' + paramValue;
+  }
+  return url;
+}
+
+exports.app = app;
