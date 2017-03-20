@@ -812,12 +812,12 @@ export class AmpFormService {
 
   /**
    * Listen for DOM updated messages sent to the document.
-   * @param {!Document} doc
+   * @param {!Document|!ShadowRoot} doc
    * @private
    */
   installGlobalEventListener_(doc) {
     doc.addEventListener('amp:dom-update', () => {
-      this.installSubmissionHandlers_(doc.forms);
+      this.installSubmissionHandlers_(doc.querySelectorAll('form'));
     });
   }
 }
