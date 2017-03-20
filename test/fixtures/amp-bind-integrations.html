@@ -19,6 +19,7 @@
   <script custom-element="amp-bind" src="/dist/v0/amp-bind-0.1.max.js"></script>
   <script custom-element="amp-brightcove" src="/dist/v0/amp-brightcove-0.1.max.js"></script>
   <script custom-element="amp-carousel" src="/dist/v0/amp-carousel-0.1.max.js"></script>
+  <script custom-element="amp-live-list" src="/dist/v0/amp-live-list-0.1.max.js"></script>
   <script custom-element="amp-selector" src="/dist/v0/amp-selector-0.1.max.js"></script>
   <script custom-element="amp-youtube" src="/dist/v0/amp-youtube-0.1.max.js"></script>
 </head>
@@ -85,6 +86,17 @@
     [controls]="videoControls">
   </amp-video>
 
+  <p>AMP-LIVE-LIST</p>
+  <button on="tap:AMP.setState(liveListText='hello world')" id="changeLiveListTextButton"></button>
+  <amp-live-list id="liveList" data-poll-interval="20000" data-max-items-per-page="2">
+    <button update id="liveListUpdateButton" on="tap:liveList.update"></button>
+    <div items id="liveListItems">
+      <div id="liveListItem1" data-sort-time="123456789">
+        <p [text]="liveListText">unbound</p>
+      </div>
+    </div>
+  </amp-live-list>
+
   <p>AMP-YOUTUBE</p>
   <button on="tap:AMP.setState(youtube='bound')" id="youtubeButton"></button>
   <amp-youtube width=480 height=270 id="youtube" data-videoid="unbound"
@@ -96,5 +108,6 @@
   <amp-brightcove width=480 height=270 id="brightcove" [data-account]="brightcove"
       data-account="906043040001" data-video-id="1401169490001" data-player="180a5658-8be8-4f33-8eba-d562ab41b40c">
   </amp-brightcove>
+
 </body>
 </html>
