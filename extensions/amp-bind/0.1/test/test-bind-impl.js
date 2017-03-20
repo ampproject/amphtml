@@ -101,6 +101,20 @@ describes.realWin('amp-bind', {
   }
 
   /**
+   * @param {string} name
+   * @return {!Promise}
+   */
+  function waitForEvent(name) {
+    return new Promise(resolve => {
+      function callback() {
+        resolve();
+        env.win.removeEventListener(callback);
+      };
+      env.win.addEventListener(name, callback);
+    });
+  }
+
+  /**
    * Calls `callback` when digest that updates bind state to `state` completes.
    * @param {!Object} state
    * @param {!Function} callback
@@ -146,44 +160,20 @@ describes.realWin('amp-bind', {
     });
   });
 
-  describe('under dynamic tags', () => {
-    it('should dynamically detect new bindings', () => {
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        createElementWithBinding('[onePlusOne]="1+1"');
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(bind.boundElements_.length).to.equal(1);
-      });
-    });
-
-    //TODO(kmh287): Move to integration test
-    it('should NOT allow unsecure attribute values', () => {
-      // Restore real implementation of isResultValid.
-      sandbox.restore();
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      let aElement;
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        const binding = '[href]="javascript:alert(1)"';
-        const div = env.win.document.createElement('div');
-        div.innerHTML = '<a ' + binding + '></a>';
-        aElement = div.firstElementChild;
-        // Templated HTML is added as a sibling to the template,
-        // not as a child
-        doc.getElementById('parent').appendChild(aElement);
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(aElement.getAttribute('href')).to.be.null;
-      });
+  it('should dynamically detect new bindings under dynamic tags', () => {
+    const doc = env.win.document;
+    const template = doc.createElement('template');
+    doc.getElementById('parent').appendChild(template);
+    return onBindReady().then(() => {
+      expect(bind.boundElements_.length).to.equal(0);
+      // As a dynamic element, template adds rendered templates as siblings.
+      // Element is added as a sibling to the template
+      createElementWithBinding('[onePlusOne]="1+1"');
+      return waitForEvent('amp:bind:mutated');
+    }).then(() => {
+      expect(bind.boundElements_.length).to.equal(1);
     });
   });
-
 
   it('should NOT apply expressions on first load', () => {
     const element = createElementWithBinding('[onePlusOne]="1+1"');

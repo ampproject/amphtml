@@ -29,7 +29,6 @@ import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {timerFor} from '../../../src/timer';
 
 const TAG = 'amp-bind';
 
@@ -109,11 +108,6 @@ export class Bind {
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
-
-    /**
-     * @const @private {!Array<Promise>}
-     */
-    this.mutationPromises_ = [];
 
     /**
      * @const @private {MutationObserver}
@@ -764,7 +758,9 @@ export class Bind {
       // TODO(kmh287): Come up with a strategy for evaluating new bindings
       // added here that mitigates FOUC.
       if (getMode().test) {
-        this.mutationPromises_.push(mutationPromise);
+        mutationPromise.then(() => {
+          this.dispatchEventForTesting_('amp:bind:mutated');
+        });
       }
     });
   }
@@ -859,24 +855,6 @@ export class Bind {
    */
   setStatePromiseForTesting() {
     return this.setStatePromise_;
-  }
-
-  /**
-   * Wait for DOM mutation observer callbacks to fire. Returns a promise
-   * that resolves when mutation callbacks have fired.
-   *
-   * @return {Promise}
-   *
-   * @visibleForTesting
-   */
-  waitForAllMutationsForTesting() {
-    return timerFor(this.win_).poll(5, () => {
-      return this.mutationPromises_.length > 0;
-    }).then(() => {
-      return Promise.all(this.mutationPromises_);
-    }).then(() => {
-      this.mutationPromises_.length = 0;
-    });
   }
 
   /**
