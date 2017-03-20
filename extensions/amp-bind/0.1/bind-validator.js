@@ -45,6 +45,15 @@ const GLOBAL_PROPERTY_RULES = map({
 });
 
 /**
+ * Property rules that apply to all AMP elements.
+ * @private {Object<string, Object<string, ?PropertyRulesDef>>}
+ */
+const AMP_PROPERTY_RULES = map({
+  'width': null,
+  'height': null,
+});
+
+/**
  * Maps tag names to property names to PropertyRulesDef.
  * If `ELEMENT_RULES[tag][property]` is null, then all values are valid
  * for that property in that tag.
@@ -60,15 +69,6 @@ const URL_PROPERTIES = map({
   'src': true,
   'srcset': true,
   'href': true,
-});
-
-/**
- * Map whose keys are attribute rules for AMP elements.
- * @private {Object<string, boolean>}
- */
-const AMP_ELEMENT_RULES = map({
-  'width': true,
-  'height': true,
 });
 
 /**
@@ -185,18 +185,18 @@ export class BindValidator {
    * @private
    */
   rulesForTagAndProperty_(tag, property) {
-    const globalRules = GLOBAL_PROPERTY_RULES[property];
-    if (globalRules) {
-      return globalRules;
+    const globalPropertyRules = GLOBAL_PROPERTY_RULES[property];
+    if (globalPropertyRules !== undefined) {
+      return globalPropertyRules;
     }
     const tagRules = ELEMENT_RULES[tag];
     // hasOwnProperty() needed since nested objects are not prototype-less.
     if (tagRules && tagRules.hasOwnProperty(property)) {
       return tagRules[property];
     }
-    const ampElementRules = AMP_ELEMENT_RULES[tag];
-    if (startsWith(tag, 'AMP-') && ampElementRules) {
-      return ampElementRules;
+    const ampPropertyRules = AMP_PROPERTY_RULES[property];
+    if (startsWith(tag, 'AMP-') && ampPropertyRules !== undefined) {
+      return ampPropertyRules;
     }
     return undefined;
   }
