@@ -141,7 +141,9 @@ describe('Ad loader', () => {
           meta.setAttribute('name', 'amp-3p-iframe-src');
           meta.setAttribute('content', 'https://example.com/remote.html');
           doc.head.appendChild(meta);
-          a4aRegistry['zort'] = () => true;
+          a4aRegistry['zort'] = () => {
+            throw new Error('predicate should not execute if remote.html!');
+          };
           ampAdElement.setAttribute('type', 'zort');
           const upgraded = new AmpAd(ampAdElement).upgradeCallback();
           return expect(upgraded).to.eventually.be.instanceof(AmpAd3PImpl);
