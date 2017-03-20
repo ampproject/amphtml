@@ -197,6 +197,14 @@ describes.fakeWin('runtime', {
     extensionRegistrationTest();
   });
 
+  it('should not maybePumpEarlyFrame ' +
+      'when a renderDelayingExtension is present', () => {
+        toggleExperiment(win, 'pump-early-frame', true);
+        win.document.body.appendChild(
+            document.createElement('amp-experiment'));
+        extensionRegistrationTest();
+      });
+
   it('should maybePumpEarlyFrame and delay extension execution', () => {
     toggleExperiment(win, 'pump-early-frame', true);
     let progress = '';

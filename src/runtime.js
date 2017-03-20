@@ -45,6 +45,9 @@ import {
   installStylesForShadowRoot,
 } from './shadow-embed';
 import {getMode} from './mode';
+import {
+  hasRenderDelayingServices,
+} from './render-delaying-services';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
@@ -979,6 +982,10 @@ function maybePumpEarlyFrame(win, cb) {
   // There is definitely nothing to draw yet, so we might as well
   // proceed.
   if (!win.document.body) {
+    cb();
+    return;
+  }
+  if (hasRenderDelayingServices(win)) {
     cb();
     return;
   }
