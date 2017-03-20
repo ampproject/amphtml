@@ -147,7 +147,7 @@ export class BindExpression {
         let unsupportedError;
 
         if (isBuiltIn) {
-          unsupportedError = `${method} is not a supported function.`
+          unsupportedError = `${method} is not a supported function.`;
           validFunction = FUNCTION_WHITELIST[BUILT_IN_FUNCTIONS][method];
         } else {
           unsupportedError =
