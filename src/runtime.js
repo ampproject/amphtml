@@ -45,6 +45,9 @@ import {
   installStylesForShadowRoot,
 } from './shadow-embed';
 import {getMode} from './mode';
+import {
+  hasRenderDelayingServices,
+} from './render-delaying-services';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
@@ -71,7 +74,11 @@ import {installViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {installBatchedXhrService} from './service/batched-xhr-impl';
-import {isExperimentOn, toggleExperiment} from './experiments';
+import {
+  isExperimentOn,
+  isExperimentOnAllowUrlOverride,
+  toggleExperiment,
+} from './experiments';
 import {parseUrl} from './url';
 import {platformFor} from './platform';
 import {registerElement} from './custom-element';
@@ -81,6 +88,7 @@ import {setStyle} from './style';
 import {timerFor} from './timer';
 import {viewerForDoc} from './viewer';
 import {viewportForDoc} from './viewport';
+import {vsyncFor} from './vsync';
 import {waitForBody} from './dom';
 import * as config from './config';
 
@@ -305,35 +313,42 @@ function adoptShared(global, opts, callback) {
     }
   }
 
-  /**
-   * Registers a new custom element.
-   * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
-   */
-  global.AMP.push = function(fnOrStruct) {
-    if (maybeLoadCorrectVersion(global, fnOrStruct)) {
-      return;
-    }
-    installExtension(fnOrStruct);
-  };
-
-  // Execute asynchronously scheduled elements.
-  for (let i = 0; i < preregisteredExtensions.length; i++) {
-    const fnOrStruct = preregisteredExtensions[i];
-    if (maybeLoadCorrectVersion(global, fnOrStruct)) {
-      continue;
-    }
-    try {
+  maybePumpEarlyFrame(global, () => {
+    /**
+     * Registers a new custom element.
+     * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+     */
+    global.AMP.push = function(fnOrStruct) {
+      if (maybeLoadCorrectVersion(global, fnOrStruct)) {
+        return;
+      }
       installExtension(fnOrStruct);
-    } catch (e) {
-      // Throw errors outside of loop in its own micro task to
-      // avoid on error stopping other extensions from loading.
-      dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
+    };
+    // Execute asynchronously scheduled elements.
+    for (let i = 0; i < preregisteredExtensions.length; i++) {
+      const fnOrStruct = preregisteredExtensions[i];
+      if (maybeLoadCorrectVersion(global, fnOrStruct)) {
+        continue;
+      }
+      try {
+        installExtension(fnOrStruct);
+      } catch (e) {
+        // Throw errors outside of loop in its own micro task to
+        // avoid on error stopping other extensions from loading.
+        dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
+      }
     }
+    // Make sure we empty the array of preregistered extensions.
+    // Technically this is only needed for testing, as everything should
+    // go out of scope here, but just making sure.
+    preregisteredExtensions.length = 0;
+  });
+  // If the closure passed to maybePumpEarlyFrame didn't execute
+  // immediately we need to keep pushing onto preregisteredExtensions
+  if (!global.AMP.push) {
+    global.AMP.push = preregisteredExtensions.push.bind(
+      preregisteredExtensions);
   }
-  // Make sure we empty the array of preregistered extensions.
-  // Technically this is only needed for testing, as everything should
-  // go out of scope here, but just making sure.
-  preregisteredExtensions.length = 0;
 
   installAutoLoadExtensions();
 
@@ -950,4 +965,33 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   extensionsFor(win).loadExtension(fnOrStruct.n,
       /* stubbing not needed, should have already happened. */ false);
   return true;
+}
+
+/**
+ * If it makes sense, let the browser paint the current frame before
+ * executing the callback.
+ * @param {!Window} win
+ * @param {function()} cb Callback that should run after a frame was
+ *     pumped.
+ */
+function maybePumpEarlyFrame(win, cb) {
+  if (!isExperimentOnAllowUrlOverride(win, 'pump-early-frame')) {
+    cb();
+    return;
+  }
+  // There is definitely nothing to draw yet, so we might as well
+  // proceed.
+  if (!win.document.body) {
+    cb();
+    return;
+  }
+  if (hasRenderDelayingServices(win)) {
+    cb();
+    return;
+  }
+  const vsync = vsyncFor(win);
+  // Need to wait 2 full frames to reliably paint in between.
+  vsync.mutate(() => {
+    vsync.mutate(cb);
+  });
 }
