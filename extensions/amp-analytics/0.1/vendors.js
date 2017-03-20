@@ -1150,7 +1150,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
   'ibeatanalytics': {
     'requests': {
       'host': 'https://ibeats.indiatimes.com',
-      'base': '${host}/ibeat/pageTrendlogAmp.html',
+      'base': '${host}/iBeat/pageTrendlogAmp.html',
       'pageview': '${base}?' +
                 '&h=${host}' +
                 '&d=${host}' +
