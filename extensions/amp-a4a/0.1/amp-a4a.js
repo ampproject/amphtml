@@ -1199,7 +1199,7 @@ export class AmpA4A extends AMP.BaseElement {
     const attributes = getContextMetadata(
         this.win, this.element, this.sentinel);
     iframe.setAttribute('name', JSON.stringify(attributes));
-    iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
+    iframe.sentinel = this.sentinel;
     return this.iframeRenderHelper_(iframe);
   }
 
@@ -1258,7 +1258,7 @@ export class AmpA4A extends AMP.BaseElement {
         // Need to reassign the name once we've generated the context
         // attributes off of the iframe. Need the iframe to generate.
         iframe.setAttribute('name', name);
-        iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
+        iframe.sentinel = this.sentinel;
       }
       return this.iframeRenderHelper_(iframe);
     });

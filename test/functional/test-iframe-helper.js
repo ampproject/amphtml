@@ -90,7 +90,7 @@ describe('iframe-helper', function() {
     return new Promise(resolve => {
       const sentinel = generateSentinel(testIframe.ownerDocument.defaultView);
       testIframe.src = iframeSrc + '#amp-3p-sentinel=' + sentinel;
-      testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
+      testIframe.sentinel = sentinel;
       unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
           () => {
             calls++;
@@ -116,7 +116,7 @@ describe('iframe-helper', function() {
       // Note that we're using a different document here which will load the
       // usual iframe-intersection.html within a nested iframe.
       testIframe.src = nestedIframeSrc + '#amp-3p-sentinel=' + sentinel;
-      testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
+      testIframe.sentinel = sentinel;
       unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
           () => {
             calls++;

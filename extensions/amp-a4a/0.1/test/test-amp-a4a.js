@@ -406,8 +406,7 @@ describe('amp-a4a', () => {
 
       it('should be able to create AmpContext', () => {
         return a4a.layoutCallback().then(() => {
-          const window_ = a4aElement.querySelector(
-              'iframe[data-amp-3p-sentinel]');
+          const window_ = a4aElement.querySelector('iframe[name]');
           const ac = new AmpContext(window_);
           expect(ac).to.be.ok;
           expect(ac.sentinel).to.be.ok;
@@ -434,8 +433,7 @@ describe('amp-a4a', () => {
 
       it('should be able to create AmpContext', () => {
         return a4a.layoutCallback().then(() => {
-          const window_ = a4aElement.querySelector(
-              'iframe[data-amp-3p-sentinel]');
+          const window_ = a4aElement.querySelector('iframe[name]');
           const ac = new AmpContext(window_);
           expect(ac).to.be.ok;
           expect(ac.sentinel).to.be.ok;

@@ -130,9 +130,8 @@ describe('amp-facebook', function() {
               type: 'requestHeight',
               is3p: true,
               height: 666,
+              sentinel: iframe.sentinel,
             };
-            message['sentinel'] = iframe.getAttribute(
-                'data-amp-3p-sentinel');
             iframe.contentWindow.postMessage(message, '*');
           });
         });

@@ -34,9 +34,7 @@ describe('3p messaging', () => {
       };
       iframe = {
         contentWindow: testWin,
-        getAttribute(attr) {
-          return attr == 'data-amp-3p-sentinel' ? 'test' : undefined;
-        },
+        sentinel: 'test',
       };
     });
   });

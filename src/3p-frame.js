@@ -106,7 +106,7 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  iframe.setAttribute('data-amp-3p-sentinel', attributes._context['sentinel']);
+  iframe.sentinel = attributes._context['sentinel'];
   return iframe;
 }
 
