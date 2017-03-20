@@ -14,25 +14,56 @@
  * limitations under the License.
  */
 
-import {AmpGist} from '../amp-gist';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
+import '../amp-gist';
+import {adopt} from '../../../../src/runtime';
 
-describes.realWin('amp-gist', {
-  amp: {
-    extensions: ['amp-gist'],
+adopt(window);
+
+describe('amp-gist', () => {
+
+  const embedUrl = 'https://gist.github.com/b9bb35bc68df68259af94430f012425f.pibb';
+
+  function getIns(gistid, opt_attrs) {
+    return createIframePromise().then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
+      const ins = iframe.doc.createElement('amp-gist');
+      ins.setAttribute('data-gistid', gistid);
+      ins.setAttribute('height', '237');
+
+      if (opt_attrs) {
+        for (const attr in opt_attrs) {
+          ins.setAttribute(attr, opt_attrs[attr]);
+        }
+      }
+
+      return iframe.addElement(ins);
+    });
   }
-}, env => {
 
-  let win;
-  let element;
-
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-gist');
-    win.document.body.appendChild(element);
+  it('renders', () => {
+    return getIns('b9bb35bc68df68259af94430f012425f').then(ins => {
+      const iframe = ins.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(embedUrl);
+    });
   });
 
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
+  it('renders responsively', () => {
+    return getIns('b9bb35bc68df68259af94430f012425f').then(ins => {
+      const iframe = ins.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    });
   });
+
+  it('renders data-gistid', () => {
+    expect(getIns('')).to.be.rejectedWith(
+      /The data-gistid attribute is required for/);
+  });
+
 });
