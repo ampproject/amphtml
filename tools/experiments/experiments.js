@@ -213,10 +213,16 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
+    id: 'pump-early-frame',
+    name: 'Force all extensions to have the same release ' +
+        'as the main JS binary',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
+  },
+  {
     id: 'version-locking',
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
-    cleanupIssue: 'DO_NOT_SUBMIT',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
   },
   {
     id: 'amp-bind',

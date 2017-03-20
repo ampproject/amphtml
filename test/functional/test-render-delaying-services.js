@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {waitForServices} from '../../src/render-delaying-services';
+import {
+  waitForServices,
+  hasRenderDelayingServices,
+} from '../../src/render-delaying-services';
 import {createIframePromise} from '../../testing/iframe';
 import * as service from '../../src/service';
 import * as sinon from 'sinon';
@@ -51,6 +54,7 @@ describe('waitForServices', () => {
   it('should resolve if no blocking services is presented', () => {
     // <script custom-element="amp-experiment"> should not block
     addExtensionScript(win, 'amp-experiment');
+    expect(hasRenderDelayingServices(win)).to.be.false;
     return expect(waitForServices(win)).to.eventually.have.lengthOf(0);
   });
 
@@ -58,6 +62,7 @@ describe('waitForServices', () => {
     addExtensionScript(win, 'amp-accordion');
     addExtensionScript(win, 'amp-dynamic-css-classes');
     win.document.body.appendChild(win.document.createElement('amp-experiment'));
+    expect(hasRenderDelayingServices(win)).to.be.true;
     addExtensionScript(win, 'non-blocking-extension');
 
     const promise = waitForServices(win);
@@ -72,6 +77,7 @@ describe('waitForServices', () => {
     addExtensionScript(win, 'amp-accordion');
     addExtensionScript(win, 'amp-dynamic-css-classes');
     win.document.body.appendChild(win.document.createElement('amp-experiment'));
+    expect(hasRenderDelayingServices(win)).to.be.true;
     addExtensionScript(win, 'non-blocking-extension');
 
     const promise = waitForServices(win);

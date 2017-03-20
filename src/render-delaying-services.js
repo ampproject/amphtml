@@ -56,12 +56,20 @@ export function waitForServices(win) {
 }
 
 /**
+ * Returns true if the page has a render delaying service.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function hasRenderDelayingServices(win) {
+  return includedServices(win).length > 0;
+}
+
+/**
  * Detects which, if any, render-delaying extensions are included on the page.
  * @param {!Window} win
  * @return {!Array<string>}
- * @private
  */
-function includedServices(win) {
+export function includedServices(win) {
   /** @const {!Document} */
   const doc = win.document;
   dev().assert(doc.body);
