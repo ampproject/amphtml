@@ -15,6 +15,7 @@
  */
 
 import {BindExpressionResultDef} from './bind-expression';
+import {childElementByAttr} from '../../../src/dom';
 import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
@@ -23,6 +24,7 @@ import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
+import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
 import {filterSplice} from '../../../src/utils/array';
@@ -36,6 +38,17 @@ const TAG = 'amp-bind';
  * @type {!RegExp}
  */
 const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
+
+/**
+ * Tags under which bind should observe mutaitons to detect added/removed
+ * bindings.
+ * @type {!Object<string, boolean>}
+ * @private
+ */
+const DYNAMIC_TAGS = map({
+  'TEMPLATE': true,
+  'AMP-LIVE-LIST': true,
+});
 
 /**
  * A bound property, e.g. [property]="expression".
@@ -331,8 +344,7 @@ export class Bind {
       // Walker is filtered to only return elements
       const element = dev().assertElement(node);
       const tagName = element.tagName;
-      if (tagName === 'TEMPLATE') {
-        // Listen for changes in amp-mustache templates
+      if (DYNAMIC_TAGS[tagName]) {
         this.observeElementForMutations_(element);
       }
 
@@ -682,14 +694,32 @@ export class Bind {
    * Begin observing mutations to element. Presently, all supported elements
    * that can add/remove bindings add new elements to their parent, so parent
    * node should be observed for mutations.
+   * @param {!Element} element
    * @private
    */
   observeElementForMutations_(element) {
-    // TODO(kmh287): What if parent is the body tag?
-    // TODO(kmh287): Generify logic for node observation strategy
-    // when bind supprots more dynamic nodes.
-    const elementToObserve = element.parentElement;
-    this.mutationObserver_.observe(elementToObserve, {childList: true});
+    const tagName = element.tagName;
+    let elementToObserve;
+    if (tagName === 'TEMPLATE') {
+      // Templates add templated elements as siblings of the template tag
+      // so the parent must be observed.
+      // TODO(kmh287): What if parent is the body tag?
+      elementToObserve = element.parentElement;
+    } else if (tagName === 'AMP-LIVE-LIST') {
+      // All elements in AMP-LIVE-LIST are children of a <div> with an
+      // `items` attribute.
+      const itemsDiv = childElementByAttr(element, 'items');
+      // Should not happen on any page that passes the AMP validator
+      // as <div items> is required.
+      elementToObserve = dev().assert(itemsDiv,
+          'Could not find items div in amp-live-list');
+    } else {
+      dev().assert(false,
+           `amp-bind asked to observe unexpected element ${tagName}`);
+    }
+    if (elementToObserve) {
+      this.mutationObserver_.observe(elementToObserve, {childList: true});
+    }
   }
 
   /**
@@ -724,9 +754,9 @@ export class Bind {
           }
         }
         return Promise.all(removePromises);
-      }).then(() => {
-        return this.digest_();
       });
+      // TODO(kmh287): Come up with a strategy for evaluating new bindings
+      // added here that mitigates FOUC.
       if (getMode().test) {
         mutationPromise.then(() => {
           this.dispatchEventForTesting_('amp:bind:mutated');
