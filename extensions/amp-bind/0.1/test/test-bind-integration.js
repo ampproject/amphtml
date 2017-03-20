@@ -244,7 +244,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       fixture.doc.getElementById('liveListUpdateButton').click();
 
       let newItem;
-      return bind.waitForAllMutationsForTesting().then(() => {
+      return waitForAllMutations().then(() => {
         expect(liveListItems.children.length).to.equal(2);
         newItem = fixture.doc.getElementById('newItem');
         fixture.doc.getElementById('changeLiveListTextButton').click();
