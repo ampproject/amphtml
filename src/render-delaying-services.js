@@ -61,7 +61,7 @@ export function waitForServices(win) {
  * @return {boolean}
  */
 export function hasRenderDelayingServices(win) {
-  return includedServices(win).length > 0
+  return includedServices(win).length > 0;
 }
 
 /**
