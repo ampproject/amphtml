@@ -35,7 +35,6 @@ import '../../../amp-selector/0.1/amp-selector';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},
-  'fie ampdoc': {ampdoc: 'fie'},
   'shadow ampdoc': {ampdoc: 'shadow'},
 }, (name, variant) => {
 
