@@ -97,7 +97,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // Configure and insert it.  Note: use the 'config' attribute here to
     // set a remote config, if we decide that it's useful to do so.
     const analyticsElement = createElementWithAttributes(
-        parentDoc.win.document, 'amp-analytics', null);
+        parentDoc.win.document, 'amp-analytics', {});
     const config = createElementWithAttributes(
         parentDoc.win.document, 'script', {type: 'application/json'});
     config.textContent = JSON.stringify(
