@@ -60,6 +60,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -308,6 +309,9 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isCollapsed_ = false;
+
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampDoc_ = this.getAmpDoc();
   }
 
   /** @override */
@@ -1382,8 +1386,14 @@ export class AmpA4A extends AMP.BaseElement {
    * variables of the form { name: val }.  It is up to the subclass what to
    * do with those variables.
    *
-   * @param {string} unusedEventName
+   * TODO(tdrl): This method and its instantiations should go away once
+   * we've verified that analytics is working correctly for performance
+   * monitoring and we can deprecate the direct CSI ping mechanism.
+   *
+   * @param {string} eventName
    * @param {!Object<string, string|number>=} opt_extraVariables
    */
-  emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
+  emitLifecycleEvent(eventName, opt_extraVariables) {
+    triggerAnalyticsEvent(this.ampDoc_, eventName, opt_extraVariables);
+  }
 }

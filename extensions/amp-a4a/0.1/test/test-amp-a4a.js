@@ -311,7 +311,7 @@ describe('amp-a4a', () => {
           'whenIniLoaded',
           () => iniLoadPromise);
       const lifecycleEventStub = sandbox.stub(
-          a4a, 'protectedEmitLifecycleEvent_');
+          a4a, 'emitLifecycleEvent_');
       a4a.onLayoutMeasure();
       const layoutPromise = a4a.layoutCallback();
       return Promise.resolve().then(() => {
@@ -892,7 +892,7 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const lifecycleEventStub = sandbox.stub(
-            a4a, 'protectedEmitLifecycleEvent_');
+            a4a, 'emitLifecycleEvent_');
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);

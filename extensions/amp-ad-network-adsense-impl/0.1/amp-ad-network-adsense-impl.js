@@ -24,7 +24,6 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-// import {dev} from '../../../src/log';
 import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
@@ -32,6 +31,8 @@ import {
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
   injectActiveViewAmpAnalyticsElement,
+  EXPERIMENT_ATTRIBUTE,
+  getGoogleAnalyticsConfig,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -43,6 +44,11 @@ import {extensionsFor} from '../../../src/extensions';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {viewerForDoc} from '../../../src/viewer';
 import {AdsenseSharedState} from './adsense-shared-state';
+// TODO(tdrl): Update to using insertAnalyticsElement when PR#7940 is
+// merged.
+import {getAmpDoc} from '../../../src/ampdoc';
+import {getServiceForDoc} from '../../../src/service';
+import {createElementWithAttributes} from '../../../src/dom';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -101,6 +107,38 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
+  }
+
+  /**
+   * Returns the URL base address for performance monitor pings.  Exists
+   * to be stubbed out during testing.
+   *
+   * @return {string}
+   */
+  getPerformanceReportingUrlBase() {
+    return 'http://localhost:8000/nowhere';
+  }
+
+  buildCallback() {
+    super.buildCallback();
+    // TODO(tdrl): Update to using insertAnalyticsElement when PR#7940 is
+    // merged.
+    // Force load of amp-analytics.
+    const parentDoc = getAmpDoc(this.element);
+    getServiceForDoc(parentDoc, 'amp-analytics-instrumentation');
+    // Configure and insert it.  Note: use the 'config' attribute here to
+    // set a remote config, if we decide that it's useful to do so.
+    const analyticsElement = createElementWithAttributes(
+        parentDoc.win.document, 'amp-analytics', null);
+    const config = createElementWithAttributes(
+        parentDoc.win.document, 'script', {type: 'application/json'});
+    config.textContent = JSON.stringify(
+        getGoogleAnalyticsConfig(this.getPerformanceReportingUrlBase(),
+            'adsense',
+            this.element.getAttribute('data-amp-slot-index'),
+            this.element.getAttribute(EXPERIMENT_ATTRIBUTE)));
+    analyticsElement.appendChild(config);
+    this.element.appendChild(analyticsElement);
   }
 
   /** @override */
@@ -206,6 +244,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   emitLifecycleEvent(eventName, opt_extraVariables) {
+    super.emitLifecycleEvent(eventName, opt_extraVariables);
     if (opt_extraVariables) {
       this.lifecycleReporter_.setPingParameters(opt_extraVariables);
     }
@@ -222,6 +261,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
     this.ampAnalyticsConfig = null;
+    // TODO(tdrl): Should we delete the performance analytics config here as
+    // well?  If yes, will #buildCallback be invoked again to recreate it,
+    // or will we need to insert something else to recreate it?
   }
 
   /**
