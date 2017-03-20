@@ -334,7 +334,8 @@ export class Preconnect {
  * @return {!Preconnect}
  */
 export function preconnectForElement(element) {
-  registerServiceBuilder(self, 'preconnect', PreconnectService);
-  const preconnectService = getService(self, 'preconnect');
+  const serviceHolder = element.ownerDocument.defaultView;
+  registerServiceBuilder(serviceHolder, 'preconnect',PreconnectService);
+  const preconnectService = getService(serviceHolder, 'preconnect');
   return new Preconnect(preconnectService, element);
 }
