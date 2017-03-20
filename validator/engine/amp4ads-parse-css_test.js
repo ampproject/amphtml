@@ -218,29 +218,29 @@ describe('validateAmp4AdsCss', () => {
   });
 
   it('allows only opacity and transform to be transitioned', () => {
-    const css = '.amp-animate .box { ' +
-        '    transition: background-color 2s; ' +
-        '}';
-    const errors = [];
-    const tokens = parse_css.tokenize(css, 1, 0, errors);
-    const sheet = parse_css.parseAStylesheet(
-        tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
-        errors);
-    assertJSONEquals([], errors);
-    parse_css.validateAmp4AdsCss(sheet, errors);
-    assertJSONEquals(
-        [{
-          'line': 1,
-          'col': 24,
-          'tokenType': 'ERROR',
-          'code': 'CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT',
-          'params': [
-            'style', 'transition', 'background-color',
-            '[\'opacity\', \'transform\']'
-          ]
-        }],
-        errors);
-  });
+       const css = '.amp-animate .box { ' +
+           '    transition: background-color 2s; ' +
+           '}';
+       const errors = [];
+       const tokens = parse_css.tokenize(css, 1, 0, errors);
+       const sheet = parse_css.parseAStylesheet(
+           tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+           errors);
+       assertJSONEquals([], errors);
+       parse_css.validateAmp4AdsCss(sheet, errors);
+       assertJSONEquals(
+           [{
+             'line': 1,
+             'col': 24,
+             'tokenType': 'ERROR',
+             'code': 'CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT',
+             'params': [
+               'style', 'transition', 'background-color',
+               '[\'opacity\', \'transform\']'
+             ]
+           }],
+           errors);
+     });
 
   it('allows keyframes as a mechanism for transitions', () => {
     const css = '@keyframes turn { ' +
@@ -273,61 +273,82 @@ describe('validateAmp4AdsCss', () => {
        assertJSONEquals([], errors);
      });
 
-  it('allows only opacity, transform in keyframe transitions', () => {
-    const css = '@keyframes slidein { ' +
-        '  from { margin-left:100%; width:300%; } ' +
-        '  to { margin-left:0%; width:100%; } ' +
-        '}';
-    const errors = [];
-    const tokens = parse_css.tokenize(css, 1, 0, errors);
-    const sheet = parse_css.parseAStylesheet(
-        tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
-        errors);
-    assertJSONEquals([], errors);
-    parse_css.validateAmp4AdsCss(sheet, errors);
-    assertJSONEquals(
-        [
-          {
-            'line': 1,
-            'col': 30,
-            'tokenType': 'ERROR',
-            'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
-            'params': [
-              'style', 'margin-left', 'keyframes',
-              '[\'opacity\', \'transform\']'
-            ]
-          },
-          {
-            'line': 1,
-            'col': 48,
-            'tokenType': 'ERROR',
-            'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
-            'params': [
-              'style', 'width', 'keyframes', '[\'opacity\', \'transform\']'
-            ]
-          },
-          {
-            'line': 1,
-            'col': 69,
-            'tokenType': 'ERROR',
-            'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
-            'params': [
-              'style', 'margin-left', 'keyframes',
-              '[\'opacity\', \'transform\']'
-            ]
-          },
-          {
-            'line': 1,
-            'col': 85,
-            'tokenType': 'ERROR',
-            'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
-            'params': [
-              'style', 'width', 'keyframes', '[\'opacity\', \'transform\']'
-            ]
-          }
-        ],
-        errors);
-  });
+  it('allows animation-timing-function within keyframes',
+     () => {
+       const css = '@-moz-keyframes turn { ' +
+           '  from { transform: rotate(180deg); ' +
+           '         animation-timing-function: linear; } ' +
+           '  to { transform: rotate(90deg); } ' +
+           '}';
+       const errors = [];
+       const tokens = parse_css.tokenize(css, 1, 0, errors);
+       const sheet = parse_css.parseAStylesheet(
+           tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+           errors);
+       assertJSONEquals([], errors);
+       parse_css.validateAmp4AdsCss(sheet, errors);
+       assertJSONEquals([], errors);
+     });
+
+  it('allows only animation-timing-function, opacity, ' +
+     'transform in keyframe transitions',
+     () => {
+       const css = '@keyframes slidein { ' +
+           '  from { margin-left:100%; width:300%; } ' +
+           '  to { margin-left:0%; width:100%; } ' +
+           '}';
+       const errors = [];
+       const tokens = parse_css.tokenize(css, 1, 0, errors);
+       const sheet = parse_css.parseAStylesheet(
+           tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+           errors);
+       assertJSONEquals([], errors);
+       parse_css.validateAmp4AdsCss(sheet, errors);
+       assertJSONEquals(
+           [
+             {
+               'line': 1,
+               'col': 30,
+               'tokenType': 'ERROR',
+               'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+               'params': [
+                 'style', 'margin-left', 'keyframes',
+                 '[\'animation-timing-function\', \'opacity\', \'transform\']'
+               ]
+             },
+             {
+               'line': 1,
+               'col': 48,
+               'tokenType': 'ERROR',
+               'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+               'params': [
+                 'style', 'width', 'keyframes',
+                 '[\'animation-timing-function\', \'opacity\', \'transform\']'
+               ]
+             },
+             {
+               'line': 1,
+               'col': 69,
+               'tokenType': 'ERROR',
+               'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+               'params': [
+                 'style', 'margin-left', 'keyframes',
+                 '[\'animation-timing-function\', \'opacity\', \'transform\']'
+               ]
+             },
+             {
+               'line': 1,
+               'col': 85,
+               'tokenType': 'ERROR',
+               'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+               'params': [
+                 'style', 'width', 'keyframes',
+                 '[\'animation-timing-function\', \'opacity\', \'transform\']'
+               ]
+             }
+           ],
+           errors);
+     });
 
   it('allows only opacity, transform in keyframe transitions (vendor prefixed)',
      () => {
@@ -351,7 +372,7 @@ describe('validateAmp4AdsCss', () => {
                'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
                'params': [
                  'style', 'margin-left', '-moz-keyframes',
-                 '[\'opacity\', \'transform\']'
+                 '[\'animation-timing-function\', \'opacity\', \'transform\']'
                ]
              },
              {
@@ -361,7 +382,7 @@ describe('validateAmp4AdsCss', () => {
                'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
                'params': [
                  'style', 'width', '-moz-keyframes',
-                 '[\'opacity\', \'transform\']'
+                 '[\'animation-timing-function\', \'opacity\', \'transform\']'
                ]
              },
              {
@@ -371,7 +392,7 @@ describe('validateAmp4AdsCss', () => {
                'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
                'params': [
                  'style', 'margin-left', '-moz-keyframes',
-                 '[\'opacity\', \'transform\']'
+                 '[\'animation-timing-function\', \'opacity\', \'transform\']'
                ]
              },
              {
@@ -381,7 +402,7 @@ describe('validateAmp4AdsCss', () => {
                'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
                'params': [
                  'style', 'width', '-moz-keyframes',
-                 '[\'opacity\', \'transform\']'
+                 '[\'animation-timing-function\', \'opacity\', \'transform\']'
                ]
              }
            ],
