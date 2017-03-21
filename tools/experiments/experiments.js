@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ const EXPERIMENTS = [
   {
     id: 'ad-type-custom',
     name: 'Activates support for custom (self-serve) advertisements',
-    spec: 'https://github.com/ampproject/amphtml/ads/custom.md',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
   },
   {
     id: 'alp',
@@ -91,18 +91,6 @@ const EXPERIMENTS = [
     name: 'AMP Auto Ads',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
-  },
-  {
-    id: 'amp-form-var-sub',
-    name: 'Variable Substitutions in AMP Form inputs for POST/GET submits',
-    spec: 'https://github.com/ampproject/amphtml/issues/5654',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
-  },
-  {
-    id: 'amp-form-var-sub-for-post',
-    name: 'Variable Substitutions in AMP Form inputs for POST submits only',
-    spec: 'https://github.com/ampproject/amphtml/issues/5654',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
   },
   {
     id: 'amp-google-vrview-image',
@@ -181,12 +169,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
   },
   {
-    id: 'link-url-replace',
-    name: 'Enables replacing variables in URLs of outgoing links.',
-    spec: 'https://github.com/ampproject/amphtml/issues/4078',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
-  },
-  {
     id: 'alp-for-a4a',
     name: 'Enable redirect to landing page directly for A4A',
     spec: 'https://github.com/ampproject/amphtml/issues/5212',
@@ -216,15 +198,14 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
   },
   {
+    id: 'visibility-v3',
+    name: 'Visibility tracking with FIE and in-a-box support',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8121',
+  },
+  {
     id: 'amp-accordion-session-state-optout',
     name: 'AMP Accordion attribute to opt out of preserved state.',
     Spec: 'https://github.com/ampproject/amphtml/issues/3813',
-  },
-  {
-    id: 'sentinel-name-change',
-    name: 'Changed sentinel name from amp3pSentinel to sentinel',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6990',
-    Spec: '',
   },
   {
     id: 'variable-filters',
@@ -232,10 +213,16 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
+    id: 'pump-early-frame',
+    name: 'Force all extensions to have the same release ' +
+        'as the main JS binary',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
+  },
+  {
     id: 'version-locking',
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
-    cleanupIssue: 'DO_NOT_SUBMIT',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
   },
   {
     id: 'amp-bind',
@@ -271,6 +258,19 @@ const EXPERIMENTS = [
     name: 'Amp extension for a parallax effect',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
     spec: 'https://github.com/ampproject/amphtml/issues/1443',
+  },
+  {
+    id: 'amp-sortable-table',
+    name: 'AMP Sortable Table',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6057',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-sortable-table/amp-sortable-table.md',
+  },
+  {
+    id: 'slidescroll-disable-css-snap',
+    name: 'Slidescroll disable css snap',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
+    spec: 'https://github.com/ampproject/amphtml/issues/7670',
   },
 ];
 

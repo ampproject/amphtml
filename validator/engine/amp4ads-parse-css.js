@@ -162,10 +162,11 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
               ]));
         }
       }
-      // This is the @keyframes variant for identifying transitions; still,
-      // the only properties that may be transitioned are opacity and transform.
+      // This is the @keyframes variant for identifying transitions;
+      // the only properties that may be specified within a transition
+      // are opacity, transform, and animation-timing-function.
       if (this.inKeyframes !== null && name !== 'transform' &&
-          name !== 'opacity') {
+          name !== 'opacity' && name !== 'animation-timing-function') {
         if (amp.validator.LIGHT) {
           this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
           return;
@@ -175,7 +176,7 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
                       .CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,
             [
               'style', decl.name, this.inKeyframes.name,
-              '[\'opacity\', \'transform\']'
+              '[\'animation-timing-function\', \'opacity\', \'transform\']'
             ]));
       }
     }

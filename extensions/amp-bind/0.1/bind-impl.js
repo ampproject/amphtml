@@ -15,21 +15,20 @@
  */
 
 import {BindExpressionResultDef} from './bind-expression';
+import {childElementByAttr} from '../../../src/dom';
 import {BindingDef, BindEvaluator} from './bind-evaluator';
-import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
-import {fromClassForDoc} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
+import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {timerFor} from '../../../src/timer';
 
 const TAG = 'amp-bind';
 
@@ -39,6 +38,17 @@ const TAG = 'amp-bind';
  * @type {!RegExp}
  */
 const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
+
+/**
+ * Tags under which bind should observe mutaitons to detect added/removed
+ * bindings.
+ * @type {!Object<string, boolean>}
+ * @private
+ */
+const DYNAMIC_TAGS = map({
+  'TEMPLATE': true,
+  'AMP-LIVE-LIST': true,
+});
 
 /**
  * A bound property, e.g. [property]="expression".
@@ -61,14 +71,6 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
- * @return {!Bind}
- */
-export function installBindForTesting(nodeOrAmpDoc) {
-  return fromClassForDoc(nodeOrAmpDoc, 'bind', Bind);
-}
-
-/**
  * Bind is the service that handles the Bind lifecycle, from identifying
  * bindings in the document to scope mutations to reevaluating expressions
  * during a digest.
@@ -78,8 +80,9 @@ export class Bind {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    // Allow integration test to access this class in testing mode.
     /** @const @private {boolean} */
-    this.enabled_ = isExperimentOn(ampdoc.win, TAG);
+    this.enabled_ = getMode().test || isExperimentOn(ampdoc.win, TAG);
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
@@ -97,9 +100,6 @@ export class Bind {
      */
     this.expressionToElements_ = Object.create(null);
 
-    /** @const @private {!./bind-validator.BindValidator} */
-    this.validator_ = new BindValidator();
-
     /** @const @private {!Object} */
     this.scope_ = Object.create(null);
 
@@ -108,11 +108,6 @@ export class Bind {
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
-
-    /**
-     * @const @private {!Array<Promise>}
-     */
-    this.mutationPromises_ = [];
 
     /**
      * @const @private {MutationObserver}
@@ -160,6 +155,11 @@ export class Bind {
         user().fine(TAG, 'State updated; re-evaluating expressions...');
         return this.digest_();
       });
+      if (getMode().test) {
+        this.setStatePromise_.then(() => {
+          this.dispatchEventForTesting_('amp:bind:setState');
+        });
+      }
       return this.setStatePromise_;
     } else {
       return Promise.resolve();
@@ -174,6 +174,8 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
+    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
+
     this.setStatePromise_ = this.initializePromise_.then(() => {
       // Allow expression to reference current scope in addition to event scope.
       Object.assign(scope, this.scope_);
@@ -202,7 +204,13 @@ export class Bind {
    */
   initialize_() {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    return this.addBindingsForNode_(this.ampdoc.getBody());
+    const promise = this.addBindingsForNode_(this.ampdoc.getBody());
+    if (getMode().test) {
+      promise.then(() => {
+        this.dispatchEventForTesting_('amp:bind:initialize');
+      });
+    }
+    return promise;
   }
 
   /**
@@ -336,8 +344,7 @@ export class Bind {
       // Walker is filtered to only return elements
       const element = dev().assertElement(node);
       const tagName = element.tagName;
-      if (tagName === 'TEMPLATE') {
-        // Listen for changes in amp-mustache templates
+      if (DYNAMIC_TAGS[tagName]) {
         this.observeElementForMutations_(element);
       }
 
@@ -397,7 +404,7 @@ export class Bind {
     const attrs = element.attributes;
     for (let i = 0, numberOfAttrs = attrs.length; i < numberOfAttrs; i++) {
       const attr = attrs[i];
-      const boundProperty = this.scanAttribute_(attr, element);
+      const boundProperty = this.scanAttribute_(attr);
       if (boundProperty) {
         boundProperties.push(boundProperty);
       }
@@ -409,20 +416,14 @@ export class Bind {
    * Returns the bound property and expression string within a given attribute,
    * if it exists. Otherwise, returns null.
    * @param {!Attr} attribute
-   * @param {!Element} element
    * @return {?{property: string, expressionString: string}}
    * @private
    */
-  scanAttribute_(attribute, element) {
+  scanAttribute_(attribute) {
     const name = attribute.name;
     if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
       const property = name.substr(1, name.length - 2);
-      if (this.validator_.canBind(element.tagName, property)) {
-        return {property, expressionString: attribute.value};
-      } else {
-        const err = user().createError(`Binding to [${property}] not allowed.`);
-        reportError(err, element);
-      }
+      return {property, expressionString: attribute.value};
     }
     return null;
   }
@@ -495,7 +496,6 @@ export class Bind {
   apply_(results) {
     const applyPromises = this.boundElements_.map(boundElement => {
       const {element, boundProperties} = boundElement;
-      const tagName = element.tagName;
 
       const applyPromise = this.resources_.mutateElement(element, () => {
         const mutations = {};
@@ -505,13 +505,7 @@ export class Bind {
           const {property, expressionString, previousResult} =
               boundProperty;
 
-          // TODO(choumx): Perform in worker with URL API.
-          // Rewrite attribute value if necessary. This is not done in the
-          // worker since it relies on `url#parseUrl`, which uses DOM APIs.
-          let newValue = results[expressionString];
-          if (typeof newValue === 'string') {
-            newValue = rewriteAttributeValue(tagName, property, newValue);
-          }
+          const newValue = results[expressionString];
 
           // Don't apply if the result hasn't changed or is missing.
           if (newValue === undefined ||
@@ -530,7 +524,7 @@ export class Bind {
             mutations[mutation.name] = mutation.value;
           }
 
-          switch (boundProperty.property) {
+          switch (property) {
             case 'width':
               width = isFiniteNumber(newValue) ? Number(newValue) : width;
               break;
@@ -604,8 +598,21 @@ export class Bind {
             attributeChanged = true;
           }
         } else if (newValue !== oldValue) {
-          element.setAttribute(property, String(newValue));
-          attributeChanged = true;
+          // TODO(choumx): Perform in worker with URL API.
+          // Rewrite attribute value if necessary. This is not done in the
+          // worker since it relies on `url#parseUrl`, which uses DOM APIs.
+          let rewrittenNewValue;
+          try {
+            rewrittenNewValue = rewriteAttributeValue(
+                element.tagName, property, String(newValue));
+          } catch (e) {
+            reportError(user().createError(e), element);
+          }
+          // Rewriting can fail due to e.g. invalid URL.
+          if (rewrittenNewValue !== undefined) {
+            element.setAttribute(property, rewrittenNewValue);
+            attributeChanged = true;
+          }
         }
 
         if (attributeChanged) {
@@ -687,14 +694,32 @@ export class Bind {
    * Begin observing mutations to element. Presently, all supported elements
    * that can add/remove bindings add new elements to their parent, so parent
    * node should be observed for mutations.
+   * @param {!Element} element
    * @private
    */
   observeElementForMutations_(element) {
-    // TODO(kmh287): What if parent is the body tag?
-    // TODO(kmh287): Generify logic for node observation strategy
-    // when bind supprots more dynamic nodes.
-    const elementToObserve = element.parentElement;
-    this.mutationObserver_.observe(elementToObserve, {childList: true});
+    const tagName = element.tagName;
+    let elementToObserve;
+    if (tagName === 'TEMPLATE') {
+      // Templates add templated elements as siblings of the template tag
+      // so the parent must be observed.
+      // TODO(kmh287): What if parent is the body tag?
+      elementToObserve = element.parentElement;
+    } else if (tagName === 'AMP-LIVE-LIST') {
+      // All elements in AMP-LIVE-LIST are children of a <div> with an
+      // `items` attribute.
+      const itemsDiv = childElementByAttr(element, 'items');
+      // Should not happen on any page that passes the AMP validator
+      // as <div items> is required.
+      elementToObserve = dev().assert(itemsDiv,
+          'Could not find items div in amp-live-list');
+    } else {
+      dev().assert(false,
+           `amp-bind asked to observe unexpected element ${tagName}`);
+    }
+    if (elementToObserve) {
+      this.mutationObserver_.observe(elementToObserve, {childList: true});
+    }
   }
 
   /**
@@ -729,11 +754,13 @@ export class Bind {
           }
         }
         return Promise.all(removePromises);
-      }).then(() => {
-        return this.digest_();
       });
+      // TODO(kmh287): Come up with a strategy for evaluating new bindings
+      // added here that mitigates FOUC.
       if (getMode().test) {
-        this.mutationPromises_.push(mutationPromise);
+        mutationPromise.then(() => {
+          this.dispatchEventForTesting_('amp:bind:mutated');
+        });
       }
     });
   }
@@ -809,7 +836,6 @@ export class Bind {
     return false;
   }
 
-
   /**
    * Wait for bind scan to finish for testing.
    *
@@ -819,7 +845,6 @@ export class Bind {
   initializePromiseForTesting() {
     return this.initializePromise_;
   }
-
 
   /**
    * Wait for bindings to evaluate and apply for testing. Should
@@ -833,21 +858,12 @@ export class Bind {
   }
 
   /**
-   * Wait for DOM mutation observer callbacks to fire. Returns a promise
-   * that resolves when mutation callbacks have fired.
-   *
-   * @return {Promise}
-   *
-   * @visibleForTesting
+   * @param {string} name
+   * @private
    */
-  waitForAllMutationsForTesting() {
-    return timerFor(this.win_).poll(5, () => {
-      return this.mutationPromises_.length > 0;
-    }).then(() => {
-      return Promise.all(this.mutationPromises_);
-    }).then(() => {
-      this.mutationPromises_.length = 0;
-    });
+  dispatchEventForTesting_(name) {
+    if (getMode().test) {
+      this.win_.dispatchEvent(new Event(name));
+    }
   }
-
 }

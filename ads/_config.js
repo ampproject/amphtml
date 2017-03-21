@@ -525,10 +525,17 @@ export const adConfig = {
       'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
     ],
+    renderStartImplemented: true,
   },
 
   sovrn: {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
+  },
+
+  sunmedia: {
+    prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
+    preconnect: 'https://static.addevweb.com',
+    renderStartImplemented: true,
   },
 
   swoop: {

@@ -23,9 +23,6 @@ amp-carousel {
  * Every `<amp-carousel>'s` immediate child is considered a slide in
  * the carousel.
  */
-/* TODO(dvoytenko, #6794): Remove old `-amp-replaced-content` form after the new
-   form is in PROD for 1-2 weeks. */
-.amp-carousel-slide > .-amp-replaced-content,
 .amp-carousel-slide > .i-amphtml-replaced-content {
   /*
    * Apply contain object-fit to all replaced content to avoid distorted ratios.
@@ -182,5 +179,13 @@ amp-carousel .amp-carousel-button.amp-disabled {
   overflow-x: auto !important;
   overflow-y: hidden !important;
   -webkit-overflow-scrolling: touch !important;
+}
+
+.-amp-slidescroll-no-snap.-amp-slides-container {
+  scroll-snap-type: none !important;
+}
+
+.-amp-slidescroll-no-snap.-amp-slide-item {
+  scroll-snap-coordinate: none !important;
 }
 /* End ScrollableCarousel */

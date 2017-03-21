@@ -30,16 +30,11 @@ describes.realWin('amp-bind', {
 }, env => {
   let bind;
 
-  // BindValidator method stubs.
-  let canBindStub;
-
   beforeEach(() => {
     installTimerService(env.win);
     toggleExperiment(env.win, 'amp-bind', true);
 
     // Stub validator methods to return true for ease of testing.
-    canBindStub = env.sandbox.stub(
-        BindValidator.prototype, 'canBind').returns(true);
     env.sandbox.stub(
         BindValidator.prototype, 'isResultValid').returns(true);
 
@@ -54,12 +49,14 @@ describes.realWin('amp-bind', {
   });
 
   /**
-   * @param {!string} binding
+   * @param {string} binding
+   * @param {string=} opt_tagName
    * @return {!Element}
    */
-  function createElementWithBinding(binding) {
+  function createElementWithBinding(binding, opt_tagName) {
+    const tag = opt_tagName || 'p';
     const div = env.win.document.createElement('div');
-    div.innerHTML = '<p ' + binding + '></p>';
+    div.innerHTML = `<${tag} ${binding}></${tag}>`;
     const newElement = div.firstElementChild;
     const parent = env.win.document.getElementById('parent');
     parent.appendChild(newElement);
@@ -104,6 +101,20 @@ describes.realWin('amp-bind', {
   }
 
   /**
+   * @param {string} name
+   * @return {!Promise}
+   */
+  function waitForEvent(name) {
+    return new Promise(resolve => {
+      function callback() {
+        resolve();
+        env.win.removeEventListener(callback);
+      };
+      env.win.addEventListener(name, callback);
+    });
+  }
+
+  /**
    * Calls `callback` when digest that updates bind state to `state` completes.
    * @param {!Object} state
    * @param {!Function} callback
@@ -117,6 +128,8 @@ describes.realWin('amp-bind', {
 
   it('should throw error if experiment is not enabled', () => {
     toggleExperiment(env.win, 'amp-bind', false);
+    // Experiment check is bypassed on test mode -- make sure it isn't.
+    window.AMP_MODE = {test: false};
     expect(() => {
       new Bind(env.ampdoc);
     }).to.throw('Experiment "amp-bind" is disabled.');
@@ -147,67 +160,20 @@ describes.realWin('amp-bind', {
     });
   });
 
-  describe('under dynamic tags', () => {
-    it('should dynamically detect new bindings', () => {
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        createElementWithBinding('[onePlusOne]="1+1"');
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(bind.boundElements_.length).to.equal(1);
-      });
-    });
-
-    //TODO(kmh287): Move to integration test
-    it('should NOT bind blacklisted attributes', () => {
-      // Restore real implementations of canBind and isResultValid
-      sandbox.restore();
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      let textElement;
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        const binding = '[onclick]="\'alert(document.cookie)\'" ' +
-          '[onmouseover]="\'alert()\'" ' +
-          '[style]="\'background=color:black\'"';
-        textElement = createElementWithBinding(binding);
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        expect(textElement.getAttribute('onclick')).to.be.null;
-        expect(textElement.getAttribute('onmouseover')).to.be.null;
-        expect(textElement.getAttribute('style')).to.be.null;
-      });
-    });
-
-    //TODO(kmh287): Move to integration test
-    it('should NOT allow unsecure attribute values', () => {
-      // Restore real implementations of canBind and isResultValid
-      sandbox.restore();
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      let aElement;
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        const binding = '[href]="javascript:alert(1)"';
-        const div = env.win.document.createElement('div');
-        div.innerHTML = '<a ' + binding + '></a>';
-        aElement = div.firstElementChild;
-        // Templated HTML is added as a sibling to the template,
-        // not as a child
-        doc.getElementById('parent').appendChild(aElement);
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(aElement.getAttribute('href')).to.be.null;
-      });
+  it('should dynamically detect new bindings under dynamic tags', () => {
+    const doc = env.win.document;
+    const template = doc.createElement('template');
+    doc.getElementById('parent').appendChild(template);
+    return onBindReady().then(() => {
+      expect(bind.boundElements_.length).to.equal(0);
+      // As a dynamic element, template adds rendered templates as siblings.
+      // Element is added as a sibling to the template
+      createElementWithBinding('[onePlusOne]="1+1"');
+      return waitForEvent('amp:bind:mutated');
+    }).then(() => {
+      expect(bind.boundElements_.length).to.equal(1);
     });
   });
-
 
   it('should NOT apply expressions on first load', () => {
     const element = createElementWithBinding('[onePlusOne]="1+1"');
@@ -218,7 +184,7 @@ describes.realWin('amp-bind', {
   });
 
   it('should verify string attribute bindings in dev mode', () => {
-    env.sandbox.stub(window, 'AMP_MODE', {development: true});
+    window.AMP_MODE = {development: true};
     // Only the initial value for [a] binding does not match.
     createElementWithBinding('[a]="a" [b]="b" b="b"');
     const errorStub = env.sandbox.stub(user(), 'createError');
@@ -228,7 +194,7 @@ describes.realWin('amp-bind', {
   });
 
   it('should verify boolean attribute bindings in dev mode', () => {
-    env.sandbox.stub(window, 'AMP_MODE', {development: true});
+    window.AMP_MODE = {development: true};
     // Only the initial value for [c] binding does not match.
     createElementWithBinding(`a [a]="true" [b]="false" c="false" [c]="false"`);
     const errorStub = env.sandbox.stub(user(), 'createError');
@@ -379,12 +345,15 @@ describes.realWin('amp-bind', {
     });
   });
 
-  it('should NOT evaluate expression if binding is NOT allowed', () => {
-    canBindStub.returns(false);
-    const element = createElementWithBinding(`[onePlusOne]="1+1"`);
-    return onBindReadyAndSetState({}).then(() => {
-      expect(canBindStub.calledOnce).to.be.true;
-      expect(element.getAttribute('oneplusone')).to.be.null;
+  it('should rewrite attribute values regardless of result type', () => {
+    const withString = createElementWithBinding(`[href]="foo"`, 'a');
+    const withArray = createElementWithBinding(`[href]="bar"`, 'a');
+    return onBindReadyAndSetState({
+      foo: '?__amp_source_origin',
+      bar: ['?__amp_source_origin'],
+    }).then(() => {
+      expect(withString.getAttribute('href')).to.equal(null);
+      expect(withArray.getAttribute('href')).to.equal(null);
     });
   });
 });
