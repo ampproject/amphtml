@@ -142,11 +142,14 @@ export class BindExpression {
         const params = this.eval_(args[1], scope);
         const method = String(value);
 
-        let validFunction = null;
-        let unsupportedError = `${method} is not a supported function.`;
+        let validFunction;
+        let unsupportedError;
 
         if (isBuiltIn) {
           validFunction = FUNCTION_WHITELIST[BUILT_IN_FUNCTIONS][method];
+          if (!validFunction) {
+            unsupportedError = `${method} is not a supported function.`;
+          }
         } else {
           const callerType = Object.prototype.toString.call(caller);
           const whitelist = FUNCTION_WHITELIST[callerType];
@@ -154,9 +157,11 @@ export class BindExpression {
             const f = caller[method];
             if (f && f === whitelist[method]) {
               validFunction = f;
-            } else {
-              unsupportedError = `${callerType}.` + unsupportedError;
             }
+          }
+          if (!validFunction) {
+            unsupportedError =
+                `${callerType}.${method} is not a supported function.`;
           }
         }
 
