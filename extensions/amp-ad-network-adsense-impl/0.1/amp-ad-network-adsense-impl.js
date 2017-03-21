@@ -252,7 +252,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @private
    */
   centerCreative_() {
-    const iframe = this.element.getElementsByTagName('iframe')[0];
+    const iframe = this.element.querySelector('iframe');
     if (iframe) {
       setStyles(iframe, {
         top: '50%',
