@@ -571,6 +571,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   sendRequest_(request, trigger) {
+    console.log(request, trigger);
     if (!request) {
       const TAG = this.getName_();
       user().error(TAG, 'Request not sent. Contents empty.');

@@ -421,6 +421,50 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
   }
 }
 
+/**
+ * Scope selector within the extension element itself
+ */
+export class AmpScopedAnalyticsRoot extends AnalyticsRoot {
+  constructor(ampdoc, parent, scopedEle) {
+    super(ampdoc, /* parent */ parent);
+
+    /** {!AmpElement}  Will only support parent as AMP element at this time*/
+    this.scopedEle_ = scopedEle;
+  }
+
+  getType() {
+    return 'scoped';
+  }
+
+  getRoot() {
+    return this.scopedEle_;
+  }
+
+  getHostElement() {
+    return null;
+  }
+
+  signals() {
+    return this.parent.signals();
+  }
+
+  getElementById(id) {
+    // get the id of all parent's children
+    return this.getElement(this.scopedEle_, '#' + id, 'scope');
+  }
+
+  /** @override */
+  whenIniLoaded() {
+    // Question: Use BUILT? INI_LOAD? LOAD_START? LOAD_END?
+    return this.parent.whenIniLoaded();
+  }
+
+  /** @override */
+  createVisibilityManager() {
+    return new VisibilityManagerForDoc(this.ampdoc);
+  }
+}
+
 
 /**
  * @param  {!Element} el
