@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {adoptServiceForEmbed, fromClass, setParentWindow} from '../service';
+import {
+  adoptServiceForEmbed,
+  registerServiceBuilder,
+  setParentWindow,
+} from '../service';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
@@ -84,13 +88,11 @@ let ExtensionHolderDef;
 /**
  * Install extensions service.
  * @param {!Window} window
- * @return {!Extensions}
  * @restricted
  */
 export function installExtensionsService(window) {
-  return fromClass(window, 'extensions', Extensions);
+  registerServiceBuilder(window, 'extensions', Extensions);
 }
-
 
 /**
  * Register and process the specified extension. The factory is called
