@@ -69,6 +69,10 @@ The instagram data-shortcode is found in every instagram photo URL.
 
 For example, in https://instagram.com/p/fBwFP, `fBwFP` is the data-shortcode.
 
+**data-captioned**
+
+Include the Instagram caption.  `amp-instagram` will attept to resize to the correct hight including the caption.
+
 **common attributes**
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
