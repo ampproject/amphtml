@@ -61,6 +61,20 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
   let impl;
   let element;
 
+  /**
+   * Creates an iframe promise, and instantiates element and impl, adding the
+   * former to the document of the iframe.
+   * @param {{width, height, type}} config
+   * @return The iframe promise.
+   */
+  function createImplTag(config) {
+    return createIframePromise().then(fixture => {
+      setupForAdTesting(fixture);
+      element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
+      impl = new AmpAdNetworkAdsenseImpl(element);
+    });
+  }
+
   beforeEach(() => {
     sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
         () => {
@@ -333,15 +347,11 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     let loadExtensionSpy;
 
     beforeEach(() => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        element = createElementWithAttributes(doc, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'adsense',
-        });
-        impl = new AmpAdNetworkAdsenseImpl(element);
+      return createImplTag({
+        width: '200',
+        height: '50',
+        type: 'adsense'
+      }).then(() => {
         const extensions = installExtensionsService(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
@@ -360,10 +370,39 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         expect(ampAnalyticsElement.innerHTML.indexOf(url)).to.not.equal(-1);
       });
     });
-    it('centers iframe in slot', () => {
+    it('centers iframe in slot when height && width', () => {
       const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
       impl.onCreativeRender(false);
       expect(centerCreativeSpy).to.be.calledOnce;
+    });
+    it('centers iframe in slot when !height && !width', () => {
+      return createImplTag({
+        type: 'adsense'
+      }).then(() => {
+        const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
+        impl.onCreativeRender(false);
+        expect(centerCreativeSpy).to.be.calledOnce;
+      });
+    });
+    it('centers iframe in slot when height && !width', () => {
+      return createImplTag({
+        height: '50',
+        type: 'adsense'
+      }).then(() => {
+        const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
+        impl.onCreativeRender(false);
+        expect(centerCreativeSpy).to.be.calledOnce;
+      });
+    });
+    it('centers iframe in slot when !height && width', () => {
+      return createImplTag({
+        width: '200',
+        type: 'adsense'
+      }).then(() => {
+        const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
+        impl.onCreativeRender(false);
+        expect(centerCreativeSpy).to.be.calledOnce;
+      });
     });
   });
 
