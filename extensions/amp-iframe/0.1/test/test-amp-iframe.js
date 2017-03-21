@@ -659,6 +659,7 @@ describe('amp-iframe', () => {
       const newSrc = 'https://foo.bar';
       container.setAttribute('src', newSrc);
       impl.mutatedAttributesCallback({src: newSrc});
+      expect(impl.iframeSrc).to.contain(newSrc);
       expect(iframe.getAttribute('src')).to.contain(newSrc);
     });
   });

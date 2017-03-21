@@ -398,9 +398,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       // Force layout in case element is not in viewport.
       ampIframe.implementation_.layoutCallback();
       const iframe = ampIframe.querySelector('iframe');
+      expect(ampIframe.src).to.not.contain('bound');
       expect(iframe.src).to.not.contain('bound');
       button.click();
       return waitForBindApplication().then(() => {
+        expect(ampIframe.src).to.contain('bound');
         expect(iframe.src).to.contain('bound');
       });
     });
