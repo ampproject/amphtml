@@ -16,6 +16,7 @@
 
 import {map} from '../../../src/utils/object';
 import {parseSrcset} from '../../../src/srcset';
+import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-bind';
@@ -33,9 +34,23 @@ let PropertyRulesDef;
  * @private {Object<string, ?PropertyRulesDef>}
  */
 const GLOBAL_PROPERTY_RULES = map({
+  'text': null,
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
+  // ARIA accessibility attributes.
+  'aria-describedby': null,
+  'aria-label': null,
+  'aria-labelledby': null,
+});
+
+/**
+ * Property rules that apply to all AMP elements.
+ * @private {Object<string, Object<string, ?PropertyRulesDef>>}
+ */
+const AMP_PROPERTY_RULES = map({
+  'width': null,
+  'height': null,
 });
 
 /**
@@ -64,6 +79,18 @@ const URL_PROPERTIES = map({
  */
 export class BindValidator {
   /**
+   * Returns true if (tag, property) binding is allowed.
+   * Otherwise, returns false.
+   * @note `tag` and `property` are case-sensitive.
+   * @param {!string} tag
+   * @param {!string} property
+   * @return {boolean}
+   */
+  canBind(tag, property) {
+    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
+  }
+
+  /**
    * Returns true if `value` is a valid result for a (tag, property) binding.
    * Otherwise, returns false.
    * @param {!string} tag
@@ -79,8 +106,13 @@ export class BindValidator {
       rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
     }
 
-    // If there are no rules governing this binding, return true.
-    if (!rules) {
+    // If binding to (tag, property) is not allowed, return false.
+    if (rules === undefined) {
+      return false;
+    }
+
+    // If binding is allowed but have no specific rules, return true.
+    if (rules === null) {
       return true;
     }
 
@@ -153,16 +185,19 @@ export class BindValidator {
    * @private
    */
   rulesForTagAndProperty_(tag, property) {
-    const globalRules = GLOBAL_PROPERTY_RULES[property];
-    if (globalRules) {
-      return globalRules;
+    const globalPropertyRules = GLOBAL_PROPERTY_RULES[property];
+    if (globalPropertyRules !== undefined) {
+      return globalPropertyRules;
     }
     const tagRules = ELEMENT_RULES[tag];
     // hasOwnProperty() needed since nested objects are not prototype-less.
     if (tagRules && tagRules.hasOwnProperty(property)) {
       return tagRules[property];
     }
-
+    const ampPropertyRules = AMP_PROPERTY_RULES[property];
+    if (startsWith(tag, 'AMP-') && ampPropertyRules !== undefined) {
+      return ampPropertyRules;
+    }
     return undefined;
   }
 }
@@ -174,7 +209,20 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = map({
+    'AMP-BRIGHTCOVE': {
+      'data-account': null,
+      'data-embed': null,
+      'data-player': null,
+      'data-player-id': null,
+      'data-playlist-id': null,
+      'data-video-id': null,
+    },
+    'AMP-CAROUSEL': {
+      'slide': null,
+    },
     'AMP-IMG': {
+      'alt': null,
+      'referrerpolicy': null,
       'src': {
         'allowedProtocols': {
           'data': true,
@@ -186,12 +234,27 @@ function createElementRules_() {
         'alternativeName': 'src',
       },
     },
+    'AMP-SELECTOR': {
+      'selected': null,
+    },
     'AMP-VIDEO': {
+      'alt': null,
+      'attribution': null,
+      'autoplay': null,
+      'controls': null,
+      'loop': null,
+      'muted': null,
+      'placeholder': null,
+      'poster': null,
+      'preload': null,
       'src': {
         'allowedProtocols': {
           'https': true,
         },
       },
+    },
+    'AMP-YOUTUBE': {
+      'data-videoid': null,
     },
     'A': {
       'href': {
@@ -214,10 +277,56 @@ function createElementRules_() {
         },
       },
     },
+    'BUTTON': {
+      'disabled': null,
+      'type': null,
+      'value': null,
+    },
+    'FIELDSET': {
+      'disabled': null,
+    },
     'INPUT': {
+      'accept': null,
+      'accesskey': null,
+      'autocomplete': null,
+      'checked': null,
+      'disabled': null,
+      'height': null,
+      'inputmode': null,
+      'max': null,
+      'maxlength': null,
+      'min': null,
+      'minlength': null,
+      'multiple': null,
+      'pattern': null,
+      'placeholder': null,
+      'readonly': null,
+      'required': null,
+      'selectiondirection': null,
+      'size': null,
+      'spellcheck': null,
+      'step': null,
       'type': {
-        'blacklistedValueRegex': '(^|\\s)(button|file|image|password|)(\\s|$)',
+        blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
       },
+      'value': null,
+      'width': null,
+    },
+    'OPTION': {
+      'disabled': null,
+      'label': null,
+      'selected': null,
+      'value': null,
+    },
+    'OPTGROUP': {
+      'disabled': null,
+      'label': null,
+    },
+    'SELECT': {
+      'disabled': null,
+      'multiple': null,
+      'required': null,
+      'size': null,
     },
     'SOURCE': {
       'src': {
@@ -225,13 +334,32 @@ function createElementRules_() {
           'https': true,
         },
       },
+      'type': null,
     },
     'TRACK': {
+      'label': null,
       'src': {
         'allowedProtocols': {
           'https': true,
         },
       },
+      'srclang': null,
+    },
+    'TEXTAREA': {
+      'autocomplete': null,
+      'cols': null,
+      'disabled': null,
+      'maxlength': null,
+      'minlength': null,
+      'placeholder': null,
+      'readonly': null,
+      'required': null,
+      'rows': null,
+      'selectiondirection': null,
+      'selectionend': null,
+      'selectionstart': null,
+      'spellcheck': null,
+      'wrap': null,
     },
   });
   return rules;
