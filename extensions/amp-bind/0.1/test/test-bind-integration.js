@@ -50,7 +50,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     return new Promise(resolve => {
       function callback() {
         resolve();
-        fixture.win.removeEventListener(callback);
+        fixture.win.removeEventListener(name, callback);
       };
       fixture.win.addEventListener(name, callback);
     });
