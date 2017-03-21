@@ -51,12 +51,6 @@ const DYNAMIC_TAGS = map({
 });
 
 /**
- * Upper limit on number of bindings for performance.
- * @private @const {number}
- */
-const MAX_BINDINGS = 2000;
-
-/**
  * A bound property, e.g. [property]="expression".
  * `previousResult` is the result of this expression during the last digest.
  * @typedef {{
@@ -101,6 +95,12 @@ export class Bind {
     this.boundElements_ = [];
 
     /**
+     * Upper limit on number of bindings for performance.
+     * @private {number}
+     */
+    this.maxNumberOfBindings_ = 2000; // Based on ~1ms to parse an expression.
+
+    /**
      * Maps expression string to the element(s) that contain it.
      * @private @const {!Object<string, !Array<!Element>>}
      */
@@ -120,9 +120,6 @@ export class Bind {
      */
     this.mutationObserver_ =
         new MutationObserver(this.onMutationsObserved_.bind(this));
-
-    /** @private {number} */
-    this.numberOfBindings_ = 0;
 
     /** @const @private {boolean} */
     this.workerExperimentEnabled_ = isExperimentOn(this.win_, 'web-worker');
@@ -229,6 +226,25 @@ export class Bind {
   }
 
   /**
+   * The current number of bindings.
+   * @return {number}
+   * @private
+   */
+  numberOfBindings_() {
+    return this.boundElements_.reduce((number, boundElement) => {
+      return number + boundElement.boundProperties.length;
+    }, 0);
+  }
+
+  /**
+   * @param {number} value
+   * @visibleForTesting
+   */
+  setMaxNumberOfBindings(value) {
+    this.maxNumberOfBindings_ = value;
+  }
+
+  /**
    * Scans the substree rooted at `node` and adds bindings for nodes
    * that contain bindable elements. This function is not idempotent.
    *
@@ -236,17 +252,15 @@ export class Bind {
    *
    * @param {!Element} node
    * @return {!Promise}
-   *
    * @private
    */
   addBindingsForNode_(node) {
-    const limit = MAX_BINDINGS - this.numberOfBindings_;
+    const limit = this.maxNumberOfBindings_ - this.numberOfBindings_();
     return this.scanNode_(node, limit).then(results => {
       const {
         boundElements, bindings, expressionToElements, limitExceeded
       } = results;
 
-      this.numberOfBindings_ += bindings.length;
       this.boundElements_ = this.boundElements_.concat(boundElements);
       Object.assign(this.expressionToElements_, expressionToElements);
 
@@ -255,8 +269,8 @@ export class Bind {
 
       if (limitExceeded) {
         user().error(TAG, `Maximum number of bindings reached ` +
-            `(${MAX_BINDINGS}). Additional elements with bindings will be ` +
-            `ignored.`);
+            `(${this.maxNumberOfBindings_}). Additional elements with ` +
+            `bindings will be ignored.`);
       }
 
       // Parse on web worker if experiment is enabled.
@@ -390,7 +404,7 @@ export class Bind {
         }
         expressionToElements[expressionString].push(element);
       });
-      return !walker.nextNode() || bindings.length >= maxBindings;
+      return !walker.nextNode() || limitExceeded;
     };
 
     return new Promise(resolve => {
