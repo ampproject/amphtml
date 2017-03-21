@@ -186,6 +186,6 @@
   "ibeatanalytics": {
     "host": "https://ibeats.indiatimes.com",
     "base": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html",
-    "pageview": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html?h=${h}&d=${d}&url=${url}&k=${k}&ts=${ts}&ch=${ch}&sid=${sid}&at=${at}&ref=${ref}&aid=${aid}&loc=${loc}&ct=${ct}&cat=${cat}&scat=${scat}&ac=${ac}&tg=${tg}&ctids=${ctids}&pts=${pts}&auth=${auth}&pos=${pos}&utmvsi=${utmvsi}&utmcsr=${utmcsr}&utmccn=${utmccn}&utmcmd=${utmcmd}&utma=${utma}&iBeatField=${iBeatField}"
+    "pageview": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=ibeats.indiatimes.com&d=ibeats.indiatimes.com&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields"
   },
 }
