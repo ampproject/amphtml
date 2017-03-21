@@ -833,7 +833,7 @@ describe.configure()
           elementX: 0,
           elementY: 75,
           firstSeenTime: 100,
-          fistVisibleTime: 100,
+          firstVisibleTime: 100,
           lastSeenTime: 100,
           lastVisibleTime: 100,
           loadTimeVisibility: 25,
@@ -882,7 +882,7 @@ describe.configure()
             elementX: 0,
             elementY: 75,
             firstSeenTime: 135,
-            fistVisibleTime: 235,  // 135 + 100
+            firstVisibleTime: 235,  // 135 + 100
             lastSeenTime: 235,
             lastVisibleTime: 235,
             loadTimeVisibility: 5,
@@ -905,7 +905,7 @@ describe.configure()
             elementX: 0,
             elementY: 65,
             firstSeenTime: 135,
-            fistVisibleTime: 335,  // 235 + 100
+            firstVisibleTime: 335,  // 235 + 100
             lastSeenTime: 335,
             lastVisibleTime: 335,
             loadTimeVisibility: 5,
@@ -972,7 +972,7 @@ describe.configure()
             elementX: 0,
             elementY: 65,
             firstSeenTime: 100,
-            fistVisibleTime: 100,
+            firstVisibleTime: 100,
             lastSeenTime: 4299,
             lastVisibleTime: 4299,
             loadTimeVisibility: 25,
