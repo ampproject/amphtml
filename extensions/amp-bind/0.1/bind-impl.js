@@ -17,6 +17,7 @@
 import {BindExpressionResultDef} from './bind-expression';
 import {childElementByAttr} from '../../../src/dom';
 import {BindingDef, BindEvaluator} from './bind-evaluator';
+import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -99,6 +100,9 @@ export class Bind {
      * @private @const {!Object<string, !Array<!Element>>}
      */
     this.expressionToElements_ = Object.create(null);
+
+    /** @const @private {!./bind-validator.BindValidator} */
+    this.validator_ = new BindValidator();
 
     /** @const @private {!Object} */
     this.scope_ = Object.create(null);
@@ -404,7 +408,7 @@ export class Bind {
     const attrs = element.attributes;
     for (let i = 0, numberOfAttrs = attrs.length; i < numberOfAttrs; i++) {
       const attr = attrs[i];
-      const boundProperty = this.scanAttribute_(attr);
+      const boundProperty = this.scanAttribute_(attr, element);
       if (boundProperty) {
         boundProperties.push(boundProperty);
       }
@@ -416,14 +420,20 @@ export class Bind {
    * Returns the bound property and expression string within a given attribute,
    * if it exists. Otherwise, returns null.
    * @param {!Attr} attribute
+   * @param {!Element} element
    * @return {?{property: string, expressionString: string}}
    * @private
    */
-  scanAttribute_(attribute) {
+  scanAttribute_(attribute, element) {
     const name = attribute.name;
     if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
       const property = name.substr(1, name.length - 2);
-      return {property, expressionString: attribute.value};
+      if (this.validator_.canBind(element.tagName, property)) {
+        return {property, expressionString: attribute.value};
+      } else {
+        const err = user().createError(`Binding to [${property}] not allowed.`);
+        reportError(err, element);
+      }
     }
     return null;
   }

@@ -30,11 +30,16 @@ describes.realWin('amp-bind', {
 }, env => {
   let bind;
 
+  // BindValidator method stubs.
+  let canBindStub;
+
   beforeEach(() => {
     installTimerService(env.win);
     toggleExperiment(env.win, 'amp-bind', true);
 
     // Stub validator methods to return true for ease of testing.
+    canBindStub = env.sandbox.stub(
+        BindValidator.prototype, 'canBind').returns(true);
     env.sandbox.stub(
         BindValidator.prototype, 'isResultValid').returns(true);
 
@@ -342,6 +347,15 @@ describes.realWin('amp-bind', {
     stub.returns('stubbed');
     return onBindReadyAndSetState({}).then(() => {
       expect(stub.calledOnce).to.be.true;
+    });
+  });
+
+  it('should NOT evaluate expression if binding is NOT allowed', () => {
+    canBindStub.returns(false);
+    const element = createElementWithBinding(`[onePlusOne]="1+1"`);
+    return onBindReadyAndSetState({}).then(() => {
+      expect(canBindStub.calledOnce).to.be.true;
+      expect(element.getAttribute('oneplusone')).to.be.null;
     });
   });
 
