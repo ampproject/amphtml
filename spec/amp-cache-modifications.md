@@ -149,10 +149,10 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 
 | before | after |
 | --- | --- |
-| `<amp-img src=https://example.com/foo.png></amp-img>` | `<amp-img src=/i/s/foo.png></amp-img>` |
-| `<amp-img srcset="https://example.com/bar.png 1080w, https://example.com/bar-400.png 400w">`| `<amp-img src="/i/s/bar.png 1080w, /i/s/bar-400.png 400w">` |
-| `<amp-anim src=foo.gif></amp-anim>` | `<amp-anim src=/i/s/foo.gif></amp-anim>` |
-| `<amp-video poster=bar.png>` | `<amp-video poster=/i/s/bar.png>` |
+| `<amp-img src=https://example.com/foo.png></amp-img>` | `<amp-img src=/i/s/example.com/foo.png></amp-img>` |
+| `<amp-img srcset="https://example.com/bar.png 1080w, https://example.com/bar-400.png 400w">`| `<amp-img src="/i/s/example.com/bar.png 1080w, /i/s/example.com/bar-400.png 400w">` |
+| `<amp-anim src=foo.gif></amp-anim>` | `<amp-anim src=/i/s/example.com/foo.gif></amp-anim>` |
+| `<amp-video poster=bar.png>` | `<amp-video poster=/i/s/example.com/bar.png>` |
 
 </details>
 
