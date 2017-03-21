@@ -371,6 +371,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       });
     });
     it('centers iframe in slot when height && width', () => {
+      expect(impl.element.getAttribute('width')).to.equal('200');
+      expect(impl.element.getAttribute('height')).to.equal('50');
       const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
       impl.onCreativeRender(false);
       expect(centerCreativeSpy).to.be.calledOnce;
@@ -379,6 +381,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return createImplTag({
         type: 'adsense',
       }).then(() => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.be.null;
         const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
         impl.onCreativeRender(false);
         expect(centerCreativeSpy).to.be.calledOnce;
@@ -389,6 +393,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         height: '50',
         type: 'adsense',
       }).then(() => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.equal('50');
         const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
         impl.onCreativeRender(false);
         expect(centerCreativeSpy).to.be.calledOnce;
@@ -399,6 +405,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         width: '200',
         type: 'adsense',
       }).then(() => {
+        expect(impl.element.getAttribute('width')).to.equal('200');
+        expect(impl.element.getAttribute('height')).to.be.null;
         const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
         impl.onCreativeRender(false);
         expect(centerCreativeSpy).to.be.calledOnce;
@@ -421,7 +429,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
-          '\\?client=ca-adsense&format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+&adtest=false' +
+          '\\?client=ca-adsense&format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+' +
+          '&adtest=false' +
           '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
           '(&asnt=[0-9]+-[0-9]+)?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
