@@ -936,11 +936,16 @@ function createBaseCustomElementClass(win) {
       this.getResources().add(this);
 
       if (this.everAttached) {
-        if (this.reconstructWhenReparented()) {
+        const reconstruct = this.reconstructWhenReparented();
+        if (reconstruct) {
           this.reset_();
-          this.getResources().upgraded(this);
         }
-        this.dispatchCustomEventForTesting('amp:attached');
+        if (this.isUpgraded()) {
+          if (reconstruct) {
+            this.getResources().upgraded(this);
+          }
+          this.dispatchCustomEventForTesting('amp:attached');
+        }
       } else {
         this.everAttached = true;
 
