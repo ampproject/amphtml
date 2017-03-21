@@ -18,9 +18,11 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {user} from '../../../src/log';
+import {map} from '../../../src/utils/object';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
+const DEFAULT_SCOPE = '_AMPDOC';
 
 
 /**
@@ -85,19 +87,24 @@ export class CustomEventTracker extends EventTracker {
   constructor(root) {
     super(root);
 
-    /** @const @private {!Object<string, !Observable<!AnalyticsEvent>>} */
-    this.observers_ = {};
+    /**
+     * {!Object<!Document|!ShadowRoot|!Element, !Object<string, !Observable<!AnalyticsEvent>>>}
+     * @const @private
+     */
+    this.observers_ = map();
 
     /**
      * Early events have to be buffered because there's no way to predict
      * how fast all `amp-analytics` elements will be instrumented.
-     * @private {!Object<string, !Array<!AnalyticsEvent>>|undefined}
+     * {!Object<string, !Object<string, !Array<!AnalyticsEvent>>>|undefined}
+     * @private
      */
     this.buffer_ = {};
 
     // Stop buffering of custom events after 10 seconds. Assumption is that all
     // `amp-analytics` elements will have been instrumented by this time.
     setTimeout(() => {
+      // QQQ: With inserted amp-analytics, should we adjust the value here?
       this.buffer_ = undefined;
     }, 10000);
   }
@@ -105,15 +112,29 @@ export class CustomEventTracker extends EventTracker {
   /** @override */
   dispose() {
     this.buffer_ = undefined;
-    for (const k in this.observers_) {
-      this.observers_[k].removeAll();
+    for (const scope in this.observers_) {
+      for (const k in this.observers_[scope]) {
+        this.observers_[k].removeAll();
+      }
     }
   }
 
   /** @override */
   add(context, eventType, config, listener) {
     // Push recent events if any.
-    const buffer = this.buffer_ && this.buffer_[eventType];
+    let scope = this.root.getRoot();
+    if (context.tagName == 'AMP-ANALYTICS' && context.getAttribute('scope')) {
+      // Add the listener to the analytics element only.
+      scope = this.root.getRoot();
+    }
+    console.log(scope);
+    console.log(this.observers_[scope]);
+
+    // const scope = (context.getAttribute('scope') &&
+    //     context.parentElement && context.parentElement.getAttribute('id')) ||
+    //     DEFAULT_SCOPE;
+    const buffer = this.buffer_ &&
+        this.buffer_[scope] && this.buffer_[scope][eventType];
     if (buffer) {
       setTimeout(() => {
         buffer.forEach(event => {
@@ -122,11 +143,17 @@ export class CustomEventTracker extends EventTracker {
       }, 1);
     }
 
-    let observers = this.observers_[eventType];
+    //if (this.observers_[scope]) {
+      console.log('create new !');
+      this.observers_[scope] = {};
+    //}
+    let observers = this.observers_[scope][eventType];
     if (!observers) {
       observers = new Observable();
-      this.observers_[eventType] = observers;
+      this.observers_[scope][eventType] = observers;
     }
+    console.log(Object.keys(this.observers_));
+
     return observers.add(listener);
   }
 
@@ -134,19 +161,28 @@ export class CustomEventTracker extends EventTracker {
    * Triggers a custom event for the associated root.
    * @param {!AnalyticsEvent} event
    */
-  trigger(event) {
+  trigger(event, context) {
+    // const scope = (context && context.getAttribute('id')) ||
+    //     DEFAULT_SCOPE;
+    // console.log(scope);
+    const scope = context || this.root.getRoot();
+    console.log(scope);
     // Buffer still exists - enqueue.
     if (this.buffer_) {
-      let buffer = this.buffer_[event.type];
+      if (!this.buffer_[scope]) {
+        this.buffer_[scope] = {};
+      }
+      let buffer = this.buffer_[scope][event.type];
       if (!buffer) {
         buffer = [];
-        this.buffer_[event.type] = buffer;
+        this.buffer_[scope][event.type] = buffer;
       }
       buffer.push(event);
     }
 
     // If listeners already present - trigger right away.
-    const observers = this.observers_[event.type];
+    const observers =
+        this.observers_[scope] && this.observers_[scope][event.type];
     if (observers) {
       observers.fire(event);
     }

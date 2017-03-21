@@ -144,6 +144,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.consentPromise_ = userNotificationManagerFor(this.win)
           .then(service => service.get(this.consentNotificationId_));
     }
+
+    this.scopingEle_ = this.element.getAttribute('scoped');
   }
 
   /** @override */
@@ -192,6 +194,8 @@ export class AmpAnalytics extends AMP.BaseElement {
           'config. No analytics data will be sent.');
       return Promise.resolve();
     }
+
+    // Add selectionMethod: scope to scoped analytics element
 
     this.processExtraUrlParams_(this.config_['extraUrlParams'],
         this.config_['extraUrlParamsReplaceMap']);
@@ -365,6 +369,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         'requestCount': 0,
       },
     });
+    // TODO: Need privacy review on defaultConfig
     const defaultConfig = this.predefinedConfig_['default'] || {};
     const typeConfig = this.predefinedConfig_[
       this.element.getAttribute('type')] || {};
