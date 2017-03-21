@@ -51,6 +51,12 @@ const DYNAMIC_TAGS = map({
 });
 
 /**
+ * Upper limit on number of bindings for performance.
+ * @private @const {number}
+ */
+const MAX_BINDINGS = 2000;
+
+/**
  * A bound property, e.g. [property]="expression".
  * `previousResult` is the result of this expression during the last digest.
  * @typedef {{
@@ -114,6 +120,9 @@ export class Bind {
      */
     this.mutationObserver_ =
         new MutationObserver(this.onMutationsObserved_.bind(this));
+
+    /** @private {number} */
+    this.numberOfBindings_ = 0;
 
     /** @const @private {boolean} */
     this.workerExperimentEnabled_ = isExperimentOn(this.win_, 'web-worker');
@@ -205,6 +214,12 @@ export class Bind {
   initialize_() {
     dev().fine(TAG, 'Scanning DOM for bindings...');
     const promise = this.addBindingsForNode_(this.ampdoc.getBody());
+    // Check default values against initial expression results in development.
+    if (getMode().development) {
+      promise.then(() => {
+        this.digest_(/* opt_verifyOnly */ true);
+      });
+    }
     if (getMode().test) {
       promise.then(() => {
         this.dispatchEventForTesting_('amp:bind:initialize');
@@ -225,13 +240,24 @@ export class Bind {
    * @private
    */
   addBindingsForNode_(node) {
-    return this.scanNode_(node).then(results => {
-      const {boundElements, bindings, expressionToElements} = results;
+    const limit = MAX_BINDINGS - this.numberOfBindings_;
+    return this.scanNode_(node, limit).then(results => {
+      const {
+        boundElements, bindings, expressionToElements, limitExceeded
+      } = results;
 
+      this.numberOfBindings_ += bindings.length;
       this.boundElements_ = this.boundElements_.concat(boundElements);
       Object.assign(this.expressionToElements_, expressionToElements);
+
       dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
           `${boundElements.length} elements.`);
+
+      if (limitExceeded) {
+        user().error(TAG, `Maximum number of bindings reached ` +
+            `(${MAX_BINDINGS}). Additional elements with bindings will be ` +
+            `ignored.`);
+      }
 
       // Parse on web worker if experiment is enabled.
       if (this.workerExperimentEnabled_) {
@@ -256,11 +282,6 @@ export class Bind {
 
       dev().fine(TAG, `Finished parsing expressions with ` +
           `${Object.keys(parseErrors).length} errors.`);
-
-      // Trigger verify-only digest in development.
-      if (getMode().development) {
-        this.digest_(/* opt_verifyOnly */ true);
-      }
     });
   }
 
@@ -313,16 +334,18 @@ export class Bind {
    * Scans `node` for attributes that conform to bind syntax and returns
    * a tuple containing bound elements and binding data for the evaluator.
    * @param {!Node} node
+   * @param {number} limit
    * @return {
    *   !Promise<{
    *     boundElements: !Array<BoundElementDef>,
    *     bindings: !Array<./bind-evaluator.BindingDef>,
    *     expressionToElements: !Object<string, !Array<!Element>>,
+   *     limitExceeded: boolean,
    *   }>
    * }
    * @private
    */
-  scanNode_(node) {
+  scanNode_(node, limit) {
     /** @type {!Array<BoundElementDef>} */
     const boundElements = [];
     /** @type {!Array<./bind-evaluator.BindingDef>} */
@@ -334,6 +357,9 @@ export class Bind {
       node.ownerDocument, 'ownerDocument is null.');
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
 
+    // Set to true if number of bindings in `node` exceeds `limit`.
+    let limitExceeded = false;
+
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
     const scanNextNode_ = () => {
@@ -341,14 +367,17 @@ export class Bind {
       if (!node) {
         return true;
       }
-      // Walker is filtered to only return elements
       const element = dev().assertElement(node);
       const tagName = element.tagName;
       if (DYNAMIC_TAGS[tagName]) {
         this.observeElementForMutations_(element);
       }
-
-      const boundProperties = this.scanElement_(element);
+      let boundProperties = this.scanElement_(element);
+      // Stop scanning once |limit| bindings are reached.
+      if (bindings.length + boundProperties.length > limit) {
+        boundProperties = boundProperties.slice(0, limit - bindings.length);
+        limitExceeded = true;
+      }
       if (boundProperties.length > 0) {
         boundElements.push({element, boundProperties});
       }
@@ -361,7 +390,7 @@ export class Bind {
         }
         expressionToElements[expressionString].push(element);
       });
-      return !walker.nextNode();
+      return !walker.nextNode() || bindings.length >= maxBindings;
     };
 
     return new Promise(resolve => {
@@ -381,10 +410,11 @@ export class Bind {
             completed = scanNextNode_();
           }
         }
-
         // If we scanned all elements, resolve. Otherwise, continue chunking.
         if (completed) {
-          resolve({boundElements, bindings, expressionToElements});
+          resolve({
+            boundElements, bindings, expressionToElements, limitExceeded,
+          });
         } else {
           chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
         }
