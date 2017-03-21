@@ -116,7 +116,7 @@ To whitelist an origin, include a `amp-link-variable-allowed-origin` `meta` tag 
 <meta name="amp-link-variable-allowed-origin" content="https://example.com https://example.org">
 ```
 
-## Variables 
+## Variables
 
 The tables below list the available URL variables grouped by type of usage. Further down in this document, are [descriptions](#variable-descriptions) of each of the variables, along with example usages.
 
@@ -148,7 +148,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Title](#title)                     | `TITLE`           | `${title}` |
 | [Viewer](#viewer)                   | `VIEWER`          | `${viewer}` |
 
-### Performance 
+### Performance
 
 | Variable Name  | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
@@ -213,7 +213,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Total Time](#total-time) | N/A | `${totalTime}` |
 | [Total Visible Time](#total-visible-time) | N/A | `${totalVisibleTime}` |
 
-### Miscellaneous 
+### Miscellaneous
 
 |  Variable Name | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
@@ -291,7 +291,7 @@ Provides the screen height in pixels available for the page rendering. This valu
   ```
 * **amp-analytics variable**: `${availableScreenHeight}`
   * Example value: `1480`
-  
+
 #### Available Screen Width
 
 Provides the screen width in pixels available for the page rendering. This value can be slightly more or less than the actual viewport height due to various browser quirks.
@@ -453,7 +453,7 @@ Provides the time the page takes to fire the `DOMContentLoaded` event from the t
 * **amp-analytics variable**: `${contentLoadTime}`
   * Example value: `40`
 
-#### Counter 
+#### Counter
 
 Use `COUNTER(name)` to generate an index for the given request. Counts start at 1 and are per given `name`.
 
@@ -546,14 +546,14 @@ Provides all the parameters that are defined in the [`extraUrlParams`](../extens
 
 #### First Seen Time
 
-Provides the time when at least 1px of the element is on the screen for the first time since the trigger is registered by `amp-analytics`.
+Provides the time when at least 1px of the element is on the screen for the first time since the page has become visible.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${firstSeenTime}`
 
 #### First Visible Time
 
-Provides the time when the element met visibility conditions for the first time since the trigger is registered by `amp-analytics`.
+Provides the time when the element met visibility conditions for the first time since the page has become visible.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${firstVisibleTime}`
@@ -567,21 +567,21 @@ Provides the horizontal scroll boundary that triggered a scroll event. This vari
 
 #### Last Seen Time
 
-Provides the time when at least 1px of the element is on the screen for the last time since javascript load.
+Provides the time when at least 1px of the element is on the screen for the last time since the page has become visible.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${lastSeenTime}`
 
 #### Last Visible Time
 
-Provides the time when the element met visibility conditions for the last time since javascript load.
+Provides the time when the element met visibility conditions for the last time since the page has become visible.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${lastVisibleTime}`
 
 #### Load Time Visibility
 
-Provides the percentage of element visible in the viewport at load time. This variable assumes that the page is scrolled to top.
+Provides the percentage of element visible in the viewport when the page has first become visible. This variable assumes that the page is scrolled to top.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${loadTimeVisibility}`
@@ -769,7 +769,7 @@ Provides the screen height in pixels. The value is retrieved from `window.screen
   ```
 * **amp-analytics variable**: `${screenHeight}`
   * Example value: `1600`
-  
+
 #### Screen Width
 
 Provides the screen height in pixels. The value is retrieved from `window.screen.width`.
@@ -817,7 +817,7 @@ Provides the number of pixels that the user has scrolled from top.
   ```
 * **amp-analytics variable**: `${scrollTop}`
   * Example value: `0`
-  
+
 #### Scroll Width
 
 Provides the total width of the page in pixels.
@@ -955,7 +955,7 @@ Provides the total time (in seconds) the user has been engaged with the page sin
 
 #### Total Time
 
-Provides the total time from the time page was loaded to the time a ping was sent out. The value is calculated from the time document became interactive.
+Provides the total time from the time page has become visible to the time a ping was sent out.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${totalTime}`
@@ -996,7 +996,7 @@ Provides the viewport height in pixels available for the page rendering. In cont
   <amp-pixel src="https://foo.com/pixel?viewportHeight=VIEWPORT_HEIGHT"></amp-pixel>
   ```
 * **amp-analytics variable**: `${viewportHeight}`
-  * Example value: `1600` 
+  * Example value: `1600`
 
 #### Viewport Width
 
@@ -1008,4 +1008,4 @@ Provides the viewport width in pixels available for the page rendering. In contr
   <amp-pixel src="https://foo.com/pixel?viewportHeight=VIEWPORT_HEIGHT"></amp-pixel>
   ```
 * **amp-analytics variable**: `${viewportWidth}`
-  * Example value: `2560` 
+  * Example value: `2560`
