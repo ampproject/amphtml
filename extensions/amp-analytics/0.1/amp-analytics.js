@@ -349,8 +349,15 @@ export class AmpAnalytics extends AMP.BaseElement {
     return config;
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {!JSONType}
+   */
   getInlineConfigNoInline() {
+    if (this.element.CONFIG) {
+      // If the analytics element is created by runtime, return cached config.
+      return this.element.CONFIG;
+    }
     let inlineConfig = {};
     const TAG = this.getName_();
     try {
@@ -372,7 +379,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       user().error(TAG, 'Analytics config could not be ' +
           'parsed. Is it in a valid JSON format?', er);
     }
-    return inlineConfig;
+    return /** @type {!JSONType} */ (inlineConfig);
   }
 
   /**
