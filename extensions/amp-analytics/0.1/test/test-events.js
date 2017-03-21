@@ -193,7 +193,6 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should listen on custom events from different scope', () => {
       const parent1 = win.document.createElement('test-parent');
-      parent1.setAttribute('a', 'b');
       parent1.id = 1;
       const parent2 = win.document.createElement('test-parent1');
       parent2.id = 2;
@@ -205,14 +204,17 @@ describes.realWin('Events', {amp: 1}, env => {
       const analyticsElement2 = win.document.createElement('amp-analytics');
       analyticsElement2.setAttribute('scope', true);
       parent2.appendChild(analyticsElement2);
+      analyticsElement1.getResourceId = () => {return 1;};
+      analyticsElement2.getResourceId = () => {return 2;};
+      win.document.body.appendChild(parent1);
+      win.document.body.appendChild(parent2);
       const handler1 = sandbox.spy();
       const handler2 = sandbox.spy();
       //tracker.add(analyticsElement, 'custom-event', {}, handler);
       tracker.add(analyticsElement1, 'custom-event', {}, handler1);
       tracker.add(analyticsElement2, 'custom-event', {}, handler2);
-      //tracker.trigger(new AnalyticsEvent(target, 'custom-event'));
-      tracker.trigger(new AnalyticsEvent(target, 'custom-event'), parent1);
-      tracker.trigger(new AnalyticsEvent(target, 'custom-event'), parent2);
+      tracker.trigger(new AnalyticsEvent(target, 'custom-event'), analyticsElement1);
+      tracker.trigger(new AnalyticsEvent(target, 'custom-event'), analyticsElement2);
       expect(handler).to.be.calledOnce;
       expect(handler1).to.be.calledOnce;
       expect(handler2).to.be.calledOnce;

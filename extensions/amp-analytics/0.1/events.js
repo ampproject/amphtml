@@ -122,10 +122,11 @@ export class CustomEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     // Push recent events if any.
-    let scope = this.root.getRoot();
+    let scope = '__AMPDOC';
     if (context.tagName == 'AMP-ANALYTICS' && context.getAttribute('scope')) {
       // Add the listener to the analytics element only.
-      scope = this.root.getRoot();
+      console.log(context);
+      scope = context.getResourceId();
     }
     console.log(scope);
     console.log(this.observers_[scope]);
@@ -143,10 +144,10 @@ export class CustomEventTracker extends EventTracker {
       }, 1);
     }
 
-    //if (this.observers_[scope]) {
+    if (!this.observers_[scope]) {
       console.log('create new !');
       this.observers_[scope] = {};
-    //}
+    }
     let observers = this.observers_[scope][eventType];
     if (!observers) {
       observers = new Observable();
@@ -162,10 +163,10 @@ export class CustomEventTracker extends EventTracker {
    * @param {!AnalyticsEvent} event
    */
   trigger(event, context) {
-    // const scope = (context && context.getAttribute('id')) ||
+    console.log('event target', event.target);
+    const scope = (context && context.getAttribute('id')) ||
     //     DEFAULT_SCOPE;
-    // console.log(scope);
-    const scope = context || this.root.getRoot();
+    console.log(scope);
     console.log(scope);
     // Buffer still exists - enqueue.
     if (this.buffer_) {
