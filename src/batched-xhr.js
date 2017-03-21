@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForWindow} from './service';
+import {getService} from './service';
 
 
 /**
@@ -23,5 +23,5 @@ import {getExistingServiceForWindow} from './service';
  */
 export function batchedXhrFor(window) {
   return /** @type {!./service/batched-xhr-impl.BatchedXhr} */ (
-      getExistingServiceForWindow(window, 'batched-xhr'));
+      getService(window, 'batched-xhr'));
 };
