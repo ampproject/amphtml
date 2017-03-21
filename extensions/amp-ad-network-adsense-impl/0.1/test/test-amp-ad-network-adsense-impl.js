@@ -73,6 +73,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       setupForAdTesting(fixture);
       element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
       impl = new AmpAdNetworkAdsenseImpl(element);
+      return fixture;
     });
   }
 
@@ -352,7 +353,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         width: '200',
         height: '50',
         type: 'adsense',
-      }).then(() => {
+      }).then(fixture => {
         const extensions = extensionsFor(fixture.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
