@@ -288,6 +288,12 @@ Type attribute value: `metrika`
 
 Adds support for Yandex Metrica.  Configuration details can be found at [Yandex Support](https://yandex.com/support/metrica/code/install-counter-amp.xml).
 
+### Ibeat Analytics
+
+Type attribute value: `ibeatanalytics`
+
+Adds support for Ibeat Analytics. Additionally, you must specify a value for `aid`.
+
 ## Attributes
 
 **type**
