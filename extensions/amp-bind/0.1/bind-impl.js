@@ -240,7 +240,7 @@ export class Bind {
    * @param {number} value
    * @visibleForTesting
    */
-  setMaxNumberOfBindings(value) {
+  setMaxNumberOfBindingsForTesting(value) {
     this.maxNumberOfBindings_ = value;
   }
 

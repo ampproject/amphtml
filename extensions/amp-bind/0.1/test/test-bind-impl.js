@@ -359,7 +359,7 @@ describes.realWin('Bind', {
   });
 
   it('should stop scanning once maximum number of bindings is reached', () => {
-    bind.setMaxNumberOfBindings(2);
+    bind.setMaxNumberOfBindingsForTesting(2);
     const errorStub = env.sandbox.stub(user(), 'error');
 
     const foo = createElementWithBinding(`[foo]="foo"`);
