@@ -24,6 +24,7 @@
  * <amp-instagram
  *   data-shortcode="fBwFP"
  *   data-captioned
+ *   data-default-framing
  *   alt="Fastest page in the west."
  *   width="320"
  *   height="392"
@@ -37,8 +38,12 @@
  * frame. If captions are specified (data-captioned) then a resize will be
  * requested every time due to the fact that it's no possible to know the height
  * of the caption in advance.
+ *
+ * If data-default-framing is present will apply the default instagram frame
+ * style without changing the layout.
  */
 
+import {CSS} from '../../../build/amp-instagram-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyles} from '../../../src/style';
 import {removeElement} from '../../../src/dom';
@@ -47,10 +52,15 @@ import {tryParseJson} from '../../../src/json';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 
-const PADDING_LEFT = 8;
-const PADDING_RIGHT = 8;
-const PADDING_BOTTOM = 48;
-const PADDING_TOP = 48;
+/*
+ * These padding values are specifc to intagram embeds with
+ * ?cr=1&v=7 if you change to a different version of the embed
+ * these will need to be recalculated.
+ */
+const PADDING_LEFT = 0;
+const PADDING_RIGHT = 0;
+const PADDING_BOTTOM = 0;
+const PADDING_TOP = 64;
 
 class AmpInstagram extends AMP.BaseElement {
 
@@ -117,6 +127,12 @@ class AmpInstagram extends AMP.BaseElement {
     image.setAttribute('referrerpolicy', 'origin');
 
     this.propagateAttributes(['alt'], image);
+    /*
+     * Add instagram default styling
+     */
+    if (this.element.hasAttribute('data-default-framing')) {
+      this.element.classList.add('amp-instagram-default-framing');
+    }
 
     // This makes the non-iframe image appear in the exact same spot
     // where it will be inside of the iframe.
@@ -146,6 +162,7 @@ class AmpInstagram extends AMP.BaseElement {
       this.handleInstagramMessages_.bind(this)
     );
 
+    iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     //Add title to the iframe for better accessibility.
@@ -153,7 +170,7 @@ class AmpInstagram extends AMP.BaseElement {
         this.element.getAttribute('alt'));
     iframe.src = 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/embed/' +
-        this.captioned_ + '?v=4';
+        this.captioned_ + '?cr=1&v=7';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     setStyles(iframe, {
@@ -188,7 +205,8 @@ class AmpInstagram extends AMP.BaseElement {
         if (this.iframe_./*OK*/offsetHeight !== height) {
           // Height returned by Instagram includes header, so
           // subtract 48px top padding
-          this.attemptChangeHeight(height - PADDING_TOP).catch(() => {});
+          this.attemptChangeHeight(height - (PADDING_TOP + PADDING_BOTTOM))
+              .catch(() => {});
         }
       });
     }
@@ -213,4 +231,4 @@ class AmpInstagram extends AMP.BaseElement {
   }
 };
 
-AMP.registerElement('amp-instagram', AmpInstagram);
+AMP.registerElement('amp-instagram', AmpInstagram, CSS);

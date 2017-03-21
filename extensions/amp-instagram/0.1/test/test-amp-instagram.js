@@ -81,14 +81,14 @@ describe('amp-instagram', () => {
 
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?v=4');
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?cr=1&v=7');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
   function testIframeCaptioned(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/captioned/?v=4');
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/captioned/?cr=1&v=7');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
@@ -176,7 +176,7 @@ describe('amp-instagram', () => {
 
       expect(attemptChangeHeight).to.be.calledOnce;
       // Height minus padding
-      expect(attemptChangeHeight.firstCall.args[0]).to.equal(newHeight - 48);
+      expect(attemptChangeHeight.firstCall.args[0]).to.equal(newHeight - 64);
     });
   });
 
