@@ -64,8 +64,8 @@ export class AmpContext {
   /**
    *  Send message to runtime requesting to resize ad to height and width.
    *    This is not guaranteed to succeed. All this does is make the request.
-   *  @param {int} width The new width for the ad we are requesting.
-   *  @param {int} height The new height for the ad we are requesting.
+   *  @param {number} width The new width for the ad we are requesting.
+   *  @param {number} height The new height for the ad we are requesting.
    */
   requestResize(width, height) {
     this.client_.sendMessage(MessageType.EMBED_SIZE, {width, height});
@@ -75,8 +75,8 @@ export class AmpContext {
    *  Allows a creative to set the callback function for when the resize
    *    request returns a success. The callback should be set before resizeAd
    *    is ever called.
-   *  @param {function(requestedHeight, requestedWidth)} callback Function
-   *    to call if the resize request succeeds.
+   *  @param {function(number, number)} callback Function to call if the resize
+   *    request succeeds.
    */
   onResizeSuccess(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
@@ -87,8 +87,8 @@ export class AmpContext {
    *  Allows a creative to set the callback function for when the resize
    *    request is denied. The callback should be set before resizeAd
    *    is ever called.
-   *  @param {function(requestedHeight, requestedWidth)} callback Function
-   *    to call if the resize request is denied.
+   *  @param {function(number, number)} callback Function to call if the resize
+   *    request is denied.
    */
   onResizeDenied(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
@@ -99,7 +99,7 @@ export class AmpContext {
   /**
    *  Takes the current name on the window, and attaches it to
    *  the name of the iframe.
-   *  @param {HTMLIframeElement} iframe The iframe we are adding the context to.
+   *  @param {HTMLIFrameElement} iframe The iframe we are adding the context to.
    */
   addContextToIframe(iframe) {
     iframe.name = this.win_.name;
@@ -108,7 +108,7 @@ export class AmpContext {
   /**
    *  Parse the metadata attributes from the name and add them to
    *  the class instance.
-   *  @param {!Object|string} contextData
+   *  @param {!Object|string} data
    *  @private
    */
   setupMetadata_(data) {
