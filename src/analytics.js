@@ -55,7 +55,22 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
     if (!analytics) {
       return;
     }
-    analytics.triggerEvent(eventType, opt_vars);
+    analytics.triggerEvent(null, eventType, opt_vars);
+  });
+}
+
+/**
+ * Helper method to trigger analytics event if amp-analytics is available.
+ * @param {!Element} element
+ * @param {string} eventType
+ * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+ */
+export function triggerAnalyticsEventForTarget(element, eventType, opt_vars) {
+  analyticsForDocOrNull(element).then(analytics => {
+    if (!analytics) {
+      return;
+    }
+    analytics.triggerEventForTarget(element, eventType, opt_vars);
   });
 }
 

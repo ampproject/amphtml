@@ -191,13 +191,14 @@ export class InstrumentationService {
   /**
    * Triggers the analytics event with the specified type.
    *
+   * @param {?Element} target
    * @param {string} eventType
    * @param {!Object<string, string>=} opt_vars A map of vars and their values.
    */
-  triggerEvent(eventType, opt_vars) {
+  triggerEvent(target, eventType, opt_vars) {
     // TODO(dvoytenko): deprecate/remove in preference of triggerEventForTarget.
-    this.triggerEventForTarget(
-        this.ampdocRoot_.getRootElement(), eventType, opt_vars);
+    target = target || this.ampdocRoot_.getRootElement();
+    this.triggerEventForTarget(target, eventType, opt_vars);
   }
 
   /**
@@ -554,9 +555,8 @@ export class AnalyticsGroup {
    *
    * @param {!JSONType} config
    * @param {function(!AnalyticsEvent)} handler
-   * @param {string=} extension
    */
-  addTrigger(config, handler, extension) {
+  addTrigger(config, handler) {
     let eventType = dev().assertString(config['on']);
     // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
     if (eventType == 'visible' && this.visibilityV3_) {
@@ -574,7 +574,7 @@ export class AnalyticsGroup {
       const tracker = this.root_.getTracker(
           trackerProfile.name, trackerProfile.klass);
       const unlisten = tracker.add(
-          this.analyticsElement_, eventType, config, handler, extension);
+          this.analyticsElement_, eventType, config, handler);
       this.listeners_.push(unlisten);
     } else {
       // TODO(dvoytenko): remove this use and `addListenerDepr_` once all

@@ -23,6 +23,7 @@ import {
   SignalTracker,
   VisibilityTracker,
 } from '../events';
+import {insertAnalyticsElement} from '../../../../src/analytics';
 import {Signals} from '../../../../src/utils/signals';
 import * as sinon from 'sinon';
 
@@ -156,7 +157,7 @@ describes.realWin('Events', {amp: 1}, env => {
   });
 
 
-  describe.only('CustomEventTracker', () => {
+  describe('CustomEventTracker', () => {
     let tracker;
     let clock;
 
@@ -173,7 +174,7 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(tracker.buffer_).to.not.exist;
     });
 
-    it.skip('should listen on custom events', () => {
+    it('should listen on custom events', () => {
       const handler2 = sandbox.spy();
       tracker.add(analyticsElement, 'custom-event-1', {}, handler);
       tracker.add(analyticsElement, 'custom-event-2', {}, handler2);
@@ -192,42 +193,39 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('should listen on custom events from different scope', () => {
-      const parent1 = win.document.createElement('test-parent');
+      const parent1 = win.document.createElement('amp-ad');
       parent1.id = 1;
-      const parent2 = win.document.createElement('test-parent1');
+      const parent2 = win.document.createElement('amp-ad');
       parent2.id = 2;
       win.document.body.appendChild(parent1);
       win.document.body.appendChild(parent2);
-      const analyticsElement1 = win.document.createElement('amp-analytics');
-      analyticsElement1.setAttribute('scope', 'true');
-      parent1.appendChild(analyticsElement1);
-      const analyticsElement2 = win.document.createElement('amp-analytics');
-      analyticsElement2.setAttribute('scope', true);
-      parent2.appendChild(analyticsElement2);
-      analyticsElement1.getResourceId = () => {return 1;};
-      analyticsElement2.getResourceId = () => {return 2;};
-      win.document.body.appendChild(parent1);
-      win.document.body.appendChild(parent2);
+      insertAnalyticsElement(parent1, {}, true);
+      insertAnalyticsElement(parent2, {}, true);
+      const analyticsElement1 = parent1.querySelector('amp-analytics');
+      const analyticsElement2 = parent2.querySelector('amp-analytics');
       const handler1 = sandbox.spy();
       const handler2 = sandbox.spy();
-      //tracker.add(analyticsElement, 'custom-event', {}, handler);
+      const handler3 = sandbox.spy();
+      tracker.add(analyticsElement, 'custom-event', {}, handler);
       tracker.add(analyticsElement1, 'custom-event', {}, handler1);
       tracker.add(analyticsElement2, 'custom-event', {}, handler2);
-      tracker.trigger(new AnalyticsEvent(target, 'custom-event'), analyticsElement1);
-      tracker.trigger(new AnalyticsEvent(target, 'custom-event'), analyticsElement2);
+      tracker.add(analyticsElement2, 'custom-event', {}, handler3);
+      tracker.trigger(new AnalyticsEvent(target, 'custom-event'));
+      tracker.trigger(new AnalyticsEvent(parent1, 'custom-event'));
+      tracker.trigger(new AnalyticsEvent(parent2, 'custom-event'));
       expect(handler).to.be.calledOnce;
       expect(handler1).to.be.calledOnce;
       expect(handler2).to.be.calledOnce;
-
+      expect(handler3).to.be.calledOnce;
     });
 
-    it.skip('should buffer custom events early on', () => {
+    it('should buffer custom events early on', () => {
       // Events before listeners added.
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
-      expect(tracker.buffer_[win.document]['custom-event-1']).to.have.length(1);
-      expect(tracker.buffer_[win.document]['custom-event-2']).to.have.length(2);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-1']).to.have.length(1);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-2']).to.have.length(2);
 
       // Listeners added: immediate events fired.
       const handler2 = sandbox.spy();
@@ -239,9 +237,9 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(handler).to.be.calledOnce;
       expect(handler2).to.have.callCount(2);
       expect(handler3).to.have.not.been.called;
-      expect(tracker.buffer_[win.document]['custom-event-1']).to.have.length(1);
-      expect(tracker.buffer_[win.document]['custom-event-2']).to.have.length(2);
-      expect(tracker.buffer_[win.document]['custom-event-3']).to.be.undefined;
+      expect(tracker.buffer_['_AMPDOC']['custom-event-1']).to.have.length(1);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-2']).to.have.length(2);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-3']).to.be.undefined;
 
       // Second round of events.
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
@@ -250,9 +248,9 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(handler).to.have.callCount(2);
       expect(handler2).to.have.callCount(3);
       expect(handler3).to.be.calledOnce;
-      expect(tracker.buffer_[win.document]['custom-event-1']).to.have.length(2);
-      expect(tracker.buffer_[win.document]['custom-event-2']).to.have.length(3);
-      expect(tracker.buffer_[win.document]['custom-event-3']).to.have.length(1);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-1']).to.have.length(2);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-2']).to.have.length(3);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-3']).to.have.length(1);
 
       // Buffering time expires.
       clock.tick(10001);

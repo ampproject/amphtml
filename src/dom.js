@@ -536,6 +536,20 @@ export function ancestorElementsByTag(child, tagName) {
   });
 }
 
+/**
+ * Finds the closest AMP ancestor elements or the AMP element itself.
+ * @param {!Element} child
+ * @return {?AmpElement}
+ */
+export function ancestorAmpElement(child) {
+  for (let ancestor = child.parentElement;
+      ancestor; ancestor = ancestor.parentElement) {
+    if (ancestor.classList.contains('i-amphtml-element')) {
+      return ancestor;
+    }
+  }
+  return null;
+}
 
 /**
  * This method wraps around window's open method. It first tries to execute

@@ -19,6 +19,7 @@ import {Observable} from '../../../src/observable';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
+import {ancestorAmpElement} from '../../../src/dom';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
@@ -122,18 +123,12 @@ export class CustomEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     // Push recent events if any.
-    let scope = '__AMPDOC';
+    let scope = DEFAULT_SCOPE;
     if (context.tagName == 'AMP-ANALYTICS' && context.getAttribute('scope')) {
       // Add the listener to the analytics element only.
-      console.log(context);
-      scope = context.getResourceId();
+      const scopeEle = ancestorAmpElement(context);
+      scope = scopeEle.getResourceId();
     }
-    console.log(scope);
-    console.log(this.observers_[scope]);
-
-    // const scope = (context.getAttribute('scope') &&
-    //     context.parentElement && context.parentElement.getAttribute('id')) ||
-    //     DEFAULT_SCOPE;
     const buffer = this.buffer_ &&
         this.buffer_[scope] && this.buffer_[scope][eventType];
     if (buffer) {
@@ -145,7 +140,6 @@ export class CustomEventTracker extends EventTracker {
     }
 
     if (!this.observers_[scope]) {
-      console.log('create new !');
       this.observers_[scope] = {};
     }
     let observers = this.observers_[scope][eventType];
@@ -153,8 +147,6 @@ export class CustomEventTracker extends EventTracker {
       observers = new Observable();
       this.observers_[scope][eventType] = observers;
     }
-    console.log(Object.keys(this.observers_));
-
     return observers.add(listener);
   }
 
@@ -162,12 +154,10 @@ export class CustomEventTracker extends EventTracker {
    * Triggers a custom event for the associated root.
    * @param {!AnalyticsEvent} event
    */
-  trigger(event, context) {
-    console.log('event target', event.target);
-    const scope = (context && context.getAttribute('id')) ||
-    //     DEFAULT_SCOPE;
-    console.log(scope);
-    console.log(scope);
+  trigger(event) {
+    const target = event.target;
+    const scope = (target.getResourceId && target.getResourceId())
+        || DEFAULT_SCOPE;
     // Buffer still exists - enqueue.
     if (this.buffer_) {
       if (!this.buffer_[scope]) {
@@ -180,7 +170,6 @@ export class CustomEventTracker extends EventTracker {
       }
       buffer.push(event);
     }
-
     // If listeners already present - trigger right away.
     const observers =
         this.observers_[scope] && this.observers_[scope][event.type];
