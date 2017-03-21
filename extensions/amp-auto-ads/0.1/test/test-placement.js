@@ -932,6 +932,25 @@ describes.realWin('placement', {
       expect(placements).to.be.empty;
     });
 
+    it('should not return a placement that\'s inside an amp-app-banner', () => {
+      const anchor = document.createElement('amp-app-banner');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(env.win, {
+        placements: [
+          {
+            anchor: {
+              selector: 'AMP-APP-BANNER#anId',
+            },
+            pos: 2,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.be.empty;
+    });
+
     it('should get a placement when outside amp-sidebar', () => {
       const anchor = document.createElement('amp-sidebar');
       anchor.id = 'anId';
@@ -950,6 +969,52 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
     });
+
+    it('should not return a placement that is a child of a blacklisted ' +
+        'ancestor.', () => {
+      const parent = document.createElement('amp-sidebar');
+      container.appendChild(parent);
+
+      const anchor = document.createElement('div');
+      anchor.id = 'anId';
+      parent.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(env.win, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+            },
+            pos: 1,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(0);
+    });
+
+    it('should get a placement when anchor parent of blacklisted ancestor.',
+        () => {
+          const anchor = document.createElement('div');
+          anchor.id = 'anId';
+          container.appendChild(anchor);
+
+          const child = document.createElement('amp-sidebar');
+          anchor.appendChild(child);
+
+          const placements = getPlacementsFromConfigObj(env.win, {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 1,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(1);
+        });
   });
 
   describe('getPlacementsFromConfigObj, sub-anchors', () => {
