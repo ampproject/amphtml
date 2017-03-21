@@ -116,9 +116,9 @@ fetched from a 3rd party ad network at the URL defined in
     <td>Object&lt;string, string&gt;</td>
     <td>{}</td>
     <td>
-      A map from attribute name to value for attrbiutes to apply to all
-      <code>&lt;amp-ad&gt;</code>s injected using this configuration. Only the
-      following attribute names are allowed:
+      A map from attribute name to value for attributes to apply to all
+      <code>&lt;amp-ad&gt;</code> elements injected using this configuration.
+      Only the following attribute names are allowed:
       <ul>
         <li>type</li>
         <li>layout</li>
@@ -177,11 +177,11 @@ fetched from a 3rd party ad network at the URL defined in
     <td>Object&lt;string, string&gt;</td>
     <td>{}</td>
     <td>
-      A map from attribute name to value for attrbiutes to apply to all
-      <code>&lt;amp-ad&gt;</code>s injected using this placement. An attribute
-      specified here overrides any with the same name that is also specified on
-      the parent <code>ConfigObj</code>. Only the following attribute names are
-      allowed:
+      A map from attribute name to value for attributes to apply to all
+      <code>&lt;amp-ad&gt;</code> elements injected using this placement. An
+      attribute specified here overrides any with the same name that is also
+      specified on the parent <code>ConfigObj</code>. Only the following
+      attribute names are allowed:
       <ul>
         <li>type</li>
         <li>layout</li>
