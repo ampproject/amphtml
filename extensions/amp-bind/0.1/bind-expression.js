@@ -146,8 +146,10 @@ export class BindExpression {
         let unsupportedError;
 
         if (isBuiltIn) {
-          unsupportedError = `${method} is not a supported function.`;
           validFunction = FUNCTION_WHITELIST[BUILT_IN_FUNCTIONS][method];
+          if (!validFunction) {
+            unsupportedError = `${method} is not a supported function.`;
+          }
         } else {
           const callerType = Object.prototype.toString.call(caller);
           const whitelist = FUNCTION_WHITELIST[callerType];
