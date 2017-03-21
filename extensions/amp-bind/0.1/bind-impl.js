@@ -258,7 +258,7 @@ export class Bind {
     const limit = this.maxNumberOfBindings_ - this.numberOfBindings_();
     return this.scanNode_(node, limit).then(results => {
       const {
-        boundElements, bindings, expressionToElements, limitExceeded
+        boundElements, bindings, expressionToElements, limitExceeded,
       } = results;
 
       this.boundElements_ = this.boundElements_.concat(boundElements);
