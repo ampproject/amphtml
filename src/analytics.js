@@ -18,6 +18,7 @@ import {
   getElementServiceForDoc,
   getElementServiceIfAvailableForDoc,
 } from './element-service';
+import {createElementWithAttributes} from './dom';
 import {extensionsFor} from './extensions';
 
 
@@ -66,8 +67,14 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
  */
 export function insertAnalyticsElement(
     parentElement, config, loadAnalytics = false) {
-  const analyticsElem =
-      parentElement.ownerDocument.createElement('amp-analytics');
+  const doc = parentElement.ownerDocument;
+  const analyticsElem = doc.createElement('amp-analytics');
+  const scriptElem = createElementWithAttributes(doc,
+        'script', {
+          'type': 'application/json',
+        });
+  scriptElem.textContent = JSON.stringify(config);
+  analyticsElem.appendChild(scriptElem);
   analyticsElem.CONFIG = config;
 
   // Force load analytics extension if script not included in page.
