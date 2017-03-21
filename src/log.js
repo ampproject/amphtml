@@ -400,7 +400,7 @@ export class Log {
  */
 function toString(val) {
   // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val.nodeType == 1) {
+  if (val && val.nodeType == 1) {
     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
   return /** @type {string} */ (val);
