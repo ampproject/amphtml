@@ -59,9 +59,9 @@ export class AmpGist extends AMP.BaseElement {
   /**@override*/
   layoutCallback() {
     const gistid = user().assert(
-        this.element.getAttribute('data-gistid'),
-          'The data-gistid attribute is required for <amp-gist> %s',
-        this.element);
+      this.element.getAttribute('data-gistid'),
+      'The data-gistid attribute is required for <amp-gist> %s',
+      this.element);
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
     const url = 'https://gist.github.com/';
