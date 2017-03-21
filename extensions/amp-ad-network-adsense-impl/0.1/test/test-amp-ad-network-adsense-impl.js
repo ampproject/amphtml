@@ -19,9 +19,6 @@ import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl';
-import {
-  installExtensionsService,
-} from '../../../../src/service/extensions-impl';
 import {extensionsFor} from '../../../../src/extensions';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
