@@ -50,7 +50,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     return new Promise(resolve => {
       function callback() {
         resolve();
-        fixture.win.removeEventListener(callback);
+        fixture.win.removeEventListener(name, callback);
       };
       fixture.win.addEventListener(name, callback);
     });
@@ -204,6 +204,56 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       return waitForBindApplication().then(() => {
         expect(img.getAttribute('height')).to.equal('300');
         expect(img.getAttribute('width')).to.equal('300');
+      });
+    });
+  });
+
+  describe('amp-live-list integration', () => {
+    it('should detect bindings in initial live-list elements', () => {
+      const liveListItems = fixture.doc.getElementById('liveListItems');
+      expect(liveListItems.children.length).to.equal(1);
+
+      const liveListItem1 = fixture.doc.getElementById('liveListItem1');
+      expect(liveListItem1.firstElementChild.textContent).to.equal('unbound');
+
+      const button = fixture.doc.getElementById('changeLiveListTextButton');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(liveListItem1.firstElementChild.textContent).to
+            .equal('hello world');
+      });
+    });
+
+    it('should apply scope to bindings in new list items', () => {
+      const liveList = fixture.doc.getElementById('liveList');
+      const liveListItems = fixture.doc.getElementById('liveListItems');
+      expect(liveListItems.children.length).to.equal(1);
+
+      const existingItem = fixture.doc.getElementById('liveListItem1');
+      expect(existingItem.firstElementChild.textContent).to.equal('unbound');
+
+      const impl = liveList.implementation_;
+      const update = document.createElement('div');
+      update.innerHTML =
+          `<div items>` +
+          ` <div id="newItem" data-sort-time=${Date.now()}>` +
+          `    <p [text]="liveListText">unbound</p>` +
+          ` </div>` +
+          `</div>`;
+      impl.update(update);
+      fixture.doc.getElementById('liveListUpdateButton').click();
+
+      let newItem;
+      return waitForAllMutations().then(() => {
+        expect(liveListItems.children.length).to.equal(2);
+        newItem = fixture.doc.getElementById('newItem');
+        fixture.doc.getElementById('changeLiveListTextButton').click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(existingItem.firstElementChild.textContent).to
+            .equal('hello world');
+        expect(newItem.firstElementChild.textContent).to
+            .equal('hello world');
       });
     });
   });
