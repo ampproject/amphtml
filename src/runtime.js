@@ -190,8 +190,9 @@ function adoptShared(global, opts, callback) {
   /** @const {!Array<function(!Object)|ExtensionPayloadDef>} */
   const preregisteredExtensions = global.AMP || [];
 
+  installExtensionsService(global);
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = installExtensionsService(global);
+  const extensions = extensionsFor(global);
   installRuntimeServices(global);
   stubLegacyElements(global);
 
