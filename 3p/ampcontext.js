@@ -16,21 +16,42 @@
 import './polyfills';
 import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
-import {MessageType} from '../src/3p-frame';
+import {MessageType} from '../src/3p-frame-messaging';
 import {tryParseJson} from '../src/json';
 
 export class AmpContext {
 
   /**
-   *  @param {Window} win The window that the instance is built inside.
+   *  @param {!Window} win The window that the instance is built inside.
    */
   constructor(win) {
+    /** @private {!Window} */
     this.win_ = win;
+
+    /** @type {?string} */
+    this.location = null;
+
+    /** @type {?string} */
+    this.canonicalUrl = null;
+
+    /** @type {?string} */
+    this.pageViewId = null;
+
+    /** @type {?string} */
+    this.sentinel = null;
+
+    // TODO(alanorozco): confirm type
+    /** @type {?} */
+    this.startTime = null;
+
+    // TODO(alanorozco): confirm type
+    /** @type {?string} */
+    this.referrer = null;
 
     this.findAndSetMetadata_();
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.getHostWindow_());
-    this.client_.setSentinel(this.sentinel);
+    this.client_.setSentinel(dev().assertString(this.sentinel));
   }
 
   /**
@@ -112,11 +133,11 @@ export class AmpContext {
    *  @private
    */
   setupMetadata_(data) {
-    data = tryParseJson(data);
-    if (!data) {
+    const dataObject = typeof data === 'string' ? tryParseJson(data) : data;
+    if (!dataObject) {
       throw new Error('Could not setup metadata.');
     }
-    const context = data._context;
+    const context = dataObject._context;
     this.location = context.location;
     this.canonicalUrl = context.canonicalUrl;
     this.pageViewId = context.pageViewId;
@@ -149,6 +170,8 @@ export class AmpContext {
   findAndSetMetadata_() {
     // If the context data is set on window, that means we don't need
     // to check the name attribute as it has been bypassed.
+    // TODO(alanorozco): why the heck could AMP_CONTEXT_DATA be two different
+    // types? FIX THIS.
     if (!this.win_.AMP_CONTEXT_DATA) {
       this.setupMetadata_(this.win_.name);
     } else if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
