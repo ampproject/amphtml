@@ -160,17 +160,15 @@ export class Platform {
   }
 
   /**
-   * Check whether current major IOS version is after specific version number.
-   * @param {number} version
-   * @return (boolean}
+   * Returns the major ios version in number.
+   * @return (number}
    */
-  afterIosMajorVersion(version) {
+  getIosMajorVersion() {
     const currentIosVersion = this.getIosVersionString();
     if (currentIosVersion == '') {
-      return false;
+      return 0;
     }
-    const currentIosMajorVersion = Number(currentIosVersion.split('.')[0]);
-    return currentIosMajorVersion > version;
+    return Number(currentIosVersion.split('.')[0]);
   }
 };
 
