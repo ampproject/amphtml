@@ -36,11 +36,14 @@
  * the example above and should produce the correct aspect ratio. amp-instagram
  * will attempt to resize on load based on the height reported by the embedded
  * frame. If captions are specified (data-captioned) then a resize will be
- * requested every time due to the fact that it's no possible to know the height
+ * requested every time due to the fact that it's not possible to know the height
  * of the caption in advance.
  *
+ * If captions are included it is stringly reccomended that an overflow element
+ * is also included.  See description of overflow in amp-iframe.
+ *
  * If data-default-framing is present will apply the default instagram frame
- * style without changing the layout.
+ * style without changing the layout/size.
  */
 
 import {CSS} from '../../../build/amp-instagram-0.1.css';
