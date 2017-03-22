@@ -30,12 +30,6 @@ const TAG = 'amp-auto-ads';
  * TODO: Specify this via the configuration.
  * @const
  */
-const TARGET_AD_WIDTH_PX = 320;
-
-/**
- * TODO: Specify this via the configuration.
- * @const
- */
 const TARGET_AD_HEIGHT_PX = 100;
 
 /**
@@ -187,7 +181,7 @@ export class Placement {
         this.adElement_ = this.createAdElement_(baseAttributes);
         this.injector_(this.anchorElement_, this.adElement_);
         return this.resources_.attemptChangeSize(this.adElement_,
-            TARGET_AD_HEIGHT_PX, TARGET_AD_WIDTH_PX, this.margins_)
+            TARGET_AD_HEIGHT_PX, undefined, this.margins_)
                 .then(() => {
                   this.state_ = PlacementState.PLACED;
                   return this.state_;
@@ -206,8 +200,7 @@ export class Placement {
    */
   createAdElement_(baseAttributes) {
     const attributes = Object.assign({
-      'layout': 'responsive',
-      'width': '0',
+      'layout': 'fixed-height',
       'height': '0',
     }, baseAttributes, this.attributes_);
     return createElementWithAttributes(
