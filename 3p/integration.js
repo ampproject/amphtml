@@ -454,7 +454,7 @@ function installContextUsingStandardImpl(win) {
   });
 
   win.context.data = data;
-  win.context.location = data._context.location;
+  win.context.location = parseUrl(data._context.location.href);
   win.context.noContentAvailable = triggerNoContentAvailable;
   win.context.requestResize = triggerResizeRequest;
   win.context.renderStart = triggerRenderStart;
