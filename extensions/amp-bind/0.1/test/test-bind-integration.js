@@ -140,47 +140,51 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       });
     });
   });
-  
+
   /**
-   * Combined test specs for amp-img 
+   * Combined test specs for amp-img
    */
   describe('amp-img integration', () => {
     const img = fixture.doc.getElementById('image');
     it('should do amp-img integration', () => {
-      const changeImgSrcButton = fixture.doc.getElementById('changeImgSrcButton');
+      const changeImgSrcButton = fixture.doc
+          .getElementById('changeImgSrcButton');
       const invalidSrcButton = fixture.doc.getElementById('invalidSrcButton');
       const ftpSrcButton = fixture.doc.getElementById('ftpSrcButton');
-      const changeImgAltButton = fixture.doc.getElementById('changeImgAltButton');
-      const changeImgDimensButton = fixture.doc.getElementById('changeImgDimensButton');
+      const changeImgAltButton = fixture.doc
+          .getElementById('changeImgAltButton');
+      const changeImgDimensButton = fixture.doc
+          .getElementById('changeImgDimensButton');
       expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
       expect(img.getAttribute('height')).to.equal('200');
       expect(img.getAttribute('width')).to.equal('200');
       changeImgSrcButton.click();
-      invalidSrcButton.click();  
+      invalidSrcButton.click();
       ftpSrcButton.click();
       changeImgAltButton.click();
-      changeImgDimensButton.click();          
+      changeImgDimensButton.click();
       return waitForBindApplication().then(() => {
         // Should change src when the src attribute binding changes
         expect(img.getAttribute('src')).to
             .equal('http://www.google.com/image2');
         // Should NOT change src when new value is a blocked URL
         expect(img.getAttribute('src')).to
-            .equal('http://www.google.com/image1'); 
+            .equal('http://www.google.com/image1');
         // Should NOT change src when new value uses an invalid protocol
-        expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
+        expect(img.getAttribute('src')).to
+            .equal('http://www.google.com/image1');
         const telSrcButton = fixture.doc.getElementById('telSrcButton');
         telSrcButton.click();
         return waitForBindApplication();
       }).then(() => {
         expect(img.getAttribute('src')).to
-            .equal('http://www.google.com/image1'); 
+            .equal('http://www.google.com/image1');
         // Should change alt when the alt attribute binding changes
-        expect(img.getAttribute('alt')).to.equal('hello world');   
+        expect(img.getAttribute('alt')).to.equal('hello world');
         // Should change width and height when their bindings change
         expect(img.getAttribute('height')).to.equal('300');
-        expect(img.getAttribute('width')).to.equal('300');                  
-      });    
+        expect(img.getAttribute('width')).to.equal('300');
+      });
     });
   });
 
