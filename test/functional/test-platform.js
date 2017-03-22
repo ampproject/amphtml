@@ -28,6 +28,7 @@ describe('Platform', () => {
   let isWebKit;
   let majorVersion;
   let iosVersion;
+  let iosMajorVersion;
 
   beforeEach(() => {
     isIos = false;
@@ -40,6 +41,7 @@ describe('Platform', () => {
     isWebKit = false;
     majorVersion = 0;
     iosVersion = '';
+    iosMajorVersion = 0;
   });
 
   function testUserAgent(userAgentString) {
@@ -54,6 +56,7 @@ describe('Platform', () => {
     expect(platform.isWebKit()).to.equal(isWebKit);
     expect(platform.getMajorVersion()).to.equal(majorVersion);
     expect(platform.getIosVersionString()).to.equal(iosVersion);
+    expect(platform.getIosMajorVersion()).to.equal(iosMajorVersion);
   }
 
   it('should tolerate empty or null', () => {
@@ -68,6 +71,7 @@ describe('Platform', () => {
     isWebKit = true;
     majorVersion = 8;
     iosVersion = '8.0';
+    iosMajorVersion = 8;
     testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X)' +
         ' AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0' +
         ' Mobile/12A4345d Safari/600.1.4');
@@ -79,6 +83,7 @@ describe('Platform', () => {
     isWebKit = true;
     majorVersion = 9;
     iosVersion = '9.3';
+    iosMajorVersion = 9;
     testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
         ' AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0' +
         ' Mobile/13E230 Safari/601.1');
@@ -90,6 +95,7 @@ describe('Platform', () => {
     isWebKit = true;
     majorVersion = 0;
     iosVersion = '9.3';
+    iosMajorVersion = 9;
     testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
         ' AppleWebKit/601.1.46 (KHTML, like Gecko)' +
         ' Mobile/13E230 Safari/601.1');
@@ -101,6 +107,7 @@ describe('Platform', () => {
     isWebKit = true;
     majorVersion = 10;
     iosVersion = '10.2.1';
+    iosMajorVersion = 10;
     testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 10_2_1 like Mac OS X)' +
         ' AppleWebKit/602.4.6 (KHTML, like Gecko) Version/10.0' +
         ' Mobile/14D27 Safari/602.1');
@@ -112,9 +119,22 @@ describe('Platform', () => {
     isWebKit = true;
     majorVersion = 7;
     iosVersion = '7.0';
+    iosMajorVersion = 7;
     testUserAgent('Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X)' +
         ' AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0' +
         ' Mobile/11A465 Safari/9537.53');
+  });
+
+  it('iPhone ios 10.2, Chrome ios', () => {
+    isIos = true;
+    isChrome = true;
+    isWebKit = true;
+    majorVersion = 56;
+    iosVersion = '10.2';
+    iosMajorVersion = 10;
+    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 10_2 like Mac OS X)' +
+        ' AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.73' +
+        ' Mobile/16D32 Safari/602.1');
   });
 
   it('Desktop Safari', () => {
