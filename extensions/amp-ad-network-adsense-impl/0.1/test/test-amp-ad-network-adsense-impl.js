@@ -19,6 +19,9 @@ import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl';
+import {
+  installExtensionsService,
+} from '../../../../src/service/extensions-impl';
 import {extensionsFor} from '../../../../src/extensions';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
@@ -58,21 +61,6 @@ function setupForAdTesting(fixture) {
 describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
   let impl;
   let element;
-
-  /**
-   * Creates an iframe promise, and instantiates element and impl, adding the
-   * former to the document of the iframe.
-   * @param {{width, height, type}} config
-   * @return The iframe promise.
-   */
-  function createImplTag(config) {
-    return createIframePromise().then(fixture => {
-      setupForAdTesting(fixture);
-      element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
-      impl = new AmpAdNetworkAdsenseImpl(element);
-      return fixture;
-    });
-  }
 
   beforeEach(() => {
     sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
@@ -346,12 +334,17 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     let loadExtensionSpy;
 
     beforeEach(() => {
-      return createImplTag({
-        width: '200',
-        height: '50',
-        type: 'adsense',
-      }).then(fixture => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+        });
+        installExtensionsService(fixture.win);
         const extensions = extensionsFor(fixture.win);
+        impl = new AmpAdNetworkAdsenseImpl(element);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
@@ -367,48 +360,6 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       // ads/google/test/test-utils.js.  Just ensure urls given exist somewhere.
       urls.forEach(url => {
         expect(ampAnalyticsElement.innerHTML.indexOf(url)).to.not.equal(-1);
-      });
-    });
-    it('centers iframe in slot when height && width', () => {
-      expect(impl.element.getAttribute('width')).to.equal('200');
-      expect(impl.element.getAttribute('height')).to.equal('50');
-      const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
-      impl.onCreativeRender(false);
-      expect(centerCreativeSpy).to.be.calledOnce;
-    });
-    it('centers iframe in slot when !height && !width', () => {
-      return createImplTag({
-        type: 'adsense',
-      }).then(() => {
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.be.null;
-        const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
-        impl.onCreativeRender(false);
-        expect(centerCreativeSpy).to.be.calledOnce;
-      });
-    });
-    it('centers iframe in slot when height && !width', () => {
-      return createImplTag({
-        height: '50',
-        type: 'adsense',
-      }).then(() => {
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.equal('50');
-        const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
-        impl.onCreativeRender(false);
-        expect(centerCreativeSpy).to.be.calledOnce;
-      });
-    });
-    it('centers iframe in slot when !height && width', () => {
-      return createImplTag({
-        width: '200',
-        type: 'adsense',
-      }).then(() => {
-        expect(impl.element.getAttribute('width')).to.equal('200');
-        expect(impl.element.getAttribute('height')).to.be.null;
-        const centerCreativeSpy = sandbox.spy(impl, 'centerCreative_');
-        impl.onCreativeRender(false);
-        expect(centerCreativeSpy).to.be.calledOnce;
       });
     });
   });
@@ -428,8 +379,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
-          '\\?client=ca-adsense&format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+' +
-          '&adtest=false' +
+          '\\?client=ca-adsense&format=0x0&w=0&h=0&adtest=false' +
           '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
           '(&asnt=[0-9]+-[0-9]+)?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
@@ -451,4 +401,3 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
   });
 });
-
