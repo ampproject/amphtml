@@ -246,7 +246,8 @@ function proxyToAmpProxy(req, res, minify) {
             'https://cdn.ampproject.org/')
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
-    body = replaceUrls(minify ? 'min' : 'max', body, getUrlPrefix(req));
+    const inabox = req.query['inabox'] == '1';
+    body = replaceUrls(minify ? 'min' : 'max', body, getUrlPrefix(req), inabox);
     res.status(response.statusCode).send(body);
   });
 }
@@ -346,16 +347,21 @@ function liveListTombstone(liveList) {
   }
 }
 
+
+// Generate a random number between min and max
+// Value is inclusive of both min and max values.
+function range(min, max) {
+  var values = Array.apply(null, Array(max - min + 1)).map((_, i) => min + i);
+  return values[Math.round(Math.random() * (max - min))]
+}
+
+// Returns the result of a coin flip, true or false
+function flip() {
+  return !!Math.floor(Math.random() * 2);
+}
+
 function getLiveBlogItem() {
   var now = Date.now();
-  // Value is inclusive of both min and max values.
-  function range(min, max) {
-    var values = Array.apply(null, Array(max - min + 1)).map((_, i) => min + i);
-    return values[Math.round(Math.random() * (max - min))]
-  }
-  function flip() {
-    return !!Math.floor(Math.random() * 2);
-  }
   // Generate a 3 to 7 worded headline
   var headline = bacon(range(3, 7));
   var numOfParagraphs = range(1, 2);
@@ -403,11 +409,44 @@ function getLiveBlogItem() {
     </amp-live-list></body></html>`;
 }
 
+function getLiveBlogItemWithBindAttributes() {
+  var now = Date.now();
+  // Generate a 3 to 7 worded headline
+  var headline = bacon(range(3, 7));
+  var numOfParagraphs = range(1, 2);
+  var body = Array.apply(null, Array(numOfParagraphs)).map(x => {
+    return `<p>${bacon(range(50, 90))}</p>`;
+  }).join('\n');
+
+  return `<!doctype html>
+    <html amp><body>
+    <amp-live-list id="live-blog-1">
+    <div items>
+      <div id="live-blog-item-${now}" data-sort-time="${now}">
+        <div class="article-body">
+          ${body}
+          <p> As you can see, bacon is far superior to <b><span [text]='favoriteFood'>everything!</span></b>!</p>
+        </div>
+      </div>
+    </div>
+    </amp-live-list></body></html>`;
+}
+
 app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
   function(req, res, next) {
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
       res.end(getLiveBlogItem());
+      return;
+    }
+    next();
+});
+
+app.use('/examples/bind/live-list.amp.(min.|max.)?html',
+  function(req, res, next) {
+    if ('amp_latest_update_time' in req.query) {
+      res.setHeader('Content-Type', 'text/html');
+      res.end(getLiveBlogItemWithBindAttributes());
       return;
     }
     next();
@@ -471,6 +510,31 @@ app.get('/iframe/*', function(req, res) {
           </html>`);
 });
 
+// Returns a document that echoes any post messages received from parent.
+// An optional `message` query param can be appended for an initial post
+// message sent on document load.
+// Example:
+// http://localhost:8000/iframe-echo-message?message=${payload}
+app.get('/iframe-echo-message', function(req, res) {
+  const message = req.query.message;
+  res.send(
+      `<!doctype html>
+        <body style="background-color: yellow">
+        <script>
+        if (${message}) {
+          echoMessage(${message});
+        }
+        window.addEventListener('message', function(event) {
+          echoMessage(event.data);
+        });
+        function echoMessage(message) {
+          parent.postMessage(message, '*');
+        }
+        </script>
+        </body>
+      </html>`);
+});
+
 // A4A envelope.
 // Examples:
 // http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
@@ -487,10 +551,38 @@ app.use('/a4a(|-3p)/', function(req, res) {
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
   }
+  adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/FORCE3P/g, force3p)
+        .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_URL/g, adUrl)
+        .replace(/AD_WIDTH/g, req.query.width || '300')
+        .replace(/AD_HEIGHT/g, req.query.height || '250');
+    res.end(result);
+  });
+});
+
+// In-a-box envelope.
+// Examples:
+// http://localhost:8000/inabox/examples/animations.amp.max.html
+// http://localhost:8000/inabox/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+// http://localhost:8000/inabox/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+app.use('/inabox/', function(req, res) {
+  var adUrl = req.url;
+  var templatePath = '/build-system/server-inabox-template.html';
+  var urlPrefix = getUrlPrefix(req);
+  if (!adUrl.startsWith('/m') &&  // Ignore /min and /max
+      urlPrefix.indexOf('//localhost') != -1) {
+    // This is a special case for testing. `localhost` URLs are transformed to
+    // `ads.localhost` to ensure that the iframe is fully x-origin.
+    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
+  }
+  adUrl = addQueryParam(adUrl, 'inabox', 1);
+  fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
+    var result = template
+        .replace(/AD_URL/g, adUrl)
+        .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_WIDTH/g, req.query.width || '300')
         .replace(/AD_HEIGHT/g, req.query.height || '250');
     res.end(result);
@@ -530,13 +622,14 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   if (!mode) {
     return next();
   }
+  const inabox = req.query['inabox'] == '1';
   filePath = filePath.substr(0, filePath.length - 9) + '.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     if (req.query['amp_js_v']) {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
     }
 
-    file = replaceUrls(mode, file);
+    file = replaceUrls(mode, file, '', inabox);
 
     // Extract amp-ad for the given 'type' specified in URL query.
     if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
@@ -657,18 +750,25 @@ app.get(['/dist/ww.js', '/dist/ww.max.js'], function(req, res) {
  * @param {string} mode
  * @param {string} file
  * @param {string=} hostName
+ * @param {boolean=} inabox
  */
-function replaceUrls(mode, file, hostName) {
+function replaceUrls(mode, file, hostName, inabox) {
   hostName = hostName || '';
   if (mode == 'max') {
     file = file.replace('https://cdn.ampproject.org/v0.js', hostName + '/dist/amp.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.js', hostName + '/dist/amp-inabox.js');
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g, hostName + '/dist/v0/$1.max.js');
+    if (inabox) {
+      file = file.replace('/dist/amp.js', '/dist/amp-inabox.js');
+    }
   } else if (mode == 'min') {
     file = file.replace('https://cdn.ampproject.org/v0.js', hostName + '/dist/v0.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.js', hostName + '/dist/amp4ads-v0.js');
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g, hostName + '/dist/v0/$1.js');
     file = file.replace(/\/dist.3p\/current\/(.*)\.max.html/, hostName + '/dist.3p/current-min/$1.html');
+    if (inabox) {
+      file = file.replace('/dist/v0.js', '/dist/amp4ads-v0.js');
+    }
   }
   return file;
 }
@@ -721,8 +821,25 @@ function getPathMode(path) {
   }
 }
 
-exports.app = app;
-
 function getUrlPrefix(req) {
   return req.protocol + '://' + req.headers.host;
 }
+
+/**
+ * @param {string} url
+ * @param {string} param
+ * @param {*} value
+ * @return {string}
+ */
+function addQueryParam(url, param, value) {
+  const paramValue =
+      encodeURIComponent(param) + '=' + encodeURIComponent(value);
+  if (url.indexOf('?') == -1) {
+    url += '?' + paramValue;
+  } else {
+    url += '&' + paramValue;
+  }
+  return url;
+}
+
+exports.app = app;

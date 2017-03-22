@@ -307,6 +307,21 @@ describe('IntersectionObserverPolyfill', () => {
       expect(callbackSpy).to.not.be.called;
     });
 
+    it('should trigger for new observed element', () => {
+      io = new IntersectionObserverPolyfill(callbackSpy, {
+        threshold: [0, 1],
+      });
+      element.getLayoutBox = () => {
+        return layoutRectLtwh(0, 0, 100, 100);
+      };
+      io.tick(layoutRectLtwh(0, 90, 100, 100));
+
+      // Observe after tick.
+      io.observe(element);
+      expect(callbackSpy).to.be.calledOnce;
+    });
+
+
 
     describe('w/o container should get IntersectionChangeEntry when', () => {
       it('completely in viewport', () => {

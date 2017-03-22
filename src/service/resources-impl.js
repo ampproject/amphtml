@@ -28,7 +28,7 @@ import {fromClassForDoc} from '../service';
 import {inputFor} from '../input';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
-import {installVsyncService} from './vsync-impl';
+import {vsyncFor} from '../vsync';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
@@ -50,7 +50,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const DOM_NODE_UID_PROPERTY = '__AMP__NODE_UID';
 
 
 /**
@@ -103,9 +102,6 @@ export class Resources {
 
     /** @private {number} */
     this.addCount_ = 0;
-
-    /** @private {number} */
-    this.nodeUidCount_ = 1;
 
     /** @private {boolean} */
     this.visible_ = this.viewer_.isVisible();
@@ -171,7 +167,7 @@ export class Resources {
     this.viewport_ = viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = installVsyncService(this.win);
+    this.vsync_ = vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -413,15 +409,6 @@ export class Resources {
     return this.vsync_.measurePromise(() => {
       return this.getViewport().getLayoutRect(element);
     });
-  }
-
-  /**
-   * @param {!Node} node
-   * @return {number}
-   */
-  getNodeUid(node) {
-    return node[DOM_NODE_UID_PROPERTY] ||
-        (node[DOM_NODE_UID_PROPERTY] = this.nodeUidCount_++);
   }
 
   /**

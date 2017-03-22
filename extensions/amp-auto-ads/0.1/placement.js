@@ -15,10 +15,10 @@
  */
 
 import {dev} from '../../../src/log';
-import {getAncestorBlacklist} from './ancestor-blacklist';
 import {getAttributesFromConfigObj} from './attributes';
 import {resourcesForDoc} from '../../../src/resources';
 import {
+  closestByTag,
   createElementWithAttributes,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -58,6 +58,16 @@ const Position = {
   LAST_CHILD: 3,  // Placement should be the last child of the anchor element.
   AFTER: 4,  // Placement should be the sibling after the anchor element.
 };
+
+/**
+ * Should be kept in sync with the disallowed_ancestors in
+ * extensions/amp-ad/.../validator-amp-ad.protoascii.
+ * @const {!Array<string>}
+ */
+const BLACKLISTED_ANCESTOR_TAGS = [
+  'AMP-SIDEBAR',
+  'AMP-APP-BANNER',
+];
 
 /**
  * @const {!Object<!Position, !function(!Element, !Element)>}
@@ -258,10 +268,8 @@ function getPlacementsFromObject(win, placementObj, placements) {
       };
     }
   }
-  const ancestorBlacklist = getAncestorBlacklist(win);
   anchorElements.forEach(anchorElement => {
-    if (!isPositionValid(anchorElement, placementObj['pos'],
-        ancestorBlacklist)) {
+    if (!isPositionValid(anchorElement, placementObj['pos'])) {
       return;
     }
     const attributes = getAttributesFromConfigObj(placementObj);
@@ -314,26 +322,22 @@ function getAnchorElements(rootElement, anchorObj) {
 /**
  * @param {!Element} anchorElement
  * @param {!Position} position
- * @param {!./ancestor-blacklist.AncestorBlacklist} ancestorBlacklist
  * @return {boolean}
  */
-function isPositionValid(anchorElement, position, ancestorBlacklist) {
-  let ancestorBlacklisted = false;
-  if (position == Position.BEFORE || position == Position.AFTER) {
-    const parent = anchorElement.parentNode;
-    if (!parent) {
-      dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
-      return false;
-    }
-    ancestorBlacklisted =
-        ancestorBlacklist.isOrDescendantOfBlacklistedElement(parent);
-  } else {
-    ancestorBlacklisted =
-        ancestorBlacklist.isOrDescendantOfBlacklistedElement(anchorElement);
-  }
-  if (ancestorBlacklisted) {
-    dev().warn(TAG, 'Placement inside blacklisted ancestor.');
+function isPositionValid(anchorElement, position) {
+  const elementToCheckOrNull =
+      position == Position.BEFORE || position == Position.AFTER ?
+          anchorElement.parentElement : anchorElement;
+  if (!elementToCheckOrNull) {
+    dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
     return false;
   }
-  return true;
+  const elementToCheck = dev().assertElement(elementToCheckOrNull);
+  return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
+    if (closestByTag(elementToCheck, tagName)) {
+      dev().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
+      return true;
+    }
+    return false;
+  });
 }

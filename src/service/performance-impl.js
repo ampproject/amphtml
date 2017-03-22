@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {documentInfoForDoc} from '../document-info';
 import {layoutRectLtwh} from '../layout-rect';
 import {fromClass} from '../service';
 import {resourcesForDoc} from '../resources';
@@ -22,7 +21,8 @@ import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 import {urls} from '../config';
-
+import {getMode} from '../mode';
+import {isCanary} from '../experiments';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -34,8 +34,8 @@ const QUEUE_LIMIT = 50;
 /**
  * @typedef {{
  *   label: string,
- *   opt_from: (string|null|undefined),
- *   opt_value: (number|undefined)
+ *   delta: (number|null|undefined),
+ *   value: (number|null|undefined)
  * }}
  */
 let TickEventDef;
@@ -74,7 +74,7 @@ export class Performance {
     this.win = win;
 
     /** @private @const {number} */
-    this.initTime_ = Date.now();
+    this.initTime_ = this.win.Date.now();
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -139,8 +139,6 @@ export class Performance {
     return channelPromise.then(() => {
       this.isMessagingReady_ = true;
 
-      // This task is async
-      this.setDocumentInfoParams_();
       // forward all queued ticks to the viewer since messaging
       // is now ready.
       this.flushQueuedTicks_();
@@ -162,7 +160,7 @@ export class Performance {
     // (hasn't been visible yet, ever at this point)
     if (didStartInPrerender) {
       this.viewer_.whenFirstVisible().then(() => {
-        docVisibleTime = Date.now();
+        docVisibleTime = this.win.Date.now();
       });
     }
 
@@ -171,7 +169,7 @@ export class Performance {
     this.whenViewportLayoutCompleteLegacy_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-            ? (Date.now() - docVisibleTime)
+            ? (this.win.Date.now() - docVisibleTime)
             : 1 /* MS (magic number for prerender was complete
                    by the time the user opened the page) */;
         this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
@@ -183,7 +181,7 @@ export class Performance {
         this.tick('pc');
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
-        this.prerenderComplete_(Date.now() - docVisibleTime);
+        this.prerenderComplete_(this.win.Date.now() - docVisibleTime);
       }
       this.flush();
     });
@@ -217,22 +215,12 @@ export class Performance {
           // is guaranteed to fire.
         });
     return whenReadyToRetrieveResources.then(() => {
-      return Promise.all(this.resources_.getResourcesInViewportLegacy()
+      return Promise.all(this.resources_.getResourcesInViewportLegacy(
+              /* isInPrerender */ true)
           .map(r => {
             return r.loadedOnce();
           }));
     });
-  }
-
-  /**
-   * Forward an object to be appended as search params to the external
-   * intstrumentation library.
-   * @param {!Object} params
-   * @private
-   */
-  setFlushParams_(params) {
-    this.viewer_.sendMessage('setFlushParams', params,
-        /* cancelUnsent */true);
   }
 
   /**
@@ -241,24 +229,21 @@ export class Performance {
    * @param {string} label The variable name as it will be reported.
    *     See TICKEVENTS.md for available metrics, and edit this file
    *     when adding a new metric.
-   * @param {?string=} opt_from The label of a previous tick to use as a
-   *    relative start for this tick.
-   * @param {number=} opt_value The time to record the tick at. Optional, if
-   *    not provided, use the current time. You probably want to use
-   *    `tickDelta` instead.
+   * @param {number=} opt_delta The delta. Call tickDelta instead of setting
+   *     this directly.
    */
-  tick(label, opt_from, opt_value) {
-    opt_from = opt_from == undefined ? null : opt_from;
-    opt_value = opt_value == undefined ? Date.now() : opt_value;
+  tick(label, opt_delta) {
+    const value = (opt_delta == undefined) ? this.win.Date.now() : undefined;
 
+    const data = {
+      label,
+      value,
+      delta: opt_delta,
+    };
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.sendMessage('tick', {
-        label,
-        from: opt_from,
-        value: opt_value,
-      });
+      this.viewer_.sendMessage('tick', data);
     } else {
-      this.queueTick_(label, opt_from, opt_value);
+      this.queueTick_(data);
     }
     // Add browser performance timeline entries for simple ticks.
     // These are for example exposed in WPT.
@@ -276,10 +261,7 @@ export class Performance {
    * @param {number} value The value in milliseconds that should be ticked.
    */
   tickDelta(label, value) {
-    // initTime_ Is added instead of non-zero, because the underlying
-    // library doesn't like 0 values.
-    this.tick('_' + label, undefined, this.initTime_);
-    this.tick(label, '_' + label, Math.round(value + this.initTime_));
+    this.tick(label, value);
   }
 
   /**
@@ -287,7 +269,7 @@ export class Performance {
    * @param {string} label The variable name as it will be reported.
    */
   tickSinceVisible(label) {
-    const now = Date.now();
+    const now = this.win.Date.now();
     const visibleTime = this.viewer_ ? this.viewer_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);
@@ -316,6 +298,13 @@ export class Performance {
       return this.enabledExperiments_;
     }
     const experiments = [];
+    // Add RTV version as experiment ID, so we can slice the data by version.
+    if (getMode(this.win).rtvVersion) {
+      experiments.push(getMode(this.win).rtvVersion);
+    }
+    if (isCanary(this.win)) {
+      experiments.push('canary');
+    }
     // Check if it's the legacy CDN domain.
     if (this.getHostname_() == urls.cdn.split('://')[1]) {
       experiments.push('legacy-cdn-domain');
@@ -330,27 +319,18 @@ export class Performance {
   /**
    * Queues the events to be flushed when tick function is set.
    *
-   * @param {string} label The variable name as it will be reported.
-   * @param {?string=} opt_from The label of a previous tick to use as a
-   *    relative start for this tick.
-   * @param {number=} opt_value The time to record the tick at. Optional, if
-   *    not provided, use the current time.
+   * @param {TickEventDef} data Tick data to be queued.
    * @private
    */
-  queueTick_(label, opt_from, opt_value) {
+  queueTick_(data) {
     // Start dropping the head of the queue if we've reached the limit
     // so that we don't take up too much memory in the runtime.
     if (this.events_.length >= QUEUE_LIMIT) {
       this.events_.shift();
     }
 
-    this.events_.push({
-      label,
-      from: opt_from,
-      value: opt_value,
-    });
+    this.events_.push(data);
   }
-
 
   /**
    * Forwards all queued ticks to the viewer tick method.
@@ -371,35 +351,6 @@ export class Performance {
       this.viewer_.sendMessage('tick', tickEvent);
     });
     this.events_.length = 0;
-  }
-
-
-  /**
-   * Calls "setFlushParams_" with relevant document information.
-   * @return {!Promise}
-   * @private
-   */
-  setDocumentInfoParams_() {
-    // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
-    // reporting regression is confirmed.
-    return this.whenViewportLayoutCompleteLegacy_().then(() => {
-      const params = Object.create(null);
-      const sourceUrl = documentInfoForDoc(this.win.document).sourceUrl
-          .replace(/#.*/, '');
-      params['sourceUrl'] = sourceUrl;
-
-      this.resources_.get().forEach(r => {
-        const el = r.element;
-        const name = el.tagName.toLowerCase();
-        incOrDef(params, name);
-        if (name == 'amp-ad') {
-          incOrDef(params, `ad-${el.getAttribute('type')}`);
-        }
-      });
-
-      this.setFlushParams_(params);
-      this.flush();
-    });
   }
 
   /**

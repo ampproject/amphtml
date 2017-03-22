@@ -25,6 +25,7 @@ import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
+import {extensionsFor} from '../../../../src/extensions';
 import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
@@ -35,6 +36,7 @@ import * as sinon from 'sinon';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
+  installExtensionsService(fixture.win);
   const doc = fixture.doc;
   // TODO(a4a-cam@): This is necessary in the short term, until A4A is
   // smarter about host document styling.  The issue is that it needs to
@@ -162,7 +164,7 @@ describe('Google A4A utils', () => {
           'type': 'adsense',
         });
         const config = {urls: []};
-        const extensions = installExtensionsService(fixture.win);
+        const extensions = extensionsFor(fixture.win);
         const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
         injectActiveViewAmpAnalyticsElement(
             new MockA4AImpl(element), extensions, config);
@@ -182,7 +184,7 @@ describe('Google A4A utils', () => {
         });
         const urls = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
         const config = {urls};
-        const extensions = installExtensionsService(fixture.win);
+        const extensions = extensionsFor(fixture.win);
         const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
         injectActiveViewAmpAnalyticsElement(
             new MockA4AImpl(element), extensions, config);
