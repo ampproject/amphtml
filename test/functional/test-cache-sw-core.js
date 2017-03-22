@@ -464,9 +464,9 @@ runner.run('Cache SW', () => {
 
   describe('fetchJsFile', () => {
     const request = {url};
-    const response = new Response('');
     const rejected = Promise.reject();
     rejected.catch(() => {});
+    let response;
     let fetch;
     let deleter;
 
@@ -475,6 +475,8 @@ runner.run('Cache SW', () => {
         'cache-control': 'public, max-age=60',
         date: new Date().toUTCString(),
       };
+
+      response = new Response('', {headers: expires});
 
       // "Previous" cached requests
       cache.cached.push(
@@ -498,7 +500,7 @@ runner.run('Cache SW', () => {
       });
 
       it('prunes previous cached responses for file', () => {
-        return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+        return sw.fetchJsFile(cache, request, rtv, '/v0.js').then(() => {
           return new Promise(resolve => setTimeout(resolve, 25));
         }).then(() => {
           expect(deleter).to.have.been.calledWith(cache.cached[0][0]);
@@ -508,7 +510,7 @@ runner.run('Cache SW', () => {
 
       describe('when diversions request fails', () => {
         it('does not prune new production of new script', () => {
-          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+          return sw.fetchJsFile(cache, request, rtv, '/v0.js').then(() => {
             return new Promise(resolve => setTimeout(resolve, 25));
           }).then(() => {
             expect(deleter).to.not.have.been.calledWith(cache.cached[4][0]);
@@ -516,7 +518,7 @@ runner.run('Cache SW', () => {
         });
 
         it('does not prune production of any other script', () => {
-          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+          return sw.fetchJsFile(cache, request, rtv, '/v0.js').then(() => {
             return new Promise(resolve => setTimeout(resolve, 25));
           }).then(() => {
             expect(deleter).to.not.have.been.calledWith(cache.cached[1][0]);
@@ -524,7 +526,7 @@ runner.run('Cache SW', () => {
         });
 
         it('does not prune diversions of new script', () => {
-          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+          return sw.fetchJsFile(cache, request, rtv, '/v0.js').then(() => {
             return new Promise(resolve => setTimeout(resolve, 25));
           }).then(() => {
             expect(deleter).to.not.have.been.calledWith(cache.cached[2][0]);
@@ -532,7 +534,7 @@ runner.run('Cache SW', () => {
         });
 
         it('does not prune diversions of any other script', () => {
-          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+          return sw.fetchJsFile(cache, request, rtv, '/v0.js').then(() => {
             return new Promise(resolve => setTimeout(resolve, 25));
           }).then(() => {
             expect(deleter).to.not.have.been.calledWith(cache.cached[3][0]);
@@ -549,7 +551,7 @@ runner.run('Cache SW', () => {
         });
 
         function waitForDiversions() {
-          return sw.fetchJsFile(cache, request, '/v0.js', rtv).then(() => {
+          return sw.fetchJsFile(cache, request, rtv, '/v0.js').then(() => {
             const setTimeout = sandbox.stub(window, 'setTimeout', callback => {
               setTimeout.restore();
               callback();
@@ -614,6 +616,10 @@ runner.run('Cache SW', () => {
     });
 
     describe('when a diversion is requested by page', () => {
+      const request = {
+        url: `https://cdn.ampproject.org/rtv/${diversionRtv}/v0.js`,
+      };
+
       beforeEach(() => {
         fetch.onCall(1).returns(Promise.resolve(
           new Response(`["${diversionRtv}","${prevDiversionRtv}"]`)));
@@ -622,7 +628,7 @@ runner.run('Cache SW', () => {
       });
 
       function waitForDiversions() {
-        return sw.fetchJsFile(cache, request, '/v0.js', diversionRtv).then(() => {
+        return sw.fetchJsFile(cache, request, diversionRtv, '/v0.js').then(() => {
           const setTimeout = sandbox.stub(window, 'setTimeout', callback => {
             setTimeout.restore();
             callback();
@@ -691,7 +697,7 @@ runner.run('Cache SW', () => {
       });
 
       it('does not prune requests for file', () => {
-        return sw.fetchJsFile(cache, request, '/v0.js', rtv).catch(() => {
+        return sw.fetchJsFile(cache, request, rtv, '/v0.js').catch(() => {
           return new Promise(resolve => setTimeout(resolve, 25));
         }).then(() => {
           expect(deleter).to.not.have.been.called;
