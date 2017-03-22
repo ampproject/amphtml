@@ -231,6 +231,9 @@ describe('FixedLayer', () => {
     };
     Object.defineProperty(elem, 'offsetTop', {
       get: () => {
+        if (elem.overrideOffsetTop != null) {
+          return elem.overrideOffsetTop;
+        }
         if (elem.style.top == 'auto' || elem.computedStyle.top == 'auto' ||
                 elem.computedStyle.top == '') {
           return elem.autoOffsetTop;
@@ -548,6 +551,51 @@ describe('FixedLayer', () => {
       expect(state['F4'].fixed).to.be.false;
       expect(state['F4'].sticky).to.be.true;
       expect(state['F4'].top).to.equal('');
+    });
+
+    it('should work around top=0 for sticky', () => {
+      // See http://crbug.com/703816.
+      element5.computedStyle['position'] = 'sticky';
+      element5.computedStyle['top'] = '0px';
+      element5.autoOffsetTop = 12;
+      element5.overrideOffsetTop = 12;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F4'].sticky).to.be.true;
+      expect(state['F4'].top).to.equal('');
+    });
+
+    it('should NOT work around top=0 for sticky when offset = 0', () => {
+      // See http://crbug.com/703816.
+      element5.computedStyle['position'] = 'sticky';
+      element5.computedStyle['top'] = '0px';
+      element5.autoOffsetTop = 0;
+      element5.overrideOffsetTop = 0;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F4'].sticky).to.be.true;
+      expect(state['F4'].top).to.equal('0px');
+    });
+
+    it('should NOT work around top=0 for sticky for non-implicit top', () => {
+      // See http://crbug.com/703816.
+      element5.computedStyle['position'] = 'sticky';
+      element5.computedStyle['top'] = '0px';
+      element5.autoOffsetTop = 12;
+      element5.overrideOffsetTop = 11;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F4'].sticky).to.be.true;
+      expect(state['F4'].top).to.equal('0px');
     });
 
     it('should collect for implicit top = auto, but not update top', () => {
