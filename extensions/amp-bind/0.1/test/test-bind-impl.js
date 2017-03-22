@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {Bind} from '../bind-impl';
 import {BindExpression} from '../bind-expression';
 import {BindValidator} from '../bind-validator';
@@ -23,7 +24,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {installTimerService} from '../../../../src/service/timer-impl';
 
-describes.realWin('amp-bind', {
+describes.realWin('Bind', {
   amp: {
     runtimeOn: false,
   },
@@ -368,6 +369,26 @@ describes.realWin('amp-bind', {
     }).then(() => {
       expect(withString.getAttribute('href')).to.equal(null);
       expect(withArray.getAttribute('href')).to.equal(null);
+    });
+  });
+
+  it('should stop scanning once maximum number of bindings is reached', () => {
+    bind.setMaxNumberOfBindingsForTesting(2);
+    const errorStub = env.sandbox.stub(user(), 'error');
+
+    const foo = createElementWithBinding(`[foo]="foo"`);
+    const bar = createElementWithBinding(`[bar]="bar" [baz]="baz"`);
+    const qux = createElementWithBinding(`[qux]="qux"`);
+
+    return onBindReadyAndSetState({foo: 1, bar: 2, baz: 3, qux: 4}).then(() => {
+      expect(foo.getAttribute('foo')).to.equal('1');
+      expect(bar.getAttribute('bar')).to.equal('2');
+      // Max number of bindings exceeded with [baz].
+      expect(bar.getAttribute('baz')).to.be.null;
+      expect(qux.getAttribute('qux')).to.be.null;
+
+      expect(errorStub).to.have.been.calledWith('amp-bind',
+          sinon.match(/Maximum number of bindings reached/));
     });
   });
 });
