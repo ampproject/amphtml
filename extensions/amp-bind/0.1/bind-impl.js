@@ -259,8 +259,8 @@ export class Bind {
    * @private
    */
   addBindingsForNode_(node) {
-    // Limit number of total bindings (unless in local dev).
-    const limit = getMode().localDev
+    // Limit number of total bindings (unless in local manual testing).
+    const limit = (getMode().localDev && !getMode().test)
         ? Number.POSITIVE_INFINITY
         : this.maxNumberOfBindings_ - this.numberOfBindings_();
     return this.scanNode_(node, limit).then(results => {
