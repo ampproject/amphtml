@@ -318,12 +318,12 @@ export class Templates {
 
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  */
-function getTemplatesService(window) {
-  installTemplatesService(window);
-  return getService(window, 'templates');
+export function installTemplatesService(win) {
+  registerServiceBuilder(win, 'templates', Templates);
 }
+
 
 /**
  * Registers an extended template. This function should typically be called
@@ -334,20 +334,7 @@ function getTemplatesService(window) {
  * @package
  */
 export function registerExtendedTemplate(win, type, templateClass) {
-  return getTemplatesService(win).registerTemplate_(type, templateClass);
-}
-
-/**
- * @param {!Window} window
- * @return {!Templates}
- */
-export function templatesServiceForTesting(window) {
-  return getTemplatesService(window);
-}
-
-/**
- * @param {!Window} window
- */
-export function installTemplatesService(window) {
-  registerServiceBuilder(window, 'templates', Templates);
+  installTemplatesService(win);
+  const templatesService = getService(win, 'templates');
+  return templatesService.registerTemplate_(type, templateClass);
 }

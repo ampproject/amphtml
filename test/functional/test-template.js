@@ -16,14 +16,15 @@
 
 import {
   BaseTemplate,
-  templatesServiceForTesting,
+  installTemplatesService,
   registerExtendedTemplate,
 } from '../../src/service/template-impl';
-
+import {templatesFor} from '../../src/template';
+import {resetServiceForTesting} from '../../src/service';
 
 describe('Template', () => {
 
-  const templates = templatesServiceForTesting(window);
+  let templates;
 
   class TemplateImpl extends BaseTemplate {
     render(data) {
@@ -44,6 +45,12 @@ describe('Template', () => {
   }
 
   beforeEach(() => {
+    installTemplatesService(window);
+    templates = templatesFor(window);
+  });
+
+  afterEach(() => {
+    resetServiceForTesting(window, 'templates');
   });
 
   it('should render immediately', () => {
