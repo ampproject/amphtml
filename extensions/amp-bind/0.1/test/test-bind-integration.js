@@ -145,7 +145,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
    * Combined test specs for amp-img
    */
   describe('amp-img integration', () => {
-    const img = fixture.doc.getElementById('image');
     it('should do amp-img integration', () => {
       const changeImgSrcButton = fixture.doc
           .getElementById('changeImgSrcButton');
@@ -155,6 +154,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
           .getElementById('changeImgAltButton');
       const changeImgDimensButton = fixture.doc
           .getElementById('changeImgDimensButton');
+      const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
       expect(img.getAttribute('height')).to.equal('200');
       expect(img.getAttribute('width')).to.equal('200');
