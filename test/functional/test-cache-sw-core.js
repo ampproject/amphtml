@@ -628,15 +628,16 @@ runner.run('Cache SW', () => {
       });
 
       function waitForDiversions() {
-        return sw.fetchJsFile(cache, request, diversionRtv, '/v0.js').then(() => {
-          const setTimeout = sandbox.stub(window, 'setTimeout', callback => {
-            setTimeout.restore();
-            callback();
-          });
-          return sw.diversions(cache).then(() => {
-            return new Promise(resolve => setTimeout(resolve, 10));
-          });
-        });
+        return sw.fetchJsFile(cache, request, diversionRtv, '/v0.js')
+            .then(() => {
+              const setTimeout = sandbox.stub(window, 'setTimeout', cb => {
+                setTimeout.restore();
+                cb();
+              });
+              return sw.diversions(cache).then(() => {
+                return new Promise(resolve => setTimeout(resolve, 10));
+              });
+            });
       }
 
       it('fetches new diversions', () => {
