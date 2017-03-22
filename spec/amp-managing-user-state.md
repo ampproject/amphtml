@@ -345,10 +345,6 @@ Now that you've figured out the analytics record identifier you can actually sto
 
 ### Task 5: Using Client ID in linking and form submission
 
-> **NOTE:**
-> 
-> This section describes features that are currently experimentally available but will be available as a stable release soon.
-
 In general, when reading and writing third-party cookies is disallowed, there will be situations where managing user state is impossible to do with complete effectiveness. In Tasks 1-4, the steps we’ve taken help in two ways: (1) They provide a completely effective solution for when reading and writing third-party cookies is allowed, and (2) they set our system up to take advantage of any eventual opportunity to reconcile cross-context identifiers if immediate reconciliation is impossible due to the browser’s cookie settings.
 
 In this task, we’ll cover an additional optimization that helps when the user is navigating across contexts from one page to another page either **via linking or form submissions**. In these situations, and with the implementation work described below, it is possible to set up a fully effective scheme for managing user state across contexts.
@@ -357,18 +353,18 @@ In this task, we’ll cover an additional optimization that helps when the user 
 
 ##### Using substitution features
 
-Our approach will take advantage of two types of AMP variable substitutions.
+Our approach will take advantage of two types of [AMP variable substitutions](./amp-var-substitutions.md).
 
 **To update outgoing links to use a Client ID substitution:** Define a new query parameter, `ref_id` (“referrer ID”), which will appear within the URL and indicate the **originating context’s identifier** for the user. Set this query parameter to equal the value of AMP’s Client ID substitution:
 
 ``` text
-<a href="https://example.com/step2.html?ref_id=CLIENT_ID(uid)">
+<a href="https://example.com/step2.html?ref_id=CLIENT_ID(uid)" data-amp-replace="CLIENT_ID">
 ```
 
 **To update form inputs to use a Client ID substitution:** Define a name for the input field, such as `orig_user_id`. Specify the `default-value` of the form field to be the value of AMP’s Client ID substitution:
 
 ``` text
-<input name="ref_id" type="hidden" default-value="CLIENT_ID(uid)">
+<input name="ref_id" type="hidden" value="CLIENT_ID(uid)" data-amp-replace="CLIENT_ID">
 ```
 
 By taking these steps, the Client ID is available to the target server and/or as a URL parameter on the page the user lands on after the link click or form submission (the **destination context**). The name (or “key”) will be `ref_id` because that’s how we’ve defined it in the above implementations and will have an associated value equal to the Client ID. For instance, by following the link (“`<a>`” tag) defined above, the user will navigate to this URL:
