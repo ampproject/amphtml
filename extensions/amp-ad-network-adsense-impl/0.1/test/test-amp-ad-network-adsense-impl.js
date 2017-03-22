@@ -73,7 +73,6 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       setupForAdTesting(fixture);
       element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
       const iframe = fixture.doc.createElement('iframe');
-      iframe.setAttribute('id', 'inner-iframe');
       element.appendChild(iframe);
       document.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
