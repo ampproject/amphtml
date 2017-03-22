@@ -104,6 +104,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {!../../../src/service/crypto-impl.Crypto} */
     this.cryptoService_ = cryptoFor(this.win);
+
+    /** @private {boolean} */
+    this.isScoped_ = !!this.element.getAttribute('scope');
   }
 
   /** @override */
@@ -237,6 +240,9 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   addTriggerNoInline_(config) {
+    if (this.isScoped_) {
+      config['isScoped'] = 'true';
+    }
     try {
       this.analyticsGroup_.addTrigger(
           config, this.handleEvent_.bind(this, config));
@@ -293,7 +299,8 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   fetchRemoteConfig_() {
     let remoteConfigUrl = this.element.getAttribute('config');
-    if (!remoteConfigUrl) {
+    if (!remoteConfigUrl || this.isScoped_) {
+      // Remote config is not supported for inserted scoped analytics element
       return Promise.resolve();
     }
     assertHttpsUrl(remoteConfigUrl, this.element);

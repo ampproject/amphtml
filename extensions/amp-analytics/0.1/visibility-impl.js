@@ -163,10 +163,11 @@ export function isVisibilitySpecValid(config) {
  * @return {?Element} Element corresponding to the selector if found.
  */
 export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
+  const isScoped = analyticsEl.getAttribute('scope');
   if (!analyticsEl) {
     return null;
   }
-
+  selectionMethod = isScoped ? 'scope' : selectionMethod;
   let foundEl;
   const friendlyFrame = getParentWindowFrameElement(analyticsEl, ampdoc.win);
   // Special case for root selector.
@@ -174,6 +175,9 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
     foundEl = friendlyFrame ?
         closestBySelector(
             friendlyFrame, '.i-amphtml-element') : null;
+    if (isScoped) {
+      foundEl = analyticsEl.parentElement.contains(foundEl) ? foundEl : null;
+    }
   } else if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);

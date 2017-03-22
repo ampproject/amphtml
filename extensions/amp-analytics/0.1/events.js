@@ -182,9 +182,12 @@ export class ClickEventTracker extends EventTracker {
 
   /** @override */
   add(context, eventType, config, listener) {
-    const selector = user().assert(config['selector'],
+    let selector = user().assert(config['selector'],
         'Missing required selector on click trigger');
-    const selectionMethod = config['selectionMethod'] || null;
+    const isScoped = !!config['isScoped'];
+    let selectionMethod = config['selectionMethod'] || null;
+    selectionMethod = isScoped ? 'scope' : selectionMethod;
+    selector = isScoped && selector == ':root' ? ':scope' : selector;
     return this.clickObservable_.add(this.root.createSelectiveListener(
         this.handleClick_.bind(this, listener),
         (context.parentElement || context),
@@ -227,8 +230,11 @@ export class SignalTracker extends EventTracker {
   add(context, eventType, config, listener) {
     let target;
     let signalsPromise;
-    const selector = config['selector'] || ':root';
-    if (selector == ':root' || selector == ':host') {
+    let selector = config['selector'] || ':root';
+    const isScoped = !!config['isScoped'];
+    selector = isScoped && (!!selector == ':root' || selector == ':host')
+        ? ':scope' : selector;
+    if (!!selector == ':root' || selector == ':host') {
       // Root selectors are delegated to analytics roots.
       target = this.root.getRootElement();
       signalsPromise = Promise.resolve(this.root.signals());
@@ -236,7 +242,7 @@ export class SignalTracker extends EventTracker {
       // Look for the AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
       signalsPromise = this.root.ampdoc.whenReady().then(() => {
-        const selectionMethod = config['selectionMethod'];
+        const selectionMethod = isScoped ? 'scope' : config['selectionMethod'];
         const element = user().assertElement(
             this.root.getAmpElement(
                 (context.parentElement || context),
@@ -276,7 +282,10 @@ export class IniLoadTracker extends EventTracker {
   add(context, eventType, config, listener) {
     let target;
     let promise;
-    const selector = config['selector'] || ':root';
+    let selector = config['selector'] || ':root';
+    const isScoped = !!config['isScoped'];
+    selector = isScoped && (!!selector == ':root' || selector == ':host')
+        ? ':scope' : selector;
     if (selector == ':root' || selector == ':host') {
       // Root selectors are delegated to analytics roots.
       target = this.root.getRootElement();
@@ -285,7 +294,7 @@ export class IniLoadTracker extends EventTracker {
       // An AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
       promise = this.root.ampdoc.whenReady().then(() => {
-        const selectionMethod = config['selectionMethod'];
+        const selectionMethod = isScoped ? 'scope' : config['selectionMethod'];
         const element = user().assertElement(
             this.root.getAmpElement(
                 (context.parentElement || context),
@@ -347,8 +356,12 @@ export class VisibilityTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const visibilitySpec = config['visibilitySpec'] || {};
-    const selector = config['selector'] || visibilitySpec['selector'];
+    let selector = config['selector'] || visibilitySpec['selector'];
     const visibilityManager = this.root.getVisibilityManager();
+    const isScoped = !!config['isScoped'];
+    selector =
+        isScoped && (!!selector == ':root' || selector == ':host' || !selector)
+        ? ':scope' : selector;
 
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
@@ -367,8 +380,8 @@ export class VisibilityTracker extends EventTracker {
     // An AMP-element. Wait for DOM to be fully parsed to avoid
     // false missed searches.
     const unlistenPromise = this.root.ampdoc.whenReady().then(() => {
-      const selectionMethod = config['selectionMethod'] ||
-          visibilitySpec['selectionMethod'];
+      const selectionMethod = isScoped ? 'scope'
+          : (config['selectionMethod'] || visibilitySpec['selectionMethod']);
       const element = user().assertElement(
           this.root.getAmpElement(
               (context.parentElement || context),
