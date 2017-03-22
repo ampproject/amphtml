@@ -90,14 +90,22 @@ const FUNCTION_WHITELIST = (function() {
 export class BindExpression {
   /**
    * @param {string} expressionString
+   * @param {number=} opt_maxAstSize
    * @throws {Error} On malformed expressions.
    */
-  constructor(expressionString) {
+  constructor(expressionString, opt_maxAstSize) {
     /** @const {string} */
     this.expressionString = expressionString;
 
     /** @const @private {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
+
+    const size = numberOfNodesInAst_(this.ast_);
+    const maxSize = opt_maxAstSize || 100;
+    if (size > maxSize) {
+      throw new Error(`Expression size (${size}) exceeds max (${maxSize}): ` +
+          `"${expressionString}"`);
+    }
   }
 
   /**
@@ -111,8 +119,23 @@ export class BindExpression {
   }
 
   /**
+   * @param {!./bind-expr-defines.AstNode} ast
+   * @return {number}
+   * @private
+   */
+  numberOfNodesInAst_(ast) {
+    let nodes = 1;
+    if (ast.args) {
+      ast.args.forEach(arg => {
+        nodes += numberOfNodesInAst_(arg);
+      });
+    }
+    return nodes;
+  }
+
+  /**
    * Recursively evaluates and returns value of `node` and its children.
-   * @param {?./bind-expr-defines.AstNode} node
+   * @param {./bind-expr-defines.AstNode} node
    * @param {!Object} scope
    * @throws {Error}
    * @return {BindExpressionResultDef}
