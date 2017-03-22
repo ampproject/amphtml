@@ -65,7 +65,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(attributes, adTracker)
           .then(() => {
             expect(placements[0].getAdElement()).to.equal(anchor.childNodes[0]);
           });
@@ -224,7 +229,12 @@ describes.realWin('placement', {
         'data-custom-att-2': 'val-2',
       };
 
-      return placements[0].placeAd(baseAttributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(baseAttributes, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
@@ -267,7 +277,12 @@ describes.realWin('placement', {
         'data-custom-att-3': 'val-4',
       };
 
-      return placements[0].placeAd(baseAttributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(baseAttributes, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
@@ -309,7 +324,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(attributes, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
@@ -348,7 +368,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(attributes, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
@@ -387,7 +412,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(attributes, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
@@ -424,7 +454,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(attributes, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
@@ -465,7 +500,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });;
+      return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
                 anchor.firstChild, 100, undefined);
@@ -500,7 +540,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
                 anchor.firstChild, 100, undefined);
@@ -529,7 +574,11 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      const adTracker = new AdTracker([fakeAd], 100);
+      const adTracker = new AdTracker([fakeAd], {
+        initialMinSpacing: 100,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
 
       const attributes = {
         'type': 'ad-network-type',
@@ -566,7 +615,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
@@ -596,7 +650,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
@@ -627,7 +686,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
@@ -658,7 +722,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
@@ -693,7 +762,12 @@ describes.realWin('placement', {
         'type': 'ad-network-type',
       };
 
-      return placements[0].placeAd(attributes, new AdTracker([], 0))
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(anchor1.childNodes).to.have.lengthOf(0);
