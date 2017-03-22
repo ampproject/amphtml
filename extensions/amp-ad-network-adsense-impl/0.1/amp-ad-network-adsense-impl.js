@@ -40,7 +40,6 @@ import {
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {extensionsFor} from '../../../src/extensions';
-import {setStyles} from '../../../src/style';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {viewerForDoc} from '../../../src/viewer';
 import {AdsenseSharedState} from './adsense-shared-state';
