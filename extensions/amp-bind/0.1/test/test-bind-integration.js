@@ -20,25 +20,20 @@ import {bindForDoc} from '../../../../src/bind';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 
 describe.configure().retryOnSaucelabs().run('amp-bind', function() {
+  const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
+
   let fixture;
   let ampdoc;
-  const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
 
   this.timeout(5000);
 
   beforeEach(() => {
-    let bindInitPromise;
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
-      bindInitPromise = waitForEvent('amp:bind:initialize');
-      const numberOfExtensionElements = 4;
-      return fixture.awaitEvent('amp:load:start', numberOfExtensionElements);
+      return waitForEvent('amp:bind:initialize');
     }).then(() => {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
-      return bindForDoc(ampdoc);
-    }).then(unusedBind => {
-      return bindInitPromise;
     });
   });
 
@@ -387,6 +382,25 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       button.click();
       return waitForBindApplication().then(() => {
         expect(iframe.src).to.contain('bound');
+      });
+    });
+  });
+
+  describe('amp-iframe', () => {
+    it('should support binding to src', () => {
+      const button = fixture.doc.getElementById('iframeButton');
+      const ampIframe = fixture.doc.getElementById('ampIframe');
+      // Force layout in case element is not in viewport.
+      ampIframe.implementation_.layoutCallback();
+      const iframe = ampIframe.querySelector('iframe');
+
+      const newSrc = 'https://giphy.com/embed/DKG1OhBUmxL4Q';
+      expect(ampIframe.getAttribute('src')).to.not.contain(newSrc);
+      expect(iframe.src).to.not.contain(newSrc);
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(ampIframe.getAttribute('src')).to.contain(newSrc);
+        expect(iframe.src).to.contain(newSrc);
       });
     });
   });

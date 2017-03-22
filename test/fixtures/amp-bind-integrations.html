@@ -19,6 +19,7 @@
   <script custom-element="amp-bind" src="/dist/v0/amp-bind-0.1.max.js"></script>
   <script custom-element="amp-brightcove" src="/dist/v0/amp-brightcove-0.1.max.js"></script>
   <script custom-element="amp-carousel" src="/dist/v0/amp-carousel-0.1.max.js"></script>
+  <script custom-element="amp-iframe" src="/dist/v0/amp-iframe-0.1.max.js"></script>
   <script custom-element="amp-live-list" src="/dist/v0/amp-live-list-0.1.max.js"></script>
   <script custom-element="amp-selector" src="/dist/v0/amp-selector-0.1.max.js"></script>
   <script custom-element="amp-youtube" src="/dist/v0/amp-youtube-0.1.max.js"></script>
@@ -109,5 +110,10 @@
       data-account="906043040001" data-video-id="1401169490001" data-player="180a5658-8be8-4f33-8eba-d562ab41b40c">
   </amp-brightcove>
 
+  <p>AMP-IFRAME</p>
+  <button id="iframeButton" on="tap:AMP.setState(iframe='https://giphy.com/embed/DKG1OhBUmxL4Q')">Change amp-iframe</button>
+  <amp-iframe width=100 height=100 id="ampIframe" sandbox="allow-scripts allow-same-origin allow-popups"
+      src="https://player.vimeo.com/video/140261016" [src]="iframe">
+  </amp-iframe>
 </body>
 </html>

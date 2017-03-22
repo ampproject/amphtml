@@ -220,6 +220,9 @@ function createElementRules_() {
     'AMP-CAROUSEL': {
       'slide': null,
     },
+    'AMP-IFRAME': {
+      'src': null,
+    },
     'AMP-IMG': {
       'alt': null,
       'referrerpolicy': null,
