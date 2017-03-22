@@ -30,11 +30,18 @@ __Required:__
 - `data-auid` - The ad unit ID to display
 - `data-host` - SSL-enabled OpenX delivery domain
 
+__Optional:__
+
+- `json` - Additional json options.
+
+  - `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html).
+
 ```
 <amp-ad width="728" height="90"
       type="openx"
+      data-host="domain.openx.net"
       data-auid="12345"
-      data-host="domain.openx.net">
+      json='{"dfp":{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1},"openx":{"customVars":{"marco":"polo","fates":["clothos","lachesis","atropos"]}}}'>
 </amp-ad>
 ```
 
@@ -50,19 +57,23 @@ __Required:__
 
 - `data-host` - SSL-enabled OpenX delivery domain
 - `data-nc` - Network code '-' sitename
+- `data-auid` - Open X Ad unit id to display
 - `data-dfp-slot` - The Doubleclick slot
 
 __Optional:__
 
-- `json` - Additional json options. Only the "dfp" is currently respected.
+- `json` - Additional json options.
+
+  - `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html).  Also note that OpenX bidder limits these keys by the __whitelisted keys__ set on your publisher settings.
 
 ```
 <amp-ad width="728" height="90"
       type="openx"
       data-host="domain.openx.net"
+      data-auid="12345"
       data-nc="56789-MySite"
       data-dfp-slot="/12345/dfp_zone"
-      json='{"dfp":{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1}}'>
+      json='{"dfp":{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1},"openx":{"customVars":{"marco":"polo","fates":["clothos","lachesis","atropos"]}}}'>
 </amp-ad>
 ```
 
