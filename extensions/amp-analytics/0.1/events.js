@@ -18,8 +18,6 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {user} from '../../../src/log';
-import {map} from '../../../src/utils/object';
-import {ancestorAmpElement} from '../../../src/dom';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
@@ -92,7 +90,7 @@ export class CustomEventTracker extends EventTracker {
      * {!Object<!Document|!ShadowRoot|!Element, !Object<string, !Observable<!AnalyticsEvent>>>}
      * @const @private
      */
-    this.observers_ = map();
+    this.observers_ = {};
 
     /**
      * Early events have to be buffered because there's no way to predict
@@ -125,9 +123,8 @@ export class CustomEventTracker extends EventTracker {
     // Push recent events if any.
     let scope = DEFAULT_SCOPE;
     if (context.tagName == 'AMP-ANALYTICS' && context.getAttribute('scope')) {
-      // Add the listener to the analytics element only.
-      const scopeEle = ancestorAmpElement(context);
-      scope = scopeEle.getResourceId();
+      // Scope the listener to the analytics element only.
+      scope = context.getResourceId();
     }
     const buffer = this.buffer_ &&
         this.buffer_[scope] && this.buffer_[scope][eventType];
@@ -155,9 +152,12 @@ export class CustomEventTracker extends EventTracker {
    * @param {!AnalyticsEvent} event
    */
   trigger(event) {
+    let scope = DEFAULT_SCOPE;
     const target = event.target;
-    const scope = (target.getResourceId && target.getResourceId())
-        || DEFAULT_SCOPE;
+    if (target.tagName == 'AMP-ANALYTICS' && target.getAttribute('scope')) {
+      scope = (target.getResourceId && target.getResourceId()) || DEFAULT_SCOPE;
+    }
+
     // Buffer still exists - enqueue.
     if (this.buffer_) {
       if (!this.buffer_[scope]) {

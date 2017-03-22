@@ -195,8 +195,6 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    // Add selectionMethod: scope to scoped analytics element
-
     this.processExtraUrlParams_(this.config_['extraUrlParams'],
         this.config_['extraUrlParamsReplaceMap']);
 
@@ -369,7 +367,6 @@ export class AmpAnalytics extends AMP.BaseElement {
         'requestCount': 0,
       },
     });
-    // TODO: Need privacy review on defaultConfig
     const defaultConfig = this.predefinedConfig_['default'] || {};
     const typeConfig = this.predefinedConfig_[
       this.element.getAttribute('type')] || {};

@@ -55,57 +55,77 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
     if (!analytics) {
       return;
     }
-    analytics.triggerEvent(null, eventType, opt_vars);
+    analytics.triggerEvent(eventType, opt_vars);
   });
 }
 
-/**
- * Helper method to trigger analytics event if amp-analytics is available.
- * @param {!Element} element
- * @param {string} eventType
- * @param {!Object<string, string>=} opt_vars A map of vars and their values.
- */
-export function triggerAnalyticsEventForTarget(element, eventType, opt_vars) {
-  analyticsForDocOrNull(element).then(analytics => {
-    if (!analytics) {
-      return;
-    }
-    analytics.triggerEventForTarget(element, eventType, opt_vars);
-  });
-}
+export class ExtensionAnalytics {
 
-/**
- * Method to create scoped analytics element for any element.
- * @param {!Element} parentElement
- * @param {!JSONType} config
- * @param {boolean=} loadAnalytics
- */
-export function insertAnalyticsElement(
-    parentElement, config, loadAnalytics = false) {
-  const doc = parentElement.ownerDocument;
-  const analyticsElem = doc.createElement('amp-analytics');
-  analyticsElem.setAttribute('sandbox', 'true');
-  const scriptElem = createElementWithAttributes(doc,
-        'script', {
-          'type': 'application/json',
-        });
-  scriptElem.textContent = JSON.stringify(config);
-  analyticsElem.appendChild(scriptElem);
-  analyticsElem.CONFIG = config;
+  /**
+   * @param {!Element} parentElement
+   * @param {boolean=} opt_loadAnalytics
+   */
+  constructor(parentElement, opt_loadAnalytics) {
+    /** @private {!Element} */
+    this.parentElement_ = parentElement;
 
-  // Force load analytics extension if script not included in page.
-  if (loadAnalytics) {
-    // Get Extensions service and force load analytics extension.
-    const extensions = extensionsFor(parentElement.ownerDocument.defaultView);
-    extensions./*OK*/loadExtension('amp-analytics');
-    parentElement.appendChild(analyticsElem);
-    return;
+    /** @private {boolean} */
+    this.loadAnalytics_ = opt_loadAnalytics || false;
+
+    /** @private {!Array<!Element>} */
+    this.analyticsElements_ = [];
   }
 
-  analyticsForDocOrNull(parentElement).then(analytics => {
-    if (!analytics) {
-      return;
+  /**
+   *
+   * @param {!JSONType} config
+   */
+  insertAnalyticsElement(config) {
+    const doc = this.parentElement_.ownerDocument;
+    const analyticsElem = doc.createElement('amp-analytics');
+    analyticsElem.setAttribute('scope', 'true');
+    const scriptElem = createElementWithAttributes(doc,
+          'script', {
+            'type': 'application/json',
+          });
+    scriptElem.textContent = JSON.stringify(config);
+    analyticsElem.appendChild(scriptElem);
+    analyticsElem.CONFIG = config;
+
+    // Force load analytics extension if script not included in page.
+    if (this.loadAnalytics_) {
+      // Get Extensions service and force load analytics extension.
+      const extensions =
+          extensionsFor(this.parentElement_.ownerDocument.defaultView);
+      extensions./*OK*/loadExtension('amp-analytics');
+      this.parentElement_.appendChild(analyticsElem);
+      this.analyticsElements_.push(analyticsElem);
     }
-    parentElement.appendChild(analyticsElem);
-  });
+
+    analyticsForDocOrNull(this.parentElement_).then(analytics => {
+      if (!analytics) {
+        return;
+      }
+      this.parentElement_.appendChild(analyticsElem);
+      this.analyticsElements_.push(analyticsElem);
+    });
+  }
+
+  /**
+   *
+   * @param {string} eventType
+   * @param {!Object<string, string>=} opt_vars
+   */
+  triggerAnalyticsEvent(eventType, opt_vars) {
+    // Note: analytics elements inserted later will not get this event.
+    analyticsForDocOrNull(this.parentElement_).then(analytics => {
+      if (!analytics) {
+        return;
+      }
+      for (let i = 0; i < this.analyticsElements_.length; i++) {
+        analytics.triggerEventForTarget(
+            this.analyticsElements_[i], eventType, opt_vars);
+      }
+    });
+  }
 }

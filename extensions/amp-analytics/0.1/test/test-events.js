@@ -23,7 +23,7 @@ import {
   SignalTracker,
   VisibilityTracker,
 } from '../events';
-import {insertAnalyticsElement} from '../../../../src/analytics';
+import {ExtensionAnalytics} from '../../../../src/analytics';
 import {Signals} from '../../../../src/utils/signals';
 import * as sinon from 'sinon';
 
@@ -166,7 +166,7 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker = new CustomEventTracker(root);
     });
 
-    it.skip('should initalize, add listeners and dispose', () => {
+    it('should initalize, add listeners and dispose', () => {
       expect(tracker.root).to.equal(root);
       expect(tracker.buffer_).to.exist;
 
@@ -199,8 +199,10 @@ describes.realWin('Events', {amp: 1}, env => {
       parent2.id = 2;
       win.document.body.appendChild(parent1);
       win.document.body.appendChild(parent2);
-      insertAnalyticsElement(parent1, {}, true);
-      insertAnalyticsElement(parent2, {}, true);
+      const ExtensionAnalytics1 = new ExtensionAnalytics(parent1, true);
+      const ExtensionAnalytics2 = new ExtensionAnalytics(parent2, true);
+      ExtensionAnalytics1.insertAnalyticsElement({});
+      ExtensionAnalytics2.insertAnalyticsElement({});
       const analyticsElement1 = parent1.querySelector('amp-analytics');
       const analyticsElement2 = parent2.querySelector('amp-analytics');
       const handler1 = sandbox.spy();
@@ -211,9 +213,12 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.add(analyticsElement2, 'custom-event', {}, handler2);
       tracker.add(analyticsElement2, 'custom-event', {}, handler3);
       tracker.trigger(new AnalyticsEvent(target, 'custom-event'));
-      tracker.trigger(new AnalyticsEvent(parent1, 'custom-event'));
-      tracker.trigger(new AnalyticsEvent(parent2, 'custom-event'));
       expect(handler).to.be.calledOnce;
+      expect(handler1).to.not.be.called;
+      tracker.trigger(new AnalyticsEvent(analyticsElement1, 'custom-event'));
+      expect(handler1).to.be.calledOnce;
+      expect(handler2).to.not.be.called;
+      tracker.trigger(new AnalyticsEvent(analyticsElement2, 'custom-event'));
       expect(handler1).to.be.calledOnce;
       expect(handler2).to.be.calledOnce;
       expect(handler3).to.be.calledOnce;

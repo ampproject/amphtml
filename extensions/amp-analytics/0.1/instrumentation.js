@@ -191,14 +191,13 @@ export class InstrumentationService {
   /**
    * Triggers the analytics event with the specified type.
    *
-   * @param {?Element} target
    * @param {string} eventType
    * @param {!Object<string, string>=} opt_vars A map of vars and their values.
    */
-  triggerEvent(target, eventType, opt_vars) {
+  triggerEvent(eventType, opt_vars) {
     // TODO(dvoytenko): deprecate/remove in preference of triggerEventForTarget.
-    target = target || this.ampdocRoot_.getRootElement();
-    this.triggerEventForTarget(target, eventType, opt_vars);
+    this.triggerEventForTarget(
+        this.ampdocRoot_.getRootElement(), eventType, opt_vars);
   }
 
   /**
