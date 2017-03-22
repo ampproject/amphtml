@@ -613,6 +613,78 @@ runner.run('Cache SW', () => {
       });
     });
 
+    describe('when a diversion is requested by page', () => {
+      beforeEach(() => {
+        fetch.onCall(1).returns(Promise.resolve(
+          new Response(`["${diversionRtv}","${prevDiversionRtv}"]`)));
+        fetch.onCall(2).returns(Promise.resolve(new Response('02')));
+        fetch.onCall(3).returns(Promise.resolve(new Response('03')));
+      });
+
+      function waitForDiversions() {
+        return sw.fetchJsFile(cache, request, '/v0.js', diversionRtv).then(() => {
+          const setTimeout = sandbox.stub(window, 'setTimeout', callback => {
+            setTimeout.restore();
+            callback();
+          });
+          return sw.diversions(cache).then(() => {
+            return new Promise(resolve => setTimeout(resolve, 10));
+          });
+        });
+      }
+
+      it('fetches new diversions', () => {
+        return waitForDiversions().then(() => {
+          expect(fetch).calledTwice;
+          expect(fetch.getCall(0).args[0].url).to.equal(
+            `https://cdn.ampproject.org/rtv/${diversionRtv}/v0.js`);
+        });
+      });
+
+      it('does not prune production of new script', () => {
+        return waitForDiversions().then(() => {
+          expect(deleter).to.not.have.been.calledWith(cache.cached[4][0]);
+        });
+      });
+
+      it('does not prune production of any other script', () => {
+        return waitForDiversions().then(() => {
+          expect(deleter).to.not.have.been.calledWith(cache.cached[1][0]);
+        });
+      });
+
+      it('prunes old diversions of new script', () => {
+        // Remove prevDiversionRtv from diversions response
+        fetch.onCall(1).returns(Promise.resolve(
+          new Response(`["${diversionRtv}"]`)));
+        return waitForDiversions().then(() => {
+          expect(deleter).to.have.been.calledWith(cache.cached[2][0]);
+        });
+      });
+
+      it('prunes old diversions of any other script', () => {
+        // Remove prevDiversionRtv from diversions response
+        fetch.onCall(1).returns(Promise.resolve(
+          new Response(`["${diversionRtv}"]`)));
+        return waitForDiversions().then(() => {
+          expect(deleter).to.have.been.calledWith(cache.cached[3][0]);
+        });
+      });
+
+      it('does not prune current diversion of new script', () => {
+        // prevDiversionRtv is in diversions response
+        return waitForDiversions().then(() => {
+          expect(deleter).to.not.have.been.calledWith(cache.cached[2][0]);
+        });
+      });
+      it('does not prune current diversion of any other script', () => {
+        // prevDiversionRtv is in diversions response
+        return waitForDiversions().then(() => {
+          expect(deleter).to.not.have.been.calledWith(cache.cached[3][0]);
+        });
+      });
+    });
+
     describe('when response is not ok', () => {
       beforeEach(() => {
         response.ok = false;
