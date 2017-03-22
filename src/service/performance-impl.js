@@ -15,7 +15,7 @@
  */
 
 import {layoutRectLtwh} from '../layout-rect';
-import {fromClass} from '../service';
+import {registerServiceBuilder, getService} from '../service';
 import {resourcesForDoc} from '../resources';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
@@ -378,8 +378,15 @@ export class Performance {
 
 /**
  * @param {!Window} window
- * @return {!Performance}
  */
 export function installPerformanceService(window) {
-  return fromClass(window, 'performance', Performance);
-};
+  registerServiceBuilder(window, 'performance', Performance);
+}
+
+/**
+ * @param {!Window} window
+ * @return {!Performance}
+ */
+export function performanceFor(window) {
+  return getService(window, 'performance');
+}

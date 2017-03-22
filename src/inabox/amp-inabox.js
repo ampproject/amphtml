@@ -22,7 +22,10 @@ import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
 import {startupChunk} from '../chunk';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
-import {installPerformanceService} from '../service/performance-impl';
+import {
+  installPerformanceService,
+  performanceFor,
+} from '../service/performance-impl';
 import {installPullToRefreshBlocker} from '../pull-to-refresh';
 import {installGlobalClickListenerForDoc} from '../document-click';
 import {installStyles, makeBodyVisible} from '../style-installer';
@@ -68,8 +71,9 @@ try {
 startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
+  installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
-  const perf = installPerformanceService(self);
+  const perf = performanceFor(self);
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
