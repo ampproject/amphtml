@@ -214,9 +214,9 @@ For example, the following form has two fields:
 ```
 When the `amp-form-submit` event fires, it generates the following variables containing the values that were specified in the form:
 
-* formId
-* formFields[user_name]
-* formFields[user_password]
+* `formId`
+* `formFields[user_name]`
+* `formFields[user_password]`
 
 ## Success/Error Response Rendering
 `amp-form` allows publishers to render the responses using [Extended Templates](../../spec/amp-html-format.md#extended-templates).
