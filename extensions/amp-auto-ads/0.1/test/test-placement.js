@@ -229,8 +229,7 @@ describes.realWin('placement', {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
             expect(adElement.getAttribute('type')).to.equal('ad-network-type');
-            expect(adElement.getAttribute('layout')).to.equal('responsive');
-            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.getAttribute('data-custom-att-1'))
                 .to.equal('val-1');
@@ -254,7 +253,6 @@ describes.realWin('placement', {
             type: 1,
             attributes: {
               'type': 'ad-network-type2',
-              'layout': 'fixed',
               'data-custom-att-1': 'val-1',
               'data-custom-att-2': 'val-2',
             },
@@ -265,7 +263,6 @@ describes.realWin('placement', {
 
       const baseAttributes = {
         'type': 'ad-network-type',
-        'layout': 'fill',
         'data-custom-att-2': 'val-3',
         'data-custom-att-3': 'val-4',
       };
@@ -275,8 +272,7 @@ describes.realWin('placement', {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
             expect(adElement.getAttribute('type')).to.equal('ad-network-type2');
-            expect(adElement.getAttribute('layout')).to.equal('fixed');
-            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.getAttribute('data-custom-att-1'))
                 .to.equal('val-1');
@@ -318,8 +314,7 @@ describes.realWin('placement', {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
             expect(adElement.getAttribute('type')).to.equal('ad-network-type');
-            expect(adElement.getAttribute('layout')).to.equal('responsive');
-            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('5px');
             expect(adElement.style.marginBottom).to.equal('6px');
@@ -358,8 +353,7 @@ describes.realWin('placement', {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
             expect(adElement.getAttribute('type')).to.equal('ad-network-type');
-            expect(adElement.getAttribute('layout')).to.equal('responsive');
-            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('5px');
             expect(adElement.style.marginBottom).to.equal('');
@@ -398,8 +392,7 @@ describes.realWin('placement', {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
             expect(adElement.getAttribute('type')).to.equal('ad-network-type');
-            expect(adElement.getAttribute('layout')).to.equal('responsive');
-            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('');
             expect(adElement.style.marginBottom).to.equal('6px');
@@ -436,8 +429,7 @@ describes.realWin('placement', {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
             expect(adElement.getAttribute('type')).to.equal('ad-network-type');
-            expect(adElement.getAttribute('layout')).to.equal('responsive');
-            expect(adElement.getAttribute('width')).to.equal('0');
+            expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('');
             expect(adElement.style.marginBottom).to.equal('');
@@ -476,7 +468,7 @@ describes.realWin('placement', {
       return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
-                anchor.firstChild, 100, 320);
+                anchor.firstChild, 100, undefined);
             expect(placementState).to.equal(PlacementState.PLACED);
           });
     });
@@ -511,7 +503,7 @@ describes.realWin('placement', {
       return placements[0].placeAd(attributes, new AdTracker([], 0))
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
-                anchor.firstChild, 100, 320);
+                anchor.firstChild, 100, undefined);
             expect(placementState).to.equal(PlacementState.RESIZE_FAILED);
           });
     });
