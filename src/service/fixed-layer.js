@@ -309,7 +309,11 @@ export class FixedLayer {
           let top = styles.top;
           const currentOffsetTop = element./*OK*/offsetTop;
           const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
-          if ((top == 'auto' || isImplicitAuto) && top != '0px') {
+          if ((top == 'auto' || isImplicitAuto) && top != '0px' ||
+              // This is workaround for http://crbug.com/703816 in Chrome where
+              // `getComputedStyle().top` returns `0px` instead of `auto`.
+              (isSticky && top == '0px' && isImplicitAuto &&
+                  currentOffsetTop != 0)) {
             top = '';
             if (currentOffsetTop == this.committedPaddingTop_) {
               top = '0px';
