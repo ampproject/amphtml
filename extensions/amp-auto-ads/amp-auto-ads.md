@@ -110,6 +110,22 @@ fetched from a 3rd party ad network at the URL defined in
     <td></td>
     <td>The potential places where ads can be inserted on the page.</td>
   </tr>
+  <tr>
+    <td>attributes</td>
+    <td>No</td>
+    <td>Object&lt;string, string&gt;</td>
+    <td>{}</td>
+    <td>
+      A map from attribute name to value for attributes to apply to all
+      <code>&lt;amp-ad&gt;</code> elements injected using this configuration.
+      Only the following attribute names are allowed:
+      <ul>
+        <li>type</li>
+        <li>layout</li>
+        <li>data-* (i.e. any data attribute)</li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
 #### PlacementObj
@@ -153,6 +169,24 @@ fetched from a 3rd party ad network at the URL defined in
     <td>
       Any styling that should be applied to an ad inserted in this placement
       position.
+    </td>
+  </tr>
+  <tr>
+    <td>attributes</td>
+    <td>No</td>
+    <td>Object&lt;string, string&gt;</td>
+    <td>{}</td>
+    <td>
+      A map from attribute name to value for attributes to apply to all
+      <code>&lt;amp-ad&gt;</code> elements injected using this placement. An
+      attribute specified here overrides any with the same name that is also
+      specified on the parent <code>ConfigObj</code>. Only the following
+      attribute names are allowed:
+      <ul>
+        <li>type</li>
+        <li>layout</li>
+        <li>data-* (i.e. any data attribute)</li>
+      </ul>
     </td>
   </tr>
 </table>
