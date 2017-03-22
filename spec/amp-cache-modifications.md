@@ -265,6 +265,7 @@ Remove any `<meta>` tags except for those that:
  - do not have attributes `content`, `itemprop`, `name` and `property`
  - have attribute `http-equiv`
  - have attribute `name` with prefix `amp-`
+ - have attribute `name` with prefix `amp4ads-`
  - have attribute `name` with prefix `dc.`
  - have attribute `name` with prefix `i-amp-` [temporary, will be removed at a future date]
  - have attribute `name` with prefix `i-amphtml-`
