@@ -624,7 +624,7 @@ export function handleFetch(request, maybeClientId) {
       // If not, let's fetch and cache the request.
       return fetchJsFile(cache, versionedRequest, pathname, version);
     });
-  }).catch((err) => {
+  }).catch(err => {
     // Throw error out of band.
     Promise.reject(err);
     throw err;
