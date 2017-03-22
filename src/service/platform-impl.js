@@ -161,7 +161,7 @@ export class Platform {
 
   /**
    * Returns the major ios version in number.
-   * @return (number}
+   * @return {number}
    */
   getIosMajorVersion() {
     const currentIosVersion = this.getIosVersionString();
