@@ -398,7 +398,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
   /** @override */
   observe(element, listener) {
-    this.polyfillAmpElementAsRootIfNeeded_(element);
+    this.polyfillAmpElementIfNeeded_(element);
     this.getIntersectionObserver_().observe(element);
 
     const id = getElementId(element);
@@ -481,7 +481,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @param {!Element} element
    * @private
    */
-  polyfillAmpElementAsRootIfNeeded_(element) {
+  polyfillAmpElementIfNeeded_(element) {
     const win = this.ampdoc.win;
     if (nativeIntersectionObserverSupported(win)) {
       return;
@@ -492,7 +492,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       return;
     }
     element.getLayoutBox = () => {
-      return this.viewport_.getRect();
+      return this.viewport_.getLayoutRect(element);
     };
     element.getOwner = () => null;
   }
