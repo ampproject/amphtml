@@ -329,6 +329,7 @@ OX_bidder_options.callback;
 var OX_bidder_ads;
 var oxRequest;
 oxRequest.addAdUnit;
+oxRequest.addVariable;
 oxRequest.setAdSizes;
 oxRequest.getOrCreateAdUnit;
 var dfpData;
