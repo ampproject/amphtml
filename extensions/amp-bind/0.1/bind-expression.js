@@ -100,7 +100,7 @@ export class BindExpression {
     /** @const @private {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
 
-    const size = numberOfNodesInAst_(this.ast_);
+    const size = this.numberOfNodesInAst_(this.ast_);
     const maxSize = opt_maxAstSize || 100;
     if (size > maxSize) {
       throw new Error(`Expression size (${size}) exceeds max (${maxSize}): ` +
@@ -127,7 +127,9 @@ export class BindExpression {
     let nodes = 1;
     if (ast.args) {
       ast.args.forEach(arg => {
-        nodes += numberOfNodesInAst_(arg);
+        if (arg) {
+          nodes += this.numberOfNodesInAst_(arg);
+        }
       });
     }
     return nodes;
