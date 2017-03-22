@@ -245,6 +245,12 @@ export class GlobalVariableSource extends VariableSource {
         if (!clientIds) {
           clientIds = Object.create(null);
         }
+
+        // A temporary work around to extract Client ID from _ga cookie. #5761
+        if (scope == '_ga') {
+          cid = extractClientIdFromGaCookie(cid);
+        }
+
         clientIds[scope] = cid;
         return cid;
       });
@@ -929,6 +935,15 @@ export class UrlReplacements {
   }
 }
 
+/**
+ * Extracts client ID from a _ga cookie.
+ * https://developers.google.com/analytics/devguides/collection/analyticsjs/cookies-user-id
+ * @param {string} gaCookie
+ * @returns {string}
+ */
+export function extractClientIdFromGaCookie(gaCookie) {
+  return gaCookie.replace(/^(GA1|1)\.[\d-]+\./, '');
+}
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
