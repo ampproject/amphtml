@@ -15,6 +15,7 @@
  */
 
 import {AstNodeType} from './bind-expr-defines';
+import {getMode} from '../../../src/mode';
 import {parser} from './bind-expr-impl';
 import {user} from '../../../src/log';
 
@@ -85,6 +86,13 @@ const FUNCTION_WHITELIST = (function() {
 })();
 
 /**
+ * Default maximum number of nodes in an expression AST.
+ * Double size of a "typical" expression in examples/bind/performance.amp.html.
+ * @const @private {number}
+ */
+const DEFAULT_MAX_AST_SIZE = 50;
+
+/**
  * A single Bind expression.
  */
 export class BindExpression {
@@ -100,9 +108,10 @@ export class BindExpression {
     /** @const @private {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
 
+    // Check if this expression string is too large (for performance).
     const size = this.numberOfNodesInAst_(this.ast_);
-    const maxSize = opt_maxAstSize || 100;
-    if (size > maxSize) {
+    const maxSize = opt_maxAstSize || DEFAULT_MAX_AST_SIZE;
+    if (size > maxSize && !getMode().localDev) {
       throw new Error(`Expression size (${size}) exceeds max (${maxSize}): ` +
           `"${expressionString}"`);
     }
