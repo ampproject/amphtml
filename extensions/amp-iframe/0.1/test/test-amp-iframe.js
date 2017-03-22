@@ -645,4 +645,22 @@ describe('amp-iframe', () => {
       expect(newIntersection.height).to.equal(250);
     });
   });
+
+  it('should propagate `src` when container attribute is mutated', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      width: 100,
+      height: 100,
+    }).then(amp => {
+      const container = amp.container;
+      const impl = container.implementation_;
+      const iframe = amp.iframe;
+
+      const newSrc = 'https://foo.bar';
+      container.setAttribute('src', newSrc);
+      impl.mutatedAttributesCallback({src: newSrc});
+      expect(impl.iframeSrc).to.contain(newSrc);
+      expect(iframe.getAttribute('src')).to.contain(newSrc);
+    });
+  });
 });

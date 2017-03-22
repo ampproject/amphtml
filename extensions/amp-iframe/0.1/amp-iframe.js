@@ -416,6 +416,18 @@ export class AmpIframe extends AMP.BaseElement {
     return super.getPriority();
   }
 
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const src = mutations['src'];
+    if (src !== undefined) {
+      this.iframeSrc = this.transformSrc_(src);
+      if (this.iframe_) {
+        this.iframe_.src = this.assertSource(
+            this.iframeSrc, window.location.href, this.sandbox_);
+      }
+    }
+  }
+
   /**
    * Makes the iframe visible.
    * @private
