@@ -58,7 +58,7 @@ const BASE_RTV_VERSION = self.AMP_CONFIG.v;
  * @const
  * @type {RtvEnvironment}
  */
-const BASE_RTV_ENVIRONMENT = BASE_RTV_VERSION.substr(0, 2);
+const BASE_RTV_ENVIRONMENT = rtvEnvironment(BASE_RTV_VERSION);
 
 /**
  * Our cache of CDN JS files.
@@ -118,7 +118,7 @@ const CDN_JS_REGEX = new RegExp(
     // Require the CDN URL origin at the beginning.
     `^${urls.cdn.replace(/\./g, '\\.')}` +
     // Allow, but don't require, RTV.
-    `(?:/rtv/((\\d{2})\\d{13,}))?` +
+    `(?:/rtv/(\\d{2}\\d{13,}))?` +
     // Require text "/v0"
     `(/v0` +
       // Allow, but don't require, an extension under the v0 directory.
@@ -130,6 +130,7 @@ const CDN_JS_REGEX = new RegExp(
 
 /**
  * Determines if a URL is a request to a CDN JS file.
+ *
  * @param {string} url
  * @return {boolean}
  * @visibleForTesting
@@ -139,10 +140,18 @@ export function isCdnJsFile(url) {
 }
 
 /**
+ * Returns the environment of the RTV.
+ * @param {!RtvVersion} rtv
+ * @return {!RtvEnvironment}
+ */
+function rtvEnvironment(rtv) {
+  return rtv.substr(0, 2);
+}
+
+/**
  * Extracts the data from the request URL.
  * @param {string} url
  * @return {{
- *   environment: !RtvEnvironment,
  *   explicitRtv: !RtvVersion,
  *   pathname: string,
  *   rtv: !RtvVersion,
@@ -154,12 +163,12 @@ export function requestData(url) {
   if (!match) {
     return null;
   }
-  return {
-    environment: match[2] || BASE_RTV_ENVIRONMENT,
+  const data = {
     explicitRtv: match[1] || '',
-    pathname: match[3],
+    pathname: match[2],
     rtv: match[1] || BASE_RTV_VERSION,
   };
+  return data;
 }
 
 /**
@@ -366,16 +375,16 @@ const cachePromise = self.caches.open('cdn-js').then(result => {
 
 /**
  * Fetches the request, and stores it in the cache. Since we only store one
- * version of each file, we'll prune all older versions after we cache this.
+ * version of each file, we'll purge all older versions after we cache this.
  *
  * @param {!Cache} cache
  * @param {!Request} request
- * @param {string} requestPath the pathname of the request
  * @param {!RtvVersion} requestVersion the version of the request
+ * @param {string} requestPath the pathname of the request
  * @return {!Promise<!Response>}
  * @visibleForTesting
  */
-export function fetchJsFile(cache, request, requestPath, requestVersion) {
+export function fetchJsFile(cache, request, requestVersion, requestPath) {
   // TODO(jridgewell): we should also fetch this requestVersion for all files
   // we know about.
   return fetchAndCache(cache, request).then(response => {
@@ -384,9 +393,9 @@ export function fetchJsFile(cache, request, requestPath, requestVersion) {
     // things up.
     diversions(cache).then(diversions => {
       // Prune old versions from the cache.
-      // This also prunes old diversions of other scripts, see purge for
+      // This also purges old diversions of other scripts, see `purge` for
       // detailed information.
-      purge(cache, requestPath, requestVersion, diversions);
+      purge(cache, requestVersion, requestPath, diversions);
 
       if (!diversions) {
         return;
@@ -411,18 +420,17 @@ export function fetchJsFile(cache, request, requestPath, requestVersion) {
 
 /**
  * Purges our cache of old files.
- * - If path and version are given, then we will only delete files that match
- *   path but are not version. I.e., we we clean up old versions of path.
- * - Else, we cleanup any non-production script that's not a current diversion.
  *
  * @param {!Cache} cache
- * @param {string} path
- * @param {string} version
+ * @param {!RtvVersion} version
+ * @param {string} pathname
  * @param {?Array<!RtvVersion>} diversions
  * @return {!Promise<undefined>}
  */
-function purge(cache, path, version, diversions) {
+function purge(cache, version, pathname, diversions) {
   return cache.keys().then(requests => {
+    const downloadedEnv = rtvEnvironment(version);
+
     for (let i = 0; i < requests.length; i++) {
       const request = requests[i];
       const url = request.url;
@@ -431,46 +439,47 @@ function purge(cache, path, version, diversions) {
         continue;
       }
 
-      if (path === cachedData.pathname) {
-        // This is case 1.
-        if (version === cachedData.rtv) {
-          continue;
-        }
-      } else {
-        // This is case 2.
-        if (BASE_RTV_ENVIRONMENT === cachedData.environment) {
-          continue;
-        }
+      // We never delete files that match the version we just downloaded.
+      if (version === cachedData.rtv) {
+        continue;
       }
 
-      if (diversions) {
-        // This is case 3.
-        if (diversions.indexOf(cachedData.rtv) > -1) {
+      const cachedEnv = rtvEnvironment(cachedData.rtv);
+      const cachedIsProd = BASE_RTV_ENVIRONMENT === cachedEnv;
+
+
+      if (cachedIsProd) {
+        // We prune production environments based on the downloaded version.
+        // But, if we downloaded a diversion, we have no information on what
+        // the current production version is. So, don't delete the production
+        // script.
+        if (BASE_RTV_ENVIRONMENT !== downloadedEnv) {
+          continue;
+        }
+
+        // We only purge the old version of the newly downloaded file.
+        // This is because we might request this particular other script later
+        // on in this request, and will purge it then.
+        if (pathname !== cachedData.pathname) {
           continue;
         }
       } else {
-        // This is case 4.
-        if (BASE_RTV_ENVIRONMENT !== cachedData.environment) {
+        // We will only delete a diversion if we know for certain the versions
+        // that are diversions.
+        if (!diversions || diversions.indexOf(cachedData.rtv) > -1) {
           continue;
         }
       }
 
       // At this point, we know the cached file is either:
-      // - An old production env of newly fetched script (falls through case
-      //   1 and 3).
-      // - An old diversion of newly fetched script (falls through case 1 and
-      //   3).
-      // - An old diversion of any other script (falls through case 2 and  3).
+      // - An old production env of the newly downloaded script.
+      // - An old diversion.
       // Importantly, it CANNOT be one of the following:
-      // - The newly fetched version script (case 1)
-      // - Any production env of any other script (case 2)
-      // - A current diversion the newly fetched script (case 3)
-      // - A current diversion of any other script (case 3)
-      // - Any suspected diversion of the newly fetched script (case 4)
-      // - Any suspected diversion of any other script (case 4)
-      //
-      // Note case 2 and 4 guarantee truthiness, so other scripts won't be
-      // deleted unless they're guaranteed old diversions.
+      // - The same version as the newly fetched script (This is the current
+      //   production version or a current diversion).
+      // - Any production version when we downloaded a diversion.
+      // - Any production version of any other script.
+      // - A current diversion, or a suspected diversion.
       cache.delete(request);
     }
   });
@@ -482,15 +491,13 @@ function purge(cache, path, version, diversions) {
  * main binary and the first requested file.
  *
  * @param {!Cache} cache
- * @param {string} requestPath
  * @param {!RtvVersion} requestVersion
- * @param {!RtvEnvironment} requestEnv
+ * @param {string} requestPath
  * @return {!Promise<!RtvVersion>}
  * @visibleForTesting
  */
-export function getCachedVersion(cache, requestPath, requestVersion,
-    requestEnv) {
-
+export function getCachedVersion(cache, requestVersion, requestPath) {
+  const requestEnv = rtvEnvironment(requestVersion);
   // If a request comes in for a version that does not match the SW's
   // environment (eg, a percent diversion when the SW is using the production
   // env), we must serve with the requested version.
@@ -515,12 +522,12 @@ export function getCachedVersion(cache, requestPath, requestVersion,
         continue;
       }
 
-      const {pathname, rtv, environment} = data;
+      const {pathname, rtv} = data;
 
       // We will not stale serve a version that does not match the request's
       // environment. This is so cached percent diversions will not be "stale"
       // served when requesting a production script.
-      if (requestEnv !== environment) {
+      if (requestEnv !== rtvEnvironment(rtv)) {
         continue;
       }
 
@@ -582,7 +589,7 @@ export function handleFetch(request, maybeClientId) {
 
   // Closure Compiler!
   const clientId = /** @type {string} */(maybeClientId);
-  const {pathname, rtv, environment} = data;
+  const {pathname, rtv} = data;
 
   // Rewrite unversioned requests to the versioned RTV URL. This is a noop if
   // it's already versioned.
@@ -598,8 +605,7 @@ export function handleFetch(request, maybeClientId) {
     }
 
     // If not, let's find the version to serve up.
-    return clientsVersion[clientId] = getCachedVersion(cache, pathname, rtv,
-        environment);
+    return clientsVersion[clientId] = getCachedVersion(cache, rtv, pathname);
   }).then(version => {
     const versionedRequest = normalizedRequest(request, version);
 
@@ -610,14 +616,14 @@ export function handleFetch(request, maybeClientId) {
         // they requested this exact version; If we served an old version,
         // let's get the new one.
         if (version !== rtv && rtv == BASE_RTV_VERSION) {
-          fetchJsFile(cache, request, pathname, rtv);
+          fetchJsFile(cache, request, rtv, pathname);
         }
 
         return response;
       }
 
       // If not, let's fetch and cache the request.
-      return fetchJsFile(cache, versionedRequest, pathname, version);
+      return fetchJsFile(cache, versionedRequest, version, pathname);
     });
   });
 }
