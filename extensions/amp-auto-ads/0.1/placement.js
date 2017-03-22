@@ -202,6 +202,7 @@ export class Placement {
     const attributes = Object.assign({
       'layout': 'fixed-height',
       'height': '0',
+      'class': 'i-amphtml-layout-awaiting-size',
     }, baseAttributes, this.attributes_);
     return createElementWithAttributes(
         this.win_.document, 'amp-ad', attributes);
