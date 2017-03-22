@@ -705,31 +705,68 @@ app.get(['/dist/sw.js', '/dist/sw.max.js'], function(req, res, next) {
     var n = new Date();
     // Round down to the nearest 5 minutes.
     n -= ((n.getMinutes() % 5) * 1000 * 60) + (n.getSeconds() * 1000) + n.getMilliseconds();
-    res.setHeader('Content-Type', 'application/javascript');
     file = 'self.AMP_CONFIG = {v: "99' + n + '",' +
         'cdnUrl: "http://localhost:8000/dist"};'
         + file;
+    res.setHeader('Content-Type', 'application/javascript');
+    res.setHeader('Date', new Date().toUTCString());
+    res.setHeader('Cache-Control', 'no-cache;max-age=150');
     res.end(file);
   }).catch(next);
 });
 
-app.get('/dist/rtv/99*/*.js', function(req, res, next) {
-  var filePath = req.path.replace(/\/rtv\/\d{15}/, '');
-  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+app.get('/dist/rtv/9[89]*/*.js', function(req, res, next) {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Date', new Date().toUTCString());
+  res.setHeader('Cache-Control', 'no-cache;max-age=31536000');
+
+  setTimeout(() => {
     // Cause a delay, to show the "stale-while-revalidate"
-    setTimeout(() => {
-      res.setHeader('Content-Type', 'application/javascript');
-      res.end(file);
-    }, 2000);
-  }).catch(next);
+    if (req.path.indexOf('v0.js') > -1) {
+      var path = req.path.replace(/rtv\/\d+/, '');
+      return fs.readFileAsync(process.cwd() + path, 'utf8')
+        .then(file => {
+          res.end(file);
+        }).catch(next);
+    }
+
+    res.end(`
+      var li = document.createElement('li');
+      li.textContent = '${req.path}';
+      loaded.appendChild(li);
+    `);
+  }, 2000);
 });
 
 app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, res, next) {
   var filePath = '/test/manual/cache-sw.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    var n = new Date();
+    // Round down to the nearest 5 minutes.
+    n -= ((n.getMinutes() % 5) * 1000 * 60) + (n.getSeconds() * 1000) + n.getMilliseconds();
+    var percent = parseFloat(req.query.canary) || 0.01;
+    var env = '99';
+    if (Math.random() < percent) {
+      env = '98';
+      n += 5 * 1000 * 60;
+    }
+    file = file.replace(/dist\/v0/g, `dist/rtv/${env}${n}/v0`);
+    file = file.replace(/CURRENT_RTV/, env + n);
+
     res.setHeader('Content-Type', 'text/html');
     res.end(file);
   }).catch(next);
+});
+
+app.get('/dist/diversions', function(req, res, next) {
+  var n = new Date();
+  // Round down to the nearest 5 minutes.
+  n -= ((n.getMinutes() % 5) * 1000 * 60) + (n.getSeconds() * 1000) + n.getMilliseconds();
+  n += 5 * 1000 * 60;
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Date', new Date().toUTCString());
+  res.setHeader('Cache-Control', 'no-cache;max-age=150');
+  res.end(JSON.stringify(["98" + n]));
 });
 /*
  * End Cache SW LOCALDEV section
