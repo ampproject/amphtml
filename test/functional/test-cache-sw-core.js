@@ -404,7 +404,7 @@ runner.run('Cache SW', () => {
         });
       });
 
-      it('returns cached response is expired', () => {
+      it('fetches response if expired', () => {
         response.headers.set('cache-control', 'private, no-cache');
         return sw.fetchAndCache(cache, request).then(() => {
           expect(fetch).to.have.been.called;
@@ -554,12 +554,13 @@ runner.run('Cache SW', () => {
               setTimeout.restore();
               callback();
             });
-            return sw.diversions(cache);
+            return sw.diversions(cache).then(() => {
+              return new Promise(resolve => setTimeout(resolve, 10));
+            });
           });
         }
 
-        // TODO(jridgewell, #8207): Unskip.
-        it.skip('fetches new diversions', () => {
+        it('fetches new diversions', () => {
           return waitForDiversions().then(() => {
             expect(fetch).calledThrice;
             expect(fetch.getCall(2).args[0].url).to.equal(
