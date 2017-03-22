@@ -595,7 +595,7 @@ export function handleFetch(request, maybeClientId) {
 
   // Wait for the cachePromise to resolve. This is necessary
   // since the SW thread may be killed and restarted at any time.
-  return cachePromise.then(() => {
+  return /** @type {!Promise<!Response>} */ (cachePromise.then(() => {
     // If we already registered this client, we must always use the same
     // version.
     if (clientsVersion[clientId]) {
@@ -628,7 +628,7 @@ export function handleFetch(request, maybeClientId) {
     // Throw error out of band.
     Promise.reject(err);
     throw err;
-  });
+  }));
 }
 
 
