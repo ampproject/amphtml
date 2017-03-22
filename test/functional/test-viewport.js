@@ -1113,6 +1113,7 @@ describe('Viewport META', () => {
 describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   let binding;
   let win;
+  let ampdoc;
   let viewer;
 
   beforeEach(() => {
@@ -1128,8 +1129,10 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 
     installPlatformService(win);
     installVsyncService(win);
+    const ampdocService = installDocService(win, /* isSingleDoc */ true);
+    ampdoc = ampdocService.getAmpDoc(win.document);
 
-    binding = new ViewportBindingNatural_(win, viewer);
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
     binding.connect();
   });
 
@@ -1143,7 +1146,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 
   it('should configure make-body-relative', () => {
     toggleExperiment(win, 'make-body-relative', true);
-    binding = new ViewportBindingNatural_(win, viewer);
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
     expect(win.document.body.style.display).to.not.be.ok;
     expect(win.document.body.style.position).to.equal('relative');
     // It's important that this experiment does NOT override the previously
@@ -1274,8 +1277,8 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
     child.style.width = '200px';
     child.style.height = '300px';
     win.document.body.appendChild(child);
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
-    const ampdoc = ampdocService.getAmpDoc();
+    const ampdoc = installDocService(win, /* isSingleDoc */ true).getAmpDoc(
+        win.document);
 
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
