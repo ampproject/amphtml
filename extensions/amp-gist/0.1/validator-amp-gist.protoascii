@@ -33,7 +33,6 @@ tags: {  # <amp-gist>
   attrs: {
     name: "data-gistid"
     mandatory: true
-    blacklisted_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   child_tags: {
