@@ -23,9 +23,7 @@
  */
 
 import './polyfills';
-import {AmpContext} from './ampcontext';
 import {installEmbedStateListener, manageWin} from './environment';
-import {isExperimentOn} from '../src/experiments';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {
   computeInMasterFrame,
@@ -152,11 +150,6 @@ import {yieldone} from '../ads/yieldone';
 import {zedo} from '../ads/zedo';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
-
-
-/** @const {string} */
-const AMP_CONTEXT_EXPERIMENT = '3p-use-ampcontext';
-
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -403,23 +396,57 @@ function isMaster() {
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
-    const location = parseUrl(data._context.location.href);
-
     ensureFramed(window);
-    validateParentOrigin(window, location);
+    window.context.location = parseUrl(data._context.location.href);
+    validateParentOrigin(window, window.context.location);
     validateAllowedTypes(window, data.type, opt_allowed3pTypes);
     if (opt_allowedEmbeddingOrigins) {
       validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
-    installContext(window);
+    // Define master related properties to be lazily read.
+    Object.defineProperties(window.context, {
+      master: {
+        get: () => masterSelection(data.type),
+      },
+      isMaster: {
+        get: isMaster,
+      },
+    });
+    window.context.data = data;
+    window.context.noContentAvailable = triggerNoContentAvailable;
+    window.context.requestResize = triggerResizeRequest;
+    window.context.renderStart = triggerRenderStart;
+
+    if (data.type === 'facebook' || data.type === 'twitter') {
+      // Only make this available to selected embeds until the
+      // generic solution is available.
+      window.context.updateDimensions = triggerDimensions;
+    }
+
+    // This only actually works for ads.
+    const initialIntersection = window.context.initialIntersection;
+    window.context.observeIntersection = cb => {
+      const unlisten = observeIntersection(cb);
+      // Call the callback with the value that was transmitted when the
+      // iframe was drawn. Called in nextTick, so that callers don't
+      // have to specially handle the sync case.
+      nextTick(window, () => cb([initialIntersection]));
+      return unlisten;
+    };
+    window.context.onResizeSuccess = onResizeSuccess;
+    window.context.onResizeDenied = onResizeDenied;
+    window.context.reportRenderedEntityIdentifier =
+        reportRenderedEntityIdentifier;
+    window.context.computeInMasterFrame = computeInMasterFrame;
+    window.context.addContextToIframe = iframe => {
+      iframe.name = iframeName;
+    };
+    window.context.getHtml = getHtml;
     delete data._context;
     manageWin(window);
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
     updateVisibilityState(window);
-
-    // TODO(alanorozco): use IframeMessagingClient for updates when experiment
-    //                   flag is on.
     // Subscribe to page visibility updates.
     nonSensitiveDataPostMessage('send-embed-state');
     nonSensitiveDataPostMessage('bootstrap-loaded');
@@ -431,60 +458,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     }
   }
 };
-
-function installContext(win) {
-  if (isExperimentOn(win, AMP_CONTEXT_EXPERIMENT)) {
-    // TODO(alanorozco): Enhance AmpContext to match standard implementation.
-    win.context = new AmpContext(win);
-    return;
-  }
-
-  installContextUsingStandardImpl(win);
-}
-
-function installContextUsingStandardImpl(win) {
-  // Define master related properties to be lazily read.
-  Object.defineProperties(win.context, {
-    master: {
-      get: () => masterSelection(data.type),
-    },
-    isMaster: {
-      get: isMaster,
-    },
-  });
-
-  win.context.data = data;
-  win.context.location = parseUrl(data._context.location.href);
-  win.context.noContentAvailable = triggerNoContentAvailable;
-  win.context.requestResize = triggerResizeRequest;
-  win.context.renderStart = triggerRenderStart;
-
-  if (data.type === 'facebook' || data.type === 'twitter') {
-    // Only make this available to selected embeds until the
-    // generic solution is available.
-    win.context.updateDimensions = triggerDimensions;
-  }
-
-  // This only actually works for ads.
-  const initialIntersection = win.context.initialIntersection;
-  win.context.observeIntersection = cb => {
-    const unlisten = observeIntersection(cb);
-    // Call the callback with the value that was transmitted when the
-    // iframe was drawn. Called in nextTick, so that callers don't
-    // have to specially handle the sync case.
-    nextTick(win, () => cb([initialIntersection]));
-    return unlisten;
-  };
-  win.context.onResizeSuccess = onResizeSuccess;
-  win.context.onResizeDenied = onResizeDenied;
-  win.context.reportRenderedEntityIdentifier =
-      reportRenderedEntityIdentifier;
-  win.context.computeInMasterFrame = computeInMasterFrame;
-  win.context.addContextToIframe = iframe => {
-    iframe.name = iframeName;
-  };
-  win.context.getHtml = getHtml;
-}
 
 function triggerNoContentAvailable() {
   nonSensitiveDataPostMessage('no-content');

@@ -279,7 +279,6 @@ var forbiddenTerms = {
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
-      'dist.3p/current/integration.js', // includes previous
     ],
   },
   '\\.sendMessageAwaitResponse\\(': {
@@ -320,7 +319,6 @@ var forbiddenTerms = {
       'src/cookies.js',
       'extensions/amp-analytics/0.1/cid-impl.js',
       'testing/fake-dom.js',
-      'dist.3p/current/integration.js',
     ],
   },
   'getCookie\\W': {
@@ -330,7 +328,6 @@ var forbiddenTerms = {
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
-      'dist.3p/current/integration.js',
     ],
   },
   'setCookie\\W': {
@@ -340,7 +337,6 @@ var forbiddenTerms = {
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
-      'dist.3p/current/integration.js',
     ],
   },
   'isTrustedViewer': {
@@ -435,7 +431,6 @@ var forbiddenTerms = {
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
       'src/event-helper-listen.js',
-      'dist.3p/current/integration.js',  // includes previous
     ],
   },
   'setTimeout.*throw': {
