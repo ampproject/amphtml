@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {user} from '../../src/log';
-
 /**
  * Given the amp-ad data attribute containing the multi-size dimensions, and a
  * set of primary dimensions, this function will return all valid multi-size
@@ -63,12 +61,10 @@ export function getMultiSizeDimensions(
           `Invalid ${badDim} of ${badVal} given for secondary size.`)) {
       return;
     }
-
-   /*   
+   /*
 This check renders makes it only possible to do a GCD size for the primary unit. Without the ability to put a creative wrapper on AdX demand we cannot resize the container back down to 300x250.
 By removing this requirement we set the defaut size to 300x250 for AdX support and allow the amp-ad comtainer to resize up to accomadate our direct sold sponsorhip larger ad sizes. The container will only resize downward when BTF so there is no negative effect on user experience that I've seen.
 Perhaps the better way to solve this is to include a new attribute in the amp-ad tag that allows for this option as an override. Thanks Sam smansour@hearst
-
      // Check that secondary size is not larger than primary size.
     if (!validateDimensions(width, height,
           w => w > primaryWidth,
@@ -77,7 +73,6 @@ Perhaps the better way to solve this is to include a new attribute in the amp-ad
          `can't be larger than the primary ${badDim}.`)) {
      return;
    }*/
-
     // Check that if multi-size-validation is on, that the secondary sizes
     // are at least minRatio of the primary size.
     if (multiSizeValidation) {
@@ -94,14 +89,12 @@ Perhaps the better way to solve this is to include a new attribute in the amp-ad
         return;
       }
     }
-
     // Passed all checks! Push additional size to dimensions.
     dimensions.push([width, height]);
   });
 
   return dimensions;
 }
-
 /**
  * A helper function for determining whether a given width or height violates
  * some condition.
