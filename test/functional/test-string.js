@@ -18,7 +18,7 @@ import {
   camelCaseToDash,
   dashToCamelCase,
   expandTemplate,
-  endsWith
+  endsWith,
 } from '../../src/string';
 
 describe('dashToCamelCase', () => {
@@ -115,5 +115,9 @@ describe('camelCaseToDash', () => {
     expect(camelCaseToDash('fooBarBaz')).to.equal('foo-bar-baz');
     // Not really valid camel case
     expect(camelCaseToDash('FooBarBaz')).to.equal('Foo-bar-baz');
+    expect(camelCaseToDash('f00B4rB4z')).to.equal('f00-b4r-b4z');
+    expect(camelCaseToDash('f00b4rb4z')).to.equal('f00b4rb4z');
+    expect(camelCaseToDash('ABC')).to.equal('A-b-c');
+    expect(camelCaseToDash('aBC')).to.equal('a-b-c');
   });
 });
