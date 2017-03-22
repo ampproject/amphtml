@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {installPerformanceService} from '../../src/service/performance-impl';
+import {
+  installPerformanceService,
+  performanceFor,
+} from '../../src/service/performance-impl';
 import {resourcesForDoc} from '../../src/resources';
 import {viewerForDoc} from '../../src/viewer';
 import * as lolex from 'lolex';
@@ -32,7 +35,8 @@ describes.realWin('performance', {amp: true}, env => {
     sandbox = env.sandbox;
     ampdoc = env.ampdoc;
     clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
-    perf = installPerformanceService(win);
+    installPerformanceService(env.win);
+    perf = performanceFor(env.win);
   });
 
   describe('when viewer is not ready', () => {
@@ -590,7 +594,8 @@ describes.realWin('performance with experiment', {amp: true}, env => {
     sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
     sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
     sandbox.stub(viewer, 'isEmbedded').returns(true);
-    perf = installPerformanceService(win);
+    installPerformanceService(win);
+    perf = performanceFor(win);
   });
 
   it('legacy-cdn-domain experiment enabled', () => {
