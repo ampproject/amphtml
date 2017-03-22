@@ -16,7 +16,7 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
-import {fromClassForDoc, getExistingServiceForDoc} from './service';
+import {registerServiceBuilderForDoc, getServiceForDoc} from './service';
 import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
 
@@ -36,6 +36,16 @@ let deactivated = /nochunking=1/.test(self.location.hash);
 const resolved = Promise.resolve();
 
 /**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @return {!Chunks}
+ * @private
+ */
+function getChunkServiceForDoc_(nodeOrAmpDoc) {
+  registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
+}
+
+/**
  * Run the given function. For visible documents the function will be
  * called in a micro task (Essentially ASAP). If the document is
  * not visible, tasks will yield to the event loop (to give the browser
@@ -50,7 +60,7 @@ export function startupChunk(nodeOrAmpDoc, fn) {
     resolved.then(fn);
     return;
   }
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   service.runForStartup_(fn);
 }
 
@@ -73,7 +83,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
     resolved.then(fn);
     return;
   }
-  const service = getExistingServiceForDoc(nodeOrAmpDoc, 'chunk');
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   service.run(fn, priority);
 }
 
@@ -82,7 +92,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
  * @return {!Chunks}
  */
 export function chunkInstanceForTesting(nodeOrAmpDoc) {
-  return fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  return getChunkServiceForDoc_(nodeOrAmpDoc);
 }
 
 /**
@@ -106,7 +116,7 @@ export function activateChunkingForTesting() {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  */
 export function runChunksForTesting(nodeOrAmpDoc) {
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = chunkInstanceForTesting(nodeOrAmpDoc);
   const errors = [];
   while (true) {
     try {
