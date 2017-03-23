@@ -18,7 +18,7 @@ import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {actionServiceForDoc} from '../../../src/action';
 import {bezierCurve} from '../../../src/curve';
-import {customEvent} from '../../../src/utils/event';
+import {createCustomEvent} from '../../../src/utils/event';
 import {dev, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
@@ -569,7 +569,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     const name = 'slideChange';
     const event =
-        customEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+        createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
     this.action_.trigger(this.element, name, event);
   }
 

@@ -21,7 +21,7 @@
  * @param {Object} detail
  * @return {!Event}
  */
-export function customEvent(win, type, detail) {
+export function createCustomEvent(win, type, detail) {
   if (win.CustomEvent) {
     return new win.CustomEvent(type, {detail});
   } else {

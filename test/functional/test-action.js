@@ -21,7 +21,7 @@ import {
   parseActionMap,
 } from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {customEvent} from '../../src/utils/event';
+import {createCustomEvent} from '../../src/utils/event';
 import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
 
@@ -356,13 +356,13 @@ describe('ActionService parseAction', () => {
 
   it('should apply arg value functions with an event with data', () => {
     const a = parseAction('e:t.m(key1=event.foo)');
-    const event = customEvent(window, 'MyEvent', {foo: 'bar'});
+    const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
     expect(applyActionInfoArgs(a.args, event)).to.deep.equal({key1: 'bar'});
   });
 
   it('should apply arg value functions with an event without data', () => {
     const a = parseAction('e:t.m(key1=foo)');
-    const event = customEvent(window, 'MyEvent');
+    const event = createCustomEvent(window, 'MyEvent');
     expect(applyActionInfoArgs(a.args, event)).to.deep.equal({key1: 'foo'});
   });
 

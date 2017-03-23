@@ -16,7 +16,7 @@
 
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {customEvent} from '../../../src/utils/event';
+import {createCustomEvent} from '../../../src/utils/event';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {getService} from '../../../src/service';
 import {
@@ -455,7 +455,8 @@ export class AmpForm {
    */
   triggerAction_(success, json) {
     const name = success ? FormState_.SUBMIT_SUCCESS : FormState_.SUBMIT_ERROR;
-    const event = customEvent(this.win_, `${TAG}.${name}`, {response: json});
+    const event =
+        createCustomEvent(this.win_, `${TAG}.${name}`, {response: json});
     this.actions_.trigger(this.form_, name, event);
   }
 
