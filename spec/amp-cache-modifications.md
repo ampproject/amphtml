@@ -264,20 +264,20 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 Remove any `<meta>` tags except for those that:
  - do not have attributes `content`, `itemprop`, `name` and `property`
  - have attribute `http-equiv`
- - have attribute `name` with prefix `amp-`
- - have attribute `name` with prefix `amp4ads-`
- - have attribute `name` with prefix `dc.`
- - have attribute `name` with prefix `i-amp-` [temporary, will be removed at a future date]
- - have attribute `name` with prefix `i-amphtml-`
- - have attribute `name` with prefix `twitter:`
+ - have attribute `name` with case-insensitive prefix `amp-`
+ - have attribute `name` with case-insensitive prefix `amp4ads-`
+ - have attribute `name` with case-insensitive prefix `dc.`
+ - have attribute `name` with case-insensitive prefix `i-amp-` [temporary, will be removed at a future date]
+ - have attribute `name` with case-insensitive prefix `i-amphtml-`
+ - have attribute `name` with case-insensitive prefix `twitter:`
  - have attribute `name=apple-itunes-app`
  - have attribute `name=copyright`
  - have attribute `name=referrer` [note: this may be inserted by AMP Cache]
  - have attribute `name=robots` [note: this is inserted by AMP Cache]
  - have attribute `name=viewport`
- - have attribute `property` with prefix "al:"
- - have attribute `property` with prefix "fb:"
- - have attribute `property` with prefix "og:"
+ - have attribute `property` with case-insensitive prefix "al:"
+ - have attribute `property` with case-insensitive prefix "fb:"
+ - have attribute `property` with case-insensitive prefix "og:"
 
 <details>
 <summary>example</summary>
