@@ -1049,6 +1049,7 @@ export class Resources {
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
+        let topUnchangedBoundary = box.top;
         let bottomDisplacedBoundary = box.bottom;
         let newMargins = undefined;
         if (request.marginChange) {
@@ -1059,6 +1060,9 @@ export class Resources {
           }
           if (newMargins.bottom != undefined) {
             bottomMarginDiff = newMargins.bottom - margins.bottom;
+          }
+          if (topMarginDiff) {
+            topUnchangedBoundary = box.top - margins.top;
           }
           if (bottomMarginDiff) {
             // The lowest boundary of the element that would appear to be
@@ -1082,8 +1086,9 @@ export class Resources {
           // 3. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
-        } else if (topMarginDiff == 0 && box.bottom + Math.min(heightDiff, 0) >=
-              viewportRect.bottom - bottomOffset) {
+        } else if (topUnchangedBoundary >= viewportRect.bottom - bottomOffset ||
+            (topMarginDiff == 0 && box.bottom + Math.min(heightDiff, 0) >=
+             viewportRect.bottom - bottomOffset)) {
           // 4. Elements under viewport are resized immediately, but only if
           // an element's boundary is not changed above the viewport after
           // resize.
