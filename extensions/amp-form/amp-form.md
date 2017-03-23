@@ -205,7 +205,7 @@ The `amp-form-submit` event fires when a form request is initiated. The `amp-for
 
 For example, the following form has two fields:
 
-```
+```html
 <form action-xhr="/register" method="POST" id="registration_form">
   <input type="text" name="user_name" />
   <input type="password" name="user_password" />
