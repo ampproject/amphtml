@@ -46,3 +46,10 @@ amp-ad iframe {
   font-family: Arial, sans-serif;
   padding: 2px 4px;
 }
+
+amp-ad[type=adsense] > iframe {
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%);
+}
+

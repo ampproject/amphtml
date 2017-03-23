@@ -234,12 +234,14 @@ class AmpYoutube extends AMP.BaseElement {
    * */
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
-      const message = JSON.stringify({
-        'event': 'command',
-        'func': command,
-        'args': opt_args || '',
-      });
-      this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        const message = JSON.stringify({
+          'event': 'command',
+          'func': command,
+          'args': opt_args || '',
+        });
+        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+      }
     });
   }
 

@@ -347,16 +347,21 @@ function liveListTombstone(liveList) {
   }
 }
 
+
+// Generate a random number between min and max
+// Value is inclusive of both min and max values.
+function range(min, max) {
+  var values = Array.apply(null, Array(max - min + 1)).map((_, i) => min + i);
+  return values[Math.round(Math.random() * (max - min))]
+}
+
+// Returns the result of a coin flip, true or false
+function flip() {
+  return !!Math.floor(Math.random() * 2);
+}
+
 function getLiveBlogItem() {
   var now = Date.now();
-  // Value is inclusive of both min and max values.
-  function range(min, max) {
-    var values = Array.apply(null, Array(max - min + 1)).map((_, i) => min + i);
-    return values[Math.round(Math.random() * (max - min))]
-  }
-  function flip() {
-    return !!Math.floor(Math.random() * 2);
-  }
   // Generate a 3 to 7 worded headline
   var headline = bacon(range(3, 7));
   var numOfParagraphs = range(1, 2);
@@ -404,11 +409,44 @@ function getLiveBlogItem() {
     </amp-live-list></body></html>`;
 }
 
+function getLiveBlogItemWithBindAttributes() {
+  var now = Date.now();
+  // Generate a 3 to 7 worded headline
+  var headline = bacon(range(3, 7));
+  var numOfParagraphs = range(1, 2);
+  var body = Array.apply(null, Array(numOfParagraphs)).map(x => {
+    return `<p>${bacon(range(50, 90))}</p>`;
+  }).join('\n');
+
+  return `<!doctype html>
+    <html amp><body>
+    <amp-live-list id="live-blog-1">
+    <div items>
+      <div id="live-blog-item-${now}" data-sort-time="${now}">
+        <div class="article-body">
+          ${body}
+          <p> As you can see, bacon is far superior to <b><span [text]='favoriteFood'>everything!</span></b>!</p>
+        </div>
+      </div>
+    </div>
+    </amp-live-list></body></html>`;
+}
+
 app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
   function(req, res, next) {
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
       res.end(getLiveBlogItem());
+      return;
+    }
+    next();
+});
+
+app.use('/examples/bind/live-list.amp.(min.|max.)?html',
+  function(req, res, next) {
+    if ('amp_latest_update_time' in req.query) {
+      res.setHeader('Content-Type', 'text/html');
+      res.end(getLiveBlogItemWithBindAttributes());
       return;
     }
     next();
@@ -513,16 +551,38 @@ app.use('/a4a(|-3p)/', function(req, res) {
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
   }
-  const inaboxParam = 'inabox=1';
-  if (adUrl.indexOf('?') == -1) {
-    adUrl += '?' + inaboxParam;
-  } else {
-    adUrl += '&' + inaboxParam;
-  }
+  adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/FORCE3P/g, force3p)
+        .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_URL/g, adUrl)
+        .replace(/AD_WIDTH/g, req.query.width || '300')
+        .replace(/AD_HEIGHT/g, req.query.height || '250');
+    res.end(result);
+  });
+});
+
+// In-a-box envelope.
+// Examples:
+// http://localhost:8000/inabox/examples/animations.amp.max.html
+// http://localhost:8000/inabox/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+// http://localhost:8000/inabox/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+app.use('/inabox/', function(req, res) {
+  var adUrl = req.url;
+  var templatePath = '/build-system/server-inabox-template.html';
+  var urlPrefix = getUrlPrefix(req);
+  if (!adUrl.startsWith('/m') &&  // Ignore /min and /max
+      urlPrefix.indexOf('//localhost') != -1) {
+    // This is a special case for testing. `localhost` URLs are transformed to
+    // `ads.localhost` to ensure that the iframe is fully x-origin.
+    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
+  }
+  adUrl = addQueryParam(adUrl, 'inabox', 1);
+  fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
+    var result = template
+        .replace(/AD_URL/g, adUrl)
+        .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_WIDTH/g, req.query.width || '300')
         .replace(/AD_HEIGHT/g, req.query.height || '250');
     res.end(result);
@@ -645,31 +705,68 @@ app.get(['/dist/sw.js', '/dist/sw.max.js'], function(req, res, next) {
     var n = new Date();
     // Round down to the nearest 5 minutes.
     n -= ((n.getMinutes() % 5) * 1000 * 60) + (n.getSeconds() * 1000) + n.getMilliseconds();
-    res.setHeader('Content-Type', 'application/javascript');
     file = 'self.AMP_CONFIG = {v: "99' + n + '",' +
         'cdnUrl: "http://localhost:8000/dist"};'
         + file;
+    res.setHeader('Content-Type', 'application/javascript');
+    res.setHeader('Date', new Date().toUTCString());
+    res.setHeader('Cache-Control', 'no-cache;max-age=150');
     res.end(file);
   }).catch(next);
 });
 
-app.get('/dist/rtv/99*/*.js', function(req, res, next) {
-  var filePath = req.path.replace(/\/rtv\/\d{15}/, '');
-  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+app.get('/dist/rtv/9[89]*/*.js', function(req, res, next) {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Date', new Date().toUTCString());
+  res.setHeader('Cache-Control', 'no-cache;max-age=31536000');
+
+  setTimeout(() => {
     // Cause a delay, to show the "stale-while-revalidate"
-    setTimeout(() => {
-      res.setHeader('Content-Type', 'application/javascript');
-      res.end(file);
-    }, 2000);
-  }).catch(next);
+    if (req.path.indexOf('v0.js') > -1) {
+      var path = req.path.replace(/rtv\/\d+/, '');
+      return fs.readFileAsync(process.cwd() + path, 'utf8')
+        .then(file => {
+          res.end(file);
+        }).catch(next);
+    }
+
+    res.end(`
+      var li = document.createElement('li');
+      li.textContent = '${req.path}';
+      loaded.appendChild(li);
+    `);
+  }, 2000);
 });
 
 app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, res, next) {
   var filePath = '/test/manual/cache-sw.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    var n = new Date();
+    // Round down to the nearest 5 minutes.
+    n -= ((n.getMinutes() % 5) * 1000 * 60) + (n.getSeconds() * 1000) + n.getMilliseconds();
+    var percent = parseFloat(req.query.canary) || 0.01;
+    var env = '99';
+    if (Math.random() < percent) {
+      env = '98';
+      n += 5 * 1000 * 60;
+    }
+    file = file.replace(/dist\/v0/g, `dist/rtv/${env}${n}/v0`);
+    file = file.replace(/CURRENT_RTV/, env + n);
+
     res.setHeader('Content-Type', 'text/html');
     res.end(file);
   }).catch(next);
+});
+
+app.get('/dist/diversions', function(req, res, next) {
+  var n = new Date();
+  // Round down to the nearest 5 minutes.
+  n -= ((n.getMinutes() % 5) * 1000 * 60) + (n.getSeconds() * 1000) + n.getMilliseconds();
+  n += 5 * 1000 * 60;
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Date', new Date().toUTCString());
+  res.setHeader('Cache-Control', 'no-cache;max-age=150');
+  res.end(JSON.stringify(["98" + n]));
 });
 /*
  * End Cache SW LOCALDEV section
@@ -761,8 +858,25 @@ function getPathMode(path) {
   }
 }
 
-exports.app = app;
-
 function getUrlPrefix(req) {
   return req.protocol + '://' + req.headers.host;
 }
+
+/**
+ * @param {string} url
+ * @param {string} param
+ * @param {*} value
+ * @return {string}
+ */
+function addQueryParam(url, param, value) {
+  const paramValue =
+      encodeURIComponent(param) + '=' + encodeURIComponent(value);
+  if (url.indexOf('?') == -1) {
+    url += '?' + paramValue;
+  } else {
+    url += '&' + paramValue;
+  }
+  return url;
+}
+
+exports.app = app;

@@ -149,10 +149,10 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 
 | before | after |
 | --- | --- |
-| `<amp-img src=https://example.com/foo.png></amp-img>` | `<amp-img src=/i/s/foo.png></amp-img>` |
-| `<amp-img srcset="https://example.com/bar.png 1080w, https://example.com/bar-400.png 400w">`| `<amp-img src="/i/s/bar.png 1080w, /i/s/bar-400.png 400w">` |
-| `<amp-anim src=foo.gif></amp-anim>` | `<amp-anim src=/i/s/foo.gif></amp-anim>` |
-| `<amp-video poster=bar.png>` | `<amp-video poster=/i/s/bar.png>` |
+| `<amp-img src=https://example.com/foo.png></amp-img>` | `<amp-img src=/i/s/example.com/foo.png></amp-img>` |
+| `<amp-img srcset="https://example.com/bar.png 1080w, https://example.com/bar-400.png 400w">`| `<amp-img src="/i/s/example.com/bar.png 1080w, /i/s/example.com/bar-400.png 400w">` |
+| `<amp-anim src=foo.gif></amp-anim>` | `<amp-anim src=/i/s/example.com/foo.gif></amp-anim>` |
+| `<amp-video poster=bar.png>` | `<amp-video poster=/i/s/example.com/bar.png>` |
 
 </details>
 
@@ -265,6 +265,7 @@ Remove any `<meta>` tags except for those that:
  - do not have attributes `content`, `itemprop`, `name` and `property`
  - have attribute `http-equiv`
  - have attribute `name` with prefix `amp-`
+ - have attribute `name` with prefix `amp4ads-`
  - have attribute `name` with prefix `dc.`
  - have attribute `name` with prefix `i-amp-` [temporary, will be removed at a future date]
  - have attribute `name` with prefix `i-amphtml-`
