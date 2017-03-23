@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {listen} from '../src/event-helper';
 import {map} from '../src/utils/object';
-import {serializeMessage, deserializeMessage} from '../src/3p-frame';
+import {
+  listen,
+  serializeMessage,
+  deserializeMessage,
+} from '../src/3p-frame-messaging';
 import {getMode} from '../src/mode';
 import {dev} from '../src/log';
 

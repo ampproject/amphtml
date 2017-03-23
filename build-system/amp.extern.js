@@ -47,6 +47,8 @@ window.AMP_CONFIG.thirdPartyFrameRegex;
 window.AMP_CONFIG.cdnUrl;
 window.AMP_CONFIG.errorReportingUrl;
 
+window.AMP_CONTEXT_DATA;
+
 // amp-viz-vega related externs.
 /**
  * @typedef {{spec: function(!JSONType, function())}}

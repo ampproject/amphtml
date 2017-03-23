@@ -22,9 +22,11 @@ import {
   preloadBootstrap,
   resetCountForTesting,
   resetBootstrapBaseUrlForTesting,
+} from '../../src/3p-frame';
+import {
   serializeMessage,
   deserializeMessage,
-} from '../../src/3p-frame';
+} from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
 import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';

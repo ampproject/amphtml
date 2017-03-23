@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {deserializeMessage, isAmpMessage} from './3p-frame';
+import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
 import {filterSplice} from './utils/array';
 import {parseUrl} from './url';

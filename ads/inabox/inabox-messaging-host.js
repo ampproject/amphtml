@@ -19,7 +19,7 @@ import {
   serializeMessage,
   deserializeMessage,
   MessageType,
-} from '../../src/3p-frame';
+} from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
 
 /** @const */
