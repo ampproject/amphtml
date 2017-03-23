@@ -1160,6 +1160,8 @@ tags: {
   # major browsers.
   attrs: { name: "border" }
   attrs: { name: "name" }
+  # <amp-bind>
+  attrs: { name: "[href]" }
   spec_url: "https://www.ampproject.org/docs/reference/spec#links"
 }
 # 4.5.2 The em element
@@ -1464,6 +1466,9 @@ tags: {
   }
   attrs: { name: "media" }
   attrs: { name: "type" }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  attrs: { name: "[type]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
 }
 tags: {
@@ -1480,6 +1485,9 @@ tags: {
   }
   attrs: { name: "media" }
   attrs: { name: "type" }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  attrs: { name: "[type]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
 }
 tags: {
@@ -1599,24 +1607,40 @@ tags: {
   spec_name: "amp-audio > track"
   mandatory_parent: "AMP-AUDIO"
   attr_lists: "track-attrs-no-subtitles"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
 }
 tags: {
   tag_name: "TRACK"
   spec_name: "amp-audio > track[kind=subtitles]"
   mandatory_parent: "AMP-AUDIO"
   attr_lists: "track-attrs-subtitles"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
 }
 tags: {
   tag_name: "TRACK"
   spec_name: "amp-video > track"
   mandatory_parent: "AMP-VIDEO"
   attr_lists: "track-attrs-no-subtitles"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
 }
 tags: {
   tag_name: "TRACK"
   spec_name: "amp-video > track[kind=subtitles]"
   mandatory_parent: "AMP-VIDEO"
   attr_lists: "track-attrs-subtitles"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
 }
 
 # 4.7.15 SVG
@@ -2663,6 +2687,30 @@ tags: {
   }
   attrs: { name: "value" }
   attrs: { name: "width" }
+  # <amp-bind>
+  attrs: { name: "[accept]" }
+  attrs: { name: "[accesskey]" }
+  attrs: { name: "[autocomplete]" }
+  attrs: { name: "[checked]" }
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[height]" }
+  attrs: { name: "[inputmode]" }
+  attrs: { name: "[max]" }
+  attrs: { name: "[maxlength]" }
+  attrs: { name: "[min]" }
+  attrs: { name: "[minlength]" }
+  attrs: { name: "[multiple]" }
+  attrs: { name: "[pattern]" }
+  attrs: { name: "[placeholder]" }
+  attrs: { name: "[readonly]" }
+  attrs: { name: "[required]" }
+  attrs: { name: "[selectiondirection]" }
+  attrs: { name: "[size]" }
+  attrs: { name: "[spellcheck]" }
+  attrs: { name: "[step]" }
+  attrs: { name: "[type]" }
+  attrs: { name: "[value]" }
+  attrs: { name: "[width]" }
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
@@ -2683,6 +2731,10 @@ tags: {
   }
   attrs: { name: "type" }
   attrs: { name: "value" }
+  # <amp-bind>
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[type]" }
+  attrs: { name: "[value]" }
   attr_lists: "input-name-attr"
 }
 # Button variant specifically supporting <amp-app-banner> tag with the
@@ -2716,6 +2768,12 @@ tags: {
   attrs: { name: "multiple" }
   attrs: { name: "required" }
   attrs: { name: "size" }
+  # <amp-bind>
+  attrs: { name: "[autofocus]" }
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[multiple]" }
+  attrs: { name: "[required]" }
+  attrs: { name: "[size]" }
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
@@ -2730,6 +2788,9 @@ tags: {
   mandatory_parent: "SELECT"
   attrs: { name: "disabled" }
   attrs: { name: "label" }
+  # <amp-bind>
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[label]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.10 The option element
@@ -2739,6 +2800,11 @@ tags: {
   attrs: { name: "label" }
   attrs: { name: "selected" }
   attrs: { name: "value" }
+  # <amp-bind>
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[label]" }
+  attrs: { name: "[selected]" }
+  attrs: { name: "[value]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.11 The textarea element
@@ -2758,7 +2824,23 @@ tags: {
   attrs: { name: "selectionend" }
   attrs: { name: "selectionstart" }
   attrs: { name: "spellcheck" }
-  attrs: { name: "wrap"}
+  attrs: { name: "wrap" }
+  # <amp-bind>
+  attrs: { name: "[autocomplete]" }
+  attrs: { name: "[autofocus]" }
+  attrs: { name: "[cols]" }
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[maxlength]" }
+  attrs: { name: "[minlength]" }
+  attrs: { name: "[placeholder]" }
+  attrs: { name: "[readonly]" }
+  attrs: { name: "[required]" }
+  attrs: { name: "[rows]" }
+  attrs: { name: "[selectiondirection]" }
+  attrs: { name: "[selectionend]" }
+  attrs: { name: "[selectionstart]" }
+  attrs: { name: "[spellcheck]" }
+  attrs: { name: "[wrap]" }
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
@@ -2789,6 +2871,8 @@ tags: {
 tags: {
   tag_name: "FIELDSET"
   attrs: { name: "disabled" }
+  # <amp-bind>
+  attrs: { name: "[disabled]" }
   attr_lists: "input-name-attr"
 }
 # 4.10.17 The legend element
@@ -2999,6 +3083,11 @@ tags: {  # <amp-img>
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
+  # <amp-bind>
+  attrs: { name: "[alt]" }
+  attrs: { name: "[attribution]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srcset]" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
   spec_url: "https://www.ampproject.org/docs/reference/amp-img"
@@ -3045,6 +3134,9 @@ attr_lists: {
   attrs: { name: "layout" }
   attrs: { name: "sizes" }
   attrs: { name: "width" }
+  # <amp-bind>
+  attrs: { name: "[height]" }
+  attrs: { name: "[width]" }
 }
 
 # AMP Extension attributes. These attributes are used in every AMP
@@ -3311,6 +3403,9 @@ attr_lists: {
       also_requires_attr: "validation-for"
     }
   }
+  # <amp-bind>
+  attrs: { name: "[class]" }
+  attrs: { name: "[text]" }
 }
 
 # Error Specificity: Used in the verbose validator to select between multiple
