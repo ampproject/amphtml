@@ -23,12 +23,12 @@
  */
 export function customEvent(win, type, detail) {
   if (win.CustomEvent) {
-    return new win.CustomEvent(`slidescroll.${name}`, {detail});
+    return new win.CustomEvent(type, {detail});
   } else {
     // Deprecated fallback for IE.
     const e = win.document.createEvent('CustomEvent');
     e.initCustomEvent(
-        type, /* canBubble */ true, /* cancelable */ true, detail);
+        type, /* canBubble */ false, /* cancelable */ false, detail);
     return e;
   }
 }
