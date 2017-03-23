@@ -16,7 +16,7 @@
 
 
 /**
- * @typedef {{
+ * @typedef {
  *   clientX: number,
  *   clientY: number,
  *   force: number,
@@ -27,12 +27,12 @@
  *   radiusY: number,
  *   screenX: number,
  *   screenY: number,
- * }}
+ * }
  */
 let TouchData;
 
 /**
- * @typedef {{
+ * @typedef {
  *   type: string,
  *   touches: Array.<TouchData>,
  *   changedTouches: Array.<TouchData>,
@@ -45,7 +45,7 @@ let TouchData;
  *   shiftKey: boolean,
  *   timeStamp: number,
  *   which: number,
- * }}
+ * }
  */
 let EventData;
 
