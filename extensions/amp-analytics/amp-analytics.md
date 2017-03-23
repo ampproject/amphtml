@@ -189,7 +189,7 @@ The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that
 
 The `triggers` configuration object describes when an analytics request should be sent. The `triggers` attribute contains a key-value pair of trigger-name and  trigger-configuration. A trigger-name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a  configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
 
-  - `on` (required) The event to listener for. Valid values are `click`, `scroll`, `timer`, `visible`, and `hidden`.
+  - `on` (required) The event to listener for. Valid values are `ini-load`, `visible`, `click`, `scroll`, `timer`, and `hidden`.
   - `request` (required) Name of the request to send (as specified in the `requests` section).
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify vars unique to this trigger.
   - `selector` (required when `on` is set to `click`) This configuration is used on conjunction with the `click` trigger. Please see below for details.
