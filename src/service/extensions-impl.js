@@ -85,6 +85,9 @@ let ExtensionDef;
  */
 let ExtensionHolderDef;
 
+// The version used when none is specified.
+const DefaultExtensionVersion = '0.1';
+
 
 /**
  * Install extensions service.
@@ -250,15 +253,19 @@ export class Extensions {
    * Returns the promise that will be resolved when the extension has been
    * loaded. If necessary, adds the extension script to the page.
    * @param {string} extensionId
+   * @param {?string=} extensionVer
    * @param {boolean=} stubElement
    * @return {!Promise<!ExtensionDef>}
    */
-  loadExtension(extensionId, stubElement = true) {
+  loadExtension(extensionId,
+      extensionVer = DefaultExtensionVersion, stubElement = true) {
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
     const holder = this.getExtensionHolder_(extensionId);
-    this.insertExtensionScriptIfNeeded_(extensionId, holder, stubElement);
+    extensionVer = extensionVer ? extensionVer : DefaultExtensionVersion;
+    this.insertExtensionScriptIfNeeded_(
+        extensionId, extensionVer, holder, stubElement);
     return this.waitFor_(holder);
   }
 
@@ -526,13 +533,16 @@ export class Extensions {
   /**
    * Ensures that the script has already been injected in the page.
    * @param {string} extensionId
+   * @param {string} extensionVer
    * @param {!ExtensionHolderDef} holder
    * @param {boolean} stubElement
    * @private
    */
-  insertExtensionScriptIfNeeded_(extensionId, holder, stubElement) {
+  insertExtensionScriptIfNeeded_(extensionId, extensionVer, holder,
+      stubElement) {
     if (this.isExtensionScriptRequired_(extensionId, holder)) {
-      const scriptElement = this.createExtensionScript_(extensionId);
+      const scriptElement = this.createExtensionScript_(extensionId,
+          extensionVer);
       this.win.document.head.appendChild(scriptElement);
       holder.scriptPresent = true;
       if (stubElement) {
@@ -563,10 +573,11 @@ export class Extensions {
   /**
    * Create the missing amp extension HTML script element.
    * @param {string} extensionId
+   * @param {string} extensionVer
    * @return {!Element} Script object
    * @private
    */
-  createExtensionScript_(extensionId) {
+  createExtensionScript_(extensionId, extensionVer) {
     const scriptElement = this.win.document.createElement('script');
     scriptElement.async = true;
     scriptElement.setAttribute('custom-element', extensionId);
@@ -577,7 +588,7 @@ export class Extensions {
       loc = this.win.testLocation;
     }
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
-        getMode().localDev);
+        extensionVer, getMode().localDev);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }

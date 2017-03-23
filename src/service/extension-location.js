@@ -34,12 +34,15 @@ function calculateScriptBaseUrl(location, isLocalDev) {
  * Calculate script url for an extension.
  * @param {!Location} location The window's location
  * @param {string} extensionId
+ * @param {string} extensionVer
  * @param {boolean=} isLocalDev
  * @return {string}
  */
-export function calculateExtensionScriptUrl(location, extensionId, isLocalDev) {
+export function calculateExtensionScriptUrl(location, extensionId,
+    extensionVer, isLocalDev) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
-  return `${base}/rtv/${getMode().rtvVersion}/v0/${extensionId}-0.1.js`;
+  return `${base}/rtv/${getMode().rtvVersion}/v0/`
+      + `${extensionId}-${extensionVer}.js`;
 }
 
 /**

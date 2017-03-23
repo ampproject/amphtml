@@ -115,7 +115,7 @@ export let AdResponseDef;
 
 /** @typedef {{
       minifiedCreative: string,
-      customElementExtensions: !Array<string>,
+      extensions: !Array<string>,
       customStylesheets: !Array<{href: string}>
     }} */
 let CreativeMetaDataDef;
@@ -729,8 +729,17 @@ export class AmpA4A extends AMP.BaseElement {
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
           const extensions = extensionsFor(this.win);
-          creativeMetaDataDef.customElementExtensions.forEach(
-              extensionId => extensions.loadExtension(extensionId));
+          creativeMetaDataDef.extensions.forEach(
+            extension => {
+              const extensionId = extension['custom-element'];
+              const extensionSrc = extension['src'];
+              const versionStartIndex = extensionSrc.indexOf(extensionId) +
+                  extensionId.length + 1;
+              const versionEndIndex = extensionSrc.length - 3;
+              const extensionVer = extensionSrc.substring(
+                  versionStartIndex, versionEndIndex);
+              extensions.loadExtension(extensionId, extensionVer)
+            });
           return creativeMetaDataDef;
         })
         .catch(error => {
@@ -1494,15 +1503,14 @@ export class AmpA4A extends AMP.BaseElement {
         throw new Error('Invalid runtime offsets');
       }
       const metaData = {};
-      if (metaDataObj['customElementExtensions']) {
-        metaData.customElementExtensions =
-          metaDataObj['customElementExtensions'];
-        if (!isArray(metaData.customElementExtensions)) {
+      if (metaDataObj['extensions']) {
+        metaData.extensions = metaDataObj['extensions'];
+        if (!isArray(metaData.extensions)) {
           throw new Error(
-              'Invalid extensions', metaData.customElementExtensions);
+              'Invalid extensions', metaData.extensions);
         }
       } else {
-        metaData.customElementExtensions = [];
+        metaData.extensions = [];
       }
       if (metaDataObj['customStylesheets']) {
         // Expect array of objects with at least one key being 'href' whose
