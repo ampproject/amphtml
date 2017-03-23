@@ -451,6 +451,18 @@ As an example, the following configuration can be used to sample 50% of the requ
 },
 ```
 
+
+#####  Element selector
+
+Some triggers such as `click` and `visible` allow specifying an single element or a collection of elements using the selector properties. Different triggers can apply different limitations and interpretations on selected elements, such as whether a selector applies to all matched element or the first one, or which elements can be matched: all or only AMP elements. See the documentation of each relevant trigger for more details.
+
+The selector properties are:
+  - `selector` This property is used to find an element or a collection of elements using CSS/DOM query. The semantics of how the element is matched can be changed using `selectionMethod`. The value of this property can be one of:
+    - a valid CSS selector, e.g. `#ad1` or `amp-ad`.
+    - `:root` - a special selector that matches the document root.
+  - `selectionMethod` When specified, this property can have one of two values: `scope` and `closest`. `scope` allows selection of element within the parent element of `amp-analytics` tag. `closest` searches for the closest ancestor of `amp-analytics` tag that satisfies the given selector.
+
+
 #### Embed render start trigger
 
 AMP elements that embed other documents in iframes (e.g., ads) may report a render start event (`"on": "render-start"`). This event
@@ -508,9 +520,9 @@ The initial load event is also emitted by the document itself and can be configu
 }
 ```
 
-#### Page and element visible trigger
+#### Page and element visibility trigger
 
-Use the page visible trigger (`"on": "visible"`) to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`.
+Use the page visibility trigger (`"on": "visible"`) to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`.
 
 ```javascript
 "triggers": {
@@ -521,7 +533,7 @@ Use the page visible trigger (`"on": "visible"`) to fire a request when the page
 }
 ```
 
-The element visible trigger can be configured for any AMP element or document's root using [`selector`](#element-selector). The trigger will fire when the specified element matches the visibility parameters that can be customized using the `visibilitySpec`.
+The element visibility trigger can be configured for any AMP element or a document root using [`selector`](#element-selector). The trigger will fire when the specified element matches the visibility parameters that can be customized using the `visibilitySpec`.
 
 ```javascript
 "triggers": {
@@ -534,7 +546,7 @@ The element visible trigger can be configured for any AMP element or document's 
 }
 ```
 
-Notice that selector can be used to only specify a single element, not a collection. The element can either be an [AMP extended  element](https://github.xom/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags) or a document root.
+Notice that selector can be used to only specify a single element, not a collection. The element can be either an [AMP extended  element](https://github.xom/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags) or a document root.
 
 The element visibility trigger waits for element's [`ini-load`](#initial-load-trigger) signal before matching the `visibilitySpec`.
 
@@ -672,19 +684,6 @@ The above configuration translates to:
 #### Access triggers
 
 AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "amp-access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
-
-
-### Common trigger properties
-
-#### Element selector
-
-Some triggers such as `click` and `visible` allow specifying an single element or a collection of elements using the selector properties. Different triggers can apply different limitations and interpretations on selected elements, such as whether a selector applies to all matched element or the first one, or which elements can be matched: all or only AMP elements. See the documentation of each relevant trigger for more details.
-
-The selector properties are:
-  - `selector` This property is used to find an element or a collection of elements using CSS/DOM query. The semantics of how the element is matched can be changed using `selectionMethod`. The value of this property can be one of:
-    - a valid CSS selector, e.g. `#ad1` or `amp-ad`.
-    - `:root` - a special selector that matches the document's root.
-  - `selectionMethod` When specified, this property can have one of two values: `scope` and `closest`. `scope` allows selection of element within the parent element of `amp-analytics` tag. `closest` searches for the closest ancestor of `amp-analytics` tag that satisfies the given selector.
 
 
 ### Transport
