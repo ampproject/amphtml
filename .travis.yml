@@ -37,6 +37,6 @@ env:
     - NPM_CONFIG_PROGRESS="false"
 
 cache:
-  yarn: true
+  #yarn: true
   directories:
   - node_modules
