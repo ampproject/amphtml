@@ -32,6 +32,8 @@ import {urlReplacementsForDoc} from './url-replacements';
 
 
 /**
+ * Install click handler service for ampdoc. Immediately instantiates the
+ * the click handler service.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installGlobalClickListenerForDoc(ampdoc) {
