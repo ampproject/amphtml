@@ -554,7 +554,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'optout': '_gaUserPrefs.ioo',
   },
 
-  // CAUTIOUS: DO NOT USE THIS NOW!
+  // CAUTION: DO NOT USE THIS NOW!
   // 'googleanalytics-v2' is an exact copy of 'googleanalytics'
   // except that it uses a different cookie name for CLIENT_ID
   // We're in the middle of cookie migration, waiting for corresponding changes
