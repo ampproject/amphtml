@@ -424,6 +424,15 @@ var forbiddenTerms = {
       'src/inabox/inabox-viewer.js',
     ],
   },
+  'internalListenImplementation': {
+    message: 'Use `listen()` in either `event-helper` or `3p-frame-messaging`' +
+        ', depending on your use case.',
+    whitelist: [
+      'src/3p-frame-messaging.js',
+      'src/event-helper.js',
+      'src/event-helper-listen.js',
+    ],
+  },
   'setTimeout.*throw': {
     message: 'Use dev.error or user.error instead.',
     whitelist: [

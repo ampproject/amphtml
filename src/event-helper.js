@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {internalListenImplementation} from './event-helper-listen';
 import {timerFor} from './timer';
 import {user} from './log';
 
@@ -29,28 +30,8 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
  * @return {!UnlistenDef}
  */
 export function listen(element, eventType, listener, opt_capture) {
-  let localElement = element;
-  let localListener = listener;
-  /** @type {?Function}  */
-  let wrapped = event => {
-    try {
-      return localListener.call(this, event);
-    } catch (e) {
-      // reportError is installed globally per window in the entry point.
-      self.reportError(e);
-      throw e;
-    }
-  };
-  const capture = opt_capture || false;
-  localElement.addEventListener(eventType, wrapped, capture);
-  return () => {
-    if (localElement) {
-      localElement.removeEventListener(eventType, wrapped, capture);
-    }
-    localListener = null;
-    localElement = null;
-    wrapped = null;
-  };
+  return internalListenImplementation(
+      element, eventType, listener, opt_capture);
 }
 
 
