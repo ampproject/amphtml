@@ -896,6 +896,17 @@ export class BaseElement {
   }
 
   /**
+   * Returns an array of nodes in this element's subtree that could have
+   * descendants added or removed dynamically. The array should not contain
+   * any ancestors of this element, but could contain this element itself.
+   * @return {Array<!Node>}
+   * @public
+   */
+  getDynamicElements() {
+    return [];
+  }
+
+  /**
    * Called when we just measured the layout rect of this element. Doing
    * more expensive style reads should now be cheap.
    * This may currently not work with extended elements. Please file

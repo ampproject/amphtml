@@ -41,17 +41,6 @@ const TAG = 'amp-bind';
 const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
 
 /**
- * Tags under which bind should observe mutaitons to detect added/removed
- * bindings.
- * @type {!Object<string, boolean>}
- * @private
- */
-const DYNAMIC_TAGS = map({
-  'TEMPLATE': true,
-  'AMP-LIVE-LIST': true,
-});
-
-/**
  * A bound property, e.g. [property]="expression".
  * `previousResult` is the result of this expression during the last digest.
  * @typedef {{
@@ -390,9 +379,15 @@ export class Bind {
       }
       const element = dev().assertElement(node);
       const tagName = element.tagName;
-      if (DYNAMIC_TAGS[tagName]) {
-        this.observeElementForMutations_(element);
+
+      let dynamicElements = [];
+      if (typeof element.getDynamicElements === 'function') {
+        dynamicElements = element.getDynamicElements(mutations);
       }
+      dynamicElements.forEach(elementToObserve => {
+        this.mutationObserver_.observe(elementToObserve, {childList: true});
+      });
+
       let boundProperties = this.scanElement_(element);
       // Stop scanning once |limit| bindings are reached.
       if (bindings.length + boundProperties.length > limit) {
@@ -744,38 +739,6 @@ export class Bind {
         `result (${expectedValue}). This can result in unexpected behavior ` +
         `after the next state change.`);
       reportError(err, element);
-    }
-  }
-
-  /**
-   * Begin observing mutations to element. Presently, all supported elements
-   * that can add/remove bindings add new elements to their parent, so parent
-   * node should be observed for mutations.
-   * @param {!Element} element
-   * @private
-   */
-  observeElementForMutations_(element) {
-    const tagName = element.tagName;
-    let elementToObserve;
-    if (tagName === 'TEMPLATE') {
-      // Templates add templated elements as siblings of the template tag
-      // so the parent must be observed.
-      // TODO(kmh287): What if parent is the body tag?
-      elementToObserve = element.parentElement;
-    } else if (tagName === 'AMP-LIVE-LIST') {
-      // All elements in AMP-LIVE-LIST are children of a <div> with an
-      // `items` attribute.
-      const itemsDiv = childElementByAttr(element, 'items');
-      // Should not happen on any page that passes the AMP validator
-      // as <div items> is required.
-      elementToObserve = dev().assert(itemsDiv,
-          'Could not find items div in amp-live-list');
-    } else {
-      dev().assert(false,
-           `amp-bind asked to observe unexpected element ${tagName}`);
-    }
-    if (elementToObserve) {
-      this.mutationObserver_.observe(elementToObserve, {childList: true});
     }
   }
 
