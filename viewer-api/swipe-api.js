@@ -81,5 +81,5 @@ class SwipeAPI {
    * vertical swiping will be enabled. Default value is 'false'.
    * @param {boolean} value
    */
-  onScrollLock(value){}
+  onScrollLock(value) {}
 }
