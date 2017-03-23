@@ -454,13 +454,13 @@ As an example, the following configuration can be used to sample 50% of the requ
 
 #####  Element selector
 
-Some triggers such as `click` and `visible` allow specifying an single element or a collection of elements using the selector properties. Different triggers can apply different limitations and interpretations on selected elements, such as whether a selector applies to all matched element or the first one, or which elements can be matched: all or only AMP elements. See the documentation of each relevant trigger for more details.
+Some triggers such as `click` and `visible` allow specifying an single element or a collection of elements using the selector properties. Different triggers can apply different limitations and interpretations on selected elements, such as whether a selector applies to all matched elements or the first one, or which elements can be matched: all or only AMP elements. See the documentation for each relevant trigger for more details.
 
 The selector properties are:
   - `selector` This property is used to find an element or a collection of elements using CSS/DOM query. The semantics of how the element is matched can be changed using `selectionMethod`. The value of this property can be one of:
     - a valid CSS selector, e.g. `#ad1` or `amp-ad`.
     - `:root` - a special selector that matches the document root.
-  - `selectionMethod` When specified, this property can have one of two values: `scope` and `closest`. `scope` allows selection of element within the parent element of `amp-analytics` tag. `closest` searches for the closest ancestor of `amp-analytics` tag that satisfies the given selector.
+  - `selectionMethod` When specified, this property can have one of two values: `scope` or `closest`. `scope` allows selection of element within the parent element of `amp-analytics` tag. `closest` searches for the closest ancestor of the `amp-analytics` tag that satisfies the given selector. The default value is `scope`.
 
 
 #### Embed render start trigger
