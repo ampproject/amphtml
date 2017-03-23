@@ -508,7 +508,13 @@ var forbiddenTerms = {
       'src/service-worker/shell.js',
       'src/worker-error-reporting.js',
     ],
-  }
+  },
+  'new CustomEvent\\(': {
+    message: 'Use customEvent() helper instead.',
+    whitelist: [
+      'src/utils/event.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
