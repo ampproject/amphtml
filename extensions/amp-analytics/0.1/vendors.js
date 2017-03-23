@@ -477,7 +477,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
   },
 
   // Important: please keep this in sync with the following config
-  // 'googleanalytics-legacycookie'.
+  // 'googleanalytics-v2'.
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
@@ -554,10 +554,12 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'optout': '_gaUserPrefs.ioo',
   },
 
-  // 'googleanalytics-legacycookie' is an exact copy of 'googleanalytics'
+  // CAUTIOUS: DO NOT USE THIS NOW!
+  // 'googleanalytics-v2' is an exact copy of 'googleanalytics'
   // except that it uses a different cookie name for CLIENT_ID
-  // It's introduced as a temporary solution for #5761.
-  'googleanalytics-legacycookie': {
+  // We're in the middle of cookie migration, waiting for corresponding changes
+  // at GA side. #5761
+  'googleanalytics-v2': {
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',

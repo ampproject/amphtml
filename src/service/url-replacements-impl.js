@@ -247,7 +247,7 @@ export class GlobalVariableSource extends VariableSource {
         }
 
         // A temporary work around to extract Client ID from _ga cookie. #5761
-        // TODO: remove this once we have the ClientID API ready.
+        // TODO: replace with "filter" when it's in place. #2198
         if (scope == '_ga') {
           cid = extractClientIdFromGaCookie(cid);
         }

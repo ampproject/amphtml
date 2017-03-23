@@ -23,10 +23,10 @@ describe('analyaitcs vendors', () => {
 
     const gaConfig = ANALYTICS_CONFIG['googleanalytics'];
     expect(gaConfig).not.to
-        .deep.equal(ANALYTICS_CONFIG['googleanalytics-legacycookie']);
+        .deep.equal(ANALYTICS_CONFIG['googleanalytics-v2']);
 
     gaConfig.vars.clientId = 'CLIENT_ID(_ga)';
     expect(gaConfig).to
-        .deep.equal(ANALYTICS_CONFIG['googleanalytics-legacycookie']);
+        .deep.equal(ANALYTICS_CONFIG['googleanalytics-v2']);
   });
 });
