@@ -364,6 +364,83 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
   });
 
+  describe('centering', () => {
+    /**
+     * Creates an iframe promise, and instantiates element and impl, adding the
+     * former to the document of the iframe.
+     * @param {{width, height, type}} config
+     * @return The iframe promise.
+     */
+    function createImplTag(config) {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
+        // Used to test styling which is targetted at first iframe child of
+        // amp-ad.
+        const iframe = fixture.doc.createElement('iframe');
+        element.appendChild(iframe);
+        document.body.appendChild(element);
+        impl = new AmpAdNetworkAdsenseImpl(element);
+        return fixture;
+      });
+    }
+
+    function verifyCss(win, elem) {
+      const iframe = elem.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const style = win.getComputedStyle(iframe);
+      expect(style.top).to.equal('50%');
+      expect(style.left).to.equal('50%');
+      expect(style.transform).to.equal('matrix(1, 0, 0, 1, -150, -75)');
+    }
+
+    afterEach(() => document.body.removeChild(impl.element));
+
+    it('centers iframe in slot when height && width', () => {
+      return createImplTag({
+        width: '300',
+        height: '150',
+        type: 'adsense',
+      }).then(fixture => {
+        expect(impl.element.getAttribute('width')).to.equal('300');
+        expect(impl.element.getAttribute('height')).to.equal('150');
+        verifyCss(fixture.win, impl.element);
+      });
+    });
+    it('centers iframe in slot when !height && !width', () => {
+      return createImplTag({
+        type: 'adsense',
+        layout: 'fixed',
+      }).then(fixture => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.be.null;
+        verifyCss(fixture.win, impl.element);
+      });
+    });
+    it('centers iframe in slot when !height && width', () => {
+      return createImplTag({
+        width: '300',
+        type: 'adsense',
+        layout: 'fixed',
+      }).then(fixture => {
+        expect(impl.element.getAttribute('width')).to.equal('300');
+        expect(impl.element.getAttribute('height')).to.be.null;
+        verifyCss(fixture.win, impl.element);
+      });
+    });
+    it('centers iframe in slot when height && !width', () => {
+      return createImplTag({
+        height: '150',
+        type: 'adsense',
+        layout: 'fixed',
+      }).then(fixture => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.equal('150');
+        verifyCss(fixture.win, impl.element);
+      });
+    });
+  });
+
   describe('#getAdUrl', () => {
     it('formats client properly', () => {
       element.setAttribute('data-ad-client', 'SoMeClient');
@@ -379,7 +456,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
-          '\\?client=ca-adsense&format=0x0&w=0&h=0&adtest=false' +
+          '\\?client=ca-adsense&format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+' +
+          '&adtest=false' +
           '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
           '(&asnt=[0-9]+-[0-9]+)?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
@@ -401,3 +479,5 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
   });
 });
+
+
