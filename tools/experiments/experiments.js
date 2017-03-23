@@ -298,6 +298,7 @@ function build() {
  * @param {!ExperimentDef} experiment
  */
 function buildExperimentRow(experiment) {
+
   const tr = document.createElement('tr');
   tr.id = 'exp-tr-' + experiment.id;
 
@@ -320,6 +321,11 @@ function buildExperimentRow(experiment) {
   buttonOn.classList.add('on');
   buttonOn.textContent = 'On';
   button.appendChild(buttonOn);
+
+  const buttonDefault = document.createElement('div');
+  buttonDefault.classList.add('default');
+  buttonDefault.textContent = 'Default on';
+  button.appendChild(buttonDefault);
 
   const buttonOff = document.createElement('div');
   buttonOff.classList.add('off');
@@ -372,7 +378,11 @@ function updateExperimentRow(experiment) {
   if (!tr) {
     return;
   }
-  tr.setAttribute('data-on', isExperimentOn_(experiment.id) ? 1 : 0);
+  let state = isExperimentOn_(experiment.id) ? 1 : 0;
+  if (self.AMP_CONFIG[experiment.id]) {
+    state = 'default';
+  }
+  tr.setAttribute('data-on', state);
 }
 
 
