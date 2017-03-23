@@ -557,6 +557,13 @@ function checkTypes() {
         includePolyfills: true,
         checkTypes: true,
       }),
+    closureCompile(['./3p/ampcontext-lib.js'], './dist',
+      'ampcontext-check-types.js', {
+        externs: ['ads/ads.extern.js'],
+        include3pDirectories: true,
+        includePolyfills: true,
+        checkTypes: true,
+      }),
   ]);
 }
 

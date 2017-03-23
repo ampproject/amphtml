@@ -13,11 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import './polyfills';
 import {AmpContext} from './ampcontext.js';
 import {initLogConstructor, setReportError} from '../src/log';
-import {reportError} from '../src/error';
+
+
 initLogConstructor();
-setReportError(reportError);
+
+
+// TODO(alanorozco): Refactor src/error.reportError so it does not contain big
+// transitive dependencies and can be included here.
+setReportError(() => {});
 
 
 /**
