@@ -56,24 +56,24 @@ let EventData;
 class SwipeAPI {
   /**
    * Notify viewer that swipe touch has started.
-   * @param {!EventData} e
-   * @param {boolean} rsvp always set to false
+   * @param {!EventData} unusedEvent
+   * @param {boolean} unusedRsvp always false
    */
-  touchstart(e, rsvp) {}
+  touchstart(unusedEvent, unusedRsvp) {}
 
   /**
    * Notify viewer about the swipe move event.
-   * @param {!EventData} e
-   * @param {boolean} rsvp always set to false
+   * @param {!EventData} unusedEvent
+   * @param {boolean} unusedRsvp always false
    */
-  touchmove(e, rsvp) {}
+  touchmove(unusedEvent, unusedRsvp) {}
 
   /**
    * Notify viewer that swipe touch has ended.
-   * @param {!EventData} e
-   * @param {boolean} rsvp always set to false
+   * @param {!EventData} unusedEvent
+   * @param {boolean} unusedRsvp always false
    */
-  touchend(e, rsvp) {}
+  touchend(unusedEvent, unusedRsvp) {}
 
   /**
    * Update scroll lock state on viewer's request. When set to 'true',
