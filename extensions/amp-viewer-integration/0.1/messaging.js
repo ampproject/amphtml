@@ -16,6 +16,7 @@
 
 
 import {listen} from '../../../src/event-helper';
+import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
@@ -46,6 +47,20 @@ export let Message;
  * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
  */
 export let RequestHandler;
+
+/**
+  * @param {*} message
+  * @return {?Message}
+  */
+export function parseMessage(message) {
+  if (typeof message != 'string') {
+    return /** @type {Message} */(message);
+  }
+  if (message.charAt(0) != '{') {
+    return null;
+  }
+  return /** @type {?Message} */ (tryParseJson(message) || null);
+}
 
 /**
  * @fileoverview This class is a de-facto implementation of MessagePort
@@ -82,8 +97,6 @@ export class WindowPortEmulator {
    */
   postMessage(data) {
     this.win.parent./*OK*/postMessage(data, this.origin_);
-    // this.win.parent./*OK*/postMessage(
-      // this.isWebview_ ? JSON.stringify(data) : data, this.origin_);
   }
   start() {
   }
@@ -161,8 +174,10 @@ export class Messaging {
    */
   handleMessage_(event) {
     dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
-    const message = /** @type {Message} */ (
-      this.isWebview_ ? JSON.parse(event.data) : event.data);
+    const message = parseMessage(event.data);
+    if (!message) {
+      return;
+    }
     if (message.type == MessageType.REQUEST) {
       this.handleRequest_(message);
     } else if (message.type == MessageType.RESPONSE) {

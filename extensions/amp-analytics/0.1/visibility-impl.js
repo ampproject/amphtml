@@ -563,6 +563,10 @@ export class Visibility {
    * @private
    */
   prepareStateForCallback_(state, layoutBox) {
+    // TODO(dvoytenko, #8259): remove once misspelling has been fixed
+    // everywhere.
+    state['firstVisibleTime'] = state[FIRST_VISIBLE_TIME];
+
     state[ELEMENT_X] = layoutBox.left;
     state[ELEMENT_Y] = layoutBox.top;
     state[ELEMENT_WIDTH] = layoutBox.width;

@@ -40,4 +40,33 @@ describe('Object', () => {
       expect(object.map(obj)).to.not.equal(obj);
     });
   });
+
+  describe('getPath', () => {
+    const obj = {a: {aa: [{aaa: 1}, {bbb: 2}]}, b: 3, c: null};
+
+    it('should return the value of a single property', () => {
+      expect(object.getPath(obj, 'b')).to.equal(3);
+    });
+
+    it('should return the value of a deeply nested property', () => {
+      expect(object.getPath(obj, 'a.aa[0].aaa')).to.equal(1);
+    });
+
+    it('should return the value of a sub-object', () => {
+      expect(object.getPath(obj, 'a.aa')).to.jsonEqual(obj.a.aa);
+    });
+
+    it('should throw when a key cannot be found', () => {
+      expect(() => object.getPath(obj, 'foo')).to.throw(/foo/);
+      expect(() => object.getPath(obj, 'foo.bar')).to.throw(/foo\.bar/);
+      expect(() => object.getPath(obj, 'a.foo')).to.throw(/a\.foo/);
+      expect(() => object.getPath(obj, 'a.aa.bar')).to.throw(/a\.aa\.bar/);
+      expect(() => object.getPath(obj, 'a.c.bar')).to.throw(/a\.c\.bar/);
+    });
+
+    it('should throw for invalid paths', () => {
+      const obj = {'.': {'.': 0}}; // not supported
+      expect(() => object.getPath(obj, '...')).to.throw();
+    });
+  });
 });

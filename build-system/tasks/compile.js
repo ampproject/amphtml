@@ -141,7 +141,7 @@ function compile(entryModuleFilenames, outputDir,
       // Strange access/login related files.
       'build/all/v0/*.js',
       // A4A has these cross extension deps.
-      'extensions/**/*-config.js',
+      'extensions/amp-ad-network*/**/*-config.js',
       'extensions/amp-ad/**/*.js',
       'extensions/amp-a4a/**/*.js',
       // Currently needed for crypto.js and visibility.js.
