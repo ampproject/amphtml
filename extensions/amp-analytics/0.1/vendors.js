@@ -476,6 +476,8 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  // Important: please keep this in sync with the following config
+  // 'googleanalytics-v2'.
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
@@ -534,6 +536,87 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
           'clt=${contentLoadTime}&' +
           'dit=${domInteractiveTime}' +
           '${baseSuffix}',
+    },
+    'triggers': {
+      'performanceTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'sampleSpec': {
+          'sampleOn': '${clientId}',
+          'threshold': 1,
+        },
+      },
+    },
+    'extraUrlParamsReplaceMap': {
+      'dimension': 'cd',
+      'metric': 'cm',
+    },
+    'optout': '_gaUserPrefs.ioo',
+  },
+
+  // CAUTION: DO NOT USE THIS NOW!
+  // 'googleanalytics-v2' is an exact copy of 'googleanalytics'
+  // except that it uses a different cookie name for CLIENT_ID
+  // We're in the middle of cookie migration, waiting for corresponding changes
+  // at GA side. #5761
+  'googleanalytics-v2': {
+    'vars': {
+      'eventValue': '0',
+      'documentLocation': 'SOURCE_URL',
+      'clientId': 'CLIENT_ID(_ga)',
+      'dataSource': 'AMP',
+    },
+    'requests': {
+      'host': 'https://www.google-analytics.com',
+      'basePrefix': 'v=1&' +
+      '_v=a1&' +
+      'ds=${dataSource}&' +
+      'aip=true&' +
+      '_s=${requestCount}&' +
+      'dt=${title}&' +
+      'sr=${screenWidth}x${screenHeight}&' +
+      '_utmht=${timestamp}&' +
+      'cid=${clientId}&' +
+      'tid=${account}&' +
+      'dl=${documentLocation}&' +
+      'dr=${documentReferrer}&' +
+      'sd=${screenColorDepth}&' +
+      'ul=${browserLanguage}&' +
+      'de=${documentCharset}',
+      'baseSuffix': '&a=${pageViewId}&' +
+      'z=${random}',
+      'pageview': '${host}/r/collect?${basePrefix}&' +
+      't=pageview&' +
+      'jid=${random}&' +
+      '_r=1' +
+      '${baseSuffix}',
+      'event': '${host}/collect?${basePrefix}&' +
+      't=event&' +
+      'jid=&' +
+      'ec=${eventCategory}&' +
+      'ea=${eventAction}&' +
+      'el=${eventLabel}&' +
+      'ev=${eventValue}' +
+      '${baseSuffix}',
+      'social': '${host}/collect?${basePrefix}&' +
+      't=social&' +
+      'jid=&' +
+      'sa=${socialAction}&' +
+      'sn=${socialNetwork}&' +
+      'st=${socialTarget}' +
+      '${baseSuffix}',
+      'timing': '${host}/collect?${basePrefix}&' +
+      't=timing&' +
+      'jid=&' +
+      'plt=${pageLoadTime}&' +
+      'dns=${domainLookupTime}&' +
+      'tcp=${tcpConnectTime}&' +
+      'rrt=${redirectTime}&' +
+      'srt=${serverResponseTime}&' +
+      'pdt=${pageDownloadTime}&' +
+      'clt=${contentLoadTime}&' +
+      'dit=${domInteractiveTime}' +
+      '${baseSuffix}',
     },
     'triggers': {
       'performanceTiming': {
