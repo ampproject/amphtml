@@ -63,7 +63,7 @@ rel="canonical">` tag.
 
 1. The creative can include optional meta tags in HTML head as identifiers,
    in the format of `<meta name="amp4ads-id" content="vendor=${vendor},type=${type},id=${id}">`.
-   Those meta tags have to be placed before the `amp4ads-v0.js` script. The 
+   Those meta tags must be placed before the `amp4ads-v0.js` script. The 
    value of `vendor` and `id` are strings containing only [0-9a-zA-Z_-].
    The value of `type` is either `creative-id` or `impression-id`. 
 
