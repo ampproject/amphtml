@@ -85,7 +85,6 @@ describe('amp-a4a', () => {
         sandbox.spy(AmpA4A.prototype, 'onCreativeRender');
     getSigningServiceNamesMock.returns(['google']);
     xhrMockJson.withArgs(
-<<<<<<< HEAD
         'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
         {
           mode: 'cors',
@@ -94,19 +93,9 @@ describe('amp-a4a', () => {
           credentials: 'omit',
         }).returns(Promise.resolve({
           json() {
-            return Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]});
+            return Promise.resolve(JSON.parse(validCSSAmp.signing_key));
           },
         }));
-=======
-      'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-      {
-        mode: 'cors',
-        method: 'GET',
-        ampCors: false,
-        credentials: 'omit',
-      }).returns(
-        Promise.resolve(JSON.parse(validCSSAmp.signing_key)));
->>>>>>> Updated comment.
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {
@@ -857,11 +846,7 @@ describe('amp-a4a', () => {
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
         const loadExtensionSpy =
             sandbox.spy(Extensions.prototype, 'loadExtension');
-<<<<<<< HEAD
         a4a.buildCallback();
-=======
-        debugger;
->>>>>>> Updated comment.
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(promiseResult => {
@@ -1057,11 +1042,7 @@ describe('amp-a4a', () => {
                 signature: base64UrlDecodeToBytes(validCSSAmp.signature),
               };
             }));
-<<<<<<< HEAD
         a4a.buildCallback();
-=======
-        debugger;
->>>>>>> Updated comment.
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           expect(a4a.isVerifiedAmpCreative_).to.be.true;
@@ -2058,16 +2039,11 @@ describe('amp-a4a', () => {
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
-<<<<<<< HEAD
           }).returns(Promise.resolve({
             json() {
-              return Promise.resolve({keys: [testKey, testKey, testKey]});
+              return Promise.resolve(testKeys);
             },
           }));
-=======
-          }).returns(
-          Promise.resolve(testKeys));
->>>>>>> Updated comment.
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
@@ -2104,18 +2080,13 @@ describe('amp-a4a', () => {
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
-<<<<<<< HEAD
           }).returns(Promise.resolve({
             json() {
               return Promise.resolve({keys: [
-                JSON.parse(validCSSAmp.publicKey),
+                JSON.parse(validCSSAmp.signing_key),
               ]});
             },
           }));
-=======
-          }).returns(
-              Promise.resolve(JSON.parse(validCSSAmp.signing_key)));
->>>>>>> Updated comment.
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
