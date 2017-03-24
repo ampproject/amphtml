@@ -101,7 +101,6 @@ amp-carousel .amp-carousel-button.amp-disabled {
   top: 0;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
-  scroll-snap-destination: 0 0;
   /**
    * Hide the scrollbar by tucking it under some padding
    * which gets cut off as it overflows the parent.

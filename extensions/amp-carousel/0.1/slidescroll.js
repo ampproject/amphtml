@@ -103,7 +103,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideWidth_ = 0;
 
     /** @private {?number} */
-    this.previousScrollLeft_ = null;
+    this.previousScrollLeft_ = 0;
 
     /** @private {!Array<?string>} */
     this.dataSlideIdArr_ = [];
@@ -335,7 +335,7 @@ export class AmpSlideScroll extends BaseSlides {
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = timerFor(this.win).delay(() => {
 
-        if (this.snappingInProgress_ || this.previousScrollLeft_ == null) {
+        if (this.snappingInProgress_) {
           return;
         }
         if (this.hasNativeSnapPoints_) {
