@@ -148,6 +148,7 @@ operation:
   | expr '!=' expr
   | expr '==' expr
   | expr '?' expr ':' expr
+  | expr '?' ':'' expr
 
 invocation:
     expr '.' NAME args
