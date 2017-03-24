@@ -188,8 +188,9 @@ describes.repeated('', {
       sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
       sandbox.stub(ampForm, 'analyticsEvent_');
       sandbox.spy(form, 'checkValidity');
-      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(
-          /Only XHR based \(via action-xhr attribute\) submissions are support/);
+      const errorRe =
+          /Only XHR based \(via action-xhr attribute\) submissions are support/;
+      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
       expect(event.preventDefault).to.be.called;
       expect(ampForm.analyticsEvent_).to.have.not.been.called;
       document.body.removeChild(form);
