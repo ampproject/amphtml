@@ -65,6 +65,23 @@ function setupForAdTesting(fixture) {
   doc.head.appendChild(ampStyle);
 }
 
+// This code is used repeatedly in various test cases. It is part of the meta-
+// data blob.
+const extensions = [
+  {
+    "custom-element": "amp-vine",
+    "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+  },
+  {
+    "custom-element": "amp-vine",
+    "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+  },
+  {
+    "custom-element": "amp-vine",
+    "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+  },
+];
+
 describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
@@ -1379,20 +1396,7 @@ describe('amp-a4a', () => {
     });
     it('should parse metadata', () => {
       const actual = a4a.getAmpAdMetadata_(buildCreativeString({
-        extensions: [
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-        ],
+        extensions: extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1400,20 +1404,7 @@ describe('amp-a4a', () => {
       }));
       const expected = {
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        extensions: [
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-        ],
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1425,20 +1416,7 @@ describe('amp-a4a', () => {
     // fixed.
     it('should parse metadata with wrong opening tag', () => {
       const creative = buildCreativeString({
-        extensions: [
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-        ],
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1448,20 +1426,7 @@ describe('amp-a4a', () => {
       const actual = a4a.getAmpAdMetadata_(creative);
       const expected = {
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        extensions: [
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-        ],
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1471,20 +1436,7 @@ describe('amp-a4a', () => {
     });
     it('should return null if metadata opening tag is (truly) wrong', () => {
       const creative = buildCreativeString({
-        extensions: [
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-        ],
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1513,39 +1465,13 @@ describe('amp-a4a', () => {
     });
     it('should return null if non-array stylesheets', () => {
       expect(a4a.getAmpAdMetadata_(buildCreativeString({
-        extensions: [
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-        ],
+        extensions,
         customStylesheets: 'https://fonts.googleapis.com/css?foobar',
       }))).to.be.null;
     });
     it('should return null if invalid stylesheet object', () => {
       expect(a4a.getAmpAdMetadata_(buildCreativeString({
-        extensions: [
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-          {
-            "custom-element": "amp-vine",
-            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
-          },
-        ],
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {foo: 'https://fonts.com/css?helloworld'},

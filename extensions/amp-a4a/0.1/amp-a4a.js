@@ -735,7 +735,7 @@ export class AmpA4A extends AMP.BaseElement {
               const versionEndIndex = extensionSrc.length - 3;
               const extensionVer = extensionSrc.substring(
                   versionStartIndex, versionEndIndex);
-              extensions.loadExtension(extensionId, extensionVer)
+              extensions.loadExtension(extensionId, extensionVer);
             });
           return creativeMetaDataDef;
         })

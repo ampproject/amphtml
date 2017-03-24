@@ -538,11 +538,11 @@ export class Extensions {
    * @param {boolean} stubElement
    * @private
    */
-  insertExtensionScriptIfNeeded_(extensionId, extensionVer, holder,
-      stubElement) {
+  insertExtensionScriptIfNeeded_(
+      extensionId, extensionVer, holder, stubElement) {
     if (this.isExtensionScriptRequired_(extensionId, holder)) {
-      const scriptElement = this.createExtensionScript_(extensionId,
-          extensionVer);
+      const scriptElement = this.createExtensionScript_(
+          extensionId, extensionVer);
       this.win.document.head.appendChild(scriptElement);
       holder.scriptPresent = true;
       if (stubElement) {
