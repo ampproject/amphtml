@@ -69,16 +69,16 @@ function setupForAdTesting(fixture) {
 // data blob.
 const extensions = [
   {
-    "custom-element": "amp-vine",
-    "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+    'custom-element': 'amp-vine',
+    'src': 'https://cdn.ampproject.org/v0/amp-vine-0.1.js',
   },
   {
-    "custom-element": "amp-vine",
-    "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+    'custom-element": "amp-vine",
+    'src': 'https://cdn.ampproject.org/v0/amp-vine-0.1.js',
   },
   {
-    "custom-element": "amp-vine",
-    "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+    'custom-element': 'amp-vine',
+    'src': 'https://cdn.ampproject.org/v0/amp-vine-0.1.js',
   },
 ];
 
@@ -1958,7 +1958,7 @@ describe('amp-a4a', () => {
       // For our purposes, re-using the same key is fine.
       const testKeys = JSON.parse(validCSSAmp.signingKey);
       testKeys.keys[1] = testKeys.keys[0];
-      testKeys.keys[2] = testKeys.keys[0]
+      testKeys.keys[2] = testKeys.keys[0];
       xhrMockJson.withArgs(
           'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
             mode: 'cors',
