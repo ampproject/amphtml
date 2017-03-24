@@ -161,12 +161,12 @@ export class Platform {
 
   /**
    * Returns the major ios version in number.
-   * @return {number}
+   * @return {?number}
    */
   getIosMajorVersion() {
     const currentIosVersion = this.getIosVersionString();
     if (currentIosVersion == '') {
-      return 0;
+      return null;
     }
     return Number(currentIosVersion.split('.')[0]);
   }
