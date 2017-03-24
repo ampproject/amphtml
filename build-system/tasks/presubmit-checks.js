@@ -512,7 +512,7 @@ var forbiddenTerms = {
   'new CustomEvent\\(': {
     message: 'Use createCustomEvent() helper instead.',
     whitelist: [
-      'src/utils/event.js',
+      'src/event-helper.js',
     ],
   },
 };

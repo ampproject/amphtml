@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {actionServiceForDoc} from '../../../src/action';
 import {closest} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/utils/event';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 export class AmpSelector extends AMP.BaseElement {

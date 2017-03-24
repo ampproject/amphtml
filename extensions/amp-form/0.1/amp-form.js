@@ -16,7 +16,7 @@
 
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {createCustomEvent} from '../../../src/utils/event';
+import {createCustomEvent} from '../../../src/event-helper';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {getService} from '../../../src/service';
 import {

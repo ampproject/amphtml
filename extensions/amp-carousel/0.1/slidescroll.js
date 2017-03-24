@@ -18,7 +18,7 @@ import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {actionServiceForDoc} from '../../../src/action';
 import {bezierCurve} from '../../../src/curve';
-import {createCustomEvent} from '../../../src/utils/event';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
