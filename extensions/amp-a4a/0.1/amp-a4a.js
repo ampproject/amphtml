@@ -732,6 +732,7 @@ export class AmpA4A extends AMP.BaseElement {
               const extensionSrc = extension['src'];
               const versionStartIndex = extensionSrc.indexOf(extensionId) +
                   extensionId.length + 1;
+              // -3 because the src string always ends with '.js'.
               const versionEndIndex = extensionSrc.length - 3;
               const extensionVer = extensionSrc.substring(
                   versionStartIndex, versionEndIndex);

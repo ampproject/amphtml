@@ -1396,7 +1396,7 @@ describe('amp-a4a', () => {
     });
     it('should parse metadata', () => {
       const actual = a4a.getAmpAdMetadata_(buildCreativeString({
-        extensions: extensions,
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
