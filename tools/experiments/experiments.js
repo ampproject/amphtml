@@ -485,7 +485,7 @@ function getAmpConfig() {
     // Setting global var to make standard experiment code just work.
     return self.AMP_CONFIG = JSON.parse(match[1]);
   }).catch(error => {
-    console.error('Error fetching AMP_CONFIG', error);
+    console./*OK*/error('Error fetching AMP_CONFIG', error);
     return {};
   });
 }
