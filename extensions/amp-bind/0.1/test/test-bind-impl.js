@@ -168,13 +168,15 @@ describes.realWin('Bind', {
 
   it('should dynamically detect new bindings under dynamic tags', () => {
     const doc = env.win.document;
-    const template = doc.createElement('template');
-    doc.getElementById('parent').appendChild(template);
+    const form = doc.createElement('form');
+    doc.getElementById('parent').appendChild(form);
+    const dynamicTag = doc.createElement('div');
+    dynamicTag.setAttribute('submit-success', null);
+    form.appendChild(dynamicTag);
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(0);
-      // As a dynamic element, template adds rendered templates as siblings.
-      // Element is added as a sibling to the template
-      createElementWithBinding('[onePlusOne]="1+1"');
+      const elementWithBinding = createElementWithBinding('[onePlusOne]="1+1"');
+      dynamicTag.appendChild(elementWithBinding);
       return waitForEvent('amp:bind:mutated');
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(1);
