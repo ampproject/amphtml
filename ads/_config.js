@@ -40,6 +40,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  a8: {
+    prefetch: 'https://statics.a8.net/amp/ad.js',
+    renderStartImplemented: true,
+  },
+
   a9: {
     prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   },
