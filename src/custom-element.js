@@ -1352,11 +1352,12 @@ function createBaseCustomElementClass(win) {
       this.implementation_.mutatedAttributesCallback(mutations);
     }
 
-        /**
-     * Returns an array of nodes in this element's subtree that could have
-     * descendants added or removed dynamically. The array should not contain
-     * any ancestors of this element, but could contain this element itself.
-     * @return {Array<!Node>}
+    /**
+     * Returns an array of elements in this element's subtree that this
+     * element owns that could have children added or removed dynamically.
+     * The array should not contain any ancestors of this element, but could
+     * contain this element itself.
+     * @return {Array<!Element>}
      * @public
      */
     getDynamicElements() {
