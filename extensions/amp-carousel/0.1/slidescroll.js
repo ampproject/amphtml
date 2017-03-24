@@ -108,7 +108,7 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {number} */
     this.slideWidth_ = 0;
 
-    /** @private {?number} */
+    /** @private {number} */
     this.previousScrollLeft_ = 0;
 
     /** @private {!Array<?string>} */
@@ -165,7 +165,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
 
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
-    if (this.hasNativeSnapPoints_ && this.noOfSlides_ == 2) {
+    if (this.hasNativeSnapPoints_) {
       const start = this.win.document.createElement('div');
       start.classList.add('-amp-carousel-start-marker');
       this.slidesContainer_.appendChild(start);
@@ -256,7 +256,7 @@ export class AmpSlideScroll extends BaseSlides {
         }
         this.updateOnScroll_(currentScrollLeft);
         this.touchEndTimeout_ = null;
-      }, NATIVE_TOUCH_TIMEOUT);
+      }, timeout);
     }
     this.hasTouchMoved_ = false;
   }
@@ -338,8 +338,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
 
     if (!this.touchEndTimeout_) {
-      const timeout =
-      this.hasNativeSnapPoints_? NATIVE_SNAP_TIMEOUT : (
+      const timeout = this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : (
           this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = timerFor(this.win).delay(() => {
