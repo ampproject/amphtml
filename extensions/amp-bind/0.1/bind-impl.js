@@ -259,7 +259,10 @@ export class Bind {
    * @private
    */
   addBindingsForNode_(node) {
-    const limit = this.maxNumberOfBindings_ - this.numberOfBindings_();
+    // Limit number of total bindings (unless in local manual testing).
+    const limit = (getMode().localDev && !getMode().test)
+        ? Number.POSITIVE_INFINITY
+        : this.maxNumberOfBindings_ - this.numberOfBindings_();
     return this.scanNode_(node, limit).then(results => {
       const {
         boundElements, bindings, expressionToElements, limitExceeded,
