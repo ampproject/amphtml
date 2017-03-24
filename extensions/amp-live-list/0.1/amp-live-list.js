@@ -18,7 +18,6 @@
 import {actionServiceForDoc} from '../../../src/action';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
 import {liveListManagerFor, LiveListManager} from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
