@@ -150,7 +150,8 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     });
 
     describe('Animated Icon', () => {
-      it('should create an animated icon overlay', () => {
+      // TODO(amphtml): Unskip when #8385 is fixed.
+      it.skip('should create an animated icon overlay', () => {
         let video;
         let viewport;
         let icon;
