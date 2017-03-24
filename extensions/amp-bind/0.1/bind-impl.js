@@ -557,8 +557,8 @@ export class Bind {
     const applyPromises = this.boundElements_.map(boundElement => {
       const {element, boundProperties} = boundElement;
 
-      // TODO(choumx): We should avoid triggering a mutation if there are the
-      // expression results don't affect this element.
+      // TODO(choumx): We should avoid triggering a mutation if the expression
+      // results don't affect this element.
       const applyPromise = this.resources_.mutateElement(element, () => {
         const mutations = {};
         let width, height;
