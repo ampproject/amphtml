@@ -145,7 +145,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
    * Combined test specs for amp-img
    */
   describe('amp-img integration', () => {
-    it('should do amp-img integration', () => {
+    it('should integrate with amp-img', () => {
       const changeImgSrcButton = fixture.doc
           .getElementById('changeImgSrcButton');
       const invalidSrcButton = fixture.doc.getElementById('invalidSrcButton');
