@@ -79,7 +79,7 @@ class SwipeApi {
    * Update scroll lock state on viewer's request. When set to 'true',
    * preventDefault will prevent vertical swiping. When set to 'false',
    * vertical swiping will be enabled. Default value is 'false'.
-   * @param {boolean} value
+   * @param {boolean} unusedValue
    */
-  onScrollLock(value) {}
+  onScrollLock(unusedValue) {}
 }
