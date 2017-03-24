@@ -29,13 +29,13 @@
  *   screenY: number,
  * }}
  */
-let TouchDataDef;
+let TouchData;
 
 /**
  * @typedef {{
  *   type: string,
- *   touches: !Array<TouchDataDef>|undefined,
- *   changedTouches: !Array<TouchDataDef>|undefined,
+ *   touches: !Array<TouchData>|undefined,
+ *   changedTouches: !Array<TouchData>|undefined,
  *   altKey: boolean,
  *   ctrlKey: boolean,
  *   detail: number,
@@ -47,39 +47,36 @@ let TouchDataDef;
  *   which: number,
  * }}
  */
-let EventDataDef;
+let EventData;
 
 /**
- * SwipeApiDef is an interface the Viewer Swipe Protocol.
+ * SwipeApi is an interface the Viewer Swipe Protocol.
  * @interface
  */
-class SwipeApiDef {
+class SwipeApi {
   /**
    * Notify viewer that swipe touch has started.
-   * @param {!EventDataDef} unusedEvent
-   * @param {boolean} unusedRsvp always false
+   * @param {!EventData} event
    */
-  touchstart(unusedEvent, unusedRsvp) {}
+  touchstart(event) {}
 
   /**
    * Notify viewer about the swipe move event.
-   * @param {!EventDataDef} unusedEvent
-   * @param {boolean} unusedRsvp always false
+   * @param {!EventData} event
    */
-  touchmove(unusedEvent, unusedRsvp) {}
+  touchmove(event) {}
 
   /**
    * Notify viewer that swipe touch has ended.
-   * @param {!EventDataDef} unusedEvent
-   * @param {boolean} unusedRsvp always false
+   * @param {!EventData} event
    */
-  touchend(unusedEvent, unusedRsvp) {}
+  touchend(event) {}
 
   /**
    * Update scroll lock state on viewer's request. When set to 'true',
    * preventDefault will prevent vertical swiping. When set to 'false',
    * vertical swiping will be enabled. Default value is 'false'.
-   * @param {boolean} unusedValue
+   * @param {boolean} value
    */
-  onScrollLock(unusedValue) {}
+  onScrollLock(value) {}
 }
