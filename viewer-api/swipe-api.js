@@ -34,8 +34,8 @@ let TouchData;
 /**
  * @typedef {{
  *   type: string,
- *   touches: Array.<TouchData>,
- *   changedTouches: Array.<TouchData>,
+ *   touches: !Array<TouchData>|undefined,
+ *   changedTouches: !Array<TouchData>|undefined,
  *   altKey: boolean,
  *   ctrlKey: boolean,
  *   detail: number,
@@ -50,10 +50,10 @@ let TouchData;
 let EventData;
 
 /**
- * SwipeAPI is an interface the Viewer Swipe Protocol.
+ * SwipeApi is an interface the Viewer Swipe Protocol.
  * @interface
  */
-class SwipeAPI {
+class SwipeApi {
   /**
    * Notify viewer that swipe touch has started.
    * @param {!EventData} unusedEvent
