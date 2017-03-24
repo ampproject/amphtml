@@ -79,7 +79,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.type_ = null;
 
     /** @private {!boolean} */
-    this.isScoped_ = !!element.getAttribute('scope');
+    this.isScoped_ = element.hasAttribute('scope');
 
     /**
      * @private {Object<string, string>} A map of request names to the request
