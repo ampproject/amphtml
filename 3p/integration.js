@@ -154,10 +154,6 @@ import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
 
-/** @const {string} */
-const AMP_CONTEXT_EXPERIMENT = '3p-use-ampcontext';
-
-
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
@@ -432,8 +428,13 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
   }
 };
 
+
+/**
+ * Installs window.context API.
+ * @param {!Window} win
+ */
 function installContext(win) {
-  if (isExperimentOn(AMP_CONTEXT_EXPERIMENT)) {
+  if (isExperimentOn('3p-use-ampcontext')) {
     // TODO(alanorozco): Enhance AmpContext to match standard implementation.
     win.context = new AmpContext(win);
     return;
@@ -442,6 +443,11 @@ function installContext(win) {
   installContextUsingStandardImpl(win);
 }
 
+
+/**
+ * Installs window.context using standard (to be deprecated) implementation.
+ * @param {!Window} win
+ */
 function installContextUsingStandardImpl(win) {
   // Define master related properties to be lazily read.
   Object.defineProperties(win.context, {
@@ -485,6 +491,7 @@ function installContextUsingStandardImpl(win) {
   };
   win.context.getHtml = getHtml;
 }
+
 
 function triggerNoContentAvailable() {
   nonSensitiveDataPostMessage('no-content');
