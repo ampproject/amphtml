@@ -31,6 +31,7 @@ import {Cid} from './cid-impl';
 import {
     InstrumentationService,
     instrumentationServicePromiseForDoc,
+    AnalyticsEventType,
 } from './instrumentation';
 import {
   ExpansionOptions,
@@ -49,6 +50,13 @@ AMP.registerServiceForDoc('cid', Cid);
 installVariableService(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
+
+const BLACKLIST_EVENT_IN_SCOPE = [
+  AnalyticsEventType.CLICK,
+  AnalyticsEventType.TIMER,
+  AnalyticsEventType.SCROLL,
+  AnalyticsEventType.HIDDEN,
+];
 
 export class AmpAnalytics extends AMP.BaseElement {
 
@@ -209,14 +217,31 @@ export class AmpAnalytics extends AMP.BaseElement {
               'attributes are required for data to be collected.');
           continue;
         }
+        // Check for not supported trigger for scoped analytics
+        // TODO(will replace with this.isScoped_ after #8360)
+        const isScoped = true;
+        if (isScoped) {
+          const eventType = trigger['on'];
+          if (BLACKLIST_EVENT_IN_SCOPE.indexOf(eventType) > -1) {
+            user().error(TAG, eventType + 'is not supported for amp-analytics' +
+            ' in scope');
+            continue;
+          }
+        }
+
         this.processExtraUrlParams_(trigger['extraUrlParams'],
             this.config_['extraUrlParamsReplaceMap']);
         promises.push(this.isSampledIn_(trigger).then(result => {
           if (!result) {
             return;
           }
-
-          if (trigger['selector']) {
+          // replace selector and selectionMethod (visibilitySpec selector as well)
+          if (isScoped) {
+            // Only support selection of parent element for analytics in scope
+            trigger['selector'] = this.element.parentElement.tagName;
+            trigger['selectionMethod'] = 'closest';
+            this.addTriggerNoInline_(trigger);
+          } else if (trigger['selector']) {
             // Expand the selector using variable expansion.
             return this.variableService_.expandTemplate(
                 trigger['selector'], expansionOptions)
