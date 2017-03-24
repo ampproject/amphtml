@@ -103,6 +103,9 @@ export class Resources {
     /** @private {number} */
     this.addCount_ = 0;
 
+    /** @private {number} */
+    this.buildAttemptsCount_ = 0;
+
     /** @private {boolean} */
     this.visible_ = this.viewer_.isVisible();
 
@@ -471,6 +474,10 @@ export class Resources {
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
+  }
+
+  shouldBuildNow() {
+    return this.buildAttemptsCount_++ < 20 || this.viewer_.hasBeenVisible();
   }
 
   /**
