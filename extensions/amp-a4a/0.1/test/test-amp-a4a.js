@@ -85,6 +85,7 @@ describe('amp-a4a', () => {
         sandbox.spy(AmpA4A.prototype, 'onCreativeRender');
     getSigningServiceNamesMock.returns(['google']);
     xhrMockJson.withArgs(
+<<<<<<< HEAD
         'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
         {
           mode: 'cors',
@@ -96,6 +97,16 @@ describe('amp-a4a', () => {
             return Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]});
           },
         }));
+=======
+      'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
+      {
+        mode: 'cors',
+        method: 'GET',
+        ampCors: false,
+        credentials: 'omit',
+      }).returns(
+        Promise.resolve(JSON.parse(validCSSAmp.signing_key)));
+>>>>>>> Updated comment.
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {
@@ -846,7 +857,11 @@ describe('amp-a4a', () => {
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
         const loadExtensionSpy =
             sandbox.spy(Extensions.prototype, 'loadExtension');
+<<<<<<< HEAD
         a4a.buildCallback();
+=======
+        debugger;
+>>>>>>> Updated comment.
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(promiseResult => {
@@ -859,7 +874,8 @@ describe('amp-a4a', () => {
               'xhr.fetchTextAndHeaders called exactly once').to.be.true;
           expect(extractCreativeAndSignatureSpy.calledOnce,
               'extractCreativeAndSignatureSpy called exactly once').to.be.true;
-          expect(loadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
+          expect(loadExtensionSpy.withArgs('amp-font', '0.1'))
+              .to.be.calledOnce;
           return a4a.layoutCallback().then(() => {
             expect(renderAmpCreativeSpy.calledOnce,
                 'renderAmpCreative_ called exactly once').to.be.true;
@@ -1041,7 +1057,11 @@ describe('amp-a4a', () => {
                 signature: base64UrlDecodeToBytes(validCSSAmp.signature),
               };
             }));
+<<<<<<< HEAD
         a4a.buildCallback();
+=======
+        debugger;
+>>>>>>> Updated comment.
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           expect(a4a.isVerifiedAmpCreative_).to.be.true;
@@ -1378,7 +1398,20 @@ describe('amp-a4a', () => {
     });
     it('should parse metadata', () => {
       const actual = a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions: [
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+        ],
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1386,7 +1419,20 @@ describe('amp-a4a', () => {
       }));
       const expected = {
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions: [
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+        ],
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1398,7 +1444,20 @@ describe('amp-a4a', () => {
     // fixed.
     it('should parse metadata with wrong opening tag', () => {
       const creative = buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions: [
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+        ],
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1408,7 +1467,20 @@ describe('amp-a4a', () => {
       const actual = a4a.getAmpAdMetadata_(creative);
       const expected = {
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions: [
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+        ],
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1418,7 +1490,20 @@ describe('amp-a4a', () => {
     });
     it('should return null if metadata opening tag is (truly) wrong', () => {
       const creative = buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions: [
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+        ],
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1438,7 +1523,7 @@ describe('amp-a4a', () => {
     });
     it('should return null if invalid extensions', () => {
       expect(a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: 'amp-vine',
+        extensions: 'amp-vine',
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1447,13 +1532,39 @@ describe('amp-a4a', () => {
     });
     it('should return null if non-array stylesheets', () => {
       expect(a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions: [
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+        ],
         customStylesheets: 'https://fonts.googleapis.com/css?foobar',
       }))).to.be.null;
     });
     it('should return null if invalid stylesheet object', () => {
       expect(a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions: [
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+          {
+            "custom-element": "amp-vine",
+            "src": "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+          },
+        ],
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {foo: 'https://fonts.com/css?helloworld'},
@@ -1938,18 +2049,25 @@ describe('amp-a4a', () => {
 
     it('should fetch multiple keys', () => {
       // For our purposes, re-using the same key is fine.
-      const testKey = JSON.parse(validCSSAmp.publicKey);
+      const testKeys = JSON.parse(validCSSAmp.signing_key);
+      testKeys.keys[1] = testKeys.keys[0];
+      testKeys.keys[2] = testKeys.keys[0]
       xhrMockJson.withArgs(
           'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
             mode: 'cors',
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
+<<<<<<< HEAD
           }).returns(Promise.resolve({
             json() {
               return Promise.resolve({keys: [testKey, testKey, testKey]});
             },
           }));
+=======
+          }).returns(
+          Promise.resolve(testKeys));
+>>>>>>> Updated comment.
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
@@ -1986,6 +2104,7 @@ describe('amp-a4a', () => {
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
+<<<<<<< HEAD
           }).returns(Promise.resolve({
             json() {
               return Promise.resolve({keys: [
@@ -1993,6 +2112,10 @@ describe('amp-a4a', () => {
               ]});
             },
           }));
+=======
+          }).returns(
+              Promise.resolve(JSON.parse(validCSSAmp.signing_key)));
+>>>>>>> Updated comment.
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
