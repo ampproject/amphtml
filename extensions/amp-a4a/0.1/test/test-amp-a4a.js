@@ -73,7 +73,7 @@ const extensions = [
     'src': 'https://cdn.ampproject.org/v0/amp-vine-0.1.js',
   },
   {
-    'custom-element": "amp-vine",
+    'custom-element': 'amp-vine',
     'src': 'https://cdn.ampproject.org/v0/amp-vine-0.1.js',
   },
   {
