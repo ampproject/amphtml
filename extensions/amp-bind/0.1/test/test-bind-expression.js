@@ -70,7 +70,8 @@ describe('BindExpression', () => {
     expect(evaluate('true ? "a" : "b"')).to.be.equal('a');
     expect(evaluate('false ? "a" : "b"')).to.be.equal('b');
     expect(evaluate('true ?: "a"')).to.be.true;
-    expect(evaluate('"hello world" ? : "a"')).to.be.equal('hello world');
+    expect(evaluate('"hello" ? : "a"')).to.be.equal('hello');
+    expect(evaluate('"" ?: "hello"')).to.be.equal('hello');
   });
 
   it('should respect arithmetic operator precedence', () => {
