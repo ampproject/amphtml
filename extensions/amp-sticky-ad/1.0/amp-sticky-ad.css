@@ -27,6 +27,7 @@ amp-sticky-ad {
   background-image: none !important;
   background-color: #fff;
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
+  margin-bottom: 0 !important;
 }
 
 amp-sticky-ad-top-padding {
