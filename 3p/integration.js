@@ -168,22 +168,19 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
 };
 
+
+/** @const {!Object} */
+const FALLBACK_CONTEXT_DATA = {
+  _context: {},
+};
+
+
 // Need to cache iframeName as it will be potentially overwritten by
 // masterSelection, as per below.
 const iframeName = window.name;
-let data = {};
-try {
-  // TODO(bradfrizzell@): Change the data structure of the attributes
-  //    to make it less terrible.
-  data = JSON.parse(iframeName).attributes;
-  window.context = data._context;
-} catch (err) {
-  window.context = {};
-  if (!getMode().test) {
-    dev().info(
-        'INTEGRATION', 'Could not parse context from:', iframeName);
-  }
-}
+const data = getData(iframeName);
+
+window.context = data._context;
 
 // This should only be invoked after window.context is set
 initLogConstructor();
@@ -322,6 +319,26 @@ const defaultAllowedTypesInCustomFrame = [
   'yieldbot',
   '_ping_',
 ];
+
+
+/**
+ * Gets data encoded in iframe name attribute.
+ * @return {!Object}
+ */
+function getData(iframeName) {
+  try {
+    // TODO(bradfrizzell@): Change the data structure of the attributes
+    //    to make it less terrible.
+    return JSON.parse(iframeName).attributes;
+  } catch (err) {
+    if (!getMode().test) {
+      dev().info(
+          'INTEGRATION', 'Could not parse context from:', iframeName);
+    }
+    return FALLBACK_CONTEXT_DATA;
+  }
+}
+
 
 /**
  * Visible for testing.
