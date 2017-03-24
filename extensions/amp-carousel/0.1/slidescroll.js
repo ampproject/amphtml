@@ -42,6 +42,9 @@ const IOS_CUSTOM_SNAP_TIMEOUT = 45;
 const NATIVE_TOUCH_TIMEOUT = 120;
 
 /** @const {number} */
+const IOS_TOUCH_TIMEOUT = 45;
+
+/** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
 
 const TAG = 'AMP-CAROUSEL';
@@ -241,6 +244,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (this.scrollTimeout_) {
         timerFor(this.win).cancel(this.scrollTimeout_);
       }
+      const timeout = this.isIos_ ? IOS_TOUCH_TIMEOUT : NATIVE_TOUCH_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
       this.touchEndTimeout_ = timerFor(this.win).delay(() => {
         const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
