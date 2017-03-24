@@ -15,6 +15,7 @@
  */
 
 import {AstNodeType} from './bind-expr-defines';
+import {getMode} from '../../../src/mode';
 import {parser} from './bind-expr-impl';
 import {user} from '../../../src/log';
 
@@ -85,19 +86,36 @@ const FUNCTION_WHITELIST = (function() {
 })();
 
 /**
+ * Default maximum number of nodes in an expression AST.
+ * Double size of a "typical" expression in examples/bind/performance.amp.html.
+ * @const @private {number}
+ */
+const DEFAULT_MAX_AST_SIZE = 50;
+
+/**
  * A single Bind expression.
  */
 export class BindExpression {
   /**
    * @param {string} expressionString
+   * @param {number=} opt_maxAstSize
    * @throws {Error} On malformed expressions.
    */
-  constructor(expressionString) {
+  constructor(expressionString, opt_maxAstSize) {
     /** @const {string} */
     this.expressionString = expressionString;
 
     /** @const @private {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
+
+    // Check if this expression string is too large (for performance).
+    const size = this.numberOfNodesInAst_(this.ast_);
+    const maxSize = opt_maxAstSize || DEFAULT_MAX_AST_SIZE;
+    const skipConstraint = getMode().localDev && !getMode().test;
+    if (size > maxSize && !skipConstraint) {
+      throw new Error(`Expression size (${size}) exceeds max (${maxSize}). ` +
+          `Please reduce number of operands in: "${expressionString}"`);
+    }
   }
 
   /**
@@ -111,8 +129,25 @@ export class BindExpression {
   }
 
   /**
+   * @param {!./bind-expr-defines.AstNode} ast
+   * @return {number}
+   * @private
+   */
+  numberOfNodesInAst_(ast) {
+    let nodes = 1;
+    if (ast.args) {
+      ast.args.forEach(arg => {
+        if (arg) {
+          nodes += this.numberOfNodesInAst_(arg);
+        }
+      });
+    }
+    return nodes;
+  }
+
+  /**
    * Recursively evaluates and returns value of `node` and its children.
-   * @param {?./bind-expr-defines.AstNode} node
+   * @param {./bind-expr-defines.AstNode} node
    * @param {!Object} scope
    * @throws {Error}
    * @return {BindExpressionResultDef}
