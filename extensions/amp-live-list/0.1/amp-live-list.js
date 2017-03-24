@@ -15,8 +15,10 @@
  */
 
 
+import {actionServiceForDoc} from '../../../src/action';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {liveListManagerFor, LiveListManager} from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
@@ -169,6 +171,9 @@ export class AmpLiveList extends AMP.BaseElement {
 
     /** @private @const {function(!Element, !Element): number} */
     this.comparator_ = this.sortByDataSortTime_.bind(this);
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.actions_ = null;
   }
 
   /** @override */
@@ -221,6 +226,8 @@ export class AmpLiveList extends AMP.BaseElement {
 
     this.curNumOfLiveItems_ = this.validateLiveListItems_(
         this.itemsSlot_, true);
+
+    this.actions_ = actionServiceForDoc(this.getAmpDoc());
 
     this.registerAction('update', this.updateAction_.bind(this));
   }
@@ -341,6 +348,7 @@ export class AmpLiveList extends AMP.BaseElement {
     if (shouldSendAmpDomUpdateEvent) {
       promise = promise.then(() => {
         this.sendAmpDomUpdateEvent_();
+        this.actions_.trigger(this.element, 'update', /* event */ null);
       });
     }
 
