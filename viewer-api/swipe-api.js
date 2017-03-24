@@ -52,6 +52,8 @@ let EventData;
 
 /**
  * SwipeApi is an interface the Viewer Swipe Protocol.
+ * To enable this protocol set cap=swipe in the Viewer's init params.
+ * This will add #cap=swipe to the AMP Doc's URL.
  * @interface
  */
 class SwipeApi {
