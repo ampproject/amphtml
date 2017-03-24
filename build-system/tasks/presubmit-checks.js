@@ -319,6 +319,7 @@ var forbiddenTerms = {
       'build-system/test-server.js',
       'src/cookies.js',
       'extensions/amp-analytics/0.1/cid-impl.js',
+      'extensions/amp-analytics/0.1/vendors.js',
       'testing/fake-dom.js',
       'dist.3p/current/integration.js',
     ],
@@ -522,7 +523,13 @@ var forbiddenTerms = {
       'src/service-worker/shell.js',
       'src/worker-error-reporting.js',
     ],
-  }
+  },
+  'new CustomEvent\\(': {
+    message: 'Use createCustomEvent() helper instead.',
+    whitelist: [
+      'src/event-helper.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
