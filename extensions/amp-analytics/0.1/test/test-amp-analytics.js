@@ -718,14 +718,14 @@ describe('amp-analytics', function() {
   it('expands url-replacements vars for scoped analytics', () => {
     const analytics = getAnalyticsTag({
       'requests': {
-        'pageview': 'https://example.com/AMPDOC_URL&AMP_VERSION&' +
-        'test1=${var1}&test2=${var2}&test3=${var3}&title=TITLE'},
+        'pageview': 'https://example.com/VIEWER&AMP_VERSION&' +
+        'test1=${var1}&test2=${var2}&test3=${var3}&url=AMPDOC_URL'},
       'triggers': [{
         'on': 'visible',
         'request': 'pageview',
         'vars': {
           'var1': 'x',
-          'var2': 'TITLE',
+          'var2': 'AMPDOC_URL',
           'var3': 'CLIENT_ID',
         },
       }]}, {
@@ -734,9 +734,9 @@ describe('amp-analytics', function() {
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
-        'https://example.com/AMPDOC_URL&%24internalRuntimeVersion%24' +
-        '&test1=x&test2=Test%20Title&test3=CLIENT_ID' +
-        '&title=Test%20Title');
+        'https://example.com/VIEWER&%24internalRuntimeVersion%24' +
+        '&test1=x&test2=about%3Asrcdoc&test3=CLIENT_ID' +
+        '&url=about%3Asrcdoc');
     });
   });
 
