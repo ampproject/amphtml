@@ -38,6 +38,7 @@ import {
   variableServiceFor,
 } from './variables';
 import {ANALYTICS_CONFIG} from './vendors';
+import {ScopedElementWhiteList} from './url-replacement-whitelists';
 
 // Register doc-service factory.
 AMP.registerServiceForDoc(
@@ -76,6 +77,9 @@ export class AmpAnalytics extends AMP.BaseElement {
      * the config from the predefined type is merged with the inline config
      */
     this.type_ = null;
+
+    /** @private {!boolean} */
+    this.isScoped_ = !!element.getAttribute('scope');
 
     /**
      * @private {Object<string, string>} A map of request names to the request
@@ -293,7 +297,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   fetchRemoteConfig_() {
     let remoteConfigUrl = this.element.getAttribute('config');
-    if (!remoteConfigUrl) {
+    if (!remoteConfigUrl || this.isScoped_) {
       return Promise.resolve();
     }
     assertHttpsUrl(remoteConfigUrl, this.element);
@@ -504,9 +508,12 @@ export class AmpAnalytics extends AMP.BaseElement {
         const expansionOptions = this.expansionOptions_(event, trigger);
         return this.variableService_.expandTemplate(request, expansionOptions);
       })
-      .then(request =>
+      .then(request => {
+        const whiteList = this.isScoped_ ? ScopedElementWhiteList : undefined;
         // For consistency with amp-pixel we also expand any url replacements.
-        urlReplacementsForDoc(this.element).expandAsync(request))
+        return urlReplacementsForDoc(this.element).expandAsync(
+            request, undefined, whiteList);
+      })
       .then(request => {
         this.sendRequest_(request, trigger);
         return request;
