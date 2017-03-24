@@ -25,7 +25,7 @@
 import './polyfills';
 import {AmpContext} from './ampcontext';
 import {installEmbedStateListener, manageWin} from './environment';
-import {isExperimentOn} from '../src/experiments';
+import {isExperimentOn} from './3p';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {
   computeInMasterFrame,
@@ -433,7 +433,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
 };
 
 function installContext(win) {
-  if (isExperimentOn(win, AMP_CONTEXT_EXPERIMENT)) {
+  if (isExperimentOn(AMP_CONTEXT_EXPERIMENT)) {
     // TODO(alanorozco): Enhance AmpContext to match standard implementation.
     win.context = new AmpContext(win);
     return;
