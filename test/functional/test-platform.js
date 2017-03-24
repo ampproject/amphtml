@@ -41,7 +41,7 @@ describe('Platform', () => {
     isWebKit = false;
     majorVersion = 0;
     iosVersion = '';
-    iosMajorVersion = 0;
+    iosMajorVersion = null;
   });
 
   function testUserAgent(userAgentString) {
