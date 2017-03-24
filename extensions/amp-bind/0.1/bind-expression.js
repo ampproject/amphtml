@@ -113,8 +113,8 @@ export class BindExpression {
     const maxSize = opt_maxAstSize || DEFAULT_MAX_AST_SIZE;
     const skipConstraint = getMode().localDev && !getMode().test;
     if (size > maxSize && !skipConstraint) {
-      throw new Error(`Expression size (${size}) exceeds max (${maxSize}): ` +
-          `"${expressionString}"`);
+      throw new Error(`Expression size (${size}) exceeds max (${maxSize}). ` +
+          `Please reduce number of operands in: "${expressionString}"`);
     }
   }
 
