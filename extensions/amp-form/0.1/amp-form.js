@@ -232,6 +232,26 @@ export class AmpForm {
   }
 
   /**
+   * Triggers 'amp-form-submit' event in 'amp-analytics' and
+   * generates variables for form fields to be accessible in analytics
+   *
+   * @private
+   */
+  triggerFormSubmitInAnalytics_() {
+    const formDataForAnalytics = {};
+    const formObject = this.getFormAsObject_();
+
+    for (const k in formObject) {
+      if (formObject.hasOwnProperty(k)) {
+        formDataForAnalytics['formFields[' + k + ']'] = formObject[k].join(',');
+      }
+    }
+    formDataForAnalytics['formId'] = this.form_.id;
+
+    this.analyticsEvent_('amp-form-submit', formDataForAnalytics);
+  }
+
+  /**
    * Handles submissions through action service invocations.
    *   e.g. <img on=tap:form.submit>
    * @private
@@ -293,6 +313,7 @@ export class AmpForm {
       user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
           'origin submit action: %s', this.form_);
     }
+
     if (this.xhrAction_) {
       this.handleXhrSubmit_(varSubsFields);
     } else if (this.method_ == 'POST') {
@@ -331,8 +352,11 @@ export class AmpForm {
       varSubPromises.push(
           this.urlReplacement_.expandInputValueAsync(varSubsFields[i]));
     }
+
     // Wait until all variables have been substituted or 100ms timeout.
     const p = this.waitOnPromisesOrTimeout_(varSubPromises, 100).then(() => {
+      this.triggerFormSubmitInAnalytics_();
+
       let xhrUrl, body;
       if (isHeadOrGet) {
         xhrUrl = addParamsToUrl(
@@ -397,6 +421,7 @@ export class AmpForm {
     for (let i = 0; i < varSubsFields.length; i++) {
       this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
     }
+    this.triggerFormSubmitInAnalytics_();
   }
 
   /**
