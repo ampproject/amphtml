@@ -22,6 +22,25 @@ import {user} from './log';
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
 /**
+ * Returns a CustomEvent with a given type and detail; supports fallback for IE.
+ * @param {!Window} win
+ * @param {string} type
+ * @param {Object} detail
+ * @return {!Event}
+ */
+export function createCustomEvent(win, type, detail) {
+  if (win.CustomEvent) {
+    return new win.CustomEvent(type, {detail});
+  } else {
+    // Deprecated fallback for IE.
+    const e = win.document.createEvent('CustomEvent');
+    e.initCustomEvent(
+        type, /* canBubble */ false, /* cancelable */ false, detail);
+    return e;
+  }
+}
+
+/**
  * Listens for the specified event on the element.
  * @param {!EventTarget} element
  * @param {string} eventType

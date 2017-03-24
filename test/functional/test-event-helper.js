@@ -15,6 +15,7 @@
  */
 
 import {
+  createCustomEvent,
   isLoaded,
   listen,
   listenOnce,
@@ -226,4 +227,13 @@ describe('EventHelper', () => {
     return promise;
   });
 
+  it('should polyfill CustomEvent constructor', () => {
+    const native = createCustomEvent(window, 'foo', {bar: 123});
+    expect(native.type).to.equal('foo');
+    expect(native.detail).to.deep.equal({bar: 123});
+
+    const polyfilled = createCustomEvent({document}, 'foo', {bar: 123});
+    expect(polyfilled.type).to.equal('foo');
+    expect(polyfilled.detail).to.deep.equal({bar: 123});
+  });
 });

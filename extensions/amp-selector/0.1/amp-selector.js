@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {actionServiceForDoc} from '../../../src/action';
 import {closest} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 export class AmpSelector extends AMP.BaseElement {
@@ -208,11 +209,11 @@ export class AmpSelector extends AMP.BaseElement {
         // 'targetOption' - option value of the selected or deselected element.
         // 'selectedOptions' - array of option values of selected elements.
         const name = 'select';
-        const detail = {
-          targetOption: el.getAttribute('option'),
-          selectedOptions: selectedValues,
-        };
-        const selectEvent = new CustomEvent(`amp-selector.${name}`, {detail});
+        const selectEvent =
+            createCustomEvent(this.win, `amp-selector.${name}`, {
+              targetOption: el.getAttribute('option'),
+              selectedOptions: selectedValues,
+            });
         this.action_.trigger(this.element, name, selectEvent);
       }
     });
