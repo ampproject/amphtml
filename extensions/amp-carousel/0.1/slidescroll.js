@@ -36,6 +36,9 @@ const SHOWN_CSS_CLASS = '-amp-slide-item-show';
 const NATIVE_SNAP_TIMEOUT = 35;
 
 /** @const {number} */
+const IOS_CUSTOM_SNAP_TIMEOUT = 45;
+
+/** @const {number} */
 const NATIVE_TOUCH_TIMEOUT = 120;
 
 /** @const {number} */
@@ -330,8 +333,8 @@ export class AmpSlideScroll extends BaseSlides {
 
     if (!this.touchEndTimeout_) {
       const timeout =
-          this.hasNativeSnapPoints_ || this.isIos_ ?
-              NATIVE_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT;
+      this.hasNativeSnapPoints_? NATIVE_SNAP_TIMEOUT : (
+          this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = timerFor(this.win).delay(() => {
 
@@ -354,9 +357,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   handleCustomElasticScroll_(currentScrollLeft) {
     const scrollWidth = this.slidesContainer_./*OK*/scrollWidth;
-    if (this.previousScrollLeft_ == null) {
-      this.elasticScrollState_ = 0
-    } else if (this.elasticScrollState_ == -1 &&
+    if (this.elasticScrollState_ == -1 &&
         currentScrollLeft >= this.previousScrollLeft_) {
       // Elastic Scroll is reversing direction take control.
       this.customSnap_(currentScrollLeft).then(() => {
@@ -473,7 +474,6 @@ export class AmpSlideScroll extends BaseSlides {
           // Make the container scrollable again to enable user swiping.
           this.slidesContainer_.classList.remove('-amp-no-scroll');
         }
-        this.previousScrollLeft_ = null;
         this.snappingInProgress_ = false;
       });
     });
