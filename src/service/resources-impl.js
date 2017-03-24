@@ -25,7 +25,7 @@ import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
 import {fromClassForDoc} from '../service';
-import {inputFor} from '../input';
+import {installInputService, inputFor} from '../input';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {vsyncFor} from '../vsync';
@@ -336,6 +336,7 @@ export class Resources {
 
   /** @private */
   monitorInput_() {
+    installInputService(this.win);
     const input = inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);

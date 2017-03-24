@@ -240,10 +240,16 @@ export class Input {
 }
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
+ */
+export function installInputService(win) {
+  registerServiceBuilder(win, 'input', Input);
+}
+
+/**
+ * @param {!Window} win
  * @return {!Input}
  */
-export function inputFor(window) {
-  registerServiceBuilder(window, 'input', Input);
-  return getService(window, 'input');
+export function inputFor(win) {
+  return getService(win, 'input');
 };
