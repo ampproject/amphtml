@@ -840,6 +840,11 @@ export class AmpLiveList extends AMP.BaseElement {
     return this.updateTime_;
   }
 
+  /** @override */
+  getDynamicElements() {
+    return this.itemsSlot_ ? [this.itemsSlot_] : [];
+  }
+
   sendAmpDomUpdateEvent_() {
     const event = this.win.document.createEvent('Event');
     event.initEvent('amp:dom-update', true, true);

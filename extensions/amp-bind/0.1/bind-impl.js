@@ -15,7 +15,6 @@
  */
 
 import {BindExpressionResultDef} from './bind-expression';
-import {childElementByAttr} from '../../../src/dom';
 import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
@@ -25,7 +24,6 @@ import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
-import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {resourcesForDoc} from '../../../src/resources';
 import {filterSplice} from '../../../src/utils/array';
@@ -382,7 +380,17 @@ export class Bind {
 
       let dynamicElements = [];
       if (typeof element.getDynamicElements === 'function') {
-        dynamicElements = element.getDynamicElements(mutations);
+        dynamicElements = element.getDynamicElements();
+      } else if (element.tagName === 'FORM') {
+        // FORM is not an amp element, so it doesn't have the getter.
+        const successDiv = element./*OK*/querySelector('[submit-success]');
+        if (successDiv) {
+          dynamicElements.push(successDiv);
+        }
+        const errorDiv = element./*OK*/querySelector('[submit-error]');
+        if (errorDiv) {
+          dynamicElements.push(errorDiv);
+        }
       }
       dynamicElements.forEach(elementToObserve => {
         this.mutationObserver_.observe(elementToObserve, {childList: true});
