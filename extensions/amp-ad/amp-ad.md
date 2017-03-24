@@ -81,6 +81,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 
 ## Supported ad networks
 
+- [A8](../../ads/a8.md)
 - [A9](../../ads/a9.md)
 - [AccessTrade](../../ads/accesstrade.md)
 - [Adblade](../../ads/adblade.md)
