@@ -29,13 +29,13 @@
  *   screenY: number,
  * }}
  */
-let TouchData;
+let TouchDataDef;
 
 /**
  * @typedef {{
  *   type: string,
- *   touches: !Array<TouchData>|undefined,
- *   changedTouches: !Array<TouchData>|undefined,
+ *   touches: !Array<TouchDataDef>|undefined,
+ *   changedTouches: !Array<TouchDataDef>|undefined,
  *   altKey: boolean,
  *   ctrlKey: boolean,
  *   detail: number,
@@ -47,30 +47,30 @@ let TouchData;
  *   which: number,
  * }}
  */
-let EventData;
+let EventDataDef;
 
 /**
- * SwipeApi is an interface the Viewer Swipe Protocol.
+ * SwipeApiDef is an interface the Viewer Swipe Protocol.
  * @interface
  */
-class SwipeApi {
+class SwipeApiDef {
   /**
    * Notify viewer that swipe touch has started.
-   * @param {!EventData} unusedEvent
+   * @param {!EventDataDef} unusedEvent
    * @param {boolean} unusedRsvp always false
    */
   touchstart(unusedEvent, unusedRsvp) {}
 
   /**
    * Notify viewer about the swipe move event.
-   * @param {!EventData} unusedEvent
+   * @param {!EventDataDef} unusedEvent
    * @param {boolean} unusedRsvp always false
    */
   touchmove(unusedEvent, unusedRsvp) {}
 
   /**
    * Notify viewer that swipe touch has ended.
-   * @param {!EventData} unusedEvent
+   * @param {!EventDataDef} unusedEvent
    * @param {boolean} unusedRsvp always false
    */
   touchend(unusedEvent, unusedRsvp) {}
