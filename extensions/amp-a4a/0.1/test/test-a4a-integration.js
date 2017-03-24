@@ -103,8 +103,7 @@ describe('integration test: a4a', () => {
             credentials: 'omit',
           }).returns(Promise.resolve({
             json() {
-              return Promise.resolve(
-                  {keys: [JSON.parse(validCSSAmp.publicKey)]});
+              return Promise.resolve(JSON.parse(validCSSAmp.signingKey));
             },
           }));
     }
