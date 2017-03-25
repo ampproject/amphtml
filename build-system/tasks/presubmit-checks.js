@@ -279,6 +279,7 @@ var forbiddenTerms = {
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
+      'dist.3p/current/integration.js', // includes previous
     ],
   },
   '\\.sendMessageAwaitResponse\\(': {
@@ -432,6 +433,7 @@ var forbiddenTerms = {
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
       'src/event-helper-listen.js',
+      'dist.3p/current/integration.js',  // includes previous
     ],
   },
   'setTimeout.*throw': {
