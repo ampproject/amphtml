@@ -46,7 +46,7 @@ If the resource requested by the `amp-img` component fails to load, the space wi
 
 A placeholder background color or other visual can be set using CSS selector and style on the element itself.
 
-The `amp-img` includes attributes for denoting attribution via the attribution attribute.
+The `amp-img` includes attributes for denoting attribution via the `attribution` attribute.
 
 Additional image features like captions can be implemented with standard HTML - using the `figure` and `figcaption` elements, for example.
 
