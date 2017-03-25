@@ -18,7 +18,7 @@
  * Used for inserted scoped analytics element.
  * @const {!Object<string, boolean>}
  */
-export const ScopedElementWhiteList = {
+export const SANDBOX_AVAILABLE_VARS = {
   'RANDOM': true,
   'CANONICAL_URL': true,
   'CANONICAL_HOST': true,

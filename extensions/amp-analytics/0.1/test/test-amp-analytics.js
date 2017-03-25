@@ -335,7 +335,7 @@ describe('amp-analytics', function() {
         'https://example.com/bar&${clientId}&baz', 'clientId': 'c1'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'scope': 'true',
+      'sandbox': 'true',
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -413,7 +413,7 @@ describe('amp-analytics', function() {
       'requests': {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'scope': 'true',
+      'sandbox': 'true',
     });
 
     return waitForSendRequest(analytics).then(() => {
@@ -428,7 +428,7 @@ describe('amp-analytics', function() {
       'requests': {'foo': 'https://example.com/random=${random}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'scope': 'true',
+      'sandbox': 'true',
     });
 
     return waitForSendRequest(analytics).then(() => {
@@ -445,7 +445,7 @@ describe('amp-analytics', function() {
           'https://example.com/cid=${clientId(analytics-abc)}random=RANDOM'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'scope': 'true',
+      'sandbox': 'true',
     });
 
     return waitForSendRequest(analytics).then(() => {
@@ -541,7 +541,7 @@ describe('amp-analytics', function() {
           'var2': 'test2',
         },
       }]}, {
-        'scope': 'true',
+        'sandbox': 'true',
       });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -729,7 +729,7 @@ describe('amp-analytics', function() {
           'var3': 'CLIENT_ID',
         },
       }]}, {
-        'scope': 'true',
+        'sandbox': 'true',
       });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -959,7 +959,7 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
       'config': 'config1',
-      'scope': 'true',
+      'sandbox': 'true',
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/local');
@@ -1057,7 +1057,7 @@ describe('amp-analytics', function() {
       const config = getConfig(1);
       config.triggers.sampled.sampleSpec.sampleOn = '${clientId}';
       const analytics = getAnalyticsTag(config, {
-        'scope': 'true',
+        'sandbox': 'true',
       });
 
       const urlReplacements = urlReplacementsForDoc(analytics.element);

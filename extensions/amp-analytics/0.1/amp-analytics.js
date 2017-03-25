@@ -38,7 +38,7 @@ import {
   variableServiceFor,
 } from './variables';
 import {ANALYTICS_CONFIG} from './vendors';
-import {ScopedElementWhiteList} from './url-replacement-whitelists';
+import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 
 // Register doc-service factory.
 AMP.registerServiceForDoc(
@@ -79,7 +79,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.type_ = null;
 
     /** @private {!boolean} */
-    this.isScoped_ = element.hasAttribute('scope');
+    this.isScoped_ = element.hasAttribute('sandbox');
 
     /**
      * @private {Object<string, string>} A map of request names to the request
@@ -509,7 +509,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         return this.variableService_.expandTemplate(request, expansionOptions);
       })
       .then(request => {
-        const whiteList = this.isScoped_ ? ScopedElementWhiteList : undefined;
+        const whiteList = this.isScoped_ ? SANDBOX_AVAILABLE_VARS : undefined;
         // For consistency with amp-pixel we also expand any url replacements.
         return urlReplacementsForDoc(this.element).expandAsync(
             request, undefined, whiteList);
