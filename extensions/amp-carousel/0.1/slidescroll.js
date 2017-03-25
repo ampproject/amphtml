@@ -36,7 +36,13 @@ const SHOWN_CSS_CLASS = '-amp-slide-item-show';
 const NATIVE_SNAP_TIMEOUT = 35;
 
 /** @const {number} */
+const IOS_CUSTOM_SNAP_TIMEOUT = 45;
+
+/** @const {number} */
 const NATIVE_TOUCH_TIMEOUT = 120;
+
+/** @const {number} */
+const IOS_TOUCH_TIMEOUT = 45;
 
 /** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
@@ -135,7 +141,6 @@ export class AmpSlideScroll extends BaseSlides {
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
 
-    // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
     if (this.shouldDisableCssSnap_) {
       this.hasNativeSnapPoints_ = false;
     }
@@ -154,6 +159,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.slidesContainer_.setAttribute('aria-live', 'polite');
 
     // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
+    // https://bugs.webkit.org/show_bug.cgi?id=169800
     if (this.shouldDisableCssSnap_) {
       this.slidesContainer_.classList.add('-amp-slidescroll-no-snap');
     }
@@ -178,11 +184,6 @@ export class AmpSlideScroll extends BaseSlides {
       slideWrapper.appendChild(slide);
       slideWrapper.classList.add('-amp-slide-item');
 
-      // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
-      if (this.shouldDisableCssSnap_) {
-        slideWrapper.classList.add('-amp-slidescroll-no-snap');
-      }
-
       this.slidesContainer_.appendChild(slideWrapper);
       this.slideWrappers_.push(slideWrapper);
     });
@@ -197,10 +198,8 @@ export class AmpSlideScroll extends BaseSlides {
     this.slidesContainer_.addEventListener(
         'touchmove', this.touchMoveHandler_.bind(this));
 
-    if (this.hasNativeSnapPoints_) {
-      this.slidesContainer_.addEventListener(
-          'touchend', this.touchEndHandler_.bind(this));
-    }
+    this.slidesContainer_.addEventListener(
+        'touchend', this.touchEndHandler_.bind(this));
 
     this.registerAction('goToSlide', invocation => {
       const args = invocation.args;
@@ -247,6 +246,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (this.scrollTimeout_) {
         timerFor(this.win).cancel(this.scrollTimeout_);
       }
+      const timeout = this.isIos_ ? IOS_TOUCH_TIMEOUT : NATIVE_TOUCH_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
       this.touchEndTimeout_ = timerFor(this.win).delay(() => {
         const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
@@ -256,7 +256,7 @@ export class AmpSlideScroll extends BaseSlides {
         }
         this.updateOnScroll_(currentScrollLeft);
         this.touchEndTimeout_ = null;
-      }, NATIVE_TOUCH_TIMEOUT);
+      }, timeout);
     }
     this.hasTouchMoved_ = false;
   }
@@ -338,8 +338,8 @@ export class AmpSlideScroll extends BaseSlides {
     }
 
     if (!this.touchEndTimeout_) {
-      const timeout =
-          this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT;
+      const timeout = this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : (
+          this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = timerFor(this.win).delay(() => {
 
@@ -414,7 +414,6 @@ export class AmpSlideScroll extends BaseSlides {
       // Move backward.
       toScrollLeft = 0;
     }
-
     return this.animateScrollLeft_(currentScrollLeft, toScrollLeft).then(() => {
       this.updateOnScroll_(toScrollLeft);
     });
