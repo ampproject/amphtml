@@ -29,9 +29,10 @@
  */
 
 import {getIframe} from '../../../src/3p-frame';
+import {listenFor} from '../../../src/iframe-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isExperimentOn} from '../experiments';
 import {removeElement} from '../../../src/dom';
+import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-gist';
@@ -59,38 +60,24 @@ export class AmpGist extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @orverride */
+  /** @override */
   buildCallback() {
     user().assert(isExperimentOn(this.win, TAG),
         `Experiment "${TAG}" is disabled.`);
   }
 
-  /**@override*/
+  /** @override */
   layoutCallback() {
-    const gistid = user().assert(
-      this.element.getAttribute('data-gistid'),
-      'The data-gistid attribute is required for <amp-gist> %s',
-      this.element);
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    const url = 'https://gist.github.com/';
-
-    const iframe = getIframe(this.win, this.element, 'gist');
-
-    iframe.setAttribute('frameborder', 'no');
-    iframe.setAttribute('scrolling', 'no');
-
-    const src = url + encodeURIComponent(gistid) + '.pibb';
-
-    iframe.src = src;
-
+    /* the third parameter 'github' ties it to the 3p/github.js */
+    const iframe = getIframe(this.win, this.element, 'github');
     this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
+    // Triggered by window.context.requestResize() inside the iframe.
+    listenFor(iframe, 'embed-size', data => {
+      this./*REVIEW*/changeHeight(data.height);
+    }, /* opt_is3P */true);
+
     this.element.appendChild(iframe);
-
     this.iframe_ = iframe;
-
     return this.loadPromise(iframe);
   }
 
