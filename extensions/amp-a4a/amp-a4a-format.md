@@ -61,6 +61,21 @@ rel="canonical">` tag.
    and won't be independently search-indexed, so self-referencing
    would be useless.
 
+1. The creative can include optional meta tags in HTML head as identifiers,
+   in the format of `<meta name="amp4ads-id" content="vendor=${vendor},type=${type},id=${id}">`.
+   Those meta tags must be placed before the `amp4ads-v0.js` script. The 
+   value of `vendor` and `id` are strings containing only [0-9a-zA-Z_-].
+   The value of `type` is either `creative-id` or `impression-id`. 
+
+   _Rationale_: Those custom identifiers can be used to identify the impression
+   or the creative. They can be helpful for reporting and debugging. 
+
+   _Example_:
+   ```html
+<meta name="amp4ads-id" content="vendor=adsense,type=creative-id,id=1283474">
+<meta name="amp4ads-id" content="vendor=adsense,type=impression-id,id=xIsjdf921S">
+   ```
+
 1. Media: Videos must not enable autoplay.  This includes 
 both the `<amp-video>`
    tag as well as autoplay on `<amp-anim>`, `<amp-carousel>`, and 3P video 
@@ -330,7 +345,8 @@ HTML5 compatible.
     prohibited.
 
 4.2.5 `<meta>`
-  - Only `<meta charset=utf8>` and `<meta name=viewport>` are allowed.
+  - Only `<meta charset=utf8>`, `<meta name=viewport>` and 
+    `<meta name=amp4ads-id>` are allowed.
 
 4.2.6 `<style>`  
 

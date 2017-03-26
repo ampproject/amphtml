@@ -202,6 +202,7 @@ key_value:
 
 ```text
 Array.concat()
+Array.includes()
 Array.indexOf()
 Array.join()
 Array.lastIndexOf()
