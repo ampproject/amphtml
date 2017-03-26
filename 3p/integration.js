@@ -40,6 +40,7 @@ import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
+import {github} from './github';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
@@ -241,6 +242,7 @@ register('felmat', felmat);
 register('flite', flite);
 register('fusion', fusion);
 register('genieessp', genieessp);
+register('github', github);
 register('gmossp', gmossp);
 register('holder', holder);
 register('ibillboard', ibillboard);
