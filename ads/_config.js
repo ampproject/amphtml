@@ -443,6 +443,13 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  outbrain: {
+    prefetch: 'https://25d64758.ngrok.io/widgetAMP/outbrainAMP.js',
+    preconnect: [
+      'https://odb.outbrain.com'
+    ]
+  },
+
   plista: {},
 
   popin: {

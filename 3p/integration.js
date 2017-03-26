@@ -116,6 +116,7 @@ import {nend} from '../ads/nend';
 import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
+import {outbrain} from '../ads/outbrain';
 import {plista} from '../ads/plista';
 import {popin} from '../ads/popin';
 import {pubmatic} from '../ads/pubmatic';
@@ -161,6 +162,7 @@ const AMP_EMBED_ALLOWED = {
   mywidget: true,
   plista: true,
   smartclip: true,
+  outbrain: true,
   taboola: true,
   zergnet: true,
 };
@@ -269,6 +271,7 @@ register('nend', nend);
 register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);
+register('outbrain', outbrain);
 register('plista', plista);
 register('popin', popin);
 register('pubmatic', pubmatic);
