@@ -36,24 +36,8 @@ export function outbrain(global, data) {
     referrer: data.referrer || global.context.referrer
   };
 
-  // push the two object into the '_outbrain' global
-  (global._outbrain = global._outbrain || []);
-
-  // observation on entering/leaving the view
-  global.context.observeIntersection(function(changes) {
-    changes.forEach(function(c) {
-      if (c && c.intersectionRect && c.intersectionRect.height) {
-        global._outbrain.push({
-          visible: true,
-          rects: c,
-          placement: data.placement
-        });
-      }
-    });
-  });
-
   // load the Outbrain AMP JS file
-  loadScript(global, 'https://25d64758.ngrok.io/widgetAMP/outbrainAMP.js', () => {
+  loadScript(global, 'https://widgets.outbrain.com/widgetAMP/outbrainAMP.js', () => {
     window.ampOBR.init(widgetData);
   });
 }

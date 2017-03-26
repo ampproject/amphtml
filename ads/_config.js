@@ -444,7 +444,8 @@ export const adConfig = {
   },
 
   outbrain: {
-    prefetch: 'https://25d64758.ngrok.io/widgetAMP/outbrainAMP.js',
+    renderStartImplemented: true,
+    prefetch: 'https://widgets.outbrain.com/widgetAMP/outbrainAMP.js',
     preconnect: [
       'https://odb.outbrain.com'
     ]
