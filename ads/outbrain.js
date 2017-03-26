@@ -37,7 +37,7 @@ export function outbrain(global, data) {
   };
 
   // load the Outbrain AMP JS file
-  loadScript(global, 'https://widgets.outbrain.com/widgetAMP/outbrainAMP.js', () => {
+  loadScript(global, 'https://widgets.outbrain.com/widgetAMP/outbrainAMP.min.js', () => {
     window.ampOBR.init(widgetData);
   });
 }
