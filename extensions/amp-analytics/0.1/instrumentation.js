@@ -121,6 +121,16 @@ const ALLOWED_IN_EMBED = [
   AnalyticsEventType.HIDDEN,
 ];
 
+/**
+ * Events that are NOT allowed in scoped analytics.
+ * @const {Array<AnalyticsEventType>}
+ */
+const BLACKLIST_IN_SCOPE = [
+  AnalyticsEventType.SCROLL,
+  AnalyticsEventType.TIMER,
+  AnalyticsEventType.HIDDEN,
+];
+
 
 /**
  * @implements {../../../src/service.Disposable}
@@ -246,6 +256,10 @@ export class InstrumentationService {
    */
   addListenerDepr_(config, listener, analyticsElement) {
     const eventType = config['on'];
+
+    // Black list for scoped config listener.
+    // If In BlackList {user error}
+
     if (!this.isTriggerAllowed_(eventType, analyticsElement)) {
       user().error(TAG, 'Trigger type "' + eventType + '" is not ' +
         'allowed in the embed.');
@@ -310,6 +324,7 @@ export class InstrumentationService {
         'createVisibilityListener should be called with visible or hidden ' +
         'eventType');
     const shouldBeVisible = eventType == AnalyticsEventType.VISIBLE;
+    const isScoped = !!config['isScoped'] || false;
     /** @const {!JSONType} */
     const spec = config['visibilitySpec'];
     if (spec) {
@@ -557,10 +572,20 @@ export class AnalyticsGroup {
    */
   addTrigger(config, handler) {
     let eventType = dev().assertString(config['on']);
+    const isScoped = !!config['isScoped'] || false;
+
     // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
     if (eventType == 'visible' && this.visibilityV3_) {
       eventType = 'visible-v3';
     }
+
+    // Blacklist config for scoped element
+    if (isScoped && BLACKLIST_IN_SCOPE.indexOf(eventType) > -1) {
+      user().error(TAG, 'Trigger type "' + eventType + '" is not ' +
+          'allowed in scoped analytics element.');
+      return;
+    }
+
     let trackerProfile = EVENT_TRACKERS[eventType];
     if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
       trackerProfile = EVENT_TRACKERS['custom'];

@@ -177,6 +177,9 @@ export class AnalyticsRoot {
     if (selector == ':host') {
       return this.getHostElement();
     }
+    if (selector == ':scope') {
+      return context;
+    }
 
     // Query search based on the selection method.
     let found;
@@ -241,12 +244,17 @@ export class AnalyticsRoot {
       const rootElement = this.getRootElement();
       const isSelectAny = (selector == '*');
       const isSelectRoot = (selector == ':root');
+      const isSelectScope = (selector == ':scope');
       let target = event.target;
       while (target) {
 
         // Target must be contained by this root.
         if (!this.contains(target)) {
           break;
+        }
+        // `:scope` selector should be the context itself.
+        if (isSelectScope && target != context) {
+          continue;
         }
         // `:scope` context must contain the target.
         if (selectionMethod == 'scope' &&
@@ -263,6 +271,7 @@ export class AnalyticsRoot {
         // Check if the target matches the selector.
         if (isSelectAny ||
             isSelectRoot && target == rootElement ||
+            isSelectScope && target == context ||
             matchesNoInline(target, selector)) {
           listener(target, event);
           // Don't fire the event multiple times even if the more than one
