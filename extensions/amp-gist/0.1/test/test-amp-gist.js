@@ -25,8 +25,6 @@ adopt(window);
 
 describe('amp-gist', () => {
 
-  const embedUrl = 'https://gist.github.com/b9bb35bc68df68259af94430f012425f.pibb';
-
   function getIns(gistid, opt_attrs) {
     return createIframePromise().then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
@@ -43,15 +41,6 @@ describe('amp-gist', () => {
       return iframe.addElement(ins);
     });
   }
-
-  it('renders', () => {
-    return getIns('b9bb35bc68df68259af94430f012425f').then(ins => {
-      const iframe = ins.firstChild;
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(embedUrl);
-    });
-  });
 
   it('renders responsively', () => {
     return getIns('b9bb35bc68df68259af94430f012425f').then(ins => {
