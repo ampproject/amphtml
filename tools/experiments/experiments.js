@@ -272,6 +272,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
     spec: 'https://github.com/ampproject/amphtml/issues/7670',
   },
+  {
+    id: 'amp-gist',
+    name: 'Embed a GitHub gist',
+  },
 ];
 
 if (getMode().localDev) {
