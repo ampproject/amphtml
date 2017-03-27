@@ -35,7 +35,7 @@ export class AmpContext {
     /** @type {?string} */
     this.clientId = null;
 
-    /** @type {?string} */
+    /** @type {?{href: string}} */
     this.location = null;
 
     /** @type {?string} */
@@ -47,11 +47,9 @@ export class AmpContext {
     /** @type {?string} */
     this.sentinel = null;
 
-    // TODO(alanorozco): confirm type
-    /** @type {?} */
+    /** @type {?number} */
     this.startTime = null;
 
-    // TODO(alanorozco): confirm type
     /** @type {?string} */
     this.referrer = null;
 
@@ -145,13 +143,13 @@ export class AmpContext {
       throw new Error('Could not setup metadata.');
     }
     const context = dataObject._context;
-    this.location = context.location;
-    this.canonicalUrl = context.canonicalUrl;
-    this.clientId = context.clientId;
-    this.pageViewId = context.pageViewId;
-    this.sentinel = context.sentinel;
-    this.startTime = context.startTime;
-    this.referrer = context.referrer;
+    this.location = context.location || null;
+    this.canonicalUrl = context.canonicalUrl || null;
+    this.clientId = context.clientId || null;
+    this.pageViewId = context.pageViewId || null;
+    this.sentinel = context.sentinel || null;
+    this.startTime = context.startTime || null;
+    this.referrer = context.referrer || null;
   }
 
   /**
