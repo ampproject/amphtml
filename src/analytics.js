@@ -69,6 +69,7 @@ export function insertAnalyticsElement(
     parentElement, config, loadAnalytics = false) {
   const doc = parentElement.ownerDocument;
   const analyticsElem = doc.createElement('amp-analytics');
+  analyticsElem.setAttribute('sandbox', 'true');
   const scriptElem = createElementWithAttributes(doc,
         'script', {
           'type': 'application/json',

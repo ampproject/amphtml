@@ -584,10 +584,12 @@ export class UrlReplacements {
    * TODO(mkhatib, #6322): Deprecate and please use expandUrlAsync or expandStringAsync.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
    * @return {!Promise<string>}
    */
-  expandAsync(url, opt_bindings) {
-    return this.expandUrlAsync(url, opt_bindings);
+  expandAsync(url, opt_bindings, opt_whiteList) {
+    return this.expandUrlAsync(url, opt_bindings, opt_whiteList);
   }
 
 
@@ -643,12 +645,15 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
    * @return {!Promise<string>}
    */
-  expandUrlAsync(url, opt_bindings) {
+  expandUrlAsync(url, opt_bindings, opt_whiteList) {
     return /** @type {!Promise<string>} */ (
-        this.expand_(url, opt_bindings).then(
-            replacement => this.ensureProtocolMatches_(url, replacement)));
+        this.expand_(url, opt_bindings, undefined, undefined,
+            opt_whiteList).then(
+              replacement => this.ensureProtocolMatches_(url, replacement)));
   }
 
   /**
