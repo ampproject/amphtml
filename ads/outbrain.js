@@ -23,13 +23,13 @@ import {loadScript, validateData} from '../3p/3p';
 export function outbrain(global, data) {
 
   // ensure we have valid widgetId, htmlURL and ampURL
-  validateData(data, ['widgetid', 'htmlurl', 'ampurl']);
+  validateData(data, ['widgetids', 'htmlurl', 'ampurl']);
 
   const widgetData = {
     viewId: global.context.pageViewId,
-    widgetId: data.widgetid,
+    widgetIds: data.widgetids,
     htmlURL: data.htmlurl || global.context.canonicalUrl,
-    ampURL: data.ampurl,
+    ampURL: data.ampurl || global.context.sourceUrl,
     fbk: data.fbk || '',
     testMode: data.testmode || 'false',
     styleFile: data.stylefile || '',

@@ -16,7 +16,7 @@ limitations under the License.
 
 # Outbrain
 
-## Example
+## Example installation of the Outbrain widget
 
 ### Basic
 
@@ -35,8 +35,8 @@ The above code must be accompanied by AMP-enabled widgets delivered by Outbrain�
 
 ## Parameters
 
-- widgetId *(**mandatory**)* - Widget Id Provided by Account Manager.
-- htmlURL *(**mandatory**)* - The URL of the standard html version of the page.
-- ampURL *(**mandatory**)* - The URL of the AMP version of the page.
+- widgetIds *(**mandatory**)* - Widget Id Provided by Account Manager.
+- htmlURL *(optional)* - The URL of the standard html version of the page.
+- ampURL *(optional)* - The URL of the AMP version of the page.
 - testMode *(optional)* - Pass the parameter with the “true” value while testing the AMP pages. 
 - styleFile *(optional)* - Provide publisher an option to pass CSS file in order to inherit the design for the AMP displayed widget. **Consult with Account Manager regarding CSS options**.
