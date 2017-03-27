@@ -33,7 +33,7 @@ export function outbrain(global, data) {
     fbk: data.fbk || '',
     testMode: data.testmode || 'false',
     styleFile: data.stylefile || '',
-    referrer: data.referrer || global.context.referrer
+    referrer: data.referrer || global.context.referrer,
   };
 
   // load the Outbrain AMP JS file

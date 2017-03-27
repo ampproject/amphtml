@@ -445,10 +445,10 @@ export const adConfig = {
 
   outbrain: {
     renderStartImplemented: true,
-    prefetch: 'https://widgets.outbrain.com/widgetAMP/outbrainAMP.min.js',
+    prefetch: 'https://widgets-test.outbrain.com/widgetAMP/outbrainAMP.min.js',
     preconnect: [
-      'https://odb.outbrain.com'
-    ]
+      'https://odb.outbrain.com',
+    ],
   },
 
   plista: {},
