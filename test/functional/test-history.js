@@ -22,10 +22,8 @@ import {
   installHistoryServiceForDoc,
 } from '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
-import {
-  installTimerService,
-  timerServiceForTesting,
-} from '../../src/service/timer-impl';
+import {installTimerService} from '../../src/service/timer-impl';
+import {timerFor} from '../../src/timer';
 import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
 
@@ -188,10 +186,11 @@ describes.sandboxed('History install', {}, () => {
       onMessage: () => function() {},
     };
 
+    installTimerService(window);
     win = {
       services: {
         'viewer': {obj: viewer},
-        'timer': {obj: timerServiceForTesting(window)},
+        'timer': {obj: timerFor(window)},
       },
       history: {
         length: 0,
