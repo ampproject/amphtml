@@ -125,7 +125,9 @@ export function googleAdUrl(
     // Detect container types.
     let parentElement = adElement.parentElement;
     const containerTypeSet = {};
-    while (parentElement) {
+    // Ensure that we don't loop too long.
+    let counter = 0;
+    while (parentElement && counter++ < 20) {
       const tagName = parentElement.tagName.toUpperCase();
       if (ValidAdContainerTypes[tagName]) {
         containerTypeSet[ValidAdContainerTypes[tagName]] = true;
@@ -189,7 +191,6 @@ export function googleAdUrl(
     return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
   }));
 }
-
 
 /**
  * @param {!ArrayBuffer} creative
@@ -425,4 +426,3 @@ export function injectActiveViewAmpAnalyticsElement(
   ampAnalyticsElem.appendChild(scriptElem);
   a4a.element.appendChild(ampAnalyticsElem);
 }
-

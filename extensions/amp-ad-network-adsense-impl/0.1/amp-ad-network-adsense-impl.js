@@ -41,6 +41,7 @@ import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {extensionsFor} from '../../../src/extensions';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {computedStyle} from '../../../src/style';
 import {viewerForDoc} from '../../../src/viewer';
 import {AdsenseSharedState} from './adsense-shared-state';
 
@@ -165,7 +166,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
       {name: 'asnt', value: this.sentinel},
       {name: 'dff',
-        value: this.win.getComputedStyle(this.element)['font-family']},
+        value: computedStyle(this.win, this.element)['font-family']},
     ];
 
     if (sharedStateParams.prevFmts) {
