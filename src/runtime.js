@@ -76,7 +76,6 @@ import {installXhrService} from './service/xhr-impl';
 import {installBatchedXhrService} from './service/batched-xhr-impl';
 import {
   isExperimentOn,
-  isExperimentOnAllowUrlOverride,
   toggleExperiment,
 } from './experiments';
 import {parseUrl} from './url';
@@ -976,7 +975,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
  *     pumped.
  */
 function maybePumpEarlyFrame(win, cb) {
-  if (!isExperimentOnAllowUrlOverride(win, 'pump-early-frame')) {
+  if (!isExperimentOn(win, 'pump-early-frame')) {
     cb();
     return;
   }

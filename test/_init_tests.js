@@ -263,6 +263,7 @@ afterEach(function() {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
+
   const forgotGlobal = !!global.sandbox;
   if (forgotGlobal) {
     // The error will be thrown later to give possibly other sandboxes a
@@ -282,7 +283,7 @@ afterEach(function() {
   }
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
-  resetExperimentTogglesForTesting();
+  resetExperimentTogglesForTesting(window);
   setReportError(reportError);
 });
 

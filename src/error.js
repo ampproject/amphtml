@@ -25,7 +25,7 @@ import {
   isUserErrorMessage,
 } from './log';
 import {isProxyOrigin} from './url';
-import {isCanary} from './experiments';
+import {isCanary, experimentTogglesOrNull} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -340,6 +340,14 @@ export function getErrorReportUrl(message, filename, line, col, error,
     detectedJsEngine = detectJsEngineFromStack();
   }
   url += `&jse=${detectedJsEngine}`;
+
+  const exps = [];
+  const experiments = experimentTogglesOrNull();
+  for (const exp in experiments) {
+    const on = experiments[exp];
+    exps.push(`${exp}=${on ? '1' : '0'}`);
+  }
+  url += `&exps=${encodeURIComponent(exps.join(','))}`;
 
   if (error) {
     const tagName = error && error.associatedElement
