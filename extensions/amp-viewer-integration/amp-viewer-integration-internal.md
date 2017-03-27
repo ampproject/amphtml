@@ -352,7 +352,7 @@ The Viewer needs to respond with the following message over the port:
 And the handshake is established. 
 
 
-_Mobile Web handshake_**
+_Mobile_** _Web_** _handshake_**
 
 In the Viewer Init Params, add the flag `cap="handshakepoll"`. 
 
