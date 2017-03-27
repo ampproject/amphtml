@@ -402,7 +402,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'v=1&' +
         'a=1%7C1%7C_load_%7C_load_%7C-%7C${navTiming(navigationStart)}%7C' +
 		'${navTiming(domContentLoadedEventEnd)}%7C0%2C2%7C2%7C_onload_%7C' +
-		'_load_%7C-%7C${navTiming(domContentLoadedEventStart)}%7C' + 
+		'_load_%7C-%7C${navTiming(domContentLoadedEventStart)}%7C' +
 		'${navTiming(domContentLoadedEventEnd)}%7C0&' +
         'fId=${pageViewId}&' +
         'vID=${clientId(rxVisitor)}&' +
