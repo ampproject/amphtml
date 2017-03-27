@@ -1,5 +1,6 @@
 {
   "allow-doc-opt-in": ["visibility-v2", "visibility-v3"],
+  "allow-url-opt-in": ["pump-early-frame"],
 
   "canary": 1,
   "amp-experiment": 1,
