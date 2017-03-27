@@ -33,8 +33,6 @@ export class ValidationBubble {
     /** @private @const {string} */
     this.id_ = id;
 
-    // TODO(dvoytenko): Switch away from viewport for this class. Or migrate
-    // to ampdoc.
     /** @private @const {!../../../src/service/viewport-impl.Viewport} */
     this.viewport_ = viewportForDoc(ampdoc);
 
