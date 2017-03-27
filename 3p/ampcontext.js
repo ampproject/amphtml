@@ -53,6 +53,9 @@ export class AmpContext {
     /** @type {?string} */
     this.referrer = null;
 
+    /** @type {?boolean} */
+    this.hidden = null;
+
     this.findAndSetMetadata_();
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.getHostWindow_());
@@ -150,6 +153,7 @@ export class AmpContext {
     this.sentinel = context.sentinel || null;
     this.startTime = context.startTime || null;
     this.referrer = context.referrer || null;
+    this.hidden = context.hidden || null;
   }
 
   /**
