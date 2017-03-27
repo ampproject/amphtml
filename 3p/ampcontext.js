@@ -18,13 +18,16 @@ import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {tryParseJson} from '../src/json';
 
-export class AmpContext {
+export class AbstractAmpContext {
 
   /**
    *  @param {!Window} win The window that the instance is built inside.
    */
   constructor(win) {
-    /** @private {!Window} */
+    dev().assert(!this.isAbstractImplementation_(),
+        'Should not construct AbstractAmpContext instances directly');
+
+    /** @protected {!Window} */
     this.win_ = win;
 
     // This value is cached since it could be overwritten by the master frame
@@ -56,10 +59,36 @@ export class AmpContext {
     /** @type {?boolean} */
     this.hidden = null;
 
+    /** @type {!Array<function(Object)>} */
+    this.visibilityCallbacks_ = [];
+
     this.findAndSetMetadata_();
+
+    /** @protected {!IframeMessagingClient} */
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.getHostWindow_());
     this.client_.setSentinel(dev().assertString(this.sentinel));
+
+    this.listenForPageVisibility_();
+  }
+
+  /**
+   * @return {boolean}
+   * @protected
+   */
+  isAbstractImplementation_() {
+    return true;
+  }
+
+  /** Registers an general handler for page visibility. */
+  listenForPageVisibility_() {
+    this.client_.makeRequest(
+        MessageType.SEND_EMBED_STATE,
+        MessageType.EMBED_STATE,
+        data => {
+          this.hidden = data.pageHidden;
+          this.visibilityCallbacks_.map(cb => cb(data));
+        });
   }
 
   /**
@@ -70,10 +99,13 @@ export class AmpContext {
    *    every time we receive a page visibility message.
    */
   observePageVisibility(callback) {
-    return this.client_.makeRequest(
-        MessageType.SEND_EMBED_STATE,
-        MessageType.EMBED_STATE,
-        callback);
+    const visibilityCallbacksLength = visibilityCallbacks.length;
+
+    this.visibilityCallbacks_.push(callback);
+
+    return () => {
+      this.visibilityCallbacks_.splice(visibilityCallbacksLength + 1, 1);
+    };
   };
 
   /**
@@ -190,5 +222,13 @@ export class AmpContext {
     } else {
       this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
     }
+  }
+}
+
+
+export class AmpContext extends AbstractAmpContext {
+  /** @return {boolean} */
+  isAbstractImplementation_() {
+    return false;
   }
 }
