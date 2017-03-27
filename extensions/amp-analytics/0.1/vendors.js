@@ -400,7 +400,10 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'pageview': '${endpoint}?type=js&' +
         'flavor=amp&' +
         'v=1&' +
-        'a=1%7C1%7C_load_%7C_load_%7C-%7C${navTiming(navigationStart)}%7C${navTiming(domContentLoadedEventEnd)}%7C0%2C2%7C2%7C_onload_%7C_load_%7C-%7C${navTiming(domContentLoadedEventStart)}%7C${navTiming(domContentLoadedEventEnd)}%7C0&' +
+        'a=1%7C1%7C_load_%7C_load_%7C-%7C${navTiming(navigationStart)}%7C' +
+		'${navTiming(domContentLoadedEventEnd)}%7C0%2C2%7C2%7C_onload_%7C' +
+		'_load_%7C-%7C${navTiming(domContentLoadedEventStart)}%7C' + 
+		'${navTiming(domContentLoadedEventEnd)}%7C0&' +
         'fId=${pageViewId}&' +
         'vID=${clientId(rxVisitor)}&' +
         'referer=${sourceUrl}&' +
@@ -430,26 +433,26 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         's${navTiming(navigationStart,loadEventStart)}' +
         't${navTiming(navigationStart,loadEventEnd)}&' +
         'app=${app}&' +
-        'time=${timestamp}'
+        'time=${timestamp}',
     },
     'triggers': {
       'trackPageview': {
         'on': 'visible',
-        'request': 'pageview'
-      }
+        'request': 'pageview',
+      },
     },
     'transport': {
       'beacon': false,
       'xhrpost': false,
-      'image': true
+      'image': true,
     },
     'vars': {
       'app': 'ampapp',
       'protocol': 'https',
       'tenant': '',
       'environment': 'live.dynatrace.com',
-      'port': '443'
-    }
+      'port': '443',
+    },
   },
 
   'euleriananalytics': {
