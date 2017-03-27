@@ -244,8 +244,8 @@ A message can be either an Object, or a String that’s serialized using JSON st
 
    * __app__: A sentinel that both the AMP Viewer and AMP Documents will use to know that the message they’ve received is a part of the AMP Viewer Integrations API. The value should always be set to `'__AMPHTML__'`.
    * __type__: This signals that the message is either a request or a response. 
-      * For a request message, specify a value of `q`.
-      * For a response message, specify a value of `s`.
+      * For a request message, specify a value of `'q'`.
+      * For a response message, specify a value of `'s'`.
    * __requestid__: A unique ID to identify the request. A simple request counter that increases its value with each request message should work just fine.
    * __name__: Specifies the message name. More API’s can be found [here](https://github.com/ampproject/amphtml/tree/master/viewer-api).
    * __rsvp__: Set to `true` if you need a response to your message; otherwise, `false`.
