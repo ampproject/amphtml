@@ -27,9 +27,6 @@
   "amp-selector": 1,
   "sticky-ad-early-load": 1,
   "amp-auto-ads": 1,
-<<<<<<< HEAD
-  "slidescroll-disable-css-snap": 1
-=======
+  "slidescroll-disable-css-snap": 1,
   "visibility-v3": 1
->>>>>>> Launch visibility V3 experiment
 }
