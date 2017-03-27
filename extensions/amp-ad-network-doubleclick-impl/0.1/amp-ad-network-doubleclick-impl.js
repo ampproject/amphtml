@@ -150,7 +150,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig = extractAmpAnalyticsConfig(responseHeaders);
+    this.ampAnalyticsConfig =
+      extractAmpAnalyticsConfig(responseHeaders, this.extensions_);
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
@@ -181,8 +182,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
-    injectActiveViewAmpAnalyticsElement(
-      this, this.extensions_, this.ampAnalyticsConfig);
+    injectActiveViewAmpAnalyticsElement(this, this.ampAnalyticsConfig);
   }
 
   /**

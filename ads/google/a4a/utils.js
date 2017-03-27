@@ -346,14 +346,18 @@ export function additionalDimensions(win, viewportSize) {
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
+ * @param {!../../../src/service/extensions-impl.Extensions} extensions
  * @return {?AmpAnalyticsConfigDef} config or null if invalid/missing.
  */
-export function extractAmpAnalyticsConfig(responseHeaders) {
+export function extractAmpAnalyticsConfig(responseHeaders, extensions) {
   if (responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     try {
       const analyticsConfig =
         JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
       dev().assert(Array.isArray(analyticsConfig['url']));
+      if (analyticsConfig.url.length) {
+        extensions.loadExtension('amp-analytics');
+      }
       return {urls: analyticsConfig.url};
     } catch (err) {
       dev().error('AMP-A4A', 'Invalid analytics', err,
@@ -367,15 +371,12 @@ export function extractAmpAnalyticsConfig(responseHeaders) {
  * Creates amp-analytics element within a4a element using urls specified
  * with amp-ad closest selector and min 50% visible for 1 sec.
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {!../../../src/service/extensions-impl.Extensions} extensions
  * @param {?AmpAnalyticsConfigDef} inputConfig
  */
-export function injectActiveViewAmpAnalyticsElement(
-    a4a, extensions, inputConfig) {
+export function injectActiveViewAmpAnalyticsElement(a4a, inputConfig) {
   if (!inputConfig || !inputConfig.urls.length) {
     return;
   }
-  extensions.loadExtension('amp-analytics');
   const ampAnalyticsElem =
     a4a.element.ownerDocument.createElement('amp-analytics');
   ampAnalyticsElem.setAttribute('scoped', '');
