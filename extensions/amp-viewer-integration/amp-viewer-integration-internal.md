@@ -136,3 +136,45 @@ Webview is for Native apps.  In Webview, the AMP Viewer can see the AMP document
    <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
 
 6. Now that the connection is set up, we need to establish the handshake between the AMP Viewer and the AMP document. 
+
+
+#### Establishing a handshake on webview
+In the previous section, we set up the connection between the AMP Viewer and AMP Document, now we need to establish a handshake between the two.
+
+1. The AMP Doc sends a message to the Viewer over the port.
+
+   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
+   
+   The message from the AMP document looks like this:
+   
+   ```javascript
+   {
+     app: “__AMPHTML__”,     // Hey viewer, it's me AMP Doc!
+     requestid: 1,           // A unique ID for the request
+     type: “q”,              // Represents a REQUEST
+     name: “channelOpen”,    // Let’s shake hands
+     data: {
+       url: “amp...yoursite.com”,   // from the amp cache
+       sourceUrl: “yoursite.com”    // the original source url
+     }
+     rsvp: true              // response required
+   };
+   ```
+
+2. The Viewer responds to the AMP document over the port.
+
+   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
+
+   The message looks like this:
+   
+   ```javascript
+   {
+     app: “__AMPHTML__”,    // Hey AMP Doc, it's me AMP Viewer! 
+     type: “s”,             // Represents a RESPONSE
+     requestid: 1,          // The same ID used in the REQUEST
+   };
+   ```
+
+3. The handshake is established and now the Viewer and AMP Document can start communicating.
+
+   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
