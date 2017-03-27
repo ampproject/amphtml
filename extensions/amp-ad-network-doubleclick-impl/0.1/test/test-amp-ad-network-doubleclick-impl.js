@@ -197,10 +197,14 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=A&sz=0x0&u_sd=[0-9]+' +
           '&adtest=false' +
 <<<<<<< HEAD
+<<<<<<< HEAD
           '(&asnt=[0-9]+-[0-9]+)?' +
 =======
           '(&dff=%22.*?%22)?' +
 >>>>>>> Added ea, dff, and pfx, and updated corresponding tests.
+=======
+          '(&dff=%22.*?%22)?' +
+>>>>>>> 3569afde305ca669bf18d5d8f7c87abe1742f9a8
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
           '&c=[0-9]+&output=html&nhd=1&biw=[0-9]+&bih=[0-9]+' +

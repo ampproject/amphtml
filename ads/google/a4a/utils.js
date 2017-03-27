@@ -355,6 +355,7 @@ export function additionalDimensions(win, viewportSize) {
           innerHeight].join();
 };
 
+<<<<<<< HEAD
 /**
  * Extracts configuration used to build amp-analytics element for active view.
  *
