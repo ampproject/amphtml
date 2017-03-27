@@ -52,11 +52,11 @@ To establish communication between the AMP Viewer and AMP Document, we need to e
 
 1. The AMP Viewer waits for the AMP document to load. The Viewer listens on its window for a `message` event.
 
-<img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
+   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
 
 2. As soon as the AMP document loads, the AMP document sends a message to the Viewer (its parent) using `postMessage()`.
 
-<img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
+   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
 
    The message from the AMP Document to the AMP Viewer looks like this:
 
@@ -76,7 +76,7 @@ To establish communication between the AMP Viewer and AMP Document, we need to e
 
 3. The AMP Viewer responds to the AMP Document by also using `postMessage()`.
 
-<img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
+   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
 
    The message from the Viewer to the AMP Document looks like this:
 
@@ -90,7 +90,7 @@ To establish communication between the AMP Viewer and AMP Document, we need to e
 
 4. The Viewer and AMP Document are now introduced, and they can start posting messages to each other.
 
-<img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
+   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
 
 
 ### Communicating between Doc and Viewer in Webview
@@ -103,7 +103,7 @@ Webview is for Native apps.  In Webview, the AMP Viewer can see the AMP document
 
 1. The AMP Viewer starts by polling the AMP Document every x milliseconds until the AMP Document is loaded and ready.
 
-<img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
+   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
 
 2. When the AMP document loads, it receives a “Are you there?”  polling message but the AMP document doesn't know who to respond to.  For this reason, the AMP Viewer uses the [Channel Messaging API](https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API) to create a 2-way connection.
 
@@ -129,10 +129,10 @@ Webview is for Native apps.  In Webview, the AMP Viewer can see the AMP document
 
 4. Eventually, the AMP Document loads and receives the message and the port.
 
-<img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
+   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
 
 5. A 2-way connection is established where the Viewer can send messages to the AMP Doc and the AMP Doc can send messages to the Viewer!
 
-<img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
+   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
 
 6. Now that the connection is set up, we need to establish the handshake between the AMP Viewer and the AMP document. 
