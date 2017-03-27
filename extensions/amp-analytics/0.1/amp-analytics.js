@@ -55,7 +55,6 @@ const BLACKLIST_EVENT_IN_SCOPE = [
   AnalyticsEventType.CLICK,
   AnalyticsEventType.TIMER,
   AnalyticsEventType.SCROLL,
-  AnalyticsEventType.HIDDEN,
 ];
 
 export class AmpAnalytics extends AMP.BaseElement {
@@ -87,7 +86,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.type_ = null;
 
     /** @private {!boolean} */
-    this.isScoped_ = element.hasAttribute('sandbox');
+    this.isSandbox_ = element.hasAttribute('sandbox');
 
     /**
      * @private {Object<string, string>} A map of request names to the request
@@ -217,10 +216,8 @@ export class AmpAnalytics extends AMP.BaseElement {
               'attributes are required for data to be collected.');
           continue;
         }
-        // Check for not supported trigger for scoped analytics
-        // TODO(will replace with this.isScoped_ after #8360)
-        const isScoped = true;
-        if (isScoped) {
+        // Check for not supported trigger for sandboxed analytics
+        if (this.isSandbox_) {
           const eventType = trigger['on'];
           if (BLACKLIST_EVENT_IN_SCOPE.indexOf(eventType) > -1) {
             user().error(TAG, eventType + 'is not supported for amp-analytics' +
@@ -236,7 +233,7 @@ export class AmpAnalytics extends AMP.BaseElement {
             return;
           }
           // replace selector and selectionMethod (visibilitySpec selector as well)
-          if (isScoped) {
+          if (this.isSandbox_) {
             // Only support selection of parent element for analytics in scope
             trigger['selector'] = this.element.parentElement.tagName;
             trigger['selectionMethod'] = 'closest';
@@ -322,7 +319,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   fetchRemoteConfig_() {
     let remoteConfigUrl = this.element.getAttribute('config');
-    if (!remoteConfigUrl || this.isScoped_) {
+    if (!remoteConfigUrl || this.isSandbox_) {
       return Promise.resolve();
     }
     assertHttpsUrl(remoteConfigUrl, this.element);
@@ -534,7 +531,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         return this.variableService_.expandTemplate(request, expansionOptions);
       })
       .then(request => {
-        const whiteList = this.isScoped_ ? SANDBOX_AVAILABLE_VARS : undefined;
+        const whiteList = this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
         // For consistency with amp-pixel we also expand any url replacements.
         return urlReplacementsForDoc(this.element).expandAsync(
             request, undefined, whiteList);

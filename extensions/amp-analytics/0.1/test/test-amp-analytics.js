@@ -319,7 +319,7 @@ describe('amp-analytics', function() {
     });
   });
 
-  it.skip('does not send a hit when eventType is blacklist', function() {
+  it('does not send a hit when eventType is blacklist', function() {
     const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
     const addStub = sandbox.stub(tracker, 'add');
     const analytics = getAnalyticsTag({
@@ -327,7 +327,7 @@ describe('amp-analytics', function() {
       triggers: [{on: 'click', selector: '${foo}', request: 'foo'}],
       vars: {foo: 'bar'},
     }, {
-      'scope': 'true',
+      'sandbox': 'true',
     });
 
     return waitForNoSendRequest(analytics).then(() => {
@@ -815,14 +815,14 @@ describe('amp-analytics', function() {
     });
   });
 
-  it.skip('replace selector and selectionMethod when in scope', () => {
+  it('replace selector and selectionMethod when in scope', () => {
     const tracker = ins.ampdocRoot_.getTracker('visible-v3', VisibilityTracker);
     const addStub = sandbox.stub(tracker, 'add');
     const analytics = getAnalyticsTag({
       requests: {foo: 'https://example.com/bar'},
       triggers: [{on: 'visible-v3', selector: 'amp-iframe', request: 'foo'}],
     }, {
-      'scope': 'true',
+      'sandbox': 'true',
     });
     return waitForNoSendRequest(analytics).then(() => {
       expect(addStub).to.be.calledOnce;
