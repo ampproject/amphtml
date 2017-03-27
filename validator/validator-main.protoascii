@@ -1606,41 +1606,41 @@ tags: {
   tag_name: "TRACK"
   spec_name: "amp-audio > track"
   mandatory_parent: "AMP-AUDIO"
-  attr_lists: "track-attrs-no-subtitles"
   # <amp-bind>
   attrs: { name: "[label]" }
   attrs: { name: "[src]" }
   attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-no-subtitles"
 }
 tags: {
   tag_name: "TRACK"
   spec_name: "amp-audio > track[kind=subtitles]"
   mandatory_parent: "AMP-AUDIO"
-  attr_lists: "track-attrs-subtitles"
   # <amp-bind>
   attrs: { name: "[label]" }
   attrs: { name: "[src]" }
   attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-subtitles"
 }
 tags: {
   tag_name: "TRACK"
   spec_name: "amp-video > track"
   mandatory_parent: "AMP-VIDEO"
-  attr_lists: "track-attrs-no-subtitles"
   # <amp-bind>
   attrs: { name: "[label]" }
   attrs: { name: "[src]" }
   attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-no-subtitles"
 }
 tags: {
   tag_name: "TRACK"
   spec_name: "amp-video > track[kind=subtitles]"
   mandatory_parent: "AMP-VIDEO"
-  attr_lists: "track-attrs-subtitles"
   # <amp-bind>
   attrs: { name: "[label]" }
   attrs: { name: "[src]" }
   attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-subtitles"
 }
 
 # 4.7.15 SVG
