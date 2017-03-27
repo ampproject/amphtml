@@ -20,6 +20,7 @@ import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {formOrNullForElement} from '../../../src/form';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
@@ -382,14 +383,10 @@ export class Bind {
       if (typeof element.getDynamicElements === 'function') {
         dynamicElements = element.getDynamicElements();
       } else if (element.tagName === 'FORM') {
-        // FORM is not an amp element, so it doesn't have the getter.
-        const successDiv = element./*OK*/querySelector('[submit-success]');
-        if (successDiv) {
-          dynamicElements.push(successDiv);
-        }
-        const errorDiv = element./*OK*/querySelector('[submit-error]');
-        if (errorDiv) {
-          dynamicElements.push(errorDiv);
+        // FORM is not an amp element, so it doesn't have the getter directly.
+        const form = formOrNullForElement(element);
+        if (form) {
+          dynamicElements = form.getDynamicElements();
         }
       }
       dynamicElements.forEach(elementToObserve => {

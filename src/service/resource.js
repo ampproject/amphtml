@@ -89,7 +89,7 @@ export class Resource {
    * @return {?Resource}
    */
   static forElementOptional(element) {
-    return /** @type {!Resource} */ (element[RESOURCE_PROP_]);
+    return /** @type {?Resource} */ (element[RESOURCE_PROP_]);
   }
 
   /**
