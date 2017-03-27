@@ -411,3 +411,65 @@ The Viewer needs to respond with the following message via `POST`:
 And the handshake is established. 
 
 
+### Sending visibility change request via messaging
+
+A message needs to be sent from the Viewer to the AMP Doc:
+
+   ```javascript
+   {
+     app: “__AMPHTML__”,      
+     requestid: 2,            
+     type: “q”,              
+     name: “visibilitychange”,     // The message type.
+     data: {
+       state: “the new state”,     // See visibility-state.js for allowed   
+ 				                           // values.Can be “visible” or “hidden”. 
+                                   // If “visible”, prerenderSize is 
+    				                       // ignored and the page loads fully.
+       prerenderSize: 1         // # of Windows of content to prerender. 
+                                // 0=no prerendering. 1=load resources for
+                                // 1st screen, etc. Default is 1.
+     }
+     rsvp: true
+   };
+   ```
+
+### Enabling swiping between AMP pages
+
+<img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200" height="100px"></img>
+
+Touch events go straight to the AMP Document. So how does the Viewer know when to animate an AMP doc out of view while bringing another one into view? The AMP Doc forwards all touch events to the Viewer. To enable this functionality, add `cap=swipe` to your Viewer Init Params:
+
+   ```javascript
+   var initParams = {
+     origin: “http://yourAmpDocsOrigin.com”,
+     cap: “foo,swipe”
+   };
+   ```
+
+By specifying `cap=swipe` as an init parameter (fyi, `"cap"` stands for capabilities) , `#cap=swipe` will be added to the AMP Cache URL:
+
+   ```html
+   https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#origin=http%3A%2F%2FyourAmpDocsOrigin.com&cap=foo%2Cswipe
+   ```
+
+The forwarded touch events are:
+* touchstart
+* touchend
+* touchmove
+
+The message forwarded from the AMP Doc to the Viewer looks like this:
+
+   ```javascript
+   {
+     app: “__AMPHTML__”,  
+     requestid: 1,  
+     type: “q”,  
+     name: “touchmove”,  
+     data: {
+       … // The event data.
+     }
+     rsvp: false
+   };
+   ```
+
