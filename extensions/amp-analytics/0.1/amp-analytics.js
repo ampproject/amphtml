@@ -51,7 +51,7 @@ installVariableService(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
-const BLACKLIST_EVENT_IN_SCOPE = [
+const BLACKLIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.CLICK,
   AnalyticsEventType.TIMER,
   AnalyticsEventType.SCROLL,
@@ -219,7 +219,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         // Check for not supported trigger for sandboxed analytics
         if (this.isSandbox_) {
           const eventType = trigger['on'];
-          if (BLACKLIST_EVENT_IN_SCOPE.indexOf(eventType) > -1) {
+          if (BLACKLIST_EVENT_IN_SANDBOX.indexOf(eventType) > -1) {
             user().error(TAG, eventType + 'is not supported for amp-analytics' +
             ' in scope');
             continue;
@@ -232,7 +232,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           if (!result) {
             return;
           }
-          // replace selector and selectionMethod (visibilitySpec selector as well)
+          // replace selector and selectionMethod
           if (this.isSandbox_) {
             // Only support selection of parent element for analytics in scope
             trigger['selector'] = this.element.parentElement.tagName;
