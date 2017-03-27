@@ -208,21 +208,21 @@ const EXPERIMENTS = [
     Spec: 'https://github.com/ampproject/amphtml/issues/3813',
   },
   {
-    id: 'sentinel-name-change',
-    name: 'Changed sentinel name from amp3pSentinel to sentinel',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6990',
-    Spec: '',
-  },
-  {
     id: 'variable-filters',
     name: 'Format to apply filters to analytics variables',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
+    id: 'pump-early-frame',
+    name: 'Force all extensions to have the same release ' +
+        'as the main JS binary',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
+  },
+  {
     id: 'version-locking',
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
-    cleanupIssue: 'DO_NOT_SUBMIT',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
   },
   {
     id: 'amp-bind',
@@ -271,6 +271,12 @@ const EXPERIMENTS = [
     name: 'Slidescroll disable css snap',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
     spec: 'https://github.com/ampproject/amphtml/issues/7670',
+  },
+  {
+    id: '3p-use-ampcontext',
+    name: 'Use AmpContext for window.context messaging',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
+    spec: 'https://github.com/ampproject/amphtml/issues/6829',
   },
 ];
 

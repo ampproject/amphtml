@@ -20,8 +20,8 @@ import {
   getProxySourceOrigin,
   viewerBaseCid,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
-import {installCryptoService, Crypto,}
-    from '../../src/service/crypto-impl';
+import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
+import {cryptoFor} from '../../src/crypto';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
@@ -34,6 +34,7 @@ import {
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
+import {extensionsFor} from '../../src/extensions';
 import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
@@ -102,8 +103,9 @@ describe('cid', () => {
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
 
+    installExtensionsService(fakeWin);
+    const extensions = extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
-    const extensions = installExtensionsService(fakeWin);
     sandbox.stub(extensions, 'loadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(fakeWin);
@@ -130,20 +132,16 @@ describe('cid', () => {
           return Promise.resolve(viewerStorage || undefined);
         });
 
-    return Promise
-        .all([cidServiceForDocForTesting(ampdoc),
-              installCryptoService(fakeWin)])
-        .then(results => {
-          cid = results[0];
-          crypto = results[1];
-          crypto.sha384Base64 = val => {
-            if (val instanceof Uint8Array) {
-              val = '[' + Array.apply([], val).join(',') + ']';
-            }
+    cid = cidServiceForDocForTesting(ampdoc);
+    installCryptoService(fakeWin);
+    crypto = cryptoFor(fakeWin);
+    crypto.sha384Base64 = val => {
+      if (val instanceof Uint8Array) {
+        val = '[' + Array.apply([], val).join(',') + ']';
+      }
 
-            return Promise.resolve('sha384(' + val + ')');
-          };
-        });
+      return Promise.resolve('sha384(' + val + ')');
+    };
   });
 
   afterEach(() => {

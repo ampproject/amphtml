@@ -50,7 +50,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const DOM_NODE_UID_PROPERTY = '__AMP__NODE_UID';
 
 
 /**
@@ -103,9 +102,6 @@ export class Resources {
 
     /** @private {number} */
     this.addCount_ = 0;
-
-    /** @private {number} */
-    this.nodeUidCount_ = 1;
 
     /** @private {boolean} */
     this.visible_ = this.viewer_.isVisible();
@@ -414,15 +410,6 @@ export class Resources {
     return this.vsync_.measurePromise(() => {
       return this.getViewport().getLayoutRect(element);
     });
-  }
-
-  /**
-   * @param {!Node} node
-   * @return {number}
-   */
-  getNodeUid(node) {
-    return node[DOM_NODE_UID_PROPERTY] ||
-        (node[DOM_NODE_UID_PROPERTY] = this.nodeUidCount_++);
   }
 
   /**
@@ -1063,6 +1050,7 @@ export class Resources {
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
+        let topUnchangedBoundary = box.top;
         let bottomDisplacedBoundary = box.bottom;
         let newMargins = undefined;
         if (request.marginChange) {
@@ -1073,6 +1061,9 @@ export class Resources {
           }
           if (newMargins.bottom != undefined) {
             bottomMarginDiff = newMargins.bottom - margins.bottom;
+          }
+          if (topMarginDiff) {
+            topUnchangedBoundary = box.top - margins.top;
           }
           if (bottomMarginDiff) {
             // The lowest boundary of the element that would appear to be
@@ -1096,8 +1087,9 @@ export class Resources {
           // 3. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
-        } else if (topMarginDiff == 0 && box.bottom + Math.min(heightDiff, 0) >=
-              viewportRect.bottom - bottomOffset) {
+        } else if (topUnchangedBoundary >= viewportRect.bottom - bottomOffset ||
+            (topMarginDiff == 0 && box.bottom + Math.min(heightDiff, 0) >=
+             viewportRect.bottom - bottomOffset)) {
           // 4. Elements under viewport are resized immediately, but only if
           // an element's boundary is not changed above the viewport after
           // resize.

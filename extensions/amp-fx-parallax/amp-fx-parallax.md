@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td><code>amp-fx-parallax</code> enables a 3D-perspective effect on elements with the attribute.</td>
+    <td>An attribute that enables a 3D-perspective effect on an element.</td>
   </tr>
   <tr>
     <td class="col-fourty" width="40%"><strong>Availability</strong></td>
@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>In development</td>
+    <td><a href="https://ampbyexample.com/components/amp-fx-parallax/">Annotated code example for amp-fx-parallax</a></td>
   </tr>
 </table>
 
@@ -39,7 +39,7 @@ limitations under the License.
 
 The `amp-fx-parallax` attribute causes an element to move as if it is nearer or farther relative to the foreground of the page content. As the user scrolls the page, the element scrolls faster or slower depending on the value assigned to the attribute.
 
-Example:
+**Example**
 
 ```html
 <amp-img amp-fx-parallax="0.5" height="50vh" layout="fixed-height" src="hero.jpg">

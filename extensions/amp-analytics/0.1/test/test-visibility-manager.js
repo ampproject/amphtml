@@ -275,12 +275,18 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
     // Trigger tick.
     sandbox.stub(viewport, 'getRect', () => {
-      return {left: 0, top: 0, width: 100, height: 100};
+      return layoutRectLtwh(0, 0, 100, 100);
+    });
+    sandbox.stub(viewport, 'getLayoutRect', element => {
+      if (element == rootElement) {
+        return layoutRectLtwh(0, 50, 100, 100);
+      }
+      return null;
     });
     expect(rootElement.getLayoutBox())
-        .to.contain({left: 0, top: 0, width: 100, height: 100});
+        .to.contain({left: 0, top: 50, width: 100, height: 100});
     viewport.scrollObservable_.fire({type: 'scroll'});
-    expect(model.getVisibility_()).to.equal(1);
+    expect(model.getVisibility_()).to.equal(0.5);
 
     return eventPromise.then(() => {
       expect(inOb.observeEntries_).to.have.length(0);
@@ -833,7 +839,7 @@ describe.configure()
           elementX: 0,
           elementY: 75,
           firstSeenTime: 100,
-          fistVisibleTime: 100,
+          firstVisibleTime: 100,
           lastSeenTime: 100,
           lastVisibleTime: 100,
           loadTimeVisibility: 25,
@@ -882,7 +888,7 @@ describe.configure()
             elementX: 0,
             elementY: 75,
             firstSeenTime: 135,
-            fistVisibleTime: 235,  // 135 + 100
+            firstVisibleTime: 235,  // 135 + 100
             lastSeenTime: 235,
             lastVisibleTime: 235,
             loadTimeVisibility: 5,
@@ -905,7 +911,7 @@ describe.configure()
             elementX: 0,
             elementY: 65,
             firstSeenTime: 135,
-            fistVisibleTime: 335,  // 235 + 100
+            firstVisibleTime: 335,  // 235 + 100
             lastSeenTime: 335,
             lastVisibleTime: 335,
             loadTimeVisibility: 5,
@@ -972,7 +978,7 @@ describe.configure()
             elementX: 0,
             elementY: 65,
             firstSeenTime: 100,
-            fistVisibleTime: 100,
+            firstVisibleTime: 100,
             lastSeenTime: 4299,
             lastVisibleTime: 4299,
             loadTimeVisibility: 25,
