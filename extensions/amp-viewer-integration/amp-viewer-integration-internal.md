@@ -301,7 +301,7 @@ To enable the Webview messaging protocol with port exchange, the Viewer Init Par
 
 In Webview, all messages sent between the AMP Viewer and the AMP Document are serialized by using JSON stringify.
 
-The Viewer starts by sending the following message every x milliseconds via POST:
+The Viewer should start by sending the following message every x milliseconds via POST:
 
    ```javascript
    var message = {
@@ -310,7 +310,7 @@ The Viewer starts by sending the following message every x milliseconds via POST
    };
    ```
 
-In the `Post`, the Viewer also send a port to the AMP Document: 
+In the `Post`, the Viewer should also send a port to the AMP Document: 
 
    ```javascript
    var channel = new MessageChannel();
@@ -339,7 +339,7 @@ The AMP Document sends the following message to the Viewer over the port:
    };
    ```
 
-The Viewer then responds with the following message over the port: 
+The Viewer needs to respond with the following message over the port: 
 
    ```javascript
    {
@@ -350,6 +350,7 @@ The Viewer then responds with the following message over the port:
    ```
 
 And the handshake is established. 
+
 
 _Mobile Web handshake_**
 
