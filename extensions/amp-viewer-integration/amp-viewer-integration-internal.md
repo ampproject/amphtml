@@ -219,7 +219,7 @@ AMP Cache providers must include the [amp-viewer-integration](https://github.com
 
 2. Using `encodeUriComponent`, convert the hash to query string format:
       * Separated by `&`
-      * Encoded to UTF-8 (`,` -> `%2C`, `:` -> `%3A`, `/` -> `%2F`)
+      * Encoded to UTF-8 (`','` -> `'%2C'`, `':'` -> `'%3A'`, `'/'` -> `'%2F'`, etc)
 
 3. Add the query string to the AMP Cache URL:
    ```html
