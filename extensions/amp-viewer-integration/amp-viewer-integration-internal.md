@@ -291,7 +291,8 @@ To establish a handshake initiated by the AMP Document:
 
 #### Viewer-initiated handshake (polling)
 
-__Webview handshake__
+_Webview handshake_**
+
 To enable the Webview messaging protocol with port exchange, the Viewer Init Params should include `webview=1` and the AMP Cache URLs should be in the following format:
 
    ```html
@@ -341,7 +342,7 @@ The AMP Document sends the following message to the Viewer over the port:
 The Viewer then responds with the following message over the port: 
 
    ```javascript
-  {
+   {
      app: “__AMPHTML__”,  
      type: “s”,  
      requestid: 1,  
@@ -350,6 +351,62 @@ The Viewer then responds with the following message over the port:
 
 And the handshake is established. 
 
+_Mobile Web handshake_**
 
+In the Viewer Init Params, add the flag `cap="handshakepoll"`. 
+
+_Example: Parameters in a hash_
+
+   ```javascript
+   var initParams = {
+     origin: “http://yourAmpDocsOrigin.com”,
+     cap: “handshakepoll”
+   };
+   ```
+
+_Example: Parameters in a query string_
+
+   ```html
+   https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#origin=http%3A%2F%2FyourAmpDocsOrigin.com&cap=handshakepoll
+   ```
+
+This will tell the AMP Document not to send out the first message and, instead, wait for a message from the viewer. 
+
+The Viewer should send the following message every x milliseconds via `POST`:
+
+   ```javascript
+   var message = {
+     app: ‘__AMPHTML__’,  
+     name: ‘handshake-poll’, 
+   };
+   ```
+
+Eventually, the AMP Document receives and loads the message. The AMP Document sends the following  message to the Viewer via POST:
+
+   ```javascript
+   {
+     app: “__AMPHTML__”,  
+     requestid: 1,  
+     type: “q”,  
+     name: “channelOpen”,  
+     data: {
+       url: “amp...yoursite.com”,  
+       sourceUrl: “yoursite.com” 
+     }
+     rsvp: true,
+   };
+   ```
+
+The Viewer needs to respond with the following message via `POST`:
+
+   ```javascript
+   {
+     app: “__AMPHTML__”, 
+     type: “s”, 
+     requestid: 1, 
+   };
+   ```
+
+And the handshake is established. 
 
 
