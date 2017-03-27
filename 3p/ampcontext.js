@@ -131,6 +131,7 @@ export class AmpContext {
    *  @param {HTMLIFrameElement} iframe The iframe we are adding the context to.
    */
   addContextToIframe(iframe) {
+    // TODO(alanorozco): consider the AMP_CONTEXT_DATA case
     iframe.name = this.cachedFrameName_;
   }
 
