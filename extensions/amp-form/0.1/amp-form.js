@@ -594,14 +594,18 @@ export class AmpForm {
    * @return {Array<!Element>}
    * @public
    */
-  getDynamicElements() {
+  getDynamicElementContainers() {
     const dynamicElements = [];
     const successDiv =
         this.form_./*OK*/querySelector(`[${FormState_.SUBMIT_SUCCESS}]`);
     const errorDiv =
         this.form_./*OK*/querySelector(`[${FormState_.SUBMIT_ERROR}]`);
-    successDiv && dynamicElements.push(successDiv);
-    errorDiv && dynamicElements.push(errorDiv);
+    if (successDiv) {
+      dynamicElements.push(successDiv);
+    }
+    if (errorDiv) {
+      dynamicElements.push(errorDiv);
+    }
     return dynamicElements;
   }
 

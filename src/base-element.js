@@ -900,10 +900,10 @@ export class BaseElement {
    * element owns that could have children added or removed dynamically.
    * The array should not contain any ancestors of this element, but could
    * contain this element itself.
-   * @return {Array<!Element>}
+   * @return {!Array<!Element>}
    * @public
    */
-  getDynamicElements() {
+  getDynamicElementContainers() {
     return [];
   }
 

@@ -15,14 +15,15 @@
  */
 
 import * as sinon from 'sinon';
+import {AmpForm} from '../../../amp-form/0.1/amp-form';
 import {Bind} from '../bind-impl';
 import {BindExpression} from '../bind-expression';
 import {BindValidator} from '../bind-validator';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
+import {installTimerService} from '../../../../src/service/timer-impl';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
-import {installTimerService} from '../../../../src/service/timer-impl';
 
 describes.realWin('Bind', {
   amp: {
@@ -173,6 +174,8 @@ describes.realWin('Bind', {
     const dynamicTag = doc.createElement('div');
     dynamicTag.setAttribute('submit-success', null);
     form.appendChild(dynamicTag);
+    // Wrap form in amp-form implementation so bind can access it
+    new AmpForm(form);
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(0);
       const elementWithBinding = createElementWithBinding('[onePlusOne]="1+1"');

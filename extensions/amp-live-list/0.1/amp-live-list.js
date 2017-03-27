@@ -841,7 +841,7 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   /** @override */
-  getDynamicElements() {
+  getDynamicElementContainers() {
     return this.itemsSlot_ ? [this.itemsSlot_] : [];
   }
 

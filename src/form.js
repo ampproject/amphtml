@@ -19,6 +19,7 @@ const FORM_PROP_ = '__AMP_FORM';
 
 /**
  * @param {!Element} element
+ * @return {../extensions/amp-form/0.1/amp-form.AmpForm}
  */
 export function formOrNullForElement(element) {
   return element[FORM_PROP_] || null;
@@ -26,6 +27,7 @@ export function formOrNullForElement(element) {
 
 /**
  * @param {!Element} element
+ * @param {!../extensions/amp-form/0.1/amp-form.AmpForm} form
  */
 export function setFormForElement(element, form) {
   element[FORM_PROP_] = form;

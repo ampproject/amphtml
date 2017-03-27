@@ -380,14 +380,13 @@ export class Bind {
       const tagName = element.tagName;
 
       let dynamicElements = [];
-      if (typeof element.getDynamicElements === 'function') {
-        dynamicElements = element.getDynamicElements();
+      if (typeof element.getDynamicElementContainers === 'function') {
+        dynamicElements = element.getDynamicElementContainers();
       } else if (element.tagName === 'FORM') {
         // FORM is not an amp element, so it doesn't have the getter directly.
         const form = formOrNullForElement(element);
-        if (form) {
-          dynamicElements = form.getDynamicElements();
-        }
+        dev().assert(form, 'could not find form implementation');
+        dynamicElements = form.getDynamicElementContainers();
       }
       dynamicElements.forEach(elementToObserve => {
         this.mutationObserver_.observe(elementToObserve, {childList: true});

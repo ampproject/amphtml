@@ -1360,8 +1360,8 @@ function createBaseCustomElementClass(win) {
      * @return {Array<!Element>}
      * @public
      */
-    getDynamicElements() {
-      return this.implementation_.getDynamicElements();
+    getDynamicElementContainers() {
+      return this.implementation_.getDynamicElementContainers();
     }
 
     /**
