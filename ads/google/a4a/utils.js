@@ -170,9 +170,8 @@ export function googleAdUrl(
         // TODO(levitzky) Look into expandable support.
         {name: 'ea', value: '0'},
         {name: 'pfx', value:
-          containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
-              || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']]
-              || false},
+          !!containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
+              || !!containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']]},
       ],
       unboundedQueryParams,
       [
