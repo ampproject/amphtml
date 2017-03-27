@@ -263,7 +263,7 @@ describe('amp-live-list', () => {
     });
 
     it('sends amp-dom-update and amp-live-list.update ' +
-        'events on new items', () => {
+       'events on new items', () => {
       buildElement(elem, dftAttrs);
       liveList.buildCallback();
       const domUpdateSpy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');

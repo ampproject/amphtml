@@ -292,9 +292,9 @@ export class AmpLiveList extends AMP.BaseElement {
   updateAction_() {
     const hasInsertItems = this.pendingItemsInsert_.length > 0;
     const hasTombstoneItems = this.pendingItemsTombstone_.length > 0;
+    const hasReplaceItems = this.pendingItemsReplace_.length > 0;
 
-    const shouldSendAmpDomUpdateEvent = this.pendingItemsInsert_.length > 0 ||
-        this.pendingItemsReplace_.length > 0;
+    const shouldSendAmpDomUpdateEvent = hasInsertItems || hasReplaceItems;
 
     let promise = this.mutateElement(() => {
 
@@ -312,12 +312,12 @@ export class AmpLiveList extends AMP.BaseElement {
         this.pendingItemsInsert_.length = 0;
       }
 
-      if (this.pendingItemsReplace_.length > 0) {
+      if (hasReplaceItems) {
         this.replace_(itemsSlot, this.pendingItemsReplace_);
         this.pendingItemsReplace_.length = 0;
       }
 
-      if (this.pendingItemsTombstone_.length > 0) {
+      if (hasTombstoneItems) {
         this.curNumOfLiveItems_ -= this.tombstone_(
             itemsSlot, this.pendingItemsTombstone_);
         this.pendingItemsTombstone_.length = 0;
