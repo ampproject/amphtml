@@ -35,7 +35,7 @@ export class AmpContext {
     /** @type {?string} */
     this.clientId = null;
 
-    /** @type {?{href: string}} */
+    /** @type {?Location} */
     this.location = null;
 
     /** @type {?string} */
