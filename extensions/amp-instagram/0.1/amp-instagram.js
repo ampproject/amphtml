@@ -205,7 +205,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (data.type == 'MEASURE' && data.details) {
       const height = data.details.height;
       this.getVsync().measure(() => {
-        if (this.iframe_./*OK*/offsetHeight !== height) {
+        if (this.iframe_ && this.iframe_./*OK*/offsetHeight !== height) {
           // Height returned by Instagram includes header, so
           // subtract 48px top padding
           this.attemptChangeHeight(height - (PADDING_TOP + PADDING_BOTTOM))
