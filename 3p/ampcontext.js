@@ -27,6 +27,14 @@ export class AmpContext {
     /** @private {!Window} */
     this.win_ = win;
 
+    // This value is cached since it could be overwritten by the master frame
+    // check using a value of a different type.
+    /** @private {!string} */
+    this.cachedFrameName_ = dev().assertString(this.win_.name);
+
+    /** @type {?string} */
+    this.clientId = null;
+
     /** @type {?string} */
     this.location = null;
 
@@ -122,7 +130,7 @@ export class AmpContext {
    *  @param {HTMLIFrameElement} iframe The iframe we are adding the context to.
    */
   addContextToIframe(iframe) {
-    iframe.name = this.win_.name;
+    iframe.name = this.cachedFrameName_;
   }
 
   /**
@@ -139,6 +147,7 @@ export class AmpContext {
     const context = dataObject._context;
     this.location = context.location;
     this.canonicalUrl = context.canonicalUrl;
+    this.clientId = context.clientId;
     this.pageViewId = context.pageViewId;
     this.sentinel = context.sentinel;
     this.startTime = context.startTime;

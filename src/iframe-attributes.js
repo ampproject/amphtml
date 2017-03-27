@@ -49,6 +49,8 @@ export function getContextMetadata(
   const viewer = viewerForDoc(element);
   const referrer = viewer.getUnconfirmedReferrerUrl();
 
+  // TODO(alanorozco): Redesign data structure so that fields not exposed by
+  // AmpContext are not part of this object.
   attributes._context = {
     ampcontextVersion: '$internalRuntimeVersion$',
     ampcontextFilepath: urls.cdn + '/$internalRuntimeVersion$' +
