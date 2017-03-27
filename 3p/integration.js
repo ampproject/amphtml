@@ -23,7 +23,7 @@
  */
 
 import './polyfills';
-import {AmpContext} from './ampcontext';
+import {IntegrationAmpContext} from './ampcontext-integration';
 import {installEmbedStateListener, manageWin} from './environment';
 import {isExperimentOn} from './3p';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
@@ -431,13 +431,19 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     manageWin(window);
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
-    updateVisibilityState(window);
 
-    // TODO(alanorozco): use IframeMessagingClient for updates when experiment
-    //                   flag is on.
-    // Subscribe to page visibility updates.
-    nonSensitiveDataPostMessage('send-embed-state');
-    nonSensitiveDataPostMessage('bootstrap-loaded');
+    if (isAmpContextExperimentOn()) {
+      window.context.observePageVisibility(
+          data => dispatchVisibilityChangeEvent(window, data.pageHidden));
+
+      window.context.notifyBootstrapLoaded();
+    } else {
+      updateVisibilityState(window);
+
+      // Subscribe to page visibility updates.
+      nonSensitiveDataPostMessage('send-embed-state');
+      nonSensitiveDataPostMessage('bootstrap-loaded');
+    }
   } catch (e) {
     const c = window.context || {mode: {test: false}};
     if (!c.mode.test) {
@@ -448,18 +454,33 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
 };
 
 
+/** @return {boolean} */
+function isAmpContextExperimentOn() {
+  return isExperimentOn('3p-use-ampcontext');
+}
+
+
 /**
  * Installs window.context API.
  * @param {!Window} win
  */
 function installContext(win) {
-  if (isExperimentOn('3p-use-ampcontext')) {
-    // TODO(alanorozco): Enhance AmpContext to match standard implementation.
-    win.context = new AmpContext(win);
+  if (isAmpContextExperimentOn()) {
+    installContextUsingExperimentalImpl(win);
     return;
   }
 
   installContextUsingStandardImpl(win);
+}
+
+
+/**
+ * Installs window.context API.
+ * @param {!Window} win
+ */
+function installContextUsingExperimentalImpl(win) {
+  win.context = new IntegrationAmpContext(win);
+  win.context.setEmbedType(dev().assertString(data.type));
 }
 
 
@@ -581,13 +602,16 @@ function observeIntersection(observerCallback) {
 function updateVisibilityState(global) {
   listenParent(window, 'embed-state', function(data) {
     global.context.hidden = data.pageHidden;
-    const event = global.document.createEvent('Event');
-    event.data = {
-      hidden: data.pageHidden,
-    };
-    event.initEvent('amp:visibilitychange', true, true);
-    global.dispatchEvent(event);
+    dispatchVisibilityChangeEvent(global, data.pageHidden);
   });
+}
+
+
+function dispatchVisibilityChangeEvent(win, isHidden) {
+  const event = win.document.createEvent('Event');
+  event.data = {hidden: isHidden};
+  event.initEvent('amp:visibilitychange', true, true);
+  win.dispatchEvent(event);
 }
 
 /**
