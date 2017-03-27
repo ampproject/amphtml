@@ -295,7 +295,9 @@ export class Bind {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
           const parseError = parseErrors[expressionString];
-          const userError = user().createError(parseError.message);
+          const userError = user().createError(
+              `${TAG}: Expression syntax error in "${expressionString}". `
+              + parseError.message);
           userError.stack = parseError.stack;
           reportError(userError, elements[0]);
         }
@@ -472,13 +474,15 @@ export class Bind {
    * @private
    */
   scanAttribute_(attribute, element) {
+    const tagName = element.tagName;
     const name = attribute.name;
     if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
       const property = name.substr(1, name.length - 2);
-      if (this.validator_.canBind(element.tagName, property)) {
+      if (this.validator_.canBind(tagName, property)) {
         return {property, expressionString: attribute.value};
       } else {
-        const err = user().createError(`Binding to [${property}] not allowed.`);
+        const err = user().createError(
+            `${TAG}: Binding to [${property}] on <${tagName}> is not allowed.`);
         reportError(err, element);
       }
     }
@@ -512,7 +516,9 @@ export class Bind {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
           const evalError = errors[expressionString];
-          const userError = user().createError(evalError.message);
+          const userError = user().createError(
+              `${TAG}: Expression evaluation error in "${expressionString}". `
+              + evalError.message);
           userError.stack = evalError.stack;
           reportError(userError, elements[0]);
         }
@@ -554,6 +560,8 @@ export class Bind {
     const applyPromises = this.boundElements_.map(boundElement => {
       const {element, boundProperties} = boundElement;
 
+      // TODO(choumx): We should avoid triggering a mutation if the expression
+      // results don't affect this element.
       const applyPromise = this.resources_.mutateElement(element, () => {
         const mutations = {};
         let width, height;
@@ -599,7 +607,15 @@ export class Bind {
         }
 
         if (typeof element.mutatedAttributesCallback === 'function') {
-          element.mutatedAttributesCallback(mutations);
+          // Prevent an exception in the callback from interrupting execution,
+          // instead wrap in user error and give a helpful message.
+          try {
+            element.mutatedAttributesCallback(mutations);
+          } catch (e) {
+            const error = user().createError(`${TAG}: Applying expression ` +
+                `results (${JSON.stringify(mutations)}) failed with error`, e);
+            reportError(error, element);
+          }
         }
       });
       return applyPromise;
@@ -637,7 +653,7 @@ export class Bind {
           element.className = ampClasses.join(' ');
         } else {
           const err = user().createError(
-              `"${newValue} is not a valid result for [class]."`);
+              `${TAG}: "${newValue}" is not a valid result for [class].`);
           reportError(err, element);
         }
         break;
@@ -663,7 +679,9 @@ export class Bind {
             rewrittenNewValue = rewriteAttributeValue(
                 element.tagName, property, String(newValue));
           } catch (e) {
-            reportError(user().createError(e), element);
+            const err = user().createError(`${TAG}: "${newValue}" is not a ` +
+                `valid result for [${property}]`, e);
+            reportError(err, element);
           }
           // Rewriting can fail due to e.g. invalid URL.
           if (rewrittenNewValue !== undefined) {
@@ -718,7 +736,7 @@ export class Bind {
           classes = expectedValue.split(' ');
         } else {
           const err = user().createError(
-              `"${expectedValue} is not a valid result for [class]."`);
+              `${TAG}: "${expectedValue}" is not a valid result for [class].`);
           reportError(err, element);
         }
         match = this.compareStringArrays_(initialValue, classes);
@@ -739,7 +757,7 @@ export class Bind {
     }
 
     if (!match) {
-      const err = user().createError(
+      const err = user().createError(`${TAG}: ` +
         `Default value for [${property}] does not match first expression ` +
         `result (${expectedValue}). This can result in unexpected behavior ` +
         `after the next state change.`);
