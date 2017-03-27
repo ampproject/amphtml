@@ -19,18 +19,18 @@ limitations under the License.
 ## How to get started
 
 Before you start developing in AMP, check out these resources:
-* [CONTRIBUTING.md](CONTRIBUTING.md) has details on various ways you can contribute to the AMP Project.
-  * If you're developing in AMP, you should read the [Contributing code](CONTRIBUTING.md#contributing-code) and [Contributing features](CONTRIBUTING.md#contributing-features) sections..
-  * The [Ongoing participation](CONTRIBUTING.md#ongoing-participation) section has details on various ways of getting in touch with others in the community including email and Slack.
-  * **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](CONTRIBUTING.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on. 
-* The [Getting Started Quick Start Guide](contributing/getting-started-quick.md) has installation steps and basic instructions for [one-time setup](contributing/getting-started-quick.md#one-time-setup), how to [build AMP & run a local server](contributing/getting-started-quick.md#build-amp--run-a-local-server) and how to [test AMP](contributing/getting-started-quick.md#test-amp). 
+* [CONTRIBUTING.md](../CONTRIBUTING.md) has details on various ways you can contribute to the AMP Project.
+  * If you're developing in AMP, you should read the [Contributing code](../CONTRIBUTING.md#contributing-code) and [Contributing features](../CONTRIBUTING.md#contributing-features) sections.
+  * The [Ongoing participation](../CONTRIBUTING.md#ongoing-participation) section has details on various ways of getting in touch with others in the community including email and Slack.
+  * **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](../CONTRIBUTING.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on.
+* The [Getting Started Quick Start Guide](getting-started-quick.md) has installation steps and basic instructions for [one-time setup](getting-started-quick.md#one-time-setup), how to [build AMP & run a local server](getting-started-quick.md#build-amp--run-a-local-server) and how to [test AMP](getting-started-quick.md#test-amp).
 
 
 ## Build & Test
 
-For most developers the instructions in the [Getting Started Quick Start Guide](contributing/getting-started-quick.md) will be sufficient for building/running/testing during development.  This section provides a more detailed reference.
+For most developers the instructions in the [Getting Started Quick Start Guide](getting-started-quick.md) will be sufficient for building/running/testing during development.  This section provides a more detailed reference.
 
-The Quick Start Guide's  [One-time setup](contributing/getting-started-quick.md#one-time-setup) has instructions for installing Node.js, Yarn, and Gulp which you'll need before running these commands.
+The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setup) has instructions for installing Node.js, Yarn, and Gulp which you'll need before running these commands.
 
 | Command                                                                 | Description                                                           |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
@@ -94,7 +94,7 @@ code elimination to trim down the file size for the file we deploy to production
 If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/min/s/output.jsbin.com/pegizoq/quiet
 
 
-### A4A envelope
+### A4A envelope (/a4a/, /a4a-3p/)
 
 If you are working on AMP 4 Ads (A4A), you can use the local A4A envelope for testing local and production AMP documents with the local JS version.
 
@@ -122,11 +122,31 @@ Additionally, the following query parameters can be provided:
 
 - `width` - the width of the `amp-ad` (default "300")
 - `height` - the height of the `amp-ad` (default "250")
+- `offset` - the offset to push the `amp-ad` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
+
+
+### In-a-box envelope (/inabox/)
+
+If you are working on AMP In-a-box Ads, you can use the local in-a-box envelope for testing local and production AMP documents with the local JS version.
+
+Make sure to run gulp with `--with_inabox` flag.
+
+The following forms are supported:
+
+- local document: http://localhost:8000/inabox/examples/animations.amp.max.html
+- proxied document with normal sources: http://localhost:8000/inabox/max/output.jsbin.com/pegizoq/quiet
+- proxied document with minified sources: http://localhost:8000/inabox/min/output.jsbin.com/pegizoq/quiet
+
+Additionally, the following query parameters can be provided:
+
+- `width` - the width of the `iframe` (default "300")
+- `height` - the height of the `iframe` (default "250")
+- `offset` - the offset to push the `iframe` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
 
 
 ### Chrome extension
 
-For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](testing/local-amp-chrome-extension/README.md).
+For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](../testing/local-amp-chrome-extension/README.md).
 
 ## Testing on Sauce Labs
 
@@ -151,8 +171,8 @@ To run the tests on Sauce Labs:
 
    # after seeing the "Sauce Connect is up" msg, run the tests
    gulp test --saucelabs
-   ``` 
-* It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard. 
+   ```
+* It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
 ## Deploying AMP on Cloud for testing on devices
 
@@ -203,6 +223,6 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 - [AMP Layout system](spec/amp-html-layout.md)
 - [Building an AMP Extension](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit#)
 
-We also recommend scanning the [spec](spec/). The non-element part should help understand some of the design aspects.
+We also recommend scanning the [spec](../spec/). The non-element part should help understand some of the design aspects.
 
-## [Code of conduct](CODE_OF_CONDUCT.md)
+## [Code of conduct](../CODE_OF_CONDUCT.md)

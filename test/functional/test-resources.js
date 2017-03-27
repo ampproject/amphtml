@@ -497,6 +497,9 @@ describe('Resources pause/resume/unlayout scheduling', () => {
       getAttribute() {
         return null;
       },
+      hasAttribute() {
+        return false;
+      },
       contains() {
         return true;
       },
@@ -680,6 +683,9 @@ describe('Resources schedulePreload', () => {
       getAttribute() {
         return null;
       },
+      hasAttribute() {
+        return false;
+      },
       contains() {
         return true;
       },
@@ -807,6 +813,7 @@ describe('Resources discoverWork', () => {
       getAttribute: () => {
         return null;
       },
+      hasAttribute: () => false,
       getBoundingClientRect: () => rect,
       updateLayoutBox: () => {},
       applySizesAndMediaQuery: () => {},
@@ -1320,6 +1327,7 @@ describe('Resources changeSize', () => {
       getAttribute: () => {
         return null;
       },
+      hasAttribute: () => false,
       getBoundingClientRect: () => rect,
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
@@ -1623,6 +1631,65 @@ describe('Resources changeSize', () => {
       expect(resource1.changeSize).to.be.calledOnce;
       expect(overflowCallbackSpy).to.be.calledOnce;
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+    });
+
+    it('should change size when below the viewport and top margin also changed',
+        () => {
+          resource1.layoutBox_ = {top: 200, left: 0, right: 100, bottom: 300,
+              height: 100};
+          resources.scheduleChangeSize_(resource1, 111, 222, {top: 20}, false);
+
+          expect(vsyncSpy).to.be.calledOnce;
+          const marginsTask = vsyncSpy.lastCall.args[0];
+          marginsTask.measure({});
+
+          resources.mutateWork_();
+          expect(resources.requestsChangeSize_).to.be.empty;
+          expect(resource1.changeSize).to.be.calledOnce;
+          expect(overflowCallbackSpy).to.be.calledOnce;
+          expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+        });
+
+    it('should change size when box top below the viewport but top margin ' +
+        'boundary is above viewport but top margin in unchanged', () => {
+      resource1.layoutBox_ = {top: 200, left: 0, right: 100, bottom: 300,
+          height: 100};
+      resource1.element.fakeComputedStyle = {
+        marginTop: '100px',
+        marginRight: '0px',
+        marginBottom: '0px',
+        marginLeft: '0px',
+      };
+      resources.scheduleChangeSize_(resource1, 111, 222, {top: 100}, false);
+
+      expect(vsyncSpy).to.be.calledOnce;
+      const marginsTask = vsyncSpy.lastCall.args[0];
+      marginsTask.measure({});
+
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce;
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+    });
+
+    it('should NOT change size when top margin boundary within viewport ' +
+        'and top margin changed', () => {
+      const callback = sandbox.spy();
+      resource1.layoutBox_ = {top: 100, left: 0, right: 100, bottom: 300,
+          height: 200};
+      resources.scheduleChangeSize_(
+          resource1, 111, 222, {top: 20}, false, callback);
+
+      expect(vsyncSpy).to.be.calledOnce;
+      const task = vsyncSpy.lastCall.args[0];
+      task.measure({});
+
+      resources.mutateWork_();
+      expect(resource1.changeSize).to.not.been.called;
+      expect(overflowCallbackSpy).to.not.been.called;
+      expect(callback).to.be.calledOnce;
+      expect(callback.args[0][0]).to.be.false;
     });
 
     it('should defer when above the viewport and scrolling on', () => {
@@ -1959,6 +2026,7 @@ describe('Resources mutateElement and collapse', () => {
       getAttribute: () => {
         return null;
       },
+      hasAttribute: () => null,
       getBoundingClientRect: () => rect,
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
@@ -2214,6 +2282,9 @@ describe('Resources.add/remove', () => {
     const element = {
       ownerDocument: {defaultView: window},
       tagName: 'amp-test',
+      hasAttribute() {
+        return false;
+      },
       isBuilt() {
         return true;
       },

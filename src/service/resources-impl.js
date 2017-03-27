@@ -28,7 +28,7 @@ import {fromClassForDoc} from '../service';
 import {inputFor} from '../input';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
-import {installVsyncService} from './vsync-impl';
+import {vsyncFor} from '../vsync';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
@@ -167,7 +167,7 @@ export class Resources {
     this.viewport_ = viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = installVsyncService(this.win);
+    this.vsync_ = vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -273,8 +273,6 @@ export class Resources {
    * @return {!Promise<!Array<!Resource>>}
    */
   getResourcesInRect(hostWin, rect, opt_isInPrerender) {
-    opt_isInPrerender = opt_isInPrerender || false;
-
     // First, wait for the `ready-scan` signal. Waiting for each element
     // individually is too expensive and `ready-scan` will cover most of
     // the initially parsed elements.
@@ -308,6 +306,27 @@ export class Resources {
         }
         return true;
       });
+    });
+  }
+
+  /**
+   * Returns a subset of resources which is identified as being in the current
+   * viewport.
+   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
+   * @return {!Array<!Resource>}
+   * TODO(dvoytenko, #7815): remove once the reporting regression is confirmed.
+   */
+  getResourcesInViewportLegacy(opt_isInPrerender) {
+    opt_isInPrerender = opt_isInPrerender || false;
+    const viewportRect = this.viewport_.getRect();
+    return this.resources_.filter(r => {
+      if (r.hasOwner() || !r.isDisplayed() || !r.overlaps(viewportRect)) {
+        return false;
+      }
+      if (opt_isInPrerender && !r.prerenderAllowed()) {
+        return false;
+      }
+      return true;
     });
   }
 
@@ -1030,6 +1049,7 @@ export class Resources {
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
+        let topUnchangedBoundary = box.top;
         let bottomDisplacedBoundary = box.bottom;
         let newMargins = undefined;
         if (request.marginChange) {
@@ -1040,6 +1060,9 @@ export class Resources {
           }
           if (newMargins.bottom != undefined) {
             bottomMarginDiff = newMargins.bottom - margins.bottom;
+          }
+          if (topMarginDiff) {
+            topUnchangedBoundary = box.top - margins.top;
           }
           if (bottomMarginDiff) {
             // The lowest boundary of the element that would appear to be
@@ -1063,8 +1086,9 @@ export class Resources {
           // 3. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
-        } else if (topMarginDiff == 0 && box.bottom + Math.min(heightDiff, 0) >=
-              viewportRect.bottom - bottomOffset) {
+        } else if (topUnchangedBoundary >= viewportRect.bottom - bottomOffset ||
+            (topMarginDiff == 0 && box.bottom + Math.min(heightDiff, 0) >=
+             viewportRect.bottom - bottomOffset)) {
           // 4. Elements under viewport are resized immediately, but only if
           // an element's boundary is not changed above the viewport after
           // resize.

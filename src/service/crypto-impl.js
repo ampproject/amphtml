@@ -15,9 +15,8 @@
  */
 
 import {PublicKeyInfoDef} from '../crypto';
-import {fromClass} from '../service';
+import {registerServiceBuilder, getService} from '../service';
 import {dev} from '../log';
-import {getExistingServiceForWindow} from '../service';
 import {extensionsFor} from '../extensions';
 import {stringToBytes, utf8Encode} from '../utils/bytes';
 import {
@@ -126,7 +125,7 @@ export class Crypto {
     }
     return this.polyfillPromise_ = extensionsFor(this.win_)
         .loadExtension('amp-crypto-polyfill')
-        .then(() => getExistingServiceForWindow(this.win_, 'crypto-polyfill'));
+        .then(() => getService(this.win_, 'crypto-polyfill'));
   }
 
   /**
@@ -271,6 +270,9 @@ function hashesEqual(signature, keyHash) {
   return true;
 }
 
+/**
+ * @param {!Window} win
+ */
 export function installCryptoService(win) {
-  return fromClass(win, 'crypto', Crypto);
+  return registerServiceBuilder(win, 'crypto', Crypto);
 }

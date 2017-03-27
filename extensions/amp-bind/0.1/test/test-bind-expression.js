@@ -19,6 +19,7 @@ import {BindExpression} from '../bind-expression';
 describe('BindExpression', () => {
   const argumentTypeError = 'Unexpected argument type';
   const unsupportedFunctionError = 'not a supported function';
+  const expressionSizeExceededError = 'exceeds max';
 
   /**
    * @param {string} expression
@@ -236,6 +237,35 @@ describe('BindExpression', () => {
     expect(evaluate('foo["bar"]')).to.be.null;
     expect(evaluate('foo[bar]')).to.be.null;
     expect(evaluate('foo[0]')).to.be.null;
+  });
+
+  it('should support select Math functions', () => {
+    expect(evaluate('abs(-1)')).to.equal(1);
+    expect(evaluate('ceil(0.1)')).to.equal(1);
+    expect(evaluate('floor(1.9)')).to.equal(1);
+    expect(evaluate('max(0, 1)')).to.equal(1);
+    expect(evaluate('min(0, 1)')).to.equal(0);
+    expect(evaluate('round(0.6)')).to.equal(1);
+    const r = evaluate('random()');
+    expect(r).to.be.at.least(0);
+    expect(r).to.be.at.below(1);
+    expect(evaluate('sign(-1)')).to.equal(-1);
+
+    // Functions should not conflict with scope variables.
+    expect(evaluate('abs(-2) + abs', {abs: 2})).to.equal(4);
+
+    // Don't support non-whitelisted functions.
+    expect(() => {
+      evaluate('sin(0.5)');
+    }).to.throw(unsupportedFunctionError);
+    expect(() => {
+      evaluate('pow(3, 2)');
+    }).to.throw(unsupportedFunctionError);
+
+    // Don't support calling functions with `Math.` prefix.
+    expect(() => {
+      evaluate('Math.abs(-1)', {Math});
+    }).to.throw(unsupportedFunctionError);
   });
 
   it('should NOT allow access to prototype properties', () => {
@@ -475,5 +505,15 @@ describe('BindExpression', () => {
     expect(() => { evaluate('/ab+c/i'); }).to.throw();
     expect(() => { evaluate('yield*'); }).to.throw();
     expect(() => { evaluate('async function*'); }).to.throw();
+  });
+
+  it('should throw an error if maximum AST size is exceeded', () => {
+    expect(new BindExpression('1 + 1', /* opt_maxAstSize */ 3)).to.not.be.null;
+
+    // The expression '1 + 1' should have an AST size of 3 -- one for each
+    // literal, and a PLUS expression wrapping them.
+    expect(() => {
+      new BindExpression('1 + 1', /* opt_maxAstSize */ 2);
+    }).to.throw(expressionSizeExceededError);
   });
 });

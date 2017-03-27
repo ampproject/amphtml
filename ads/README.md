@@ -216,7 +216,8 @@ Access to a publishers 1st party cookies may be achieved through a custom ad boo
 If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on https://nytimes.com, then the remote file should be hosted on something similar to https://sub-domain.nytimes.com for the custom JavaScript to have the abiity to read or write cookies for nytimes.com.
 
 ## Developer guidelines for a pull request
-Please read through [DEVELOPING.md](../DEVELOPING.md) before contributing to this code repository.
+
+Please read through [DEVELOPING.md](../contributing/DEVELOPING.md) before contributing to this code repository.
 
 ### Files to change
 

@@ -19,6 +19,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
+import {extensionsFor} from '../../../../src/extensions';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
@@ -157,7 +158,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'type': 'adsense',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
-        const extensions = installExtensionsService(impl.win);
+        installExtensionsService(impl.win);
+        const extensions = extensionsFor(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
@@ -200,13 +202,29 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           '&c=[0-9]+&output=html&nhd=1&biw=[0-9]+&bih=[0-9]+' +
           '&adx=-?[0-9]+&ady=-?[0-9]+&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
-          '&oid=2&brdim=[0-9]+(%2C[0-9]+){9}' +
+          '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +
           '&isw=[0-9]+&ish=[0-9]+' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
           '&ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '&dtd=[0-9]+$'));
+      });
+    });
+
+    it('handles tagForChildDirectedTreatment', () => {
+      element.setAttribute('json', '{"tagForChildDirectedTreatment": 1}');
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/&tfcd=1&/);
+      });
+    });
+
+    it('handles categoryExclusions without targeting', () => {
+      element.setAttribute('json', '{"categoryExclusions": "sports"}');
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/&scp=excl_cat%3Dsports&/);
       });
     });
   });

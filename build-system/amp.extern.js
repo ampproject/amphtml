@@ -22,7 +22,6 @@ process.end.NODE_ENV;
 // Exposed to ads.
 window.context = {};
 window.context.sentinel;
-window.context.amp3pSentinel;
 window.context.clientId;
 window.context.initialIntersection;
 window.context.sourceUrl;
@@ -47,6 +46,8 @@ window.AMP_CONFIG.thirdPartyFrameHost;
 window.AMP_CONFIG.thirdPartyFrameRegex;
 window.AMP_CONFIG.cdnUrl;
 window.AMP_CONFIG.errorReportingUrl;
+
+window.AMP_CONTEXT_DATA;
 
 // amp-viz-vega related externs.
 /**
@@ -104,7 +105,9 @@ data.pageHidden;
 data.changes;
 data._context;
 data.inViewport;
-
+data.numposts;
+data.orderBy;
+data.colorscheme;
 
 // 3p code
 var twttr;

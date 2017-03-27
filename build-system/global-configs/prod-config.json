@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["visibility-v2"],
+  "allow-doc-opt-in": ["visibility-v2", "visibility-v3"],
 
   "canary": 0,
   "amp-experiment": 1,
@@ -23,5 +23,7 @@
   "chunked-amp": 1,
   "visibility-v2": 1,
   "amp-selector": 1,
-  "sentinel-name-change": 1
+  "sentinel-name-change": 1,
+  "sticky-ad-early-load": 1,
+  "amp-auto-ads": 1
 }

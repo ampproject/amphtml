@@ -97,7 +97,7 @@ var forbiddenTerms = {
     message: realiasGetMode,
     whitelist: [
       'src/mode-object.js',
-      'src/3p-frame.js',
+      'src/iframe-attributes.js',
       'src/log.js',
       'dist.3p/current/integration.js',
     ],
@@ -154,7 +154,7 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
-  'installCidServiceForDocForTesting': {
+  'cidServiceForDocForTesting': {
     message: privateServiceFactory,
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
@@ -279,6 +279,7 @@ var forbiddenTerms = {
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
+      'dist.3p/current/integration.js', // includes previous
     ],
   },
   '\\.sendMessageAwaitResponse\\(': {
@@ -318,6 +319,8 @@ var forbiddenTerms = {
       'build-system/test-server.js',
       'src/cookies.js',
       'extensions/amp-analytics/0.1/cid-impl.js',
+      'extensions/amp-analytics/0.1/vendors.js',
+      'testing/fake-dom.js',
     ],
   },
   'getCookie\\W': {
@@ -423,6 +426,16 @@ var forbiddenTerms = {
       'src/inabox/inabox-viewer.js',
     ],
   },
+  'internalListenImplementation': {
+    message: 'Use `listen()` in either `event-helper` or `3p-frame-messaging`' +
+        ', depending on your use case.',
+    whitelist: [
+      'src/3p-frame-messaging.js',
+      'src/event-helper.js',
+      'src/event-helper-listen.js',
+      'dist.3p/current/integration.js',  // includes previous
+    ],
+  },
   'setTimeout.*throw': {
     message: 'Use dev.error or user.error instead.',
     whitelist: [
@@ -507,7 +520,13 @@ var forbiddenTerms = {
       'src/service-worker/shell.js',
       'src/worker-error-reporting.js',
     ],
-  }
+  },
+  'new CustomEvent\\(': {
+    message: 'Use createCustomEvent() helper instead.',
+    whitelist: [
+      'src/event-helper.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
@@ -608,6 +627,7 @@ var forbiddenTermsSrcInclusive = {
       'src/service/lightbox-manager-discovery.js',
       'src/service/crypto-impl.js',
       'src/shadow-embed.js',
+      'src/analytics.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'ads/google/a4a/utils.js',
@@ -673,6 +693,22 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
+    ],
+  },
+  '(cdn|3p)\\.ampproject\\.': {
+    message: 'The CDN domain should typically not be hardcoded in source ' +
+        'code. Use a property of urls from src/config.js instead.',
+    whitelist: [
+      'ads/_a4a-config.js',
+      'build-system/server.js',
+      'dist.3p/current/integration.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+      'src/config.js',
+      'testing/local-amp-chrome-extension/background.js',
+      'tools/errortracker/errortracker.go',
+      'validator/nodejs/index.js',
+      'validator/webui/serve-standalone.go',
+      'build-system/tasks/extension-generator/index.js',
     ],
   },
 };
@@ -802,7 +838,8 @@ function hasAnyTerms(file) {
 
   hasTerms = matchTerms(file, forbiddenTerms);
 
-  var isTestFile = /^test-/.test(basename) || /^_init_tests/.test(basename);
+  var isTestFile = /^test-/.test(basename) || /^_init_tests/.test(basename)
+      || /_test\.js$/.test(basename);
   if (!isTestFile) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }

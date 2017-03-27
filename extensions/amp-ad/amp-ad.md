@@ -81,6 +81,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 
 ## Supported ad networks
 
+- [A8](../../ads/a8.md)
 - [A9](../../ads/a9.md)
 - [AccessTrade](../../ads/accesstrade.md)
 - [Adblade](../../ads/adblade.md)
@@ -169,6 +170,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [smartclip](../../ads/smartclip.md)
 - [Sortable](../../ads/sortable.md)
 - [SOVRN](../../ads/sovrn.md)
+- [SunMedia](../../ads/sunmedia.md)
 - [Swoop](../../ads/swoop.md)
 - [Teads](../../ads/teads.md)
 - [TripleLift](../../ads/triplelift.md)

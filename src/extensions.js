@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForWindow} from './service';
+import {getService} from './service';
 
 
 /**
@@ -23,5 +23,5 @@ import {getExistingServiceForWindow} from './service';
  */
 export function extensionsFor(window) {
   return /** @type {!./service/extensions-impl.Extensions} */ (
-      getExistingServiceForWindow(window, 'extensions'));
+      getService(window, 'extensions'));
 };

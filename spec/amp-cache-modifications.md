@@ -37,7 +37,7 @@ The AMP Cache parses and re-serializes all documents to remove any ambiguities i
 
 | before | after |
 | --- | --- |
-| `<p data-foo=’< >’>` | `<p data-foo="&lt; &gt">` |
+| `<p data-foo='< >'>` | `<p data-foo="&lt; &gt">` |
 
 </details>
 
@@ -105,7 +105,9 @@ The AMP Cache parses and re-serializes all documents to remove any ambiguities i
 
 The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to rebase relative URLs found in the document so that the URL remains the same when loaded from the AMP Cache. The other reason is to improve performance by selecting a different equivalent resource. This includes rewriting image and font URLs to use a cached copy and rewriting AMP javascript URLs to use a copy with longer cache lifetimes.
 
-#### All relative `href` , `src` and `data-iframe-src` URLs are rewritten as absolute URLs
+#### All relative `href` , `src`, `data-iframe-src` and `data-no-service-worker-fallback-shell-url` URLs are rewritten as absolute URLs
+
+`data-iframe-src` and `data-no-service-worker-fallback-shell-url` are part of `<amp-install-serviceworker>` [spec](https://www.ampproject.org/docs/reference/components/amp-install-serviceworker).
 
 <details>
 <summary>example</summary>
@@ -147,10 +149,10 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 
 | before | after |
 | --- | --- |
-| `<amp-img src=https://example.com/foo.png></amp-img>` | `<amp-img src=/i/s/foo.png></amp-img>` |
-| `<amp-img srcset="https://example.com/bar.png 1080w, https://example.com/bar-400.png 400w">`| `<amp-img src="/i/s/bar.png 1080w, /i/s/bar-400.png 400w">` |
-| `<amp-anim src=foo.gif></amp-anim>` | `<amp-anim src=/i/s/foo.gif></amp-anim>` |
-| `<amp-video poster=bar.png>` | `<amp-video poster=/i/s/bar.png>` |
+| `<amp-img src=https://example.com/foo.png></amp-img>` | `<amp-img src=/i/s/example.com/foo.png></amp-img>` |
+| `<amp-img srcset="https://example.com/bar.png 1080w, https://example.com/bar-400.png 400w">`| `<amp-img src="/i/s/example.com/bar.png 1080w, /i/s/example.com/bar-400.png 400w">` |
+| `<amp-anim src=foo.gif></amp-anim>` | `<amp-anim src=/i/s/example.com/foo.gif></amp-anim>` |
+| `<amp-video poster=bar.png>` | `<amp-video poster=/i/s/example.com/bar.png>` |
 
 </details>
 
@@ -262,19 +264,20 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 Remove any `<meta>` tags except for those that:
  - do not have attributes `content`, `itemprop`, `name` and `property`
  - have attribute `http-equiv`
- - have attribute `name` with prefix `amp-`
- - have attribute `name` with prefix `dc.`
- - have attribute `name` with prefix `i-amp-` [temporary, will be removed at a future date]
- - have attribute `name` with prefix `i-amphtml-`
- - have attribute `name` with prefix `twitter:`
+ - have attribute `name` with case-insensitive prefix `amp-`
+ - have attribute `name` with case-insensitive prefix `amp4ads-`
+ - have attribute `name` with case-insensitive prefix `dc.`
+ - have attribute `name` with case-insensitive prefix `i-amp-` [temporary, will be removed at a future date]
+ - have attribute `name` with case-insensitive prefix `i-amphtml-`
+ - have attribute `name` with case-insensitive prefix `twitter:`
  - have attribute `name=apple-itunes-app`
  - have attribute `name=copyright`
  - have attribute `name=referrer` [note: this may be inserted by AMP Cache]
  - have attribute `name=robots` [note: this is inserted by AMP Cache]
  - have attribute `name=viewport`
- - have attribute `property` with prefix "al:"
- - have attribute `property` with prefix "fb:"
- - have attribute `property` with prefix "og:"
+ - have attribute `property` with case-insensitive prefix "al:"
+ - have attribute `property` with case-insensitive prefix "fb:"
+ - have attribute `property` with case-insensitive prefix "og:"
 
 <details>
 <summary>example</summary>
@@ -289,26 +292,10 @@ Remove any `<meta>` tags except for those that:
 
 This is discussed in detail at [Server side filtering for `amp-live-list`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
 
-#### Remove `amp-access-hide` sections when `amp-access` JSON is `"type": "server"`
-
-If the document is using `amp-access` type of `server` then the AMP Cache removes any section with the attribute `amp-access-hide` from the document.
-
-*Condition*:
-`<script id=amp-access type=application/json>...</script>` contains `"type": "server"`
-
-<details>
-<summary>example</summary>
-
-| before | after |
-| --- | --- |
-| `<script id=amp-access type=application/json>`<br>`{`<br>`...`<br>`"type": "server"`<br>`}`<br>`</script>`<br>`...`<br>`<div amp-access-hide ...>`<br>`Content`<br>`</div>` | `<script id=amp-access type=application/json>`<br>`{`<br>`...`<br>`"type": "server"`<br>`}`<br>`</script>`<br>`...` |
-
-</details>
-
 #### Remove attribute `nonce`
 
 *Condition*:
-Remove `nonce` from every tag except for those that are only inserted by the AMP cache `<meta content=NONCE name=i-amphtml-access-state>` and `<meta content=NONCE name=i-amp-access-state>`
+Remove `nonce` attribute from every tag.
 
 <details>
 <summary>example</summary>

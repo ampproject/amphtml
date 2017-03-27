@@ -45,9 +45,21 @@ amp-fx-flying-carpet > .-amp-fx-flying-carpet-clip > .-amp-fx-flying-carpet-cont
   position: fixed !important;
   top: 0 !important;
   width: 100%;
+  height: 100%;
   /*
    * Included to force slow webkit browsers (Android) into rendering the
    * container using the GPU.
    */
   -webkit-transform: translateZ(0) !important;
+
+  /* Center contents in the container */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.-amp-fx-flying-carpet-container > .i-amphtml-layout-responsive,
+.-amp-fx-flying-carpet-container > .i-amphtml-layout-fixed-height {
+  align-self: stretch;
 }

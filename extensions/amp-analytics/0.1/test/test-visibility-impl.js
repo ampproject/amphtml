@@ -218,6 +218,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
           return {
             observe: observeSpy,
             unobserve: unobserveSpy,
+            tick: sandbox.stub(),
           };
         });
       }
@@ -247,6 +248,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
           elementY: '75',
           firstSeenTime: '100',
           fistVisibleTime: '100',
+          firstVisibleTime: '100',
           lastSeenTime: '100',
           lastVisibleTime: '100',
           loadTimeVisibility: '25',
@@ -297,6 +299,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
           elementY: '75',
           firstSeenTime: '135',
           fistVisibleTime: '235', // 135 + 100
+          firstVisibleTime: '235', // 135 + 100
           lastSeenTime: '235',
           lastVisibleTime: '235',
           loadTimeVisibility: '5',
@@ -321,6 +324,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
           elementY: '65',
           firstSeenTime: '135',
           fistVisibleTime: '335', // 235 + 100
+          firstVisibleTime: '335', // 235 + 100
           lastSeenTime: '335',
           lastVisibleTime: '335',
           loadTimeVisibility: '5',
@@ -384,6 +388,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
           elementY: '65',
           firstSeenTime: '100',
           fistVisibleTime: '100',
+          firstVisibleTime: '100',
           lastSeenTime: '4299',
           lastVisibleTime: '4299',
           loadTimeVisibility: '25',
@@ -501,6 +506,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
           elementY: '99',
           firstSeenTime: '100',
           fistVisibleTime: '200',
+          firstVisibleTime: '200',
           lastSeenTime: '2500',
           lastVisibleTime: '2400',
           loadTimeVisibility: '5',
