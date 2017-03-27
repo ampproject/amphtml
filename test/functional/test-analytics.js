@@ -113,6 +113,7 @@ describes.realWin('analytics', {
         const script = (analyticsEle).querySelector('script');
         expect(script.textContent).to.jsonEqual(JSON.stringify(config));
         expect(analyticsEle.CONFIG).to.jsonEqual(config);
+        expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
       });
     });
   });

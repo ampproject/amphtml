@@ -329,6 +329,21 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('expand blacklist nested requests', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {'foo':
+        'https://example.com/bar&${clientId}&baz', 'clientId': 'c1'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
+    }, {
+      'sandbox': 'true',
+    });
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0])
+        .to.equal('https://example.com/bar&c1&baz');
+    });
+  });
+
   it('expands nested requests (3 levels)', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo':
@@ -388,6 +403,58 @@ describe('amp-analytics', function() {
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.match(/cid=[a-zA-Z\-]+/);
+      expect(sendRequestSpy.args[0][0]).to.not.equal(
+          'https://example.com/cid=CLIENT_ID(analytics-abc)');
+    });
+  });
+
+  it('should not fill blacklist variable for scoped analytics', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
+    }, {
+      'sandbox': 'true',
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal(
+          'https://example.com/cid=CLIENT_ID(analytics-abc)');
+    });
+  });
+
+  it('should fill whitelist variable for scoped analytics', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {'foo': 'https://example.com/random=${random}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
+    }, {
+      'sandbox': 'true',
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.match(/random=0.[0-9]/);
+      expect(sendRequestSpy.args[0][0]).to.not.equal(
+          'https://example.com/random=${random}');
+    });
+  });
+
+  it('should fill for multi whitelistd(not) variables', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {'foo':
+          'https://example.com/cid=${clientId(analytics-abc)}random=RANDOM'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
+    }, {
+      'sandbox': 'true',
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.match(/random=0.[0-9]/);
+      expect(sendRequestSpy.args[0][0]).to.not.equal(
+        'https://example.com/cid=${clientId}random=RANDOM');
+      expect(sendRequestSpy.args[0][0]).to.includes(
+          'https://example.com/cid=CLIENT_ID(analytics-abc)random=');
     });
   });
 
@@ -459,6 +526,28 @@ describe('amp-analytics', function() {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/test1=x&test2=test2');
+    });
+  });
+
+  it('expand trigger vars and not replace blacklist variables', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {'pageview':
+        'https://example.com/test1=${var1}&CLIENT_ID(analytics-abc)=${var2}'},
+      'triggers': [{
+        'on': 'visible',
+        'request': 'pageview',
+        'vars': {
+          'var1': 'CLIENT_ID(analytics-abc)',
+          'var2': 'test2',
+        },
+      }]}, {
+        'sandbox': 'true',
+      });
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal(
+          'https://example.com/test1=CLIENT_ID(analytics-abc)&' +
+          'CLIENT_ID(analytics-abc)=test2');
     });
   });
 
@@ -623,6 +712,31 @@ describe('amp-analytics', function() {
           'https://example.com/test1=x&' +
           'test2=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html' +
           '&title=Test%20Title');
+    });
+  });
+
+  it('expands url-replacements vars for scoped analytics', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {
+        'pageview': 'https://example.com/VIEWER&AMP_VERSION&' +
+        'test1=${var1}&test2=${var2}&test3=${var3}&url=AMPDOC_URL'},
+      'triggers': [{
+        'on': 'visible',
+        'request': 'pageview',
+        'vars': {
+          'var1': 'x',
+          'var2': 'AMPDOC_URL',
+          'var3': 'CLIENT_ID',
+        },
+      }]}, {
+        'sandbox': 'true',
+      });
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal(
+        'https://example.com/VIEWER&%24internalRuntimeVersion%24' +
+        '&test1=x&test2=about%3Asrcdoc&test3=CLIENT_ID' +
+        '&url=about%3Asrcdoc');
     });
   });
 
@@ -838,6 +952,20 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('not fetch remote config for scoped analtycis', () => {
+    const analytics = getAnalyticsTag({
+      'vars': {'title': 'local'},
+      'requests': {'foo': 'https://example.com/${title}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
+    }, {
+      'config': 'config1',
+      'sandbox': 'true',
+    });
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/local');
+    });
+  });
+
   it('fetches and merges remote config with credentials', () => {
     configWithCredentials = true;
     const analytics = getAnalyticsTag({
@@ -920,6 +1048,23 @@ describe('amp-analytics', function() {
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.be.calledOnce;
+      });
+    });
+
+    it('allow a request through on blacklist url variables', () => {
+      const config = getConfig(1);
+      config.triggers.sampled.sampleSpec.sampleOn = '${clientId}';
+      const analytics = getAnalyticsTag(config, {
+        'sandbox': 'true',
+      });
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
+      sandbox.stub(crypto, 'uniform')
+          .withArgs('0').returns(Promise.resolve(0.005))
+          .withArgs('CLIENT_ID').returns(Promise.resolve(0.5));
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy).to.be.calledOnce;
       });
