@@ -261,6 +261,94 @@ There are two types of handshakes:
    * Mobile Web
    * Webview (Native apps)
 
+#### AMP Document-initiated handshake
+To establish a handshake initiated by the AMP Document:
+
+1. The AMP Document initiates the handshake by sending a request to the AMP Viewer via `POST`:
+   
+   ```javascript
+   {
+     app: "__AMPHTML__",  
+     requestid: 1,  
+     type: "q",  
+     name: "channelOpen",  
+     data: {
+       url: “amp...yoursite.com”,  
+       sourceUrl: “yoursite.com” 
+     }
+     rsvp: true,
+   };
+   ```
+2. The AMP Viewer acknowledges the request and responds via `POST`:
+
+   ```javascript
+   {
+     app: “__AMPHTML__”,  
+     type: “s”,  
+     requestid: 1,  
+   };
+   ```
+
+#### Viewer-initiated handshake (polling)
+
+__Webview handshake__
+To enable the Webview messaging protocol with port exchange, the Viewer Init Params should include `webview=1` and the AMP Cache URLs should be in the following format:
+
+   ```html
+   https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#webview=1
+   ```
+
+In Webview, all messages sent between the AMP Viewer and the AMP Document are serialized by using JSON stringify.
+
+The Viewer starts by sending the following message every x milliseconds via POST:
+
+   ```javascript
+   var message = {
+     app: ‘__AMPHTML__’,  
+     name: ‘handshake-poll’,  
+   };
+   ```
+
+In the `Post`, the Viewer also send a port to the AMP Document: 
+
+   ```javascript
+   var channel = new MessageChannel();
+   ampdoc.postMessage(message, ‘*’, [channel.port2]);
+   ```
+
+Eventually, the AMP Document loads and receives the message and port. There is now a 2-way connection where the Viewer can send messages to the AMP Doc and the AMP Doc can send messages to the Viewer. 
+
+The Viewer will send and receive messages over `channel.port1`, and the AMP Doc will send and receive messages over `channel.port2` (See [ChannelMessagingApi](https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API) for details).
+
+The handshake can now begin.
+
+The AMP Document sends the following message to the Viewer over the port:
+
+   ```javascript
+   {
+     app: “__AMPHTML__”,  
+     requestid: 1,  
+     type: “q”,  
+     name: “channelOpen”,  
+     data: {
+       url: “amp...yoursite.com”,  
+       sourceUrl: “yoursite.com” 
+     }
+     rsvp: true,
+   };
+   ```
+
+The Viewer then responds with the following message over the port: 
+
+   ```javascript
+  {
+     app: “__AMPHTML__”,  
+     type: “s”,  
+     requestid: 1,  
+   };
+   ```
+
+And the handshake is established. 
 
 
 
