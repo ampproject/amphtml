@@ -313,10 +313,6 @@ export const adConfig = {
   },
 
   ix: {
-    prefetch: [
-      'https://js-sec.indexww.com/indexJTag.js',
-      'https://js-sec.indexww.com/apl/apl6.js',
-    ],
     preconnect: 'https://as-sec.casalemedia.com',
   },
 
