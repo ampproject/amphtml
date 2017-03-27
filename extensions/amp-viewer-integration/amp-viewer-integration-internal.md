@@ -225,3 +225,43 @@ AMP Cache providers must include the [amp-viewer-integration](https://github.com
    ```html
    https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#origin=http%3A%2F%2FyourAmpDocsOrigin.com&someOtherParam=someValue%2CanotherValue
    ```
+
+
+### Composing messages
+A message can be either an Object, or a String that’s serialized using JSON stringify. A message can contain the following fields:
+
+   ```javascript
+   {
+     app: string,
+     type: string,
+     requestid: number,
+     name: string,
+     data: *,
+     rsvp: boolean,
+     error: string
+   };
+   ```
+
+   * __app__: A sentinel that both the AMP Viewer and AMP Documents will use to know that the message they’ve received is a part of the AMP Viewer Integrations API. The value should always be set to `'__AMPHTML__'`.
+   * __type__: This signals that the message is either a request or a response. 
+      * For a request message, specify a value of `q`.
+      * For a response message, specify a value of `s`.
+   * __requestid__: A unique ID to identify the request. A simple request counter that increases its value with each request message should work just fine.
+   * __name__: Specifies the message name. More API’s can be found [here](https://github.com/ampproject/amphtml/tree/master/viewer-api).
+   * __rsvp__: Set to `true` if you need a response to your message; otherwise, `false`.
+   * __data__: The data you need to send with your message.
+   * __error__: The string explaining the error that occurred. Only used in a response.
+
+
+### Establishing handshakes
+There are two types of handshakes: 
+
+1. A handshake initiated by the AMP Document (typically used in Mobile Web).
+2. A handshake initiated by the Viewer (typically used in Webview).  In this case, the Viewer polls the AMP Document every X milliseconds to initiate the handshake. There are two ways to do this:
+   * Mobile Web
+   * Webview (Native apps)
+
+
+
+
+
