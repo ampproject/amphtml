@@ -60,19 +60,19 @@ To establish communication between the AMP Viewer and AMP Document, we need to e
 
    The message from the AMP Document to the AMP Viewer looks like this:
 
-```javascript
-{
-  app: “__AMPHTML__”,     // Hey viewer, it's me AMP Doc!
-  requestid: 1,           // A unique ID for the request
-  type: “q”,              // Represents a REQUEST
-  name: “channelOpen”,    // Let’s shake hands
-  data: {
-    url: “amp...yoursite.com”,   // from the amp cache
-    sourceUrl: “yoursite.com”    // the original source url
-  }
-  rsvp: true              // response required
-};
-```
+   ```javascript
+   {
+     app: “__AMPHTML__”,     // Hey viewer, it's me AMP Doc!
+     requestid: 1,           // A unique ID for the request
+     type: “q”,              // Represents a REQUEST
+     name: “channelOpen”,    // Let’s shake hands
+     data: {
+       url: “amp...yoursite.com”,   // from the amp cache
+       sourceUrl: “yoursite.com”    // the original source url
+     }
+     rsvp: true              // response required
+   };
+   ```
 
 3. The AMP Viewer responds to the AMP Document by also using `postMessage()`.
 
@@ -80,13 +80,13 @@ To establish communication between the AMP Viewer and AMP Document, we need to e
 
    The message from the Viewer to the AMP Document looks like this:
 
-```javascript
-{
-  app: “__AMPHTML__”,    // Hey AMP Doc, it's me AMP Viewer! 
-  type: “s”,             // Represents a RESPONSE
-  requestid: 1,          // The same ID used in the REQUEST
-};
-```
+   ```javascript
+   {
+     app: “__AMPHTML__”,    // Hey AMP Doc, it's me AMP Viewer! 
+     type: “s”,             // Represents a RESPONSE
+     requestid: 1,          // The same ID used in the REQUEST
+   };
+   ```
 
 4. The Viewer and AMP Document are now introduced, and they can start posting messages to each other.
 
@@ -108,23 +108,24 @@ Webview is for Native apps.  In Webview, the AMP Viewer can see the AMP document
 2. When the AMP document loads, it receives a “Are you there?”  polling message but the AMP document doesn't know who to respond to.  For this reason, the AMP Viewer uses the [Channel Messaging API](https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API) to create a 2-way connection.
 
 3. The Viewer creates two ports: one for the Viewer and one for the AMP Document. The Viewer sends a port with its polling message to the AMP Document.
-<img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
+
+   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
 
    The message sent from the Viewer to the AMP Doc is done using the `POST` request method. The post contains the following message:
 
-```javascript
-var message = {
-  app: ‘__AMPHTML__’,       // Hey AMP Doc, it's me AMP Viewer!
-  name: ‘handshake-poll’,   // I’m polling you so we can shake hands.
-};
-```
+   ```javascript
+   var message = {
+     app: ‘__AMPHTML__’,       // Hey AMP Doc, it's me AMP Viewer!
+     name: ‘handshake-poll’,   // I’m polling you so we can shake hands.
+   };
+   ```
 
    In the POST, the Viewer also sends the port to the AMP Doc and it looks like this:
 
-```javascript
-var channel = new MessageChannel();
-ampdoc.postMessage(message, ‘*’, [channel.port2]);
-```
+   ```javascript
+   var channel = new MessageChannel();
+   ampdoc.postMessage(message, ‘*’, [channel.port2]);
+   ```
 
 4. Eventually, the AMP Document loads and receives the message and the port.
 
