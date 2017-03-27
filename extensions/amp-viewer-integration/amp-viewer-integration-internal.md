@@ -291,7 +291,7 @@ To establish a handshake initiated by the AMP Document:
 
 #### Viewer-initiated handshake (polling)
 
-_Webview handshake_**
+__Webview handshake__
 
 To enable the Webview messaging protocol with port exchange, the Viewer Init Params should include `webview=1` and the AMP Cache URLs should be in the following format:
 
@@ -352,7 +352,7 @@ The Viewer needs to respond with the following message over the port:
 And the handshake is established. 
 
 
-_Mobile_** _Web_** _handshake_**
+__Mobile Web handshake__
 
 In the Viewer Init Params, add the flag `cap="handshakepoll"`. 
 
