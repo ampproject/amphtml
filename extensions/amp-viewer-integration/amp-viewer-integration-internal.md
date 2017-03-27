@@ -176,5 +176,52 @@ In the previous section, we set up the connection between the AMP Viewer and AMP
    ```
 
 3. The handshake is established and now the Viewer and AMP Document can start communicating.
-
+   
    <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200"></img>
+
+
+
+## Using the Integration API with AMP Viewer
+
+
+### How to enable AMP Viewer integration
+The AMP Viewer integration API must be enabled in the AMP Viewer and in the AMP cache.
+
+#### Google AMP Cache
+If the AMP Viewer uses the Google AMP Cache, the AMP Cache URL in the AMP viewer must be as follows:
+
+   ```html
+   https://...cdn.ampproject.org/v/s/origin?amp_js_v=0.1
+   ```
+
+   Where `/v/` and `amp_js_v=0.1` add the messaging scripts to the AMP page.
+
+#### Other AMP Caches
+If the AMP Viewer uses an AMP cache other than the Google AMP Cache, refer to the Cache provider’s documentation for required settings.
+
+#### AMP Cache Providers
+AMP Cache providers must include the [amp-viewer-integration](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration) component in the cached AMP documents like this:
+
+   ```html
+   <script async src=”../amp-viewer-integration”>
+   ```
+
+
+### Specifying Viewer Init Params
+1. In the AMP Viewer, you need to create initialization parameters in a hash:
+   
+   ```javascript
+   var initParams = {
+     origin: “http://yourAmpDocsOrigin.com”
+     someOtherParam: “someValue,anotherValue”
+   };
+   ```
+
+2. Using `encodeUriComponent`, convert the hash to query string format:
+      * Separated by `&`
+      * Encoded to UTF-8 (`,` -> `%2C`, `:` -> `%3A`, `/` -> `%2F`)
+
+3. Add the query string to the AMP Cache URL:
+   ```html
+   https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#origin=http%3A%2F%2FyourAmpDocsOrigin.com&someOtherParam=someValue%2CanotherValue
+   ```
