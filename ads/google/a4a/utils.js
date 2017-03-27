@@ -134,7 +134,6 @@ export function googleAdUrl(
     }
     queryParams.push({name: 'act', value:
       Object.keys(containerTypeSet).join()});
-    queryParams.push({name: 'dff', value: a4a.getDetectedFont()});
     const allQueryParams = queryParams.concat(
       [
         {
