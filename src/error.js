@@ -358,7 +358,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
       url += `&args=${encodeURIComponent(JSON.stringify(error.args))}`;
     }
 
-    if (!isUserError) {
+    if (!isUserError && !error.ignoreStack) {
       url += `&s=${encodeURIComponent(error.stack || '')}`;
     }
 
