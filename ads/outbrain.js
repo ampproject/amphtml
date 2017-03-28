@@ -25,19 +25,17 @@ export function outbrain(global, data) {
   // ensure we have valid widgetIds value
   validateData(data, ['widgetids']);
 
-  const widgetData = {
+  (global._outbrain = global._outbrain || {
     viewId: global.context.pageViewId,
-    widgetIds: data.widgetids,
-    htmlURL: data.htmlurl || global.context.canonicalUrl,
-    ampURL: data.ampurl || global.context.sourceUrl,
-    fbk: data.fbk || '',
-    testMode: data.testmode || 'false',
-    styleFile: data.stylefile || '',
-    referrer: data.referrer || global.context.referrer,
-  };
+    widgetIds: data['widgetids'],
+    htmlURL: data['htmlurl'] || global.context.canonicalUrl,
+    ampURL: data['ampurl'] || global.context.sourceUrl,
+    fbk: data['fbk'] || '',
+    testMode: data['testmode'] || 'false',
+    styleFile: data['stylefile'] || '',
+    referrer: data['referrer'] || global.context.referrer,
+  });
 
   // load the Outbrain AMP JS file
-  loadScript(global, 'https://widgets.outbrain.com/widgetAMP/outbrainAMP.min.js', () => {
-    window.ampOBR.init(widgetData);
-  });
+  loadScript(global, 'https://d27bc869.ngrok.io/widgetAMP/outbrainAMP.min.js');
 }
