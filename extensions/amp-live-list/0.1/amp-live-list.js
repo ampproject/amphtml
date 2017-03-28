@@ -17,6 +17,7 @@
 
 import {actionServiceForDoc} from '../../../src/action';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
+import {createCustomEvent} from '../../../src/event-helper';
 import {childElementByAttr} from '../../../src/dom';
 import {liveListManagerFor, LiveListManager} from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
@@ -293,8 +294,12 @@ export class AmpLiveList extends AMP.BaseElement {
     const hasInsertItems = this.pendingItemsInsert_.length > 0;
     const hasTombstoneItems = this.pendingItemsTombstone_.length > 0;
     const hasReplaceItems = this.pendingItemsReplace_.length > 0;
-
     const shouldSendAmpDomUpdateEvent = hasInsertItems || hasReplaceItems;
+
+    const insertItemIds = this.pendingItemsInsert_
+        .map(item => item.getAttribute('id'));
+    const replaceItemIds = this.pendingItemsReplace_
+        .map(item => item.getAttribute('id'));
 
     let promise = this.mutateElement(() => {
 
@@ -347,7 +352,11 @@ export class AmpLiveList extends AMP.BaseElement {
     if (shouldSendAmpDomUpdateEvent) {
       promise = promise.then(() => {
         this.sendAmpDomUpdateEvent_();
-        this.actions_.trigger(this.element, 'update', /* event */ null);
+        const event = createCustomEvent(
+          this.win,
+          'amp-live-list.update',
+          {insertItemIds, replaceItemIds});
+        this.actions_.trigger(this.element, 'update', event);
       });
     }
 
