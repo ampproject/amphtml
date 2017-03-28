@@ -554,6 +554,8 @@ export class AmpA4A extends AMP.BaseElement {
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&
               creativeParts.creative) {
+            debugger;
+            return Promise.resolve();
             this.creativeBody_ = creativeParts.creative;
           }
           if (creativeParts.size && creativeParts.size.length == 2) {

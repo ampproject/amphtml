@@ -134,6 +134,10 @@ export function googleAdUrl(
       }
       parentElement = parentElement.parentElement;
     }
+    const pfx =
+        (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
+         || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
+        ? '1' : '0';
     queryParams.push({name: 'act', value:
       Object.keys(containerTypeSet).join()});
     const allQueryParams = queryParams.concat(
@@ -169,10 +173,7 @@ export function googleAdUrl(
         {name: 'ish', value: viewportSize.height},
         // TODO(levitzky) Look into expandable support.
         {name: 'ea', value: '0'},
-        {name: 'pfx', value:
-          containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
-              || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']]
-              || '0'},
+        {name: 'pfx', value: pfx},
       ],
       unboundedQueryParams,
       [
