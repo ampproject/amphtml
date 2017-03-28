@@ -116,11 +116,10 @@ export function isLoaded(eleOrWindow) {
  * and 'error' events. Optionally this method takes a timeout, which will reject
  * the promise if the resource has not loaded by then.
  * @param {T} eleOrWindow Supports both Elements and as a special case Windows.
- * @param {number=} opt_timeout
  * @return {!Promise<T>}
  * @template T
  */
-export function loadPromise(eleOrWindow, opt_timeout) {
+export function loadPromise(eleOrWindow) {
   let unlistenLoad;
   let unlistenError;
   if (isLoaded(eleOrWindow)) {
@@ -141,8 +140,7 @@ export function loadPromise(eleOrWindow, opt_timeout) {
     }
   });
   loadingPromise = loadingPromise.then(() => eleOrWindow, failedToLoad);
-  return racePromise_(loadingPromise, unlistenLoad, unlistenError,
-      opt_timeout);
+  return racePromise_(loadingPromise, unlistenLoad, unlistenError, 0);
 }
 
 /**
