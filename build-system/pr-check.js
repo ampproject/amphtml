@@ -224,9 +224,10 @@ function main(argv) {
   if (buildTargets.has('FLAG_CONFIG')) {
     files.forEach((file) => {
       if (!isFlagConfig(file)) {
-        console.log('Pull requests may not contain a mix of flag-config and ' +
-            'non-flag-config files. Stopping build process.');
-        return 0;
+        console.log('A pull request may not contain a mix of flag-config and ' +
+            'non-flag-config files. Please make your changes in separate ' +
+            'pull requests.');
+        process.exit(1);
       }
     });
   }
