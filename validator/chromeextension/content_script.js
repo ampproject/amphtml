@@ -28,7 +28,7 @@ globals.ampCaches = [
       }
     },
     'isAmpCache': function() {
-      return window.location.hostname === 'cdn.ampproject.org';
+      return window.location.hostname.endsWith('cdn.ampproject.org');
     },
   }
 ];
