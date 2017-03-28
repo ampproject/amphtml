@@ -35,19 +35,6 @@ function getGistJs(global, scriptSource, cb) {
 }
 
 /**
- * Create DOM element for the gist.
- * @param {!Window} global
- * @param {!Object} data The element data
- * @return {!Element} div
- */
-function getGistContainer(global, data) {
-  const container = global.document.createElement('div');
-  container.className = 'gh-gist';
-  container.setAttribute('data-gistid', data.gistid);
-  return container;
-}
-
-/**
  * @param {!Window} global
  * @param {!Object} data
  */
@@ -58,18 +45,15 @@ export function github(global, data) {
     data.element);
 
   const gistid = data.gistid;
-  const container = getGistContainer(global, data);
-
-  global.document.getElementById('c').appendChild(container);
 
   getGistJs(global, 'https://gist.github.com/' + gistid + '.js', function() {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;
     const ctnr = document./*REVIEW*/querySelector('#c .gist');
-    window.context.requestResize(
-      container./*REVIEW*/offsetWidth,
-      ctnr./*REVIEW*/offsetHeight + /* margins */ 20
+    context.updateDimensions(
+      ctnr./*REVIEW*/offsetWidth,
+      ctnr./*REVIEW*/offsetHeight
     );
   });
 }
