@@ -68,6 +68,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
     try {
       listener.call(this, event);
     } finally {
+      // Ensure listener is GC'd
       listener = null;
       unlisten();
     }
