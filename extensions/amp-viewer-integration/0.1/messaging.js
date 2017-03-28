@@ -20,7 +20,7 @@ import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
-const APP = '__AMPHTML__';
+export const APP = '__AMPHTML__';
 
 /**
  * @enum {string}

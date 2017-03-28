@@ -17,6 +17,9 @@
 import {APP, Messaging, MessageType, WindowPortEmulator} from '../messaging';
 import {dev} from '../../../../src/log';
 
+
+const CHANNEL_OPEN_MSG = 'channelOpen';
+
 /**
  * @fileoverview This is an example of how the viewer host can be implemented
  * for communication with the AMP docs.
@@ -50,11 +53,10 @@ export class AmpViewerHost {
     const viewerId = this.id;
     const target = this.ampIframe_.contentWindow;
     const listener = function(event) {
-      if (event.origin == viewerOrigin //&&
-              // this.isChannelOpen_(event.data)// &&
-              // (!event.source || event.source == target)
+      if (event.origin == viewerOrigin &&
+              this.isChannelOpen_(event.data) &&
+              (!event.source || event.source == target)
               ) {
-        console.log('event: ',event);
         console.log('Viewer ' + viewerId + ' messaging established with ',
             viewerOrigin);
         window.removeEventListener('message', listener, false);
@@ -81,7 +83,8 @@ export class AmpViewerHost {
   }
 
   isChannelOpen_(eventData) {
-    return eventData.app == APP && eventData.name == 'channelOpen';
+    debugger;
+    return eventData.app == APP && eventData.name == CHANNEL_OPEN_MSG;
   };
 
   sendRequest_(type, data, awaitResponse) {
