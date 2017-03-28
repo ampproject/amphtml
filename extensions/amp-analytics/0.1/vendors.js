@@ -1235,7 +1235,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'deviceId': 'CLIENT_ID(rakam_device_id)',
     },
     'requests': {
-      'base': '?api.api_key=${writeKey}' +
+      'base': '/?api.api_key=${writeKey}' +
         '&prop._platform=amp' +
         '&prop._device_id=${deviceId}' +
         '&prop.locale=${browserLanguage}' +
