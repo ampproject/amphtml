@@ -64,30 +64,14 @@ export function listen(element, eventType, listener, opt_capture) {
  * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
-  let localElement = element;
-  let localListener = listener;
-  const capture = opt_capture || false;
-  let unlisten;
-  let proxy = event => {
+  let unlisten = internalListenImplementation(element, eventType, event => {
     try {
-      localListener(event);
-    } catch (e) {
-      // reportError is installed globally per window in the entry point.
-      self.reportError(e);
-      throw e;
+      listener.call(this, event);
     } finally {
+      listener = null;
       unlisten();
     }
-  };
-  unlisten = () => {
-    if (localElement) {
-      localElement.removeEventListener(eventType, proxy, capture);
-    }
-    localElement = null;
-    proxy = null;
-    localListener = null;
-  };
-  localElement.addEventListener(eventType, proxy, capture);
+  }, opt_capture);
   return unlisten;
 }
 
