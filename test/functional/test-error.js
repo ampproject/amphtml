@@ -126,6 +126,24 @@ describe('reportErrorToServer', () => {
     expect(query.args).to.be.undefined;
   });
 
+  it('reportError with error and ignore stack', () => {
+    const e = new Error('XYZ');
+    e.ignoreStack = true;
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
+          true));
+    const query = parseQueryString(url.search);
+    expect(query.s).to.be.undefined;
+
+    expect(url.href.indexOf(
+        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
+    expect(query.m).to.equal('XYZ');
+    expect(query.el).to.equal('u');
+    expect(query.a).to.equal('0');
+    expect(query['3p']).to.equal(undefined);
+    expect(e.message).to.contain('_reported_');
+  });
+
   it('reportError with error object w/args', () => {
     const e = new Error('XYZ');
     e.args = {x: 1};
@@ -435,7 +453,7 @@ describes.sandboxed('reportError', {}, () => {
     window.AMP_MODE = {localDev: true, test: false};
     const result = reportError('error');
     expect(result).to.be.instanceOf(Error);
-    expect(result.message).to.be.equal('error');
+    expect(result.message).to.contain('error');
     expect(result.origError).to.be.equal('error');
     expect(result.reported).to.be.true;
     expect(() => {
@@ -447,7 +465,7 @@ describes.sandboxed('reportError', {}, () => {
     window.AMP_MODE = {localDev: true, test: false};
     const result = reportError(101);
     expect(result).to.be.instanceOf(Error);
-    expect(result.message).to.be.equal('101');
+    expect(result.message).to.contain('101');
     expect(result.origError).to.be.equal(101);
     expect(result.reported).to.be.true;
     expect(() => {
@@ -459,7 +477,7 @@ describes.sandboxed('reportError', {}, () => {
     window.AMP_MODE = {localDev: true, test: false};
     const result = reportError(null);
     expect(result).to.be.instanceOf(Error);
-    expect(result.message).to.be.equal('Unknown error');
+    expect(result.message).to.contain('Unknown error');
     expect(result.origError).to.be.undefined;
     expect(result.reported).to.be.true;
     expect(() => {
