@@ -40,7 +40,7 @@ describe('AccessServerJwtAdapter', () => {
     };
 
     meta = document.createElement('meta');
-    meta.setAttribute('name', 'i-amp-access-state');
+    meta.setAttribute('name', 'i-amphtml-access-state');
     meta.setAttribute('content', 'STATE1');
     document.head.appendChild(meta);
 
@@ -105,7 +105,7 @@ describe('AccessServerJwtAdapter', () => {
       expect(adapter.keyUrl_).to.be.null;
     });
 
-    it('should tolerate when i-amp-access-state is missing', () => {
+    it('should tolerate when i-amphtml-access-state is missing', () => {
       document.head.removeChild(meta);
       const adapter = new AccessServerJwtAdapter(window, validConfig, context);
       expect(adapter.serverState_).to.be.null;
@@ -148,11 +148,11 @@ describe('AccessServerJwtAdapter', () => {
       responseDoc.appendChild(responseAccessData);
 
       targetElement1 = document.createElement('div');
-      targetElement1.setAttribute('i-amp-access-id', '1/1');
+      targetElement1.setAttribute('i-amphtml-access-id', '1/1');
       document.body.appendChild(targetElement1);
 
       targetElement2 = document.createElement('div');
-      targetElement2.setAttribute('i-amp-access-id', '1/2');
+      targetElement2.setAttribute('i-amphtml-access-id', '1/2');
       document.body.appendChild(targetElement2);
     });
 
@@ -312,26 +312,26 @@ describe('AccessServerJwtAdapter', () => {
 
       it('should replace sections', () => {
         const responseElement1 = document.createElement('div');
-        responseElement1.setAttribute('i-amp-access-id', '1/1');
+        responseElement1.setAttribute('i-amphtml-access-id', '1/1');
         responseElement1.textContent = 'a1';
         responseDoc.appendChild(responseElement1);
 
         const responseElement2 = document.createElement('div');
-        responseElement2.setAttribute('i-amp-access-id', '1/2');
+        responseElement2.setAttribute('i-amphtml-access-id', '1/2');
         responseElement2.textContent = 'a2';
         responseDoc.appendChild(responseElement2);
 
         const unknownResponseElement3 = document.createElement('div');
-        unknownResponseElement3.setAttribute('i-amp-access-id', 'a3');
+        unknownResponseElement3.setAttribute('i-amphtml-access-id', 'a3');
         unknownResponseElement3.textContent = 'a3';
         responseDoc.appendChild(unknownResponseElement3);
 
         return adapter.replaceSections_(responseDoc).then(() => {
-          expect(document.querySelector('[i-amp-access-id="1/1"]').textContent)
-              .to.equal('a1');
-          expect(document.querySelector('[i-amp-access-id="1/2"]').textContent)
-              .to.equal('a2');
-          expect(document.querySelector('[i-amp-access-id=a3]')).to.be.null;
+          expect(document.querySelector('[i-amphtml-access-id="1/1"]')
+              .textContent).to.equal('a1');
+          expect(document.querySelector('[i-amphtml-access-id="1/2"]')
+              .textContent).to.equal('a2');
+          expect(document.querySelector('[i-amphtml-access-id=a3]')).to.be.null;
         });
       });
 

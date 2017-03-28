@@ -86,7 +86,7 @@ export class AccessServerAdapter {
     this.vsync_ = vsyncFor(win);
 
     const stateElement = this.win.document.querySelector(
-        'meta[name="i-amp-access-state"]');
+        'meta[name="i-amphtml-access-state"]');
 
     /** @private @const {?string} */
     this.serverState_ = stateElement ?
@@ -188,14 +188,14 @@ export class AccessServerAdapter {
    * @return {!Promise}
    */
   replaceSections_(doc) {
-    const sections = doc.querySelectorAll('[i-amp-access-id]');
+    const sections = doc.querySelectorAll('[i-amphtml-access-id]');
     dev().fine(TAG, '- access sections: ', sections);
     return this.vsync_.mutatePromise(() => {
       for (let i = 0; i < sections.length; i++) {
         const section = sections[i];
-        const sectionId = section.getAttribute('i-amp-access-id');
+        const sectionId = section.getAttribute('i-amphtml-access-id');
         const target = this.win.document.querySelector(
-            '[i-amp-access-id="' + sectionId + '"]');
+            '[i-amphtml-access-id="' + sectionId + '"]');
         if (!target) {
           dev().warn(TAG, 'Section not found: ', sectionId);
           continue;
