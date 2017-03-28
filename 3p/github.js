@@ -52,8 +52,8 @@ export function github(global, data) {
     delete data.height;
     const gistContainer = global.document.querySelector('#c .gist');
     context.updateDimensions(
-      gistContainer./*REVIEW*/offsetWidth,
-      gistContainer./*REVIEW*/offsetHeight
+      gistContainer./*OK*/offsetWidth,
+      gistContainer./*OK*/offsetHeight
     );
   });
 }
