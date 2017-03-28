@@ -165,7 +165,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>
       <ul>
         <li><code>data-param-text</code>: optional, defaults to: "Current page title"</li>
-        <li><code>data-param-data-mode</code>: optional, if set to <code>replace</code>, all other share options are removed.</li>
+        <li><code>data-mode</code>: optional, if set to <code>replace</code>, all other share options are removed.</li>
       </ul>
     </td>
   </tr>
