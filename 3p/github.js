@@ -50,7 +50,7 @@ export function github(global, data) {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;
-    const gistContainer = document./*REVIEW*/querySelector('#c .gist');
+    const gistContainer = global.document.querySelector('#c .gist');
     context.updateDimensions(
       gistContainer./*REVIEW*/offsetWidth,
       gistContainer./*REVIEW*/offsetHeight
