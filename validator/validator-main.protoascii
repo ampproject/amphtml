@@ -3379,7 +3379,6 @@ attr_lists: {
   attrs: { name: "amp-access-show" }
   attrs: { name: "amp-access-style" }
   attrs: { name: "amp-access-template" }
-  attrs: { name: "i-amp-access-id" }
   # amp-form specific attributes, see
   # https://github.com/ampproject/amphtml/issues/5268
   attrs: {
