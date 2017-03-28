@@ -619,6 +619,10 @@ function createBaseCustomElementClass(win) {
       }
       this.implementation_ = new newImplClass(this);
       if (this.everAttached) {
+        // Usually, we do an implementation upgrade when the element is
+        // attached to the DOM. But, if it hadn't yet upgraded from
+        // ElementStub, we couldn't. Now that it's upgraded from a stub, go
+        // ahead and do the full upgrade.
         this.tryUpgrade_();
       }
     }
@@ -637,13 +641,9 @@ function createBaseCustomElementClass(win) {
       this.assertLayout_();
       this.implementation_.layout_ = this.layout_;
       this.implementation_.layoutWidth_ = this.layoutWidth_;
-      if (this.everAttached) {
-        this.implementation_.firstAttachedCallback();
-        this.dispatchCustomEventForTesting('amp:attached');
-        // For a never-added resource, the build will be done automatically
-        // via `resources.add` on the first attach.
-        this.getResources().upgraded(this);
-      }
+      this.implementation_.firstAttachedCallback();
+      this.dispatchCustomEventForTesting('amp:attached');
+      this.getResources().upgraded(this);
     }
 
     /* @private */
@@ -933,37 +933,38 @@ function createBaseCustomElementClass(win) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = resourcesForDoc(this.ampdoc_);
       }
-      if (!this.everAttached) {
+      this.getResources().add(this);
+
+      if (this.everAttached) {
+        const reconstruct = this.reconstructWhenReparented();
+        if (reconstruct) {
+          this.reset_();
+        }
+        if (this.isUpgraded()) {
+          if (reconstruct) {
+            this.getResources().upgraded(this);
+          }
+          this.dispatchCustomEventForTesting('amp:attached');
+        }
+      } else {
+        this.everAttached = true;
+
+        try {
+          this.layout_ = applyLayout_(this);
+        } catch (e) {
+          reportError(e, this);
+        }
         if (!isStub(this.implementation_)) {
           this.tryUpgrade_();
         }
         if (!this.isUpgraded()) {
           this.classList.add('amp-unresolved');
           this.classList.add('i-amphtml-unresolved');
+          // amp:attached is dispatched from the ElementStub class when it
+          // replayed the firstAttachedCallback call.
+          this.dispatchCustomEventForTesting('amp:stubbed');
         }
-        try {
-          this.layout_ = applyLayout_(this);
-          this.assertLayout_();
-          this.implementation_.layout_ = this.layout_;
-          this.implementation_.firstAttachedCallback();
-          if (!this.isUpgraded()) {
-            // amp:attached is dispatched from the ElementStub class when it
-            // replayed the firstAttachedCallback call.
-            this.dispatchCustomEventForTesting('amp:stubbed');
-          } else {
-            this.dispatchCustomEventForTesting('amp:attached');
-          }
-        } catch (e) {
-          reportError(e, this);
-        }
-
-        // It's important to have this flag set in the end to avoid
-        // `resources.add` called twice if upgrade happens immediately.
-        this.everAttached = true;
-      } else if (this.reconstructWhenReparented()) {
-        this.reset_();
       }
-      this.getResources().add(this);
     }
 
     /** The Custom Elements V0 sibling to `connectedCallback`. */
