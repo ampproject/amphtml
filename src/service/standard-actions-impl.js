@@ -96,7 +96,7 @@ export class StandardActions {
             }
             bind.setStateWithExpression(objectString, scope);
           } else {
-            user().warn('amp-bind', `Key-value syntax for AMP.setState() will `
+            user().warn('AMP-BIND', `Key-value syntax for AMP.setState() will `
                 + `be removed soon. Please use the object-literal syntax `
                 + `instead, e.g. "AMP.setState({foo: 'bar'})" instead of `
                 + `"AMP.setState(foo='bar')".`);
