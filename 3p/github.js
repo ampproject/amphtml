@@ -50,10 +50,10 @@ export function github(global, data) {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;
-    const ctnr = document./*REVIEW*/querySelector('#c .gist');
+    const gistContainer = document./*REVIEW*/querySelector('#c .gist');
     context.updateDimensions(
-      ctnr./*REVIEW*/offsetWidth,
-      ctnr./*REVIEW*/offsetHeight
+      gistContainer./*REVIEW*/offsetWidth,
+      gistContainer./*REVIEW*/offsetHeight
     );
   });
 }
