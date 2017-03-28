@@ -86,7 +86,7 @@ export class AccessServerAdapter {
     this.vsync_ = vsyncFor(win);
 
     const stateElement = this.win.document.querySelector(
-        'meta[name="i-amp-access-state"]');
+        'meta[name="i-amphtml-access-state"]');
 
     /** @private @const {?string} */
     this.serverState_ = stateElement ?

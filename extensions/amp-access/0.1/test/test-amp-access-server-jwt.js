@@ -40,7 +40,7 @@ describe('AccessServerJwtAdapter', () => {
     };
 
     meta = document.createElement('meta');
-    meta.setAttribute('name', 'i-amp-access-state');
+    meta.setAttribute('name', 'i-amphtml-access-state');
     meta.setAttribute('content', 'STATE1');
     document.head.appendChild(meta);
 
@@ -105,7 +105,7 @@ describe('AccessServerJwtAdapter', () => {
       expect(adapter.keyUrl_).to.be.null;
     });
 
-    it('should tolerate when i-amp-access-state is missing', () => {
+    it('should tolerate when i-amphtml-access-state is missing', () => {
       document.head.removeChild(meta);
       const adapter = new AccessServerJwtAdapter(window, validConfig, context);
       expect(adapter.serverState_).to.be.null;
