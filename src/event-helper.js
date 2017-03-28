@@ -64,12 +64,13 @@ export function listen(element, eventType, listener, opt_capture) {
  * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
+  let localListener = listener;
   const unlisten = internalListenImplementation(element, eventType, event => {
     try {
-      listener.call(this, event);
+      localListener.call(this, event);
     } finally {
       // Ensure listener is GC'd
-      listener = null;
+      localListener = null;
       unlisten();
     }
   }, opt_capture);
