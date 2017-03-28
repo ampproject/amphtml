@@ -15,7 +15,9 @@
  */
 
 var argv = require('minimist')(process.argv.slice(2));
+var babel = require('babelify');
 var gulp = require('gulp-help')(require('gulp'));
+var glob = require('glob');
 var Karma = require('karma').Server;
 var config = require('../config');
 var fs = require('fs');
@@ -132,6 +134,21 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     c.files = [].concat(config.commonTestPaths, argv.files);
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
+  } else if (argv.randomize) {
+    var testPaths = [
+      'test/**/*.js',
+      'ads/**/test/test-*.js',
+      'extensions/**/test/**/*.js',
+    ];
+
+    var testFiles = [];
+
+    for (index in testPaths) {
+      testFiles = testFiles.concat(glob.sync(testPaths[index]));
+    }
+    testFiles = shuffleArray(testFiles);
+    c.files = [].concat(config.commonTestPaths, testFiles);
+
   } else {
     c.files = config.testPaths;
   }
@@ -188,3 +205,14 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     'files': 'Runs tests for specific files',
   }
 });
+
+
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+}
