@@ -1152,8 +1152,8 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'host': 'https://ibeats.indiatimes.com',
       'base': 'https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html',
       'pageview': '${base}?' +
-                '&h=ibeats.indiatimes.com' +
-                '&d=ibeats.indiatimes.com' +
+                '&h=${h}' +
+                '&d=${h}' +
                 '&url=${url}' +
                 '&k=${key}' +
                 '&ts=${time}' +
@@ -1179,11 +1179,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'on': 'visible',
         'request': 'pageview',
       },
-    },
-    'transport': {
-      'beacon': false,
-      'xhrpost': false,
-      'image': true,
     },
   },
 });
