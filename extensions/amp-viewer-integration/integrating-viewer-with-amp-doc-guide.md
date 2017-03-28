@@ -20,7 +20,7 @@ limitations under the License.
 
 This document explains the communication between a Viewer and AMP documents by using the open-source [AMP Viewer Integration API](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration).  The AMP Viewer Integration API provides a protocol to establish a connection and send messages between the Viewer and AMP documents.
 
-<img src="img/intro.png" height="100px"></img>
+<img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200" height="100px"></img>
 
 A Viewer is a container in which you can view AMP Documents. An AMP Document is a document created with the AMPHTML library and validated by the [AMP Validator](https://validator.ampproject.org/).
 
