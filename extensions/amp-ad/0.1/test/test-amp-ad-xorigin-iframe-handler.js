@@ -213,7 +213,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       });
     });
 
-    it('should trigger render-start on message "bootstrap-loaded" if' +
+    // TODO(amphtml): Unskip when #8386 is fixed.
+    it.skip('should trigger render-start on message "bootstrap-loaded" if' +
        ' render-start is NOT implemented', done => {
       initPromise = iframeHandler.init(iframe);
       iframe.onload = () => {

@@ -65,8 +65,12 @@ amp-carousel[controls] .amp-carousel-button,
   background-size: 18px 18px;
 }
 
-:not(.amp-mode-mouse) .-amp-carousel-button-start-hint .amp-carousel-button:not(.amp-disabled) {
+.-amp-carousel-button-start-hint .amp-carousel-button:not(.amp-disabled) {
   animation: -amp-carousel-hint 1s ease-in 3s 1 normal both;
+}
+
+.amp-mode-mouse .-amp-carousel-button-start-hint .amp-carousel-button:not(.amp-disabled) {
+  animation: none;
 }
 
 @keyframes -amp-carousel-hint {
@@ -161,6 +165,14 @@ amp-carousel .amp-carousel-button.amp-disabled {
   order: 100000000 !important;
   margin-right: -1px !important;
 }
+
+.-amp-slidescroll-no-snap.-amp-slides-container {
+  scroll-snap-type: none !important;
+}
+
+.-amp-slidescroll-no-snap .-amp-slide-item {
+  scroll-snap-coordinate: none !important;
+}
 /* End SlideScroll */
 
 /* Begin ScrollableCarousel */
@@ -179,13 +191,5 @@ amp-carousel .amp-carousel-button.amp-disabled {
   overflow-x: auto !important;
   overflow-y: hidden !important;
   -webkit-overflow-scrolling: touch !important;
-}
-
-.-amp-slidescroll-no-snap.-amp-slides-container {
-  scroll-snap-type: none !important;
-}
-
-.-amp-slidescroll-no-snap.-amp-slide-item {
-  scroll-snap-coordinate: none !important;
 }
 /* End ScrollableCarousel */

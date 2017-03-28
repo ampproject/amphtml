@@ -279,6 +279,7 @@ var forbiddenTerms = {
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
+      'dist.3p/current/integration.js', // includes previous
     ],
   },
   '\\.sendMessageAwaitResponse\\(': {
@@ -318,6 +319,7 @@ var forbiddenTerms = {
       'build-system/test-server.js',
       'src/cookies.js',
       'extensions/amp-analytics/0.1/cid-impl.js',
+      'extensions/amp-analytics/0.1/vendors.js',
       'testing/fake-dom.js',
     ],
   },
@@ -424,6 +426,16 @@ var forbiddenTerms = {
       'src/inabox/inabox-viewer.js',
     ],
   },
+  'internalListenImplementation': {
+    message: 'Use `listen()` in either `event-helper` or `3p-frame-messaging`' +
+        ', depending on your use case.',
+    whitelist: [
+      'src/3p-frame-messaging.js',
+      'src/event-helper.js',
+      'src/event-helper-listen.js',
+      'dist.3p/current/integration.js',  // includes previous
+    ],
+  },
   'setTimeout.*throw': {
     message: 'Use dev.error or user.error instead.',
     whitelist: [
@@ -508,7 +520,13 @@ var forbiddenTerms = {
       'src/service-worker/shell.js',
       'src/worker-error-reporting.js',
     ],
-  }
+  },
+  'new CustomEvent\\(': {
+    message: 'Use createCustomEvent() helper instead.',
+    whitelist: [
+      'src/event-helper.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +

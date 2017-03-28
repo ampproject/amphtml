@@ -270,20 +270,42 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
   });
 
   describe('#extractCreativeAndSignature', () => {
+    let loadExtensionSpy;
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+          'layout': 'fixed',
+        });
+        impl = new AmpAdNetworkAdsenseImpl(element);
+        installExtensionsService(impl.win);
+        const extensions = extensionsFor(impl.win);
+        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+      });
+    });
+
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(impl.extractCreativeAndSignature(
+        return impl.extractCreativeAndSignature(
           creative,
           {
             get: function() { return undefined; },
             has: function() { return false; },
-          })).to.eventually.deep.equal(
-                {creative, signature: null, size: null});
+          }).then(adResponse => {
+            expect(adResponse).to.deep.equal(
+                  {creative, signature: null, size: null});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+          });
       });
     });
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(impl.extractCreativeAndSignature(
+        return impl.extractCreativeAndSignature(
           creative,
           {
             get: function(name) {
@@ -292,10 +314,12 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             has: function(name) {
               return name === 'X-AmpAdSignature';
             },
-          })).to.eventually.deep.equal(
-              {creative,
-               signature: base64UrlDecodeToBytes('AQAB'),
+          }).then(adResponse => {
+            expect(adResponse).to.deep.equal(
+              {creative, signature: base64UrlDecodeToBytes('AQAB'),
                size: null});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+          });
       });
     });
     it('with analytics', () => {
@@ -325,14 +349,13 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 size: null,
               });
             expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
           });
       });
     });
   });
 
   describe('#onCreativeRender', () => {
-    let loadExtensionSpy;
-
     beforeEach(() => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -342,10 +365,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'height': '50',
           'type': 'adsense',
         });
-        installExtensionsService(fixture.win);
-        const extensions = extensionsFor(fixture.win);
         impl = new AmpAdNetworkAdsenseImpl(element);
-        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
 
@@ -353,7 +373,6 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       impl.ampAnalyticsConfig = {urls};
       impl.onCreativeRender(false);
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
       // Exact format of amp-analytics element covered in
@@ -479,5 +498,3 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
   });
 });
-
-

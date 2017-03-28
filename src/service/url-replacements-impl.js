@@ -245,6 +245,13 @@ export class GlobalVariableSource extends VariableSource {
         if (!clientIds) {
           clientIds = Object.create(null);
         }
+
+        // A temporary work around to extract Client ID from _ga cookie. #5761
+        // TODO: replace with "filter" when it's in place. #2198
+        if (scope == '_ga') {
+          cid = extractClientIdFromGaCookie(cid);
+        }
+
         clientIds[scope] = cid;
         return cid;
       });
@@ -577,10 +584,12 @@ export class UrlReplacements {
    * TODO(mkhatib, #6322): Deprecate and please use expandUrlAsync or expandStringAsync.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
    * @return {!Promise<string>}
    */
-  expandAsync(url, opt_bindings) {
-    return this.expandUrlAsync(url, opt_bindings);
+  expandAsync(url, opt_bindings, opt_whiteList) {
+    return this.expandUrlAsync(url, opt_bindings, opt_whiteList);
   }
 
 
@@ -636,12 +645,15 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
    * @return {!Promise<string>}
    */
-  expandUrlAsync(url, opt_bindings) {
+  expandUrlAsync(url, opt_bindings, opt_whiteList) {
     return /** @type {!Promise<string>} */ (
-        this.expand_(url, opt_bindings).then(
-            replacement => this.ensureProtocolMatches_(url, replacement)));
+        this.expand_(url, opt_bindings, undefined, undefined,
+            opt_whiteList).then(
+              replacement => this.ensureProtocolMatches_(url, replacement)));
   }
 
   /**
@@ -929,6 +941,15 @@ export class UrlReplacements {
   }
 }
 
+/**
+ * Extracts client ID from a _ga cookie.
+ * https://developers.google.com/analytics/devguides/collection/analyticsjs/cookies-user-id
+ * @param {string} gaCookie
+ * @returns {string}
+ */
+export function extractClientIdFromGaCookie(gaCookie) {
+  return gaCookie.replace(/^(GA1|1)\.[\d-]+\./, '');
+}
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
