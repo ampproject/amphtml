@@ -162,25 +162,41 @@ describe('amp-fx-flying-carpet', () => {
     });
   });
 
-  it('should not render in the first viewport', () => {
-    return getAmpFlyingCarpet(null, '99vh').then(() => {
+  it('should not render in the 75% of first viewport', () => {
+    return getAmpFlyingCarpet(null, '74vh').then(() => {
       throw new Error('should never reach this');
     }, ref => {
       expect(ref.error.message).to.have.string(
-        'elements must be positioned after the first viewport'
+        'elements must be positioned after the 75% of first viewport'
       );
       expect(ref.flyingCarpet).to.not.display;
     });
   });
 
+  it('should render past 75% of first viewport', () => {
+    return getAmpFlyingCarpet(null, '80vh').then(flyingCarpet => {
+      expect(flyingCarpet).to.display;
+    });
+  });
+
   it('should not render in the last viewport', () => {
-    return getAmpFlyingCarpet(null, '301vh').then(() => {
+    // Doc: 600px
+    // Viewport: 150px
+    return getAmpFlyingCarpet(null, '460px').then(() => {
       throw new Error('should never reach this');
     }, ref => {
       expect(ref.error.message).to.have.string(
         'elements must be positioned before the last viewport'
       );
       expect(ref.flyingCarpet).to.not.display;
+    });
+  });
+
+  it('should render close to the last viewport', () => {
+    // Doc: 600px
+    // Viewport: 150px
+    return getAmpFlyingCarpet(null, '455px').then(flyingCarpet => {
+      expect(flyingCarpet).to.display;
     });
   });
 
