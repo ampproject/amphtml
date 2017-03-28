@@ -16,6 +16,7 @@
 
 import {Observable} from './observable';
 import {dev} from './log';
+import {timerFor} from './timer';
 import {listenOnce, listenOncePromise} from './event-helper';
 import {registerServiceBuilder} from './service';
 
@@ -215,8 +216,18 @@ export class Input {
     // If "click" arrives within a timeout time, this is most likely a
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.
-    return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_)
-        .then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
+    let unlisten;
+    const listenPromise = listenOncePromise(this.win.document, 'click',
+        /* capture */ undefined, unlistener => {
+          unlisten = unlistener;
+        });
+    return timerFor(this.win).timeoutPromise(CLICK_TIMEOUT_, listenPromise)
+        .then(this.boundMouseCanceled_, () => {
+          if (unlisten) {
+            unlisten();
+          }
+          this.boundMouseConfirmed_();
+        });
   }
 
   /** @private */
