@@ -1235,7 +1235,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'deviceId': 'CLIENT_ID(rakam_device_id)',
     },
     'requests': {
-      'base': '/?api.api_key=${writeKey}' +
+      'base': '?api.api_key=${writeKey}' +
         '&prop._platform=amp' +
         '&prop._device_id=${deviceId}' +
         '&prop.locale=${browserLanguage}' +
@@ -1247,8 +1247,8 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         '&prop.timezone=${timezone}' +
         '&prop._time=${timestamp}' +
         '&prop.resolution=${screenWidth} × ${screenHeight}',
-      'pageview': 'https://${apiEndpoint}/event/pixel/${base}&collection=${pageViewName}',
-      'custom': 'https://${apiEndpoint}/event/pixel/${base}&collection=${collection}',
+      'pageview': 'https://${apiEndpoint}/event/pixel${base}&collection=${pageViewName}',
+      'custom': 'https://${apiEndpoint}/event/pixel${base}&collection=${collection}',
     },
     'transport': {
       'beacon': false,
