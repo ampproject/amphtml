@@ -16,6 +16,7 @@
 import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
+import {nextTick} from './3p';
 import {tryParseJson} from '../src/json';
 
 export class AbstractAmpContext {
@@ -58,6 +59,15 @@ export class AbstractAmpContext {
 
     /** @type {?boolean} */
     this.hidden = null;
+
+    /** @type {?Object} */
+    this.mode = null;
+
+    /** @type {?Object} */
+    this.initialIntersection = null;
+
+    /** @type {?string} */
+    this.sourceUrl = null;
 
     /** @type {!Array<function(Object)>} */
     this.visibilityCallbacks_ = [];
@@ -110,16 +120,27 @@ export class AbstractAmpContext {
 
   /**
    *  Send message to runtime to start sending intersection messages.
-   *  @param {function(Object)} callback Function to call every time we receive
-   *  an intersection message.
+   *  @param {function(Array<Object>)} callback Function to call every time we
+   *    receive an intersection message.
    *  @returns {function()} that when called stops triggering the callback
    *    every time we receive an intersection message.
    */
   observeIntersection(callback) {
-    return this.client_.makeRequest(
+    const unlisten = this.client_.makeRequest(
         MessageType.SEND_INTERSECTIONS,
         MessageType.INTERSECTION,
-        callback);
+        intersection => {
+          callback(intersection.changes);
+        });
+
+    // Call the callback with the value that was transmitted when the
+    // iframe was drawn. Called in nextTick, so that callers don't
+    // have to specially handle the sync case.
+    nextTick(this.win_, () => {
+      callback([this.initialIntersection]);
+    });
+
+    return unlisten;
   };
 
   /**
@@ -178,15 +199,18 @@ export class AbstractAmpContext {
     if (!dataObject) {
       throw new Error('Could not setup metadata.');
     }
-    const context = dataObject._context;
-    this.location = context.location || null;
-    this.canonicalUrl = context.canonicalUrl || null;
-    this.clientId = context.clientId || null;
-    this.pageViewId = context.pageViewId || null;
-    this.sentinel = context.sentinel || null;
-    this.startTime = context.startTime || null;
-    this.referrer = context.referrer || null;
-    this.hidden = context.hidden || null;
+    const context = dataObject.attributes._context;
+    this.location = context.location;
+    this.canonicalUrl = context.canonicalUrl;
+    this.clientId = context.clientId;
+    this.pageViewId = context.pageViewId;
+    this.sentinel = context.sentinel;
+    this.startTime = context.startTime;
+    this.referrer = context.referrer;
+    this.mode = context.mode;
+    this.initialIntersection = context.initialIntersection;
+    this.hidden = context.hidden;
+    this.sourceUrl = context.sourceUrl;
   }
 
   /**

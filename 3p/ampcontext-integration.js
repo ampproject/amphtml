@@ -69,7 +69,7 @@ export class IntegrationAmpContext extends AbstractAmpContext {
 
   /** @return {!Window} */
   get master() {
-    return master_();
+    return this.master_();
   }
 
   /** @return {!Window} */
@@ -109,6 +109,13 @@ export class IntegrationAmpContext extends AbstractAmpContext {
 
   notifyBootstrapLoaded() {
     this.client_.sendMessage('bootstrap-loaded');
+  }
+
+  /**
+   * @param {{width, height}=} opt_data
+   */
+  renderStart(opt_data) {
+    this.client_.sendMessage('render-start', opt_data);
   }
 
   /**
