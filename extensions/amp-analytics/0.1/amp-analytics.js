@@ -26,6 +26,7 @@ import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
 import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
+import {isEnumValue} from '../../../src/types';
 import {Activity} from './activity-impl';
 import {Cid} from './cid-impl';
 import {
@@ -51,10 +52,9 @@ installVariableService(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
-const BLACKLIST_EVENT_IN_SANDBOX = [
-  AnalyticsEventType.CLICK,
-  AnalyticsEventType.TIMER,
-  AnalyticsEventType.SCROLL,
+const WHITELIST_EVENT_IN_SANDBOX = [
+  AnalyticsEventType.VISIBLE,
+  AnalyticsEventType.HIDDEN,
 ];
 
 export class AmpAnalytics extends AMP.BaseElement {
@@ -219,7 +219,8 @@ export class AmpAnalytics extends AMP.BaseElement {
         // Check for not supported trigger for sandboxed analytics
         if (this.isSandbox_) {
           const eventType = trigger['on'];
-          if (BLACKLIST_EVENT_IN_SANDBOX.indexOf(eventType) > -1) {
+          if (isEnumValue(AnalyticsEventType, eventType) &&
+              WHITELIST_EVENT_IN_SANDBOX.indexOf(eventType) == -1) {
             user().error(TAG, eventType + 'is not supported for amp-analytics' +
             ' in scope');
             continue;
