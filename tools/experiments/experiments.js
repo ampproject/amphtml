@@ -275,6 +275,7 @@ const EXPERIMENTS = [
   {
     id: 'amp-gist',
     name: 'Embed a GitHub gist',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8467',
   },
   {
     id: '3p-use-ampcontext',
