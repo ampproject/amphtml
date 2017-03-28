@@ -282,9 +282,11 @@ export class Resource {
    * for details.
    */
   build() {
-    if (this.blacklisted_ || !this.element.isUpgraded()
-        || !this.resources_.shouldBuildNow()) {
+    if (this.blacklisted_ || !this.element.isUpgraded()) {
       return;
+    }
+    if (!this.resources_.grantBuildPermission()) {
+
     }
     try {
       this.element.build();

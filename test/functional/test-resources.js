@@ -1104,6 +1104,18 @@ describe('Resources discoverWork', () => {
     expect(setInViewport).to.have.been.calledBefore(schedule);
   });
 
+  it('should not grant permission to build when threshold reached', () => {
+    let hasBeenVisible = false;
+    sandbox.stub(resources.viewer_, 'hasBeenVisible', () => hasBeenVisible);
+
+    for (let i = 0; i < 20; i++) {
+      expect(resources.grantBuildPermission()).to.be.true;
+    }
+    expect(resources.grantBuildPermission()).to.be.false;
+    hasBeenVisible = true;
+    expect(resources.grantBuildPermission()).to.be.true;
+  });
+
   it('should build resource when not built', () => {
     const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     sandbox.stub(resources, 'schedule_');

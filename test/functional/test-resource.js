@@ -124,6 +124,14 @@ describe('Resource', () => {
     expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
   });
 
+  it('should not build if permission is not granted', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('build').never();
+    sandbox.stub(resources, 'grantBuildPermission', () => false);
+    resource.build();
+    expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+  });
+
   it('should blacklist on build failure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').throws('Failed').once();
