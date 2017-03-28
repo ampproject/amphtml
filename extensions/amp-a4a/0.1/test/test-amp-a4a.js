@@ -1399,6 +1399,16 @@ describe('amp-a4a', () => {
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
       expect(userErrorStub.args[0][1].message).to.be.match(/intentional/);
+      expect(userErrorStub.args[0][1].ignoreStack).to.be.undefined;
+    });
+
+    it('should configure ignoreStack when specified', () => {
+      window.AMP_MODE = {development: true};
+      a4a.promiseErrorHandler_('intentional', /* ignoreStack */ true);
+      expect(userErrorStub).to.be.calledOnce;
+      expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
+      expect(userErrorStub.args[0][1].message).to.be.match(/intentional/);
+      expect(userErrorStub.args[0][1].ignoreStack).to.equal(true);
     });
 
     it('should route error to user.error in dev mode', () => {
