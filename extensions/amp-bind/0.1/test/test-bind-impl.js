@@ -396,4 +396,134 @@ describes.realWin('Bind', {
           sinon.match(/Maximum number of bindings reached/));
     });
   });
+
+  describe('state merging', () => {
+    it('should deep merge state', () => {
+      return onBindReadyAndSetState({
+        a: 'hello world',
+        b: 'goodbye world',
+        c: {
+          d: 'foo',
+          e: {
+            f: 'bar',
+          },
+        },
+      }).then(() => {
+        return bind.setState({
+          b: 'hello world',
+          c: {
+            d: 'bah',
+            e: {
+              g: 'baz',
+            },
+          },
+        });
+      }).then(() => {
+        expect(bind.scope_).to.deep.equal({
+          a: 'hello world',
+          b: 'hello world',
+          c: {
+            d: 'bah',
+            e: {
+              f: 'bar',
+              g: 'baz',
+            },
+          },
+        });
+      });
+    });
+
+    it('should replace reassigned arrays and NOT deep merge', () => {
+      return onBindReadyAndSetState({
+        a: [1,2,3,4,5],
+        b: {
+          c: [9,8,7,6,5],
+        },
+      }).then(() => {
+        return bind.setState({
+          b: {
+            c: ['h', 'i'],
+          },
+        });
+      }).then(() => {
+        expect(bind.scope_).to.deep.equal({
+          a: [1,2,3,4,5],
+          b: {
+            c: ['h', 'i'],
+          },
+        });
+      });
+    });
+
+
+    it('should copy any array merged into scope', () => {
+      const arr = ['h', 'i'];
+      return onBindReadyAndSetState({
+        a: {
+          b: [1,2,3,4,5],
+        },
+      }).then(() => {
+        return bind.setState({
+          a: {
+            b: arr,
+          },
+        });
+      }).then(() => {
+        expect(bind.scope_.a.b).to.deep.equal(arr);
+        expect(bind.scope_.a.b).to.not.equal(arr);
+      });
+    });
+
+    it('should throw if merged object exceeds max permitted depth', () => {
+      const errorStub = env.sandbox.stub(user(), 'error');
+      return onBindReadyAndSetState({
+        a: {
+          b: {
+            c: {
+              d: 'e',
+            },
+          },
+        },
+      }).then(() => {
+        bind.setMaxMergeDepthForTesting(2);
+        return bind.setState({
+          a: {
+            b: {
+              c: {
+                d: 'z',
+                f: 'y',
+              },
+            },
+          },
+        });
+      }).then(() => {
+        expect(errorStub).to.have.been.calledWith('amp-bind',
+            sinon.match(/merge depth exeeds limit/));
+      });
+    });
+
+    it('should merge null correctly', () => {
+      return onBindReadyAndSetState({
+        a: null,
+        b: {
+          c: 'd',
+        },
+      }).then(() => {
+        return bind.setState({
+          a: {
+            e: 'f',
+          },
+          b: null,
+        });
+      }).then(() => {
+        expect(bind.scope_).to.deep.equal({
+          a: {
+            e: 'f',
+          },
+          b: null,
+        });
+      });
+    });
+  });
+
 });

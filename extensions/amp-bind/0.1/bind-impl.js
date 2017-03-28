@@ -40,6 +40,12 @@ const TAG = 'amp-bind';
 const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
 
 /**
+ * Maximuim depth for state merge.
+ * @type {number}
+ */
+const MAX_MERGE_DEPTH = 50;
+
+/**
  * A bound property, e.g. [property]="expression".
  * `previousResult` is the result of this expression during the last digest.
  * @typedef {{
@@ -88,6 +94,12 @@ export class Bind {
      * @private {number}
      */
     this.maxNumberOfBindings_ = 2000; // Based on ~1ms to parse an expression.
+
+    /**
+     * Maximum depth for scope merging
+     * @private {number}
+     */
+    this.maxMergeDepth_ = MAX_MERGE_DEPTH;
 
     /**
      * Maps expression string to the element(s) that contain it.
@@ -146,7 +158,12 @@ export class Bind {
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     // TODO(choumx): What if `state` contains references to globals?
-    Object.assign(this.scope_, state);
+    if (Object.keys(this.scope_).length > 0) {
+      this.deepMerge_(this.scope_, state);
+    } else {
+      // No need for merge logic for empty state
+      Object.assign(this.scope_, state);
+    }
 
     if (!opt_skipDigest) {
       this.setStatePromise_ = this.initializePromise_.then(() => {
@@ -234,6 +251,14 @@ export class Bind {
    */
   setMaxNumberOfBindingsForTesting(value) {
     this.maxNumberOfBindings_ = value;
+  }
+
+  /**
+   * @param {number} value
+   * @visibleForTesting
+   */
+  setMaxMergeDepthForTesting(value) {
+    this.maxMergeDepth_ = value;
   }
 
   /**
@@ -876,6 +901,49 @@ export class Bind {
     }
 
     return false;
+  }
+
+  /**
+   * Deep merge object b into object a. Both a and b can only contain
+   * primitives, arrays, and objects created by Object.create(null).
+   * Arrays are always copied and overwriten.
+   * Objeccts are recursively merged.
+   * @param {!Object} a the destination object
+   * @param {!Object} b
+   * @param {number=} opt_depth The depth of the objects being merged
+   * @return {!Object}
+   */
+  deepMerge_(a, b, opt_depth) {
+    const depth = opt_depth || 0;
+    if (depth > this.maxMergeDepth_) {
+      user().error(TAG, 'merge depth exeeds limit');
+      return a;
+    }
+    Object.keys(b).forEach(key => {
+      const newValue = b[key];
+      // Perform a deep merge IFF
+      // 1: Both a and b have the same property
+      if (Object.hasOwnProperty.call(a, key)) {
+        const oldValue = a[key];
+        // 2: AND the properties on both a and b are non-null objects
+        if (Object(newValue) === newValue && Object(oldValue) == oldValue) {
+          // 3: AND the properties on both a and b are not arrays
+          // (we just want to overwrite arrays)
+          if (!Array.isArray(newValue) && !Array.isArray(oldValue)) {
+            a[key] = this.deepMerge_(oldValue, newValue, depth + 1);
+            return;
+          }
+        }
+      }
+      // Not an object that needs deep merge.
+      if (Array.isArray(newValue)) {
+        // Objects in arrays SHOULD NOT be deep merged
+        a[key] = newValue.slice();
+      } else {
+        a[key] = newValue;
+      }
+    });
+    return a;
   }
 
   /**
