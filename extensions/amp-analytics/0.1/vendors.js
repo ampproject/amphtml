@@ -1173,7 +1173,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
                 '&auth=${author}' +
                 '&pos=${position}' +
                 '&iBeatField=${ibeatFields}' +
-                '&cid=${clientId(MSCSAuthDetails)}'
+                '&cid=${clientId(MSCSAuthDetails)}',
     },
     'triggers': {
       'defaultPageview': {
