@@ -173,7 +173,7 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
+    // dev().fine(TAG, 'Got a message:', event.type, event.data);
     const message = parseMessage(event.data);
     if (!message) {
       return;
@@ -220,7 +220,7 @@ export class Messaging {
    * @private
    */
   sendResponse_(requestId, messageName, messageData) {
-    dev().fine(TAG, 'sendResponse_');
+    // dev().fine(TAG, 'sendResponse_');
     this.sendMessage_({
       app: APP,
       requestid: requestId,
@@ -267,7 +267,7 @@ export class Messaging {
    * @private
    */
   handleRequest_(message) {
-    dev().fine(TAG, 'handleRequest_', message);
+    // dev().fine(TAG, 'handleRequest_', message);
 
     let handler = this.messageHandlers_[message.name];
     if (!handler) {
@@ -304,7 +304,7 @@ export class Messaging {
    * @private
    */
   handleResponse_(message) {
-    dev().fine(TAG, 'handleResponse_');
+    // dev().fine(TAG, 'handleResponse_');
     const requestId = message.requestid;
     const pending = this.waitingForResponse_[requestId];
     if (pending) {

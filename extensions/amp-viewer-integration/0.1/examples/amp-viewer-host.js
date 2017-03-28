@@ -14,8 +14,55 @@
  * limitations under the License.
  */
 
-import {APP, Messaging, MessageType, WindowPortEmulator} from '../messaging';
+import {APP, Messaging, MessageType} from '../messaging';
+import {listen} from '../../../../src/event-helper';
 import {dev} from '../../../../src/log';
+
+/**
+ * @fileoverview This class is a de-facto implementation of MessagePort
+ * from Channel Messaging API:
+ * https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API
+ */
+class WindowPortEmulator {
+  /**
+   * @param {!Window} win
+   * @param {!Window} ampdoc
+   * @param {string} origin
+   */
+  constructor(win, ampdoc, origin) {
+    /** @const {!Window} */
+    this.win = win;
+    /** @const {!Window} */
+    this.ampdoc_ = ampdoc;
+    /** @private {string} */
+    this.origin_ = origin;
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {function(!Event):undefined} handler
+   */
+  addEventListener(eventType, handler) {
+    listen(this.win, 'message', e => {
+      console.log('%%% got a message from the amp doc!', e.data);
+      if (e.origin == this.origin_ && e.data.app == APP) {
+        console.log('Viewer is about to handle message!');
+        handler(e);
+      }
+    }.bind(this));
+  }
+
+  /**
+   * @param {Object} data
+   */
+  postMessage(data) {
+    console.log('&&& viewer posting message to amp doc', data);
+    this.ampdoc_./*OK*/postMessage(data, this.origin_);
+  }
+  start() {
+  }
+}
+
 
 
 const CHANNEL_OPEN_MSG = 'channelOpen';
@@ -55,12 +102,10 @@ export class AmpViewerHost {
     const listener = function(event) {
       if (event.origin == viewerOrigin &&
               this.isChannelOpen_(event.data) &&
-              (!event.source || event.source == target)
-              ) {
+              (!event.source || event.source == target)) {
         console.log('Viewer ' + viewerId + ' messaging established with ',
             viewerOrigin);
         window.removeEventListener('message', listener, false);
-
         const message = {
           app: APP,
           requestid: event.data.requestid,
@@ -69,7 +114,7 @@ export class AmpViewerHost {
         };
         target./*OK*/postMessage(message, viewerOrigin);
 
-        const port = new WindowPortEmulator(this.win, viewerOrigin);
+        const port = new WindowPortEmulator(this.win, target, viewerOrigin);
         this.messaging_ = new Messaging(this.win, port);
         this.messaging_.setDefaultHandler(this.handleMessage_.bind(this));
 
@@ -83,7 +128,6 @@ export class AmpViewerHost {
   }
 
   isChannelOpen_(eventData) {
-    debugger;
     return eventData.app == APP && eventData.name == CHANNEL_OPEN_MSG;
   };
 
@@ -97,10 +141,6 @@ export class AmpViewerHost {
 
   handleMessage_(type, data, awaitResponse) {
     console.log('Viewer.handleMessage_', type, data, awaitResponse);
-    if (!this.messaging_) {
-      return;
-    }
-    return this.messaging_.sendRequest(type, data, awaitResponse);
   };
 }
 
