@@ -24,9 +24,7 @@ limitations under the License.
   <amp-embed width="100" height="100"
              type="outbrain"
              layout="responsive"
-             data-widgetId="AMP_1"
-             data-htmlURL="http://static-test.outbrain.com/regularversion.html"
-             data-ampURL="http://static-test.outbrain.com/ampversion.html"
+             data-widgetIds="AMP_1,AMP_2"
              data-testMode="true">
   </amp-embed>
 ```
@@ -35,7 +33,7 @@ The above code must be accompanied by AMP-enabled widgets delivered by Outbrain�
 
 ## Parameters
 
-- widgetIds *(**mandatory**)* - Widget Id Provided by Account Manager.
+- widgetIds *(**mandatory**)* - Widget Id/s Provided by Account Manager.
 - htmlURL *(optional)* - The URL of the standard html version of the page.
 - ampURL *(optional)* - The URL of the AMP version of the page.
 - testMode *(optional)* - Pass the parameter with the “true” value while testing the AMP pages. 

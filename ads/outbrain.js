@@ -22,8 +22,8 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function outbrain(global, data) {
 
-  // ensure we have valid widgetId, htmlURL and ampURL
-  validateData(data, ['widgetids', 'htmlurl', 'ampurl']);
+  // ensure we have valid widgetIds value
+  validateData(data, ['widgetids']);
 
   const widgetData = {
     viewId: global.context.pageViewId,
