@@ -20,7 +20,7 @@ limitations under the License.
 
 This document explains the communication between a Viewer and AMP documents by using the open-source [AMP Viewer Integration API](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration).  The AMP Viewer Integration API provides a protocol to establish a connection and send messages between the Viewer and AMP documents.
 
-<img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200" height="100px"></img>
+<img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/intro.png" height="100px"></img>
 
 A Viewer is a container in which you can view AMP Documents. An AMP Document is a document created with the AMPHTML library and validated by the [AMP Validator](https://validator.ampproject.org/).
 
@@ -35,11 +35,11 @@ To establish communication between the Viewer and AMP Document, we need to estab
 
 1. The Viewer waits for the AMP document to load. The Viewer listens on its window for a `message` event.
 
-   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200" height="100px"></img>
+   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake1.png" height="100px"></img>
 
 2. As soon as the AMP document loads, the AMP document sends a message to the Viewer (its parent) using `postMessage()`.
 
-   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200" height="100px"></img>
+   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake2.png" height="100px"></img>
 
    The message from the AMP Document to the Viewer looks like this:
 
@@ -59,7 +59,7 @@ To establish communication between the Viewer and AMP Document, we need to estab
 
 3. The Viewer responds to the AMP Document by also using `postMessage()`.
 
-   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200" height="100px"></img>
+   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake3.png" height="100px"></img>
 
    The message from the Viewer to the AMP Document looks like this:
 
@@ -73,7 +73,7 @@ To establish communication between the Viewer and AMP Document, we need to estab
 
 4. The Viewer and AMP Document are now introduced, and they can start posting messages to each other.
 
-   <img src="https://avatars1.githubusercontent.com/u/14114390?v=3&s=200" height="100px"></img>
+   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake4.png" height="100px"></img>
 
 
 ### Communicating between Doc and Viewer in Webview
