@@ -161,7 +161,8 @@ export class Bind {
     if (Object.keys(this.scope_).length > 0) {
       this.deepMerge_(this.scope_, state);
     } else {
-      // No need for merge logic for empty state
+      // No need for merge logic when socpe is empty, such as when
+      // amp-state is adding its contents to scope.
       Object.assign(this.scope_, state);
     }
 
@@ -906,8 +907,7 @@ export class Bind {
   /**
    * Deep merge object b into object a. Both a and b can only contain
    * primitives, arrays, and objects created by Object.create(null).
-   * Arrays are always copied and overwriten.
-   * Objeccts are recursively merged.
+   * Arrays are replaced, not merged. Other objects are recursively merged.
    * @param {!Object} a the destination object
    * @param {!Object} b
    * @param {number=} opt_depth The depth of the objects being merged
