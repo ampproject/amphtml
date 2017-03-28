@@ -64,7 +64,7 @@ export function listen(element, eventType, listener, opt_capture) {
  * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
-  let unlisten = internalListenImplementation(element, eventType, event => {
+  const unlisten = internalListenImplementation(element, eventType, event => {
     try {
       listener.call(this, event);
     } finally {
