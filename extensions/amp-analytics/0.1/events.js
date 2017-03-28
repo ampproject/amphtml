@@ -406,3 +406,103 @@ export class VisibilityTracker extends EventTracker {
     listener(new AnalyticsEvent(target, eventType, state));
   }
 }
+
+
+/**
+ * Tracks visibility events.
+ */
+export class VisibilityTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+
+    // QQQ: initialy correctly with singleton.
+    /** @const @private {!./visibility-impl.Visibility} */
+    this.visibility_ = null;
+
+    // QQQ: how to correctly empty this listeners to avoid unlisten leak?
+    /** @const @private {!Array<!UnlistenDef>} */
+    this.listeners_ = [];
+  }
+
+  /** @override */
+  dispose() {
+    // QQQ: find and trigger all existing trackers for hidden/unload!
+    // I have to have a clear set of object to trigger this on. Or better yet,
+    // I can trigger it on a single parent, which would automatically propagate
+    // the signal everywhere. As it stands, this object is not available to me
+    // here.
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    let target;
+    let promise;
+    const visibilitySpec = config['visibilitySpec'] || {};
+    const selector = config['selector'] ||
+        visibilitySpec['selector'] || ':root';
+
+
+    // Root selectors.
+    if (selector == ':root' || selector == ':host') {
+      let unlisten;
+      target = this.root.getRootElement();
+      if (this.root.isMainDoc()) {
+        // This is a main document. Rely on viewer visibility.
+        unlisten = this.visibility_.listenDoc(config, listener);
+      } else if (this.root.getHostElement()) {
+        // This is a FIE embed.
+        // QQQ: this only works if we never allow other FIE in the a4a.
+        unlisten = this.visibility_.listenOnce(
+            this.root.getHostElement(), config, listener);
+      } else {
+        // This is a in-a-box embed.
+        unlisten = this.visibility_.listenOnce(target, config, listener);
+      }
+      this.listeners_.push(unlisten);
+      return unlisten;
+    }
+
+    // An AMP-element. Wait for DOM to be fully parsed to avoid
+    // false missed searches.
+    const unlistenPromise = this.root.ampdoc.whenReady().then(() => {
+      const selectionMethod = config['selectionMethod'] ||
+          visibilitySpec['selectionMethod'];
+      const element = user().assertElement(
+          this.root.getAmpElement(
+              (context.parentElement || context),
+              selector,
+              selectionMethod),
+          `Element "${selector}" not found`);
+      target = element;
+      const unlisten = this.visibility_.listenOnce(target, config, listener);
+      this.listeners_.push(unlisten);
+      return unlisten;
+    });
+    return function() {
+      unlistenPromise.then(unlisten => {
+        unlisten();
+      });
+    };
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {function(!AnalyticsEvent)} listener
+   * @param {!Element} target
+   * @param {!Object<string, *>} state
+   * @private
+   */
+  onEvent_(eventType, listener, target, state) {
+    const attr = getDataParamsFromAttributes(
+        target,
+        /* computeParamNameFunc */ undefined,
+        VARIABLE_DATA_ATTRIBUTE_KEY);
+    for (const key in attr) {
+      state[key] = attr[key];
+    }
+    listener(new AnalyticsEvent(target, eventType, state));
+  }
+}
