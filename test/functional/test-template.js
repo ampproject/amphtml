@@ -197,6 +197,26 @@ describes.fakeWin('Template', {}, env => {
     }).to.throw(/Template not found/);
   });
 
+  it('should detect if a template is present in a container', () => {
+    const parentElement = doc.createElement('div');
+    expect(templates.hasTemplate(parentElement)).to.be.false;
+
+    parentElement.setAttribute('template', 'notemplate' + Math.random());
+    expect(templates.hasTemplate(parentElement)).to.be.false;
+
+    const templateElement = createTemplateElement();
+    const type = templateElement.getAttribute('type');
+    registerExtendedTemplate(env.win, type, TemplateImpl);
+
+    // With template, but different ID
+    parentElement.appendChild(templateElement);
+    expect(templates.hasTemplate(parentElement)).to.be.false;
+
+    // With template and correct ID
+    parentElement.removeAttribute('template');
+    expect(templates.hasTemplate(parentElement)).to.be.true;
+  });
+
   it('should discover and render template for an array', () => {
     const templateElement = createTemplateElement();
     const type = templateElement.getAttribute('type');
