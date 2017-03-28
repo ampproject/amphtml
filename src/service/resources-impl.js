@@ -468,7 +468,6 @@ export class Resources {
     } else {
       // Create and add a new resource.
       resource = new Resource((++this.resourceIdCounter_), element, this);
-      this.buildOrScheduleBuildForResource_(resource);
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
