@@ -83,19 +83,19 @@ export function listenOnce(element, eventType, listener, opt_capture) {
  * @param {!EventTarget} element
  * @param {string} eventType
  * @param {boolean=} opt_capture
- * @param {function(function(*))} opt_canceler An optional function that, when
+ * @param {function(!UnlistenDef)=} opt_cancel An optional function that, when
  *     provided, will be called with the unlistener. This gives the caller
  *     access to the unlistener, so it may be called manually when necessary.
  * @return {!Promise<!Event>}
  */
-export function listenOncePromise(element, eventType, opt_capture, opt_canceler) {
+export function listenOncePromise(element, eventType, opt_capture, opt_cancel) {
   let unlisten;
   const eventPromise = new Promise((resolve, unusedReject) => {
     unlisten = listenOnce(element, eventType, resolve, opt_capture);
   });
   eventPromise.then(unlisten, unlisten);
-  if (opt_canceler) {
-    opt_canceler(unlisten);
+  if (opt_cancel) {
+    opt_cancel(unlisten);
   }
   return eventPromise;
 }
@@ -147,8 +147,8 @@ export function loadPromise(eleOrWindow) {
     if (unlistenError) {
       unlistenError();
     }
-    return eleOrWindow
-  }, err => {
+    return eleOrWindow;
+  }, () => {
     if (unlistenLoad) {
       unlistenLoad();
     }
