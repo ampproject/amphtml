@@ -279,7 +279,6 @@ Remove any `<meta>` tags except for those that:
  - have attribute `name` with case-insensitive prefix `amp-`
  - have attribute `name` with case-insensitive prefix `amp4ads-`
  - have attribute `name` with case-insensitive prefix `dc.`
- - have attribute `name` with case-insensitive prefix `i-amp-` [temporary, will be removed at a future date]
  - have attribute `name` with case-insensitive prefix `i-amphtml-`
  - have attribute `name` with case-insensitive prefix `twitter:`
  - have attribute `name=apple-itunes-app`
