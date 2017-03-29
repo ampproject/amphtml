@@ -570,7 +570,7 @@ export class AmpForm {
       return this.templates_.findAndRenderTemplate(container, data)
           .then(rendered => {
             rendered.id = messageId;
-            rendered.setAttribute('i-amp-rendered', '');
+            rendered.setAttribute('i-amphtml-rendered', '');
             container.appendChild(rendered);
           });
     }
@@ -584,7 +584,7 @@ export class AmpForm {
     if (!container) {
       return;
     }
-    const previousRender = childElementByAttr(container, 'i-amp-rendered');
+    const previousRender = childElementByAttr(container, 'i-amphtml-rendered');
     if (previousRender) {
       removeElement(previousRender);
     }

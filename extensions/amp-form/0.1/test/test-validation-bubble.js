@@ -32,7 +32,7 @@ describe('validation-bubble', () => {
   it('should append a dom element to the document', () => {
     return createIframePromise().then(iframe => {
       new ValidationBubble(iframe.win);
-      expect(iframe.doc.querySelector('.-amp-validation-bubble'))
+      expect(iframe.doc.querySelector('.i-amphtml-validation-bubble'))
           .to.not.be.null;
     });
   });
@@ -58,7 +58,7 @@ describe('validation-bubble', () => {
           }
         },
       };
-      const bubbleEl = iframe.doc.querySelector('.-amp-validation-bubble');
+      const bubbleEl = iframe.doc.querySelector('.i-amphtml-validation-bubble');
       bubble.show(targetEl, 'Hello World');
       expect(bubbleEl).to.not.be.null;
       expect(bubbleEl.textContent).to.equal('Hello World');
