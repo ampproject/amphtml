@@ -187,10 +187,14 @@ export class AmpAdUIHandler {
 
   /**
    * @param {string} name
-   * @return {!Element}
+   * @return {?Element}
    * @private
    */
   addDefaultUiComponent_(name) {
+    if (this.element_.tagName == 'AMP-EMBED') {
+      // Do nothing for amp-embed element;
+      return null;
+    }
     const uiComponent = this.doc_.createElement('div');
     uiComponent.setAttribute(name, '');
 
