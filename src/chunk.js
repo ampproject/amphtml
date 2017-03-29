@@ -312,7 +312,11 @@ class Chunks {
     this.tasks_ = new PriorityQueue();
     /** @private @const {function(?IdleDeadline)} */
     this.boundExecute_ = this.execute_.bind(this);
-
+    /**
+     * True iff `schedule_()` will run at end of current event loop.
+     * @private {boolean}
+     */
+    this.scheduled_ = false;
     /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
     this.viewerPromise_ = viewerPromiseForDoc(ampDoc);
 
@@ -351,9 +355,7 @@ class Chunks {
    */
   enqueueTask_(task, priority) {
     this.tasks_.enqueue(task, priority);
-    resolved.then(() => {
-      this.schedule_();
-    });
+    this.scheduleAsap_();
   }
 
   /**
@@ -391,21 +393,19 @@ class Chunks {
     }
     const before = Date.now();
     t.runTask_(idleDeadline);
-    resolved.then(() => {
-      this.schedule_();
-    });
+    this.scheduleAsap_();
     dev().fine(TAG, t.getName_(), 'Chunk duration', Date.now() - before);
     return true;
   }
 
   /**
-   * Calls `execute_()` asynchronously.
+   * Calls `execute_()` in a micro task.
    * @param {?IdleDeadline} idleDeadline
    * @private
    */
   executeAsap_(idleDeadline) {
     resolved.then(() => {
-      this.boundExecute_(idleDeadline);
+      this.execute_(idleDeadline);
     });
   }
 
@@ -439,6 +439,20 @@ class Chunks {
     }
     // The message doesn't actually matter.
     this.win_.postMessage/*OK*/('amp-macro-task', '*');
+  }
+
+  /**
+   * Calls `schedule_()` in a micro task if not already queued.
+   * @private
+   */
+  scheduleAsap_() {
+    if (!this.scheduled_) {
+      this.scheduled_ = true;
+      resolved.then(() => {
+        this.schedule_();
+        this.scheduled_ = false;
+      });
+    }
   }
 }
 
