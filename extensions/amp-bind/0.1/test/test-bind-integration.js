@@ -67,14 +67,20 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
 
   describe('detecting bindings under dynamic tags', () => {
     it('should NOT bind blacklisted attributes', () => {
-      const template = fixture.doc.getElementById('dynamicTemplate');
+      const dynamicTag = fixture.doc.getElementById('dynamicTag');
       const div = fixture.doc.createElement('div');
       div.innerHTML = '<p [onclick]="javascript:alert(document.cookie)" ' +
                          '[onmouseover]="javascript:alert()" ' +
                          '[style]="background=color:black"></p>';
       const textElement = div.firstElementChild;
-      template.parentElement.appendChild(textElement);
+      // for amp-live-list, dynamic element is <div items>, which is a child
+      // of the list.
+      dynamicTag.firstElementChild.appendChild(textElement);
       return waitForAllMutations().then(() => {
+        // Force bind to apply bindings
+        fixture.doc.getElementById('triggerBindApplicationButton').click();
+        return waitForBindApplication();
+      }).then(() => {
         expect(textElement.getAttribute('onclick')).to.be.null;
         expect(textElement.getAttribute('onmouseover')).to.be.null;
         expect(textElement.getAttribute('style')).to.be.null;
@@ -85,9 +91,13 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       const div = fixture.doc.createElement('div');
       div.innerHTML = '<a [href]="javascript:alert(1)"></a>';
       const aElement = div.firstElementChild;
-      const template = fixture.doc.getElementById('dynamicTemplate');
-      template.parentElement.appendChild(aElement);
+      const dynamicTag = fixture.doc.getElementById('dynamicTag');
+      dynamicTag.firstElementChild.appendChild(aElement);
       return waitForAllMutations().then(() => {
+        // Force bind to apply bindings
+        fixture.doc.getElementById('triggerBindApplicationButton').click();
+        return waitForBindApplication();
+      }).then(() => {
         expect(aElement.getAttribute('href')).to.be.null;
       });
     });
