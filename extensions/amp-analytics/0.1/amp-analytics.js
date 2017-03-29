@@ -26,11 +26,13 @@ import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
 import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
+import {isEnumValue} from '../../../src/types';
 import {Activity} from './activity-impl';
 import {Cid} from './cid-impl';
 import {
     InstrumentationService,
     instrumentationServicePromiseForDoc,
+    AnalyticsEventType,
 } from './instrumentation';
 import {
   ExpansionOptions,
@@ -49,6 +51,11 @@ AMP.registerServiceForDoc('cid', Cid);
 installVariableService(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
+
+const WHITELIST_EVENT_IN_SANDBOX = [
+  AnalyticsEventType.VISIBLE,
+  AnalyticsEventType.HIDDEN,
+];
 
 export class AmpAnalytics extends AMP.BaseElement {
 
@@ -79,7 +86,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.type_ = null;
 
     /** @private {!boolean} */
-    this.isScoped_ = element.hasAttribute('sandbox');
+    this.isSandbox_ = element.hasAttribute('sandbox');
 
     /**
      * @private {Object<string, string>} A map of request names to the request
@@ -209,14 +216,30 @@ export class AmpAnalytics extends AMP.BaseElement {
               'attributes are required for data to be collected.');
           continue;
         }
+        // Check for not supported trigger for sandboxed analytics
+        if (this.isSandbox_) {
+          const eventType = trigger['on'];
+          if (isEnumValue(AnalyticsEventType, eventType) &&
+              WHITELIST_EVENT_IN_SANDBOX.indexOf(eventType) == -1) {
+            user().error(TAG, eventType + 'is not supported for amp-analytics' +
+            ' in scope');
+            continue;
+          }
+        }
+
         this.processExtraUrlParams_(trigger['extraUrlParams'],
             this.config_['extraUrlParamsReplaceMap']);
         promises.push(this.isSampledIn_(trigger).then(result => {
           if (!result) {
             return;
           }
-
-          if (trigger['selector']) {
+          // replace selector and selectionMethod
+          if (this.isSandbox_) {
+            // Only support selection of parent element for analytics in scope
+            trigger['selector'] = this.element.parentElement.tagName;
+            trigger['selectionMethod'] = 'closest';
+            this.addTriggerNoInline_(trigger);
+          } else if (trigger['selector']) {
             // Expand the selector using variable expansion.
             return this.variableService_.expandTemplate(
                 trigger['selector'], expansionOptions)
@@ -297,7 +320,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   fetchRemoteConfig_() {
     let remoteConfigUrl = this.element.getAttribute('config');
-    if (!remoteConfigUrl || this.isScoped_) {
+    if (!remoteConfigUrl || this.isSandbox_) {
       return Promise.resolve();
     }
     assertHttpsUrl(remoteConfigUrl, this.element);
@@ -509,7 +532,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         return this.variableService_.expandTemplate(request, expansionOptions);
       })
       .then(request => {
-        const whiteList = this.isScoped_ ? SANDBOX_AVAILABLE_VARS : undefined;
+        const whiteList = this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
         // For consistency with amp-pixel we also expand any url replacements.
         return urlReplacementsForDoc(this.element).expandAsync(
             request, undefined, whiteList);
