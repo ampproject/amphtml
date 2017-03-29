@@ -25,7 +25,6 @@ import {installResourcesServiceForDoc} from './resources-impl';
 import {computedStyle, getStyle, toggle} from '../style';
 import {vsyncFor} from '../vsync';
 
-
 /**
  * @param {!Element} element
  * @return {boolean}
@@ -97,6 +96,10 @@ export class StandardActions {
             }
             bind.setStateWithExpression(objectString, scope);
           } else {
+            user().warn('AMP-BIND', `Key-value syntax for AMP.setState() will `
+                + `be removed soon. Please use the object-literal syntax `
+                + `instead, e.g. "AMP.setState({foo: 'bar'})" instead of `
+                + `"AMP.setState(foo='bar')".`);
             // Key-value args.
             bind.setState(args);
           }

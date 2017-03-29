@@ -54,7 +54,7 @@ To update, copy current Proxy CSP into meta tag. This file intentionally does no
 <amp-img src="https://cdn.ampproject.org/i/s/i.guim.co.uk/img/media/dc4d6f2e1198a804b9c9d4b70515a8f7915e1943/0_0_6144_3688/master/6144.jpg?w=700&q=85&auto=format&sharp=10&s=e13bbb3b723ce2d831869edc96ec4b96" width=50 height=50></amp-img>
 <h2>Should say "Hello World" when button is clicked</h2>
 <p [text]="foo"></p>
-<button on="tap:AMP.setState(foo='Hello World')">Click me</button>
+<button on="tap:AMP.setState({foo: 'Hello World'})">Click me</button>
 
 <h2 class="font">Different font</h2>
 </body>
