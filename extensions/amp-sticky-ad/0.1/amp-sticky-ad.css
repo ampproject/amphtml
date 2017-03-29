@@ -25,7 +25,7 @@ amp-sticky-ad {
   box-sizing: border-box;
 }
 
-.-amp-sticky-ad-layout {
+.i-amphtml-sticky-ad-layout {
   display: flex;
   visibility: hidden !important;
   flex-direction: column;
@@ -43,7 +43,7 @@ amp-sticky-ad[visible] {
   background-color: #fff;
 }
 
-.-amp-sticky-ad-layout > amp-ad {
+.i-amphtml-sticky-ad-layout > amp-ad {
   display: block;
 }
 

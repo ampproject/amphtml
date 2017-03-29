@@ -195,7 +195,7 @@ export class AmpAdUIHandler {
     uiComponent.setAttribute(name, '');
 
     const content = this.doc_.createElement('div');
-    content.classList.add('-amp-ad-default-holder');
+    content.classList.add('i-amphtml-ad-default-holder');
     uiComponent.appendChild(content);
 
     this.baseInstance_.element.appendChild(uiComponent);
