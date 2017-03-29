@@ -309,7 +309,7 @@ An `.amp-hidden` and `.amp-active` class is added to the `update`
 reference point, and you can hook into this class to add transitions.
 (see Examples below)
 
-## Actions
+## Actions and Events
 The `amp-live-list` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
 
 <table>
@@ -320,6 +320,21 @@ The `amp-live-list` exposes the following actions you can use [AMP on-syntax to 
   <tr>
     <td>update (default)</td>
     <td>Updates DOM elements with new discovered updates</td>
+  </tr>
+</table>
+
+The `amp-live-list` also generates the following events for which you can use [AMP on-syntax to listen](../../../src/spec/amp-actions-and-events.md):
+
+<table>
+  <tr>
+    <th>Event</th>
+    <th>Description</th>
+    <th>Data</th>
+  </tr>
+  <tr>
+    <td>update</td>
+    <td>Fired when the list's DOM items are inserted or replaced</td>
+    <td><code>event.insertItemIds</code> : the <code>id</code>s of inserted list items, <code>event.replaceItemIds</code> : the <code>id</code>s of replaced list items</td>
   </tr>
 </table>
 
