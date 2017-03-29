@@ -15,14 +15,15 @@
  */
 
 import * as sinon from 'sinon';
+import {AmpForm} from '../../../amp-form/0.1/amp-form';
 import {Bind} from '../bind-impl';
 import {BindExpression} from '../bind-expression';
 import {BindValidator} from '../bind-validator';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
+import {installTimerService} from '../../../../src/service/timer-impl';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
-import {installTimerService} from '../../../../src/service/timer-impl';
 
 describes.realWin('Bind', {
   amp: {
@@ -168,13 +169,17 @@ describes.realWin('Bind', {
 
   it('should dynamically detect new bindings under dynamic tags', () => {
     const doc = env.win.document;
-    const template = doc.createElement('template');
-    doc.getElementById('parent').appendChild(template);
+    const form = doc.createElement('form');
+    doc.getElementById('parent').appendChild(form);
+    const dynamicTag = doc.createElement('div');
+    dynamicTag.setAttribute('submit-success', null);
+    form.appendChild(dynamicTag);
+    // Wrap form in amp-form implementation so bind can access it
+    new AmpForm(form);
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(0);
-      // As a dynamic element, template adds rendered templates as siblings.
-      // Element is added as a sibling to the template
-      createElementWithBinding('[onePlusOne]="1+1"');
+      const elementWithBinding = createElementWithBinding('[onePlusOne]="1+1"');
+      dynamicTag.appendChild(elementWithBinding);
       return waitForEvent('amp:bind:mutated');
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(1);

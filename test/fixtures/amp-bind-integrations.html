@@ -26,12 +26,17 @@
 </head>
 
 <body>
+
+  <button on="tap:AMP.setState({})" id="triggerBindApplicationButton"></button>
+
   <p>DYNAMIC TAGS</p>
-  <!-- For generic dynamic tag tests only. Template tag used as an example. -->
-  <div>
-    <template id="dynamicTemplate"></template>
-    <!-- Siblings added in test -->
-  </div>
+  <!-- Live list is used for generic dynamic tag testing  -->
+  <amp-live-list id="dynamicTag" data-poll-interval="15000" data-max-items-per-page="2">
+    <div items>
+      <!-- Children added in test -->
+    </div>
+    <button update></button>
+  </amp-live-list>
 
   <p>P TAG</p>
   <button on="tap:AMP.setState(boundText='hello world')" id="changeTextButton"></button>

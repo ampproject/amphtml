@@ -1354,6 +1354,18 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns an array of elements in this element's subtree that this
+     * element owns that could have children added or removed dynamically.
+     * The array should not contain any ancestors of this element, but could
+     * contain this element itself.
+     * @return {Array<!Element>}
+     * @public
+     */
+    getDynamicElementContainers() {
+      return this.implementation_.getDynamicElementContainers();
+    }
+
+    /**
      * Enqueues the action with the element. If element has been upgraded and
      * built, the action is dispatched to the implementation right away.
      * Otherwise the invocation is enqueued until the implementation is ready

@@ -149,6 +149,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-analytics/**/*.js',
       // For amp-bind in the web worker (ww.js).
       'extensions/amp-bind/**/*.js',
+      // Needed to access form impl from other extensions
+      'extensions/amp-form/**/*.js',
       'src/*.js',
       'src/!(inabox)*/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
