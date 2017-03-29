@@ -16,7 +16,10 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
-import {ClickEventTracker} from '../events';
+import {
+  ClickEventTracker,
+  VisibilityTracker,
+} from '../events';
 import {Crypto} from '../../../../src/service/crypto-impl';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
 import {
@@ -313,6 +316,22 @@ describe('amp-analytics', function() {
 
     return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy).to.have.not.been.called;
+    });
+  });
+
+  it('does not send a hit when eventType is blacklist', function() {
+    const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+    const addStub = sandbox.stub(tracker, 'add');
+    const analytics = getAnalyticsTag({
+      requests: {foo: 'https://example.com/bar'},
+      triggers: [{on: 'click', selector: '${foo}', request: 'foo'}],
+      vars: {foo: 'bar'},
+    }, {
+      'sandbox': 'true',
+    });
+
+    return waitForNoSendRequest(analytics).then(() => {
+      expect(addStub).to.not.be.called;;
     });
   });
 
@@ -793,6 +812,24 @@ describe('amp-analytics', function() {
       expect(addStub).to.be.calledOnce;
       const config = addStub.args[0][2];
       expect(config['selector']).to.equal('bar');
+    });
+  });
+
+  it('replace selector and selectionMethod when in scope', () => {
+    const tracker = ins.ampdocRoot_.getTracker('visible-v3', VisibilityTracker);
+    const addStub = sandbox.stub(tracker, 'add');
+    const analytics = getAnalyticsTag({
+      requests: {foo: 'https://example.com/bar'},
+      triggers: [{on: 'visible-v3', selector: 'amp-iframe', request: 'foo'}],
+    }, {
+      'sandbox': 'true',
+    });
+    return waitForNoSendRequest(analytics).then(() => {
+      expect(addStub).to.be.calledOnce;
+      const config = addStub.args[0][2];
+      expect(config['selector']).to.equal(
+          analytics.element.parentElement.tagName);
+      expect(config['selectionMethod']).to.equal('closest');
     });
   });
 
