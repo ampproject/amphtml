@@ -1225,15 +1225,13 @@ export class AmpA4A extends AMP.BaseElement {
     this.protectedEmitLifecycleEvent_('renderSafeFrameStart');
     return utf8Decode(creativeBody).then(creative => {
       let srcPath;
-      let nameData;
+      let name;
       switch (method) {
         case XORIGIN_MODE.SAFEFRAME:
           srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
-          nameData = `${SAFEFRAME_VERSION};${creative.length};${creative}`;
           break;
         case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
-          nameData = '';
           // Name will be set for real below in nameframe case.
           break;
         default:
@@ -1252,18 +1250,22 @@ export class AmpA4A extends AMP.BaseElement {
             'height': this.element.getAttribute('height'),
             'width': this.element.getAttribute('width'),
             'src': srcPath,
-            'name': nameData,
           }, SHARED_IFRAME_PROPERTIES));
-      if (method == XORIGIN_MODE.NAMEFRAME) {
         // TODO(bradfrizzell): change name of function and var
-        const attributes = getContextMetadata(
-            this.win, this.element, this.sentinel);
+      let attributes = getContextMetadata(
+          this.win, this.element, this.sentinel);
+      if (method == XORIGIN_MODE.NAMEFRAME) {
         attributes['creative'] = creative;
-        const name = JSON.stringify(attributes);
+        name = JSON.stringify(attributes);
         // Need to reassign the name once we've generated the context
         // attributes off of the iframe. Need the iframe to generate.
         iframe.setAttribute('name', name);
         iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
+      } else if (method == XORIGIN_MODE.SAFEFRAME) {
+        attributes = JSON.stringify(attributes);
+        name = `${SAFEFRAME_VERSION};${creative.length};${creative}` +
+            `${attributes}`;
+        iframe.setAttribute('name', name);
       }
       return this.iframeRenderHelper_(iframe);
     });
