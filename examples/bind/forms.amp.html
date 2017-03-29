@@ -39,7 +39,14 @@
           <template type="amp-mustache">
               Success! Thanks {{name}} for entering your email: {{email}}
 
-              <p>You have selected: <span [text]="selected ? selected : 'No selection'">0</span></p>
+              <p>You have selected: <span [text]="selected ? selected : 'No selection'">No selection</span></p>
+          </template>
+      </div>
+      <div submit-error>
+        <template type="amp-mustache">
+              Error! Failure to register: {{name}} : {{email}}
+
+              <p>You have selected: <span [text]="selected ? selected : 'No selection'">No selection</span></p>
           </template>
       </div>
   </form>
