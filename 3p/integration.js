@@ -42,6 +42,7 @@ import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
+import {github} from './github';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
@@ -243,6 +244,7 @@ register('felmat', felmat);
 register('flite', flite);
 register('fusion', fusion);
 register('genieessp', genieessp);
+register('github', github);
 register('gmossp', gmossp);
 register('holder', holder);
 register('ibillboard', ibillboard);
@@ -484,7 +486,8 @@ function installContextUsingStandardImpl(win) {
   win.context.requestResize = triggerResizeRequest;
   win.context.renderStart = triggerRenderStart;
 
-  if (data.type === 'facebook' || data.type === 'twitter') {
+  if (data.type === 'facebook' || data.type === 'twitter'
+    || data.type === 'github') {
     // Only make this available to selected embeds until the
     // generic solution is available.
     win.context.updateDimensions = triggerDimensions;
