@@ -17,9 +17,9 @@
       <div class="content-container">
         <div class="article-body" itemprop="articleBody">
           <h2> Select your favorite food </h2>
-          <button on="tap:AMP.setState(favoriteFood='pizza')">Pizza</button>
-          <button on="tap:AMP.setState(favoriteFood='pasta')">Pasta</button>
-          <button on="tap:AMP.setState(favoriteFood='cake')">Cake</button>
+          <button on="tap:AMP.setState({favoriteFood: 'pizza'})">Pizza</button>
+          <button on="tap:AMP.setState({favoriteFood: 'pasta'})">Pasta</button>
+          <button on="tap:AMP.setState({favoriteFood: 'cake'})">Cake</button>
           <amp-live-list
             layout="container"
             data-poll-interval="15000"
