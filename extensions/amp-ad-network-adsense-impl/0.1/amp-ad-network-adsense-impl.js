@@ -41,6 +41,7 @@ import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {extensionsFor} from '../../../src/extensions';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {computedStyle} from '../../../src/style';
 import {viewerForDoc} from '../../../src/viewer';
 import {AdsenseSharedState} from './adsense-shared-state';
 
@@ -143,7 +144,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.uniqueSlotId_ = slotId + adk;
     const sharedStateParams = sharedState.addNewSlot(
         format, this.uniqueSlotId_, adClientId);
-
     const paramList = [
       {name: 'client', value: adClientId},
       {name: 'format', value: format},
@@ -165,6 +165,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'vis', value: visibilityStateCodes[visibilityState] || '0'},
       {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
       {name: 'asnt', value: this.sentinel},
+      {name: 'dff',
+        value: computedStyle(this.win, this.element)['font-family']},
     ];
 
     if (sharedStateParams.prevFmts) {
@@ -247,3 +249,4 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 }
 
 AMP.registerElement('amp-ad-network-adsense-impl', AmpAdNetworkAdsenseImpl);
+

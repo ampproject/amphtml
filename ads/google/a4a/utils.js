@@ -45,10 +45,11 @@ const AmpAdImplementation = {
 };
 
 /** @const {!Object} */
-export const ValidAdContainerTypes = [
-  'AMP-STICKY-AD',
-  'AMP-FX-FLYING-CARPET',
-];
+export const ValidAdContainerTypes = {
+  'AMP-STICKY-AD': 'sa',
+  'AMP-FX-FLYING-CARPET': 'fc',
+  'AMP-LIGHTBOX': 'lb',
+};
 
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
@@ -92,7 +93,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
 }
 
 /**
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a class instance
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
  * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
@@ -121,10 +122,21 @@ export function googleAdUrl(
     const viewportRect = viewport.getRect();
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
-    if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
-      queryParams.push({name: 'amp_ct',
-                        value: adElement.parentElement.tagName});
+    // Detect container types.
+    const containerTypeSet = {};
+    for (let el = adElement.parentElement, counter = 0;
+        el && counter < 20; el = el.parentElement, counter++) {
+      const tagName = el.tagName.toUpperCase();
+      if (ValidAdContainerTypes[tagName]) {
+        containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+      }
     }
+    const pfx =
+        (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
+         || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
+        ? '1' : '0';
+    queryParams.push({name: 'act', value:
+      Object.keys(containerTypeSet).join()});
     const allQueryParams = queryParams.concat(
       [
         {
@@ -156,6 +168,8 @@ export function googleAdUrl(
         {name: 'brdim', value: additionalDimensions(win, viewportSize)},
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
+        {name: 'ea', value: '0'},
+        {name: 'pfx', value: pfx},
       ],
       unboundedQueryParams,
       [
@@ -174,7 +188,6 @@ export function googleAdUrl(
     return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
   }));
 }
-
 
 /**
  * @param {!ArrayBuffer} creative

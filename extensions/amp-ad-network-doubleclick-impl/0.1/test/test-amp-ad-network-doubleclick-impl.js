@@ -207,8 +207,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           '^https://securepubads\\.g\\.doubleclick\\.net/gampad/ads' +
           // Depending on how the test is run, it can get different results.
           '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=A&sz=0x0&u_sd=[0-9]+' +
-          '&adtest=false' +
-          '(&asnt=[0-9]+-[0-9]+)?' +
+          '&adtest=false(&asnt=[0-9]+-[0-9]+)?' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
           '&c=[0-9]+&output=html&nhd=1&biw=[0-9]+&bih=[0-9]+' +
@@ -216,6 +215,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +
           '&isw=[0-9]+&ish=[0-9]+' +
+          '&ea=0&pfx=(1|0)' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
