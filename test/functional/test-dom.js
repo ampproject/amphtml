@@ -411,6 +411,14 @@ describes.sandboxed('DOM', {}, env => {
     expect(bSpy).to.be.notCalled;
   });
 
+  it('iterateCursor should allow null elements in a list', () => {
+    const list = ['wow', null, 'cool'];
+
+    const spy = sandbox.spy();
+    dom.iterateCursor(list, spy);
+    expect(spy).to.be.calledThrice;
+  });
+
   function testScopedQuerySelector() {
     const grandparent = document.createElement('div');
 

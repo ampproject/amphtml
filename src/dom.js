@@ -547,7 +547,7 @@ export function ancestorElementsByTag(child, tagName) {
  * @template T
  */
 export function iterateCursor(iterable, cb) {
-  for (let i = 0, value; (value = iterable[i]) != undefined; i++) {
+  for (let i = 0, value; (value = iterable[i]) !== undefined; i++) {
     cb(value, i);
   }
 }
