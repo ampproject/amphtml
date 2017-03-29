@@ -119,6 +119,9 @@ twttr.widgets.createTweet;
 var FB;
 FB.init;
 
+var gist;
+gist.gistid;
+
 // Validator
 var amp;
 amp.validator;
