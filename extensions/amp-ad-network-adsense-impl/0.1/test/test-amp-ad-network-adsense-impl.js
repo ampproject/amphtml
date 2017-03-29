@@ -171,7 +171,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         });
       });
     });
-    it('should contain amp_ct', () => {
+    it('should contain act', () => {
       return createIframePromise().then(fixture => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
@@ -183,7 +183,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         ampStickyAd.appendChild(element);
         fixture.doc.body.appendChild(ampStickyAd);
         return impl.getAdUrl().then(adUrl => {
-          expect(adUrl.indexOf('amp_ct=AMP-STICKY-AD') >= 0).to.be.true;
+          expect(adUrl.indexOf('act=sa') >= 0).to.be.true;
         });
       });
     });
@@ -478,8 +478,9 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '\\?client=ca-adsense&format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+' +
           '&adtest=false' +
           '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
-          '(&asnt=[0-9]+-[0-9]+)?' +
+          '(&asnt=[0-9]+-[0-9]+)?(&dff=%22.*?%22)?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
+          '(&dff=%22.*?%22)?' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           // Depending on how the test is run, it can get different
           // results.
@@ -489,6 +490,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +
           '&isw=[0-9]+&ish=[0-9]+' +
+          '&ea=[0-9]+&pfx=(1|0)' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
