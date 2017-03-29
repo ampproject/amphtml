@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilderForDoc} from '../service';
 import {parseUrl, getSourceUrl} from '../url';
 import {map} from '../utils/object';
 import {isArray} from '../types';
+import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */
 const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
