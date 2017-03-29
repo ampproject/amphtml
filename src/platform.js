@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForWindow} from './service';
+import {getService} from './service';
 
 
 /**
@@ -23,5 +23,5 @@ import {getExistingServiceForWindow} from './service';
  */
 export function platformFor(window) {
   return /** @type {!./service/platform-impl.Platform} */ (
-      getExistingServiceForWindow(window, 'platform'));
+      getService(window, 'platform'));
 };
