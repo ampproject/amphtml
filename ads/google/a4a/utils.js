@@ -124,10 +124,9 @@ export function googleAdUrl(
     const viewportSize = viewport.getSize();
     // Detect container types.
     const containerTypeSet = {};
-    for (let parentElement = adElement.parentElement, counter = 0;
-        parentElement && counter < 20;
-        parentElement = parentElement.parentElement, counter++) {
-      const tagName = parentElement.tagName.toUpperCase();
+    for (let el = adElement.parentElement, counter = 0;
+        el && counter < 20; el = el.parentElement, counter++) {
+      const tagName = el.tagName.toUpperCase();
       if (ValidAdContainerTypes[tagName]) {
         containerTypeSet[ValidAdContainerTypes[tagName]] = true;
       }
