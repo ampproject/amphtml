@@ -88,10 +88,10 @@ describes.fakeWin('Timer', {}, env => {
     }), 111).returns(1).once();
 
     let c = 0;
-    return timer.promise(111, 'A').then(result => {
+    return timer.promise(111).then(result => {
       c++;
       expect(c).to.equal(1);
-      expect(result).to.equal('A');
+      expect(result).to.be.undefined;
     });
   });
 
