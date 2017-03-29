@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {fromClassForDoc} from '../service';
 import {parseUrl, getSourceUrl} from '../url';
 import {map} from '../utils/object';
 import {isArray} from '../types';
+import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */
 const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
@@ -44,10 +44,9 @@ export let DocumentInfoDef;
 
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!DocInfo} Info about the doc
  */
 export function installDocumentInfoServiceForDoc(nodeOrDoc) {
-  return fromClassForDoc(nodeOrDoc, 'documentInfo', DocInfo);
+  return registerServiceBuilderForDoc(nodeOrDoc, 'documentInfo', DocInfo);
 }
 
 
