@@ -26,7 +26,7 @@ amp-app-banner {
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }
 
-i-amp-app-banner-top-padding {
+i-amphtml-app-banner-top-padding {
   position: absolute;
   top: 0;
   left: 0;

@@ -162,9 +162,9 @@ export class AmpImg extends BaseElement {
     return this.loadPromise(this.img_).then(() => {
       // Clean up the fallback if the src has changed.
       if (!this.allowImgLoadFallback_ &&
-          this.img_.classList.contains('-amp-ghost')) {
+          this.img_.classList.contains('i-amphtml-ghost')) {
         this.getVsync().mutate(() => {
-          this.img_.classList.remove('-amp-ghost');
+          this.img_.classList.remove('i-amphtml-ghost');
           this.toggleFallback(false);
         });
       }
@@ -173,7 +173,7 @@ export class AmpImg extends BaseElement {
 
   onImgLoadingError_() {
     this.getVsync().mutate(() => {
-      this.img_.classList.add('-amp-ghost');
+      this.img_.classList.add('i-amphtml-ghost');
       this.toggleFallback(true);
     });
   }

@@ -4,7 +4,7 @@ selector                                         |   z-index      |   file
 .amp-video-eq                                    |   1            |   css/amp.css
 .i-amphtml-layout-size-defined > [fallback]      |   1            |   css/amp.css
 .i-amphtml-loading-container                     |   1            |   css/amp.css
-i-amp-video-mask                                 |   1            |   css/amp.css
+i-amphtml-video-mask                             |   1            |   css/amp.css
 .i-amphtml-layout-size-defined > [placeholder]   |   1            |   css/amp.css
 .-amp-image-lightbox-viewer-image                |   1            |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
 .-amp-image-lightbox-viewer                      |   1            |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
@@ -17,7 +17,7 @@ amp-sticky-ad                                    |   11           |   extensions
 amp-sticky-ad-top-padding                        |   12           |   extensions/amp-sticky-ad/1.0/amp-sticky-ad.css
 amp-app-banner                                   |   13           |   extensions/amp-app-banner/0.1/amp-app-banner.css
 .amp-app-banner-dismiss-button                   |   14           |   extensions/amp-app-banner/0.1/amp-app-banner.css
-i-amp-app-banner-top-padding                     |   15           |   extensions/amp-app-banner/0.1/amp-app-banner.css
+i-amphtml-app-banner-top-padding                 |   15           |   extensions/amp-app-banner/0.1/amp-app-banner.css
 amp-user-notification                            |   1000         |   extensions/amp-user-notification/0.1/amp-user-notification.css
 .i-amphtml-jank-meter                            |   1000         |   css/amp.css
 amp-image-lightbox                               |   1000         |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
@@ -29,7 +29,7 @@ amp-lightbox                                     |   1000         |   extensions
 .amp-lightboxed                                  |   2147483643   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
 .amp-lbv-desc-box                                |   2147483644   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
 .-amp-lbv-gallery                                |   2147483645   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-.-amp-sidebar-mask                               |   2147483646   |   extensions/amp-sidebar/0.1/amp-sidebar.css
+.i-amphtml-sidebar-mask                          |   2147483646   |   extensions/amp-sidebar/0.1/amp-sidebar.css
 .amp-lbv-button-prev                             |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
 .amp-lbv-button-next                             |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
 .amp-lbv-button-gallery                          |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css

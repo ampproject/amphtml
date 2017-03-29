@@ -24,7 +24,7 @@ amp-ad iframe {
   padding: 0 !important;
 }
 
-.-amp-ad-default-holder {
+.i-amphtml-ad-default-holder {
   position: absolute;
   left: 0;
   right: 0;
@@ -36,7 +36,7 @@ amp-ad iframe {
   background-color: rgba(200, 200, 200, 0.5);
 }
 
-.-amp-ad-default-holder:after {
+.i-amphtml-ad-default-holder:after {
   content: "Ad";
   background-color: rgba(0, 0, 0, 0.5);
   border-radius: 2px;

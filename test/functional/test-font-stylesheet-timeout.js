@@ -80,10 +80,10 @@ describes.realWin('font-stylesheet-timeout', {
     fontStylesheetTimeout(win);
     clock.tick(999);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(0);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
     clock.tick(1);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(1);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(1);
     const after = win.document.querySelector(
         'link[rel="stylesheet"]');
     expect(after).to.not.equal(link);
@@ -103,10 +103,10 @@ describes.realWin('font-stylesheet-timeout', {
     fontStylesheetTimeout(win);
     clock.tick(499);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(0);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
     clock.tick(1);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(1);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(1);
     expect(win.document.querySelector(
         'link[rel="stylesheet"]')).to.not.equal(link);
     expect(win.document.querySelector(
@@ -121,10 +121,10 @@ describes.realWin('font-stylesheet-timeout', {
     const link1 = addLink(2);
     fontStylesheetTimeout(win);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(0);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
     clock.tick(1);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(2);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(2);
     expect(win.document.querySelector(
         'link[rel="stylesheet"]')).to.not.equal(link0);
     expect(win.document.querySelectorAll(

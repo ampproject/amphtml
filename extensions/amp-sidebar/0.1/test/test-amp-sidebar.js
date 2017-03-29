@@ -96,7 +96,7 @@ describe('amp-sidebar', () => {
         callback();
       });
       impl.open_();
-      expect(iframe.doc.querySelectorAll('.-amp-sidebar-mask').length)
+      expect(iframe.doc.querySelectorAll('.i-amphtml-sidebar-mask').length)
           .to.equal(1);
     });
   });

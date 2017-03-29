@@ -65,9 +65,9 @@ describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
 
       // create container
       expect(carousel.getElementsByClassName(
-          '-amp-scrollable-carousel-container').length).to.equal(1);
+          'i-amphtml-scrollable-carousel-container').length).to.equal(1);
       const container = carousel.getElementsByClassName(
-          '-amp-scrollable-carousel-container')[0];
+          'i-amphtml-scrollable-carousel-container')[0];
       const containerStyle = win.getComputedStyle(container, null);
 
       expect(containerStyle.getPropertyValue('overflow-x')).to.equal('auto');

@@ -56,7 +56,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.cells_ = this.getRealChildren();
 
     this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.classList.add('-amp-scrollable-carousel-container');
+    this.container_.classList.add('i-amphtml-scrollable-carousel-container');
     this.element.appendChild(this.container_);
 
     this.cells_.forEach(cell => {
