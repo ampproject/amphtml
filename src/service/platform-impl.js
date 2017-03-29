@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {fromClass} from '../service';
+import {registerServiceBuilder} from '../service';
 
 
 /**
@@ -175,8 +175,7 @@ export class Platform {
 
 /**
  * @param {!Window} window
- * @return {!Platform}
  */
 export function installPlatformService(window) {
-  return fromClass(window, 'platform', Platform);
+  return registerServiceBuilder(window, 'platform', Platform);
 };
