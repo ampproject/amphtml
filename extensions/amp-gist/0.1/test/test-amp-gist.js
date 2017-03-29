@@ -20,6 +20,7 @@ import {
 } from '../../../../testing/iframe';
 import '../amp-gist';
 import {adopt} from '../../../../src/runtime';
+import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
 
@@ -27,6 +28,7 @@ describe('amp-gist', () => {
 
   function getIns(gistid, opt_attrs) {
     return createIframePromise().then(iframe => {
+      toggleExperiment(iframe.win, 'amp-gist', true);
       doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-gist');
       ins.setAttribute('data-gistid', gistid);
