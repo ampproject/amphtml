@@ -305,10 +305,15 @@ describe('amp-youtube', function() {
     return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
       const placeholder = yt.querySelector('[placeholder]');
       const obj = yt.implementation_;
+      const unlistenSpy = sandbox.spy(obj, 'unlistenMessage_');
       obj.unlayoutCallback();
+      expect(unlistenSpy).to.have.been.called;
       expect(yt.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
       expect(placeholder.style.display).to.be.equal('');
+      expect(obj.playerState_).to.be.equal(2)
+      expect(obj.playerReadyPromise_).to.be.null;
+      expect(obj.playerReadyResolver_).to.be.null;
     });
   });
 
