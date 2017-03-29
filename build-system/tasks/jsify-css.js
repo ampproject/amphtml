@@ -45,6 +45,9 @@ cssnano = cssnano({
   mergeIdents: true,
   reduceIdents: false,
   zindex: false,
+  svgo: {
+    encode: true,
+  }
 });
 
 
