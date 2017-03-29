@@ -45,7 +45,11 @@ export function github(global, data) {
     data.element);
 
   const gistid = data.gistid;
-  const gistUrl = 'https://gist.github.com/' + gistid + '.js';
+  var gistUrl = 'https://gist.github.com/' + gistid + '.js';
+
+  if(data.file) {
+    gistUrl += '?file=' + data.file;
+  }
 
   getGistJs(global, gistUrl, function() {
     // Dimensions are given by the parent frame.
