@@ -311,11 +311,24 @@ describe('amp-youtube', function() {
       expect(yt.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
       expect(placeholder.style.display).to.be.equal('');
-      expect(obj.playerState_).to.be.equal(2)
+      expect(obj.playerState_).to.be.equal(2);
       expect(obj.playerReadyPromise_).to.be.null;
       expect(obj.playerReadyResolver_).to.be.null;
     });
   });
+<<<<<<< HEAD
+=======
+  it('should propagate attribute mutations', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const spy = sandbox.spy(yt.implementation_, 'sendCommand_');
+      yt.setAttribute('data-videoid', 'lBTCB7yLs8Y');
+      yt.mutatedAttributesCallback({'data-videoid': 'lBTCB7yLs8Y'});
+      expect(spy).to.be.calledWith('loadVideoById',
+          sinon.match(['lBTCB7yLs8Y']));
+
+    });
+  });
+>>>>>>> Fix specs
 
   function sendFakeInfoDeliveryMessage(yt, iframe, info) {
     yt.implementation_.handleYoutubeMessages_({

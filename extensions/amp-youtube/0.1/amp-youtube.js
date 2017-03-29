@@ -197,6 +197,10 @@ class AmpYoutube extends AMP.BaseElement {
       this.handleYoutubeMessages_.bind(this)
     );
 
+    this.win.addEventListener(
+      'message', event => this.handleYoutubeMessages_(event)
+    );
+
     return this.loadPromise(iframe)
         .then(() => this.listenToFrame_())
         .then(() => this.playerReadyPromise_);
