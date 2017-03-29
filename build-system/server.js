@@ -19,7 +19,6 @@
  * files and list directories for use with the gulp live server
  */
 var BBPromise = require('bluebird');
-var app = require('express')();
 var bacon = require('baconipsum');
 var bodyParser = require('body-parser');
 var fs = BBPromise.promisifyAll(require('fs'));
@@ -28,9 +27,18 @@ var jsdom = require('jsdom');
 var path = require('path');
 var request = require('request');
 var url = require('url');
+delete require.cache[require.resolve('express')];
 
+delete require.cache['/Users/zhouyx/amphtml/node_modules/express/lib/express.js'];
+var app = require('express')();
+console.log('app id is ', app.id);
 app.use(bodyParser.json());
+if (!app.id) {
+  app.id = Date.now();
+}
+console.log(app.id);
 
+//
 app.use('/pwa', function(req, res, next) {
   var file;
   var contentType;
@@ -616,14 +624,23 @@ app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
   setTimeout(next, sleep);
 });
 
+console.log('HAHAHA:');
 app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   var filePath = req.path;
-  var mode = getPathMode(filePath);
+  //var mode = getPathMode(filePath);
+  var mode = process.env.SERVE_MODE;
+  console.log('mode here is', mode);
   if (!mode) {
     return next();
   }
+  // res.send('<a href="></a>');
+
+  //
+
   const inabox = req.query['inabox'] == '1';
-  filePath = filePath.substr(0, filePath.length - 9) + '.html';
+  if (getPathMode(filePath)) {
+    filePath = filePath.substr(0, filePath.length - 9) + '.html';
+  }
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     if (req.query['amp_js_v']) {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
@@ -791,6 +808,7 @@ app.get(['/dist/ww.js', '/dist/ww.max.js'], function(req, res) {
  */
 function replaceUrls(mode, file, hostName, inabox) {
   hostName = hostName || '';
+  console.log('in replaceUrlssssFFFFFNNNN mode is ', mode);
   if (mode == 'max') {
     file = file.replace('https://cdn.ampproject.org/v0.js', hostName + '/dist/amp.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.js', hostName + '/dist/amp-inabox.js');
@@ -879,4 +897,4 @@ function addQueryParam(url, param, value) {
   return url;
 }
 
-exports.app = app;
+module.exports = app;
