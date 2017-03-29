@@ -273,14 +273,14 @@ describe('amp-live-list', () => {
       return liveList.updateAction_().then(() => {
         expect(domUpdateSpy).to.have.been.calledOnce;
         expect(triggerSpy).to.have.been.calledWith(
-          elem,
-          'update',
-          sinon.match({
-            detail: {
-              insertItemIds: ['id0'],
-              replaceItemIds: [],
-            },
-          }));
+            elem,
+            'update',
+            sinon.match({
+              detail: {
+                insertItemIds: ['id0'],
+                replaceItemIds: [],
+              },
+            }));
       });
     });
 
@@ -308,15 +308,15 @@ describe('amp-live-list', () => {
       stub./*OK*/restore();
       return liveList.updateAction_().then(() => {
         expect(domUpdateSpy).to.have.been.calledOnce;
-        expect(triggerSpy).to.have.been .calledWith(
-        elem,
-        'update',
-        sinon.match({
-          detail: {
-            insertItemIds: [],
-            replaceItemIds: ['id1'],
-          },
-        }));
+        expect(triggerSpy).to.have.been.calledWith(
+            elem,
+            'update',
+            sinon.match({
+              detail: {
+                insertItemIds: [],
+                replaceItemIds: ['id1'],
+              },
+            }));
       });
     });
 
