@@ -64,7 +64,13 @@ This extension creates an iframe and displays the gist from GitHub.
 
 ## Attributes
 
-It requires the `data-gistid` attribute of the gist. The `data-file` is used for displaying only one file in a gist and it is optional.
+These are the valid attributes for the `amp-gist` component:
+
+**data-gistid** (required)
+The ID of the gist to embed.
+
+**data-file** (optional)
+`data-file` is used for displaying only one file in a gist.
 
 ## Validation
 See [amp-gist rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gist/0.1/validator-amp-gist.protoascii) in the AMP validator specification.
