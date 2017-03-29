@@ -520,6 +520,7 @@ var forbiddenTerms = {
       'src/mode.js',
       'src/service-worker/core.js',
       'src/worker-error-reporting.js',
+      'tools/experiments/experiments.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {

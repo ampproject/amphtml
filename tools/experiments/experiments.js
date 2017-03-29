@@ -309,6 +309,7 @@ function build() {
  * @param {!ExperimentDef} experiment
  */
 function buildExperimentRow(experiment) {
+
   const tr = document.createElement('tr');
   tr.id = 'exp-tr-' + experiment.id;
 
@@ -331,6 +332,11 @@ function buildExperimentRow(experiment) {
   buttonOn.classList.add('on');
   buttonOn.textContent = 'On';
   button.appendChild(buttonOn);
+
+  const buttonDefault = document.createElement('div');
+  buttonDefault.classList.add('default');
+  buttonDefault.textContent = 'Default on';
+  button.appendChild(buttonDefault);
 
   const buttonOff = document.createElement('div');
   buttonOff.classList.add('off');
@@ -383,7 +389,11 @@ function updateExperimentRow(experiment) {
   if (!tr) {
     return;
   }
-  tr.setAttribute('data-on', isExperimentOn_(experiment.id) ? 1 : 0);
+  let state = isExperimentOn_(experiment.id) ? 1 : 0;
+  if (self.AMP_CONFIG[experiment.id]) {
+    state = 'default';
+  }
+  tr.setAttribute('data-on', state);
 }
 
 
@@ -422,6 +432,8 @@ function toggleExperiment_(id, name, opt_on) {
             // Set explicit domain, so the cookie gets send to sub domains.
             domain: location.hostname,
           });
+      // Reflect default experiment state.
+      self.location.reload();
     } else {
       toggleExperiment(window, id, on);
     }
@@ -459,9 +471,41 @@ function showConfirmation_(message, callback) {
   container.classList.add('show');
 }
 
+/**
+ * Loads the AMP_CONFIG objects from whatever the v0.js is that the
+ * user has (depends on whether they opted into canary), so that
+ * experiment state can reflect the default activated experiments.
+ */
+function getAmpConfig() {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.addEventListener('load', () => {
+      resolve(xhr.responseText);
+    });
+    xhr.addEventListener('error', () => {
+      reject(new Error(xhr.statusText));
+    });
+    // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
+    xhr.open('GET', '/v0.js?' + Math.random(), true);
+    xhr.send(null);
+  }).then(text => {
+    const match = text.match(/self\.AMP_CONFIG=([^;]+)/);
+    if (!match) {
+      throw new Error('Can\'t find AMP_CONFIG in: ' + text);
+    }
+    // Setting global var to make standard experiment code just work.
+    return self.AMP_CONFIG = JSON.parse(match[1]);
+  }).catch(error => {
+    console./*OK*/error('Error fetching AMP_CONFIG', error);
+    return {};
+  });
+}
+
 
 // Start up.
-onDocumentReady(document, () => {
-  build();
-  update();
+getAmpConfig().then(() => {
+  onDocumentReady(document, () => {
+    build();
+    update();
+  });
 });
