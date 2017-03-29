@@ -140,7 +140,7 @@ describes.realWin('AmpForm Integration', {
       return timer.promise(100).then(() => {
         return fetch.returnValues[0];
       }).then(() => {
-        const rendered = form.querySelectorAll('[i-amp-rendered]');
+        const rendered = form.querySelectorAll('[i-amphtml-rendered]');
         expect(rendered.length).to.equal(1);
         expect(rendered[0].textContent).to.equal(
             'Thanks John Miller for adding your interests: ' +
@@ -180,7 +180,7 @@ describes.realWin('AmpForm Integration', {
       }).then(() => {
         expect(errors.length).to.equal(1);
         expect(errors[0].message).to.match(/HTTP error 500/);
-        const rendered = form.querySelectorAll('[i-amp-rendered]');
+        const rendered = form.querySelectorAll('[i-amphtml-rendered]');
         expect(rendered.length).to.equal(1);
         expect(rendered[0].textContent).to.equal(
             'Oops. John Miller your email john@miller.what is already ' +
@@ -208,7 +208,7 @@ describes.realWin('AmpForm Integration', {
       return timer.promise(100).then(() => {
         return fetch.returnValues[0];
       }).then(() => {
-        const rendered = form.querySelectorAll('[i-amp-rendered]');
+        const rendered = form.querySelectorAll('[i-amphtml-rendered]');
         expect(rendered.length).to.equal(1);
         expect(rendered[0].textContent).to.equal(
             'Thanks John Miller for adding your interests: ' +
@@ -248,7 +248,7 @@ describes.realWin('AmpForm Integration', {
       }).then(() => {
         expect(errors.length).to.equal(1);
         expect(errors[0].message).to.match(/HTTP error 500/);
-        const rendered = form.querySelectorAll('[i-amp-rendered]');
+        const rendered = form.querySelectorAll('[i-amphtml-rendered]');
         expect(rendered.length).to.equal(1);
         expect(rendered[0].textContent).to.equal(
             'Oops. John Miller your email john@miller.what is already ' +

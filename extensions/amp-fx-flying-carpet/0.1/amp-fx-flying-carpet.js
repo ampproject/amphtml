@@ -75,8 +75,8 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     this.children_.forEach(child => this.setAsOwner(child));
 
     const clip = doc.createElement('div');
-    clip.setAttribute('class', '-amp-fx-flying-carpet-clip');
-    container.setAttribute('class', '-amp-fx-flying-carpet-container');
+    clip.setAttribute('class', 'i-amphtml-fx-flying-carpet-clip');
+    container.setAttribute('class', 'i-amphtml-fx-flying-carpet-container');
 
     childNodes.forEach(child => container.appendChild(child));
     clip.appendChild(container);

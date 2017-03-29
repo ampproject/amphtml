@@ -85,11 +85,11 @@ describe('amp-fx-flying-carpet', () => {
     }).then(flyingCarpet => {
       const clip = flyingCarpet.firstChild;
       expect(clip.tagName).to.equal('DIV');
-      expect(clip).to.have.class('-amp-fx-flying-carpet-clip');
+      expect(clip).to.have.class('i-amphtml-fx-flying-carpet-clip');
 
       const container = clip.firstChild;
       expect(container.tagName).to.equal('DIV');
-      expect(container).to.have.class('-amp-fx-flying-carpet-container');
+      expect(container).to.have.class('i-amphtml-fx-flying-carpet-container');
 
       expect(container.firstChild).to.equal(img);
     });
@@ -103,11 +103,11 @@ describe('amp-fx-flying-carpet', () => {
     }).then(flyingCarpet => {
       const clip = flyingCarpet.firstChild;
       expect(clip.tagName).to.equal('DIV');
-      expect(clip).to.have.class('-amp-fx-flying-carpet-clip');
+      expect(clip).to.have.class('i-amphtml-fx-flying-carpet-clip');
 
       const container = clip.firstChild;
       expect(container.tagName).to.equal('DIV');
-      expect(container).to.have.class('-amp-fx-flying-carpet-container');
+      expect(container).to.have.class('i-amphtml-fx-flying-carpet-container');
 
       expect(container.firstChild).to.equal(text);
     });

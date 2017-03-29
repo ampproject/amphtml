@@ -21,7 +21,7 @@ amp-fx-flying-carpet {
 }
 
 /* Clip the contents of the flying-carpet so it is only viewable "inside" */
-amp-fx-flying-carpet > .-amp-fx-flying-carpet-clip {
+amp-fx-flying-carpet > .i-amphtml-fx-flying-carpet-clip {
   /* Absolutely so clipping works */
   position: absolute !important;
   top: 0 !important;
@@ -41,7 +41,7 @@ amp-fx-flying-carpet > .-amp-fx-flying-carpet-clip {
 }
 
 /* Fixed position container that creates the scroll effect */
-amp-fx-flying-carpet > .-amp-fx-flying-carpet-clip > .-amp-fx-flying-carpet-container {
+amp-fx-flying-carpet > .i-amphtml-fx-flying-carpet-clip > .i-amphtml-fx-flying-carpet-container {
   position: fixed !important;
   top: 0 !important;
   width: 100%;
@@ -59,7 +59,7 @@ amp-fx-flying-carpet > .-amp-fx-flying-carpet-clip > .-amp-fx-flying-carpet-cont
   justify-content: center;
 }
 
-.-amp-fx-flying-carpet-container > .i-amphtml-layout-responsive,
-.-amp-fx-flying-carpet-container > .i-amphtml-layout-fixed-height {
+.i-amphtml-fx-flying-carpet-container > .i-amphtml-layout-responsive,
+.i-amphtml-fx-flying-carpet-container > .i-amphtml-layout-fixed-height {
   align-self: stretch;
 }
