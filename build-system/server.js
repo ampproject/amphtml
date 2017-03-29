@@ -18,6 +18,7 @@
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
+var argv = require('minimist')(process.argv.slice(2));
 var BBPromise = require('bluebird');
 var app = require('express')();
 var bacon = require('baconipsum');
@@ -28,6 +29,14 @@ var jsdom = require('jsdom');
 var path = require('path');
 var request = require('request');
 var url = require('url');
+var webserver = require('gulp-webserver');
+var gulp = require('gulp-help')(require('gulp'));
+var morgan = require('morgan');
+var util = require('gulp-util');
+
+var host = argv.host || 'localhost';
+var port = argv.port || process.env.PORT || 8000;
+var useHttps = argv.https != undefined;
 
 app.use(bodyParser.json());
 
@@ -879,4 +888,14 @@ function addQueryParam(url, param, value) {
   return url;
 }
 
-exports.app = app;
+// Start gulp webserver
+gulp.src(process.cwd())
+  .pipe(webserver({
+    port,
+    host,
+    directoryListing: true,
+    https: useHttps,
+    middleware: [morgan('dev'), app],
+  }));
+
+module.exports = app;
