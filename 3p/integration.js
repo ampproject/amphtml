@@ -164,9 +164,9 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
   'mantis-recommend': true,
   mywidget: true,
+  outbrain: true,
   plista: true,
   smartclip: true,
-  outbrain: true,
   taboola: true,
   zergnet: true,
 };
