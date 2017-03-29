@@ -24,10 +24,7 @@ import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/viewer';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
-import {
-  createElementWithAttributes,
-  closest,
-} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/dom';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -127,14 +124,14 @@ export function googleAdUrl(
     const viewportSize = viewport.getSize();
     // Detect container types.
     const containerTypeSet = {};
-    closest(adElement.parentElement, el => {
-      const tagName = el.tagName.toUpperCase();
+    for (let parentElement = adElement.parentElement, counter = 0;
+        parentElement && counter < 20;
+        parentElement = parentElement.parentElement, counter++) {
+      const tagName = parentElement.tagName.toUpperCase();
       if (ValidAdContainerTypes[tagName]) {
         containerTypeSet[ValidAdContainerTypes[tagName]] = true;
       }
-      // Terminate when we reach root of tree.
-      return false;
-    });
+    }
     const pfx =
         (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
          || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
