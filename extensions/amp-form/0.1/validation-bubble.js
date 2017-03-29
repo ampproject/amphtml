@@ -50,7 +50,8 @@ export class ValidationBubble {
 
     /** @private @const {!Element} */
     this.bubbleElement_ = ampdoc.win.document.createElement('div');
-    this.bubbleElement_.classList.add('-amp-validation-bubble');
+
+    this.bubbleElement_.classList.add('i-amphtml-validation-bubble');
     this.bubbleElement_[OBJ_PROP] = this;
     ampdoc.getBody().appendChild(this.bubbleElement_);
   }

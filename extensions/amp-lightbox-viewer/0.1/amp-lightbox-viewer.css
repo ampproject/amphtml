@@ -48,7 +48,7 @@
  * context and therefore the z-index will be absolute. See https://goo.gl/uqY5CN
  * Code is copied from Webkit's FullScreen Css https://goo.gl/gjbKoI
  */
-.-amp-lightboxed-ancestor {
+.i-amphtml-lightboxed-ancestor {
   z-index: auto !important;
   position: static !important;
   opacity: 1 !important;
@@ -64,13 +64,13 @@
   -webkit-box-reflect: none !important;
 }
 
-:root.-amp-lightboxed-ancestor {
+:root.i-amphtml-lightboxed-ancestor {
   overflow: hidden !important;
 }
 
 /* Page Mask, Gallery Viewer, Description Box */
-.-amp-lbv-mask,
-.-amp-lbv-gallery,
+.i-amphtml-lbv-mask,
+.i-amphtml-lbv-gallery,
 .amp-lbv-desc-box {
   position: fixed !important;
   left: 0 !important;
@@ -79,8 +79,8 @@
   background-image: none !important;
 }
 
-.-amp-lbv-mask,
-.-amp-lbv-gallery {
+.i-amphtml-lbv-mask,
+.i-amphtml-lbv-gallery {
   top:0 !important;
   /*
    * For now we force a non-transparent shim until we find a good solution
@@ -90,11 +90,11 @@
   background-color: rgba(0,0,0, 1) !important;
 }
 
-.-amp-lbv-mask {
+.i-amphtml-lbv-mask {
   z-index: 2147483642 !important;
 }
 
-.-amp-lbv-gallery {
+.i-amphtml-lbv-gallery {
   display: none;
   z-index: 2147483645 !important;
   top: 50px !important;
@@ -117,13 +117,13 @@
   opacity: 0;
 }
 
-.-amp-lbv[gallery-view] .-amp-lbv-gallery {
+.i-amphtml-lbv[gallery-view] .i-amphtml-lbv-gallery {
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
 }
 
-.-amp-lbv-gallery-thumbnail {
+.i-amphtml-lbv-gallery-thumbnail {
   width: calc(100vw/3);
   height: calc(100vw/3);
   padding: 5px;
@@ -131,7 +131,7 @@
   overflow: hidden;
 }
 
-.-amp-lbv-gallery-thumbnail-img {
+.i-amphtml-lbv-gallery-thumbnail-img {
   object-fit: cover;
   width: 100%;
   height: 100%;
@@ -189,21 +189,21 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="#fff" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>');
 }
 
-.-amp-lbv[no-next] .amp-lbv-button-next {
+.i-amphtml-lbv[no-next] .amp-lbv-button-next {
   display: none;
 }
 
-.-amp-lbv[no-prev] .amp-lbv-button-prev {
+.i-amphtml-lbv[no-prev] .amp-lbv-button-prev {
   display: none;
 }
 
-.-amp-lbv[gallery-view] .amp-lbv-button-close,
-.-amp-lbv[gallery-view] .amp-lbv-button-next,
-.-amp-lbv[gallery-view] .amp-lbv-button-prev,
-.-amp-lbv[gallery-view] .amp-lbv-button-gallery {
+.i-amphtml-lbv[gallery-view] .amp-lbv-button-close,
+.i-amphtml-lbv[gallery-view] .amp-lbv-button-next,
+.i-amphtml-lbv[gallery-view] .amp-lbv-button-prev,
+.i-amphtml-lbv[gallery-view] .amp-lbv-button-gallery {
   display: none;
 }
 
-.-amp-lbv[gallery-view] .amp-lbv-button-back {
+.i-amphtml-lbv[gallery-view] .amp-lbv-button-back {
   display: block;
 }

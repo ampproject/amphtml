@@ -21,7 +21,6 @@ import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {iterateCursor} from '../../../src/dom';
 import {setFormForElement} from '../../../src/form';
-import {getService} from '../../../src/service';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -571,7 +570,7 @@ export class AmpForm {
       return this.templates_.findAndRenderTemplate(container, data)
           .then(rendered => {
             rendered.id = messageId;
-            rendered.setAttribute('i-amp-rendered', '');
+            rendered.setAttribute('i-amphtml-rendered', '');
             container.appendChild(rendered);
           });
     }
@@ -585,7 +584,7 @@ export class AmpForm {
     if (!container) {
       return;
     }
-    const previousRender = childElementByAttr(container, 'i-amp-rendered');
+    const previousRender = childElementByAttr(container, 'i-amphtml-rendered');
     if (previousRender) {
       removeElement(previousRender);
     }

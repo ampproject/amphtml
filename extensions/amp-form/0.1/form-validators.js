@@ -108,7 +108,7 @@ export class PolyfillDefaultValidator extends FormValidator {
 
   constructor(form) {
     super(form);
-    const bubbleId = `amp-validation-bubble-${validationBubbleCount++}`;
+    const bubbleId = `i-amphtml-validation-bubble-${validationBubbleCount++}`;
     /** @private @const {!./validation-bubble.ValidationBubble} */
     this.validationBubble_ = new ValidationBubble(this.ampdoc, bubbleId);
   }

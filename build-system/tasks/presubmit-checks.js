@@ -46,23 +46,25 @@ var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
-  // TODO(dvoytenko, #6463): Enable this check once the current uses have
-  // been cleaned up.
   // TODO(dvoytenko, #8464): cleanup whitelist.
-  // '(^-amp-|\\W-amp-)': {
-  //   message: 'Switch to new internal class form',
-  //   whitelist: [
-  //     'build-system/tasks/extension-generator/index.js',
-  //     'css/amp.css',
-  //   ],
-  // },
-  // '(^i-amp-|\\Wi-amp-)': {
-  //   message: 'Switch to new internal ID form',
-  //   whitelist: [
-  //     'build-system/tasks/extension-generator/index.js',
-  //     'css/amp.css',
-  //   ],
-  // },
+  '(^-amp-|\\W-amp-)': {
+    message: 'Switch to new internal class form',
+    whitelist: [
+      'build-system/tasks/extension-generator/index.js',
+      'css/amp.css',
+      'extensions/amp-pinterest/0.1/amp-pinterest.css',
+      'extensions/amp-pinterest/0.1/follow-button.js',
+      'extensions/amp-pinterest/0.1/pin-widget.js',
+      'extensions/amp-pinterest/0.1/pinit-button.js',
+    ],
+  },
+  '(^i-amp-|\\Wi-amp-)': {
+    message: 'Switch to new internal ID form',
+    whitelist: [
+      'build-system/tasks/extension-generator/index.js',
+      'css/amp.css',
+    ],
+  },
   'describe\\.only': '',
   'describes.*\\.only': '',
   'it\\.only': '',
