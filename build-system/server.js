@@ -30,15 +30,24 @@ var url = require('url');
 delete require.cache[require.resolve('express')];
 
 delete require.cache['/Users/zhouyx/amphtml/node_modules/express/lib/express.js'];
-var app = require('express')();
-console.log('app id is ', app.id);
+var app = require(require.resolve('express'))();
+console.log('app id issss ', app.id);
 app.use(bodyParser.json());
 if (!app.id) {
   app.id = Date.now();
 }
 console.log(app.id);
 
-//
+app.use('/aaa', function(req, res, next) {
+  console.log("newest aaa");
+  next();
+});
+
+app.use('/bbb', function(req, res, next) {
+  console.log("newest bbb");
+  next();
+});
+
 app.use('/pwa', function(req, res, next) {
   var file;
   var contentType;
@@ -175,6 +184,11 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   res.setHeader('AMP-Access-Control-Allow-Source-Origin',
       req.query.__amp_source_origin);
 }
+
+app.use('/bbb/', function(req, res, next) {
+  console.log('added ssssnew!!!');
+  next();
+});
 
 app.use('/form/echo-json/post', function(req, res) {
   assertCors(req, res, ['POST']);
@@ -625,42 +639,42 @@ app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
 });
 
 console.log('HAHAHA:');
-app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
-  var filePath = req.path;
-  //var mode = getPathMode(filePath);
-  var mode = process.env.SERVE_MODE;
-  console.log('mode here is', mode);
-  if (!mode) {
-    return next();
-  }
-  // res.send('<a href="></a>');
+// app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
+//   var filePath = req.path;
+//   //var mode = getPathMode(filePath);
+//   var mode = process.env.SERVE_MODE;
+//   console.log('mode here is', mode);
+//   if (!mode) {
+//     return next();
+//   }
+//   // res.send('<a href="></a>');
 
-  //
+//   //
 
-  const inabox = req.query['inabox'] == '1';
-  if (getPathMode(filePath)) {
-    filePath = filePath.substr(0, filePath.length - 9) + '.html';
-  }
-  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
-    if (req.query['amp_js_v']) {
-      file = addViewerIntegrationScript(req.query['amp_js_v'], file);
-    }
+//   const inabox = req.query['inabox'] == '1';
+//   if (getPathMode(filePath)) {
+//     filePath = filePath.substr(0, filePath.length - 9) + '.html';
+//   }
+//   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+//     if (req.query['amp_js_v']) {
+//       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
+//     }
 
-    file = replaceUrls(mode, file, '', inabox);
+//     file = replaceUrls(mode, file, '', inabox);
 
-    // Extract amp-ad for the given 'type' specified in URL query.
-    if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
-      var ads = file.match(new RegExp('<(amp-ad|amp-embed) [^>]*[\'"]'
-          + req.query.type + '[\'"][^>]*>([\\s\\S]+?)<\/(amp-ad|amp-embed)>', 'gm'));
-      file = file.replace(
-          /<body>[\s\S]+<\/body>/m, '<body>' + ads.join('') + '</body>');
-    }
+//     // Extract amp-ad for the given 'type' specified in URL query.
+//     if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
+//       var ads = file.match(new RegExp('<(amp-ad|amp-embed) [^>]*[\'"]'
+//           + req.query.type + '[\'"][^>]*>([\\s\\S]+?)<\/(amp-ad|amp-embed)>', 'gm'));
+//       file = file.replace(
+//           /<body>[\s\S]+<\/body>/m, '<body>' + ads.join('') + '</body>');
+//     }
 
-    res.send(file);
-  }).catch(() => {
-    next();
-  });
-});
+//     res.send(file);
+//   }).catch(() => {
+//     next();
+//   });
+// });
 
 app.use('/bind/form/get', function(req, res, next) {
   assertCors(req, res, ['GET']);
@@ -897,4 +911,4 @@ function addQueryParam(url, param, value) {
   return url;
 }
 
-module.exports = app;
+exports.app = app;

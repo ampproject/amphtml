@@ -33,7 +33,7 @@ var count = 0;
 function serve() {
   delete require.cache[require.resolve('../server')];
   delete require.cache[require.resolve('express')];
-  var app = require('../server');
+  var app = require('../server').app;
   if (!!argv.compiled) {
     process.env.SERVE_MODE = 'min';
     util.log('Serving ' + util.colors.green('compiled') + ' version');
@@ -49,15 +49,17 @@ function serve() {
     server.emit('kill');
     server = null;
     app = null;
+    middlewareObj = null;
   }
-
+  var middlewareObj = [];
+  middlewareObj = [morgan('dev'), app];
   server = gulp.src(process.cwd())
     .pipe(webserver({
       port,
       host,
       directoryListing: true,
       https: useHttps,
-      middleware: [morgan('dev'), app],
+      middleware: middlewareObj,
     }));
   console.log(count++);
 
