@@ -423,7 +423,6 @@ export function injectActiveViewAmpAnalyticsElement(a4a, inputConfig) {
         'type': 'application/json',
       });
   scriptElem.textContent = JSON.stringify(config);
-  console.log(JSON.stringify(config));
   ampAnalyticsElem.appendChild(scriptElem);
   a4a.element.appendChild(ampAnalyticsElem);
 }
