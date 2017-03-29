@@ -73,7 +73,7 @@ export function fontStylesheetTimeout(win) {
       newLink.onload = () => {
         newLink.media = media;
       };
-      newLink.setAttribute('i-amp-timeout', timeout);
+      newLink.setAttribute('i-amphtml-timeout', timeout);
       const parent = existingLink.parentElement;
       // Insert the stylesheet. We do it right before the existing one,
       // so that

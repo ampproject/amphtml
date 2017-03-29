@@ -30,7 +30,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {startsWith} from '../../../src/string';
 
 /** @const {string} */
-const SHOWN_CSS_CLASS = '-amp-slide-item-show';
+const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
 
 /** @const {number} */
 const NATIVE_SNAP_TIMEOUT = 35;
@@ -145,14 +145,14 @@ export class AmpSlideScroll extends BaseSlides {
       this.hasNativeSnapPoints_ = false;
     }
 
-    this.element.classList.add('-amp-slidescroll');
+    this.element.classList.add('i-amphtml-slidescroll');
 
     this.slides_ = this.getRealChildren();
 
     this.noOfSlides_ = this.slides_.length;
 
     this.slidesContainer_ = this.win.document.createElement('div');
-    this.slidesContainer_.classList.add('-amp-slides-container');
+    this.slidesContainer_.classList.add('i-amphtml-slides-container');
     // Let screen reader know that this is a live area and changes
     // to it (such after pressing next) should be announced to the
     // user.
@@ -161,17 +161,17 @@ export class AmpSlideScroll extends BaseSlides {
     // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
     // https://bugs.webkit.org/show_bug.cgi?id=169800
     if (this.shouldDisableCssSnap_) {
-      this.slidesContainer_.classList.add('-amp-slidescroll-no-snap');
+      this.slidesContainer_.classList.add('i-amphtml-slidescroll-no-snap');
     }
 
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
       const start = this.win.document.createElement('div');
-      start.classList.add('-amp-carousel-start-marker');
+      start.classList.add('i-amphtml-carousel-start-marker');
       this.slidesContainer_.appendChild(start);
 
       const end = this.win.document.createElement('div');
-      end.classList.add('-amp-carousel-end-marker');
+      end.classList.add('i-amphtml-carousel-end-marker');
       this.slidesContainer_.appendChild(end);
     }
 
@@ -182,7 +182,7 @@ export class AmpSlideScroll extends BaseSlides {
       const slideWrapper = this.win.document.createElement('div');
       slide.classList.add('amp-carousel-slide');
       slideWrapper.appendChild(slide);
-      slideWrapper.classList.add('-amp-slide-item');
+      slideWrapper.classList.add('i-amphtml-slide-item');
 
       this.slidesContainer_.appendChild(slideWrapper);
       this.slideWrappers_.push(slideWrapper);
@@ -467,17 +467,17 @@ export class AmpSlideScroll extends BaseSlides {
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
       //TODO (camelburrito): Identify more platforms that require
-      // -amp-no-scroll.
+      // i-amphtml-no-scroll.
       if (this.isIos_) {
         // Make the container non scrollable to stop scroll events.
-        this.slidesContainer_.classList.add('-amp-no-scroll');
+        this.slidesContainer_.classList.add('i-amphtml-no-scroll');
       }
       // Scroll to new slide and update scrollLeft to the correct slide.
       this.showSlideAndTriggerAction_(newIndex);
       this.vsync_.mutate(() => {
         if (this.isIos_) {
           // Make the container scrollable again to enable user swiping.
-          this.slidesContainer_.classList.remove('-amp-no-scroll');
+          this.slidesContainer_.classList.remove('i-amphtml-no-scroll');
         }
         this.snappingInProgress_ = false;
       });

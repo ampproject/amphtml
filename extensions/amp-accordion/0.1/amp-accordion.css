@@ -31,8 +31,8 @@ amp-accordion > section > *:nth-child(n) {
 }
 
 /*  Display the first 2 elements (heading and content) */
-amp-accordion > section > .-amp-accordion-header,
-amp-accordion > section > .-amp-accordion-content {
+amp-accordion > section > .i-amphtml-accordion-header,
+amp-accordion > section > .i-amphtml-accordion-content {
   display: block !important;
   overflow: hidden !important; /* clearfix */
   position: relative !important;
@@ -40,15 +40,15 @@ amp-accordion > section > .-amp-accordion-content {
 
 amp-accordion,
 amp-accordion > section,
-.-amp-accordion-header,
-.-amp-accordion-content {
+.i-amphtml-accordion-header,
+.i-amphtml-accordion-content {
   margin: 0;
 }
 
 
 
 /* heading element*/
-.-amp-accordion-header {
+.i-amphtml-accordion-header {
   cursor: pointer;
   background-color: #efefef;
   padding-right: 20px;
@@ -56,12 +56,12 @@ amp-accordion > section,
 }
 
 /* Collapse content by default. */
-amp-accordion > section > .-amp-accordion-content {
+amp-accordion > section > .i-amphtml-accordion-content {
   display: none !important;
 }
 
 /* Expand content when needed. */
-amp-accordion > section[expanded] > .-amp-accordion-content {
+amp-accordion > section[expanded] > .i-amphtml-accordion-content {
   display: block !important;
 }
 

@@ -555,7 +555,7 @@ describe('vsync', () => {
 
     beforeEach(() => {
       installDocService(win, /* isSingleDoc */ false);
-      root = document.createElement('i-amp-shadow-root');
+      root = document.createElement('i-amphtml-shadow-root');
       document.body.appendChild(root);
       ampdoc = new AmpDocShadow(win, 'https://acme.org/', root);
       ampdoc.services = {};

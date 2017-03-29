@@ -48,8 +48,21 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   // TODO(dvoytenko, #6463): Enable this check once the current uses have
   // been cleaned up.
-  // '(^-amp-|\\W-amp-)': 'Switch to new internal class form',
-  // '(^i-amp-|\\Wi-amp-)': 'Switch to new internal ID form',
+  // TODO(dvoytenko, #8464): cleanup whitelist.
+  // '(^-amp-|\\W-amp-)': {
+  //   message: 'Switch to new internal class form',
+  //   whitelist: [
+  //     'build-system/tasks/extension-generator/index.js',
+  //     'css/amp.css',
+  //   ],
+  // },
+  // '(^i-amp-|\\Wi-amp-)': {
+  //   message: 'Switch to new internal ID form',
+  //   whitelist: [
+  //     'build-system/tasks/extension-generator/index.js',
+  //     'css/amp.css',
+  //   ],
+  // },
   'describe\\.only': '',
   'describes.*\\.only': '',
   'it\\.only': '',

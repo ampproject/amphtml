@@ -121,7 +121,7 @@ export class AmpSidebar extends AMP.BaseElement {
     const screenReaderCloseButton = this.document_.createElement('button');
     // TODO(aghassemi, #4146) i18n
     screenReaderCloseButton.textContent = 'Close the sidebar';
-    screenReaderCloseButton.classList.add('-amp-screen-reader');
+    screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => {
@@ -257,7 +257,7 @@ export class AmpSidebar extends AMP.BaseElement {
   openMask_() {
     if (!this.maskElement_) {
       const mask = this.document_.createElement('div');
-      mask.classList.add('-amp-sidebar-mask');
+      mask.classList.add('i-amphtml-sidebar-mask');
       mask.addEventListener('click', () => {
         this.close_();
       });

@@ -117,7 +117,8 @@ describe('amp-iframe', () => {
             return {
               container: ampIframe,
               iframe: created,
-              scrollWrapper: ampIframe.querySelector('i-amp-scroll-container'),
+              scrollWrapper: ampIframe.querySelector(
+                  'i-amphtml-scroll-container'),
             };
           });
         }

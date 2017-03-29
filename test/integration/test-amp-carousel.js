@@ -231,7 +231,7 @@ describe.skip('integration amp-carousel', () => {
         expect(fixture.doc.body).to.not.have.class('amp-mode-mouse');
 
         expect(amp).to.have.attribute('controls');
-        expect(amp).to.have.class('-amp-carousel-has-controls');
+        expect(amp).to.have.class('i-amphtml-carousel-has-controls');
 
         const prevBtn = amp.querySelector('.amp-carousel-button-prev');
         const nextBtn = amp.querySelector('.amp-carousel-button-next');
@@ -248,7 +248,7 @@ describe.skip('integration amp-carousel', () => {
         expect(fixture.doc.body).to.not.have.class('amp-mode-mouse');
 
         expect(amp).to.have.attribute('controls');
-        expect(amp).to.have.class('-amp-carousel-has-controls');
+        expect(amp).to.have.class('i-amphtml-carousel-has-controls');
 
         const prevBtn = amp.querySelector('.amp-carousel-button-prev');
         const nextBtn = amp.querySelector('.amp-carousel-button-next');

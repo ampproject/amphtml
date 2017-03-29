@@ -40,7 +40,7 @@ amp-sticky-ad-top-padding {
   z-index: 12 !important;
 }
 
-.-amp-sticky-ad-layout {
+.i-amphtml-sticky-ad-layout {
   display: flex;
   visibility: hidden !important;
   flex-direction: column;
@@ -54,7 +54,7 @@ amp-sticky-ad[visible] {
   visibility: visible !important;
 }
 
-.-amp-sticky-ad-layout > amp-ad {
+.i-amphtml-sticky-ad-layout > amp-ad {
   display: block;
 }
 

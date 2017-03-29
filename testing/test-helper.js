@@ -42,7 +42,7 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
  */
 export function assertScreenReaderElement(element) {
   expect(element).to.exist;
-  expect(element.classList.contains('-amp-screen-reader')).to.be.true;
+  expect(element.classList.contains('i-amphtml-screen-reader')).to.be.true;
   const win = element.ownerDocument.defaultView;
   const computedStyle = win.getComputedStyle(element);
   expect(computedStyle.getPropertyValue('position')).to.equal('fixed');
