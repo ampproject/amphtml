@@ -40,7 +40,7 @@ const TAG = 'amp-bind';
 const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
 
 /**
- * Maximuim depth for state merge.
+ * Maximum depth for state merge.
  * @type {number}
  */
 const MAX_MERGE_DEPTH = 50;
@@ -96,7 +96,7 @@ export class Bind {
     this.maxNumberOfBindings_ = 2000; // Based on ~1ms to parse an expression.
 
     /**
-     * Maximum depth for scope merging
+     * Maximum recursive depth for scope merging.
      * @private {number}
      */
     this.maxMergeDepth_ = MAX_MERGE_DEPTH;
@@ -917,6 +917,7 @@ export class Bind {
     const depth = opt_depth || 0;
     if (depth > this.maxMergeDepth_) {
       user().error(TAG, 'merge depth exeeds limit');
+      Object.assign(a, b);
       return a;
     }
     Object.keys(b).forEach(key => {
@@ -929,7 +930,8 @@ export class Bind {
         if (Object(newValue) === newValue && Object(oldValue) == oldValue) {
           // 3: AND the properties on both a and b are not arrays
           // (we just want to overwrite arrays)
-          if (!Array.isArray(newValue) && !Array.isArray(oldValue)) {
+          if (Object.prototype.toString.call(oldValue) === '[object Object]' &&
+              Object.prototype.toString.call(newValue) === '[object Object]') {
             a[key] = this.deepMerge_(oldValue, newValue, depth + 1);
             return;
           }
@@ -965,6 +967,16 @@ export class Bind {
    */
   setStatePromiseForTesting() {
     return this.setStatePromise_;
+  }
+
+  /**
+   * Return the current scope.
+   *
+   * @return {!Object}
+   * @visibleForTesting
+   */
+  getScopeForTesting() {
+    return this.scope_;
   }
 
   /**
