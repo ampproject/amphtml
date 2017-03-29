@@ -102,4 +102,4 @@ export class AmpAd extends AMP.BaseElement {
 }
 
 AMP.registerElement('amp-ad', AmpAd, CSS);
-AMP.registerElement('amp-embed', AmpAd, CSS);
+AMP.registerElement('amp-embed', AmpAd);
