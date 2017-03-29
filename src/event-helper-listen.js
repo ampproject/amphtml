@@ -47,6 +47,7 @@ export function internalListenImplementation(element, eventType, listener,
     if (localElement) {
       localElement.removeEventListener(eventType, wrapped, capture);
     }
+    // Ensure these are GC'd
     localListener = null;
     localElement = null;
     wrapped = null;
