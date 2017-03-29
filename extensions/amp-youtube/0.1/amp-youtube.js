@@ -211,6 +211,15 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
+    if (this.playerState_ !== PlayerStates.PAUSED) {
+      this.playerState_ = PlayerStates.PAUSED;
+    }
+    if (this.playerReadyPromise_) {
+      this.playerReadyPromise_ = null;
+    }
+    if (this.playerReadyResolver_) {
+      this.playerReadyResolver_ = null;
+    }
     return true;  // Call layoutCallback again.
   }
 
