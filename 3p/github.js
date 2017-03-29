@@ -45,9 +45,9 @@ export function github(global, data) {
     data.element);
 
   const gistid = data.gistid;
-  var gistUrl = 'https://gist.github.com/' + gistid + '.js';
+  let gistUrl = 'https://gist.github.com/' + gistid + '.js';
 
-  if(data.file) {
+  if (data.file) {
     gistUrl += '?file=' + data.file;
   }
 
