@@ -1266,6 +1266,7 @@ export class AmpA4A extends AMP.BaseElement {
         name = `${SAFEFRAME_VERSION};${creative.length};${creative}` +
             `${attributes}`;
         iframe.setAttribute('name', name);
+        iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
       }
       return this.iframeRenderHelper_(iframe);
     });
