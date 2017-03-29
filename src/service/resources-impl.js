@@ -103,6 +103,9 @@ export class Resources {
     /** @private {number} */
     this.addCount_ = 0;
 
+    /** @private {number} */
+    this.buildAttemptsCount_ = 0;
+
     /** @private {boolean} */
     this.visible_ = this.viewer_.isVisible();
 
@@ -471,6 +474,23 @@ export class Resources {
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
+  }
+
+  /**
+   * Limits the number of elements being build in pre-render phase to
+   * a finite number. Returns false if the number has been reached.
+   * @return {boolean}
+   */
+  grantBuildPermission() {
+    // For pre-render we want to limit the amount of CPU used, so we limit
+    // the number of elements build. For pre-render to "seem complete"
+    // we only need to build elements in the first viewport. We can't know
+    // which are actually in the viewport (because the decision is pre-layout,
+    // so we use a heuristic instead.
+    // Most documents have 10 or less AMP tags. By building 20 we should not
+    // change the behavior for the vast majority of docs, and almost always
+    // catch everything in the first viewport.
+    return this.buildAttemptsCount_++ < 20 || this.viewer_.hasBeenVisible();
   }
 
   /**
