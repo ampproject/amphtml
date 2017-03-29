@@ -194,7 +194,7 @@
   },
   "rakam": {
     "base": "?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_x_screen_height_",
-    "pageview": "https://$apiEndpoint/event/pixel?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_prop.timezone=_timezone_&prop._time=_timestamp_&&prop.resolution=_screen_width_ × _screen_height_&collection=$pageViewName",
+    "pageview": "https://$apiEndpoint/event/pixel?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=$pageViewName",
     "custom": "https://$apiEndpoint/event/pixel?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=$collection"
   },
 }
