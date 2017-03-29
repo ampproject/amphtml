@@ -355,7 +355,7 @@ export class AmpLiveList extends AMP.BaseElement {
         const event = createCustomEvent(
           this.win,
           'amp-live-list.update',
-          {insertItemIds, replaceItemIds});
+          {insertedItemIds: insertItemIds, replacedItemIds: replaceItemIds});
         this.actions_.trigger(this.element, 'update', event);
       });
     }

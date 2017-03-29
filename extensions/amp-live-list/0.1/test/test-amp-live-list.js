@@ -277,8 +277,8 @@ describe('amp-live-list', () => {
             'update',
             sinon.match({
               detail: {
-                insertItemIds: ['id0'],
-                replaceItemIds: [],
+                insertedItemIds: ['id0'],
+                replacedItemIds: [],
               },
             }));
       });
@@ -313,8 +313,8 @@ describe('amp-live-list', () => {
             'update',
             sinon.match({
               detail: {
-                insertItemIds: [],
-                replaceItemIds: ['id1'],
+                insertedItemIds: [],
+                replacedItemIds: ['id1'],
               },
             }));
       });
