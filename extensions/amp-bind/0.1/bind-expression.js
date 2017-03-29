@@ -35,6 +35,27 @@ const BUILT_IN_FUNCTIONS = 'built-in-functions';
  * @const @private {!Object<string, !Object<string, Function>>}
  */
 const FUNCTION_WHITELIST = (function() {
+
+  /**
+   * Custom wrappers for mutating array methods so that we can offer the
+   * same functionality without allowing mutation on variables in bind scope.
+   */
+  const BindArrays = {
+    'arraySplice': function(array, start, deleteCount) {
+      const copy = array.slice();
+      copy.splice.apply(copy, Array.prototype.slice.call(arguments, 1));
+      return copy;
+    },
+    'arraySet': function(array, index, item) {
+      const copy = array.slice();
+      // Don't allow indexing with non-numbers which is allowed in JS
+      if (typeof index === 'number' && index == index) {
+        copy[index] = item !== undefined ? item : null;
+      }
+      return copy;
+    }
+  };
+
   const whitelist = {
     '[object Array]':
       [
@@ -69,6 +90,8 @@ const FUNCTION_WHITELIST = (function() {
     Math.random,
     Math.round,
     Math.sign,
+    BindArrays.arraySplice,
+    BindArrays.arraySet,
   ];
   // Creates a prototype-less map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
