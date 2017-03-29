@@ -78,7 +78,7 @@
       color: #fff;
     }
 
-    .on, .off {
+    .on, .off, .default {
       display: none;
     }
 
@@ -87,6 +87,10 @@
     }
 
     tr[data-on='1'] .on {
+      display: block;
+    }
+
+    tr[data-on='default'] .default {
       display: block;
     }
 
