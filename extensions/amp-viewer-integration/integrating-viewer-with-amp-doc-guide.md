@@ -406,9 +406,9 @@ A message needs to be sent from the Viewer to the AMP Doc:
      name: “visibilitychange”,     // The message type.
      data: {
        state: “the new state”,     // See visibility-state.js for allowed   
- 				                           // values.Can be “visible” or “hidden”. 
+                                   // values.Can be “visible” or “hidden”. 
                                    // If “visible”, prerenderSize is 
-    				                       // ignored and the page loads fully.
+                                   // ignored and the page loads fully.
        prerenderSize: 1         // # of Windows of content to prerender. 
                                 // 0=no prerendering. 1=load resources for
                                 // 1st screen, etc. Default is 1.
