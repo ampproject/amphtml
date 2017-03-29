@@ -234,6 +234,18 @@ AMP Cache pages should not show up in search result pages. The cache also uses [
 
 </details>
 
+#### Rewrite all `<meta>` tags to be the first children of `<head>`.
+
+Some `<meta>` tags are used by AMP Components and providing them before the AMP Component's script has loaded is important. As a result we move all `<meta>` tags to be the first children of `<head>`. An example of one of these tags is `<meta name="amp-experiments-opt-in" ...>`.
+
+<details>
+<summary>example</summary>
+
+| before | after |
+| --- | --- |
+| `<head>`<br>`<meta charset=utf-8>`<br>`...`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`<meta name="amp-experiments-opt-in" content="experiment-a,experiment-b">`<br>`</head>` | `<head>`<br>`<meta charset=utf-8>`<br>`<meta name="amp-experiments-opt-in" content="experiment-a,experiment-b">`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`...`<br>`</head>` |
+
+</details>
 
 ### Remove Tags and Attributes
 
@@ -267,7 +279,6 @@ Remove any `<meta>` tags except for those that:
  - have attribute `name` with case-insensitive prefix `amp-`
  - have attribute `name` with case-insensitive prefix `amp4ads-`
  - have attribute `name` with case-insensitive prefix `dc.`
- - have attribute `name` with case-insensitive prefix `i-amp-` [temporary, will be removed at a future date]
  - have attribute `name` with case-insensitive prefix `i-amphtml-`
  - have attribute `name` with case-insensitive prefix `twitter:`
  - have attribute `name=apple-itunes-app`

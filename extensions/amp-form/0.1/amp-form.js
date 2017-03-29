@@ -20,6 +20,8 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {iterateCursor} from '../../../src/dom';
+import {setFormForElement} from '../../../src/form';
+import {getService} from '../../../src/service';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -101,6 +103,8 @@ export class AmpForm {
     } catch (e) {
       dev().error(TAG, 'form proxy failed to install', e);
     }
+
+    setFormForElement(element, this);
 
     /** @private @const {string} */
     this.id_ = id;
@@ -585,6 +589,25 @@ export class AmpForm {
     if (previousRender) {
       removeElement(previousRender);
     }
+  }
+
+  /**
+   * @return {Array<!Element>}
+   * @public
+   */
+  getDynamicElementContainers() {
+    const dynamicElements = [];
+    const successDiv =
+        this.form_./*OK*/querySelector(`[${FormState_.SUBMIT_SUCCESS}]`);
+    const errorDiv =
+        this.form_./*OK*/querySelector(`[${FormState_.SUBMIT_ERROR}]`);
+    if (successDiv) {
+      dynamicElements.push(successDiv);
+    }
+    if (errorDiv) {
+      dynamicElements.push(errorDiv);
+    }
+    return dynamicElements;
   }
 
   /**

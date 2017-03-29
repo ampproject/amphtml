@@ -52,7 +52,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test --nobuild`                                                   | Runs tests without re-build.                                          |
 | `gulp test --watch`<sup>[[1]](#footnote-1)</sup>                        | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test --watch --verbose`<sup>[[1]](#footnote-1)</sup>              | Same as "watch" with logging enabled.                                 |
-| `gulp test --saucelabs`<sup>[[1]](#footnote-1)</sup>                    | Runs test on saucelabs (requires [setup](#saucelabs)).                |
+| `gulp test --saucelabs`<sup>[[1]](#footnote-1)</sup>                    | Runs test on saucelabs (requires [setup](#testing-on-sauce-labs)).                |
 | `gulp test --safari`<sup>[[1]](#footnote-1)</sup>                       | Runs tests in Safari.                                                 |
 | `gulp test --firefox`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup> | Runs specific test files.                                             |

@@ -48,8 +48,21 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   // TODO(dvoytenko, #6463): Enable this check once the current uses have
   // been cleaned up.
-  // '(^-amp-|\\W-amp-)': 'Switch to new internal class form',
-  // '(^i-amp-|\\Wi-amp-)': 'Switch to new internal ID form',
+  // TODO(dvoytenko, #8464): cleanup whitelist.
+  // '(^-amp-|\\W-amp-)': {
+  //   message: 'Switch to new internal class form',
+  //   whitelist: [
+  //     'build-system/tasks/extension-generator/index.js',
+  //     'css/amp.css',
+  //   ],
+  // },
+  // '(^i-amp-|\\Wi-amp-)': {
+  //   message: 'Switch to new internal ID form',
+  //   whitelist: [
+  //     'build-system/tasks/extension-generator/index.js',
+  //     'css/amp.css',
+  //   ],
+  // },
   'describe\\.only': '',
   'describes.*\\.only': '',
   'it\\.only': '',
@@ -279,6 +292,7 @@ var forbiddenTerms = {
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
+      'dist.3p/current/integration.js', // includes previous
     ],
   },
   '\\.sendMessageAwaitResponse\\(': {
@@ -432,6 +446,7 @@ var forbiddenTerms = {
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
       'src/event-helper-listen.js',
+      'dist.3p/current/integration.js',  // includes previous
     ],
   },
   'setTimeout.*throw': {
@@ -505,6 +520,7 @@ var forbiddenTerms = {
       'src/mode.js',
       'src/service-worker/core.js',
       'src/worker-error-reporting.js',
+      'tools/experiments/experiments.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {

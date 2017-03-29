@@ -247,7 +247,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           const iframe = this.constructIframe_(src);
           const overflow = this.constructOverflow_();
           const mutate = state => {
-            state.element.classList.add('-amp-apester-iframe-ready');
+            state.element.classList.add('i-amphtml-apester-iframe-ready');
           };
           const state = {
             element: iframe, mutator: mutate,

@@ -747,7 +747,7 @@ class AmpImageLightbox extends AMP.BaseElement {
         .createElement('button');
     // TODO(aghassemi, #4146) i18n
     screenReaderCloseButton.textContent = 'Close the lightbox';
-    screenReaderCloseButton.classList.add('-amp-screen-reader');
+    screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => {
@@ -946,7 +946,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       });
       transLayer.appendChild(clone);
 
-      this.sourceImage_.classList.add('-amp-ghost');
+      this.sourceImage_.classList.add('i-amphtml-ghost');
 
       // Move and resize the image to the location given by the lightbox.
       const dx = imageBox.left - rect.left;
@@ -1046,7 +1046,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       anim.add(Math.min(0.8 - motionTime, 0.2), (time, complete) => {
         moveAndScale(time);
         if (complete) {
-          this.sourceImage_.classList.remove('-amp-ghost');
+          this.sourceImage_.classList.remove('i-amphtml-ghost');
         }
       }, motionTime, EXIT_CURVE_);
 
@@ -1062,7 +1062,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     return anim.start(dur).thenAlways(() => {
       if (this.sourceImage_) {
-        this.sourceImage_.classList.remove('-amp-ghost');
+        this.sourceImage_.classList.remove('i-amphtml-ghost');
       }
       this./*OK*/collapse();
       st.setStyles(this.element, {
