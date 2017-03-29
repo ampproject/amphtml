@@ -41,14 +41,31 @@ const FUNCTION_WHITELIST = (function() {
    * same functionality without allowing mutation on variables in bind scope.
    */
   const BindArrays = {
-    'arraySplice': function(array) {
+    /**
+     * Similar to Array.prototype.splice, except it returns a copy of the
+     * passed-in array with the desired modifications.
+     * @param {!Array} array
+     * @param {number=} start
+     * @param {number=} end
+     * @param {...?} items
+     */
+    /*eslint "no-unused-vars": 0*/
+    'arraySplice': function(array, start, end, items) {
       const copy = array.slice();
       copy.splice.apply(copy, Array.prototype.slice.call(arguments, 1));
       return copy;
     },
+
+    /**
+     * Similar to array[index] = item except it returns a copy of the
+     * passed-in array with the desired modification.
+     * @param {!Array} array
+     * @param {!number} index, must be an integer
+     * @param {?=} item, null if unspecified
+     */
     'arraySet': function(array, index, item) {
       const copy = array.slice();
-      // Don't allow indexing with non-numbers which is allowed in JS
+      // Don't allow indexing with non-integers which is allowed in JS
       if (typeof index === 'number'
           && isFinite(index)
           && Math.floor(index) === index) {
