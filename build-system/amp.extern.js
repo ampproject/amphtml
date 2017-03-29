@@ -30,6 +30,10 @@ window.context.experimentToggles;
 // Service Holder
 window.services;
 
+// Safeframe
+window.sf_ = {};
+window.sf_.cfg;
+
 // Exposed to custom ad iframes.
 /* @type {!Function} */
 window.draw3p;
