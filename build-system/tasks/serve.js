@@ -17,30 +17,22 @@
 var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp-help')(require('gulp'));
 var util = require('gulp-util');
-var webserver = require('gulp-webserver');
-var app = require('../server').app;
-var morgan = require('morgan');
-var host = argv.host || 'localhost';
-var port = argv.port || process.env.PORT || 8000;
-var useHttps = argv.https != undefined;
+var nodemon = require('nodemon');
 
 /**
  * Starts a simple http server at the repository root
  */
 function serve() {
-  var server = gulp.src(process.cwd())
-      .pipe(webserver({
-        port,
-        host,
-        directoryListing: true,
-        https: useHttps,
-        middleware: [morgan('dev'), app],
-      }));
+  nodemon({
+    script: require.resolve('../server.js'),
+    watch: [require.resolve('../app.js'),
+        require.resolve('../server.js')],
+    env: {'NODE_ENV': 'development'},
+  });
 
   util.log(util.colors.yellow('Run `gulp build` then go to '
       + getHost() + '/examples/article.amp.max.html'
   ));
-  return server;
 }
 
 gulp.task(
@@ -56,6 +48,10 @@ gulp.task(
     }
 );
 
+var host = argv.host || 'localhost';
+var port = argv.port || process.env.PORT || 8000;
+var useHttps = argv.https != undefined;
 function getHost() {
   return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
 }
+
