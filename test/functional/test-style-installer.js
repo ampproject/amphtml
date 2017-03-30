@@ -22,6 +22,7 @@ import {
 } from '../../src/service/performance-impl';
 import {createIframePromise} from '../../testing/iframe';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
+import {resourcesForDoc} from '../../src/resources';
 import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 
@@ -45,8 +46,8 @@ describe('Styles', () => {
       installPerformanceService(doc.defaultView);
       const perf = performanceFor(doc.defaultView);
       tickSpy = sandbox.spy(perf, 'tick');
-
-      resources = installResourcesServiceForDoc(doc);
+      installResourcesServiceForDoc(doc);
+      resources = resourcesForDoc(doc);
       ampdoc = resources.ampdoc;
       schedulePassSpy = sandbox.spy(resources, 'schedulePass');
       waitForServicesStub = sandbox.stub(rds, 'waitForServices');

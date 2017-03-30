@@ -21,7 +21,7 @@ import {bindForDoc} from '../bind';
 import {dev, user} from '../log';
 import {fromClassForDoc} from '../service';
 import {historyForDoc} from '../history';
-import {installResourcesServiceForDoc} from './resources-impl';
+import {resourcesForDoc} from '../resources';
 import {computedStyle, getStyle, toggle} from '../style';
 import {vsyncFor} from '../vsync';
 
@@ -52,7 +52,7 @@ export class StandardActions {
     this.actions_ = actionServiceForDoc(ampdoc);
 
     /** @const @private {!./resources-impl.Resources} */
-    this.resources_ = installResourcesServiceForDoc(ampdoc);
+    this.resources_ = resourcesForDoc(ampdoc);
 
     this.installActions_(this.actions_);
   }
