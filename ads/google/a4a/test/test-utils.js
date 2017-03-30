@@ -200,12 +200,34 @@ describe('Google A4A utils', () => {
           {
             transport: {beacon: false, xhrpost: false},
             requests: {
-              visibility1: urls[0], visibility2: urls[1],
+              visibility1: urls[0],
+              visibility2: urls[1],
+              visibilityCsi: 'https://csi.gstatic.com/csi',
             },
             triggers: {
               continuousVisible: {
                 on: 'visible',
                 request: ['visibility1', 'visibility2'],
+                visibilitySpec: {
+                  selector: 'amp-ad',
+                  selectionMethod: 'closest',
+                  visiblePercentageMin: 50,
+                  continuousTimeMin: 1000,
+                },
+              },
+              continuousVisibleIniLoad: {
+                on: 'ini-load',
+                request: 'visibilityCsi',
+                visibilitySpec: {
+                  selector: 'amp-ad',
+                  selectionMethod: 'closest',
+                  visiblePercentageMin: 50,
+                  continuousTimeMin: 1000,
+                },
+              },
+              continuousVisibleRenderStart: {
+                on: 'render-start',
+                request: 'visibilityCsi',
                 visibilitySpec: {
                   selector: 'amp-ad',
                   selectionMethod: 'closest',
