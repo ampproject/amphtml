@@ -207,7 +207,7 @@ var forbiddenTerms = {
       'src/service/url-replacements-impl.js',
     ],
   },
-  'getViewerServiceForDoc': {
+  'installViewerServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',

@@ -18,7 +18,7 @@ import {Observable} from '../observable';
 import {findIndex} from '../utils/array';
 import {map} from '../utils/object';
 import {documentStateFor} from './document-state';
-import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {dev} from '../log';
 import {isIframed} from '../dom';
 import {
@@ -953,11 +953,9 @@ export function setViewerVisibilityState(viewer, state) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
- * @return {!Viewer}
  */
-export function getViewerServiceForDoc(ampdoc, opt_initParams) {
+export function installViewerServiceForDoc(ampdoc, opt_initParams) {
   registerServiceBuilderForDoc(ampdoc, 'viewer', () => {
     return new Viewer(ampdoc, opt_initParams);
   });
-  return getServiceForDoc(ampdoc, 'viewer');
 }

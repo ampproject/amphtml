@@ -26,7 +26,7 @@ import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {getViewerServiceForDoc} from '../../src/service/viewer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {
   installCryptoPolyfill,
@@ -34,6 +34,7 @@ import {
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
+import{viewerForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
@@ -110,7 +111,8 @@ describe('cid', () => {
       return Promise.resolve();
     });
 
-    viewer = getViewerServiceForDoc(ampdoc);
+    installViewerServiceForDoc(ampdoc);
+    viewer = viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
@@ -342,7 +344,7 @@ describe('cid', () => {
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
     installPlatformService(win);
-    getViewerServiceForDoc(ampdoc2);
+    installViewerServiceForDoc(ampdoc2);
     installCidServiceForDocForTesting(ampdoc2);
     installCryptoService(win);
     return cidForDoc(ampdoc2).then(cid => {

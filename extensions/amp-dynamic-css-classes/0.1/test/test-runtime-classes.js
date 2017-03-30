@@ -16,7 +16,8 @@
 
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../../../src/service/platform-impl';
-import {getViewerServiceForDoc} from '../../../../src/service/viewer-impl';
+import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
+import {viewerForDoc} from '../../../../src/viewer';
 import {installVsyncService} from '../../../../src/service/vsync-impl';
 import {installDynamicClassesForTesting} from '../amp-dynamic-css-classes';
 
@@ -57,6 +58,7 @@ describe('dynamic classes are inserted at runtime', () => {
       },
     };
     mockWin.document.defaultView = mockWin;
+
   });
 
   function setup(embeded, userAgent, referrer) {
@@ -69,7 +71,8 @@ describe('dynamic classes are inserted at runtime', () => {
       vsync.runScheduledTasks_();
     };
 
-    viewer = getViewerServiceForDoc(ampdoc);
+    installViewerServiceForDoc(ampdoc);
+    viewer = viewerForDoc(ampdoc);
     viewer.isEmbedded = () => !!embeded;
 
     if (userAgent !== undefined) {
