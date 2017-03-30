@@ -396,10 +396,11 @@ ATTR_LIST_NAME_REFERENCE_FIELD = ['amp.validator.TagSpec.attr_lists']
 # the AttrSpecs.
 SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.AttrList.attrs',
+    'amp.validator.AttrSpec.mandatory_oneof',
     'amp.validator.TagSpec.attrs',
+    'amp.validator.TagSpec.mandatory_alternatives',
     'amp.validator.TagSpec.requires',
     'amp.validator.TagSpec.satisfies',
-    'amp.validator.AttrSpec.mandatory_oneof',
 ]
 
 
