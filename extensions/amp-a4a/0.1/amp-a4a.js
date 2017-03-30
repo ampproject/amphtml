@@ -1252,20 +1252,20 @@ export class AmpA4A extends AMP.BaseElement {
             'src': srcPath,
           }, SHARED_IFRAME_PROPERTIES));
         // TODO(bradfrizzell): change name of function and var
-      let attributes = getContextMetadata(
+      let contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel);
       if (method == XORIGIN_MODE.NAMEFRAME) {
-        attributes['creative'] = creative;
-        name = JSON.stringify(attributes);
-        // Need to reassign the name once we've generated the context
-        // attributes off of the iframe. Need the iframe to generate.
-        iframe.setAttribute('name', name);
-        iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
+        contextMetadata['creative'] = creative;
+        name = JSON.stringify(contextMetadata);
       } else if (method == XORIGIN_MODE.SAFEFRAME) {
-        attributes = JSON.stringify(attributes);
+        contextMetadata = JSON.stringify(contextMetadata);
         name = `${SAFEFRAME_VERSION};${creative.length};${creative}` +
-            `${attributes}`;
+            `${contextMetadata}`;
+      }
+      if (name) {
         iframe.setAttribute('name', name);
+      }
+      if (this.sentinel) {
         iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
       }
       return this.iframeRenderHelper_(iframe);

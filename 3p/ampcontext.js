@@ -171,14 +171,17 @@ export class AmpContext {
     // to check the name attribute as it has been bypassed.
     // TODO(alanorozco): why the heck could AMP_CONTEXT_DATA be two different
     // types? FIX THIS.
-    if (!this.win_.AMP_CONTEXT_DATA && !this.win_.sf_) {
-      this.setupMetadata_(this.win_.name);
-    } else if (this.win_.sf_ && this.win_.sf_.cfg) {
+    if (/** @type {?Object} */(this.win_.sf_) &&
+        /** @type {?Object} */(this.win_.sf_.cfg)) {
       this.setupMetadata_(this.win_.sf_.cfg);
-    } else if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
-      this.sentinel = this.win_.AMP_CONTEXT_DATA;
+    } else if (this.win_.AMP_CONTEXT_DATA) {
+      if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
+        this.sentinel = this.win_.AMP_CONTEXT_DATA;
+      } else {
+        this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
+      }
     } else {
-      this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
+      this.setupMetadata_(this.win_.name);
     }
   }
 }

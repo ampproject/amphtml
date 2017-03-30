@@ -31,7 +31,9 @@ window.context.experimentToggles;
 window.services;
 
 // Safeframe
+/* @type {?Object} */
 window.sf_ = {};
+/* @type {?Object} */
 window.sf_.cfg;
 
 // Exposed to custom ad iframes.
