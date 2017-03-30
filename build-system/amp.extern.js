@@ -31,6 +31,7 @@ window.context.experimentToggles;
 window.services;
 
 // Safeframe
+// TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
 /* @type {?Object} */
 window.sf_ = {};
 /* @type {?Object} */
