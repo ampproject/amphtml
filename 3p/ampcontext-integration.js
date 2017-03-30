@@ -94,7 +94,7 @@ export class IntegrationAmpContext extends AbstractAmpContext {
     if (type === 'facebook' || type === 'twitter') {
       // Only make this available to selected embeds until the
       // generic solution is available.
-      win.context.updateDimensionsEnabled_ = true;
+      this.updateDimensionsEnabled_ = true;
     }
   }
 

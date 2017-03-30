@@ -109,7 +109,7 @@ export class AbstractAmpContext {
    *    every time we receive a page visibility message.
    */
   observePageVisibility(callback) {
-    const visibilityCallbacksLength = visibilityCallbacks.length;
+    const visibilityCallbacksLength = this.visibilityCallbacks_.length;
 
     this.visibilityCallbacks_.push(callback);
 
