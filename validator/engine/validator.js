@@ -1531,14 +1531,11 @@ class CdataMatcher {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
           return;
         }
-        // TODO(powdercloud): Improve this error message to make it more
-        // specific.
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+            amp.validator.ValidationError.Code.NON_WHITESPACE_CDATA_ENCOUNTERED,
             context.getDocLocator(),
-            /* params */
-            [getTagSpecName(this.tagSpec_), 'contents'], this.tagSpec_.specUrl,
+            /* params */[getTagSpecName(this.tagSpec_)], this.tagSpec_.specUrl,
             validationResult);
       }
     }
@@ -4661,6 +4658,16 @@ amp.validator.categorizeError = function(error) {
        isAuthorStylesheet(error.params[0]))) {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
+
+  // The tag 'amp-hulu extension .js script' contains non-whitespace text
+  // (CDATA), which is disallowed.
+  if (error.code ===
+          amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST ||
+      error.code ===
+          amp.validator.ValidationError.Code.NON_WHITESPACE_CDATA_ENCOUNTERED) {
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+
   // E.g. "CSS syntax error in tag 'style amp-custom' - Invalid Declaration."
   // TODO(powdercloud): Legacy generic css error code. Remove after
   // 2016-06-01.
