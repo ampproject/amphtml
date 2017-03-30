@@ -24,7 +24,6 @@ import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
-import {fromClassForDoc} from '../service';
 import {installInputService, inputFor} from '../input';
 import {registerServiceBuilderForDoc} from '../service';
 import {viewerForDoc} from '../viewer';
