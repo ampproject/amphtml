@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {isObject} from '../types.js';
+
 /* @const */
 const hasOwn_ = Object.prototype.hasOwnProperty;
 
@@ -43,4 +45,38 @@ export function map(opt_initial) {
  */
 export function hasOwn(obj, key) {
   return hasOwn_.call(obj, key);
+}
+
+/**
+ * Deep merge object b into object a. Both a and b can only contain
+ * primitives, arrays, and plain objects. For any conflicts, object b wins.
+ * Arrays are replaced, not merged. Plain objects are recursively merged.
+ * @param {!Object} a the destination object
+ * @param {!Object} b
+ * @param {number=} opt_maxDepth The maximum depth for deep merge, beyond which
+ *                               Object.assign will be used.
+ * @param {number=} opt_depth The current depth of the objects being merged.
+ * @return {!Object}
+ */
+export function deepMerge(a, b, opt_maxDepth, opt_depth) {
+  const depth = opt_depth || 0;
+  if (depth > opt_maxDepth) {
+    Object.assign(a, b);
+    return a;
+  }
+  Object.keys(b).forEach(key => {
+    const newValue = b[key];
+    // Perform a deep merge IFF
+    // 1: Both a and b have the same property
+    if (hasOwn(a, key)) {
+      const oldValue = a[key];
+      // 2: AND the properties on both a and b are non-null plain objects
+      if (isObject(newValue) && isObject(oldValue)) {
+        a[key] = deepMerge(oldValue, newValue, opt_maxDepth, depth + 1);
+        return;
+      }
+    }
+    a[key] = newValue;
+  });
+  return a;
 }

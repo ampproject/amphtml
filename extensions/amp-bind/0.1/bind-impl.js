@@ -19,6 +19,7 @@ import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
+import {deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {formOrNullForElement} from '../../../src/form';
 import {isArray, toArray} from '../../../src/types';
@@ -159,7 +160,7 @@ export class Bind {
 
     // TODO(choumx): What if `state` contains references to globals?
     if (Object.keys(this.scope_).length > 0) {
-      this.deepMerge_(this.scope_, state);
+      deepMerge(this.scope_, state);
     } else {
       // No need for merge logic when socpe is empty, such as when
       // amp-state is adding its contents to scope.
@@ -902,50 +903,6 @@ export class Bind {
     }
 
     return false;
-  }
-
-  /**
-   * Deep merge object b into object a. Both a and b can only contain
-   * primitives, arrays, and objects created by Object.create(null).
-   * Arrays are replaced, not merged. Other objects are recursively merged.
-   * @param {!Object} a the destination object
-   * @param {!Object} b
-   * @param {number=} opt_depth The depth of the objects being merged
-   * @return {!Object}
-   */
-  deepMerge_(a, b, opt_depth) {
-    const depth = opt_depth || 0;
-    if (depth > this.maxMergeDepth_) {
-      user().error(TAG, 'merge depth exeeds limit');
-      Object.assign(a, b);
-      return a;
-    }
-    Object.keys(b).forEach(key => {
-      const newValue = b[key];
-      // Perform a deep merge IFF
-      // 1: Both a and b have the same property
-      if (Object.hasOwnProperty.call(a, key)) {
-        const oldValue = a[key];
-        // 2: AND the properties on both a and b are non-null objects
-        if (Object(newValue) === newValue && Object(oldValue) == oldValue) {
-          // 3: AND the properties on both a and b are not arrays
-          // (we just want to overwrite arrays)
-          if (Object.prototype.toString.call(oldValue) === '[object Object]' &&
-              Object.prototype.toString.call(newValue) === '[object Object]') {
-            a[key] = this.deepMerge_(oldValue, newValue, depth + 1);
-            return;
-          }
-        }
-      }
-      // Not an object that needs deep merge.
-      if (Array.isArray(newValue)) {
-        // Objects in arrays SHOULD NOT be deep merged
-        a[key] = newValue.slice();
-      } else {
-        a[key] = newValue;
-      }
-    });
-    return a;
   }
 
   /**
