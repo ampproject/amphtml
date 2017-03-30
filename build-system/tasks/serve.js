@@ -25,7 +25,7 @@ var nodemon = require('nodemon');
 function serve() {
   nodemon({
     script: require.resolve('../server.js'),
-    watch: [require.resolve('../middleware-routing.js'),
+    watch: [require.resolve('../app.js'),
         require.resolve('../server.js')],
     env: {'NODE_ENV': 'development'},
   });

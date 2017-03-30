@@ -73,7 +73,7 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     whitelist: [
       'build-system/pr-check.js',
-      'build-system/middleware-routing.js',
+      'build-system/app.js',
       'validator/nodejs/index.js',  // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -498,7 +498,7 @@ var forbiddenTerms = {
         'and getMode() to access config',
     whitelist: [
       'build-system/amp.extern.js',
-      'build-system/middleware-routing.js',
+      'build-system/app.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
       'dist.3p/current/integration.js',
@@ -700,7 +700,7 @@ var forbiddenTermsSrcInclusive = {
         'code. Use a property of urls from src/config.js instead.',
     whitelist: [
       'ads/_a4a-config.js',
-      'build-system/middleware-routing.js',
+      'build-system/app.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/config.js',
