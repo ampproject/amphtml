@@ -61,6 +61,27 @@ html.i-amphtml-singledoc.i-amphtml-embedded {
   touch-action: pan-y;
 }
 
+/**
+ * Override a user-supplied `body{overflow: visible; position:relative}`. This
+ * style is set in runtime vs css to avoid conflicts with ios-embedded mode
+ * and fixed transfer layer.
+ */
+html.i-amphtml-singledoc > body {
+  overflow: visible !important;
+  position: relative !important;
+}
+
+/**
+ * Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS WebView
+ * does NOT respect `html {overflow-x: hidden}`.
+ * Note! For all other natural cases body's style is `body {overflow: visible}`
+ * to avoid visibility issues with iframes.
+ */
+html.i-amphtml-ios-webview > body {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
 
 /**
  * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amphtml-wrapper`
@@ -97,11 +118,6 @@ html.i-amphtml-ios-embed {
   border-top: 1px solid transparent !important;
 }
 
-
-/** make-body-block experiment */
-.i-amphtml-make-body-block body {
-  display: block !important;
-}
 
 .i-amphtml-element {
   display: inline-block;
