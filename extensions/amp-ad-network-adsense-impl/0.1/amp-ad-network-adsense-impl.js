@@ -149,7 +149,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'format', value: format},
       {name: 'w', value: size.width},
       {name: 'h', value: size.height},
-      {name: 'adtest', value: adTestOn},
+      {name: 'adtest', value: adTestOn ? 'on' : null},
       {name: 'adk', value: adk},
       {name: 'raru', value: 1},
       {
