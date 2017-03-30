@@ -69,7 +69,7 @@ const FUNCTION_WHITELIST = (function() {
       if (typeof index === 'number'
           && isFinite(index)
           && Math.floor(index) === index) {
-        copy[index] = item !== undefined ? item : null;
+        copy[index] = item === undefined ? null : item;
       }
       return copy;
     },
