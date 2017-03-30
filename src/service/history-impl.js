@@ -18,7 +18,6 @@ import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   getService,
-  getServiceForDoc,
 } from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
@@ -848,11 +847,9 @@ function createHistory(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!History}
  */
-export function getHistoryServiceForDoc(ampdoc) {
+export function installHistoryServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'history', ampdoc => {
     return createHistory(ampdoc);
   });
-  return /** @type {!History} */ (getServiceForDoc(ampdoc, 'history'));
 }
