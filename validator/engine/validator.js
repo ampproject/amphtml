@@ -1832,11 +1832,11 @@ class Context {
      */
     this.rules_ = rules;
     /**
-     * The mandatory alternatives that we've validated.
-     * @type {!Object<string, ?>}
+     * The mandatory alternatives that we've validated (a small list of ids).
+     * @type {!Array<number>}
      * @private
      */
-    this.mandatoryAlternativesSatisfied_ = Object.create(null);
+    this.mandatoryAlternativesSatisfied_ = [];
     /**
      * DocLocator object from the parser which gives us line/col numbers.
      * @type {amp.htmlparser.DocLocator}
@@ -1999,15 +1999,16 @@ class Context {
 
   /**
    * For use by |ParsedValidatorRules|, which doesn't have any mutable state.
-   * @param {string} alternative id of the validated alternative.
+   * @param {number} alternative id of the validated alternative.
    */
   recordMandatoryAlternativeSatisfied(alternative) {
-    this.mandatoryAlternativesSatisfied_[alternative] = 0;
+    this.mandatoryAlternativesSatisfied_.push(alternative);
   }
 
   /**
-   * The mandatory alternatives that we've satisfied.
-   * @return {!Object<string, ?>}
+   * The mandatory alternatives that we've satisfied. This may contain
+   * duplicates (we'd have to filter them in record... above if we cared).
+   * @return {!Array<number>}
    */
   getMandatoryAlternativesSatisfied() {
     return this.mandatoryAlternativesSatisfied_;
@@ -3244,7 +3245,8 @@ function validateAttributes(
   /** @type {!Array<boolean>} */
   let mandatoryAttrsSeen = [];  // This is a set of attr ids.
   /** @type {!Array<number>} */
-  const mandatoryOneofsSeen = [];  // This is a (small) list of interned strings.
+  const mandatoryOneofsSeen =
+      [];  // This is a (small) list of interned strings.
   let parsedTriggerSpecs = [];
   /**
    * If a tag has implicit attributes, we then add these attributes as
@@ -4018,13 +4020,14 @@ class ParsedValidatorRules {
         continue;
       }
       const alternative = tagSpec.mandatoryAlternatives;
-      if (!(alternative in satisfied)) {
+      if (satisfied.indexOf(alternative) === -1) {
         if (amp.validator.LIGHT) {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
           return;
         }
-        missing.push(alternative);
-        specUrlsByMissing[alternative] = tagSpec.specUrl;
+        const alternativeName = context.getInternedString(alternative);
+        missing.push(alternativeName);
+        specUrlsByMissing[alternativeName] = tagSpec.specUrl;
       }
     }
     if (!amp.validator.LIGHT) {
