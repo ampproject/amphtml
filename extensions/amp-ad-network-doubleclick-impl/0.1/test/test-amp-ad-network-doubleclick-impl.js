@@ -172,6 +172,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'width': '200',
           'height': '50',
           'type': 'doubleclick',
+          'layout': 'fixed',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
       });
@@ -180,6 +181,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     it('injects amp analytics', () => {
       const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       impl.ampAnalyticsConfig = {urls};
+      impl.responseHeaders_ = {get: () => 'qqid_string'};
+      debugger;
       impl.onCreativeRender(false);
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
