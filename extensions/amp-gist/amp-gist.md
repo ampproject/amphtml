@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-gist-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-gist" src="https://cdn.ampproject.org/v0/amp-gist-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -35,13 +35,24 @@ limitations under the License.
   </tr>
 </table>
 
-## Example
+## Examples
 
-Example:
+### Multiple files
 
 ```html
 <amp-gist
     data-gistid="b9bb35bc68df68259af94430f012425f"
+    layout="responsive"
+    width="480" height="270">
+</amp-gist>
+```
+
+### Single file
+
+```html
+<amp-gist
+    data-gistid="a19e811dcd7df10c4da0931641538497"
+    data-file="hi.c"
     layout="responsive"
     width="480" height="270">
 </amp-gist>
@@ -53,7 +64,13 @@ This extension creates an iframe and displays the gist from GitHub.
 
 ## Attributes
 
-It requires the `data-gistid` attribute of the gist.
+These are the valid attributes for the `amp-gist` component:
+
+**data-gistid** (required)
+The ID of the gist to embed.
+
+**data-file** (optional)
+`data-file` is used for displaying only one file in a gist.
 
 ## Validation
 See [amp-gist rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gist/0.1/validator-amp-gist.protoascii) in the AMP validator specification.
