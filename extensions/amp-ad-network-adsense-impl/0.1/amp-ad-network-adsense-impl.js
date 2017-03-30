@@ -102,6 +102,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
+
+    /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
+    this.responseHeaders_ = null;
   }
 
   /** @override */
@@ -182,6 +185,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig =
       extractAmpAnalyticsConfig(responseHeaders, this.extensions_);
+    this.responseHeaders_ = responseHeaders;
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
@@ -244,7 +248,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
-    injectActiveViewAmpAnalyticsElement(this, this.ampAnalyticsConfig);
+    injectActiveViewAmpAnalyticsElement(
+        this, this.ampAnalyticsConfig, this.responseHeaders_);
   }
 }
 
