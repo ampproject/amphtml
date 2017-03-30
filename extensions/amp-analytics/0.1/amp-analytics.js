@@ -144,8 +144,6 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.consentPromise_ = userNotificationManagerFor(this.win)
           .then(service => service.get(this.consentNotificationId_));
     }
-
-    this.scopingEle_ = this.element.getAttribute('scoped');
   }
 
   /** @override */

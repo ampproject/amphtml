@@ -114,13 +114,12 @@ describes.realWin('analytics', {
       };
       fromClassForDoc(
           ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
-      testClass = new ExtensionAnalytics(baseEle.element);
+      expect(baseEle.element.querySelector('amp-analytics')).to.be.null;
+      testClass = new ExtensionAnalytics(baseEle.element, config);
       triggerEventForTargetSpy = sandbox.spy();
     });
 
     it('should create analytics element if analytics is installed', () => {
-      expect(baseEle.element.querySelector('amp-analytics')).to.be.null;
-      testClass.insertAnalyticsElement(config);
       return timer.promise(50).then(() => {
         const analyticsEle = baseEle.element.querySelector('amp-analytics');
         expect(analyticsEle).to.not.be.null;
@@ -133,17 +132,11 @@ describes.realWin('analytics', {
     });
 
     it('should trigger events for contained analyticsElements', () => {
-      expect(baseEle.element.querySelector('amp-analytics')).to.be.null;
-      testClass.insertAnalyticsElement(config);
-      testClass.insertAnalyticsElement(config);
+      testClass = new ExtensionAnalytics(baseEle.element, [config, config]);
       testClass.triggerAnalyticsEvent('test');
       return timer.promise(50).then(() => {
-        testClass.insertAnalyticsElement(config);
+        expect(testClass.analyticsElements_).to.have.length(2);
         expect(triggerEventForTargetSpy).to.be.calledTwice;
-        return timer.promise(50).then(() => {
-          expect(testClass.analyticsElements_).to.have.length(3);
-          expect(triggerEventForTargetSpy).to.be.calledTwice;
-        });
       });
     });
   });

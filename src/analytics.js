@@ -20,6 +20,7 @@ import {
 } from './element-service';
 import {createElementWithAttributes} from './dom';
 import {extensionsFor} from './extensions';
+import {isArray} from './types';
 
 
 /**
@@ -63,9 +64,10 @@ export class ExtensionAnalytics {
 
   /**
    * @param {!Element} parentElement
+   * @param {!JSONType|!Array<!JSONType>} config
    * @param {boolean=} opt_loadAnalytics
    */
-  constructor(parentElement, opt_loadAnalytics) {
+  constructor(parentElement, config, opt_loadAnalytics) {
     /** @private {!Element} */
     this.parentElement_ = parentElement;
 
@@ -74,16 +76,24 @@ export class ExtensionAnalytics {
 
     /** @private {!Array<!Element>} */
     this.analyticsElements_ = [];
+
+    if (isArray(config)) {
+      for (let i = 0; i < config.length; i++) {
+        this.insertAnalyticsElement_(config[i]);
+      }
+    } else {
+      this.insertAnalyticsElement_(config);
+    }
   }
 
   /**
-   *
+   * @private
    * @param {!JSONType} config
    */
-  insertAnalyticsElement(config) {
+  insertAnalyticsElement_(config) {
     const doc = this.parentElement_.ownerDocument;
     const analyticsElem = doc.createElement('amp-analytics');
-    analyticsElem.setAttribute('scope', 'true');
+    analyticsElem.setAttribute('sandbox', 'true');
     const scriptElem = createElementWithAttributes(doc,
           'script', {
             'type': 'application/json',
