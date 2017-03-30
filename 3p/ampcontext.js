@@ -17,6 +17,7 @@ import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {tryParseJson} from '../src/json';
+import {isObject} from '../src/types';
 
 export class AmpContext {
 
@@ -171,12 +172,16 @@ export class AmpContext {
     // to check the name attribute as it has been bypassed.
     // TODO(alanorozco): why the heck could AMP_CONTEXT_DATA be two different
     // types? FIX THIS.
-    if (!this.win_.AMP_CONTEXT_DATA) {
-      this.setupMetadata_(this.win_.name);
-    } else if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
-      this.sentinel = this.win_.AMP_CONTEXT_DATA;
+    if (isObject(this.win_.sf_) && this.win_.sf_.cfg) {
+      this.setupMetadata_(/** @type {!string}*/(this.win_.sf_.cfg));
+    } else if (this.win_.AMP_CONTEXT_DATA) {
+      if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
+        this.sentinel = this.win_.AMP_CONTEXT_DATA;
+      } else if (isObject(this.win_.AMP_CONTEXT_DATA)) {
+        this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
+      }
     } else {
-      this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
+      this.setupMetadata_(this.win_.name);
     }
   }
 }
