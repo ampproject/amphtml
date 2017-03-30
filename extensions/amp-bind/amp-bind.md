@@ -71,8 +71,8 @@ The state can be initialized with the `amp-state` component:
 </amp-state>
 ```
 
-[Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
-
+- [Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
+- An `<amp-state>` element's JSON has a maximum size of 100KB.
 
 ##### AMP.setState()
 
