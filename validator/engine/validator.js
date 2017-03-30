@@ -33,6 +33,7 @@ goog.require('amp.validator.CdataSpec');
 goog.require('amp.validator.CssSpec');
 goog.require('amp.validator.ErrorCategory');
 goog.require('amp.validator.LIGHT');
+goog.require('amp.validator.PropertySpecList');
 goog.require('amp.validator.ReferencePoint');
 goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.VALIDATE_CSS');
@@ -240,6 +241,41 @@ class ParsedAttrTriggerSpec {
   }
 }
 
+/** @private */
+class ParsedValueProperties {
+  /** @param {!amp.validator.PropertySpecList} spec */
+  constructor(spec) {
+    /**
+     * @type {!Object<string, !amp.validator.PropertySpec>}
+     * @private
+     */
+    this.valuePropertyByName_ = Object.create(null);
+    /**
+     * @type {!Array<string>}
+     * @private
+     */
+    this.mandatoryValuePropertyNames_ = [];
+
+    for (const propertySpec of spec.properties) {
+      this.valuePropertyByName_[propertySpec.name] = propertySpec;
+      if (propertySpec.mandatory) {
+        this.mandatoryValuePropertyNames_.push(propertySpec.name);
+      }
+    }
+    goog.array.sort(this.mandatoryValuePropertyNames_);
+  }
+
+  /** @return {!Object<string, amp.validator.PropertySpec>} */
+  getValuePropertyByName() {
+    return this.valuePropertyByName_;
+  }
+
+  /** @return {!Array<string>} */
+  getMandatoryValuePropertyNames() {
+    return this.mandatoryValuePropertyNames_;
+  }
+}
+
 /**
  * This wrapper class provides access to an AttrSpec and
  * an attribute id which is unique within its context
@@ -258,45 +294,31 @@ class ParsedAttrSpec {
      * @private
      */
     this.spec_ = attrSpec;
+
     /**
      * Globally unique attribute rule id.
      * @type {number}
      * @private
      */
     this.id_ = attrId;
+
     /**
      * @type {ParsedAttrTriggerSpec}
      * @private
      */
     this.triggerSpec_ = null;
-    if (this.spec_.trigger !== null) {
-      this.triggerSpec_ = new ParsedAttrTriggerSpec(this.spec_);
-    }
-    /**
-     * @type {!ParsedUrlSpec}
-     * @private
-     */
-    this.valueUrlSpec_ = new ParsedUrlSpec(this.spec_.valueUrl);
-    /**
-     * @type {!Object<string, !amp.validator.PropertySpec>}
-     * @private
-     */
-    this.valuePropertyByName_ = Object.create(null);
-    /**
-     * @type {!Array<string>}
-     * @private
-     */
-    this.mandatoryValuePropertyNames_ = [];
 
-    if (this.spec_.valueProperties !== null) {
-      for (const propertySpec of this.spec_.valueProperties.properties) {
-        this.valuePropertyByName_[propertySpec.name] = propertySpec;
-        if (propertySpec.mandatory) {
-          this.mandatoryValuePropertyNames_.push(propertySpec.name);
-        }
-      }
-      goog.array.sort(this.mandatoryValuePropertyNames_);
-    }
+    /**
+     * @type {ParsedUrlSpec}
+     * @private
+     */
+    this.valueUrlSpec_ = null;
+
+    /**
+     * @type {ParsedValueProperties}
+     * @private
+     */
+    this.valueProperties_ = null;
 
     /**
      * @type {RegExp} valueRegex
@@ -367,16 +389,13 @@ class ParsedAttrSpec {
   }
 
   /**
-   * @return {boolean}
-   */
-  hasTriggerSpec() {
-    return this.triggerSpec_ !== null;
-  }
-
-  /**
    * @return {ParsedAttrTriggerSpec}
    */
-  getTriggerSpec() {
+  getTriggerSpecOrNull() {
+    if (this.spec_.trigger === null) return null;
+    if (this.triggerSpec_ === null) {
+      this.triggerSpec_ = new ParsedAttrTriggerSpec(this.spec_);
+    }
     return this.triggerSpec_;
   }
 
@@ -384,7 +403,22 @@ class ParsedAttrSpec {
    * @return {!ParsedUrlSpec}
    */
   getValueUrlSpec() {
+    if (this.valueUrlSpec_ === null) {
+      this.valueUrlSpec_ = new ParsedUrlSpec(this.spec_.valueUrl);
+    }
     return this.valueUrlSpec_;
+  }
+
+  /**
+   * @return {ParsedValueProperties}
+   */
+  getValuePropertiesOrNull() {
+    if (this.spec_.valueProperties === null) return null;
+    if (this.valueProperties_ === null) {
+      this.valueProperties_ =
+          new ParsedValueProperties(this.spec_.valueProperties);
+    }
+    return this.valueProperties_;
   }
 }
 
@@ -2352,7 +2386,7 @@ function validateUrlAndProtocol(
 
 /**
  * Helper method for validateNonTemplateAttrValueAgainstSpec.
- * @param {ParsedAttrSpec} parsedAttrSpec
+ * @param {ParsedValueProperties} parsedValueProperties
  * @param {!Context} context
  * @param {string} attrName
  * @param {string} attrValue
@@ -2360,7 +2394,7 @@ function validateUrlAndProtocol(
  * @param {!amp.validator.ValidationResult} result
  */
 function validateAttrValueProperties(
-    parsedAttrSpec, context, attrName, attrValue, tagSpec, result) {
+    parsedValueProperties, context, attrName, attrValue, tagSpec, result) {
   // TODO(johannes): Replace this hack with a parser.
   const segments = attrValue.split(/[,;]/);
   /** @type {!Object<string, string>} */
@@ -2376,7 +2410,8 @@ function validateAttrValueProperties(
   const names = Object.keys(properties).sort();
   for (const name of names) {
     const value = properties[name];
-    if (!(name in parsedAttrSpec.valuePropertyByName_)) {
+    const valuePropertyByName = parsedValueProperties.getValuePropertyByName();
+    if (!(name in valuePropertyByName)) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -2389,7 +2424,7 @@ function validateAttrValueProperties(
           tagSpec.specUrl, result);
       continue;
     }
-    const propertySpec = parsedAttrSpec.valuePropertyByName_[name];
+    const propertySpec = valuePropertyByName[name];
     if (propertySpec.value !== null) {
       if (propertySpec.value !== value.toLowerCase()) {
         if (amp.validator.LIGHT) {
@@ -2420,8 +2455,8 @@ function validateAttrValueProperties(
       }
     }
   }
-  const notSeen =
-      subtractDiff(parsedAttrSpec.mandatoryValuePropertyNames_, names);
+  const notSeen = subtractDiff(
+      parsedValueProperties.getMandatoryValuePropertyNames(), names);
   if (amp.validator.LIGHT) {
     if (notSeen.length > 0) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -2511,9 +2546,12 @@ function validateNonTemplateAttrValueAgainstSpec(
   } else if (spec.valueUrl !== null) {
     validateAttrValueUrl(
         parsedAttrSpec, context, attrName, attrValue, tagSpec, result);
-  } else if (spec.valueProperties !== null) {
-    validateAttrValueProperties(
-        parsedAttrSpec, context, attrName, attrValue, tagSpec, result);
+  } else {
+    const valueProperties = parsedAttrSpec.getValuePropertiesOrNull();
+    if (valueProperties !== null) {
+      validateAttrValueProperties(
+          valueProperties, context, attrName, attrValue, tagSpec, result);
+    }
   }
   // } end oneof
 }
@@ -3386,11 +3424,12 @@ function validateAttributes(
     // If the trigger does not have an if_value_regex, then proceed to add the
     // spec. If it does have an if_value_regex, then test the regex to see
     // if it should add the spec.
-    if (parsedAttrSpec.hasTriggerSpec() &&
-        (!parsedAttrSpec.getTriggerSpec().hasIfValueRegex() ||
-         (parsedAttrSpec.getTriggerSpec().hasIfValueRegex() &&
-          parsedAttrSpec.getTriggerSpec().getIfValueRegex().test(attrValue)))) {
-      parsedTriggerSpecs.push(parsedAttrSpec.getTriggerSpec());
+    const triggerSpec = parsedAttrSpec.getTriggerSpecOrNull();
+    if (triggerSpec !== null &&
+        (!triggerSpec.hasIfValueRegex() ||
+         (triggerSpec.hasIfValueRegex() &&
+          triggerSpec.getIfValueRegex().test(attrValue)))) {
+      parsedTriggerSpecs.push(triggerSpec);
     }
     attrspecsValidated[parsedAttrSpec.getId()] = 0;
   }
