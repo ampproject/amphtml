@@ -49,8 +49,6 @@ export class AmpContext {
 
     this.findAndSetMetadata_();
     this.client_ = new IframeMessagingClient(win);
-    this.win_ = win;
-    this.setupMetadata_();
     this.client_.setHostWindow(this.getHostWindow_());
     this.client_.setSentinel(dev().assertString(this.sentinel));
   }

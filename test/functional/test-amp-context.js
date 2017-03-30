@@ -16,8 +16,7 @@
 import {
   AmpContext,
 } from '../../3p/ampcontext';
-import {MessageType} from '../../src/3p-frame';
-import {createIframePromise} from '../../testing/iframe';
+import {MessageType} from '../../src/3p-frame-messaging';
 import * as sinon from 'sinon';
 
 describe('3p ampcontext.js', () => {
@@ -47,8 +46,8 @@ describe('3p ampcontext.js', () => {
     windowMessageHandler = undefined;
   });
 
-  it('should add metadata to window.context', () => {
-    win.name = generateAttributes();
+  it('should add metadata to window.context using name.', () => {
+    win.name = generateStringifiedAttributes();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
     expect(context.location).to.equal('foo.com');
@@ -59,10 +58,30 @@ describe('3p ampcontext.js', () => {
     expect(context.referrer).to.equal('baz.net');
   });
 
-  it ('should throw error if sentinel invalid', () => {
-    win.name = generateAttributes('foobar');
+  it('should add metadata to window.context using window var.', () => {
+    win.AMP_CONTEXT_DATA = generateAttributes();
+    const context = new AmpContext(win);
+    expect(context).to.be.ok;
+    expect(context.location).to.equal('foo.com');
+    expect(context.canonicalUrl).to.equal('foo.com');
+    expect(context.pageViewId).to.equal('1');
+    expect(context.sentinel).to.equal('1-291921');
+    expect(context.startTime).to.equal('0');
+    expect(context.referrer).to.equal('baz.net');
+  });
+
+  it('should set up only sentinel if no metadata provided.', () => {
+    const sentinel = '123-456';
+    win.AMP_CONTEXT_DATA = sentinel;
+    const context = new AmpContext(win);
+    expect(context).to.be.ok;
+    expect(context.sentinel).to.equal(sentinel);
+  });
+
+  it('should throw error if sentinel invalid', () => {
+    win.name = generateStringifiedAttributes('foobar');
     const AmpContextSpy = sandbox.spy(AmpContext);
-    try{
+    try {
       new AmpContextSpy(win);
     } catch (err) {
       // do nothing with it
@@ -73,22 +92,20 @@ describe('3p ampcontext.js', () => {
         'Incorrect sentinel format');
   });
 
-  it ('should throw error if metadata missing', () => {
+  it('should throw error if metadata missing', () => {
     win.name = generateIncorrectAttributes();
     const AmpContextSpy = sandbox.spy(AmpContext);
-    try{
+    try {
       new AmpContextSpy(win);
     } catch (err) {
       // do nothing with it
     }
     expect(AmpContextSpy.threw()).to.be.true;
     expect(AmpContextSpy.exceptions.length).to.equal(1);
-    expect(AmpContextSpy.exceptions[0].message).to.equal(
-        'Could not parse metadata.');
   });
 
   it('should be able to send an intersection observer request', () => {
-    win.name = generateAttributes();
+    win.name = generateStringifiedAttributes();
     const context = new AmpContext(win);
     const callbackSpy = sandbox.spy();
     const stopObserving = context.observeIntersection(callbackSpy);
@@ -129,7 +146,7 @@ describe('3p ampcontext.js', () => {
   });
 
   it('should send a pM and set callback when observePageVisibility()', () => {
-    win.name = generateAttributes();
+    win.name = generateStringifiedAttributes();
     const context = new AmpContext(win);
     const callbackSpy = sandbox.spy();
     const stopObserving = context.observePageVisibility(callbackSpy);
@@ -170,7 +187,7 @@ describe('3p ampcontext.js', () => {
   });
 
   it('should call resize success callback on resize success', () => {
-    win.name = generateAttributes();
+    win.name = generateStringifiedAttributes();
     const context = new AmpContext(win);
     const successCallbackSpy = sandbox.spy();
     const deniedCallbackSpy = sandbox.spy();
@@ -212,7 +229,7 @@ describe('3p ampcontext.js', () => {
   });
 
   it('should call resize denied callback on resize denied', () => {
-    win.name = generateAttributes();
+    win.name = generateStringifiedAttributes();
     const context = new AmpContext(win);
     const successCallbackSpy = sandbox.spy();
     const deniedCallbackSpy = sandbox.spy();
@@ -251,40 +268,22 @@ describe('3p ampcontext.js', () => {
 
     expect(successCallbackSpy.called).to.be.false;
   });
-
-  /*it('context should be available when creation event fired', () => {
-    // create an iframe that includes the ampcontext-lib script
-    return createIframePromise().then(iframe => {
-      iframe.win.name = generateAttributes();
-
-      const windowContextPromise = new Promise(resolve => {
-        iframe.win.addEventListener('amp-windowContextCreated', resolve);
-      });
-
-      const windowContextScript = iframe.doc.createElement('script');
-      windowContextScript.src = '../../dist.3p/current/ampcontext-lib.js';
-
-      const scriptPromise = new Promise((resolve, reject) => {
-        windowContextScript.addEventListener('error', () => {
-          reject(new Error('script error'));
-        });
-        windowContextScript.addEventListener('load', resolve);
-      });
-
-      iframe.doc.body.appendChild(windowContextScript);
-      return scriptPromise.then(() => windowContextPromise).then(() => {
-        expect(iframe.win.context).to.be.ok;
-        expect(iframe.win.context.location).to.equal('foo.com');
-        expect(iframe.win.context.canonicalUrl).to.equal('foo.com');
-        expect(iframe.win.context.pageViewId).to.equal('1');
-        expect(iframe.win.context.sentinel).to.equal('1-291921');
-        expect(iframe.win.context.startTime).to.equal('0');
-        expect(iframe.win.context.referrer).to.equal('baz.net');
-      });
-    });
-  });
-  */
 });
+
+function generateStringifiedAttributes(opt_sentinel) {
+  const attributes = {};
+  const sentinel = opt_sentinel || '1-291921';
+  attributes._context = {
+    location: 'foo.com',
+    canonicalUrl: 'foo.com',
+    pageViewId: '1',
+    sentinel,
+    startTime: '0',
+    referrer: 'baz.net',
+  };
+
+  return JSON.stringify(attributes);
+}
 
 function generateAttributes(opt_sentinel) {
   const attributes = {};
@@ -293,12 +292,12 @@ function generateAttributes(opt_sentinel) {
     location: 'foo.com',
     canonicalUrl: 'foo.com',
     pageViewId: '1',
-    sentinel: sentinel,
+    sentinel,
     startTime: '0',
     referrer: 'baz.net',
   };
 
-  return encodeURI(JSON.stringify(attributes));
+  return attributes;
 }
 
 
@@ -313,5 +312,5 @@ function generateIncorrectAttributes() {
     referrer: 'baz.net',
   };
 
-  return encodeURI(JSON.stringify(attributes));
+  return JSON.stringify(attributes);
 }
