@@ -20,10 +20,9 @@
  * Example:
  * <code>
  * <amp-gist
- *   layout="responsive"
+ *   layout="fixed-height"
  *   data-gistid="a19e811dcd7df10c4da0931641538497"
- *   width="100"
- *   height="100">
+ *   height="1613">
  * </amp-gist>
  * </code>
  */
