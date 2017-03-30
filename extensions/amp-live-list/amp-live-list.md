@@ -329,12 +329,10 @@ The `amp-live-list` also generates the following events for which you can use [A
   <tr>
     <th>Event</th>
     <th>Description</th>
-    <th>Data</th>
   </tr>
   <tr>
     <td>update</td>
     <td>Fired when the list's DOM items are inserted or replaced</td>
-    <td><code>event.insertedItemIds</code> : the <code>id</code>s of inserted list items, <code>event.replacedItemIds</code> : the <code>id</code>s of replaced list items</td>
   </tr>
 </table>
 
