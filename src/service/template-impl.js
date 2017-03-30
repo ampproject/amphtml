@@ -324,7 +324,6 @@ export function installTemplatesService(win) {
   registerServiceBuilder(win, 'templates', Templates);
 }
 
-
 /**
  * Registers an extended template. This function should typically be called
  * through the registerTemplate method on the AMP runtime.
