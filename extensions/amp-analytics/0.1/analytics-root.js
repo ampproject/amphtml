@@ -15,6 +15,10 @@
  */
 
 import {
+  VisibilityManagerForDoc,
+  VisibilityManagerForEmbed,
+} from './visibility-manager';
+import {
   closestBySelector,
   matches,
   scopedQuerySelector,
@@ -53,6 +57,9 @@ export class AnalyticsRoot {
 
     /** @const */
     this.trackers_ = map();
+
+    /** @private {?./visibility-manager.VisibilityManager} */
+    this.visibilityManager_ = null;
   }
 
   /** @override */
@@ -60,6 +67,9 @@ export class AnalyticsRoot {
     for (const k in this.trackers_) {
       this.trackers_[k].dispose();
       delete this.trackers_[k];
+    }
+    if (this.visibilityManager_) {
+      this.visibilityManager_.dispose();
     }
   }
 
@@ -198,11 +208,8 @@ export class AnalyticsRoot {
   getAmpElement(context, selector, selectionMethod) {
     const element = this.getElement(context, selector, selectionMethod);
     if (element) {
-      // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
-      // form is in PROD for 1-2 weeks.
       user().assert(
-          (element.classList.contains('-amp-element')
-            || element.classList.contains('i-amphtml-element')),
+          element.classList.contains('i-amphtml-element'),
           'Element "%s" is required to be an AMP element', selector);
     }
     return element;
@@ -275,6 +282,26 @@ export class AnalyticsRoot {
    * @abstract
    */
   whenIniLoaded() {}
+
+  /**
+   * Returns the visibility root corresponding to this analytics root (ampdoc
+   * or embed). The visibility root is created lazily as needed and takes
+   * care of all visibility tracking functions.
+   * @return {!./visibility-manager.VisibilityManager}
+   */
+  getVisibilityManager() {
+    if (!this.visibilityManager_) {
+      this.visibilityManager_ = this.createVisibilityManager();
+    }
+    return this.visibilityManager_;
+  }
+
+  /**
+   * @return {!./visibility-manager.VisibilityManager}
+   * @protected
+   * @abstract
+   */
+  createVisibilityManager() {}
 }
 
 
@@ -333,6 +360,11 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
     }
     return whenContentIniLoad(this.ampdoc, this.ampdoc.win, rect);
   }
+
+  /** @override */
+  createVisibilityManager() {
+    return new VisibilityManagerForDoc(this.ampdoc);
+  }
 }
 
 
@@ -379,6 +411,13 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
   /** @override */
   whenIniLoaded() {
     return this.embed.whenIniLoaded();
+  }
+
+  /** @override */
+  createVisibilityManager() {
+    return new VisibilityManagerForEmbed(
+        this.parent.getVisibilityManager(),
+        this.embed);
   }
 }
 

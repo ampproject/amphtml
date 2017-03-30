@@ -72,7 +72,7 @@ const METADATA_STRING_NO_QUOTES =
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-const SAFEFRAME_VERSION = '1-0-5';
+const SAFEFRAME_VERSION = '1-0-6';
 /** @type {string} @visibleForTesting */
 export const SAFEFRAME_IMPL_PATH =
     'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
@@ -738,9 +738,10 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Handles uncaught errors within promise flow.
    * @param {*} error
+   * @param {boolean=} opt_ignoreStack
    * @private
    */
-  promiseErrorHandler_(error) {
+  promiseErrorHandler_(error, opt_ignoreStack) {
     if (isCancellation(error)) {
       // Rethrow if cancellation.
       throw error;
@@ -748,6 +749,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     if (!error || !error.message) {
       error = new Error('unknown error ' + error);
+    }
+    if (opt_ignoreStack) {
+      error.ignoreStack = opt_ignoreStack;
     }
 
     // Add `type` to the message. Ensure to preserve the original stack.
@@ -1054,8 +1058,9 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderNonAmpCreative_() {
-    this.promiseErrorHandler_(new Error('fallback to 3p'));
-    this.protectedEmitLifecycleEvent_('preAdThrottle');
+    this.promiseErrorHandler_(
+        new Error('fallback to 3p'),
+        /* ignoreStack */ true);
     incrementLoadingAds(this.win);
     // Haven't rendered yet, so try rendering via one of our
     // cross-domain iframe solutions.

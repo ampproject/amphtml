@@ -16,6 +16,7 @@
 
 
 import {listen} from '../../../src/event-helper';
+import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
@@ -46,6 +47,20 @@ export let Message;
  * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
  */
 export let RequestHandler;
+
+/**
+  * @param {*} message
+  * @return {?Message}
+  */
+export function parseMessage(message) {
+  if (typeof message != 'string') {
+    return /** @type {Message} */(message);
+  }
+  if (message.charAt(0) != '{') {
+    return null;
+  }
+  return /** @type {?Message} */ (tryParseJson(message) || null);
+}
 
 /**
  * @fileoverview This class is a de-facto implementation of MessagePort
@@ -100,12 +115,15 @@ export class Messaging {
    * Conversation (messaging protocol) between me and Bob.
    * @param {!Window} win
    * @param {!MessagePort|!WindowPortEmulator} port
+   * @param {boolean} opt_isWebview
    */
-  constructor(win, port) {
+  constructor(win, port, opt_isWebview) {
     /** @const {!Window} */
     this.win = win;
     /** @const @private {!MessagePort|!WindowPortEmulator} */
     this.port_ = port;
+    /** @const @private */
+    this.isWebview_ = !!opt_isWebview;
     /** @private {!number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
@@ -156,8 +174,10 @@ export class Messaging {
    */
   handleMessage_(event) {
     dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
-    /** @type {Message} */
-    const message = event.data;
+    const message = parseMessage(event.data);
+    if (!message) {
+      return;
+    }
     if (message.type == MessageType.REQUEST) {
       this.handleRequest_(message);
     } else if (message.type == MessageType.RESPONSE) {
@@ -235,7 +255,8 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
-    this.port_./*OK*/postMessage(message);
+    this.port_./*OK*/postMessage(
+      this.isWebview_ ? JSON.stringify(message) : message);
   }
 
   /**
@@ -291,7 +312,7 @@ export class Messaging {
         pending.reject(
           new Error(`Request ${message.name} failed: ${message.error}`));
       } else {
-        pending.resolve(message.data);
+        pending.resolve(message);
       }
     }
   }

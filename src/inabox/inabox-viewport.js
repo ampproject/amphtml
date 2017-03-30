@@ -23,7 +23,7 @@ import {
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
-import {MessageType} from '../../src/3p-frame';
+import {MessageType} from '../../src/3p-frame-messaging';
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
 import {dev} from '../log';
 
