@@ -82,7 +82,7 @@ export class ExtensionAnalytics {
         this.insertAnalyticsElement_(config[i]);
       }
     } else {
-      this.insertAnalyticsElement_(config);
+      this.insertAnalyticsElement_(/** @type {!JSONType} */ (config));
     }
   }
 
