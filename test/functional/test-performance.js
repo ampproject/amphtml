@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getMode} from '../../src/mode';
 import {
   installPerformanceService,
   performanceFor,
@@ -21,7 +22,8 @@ import {
 import {resourcesForDoc} from '../../src/resources';
 import {viewerForDoc} from '../../src/viewer';
 import * as lolex from 'lolex';
-import {getMode} from '../../src/mode';
+import * as sinon from 'sinon';
+
 
 describes.realWin('performance', {amp: true}, env => {
   let sandbox;
@@ -396,9 +398,7 @@ describes.realWin('performance', {amp: true}, env => {
     });
   });
 
-  // TODO(dvoytenko, #7815): re-enable once the reporting regression is
-  // confirmed.
-  it.skip('should wait for visible resources', () => {
+  it('should wait for visible resources', () => {
     function resource() {
       const res = {
         loadedComplete: false,
@@ -468,10 +468,6 @@ describes.realWin('performance', {amp: true}, env => {
 
       sandbox.stub(viewer, 'whenFirstVisible')
           .returns(whenFirstVisiblePromise);
-      // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
-      // reporting regression is confirmed.
-      sandbox.stub(perf, 'whenViewportLayoutCompleteLegacy_')
-          .returns(whenViewportLayoutCompletePromise);
       sandbox.stub(perf, 'whenViewportLayoutComplete_')
           .returns(whenViewportLayoutCompletePromise);
       return viewer.whenMessagingReady();
