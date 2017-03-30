@@ -26,6 +26,7 @@ import {
   stringifyViewportMeta,
   updateViewportMetaString,
 } from '../../src/service/viewport-impl';
+import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -46,6 +47,7 @@ describes.fakeWin('Viewport', {}, env => {
   let viewerMock;
   let windowApi;
   let ampdoc;
+  let visibilityState;
   let viewerViewportHandler;
   let viewerScrollDocHandler;
   let updatedPaddingTop;
@@ -60,6 +62,7 @@ describes.fakeWin('Viewport', {}, env => {
 
     viewerViewportHandler = undefined;
     viewerScrollDocHandler = undefined;
+    visibilityState = 'visible';
     viewer = {
       isEmbedded: () => false,
       getParam: param => {
@@ -76,15 +79,18 @@ describes.fakeWin('Viewport', {}, env => {
         }
       },
       sendMessage: sandbox.spy(),
-      isVisible: () => true,
+      getVisibilityState: () => visibilityState,
+      isVisible: () => (visibilityState == 'visible'),
       onVisibilityChanged: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     const ampdocService = installDocService(windowApi, /* isSingleDoc */ true);
     ampdoc = ampdocService.getAmpDoc();
     installTimerService(windowApi);
+    installVsyncService(windowApi);
     installPlatformService(windowApi);
     installViewerServiceForDoc(ampdoc);
+
     binding = new ViewportBindingDef();
     viewportSize = {width: 111, height: 222};
     binding.getSize = () => {
@@ -174,6 +180,99 @@ describes.fakeWin('Viewport', {}, env => {
       ampdoc.win.parent = {};
       new Viewport(ampdoc, binding, viewer);
       expect(root).to.have.class('i-amphtml-iframed');
+    });
+  });
+
+  describe('zero dimensions', () => {
+    let errorStub;
+    let randomValue;
+
+    beforeEach(() => {
+      viewport.size_ = null;
+      errorStub = sandbox.stub(dev(), 'error');
+      randomValue = 0.009;
+      sandbox.stub(Math, 'random', () => randomValue);
+    });
+
+    it('should be ok with non-zero dimensions', () => {
+      expect(viewport.getSize().width).to.equal(111);
+      expect(viewport.getSize().height).to.equal(222);
+      expect(errorStub).to.not.be.called;
+    });
+
+    it('should report zero width', () => {
+      binding.getSize = () => {
+        return {width: 0, height: viewportSize.height};
+      };
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(222);
+      expect(errorStub).to.be.calledOnce;
+      expect(errorStub).to.be.calledWith(
+          'Viewport', 'viewport has zero dimensions');
+    });
+
+    it('should report zero height', () => {
+      binding.getSize = () => {
+        return {width: viewportSize.width, height: 0};
+      };
+      expect(viewport.getSize().width).to.equal(111);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.be.calledOnce;
+      expect(errorStub).to.be.calledWith(
+          'Viewport', 'viewport has zero dimensions');
+    });
+
+    it('should report both zero width and height', () => {
+      binding.getSize = () => {
+        return {width: 0, height: 0};
+      };
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.be.calledOnce;
+      expect(errorStub).to.be.calledWith(
+          'Viewport', 'viewport has zero dimensions');
+    });
+
+    it('should report only 1% of the time', () => {
+      binding.getSize = () => {
+        return {width: 0, height: 0};
+      };
+      randomValue = 0.011;
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.not.be.called;
+    });
+
+    it('should report in prerender state', () => {
+      visibilityState = 'prerender';
+      binding.getSize = () => {
+        return {width: 0, height: 0};
+      };
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.be.calledOnce;
+      expect(errorStub).to.be.calledWith(
+          'Viewport', 'viewport has zero dimensions');
+    });
+
+    it('should NOT report in hidden state', () => {
+      visibilityState = 'hidden';
+      binding.getSize = () => {
+        return {width: 0, height: 0};
+      };
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.not.be.called;
+    });
+
+    it('should NOT report in inactive state', () => {
+      visibilityState = 'inactive';
+      binding.getSize = () => {
+        return {width: 0, height: 0};
+      };
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.not.be.called;
     });
   });
 
@@ -930,6 +1029,7 @@ describe('Viewport META', () => {
           /* isSingleDoc */ true);
       ampdoc = ampdocService.getAmpDoc();
       installTimerService(windowApi);
+      installVsyncService(windowApi);
       installPlatformService(windowApi);
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
@@ -1028,6 +1128,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     viewer = {};
 
     installPlatformService(win);
+    installVsyncService(win);
 
     binding = new ViewportBindingNatural_(win, viewer);
     binding.connect();
@@ -1179,7 +1280,6 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
 
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
-    installVsyncService(win);
 
     binding = new ViewportBindingNaturalIosEmbed_(win, ampdoc);
     return Promise.resolve();
@@ -1599,6 +1699,7 @@ describe('createViewport', () => {
       win = env.win;
       installPlatformService(win);
       installTimerService(win);
+      installVsyncService(win);
     });
 
     it('should bind to "natural" when not iframed', () => {
@@ -1627,6 +1728,7 @@ describe('createViewport', () => {
       win = env.win;
       installPlatformService(win);
       installTimerService(win);
+      installVsyncService(win);
     });
 
     it('should bind to "natural" when not iframed', () => {

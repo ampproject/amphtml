@@ -150,17 +150,18 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     });
 
     describe('Animated Icon', () => {
-      it('should create an animated icon overlay', () => {
+      // TODO(amphtml): Unskip when #8385 is fixed.
+      it.skip('should create an animated icon overlay', () => {
         let video;
         let viewport;
         let icon;
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
           video = r.video;
           return poll('animation icon', () => {
-            return !!video.querySelector('i-amp-video-eq');
+            return !!video.querySelector('i-amphtml-video-eq');
           });
         }).then(() => {
-          icon = video.querySelector('i-amp-video-eq');
+          icon = video.querySelector('i-amphtml-video-eq');
           expect(icon).to.exist;
           // animation should be paused since video is not played yet
           expect(isAnimationPaused(icon)).to.be.true;

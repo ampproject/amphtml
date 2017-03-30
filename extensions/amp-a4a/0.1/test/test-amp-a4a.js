@@ -212,10 +212,7 @@ describe('amp-a4a', () => {
     expect(() => {attributes = JSON.parse(nameData);}).not.to.throw(Error);
     expect(attributes).to.be.ok;
     expect(attributes._context).to.be.ok;
-    expect(attributes._context).not.to.contain.all.keys(
-        'sentinel', 'amp3pSentinel');
-    const sentinel = attributes._context.amp3pSentinel ||
-        attributes._context.sentinel;
+    const sentinel = attributes._context.sentinel;
     expect(sentinel).to.be.ok;
     expect(sentinel).to.match(/((\d+)-\d+)/);
   }
@@ -1402,6 +1399,16 @@ describe('amp-a4a', () => {
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
       expect(userErrorStub.args[0][1].message).to.be.match(/intentional/);
+      expect(userErrorStub.args[0][1].ignoreStack).to.be.undefined;
+    });
+
+    it('should configure ignoreStack when specified', () => {
+      window.AMP_MODE = {development: true};
+      a4a.promiseErrorHandler_('intentional', /* ignoreStack */ true);
+      expect(userErrorStub).to.be.calledOnce;
+      expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
+      expect(userErrorStub.args[0][1].message).to.be.match(/intentional/);
+      expect(userErrorStub.args[0][1].ignoreStack).to.equal(true);
     });
 
     it('should route error to user.error in dev mode', () => {

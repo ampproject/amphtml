@@ -42,7 +42,7 @@ function assign(target, source) {
  * @param {!Object} data
  */
 export function openx(global, data) {
-  const openxData = ['host', 'nc', 'auid', 'dfpSlot', 'dfp'];
+  const openxData = ['host', 'nc', 'auid', 'dfpSlot', 'dfp', 'openx'];
   const dfpData = assign({}, data); // Make a copy for dfp.
 
   // TODO: check mandatory fields
@@ -88,8 +88,12 @@ export function openx(global, data) {
           const oxAnchor = global.document.createElement('div');
           global.document.body.appendChild(oxAnchor);
           /*eslint "google-camelcase/google-camelcase": 0*/
+          OX._requestArgs['bc'] = 'amp';
           oxRequest.addAdUnit(data.auid);
           oxRequest.setAdSizes([data.width + 'x' + data.height]);
+          if (data.openx && data.openx.customVars) {
+            setCustomVars(oxRequest, filterCustomVar(data.openx.customVars));
+          }
           oxRequest.getOrCreateAdUnit(data.auid).set('anchor', oxAnchor);
           global.context.renderStart();
           oxRequest.load();
@@ -111,6 +115,10 @@ function standardImplementation(global, jssdk, dfpData) {
 
 function advanceImplementation(global, jssdk, dfpData, data) {
   const size = [data.width + 'x' + data.height];
+  let customVars = {};
+  if (data.openx && data.openx.customVars) {
+    customVars = filterCustomVar(data.openx.customVars);
+  }
   global.OX_bidder_options = {
     bidderType: 'hb_amp',
     callback: () => {
@@ -123,6 +131,31 @@ function advanceImplementation(global, jssdk, dfpData, data) {
       doubleclick(global, dfpData);
     },
   };
-  global.OX_bidder_ads = [[data.dfpSlot, size, 'c']];
+  global.OX_bidder_ads = [[data.dfpSlot, size, 'c', customVars]];
   loadScript(global, jssdk);
+}
+
+function setCustomVars(oxRequest, customVars) {
+  const customVarKeys = Object.keys(customVars);
+  customVarKeys.forEach(customVarKey => {
+    const customVarValue = customVars[customVarKey];
+    if (Array.isArray(customVarValue)) {
+      customVarValue.forEach(value => {
+        oxRequest.addVariable(customVarKey, value);
+      });
+    } else {
+      oxRequest.addVariable(customVarKey, customVarValue);
+    }
+  });
+}
+
+function filterCustomVar(customVars) {
+  const filterPattern = /^[A-Za-z0-9._]{1,20}$/;
+  const filteredKeys = Object.keys(customVars)
+    .filter(key => filterPattern.test(key));
+  const filteredCustomVar = {};
+  filteredKeys.forEach(key => {
+    filteredCustomVar[key.toLowerCase()] = customVars[key];
+  });
+  return filteredCustomVar;
 }

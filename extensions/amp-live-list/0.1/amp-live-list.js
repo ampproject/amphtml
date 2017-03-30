@@ -17,7 +17,7 @@
 
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
-import {installLiveListManager, LiveListManager} from './live-list-manager';
+import {liveListManagerFor, LiveListManager} from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 
@@ -180,7 +180,7 @@ export class AmpLiveList extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
 
-    this.manager_ = installLiveListManager(this.win);
+    this.manager_ = liveListManagerFor(this.win);
 
     this.updateSlot_ = user().assert(
        this.getUpdateSlot_(this.element),
@@ -838,6 +838,11 @@ export class AmpLiveList extends AMP.BaseElement {
   /** @override */
   getUpdateTime() {
     return this.updateTime_;
+  }
+
+  /** @override */
+  getDynamicElementContainers() {
+    return this.itemsSlot_ ? [this.itemsSlot_] : [];
   }
 
   sendAmpDomUpdateEvent_() {

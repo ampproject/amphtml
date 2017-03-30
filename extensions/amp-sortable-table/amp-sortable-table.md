@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,27 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-viewer-integration"></a> `amp-viewer-integration`
+# <a name="amp-sortable-table"></a>`amp-sortable-table`
 
 <table>
   <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>AMP Viewer Integration component</td>
+    <td class="col-fourty"><strong>Description</strong></td>
+    <td>Displays a sortable table.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</div><div>Work in progress.</div></td>
+    <td class="col-fourty"><strong>Availability</strong></td>
+    <td>Experimental</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-viewer-integration" src="https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js">&lt;/script></code></td>
+    <td class="col-fourty"><strong>Required Script</strong></td>
+    <td>
+      <div>
+        <code>&lt;script async custom-element="amp-sortable-table" src="https://cdn.ampproject.org/v0/amp-sortable-table-0.1.js">&lt;/script></code>
+      </div>
+    </td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
+    <td>container</td>
   </tr>
 </table>
-
-## Overview
-
-TODO

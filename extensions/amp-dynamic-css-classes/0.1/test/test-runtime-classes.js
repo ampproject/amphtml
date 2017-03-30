@@ -18,7 +18,7 @@ import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {viewerForDoc} from '../../../../src/viewer';
-import {installVsyncService} from '../../../../src/service/vsync-impl';
+import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 import {installDynamicClassesForTesting} from '../amp-dynamic-css-classes';
 
 const tcoReferrer = 'http://t.co/xyzabc123';
@@ -66,7 +66,7 @@ describe('dynamic classes are inserted at runtime', () => {
     const ampdoc = ampdocService.getAmpDoc();
     installPlatformService(mockWin);
 
-    const vsync = installVsyncService(mockWin);
+    const vsync = vsyncForTesting(mockWin);
     vsync.schedule_ = () => {
       vsync.runScheduledTasks_();
     };
