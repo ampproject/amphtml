@@ -169,7 +169,7 @@ message CssSpec {
   optional bool validate_amp4ads = 5;
 }
 
-// NEXT AVAILABLE TAG: 8
+// NEXT AVAILABLE TAG: 9
 message CdataSpec {
   // If set, the cdata contents cannot be greater than this length, in bytes.
   optional int32 max_bytes = 1 [ default = -1 ];
@@ -187,6 +187,9 @@ message CdataSpec {
   // If at least one CssSpec is provided, this cdata field will be parsed
   // as CSS3, and any parsing errors will become validation errors.
   optional CssSpec css_spec = 7;
+  // If set to true, then only whitespace may be in the cdata contents.
+  // This is useful for script tags that reference extensions etc.
+  optional bool whitespace_only = 8;
   // } end oneof
 
   // If any of these regexes match, then this cdata spec does not validate.
@@ -500,7 +503,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 82
+  // NEXT AVAILABLE TAG: 83
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -527,6 +530,7 @@ message ValidationError {
     STYLESHEET_TOO_LONG = 50;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
+    NON_WHITESPACE_CDATA_ENCOUNTERED = 82;
     DEV_MODE_ENABLED = 10;  // Deprecated, remove after 2016-04-01.
     DEPRECATED_ATTR = 11;
     DEPRECATED_TAG = 12;
