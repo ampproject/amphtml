@@ -120,6 +120,7 @@ import {nend} from '../ads/nend';
 import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
+import {outbrain} from '../ads/outbrain';
 import {plista} from '../ads/plista';
 import {popin} from '../ads/popin';
 import {pubmatic} from '../ads/pubmatic';
@@ -164,6 +165,7 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
   'mantis-recommend': true,
   mywidget: true,
+  outbrain: true,
   plista: true,
   smartclip: true,
   taboola: true,
@@ -273,6 +275,7 @@ register('nend', nend);
 register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);
+register('outbrain', outbrain);
 register('plista', plista);
 register('popin', popin);
 register('pubmatic', pubmatic);
