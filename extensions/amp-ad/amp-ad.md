@@ -189,6 +189,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 
 ## Supported embed types
 
+- [Outbrain](../../ads/outbrain.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)
 
