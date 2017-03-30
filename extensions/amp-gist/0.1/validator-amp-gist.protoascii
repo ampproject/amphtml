@@ -34,6 +34,10 @@ tags: {  # <amp-gist>
     name: "data-gistid"
     mandatory: true
   }
+  attrs: {
+    name: "data-file"
+    value: ""
+  }
   satisfies: "amp-gist"
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-gist"
