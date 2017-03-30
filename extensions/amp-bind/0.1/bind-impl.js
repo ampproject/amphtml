@@ -44,7 +44,7 @@ const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
  * Maximum depth for state merge.
  * @type {number}
  */
-const MAX_MERGE_DEPTH = 50;
+const MAX_MERGE_DEPTH = 10;
 
 /**
  * A bound property, e.g. [property]="expression".
