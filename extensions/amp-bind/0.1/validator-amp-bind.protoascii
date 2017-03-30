@@ -25,23 +25,12 @@ tags: {  # amp-bind
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-state>
-  html_format: AMP
-  disallowed_ancestor: "AMP-SIDEBAR"
-  tag_name: "AMP-STATE"
-  satisfies: "amp-state"
-  requires: "amp-bind extension .js script"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
-}
 tags: {  # <amp-state> (json)
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-bind extension .json script"
   mandatory_parent: "AMP-STATE"
+  requires: "amp-bind extension .js script"
   attrs: { name: "nonce" }
   attrs: {
     name: "type"
@@ -50,12 +39,22 @@ tags: {  # <amp-state> (json)
     dispatch_key: true
   }
   cdata: {
-    max_bytes: 100000
-    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-bind#state"
     blacklisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+}
+tags: {  # <amp-state>
+  html_format: AMP
+  tag_name: "AMP-STATE"
+  satisfies: "amp-state"
+  requires: "amp-bind extension .js script"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  attrs: {
+    name: "id"
+    mandatory: true
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
 }
