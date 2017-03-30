@@ -222,7 +222,7 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
     ],
   },
-  'getViewportServiceForDoc': {
+  'installViewportServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',

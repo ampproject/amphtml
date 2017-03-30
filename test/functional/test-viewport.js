@@ -16,7 +16,7 @@
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {
-  getViewportServiceForDoc,
+  installViewportServiceForDoc,
   Viewport,
   ViewportBindingDef,
   ViewportBindingIosEmbedWrapper_,
@@ -34,6 +34,7 @@ import {installVsyncService} from '../../src/service/vsync-impl';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
 import {toggleExperiment} from '../../src/experiments';
+import {viewportForDoc} from '../../src/viewport';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
@@ -1604,7 +1605,8 @@ describe('createViewport', () => {
       win.parent = win;
       const ampDoc = installDocService(win, true).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
-      const viewport = getViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
     });
 
@@ -1612,7 +1614,8 @@ describe('createViewport', () => {
       win.parent = {};
       const ampDoc = installDocService(win, true).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
-      const viewport = getViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
     });
   });
@@ -1632,7 +1635,8 @@ describe('createViewport', () => {
       win.parent = win;
       const ampDoc = installDocService(win, true).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
-      const viewport = getViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
     });
 
@@ -1641,7 +1645,8 @@ describe('createViewport', () => {
       const ampDoc = installDocService(win, true).getAmpDoc();
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => true);
-      const viewport = getViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNaturalIosEmbed_);
     });
@@ -1651,7 +1656,8 @@ describe('createViewport', () => {
       const ampDoc = installDocService(win, true).getAmpDoc();
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
-      const viewport = getViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNatural_);
     });
@@ -1661,7 +1667,8 @@ describe('createViewport', () => {
       getMode(win).development = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
-      const viewport = getViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNaturalIosEmbed_);
     });
@@ -1672,7 +1679,8 @@ describe('createViewport', () => {
       getMode(win).test = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
-      const viewport = getViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNaturalIosEmbed_);
     });
@@ -1683,7 +1691,8 @@ describe('createViewport', () => {
       getMode(win).development = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
-      const viewport = getViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNatural_);
     });
