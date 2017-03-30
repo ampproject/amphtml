@@ -268,8 +268,9 @@ export class Bind {
             `bindings will be ignored.`);
       }
 
-      // Parse on web worker if experiment is enabled.
-      if (this.workerExperimentEnabled_) {
+      if (bindings.length == 0) {
+        return {};
+      } else if (this.workerExperimentEnabled_) {
         dev().fine(TAG, `Asking worker to parse expressions...`);
         return invokeWebWorker(this.win_, 'bind.addBindings', [bindings]);
       } else {
@@ -329,13 +330,17 @@ export class Bind {
       }
 
       // Remove the bindings from the evaluator.
-      if (this.workerExperimentEnabled_) {
-        dev().fine(TAG, `Asking worker to parse expressions...`);
-        return invokeWebWorker(
-            this.win_, 'bind.removeBindings', [deletedExpressions]);
-      } else {
-        this.evaluator_.removeBindingsWithExpressionStrings(deletedExpressions);
+      if (deletedExpressions.length > 0) {
+        if (this.workerExperimentEnabled_) {
+          dev().fine(TAG, `Asking worker to parse expressions...`);
+          return invokeWebWorker(
+              this.win_, 'bind.removeBindings', [deletedExpressions]);
+        } else {
+          this.evaluator_.removeBindingsWithExpressionStrings(
+              deletedExpressions);
+        }
       }
+
       resolve();
     });
   }
