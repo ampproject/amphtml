@@ -28,7 +28,6 @@ goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AmpLayout');
 goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
-goog.require('amp.validator.BlackListedCDataRegex');
 goog.require('amp.validator.CdataSpec');
 goog.require('amp.validator.CssSpec');
 goog.require('amp.validator.ErrorCategory');
@@ -657,8 +656,7 @@ class ParsedTagSpec {
 
     if (amp.validator.VALIDATE_CSS) {
       this.spec_.cdata = new amp.validator.CdataSpec();
-      this.spec_.cdata.blacklistedCdataRegex =
-          [new amp.validator.BlackListedCDataRegex('.', 'contents')];
+      this.spec_.cdata.whitespaceOnly = true;
     }
   }
 
@@ -1715,6 +1713,22 @@ class CdataMatcher {
                 amp.validator.ValidationResult.Status.FAIL) {
           return;
         }
+      }
+    } else if (cdataSpec.whitespaceOnly === true) {
+      if (!(new RegExp('^\\s*$').test(cdata))) {
+        if (amp.validator.LIGHT) {
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
+        }
+        // TODO(powdercloud): Improve this error message to make it more
+        // specific.
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+            context.getDocLocator(),
+            /* params */
+            [getTagSpecName(this.tagSpec_), 'contents'], this.tagSpec_.specUrl,
+            validationResult);
       }
     }
     // } end oneof
