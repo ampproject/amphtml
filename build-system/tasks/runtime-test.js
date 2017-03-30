@@ -24,7 +24,6 @@ var util = require('gulp-util');
 var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
 var karmaDefault = require('./karma.conf');
-
 /**
  * Read in and process the configuration settings for karma
  * @return {!Object} Karma configuration
@@ -140,6 +139,14 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     saucelabs: !!argv.saucelabs,
     adTypes: getAdTypes(),
   };
+
+  if (!!argv.compiled) {
+    process.env.SERVE_MODE = 'min';
+    util.log('Testing with ' + util.colors.green('compiled') + ' version');
+  } else {
+    process.env.SERVE_MODE = 'max';
+    util.log('Testing with ' + util.colors.green('max') + ' version');
+  }
 
   if (argv.grep) {
     c.client.mocha = {
