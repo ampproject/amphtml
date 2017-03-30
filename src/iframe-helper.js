@@ -373,7 +373,7 @@ export function postMessageToWindows(iframe, targets, type, object, opt_is3P) {
  * @private
  */
 function getSentinel_(iframe, opt_is3P) {
-  return opt_is3P ? iframe.getAttribute('data-amp-3p-sentinel') : 'amp';
+  return opt_is3P ? iframe.sentinel : 'amp';
 }
 
 /**
