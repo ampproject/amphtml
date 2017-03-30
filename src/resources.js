@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForDoc} from './service';
+import {getServiceForDoc} from './service';
 
 
 /**
@@ -23,5 +23,5 @@ import {getExistingServiceForDoc} from './service';
  */
 export function resourcesForDoc(nodeOrDoc) {
   return /** @type {!./service/resources-impl.Resources} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'resources'));
+      getServiceForDoc(nodeOrDoc, 'resources'));
 };

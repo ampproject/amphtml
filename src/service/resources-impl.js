@@ -24,7 +24,7 @@ import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
-import {fromClassForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {inputFor} from '../input';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
@@ -1997,8 +1997,7 @@ export let SizeDef;
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Resources}
  */
 export function installResourcesServiceForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'resources', Resources);
+  registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
 };
