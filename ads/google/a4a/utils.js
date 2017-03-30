@@ -385,7 +385,7 @@ export function extractAmpAnalyticsConfig(responseHeaders, extensions) {
  * with amp-ad closest selector and min 50% visible for 1 sec.
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {?AmpAnalyticsConfigDef} inputConfig
- * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
+ * @param {?../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  */
 export function injectActiveViewAmpAnalyticsElement(
     a4a, inputConfig, responseHeaders) {
@@ -430,7 +430,7 @@ export function injectActiveViewAmpAnalyticsElement(
   // Add CSI pingbacks.
   const correlator = getCorrelator(a4a.win);
   const slotId = a4a.element.getAttribute('data-amp-slot-index');
-  const qqid = responseHeaders.get(QQID_HEADER);
+  const qqid = responseHeaders ? responseHeaders.get(QQID_HEADER) : 'null';
   config['requests']['visibilityCsi'] = 'https://csi.gstatic.com/csi?fromAnalytics=1' +
       `&c=${correlator}&slotId=${slotId}&qqid.0=${qqid}`;
   config['triggers']['continuousVisibleIniLoad']['request'] =

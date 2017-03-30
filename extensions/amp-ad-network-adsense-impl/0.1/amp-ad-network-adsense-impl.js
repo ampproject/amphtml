@@ -103,7 +103,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
 
-    /** @private {!../../../src/service/xhr-impl.FetchResponseHeaders} */
+    /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
     this.responseHeaders_ = null;
   }
 
