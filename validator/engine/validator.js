@@ -769,6 +769,9 @@ class LineCol {
   }
 }
 
+/** @type {!LineCol} */
+const DOCUMENT_START = new LineCol(1, 0);
+
 /**
  * The child tag matcher evaluates ChildTagSpec. The constructor
  * provides the enclosing TagSpec for the parent tag so that we can
@@ -792,11 +795,13 @@ class ChildTagMatcher {
      */
     this.numChildTagsSeen_ = 0;
 
-    /**
-     * @type {!LineCol}
-     * @private
-     */
-    this.lineCol_ = new LineCol(1, 0);
+    if (!amp.validator.LIGHT) {
+      /**
+       * @type {!LineCol}
+       * @private
+       */
+      this.lineCol_ = DOCUMENT_START;
+    }
   }
 
   /**
@@ -804,6 +809,12 @@ class ChildTagMatcher {
    */
   setLineCol(lineCol) {
     this.lineCol_ = lineCol;
+  }
+
+  /** @return {!LineCol} */
+  getLineCol() {
+    if (amp.validator.LIGHT) return DOCUMENT_START;
+    return this.lineCol_;
   }
 
   /**
@@ -889,7 +900,7 @@ class ChildTagMatcher {
     context.addError(
         amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS,
-        this.lineCol_,
+        this.getLineCol(),
         /* params */
         [
           getTagSpecName(this.parentSpec_), expected.toString(),
@@ -923,11 +934,13 @@ class ReferencePointMatcher {
      */
     this.parsedReferencePoints_ = parsedReferencePoints;
 
-    /**
-     * @type {!LineCol}
-     * @private
-     */
-    this.lineCol_ = new LineCol(1, 0);
+    if (!amp.validator.LIGHT) {
+      /**
+       * @type {!LineCol}
+       * @private
+       */
+      this.lineCol_ = DOCUMENT_START;
+    }
 
     /**
      * @type {!Array<number>}
@@ -944,6 +957,14 @@ class ReferencePointMatcher {
    */
   setLineCol(lineCol) {
     this.lineCol_ = lineCol;
+  }
+
+  /**
+   * @return {!LineCol}
+   */
+  getLineCol() {
+    if (amp.validator.LIGHT) return DOCUMENT_START;
+    return this.lineCol_;
   }
 
   /**
@@ -1064,7 +1085,7 @@ class ReferencePointMatcher {
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code
                 .MANDATORY_REFERENCE_POINT_MISSING,
-            this.lineCol_,
+            this.getLineCol(),
             /*params*/
             [
               this.parsedValidatorRules_.getReferencePointName(p),
@@ -1081,7 +1102,7 @@ class ReferencePointMatcher {
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT,
-            this.lineCol_,
+            this.getLineCol(),
             /*params*/
             [
               this.parsedValidatorRules_.getReferencePointName(p),
@@ -1435,9 +1456,9 @@ class CdataMatcher {
     // we've advanced past the tag. This information gets filled in
     // by Context.setCdataMatcher.
 
-    if (amp.validator.LIGHT) {  // FIXME
+    if (!amp.validator.LIGHT) {
       /** @private @type {!LineCol} */
-      this.lineCol_ = new LineCol(1, 0);
+      this.lineCol_ = DOCUMENT_START;
     }
   }
 
@@ -1649,6 +1670,7 @@ class CdataMatcher {
 
   /** @return {!LineCol} */
   getLineCol() {
+    if (amp.validator.LIGHT) return DOCUMENT_START;
     return this.lineCol_;
   }
 }
