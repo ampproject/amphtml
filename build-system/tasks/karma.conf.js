@@ -178,7 +178,7 @@ module.exports = {
     'karma-sinon-chai',
     {
       'middleware:custom': ['factory', function() {
-        var app = require(require.resolve('../server.js'));
+        var app = require(require.resolve('../middleware-routing.js'));
         return app;
       }],
     },
