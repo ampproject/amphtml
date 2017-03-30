@@ -30,14 +30,6 @@ const TAG = 'web-worker';
 let PendingMessageDef;
 
 /**
- * @param {!Window} win
- * @private
- */
-function installWebWorker(win) {
-  registerServiceBuilder(win, 'amp-worker', AmpWorker);
-}
-
-/**
  * Invokes function named `method` with args `opt_args` on the web worker
  * and returns a Promise that will be resolved with the function's return value.
  * @note Currently only works in a single entry point.
@@ -53,7 +45,7 @@ export function invokeWebWorker(win, method, opt_args) {
   if (!win.Worker) {
     return Promise.reject('Worker not supported in window.');
   }
-  installWebWorker(win);
+  registerServiceBuilder(win, 'amp-worker', AmpWorker);
   const worker = getService(win, 'amp-worker');
   return worker.sendMessage_(method, opt_args || []);
 }
@@ -64,7 +56,7 @@ export function invokeWebWorker(win, method, opt_args) {
  * @visibleForTesting
  */
 export function ampWorkerForTesting(win) {
-  installWebWorker(win);
+  registerServiceBuilder(win, 'amp-worker', AmpWorker);
   return getService(win, 'amp-worker');
 }
 
