@@ -393,17 +393,26 @@ export function injectActiveViewAmpAnalyticsElement(a4a, inputConfig) {
   const ampAnalyticsElem =
     a4a.element.ownerDocument.createElement('amp-analytics');
   ampAnalyticsElem.setAttribute('scoped', '');
+  const visibilitySpec = {
+    'selector': 'amp-ad',
+    'selectionMethod': 'closest',
+    'visiblePercentageMin': 50,
+    'continuousTimeMin': 1000,
+  };
   const config = {
     'transport': {'beacon': false, 'xhrpost': false},
     'triggers': {
       'continuousVisible': {
         'on': 'visible',
-        'visibilitySpec': {
-          'selector': 'amp-ad',
-          'selectionMethod': 'closest',
-          'visiblePercentageMin': 50,
-          'continuousTimeMin': 1000,
-        },
+        visibilitySpec,
+      },
+      'continuousVisibleIniLoad': {
+        'on': 'ini-load',
+        visibilitySpec,
+      },
+      'continuousVisibleRenderStart': {
+        'on': 'render-start',
+        visibilitySpec,
       },
     },
   };
@@ -416,6 +425,12 @@ export function injectActiveViewAmpAnalyticsElement(a4a, inputConfig) {
   // Security review needed here.
   config['requests'] = requests;
   config['triggers']['continuousVisible']['request'] = Object.keys(requests);
+  // Add CSI pingbacks.
+  config['requests']['visibilityCsi'] = 'https://csi.gstatic.com/csi';
+  config['triggers']['continuousVisibleIniLoad']['request'] =
+      'visibilityCsi';
+  config['triggers']['continuousVisibleRenderStart']['request'] =
+      'visibilityCsi';
   const scriptElem = createElementWithAttributes(
       /** @type {!Document} */(a4a.element.ownerDocument), 'script', {
         'type': 'application/json',
