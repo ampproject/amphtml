@@ -29,7 +29,6 @@
 
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
