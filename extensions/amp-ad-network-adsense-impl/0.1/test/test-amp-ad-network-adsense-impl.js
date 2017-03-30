@@ -372,6 +372,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     it('injects amp analytics', () => {
       const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       impl.ampAnalyticsConfig = {urls};
+      impl.responseHeaders_ = {get: () => 'qqid_string'};
       impl.onCreativeRender(false);
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
