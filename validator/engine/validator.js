@@ -28,11 +28,11 @@ goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AmpLayout');
 goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
-goog.require('amp.validator.BlackListedCDataRegex');
 goog.require('amp.validator.CdataSpec');
 goog.require('amp.validator.CssSpec');
 goog.require('amp.validator.ErrorCategory');
 goog.require('amp.validator.LIGHT');
+goog.require('amp.validator.PropertySpecList');
 goog.require('amp.validator.ReferencePoint');
 goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.VALIDATE_CSS');
@@ -175,68 +175,38 @@ class ParsedUrlSpec {
   }
 }
 
-/**
- * ParsedAttrTriggerSpec is used by ParsedAttrSpec to determine which
- * attributes also require another attribute for some given set of
- * conditions.
- * (e.g. attr name: "on" if_value_regex: "tap:.*" also_require_attr: "role")
- * @private
- */
-class ParsedAttrTriggerSpec {
-  /**
-   * @param {!amp.validator.AttrSpec} attrSpec
-   */
-  constructor(attrSpec) {
+/** @private */
+class ParsedValueProperties {
+  /** @param {!amp.validator.PropertySpecList} spec */
+  constructor(spec) {
     /**
-     * JSON Attribute Trigger Spec dictionary.
-     * @type {amp.validator.AttrTriggerSpec}
+     * @type {!Object<string, !amp.validator.PropertySpec>}
      * @private
      */
-    this.spec_ = attrSpec.trigger;
-
+    this.valuePropertyByName_ = Object.create(null);
     /**
-     * @type {string} attrName
+     * @type {!Array<string>}
      * @private
      */
-    this.attrName_ = attrSpec.name;
+    this.mandatoryValuePropertyNames_ = [];
 
-    /**
-     * @type {RegExp} ifValueRegex
-     * @private
-     */
-    this.ifValueRegex_ = null;
-
-    if (this.spec_ !== null && this.spec_.ifValueRegex !== null) {
-      this.ifValueRegex_ = new RegExp('^(' + this.spec_.ifValueRegex + ')$');
+    for (const propertySpec of spec.properties) {
+      this.valuePropertyByName_[propertySpec.name] = propertySpec;
+      if (propertySpec.mandatory) {
+        this.mandatoryValuePropertyNames_.push(propertySpec.name);
+      }
     }
+    goog.array.sort(this.mandatoryValuePropertyNames_);
   }
 
-  /**
-   * @return {boolean}
-   */
-  hasIfValueRegex() {
-    return this.ifValueRegex_ !== null;
+  /** @return {!Object<string, amp.validator.PropertySpec>} */
+  getValuePropertyByName() {
+    return this.valuePropertyByName_;
   }
 
-  /**
-   * @return {RegExp} ifValueRegex
-   */
-  getIfValueRegex() {
-    return this.ifValueRegex_;
-  }
-
-  /**
-   * @return {string} attrName
-   */
-  getAttrName() {
-    return this.attrName_;
-  }
-
-  /**
-   * @return {amp.validator.AttrTriggerSpec}
-   */
-  getSpec() {
-    return this.spec_;
+  /** @return {!Array<string>} */
+  getMandatoryValuePropertyNames() {
+    return this.mandatoryValuePropertyNames_;
   }
 }
 
@@ -258,116 +228,25 @@ class ParsedAttrSpec {
      * @private
      */
     this.spec_ = attrSpec;
+
     /**
      * Globally unique attribute rule id.
      * @type {number}
      * @private
      */
     this.id_ = attrId;
-    /**
-     * @type {ParsedAttrTriggerSpec}
-     * @private
-     */
-    this.triggerSpec_ = null;
-    if (this.spec_.trigger !== null) {
-      this.triggerSpec_ = new ParsedAttrTriggerSpec(this.spec_);
-    }
-    /**
-     * @type {!ParsedUrlSpec}
-     * @private
-     */
-    this.valueUrlSpec_ = new ParsedUrlSpec(this.spec_.valueUrl);
-    /**
-     * @type {!Object<string, !amp.validator.PropertySpec>}
-     * @private
-     */
-    this.valuePropertyByName_ = Object.create(null);
-    /**
-     * @type {!Array<string>}
-     * @private
-     */
-    this.mandatoryValuePropertyNames_ = [];
-
-    if (this.spec_.valueProperties !== null) {
-      for (const propertySpec of this.spec_.valueProperties.properties) {
-        this.valuePropertyByName_[propertySpec.name] = propertySpec;
-        if (propertySpec.mandatory) {
-          this.mandatoryValuePropertyNames_.push(propertySpec.name);
-        }
-      }
-      goog.array.sort(this.mandatoryValuePropertyNames_);
-    }
 
     /**
-     * @type {RegExp} valueRegex
+     * @type {ParsedUrlSpec}
      * @private
      */
-    this.valueRegex_ = null;
-    if (this.spec_ !== null && this.spec_.valueRegex !== null) {
-      this.valueRegex_ = new RegExp('^(' + this.spec_.valueRegex + ')$');
-    }
+    this.valueUrlSpec_ = null;
 
     /**
-     * @type {RegExp} valueRegexCasei
+     * @type {ParsedValueProperties}
      * @private
      */
-    this.valueRegexCasei_ = null;
-    if (this.spec_ !== null && this.spec_.valueRegexCasei !== null) {
-      this.valueRegexCasei_ =
-          new RegExp('^(' + this.spec_.valueRegexCasei + ')$', 'i');
-    }
-
-    /**
-     * @type {RegExp} blacklistedValueRegex
-     * @private
-     */
-    this.blacklistedValueRegex_ = null;
-    if (this.spec_ !== null && this.spec_.blacklistedValueRegex !== null) {
-      this.blacklistedValueRegex_ =
-          new RegExp(this.spec_.blacklistedValueRegex, 'i');
-    }
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasValueRegex() {
-    return this.valueRegex_ !== null;
-  }
-
-  /**
-   * @return {RegExp} valueRegex
-   */
-  getValueRegex() {
-    return this.valueRegex_;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasValueRegexCasei() {
-    return this.valueRegexCasei_ !== null;
-  }
-
-  /**
-   * @return {RegExp} valueRegex
-   */
-  getValueRegexCasei() {
-    return this.valueRegexCasei_;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasBlacklistedValueRegex() {
-    return this.blacklistedValueRegex_ !== null;
-  }
-
-  /**
-   * @return {RegExp} blacklistedValueRegex
-   */
-  getBlacklistedValueRegex() {
-    return this.blacklistedValueRegex_;
+    this.valueProperties_ = null;
   }
 
   /**
@@ -385,24 +264,25 @@ class ParsedAttrSpec {
   }
 
   /**
-   * @return {boolean}
-   */
-  hasTriggerSpec() {
-    return this.triggerSpec_ !== null;
-  }
-
-  /**
-   * @return {ParsedAttrTriggerSpec}
-   */
-  getTriggerSpec() {
-    return this.triggerSpec_;
-  }
-
-  /**
    * @return {!ParsedUrlSpec}
    */
   getValueUrlSpec() {
+    if (this.valueUrlSpec_ === null) {
+      this.valueUrlSpec_ = new ParsedUrlSpec(this.spec_.valueUrl);
+    }
     return this.valueUrlSpec_;
+  }
+
+  /**
+   * @return {ParsedValueProperties}
+   */
+  getValuePropertiesOrNull() {
+    if (this.spec_.valueProperties === null) return null;
+    if (this.valueProperties_ === null) {
+      this.valueProperties_ =
+          new ParsedValueProperties(this.spec_.valueProperties);
+    }
+    return this.valueProperties_;
   }
 }
 
@@ -641,8 +521,7 @@ class ParsedTagSpec {
 
     if (amp.validator.VALIDATE_CSS) {
       this.spec_.cdata = new amp.validator.CdataSpec();
-      this.spec_.cdata.blacklistedCdataRegex =
-          [new amp.validator.BlackListedCDataRegex('.', 'contents')];
+      this.spec_.cdata.whitespaceOnly = true;
     }
   }
 
@@ -890,6 +769,9 @@ class LineCol {
   }
 }
 
+/** @type {!LineCol} */
+const DOCUMENT_START = new LineCol(1, 0);
+
 /**
  * The child tag matcher evaluates ChildTagSpec. The constructor
  * provides the enclosing TagSpec for the parent tag so that we can
@@ -913,11 +795,13 @@ class ChildTagMatcher {
      */
     this.numChildTagsSeen_ = 0;
 
-    /**
-     * @type {!LineCol}
-     * @private
-     */
-    this.lineCol_ = new LineCol(1, 0);
+    if (!amp.validator.LIGHT) {
+      /**
+       * @type {!LineCol}
+       * @private
+       */
+      this.lineCol_ = DOCUMENT_START;
+    }
   }
 
   /**
@@ -925,6 +809,12 @@ class ChildTagMatcher {
    */
   setLineCol(lineCol) {
     this.lineCol_ = lineCol;
+  }
+
+  /** @return {!LineCol} */
+  getLineCol() {
+    if (amp.validator.LIGHT) return DOCUMENT_START;
+    return this.lineCol_;
   }
 
   /**
@@ -1010,7 +900,7 @@ class ChildTagMatcher {
     context.addError(
         amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS,
-        this.lineCol_,
+        this.getLineCol(),
         /* params */
         [
           getTagSpecName(this.parentSpec_), expected.toString(),
@@ -1044,11 +934,13 @@ class ReferencePointMatcher {
      */
     this.parsedReferencePoints_ = parsedReferencePoints;
 
-    /**
-     * @type {!LineCol}
-     * @private
-     */
-    this.lineCol_ = new LineCol(1, 0);
+    if (!amp.validator.LIGHT) {
+      /**
+       * @type {!LineCol}
+       * @private
+       */
+      this.lineCol_ = DOCUMENT_START;
+    }
 
     /**
      * @type {!Array<number>}
@@ -1065,6 +957,14 @@ class ReferencePointMatcher {
    */
   setLineCol(lineCol) {
     this.lineCol_ = lineCol;
+  }
+
+  /**
+   * @return {!LineCol}
+   */
+  getLineCol() {
+    if (amp.validator.LIGHT) return DOCUMENT_START;
+    return this.lineCol_;
   }
 
   /**
@@ -1185,7 +1085,7 @@ class ReferencePointMatcher {
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code
                 .MANDATORY_REFERENCE_POINT_MISSING,
-            this.lineCol_,
+            this.getLineCol(),
             /*params*/
             [
               this.parsedValidatorRules_.getReferencePointName(p),
@@ -1202,7 +1102,7 @@ class ReferencePointMatcher {
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT,
-            this.lineCol_,
+            this.getLineCol(),
             /*params*/
             [
               this.parsedValidatorRules_.getReferencePointName(p),
@@ -1556,66 +1456,10 @@ class CdataMatcher {
     // we've advanced past the tag. This information gets filled in
     // by Context.setCdataMatcher.
 
-    if (amp.validator.LIGHT) {  // FIXME
+    if (!amp.validator.LIGHT) {
       /** @private @type {!LineCol} */
-      this.lineCol_ = new LineCol(1, 0);
+      this.lineCol_ = DOCUMENT_START;
     }
-
-    /**
-     * @type {RegExp} cdataRegex
-     * @private
-     */
-    this.cdataRegex_ = null;
-    if (tagSpec.cdata !== null && tagSpec.cdata.cdataRegex !== null) {
-      this.cdataRegex_ = new RegExp('^(' + tagSpec.cdata.cdataRegex + ')$');
-    }
-
-    /** @type {string} */
-    var blacklistedCdataRegexStr = '';
-    if (tagSpec.cdata !== null) {
-      blacklistedCdataRegexStr = tagSpec.cdata.blacklistedCdataRegex
-                                     .map(function(b) {
-                                       return b.regex;
-                                     })
-                                     .join('|');
-    }
-    /**
-     * @type {RegExp} blacklistedCdataRegex
-     * @private
-     */
-    this.blacklistedCdataRegex_ = null;
-    if (blacklistedCdataRegexStr !== '') {
-      this.blacklistedCdataRegex_ =
-          new RegExp('(' + blacklistedCdataRegexStr + ')', 'i');
-    }
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasCdataRegex() {
-    return this.cdataRegex_ !== null;
-  }
-
-  /**
-   * @return {RegExp} cdataRegex
-   */
-  getCdataRegex() {
-    return this.cdataRegex_;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasBlacklistedCdataRegex() {
-    return this.blacklistedCdataRegex_ !== null;
-  }
-
-  /**
-   * @return {RegExp} blacklistedCdataRegex
-   */
-  getBlacklistedCdataRegex() {
-    return this.blacklistedCdataRegex_;
   }
 
   /**
@@ -1676,8 +1520,10 @@ class CdataMatcher {
       // We return early if the cdata has an exact match rule. The
       // spec shouldn't have an exact match rule that doesn't validate.
       return;
-    } else if (this.hasCdataRegex()) {
-      if (!this.getCdataRegex().test(cdata)) {
+    } else if (this.tagSpec_.cdata.cdataRegex !== null) {
+      if (!context.getRules()
+               .getFullMatchRegex(this.tagSpec_.cdata.cdataRegex)
+               .test(cdata)) {
         if (amp.validator.LIGHT) {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         } else {
@@ -1700,6 +1546,19 @@ class CdataMatcher {
           return;
         }
       }
+    } else if (cdataSpec.whitespaceOnly === true) {
+      if (!(/^\s*$/.test(cdata))) {
+        if (amp.validator.LIGHT) {
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
+        }
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.NON_WHITESPACE_CDATA_ENCOUNTERED,
+            context.getDocLocator(),
+            /* params */[getTagSpecName(this.tagSpec_)], this.tagSpec_.specUrl,
+            validationResult);
+      }
     }
     // } end oneof
 
@@ -1707,24 +1566,25 @@ class CdataMatcher {
     // We use a combined regex as a fast test. If it matches, we re-match
     // against each individual regex so that we can generate better error
     // messages.
-    if (this.hasBlacklistedCdataRegex() &&
-        this.getBlacklistedCdataRegex().test(cdata)) {
-      for (const blacklist of cdataSpec.blacklistedCdataRegex) {
-        const blacklistRegex = new RegExp(blacklist.regex, 'i');
-        if (blacklistRegex.test(cdata)) {
-          if (amp.validator.LIGHT) {
-            validationResult.status =
-                amp.validator.ValidationResult.Status.FAIL;
-            return;
-          }
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
-              context.getDocLocator(),
-              /* params */
-              [getTagSpecName(this.tagSpec_), blacklist.errorMessage],
-              this.tagSpec_.specUrl, validationResult);
-        }
+    if (cdataSpec.combinedBlacklistedCdataRegex === null) return;
+    if (!context.getRules()
+             .getPartialMatchCaseiRegex(cdataSpec.combinedBlacklistedCdataRegex)
+             .test(cdata))
+      return;
+    if (amp.validator.LIGHT) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return;
+    }
+    for (const blacklist of cdataSpec.blacklistedCdataRegex) {
+      const blacklistRegex = new RegExp(blacklist.regex, 'i');
+      if (blacklistRegex.test(cdata)) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+            context.getDocLocator(),
+            /* params */
+            [getTagSpecName(this.tagSpec_), blacklist.errorMessage],
+            this.tagSpec_.specUrl, validationResult);
       }
     }
   }
@@ -1810,6 +1670,7 @@ class CdataMatcher {
 
   /** @return {!LineCol} */
   getLineCol() {
+    if (amp.validator.LIGHT) return DOCUMENT_START;
     return this.lineCol_;
   }
 }
@@ -1823,20 +1684,20 @@ class CdataMatcher {
  */
 class Context {
   /**
-   * @param {!amp.validator.ValidatorRules} rules
+   * @param {!ParsedValidatorRules} parsedRules
    */
-  constructor(rules) {
+  constructor(parsedRules) {
     /**
-     * @type {!amp.validator.ValidatorRules}
+     * @type {!ParsedValidatorRules}
      * @private
      */
-    this.rules_ = rules;
+    this.rules_ = parsedRules;
     /**
-     * The mandatory alternatives that we've validated.
-     * @type {!Object<string, ?>}
+     * The mandatory alternatives that we've validated (a small list of ids).
+     * @type {!Array<number>}
      * @private
      */
-    this.mandatoryAlternativesSatisfied_ = Object.create(null);
+    this.mandatoryAlternativesSatisfied_ = [];
     /**
      * DocLocator object from the parser which gives us line/col numbers.
      * @type {amp.htmlparser.DocLocator}
@@ -1872,17 +1733,9 @@ class Context {
     this.firstUrlSeenTag_ = null;
   }
 
-  /** @return {!amp.validator.ValidatorRules} */
+  /** @return {!ParsedValidatorRules} */
   getRules() {
     return this.rules_;
-  }
-
-  /**
-   * @param {number} id
-   * @return {string}
-   */
-  getInternedString(id) {
-    return this.rules_.internedStrings[-1 - id];
   }
 
   /**
@@ -1999,15 +1852,16 @@ class Context {
 
   /**
    * For use by |ParsedValidatorRules|, which doesn't have any mutable state.
-   * @param {string} alternative id of the validated alternative.
+   * @param {number} alternative id of the validated alternative.
    */
   recordMandatoryAlternativeSatisfied(alternative) {
-    this.mandatoryAlternativesSatisfied_[alternative] = 0;
+    this.mandatoryAlternativesSatisfied_.push(alternative);
   }
 
   /**
-   * The mandatory alternatives that we've satisfied.
-   * @return {!Object<string, ?>}
+   * The mandatory alternatives that we've satisfied. This may contain
+   * duplicates (we'd have to filter them in record... above if we cared).
+   * @return {!Array<number>}
    */
   getMandatoryAlternativesSatisfied() {
     return this.mandatoryAlternativesSatisfied_;
@@ -2369,7 +2223,7 @@ function validateUrlAndProtocol(
 
 /**
  * Helper method for validateNonTemplateAttrValueAgainstSpec.
- * @param {ParsedAttrSpec} parsedAttrSpec
+ * @param {ParsedValueProperties} parsedValueProperties
  * @param {!Context} context
  * @param {string} attrName
  * @param {string} attrValue
@@ -2377,7 +2231,7 @@ function validateUrlAndProtocol(
  * @param {!amp.validator.ValidationResult} result
  */
 function validateAttrValueProperties(
-    parsedAttrSpec, context, attrName, attrValue, tagSpec, result) {
+    parsedValueProperties, context, attrName, attrValue, tagSpec, result) {
   // TODO(johannes): Replace this hack with a parser.
   const segments = attrValue.split(/[,;]/);
   /** @type {!Object<string, string>} */
@@ -2393,7 +2247,8 @@ function validateAttrValueProperties(
   const names = Object.keys(properties).sort();
   for (const name of names) {
     const value = properties[name];
-    if (!(name in parsedAttrSpec.valuePropertyByName_)) {
+    const valuePropertyByName = parsedValueProperties.getValuePropertyByName();
+    if (!(name in valuePropertyByName)) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -2406,7 +2261,7 @@ function validateAttrValueProperties(
           tagSpec.specUrl, result);
       continue;
     }
-    const propertySpec = parsedAttrSpec.valuePropertyByName_[name];
+    const propertySpec = valuePropertyByName[name];
     if (propertySpec.value !== null) {
       if (propertySpec.value !== value.toLowerCase()) {
         if (amp.validator.LIGHT) {
@@ -2437,8 +2292,8 @@ function validateAttrValueProperties(
       }
     }
   }
-  const notSeen =
-      subtractDiff(parsedAttrSpec.mandatoryValuePropertyNames_, names);
+  const notSeen = subtractDiff(
+      parsedValueProperties.getMandatoryValuePropertyNames(), names);
   if (amp.validator.LIGHT) {
     if (notSeen.length > 0) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -2508,14 +2363,11 @@ function validateNonTemplateAttrValueAgainstSpec(
         context.getDocLocator(),
         /* params */[attrName, getTagSpecName(tagSpec), attrValue],
         tagSpec.specUrl, result);
-  } else if (
-      parsedAttrSpec.hasValueRegex() || parsedAttrSpec.hasValueRegexCasei()) {
-    let valueRegex;
-    if (parsedAttrSpec.hasValueRegex()) {
-      valueRegex = parsedAttrSpec.getValueRegex();
-    } else {
-      valueRegex = parsedAttrSpec.getValueRegexCasei();
-    }
+  } else if (spec.valueRegex !== null || spec.valueRegexCasei !== null) {
+    const valueRegex = (spec.valueRegex !== null) ?
+        context.getRules().getFullMatchRegex(spec.valueRegex) :
+        context.getRules().getFullMatchCaseiRegex(
+            /** @type {number} */ (spec.valueRegexCasei));
     if (!valueRegex.test(attrValue)) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -2531,9 +2383,12 @@ function validateNonTemplateAttrValueAgainstSpec(
   } else if (spec.valueUrl !== null) {
     validateAttrValueUrl(
         parsedAttrSpec, context, attrName, attrValue, tagSpec, result);
-  } else if (spec.valueProperties !== null) {
-    validateAttrValueProperties(
-        parsedAttrSpec, context, attrName, attrValue, tagSpec, result);
+  } else {
+    const valueProperties = parsedAttrSpec.getValuePropertiesOrNull();
+    if (valueProperties !== null) {
+      validateAttrValueProperties(
+          valueProperties, context, attrName, attrValue, tagSpec, result);
+    }
   }
   // } end oneof
 }
@@ -3087,13 +2942,13 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
         amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
         context.getDocLocator(),
         /* params */[attrName, getTagSpecName(parsedTagSpec.getSpec())],
-        context.getRules().templateSpecUrl, result);
+        context.getRules().getTemplateSpecUrl(), result);
   } else if (attrName == 'style') {
     context.addError(
         amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.DISALLOWED_STYLE_ATTR,
         context.getDocLocator(), /* params */[],
-        context.getRules().stylesSpecUrl, result);
+        context.getRules().getStylesSpecUrl(), result);
   } else {
     context.addError(
         amp.validator.ValidationError.Severity.ERROR,
@@ -3124,7 +2979,7 @@ function validateAttrValueBelowTemplateTag(
           amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
           context.getDocLocator(),
           /* params */[attrName, getTagSpecName(spec), attrValue],
-          context.getRules().templateSpecUrl, result);
+          context.getRules().getTemplateSpecUrl(), result);
     }
   } else if (attrValueHasPartialsTemplateSyntax(attrValue)) {
     if (amp.validator.LIGHT) {
@@ -3136,7 +2991,7 @@ function validateAttrValueBelowTemplateTag(
           amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
           context.getDocLocator(),
           /* params */[attrName, getTagSpecName(spec), attrValue],
-          context.getRules().templateSpecUrl, result);
+          context.getRules().getTemplateSpecUrl(), result);
     }
   }
 }
@@ -3244,8 +3099,9 @@ function validateAttributes(
   /** @type {!Array<boolean>} */
   let mandatoryAttrsSeen = [];  // This is a set of attr ids.
   /** @type {!Array<number>} */
-  const mandatoryOneofsSeen = [];  // This is a (small) list of interned strings.
-  let parsedTriggerSpecs = [];
+  const mandatoryOneofsSeen = [];  // This is small list of interned strings.
+  /** @type {!Array<!amp.validator.AttrSpec>} */
+  const triggersToCheck = [];
   /**
    * If a tag has implicit attributes, we then add these attributes as
    * validated. E.g. tag 'a' has implicit attributes 'role' and 'tabindex'.
@@ -3321,16 +3177,15 @@ function validateAttributes(
       continue;
     }
     const parsedAttrSpec = parsedAttrSpecs.getByAttrSpecId(attrId);
-    if (!amp.validator.LIGHT && parsedAttrSpec.getSpec().deprecation !== null) {
+    const attrSpec = parsedAttrSpec.getSpec();
+    if (!amp.validator.LIGHT && attrSpec.deprecation !== null) {
       context.addError(
           amp.validator.ValidationError.Severity.WARNING,
           amp.validator.ValidationError.Code.DEPRECATED_ATTR,
           context.getDocLocator(),
           /* params */
-          [
-            attrName, getTagSpecName(spec), parsedAttrSpec.getSpec().deprecation
-          ],
-          parsedAttrSpec.getSpec().deprecationUrl, result);
+          [attrName, getTagSpecName(spec), attrSpec.deprecation],
+          attrSpec.deprecationUrl, result);
       // Deprecation is only a warning, so we don't return.
     }
     if (!hasTemplateAncestor || !attrValueHasTemplateSyntax(attrValue)) {
@@ -3343,10 +3198,11 @@ function validateAttributes(
           continue;
       }
     }
-    if (parsedAttrSpec.hasBlacklistedValueRegex()) {
+    if (attrSpec.blacklistedValueRegex !== null) {
       const decodedAttrValue = decodeAttrValue(attrValue);
-      if (parsedAttrSpec.getBlacklistedValueRegex().test(attrValue) ||
-          parsedAttrSpec.getBlacklistedValueRegex().test(decodedAttrValue)) {
+      const regex = context.getRules().getPartialMatchCaseiRegex(
+          attrSpec.blacklistedValueRegex);
+      if (regex.test(attrValue) || regex.test(decodedAttrValue)) {
         if (amp.validator.LIGHT) {
           result.status = amp.validator.ValidationResult.Status.FAIL;
           return;
@@ -3361,7 +3217,7 @@ function validateAttributes(
         }
       }
     }
-    if (parsedAttrSpec.getSpec().mandatory) {
+    if (attrSpec.mandatory) {
       mandatoryAttrsSeen[parsedAttrSpec.getId()] = true;
     }
     if (parsedSpec.getSpec().tagName === 'BASE' && attrName === 'href' &&
@@ -3378,7 +3234,7 @@ function validateAttributes(
         continue;
       }
     }
-    const mandatoryOneof = parsedAttrSpec.getSpec().mandatoryOneof;
+    const mandatoryOneof = attrSpec.mandatoryOneof;
     if (mandatoryOneof !== null) {
       // The "at most 1" part of mandatory_oneof: mandatory_oneof
       // wants exactly one of the alternatives, so here
@@ -3393,23 +3249,28 @@ function validateAttributes(
               amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
               context.getDocLocator(),
               /* params */
-              [getTagSpecName(spec), context.getInternedString(mandatoryOneof)],
+              [
+                getTagSpecName(spec),
+                context.getRules().getInternedString(mandatoryOneof)
+              ],
               spec.specUrl, result);
           continue;
         }
       }
       mandatoryOneofsSeen.push(mandatoryOneof);
     }
+    attrspecsValidated[parsedAttrSpec.getId()] = 0;
     // If the trigger does not have an if_value_regex, then proceed to add the
     // spec. If it does have an if_value_regex, then test the regex to see
     // if it should add the spec.
-    if (parsedAttrSpec.hasTriggerSpec() &&
-        (!parsedAttrSpec.getTriggerSpec().hasIfValueRegex() ||
-         (parsedAttrSpec.getTriggerSpec().hasIfValueRegex() &&
-          parsedAttrSpec.getTriggerSpec().getIfValueRegex().test(attrValue)))) {
-      parsedTriggerSpecs.push(parsedAttrSpec.getTriggerSpec());
+    if (attrSpec.trigger === null) continue;
+    const trigger = attrSpec.trigger;
+    if (trigger.ifValueRegex === null ||
+        context.getRules()
+            .getFullMatchRegex(trigger.ifValueRegex)
+            .test(attrValue)) {
+      triggersToCheck.push(attrSpec);
     }
-    attrspecsValidated[parsedAttrSpec.getId()] = 0;
   }
   if (result.status == amp.validator.ValidationResult.Status.FAIL) return;
   // The "at least 1" part of mandatory_oneof: If none of the
@@ -3425,13 +3286,16 @@ function validateAttributes(
             amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
             context.getDocLocator(),
             /* params */
-            [getTagSpecName(spec), context.getInternedString(mandatoryOneof)],
+            [
+              getTagSpecName(spec),
+              context.getRules().getInternedString(mandatoryOneof)
+            ],
             spec.specUrl, result);
       }
     }
   }
-  for (const triggerSpec of parsedTriggerSpecs) {
-    for (const alsoRequiresAttr of triggerSpec.getSpec().alsoRequiresAttr) {
+  for (const attrSpec of triggersToCheck) {
+    for (const alsoRequiresAttr of attrSpec.trigger.alsoRequiresAttr) {
       if (!(alsoRequiresAttr in attrsByName)) {
         continue;
       }
@@ -3447,7 +3311,7 @@ function validateAttributes(
               /* params */
               [
                 parsedAttrSpecs.getNameByAttrSpecId(attrId),
-                getTagSpecName(spec), triggerSpec.getAttrName()
+                getTagSpecName(spec), attrSpec.name
               ],
               spec.specUrl, result);
         }
@@ -3765,6 +3629,26 @@ class ParsedValidatorRules {
      * @private
      */
     this.mandatoryTagSpecs_ = [];
+
+    /**
+     * A cache for regex istantiations.
+     * @type {!Array<!RegExp>}
+     * @private
+     */
+    this.fullMatchRegexes_ = [];
+    /**
+     * A cache for regex istantiations.
+     * @type {!Array<!RegExp>}
+     * @private
+     */
+    this.fullMatchCaseiRegexes_ = [];
+    /**
+     * A cache for regex istantiations.
+     * @type {!Array<!RegExp>}
+     * @private
+     */
+    this.partialMatchCaseiRegexes_ = [];
+
     if (!amp.validator.LIGHT) {
       /**
        * @type {!function(!amp.validator.TagSpec) : boolean}
@@ -3868,6 +3752,56 @@ class ParsedValidatorRules {
     }
   }
 
+  /**
+   * @param {number} internedStringId
+   * @return {!RegExp}
+   */
+  getFullMatchRegex(internedStringId) {
+    const idx = -1 - internedStringId;
+    if (this.fullMatchRegexes_.hasOwnProperty(idx)) {
+      return this.fullMatchRegexes_[idx];
+    }
+    const re = new RegExp('^(' + this.rules_.internedStrings[idx] + ')$');
+    this.fullMatchRegexes_[idx] = re;
+    return re;
+  }
+
+  /**
+   * @param {number} internedStringId
+   * @return {!RegExp}
+   */
+  getFullMatchCaseiRegex(internedStringId) {
+    const idx = -1 - internedStringId;
+    if (this.fullMatchCaseiRegexes_.hasOwnProperty(idx)) {
+      return this.fullMatchCaseiRegexes_[idx];
+    }
+    const re = new RegExp('^(' + this.rules_.internedStrings[idx] + ')$', 'i');
+    this.fullMatchCaseiRegexes_[idx] = re;
+    return re;
+  }
+
+  /**
+   * @param {number} internedStringId
+   * @return {!RegExp}
+   */
+  getPartialMatchCaseiRegex(internedStringId) {
+    const idx = -1 - internedStringId;
+    if (this.partialMatchCaseiRegexes_.hasOwnProperty(idx)) {
+      return this.partialMatchCaseiRegexes_[idx];
+    }
+    const re = new RegExp(this.rules_.internedStrings[idx], 'i');
+    this.partialMatchCaseiRegexes_[idx] = re;
+    return re;
+  }
+
+  /**
+   * @param {number} id
+   * @return {string}
+   */
+  getInternedString(id) {
+    return this.rules_.internedStrings[-1 - id];
+  }
+
   /** @return {!amp.validator.ValidatorRules} */
   getRules() {
     return this.rules_;
@@ -3879,6 +3813,16 @@ class ParsedValidatorRules {
    */
   getFormatByCode(errorCode) {
     return this.errorCodes_[errorCode].format;
+  }
+
+  /** @return {?string} */
+  getTemplateSpecUrl() {
+    return this.rules_.templateSpecUrl;
+  }
+
+  /** @return {?string} */
+  getStylesSpecUrl() {
+    return this.rules_.stylesSpecUrl;
   }
 
   /**
@@ -3953,7 +3897,7 @@ class ParsedValidatorRules {
               context.getDocLocator(),
               /* params */
               [
-                context.getInternedString(condition),
+                context.getRules().getInternedString(condition),
                 getTagSpecName(spec.getSpec())
               ],
               spec.getSpec().specUrl, validationResult);
@@ -4018,13 +3962,15 @@ class ParsedValidatorRules {
         continue;
       }
       const alternative = tagSpec.mandatoryAlternatives;
-      if (!(alternative in satisfied)) {
+      if (satisfied.indexOf(alternative) === -1) {
         if (amp.validator.LIGHT) {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
           return;
         }
-        missing.push(alternative);
-        specUrlsByMissing[alternative] = tagSpec.specUrl;
+        const alternativeName =
+            context.getRules().getInternedString(alternative);
+        missing.push(alternativeName);
+        specUrlsByMissing[alternativeName] = tagSpec.specUrl;
       }
     }
     if (!amp.validator.LIGHT) {
@@ -4160,7 +4106,7 @@ amp.validator.ValidationHandler =
      * @type {!Context}
      * @private
      */
-    this.context_ = new Context(this.rules_.getRules());
+    this.context_ = new Context(this.rules_);
   }
 
   /**
@@ -4307,7 +4253,7 @@ amp.validator.ValidationHandler =
       } else {
         let specUrl = '';
         if (tagName === 'FONT')
-          specUrl = this.context_.getRules().stylesSpecUrl;
+          specUrl = this.context_.getRules().getStylesSpecUrl();
         this.context_.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DISALLOWED_TAG,
@@ -4734,6 +4680,16 @@ amp.validator.categorizeError = function(error) {
        isAuthorStylesheet(error.params[0]))) {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
+
+  // The tag 'amp-hulu extension .js script' contains non-whitespace text
+  // (CDATA), which is disallowed.
+  if (error.code ===
+          amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST ||
+      error.code ===
+          amp.validator.ValidationError.Code.NON_WHITESPACE_CDATA_ENCOUNTERED) {
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+
   // E.g. "CSS syntax error in tag 'style amp-custom' - Invalid Declaration."
   // TODO(powdercloud): Legacy generic css error code. Remove after
   // 2016-06-01.

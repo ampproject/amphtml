@@ -360,8 +360,9 @@ describe('CssLength', () => {
 /**
  * Helper for ValidatorRulesMakeSense.
  * @param {!amp.validator.AttrSpec} attrSpec
+ * @param {!amp.validator.ValidatorRules} rules
  */
-function attrRuleShouldMakeSense(attrSpec) {
+function attrRuleShouldMakeSense(attrSpec, rules) {
   const attrSpecNameRegex = new RegExp('[^A-Z]+');
   // name
   it('attr_spec name defined', () => {
@@ -396,10 +397,22 @@ function attrRuleShouldMakeSense(attrSpec) {
          });
     }
   }
-  // blacklisted_value_regex
+  if (attrSpec.valueRegex !== null) {
+    it('value_regex valid', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
+      expect(isValidRegex(regex)).toBe(true);
+    });
+  }
+  if (attrSpec.valueRegexCasei !== null) {
+    it('value_regex_casei valid', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
+      expect(isValidRegex(regex)).toBe(true);
+    });
+  }
   if (attrSpec.blacklistedValueRegex !== null) {
     it('blacklisted_value_regex valid', () => {
-      expect(isValidRegex(attrSpec.blacklistedValueRegex)).toBe(true);
+      const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
+      expect(isValidRegex(regex)).toBe(true);
     });
   }
   // value_url must have at least one allowed protocol.
@@ -782,7 +795,7 @@ describe('ValidatorRulesMakeSense', () => {
 
   // attr_specs within rules.
   for (const attrSpec of rules.attrs) {
-    attrRuleShouldMakeSense(attrSpec);
+    attrRuleShouldMakeSense(attrSpec, rules);
   }
 
   // Verify that for every error code in our enum, we have exactly one format
