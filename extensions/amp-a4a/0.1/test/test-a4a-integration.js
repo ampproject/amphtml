@@ -40,6 +40,7 @@ import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {loadPromise} from '../../../../src/event-helper';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {getMode} from '../../../../src/mode';
+import {getDefaultBootstrapBaseUrl} from '../../../../src/3p-frame';
 import * as sinon from 'sinon';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
@@ -320,20 +321,6 @@ describe('integration test: a4a', () => {
         });
       });
 
-  it('nameframe iframe should use same URL as prefetch', () => {
-    delete headers[SIGNATURE_HEADER];  // Force xdom rendering.
-    headers[RENDERING_TYPE_HEADER] = 'nameframe';  // Render via nameframe.
-    return fixture.addElement(a4aElement).then(unusedElement => {
-      const prefetches = fixture.doc.head.querySelectorAll(
-          'link[rel=preconnect][href*=nameframe]');
-      expect(prefetches).to.have.length(1);
-      const prefetchUrl = prefetches[0].href;
-      expect(prefetchUrl).to.have.string('nameframe');
-      expectRenderedInXDomainIframe(a4aElement, 'nameframe.html');
-
-    });
-  });
-
   // TODO(@ampproject/a4a): Need a test that double-checks that thrown errors
   // are propagated out and printed to console and/or sent upstream to error
   // logging systems.  This is a bit tricky, because it's handled by the AMP
@@ -345,7 +332,7 @@ describe('integration test: a4a', () => {
 });
 
 describes.sandboxed('integration test: Fast Fetch', {}, () => {
-  describes.fakeWin('render methods', {amp: true}, env => {
+  describes.realWin('render methods', {amp: true}, env => {
     let xhrMock;
     let mockResponse;
     let a4aElement;
@@ -358,8 +345,8 @@ describes.sandboxed('integration test: Fast Fetch', {}, () => {
       // Fool AMP into thinking that it's not in dev or test mode so that
       // getDefaultBootstrapBaseUrl will actually randomize, rather than
       // returning a fixed localhost address.
-      getMode(win).localDev = false;
-      getMode(win).test = false;
+      getMode().localDev = false;
+      getMode().test = false;
       xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
       // Expect key set fetches for signing services.
       const fetchJsonMock = sandbox.stub(Xhr.prototype, 'fetchJson');
@@ -397,33 +384,30 @@ describes.sandboxed('integration test: Fast Fetch', {}, () => {
       // TDRL: Is this necessary?
       installDocService(win, /* isSingleDoc */ true);
       upgradeOrRegisterElement(win, 'amp-a4a', MockA4AImpl);
-      a4aElement = doc.createElement('amp-a4a');
-      a4aElement.setAttribute('type', 'mock');
-      // a4aElement = createElementWithAttributes(doc, 'amp-a4a', {
-      //   width: 200,
-      //   height: 50,
-      //   type: 'mock',
-      // });
+      a4aElement = createElementWithAttributes(doc, 'amp-a4a', {
+        width: 200,
+        height: 50,
+        type: 'mock',
+      });
     });
 
     it('nameframe iframe should use same URL as prefetch', () => {
       return env.ampdoc.whenReady().then(() => {
         doc.body.appendChild(a4aElement);
-        expect(a4aElement.implementation_,
-            `upgradeCallback = ${a4aElement.implementation_.upgradeCallback}`)
-            .to.have.key('upgradeCallback');
-        return a4aElement.implementation_.upgradeCallback().then(() => {
-          const impl = a4aElement.implementation_;
-          expect(impl).to.have.key('onLayoutMeasure');
+        const impl = a4aElement.implementation_;
+        // TODO(tdrl): Shouldn't the runtime have run the full lifecycle of
+        // this?
+        impl.buildCallback();
+        impl.preconnectCallback();
+        impl.onLayoutMeasure();
+        return impl.layoutCallback().then(() => {
+          const preconnects = doc.head.querySelectorAll(
+              'link[rel=preconnect][href*=ampproject]');
+          expect(preconnects).to.have.length(1);
+          const preconnectUrl = preconnects[0].href;
+          expect(preconnectUrl).to.match(/https:\/\/d-[0-9]*.ampproject.net/);
+          expectRenderedInXDomainIframe(a4aElement, 'nameframe.html');
         });
-        // return a4aElement.element.layoutCallback().then(() => {
-        //   const prefetches = doc.head.querySelectorAll(
-        //       'link[rel=preconnect][href*=ampproject]');
-        //   expect(prefetches).to.have.length(1);
-        //   const prefetchUrl = prefetches[0].href;
-        //   expect(prefetchUrl).to.have.string('nameframe');
-        //   expectRenderedInXDomainIframe(a4aElement, 'nameframe.html');
-        // });
       });
     });
   });
