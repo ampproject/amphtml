@@ -97,8 +97,13 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   iframe.src = baseUrl;
   iframe.ampLocation = parseUrl(baseUrl);
   iframe.name = name;
-  iframe.width = attributes.width;
-  iframe.height = attributes.height;
+  // Add the check before assigning to prevent IE throw Invalid argument error
+  if (attributes.width) {
+    iframe.width = attributes.width;
+  }
+  if (attributes.height) {
+    iframe.height = attributes.height;
+  }
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
   /** @this {!Element} */
