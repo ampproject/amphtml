@@ -30,6 +30,13 @@ window.context.experimentToggles;
 // Service Holder
 window.services;
 
+// Safeframe
+// TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
+/* @type {?Object} */
+window.sf_ = {};
+/* @type {?Object} */
+window.sf_.cfg;
+
 // Exposed to custom ad iframes.
 /* @type {!Function} */
 window.draw3p;
