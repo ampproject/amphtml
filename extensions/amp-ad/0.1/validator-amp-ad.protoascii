@@ -41,7 +41,7 @@ tags: {  # <amp-ad>
   # of making this a validation error.
   also_requires_tag_warning: "amp-ad extension .js script"
   # If modifying disallowed_ancestors, then please also edit
-  # extensions/amp-auto-ads/*/ancestor-blacklist.js
+  # extensions/amp-auto-ads/*/placement.js
   disallowed_ancestor: "AMP-APP-BANNER"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
