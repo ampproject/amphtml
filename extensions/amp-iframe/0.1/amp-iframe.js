@@ -425,8 +425,6 @@ export class AmpIframe extends AMP.BaseElement {
         this.iframe_.src = this.assertSource(
             this.iframeSrc, window.location.href, this.sandbox_);
       }
-      // Per validator, src and srcdoc should be mutually exclusive.
-      this.element.removeAttribute('srcdoc');
     }
   }
 
