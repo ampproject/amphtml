@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForWindow} from './service';
+import {getService} from './service';
 
 /**
  * @param {!Window} window
@@ -22,5 +22,5 @@ import {getExistingServiceForWindow} from './service';
  */
 export function timerFor(window) {
   return /** @type {!./service/timer-impl.Timer} */ (
-      getExistingServiceForWindow(window, 'timer'));
+      getService(window, 'timer'));
 };
