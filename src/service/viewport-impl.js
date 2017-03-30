@@ -17,6 +17,7 @@
 import {Animation} from '../animation';
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
+import {VisibilityState} from '../visibility-state';
 import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
     './ios-scrollfreeze-bug';
 import {
@@ -30,7 +31,7 @@ import {onDocumentReady, whenDocumentReady} from '../document-ready';
 import {platformFor} from '../platform';
 import {px, setStyle, setStyles, computedStyle} from '../style';
 import {timerFor} from '../timer';
-import {installVsyncService} from './vsync-impl';
+import {vsyncFor} from '../vsync';
 import {viewerForDoc} from '../viewer';
 import {isExperimentOn} from '../experiments';
 import {waitForBody, isIframed} from '../dom';
@@ -114,7 +115,7 @@ export class Viewport {
     this.timer_ = timerFor(this.ampdoc.win);
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = installVsyncService(this.ampdoc.win);
+    this.vsync_ = vsyncFor(this.ampdoc.win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -285,7 +286,20 @@ export class Viewport {
     if (this.size_) {
       return this.size_;
     }
-    return this.size_ = this.binding_.getSize();
+    this.size_ = this.binding_.getSize();
+    if (this.size_.width == 0 || this.size_.height == 0) {
+      // Only report when the visibility is "visible" or "prerender".
+      const visibilityState = this.viewer_.getVisibilityState();
+      if (visibilityState == VisibilityState.PRERENDER ||
+          visibilityState == VisibilityState.VISIBLE) {
+        // TODO(dvoytenko, #8044): only report 1% for now until most of cases
+        // are elimitated.
+        if (Math.random() < 0.01) {
+          dev().error(TAG_, 'viewport has zero dimensions');
+        }
+      }
+    }
+    return this.size_;
   }
 
   /**
@@ -1814,7 +1828,7 @@ function createViewport(ampdoc) {
     if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')
         // The overriding of document.body fails in iOS7.
         // Also, iOS8 sometimes freezes scrolling.
-        && platformFor(ampdoc.win).getMajorVersion() > 8) {
+        && platformFor(ampdoc.win).getIosMajorVersion() > 8) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);

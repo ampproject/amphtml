@@ -19,6 +19,7 @@ import {BindExpression} from '../bind-expression';
 describe('BindExpression', () => {
   const argumentTypeError = 'Unexpected argument type';
   const unsupportedFunctionError = 'not a supported function';
+  const expressionSizeExceededError = 'exceeds max';
 
   /**
    * @param {string} expression
@@ -504,5 +505,15 @@ describe('BindExpression', () => {
     expect(() => { evaluate('/ab+c/i'); }).to.throw();
     expect(() => { evaluate('yield*'); }).to.throw();
     expect(() => { evaluate('async function*'); }).to.throw();
+  });
+
+  it('should throw an error if maximum AST size is exceeded', () => {
+    expect(new BindExpression('1 + 1', /* opt_maxAstSize */ 3)).to.not.be.null;
+
+    // The expression '1 + 1' should have an AST size of 3 -- one for each
+    // literal, and a PLUS expression wrapping them.
+    expect(() => {
+      new BindExpression('1 + 1', /* opt_maxAstSize */ 2);
+    }).to.throw(expressionSizeExceededError);
   });
 });

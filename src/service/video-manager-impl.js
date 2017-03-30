@@ -325,7 +325,7 @@ class VideoEntry {
    */
   createAutoplayAnimation_() {
     const doc = this.ampdoc_.win.document;
-    const anim = doc.createElement('i-amp-video-eq');
+    const anim = doc.createElement('i-amphtml-video-eq');
     anim.classList.add('amp-video-eq');
     // Four columns for the equalizer.
     for (let i = 1; i <= 4; i++) {
@@ -362,11 +362,8 @@ class VideoEntry {
    */
   createAutoplayMask_() {
     const doc = this.ampdoc_.win.document;
-    const mask = doc.createElement('i-amp-video-mask');
-    // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-    // form is in PROD for 1-2 weeks.
+    const mask = doc.createElement('i-amphtml-video-mask');
     mask.classList.add('i-amphtml-fill-content');
-    mask.classList.add('-amp-fill-content');
     return mask;
   }
 

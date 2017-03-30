@@ -1,5 +1,6 @@
 {
-  "allow-doc-opt-in": ["visibility-v2"],
+  "allow-doc-opt-in": ["visibility-v2", "visibility-v3"],
+  "allow-url-opt-in": ["pump-early-frame"],
 
   "canary": 1,
   "amp-experiment": 1,
@@ -24,5 +25,7 @@
   "make-body-relative": 1,
   "visibility-v2": 1,
   "amp-selector": 1,
-  "sticky-ad-early-load": 1
+  "sticky-ad-early-load": 1,
+  "amp-auto-ads": 1,
+  "slidescroll-disable-css-snap": 1
 }

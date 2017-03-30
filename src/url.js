@@ -288,6 +288,19 @@ export function removeFragment(url) {
   return url.substring(0, index);
 }
 
+/**
+ * Returns the fragment from the URL. If the URL doesn't contain fragment,
+ * the empty string is returned.
+ * @param {string} url
+ * @return {string}
+ */
+export function getFragment(url) {
+  const index = url.indexOf('#');
+  if (index == -1) {
+    return '';
+  }
+  return url.substring(index);
+}
 
 /**
  * Returns whether the URL has the origin of a proxy.

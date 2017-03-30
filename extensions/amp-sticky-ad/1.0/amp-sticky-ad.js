@@ -60,7 +60,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.viewport_ = this.getViewport();
 
     toggle(this.element, true);
-    this.element.classList.add('-amp-sticky-ad-layout');
+    this.element.classList.add('i-amphtml-sticky-ad-layout');
     const children = this.getRealChildren();
     user().assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
         'amp-sticky-ad must have a single amp-ad child');

@@ -34,7 +34,7 @@
     <p [text]="'Selected slide: ' + selectedSlide">Selected slide: None<p>
 
     <amp-carousel controls type=slides width=400 height=300
-        [slide]="selectedSlide" on="slideChange:AMP.setState(selectedSlide=event.index)">
+        [slide]="selectedSlide" on="slideChange:AMP.setState({selectedSlide: event.index})">
       <amp-img src="https://ampbyexample.com/img/image1.jpg" width=400 height=300></amp-img>
       <amp-img src="https://ampbyexample.com/img/image2.jpg" width=400 height=300></amp-img>
       <amp-img src="https://ampbyexample.com/img/image3.jpg" width=400 height=300></amp-img>
@@ -50,27 +50,28 @@
   <p>Without &lt;amp-selector&gt;</p>
   <amp-carousel controls width=400 height=100>
     <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75
-        [class]="selectedSlide == 0 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=0)"></amp-img>
+        [class]="selectedSlide == 0 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 0})"></amp-img>
     <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75
-        [class]="selectedSlide == 1 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=1)"></amp-img>
+        [class]="selectedSlide == 1 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 1})"></amp-img>
     <amp-img src="https://ampbyexample.com/img/image3.jpg" width=100 height=75
-        [class]="selectedSlide == 2 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=2)"></amp-img>
+        [class]="selectedSlide == 2 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 2})"></amp-img>
     <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75
-        [class]="selectedSlide == 3 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=3)"></amp-img>
+        [class]="selectedSlide == 3 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 3})"></amp-img>
     <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75
-        [class]="selectedSlide == 4 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=4)"></amp-img>
+        [class]="selectedSlide == 4 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 4})"></amp-img>
     <amp-img src="https://ampbyexample.com/img/image3.jpg" width=100 height=75
-        [class]="selectedSlide == 5 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=5)"></amp-img>
+        [class]="selectedSlide == 5 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 5})"></amp-img>
     <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75
-        [class]="selectedSlide == 6 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=6)"></amp-img>
+        [class]="selectedSlide == 6 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 6})"></amp-img>
     <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75
-        [class]="selectedSlide == 7 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=7)"></amp-img>
+        [class]="selectedSlide == 7 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 7})"></amp-img>
     <amp-img src="https://ampbyexample.com/img/image3.jpg" width=100 height=75
-        [class]="selectedSlide == 8 ? 'selected' : ''" on="tap:AMP.setState(selectedSlide=8)"></amp-img>
+        [class]="selectedSlide == 8 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 8})"></amp-img>
   </amp-carousel>
 
   <p>With &lt;amp-selector&gt;</p>
-  <amp-selector layout=container name="carousel-selector" [selected]="selectedSlide" on="select:AMP.setState(selectedSlide=event.targetOption)">
+  <amp-selector layout=container name="carousel-selector" [selected]="selectedSlide"
+      on="select:AMP.setState({selectedSlide: event.targetOption})">
     <amp-carousel controls width=400 height=100>
         <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75 option=0></amp-img>
         <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75 option=1></amp-img>
