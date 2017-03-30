@@ -303,70 +303,52 @@ class ParsedAttrSpec {
      * @private
      */
     this.valueRegex_ = null;
-    if (this.spec_ !== null && this.spec_.valueRegex !== null) {
-      this.valueRegex_ = new RegExp('^(' + this.spec_.valueRegex + ')$');
-    }
 
     /**
      * @type {RegExp} valueRegexCasei
      * @private
      */
     this.valueRegexCasei_ = null;
-    if (this.spec_ !== null && this.spec_.valueRegexCasei !== null) {
-      this.valueRegexCasei_ =
-          new RegExp('^(' + this.spec_.valueRegexCasei + ')$', 'i');
-    }
 
     /**
      * @type {RegExp} blacklistedValueRegex
      * @private
      */
     this.blacklistedValueRegex_ = null;
-    if (this.spec_ !== null && this.spec_.blacklistedValueRegex !== null) {
-      this.blacklistedValueRegex_ =
-          new RegExp(this.spec_.blacklistedValueRegex, 'i');
-    }
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasValueRegex() {
-    return this.valueRegex_ !== null;
   }
 
   /**
    * @return {RegExp} valueRegex
    */
-  getValueRegex() {
+  getValueRegexOrNull() {
+    if (this.spec_.valueRegex === null) return null;
+    if (this.valueRegex_ === null) {
+      this.valueRegex_ = new RegExp('^(' + this.spec_.valueRegex + ')$');
+    }
     return this.valueRegex_;
   }
 
   /**
-   * @return {boolean}
-   */
-  hasValueRegexCasei() {
-    return this.valueRegexCasei_ !== null;
-  }
-
-  /**
    * @return {RegExp} valueRegex
    */
-  getValueRegexCasei() {
+  getValueRegexCaseiOrNull() {
+    if (this.spec_.valueRegexCasei === null) return null;
+    if (this.valueRegexCasei_ === null) {
+      this.valueRegexCasei_ =
+          new RegExp('^(' + this.spec_.valueRegexCasei + ')$', 'i');
+    }
     return this.valueRegexCasei_;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasBlacklistedValueRegex() {
-    return this.blacklistedValueRegex_ !== null;
   }
 
   /**
    * @return {RegExp} blacklistedValueRegex
    */
-  getBlacklistedValueRegex() {
+  getBlacklistedValueRegexOrNull() {
+    if (this.spec_.blacklistedValueRegex === null) return null;
+    if (this.blacklistedValueRegex_ === null) {
+      this.blacklistedValueRegex_ =
+          new RegExp(this.spec_.blacklistedValueRegex, 'i');
+    }
     return this.blacklistedValueRegex_;
   }
 
@@ -2509,13 +2491,10 @@ function validateNonTemplateAttrValueAgainstSpec(
         context.getDocLocator(),
         /* params */[attrName, getTagSpecName(tagSpec), attrValue],
         tagSpec.specUrl, result);
-  } else if (
-      parsedAttrSpec.hasValueRegex() || parsedAttrSpec.hasValueRegexCasei()) {
-    let valueRegex;
-    if (parsedAttrSpec.hasValueRegex()) {
-      valueRegex = parsedAttrSpec.getValueRegex();
-    } else {
-      valueRegex = parsedAttrSpec.getValueRegexCasei();
+  } else if (spec.valueRegex !== null || spec.valueRegexCasei !== null) {
+    let valueRegex = parsedAttrSpec.getValueRegexOrNull();
+    if (valueRegex === null) {
+      valueRegex = parsedAttrSpec.getValueRegexCaseiOrNull();
     }
     if (!valueRegex.test(attrValue)) {
       if (amp.validator.LIGHT) {
@@ -3345,10 +3324,12 @@ function validateAttributes(
           continue;
       }
     }
-    if (parsedAttrSpec.hasBlacklistedValueRegex()) {
+    const blacklistedValueRegex =
+        parsedAttrSpec.getBlacklistedValueRegexOrNull();
+    if (blacklistedValueRegex !== null) {
       const decodedAttrValue = decodeAttrValue(attrValue);
-      if (parsedAttrSpec.getBlacklistedValueRegex().test(attrValue) ||
-          parsedAttrSpec.getBlacklistedValueRegex().test(decodedAttrValue)) {
+      if (blacklistedValueRegex.test(attrValue) ||
+          blacklistedValueRegex.test(decodedAttrValue)) {
         if (amp.validator.LIGHT) {
           result.status = amp.validator.ValidationResult.Status.FAIL;
           return;
