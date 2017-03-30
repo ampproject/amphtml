@@ -2107,11 +2107,22 @@ function validateAttrValueUrl(
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
       } else {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR, parseResult.errorCode,
-            context.getDocLocator(),
-            /* params */[attrName, getTagSpecName(tagSpec), attrValue],
-            tagSpec.specUrl, result);
+        // DUPLICATE_DIMENSION only needs two paramters, it does not report
+        // on the attribute value.
+        if (parseResult.errorCode ===
+            amp.validator.ValidationError.Code.DUPLICATE_DIMENSION) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              parseResult.errorCode, context.getDocLocator(),
+              /* params */[attrName, getTagSpecName(tagSpec)], tagSpec.specUrl,
+              result);
+        } else {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              parseResult.errorCode, context.getDocLocator(),
+              /* params */[attrName, getTagSpecName(tagSpec), attrValue],
+              tagSpec.specUrl, result);
+        }
       }
       return;
     }
