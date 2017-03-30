@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForDoc} from './service';
+import {getServiceForDoc} from './service';
 
 
 /**
@@ -23,5 +23,5 @@ import {getExistingServiceForDoc} from './service';
  */
 export function documentInfoForDoc(nodeOrDoc) {
   return /** @type {!./service/document-info-impl.DocInfo} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'documentInfo')).get();
+      getServiceForDoc(nodeOrDoc, 'documentInfo')).get();
 }

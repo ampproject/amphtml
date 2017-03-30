@@ -34,7 +34,7 @@ export function internalListenImplementation(element, eventType, listener,
   /** @type {?Function}  */
   let wrapped = event => {
     try {
-      return localListener.call(this, event);
+      return localListener(event);
     } catch (e) {
       // reportError is installed globally per window in the entry point.
       self.reportError(e);
@@ -47,6 +47,7 @@ export function internalListenImplementation(element, eventType, listener,
     if (localElement) {
       localElement.removeEventListener(eventType, wrapped, capture);
     }
+    // Ensure these are GC'd
     localListener = null;
     localElement = null;
     wrapped = null;

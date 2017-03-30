@@ -46,10 +46,25 @@ var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
-  // TODO(dvoytenko, #6463): Enable this check once the current uses have
-  // been cleaned up.
-  // '(^-amp-|\\W-amp-)': 'Switch to new internal class form',
-  // '(^i-amp-|\\Wi-amp-)': 'Switch to new internal ID form',
+  // TODO(dvoytenko, #8464): cleanup whitelist.
+  '(^-amp-|\\W-amp-)': {
+    message: 'Switch to new internal class form',
+    whitelist: [
+      'build-system/tasks/extension-generator/index.js',
+      'css/amp.css',
+      'extensions/amp-pinterest/0.1/amp-pinterest.css',
+      'extensions/amp-pinterest/0.1/follow-button.js',
+      'extensions/amp-pinterest/0.1/pin-widget.js',
+      'extensions/amp-pinterest/0.1/pinit-button.js',
+    ],
+  },
+  '(^i-amp-|\\Wi-amp-)': {
+    message: 'Switch to new internal ID form',
+    whitelist: [
+      'build-system/tasks/extension-generator/index.js',
+      'css/amp.css',
+    ],
+  },
   'describe\\.only': '',
   'describes.*\\.only': '',
   'it\\.only': '',
@@ -507,6 +522,7 @@ var forbiddenTerms = {
       'src/mode.js',
       'src/service-worker/core.js',
       'src/worker-error-reporting.js',
+      'tools/experiments/experiments.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {

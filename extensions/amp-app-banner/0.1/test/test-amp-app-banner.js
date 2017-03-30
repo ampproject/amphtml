@@ -390,7 +390,7 @@ describe('amp-app-banner', () => {
         banner.addDismissButton_();
 
         const bannerTop = element.querySelector(
-            'i-amp-app-banner-top-padding');
+            'i-amphtml-app-banner-top-padding');
         expect(bannerTop).to.exist;
         const dismissBtn = element.querySelector(
             '.amp-app-banner-dismiss-button');

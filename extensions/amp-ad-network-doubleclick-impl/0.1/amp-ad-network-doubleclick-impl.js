@@ -122,7 +122,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       {name: 'sz', value: size},
       {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
       {name: 'u_sd', value: global.devicePixelRatio},
-      {name: 'adtest', value: adTestOn},
+      {name: 'adtest', value: adTestOn ? 'on' : null},
       {name: 'asnt', value: this.sentinel},
     ], [
       {
@@ -150,7 +150,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig = extractAmpAnalyticsConfig(responseHeaders);
+    this.ampAnalyticsConfig =
+      extractAmpAnalyticsConfig(responseHeaders, this.extensions_);
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
@@ -181,8 +182,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
-    injectActiveViewAmpAnalyticsElement(
-      this, this.extensions_, this.ampAnalyticsConfig);
+    injectActiveViewAmpAnalyticsElement(this, this.ampAnalyticsConfig);
   }
 
   /**

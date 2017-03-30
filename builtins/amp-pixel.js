@@ -62,6 +62,9 @@ export class AmpPixel extends BaseElement {
     // TODO(dvoytenko): use an improved idle signal when available.
     this.triggerPromise_ = timerFor(this.win).promise(1).then(() => {
       const src = this.element.getAttribute('src');
+      if (!src) {
+        return;
+      }
       return urlReplacementsForDoc(this.element)
           .expandAsync(this.assertSource_(src))
           .then(src => {

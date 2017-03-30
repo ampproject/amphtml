@@ -132,26 +132,33 @@ describe('Google A4A utils', () => {
     });
 
     it('should extract config from headers', () => {
-      let url = ['https://foo.com?a=b', 'https://bar.com?d=f'];
-      const headers = {
-        get: function(name) {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const extensions = extensionsFor(fixture.win);
+        const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+        let url = ['https://foo.com?a=b', 'https://bar.com?d=f'];
+        const headers = {
+          get: function(name) {
+            expect(name).to.equal('X-AmpAnalytics');
+            return JSON.stringify({url});
+          },
+          has: function(name) {
+            expect(name).to.equal('X-AmpAnalytics');
+            return true;
+          },
+        };
+        expect(extractAmpAnalyticsConfig(headers, extensions))
+          .to.deep.equal({urls: url});
+        url = 'not an array';
+        expect(extractAmpAnalyticsConfig(headers, extensions)).to.not.be.ok;
+        url = ['https://foo.com?a=b', 'https://bar.com?d=f'];
+        headers.has = function(name) {
           expect(name).to.equal('X-AmpAnalytics');
-          return JSON.stringify({url});
-        },
-        has: function(name) {
-          expect(name).to.equal('X-AmpAnalytics');
-          return true;
-        },
-      };
-      expect(extractAmpAnalyticsConfig(headers)).to.deep.equal({urls: url});
-      url = 'not an array';
-      expect(extractAmpAnalyticsConfig(headers)).to.not.be.ok;
-      url = ['https://foo.com?a=b', 'https://bar.com?d=f'];
-      headers.has = function(name) {
-        expect(name).to.equal('X-AmpAnalytics');
-        return false;
-      };
-      expect(extractAmpAnalyticsConfig(headers)).to.not.be.ok;
+          return false;
+        };
+        expect(extractAmpAnalyticsConfig(headers, extensions)).to.not.be.ok;
+        expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called.once;
+      });
     });
 
     it('should not create amp-analytics element if no urls', () => {
@@ -164,11 +171,7 @@ describe('Google A4A utils', () => {
           'type': 'adsense',
         });
         const config = {urls: []};
-        const extensions = extensionsFor(fixture.win);
-        const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
-        injectActiveViewAmpAnalyticsElement(
-            new MockA4AImpl(element), extensions, config);
-        expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+        injectActiveViewAmpAnalyticsElement(new MockA4AImpl(element), config);
         const ampAnalyticsElements = element.querySelectorAll('amp-analytics');
         expect(ampAnalyticsElements.length).to.equal(0);
       });
@@ -184,11 +187,7 @@ describe('Google A4A utils', () => {
         });
         const urls = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
         const config = {urls};
-        const extensions = extensionsFor(fixture.win);
-        const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
-        injectActiveViewAmpAnalyticsElement(
-            new MockA4AImpl(element), extensions, config);
-        expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+        injectActiveViewAmpAnalyticsElement(new MockA4AImpl(element), config);
         const ampAnalyticsElements = element.querySelectorAll('amp-analytics');
         expect(ampAnalyticsElements.length).to.equal(1);
         const ampAnalyticsElement = ampAnalyticsElements[0];
@@ -201,12 +200,34 @@ describe('Google A4A utils', () => {
           {
             transport: {beacon: false, xhrpost: false},
             requests: {
-              visibility1: urls[0], visibility2: urls[1],
+              visibility1: urls[0],
+              visibility2: urls[1],
+              visibilityCsi: 'https://csi.gstatic.com/csi',
             },
             triggers: {
               continuousVisible: {
                 on: 'visible',
                 request: ['visibility1', 'visibility2'],
+                visibilitySpec: {
+                  selector: 'amp-ad',
+                  selectionMethod: 'closest',
+                  visiblePercentageMin: 50,
+                  continuousTimeMin: 1000,
+                },
+              },
+              continuousVisibleIniLoad: {
+                on: 'ini-load',
+                request: 'visibilityCsi',
+                visibilitySpec: {
+                  selector: 'amp-ad',
+                  selectionMethod: 'closest',
+                  visiblePercentageMin: 50,
+                  continuousTimeMin: 1000,
+                },
+              },
+              continuousVisibleRenderStart: {
+                on: 'render-start',
+                request: 'visibilityCsi',
                 visibilitySpec: {
                   selector: 'amp-ad',
                   selectionMethod: 'closest',
