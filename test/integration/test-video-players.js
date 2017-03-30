@@ -45,3 +45,13 @@ describe.configure().skipIos().run('amp-youtube', () => {
     return video;
   });
 });
+
+//TODO(aghassemi,#8264): Unskip when integration is fixed.
+describe.skip('amp-nexxtv-player', () => {
+  runVideoPlayerIntegrationTests(fixture => {
+    const video = fixture.doc.createElement('amp-nexxtv-player');
+    video.setAttribute('data-mediaid', 'PTPFEC4U184674');
+    video.setAttribute('data-client', '583');
+    return video;
+  });
+});

@@ -75,8 +75,8 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     this.children_.forEach(child => this.setAsOwner(child));
 
     const clip = doc.createElement('div');
-    clip.setAttribute('class', '-amp-fx-flying-carpet-clip');
-    container.setAttribute('class', '-amp-fx-flying-carpet-container');
+    clip.setAttribute('class', 'i-amphtml-fx-flying-carpet-clip');
+    container.setAttribute('class', 'i-amphtml-fx-flying-carpet-container');
 
     childNodes.forEach(child => container.appendChild(child));
     clip.appendChild(container);
@@ -109,22 +109,22 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     const viewportHeight = viewport.getHeight();
     const docHeight = viewport.getScrollHeight();
     // Hmm, can the page height change and affect us?
+    const minTop = viewportHeight * 0.75;
+    const maxTop = docHeight - viewportHeight * 0.95;
     user().assert(
-      layoutBox.top >= viewportHeight,
-      '<amp-fx-flying-carpet> elements must be positioned after the first ' +
-      'viewport: %s Current position: %s. Min: %s',
+      layoutBox.top >= minTop,
+      '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
+      ' first viewport: %s Current position: %s. Min: %s',
       this.element,
       layoutBox.top,
-      viewportHeight
-    );
+      minTop);
     user().assert(
-      layoutBox.bottom <= docHeight - viewportHeight,
+      layoutBox.top <= maxTop,
       '<amp-fx-flying-carpet> elements must be positioned before the last ' +
       'viewport: %s Current position: %s. Max: %s',
       this.element,
-      layoutBox.bottom,
-      docHeight - viewportHeight
-    );
+      layoutBox.top,
+      maxTop);
   }
 
   /** @override */

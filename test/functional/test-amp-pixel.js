@@ -45,7 +45,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
    * @return {!Promise<?Image>}
    */
   function trigger(opt_src) {
-    if (opt_src) {
+    if (opt_src != null) {
       pixel.setAttribute('src', opt_src);
     }
     whenFirstVisibleResolver();
@@ -60,6 +60,15 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     expect(pixel.style.height).to.equal('0px');
     expect(pixel.getAttribute('aria-hidden')).to.equal('true');
     expect(win.getComputedStyle(pixel).display).to.equal('none');
+  });
+
+  it('should NOT trigger when src is empty', () => {
+    expect(pixel.children).to.have.length(0);
+    expect(implementation.triggerPromise_).to.be.null;
+    return trigger('').then(img => {
+      expect(implementation.triggerPromise_).to.be.ok;
+      expect(img).to.be.undefined;
+    });
   });
 
   it('should trigger when doc becomes visible', () => {

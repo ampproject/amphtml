@@ -171,11 +171,9 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
   const friendlyFrame = getParentWindowFrameElement(analyticsEl, ampdoc.win);
   // Special case for root selector.
   if (selector == ':host' || selector == ':root') {
-    // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
-    // form is in PROD for 1-2 weeks.
     foundEl = friendlyFrame ?
         closestBySelector(
-            friendlyFrame, '.-amp-element,.i-amphtml-element') : null;
+            friendlyFrame, '.i-amphtml-element') : null;
   } else if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);
@@ -300,6 +298,7 @@ export class Visibility {
             onIntersectionChanges, {threshold: DEFAULT_THRESHOLD});
         //TODO: eventually this is go into the proposed layoutManager.
         const viewport = viewportForDoc(this.ampdoc);
+        this.intersectionObserver_.tick(viewport.getRect());
         const ticker = () => {
           this.intersectionObserver_.tick(viewport.getRect());
         };
@@ -564,6 +563,10 @@ export class Visibility {
    * @private
    */
   prepareStateForCallback_(state, layoutBox) {
+    // TODO(dvoytenko, #8259): remove once misspelling has been fixed
+    // everywhere.
+    state['firstVisibleTime'] = state[FIRST_VISIBLE_TIME];
+
     state[ELEMENT_X] = layoutBox.left;
     state[ELEMENT_Y] = layoutBox.top;
     state[ELEMENT_WIDTH] = layoutBox.width;

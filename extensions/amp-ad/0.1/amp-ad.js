@@ -42,6 +42,13 @@ function networkImplementationTag(type) {
 export class AmpAd extends AMP.BaseElement {
 
   /** @override */
+  isLayoutSupported(unusedLayout) {
+    // TODO(jridgewell, #5980, #8218): ensure that unupgraded calls are not
+    // done for `isLayoutSupported`.
+    return true;
+  }
+
+  /** @override */
   upgradeCallback() {
     // Block whole ad load if a consent is needed.
     /** @const {string} */
@@ -69,8 +76,8 @@ export class AmpAd extends AMP.BaseElement {
 
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
-          !a4aRegistry[type](this.win, this.element) ||
-          this.win.document.querySelector('meta[name=amp-3p-iframe-src]')) {
+          this.win.document.querySelector('meta[name=amp-3p-iframe-src]') ||
+          !a4aRegistry[type](this.win, this.element)) {
         // Either this ad network doesn't support Fast Fetch, its Fast Fetch
         // implementation has explicitly opted not to handle this tag, or this
         // page uses remote.html which is inherently incompatible with Fast
@@ -95,4 +102,4 @@ export class AmpAd extends AMP.BaseElement {
 }
 
 AMP.registerElement('amp-ad', AmpAd, CSS);
-AMP.registerElement('amp-embed', AmpAd, CSS);
+AMP.registerElement('amp-embed', AmpAd);

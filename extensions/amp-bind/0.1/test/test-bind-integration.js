@@ -15,42 +15,93 @@
  */
 
 import '../../../amp-carousel/0.1/amp-carousel';
-import {installBindForTesting} from '../bind-impl';
-import {toggleExperiment} from '../../../../src/experiments';
 import {createFixtureIframe} from '../../../../testing/iframe';
 import {bindForDoc} from '../../../../src/bind';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 
-describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
+describe.configure().retryOnSaucelabs().run('amp-bind', function() {
+  const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
+
   let fixture;
   let ampdoc;
-  let bind;
-  const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
 
   this.timeout(5000);
 
   beforeEach(() => {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
-      toggleExperiment(fixture, 'amp-bind', true, true);
-      return fixture.awaitEvent('amp:load:start', 1);
+      return waitForEvent('amp:bind:initialize');
     }).then(() => {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
-      // Bind is installed manually here to get around an issue
-      // toggling experiments on the fixture iframe.
-      bind = installBindForTesting(ampdoc);
-      return bind.initializePromiseForTesting();
     });
   });
 
-  function waitForBindApplication() {
-    // Bind should be available, but need to wait for actions to resolve
-    // service promise for bind and call setState
-    return bindForDoc(ampdoc).then(() => {
-      return bind.setStatePromiseForTesting();
+  /**
+   * @param {string} name
+   * @return {!Promise}
+   */
+  function waitForEvent(name) {
+    return new Promise(resolve => {
+      function callback() {
+        resolve();
+        fixture.win.removeEventListener(name, callback);
+      };
+      fixture.win.addEventListener(name, callback);
     });
   }
+
+  /** @return {!Promise} */
+  function waitForBindApplication() {
+    // Bind should be available, but need to wait for actions to resolve
+    // service promise for bind and call setState.
+    return bindForDoc(ampdoc).then(unusedBind =>
+        waitForEvent('amp:bind:setState'));
+  }
+
+  /** @return {!Promise} */
+  function waitForAllMutations() {
+    return bindForDoc(ampdoc).then(unusedBind =>
+        waitForEvent('amp:bind:mutated'));
+  }
+
+  describe('detecting bindings under dynamic tags', () => {
+    it('should NOT bind blacklisted attributes', () => {
+      const dynamicTag = fixture.doc.getElementById('dynamicTag');
+      const div = fixture.doc.createElement('div');
+      div.innerHTML = '<p [onclick]="javascript:alert(document.cookie)" ' +
+                         '[onmouseover]="javascript:alert()" ' +
+                         '[style]="background=color:black"></p>';
+      const textElement = div.firstElementChild;
+      // for amp-live-list, dynamic element is <div items>, which is a child
+      // of the list.
+      dynamicTag.firstElementChild.appendChild(textElement);
+      return waitForAllMutations().then(() => {
+        // Force bind to apply bindings
+        fixture.doc.getElementById('triggerBindApplicationButton').click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(textElement.getAttribute('onclick')).to.be.null;
+        expect(textElement.getAttribute('onmouseover')).to.be.null;
+        expect(textElement.getAttribute('style')).to.be.null;
+      });
+    });
+
+    it('should NOT allow unsecure attribute values', () => {
+      const div = fixture.doc.createElement('div');
+      div.innerHTML = '<a [href]="javascript:alert(1)"></a>';
+      const aElement = div.firstElementChild;
+      const dynamicTag = fixture.doc.getElementById('dynamicTag');
+      dynamicTag.firstElementChild.appendChild(aElement);
+      return waitForAllMutations().then(() => {
+        // Force bind to apply bindings
+        fixture.doc.getElementById('triggerBindApplicationButton').click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(aElement.getAttribute('href')).to.be.null;
+      });
+    });
+  });
 
   describe('text integration', () => {
     it('should update text when text attribute binding changes', () => {
@@ -162,6 +213,56 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
   });
 
+  describe('amp-live-list integration', () => {
+    it('should detect bindings in initial live-list elements', () => {
+      const liveListItems = fixture.doc.getElementById('liveListItems');
+      expect(liveListItems.children.length).to.equal(1);
+
+      const liveListItem1 = fixture.doc.getElementById('liveListItem1');
+      expect(liveListItem1.firstElementChild.textContent).to.equal('unbound');
+
+      const button = fixture.doc.getElementById('changeLiveListTextButton');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(liveListItem1.firstElementChild.textContent).to
+            .equal('hello world');
+      });
+    });
+
+    it('should apply scope to bindings in new list items', () => {
+      const liveList = fixture.doc.getElementById('liveList');
+      const liveListItems = fixture.doc.getElementById('liveListItems');
+      expect(liveListItems.children.length).to.equal(1);
+
+      const existingItem = fixture.doc.getElementById('liveListItem1');
+      expect(existingItem.firstElementChild.textContent).to.equal('unbound');
+
+      const impl = liveList.implementation_;
+      const update = document.createElement('div');
+      update.innerHTML =
+          `<div items>` +
+          ` <div id="newItem" data-sort-time=${Date.now()}>` +
+          `    <p [text]="liveListText">unbound</p>` +
+          ` </div>` +
+          `</div>`;
+      impl.update(update);
+      fixture.doc.getElementById('liveListUpdateButton').click();
+
+      let newItem;
+      return waitForAllMutations().then(() => {
+        expect(liveListItems.children.length).to.equal(2);
+        newItem = fixture.doc.getElementById('newItem');
+        fixture.doc.getElementById('changeLiveListTextButton').click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(existingItem.firstElementChild.textContent).to
+            .equal('hello world');
+        expect(newItem.firstElementChild.textContent).to
+            .equal('hello world');
+      });
+    });
+  });
+
   describe('amp-selector integration', () => {
     it('should update dependent bindings when selection changes', () => {
       const selectionText = fixture.doc.getElementById('selectionText');
@@ -234,7 +335,7 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
           .equal('https://www.google.com/unbound.webm');
       button.click();
       return waitForBindApplication().then(() => {
-      // Only HTTPS is allowed
+        // Only HTTPS is allowed
         expect(vid.getAttribute('src')).to
             .equal('https://www.google.com/unbound.webm');
       });
@@ -268,4 +369,49 @@ describe.configure().retryOnSaucelabs().run('integration amp-bind', function() {
     });
   });
 
+  describe('amp-youtube', () => {
+    it('should support binding to data-video-id', () => {
+      const button = fixture.doc.getElementById('youtubeButton');
+      const yt = fixture.doc.getElementById('youtube');
+      expect(yt.getAttribute('data-videoid')).to.equal('unbound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(yt.getAttribute('data-videoid')).to.equal('bound');
+      });
+    });
+  });
+
+  describe('amp-brightcove', () => {
+    it('should support binding to data-account', () => {
+      const button = fixture.doc.getElementById('brightcoveButton');
+      const bc = fixture.doc.getElementById('brightcove');
+      // Force layout in case element is not in viewport.
+      bc.implementation_.layoutCallback();
+      const iframe = bc.querySelector('iframe');
+      expect(iframe.src).to.not.contain('bound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(iframe.src).to.contain('bound');
+      });
+    });
+  });
+
+  describe('amp-iframe', () => {
+    it('should support binding to src', () => {
+      const button = fixture.doc.getElementById('iframeButton');
+      const ampIframe = fixture.doc.getElementById('ampIframe');
+      // Force layout in case element is not in viewport.
+      ampIframe.implementation_.layoutCallback();
+      const iframe = ampIframe.querySelector('iframe');
+
+      const newSrc = 'https://giphy.com/embed/DKG1OhBUmxL4Q';
+      expect(ampIframe.getAttribute('src')).to.not.contain(newSrc);
+      expect(iframe.src).to.not.contain(newSrc);
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(ampIframe.getAttribute('src')).to.contain(newSrc);
+        expect(iframe.src).to.contain(newSrc);
+      });
+    });
+  });
 });
