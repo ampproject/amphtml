@@ -49,7 +49,7 @@ describe('amp-analytics.VariableService', function() {
 
   describe('expandTemplate', () => {
     const vars = {
-        '1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}', '5': 0};
+      '1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}', '5': 0};
 
     it('expands zeros', () => {
       return variables.expandTemplate('${5}', new ExpansionOptions(vars))
