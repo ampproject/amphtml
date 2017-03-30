@@ -62,9 +62,10 @@ tags: {  # <amp-video>
     blacklisted_value_regex: "__amp_source_origin"
   }
   # <amp-bind>
+  attrs: { name: "[alt]" }
+  attrs: { name: "[attribution]" }
   attrs: { name: "[controls]" }
   attrs: { name: "[loop]" }
-  attrs: { name: "[muted]" }
   attrs: { name: "[poster]" }
   attrs: { name: "[preload]" }
   attrs: { name: "[src]" }

@@ -72,6 +72,13 @@ tags: {  # <amp-iframe>
     name: "srcdoc"
     mandatory_oneof: "['src', 'srcdoc']"
   }
+  # <amp-bind>
+  attrs: {
+    name: "[src]"
+    trigger: {
+      also_requires_attr: "src"
+    }
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-iframe"
   amp_layout: {
