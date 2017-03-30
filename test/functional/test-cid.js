@@ -34,7 +34,7 @@ import {
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
-import{viewerForDoc} from '../../src/viewer';
+import {viewerForDoc} from '../../src/viewer';
 import {extensionsFor} from '../../src/extensions';
 import * as sinon from 'sinon';
 

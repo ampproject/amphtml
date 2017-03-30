@@ -58,7 +58,6 @@ describe('dynamic classes are inserted at runtime', () => {
       },
     };
     mockWin.document.defaultView = mockWin;
-
   });
 
   function setup(embeded, userAgent, referrer) {
