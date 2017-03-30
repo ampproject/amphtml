@@ -1725,14 +1725,13 @@ class CdataMatcher {
     // messages.
     if (this.hasBlacklistedCdataRegex() &&
         this.getBlacklistedCdataRegex().test(cdata)) {
+      if (amp.validator.LIGHT) {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      }
       for (const blacklist of cdataSpec.blacklistedCdataRegex) {
         const blacklistRegex = new RegExp(blacklist.regex, 'i');
         if (blacklistRegex.test(cdata)) {
-          if (amp.validator.LIGHT) {
-            validationResult.status =
-                amp.validator.ValidationResult.Status.FAIL;
-            return;
-          }
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
