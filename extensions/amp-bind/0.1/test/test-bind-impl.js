@@ -396,5 +396,4 @@ describes.realWin('Bind', {
           sinon.match(/Maximum number of bindings reached/));
     });
   });
-
 });

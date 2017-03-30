@@ -97,12 +97,6 @@ export class Bind {
     this.maxNumberOfBindings_ = 2000; // Based on ~1ms to parse an expression.
 
     /**
-     * Maximum recursive depth for scope merging.
-     * @private {number}
-     */
-    this.maxMergeDepth_ = MAX_MERGE_DEPTH;
-
-    /**
      * Maps expression string to the element(s) that contain it.
      * @private @const {!Object<string, !Array<!Element>>}
      */
@@ -159,13 +153,7 @@ export class Bind {
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     // TODO(choumx): What if `state` contains references to globals?
-    if (Object.keys(this.scope_).length > 0) {
-      deepMerge(this.scope_, state);
-    } else {
-      // No need for merge logic when socpe is empty, such as when
-      // amp-state is adding its contents to scope.
-      Object.assign(this.scope_, state);
-    }
+    deepMerge(this.scope_, state, MAX_MERGE_DEPTH);
 
     if (!opt_skipDigest) {
       this.setStatePromise_ = this.initializePromise_.then(() => {
@@ -253,14 +241,6 @@ export class Bind {
    */
   setMaxNumberOfBindingsForTesting(value) {
     this.maxNumberOfBindings_ = value;
-  }
-
-  /**
-   * @param {number} value
-   * @visibleForTesting
-   */
-  setMaxMergeDepthForTesting(value) {
-    this.maxMergeDepth_ = value;
   }
 
   /**
@@ -924,16 +904,6 @@ export class Bind {
    */
   setStatePromiseForTesting() {
     return this.setStatePromise_;
-  }
-
-  /**
-   * Return the current scope.
-   *
-   * @return {!Object}
-   * @visibleForTesting
-   */
-  getScopeForTesting() {
-    return this.scope_;
   }
 
   /**
