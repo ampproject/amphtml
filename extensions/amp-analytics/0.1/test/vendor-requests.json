@@ -121,9 +121,9 @@
   "mparticle": {
     "host": "https://pixels.mparticle.com",
     "endpointPath": "/v1/$apiKey/Pixel",
-    "baseParams": "et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=$debug&lc=$location&av=$appVersion",
-    "pageview": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=$debug&lc=$location&av=$appVersion",
-    "event": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=AppEvent&n=$eventName&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=$debug&lc=$location&av=$appVersion"
+    "baseParams": "et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion",
+    "pageview": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion",
+    "event": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=AppEvent&n=$eventName&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion"
   },
   "parsely": {
     "host": "https://srv.pixel.parsely.com",
