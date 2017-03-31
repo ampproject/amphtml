@@ -33,7 +33,6 @@ import {px, setStyle, setStyles, computedStyle} from '../style';
 import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
 import {viewerForDoc} from '../viewer';
-import {isExperimentOn} from '../experiments';
 import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
@@ -1790,10 +1789,9 @@ function createViewport(ampdoc) {
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')
-        // The overriding of document.body fails in iOS7.
-        // Also, iOS8 sometimes freezes scrolling.
-        && platformFor(ampdoc.win).getIosMajorVersion() > 8) {
+    // The overriding of document.body fails in iOS7.
+    // Also, iOS8 sometimes freezes scrolling.
+    if (platformFor(ampdoc.win).getIosMajorVersion() > 8) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
