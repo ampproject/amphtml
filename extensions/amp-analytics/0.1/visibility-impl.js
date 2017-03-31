@@ -303,7 +303,8 @@ export class Visibility {
         };
         viewport.onScroll(ticker);
         viewport.onChanged(ticker);
-        ticker();
+        // Tick in the next event loop. That's how native InOb works.
+        setTimeout(ticker);
       }
     }
 

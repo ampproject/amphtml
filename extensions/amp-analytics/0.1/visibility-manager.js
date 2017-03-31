@@ -473,7 +473,8 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     };
     this.unsubscribe(this.viewport_.onScroll(ticker));
     this.unsubscribe(this.viewport_.onChanged(ticker));
-    ticker();
+    // Tick in the next event loop. That's how native InOb works.
+    setTimeout(ticker);
     return intersectionObserverPolyfill;
   }
 
