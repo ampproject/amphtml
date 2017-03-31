@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isObject} from '../types.js';
+import {isObject} from '../types';
 
 /* @const */
 const hasOwn_ = Object.prototype.hasOwnProperty;
@@ -48,44 +48,52 @@ export function hasOwn(obj, key) {
 }
 
 /**
- * @param {!Object} a the destination object
- * @param {!Object} b
+ * @param {!Object} target
+ * @param {!Object} source
  * @param {number} currentDepth
- * @param {number|undefined=} opt_maxDepth The maximum depth for deep merge, beyond which
- *                               Object.assign will be used.
+ * @param {number} maxDepth The maximum depth for deep merge, beyond which
+ *    Object.assign will be used.
  * @return {!Object}
  */
-function deepMerge_(a, b, currentDepth, opt_maxDepth) {
-  if (currentDepth > opt_maxDepth) {
-    Object.assign(a, b);
-    return a;
+function deepMerge_(target, source, currentDepth, maxDepth) {
+  if (currentDepth > maxDepth) {
+    Object.assign(target, source);
+    return target;
   }
-  Object.keys(b).forEach(key => {
-    const newValue = b[key];
+  Object.keys(source).forEach(key => {
+    const newValue = source[key];
     // Perform a deep merge IFF both a and b have the same property and
     // the properties on both a and b are non-null plain objects
-    if (hasOwn(a, key)) {
-      const oldValue = a[key];
+    if (hasOwn(target, key)) {
+      const oldValue = target[key];
       if (isObject(newValue) && isObject(oldValue)) {
-        a[key] = deepMerge_(oldValue, newValue, currentDepth + 1, opt_maxDepth);
+        target[key] = deepMerge_(
+            oldValue,
+            newValue,
+            currentDepth + 1,
+            maxDepth);
         return;
       }
     }
-    a[key] = newValue;
+    target[key] = newValue;
   });
-  return a;
+  return target;
 }
 
 /**
  * Deep merge object b into object a. Both a and b can only contain
  * primitives, arrays, and plain objects. For any conflicts, object b wins.
  * Arrays are replaced, not merged. Plain objects are recursively merged.
- * @param {!Object} a the destination object
- * @param {!Object} b
- * @param {number|undefined=} opt_maxDepth The maximum depth for deep merge, beyond which
- *                               Object.assign will be used.
+ * @param {!Object} target
+ * @param {!Object} source
+ * @param {number|undefined=} opt_maxDepth The maximum depth for deep merge,
+ *     beyond which Object.assign will be used.
  * @return {!Object}
  */
-export function deepMerge(a, b, opt_maxDepth) {
-  return deepMerge_(a, b, 0, opt_maxDepth);
+export function deepMerge(target, source, opt_maxDepth) {
+  return deepMerge_(
+      target,
+      source,
+      /* currentDepth */ 0,
+      opt_maxDepth || Number.POSITIVE_INFINITY);
 }
