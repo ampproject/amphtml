@@ -50,30 +50,42 @@ export function hasOwn(obj, key) {
 /**
  * @param {!Object} target
  * @param {!Object} source
- * @param {number} currentDepth
  * @param {number} maxDepth The maximum depth for deep merge, beyond which
  *    Object.assign will be used.
  * @return {!Object}
  */
-function deepMerge_(target, source, currentDepth, maxDepth) {
-  if (currentDepth > maxDepth) {
-    Object.assign(target, source);
-    return target;
-  }
-  Object.keys(source).forEach(key => {
-    const newValue = source[key];
-    // Perform a deep merge IFF both a and b have the same property and
-    // the properties on both a and b are non-null plain objects.
-    if (hasOwn(target, key)) {
-      const oldValue = target[key];
-      if (isObject(newValue) && isObject(oldValue)) {
-        target[key] = deepMerge_(
-            oldValue, newValue, currentDepth + 1, maxDepth);
-        return;
-      }
+function deepMerge_(target, source, maxDepth) {
+  // Keep track of seen objects to prevent infinite loops on objects with
+  // recursive references.
+  const seen = [];
+  const stack = [{target, source, currentDepth: 0}];
+  while (stack.length > 0) {
+    const {target, source, currentDepth} = stack.pop();
+    seen.push(target, source);
+    if (currentDepth > maxDepth) {
+      Object.assign(target, source);
+      continue;
     }
-    target[key] = newValue;
-  });
+    Object.keys(source).forEach(key => {
+      const newValue = source[key];
+      // Perform a deep merge IFF both a and b have the same property and
+      // the properties on both a and b are non-null plain objects.
+      if (hasOwn(target, key)) {
+        const oldValue = target[key];
+        if (isObject(newValue) && isObject(oldValue)) {
+          if (!seen.includes(newValue) && !seen.includes(oldValue)) {
+            stack.push({
+              target: oldValue,
+              source: newValue,
+              currentDepth: currentDepth + 1,
+            });
+            return;
+          }
+        }
+      }
+      target[key] = newValue;
+    });
+  }
   return target;
 }
 
@@ -88,9 +100,5 @@ function deepMerge_(target, source, currentDepth, maxDepth) {
  * @return {!Object}
  */
 export function deepMerge(target, source, opt_maxDepth) {
-  return deepMerge_(
-      target,
-      source,
-      /* currentDepth */ 0,
-      opt_maxDepth || Number.POSITIVE_INFINITY);
+  return deepMerge_(target, source, opt_maxDepth || Number.POSITIVE_INFINITY);
 }

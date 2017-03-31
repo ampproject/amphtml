@@ -128,6 +128,16 @@ describe('Object', () => {
       });
     });
 
+    it('should handle objects with recursive references', () => {
+      const destObject = {};
+      destObject.a = destObject;
+      const fromObject = {};
+      fromObject.a = fromObject;
+      expect(object.deepMerge(destObject, fromObject)).to.deep.equal({
+        a: fromObject,
+      });
+    });
+
     it('should merge null and undefined correctly', () => {
       const destObject = {
         a: null,
