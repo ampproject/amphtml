@@ -298,24 +298,24 @@ export class Visibility {
             onIntersectionChanges, {threshold: DEFAULT_THRESHOLD});
         //TODO: eventually this is go into the proposed layoutManager.
         const viewport = viewportForDoc(this.ampdoc);
-        this.intersectionObserver_.tick(viewport.getRect());
         const ticker = () => {
           this.intersectionObserver_.tick(viewport.getRect());
         };
         viewport.onScroll(ticker);
         viewport.onChanged(ticker);
+        // Tick in the next event loop. That's how native InOb works.
+        setTimeout(ticker);
       }
     }
 
     resource.loadedOnce().then(() => {
-      this.intersectionObserver_.observe(element);
-
       const resId = resource.getId();
       this.listeners_[resId] = (this.listeners_[resId] || []);
       const state = {};
       state[TIME_LOADED] = this.now_();
       this.listeners_[resId].push({config, callback, state, shouldBeVisible});
       this.resources_.push(resource);
+      this.intersectionObserver_.observe(element);
     });
 
     if (!this.visibilityListenerRegistered_) {

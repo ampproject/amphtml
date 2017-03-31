@@ -399,7 +399,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   /** @override */
   observe(element, listener) {
     this.polyfillAmpElementIfNeeded_(element);
-    this.getIntersectionObserver_().observe(element);
 
     const id = getElementId(element);
     let trackedElement = this.trackedElements_[id];
@@ -415,6 +414,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       listener(trackedElement.intersectionRatio);
     }
     trackedElement.listeners.push(listener);
+    this.getIntersectionObserver_().observe(element);
     return () => {
       const trackedElement = this.trackedElements_[id];
       if (trackedElement) {
@@ -473,6 +473,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     };
     this.unsubscribe(this.viewport_.onScroll(ticker));
     this.unsubscribe(this.viewport_.onChanged(ticker));
+    // Tick in the next event loop. That's how native InOb works.
     setTimeout(ticker);
     return intersectionObserverPolyfill;
   }
