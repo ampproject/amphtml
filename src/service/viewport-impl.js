@@ -33,7 +33,6 @@ import {px, setStyle, setStyles, computedStyle} from '../style';
 import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
 import {viewerForDoc} from '../viewer';
-import {isExperimentOn} from '../experiments';
 import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
