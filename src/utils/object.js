@@ -63,15 +63,12 @@ function deepMerge_(target, source, currentDepth, maxDepth) {
   Object.keys(source).forEach(key => {
     const newValue = source[key];
     // Perform a deep merge IFF both a and b have the same property and
-    // the properties on both a and b are non-null plain objects
+    // the properties on both a and b are non-null plain objects.
     if (hasOwn(target, key)) {
       const oldValue = target[key];
       if (isObject(newValue) && isObject(oldValue)) {
         target[key] = deepMerge_(
-            oldValue,
-            newValue,
-            currentDepth + 1,
-            maxDepth);
+            oldValue, newValue, currentDepth + 1, maxDepth);
         return;
       }
     }
@@ -81,12 +78,12 @@ function deepMerge_(target, source, currentDepth, maxDepth) {
 }
 
 /**
- * Deep merge object b into object a. Both a and b can only contain
+ * Deep merge object b into object a. Both a and b should only contain
  * primitives, arrays, and plain objects. For any conflicts, object b wins.
  * Arrays are replaced, not merged. Plain objects are recursively merged.
  * @param {!Object} target
  * @param {!Object} source
- * @param {number|undefined=} opt_maxDepth The maximum depth for deep merge,
+ * @param {number=} opt_maxDepth The maximum depth for deep merge,
  *     beyond which Object.assign will be used.
  * @return {!Object}
  */
