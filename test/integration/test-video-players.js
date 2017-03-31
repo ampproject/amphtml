@@ -28,7 +28,11 @@
 
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 
-describe('amp-video', () => {
+
+//TODO(aghassemi,#7822): We have to skip iOS for video tests since videos
+// can't play SauceLab's iOS simulator. We need real devices instead.
+
+describe.configure().skipIos().run('amp-video', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-video');
     video.setAttribute('src', '/examples/av/ForBiggerJoyrides.mp4');
@@ -36,8 +40,6 @@ describe('amp-video', () => {
   });
 });
 
-//TODO(aghassemi,#7160): We have to skip iOS for YouTube tests since YouTube
-//player does not work at all (not AMP related) on SauceLab's iOS simulator.
 describe.configure().skipIos().run('amp-youtube', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-youtube');
