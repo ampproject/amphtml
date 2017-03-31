@@ -58,6 +58,11 @@ function deepMerge_(target, source, maxDepth) {
   // Keep track of seen objects to prevent infinite loops on objects with
   // recursive references.
   const seen = [];
+  // Queue ensures that the algorithm performs BFS during merge. This makes it
+  // so any object encountered for the first time does not have a reference
+  // at a shallower depth. This prevents us from marking an object as seen
+  // at currentDepth == maxDepth and failing to merge other references to it
+  // at shallower depths.
   const queue = [{target, source, currentDepth: 0}];
   while (queue.length > 0) {
     const {target, source, currentDepth} = queue.shift();
