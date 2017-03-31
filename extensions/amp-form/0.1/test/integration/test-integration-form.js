@@ -66,24 +66,35 @@ describes.realWin('AmpForm Integration', {
       form.setAttribute('on', config.on);
     }
 
-    if (config.successTemplate) {
+    if (config.success) {
+      const {message, template} = config.success;
       const successDiv = doc.createElement('div');
       successDiv.setAttribute('submit-success', '');
-      const template = doc.createElement('template');
-      template.setAttribute('type', 'amp-mustache');
-      template./*OK*/innerHTML = config.successTemplate;
-      successDiv.appendChild(template);
+      if (template) {
+        const child = doc.createElement('template');
+        child.setAttribute('type', 'amp-mustache');
+        child./*OK*/innerHTML = message;
+        successDiv.appendChild(child);
+      } else {
+        successDiv./*OK*/innerHTML = message;
+      }
+
       form.appendChild(successDiv);
     }
 
-    if (config.errorTemplate) {
-      const successDiv = doc.createElement('div');
-      successDiv.setAttribute('submit-error', '');
-      const template = doc.createElement('template');
-      template.setAttribute('type', 'amp-mustache');
-      template./*OK*/innerHTML = config.errorTemplate;
-      successDiv.appendChild(template);
-      form.appendChild(successDiv);
+    if (config.error) {
+      const {message, template} = config.error;
+      const errorDiv = doc.createElement('div');
+      errorDiv.setAttribute('submit-error', '');
+      if (template) {
+        const child = doc.createElement('template');
+        child.setAttribute('type', 'amp-mustache');
+        child./*OK*/innerHTML = message;
+        errorDiv.appendChild(child);
+      } else {
+        errorDiv./*OK*/innerHTML = message;
+      }
+      form.appendChild(errorDiv);
     }
 
     doc.body.appendChild(form);
@@ -128,9 +139,12 @@ describes.realWin('AmpForm Integration', {
       const form = getForm({
         id: 'form1',
         actionXhr: baseUrl + '/form/post/success',
-        successTemplate: 'Thanks {{name}} for adding your interests:' +
-            ' {{#interests}}{{title}} {{/interests}}.',
-        errorTemplate: 'Should not render this.',
+        success: {
+          message: 'Thanks {{name}} for adding your interests:' +
+              ' {{#interests}}{{title}} {{/interests}}.',
+          template: true,
+        },
+        error: {message: 'Should not render this.', template: true},
       });
       const ampForm = new AmpForm(form, 'form1');
 
@@ -152,9 +166,12 @@ describes.realWin('AmpForm Integration', {
       const form = getForm({
         id: 'form1',
         actionXhr: baseUrl + '/form/post/error',
-        successTemplate: 'Should not render this.',
-        errorTemplate: 'Oops. {{name}} your email {{email}} is already ' +
-            'subscribed.',
+        success: {message: 'Should not render this.', template: true},
+        error: {
+          message: 'Oops. {{name}} your email {{email}} is already ' +
+              'subscribed.',
+          template: true,
+        },
       });
       const ampForm = new AmpForm(form, 'form1');
       // Stubbing timeout to catch async-thrown errors and expect
@@ -196,9 +213,12 @@ describes.realWin('AmpForm Integration', {
         id: 'form1',
         method: 'GET',
         actionXhr: baseUrl + '/form/post/success',
-        successTemplate: 'Thanks {{name}} for adding your interests:' +
-        ' {{#interests}}{{title}} {{/interests}}.',
-        errorTemplate: 'Should not render this.',
+        success: {
+          message: 'Thanks {{name}} for adding your interests:' +
+              ' {{#interests}}{{title}} {{/interests}}.',
+          template: true,
+        },
+        error: {message: 'Should not render this.', template: true},
       });
       const ampForm = new AmpForm(form, 'form1');
 
@@ -220,9 +240,12 @@ describes.realWin('AmpForm Integration', {
       const form = getForm({
         id: 'form1',
         actionXhr: baseUrl + '/form/post/error',
-        successTemplate: 'Should not render this.',
-        errorTemplate: 'Oops. {{name}} your email {{email}} is already ' +
-        'subscribed.',
+        success: {message: 'Should not render this.', template: true},
+        error: {
+          message: 'Oops. {{name}} your email {{email}} is already ' +
+              'subscribed.',
+          template: true,
+        },
       });
       const ampForm = new AmpForm(form, 'form1');
       const errors = [];
@@ -253,6 +276,55 @@ describes.realWin('AmpForm Integration', {
         expect(rendered[0].textContent).to.equal(
             'Oops. John Miller your email john@miller.what is already ' +
             'subscribed.');
+      });
+    });
+
+    it('should submit and render error if no template element is used', () => {
+      const form = getForm({
+        id: 'form1',
+        actionXhr: baseUrl + '/form/post/error',
+        success: {message: 'Should not render this.', template: false},
+        error: {
+          message: 'Oops! Your email is already subscribed.' +
+              '<amp-img src="/examples/img/ampicon.png" ' +
+              'width="42" height="42"></amp-img>',
+          template: false,
+        },
+      });
+      const ampForm = new AmpForm(form, 'form1');
+      const errors = [];
+      // Stubbing timeout to catch async-thrown errors and expect
+      // them. These catch errors thrown inside the catch-clause of the
+      // xhr request using rethrowAsync.
+      const realSetTimeout = window.setTimeout;
+      sandbox.stub(window, 'setTimeout', (callback, delay) => {
+        realSetTimeout(() => {
+          try {
+            callback();
+          } catch (e) {
+            errors.push(e);
+          }
+        }, delay);
+      });
+
+      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
+      form.dispatchEvent(new Event('submit'));
+
+      return timer.promise(100).then(() => {
+        return fetch.returnValues[0].catch(() => {});
+      }).then(() => {
+        expect(errors.length).to.equal(1);
+        expect(errors[0].message).to.match(/HTTP error 500/);
+
+        // It shouldn't have the i-amphtml-rendered attribute since no
+        // template was rendered.
+        const rendered = form.querySelectorAll('[i-amphtml-rendered]');
+        expect(rendered.length).to.equal(0);
+
+        // An img tag should render after the amp-img has been layed out.
+        return form.querySelector('amp-img').layoutCallback().then(() => {
+          expect(form.querySelectorAll('amp-img img').length).to.equal(1);
+        });
       });
     });
   });
