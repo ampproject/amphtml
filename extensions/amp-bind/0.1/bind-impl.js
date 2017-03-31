@@ -285,7 +285,7 @@ export class Bind {
         if (elements.length > 0) {
           const parseError = parseErrors[expressionString];
           const userError = user().createError(
-              `${TAG}: Expression syntax error in "${expressionString}". `
+              `${TAG}: Expression compilation error in "${expressionString}". `
               + parseError.message);
           userError.stack = parseError.stack;
           reportError(userError, elements[0]);
