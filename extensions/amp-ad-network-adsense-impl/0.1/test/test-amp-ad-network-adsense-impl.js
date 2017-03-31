@@ -411,7 +411,12 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       const style = win.getComputedStyle(iframe);
       expect(style.top).to.equal('50%');
       expect(style.left).to.equal('50%');
-      expect(style.transform).to.equal('matrix(1, 0, 0, 1, -150, -75)');
+      // We don't know the exact values by which the frame will be translated,
+      // as this can vary depending on whether we use the height/width
+      // attributes, or the actual size of the frame. To make this less of a
+      // hassle, we'll just match against regexp.
+      expect(style.transform).to.match(new RegExp(
+          'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
     }
 
     afterEach(() => document.body.removeChild(impl.element));
@@ -489,8 +494,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '&adx=-?[0-9]+&ady=-?[0-9]+&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +
-          '&isw=[0-9]+&ish=[0-9]+' +
-          '&ea=[0-9]+&pfx=(1|0)' +
+          '&isw=[0-9]+&ish=[0-9]+&pfx=(1|0)' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +

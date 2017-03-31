@@ -41,7 +41,10 @@ import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {computedStyle} from '../../../src/style';
+import {
+  computedStyle,
+  setStyles,
+} from '../../../src/style';
 import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
 
@@ -105,6 +108,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
     this.responseHeaders_ = null;
+
+    /** @private {{width, height}} */
+    this.size_ = null;
   }
 
   /** @override */
@@ -133,10 +139,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const height = this.element.getAttribute('height');
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
-    const size = (width && !isNaN(width) && height && !isNaN(height))
+    this.size_ = (width && !isNaN(width) && height && !isNaN(height))
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
-    const format = `${size.width}x${size.height}`;
+    const format = `${this.size_.width}x${this.size_.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
     // TODO(bcassels): Uncomment the assertion, fixing the tests.
@@ -149,8 +155,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const paramList = [
       {name: 'client', value: adClientId},
       {name: 'format', value: format},
-      {name: 'w', value: size.width},
-      {name: 'h', value: size.height},
+      {name: 'w', value: this.size_.width},
+      {name: 'h', value: this.size_.height},
       {name: 'adtest', value: adTestOn ? 'on' : null},
       {name: 'adk', value: adk},
       {name: 'raru', value: 1},
@@ -249,6 +255,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     injectActiveViewAmpAnalyticsElement(
         this, this.ampAnalyticsConfig, this.responseHeaders_);
+    const iframe = this.element.querySelector('iframe');
+    if (iframe) {
+      setStyles(iframe, {
+        width: `${this.size_.width}px`,
+        height: `${this.size_.height}px`,
+      });
+    }
   }
 }
 
