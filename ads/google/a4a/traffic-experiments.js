@@ -25,7 +25,7 @@
 import {isGoogleAdsA4AValidEnvironment, EXPERIMENT_ATTRIBUTE} from './utils';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{control: string, experiment: string}} */

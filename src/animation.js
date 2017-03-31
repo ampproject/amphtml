@@ -16,7 +16,7 @@
 
 import {getCurve} from './curve';
 import {dev} from './log';
-import {vsyncFor} from './vsync';
+import {vsyncFor} from './services';
 
 const TAG_ = 'Animation';
 

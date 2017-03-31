@@ -16,14 +16,14 @@
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
-import {cidForDoc} from '../../../src/cid';
+import {cidForDoc} from '../../../src/services';
 import {registerServiceBuilder, getService} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
-import {storageForDoc} from '../../../src/storage';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
-import {viewerForDoc} from '../../../src/viewer';
+import {storageForDoc} from '../../../src/services';
+import {urlReplacementsForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
 import {whenDocumentReady} from '../../../src/document-ready';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 import {setStyle} from '../../../src/style';
 
 

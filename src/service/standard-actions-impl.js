@@ -16,14 +16,14 @@
 
 import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
-import {actionServiceForDoc} from '../action';
-import {bindForDoc} from '../bind';
+import {actionServiceForDoc} from '../services';
+import {bindForDoc} from '../services';
 import {dev, user} from '../log';
 import {registerServiceBuilderForDoc} from '../service';
-import {historyForDoc} from '../history';
-import {resourcesForDoc} from '../resources';
+import {historyForDoc} from '../services';
+import {resourcesForDoc} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
-import {vsyncFor} from '../vsync';
+import {vsyncFor} from '../services';
 
 /**
  * @param {!Element} element

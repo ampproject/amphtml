@@ -23,7 +23,7 @@ import {
 } from '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
 import {installTimerService} from '../../src/service/timer-impl';
-import {timerFor} from '../../src/timer';
+import {timerFor} from '../../src/services';
 import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
 
