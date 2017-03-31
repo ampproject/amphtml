@@ -184,10 +184,12 @@ export class Bind {
         return this.evaluator_.evaluateExpression(expression, scope);
       }
     }).then(returnValue => {
-      if (returnValue.error) {
-        user().error(TAG,
-            'AMP.setState() failed with error: ', returnValue.error);
-        throw returnValue.error;
+      const {result, error} = returnValue;
+      if (error) {
+        const userError = user().createError(`${TAG}: AMP.setState() failed `
+            + `with error: ${error.message}`);
+        userError.stack = error.stack;
+        reportError(userError);
       } else {
         return this.setState(returnValue.result);
       }
@@ -304,7 +306,6 @@ export class Bind {
    *
    * @param {!Element} node
    * @return {!Promise}
-   *
    * @private
    */
   removeBindingsForNode_(node) {
@@ -332,7 +333,7 @@ export class Bind {
       // Remove the bindings from the evaluator.
       if (deletedExpressions.length > 0) {
         if (this.workerExperimentEnabled_) {
-          dev().fine(TAG, `Asking worker to parse expressions...`);
+          dev().fine(TAG, `Asking worker to remove expressions...`);
           return invokeWebWorker(
               this.win_, 'bind.removeBindings', [deletedExpressions]);
         } else {
