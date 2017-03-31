@@ -416,7 +416,10 @@ describe('amp-a4a', () => {
         });
       });
 
-      it('should be able to create AmpContext', () => {
+      // Skipping since the window object for the iframe context cannot be
+      // accesed here. "window_" is being set to an HTMLIframeElement, not a
+      // Window object.
+      it.skip('should be able to create AmpContext', () => {
         return a4a.layoutCallback().then(() => {
           const window_ = a4aElement.querySelector(
               'iframe[data-amp-3p-sentinel]');
@@ -444,7 +447,10 @@ describe('amp-a4a', () => {
         });
       });
 
-      it('should be able to create AmpContext', () => {
+      // Skipping since the window object for the iframe context cannot be
+      // accesed here. "window_" is being set to an HTMLIframeElement, not a
+      // Window object.
+      it.skip('should be able to create AmpContext', () => {
         return a4a.layoutCallback().then(() => {
           const window_ = a4aElement.querySelector(
               'iframe[data-amp-3p-sentinel]');
