@@ -24,7 +24,7 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-// import {dev} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
@@ -109,7 +109,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
     this.responseHeaders_ = null;
 
-    /** @private {{width, height}} */
+    /** @private {?{width, height}} */
     this.size_ = null;
   }
 
@@ -139,7 +139,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const height = this.element.getAttribute('height');
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
-    this.size_ = (width && !isNaN(width) && height && !isNaN(height))
+    this.size_ = isExperimentOn(this.win, 'a4a-adsense-use-new-format')
+        && width && !isNaN(width) && height && !isNaN(height)
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;

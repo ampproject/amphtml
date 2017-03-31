@@ -277,6 +277,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
     spec: 'https://github.com/ampproject/amphtml/issues/6829',
   },
+  {
+    id: 'a4a-adsense-use-new-format',
+    name: 'Use slot width/height attribute for size format',
+    cleanupIssue: 'TBD',
+    spec: 'TBD',
+  },
 ];
 
 if (getMode().localDev) {
