@@ -84,8 +84,8 @@ describes.fakeWin('Viewport', {}, env => {
       onVisibilityChanged: () => {},
     };
     viewerMock = sandbox.mock(viewer);
-    installDocService(mockWin, /* isSingleDoc */ true);
-    const ampdocService = ampdocServiceFor(mockWin);
+    installDocService(windowApi, /* isSingleDoc */ true);
+    const ampdocService = ampdocServiceFor(windowApi);
     ampdoc = ampdocService.getAmpDoc();
     installTimerService(windowApi);
     installVsyncService(windowApi);
@@ -1026,8 +1026,8 @@ describe('Viewport META', () => {
         clearTimeout: window.clearTimeout,
         location: {},
       };
-      installDocService(mockWin, /* isSingleDoc */ true);
-      const ampdocService = ampdocServiceFor(mockWin);
+      installDocService(windowApi, /* isSingleDoc */ true);
+      const ampdocService = ampdocServiceFor(windowApi);
       ampdoc = ampdocService.getAmpDoc();
       installTimerService(windowApi);
       installVsyncService(windowApi);
@@ -1276,8 +1276,8 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
     child.style.width = '200px';
     child.style.height = '300px';
     win.document.body.appendChild(child);
-    installDocService(mockWin, /* isSingleDoc */ true);
-    const ampdocService = ampdocServiceFor(mockWin);
+    installDocService(win, /* isSingleDoc */ true);
+    const ampdocService = ampdocServiceFor(win);
     const ampdoc = ampdocService.getAmpDoc();
 
     installPlatformService(win);
@@ -1718,6 +1718,7 @@ describe('createViewport', () => {
       win.parent = {};
       installDocService(win, /* isSingleDoc */ true);
       const ampdocService = ampdocServiceFor(win);
+      const ampDoc = ampdocService.getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       const viewport = installViewportServiceForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
@@ -1786,7 +1787,7 @@ describe('createViewport', () => {
       win.parent = {};
       installDocService(win, /* isSingleDoc */ true);
       const ampdocService = ampdocServiceFor(win);
-      const ampDoc =ampdocService.getAmpDoc();
+      const ampDoc = ampdocService.getAmpDoc();
       getMode(win).test = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
@@ -1799,7 +1800,7 @@ describe('createViewport', () => {
       win.parent = {};
       installDocService(win, /* isSingleDoc */ true);
       const ampdocService = ampdocServiceFor(win);
-      const ampDoc =ampdocService.getAmpDoc();
+      const ampDoc = ampdocService.getAmpDoc();
       getMode(win).development = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);

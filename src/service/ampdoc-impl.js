@@ -19,7 +19,6 @@ import {dev} from '../log';
 import {
   getParentWindowFrameElement,
   registerServiceBuilder,
-  getService,
 } from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
@@ -477,9 +476,8 @@ export class AmpDocShadow extends AmpDoc {
  * initial configuration.
  * @param {!Window} win
  * @param {boolean} isSingleDoc
- * @return {!AmpDocService}
  */
-export function installAmpdocService(win, isSingleDoc) {
+export function installDocService(win, isSingleDoc) {
   registerServiceBuilder(
       win,
       'ampdoc',

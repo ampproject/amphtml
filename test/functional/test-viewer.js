@@ -78,8 +78,8 @@ describe('Viewer', () => {
     windowApi.history = {
       replaceState: sandbox.spy(),
     };
-    installDocService(mockWin, /* isSingleDoc */ true);
-    const ampdocService = ampdocServiceFor(mockWin);
+    installDocService(windowApi, /* isSingleDoc */ true);
+    const ampdocService = ampdocServiceFor(windowApi);
     ampdoc = ampdocService.getAmpDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);
