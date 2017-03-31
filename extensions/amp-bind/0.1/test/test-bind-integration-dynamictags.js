@@ -19,7 +19,8 @@ import {bindForDoc} from '../../../../src/bind';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 
 describe.configure().retryOnSaucelabs().run('amp-bind', function() {
-  const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
+  const fixtureLocation =
+      'test/fixtures/amp-bind-integrations/dynamic-tags.html';
 
   let fixture;
   let ampdoc;
