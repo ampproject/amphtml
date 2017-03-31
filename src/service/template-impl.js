@@ -333,7 +333,6 @@ export function installTemplatesService(win) {
  * @package
  */
 export function registerExtendedTemplate(win, type, templateClass) {
-  installTemplatesService(win);
   const templatesService = getService(win, 'templates');
   return templatesService.registerTemplate_(type, templateClass);
 }
