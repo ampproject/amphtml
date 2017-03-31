@@ -138,6 +138,7 @@ export class Viewport {
     this.fixedLayer_ = new FixedLayer(
         this.ampdoc,
         this.vsync_,
+        this.binding_.getBorderTop(),
         this.paddingTop_,
         this.binding_.requiresFixedLayerTransfer());
     this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
@@ -824,6 +825,13 @@ export class ViewportBindingDef {
   disconnect() {}
 
   /**
+   * Returns the width of top border if this type of viewport needs border
+   * offsetting. This is currently only needed for iOS to avoid scroll freeze.
+   * @return {number}
+   */
+  getBorderTop() {}
+
+  /**
    * Whether the binding requires fixed elements to be transfered to a
    * independent fixed layer.
    * @return {boolean}
@@ -987,6 +995,11 @@ export class ViewportBindingNatural_ {
   /** @override */
   ensureReadyForElements() {
     // Nothing.
+  }
+
+  /** @override */
+  getBorderTop() {
+    return 0;
   }
 
   /** @override */
@@ -1176,6 +1189,11 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   ensureReadyForElements() {
     // Nothing.
+  }
+
+  /** @override */
+  getBorderTop() {
+    return 0;
   }
 
   /** @override */
@@ -1565,6 +1583,12 @@ export class ViewportBindingIosEmbedWrapper_ {
   disconnect() {
     this.win.removeEventListener('resize', this.boundResizeEventListener_);
     this.wrapper_.removeEventListener('scroll', this.boundScrollEventListener_);
+  }
+
+  /** @override */
+  getBorderTop() {
+    // iOS needs an extra pixel to avoid scroll freezing.
+    return 1;
   }
 
   /** @override */
