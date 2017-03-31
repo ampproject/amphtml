@@ -213,7 +213,7 @@ export class VariableService {
       }
 
       const {name, argList} = this.getNameArgs_(initialValue);
-      const raw = options.vars[name] || '';
+      const raw = options.vars[name] != null ? options.vars[name] : '';
 
       let p;
       if (typeof raw == 'string') {
@@ -274,7 +274,7 @@ export class VariableService {
    * @return {string} The encoded value.
    */
   encodeVars(raw, unusedName) {
-    if (!raw) {
+    if (raw == null) {
       return '';
     }
 
