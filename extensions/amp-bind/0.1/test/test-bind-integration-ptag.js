@@ -42,12 +42,12 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   */
   function waitForEvent(name) {
     return new Promise(resolve => {
-     function callback() {
-       resolve();
-       fixture.win.removeEventListener(name, callback);
-     };
-     fixture.win.addEventListener(name, callback);
-   });
+      function callback() {
+        resolve();
+        fixture.win.removeEventListener(name, callback);
+      };
+      fixture.win.addEventListener(name, callback);
+    });
   }
 
  /** @return {!Promise} */
@@ -60,23 +60,23 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
 
   describe('text integration', () => {
     it('should update text when text attribute binding changes', () => {
-     const textElement = fixture.doc.getElementById('textElement');
-     const button = fixture.doc.getElementById('changeTextButton');
-     expect(textElement.textContent).to.equal('unbound');
-     button.click();
-     return waitForBindApplication().then(() => {
-       expect(textElement.textContent).to.equal('hello world');
-     });
-   });
+      const textElement = fixture.doc.getElementById('textElement');
+      const button = fixture.doc.getElementById('changeTextButton');
+      expect(textElement.textContent).to.equal('unbound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(textElement.textContent).to.equal('hello world');
+      });
+    });
 
     it('should update CSS class when class binding changes', () => {
-     const textElement = fixture.doc.getElementById('textElement');
-     const button = fixture.doc.getElementById('changeTextClassButton');
-     expect(textElement.className).to.equal('original');
-     button.click();
-     return waitForBindApplication().then(() => {
-       expect(textElement.className).to.equal('new');
-     });
-   });
+      const textElement = fixture.doc.getElementById('textElement');
+      const button = fixture.doc.getElementById('changeTextClassButton');
+      expect(textElement.className).to.equal('original');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(textElement.className).to.equal('new');
+      });
+    });
   });
 });
