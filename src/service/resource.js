@@ -86,10 +86,10 @@ export class Resource {
 
   /**
    * @param {!Element} element
-   * @return {?Resource}
+   * @return {Resource}
    */
   static forElementOptional(element) {
-    return /** @type {!Resource} */ (element[RESOURCE_PROP_]);
+    return /** @type {Resource} */ (element[RESOURCE_PROP_]);
   }
 
   /**
@@ -282,7 +282,8 @@ export class Resource {
    * for details.
    */
   build() {
-    if (this.blacklisted_ || !this.element.isUpgraded()) {
+    if (this.blacklisted_ || !this.element.isUpgraded()
+        || !this.resources_.grantBuildPermission()) {
       return;
     }
     try {

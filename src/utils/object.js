@@ -44,25 +44,3 @@ export function map(opt_initial) {
 export function hasOwn(obj, key) {
   return hasOwn_.call(obj, key);
 }
-
-/**
- * Returns the value of the property referenced by dot-separated keys.
- * e.g.
- * `getPath({a: {b: [{c: 2}]}}, 'a.b[0].c') === 2`
- *
- * @param {*} obj a map-like value
- * @param {string} path a dot-separated list of keys to reference a value
- * @return {*}
- */
-export function getPath(obj, path) {
-  const arrayIndexRe = /\[(\d+)\]/g;
-  const keys = path.replace(arrayIndexRe, '.$1').split('.');
-  let value = obj;
-  for (let i = 0; i < keys.length; i++) {
-    if (!hasOwn(value, keys[i])) {
-      throw new Error(`Cannot find property ${keys[i]} in path ${path}.`);
-    }
-    value = value[keys[i]];
-  }
-  return value;
-}

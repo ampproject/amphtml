@@ -46,10 +46,25 @@ var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
-  // TODO(dvoytenko, #6463): Enable this check once the current uses have
-  // been cleaned up.
-  // '(^-amp-|\\W-amp-)': 'Switch to new internal class form',
-  // '(^i-amp-|\\Wi-amp-)': 'Switch to new internal ID form',
+  // TODO(dvoytenko, #8464): cleanup whitelist.
+  '(^-amp-|\\W-amp-)': {
+    message: 'Switch to new internal class form',
+    whitelist: [
+      'build-system/tasks/extension-generator/index.js',
+      'css/amp.css',
+      'extensions/amp-pinterest/0.1/amp-pinterest.css',
+      'extensions/amp-pinterest/0.1/follow-button.js',
+      'extensions/amp-pinterest/0.1/pin-widget.js',
+      'extensions/amp-pinterest/0.1/pinit-button.js',
+    ],
+  },
+  '(^i-amp-|\\Wi-amp-)': {
+    message: 'Switch to new internal ID form',
+    whitelist: [
+      'build-system/tasks/extension-generator/index.js',
+      'css/amp.css',
+    ],
+  },
   'describe\\.only': '',
   'describes.*\\.only': '',
   'it\\.only': '',
@@ -73,7 +88,7 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     whitelist: [
       'build-system/pr-check.js',
-      'build-system/server.js',
+      'build-system/app.js',
       'validator/nodejs/index.js',  // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -499,7 +514,7 @@ var forbiddenTerms = {
         'and getMode() to access config',
     whitelist: [
       'build-system/amp.extern.js',
-      'build-system/server.js',
+      'build-system/app.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
       'dist.3p/current/integration.js',
@@ -508,6 +523,7 @@ var forbiddenTerms = {
       'src/mode.js',
       'src/service-worker/core.js',
       'src/worker-error-reporting.js',
+      'tools/experiments/experiments.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -701,7 +717,7 @@ var forbiddenTermsSrcInclusive = {
         'code. Use a property of urls from src/config.js instead.',
     whitelist: [
       'ads/_a4a-config.js',
-      'build-system/server.js',
+      'build-system/app.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/config.js',

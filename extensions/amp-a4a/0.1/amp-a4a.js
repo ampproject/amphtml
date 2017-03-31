@@ -738,9 +738,10 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Handles uncaught errors within promise flow.
    * @param {*} error
+   * @param {boolean=} opt_ignoreStack
    * @private
    */
-  promiseErrorHandler_(error) {
+  promiseErrorHandler_(error, opt_ignoreStack) {
     if (isCancellation(error)) {
       // Rethrow if cancellation.
       throw error;
@@ -748,6 +749,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     if (!error || !error.message) {
       error = new Error('unknown error ' + error);
+    }
+    if (opt_ignoreStack) {
+      error.ignoreStack = opt_ignoreStack;
     }
 
     // Add `type` to the message. Ensure to preserve the original stack.
@@ -1054,7 +1058,9 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderNonAmpCreative_() {
-    this.promiseErrorHandler_(new Error('fallback to 3p'));
+    this.promiseErrorHandler_(
+        new Error('fallback to 3p'),
+        /* ignoreStack */ true);
     incrementLoadingAds(this.win);
     // Haven't rendered yet, so try rendering via one of our
     // cross-domain iframe solutions.
@@ -1156,10 +1162,17 @@ export class AmpA4A extends AMP.BaseElement {
    * Shared functionality for cross-domain iframe-based rendering methods.
    * @param {!Element} iframe Iframe to render.  Should be fully configured
    * (all attributes set), but not yet attached to DOM.
+   * @param {!string} name
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
-  iframeRenderHelper_(iframe) {
+  iframeRenderHelper_(iframe, name) {
+    if (name) {
+      iframe.setAttribute('name', name);
+    }
+    if (this.sentinel) {
+      iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
+    }
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
     return this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
@@ -1195,11 +1208,9 @@ export class AmpA4A extends AMP.BaseElement {
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
     // Can't get the attributes until we have the iframe, then set it.
-    const attributes = getContextMetadata(
-        this.win, this.element, this.sentinel);
-    iframe.setAttribute('name', JSON.stringify(attributes));
-    iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
-    return this.iframeRenderHelper_(iframe);
+    const name = JSON.stringify(getContextMetadata(
+        this.win, this.element, this.sentinel));
+    return this.iframeRenderHelper_(iframe, name);
   }
 
   /**
@@ -1219,15 +1230,13 @@ export class AmpA4A extends AMP.BaseElement {
     this.protectedEmitLifecycleEvent_('renderSafeFrameStart');
     return utf8Decode(creativeBody).then(creative => {
       let srcPath;
-      let nameData;
+      let name = '';
       switch (method) {
         case XORIGIN_MODE.SAFEFRAME:
           srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
-          nameData = `${SAFEFRAME_VERSION};${creative.length};${creative}`;
           break;
         case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
-          nameData = '';
           // Name will be set for real below in nameframe case.
           break;
         default:
@@ -1246,20 +1255,20 @@ export class AmpA4A extends AMP.BaseElement {
             'height': this.element.getAttribute('height'),
             'width': this.element.getAttribute('width'),
             'src': srcPath,
-            'name': nameData,
           }, SHARED_IFRAME_PROPERTIES));
-      if (method == XORIGIN_MODE.NAMEFRAME) {
         // TODO(bradfrizzell): change name of function and var
-        const attributes = getContextMetadata(
-            this.win, this.element, this.sentinel);
-        attributes['creative'] = creative;
-        const name = JSON.stringify(attributes);
-        // Need to reassign the name once we've generated the context
-        // attributes off of the iframe. Need the iframe to generate.
-        iframe.setAttribute('name', name);
-        iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
+      let contextMetadata = getContextMetadata(
+          this.win, this.element, this.sentinel);
+      // TODO(bradfrizzell) Clean up name assigning.
+      if (method == XORIGIN_MODE.NAMEFRAME) {
+        contextMetadata['creative'] = creative;
+        name = JSON.stringify(contextMetadata);
+      } else if (method == XORIGIN_MODE.SAFEFRAME) {
+        contextMetadata = JSON.stringify(contextMetadata);
+        name = `${SAFEFRAME_VERSION};${creative.length};${creative}` +
+            `${contextMetadata}`;
       }
-      return this.iframeRenderHelper_(iframe);
+      return this.iframeRenderHelper_(iframe, name);
     });
   }
 

@@ -286,7 +286,7 @@ describes.realWin('amp-form', {
       };
 
       const bubbleEl = ampForm.win_.document.querySelector(
-          '.-amp-validation-bubble');
+          '.i-amphtml-validation-bubble');
       const validationBubble = bubbleEl['__BUBBLE_OBJ'];
       sandbox.spy(validationBubble, 'show');
       sandbox.spy(validationBubble, 'hide');
@@ -635,7 +635,7 @@ describes.realWin('amp-form', {
         expect(findTemplateStub).to.have.been.calledWith(
             errorContainer, {message: 'hello there'});
         // Check that form has a rendered div with class .submit-error-message.
-        renderedTemplate = form.querySelector('[i-amp-rendered]');
+        renderedTemplate = form.querySelector('[i-amphtml-rendered]');
         expect(renderedTemplate).to.not.be.null;
       });
     });
@@ -654,7 +654,7 @@ describes.realWin('amp-form', {
       successContainer.appendChild(successTemplate);
       const renderedTemplate = document.createElement('div');
       renderedTemplate.innerText = 'Success: hello';
-      renderedTemplate.setAttribute('i-amp-rendered', '');
+      renderedTemplate.setAttribute('i-amphtml-rendered', '');
       successContainer.appendChild(renderedTemplate);
       ampForm.state_ = 'submit-success';
 
@@ -679,7 +679,7 @@ describes.realWin('amp-form', {
         expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(
             successContainer, {'message': 'What What'})).to.be.true;
-        const renderedTemplates = form.querySelectorAll('[i-amp-rendered]');
+        const renderedTemplates = form.querySelectorAll('[i-amphtml-rendered]');
         expect(renderedTemplates[0]).to.not.be.null;
         expect(renderedTemplates.length).to.equal(1);
         expect(renderedTemplates[0]).to.equal(newRender);

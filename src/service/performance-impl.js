@@ -19,7 +19,7 @@ import {registerServiceBuilder, getService} from '../service';
 import {resourcesForDoc} from '../resources';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
-import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
+import {whenDocumentComplete} from '../document-ready';
 import {urls} from '../config';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
@@ -164,9 +164,7 @@ export class Performance {
       });
     }
 
-    // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
-    // reporting regression is confirmed.
-    this.whenViewportLayoutCompleteLegacy_().then(() => {
+    this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
             ? (this.win.Date.now() - docVisibleTime)
@@ -199,28 +197,6 @@ export class Performance {
     return this.resources_.getResourcesInRect(
             this.win, rect, /* isInPrerender */ true)
         .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
-  }
-
-  /**
-   * TODO(dvoytenko, #7815): remove once the reporting regression is confirmed.
-   * @return {!Promise}
-   * @private
-   */
-  whenViewportLayoutCompleteLegacy_() {
-    const whenReadyToRetrieveResources = whenDocumentReady(this.win.document)
-        .then(() => {
-          // Two fold. First, resolve the promise to undefined.
-          // Second, causes a delay by introducing another async request
-          // (this `#then` block) so that Resources' onDocumentReady event
-          // is guaranteed to fire.
-        });
-    return whenReadyToRetrieveResources.then(() => {
-      return Promise.all(this.resources_.getResourcesInViewportLegacy(
-              /* isInPrerender */ true)
-          .map(r => {
-            return r.loadedOnce();
-          }));
-    });
   }
 
   /**

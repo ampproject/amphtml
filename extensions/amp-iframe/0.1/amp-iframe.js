@@ -545,8 +545,7 @@ function setSandbox(element, iframe, sandbox) {
 function makeIOsScrollable(element) {
   if (element.getAttribute('scrolling') != 'no') {
     const wrapper = element.ownerDocument.createElement(
-      'i-amp-scroll-container'
-    );
+        'i-amphtml-scroll-container');
     element.appendChild(wrapper);
     return wrapper;
   }

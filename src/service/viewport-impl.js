@@ -33,7 +33,6 @@ import {px, setStyle, setStyles, computedStyle} from '../style';
 import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
 import {viewerForDoc} from '../viewer';
-import {isExperimentOn} from '../experiments';
 import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
@@ -172,13 +171,9 @@ export class Viewport {
     if (isIframed(this.ampdoc.win)) {
       this.globalDoc_.documentElement.classList.add('i-amphtml-iframed');
     }
-
-    // TODO(sriramkrish85, #5319): Cleanup the experiment by making the effects
-    // on CSS permanent and removing the code block below.
-    if (this.ampdoc.isSingleDoc() &&
-            isExperimentOn(this.ampdoc.win, 'make-body-block')) {
-      this.globalDoc_.documentElement.classList.add(
-          'i-amphtml-make-body-block');
+    const platform = platformFor(this.ampdoc.win);
+    if (platform.isIos() && viewer.getParam('webview') === '1') {
+      this.globalDoc_.documentElement.classList.add('i-amphtml-ios-webview');
     }
 
     // To avoid browser restore scroll position when traverse history
@@ -973,37 +968,6 @@ export class ViewportBindingNatural_ {
 
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
-
-    if (this.win.document.defaultView) {
-      waitForBody(this.win.document, () => {
-        const body = dev().assertElement(this.win.document.body);
-        // Override a user-supplied `body{overflow}` to be always visible. This
-        // style is set in runtime vs css to avoid conflicts with ios-embedded
-        // mode and fixed transfer layer.
-        setStyle(body, 'overflow', 'visible');
-
-        // Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS
-        // WebView does NOT respect `html {overflow-x: hidden}`.
-        // Note! For all other cases body's style should be
-        // `body {overflow: visible}` to avoid visibility issues with iframes.
-        if (this.platform_.isIos() &&
-            this.viewer_.getParam('webview') === '1') {
-          setStyles(body, {
-            overflowX: 'hidden',
-            overflowY: 'visible',
-          });
-        }
-
-        // Require `body{position:relative}`.
-        // TODO(dvoytenko, #5660): cleanup "make-body-relative" experiment by
-        // merging this style into `amp.css`.
-        if (isExperimentOn(this.win, 'make-body-relative')) {
-          setStyles(body, {
-            position: 'relative',
-          });
-        }
-      });
-    }
 
     dev().fine(TAG_, 'initialized natural viewport');
   }
@@ -1825,10 +1789,9 @@ function createViewport(ampdoc) {
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')
-        // The overriding of document.body fails in iOS7.
-        // Also, iOS8 sometimes freezes scrolling.
-        && platformFor(ampdoc.win).getIosMajorVersion() > 8) {
+    // The overriding of document.body fails in iOS7.
+    // Also, iOS8 sometimes freezes scrolling.
+    if (platformFor(ampdoc.win).getIosMajorVersion() > 8) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);

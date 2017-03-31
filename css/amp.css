@@ -61,6 +61,27 @@ html.i-amphtml-singledoc.i-amphtml-embedded {
   touch-action: pan-y;
 }
 
+/**
+ * Override a user-supplied `body{overflow: visible; position:relative}`. This
+ * style is set in runtime vs css to avoid conflicts with ios-embedded mode
+ * and fixed transfer layer.
+ */
+html.i-amphtml-singledoc > body {
+  overflow: visible !important;
+  position: relative !important;
+}
+
+/**
+ * Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS WebView
+ * does NOT respect `html {overflow-x: hidden}`.
+ * Note! For all other natural cases body's style is `body {overflow: visible}`
+ * to avoid visibility issues with iframes.
+ */
+html.i-amphtml-ios-webview > body {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
 
 /**
  * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amphtml-wrapper`
@@ -72,7 +93,7 @@ html.i-amphtml-ios-embed {
   position: static;
 }
 
-/** Wrapper for iOS-Embed-Wrapper mode. */
+/** Wrapper for iOS Embed Wrapper mode. */
 #i-amphtml-wrapper {
   overflow-x: hidden !important;
   overflow-y: auto !important;
@@ -88,7 +109,7 @@ html.i-amphtml-ios-embed {
 
 #i-amphtml-wrapper > body {
   /* Make sure position:absolute elements are positioned relative to the body,
-     not i-amp-html-wrapper */
+     not i-amphtml-wrapper */
   position: relative !important;
   /* `body` must have a 1px transparent border for two purposes:
       (1) to cancel out margin collapse in body's children so that position
@@ -97,11 +118,6 @@ html.i-amphtml-ios-embed {
   border-top: 1px solid transparent !important;
 }
 
-
-/** make-body-block experiment */
-.i-amphtml-make-body-block body {
-  display: block !important;
-}
 
 .i-amphtml-element {
   display: inline-block;
@@ -189,7 +205,7 @@ i-amphtml-sizer {
  * element needs to have a defined size and be on viewport otherwise TalkBack
  * does not allow activation of buttons.
  */
-.-amp-screen-reader {
+.i-amphtml-screen-reader {
   position: fixed !important;
   /* keep it on viewport */
   top: 0px !important;
@@ -246,7 +262,7 @@ i-amphtml-sizer {
   display: none;
 }
 
-.-amp-ghost {
+.i-amphtml-ghost {
   visibility: hidden !important;
 }
 
@@ -303,8 +319,9 @@ i-amphtml-sizer {
  * Wraps an element to make the contents scrollable. This is
  * used to wrap iframes which in iOS always behave as if they had the
  * seamless attribute.
+ * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
  */
-i-amp-scroll-container {
+i-amphtml-scroll-container, i-amp-scroll-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -316,8 +333,9 @@ i-amp-scroll-container {
 /**
  * Overflow:auto will be set with delay due to iOS bug where iframe is not
  * rendered.
+ * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
  */
-i-amp-scroll-container.amp-active {
+i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -555,8 +573,9 @@ amp-fresh {
  * Animated equalizer icon for muted autoplaying videos.
  *
  * TODO(aghassemi, #5306): Move to video extension when video is out of core.
+ * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
  */
- i-amp-video-mask {
+i-amphtml-video-mask, i-amp-video-mask {
   z-index: 1;
 }
 .amp-video-eq {

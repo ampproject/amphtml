@@ -42,6 +42,7 @@ import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
+import {github} from './github';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
@@ -119,6 +120,7 @@ import {nend} from '../ads/nend';
 import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
+import {outbrain} from '../ads/outbrain';
 import {plista} from '../ads/plista';
 import {popin} from '../ads/popin';
 import {pubmatic} from '../ads/pubmatic';
@@ -163,6 +165,7 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
   'mantis-recommend': true,
   mywidget: true,
+  outbrain: true,
   plista: true,
   smartclip: true,
   taboola: true,
@@ -243,6 +246,7 @@ register('felmat', felmat);
 register('flite', flite);
 register('fusion', fusion);
 register('genieessp', genieessp);
+register('github', github);
 register('gmossp', gmossp);
 register('holder', holder);
 register('ibillboard', ibillboard);
@@ -271,6 +275,7 @@ register('nend', nend);
 register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);
+register('outbrain', outbrain);
 register('plista', plista);
 register('popin', popin);
 register('pubmatic', pubmatic);
@@ -505,7 +510,8 @@ function installContextUsingStandardImpl(win) {
   win.context.requestResize = triggerResizeRequest;
   win.context.renderStart = triggerRenderStart;
 
-  if (data.type === 'facebook' || data.type === 'twitter') {
+  if (data.type === 'facebook' || data.type === 'twitter'
+    || data.type === 'github') {
     // Only make this available to selected embeds until the
     // generic solution is available.
     win.context.updateDimensions = triggerDimensions;

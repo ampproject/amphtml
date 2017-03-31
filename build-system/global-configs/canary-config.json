@@ -26,5 +26,6 @@
   "visibility-v2": 1,
   "amp-selector": 1,
   "sticky-ad-early-load": 1,
-  "amp-auto-ads": 1
+  "amp-auto-ads": 1,
+  "slidescroll-disable-css-snap": 1
 }
