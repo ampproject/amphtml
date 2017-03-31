@@ -41,8 +41,7 @@ describe('ad-cid', () => {
     element = document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
     installDocService(window, /* isSingleDoc */ true);
-    const ampdocService = ampdocServiceFor(window);
-    const ampdoc = ampdocService.getAmpDoc();
+    const ampdoc = ampdocServiceFor(window).getAmpDoc();
     cidService = cidServiceForDocForTesting(ampdoc);
     adElement = {
       getAmpDoc: () => ampdoc,

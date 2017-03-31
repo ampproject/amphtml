@@ -145,8 +145,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     };
     win.document.defaultView = win;
     installDocService(win, /* isSingleDoc */ true);
-    const ampdocService = ampdocServiceFor(win);
-    const ampdoc = ampdocService.getAmpDoc(win.document);
+    const ampdoc = ampdocServiceFor(win).getAmpDoc();
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     return win;

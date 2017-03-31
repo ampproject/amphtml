@@ -79,8 +79,7 @@ describe('Viewer', () => {
       replaceState: sandbox.spy(),
     };
     installDocService(windowApi, /* isSingleDoc */ true);
-    const ampdocService = ampdocServiceFor(windowApi);
-    ampdoc = ampdocService.getAmpDoc();
+    ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);
     events = {};

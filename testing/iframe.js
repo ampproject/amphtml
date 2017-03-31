@@ -217,8 +217,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
       installDocService(iframe.contentWindow, /* isSingleDoc */ true);
-      const ampdocService = ampdocServiceFor(win);
-      const ampdoc = ampdocService.getAmpDoc(iframe.contentWindow.document);
+      const ampdoc = ampdocServiceFor(win).getAmpDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       installCustomElements(iframe.contentWindow);

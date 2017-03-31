@@ -84,12 +84,12 @@ describes.fakeWin('Viewport', {}, env => {
       onVisibilityChanged: () => {},
     };
     viewerMock = sandbox.mock(viewer);
-    installDocService(windowApi, /* isSingleDoc */ true);
-    const ampdocService = ampdocServiceFor(windowApi);
-    ampdoc = ampdocService.getAmpDoc();
     installTimerService(windowApi);
     installVsyncService(windowApi);
     installPlatformService(windowApi);
+
+    installDocService(windowApi, /* isSingleDoc */ true);
+    ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
     installViewerServiceForDoc(ampdoc);
 
     binding = new ViewportBindingDef();
@@ -1026,12 +1026,11 @@ describe('Viewport META', () => {
         clearTimeout: window.clearTimeout,
         location: {},
       };
-      installDocService(windowApi, /* isSingleDoc */ true);
-      const ampdocService = ampdocServiceFor(windowApi);
-      ampdoc = ampdocService.getAmpDoc();
       installTimerService(windowApi);
       installVsyncService(windowApi);
       installPlatformService(windowApi);
+      installDocService(windowApi, /* isSingleDoc */ true);
+      ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
       viewport = new Viewport(ampdoc, binding, viewer);
@@ -1277,8 +1276,7 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
     child.style.height = '300px';
     win.document.body.appendChild(child);
     installDocService(win, /* isSingleDoc */ true);
-    const ampdocService = ampdocServiceFor(win);
-    const ampdoc = ampdocService.getAmpDoc();
+    const ampdoc = ampdocServiceFor(win).getAmpDoc();
 
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
@@ -1707,8 +1705,7 @@ describe('createViewport', () => {
     it('should bind to "natural" when not iframed', () => {
       win.parent = win;
       installDocService(win, /* isSingleDoc */ true);
-      const ampdocService = ampdocServiceFor(win);
-      const ampDoc = ampdocService.getAmpDoc();
+      const ampDoc = ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       const viewport = installViewportServiceForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
@@ -1717,8 +1714,7 @@ describe('createViewport', () => {
     it('should bind to "naturual" when iframed', () => {
       win.parent = {};
       installDocService(win, /* isSingleDoc */ true);
-      const ampdocService = ampdocServiceFor(win);
-      const ampDoc = ampdocService.getAmpDoc();
+      const ampDoc = ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       const viewport = installViewportServiceForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
@@ -1740,8 +1736,7 @@ describe('createViewport', () => {
     it('should bind to "natural" when not iframed', () => {
       win.parent = win;
       installDocService(win, /* isSingleDoc */ true);
-      const ampdocService = ampdocServiceFor(win);
-      const ampDoc = ampdocService.getAmpDoc();
+      const ampDoc = ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       const viewport = installViewportServiceForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
@@ -1750,8 +1745,7 @@ describe('createViewport', () => {
     it('should bind to "iOS embed" when iframed', () => {
       win.parent = {};
       installDocService(win, /* isSingleDoc */ true);
-      const ampdocService = ampdocServiceFor(win);
-      const ampDoc = ampdocService.getAmpDoc();
+      const ampDoc = ampdocServiceFor(win).getAmpDoc();
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => true);
       const viewport = installViewportServiceForDoc(ampDoc);
@@ -1762,8 +1756,7 @@ describe('createViewport', () => {
     it('should NOT bind to "iOS embed" when iframed but not embedded', () => {
       win.parent = {};
       installDocService(win, /* isSingleDoc */ true);
-      const ampdocService = ampdocServiceFor(win);
-      const ampDoc = ampdocService.getAmpDoc();
+      const ampDoc = ampdocServiceFor(win).getAmpDoc();
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
       const viewport = installViewportServiceForDoc(ampDoc);
@@ -1773,8 +1766,7 @@ describe('createViewport', () => {
 
     it('should bind to "iOS embed" when not iframed but in dev mode', () => {
       installDocService(win, /* isSingleDoc */ true);
-      const ampdocService = ampdocServiceFor(win);
-      const ampDoc = ampdocService.getAmpDoc();
+      const ampDoc = ampdocServiceFor(win).getAmpDoc();
       getMode(win).development = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
@@ -1786,8 +1778,7 @@ describe('createViewport', () => {
     it('should bind to "iOS embed" when iframed but in test mode', () => {
       win.parent = {};
       installDocService(win, /* isSingleDoc */ true);
-      const ampdocService = ampdocServiceFor(win);
-      const ampDoc = ampdocService.getAmpDoc();
+      const ampDoc = ampdocServiceFor(win).getAmpDoc();
       getMode(win).test = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
@@ -1799,8 +1790,7 @@ describe('createViewport', () => {
     it('should NOT bind to "iOS embed" when in dev mode, but iframed', () => {
       win.parent = {};
       installDocService(win, /* isSingleDoc */ true);
-      const ampdocService = ampdocServiceFor(win);
-      const ampDoc = ampdocService.getAmpDoc();
+      const ampDoc = ampdocServiceFor(win).getAmpDoc();
       getMode(win).development = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);

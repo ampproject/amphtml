@@ -236,8 +236,7 @@ function beforeTest() {
   };
   window.AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
-  const ampdocService = ampdocServiceFor(window);
-  const ampdoc = ampdocService.getAmpDoc(window.document);
+  const ampdoc = ampdocServiceFor(window).getAmpDoc();
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
 }

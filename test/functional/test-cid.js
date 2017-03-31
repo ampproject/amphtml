@@ -99,8 +99,7 @@ describe('cid', () => {
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
-    const ampdocService = ampdocServiceFor(fakeWin);
-    ampdoc = ampdocService.getAmpDoc();
+    ampdoc = ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
 
@@ -344,8 +343,7 @@ describe('cid', () => {
       services: {},
     };
     installDocService(win, /* isSingleDoc */ true);
-    const ampdocService = ampdocServiceFor(win);
-    const ampdoc2 = ampdocService.getAmpDoc();
+    const ampdoc2 = ampdocServiceFor(win).getAmpDoc();
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
     installPlatformService(win);
