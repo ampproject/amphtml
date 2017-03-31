@@ -18,8 +18,8 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
-import {resourcesForDoc} from '../../src/resources';
-import {vsyncFor} from '../../src/vsync';
+import {resourcesForDoc} from '../../src/services';
+import {vsyncFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 import {getService, resetServiceForTesting} from '../../src/service';

@@ -26,7 +26,7 @@ import {
 } from '../src/runtime';
 import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {platformFor} from '../src/platform';
+import {platformFor} from '../src/services';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {
   resetAccumulatedErrorMessagesForTesting,

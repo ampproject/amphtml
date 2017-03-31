@@ -21,11 +21,11 @@ import {
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {timerFor} from '../../../src/timer';
-import {viewportForDoc} from '../../../src/viewport';
-import {viewerForDoc} from '../../../src/viewer';
+import {timerFor} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
 import {startsWith} from '../../../src/string';
 import {
   DEFAULT_THRESHOLD,

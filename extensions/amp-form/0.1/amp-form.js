@@ -17,7 +17,7 @@
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
-import {documentInfoForDoc} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/services';
 import {setFormForElement} from '../../../src/form';
 import {getService} from '../../../src/service';
 import {
@@ -31,9 +31,9 @@ import {
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {onDocumentReady} from '../../../src/document-ready';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 import {toArray} from '../../../src/types';
-import {templatesFor} from '../../../src/template';
+import {templatesFor} from '../../../src/services';
 import {
   removeElement,
   childElementByAttr,
@@ -41,10 +41,10 @@ import {
 } from '../../../src/dom';
 import {installStyles} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {vsyncFor} from '../../../src/vsync';
-import {actionServiceForDoc} from '../../../src/action';
-import {timerFor} from '../../../src/timer';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {vsyncFor} from '../../../src/services';
+import {actionServiceForDoc} from '../../../src/services';
+import {timerFor} from '../../../src/services';
+import {urlReplacementsForDoc} from '../../../src/services';
 import {
   getFormValidator,
   isCheckValiditySupported,

@@ -28,12 +28,12 @@ import {
   deserializeMessage,
 } from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
-import {documentInfoForDoc} from '../../src/document-info';
+import {documentInfoForDoc} from '../../src/services';
 import {loadPromise} from '../../src/event-helper';
 import {toggleExperiment} from '../../src/experiments';
 import {preconnectForElement} from '../../src/preconnect';
 import {validateData} from '../../3p/3p';
-import {viewerForDoc} from '../../src/viewer';
+import {viewerForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('3p-frame', () => {

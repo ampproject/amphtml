@@ -19,8 +19,8 @@ import {
   installPerformanceService,
   performanceFor,
 } from '../../src/service/performance-impl';
-import {resourcesForDoc} from '../../src/resources';
-import {viewerForDoc} from '../../src/viewer';
+import {resourcesForDoc} from '../../src/services';
+import {viewerForDoc} from '../../src/services';
 import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 
