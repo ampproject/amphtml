@@ -28,6 +28,7 @@ var jsdom = require('jsdom');
 var path = require('path');
 var request = require('request');
 var url = require('url');
+var mode = process.env.SERVE_MODE;
 
 app.use(bodyParser.json());
 app.use('/request-bank', require('./request-bank'));
@@ -42,6 +43,15 @@ app.use(function(req, res, next) {
   }
   next();
 });
+
+// Deprecate usage of .min.html/.max.html
+app.use(['/examples/*.(min|max).html', 'test/manual/*.(min|max).html',
+    '/dist/cache-sw.(min|max).html'],
+    function (req, res, next) {
+      var filePath = req.baseUrl;
+      res.send(generateInfo(filePath));
+      return;
+    });
 
 app.use('/pwa', function(req, res, next) {
   var file;
@@ -232,10 +242,13 @@ var liveListCtr = 0;
 var itemCtr = 2;
 var liveListDoc = null;
 var doctype = '<!doctype html>\n';
-// Only handle min/max
-app.use('/examples/live-list-update.amp.(min|max).html', function(req, res) {
-  var filePath = req.baseUrl;
-  var mode = getPathMode(filePath);
+app.use('/examples/live-list-update.amp.html', function(req, res, next) {
+  var mode = process.env.SERVE_MODE;
+  if (mode != 'min' && mode != 'max') {
+    // Only handle min/max mode
+    next();
+    return;
+  }
   // When we already have state in memory and user refreshes page, we flush
   // the dom we maintain on the server.
   if (!('amp_latest_update_time' in req.query) && liveListDoc) {
@@ -406,7 +419,7 @@ function getLiveBlogItemWithBindAttributes() {
     </amp-live-list></body></html>`;
 }
 
-app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
+app.use('/examples/live-blog(-non-floating-button)?.amp.html',
   function(req, res, next) {
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
@@ -416,7 +429,7 @@ app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
     next();
 });
 
-app.use('/examples/bind/live-list.amp.(min.|max.)?html',
+app.use('/examples/bind/live-list.amp.html',
   function(req, res, next) {
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
@@ -426,7 +439,7 @@ app.use('/examples/bind/live-list.amp.(min.|max.)?html',
     next();
 });
 
-app.use('/examples/amp-fresh.amp.(min.|max.)?html', function(req, res, next) {
+app.use('/examples/amp-fresh.amp.html', function(req, res, next) {
     if ('amp-fresh' in req.query && req.query['amp-fresh']) {
       res.setHeader('Content-Type', 'text/html');
       res.end(`<!doctype html>
@@ -459,6 +472,11 @@ app.use('/impression-proxy/', function(req, res) {
 // Example:
 // http://localhost:8000/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/max/', function(req, res) {
+  if (mode != 'max') {
+    var info = '<h2>Current server is not serving unminified JS.</h2>'
+        + '<h2>Please run "gulp serve" instead</h2>';
+    res.send(info);
+  }
   proxyToAmpProxy(req, res, /* minify */ false);
 });
 
@@ -466,12 +484,17 @@ app.use('/max/', function(req, res) {
 // Example:
 // http://localhost:8000/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/min/', function(req, res) {
+  if (mode != 'min') {
+    var info = '<h2>Current server is not serving minified JS.</h2>'
+        + '<h2>Please run "gulp serve --compiled" instead</h2>';
+    res.send(info);
+  }
   proxyToAmpProxy(req, res, /* minify */ true);
 });
 
 // Nest the response in an iframe.
 // Example:
-// http://localhost:8000/iframe/examples/ads.amp.max.html
+// http://localhost:8000/iframe/examples/ads.amp.html
 app.get('/iframe/*', function(req, res) {
   // Returns an html blob with an iframe pointing to the url after /iframe/.
   res.send(`<!doctype html>
@@ -510,7 +533,7 @@ app.get('/iframe-echo-message', function(req, res) {
 
 // A4A envelope.
 // Examples:
-// http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
+// http://localhost:8000/a4a[-3p]/examples/animations.amp.html
 // http://localhost:8000/a4a[-3p]/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 // http://localhost:8000/a4a[-3p]/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/a4a(|-3p)/', function(req, res) {
@@ -539,7 +562,7 @@ app.use('/a4a(|-3p)/', function(req, res) {
 
 // In-a-box envelope.
 // Examples:
-// http://localhost:8000/inabox/examples/animations.amp.max.html
+// http://localhost:8000/inabox/examples/animations.amp.html
 // http://localhost:8000/inabox/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 // http://localhost:8000/inabox/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/inabox/', function(req, res) {
@@ -592,12 +615,8 @@ app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
 
 app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   var filePath = req.path;
-  var mode = getPathMode(filePath);
-  if (!mode) {
-    return next();
-  }
+  var mode = process.env.SERVE_MODE;
   const inabox = req.query['inabox'] == '1';
-  filePath = filePath.substr(0, filePath.length - 9) + '.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     if (req.query['amp_js_v']) {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
@@ -805,7 +824,7 @@ app.get('/dist/rtv/9[89]*/*.js', function(req, res, next) {
   }, 2000);
 });
 
-app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, res, next) {
+app.get(['/dist/cache-sw.html'], function(req, res, next) {
   var filePath = '/test/manual/cache-sw.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     var n = new Date();
@@ -992,6 +1011,16 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   }
 
   enableCors(req, res, origin, opt_exposeHeaders);
+}
+
+function generateInfo(filePath) {
+  var mode = process.env.SERVE_MODE;
+  filePath = filePath.substr(0, filePath.length - 9) + '.html';
+  var info = '<h2>Please note that .min/.max is no longer supported</h2>' +
+      '<h3>Current serving mode is ' + mode + '</h3>' +
+      '<h3>Please go to <a href= ' + filePath +
+      '>Unversioned Link</a> to view the page<h3>';
+  return info;
 }
 
 module.exports = app;

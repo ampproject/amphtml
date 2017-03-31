@@ -27,6 +27,18 @@ var useHttps = argv.https != undefined;
  * Starts a simple http server at the repository root
  */
 function serve() {
+  // Get the serve mode
+  if (argv.compiled) {
+    process.env.SERVE_MODE = 'min';
+    util.log(util.colors.green('Serving minified js'));
+  } else if (argv.cdn) {
+    process.env.SERVE_MODE = 'cdn';
+    util.log(util.colors.green('Serving current prod js'));
+  } else {
+    process.env.SERVE_MODE = 'max';
+    util.log(util.colors.green('Serving unminified js'));
+  }
+
   nodemon({
     script: require.resolve('../server.js'),
     watch: [require.resolve('../app.js'),
