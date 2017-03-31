@@ -279,6 +279,7 @@ var forbiddenTerms = {
       'extensions/amp-access/0.1/amp-login-done.js',
       'src/runtime.js',
       'src/log.js',
+      'src/web-worker/web-worker.js',
       'tools/experiments/experiments.js',
     ],
   },
