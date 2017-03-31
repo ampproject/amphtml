@@ -168,7 +168,6 @@ export function googleAdUrl(
         {name: 'brdim', value: additionalDimensions(win, viewportSize)},
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
-        {name: 'ea', value: '0'},
         {name: 'pfx', value: pfx},
       ],
       unboundedQueryParams,

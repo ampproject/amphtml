@@ -129,14 +129,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
-    let size;
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    if (width && height) {
-      size = {width, height};
-    } else {
-      size = this.getIntersectionElementLayoutBox();
-    }
+    // Need to ensure these are numbers since width can be set to 'auto'.
+    // Checking height just in case.
+    debugger;
+    const size = (width && !isNaN(width) && height && !isNaN(height))
+        ? {width, height}
+        : this.getIntersectionElementLayoutBox();
     const format = `${size.width}x${size.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
