@@ -24,8 +24,10 @@
 import '../../third_party/babel/custom-babel-helpers';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
+import {initLogConstructor} from '../../src/log';
 import {installWorkerErrorReporting} from '../worker-error-reporting';
 
+initLogConstructor();
 installWorkerErrorReporting('ww');
 
 /** @private {BindEvaluator} */
@@ -41,7 +43,7 @@ self.addEventListener('message', function(event) {
       evaluator_ = evaluator_ || new BindEvaluator();
       returnValue = evaluator_.addBindings.apply(evaluator_, args);
       break;
-    case 'bind.removeBindings':
+    case 'bind.removeBindingsWithExpressionStrings':
       if (evaluator_) {
         const removeBindings = evaluator_.removeBindingsWithExpressionStrings;
         returnValue = removeBindings.apply(evaluator_, args);
