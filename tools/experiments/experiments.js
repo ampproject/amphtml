@@ -170,7 +170,7 @@ const EXPERIMENTS = [
   {
     id: 'ios-embed-wrapper',
     name: 'A new iOS embedded viewport model that wraps the body into' +
-        ' a synthetic root',
+        ' a synthetic root (launched)',
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
   },

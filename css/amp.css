@@ -93,7 +93,7 @@ html.i-amphtml-ios-embed {
   position: static;
 }
 
-/** Wrapper for iOS-Embed-Wrapper mode. */
+/** Wrapper for iOS Embed Wrapper mode. */
 #i-amphtml-wrapper {
   overflow-x: hidden !important;
   overflow-y: auto !important;
