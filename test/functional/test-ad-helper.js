@@ -16,6 +16,7 @@
 
 import {isAdPositionAllowed, getAdContainer} from '../../src/ad-helper';
 import {createIframePromise} from '../../testing/iframe';
+import {computedStyle} from '../../src/style';
 
 describe('ad-helper', () => {
   describe('isAdPositionAllowed function', () => {
@@ -57,6 +58,10 @@ describe('ad-helper', () => {
       return createIframePromise().then(iframe => {
         const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
         nonWhitelistedElement.style.position = 'sticky';
+        // Check if browser support position:sticky
+        if (computedStyle(iframe.win, nonWhitelistedElement) != 'sticky') {
+          return;
+        }
         iframe.doc.body.appendChild(nonWhitelistedElement);
         expect(isAdPositionAllowed(nonWhitelistedElement, iframe.win))
             .to.be.false;
