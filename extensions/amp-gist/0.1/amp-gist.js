@@ -20,20 +20,19 @@
  * Example:
  * <code>
  * <amp-gist
- *   layout="responsive"
+ *   layout="fixed-height"
  *   data-gistid="a19e811dcd7df10c4da0931641538497"
- *   width="100"
- *   height="100">
+ *   height="1613">
  * </amp-gist>
  * </code>
  */
 
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
+import {Layout} from '../../../src/layout';
 
 const TAG = 'amp-gist';
 
@@ -57,7 +56,7 @@ export class AmpGist extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return layout == Layout.FIXED_HEIGHT;
   }
 
   /** @override */
