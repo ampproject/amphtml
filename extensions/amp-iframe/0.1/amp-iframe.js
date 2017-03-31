@@ -24,7 +24,7 @@ import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';

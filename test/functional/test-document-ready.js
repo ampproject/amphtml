@@ -19,7 +19,7 @@ import {isDocumentReady,
   whenDocumentReady,
   whenDocumentComplete,
 } from '../../src/document-ready';
-import {timerFor} from '../../src/timer';
+import {timerFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 

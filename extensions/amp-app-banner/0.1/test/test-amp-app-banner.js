@@ -15,20 +15,20 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {platformFor} from '../../../../src/platform';
-import {vsyncFor} from '../../../../src/vsync';
+import {platformFor} from '../../../../src/services';
+import {vsyncFor} from '../../../../src/services';
 import {
     AmpAppBanner,
     AbstractAppBanner,
     AmpIosAppBanner,
     AmpAndroidAppBanner,
 } from '../amp-app-banner';
-import {xhrFor} from '../../../../src/xhr';
-import {timerFor} from '../../../../src/timer';
+import {xhrFor} from '../../../../src/services';
+import {timerFor} from '../../../../src/services';
 import '../../../amp-analytics/0.1/amp-analytics';
 import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {viewerForDoc} from '../../../../src/viewer';
+import {viewerForDoc} from '../../../../src/services';
 
 describe('amp-app-banner', () => {
 

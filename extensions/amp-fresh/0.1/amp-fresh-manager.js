@@ -21,7 +21,7 @@ import {
 } from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 
 
 /** @const */

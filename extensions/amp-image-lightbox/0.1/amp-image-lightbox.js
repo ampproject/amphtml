@@ -26,7 +26,7 @@ import {
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {historyForDoc} from '../../../src/history';
+import {historyForDoc} from '../../../src/services';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -34,7 +34,7 @@ import {
   moveLayoutRect,
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {user, dev} from '../../../src/log';
 import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';

@@ -19,7 +19,7 @@ import {
   getElementServiceIfAvailableForDoc,
 } from './element-service';
 import {createElementWithAttributes} from './dom';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 
 
 /**
