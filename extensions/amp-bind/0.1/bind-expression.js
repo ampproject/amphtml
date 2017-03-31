@@ -70,7 +70,7 @@ const FUNCTION_WHITELIST = (function() {
      * @param {!number} index, must be an integer
      * @param {?=} item, null if unspecified
      */
-    'arraySet': function(array, index, item) {
+    'copyAndSet': function(array, index, item) {
       if (!isArray(array)) {
         user().warn(
             TAG,
@@ -123,7 +123,7 @@ const FUNCTION_WHITELIST = (function() {
     Math.round,
     Math.sign,
     BindArrays.copyAndSplice,
-    BindArrays.arraySet,
+    BindArrays.copyAndSet,
   ];
   // Creates a prototype-less map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
