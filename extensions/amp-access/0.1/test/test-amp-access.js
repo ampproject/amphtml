@@ -21,12 +21,12 @@ import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {installActionServiceForDoc,} from
     '../../../../src/service/action-impl';
 import {cidServiceForDocForTesting,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {getDocService,} from
+import {installDocService,} from
     '../../../../src/service/ampdoc-impl';
 import {installPerformanceService,} from
     '../../../../src/service/performance-impl';
@@ -44,7 +44,8 @@ describe('AccessService', () => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = getDocService(window, /* isSingleDoc */ true);
+    installDocService(window,  /* isSingleDoc */ true);
+    const docService = ampdocServiceFor(window);
     installActionServiceForDoc(docService.getAmpDoc());
     cidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -374,7 +375,9 @@ describe('AccessService adapter context', () => {
     clock.tick(0);
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = getDocService(window, /* isSingleDoc */ true);
+
+    installDocService(window,  /* isSingleDoc */ true);
+    const docService = ampdocServiceFor(window);
     installActionServiceForDoc(docService.getAmpDoc());
     cidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -485,7 +488,8 @@ describe('AccessService authorization', () => {
     clock.tick(0);
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = getDocService(window, /* isSingleDoc */ true);
+    installDocService(window,  /* isSingleDoc */ true);
+    const docService = ampdocServiceFor(window);
     installActionServiceForDoc(docService.getAmpDoc());
     cidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -788,7 +792,8 @@ describe('AccessService applyAuthorizationToElement_', () => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = getDocService(window, /* isSingleDoc */ true);
+    installDocService(window,  /* isSingleDoc */ true);
+    const docService = ampdocServiceFor(window);
     installActionServiceForDoc(docService.getAmpDoc());
     cidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -936,7 +941,8 @@ describe('AccessService pingback', () => {
     clock = sandbox.useFakeTimers();
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = getDocService(window, /* isSingleDoc */ true);
+    installDocService(window,  /* isSingleDoc */ true);
+    const docService = ampdocServiceFor(window);
     installActionServiceForDoc(docService.getAmpDoc());
     cidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -1272,7 +1278,8 @@ describe('AccessService login', () => {
     clock = sandbox.useFakeTimers();
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = getDocService(window, /* isSingleDoc */ true);
+    installDocService(window,  /* isSingleDoc */ true);
+    const docService = ampdocServiceFor(window);
     installActionServiceForDoc(docService.getAmpDoc());
     cidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);
@@ -1627,7 +1634,8 @@ describe('AccessService analytics', () => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = getDocService(window, /* isSingleDoc */ true);
+    installDocService(window,  /* isSingleDoc */ true);
+    const docService = ampdocServiceFor(window);
     installActionServiceForDoc(docService.getAmpDoc());
     cidServiceForDocForTesting(docService.getAmpDoc());
     installPerformanceService(window);

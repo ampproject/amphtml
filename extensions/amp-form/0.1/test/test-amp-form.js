@@ -19,6 +19,7 @@ import {
   installAmpForm,
   onInputInteraction_,
 } from '../amp-form';
+import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
   setReportValiditySupportedForTesting,
   setCheckValiditySupportedForTesting,
@@ -95,7 +96,8 @@ describes.realWin('amp-form', {
 
   beforeEach(() => {
     installTemplatesService(window);
-    const docService = getDocService(window, /* isSingleDoc */ true);
+    installDocService(window,  /* isSingleDoc */ true);
+    const docService = ampdocServiceFor(window);
     installActionServiceForDoc(docService.getAmpDoc());
 
     sandbox = env.sandbox;

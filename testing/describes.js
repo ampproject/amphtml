@@ -25,6 +25,7 @@ import {
 } from './fake-dom';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {doNotLoadExternalResourcesInTest} from './iframe';
+import {ampdocServiceFor} from '../src/ampdoc';
 import {
   adopt,
   adoptShadowMode,
@@ -34,7 +35,7 @@ import {
 } from '../src/runtime';
 import {cssText} from '../build/css';
 import {createAmpElementProto} from '../src/custom-element';
-import {getDocService} from '../src/service/ampdoc-impl';
+import {installDocService} from '../src/service/ampdoc-impl';
 import {
   installBuiltinElements,
   installExtensionsService,
@@ -472,7 +473,8 @@ class AmpFixture {
     }
     const ampdocType = spec.ampdoc || 'single';
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
-    const ampdocService = getDocService(win, singleDoc);
+    installDocService(win, singleDoc);
+    const ampdocService = ampdocServiceFor(win);
     env.ampdocService  = ampdocService;
     env.extensions = installExtensionsService(win);
     installBuiltinElements(win);

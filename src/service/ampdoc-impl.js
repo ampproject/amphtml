@@ -479,9 +479,12 @@ export class AmpDocShadow extends AmpDoc {
  * @param {boolean} isSingleDoc
  * @return {!AmpDocService}
  */
-export function getDocService(win, isSingleDoc) {
-  registerServiceBuilder(win, 'ampdoc', undefined, () => {
-    return new AmpDocService(win, isSingleDoc);
-  });
-  return getService(win, 'ampdoc');
+export function installAmpdocService(win, isSingleDoc) {
+  registerServiceBuilder(
+      win,
+      'ampdoc',
+      /* opt_constructor */ undefined,
+      () => {
+        return new AmpDocService(win, isSingleDoc);
+      });
 };

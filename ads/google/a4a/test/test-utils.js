@@ -29,12 +29,12 @@ import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {getDocService} from '../../../../src/service/ampdoc-impl';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 
 function setupForAdTesting(fixture) {
-  getDocService(fixture.win, /* isSingleDoc */ true);
+  installDocService(fixture.win, /* isSingleDoc */ true);
   const doc = fixture.doc;
   // TODO(a4a-cam@): This is necessary in the short term, until A4A is
   // smarter about host document styling.  The issue is that it needs to

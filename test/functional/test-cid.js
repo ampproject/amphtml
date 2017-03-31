@@ -22,7 +22,7 @@ import {
 } from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService, Crypto,}
     from '../../src/service/crypto-impl';
-import {getDocService} from '../../src/service/ampdoc-impl';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
 import {installPlatformService} from '../../src/service/platform-impl';
@@ -97,7 +97,8 @@ describe('cid', () => {
       setTimeout: window.setTimeout,
     };
     fakeWin.document.defaultView = fakeWin;
-    const ampdocService = getDocService(fakeWin, /* isSingleDoc */ true);
+    installDocService(mockWin, /* isSingleDoc */ true);
+    const ampdocService = ampdocServiceFor(mockWin);
     ampdoc = ampdocService.getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
@@ -341,12 +342,8 @@ describe('cid', () => {
       navigator: window.navigator,
       services: {},
     };
-<<<<<<< HEAD
-    const ampdocService = getDocService(win, /* isSingleDoc */ true);
-=======
-
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
->>>>>>> bae90708517df167c3ed5e32226760f6b9dd77fc
+    installDocService(mockWin, /* isSingleDoc */ true);
+    const ampdocService = ampdocServiceFor(mockWin);
     const ampdoc2 = ampdocService.getAmpDoc();
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);

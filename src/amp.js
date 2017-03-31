@@ -19,6 +19,7 @@
  */
 
 import './polyfills';
+import {ampdocServiceFor} from './ampdoc';
 import {startupChunk} from './chunk';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {installPerformanceService} from './service/performance-impl';
@@ -56,7 +57,8 @@ try {
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  ampdocService = getDocService(self, /* isSingleDoc */ true);
+  installDocService(window,  /* isSingleDoc */ true);
+  ampdocService = ampdocServiceFor(window);
 } catch (e) {
   // In case of an error call this.
   makeBodyVisible(self.document);

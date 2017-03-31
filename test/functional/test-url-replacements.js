@@ -15,6 +15,7 @@
  */
 
 import {Observable} from '../../src/observable';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {createIframePromise} from '../../testing/iframe';
 import {user} from '../../src/log';
 import {urlReplacementsForDoc} from '../../src/url-replacements';
@@ -25,7 +26,7 @@ import {
 import {cidServiceForDocForTesting,} from
     '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
-import {getDocService} from '../../src/service/ampdoc-impl';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
 import {
@@ -143,7 +144,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
       },
     };
     win.document.defaultView = win;
-    const ampdocService = getDocService(win, true);
+    installDocService(mockWin, /* isSingleDoc */ true);
+    const ampdocService = ampdocServiceFor(mockWin);
     const ampdoc = ampdocService.getAmpDoc(win.document);
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;

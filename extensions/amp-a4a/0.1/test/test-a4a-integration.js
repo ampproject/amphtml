@@ -25,7 +25,7 @@ import {
     data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {installCryptoService} from '../../../../src/service/crypto-impl';
-import {getDocService} from '../../../../src/service/ampdoc-impl';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {adConfig} from '../../../../ads/_config';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
@@ -125,7 +125,7 @@ describe('integration test: a4a', () => {
     a4aRegistry['mock'] = () => {return true;};
     return createIframePromise().then(f => {
       fixture = f;
-      getDocService(fixture.win, /* isSingleDoc */ true);
+      installDocService(fixture.win, /* isSingleDoc */ true);
       installCryptoService(fixture.win);
       upgradeOrRegisterElement(fixture.win, 'amp-a4a', MockA4AImpl);
       const doc = fixture.doc;

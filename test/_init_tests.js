@@ -25,7 +25,7 @@ import {
   installRuntimeServices,
 } from '../src/runtime';
 import {activateChunkingForTesting} from '../src/chunk';
-import {getDocService} from '../src/service/ampdoc-impl';
+import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {
@@ -234,7 +234,8 @@ function beforeTest() {
     canary: 'testSentinel',
   };
   window.AMP_TEST = true;
-  const ampdocService = getDocService(window, true);
+  installDocService(mockWin, /* isSingleDoc */ true);
+  const ampdocService = ampdocServiceFor(mockWin);
   const ampdoc = ampdocService.getAmpDoc(window.document);
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);

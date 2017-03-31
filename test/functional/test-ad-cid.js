@@ -18,7 +18,7 @@ import {adConfig} from '../../ads/_config';
 import {createIframePromise} from '../../testing/iframe';
 import {cidServiceForDocForTesting,} from
     '../../extensions/amp-analytics/0.1/cid-impl';
-import {getDocService} from '../../src/service/ampdoc-impl';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {getAdCid} from '../../src/ad-cid';
 import {setCookie} from '../../src/cookies';
 import {timerFor} from '../../src/timer';
@@ -39,7 +39,8 @@ describe('ad-cid', () => {
     clock = sandbox.useFakeTimers();
     element = document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
-    const ampdocService = getDocService(window, /* isSingleDoc */ true);
+    installDocService(mockWin, /* isSingleDoc */ true);
+    const ampdocService = ampdocServiceFor(mockWin);
     const ampdoc = ampdocService.getAmpDoc();
     cidService = cidServiceForDocForTesting(ampdoc);
     adElement = {
