@@ -58,9 +58,9 @@ function deepMerge_(target, source, maxDepth) {
   // Keep track of seen objects to prevent infinite loops on objects with
   // recursive references.
   const seen = [];
-  const stack = [{target, source, currentDepth: 0}];
-  while (stack.length > 0) {
-    const {target, source, currentDepth} = stack.pop();
+  const queue = [{target, source, currentDepth: 0}];
+  while (queue.length > 0) {
+    const {target, source, currentDepth} = queue.shift();
     seen.push(target, source);
     if (currentDepth > maxDepth) {
       Object.assign(target, source);
@@ -74,7 +74,7 @@ function deepMerge_(target, source, maxDepth) {
         const oldValue = target[key];
         if (isObject(newValue) && isObject(oldValue)) {
           if (!seen.includes(newValue) && !seen.includes(oldValue)) {
-            stack.push({
+            queue.push({
               target: oldValue,
               source: newValue,
               currentDepth: currentDepth + 1,
