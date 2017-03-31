@@ -154,7 +154,7 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   result: ./bind-expression.BindExpressionResultDef,
-   *   error: EvaluatorErrorDef,
+   *   error: ?EvaluatorErrorDef,
    * }}
    */
   evaluateExpression(expressionString, scope) {
@@ -174,7 +174,7 @@ export class BindEvaluator {
    * @param {string} expressionString
    * @return {{
    *   expression: BindExpression,
-   *   error: EvaluatorErrorDef,
+   *   error: ?EvaluatorErrorDef,
    * }}
    * @private
    */
@@ -198,7 +198,7 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   result: ./bind-expression.BindExpressionResultDef,
-   *   error: EvaluatorErrorDef,
+   *   error: ?EvaluatorErrorDef,
    * }}
    * @private
    */
