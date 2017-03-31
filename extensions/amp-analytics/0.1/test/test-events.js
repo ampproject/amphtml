@@ -23,6 +23,7 @@ import {
   SignalTracker,
   VisibilityTracker,
 } from '../events';
+import {ExtensionAnalytics} from '../../../../src/analytics';
 import {Signals} from '../../../../src/utils/signals';
 import * as sinon from 'sinon';
 
@@ -191,13 +192,45 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(handler2).to.be.calledOnce;
     });
 
+    it('should listen on custom events from different scope', () => {
+      const parent1 = win.document.createElement('amp-ad');
+      parent1.id = 1;
+      const parent2 = win.document.createElement('amp-ad');
+      parent2.id = 2;
+      win.document.body.appendChild(parent1);
+      win.document.body.appendChild(parent2);
+      const ExtensionAnalytics1 = new ExtensionAnalytics(parent1, true);
+      const ExtensionAnalytics2 = new ExtensionAnalytics(parent2, true);
+      ExtensionAnalytics1.insertAnalyticsElement({});
+      ExtensionAnalytics2.insertAnalyticsElement({});
+      const analyticsElement1 = parent1.querySelector('amp-analytics');
+      const analyticsElement2 = parent2.querySelector('amp-analytics');
+      const handler1 = sandbox.spy();
+      const handler2 = sandbox.spy();
+      const handler3 = sandbox.spy();
+      tracker.add(analyticsElement, 'custom-event', {}, handler);
+      tracker.add(analyticsElement1, 'custom-event', {}, handler1);
+      tracker.add(analyticsElement2, 'custom-event', {}, handler2);
+      tracker.add(analyticsElement2, 'custom-event', {}, handler3);
+      tracker.trigger(new AnalyticsEvent(target, 'custom-event'));
+      expect(handler).to.be.calledOnce;
+      expect(handler1).to.not.be.called;
+      tracker.trigger(new AnalyticsEvent(analyticsElement1, 'custom-event'));
+      expect(handler1).to.be.calledOnce;
+      expect(handler2).to.not.be.called;
+      tracker.trigger(new AnalyticsEvent(analyticsElement2, 'custom-event'));
+      expect(handler1).to.be.calledOnce;
+      expect(handler2).to.be.calledOnce;
+      expect(handler3).to.be.calledOnce;
+    });
+
     it('should buffer custom events early on', () => {
       // Events before listeners added.
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
-      expect(tracker.buffer_['custom-event-1']).to.have.length(1);
-      expect(tracker.buffer_['custom-event-2']).to.have.length(2);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-1']).to.have.length(1);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-2']).to.have.length(2);
 
       // Listeners added: immediate events fired.
       const handler2 = sandbox.spy();
@@ -209,9 +242,9 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(handler).to.be.calledOnce;
       expect(handler2).to.have.callCount(2);
       expect(handler3).to.have.not.been.called;
-      expect(tracker.buffer_['custom-event-1']).to.have.length(1);
-      expect(tracker.buffer_['custom-event-2']).to.have.length(2);
-      expect(tracker.buffer_['custom-event-3']).to.be.undefined;
+      expect(tracker.buffer_['_AMPDOC']['custom-event-1']).to.have.length(1);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-2']).to.have.length(2);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-3']).to.be.undefined;
 
       // Second round of events.
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
@@ -220,9 +253,9 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(handler).to.have.callCount(2);
       expect(handler2).to.have.callCount(3);
       expect(handler3).to.be.calledOnce;
-      expect(tracker.buffer_['custom-event-1']).to.have.length(2);
-      expect(tracker.buffer_['custom-event-2']).to.have.length(3);
-      expect(tracker.buffer_['custom-event-3']).to.have.length(1);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-1']).to.have.length(2);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-2']).to.have.length(3);
+      expect(tracker.buffer_['_AMPDOC']['custom-event-3']).to.have.length(1);
 
       // Buffering time expires.
       clock.tick(10001);

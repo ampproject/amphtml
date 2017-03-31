@@ -22,7 +22,7 @@ import {
 } from '../../src/service';
 import {
   triggerAnalyticsEvent,
-  insertAnalyticsElement,
+  ExtensionAnalytics,
 } from '../../src/analytics';
 import {timerFor} from '../../src/timer';
 import {BaseElement} from '../../src/base-element';
@@ -50,6 +50,7 @@ describes.realWin('analytics', {
       sandbox = sinon.sandbox.create();
       timer = timerFor(env.win);
       ampdoc = env.ampdoc;
+      win = env.win;
       triggerEventSpy = sandbox.spy();
       resetServiceForTesting(window, 'amp-analytics-instrumentation');
     });
@@ -78,23 +79,29 @@ describes.realWin('analytics', {
     });
   });
 
-  describe('insertAnalyticsElement', () => {
+  describe('ExtensionAnalytics Class', () => {
+    let sandbox;
+    let ele;
+    let baseEle;
+    let config;
+    let testClass;
+    let triggerEventForTargetSpy;
+
     class MockInstrumentation {
-    };
+      triggerEventForTarget(target, eventType, opt_vars) {
+        triggerEventForTargetSpy(target, eventType, opt_vars);
+      }
+    }
 
     beforeEach(() => {
+      sandbox = sinon.sandbox.create();
       timer = timerFor(env.win);
       ampdoc = env.ampdoc;
       win = env.win;
-    });
-
-    it('should create analytics element if analytics is installed', () => {
-      const ele = win.document.createElement('div');
+      ele = win.document.createElement('div');
       win.document.body.appendChild(ele);
-      const baseEle = new BaseElement(ele);
-      fromClassForDoc(
-          ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
-      const config = {
+      baseEle = new BaseElement(ele);
+      config = {
         'requests': {
           'pageview': 'https://example.com/analytics',
         },
@@ -105,15 +112,31 @@ describes.realWin('analytics', {
           },
         },
       };
+      fromClassForDoc(
+          ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
       expect(baseEle.element.querySelector('amp-analytics')).to.be.null;
-      insertAnalyticsElement(baseEle.element, config, true);
+      testClass = new ExtensionAnalytics(baseEle.element, config);
+      triggerEventForTargetSpy = sandbox.spy();
+    });
+
+    it('should create analytics element if analytics is installed', () => {
       return timer.promise(50).then(() => {
         const analyticsEle = baseEle.element.querySelector('amp-analytics');
         expect(analyticsEle).to.not.be.null;
-        const script = (analyticsEle).querySelector('script');
+        const script = analyticsEle.querySelector('script');
         expect(script.textContent).to.jsonEqual(JSON.stringify(config));
         expect(analyticsEle.CONFIG).to.jsonEqual(config);
         expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
+        expect(testClass.analyticsElements_).to.have.length(1);
+      });
+    });
+
+    it('should trigger events for contained analyticsElements', () => {
+      testClass = new ExtensionAnalytics(baseEle.element, [config, config]);
+      testClass.triggerAnalyticsEvent('test');
+      return timer.promise(50).then(() => {
+        expect(testClass.analyticsElements_).to.have.length(2);
+        expect(triggerEventForTargetSpy).to.be.calledTwice;
       });
     });
   });
