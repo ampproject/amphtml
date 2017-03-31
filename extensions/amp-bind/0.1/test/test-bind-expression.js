@@ -270,13 +270,15 @@ describe('BindExpression', () => {
 
   it('should support BindArrays functions', () => {
     const arr = [1, 2, 3];
-    expect(evaluate('arraySplice(arr)', {arr})).to.not.equal(arr);
-    expect(evaluate('arraySplice(arr)', {arr})).to.deep.equal(arr);
-    expect(evaluate('arraySplice(arr, 1)', {arr})).to.deep.equal([1]);
-    expect(evaluate('arraySplice(arr, 1, 1)', {arr})).to.deep.equal([1, 3]);
-    expect(evaluate('arraySplice(arr, 1, 1, 47)', {arr})).to
+    expect(evaluate('copyAndSplice()')).to.be.null;
+    expect(evaluate('copyAndSplice(arr)', {arr})).to.not.equal(arr);
+    expect(evaluate('copyAndSplice(arr)', {arr})).to.deep.equal(arr);
+    expect(evaluate('copyAndSplice(arr, 1)', {arr})).to.deep.equal([1]);
+    expect(evaluate('copyAndSplice(arr, 1, 1)', {arr})).to.deep.equal([1, 3]);
+    expect(evaluate('copyAndSplice(arr, 1, 1, 47)', {arr})).to
         .deep.equal([1, 47, 3]);
 
+    expect(evaluate('arraySet()')).to.be.null;
     expect(evaluate('arraySet(arr)', {arr})).to.not.equal(arr);
     expect(evaluate('arraySet(arr)', {arr})).to.deep.equal(arr);
     expect(evaluate('arraySet(arr, 2)', {arr})).to.deep.equal([1, 2, null]);

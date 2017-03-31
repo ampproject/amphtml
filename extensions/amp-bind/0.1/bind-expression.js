@@ -16,6 +16,7 @@
 
 import {AstNodeType} from './bind-expr-defines';
 import {getMode} from '../../../src/mode';
+import {isArray, isObject} from '../../../src/types';
 import {parser} from './bind-expr-impl';
 import {user} from '../../../src/log';
 
@@ -46,11 +47,17 @@ const FUNCTION_WHITELIST = (function() {
      * passed-in array with the desired modifications.
      * @param {!Array} array
      * @param {number=} start
-     * @param {number=} end
+     * @param {number=} deleteCount
      * @param {...?} items
      */
     /*eslint "no-unused-vars": 0*/
-    'arraySplice': function(array, start, end, items) {
+    'copyAndSplice': function(array, start, deleteCount, items) {
+      if (!isArray(array)) {
+        user().warn(
+            TAG,
+            `copyAndSplice: ${array} is not an array; returning null.`);
+        return null;
+      }
       const copy = array.slice();
       copy.splice.apply(copy, Array.prototype.slice.call(arguments, 1));
       return copy;
@@ -64,6 +71,12 @@ const FUNCTION_WHITELIST = (function() {
      * @param {?=} item, null if unspecified
      */
     'arraySet': function(array, index, item) {
+      if (!isArray(array)) {
+        user().warn(
+            TAG,
+            `copyAndSet: ${array} is not an array; returning null.`);
+        return null;
+      }
       const copy = array.slice();
       // Don't allow indexing with non-integers which is allowed in JS
       if (typeof index === 'number'
@@ -109,7 +122,7 @@ const FUNCTION_WHITELIST = (function() {
     Math.random,
     Math.round,
     Math.sign,
-    BindArrays.arraySplice,
+    BindArrays.copyAndSplice,
     BindArrays.arraySet,
   ];
   // Creates a prototype-less map of function name to the function itself.
@@ -397,7 +410,7 @@ export class BindExpression {
    */
   containsObject_(array) {
     for (let i = 0; i < array.length; i++) {
-      if (Object.prototype.toString.call(array[i]) === '[object Object]') {
+      if (isObject(array[i])) {
         return true;
       }
     }
