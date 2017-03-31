@@ -580,10 +580,12 @@ export class AmpForm {
               container.appendChild(rendered);
             });
       } else {
-        // TODO(vializ): This will be unnecessary when the AMP Layers
-        // implementation is complete. We call mutateElement here and not
-        // where the template is made visible so that we don't do
-        // redundant layout work when a template is rendered too.
+        // TODO(vializ): This is to let AMP know that the AMP elements inside
+        // this container are now visible so they get scheduled for layout.
+        // This will be unnecessary when the AMP Layers implementation is
+        // complete. We call mutateElement here and not where the template is
+        // made visible so that we don't do redundant layout work when a
+        // template is rendered too.
         this.resources_.mutateElement(container, () => {});
       }
     }

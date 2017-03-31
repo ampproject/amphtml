@@ -214,6 +214,7 @@ export class Templates {
   }
 
   /**
+   * Find a specified template inside the parent. Returns null if not present.
    * The template can be specified either via "template" attribute or as a
    * child "template" element. When specified via "template" attribute,
    * the value indicates the ID of the template element.
