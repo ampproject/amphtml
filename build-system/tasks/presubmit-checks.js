@@ -314,7 +314,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/ad-cid.js',
-      'src/cid.js',
+      'src/services.js',
       'src/service/cid-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
@@ -374,7 +374,7 @@ var forbiddenTerms = {
   'storageForDoc': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/storage.js',
+      'src/services.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
     ],

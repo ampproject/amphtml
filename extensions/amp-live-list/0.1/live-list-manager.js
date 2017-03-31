@@ -19,9 +19,9 @@ import {addParamToUrl} from '../../../src/url';
 import {getMode} from '../../../src/mode';
 import {registerServiceBuilder, getService} from '../../../src/service';
 import {user} from '../../../src/log';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {whenDocumentReady} from '../../../src/document-ready';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 
 
 /**

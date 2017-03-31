@@ -35,7 +35,7 @@
  */
 
 import {FontLoader} from './fontloader';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
 import {user} from '../../../src/log';
 

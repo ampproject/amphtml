@@ -26,7 +26,7 @@ import {
   installExtensionsService,
   registerExtension,
 } from '../../src/service/extensions-impl';
-import {extensionsFor} from '../../src/extensions';
+import {extensionsFor} from '../../src/services';
 import {resetScheduledElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 

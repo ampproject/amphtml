@@ -20,7 +20,7 @@ import {dev} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {getMode} from '../mode';
 import {isExperimentOn} from '../experiments';
-import {xhrFor} from '../xhr';
+import {xhrFor} from '../services';
 
 const TAG = 'web-worker';
 

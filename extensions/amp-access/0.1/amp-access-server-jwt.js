@@ -26,10 +26,10 @@ import {
   serializeQueryString,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {timerFor} from '../../../src/timer';
-import {viewerForDoc} from '../../../src/viewer';
-import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
+import {timerFor} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
+import {vsyncFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 
 /** @const {string} */
 const TAG = 'amp-access-server-jwt';

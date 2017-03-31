@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {platformFor} from './platform';
-import {viewerForDoc} from './viewer';
-import {viewportForDoc} from './viewport';
+import {platformFor} from './services';
+import {viewerForDoc} from './services';
+import {viewportForDoc} from './services';
 
 
 /**

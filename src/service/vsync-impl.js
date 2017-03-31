@@ -22,7 +22,7 @@ import {documentStateFor} from './document-state';
 
 import {registerServiceBuilder, getService} from '../service';
 import {installTimerService} from './timer-impl';
-import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
+import {viewerForDoc, viewerPromiseForDoc} from '../services';
 import {JankMeter} from './jank-meter';
 
 /** @const {time} */

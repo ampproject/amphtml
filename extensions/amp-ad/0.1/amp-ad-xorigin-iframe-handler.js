@@ -25,9 +25,9 @@ import {
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';

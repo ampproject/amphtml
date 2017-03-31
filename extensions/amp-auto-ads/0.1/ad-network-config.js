@@ -15,9 +15,9 @@
  */
 
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
-import {documentInfoForDoc} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
-import {viewportForDoc} from '../../../src/viewport';
+import {viewportForDoc} from '../../../src/services';
 
 
 /**

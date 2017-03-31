@@ -20,8 +20,8 @@ import {isExperimentOn} from '../experiments';
 import {setStyles} from '../style';
 import {toArray} from '../types';
 import {user} from '../log';
-import {viewportForDoc} from '../viewport';
-import {vsyncFor} from '../vsync';
+import {viewportForDoc} from '../services';
+import {vsyncFor} from '../services';
 
 const ATTR = 'amp-fx-parallax';
 const EXPERIMENT = ATTR;

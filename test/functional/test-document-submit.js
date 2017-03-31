@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {actionServiceForDoc} from '../../src/action';
+import {actionServiceForDoc} from '../../src/services';
 import {onDocumentFormSubmit_} from '../../src/document-submit';
 import * as sinon from 'sinon';
 

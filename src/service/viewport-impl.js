@@ -28,11 +28,11 @@ import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
-import {platformFor} from '../platform';
+import {platformFor} from '../services';
 import {px, setStyle, setStyles, computedStyle} from '../style';
-import {timerFor} from '../timer';
-import {vsyncFor} from '../vsync';
-import {viewerForDoc} from '../viewer';
+import {timerFor} from '../services';
+import {vsyncFor} from '../services';
+import {viewerForDoc} from '../services';
 import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 

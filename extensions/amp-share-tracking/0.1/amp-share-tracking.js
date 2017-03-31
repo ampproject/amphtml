@@ -15,8 +15,8 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
-import {xhrFor} from '../../../src/xhr';
-import {historyForDoc} from '../../../src/history';
+import {xhrFor} from '../../../src/services';
+import {historyForDoc} from '../../../src/services';
 import {getService} from '../../../src/service';
 import {Layout} from '../../../src/layout';
 import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';

@@ -22,7 +22,7 @@ import {
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
-import {extensionsFor} from '../../src/extensions';
+import {extensionsFor} from '../../src/services';
 import {stringToBytes} from '../../src/utils/bytes';
 
 describes.realWin('crypto-impl', {}, env => {

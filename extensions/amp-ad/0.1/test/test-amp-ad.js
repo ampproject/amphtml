@@ -18,9 +18,9 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {extensionsFor} from '../../../../src/extensions';
+import {extensionsFor} from '../../../../src/services';
 import {stubService} from '../../../../testing/test-helper';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('Ad loader', () => {

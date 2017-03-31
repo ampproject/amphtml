@@ -25,7 +25,7 @@ import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {extensionsFor} from '../../../../src/extensions';
+import {extensionsFor} from '../../../../src/services';
 import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';

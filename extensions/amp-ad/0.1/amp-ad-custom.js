@@ -16,8 +16,8 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
-import {templatesFor} from '../../../src/template';
-import {xhrFor} from '../../../src/xhr';
+import {templatesFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {removeChildren} from '../../../src/dom';

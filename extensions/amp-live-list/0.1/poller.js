@@ -17,7 +17,7 @@
 
 import {exponentialBackoffClock, getJitter,}
     from '../../../src/exponential-backoff';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 
 
 /**

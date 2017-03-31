@@ -18,7 +18,7 @@ import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {ampdocServiceFor} from './ampdoc';
 import {dev} from './log';
 import {closestNode, escapeCssSelectorIdent} from './dom';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 import {insertStyleElement} from './style-installer';
 import {setStyle} from './style';
 import {

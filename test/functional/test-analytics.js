@@ -24,7 +24,7 @@ import {
   triggerAnalyticsEvent,
   insertAnalyticsElement,
 } from '../../src/analytics';
-import {timerFor} from '../../src/timer';
+import {timerFor} from '../../src/services';
 import {BaseElement} from '../../src/base-element';
 import * as sinon from 'sinon';
 

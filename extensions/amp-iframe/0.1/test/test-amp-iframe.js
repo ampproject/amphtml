@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import {
   AmpIframe,
   isAdLike,
@@ -25,7 +25,7 @@ import {
   createIframePromise,
   poll,
 } from '../../../../testing/iframe';
-import {viewportForDoc} from '../../../../src/viewport';
+import {viewportForDoc} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 adopt(window);

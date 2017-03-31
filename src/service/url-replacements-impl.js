@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {accessServiceForOrNull} from '../access-service';
-import {cidForDoc} from '../cid';
-import {variantForOrNull} from '../variant-service';
-import {shareTrackingForOrNull} from '../share-tracking-service';
+import {accessServiceForOrNull} from '../services';
+import {cidForDoc} from '../services';
+import {variantForOrNull} from '../services';
+import {shareTrackingForOrNull} from '../services';
 import {dev, user, rethrowAsync} from '../log';
-import {documentInfoForDoc} from '../document-info';
+import {documentInfoForDoc} from '../services';
 import {getServiceForDoc, installServiceInEmbedScope} from '../service';
 import {isSecureUrl, parseUrl, removeFragment, parseQueryString} from '../url';
-import {viewerForDoc} from '../viewer';
-import {viewportForDoc} from '../viewport';
-import {userNotificationManagerFor} from '../user-notification';
-import {activityForDoc} from '../activity';
+import {viewerForDoc} from '../services';
+import {viewportForDoc} from '../services';
+import {userNotificationManagerFor} from '../services';
+import {activityForDoc} from '../services';
 import {getTrackImpressionPromise} from '../impression.js';
 import {
   VariableSource,

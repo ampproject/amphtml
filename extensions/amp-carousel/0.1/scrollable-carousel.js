@@ -17,7 +17,7 @@
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {numeric} from '../../../src/transition';
 import {dev} from '../../../src/log';
 

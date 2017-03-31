@@ -19,7 +19,7 @@ import {
 } from '../../../../testing/iframe';
 import '../amp-apester-media';
 import {adopt} from '../../../../src/runtime';
-import {xhrFor} from '../../../../src/xhr';
+import {xhrFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 adopt(window);

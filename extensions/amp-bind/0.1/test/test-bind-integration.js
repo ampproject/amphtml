@@ -16,7 +16,7 @@
 
 import '../../../amp-carousel/0.1/amp-carousel';
 import {createFixtureIframe} from '../../../../testing/iframe';
-import {bindForDoc} from '../../../../src/bind';
+import {bindForDoc} from '../../../../src/services';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 
 describe.configure().retryOnSaucelabs().run('amp-bind', function() {

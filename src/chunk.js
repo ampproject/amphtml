@@ -18,7 +18,7 @@ import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
 import {registerServiceBuilderForDoc, getServiceForDoc} from './service';
 import {makeBodyVisible} from './style-installer';
-import {viewerPromiseForDoc} from './viewer';
+import {viewerPromiseForDoc} from './services';
 
 /**
  * @const {string}

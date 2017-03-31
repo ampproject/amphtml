@@ -17,14 +17,14 @@
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {platformFor} from '../platform';
+import {platformFor} from '../services';
 import {registerServiceBuilderForDoc} from '../service';
 import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
 import {VideoEvents, VideoAttributes} from '../video-interface';
-import {viewerForDoc} from '../viewer';
-import {viewportForDoc} from '../viewport';
-import {vsyncFor} from '../vsync';
+import {viewerForDoc} from '../services';
+import {viewportForDoc} from '../services';
+import {vsyncFor} from '../services';
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it

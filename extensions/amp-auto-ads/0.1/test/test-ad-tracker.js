@@ -17,7 +17,7 @@
 
 import {AdTracker, getExistingAds} from '../ad-tracker';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {resourcesForDoc} from '../../../../src/resources';
+import {resourcesForDoc} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('ad-tracker', () => {

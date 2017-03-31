@@ -27,7 +27,7 @@ import {
   removeFragment,
   isProxyOrigin,
 } from '../url';
-import {timerFor} from '../timer';
+import {timerFor} from '../services';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
 

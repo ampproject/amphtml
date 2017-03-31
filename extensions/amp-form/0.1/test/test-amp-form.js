@@ -24,18 +24,18 @@ import {
   setCheckValiditySupportedForTesting,
 } from '../form-validators';
 import * as sinon from 'sinon';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
 import {installDocService,} from
     '../../../../src/service/ampdoc-impl';
 import {installActionServiceForDoc,} from
     '../../../../src/service/action-impl';
-import {actionServiceForDoc} from '../../../../src/action';
+import {actionServiceForDoc} from '../../../../src/services';
 import {
     cidServiceForDocForTesting,
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {documentInfoForDoc} from '../../../../src/document-info';
+import {documentInfoForDoc} from '../../../../src/services';
 import '../../../amp-selector/0.1/amp-selector';
 
 describes.realWin('amp-form', {

@@ -16,9 +16,9 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/services';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 
 
 /**

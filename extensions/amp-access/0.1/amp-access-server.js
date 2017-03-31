@@ -18,10 +18,10 @@ import {AccessClientAdapter} from './amp-access-client';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {dev} from '../../../src/log';
-import {timerFor} from '../../../src/timer';
-import {viewerForDoc} from '../../../src/viewer';
-import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
+import {timerFor} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
+import {vsyncFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 
 /** @const {string} */
 const TAG = 'amp-access-server';

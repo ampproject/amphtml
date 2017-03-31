@@ -31,7 +31,7 @@ import {
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {
   userNotificationManagerFor,
-} from '../../../../src/user-notification';
+} from '../../../../src/services';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
@@ -42,7 +42,7 @@ import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';
 import {cidServiceForDocForTesting,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {urlReplacementsForDoc} from '../../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';

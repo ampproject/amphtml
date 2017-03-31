@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 
 /**
  * Store loading ads info within window to ensure it can be properly stored

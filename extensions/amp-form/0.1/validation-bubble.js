@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {vsyncFor} from '../../../src/vsync';
-import {viewportForDoc} from '../../../src/viewport';
+import {vsyncFor} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
 import {setStyles} from '../../../src/style';
 import {removeChildren} from '../../../src/dom';
 

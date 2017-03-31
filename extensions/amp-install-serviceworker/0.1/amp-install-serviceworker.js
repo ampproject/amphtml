@@ -24,12 +24,12 @@ import {
 } from '../../../src/url';
 import {closestByTag, removeElement} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {documentInfoForDoc} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {setStyle} from '../../../src/style';
 
 /** @private @const {string} */

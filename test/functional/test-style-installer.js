@@ -22,7 +22,7 @@ import {
 } from '../../src/service/performance-impl';
 import {createIframePromise} from '../../testing/iframe';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
-import {resourcesForDoc} from '../../src/resources';
+import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 

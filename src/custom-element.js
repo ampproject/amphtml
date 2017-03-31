@@ -31,9 +31,9 @@ import {
 import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
-import {resourcesForDoc} from './resources';
-import {timerFor} from './timer';
-import {vsyncFor} from './vsync';
+import {resourcesForDoc} from './services';
+import {timerFor} from './services';
+import {vsyncFor} from './services';
 import * as dom from './dom';
 import {setStyle, setStyles} from './style';
 

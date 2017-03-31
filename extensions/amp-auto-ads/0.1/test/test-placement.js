@@ -15,7 +15,7 @@
  */
 
 import {AdTracker} from '../ad-tracker';
-import {resourcesForDoc} from '../../../../src/resources';
+import {resourcesForDoc} from '../../../../src/services';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 
 describes.realWin('placement', {

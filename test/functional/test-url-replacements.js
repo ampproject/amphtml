@@ -17,7 +17,7 @@
 import {Observable} from '../../src/observable';
 import {createIframePromise} from '../../testing/iframe';
 import {user} from '../../src/log';
-import {urlReplacementsForDoc} from '../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../src/services';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
@@ -38,7 +38,7 @@ import {
 import {getService} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
-import {viewerForDoc} from '../../src/viewer';
+import {viewerForDoc} from '../../src/services';
 import * as trackPromise from '../../src/impression';
 
 

@@ -15,7 +15,7 @@
  */
 
 import {Observable} from './observable';
-import {timerFor} from './timer';
+import {timerFor} from './services';
 import {dev} from './log';
 
 

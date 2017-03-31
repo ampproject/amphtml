@@ -15,7 +15,7 @@
  */
 
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
 import {ViewportBindingInabox} from '../../../src/inabox/inabox-viewport';
 
 describes.fakeWin('inabox-viewport', {amp: {}}, env => {
