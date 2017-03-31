@@ -25,11 +25,11 @@ import {
 } from '../../src/friendly-iframe-embed';
 import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
-import {extensionsFor} from '../../src/extensions';
+import {extensionsFor} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import {resourcesForDoc} from '../../src/resources';
+import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 

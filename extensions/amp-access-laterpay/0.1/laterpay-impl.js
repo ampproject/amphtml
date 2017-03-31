@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {accessServiceFor} from '../../../src/access-service';
+import {accessServiceFor} from '../../../src/services';
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
@@ -22,10 +22,10 @@ import {installStyles} from '../../../src/style-installer';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeChildren} from '../../../src/dom';
-import {timerFor} from '../../../src/timer';
-import {viewportForDoc} from '../../../src/viewport';
-import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
+import {timerFor} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
+import {vsyncFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 
 const TAG = 'amp-access-laterpay';
 const CONFIG_URL = 'https://connector.laterpay.net';

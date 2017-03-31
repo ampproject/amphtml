@@ -18,12 +18,12 @@ import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
-import {historyForDoc} from '../../../src/history';
-import {platformFor} from '../../../src/platform';
+import {historyForDoc} from '../../../src/services';
+import {platformFor} from '../../../src/services';
 import {setStyles, toggle} from '../../../src/style';
 import {removeFragment, parseUrl} from '../../../src/url';
-import {vsyncFor} from '../../../src/vsync';
-import {timerFor} from '../../../src/timer';
+import {vsyncFor} from '../../../src/services';
+import {timerFor} from '../../../src/services';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;

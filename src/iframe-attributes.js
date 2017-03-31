@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import {urls} from './config';
-import {documentInfoForDoc} from './document-info';
+import {documentInfoForDoc} from './services';
 import {experimentToggles, isCanary} from './experiments';
-import {viewerForDoc} from './viewer';
+import {viewerForDoc} from './services';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
 import {domFingerprint} from './utils/dom-fingerprint';

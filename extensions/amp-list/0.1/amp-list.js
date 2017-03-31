@@ -15,11 +15,11 @@
  */
 
 import {assertHttpsUrl} from '../../../src/url';
-import {batchedXhrFor} from '../../../src/batched-xhr';
+import {batchedXhrFor} from '../../../src/services';
 import {getValueForExpr} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {templatesFor} from '../../../src/template';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {templatesFor} from '../../../src/services';
+import {urlReplacementsForDoc} from '../../../src/services';
 import {user} from '../../../src/log';
 
 

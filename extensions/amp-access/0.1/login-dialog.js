@@ -19,7 +19,7 @@ import {listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {urls} from '../../../src/config';
 
 /** @const */

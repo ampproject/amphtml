@@ -23,9 +23,9 @@ import {VisibilityModel} from './visibility-model';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {map} from '../../../src/utils/object';
-import {resourcesForDoc} from '../../../src/resources';
-import {viewerForDoc} from '../../../src/viewer';
-import {viewportForDoc} from '../../../src/viewport';
+import {resourcesForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
 
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 

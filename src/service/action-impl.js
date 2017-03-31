@@ -19,8 +19,8 @@ import {fromClassForDoc, installServiceInEmbedScope} from '../service';
 import {getMode} from '../mode';
 import {isArray} from '../types';
 import {map} from '../utils/object';
-import {timerFor} from '../timer';
-import {vsyncFor} from '../vsync';
+import {timerFor} from '../services';
+import {vsyncFor} from '../services';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.

@@ -22,7 +22,7 @@ import {
   startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {viewerForDoc, viewerPromiseForDoc} from '../../src/viewer';
+import {viewerForDoc, viewerPromiseForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
 
 /**
  * Structure for defining contraints about the placement of ads.

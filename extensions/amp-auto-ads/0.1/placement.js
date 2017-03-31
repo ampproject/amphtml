@@ -16,7 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {getAttributesFromConfigObj} from './attributes';
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
 import {
   closestByTag,
   createElementWithAttributes,

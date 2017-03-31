@@ -26,7 +26,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 

@@ -15,7 +15,7 @@
  */
 
 import {AmpForm} from '../../amp-form';
-import {timerFor} from '../../../../../src/timer';
+import {timerFor} from '../../../../../src/services';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
 import {registerExtendedTemplate,} from
     '../../../../../src/service/template-impl';

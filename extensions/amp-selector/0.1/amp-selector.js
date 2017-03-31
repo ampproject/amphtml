@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {actionServiceForDoc} from '../../../src/action';
+import {actionServiceForDoc} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';

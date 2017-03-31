@@ -15,7 +15,7 @@
  */
 
 import {internalListenImplementation} from './event-helper-listen';
-import {timerFor} from './timer';
+import {timerFor} from './services';
 import {user} from './log';
 
 /** @const {string}  */

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {platformFor} from '../platform';
-import {viewerForDoc} from '../viewer';
-import {vsyncFor} from '../vsync';
+import {platformFor} from '../services';
+import {viewerForDoc} from '../services';
+import {vsyncFor} from '../services';
 import {setStyle} from '../style';
 
 

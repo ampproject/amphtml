@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {bindForDoc} from '../../../src/bind';
+import {bindForDoc} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';

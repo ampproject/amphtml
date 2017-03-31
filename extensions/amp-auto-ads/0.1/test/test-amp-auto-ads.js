@@ -16,9 +16,9 @@
 
 import {AmpAutoAds} from '../amp-auto-ads';
 import {toggleExperiment} from '../../../../src/experiments';
-import {xhrFor} from '../../../../src/xhr';
+import {xhrFor} from '../../../../src/services';
 import {waitForChild} from '../../../../src/dom';
-import {viewportForDoc} from '../../../../src/viewport';
+import {viewportForDoc} from '../../../../src/services';
 
 describes.realWin('amp-auto-ads', {
   amp: {

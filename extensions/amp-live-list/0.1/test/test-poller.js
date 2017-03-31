@@ -17,7 +17,7 @@
 
 import * as sinon from 'sinon';
 import {Poller} from '../poller';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 
 
 describe('Poller', () => {

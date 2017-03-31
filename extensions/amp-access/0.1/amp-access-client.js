@@ -16,8 +16,8 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {timerFor} from '../../../src/timer';
-import {xhrFor} from '../../../src/xhr';
+import {timerFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 
 /** @const {string} */

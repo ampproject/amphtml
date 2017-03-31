@@ -16,7 +16,7 @@
 
 import {dev, user} from '../log';
 import {endsWith} from '../string';
-import {platformFor} from '../platform';
+import {platformFor} from '../services';
 import {getStyle, setStyle, setStyles, computedStyle} from '../style';
 
 const TAG = 'FixedLayer';

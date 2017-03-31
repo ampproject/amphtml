@@ -21,9 +21,9 @@ import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/services';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {platformFor} from '../../../src/platform';
+import {platformFor} from '../../../src/services';
 
 
 class AmpSocialShare extends AMP.BaseElement {

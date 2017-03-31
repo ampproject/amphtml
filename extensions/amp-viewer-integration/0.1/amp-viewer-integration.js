@@ -21,7 +21,7 @@ import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {getSourceUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';

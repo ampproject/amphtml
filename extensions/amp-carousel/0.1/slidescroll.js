@@ -16,15 +16,15 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {actionServiceForDoc} from '../../../src/action';
+import {actionServiceForDoc} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
-import {platformFor} from '../../../src/platform';
-import {timerFor} from '../../../src/timer';
+import {platformFor} from '../../../src/services';
+import {timerFor} from '../../../src/services';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {isExperimentOn} from '../../../src/experiments';
 import {startsWith} from '../../../src/string';

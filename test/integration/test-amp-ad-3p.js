@@ -19,7 +19,7 @@ import {
   pollForLayout,
   poll,
 } from '../../testing/iframe';
-import {platformFor} from '../../src/platform';
+import {platformFor} from '../../src/services';
 import {installPlatformService} from '../../src/service/platform-impl';
 
 describes.realWin('3P Ad', {

@@ -15,7 +15,7 @@
  */
 
 import {dev} from '../log';
-import {platformFor} from '../platform';
+import {platformFor} from '../services';
 
 
 const TAG = 'ie-media-bug';

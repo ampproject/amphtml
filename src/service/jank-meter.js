@@ -15,7 +15,7 @@
  */
 
 import {isExperimentOn} from '../experiments';
-import {performanceForOrNull} from '../performance';
+import {performanceForOrNull} from '../services';
 import {dev} from '../log';
 
 /** @const {number} */

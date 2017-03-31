@@ -21,11 +21,11 @@ import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {SignInProtocol} from './signin';
-import {actionServiceForDoc} from '../../../src/action';
+import {actionServiceForDoc} from '../../../src/services';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
-import {cidForDoc} from '../../../src/cid';
+import {cidForDoc} from '../../../src/services';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
@@ -37,14 +37,14 @@ import {dev, user} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
-import {performanceFor} from '../../../src/performance';
-import {resourcesForDoc} from '../../../src/resources';
-import {templatesFor} from '../../../src/template';
-import {timerFor} from '../../../src/timer';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
-import {viewerForDoc} from '../../../src/viewer';
-import {viewportForDoc} from '../../../src/viewport';
-import {vsyncFor} from '../../../src/vsync';
+import {performanceFor} from '../../../src/services';
+import {resourcesForDoc} from '../../../src/services';
+import {templatesFor} from '../../../src/services';
+import {timerFor} from '../../../src/services';
+import {urlReplacementsForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
+import {vsyncFor} from '../../../src/services';
 
 
 /** @const */

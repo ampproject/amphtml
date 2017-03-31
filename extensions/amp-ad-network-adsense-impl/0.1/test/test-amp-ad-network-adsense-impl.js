@@ -22,7 +22,7 @@ import {
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {extensionsFor} from '../../../../src/extensions';
+import {extensionsFor} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars

@@ -18,8 +18,8 @@ import {Layout} from './layout';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
-import {viewportForDoc} from './viewport';
-import {vsyncFor} from './vsync';
+import {viewportForDoc} from './services';
+import {vsyncFor} from './services';
 import {user} from './log';
 
 

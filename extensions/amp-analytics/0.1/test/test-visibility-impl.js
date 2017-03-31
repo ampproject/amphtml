@@ -24,7 +24,7 @@ import {
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 import * as inob from '../../../../src/intersection-observer-polyfill';
 import {VisibilityState} from '../../../../src/visibility-state';
-import {viewerForDoc} from '../../../../src/viewer';
+import {viewerForDoc} from '../../../../src/services';
 import {loadPromise} from '../../../../src/event-helper';
 
 import * as sinon from 'sinon';

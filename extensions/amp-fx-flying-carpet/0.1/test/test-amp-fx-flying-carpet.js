@@ -17,7 +17,7 @@
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installImg} from '../../../../builtins/amp-img';
-import {viewportForDoc} from '../../../../src/viewport';
+import {viewportForDoc} from '../../../../src/services';
 import * as sinon from 'sinon';
 import '../amp-fx-flying-carpet';
 

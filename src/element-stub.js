@@ -16,7 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {dev} from './log';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 
 /** @type {!Array} */
 export const stubbedElements = [];

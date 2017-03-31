@@ -15,7 +15,7 @@
  */
 import {openWindowDialog} from '../../../src/dom';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 
 import {Util} from './util';
 

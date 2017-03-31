@@ -18,7 +18,7 @@ import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {timerFor} from '../timer';
+import {timerFor} from '../services';
 import {parseUrl} from '../url';
 import {urls} from '../config';
 

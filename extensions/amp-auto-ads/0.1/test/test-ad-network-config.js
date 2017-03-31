@@ -15,7 +15,7 @@
  */
 
 import {getAdNetworkConfig} from '../ad-network-config';
-import {viewportForDoc} from '../../../../src/viewport';
+import {viewportForDoc} from '../../../../src/services';
 
 describes.realWin('ad-network-config', {
   amp: {

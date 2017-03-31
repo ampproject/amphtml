@@ -19,7 +19,7 @@ import {
   setInViewportForTesting,
 } from '../../3p/environment';
 import {createIframePromise} from '../../testing/iframe';
-import {timerFor} from '../../src/timer';
+import {timerFor} from '../../src/services';
 import {loadPromise} from '../../src/event-helper';
 import * as lolex from 'lolex';
 

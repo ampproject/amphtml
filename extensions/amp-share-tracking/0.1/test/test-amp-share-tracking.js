@@ -17,7 +17,7 @@
 import {AmpShareTracking} from '../amp-share-tracking';
 import {History} from '../../../../src/service/history-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
-import {shareTrackingForOrNull} from '../../../../src/share-tracking-service';
+import {shareTrackingForOrNull} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as bytes from '../../../../src/utils/bytes';
 

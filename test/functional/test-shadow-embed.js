@@ -30,7 +30,7 @@ import {
   setShadowDomSupportedVersionForTesting,
   ShadowDomVersion,
 } from '../../src/web-components';
-import {extensionsFor} from '../../src/extensions';
+import {extensionsFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 

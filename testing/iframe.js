@@ -15,7 +15,7 @@
  */
 
 import {FakeLocation} from './fake-dom';
-import {Timer} from '../src/timer';
+import {Timer} from '../src/services';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
 import {installDocService} from '../src/service/ampdoc-impl';

@@ -33,9 +33,9 @@ import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {loadPromise} from '../../src/event-helper';
-import {platformFor} from '../../src/platform';
+import {platformFor} from '../../src/services';
 import {setParentWindow} from '../../src/service';
-import {vsyncFor} from '../../src/vsync';
+import {vsyncFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 

@@ -18,7 +18,7 @@ import {whenDocumentReady} from '../../../../src/document-ready';
 import {isExperimentOn} from '../../../../src/experiments';
 import {autoDiscoverLightboxables} from './lightbox-manager-discovery';
 import {dev} from '../../../../src/log';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 
 
 /**

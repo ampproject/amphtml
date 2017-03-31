@@ -25,7 +25,7 @@ import {isObject} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/video-manager';
+import {videoManagerForDoc} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}

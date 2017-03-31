@@ -17,9 +17,9 @@
 import {BaseElement} from '../src/base-element';
 import {dev, user} from '../src/log';
 import {registerElement} from '../src/custom-element';
-import {timerFor} from '../src/timer';
-import {urlReplacementsForDoc} from '../src/url-replacements';
-import {viewerForDoc} from '../src/viewer';
+import {timerFor} from '../src/services';
+import {urlReplacementsForDoc} from '../src/services';
+import {viewerForDoc} from '../src/services';
 
 const TAG = 'amp-pixel';
 

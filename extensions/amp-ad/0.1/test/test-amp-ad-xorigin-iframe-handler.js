@@ -23,7 +23,7 @@ import {
   expectPostMessage,
 } from '../../../../testing/iframe';
 import {AmpAdUIHandler} from '../amp-ad-ui';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-ad-xorigin-iframe-handler', () => {

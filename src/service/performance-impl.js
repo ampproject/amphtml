@@ -16,9 +16,9 @@
 
 import {layoutRectLtwh} from '../layout-rect';
 import {registerServiceBuilder, getService} from '../service';
-import {resourcesForDoc} from '../resources';
-import {viewerForDoc} from '../viewer';
-import {viewportForDoc} from '../viewport';
+import {resourcesForDoc} from '../services';
+import {viewerForDoc} from '../services';
+import {viewportForDoc} from '../services';
 import {whenDocumentComplete} from '../document-ready';
 import {urls} from '../config';
 import {getMode} from '../mode';
