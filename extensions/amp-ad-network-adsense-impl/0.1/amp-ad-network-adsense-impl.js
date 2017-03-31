@@ -133,7 +133,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const height = this.element.getAttribute('height');
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
-    debugger;
     const size = (width && !isNaN(width) && height && !isNaN(height))
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
