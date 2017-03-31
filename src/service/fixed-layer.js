@@ -40,15 +40,19 @@ export class FixedLayer {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!./vsync-impl.Vsync} vsync
+   * @param {number} borderTop
    * @param {number} paddingTop
    * @param {boolean} transfer
    */
-  constructor(ampdoc, vsync, paddingTop, transfer) {
+  constructor(ampdoc, vsync, borderTop, paddingTop, transfer) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const */
     this.vsync_ = vsync;
+
+    /** @const @private {number} */
+    this.borderTop_ = borderTop;
 
     /** @private {number} */
     this.paddingTop_ = paddingTop;
@@ -315,7 +319,8 @@ export class FixedLayer {
               (isSticky && top == '0px' && isImplicitAuto &&
                   currentOffsetTop != 0)) {
             top = '';
-            if (currentOffsetTop == this.committedPaddingTop_) {
+            if (currentOffsetTop ==
+                    this.committedPaddingTop_ + this.borderTop_) {
               top = '0px';
             }
           }
