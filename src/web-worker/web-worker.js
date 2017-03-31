@@ -43,7 +43,7 @@ self.addEventListener('message', function(event) {
       evaluator_ = evaluator_ || new BindEvaluator();
       returnValue = evaluator_.addBindings.apply(evaluator_, args);
       break;
-    case 'bind.removeBindings':
+    case 'bind.removeBindingsWithExpressionStrings':
       if (evaluator_) {
         const removeBindings = evaluator_.removeBindingsWithExpressionStrings;
         returnValue = removeBindings.apply(evaluator_, args);

@@ -116,6 +116,10 @@ export class Bind {
     /** @const @private {boolean} */
     this.workerExperimentEnabled_ = isExperimentOn(this.win_, 'web-worker');
 
+    if (!this.workerExperimentEnabled_) {
+      this.evaluator_ = new BindEvaluator();
+    }
+
     /**
      * Resolved when the service is fully initialized.
      * @const @private {Promise}
@@ -191,7 +195,7 @@ export class Bind {
         userError.stack = error.stack;
         reportError(userError);
       } else {
-        return this.setState(returnValue.result);
+        return this.setState(result);
       }
     });
     return this.setStatePromise_;
@@ -276,7 +280,6 @@ export class Bind {
         dev().fine(TAG, `Asking worker to parse expressions...`);
         return invokeWebWorker(this.win_, 'bind.addBindings', [bindings]);
       } else {
-        this.evaluator_ = this.evaluator_ || new BindEvaluator();
         const parseErrors = this.evaluator_.addBindings(bindings);
         return parseErrors;
       }
@@ -334,8 +337,8 @@ export class Bind {
       if (deletedExpressions.length > 0) {
         if (this.workerExperimentEnabled_) {
           dev().fine(TAG, `Asking worker to remove expressions...`);
-          return invokeWebWorker(
-              this.win_, 'bind.removeBindings', [deletedExpressions]);
+          return invokeWebWorker(this.win_,
+              'bind.removeBindingsWithExpressionStrings', [deletedExpressions]);
         } else {
           this.evaluator_.removeBindingsWithExpressionStrings(
               deletedExpressions);
