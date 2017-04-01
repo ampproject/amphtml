@@ -20,6 +20,7 @@ import {loadScript, validateData} from '../3p/3p';
 __kxamp: false,
 __kx_ad_slots: false,
 __kx_ad_start: false,
+__kx_viewability: false,
 */
 
 /**
@@ -30,6 +31,10 @@ __kx_ad_start: false,
 export function kixer(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
   validateData(data, ['adslot'], []);
+
+  let in_view = false;
+  let viewed = false;
+  let view_timer = null;
 
   const d = global.document.createElement('div');
   d.id = '__kx_ad_' + data.adslot;
@@ -43,7 +48,33 @@ export function kixer(global, data) {
       global.context.noContentAvailable();
     }
   };
-  d.addEventListener('load', kxload, false);
+  d.addEventListener('load', kxload, false); // Listen for the kixer load event
+
+  const kxview_check = function(coords) {
+    if (coords.intersectionRect.height > coords.boundingClientRect.height / 2) {
+      if (viewed === false && view_timer == null) {
+        view_timer = setTimeout(function() {
+          clearTimeout(view_timer);
+          view_timer = null;
+          if (in_view === true) {
+            if (typeof __kx_viewability.process_locked === 'function') {
+              viewed = true;
+              __kx_viewability.process_locked(data.adslot);
+            }
+          }
+        }, 900);
+      }
+      in_view = true;
+    } else {
+      in_view = false;
+    }
+  };
+
+  global.context.observeIntersection(function(changes) {
+    changes.forEach(function(c) {
+      kxview_check(c);
+    });
+  });
 
   loadScript(global, 'https://cdn.kixer.com/ad/load.js', () => {
     __kxamp[data.adslot] = 1;
