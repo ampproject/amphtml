@@ -789,6 +789,14 @@ app.get('/dist/rtv/*/v0/*.js', function(req, res, next) {
   var mode = process.env.SERVE_MODE;
   var fileName = path.basename(req.path);
   var filePath = 'https://cdn.ampproject.org/v0/' + fileName;
+  if (mode == 'cdn') {
+    // This will not be useful until extension-location.js change in prod
+    // Require url from cdn
+    request(filePath, function (error, response) {
+      res.send(response);
+    });
+    return;
+  }
   filePath = replaceUrls(mode, filePath);
   req.url = filePath;
   next();
@@ -801,9 +809,19 @@ app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
     function(req, res, next) {
       // Speical case for entry point script url. Use compiled for testing
       var mode = process.env.SERVE_MODE;
-      var fileUrl = req.url;
+      var fileName = path.basename(req.path);
+      if (mode == 'cdn') {
+        // This will not be useful until extension-location.js change in prod
+        // Require url from cdn
+        var filePath = 'https://cdn.ampproject.org/' + fileName;
+        request(filePath, function(error, response) {
+          res.send(response);
+        });
+        return;
+      }
       // TODO: May need to use compiled version in gulp test. Need comfirm first.
       if (mode == 'max') {
+        var fileUrl = req.url;
         req.url = fileUrl.substr(0, fileUrl.length - 3) + '.max.js';
       }
       next();
