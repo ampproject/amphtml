@@ -783,9 +783,36 @@ app.get([ fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], function(req, 
 });
 
 /*
+ * Serve extension script url
+ */
+app.get('/dist/rtv/*/v0/*.js', function(req, res, next) {
+  var mode = process.env.SERVE_MODE;
+  var fileName = path.basename(req.path);
+  var filePath = 'https://cdn.ampproject.org/v0/' + fileName;
+  filePath = replaceUrls(mode, filePath);
+  req.url = filePath;
+  next();
+});
+
+/**
+ * Serve entry point script url
+ */
+app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
+    function(req, res, next) {
+      // Speical case for entry point script url. Use compiled for testing
+      var mode = process.env.SERVE_MODE;
+      var fileUrl = req.url;
+      // TODO: May need to use compiled version in gulp test. Need comfirm first.
+      if (mode == 'max') {
+        req.url = fileUrl.substr(0, fileUrl.length - 3) + '.max.js';
+      }
+      next();
+    });
+
+/*
  * Start Cache SW LOCALDEV section
  */
-app.get(['/dist/sw.js', '/dist/sw.max.js'], function(req, res, next) {
+app.get('/dist/sw(.max)?.js', function(req, res, next) {
   var filePath = req.path;
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     var n = new Date();
@@ -861,7 +888,7 @@ app.get('/dist/diversions', function(req, res, next) {
 /**
  * Web worker binary.
  */
-app.get(['/dist/ww.js', '/dist/ww.max.js'], function(req, res) {
+app.get('/dist/ww(.max)?.js', function(req, res) {
   fs.readFileAsync(process.cwd() + req.path).then(file => {
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');
