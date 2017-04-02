@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const sv = function(number, index) {
   return [
     ['just nu', 'om en stund'],
     ['%s sekunder sedan', 'om %s seconder'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1 månad sedan', 'om 1 månad'],
     ['%s månader sedan', 'om %s månader'],
     ['1 år sedan', 'om 1 år'],
-    ['%s år sedan', 'om %s år']
+    ['%s år sedan', 'om %s år'],
   ][index];
-}
+};

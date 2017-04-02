@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const ptBR = function(number, index) {
   return [
     ['agora mesmo', 'daqui um pouco'],
     ['há %s segundos', 'em %s segundos'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['há um mês', 'em um mês'],
     ['há %s meses', 'em %s meses'],
     ['há um ano', 'em um ano'],
-    ['há %s anos', 'em %s anos']
+    ['há %s anos', 'em %s anos'],
   ][index];
-}
+};

@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const vi = function(number, index) {
   return [
     ['vừa xong', 'một lúc'],
     ['%s giây trước', 'trong %s giây'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1 tháng trước', 'trong 1 tháng'],
     ['%s tháng trước', 'trong %s tháng'],
     ['1 năm trước', 'trong 1 năm'],
-    ['%s năm trước', 'trong %s năm']
+    ['%s năm trước', 'trong %s năm'],
   ][index];
-}
+};

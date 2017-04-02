@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const inID = function(number, index) {
   return [
     ['baru saja', 'sebentar'],
     ['%s detik yang lalu', 'dalam %s detik'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1 bulan yang lalu', 'dalam 1 bulan'],
     ['%s bulan yang lalu', 'dalam %s bulan'],
     ['1 tahun yang lalu', 'dalam 1 tahun'],
-    ['%s tahun yang lalu', 'dalam %s tahun']
+    ['%s tahun yang lalu', 'dalam %s tahun'],
   ][index];
-}
+};

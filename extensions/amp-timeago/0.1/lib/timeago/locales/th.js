@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const th = function(number, index) {
   return [
     ['เมื่อสักครู่นี้', 'อีกสักครู่'],
     ['%s วินาทีที่แล้ว', 'ใน %s วินาที'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1 เดือนที่แล้ว', 'ใน 1 เดือน'],
     ['%s เดือนที่แล้ว', 'ใน %s เดือน'],
     ['1 ปีที่แล้ว', 'ใน 1 ปี'],
-    ['%s ปีที่แล้ว', 'ใน %s ปี']
+    ['%s ปีที่แล้ว', 'ใน %s ปี'],
   ][index];
-}
+};

@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const da = function(number, index) {
   return [
     ['for et øjeblik siden', 'om et øjeblik'],
     ['for %s sekunder siden', 'om %s sekunder'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['for 1 måned siden', 'om 1 måned'],
     ['for %s måneder siden', 'om %s måneder'],
     ['for 1 år siden', 'om 1 år'],
-    ['for %s år siden', 'om %s år']
+    ['for %s år siden', 'om %s år'],
   ][index];
-}
+};

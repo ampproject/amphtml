@@ -1,5 +1,5 @@
-module.exports = function(number, index) {
-  var langTable = [
+export const ro = function(number, index) {
+  const langTable = [
     ['chiar acum', 'chiar acum'],
     ['acum %s secunde', 'peste %s secunde'],
     ['acum un minut', 'peste un minut'],
@@ -13,11 +13,11 @@ module.exports = function(number, index) {
     ['acum o lună', 'peste o lună'],
     ['acum %s luni', 'peste %s luni'],
     ['acum un an', 'peste un an'],
-    ['acum %s ani', 'peste %s ani']
+    ['acum %s ani', 'peste %s ani'],
   ];
 
   if (number < 20) {
-  	return langTable[index];
+    return langTable[index];
   }
 
   // A `de` preposition must be added between the number and the adverb
@@ -26,4 +26,4 @@ module.exports = function(number, index) {
     langTable[index][0].replace('%s', '%s de'),
     langTable[index][1].replace('%s', '%s de'),
   ];
-}
+};

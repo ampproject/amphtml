@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const ja = function(number, index) {
   return [
     ['すこし前', 'すぐに'],
     ['%s秒前', '%s秒以内'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1ヶ月前', '1ヶ月以内'],
     ['%sヶ月前', '%sヶ月以内'],
     ['1年前', '1年以内'],
-    ['%s年前', '%s年以内']
+    ['%s年前', '%s年以内'],
   ][index];
-}
+};

@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const tr = function(number, index) {
   return [
     ['az önce', 'şimdi'],
     ['%s saniye önce', '%s saniye içinde'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1 ay önce', '1 ay içinde'],
     ['%s ay önce', '%s ay içinde'],
     ['1 yıl önce', '1 yıl içinde'],
-    ['%s yıl önce', '%s yıl içinde']
+    ['%s yıl önce', '%s yıl içinde'],
   ][index];
-}
+};

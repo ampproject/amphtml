@@ -13,8 +13,82 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import timeago from './lib/timeago/timeago';
+import {ar} from './lib/timeago/locales/ar';
+import {be} from './lib/timeago/locales/be';
+import {bg} from './lib/timeago/locales/bg';
+import {ca} from './lib/timeago/locales/ca';
+import {da} from './lib/timeago/locales/da';
+import {de} from './lib/timeago/locales/de';
+import {el} from './lib/timeago/locales/el';
+import {en} from './lib/timeago/locales/en';
+import {enShort} from './lib/timeago/locales/enShort';
+import {es} from './lib/timeago/locales/es';
+import {eu} from './lib/timeago/locales/eu';
+import {fi} from './lib/timeago/locales/fi';
+import {fr} from './lib/timeago/locales/fr';
+import {he} from './lib/timeago/locales/he';
+import {hu} from './lib/timeago/locales/hu';
+import {inBG} from './lib/timeago/locales/inBG';
+import {inHI} from './lib/timeago/locales/inHI';
+import {inID} from './lib/timeago/locales/inID';
+import {it} from './lib/timeago/locales/it';
+import {ja} from './lib/timeago/locales/ja';
+import {ko} from './lib/timeago/locales/ko';
+import {ml} from './lib/timeago/locales/ml';
+import {nbNO} from './lib/timeago/locales/nbNO';
+import {nl} from './lib/timeago/locales/nl';
+import {nnNO} from './lib/timeago/locales/nnNO';
+import {pl} from './lib/timeago/locales/pl';
+import {ptBR} from './lib/timeago/locales/ptBR';
+import {ro} from './lib/timeago/locales/ro';
+import {ru} from './lib/timeago/locales/ru';
+import {sv} from './lib/timeago/locales/sv';
+import {ta} from './lib/timeago/locales/ta';
+import {th} from './lib/timeago/locales/th';
+import {tr} from './lib/timeago/locales/tr';
+import {uk} from './lib/timeago/locales/uk';
+import {vi} from './lib/timeago/locales/vi';
+import {zhCN} from './lib/timeago/locales/zhCN';
+import {zhTW} from './lib/timeago/locales/zhTW';
+
+timeago.register('ar', ar);
+timeago.register('be', be);
+timeago.register('bg', bg);
+timeago.register('ca', ca);
+timeago.register('da', da);
+timeago.register('de', de);
+timeago.register('el', el);
+timeago.register('en', en);
+timeago.register('enShort', enShort);
+timeago.register('es', es);
+timeago.register('eu', eu);
+timeago.register('fi', fi);
+timeago.register('fr', fr);
+timeago.register('he', he);
+timeago.register('hu', hu);
+timeago.register('inBG', inBG);
+timeago.register('inHI', inHI);
+timeago.register('inID', inID);
+timeago.register('it', it);
+timeago.register('ja', ja);
+timeago.register('ko', ko);
+timeago.register('ml', ml);
+timeago.register('nbNO', nbNO);
+timeago.register('nl', nl);
+timeago.register('nnNO', nnNO);
+timeago.register('pl', pl);
+timeago.register('ptBR', ptBR);
+timeago.register('ro', ro);
+timeago.register('ru', ru);
+timeago.register('sv', sv);
+timeago.register('ta', ta);
+timeago.register('th', th);
+timeago.register('tr', tr);
+timeago.register('uk', uk);
+timeago.register('vi', vi);
+timeago.register('zhCN', zhCN);
+timeago.register('zhTW', zhTW);
 
 /** @private @const {string} */
 const DEFAULT_LOCALE_ = 'en';
@@ -28,7 +102,6 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
     /** @private @const {string} */
     this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE_;
-    this.loadLocale_(this.locale_);
 
     /** @private @const {string} */
     this.timeago_ = timeago().format(this.datetime_, this.locale_);
@@ -52,41 +125,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
    * @private
    */
   loadLocale_(locale) {
-    if (locale === 'ar') timeago.register('ar', require('./lib/timeago/locales/ar'));
-    if (locale === 'be') timeago.register('be', require('./lib/timeago/locales/be'));
-    if (locale === 'bg') timeago.register('bg', require('./lib/timeago/locales/bg'));
-    if (locale === 'ca') timeago.register('ca', require('./lib/timeago/locales/ca'));
-    if (locale === 'da') timeago.register('da', require('./lib/timeago/locales/da'));
-    if (locale === 'de') timeago.register('de', require('./lib/timeago/locales/de'));
-    if (locale === 'el') timeago.register('el', require('./lib/timeago/locales/el'));
-    if (locale === 'en_short') timeago.register('en_short', require('./lib/timeago/locales/en_short'));
-    if (locale === 'es') timeago.register('es', require('./lib/timeago/locales/es'));
-    if (locale === 'eu') timeago.register('eu', require('./lib/timeago/locales/eu'));
-    if (locale === 'fi') timeago.register('fi', require('./lib/timeago/locales/fi'));
-    if (locale === 'fr') timeago.register('fr', require('./lib/timeago/locales/fr'));
-    if (locale === 'he') timeago.register('he', require('./lib/timeago/locales/he'));
-    if (locale === 'hu') timeago.register('hu', require('./lib/timeago/locales/hu'));
-    if (locale === 'in_BG') timeago.register('in_BG', require('./lib/timeago/locales/in_BG'));
-    if (locale === 'in_HI') timeago.register('in_HI', require('./lib/timeago/locales/in_HI'));
-    if (locale === 'in_ID') timeago.register('in_ID', require('./lib/timeago/locales/in_ID'));
-    if (locale === 'it') timeago.register('it', require('./lib/timeago/locales/it'));
-    if (locale === 'ja') timeago.register('ja', require('./lib/timeago/locales/ja'));
-    if (locale === 'ko') timeago.register('ko', require('./lib/timeago/locales/ko'));
-    if (locale === 'ml') timeago.register('ml', require('./lib/timeago/locales/ml'));
-    if (locale === 'nb_NO') timeago.register('nb_NO', require('./lib/timeago/locales/nb_NO'));
-    if (locale === 'nl') timeago.register('nl', require('./lib/timeago/locales/nl'));
-    if (locale === 'nn_NO') timeago.register('nn_NO', require('./lib/timeago/locales/nn_NO'));
-    if (locale === 'pl') timeago.register('pl', require('./lib/timeago/locales/pl'));
-    if (locale === 'pt_BR') timeago.register('pt_BR', require('./lib/timeago/locales/pt_BR'));
-    if (locale === 'ro') timeago.register('ro', require('./lib/timeago/locales/ro'));
-    if (locale === 'ru') timeago.register('ru', require('./lib/timeago/locales/ru'));
-    if (locale === 'sv') timeago.register('sv', require('./lib/timeago/locales/sv'));
-    if (locale === 'ta') timeago.register('ta', require('./lib/timeago/locales/ta'));
-    if (locale === 'th') timeago.register('th', require('./lib/timeago/locales/th'));
-    if (locale === 'tr') timeago.register('tr', require('./lib/timeago/locales/tr'));
-    if (locale === 'uk') timeago.register('uk', require('./lib/timeago/locales/uk'));
-    if (locale === 'vi') timeago.register('vi', require('./lib/timeago/locales/vi'));
-    if (locale === 'zh_TW') timeago.register('zh_TW', require('./lib/timeago/locales/zh_TW'));
+    timeago.register(locale, locale);
   }
 
 }

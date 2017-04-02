@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const ko = function(number, index) {
   return [
     ['방금', '곧'],
     ['%s초 전', '%s초 후'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1개월 전', '1개월 후'],
     ['%s개월 전', '%s개월 후'],
     ['1년 전', '1년 후'],
-    ['%s년 전', '%s년 후']
+    ['%s년 전', '%s년 후'],
   ][index];
-}
+};

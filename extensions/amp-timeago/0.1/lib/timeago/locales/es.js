@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const es = function(number, index) {
   return [
     ['justo ahora', 'en un rato'],
     ['hace %s segundos', 'en %s segundos'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['hace 1 mes', 'en 1 mes'],
     ['hace %s meses', 'en %s meses'],
     ['hace 1 año', 'en 1 año'],
-    ['hace %s años', 'en %s años']
+    ['hace %s años', 'en %s años'],
   ][index];
 };

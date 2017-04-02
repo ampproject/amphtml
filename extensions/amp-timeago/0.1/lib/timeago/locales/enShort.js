@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const enShort = function(number, index) {
   return [
     ['just now', 'right now'],
     ['%ss ago', 'in %ss'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1mo ago', 'in 1mo'],
     ['%smo ago', 'in %smo'],
     ['1yr ago', 'in 1yr'],
-    ['%syr ago', 'in %syr']
+    ['%syr ago', 'in %syr'],
   ][index];
-}
+};

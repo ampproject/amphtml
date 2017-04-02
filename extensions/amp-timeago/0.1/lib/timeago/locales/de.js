@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const de = function(number, index) {
   return [
     ['gerade eben', 'vor einer Weile'],
     ['vor %s Sekunden', 'in %s Sekunden'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['vor 1 Monat', 'in 1 Monat'],
     ['vor %s Monaten', 'in %s Monaten'],
     ['vor 1 Jahr', 'in 1 Jahr'],
-    ['vor %s Jahren', 'in %s Jahren']
+    ['vor %s Jahren', 'in %s Jahren'],
   ][index];
-}
+};

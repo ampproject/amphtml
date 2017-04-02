@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const eu = function(number, index) {
   return [
     ['orain', 'denbora bat barru'],
     ['duela %s segundu', '%s segundu barru'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['duela hillabete 1', 'hillabete 1 barru'],
     ['duela %s hillabete', '%s hillabete barru'],
     ['duela urte 1', 'urte 1 barru'],
-    ['duela %s urte', '%s urte barru']
+    ['duela %s urte', '%s urte barru'],
   ][index];
-}
+};

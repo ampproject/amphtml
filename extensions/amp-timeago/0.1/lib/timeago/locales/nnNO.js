@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const nnNO = function(number, index) {
   return [
     ['nett no', 'om litt'],
     ['%s sekund sidan', 'om %s sekund'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1 månad sidan', 'om 1 månad'],
     ['%s månadar sidan', 'om %s månadar'],
     ['1 år sidan', 'om 1 år'],
-    ['%s år sidan', 'om %s år']
+    ['%s år sidan', 'om %s år'],
   ][index];
-}
+};

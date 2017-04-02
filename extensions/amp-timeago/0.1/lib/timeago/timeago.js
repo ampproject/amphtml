@@ -1,57 +1,72 @@
 /**
- * Copyright (c) 2016 hustcc
- * License: MIT
- * Version: v3.0.0
+ * This is a fork of the timago.js library developed by hustcc
  * https://github.com/hustcc/timeago.js
 **/
 /* jshint expr: true */
-!function (root, factory) {
+function(root, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory(root); // nodejs support
     module.exports['default'] = module.exports; // es6 support
   }
-  else
+  else {
     root.timeago = factory(root);
+  }
 }(typeof window !== 'undefined' ? window : this,
-function () {
-  var indexMapEn = 'second_minute_hour_day_week_month_year'.split('_'),
-    indexMapZh = '秒_分钟_小时_天_周_月_年'.split('_'),
-    // build-in locales: en & zh_CN
-    locales = {
-      'en': function(number, index) {
-        if (index === 0) return ['just now', 'right now'];
-        var unit = indexMapEn[parseInt(index / 2)];
-        if (number > 1) unit += 's';
-        return [number + ' ' + unit + ' ago', 'in ' + number + ' ' + unit];
-      },
-      'zh_CN': function(number, index) {
-        if (index === 0) return ['刚刚', '片刻后'];
-        var unit = indexMapZh[parseInt(index / 2)];
-        return [number + unit + '前', number + unit + '后'];
+function() {
+  const indexMapEn = 'second_minute_hour_day_week_month_year'.split('_');
+  const indexMapZh = '秒_分钟_小时_天_周_月_年'.split('_');
+
+  // build-in locales: en & zh_CN
+  const locales = {
+    'en': function(number, index) {
+      if (index === 0) {
+        return ['just now', 'right now'];
       }
+      let unit = indexMapEn[parseInt(index / 2, 10)];
+      if (number > 1) {
+        unit += 's';
+      }
+      return [number + ' ' + unit + ' ago', 'in ' + number + ' ' + unit];
     },
-    // second, minute, hour, day, week, month, year(365 days)
-    SEC_ARRAY = [60, 60, 24, 7, 365/7/12, 12],
-    SEC_ARRAY_LEN = 6,
-    ATTR_DATETIME = 'datetime',
-    ATTR_DATA_TID = 'data-tid',
-    timers = {}; // real-time render timers
+    'zh_CN': function(number, index) {
+      if (index === 0) {
+        return ['刚刚', '片刻后'];
+      }
+      const unit = indexMapZh[parseInt(index / 2, 10)];
+      return [number + unit + '前', number + unit + '后'];
+    }
+  };
+
+  // second, minute, hour, day, week, month, year(365 days)
+  const SEC_ARRAY = [60, 60, 24, 7, 365 / 7 / 12, 12];
+  const SEC_ARRAY_LEN = 6;
+  const ATTR_DATETIME = 'datetime';
+  const ATTR_DATA_TID = 'data-tid';
+  let timers = {}; // real-time render timers
 
   // format Date / string / timestamp to Date instance.
   function toDate(input) {
-    if (input instanceof Date) return input;
-    if (!isNaN(input)) return new Date(toInt(input));
-    if (/^\d+$/.test(input)) return new Date(toInt(input));
+    if (input instanceof Date) {
+      return input;
+    }
+    if (!isNaN(input)) {
+      return new Date(toInt(input));
+    }
+    if (/^\d+$/.test(input)) {
+      return new Date(toInt(input));
+    }
     input = (input || '').trim().replace(/\.\d+/, '') // remove milliseconds
       .replace(/-/, '/').replace(/-/, '/')
       .replace(/(\d)T(\d)/, '$1 $2').replace(/Z/, ' UTC') // 2017-2-5T3:57:52Z -> 2017-2-5 3:57:52UTC
       .replace(/([\+\-]\d\d)\:?(\d\d)/, ' $1$2'); // -04:00 -> -0400
     return new Date(input);
   }
+
   // change f into int, remove Decimal. just for code compression
   function toInt(f) {
     return parseInt(f);
   }
+
   // format the diff second to *** time ago, with setting locale
   function formatDiff(diff, locale, defaultLocale) {
     // if locale is not exist, use defaultLocale.
@@ -72,11 +87,13 @@ function () {
     if (diff > (i === 0 ? 9 : 1)) i += 1;
     return locales[locale](diff, i)[agoin].replace('%s', diff);
   }
+
   // calculate the diff second between date to be formated an now date.
   function diffSec(date, nowDate) {
     nowDate = nowDate ? toDate(nowDate) : new Date();
     return (nowDate - toDate(date)) / 1000;
   }
+
   /**
    * nextInterval: calculate the next interval time.
    * - diff: the diff sec between now and date to be formated.
@@ -97,6 +114,7 @@ function () {
     d = d ? rst - d : rst;
     return Math.ceil(d);
   }
+
   // get the datetime attribute, jQuery and DOM
   function getDateAttr(node) {
     if(node.dataset.timeago) return node.dataset.timeago; // data-timeago supported
@@ -113,6 +131,7 @@ function () {
   function getTidFromNode(node) {
     return getAttr(node, ATTR_DATA_TID);
   }
+
   /**
    * timeago: the function to get `timeago` instance.
    * - nowDate: the relative date, default is new Date().
@@ -150,6 +169,7 @@ function () {
     //   return Math.ceil(d);
     // }; // for dev test
   }
+
   // what the timer will do
   Timeago.prototype.doRender = function(node, date, locale) {
     var diff = diffSec(date, this.nowDate),
@@ -165,6 +185,7 @@ function () {
     // set attribute date-tid
     setTidAttr(node, tid);
   };
+
   /**
    * format: format the date to *** time ago, with setting or default locale
    * - date: the date / string / timestamp to be formated
@@ -179,6 +200,7 @@ function () {
   Timeago.prototype.format = function(date, locale) {
     return formatDiff(diffSec(date, this.nowDate), locale, this.defaultLocale);
   };
+
   /**
    * render: render the DOM real-time.
    * - nodes: which nodes will be rendered.
@@ -199,6 +221,7 @@ function () {
       this.doRender(nodes[i], getDateAttr(nodes[i]), locale); // render item
     }
   };
+
   /**
    * setLocale: set the default locale name.
    *
@@ -210,6 +233,7 @@ function () {
   Timeago.prototype.setLocale = function(locale) {
     this.defaultLocale = locale;
   };
+
   /**
    * timeago: the function to get `timeago` instance.
    * - nowDate: the relative date, default is new Date().
@@ -225,6 +249,7 @@ function () {
   function timeagoFactory(nowDate, defaultLocale) {
     return new Timeago(nowDate, defaultLocale);
   }
+
   /**
    * register: register a new language locale
    * - locale: locale name, e.g. en / zh_CN, notice the standard.

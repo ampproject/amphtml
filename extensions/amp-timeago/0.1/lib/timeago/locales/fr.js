@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const fr = function(number, index) {
   return [
     ['à l\'instant', 'dans un instant'],
     ['il y a %s secondes', 'dans %s secondes'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['il y a 1 mois', 'dans 1 mois'],
     ['il y a %s mois', 'dans %s mois'],
     ['il y a 1 an', 'dans 1 an'],
-    ['il y a %s ans', 'dans %s ans']
+    ['il y a %s ans', 'dans %s ans'],
   ][index];
-}
+};

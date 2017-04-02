@@ -1,20 +1,27 @@
-var seconds = formatNum.bind(null, 'секунду', '%s секунду', '%s секунды', '%s секунд'),
-  minutes = formatNum.bind(null, 'хвіліну', '%s хвіліну', '%s хвіліны', '%s хвілін'),
-  hours = formatNum.bind(null, 'гадзіну', '%s гадзіну', '%s гадзіны', '%s гадзін'),
-  days = formatNum.bind(null, 'дзень', '%s дзень', '%s дні', '%s дзён'),
-  weeks = formatNum.bind(null, 'тыдзень', '%s тыдзень', '%s тыдні', '%s тыдняў'),
-  months = formatNum.bind(null, 'месяц', '%s месяц', '%s месяцы', '%s месяцаў'),
-  years = formatNum.bind(null, 'год', '%s год', '%s гады', '%s гадоў');
+const seconds =
+  formatNum.bind(null, 'секунду', '%s секунду', '%s секунды', '%s секунд');
+const minutes =
+  formatNum.bind(null, 'хвіліну', '%s хвіліну', '%s хвіліны', '%s хвілін');
+const hours =
+  formatNum.bind(null, 'гадзіну', '%s гадзіну', '%s гадзіны', '%s гадзін');
+const days =
+  formatNum.bind(null, 'дзень', '%s дзень', '%s дні', '%s дзён');
+const weeks =
+  formatNum.bind(null, 'тыдзень', '%s тыдзень', '%s тыдні', '%s тыдняў');
+const months =
+  formatNum.bind(null, 'месяц', '%s месяц', '%s месяцы', '%s месяцаў');
+const years =
+  formatNum.bind(null, 'год', '%s год', '%s гады', '%s гадоў');
 
-module.exports = function(number, index) {
-  switch(index) {
+export const be = function(number, index) {
+  switch (index) {
     case 0: return ['толькі што', 'праз некалькі секунд'];
     case 1: return [seconds(number) + ' таму', 'праз ' + seconds(number)];
     case 2:
     case 3: return [minutes(number) + ' таму', 'праз ' + minutes(number)];
     case 4:
     case 5: return [hours(number) + ' таму', 'праз ' + hours(number)];
-    case 6: 
+    case 6:
     case 7: return [days(number) + ' таму', 'праз ' + days(number)];
     case 8:
     case 9: return [weeks(number) + ' таму', 'праз ' + weeks(number)];
@@ -22,7 +29,7 @@ module.exports = function(number, index) {
     case 11: return [months(number) + ' таму', 'праз ' + months(number)];
     case 12:
     case 13: return [years(number) + ' таму', 'праз ' + years(number)];
-    default: return ['', '']
+    default: return ['', ''];
   }
 };
 
@@ -36,8 +43,8 @@ module.exports = function(number, index) {
  * @returns {string}
  */
 function formatNum(f1, f, s, t, n) {
-  var n10 = n % 10,
-    str = t;
+  const n10 = n % 10;
+  let str = t;
 
   if (n === 1) {
     str = f1;

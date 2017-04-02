@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const bg = function(number, index) {
   return [
     ['току що', 'съвсем скоро'],
     ['преди %s секунди', 'след %s секунди'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['преди 1 месец', 'след 1 месец'],
     ['преди %s месеца', 'след %s месеца'],
     ['преди 1 година', 'след 1 година'],
-    ['преди %s години', 'след %s години']
+    ['преди %s години', 'след %s години'],
   ][index];
-}
+};

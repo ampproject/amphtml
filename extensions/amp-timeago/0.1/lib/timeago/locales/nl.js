@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const nl = function(number, index) {
   return [
     ['recent', 'binnenkort'],
     ['%s seconden geleden', 'binnen %s seconden'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1 maand geleden', 'binnen 1 maand'],
     ['%s maanden geleden', 'binnen %s maanden'],
     ['1 jaar geleden', 'binnen 1 jaar'],
-    ['%s jaren geleden', 'binnen %s jaren']
+    ['%s jaren geleden', 'binnen %s jaren'],
   ][index];
-}
+};

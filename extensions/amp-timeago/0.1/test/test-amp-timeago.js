@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {AmpTimeago} from '../amp-timeago';
+import '../amp-timeago';
 
 describes.realWin('amp-timeago', {
   amp: {
     extensions: ['amp-timeago'],
-  }
+  },
 }, env => {
 
   let win;
@@ -29,7 +28,7 @@ describes.realWin('amp-timeago', {
     win = env.win;
     element = win.document.createElement('amp-timeago');
 
-    var date = new Date();
+    const date = new Date();
     date.setDate(date.getDate() - 2);
     element.setAttribute('datetime', date.toISOString());
     win.document.body.appendChild(element);

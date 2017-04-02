@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const fi = function(number, index) {
   return [
     ['juuri äsken', 'juuri nyt'],
     ['%s sekuntia sitten', '%s sekunnin päästä'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['kuukausi sitten', 'kuukauden päästä'],
     ['%s kuukautta sitten', '%s kuukauden päästä'],
     ['vuosi sitten', 'vuoden päästä'],
-    ['%s vuotta sitten', '%s vuoden päästä']
+    ['%s vuotta sitten', '%s vuoden päästä'],
   ][index];
-}
+};

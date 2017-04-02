@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const zhCN = function(number, index) {
   return [
     ['刚刚', '片刻后'],
     ['%s秒前', '%s秒后'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1月前', '1月后'],
     ['%s月前', '%s月后'],
     ['1年前', '1年后'],
-    ['%s年前', '%s年后']
+    ['%s年前', '%s年后'],
   ][index];
-}
+};

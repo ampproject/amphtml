@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const it = function(number, index) {
   return [
     ['poco fa', 'tra poco'],
     ['%s secondi fa', '%s secondi da ora'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['un mese fa', 'un mese da ora'],
     ['%s mesi fa', '%s mesi da ora'],
     ['un anno fa', 'un anno da ora'],
-    ['%s anni fa', '%s anni da ora']
+    ['%s anni fa', '%s anni da ora'],
   ][index];
-}
+};

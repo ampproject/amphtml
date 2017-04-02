@@ -1,4 +1,4 @@
-module.exports = function(number, index) {
+export const hu = function(number, index) {
   return [
     ['éppen most', 'éppen most'],
     ['%s másodperce', '%s másodpercen belül'],
@@ -13,6 +13,6 @@ module.exports = function(number, index) {
     ['1 hónapja', '1 hónapon belül'],
     ['%s hónapja', '%s hónapon belül'],
     ['1 éve', '1 éven belül'],
-    ['%s éve', '%s éven belül']
+    ['%s éve', '%s éven belül'],
   ][index];
-}
+};
