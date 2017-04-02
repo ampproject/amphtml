@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import timeago from './lib/timeago/timeago';
+import {timeagoFactory as timeago} from './lib/timeago/timeago';
 import {ar} from './lib/timeago/locales/ar';
 import {be} from './lib/timeago/locales/be';
 import {bg} from './lib/timeago/locales/bg';
@@ -116,16 +116,6 @@ export class AmpTimeAgo extends AMP.BaseElement {
   /** @override */
   isLayoutSupported() {
     return true;
-  }
-
-  /**
-   * Loads the required locale from the timeago plugin.
-   * Unfortunately it doesn't seem possible to do this as a loop.
-   * http://stackoverflow.com/questions/37241662/using-require-with-a-variable-vs-using-a-string-in-webpack/37241982
-   * @private
-   */
-  loadLocale_(locale) {
-    timeago.register(locale, locale);
   }
 
 }
