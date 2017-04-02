@@ -27,10 +27,12 @@ function toDate(input) {
     .replace(/([\+\-]\d\d)\:?(\d\d)/, ' $1$2'); // -04:00 -> -0400
   return new Date(input);
 }
+
 // change f into int, remove decimal. Just for code compression
 function toInt(f) {
   return parseInt(f, 10);
 }
+
 // format the diff second to *** time ago, with setting locale
 function formatDiff(diff, locale, defaultLocale) {
   // if locale is not exist, use defaultLocale.
@@ -54,11 +56,13 @@ function formatDiff(diff, locale, defaultLocale) {
   }
   return locales[locale](diff, i, totalSec)[agoin].replace('%s', diff);
 }
+
 // calculate the diff second between date to be formated an now date.
 function diffSec(date, nowDate) {
   nowDate = nowDate ? toDate(nowDate) : new Date();
   return (nowDate - toDate(date)) / 1000;
 }
+
 /**
  * nextInterval: calculate the next interval time.
  * - diff: the diff sec between now and date to be formated.
@@ -79,6 +83,7 @@ function nextInterval(diff) {
   d = d ? rst - d : rst;
   return Math.ceil(d);
 }
+
 // get the datetime attribute, jQuery and DOM
 function getDateAttr(node) {
   if (node.dataset.timeago) {
@@ -86,25 +91,19 @@ function getDateAttr(node) {
   }
   return getAttr(node, ATTR_DATETIME);
 }
+
 function getAttr(node, name) {
-  if (node.getAttribute) {
-    return node.getAttribute(name); // native
-  }
-  if (node.attr) {
-    return node.attr(name); // jquery
-  }
+  return node.getAttribute(name);
 }
+
 function setTidAttr(node, val) {
-  if (node.setAttribute) {
-    return node.setAttribute(ATTR_DATA_TID, val); // native
-  }
-  if (node.attr) {
-    return node.attr(ATTR_DATA_TID, val); // jquery
-  }
+  return node.setAttribute(ATTR_DATA_TID, val);
 }
+
 function getTidFromNode(node) {
   return getAttr(node, ATTR_DATA_TID);
 }
+
 /**
  * timeago: the function to get `timeago` instance.
  * - nowDate: the relative date, default is new Date().
@@ -124,6 +123,7 @@ function Timeago(nowDate, defaultLocale) {
   // for dev test
   // this.nextInterval = nextInterval;
 }
+
 // what the timer will do
 Timeago.prototype.doRender = function(node, date, locale) {
   const diff = diffSec(date, this.nowDate);
@@ -139,6 +139,7 @@ Timeago.prototype.doRender = function(node, date, locale) {
   // set attribute date-tid
   setTidAttr(node, tid);
 };
+
 /**
  * format: format the date to *** time ago, with setting or default locale
  * - date: the date / string / timestamp to be formated
@@ -153,6 +154,7 @@ Timeago.prototype.doRender = function(node, date, locale) {
 Timeago.prototype.format = function(date, locale) {
   return formatDiff(diffSec(date, this.nowDate), locale, this.defaultLocale);
 };
+
 /**
  * render: render the DOM real-time.
  * - nodes: which nodes will be rendered.
@@ -175,6 +177,7 @@ Timeago.prototype.render = function(nodes, locale) {
     this.doRender(nodes[i], getDateAttr(nodes[i]), locale); // render item
   }
 };
+
 /**
  * setLocale: set the default locale name.
  *
@@ -185,6 +188,7 @@ Timeago.prototype.render = function(nodes, locale) {
 Timeago.prototype.setLocale = function(locale) {
   this.defaultLocale = locale;
 };
+
 /**
  * timeago: the function to get `timeago` instance.
  * - nowDate: the relative date, default is new Date().
@@ -200,6 +204,7 @@ Timeago.prototype.setLocale = function(locale) {
 export function timeagoFactory(nowDate, defaultLocale) {
   return new Timeago(nowDate, defaultLocale);
 }
+
 /**
  * register: register a new language locale
  * - locale: locale name, e.g. en / zh_CN, notice the standard.
