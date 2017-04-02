@@ -6,9 +6,6 @@ const locales = {};
 // second, minute, hour, day, week, month, year(365 days)
 const SEC_ARRAY = [60, 60, 24, 7, 365 / 7 / 12, 12];
 const SEC_ARRAY_LEN = 6;
-const ATTR_DATETIME = 'datetime';
-const ATTR_DATA_TID = 'data-tid';
-let timers = {}; // real-time render timers
 
 // format Date / string / timestamp to Date instance.
 function toDate(input) {
@@ -64,47 +61,6 @@ function diffSec(date, nowDate) {
 }
 
 /**
- * nextInterval: calculate the next interval time.
- * - diff: the diff sec between now and date to be formated.
- *
- * What's the meaning?
- * diff = 61 then return 59
- * diff = 3601 (an hour + 1 second), then return 3599
- * make the interval with high performace.
-**/
-function nextInterval(diff) {
-  let rst = 1, i = 0, d = Math.abs(diff);
-  for (; diff >= SEC_ARRAY[i] && i < SEC_ARRAY_LEN; i++) {
-    diff /= SEC_ARRAY[i];
-    rst *= SEC_ARRAY[i];
-  }
-  // return leftSec(d, rst);
-  d = d % rst;
-  d = d ? rst - d : rst;
-  return Math.ceil(d);
-}
-
-// get the datetime attribute, jQuery and DOM
-function getDateAttr(node) {
-  if (node.dataset.timeago) {
-    return node.dataset.timeago; // data-timeago supported
-  }
-  return getAttr(node, ATTR_DATETIME);
-}
-
-function getAttr(node, name) {
-  return node.getAttribute(name);
-}
-
-function setTidAttr(node, val) {
-  return node.setAttribute(ATTR_DATA_TID, val);
-}
-
-function getTidFromNode(node) {
-  return getAttr(node, ATTR_DATA_TID);
-}
-
-/**
  * timeago: the function to get `timeago` instance.
  * - nowDate: the relative date, default is new Date().
  * - defaultLocale: the default locale, default is en. if your set it, then the `locale` parameter of format is not needed of you.
@@ -124,22 +80,6 @@ function Timeago(nowDate, defaultLocale) {
   // this.nextInterval = nextInterval;
 }
 
-// what the timer will do
-Timeago.prototype.doRender = function(node, date, locale) {
-  const diff = diffSec(date, this.nowDate);
-  const self = this;
-  let tid;
-  // delete previously assigned timeout's id to node
-  node.innerHTML = formatDiff(diff, locale, this.defaultLocale);
-  // waiting %s seconds, do the next render
-  timers[tid = setTimeout(function() {
-    self.doRender(node, date, locale);
-    delete timers[tid];
-  }, Math.min(nextInterval(diff) * 1000, 0x7FFFFFFF))] = 0; // there is no need to save node in object.
-  // set attribute date-tid
-  setTidAttr(node, tid);
-};
-
 /**
  * format: format the date to *** time ago, with setting or default locale
  * - date: the date / string / timestamp to be formated
@@ -153,40 +93,6 @@ Timeago.prototype.doRender = function(node, date, locale) {
 **/
 Timeago.prototype.format = function(date, locale) {
   return formatDiff(diffSec(date, this.nowDate), locale, this.defaultLocale);
-};
-
-/**
- * render: render the DOM real-time.
- * - nodes: which nodes will be rendered.
- * - locale: the locale name used to format date.
- *
- * How to use it?
- * var timeago = require('timeago.js')();
- * // 1. javascript selector
- * timeago.render(document.querySelectorAll('.need_to_be_rendered'));
- * // 2. use jQuery selector
- * timeago.render($('.need_to_be_rendered'), 'pl');
- *
- * Notice: please be sure the dom has attribute `datetime`.
-**/
-Timeago.prototype.render = function(nodes, locale) {
-  if (nodes.length === undefined) {
-    nodes = [nodes];
-  }
-  for (let i = 0, len = nodes.length; i < len; i++) {
-    this.doRender(nodes[i], getDateAttr(nodes[i]), locale); // render item
-  }
-};
-
-/**
- * setLocale: set the default locale name.
- *
- * How to use it?
- * var timeago = require('timeago.js')();
- * timeago.setLocale('fr');
-**/
-Timeago.prototype.setLocale = function(locale) {
-  this.defaultLocale = locale;
 };
 
 /**
@@ -219,38 +125,4 @@ export function timeagoFactory(nowDate, defaultLocale) {
  **/
 timeagoFactory.register = function(locale, localeFunc) {
   locales[locale] = localeFunc;
-};
-
-/**
- * cancel: cancels one or all the timers which are doing real-time render.
- *
- * How to use it?
- * For canceling all the timers:
- * var timeagoFactory = require('timeago.js');
- * var timeago = timeagoFactory();
- * timeago.render(document.querySelectorAll('.need_to_be_rendered'));
- * timeagoFactory.cancel(); // will stop all the timers, stop render in real time.
- *
- * For canceling single timer on specific node:
- * var timeagoFactory = require('timeago.js');
- * var timeago = timeagoFactory();
- * var nodes = document.querySelectorAll('.need_to_be_rendered');
- * timeago.render(nodes);
- * timeagoFactory.cancel(nodes[0]); // will clear a timer attached to the first node, stop render in real time.
- **/
-timeagoFactory.cancel = function(node) {
-  let tid;
-  // assigning in if statement to save space
-  if (node) {
-    tid = getTidFromNode(node);
-    if (tid) {
-      clearTimeout(tid);
-      delete timers[tid];
-    }
-  } else {
-    for (tid in timers) {
-      clearTimeout(tid);
-    }
-    timers = {};
-  }
 };
