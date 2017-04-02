@@ -33,7 +33,7 @@ limitations under the License.
 
 ## Behavior
 
-The <code>amp-timeago</code> component is a wrapper around the <a href="https://github.com/hustcc/timeago.js">Supported Layouts</a> project for use on AMP pages.
+The <code>amp-timeago</code> component is a wrapper around the <a href="https://github.com/hustcc/timeago.js">timeago.js</a> project for use on AMP pages.
 
 ## Attributes
 
@@ -43,7 +43,46 @@ An ISO datetime. E.g. 2017-03-10T01:00:00Z.
 
 **locale** (optional)
 
-A locale option can be specified as listed <a href="https://github.com/hustcc/timeago.js/tree/master/locales">here</a>. Defaults to *en*.
+One of the following locale options can be specified:
 
-## Validation
-See [amp-timeago rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-timeago/0.1/validator-amp-timeago.protoascii) in the AMP validator specification.
+<ul>
+  <li>ar (Arabic)</li>
+  <li>be (Belarusian)</li>
+  <li>bg (Bulgarian)</li>
+  <li>ca (Catalan)</li>
+  <li>da (Danish)</li>
+  <li>de (German)</li>
+  <li>el (Greek)</li>
+  <li>en (English)</li>
+  <li>en_short (English - short)</li>
+  <li>es (Spanish)</li>
+  <li>eu (Basque)</li>
+  <li>fi (Finnish)</li>
+  <li>fr (French)</li>
+  <li>he (Hebrew)</li>
+  <li>hu (Hungarian)</li>
+  <li>in_BG (Bangla)</li>
+  <li>in_HI (Hindi)</li>
+  <li>in_ID (Malay)</li>
+  <li>it (Italian)</li>
+  <li>ja (Japanese)</li>
+  <li>ko (Korean)</li>
+  <li>ml (Malayalam)</li>
+  <li>nb_NO (Norwegian Bokmål)</li>
+  <li>nl (Dutch)</li>
+  <li>nn_NO (Norwegian Nynorsk)</li>
+  <li>pl (Polish)</li>
+  <li>pt_BR (Portuguese)</li>
+  <li>ro (Romanian)</li>
+  <li>ru (Russian)</li>
+  <li>sv (Swedish)</li>
+  <li>ta (Tamil)</li>
+  <li>th (Thai)</li>
+  <li>tr (Turkish)</li>
+  <li>uk (Ukrainian)</li>
+  <li>vi (Vietnames)</li>
+  <li>zh_CN (Chinese)</li>
+  <li>zh_TW (Taiwanese)</li>
+</ul>
+
+Defaults to *en*.
