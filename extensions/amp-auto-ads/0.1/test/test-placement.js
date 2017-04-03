@@ -298,6 +298,45 @@ describes.realWin('placement', {
           });
     });
 
+    it('should place an ad with i-amphtml-layout-awaiting-size class', () => {
+      const anchor = document.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(env.win, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+            },
+            pos: 2,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+
+      const baseAttributes = {
+        'type': 'ad-network-type',
+      };
+
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(baseAttributes, adTracker)
+          .then(() => {
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('layout')).to.equal('fixed-height');
+            expect(adElement.getAttribute('height')).to.equal('0');
+            expect(adElement.classList.contains(
+                'i-amphtml-layout-awaiting-size')).to.equal.true;
+          });
+    });
+
     it('should place an ad with the correct margins', () => {
       const anchor = document.createElement('div');
       anchor.id = 'anId';
