@@ -45,9 +45,10 @@ app.use(function(req, res, next) {
 });
 
 // Deprecate usage of .min.html/.max.html
-app.use(['/examples/*.(min|max).html', 'test/manual/*.(min|max).html',
+app.use(['/examples/*.(min|max).html', '/test/manual/*.(min|max).html',
     '/dist/cache-sw.(min|max).html'],
     function (req, res, next) {
+      console.log('aaaaaaa');
       var filePath = req.baseUrl;
       res.send(generateInfo(filePath));
       return;
