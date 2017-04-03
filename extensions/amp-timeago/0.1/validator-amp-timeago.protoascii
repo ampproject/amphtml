@@ -22,7 +22,6 @@ tags: {  # amp-timeago
   requires: "amp-timeago"
   mandatory_parent: "HEAD"
   unique: true
-  extension_unused_unless_tag_present: "amp-timeago"
   attrs: {
     name: "async"
     mandatory: true
