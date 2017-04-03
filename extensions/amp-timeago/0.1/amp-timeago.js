@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {timeagoFactory as timeago} from './lib/timeago/timeago';
+import {timeago} from './lib/timeago/timeago';
 import {ar} from './lib/timeago/locales/ar';
 import {be} from './lib/timeago/locales/be';
 import {bg} from './lib/timeago/locales/bg';
@@ -95,29 +95,34 @@ const DEFAULT_LOCALE_ = 'en';
 
 export class AmpTimeAgo extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {string} */
+    this.datetime_ = '';
+
+    /** @private {string} */
+    this.locale_ = '';
+
+    /** @private {string} */
+    this.title_ = '';
+  }
+
   /** @override */
   buildCallback() {
-    /** @private @const {string} */
     this.datetime_ = this.element.getAttribute('datetime');
-
-    /** @private @const {string} */
     this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE_;
-
-    /** @private @const {string} */
-    this.timeago_ = timeago().format(this.datetime_, this.locale_);
-
-    /** @private @const {string} */
     this.title_ = this.element.textContent;
 
     this.element.title = this.title_;
-    this.element.textContent = this.timeago_;
+    this.element.textContent = timeago(this.datetime_, this.locale_);
   }
 
   /** @override */
   isLayoutSupported() {
     return true;
   }
-
 }
 
 AMP.registerElement('amp-timeago', AmpTimeAgo);

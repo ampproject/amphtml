@@ -31,12 +31,11 @@ function toInt(f) {
 }
 
 // format the diff second to *** time ago, with setting locale
-function formatDiff(diff, locale, defaultLocale) {
+function formatDiff(diff, locale) {
   // if locale is not exist, use defaultLocale.
   // if defaultLocale is not exist, use build-in `en`.
   // be sure of no error when locale is not exist.
-  locale = locales[locale] ? locale : (locales[defaultLocale] ? defaultLocale :
-    'en');
+  locale = locales[locale] ? locale : 'en';
   // if (! locales[locale]) locale = defaultLocale;
   let i = 0;
   const agoin = diff < 0 ? 1 : 0; // timein or timeago
@@ -55,8 +54,8 @@ function formatDiff(diff, locale, defaultLocale) {
 }
 
 // calculate the diff second between date to be formated an now date.
-function diffSec(date, nowDate) {
-  nowDate = nowDate ? toDate(nowDate) : new Date();
+function diffSec(date) {
+  const nowDate = new Date();
   return (nowDate - toDate(date)) / 1000;
 }
 
@@ -64,59 +63,16 @@ function diffSec(date, nowDate) {
  * timeago: the function to get `timeago` instance.
  * - nowDate: the relative date, default is new Date().
  * - defaultLocale: the default locale, default is en. if your set it, then the `locale` parameter of format is not needed of you.
- *
- * How to use it?
- * var timeagoLib = require('timeago.js');
- * var timeago = timeagoLib(); // all use default.
- * var timeago = timeagoLib('2016-09-10'); // the relative date is 2016-09-10, so the 2016-09-11 will be 1 day ago.
- * var timeago = timeagoLib(null, 'zh_CN'); // set default locale is `zh_CN`.
- * var timeago = timeagoLib('2016-09-10', 'zh_CN'); // the relative date is 2016-09-10, and locale is zh_CN, so the 2016-09-11 will be 1天前.
-**/
-const Timeago = function() {};
-
-/**
- * format: format the date to *** time ago, with setting or default locale
- * - date: the date / string / timestamp to be formated
- * - locale: the formated string's locale name, e.g. en / zh_CN
- *
- * How to use it?
- * var timeago = require('timeago.js')();
- * timeago.format(new Date(), 'pl'); // Date instance
- * timeago.format('2016-09-10', 'fr'); // formated date string
- * timeago.format(1473473400269); // timestamp with ms
-**/
-Timeago.prototype.format = function(date, locale) {
-  return formatDiff(diffSec(date, this.nowDate), locale, this.defaultLocale);
-};
-
-/**
- * timeago: the function to get `timeago` instance.
- * - nowDate: the relative date, default is new Date().
- * - defaultLocale: the default locale, default is en. if your set it, then the `locale` parameter of format is not needed of you.
- *
- * How to use it?
- * var timeagoFactory = require('timeago.js');
- * var timeago = timeagoFactory(); // all use default.
- * var timeago = timeagoFactory('2016-09-10'); // the relative date is 2016-09-10, so the 2016-09-11 will be 1 day ago.
- * var timeago = timeagoFactory(null, 'zh_CN'); // set default locale is `zh_CN`.
- * var timeago = timeagoFactory('2016-09-10', 'zh_CN'); // the relative date is 2016-09-10, and locale is zh_CN, so the 2016-09-11 will be 1天前.
  **/
-export function timeagoFactory(nowDate, defaultLocale) {
-  return new Timeago(nowDate, defaultLocale);
+export function timeago(date, locale) {
+  return formatDiff(diffSec(date), locale);
 }
 
 /**
  * register: register a new language locale
  * - locale: locale name, e.g. en / zh_CN, notice the standard.
  * - localeFunc: the locale process function
- *
- * How to use it?
- * var timeagoFactory = require('timeago.js');
- *
- * timeagoFactory.register('the locale name', the_locale_func);
- * // or
- * timeagoFactory.register('pl', require('timeago.js/locales/pl'));
  **/
-timeagoFactory.register = function(locale, localeFunc) {
+timeago.register = function(locale, localeFunc) {
   locales[locale] = localeFunc;
 };
