@@ -58,14 +58,17 @@ function deepMerge_(target, source, maxDepth) {
   // Keep track of seen objects to prevent infinite loops on objects with
   // recursive references.
   const seen = [];
-  // Queue ensures that the algorithm performs BFS during merge. This makes it
-  // so any object encountered for the first time does not have a reference
-  // at a shallower depth. This prevents us from marking an object as seen
-  // at currentDepth == maxDepth and failing to merge other references to it
-  // at shallower depths.
+  // Traversal must be breadth-first so any object encountered for the first
+  // time does not have a reference  at a shallower depth. Otherwise, a
+  // recursive reference found at depth == maxDepth could cause an unexpected
+  // change at a shallower depth if the same object exists at a shallower depth.
   const queue = [{target, source, currentDepth: 0}];
   while (queue.length > 0) {
     const {target, source, currentDepth} = queue.shift();
+    if (seen.includes(target) || seen.includes(source)) {
+      // No recursive merge
+      continue;
+    }
     seen.push(target, source);
     if (currentDepth > maxDepth) {
       Object.assign(target, source);
@@ -78,14 +81,12 @@ function deepMerge_(target, source, maxDepth) {
       if (hasOwn(target, key)) {
         const oldValue = target[key];
         if (isObject(newValue) && isObject(oldValue)) {
-          if (!seen.includes(newValue) && !seen.includes(oldValue)) {
-            queue.push({
-              target: oldValue,
-              source: newValue,
-              currentDepth: currentDepth + 1,
-            });
-            return;
-          }
+          queue.push({
+            target: oldValue,
+            source: newValue,
+            currentDepth: currentDepth + 1,
+          });
+          return;
         }
       }
       target[key] = newValue;
