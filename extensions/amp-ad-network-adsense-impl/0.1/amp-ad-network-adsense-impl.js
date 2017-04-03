@@ -45,7 +45,7 @@ import {
   computedStyle,
   setStyles,
 } from '../../../src/style';
-import {viewerForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/viewer';
 import {AdsenseSharedState} from './adsense-shared-state';
 
 /** @const {string} */
