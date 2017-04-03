@@ -48,7 +48,6 @@ import {platformFor} from '../../../../src/services';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {AmpContext} from '../../../../3p/ampcontext.js';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
