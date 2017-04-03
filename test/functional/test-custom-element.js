@@ -1042,6 +1042,16 @@ describe('CustomElement', () => {
     expect(element.style.width).to.equal('0px');
   });
 
+  it('should remove i-amphtml-layout-awaiting-size class when ' +
+      'size changed', () => {
+    const element = new StubElementClass();
+    expect(element.isUpgraded()).to.equal(false);
+    element.classList.add('i-amphtml-layout-awaiting-size');
+
+    expect(element).to.have.class('i-amphtml-layout-awaiting-size');
+    element.changeSize(100, 100);
+    expect(element).not.to.have.class('i-amphtml-layout-awaiting-size');
+  });
 
   describe('unlayoutCallback', () => {
 

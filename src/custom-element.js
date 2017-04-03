@@ -904,6 +904,9 @@ function createBaseCustomElementClass(win) {
           setStyle(this, 'marginLeft', opt_newMargins.left, 'px');
         }
       }
+      if (this.isAwaitingSize_()) {
+        this.sizeProvided_();
+      }
     }
 
     /**
@@ -965,6 +968,21 @@ function createBaseCustomElementClass(win) {
           this.dispatchCustomEventForTesting('amp:stubbed');
         }
       }
+    }
+
+    /**
+     * @return {boolean}
+     * @private
+     */
+    isAwaitingSize_() {
+      return this.classList.contains('i-amphtml-layout-awaiting-size');
+    }
+
+    /**
+     * @private
+     */
+    sizeProvided_() {
+      this.classList.remove('i-amphtml-layout-awaiting-size');
     }
 
     /** The Custom Elements V0 sibling to `connectedCallback`. */
