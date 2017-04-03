@@ -19,7 +19,7 @@ import {
   installTemplatesService,
   registerExtendedTemplate,
 } from '../../src/service/template-impl';
-import {templatesFor} from '../../src/template';
+import {templatesFor} from '../../src/services';
 import {resetServiceForTesting} from '../../src/service';
 
 describe('Template', () => {

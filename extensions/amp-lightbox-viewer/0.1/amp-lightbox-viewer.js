@@ -21,7 +21,7 @@ import {ancestorElements} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
@@ -75,7 +75,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @const @private {!Element} */
     this.container_ = this.win.document.createElement('div');
-    this.container_.classList.add('-amp-lbv');
+    this.container_.classList.add('i-amphtml-lbv');
 
     /** @private {?Element} */
     this.descriptionBox_ = null;
@@ -111,7 +111,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildMask_() {
     dev().assert(this.container_);
     const mask = this.win.document.createElement('div');
-    mask.classList.add('-amp-lbv-mask');
+    mask.classList.add('i-amphtml-lbv-mask');
     this.container_.appendChild(mask);
   }
 
@@ -392,24 +392,24 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
   /**
    * Walks up the tree from the given element and either adds or removes
-   * `-amp-lightboxed-ancestor` class to/from all ancestors.
+   * `i-amphtml-lightboxed-ancestor` class to/from all ancestors.
    *
-   * `-amp-lightboxed-ancestor` resets the properties that create new
+   * `i-amphtml-lightboxed-ancestor` resets the properties that create new
    * stacking context on the ancestors of the `elem` and therefore the z-index
    * value given to `elem` becomes absolute and `elem` can be displayed on top
    * of everything else. More info: https://goo.gl/uqY5CN
    *
    * @param {!Element} element
    * @param {!boolean} reset Whether to add or remove the
-   * `-amp-lightboxed-ancestor` class.
+   * `i-amphtml-lightboxed-ancestor` class.
    * @private
    */
   updateStackingContext_(element, reset) {
     ancestorElements(element, ancestor => {
       if (reset) {
-        ancestor.classList.remove('-amp-lightboxed-ancestor');
+        ancestor.classList.remove('i-amphtml-lightboxed-ancestor');
       } else {
-        ancestor.classList.add('-amp-lightboxed-ancestor');
+        ancestor.classList.add('i-amphtml-lightboxed-ancestor');
       }
     });
   }
@@ -470,7 +470,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildGallery_() {
     // Build gallery
     this.gallery_ = this.win.document.createElement('div');
-    this.gallery_.classList.add('-amp-lbv-gallery');
+    this.gallery_.classList.add('i-amphtml-lbv-gallery');
 
     // Initialize thumbnails
     this.updateThumbnails_();
@@ -517,9 +517,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   createThumbnailElement_(thumbnailObj) {
     const element = this.win.document.createElement('div');
-    element.classList.add('-amp-lbv-gallery-thumbnail');
+    element.classList.add('i-amphtml-lbv-gallery-thumbnail');
     const imgElement = this.win.document.createElement('img');
-    imgElement.classList.add('-amp-lbv-gallery-thumbnail-img');
+    imgElement.classList.add('i-amphtml-lbv-gallery-thumbnail-img');
     imgElement.setAttribute('src', thumbnailObj.url);
     element.appendChild(imgElement);
     const redirect = event => {

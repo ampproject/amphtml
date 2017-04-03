@@ -20,6 +20,14 @@ import {dev} from '../../../src/log';
 /** @const */
 const TAG = 'amp-auto-ads';
 
+/**
+ * @typedef {{
+ *   adsPlaced: number,
+ *   totalAdsOnPage: number
+ * }}
+ */
+export let StrategyResult;
+
 export class AdStrategy {
 
   /**
@@ -28,9 +36,8 @@ export class AdStrategy {
    *     be added to any inserted ads. These will be combined with any
    *     additional data atrributes specified by the placement.
    * @param {!./ad-tracker.AdTracker} adTracker
-   * @param {number} targetAdCount
    */
-  constructor(placements, baseAttributes, adTracker, targetAdCount) {
+  constructor(placements, baseAttributes, adTracker) {
     this.availablePlacements_ = placements.slice(0);
 
     this.baseAttributes_ = baseAttributes;
@@ -39,22 +46,33 @@ export class AdStrategy {
     this.adTracker_ = adTracker;
 
     /** @type {number} */
-    this.targetAdCount_ = targetAdCount;
+    this.adsPlaced_ = 0;
   }
 
   /**
-   * @return {!Promise<boolean>} True if strategy succeeds false otherwise.
+   * @return {!Promise<StrategyResult>} Resolves when the strategy is complete.
    */
   run() {
-    if (this.adTracker_.getAdCount() >= this.targetAdCount_) {
-      return Promise.resolve(true);
+    if (this.adTracker_.isMaxAdCountReached()) {
+      return Promise.resolve(this.getStrategyResult_());
     }
     return this.placeNextAd_().then(success => {
       if (success) {
         return this.run();
       }
-      return false;
+      return this.getStrategyResult_();
     });
+  }
+
+  /**
+   * @return {!StrategyResult}
+   * @private
+   */
+  getStrategyResult_() {
+    return {
+      adsPlaced: this.adsPlaced_,
+      totalAdsOnPage: this.adTracker_.getAdCount(),
+    };
   }
 
   /**
@@ -74,6 +92,7 @@ export class AdStrategy {
         .then(state => {
           if (state == PlacementState.PLACED) {
             this.adTracker_.addAd(nextPlacement.getAdElement());
+            this.adsPlaced_++;
             return true;
           } else {
             return this.placeNextAd_();

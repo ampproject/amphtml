@@ -15,12 +15,12 @@
  */
 
 import {assertHttpsUrl} from '../../../src/url';
+import {batchedXhrFor} from '../../../src/services';
 import {getValueForExpr} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {templatesFor} from '../../../src/template';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {templatesFor} from '../../../src/services';
+import {urlReplacementsForDoc} from '../../../src/services';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
 
 
 /**
@@ -64,7 +64,7 @@ export class AmpList extends AMP.BaseElement {
           if (!opts.credentials) {
             opts.requireAmpResponseSourceOrigin = false;
           }
-          return xhrFor(this.win).fetchJson(src, opts);
+          return batchedXhrFor(this.win).fetchJson(src, opts);
         }).then(data => {
           user().assert(data != null, 'Response is undefined %s', this.element);
           const itemsExpr = this.element.getAttribute('items') || 'items';

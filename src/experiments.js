@@ -34,8 +34,8 @@ const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 /** @const {time} */
 const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
-/** @type {Object<string, boolean>|undefined} */
-let toggles_;
+/** @type {Object<string, boolean>} */
+let toggles_ = null;
 
 /**
  * Whether we are in canary.
@@ -56,32 +56,6 @@ export function isCanary(win) {
 export function isExperimentOn(win, experimentId) {
   const toggles = experimentToggles(win);
   return !!toggles[experimentId];
-}
-
-/**
- * Check whether an experiment is on while allowing viewers to force
- * the experiment state via a viewer URL param of the form:
- * `e-$experimentId=1` (on) or `e-$experimentId=0` (off).
- * NOTE: This should only be used if it is needed and if turning the
- * experiment on or off does not have security implications.
- * @param {!Window} win
- * @param {string} experimentId
- * @return {boolean}
- */
-export function isExperimentOnAllowUrlOverride(win, experimentId) {
-  const hash = win.location.originalHash || win.location.hash;
-  if (hash) {
-    // Note: If this is used a lot, this should be optimized to only
-    // parse once per page load.
-    const param = parseQueryString(hash)['e-' + experimentId];
-    if (param == '1') {
-      return true;
-    }
-    if (param == '0') {
-      return false;
-    }
-  }
-  return isExperimentOn(win, experimentId);
 }
 
 /**
@@ -153,6 +127,32 @@ export function experimentToggles(win) {
   }
 
   Object.assign(toggles_, getExperimentTogglesFromCookie(win));
+
+  if (win.AMP_CONFIG
+      && Array.isArray(win.AMP_CONFIG['allow-url-opt-in'])
+      && win.AMP_CONFIG['allow-url-opt-in'].length > 0) {
+    const allowed = win.AMP_CONFIG['allow-url-opt-in'];
+    const hash = win.location.originalHash || win.location.hash;
+    const params = parseQueryString(hash);
+    for (let i = 0; i < allowed.length; i++) {
+      const param = params[`e-${allowed[i]}`];
+      if (param == '1') {
+        toggles_[allowed[i]] = true;
+      }
+      if (param == '0') {
+        toggles_[allowed[i]] = false;
+      }
+    }
+  }
+  return toggles_;
+}
+
+/**
+ * Returns the cached experiments toggles, or null if they have not been
+ * computed yet.
+ * @return {Object<string, boolean>}
+ */
+export function experimentTogglesOrNull() {
   return toggles_;
 }
 
@@ -210,8 +210,12 @@ export function getExperimentToglesFromCookieForTesting(win) {
 
 /**
  * Resets the experimentsToggle cache for testing purposes.
+ * @param {!Window} win
  * @visibleForTesting
  */
-export function resetExperimentTogglesForTesting() {
-  toggles_ = undefined;
+export function resetExperimentTogglesForTesting(win) {
+  setCookie(win, COOKIE_NAME, '', 0, {
+    domain: win.location.hostname,
+  });
+  toggles_ = null;
 }

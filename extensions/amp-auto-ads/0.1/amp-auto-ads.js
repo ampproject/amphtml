@@ -17,7 +17,7 @@
 import {AdTracker, getExistingAds} from './ad-tracker';
 import {AdStrategy} from './ad-strategy';
 import {dev, user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {getAttributesFromConfigObj} from './attributes';
@@ -25,23 +25,6 @@ import {getPlacementsFromConfigObj} from './placement';
 
 /** @const */
 const TAG = 'amp-auto-ads';
-
-/**
- * The target number of ads for the page. Both existing ads and any inserted by
- * amp-auto-ads count towards this.
- * TODO: Make this configurable via the JSON config returned by the ad network.
- * @const {number}
- */
-const TARGET_AD_COUNT = 3;
-
-/**
- * The minimum distance between any two ads in pixels. Auto ads will only be
- * inserted in positions where they are estimated to be a vertical distance of
- * this or more from any other ads.
- * TODO: Make this configurable via the JSON config returned by the ad network.
- * @const {number}
- */
-const MIN_AD_SPACING = 500;
 
 
 export class AmpAutoAds extends AMP.BaseElement {
@@ -60,8 +43,9 @@ export class AmpAutoAds extends AMP.BaseElement {
       const placements = getPlacementsFromConfigObj(this.win, configObj);
       const attributes = Object.assign(adNetwork.getAttributes(),
           getAttributesFromConfigObj(configObj));
-      const adTracker = new AdTracker(getExistingAds(this.win), MIN_AD_SPACING);
-      new AdStrategy(placements, attributes, adTracker, TARGET_AD_COUNT).run();
+      const adTracker =
+          new AdTracker(getExistingAds(this.win), adNetwork.getAdConstraints());
+      new AdStrategy(placements, attributes, adTracker).run();
     });
   }
 

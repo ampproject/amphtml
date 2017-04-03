@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {vsyncFor} from '../../../src/vsync';
-import {viewportForDoc} from '../../../src/viewport';
+import {vsyncFor} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
 import {setStyles} from '../../../src/style';
 import {removeChildren} from '../../../src/dom';
 
@@ -52,7 +52,7 @@ export class ValidationBubble {
 
     /** @private @const {!Element} */
     this.bubbleElement_ = win.document.createElement('div');
-    this.bubbleElement_.classList.add('-amp-validation-bubble');
+    this.bubbleElement_.classList.add('i-amphtml-validation-bubble');
     this.bubbleElement_[OBJ_PROP] = this;
     win.document.body.appendChild(this.bubbleElement_);
   }
