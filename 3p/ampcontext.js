@@ -17,6 +17,7 @@ import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {nextTick} from './3p';
+import {Observable} from '../src/observable';
 import {tryParseJson} from '../src/json';
 import {isObject} from '../src/types';
 
@@ -70,8 +71,8 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.sourceUrl = null;
 
-    /** @type {!Array<function(Object)>} */
-    this.visibilityCallbacks_ = [];
+    /** @type {!Observable<Object>} */
+    this.visibilityObservable_ = new Observable();
 
     this.findAndSetMetadata_();
 
@@ -98,7 +99,7 @@ export class AbstractAmpContext {
         MessageType.EMBED_STATE,
         data => {
           this.hidden = data.pageHidden;
-          this.visibilityCallbacks_.map(cb => cb(data));
+          this.visibilityObservable_.fire(data);
           this.dispatchVisibilityChangeEvent_();
         });
   }
@@ -119,13 +120,7 @@ export class AbstractAmpContext {
    *    every time we receive a page visibility message.
    */
   observePageVisibility(callback) {
-    const visibilityCallbacksLength = this.visibilityCallbacks_.length;
-
-    this.visibilityCallbacks_.push(callback);
-
-    return () => {
-      this.visibilityCallbacks_.splice(visibilityCallbacksLength + 1, 1);
-    };
+    return this.visibilityObservable_.add(callback);
   };
 
   /**
