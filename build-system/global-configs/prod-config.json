@@ -27,5 +27,6 @@
   "sentinel-name-change": 1,
   "sticky-ad-early-load": 1,
   "amp-auto-ads": 1,
-  "slidescroll-disable-css-snap": 1
+  "slidescroll-disable-css-snap": 1,
+  "visibility-v3": 0
 }
