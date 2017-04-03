@@ -186,10 +186,15 @@
   "mpulse": {
     "onvisible": "https://$beacon_url?h.d=$h.d&h.key=$h.key&h.t=$h.t&h.cr=$h.cr&rt.start=navigation&rt.si=_client_id_&rt.ss=_timestamp_&rt.end=_timestamp_&t_resp=_nav_timing_&t_page=_nav_timing_&t_done=_nav_timing_&nt_nav_type=_nav_type_&nt_red_cnt=_nav_redirect_count_&nt_nav_st=_nav_timing_&nt_red_st=_nav_timing_&nt_red_end=_nav_timing_&nt_fet_st=_nav_timing_&nt_dns_st=_nav_timing_&nt_dns_end=_nav_timing_&nt_con_st=_nav_timing_&nt_ssl_st=_nav_timing_&nt_con_end=_nav_timing_&nt_req_st=_nav_timing_&nt_res_st=_nav_timing_&nt_unload_st=_nav_timing_&nt_unload_end=_nav_timing_&nt_domloading=_nav_timing_&nt_res_end=_nav_timing_&nt_domint=_nav_timing_&nt_domcontloaded_st=_nav_timing_&nt_domcontloaded_end=_nav_timing_&nt_domcomp=_nav_timing_&nt_load_st=_nav_timing_&nt_load_end=_nav_timing_&v=1&http.initiator=amp&u=_source_url_&amp.u=_ampdoc_url_&r2=_document_referrer_&scr.xy=_screen_width_x_screen_height_",
   },
- "linkpulse": {
+  "linkpulse": {
     "base": "https://pp.lp4.io",
     "pageview": "https://pp.lp4.io/p?i=$id&r=_document_referrer_&p=_canonical_url_&s=$section&t=$type&c=amp&mt=_title_&_t=amp&_r=_random_",
     "pageload": "https://pp.lp4.io/pl?i=$id&ct=_dom_interactive_time_&rt=_page_download_time_&pt=_page_load_time_&p=_canonical_url_&c=amp&t=$type&s=$section&_t=amp&_r=_random_",
     "ping": "https://pp.lp4.io/u?i=$id&u=_client_id_&p=_canonical_url_&uActive=true&isPing=yes&c=amp&t=$type&s=$section&_t=amp&_r=_random_",
+  },
+  "ibeatanalytics": {
+    "host": "https://ibeats.indiatimes.com",
+    "base": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html",
+    "pageview": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_",
   },
 }
