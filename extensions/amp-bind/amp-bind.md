@@ -168,15 +168,13 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
 
 Only binding to the following components and attributes are allowed. Most bindable attributes correspond to a non-bindable counterpart, e.g. for `<amp-img>`, `[src]` changes the value of `src`.
 
-(*) Denotes bindable attributes that don't have a non-bindable counterpart.
-
 | Component | Attribute(s) | Behavior |
 | --- | --- | --- |
 | `<amp-brightcove>` | `[data-account]`<br>`[data-embed]`<br>`[data-player]`<br>`[data-player-id]`<br>`[data-playlist-id]`<br>`[data-video-id]` | Changes the displayed Brightcove video. |
-| `<amp-carousel type=slides>` | `[slide]`* | Changes the currently displayed slide index. [See an example](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind).
+| `<amp-carousel type=slides>` | `[slide]`<sup>1</sup> | Changes the currently displayed slide index. [See an example](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind).
 | `<amp-iframe>` | `[src]` | Changes the iframe's source URL. |
 | `<amp-img>` | `[alt]`<br>`[attribution]`<br>`[src]`<br>`[srcset]` | See corresponding [amp-img attributes](https://www.ampproject.org/docs/reference/components/media/amp-img#attributes). |
-| `<amp-selector>` | `[selected]`* | Changes the currently selected children element(s)<br>identified by their `option` attribute values. Supports a comma-separated list of values for multiple selection. [See an example](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind).
+| `<amp-selector>` | `[selected]`<sup>1</sup> | Changes the currently selected children element(s)<br>identified by their `option` attribute values. Supports a comma-separated list of values for multiple selection. [See an example](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind).
 | `<amp-video>` | `[alt]`<br>`[attribution]`<br>`[controls]`<br>`[loop]`<br>`[poster]`<br>`[preload]`<br>`[src]` | See corresponding [amp-video attributes](https://www.ampproject.org/docs/reference/components/media/amp-video#attributes). |
 | `<amp-youtube>` | `[data-videoid]` | Changes the displayed YouTube video. |
 | `<a>` | `[href]` | Changes the link. |
@@ -189,6 +187,8 @@ Only binding to the following components and attributes are allowed. Most bindab
 | `<source>` | `[src]`<br>`[type]` | See corresponding [source attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source#Attributes). |
 | `<track>` | `[label]`<br>`[src]`<br>`[srclang]` | See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes). |
 | `<textarea>` | `[autocomplete]`<br>`[autofocus]`<br>`[cols]`<br>`[disabled]`<br>`[maxlength]`<br>`[minlength]`<br>`[placeholder]`<br>`[readonly]`<br>`[required]`<br>`[rows]`<br>`[selectiondirection]`<br>`[selectionend]`<br>`[selectionstart]`<br>`[spellcheck]`<br>`[wrap]` | See corresponding [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes). |
+
+<sup>1</sup>Denotes bindable attributes that don't have a non-bindable counterpart.
 
 ### Expressions
 
@@ -203,14 +203,17 @@ Only binding to the following components and attributes are allowed. Most bindab
 - Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
 - A single expression is currently capped at 50 operands for performance reasons. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
 
+The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
+
 #### Whitelisted functions
 
 | Object type | Function(s) | Example |
 | --- | --- | --- |
 | [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods) | `concat`<br>`includes`<br>`indexOf`<br>`join`<br>`lastIndexOf`<br>`slice` | `// Returns true.`<br>`[1, 2, 3].includes(1)` |
 | [`String`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods) | `charAt`<br>`charCodeAt`<br>`concat`<br>`indexOf`<br>`lastIndexOf`<br>`slice`<br>`split`<br>`substr`<br>`substring`<br>`toLowerCase`<br>`toUpperCase` | `// Returns 'abcdef'.`<br>`'abc'.concat('def')` |
+| [`Math`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math)<sup>2</sup> | `abs`<br>`ceil`<br>`floor`<br>`max`<br>`min`<br>`random`<br>`round`<br>`sign` | `// Returns 1.`<br>`abs(-1)` |
 
-The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
+<sup>2</sup>`Math` functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
 
 #### BNF-like grammar
 
