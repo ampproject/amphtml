@@ -68,11 +68,11 @@ Tapping the button causes the `<p>` element's text to change from "Hello World" 
 1. [State](#state)
   - In the example above, the state is empty before tapping the button and `{foo: 'amp-bind'}` after tapping the button.
 2. [Expressions](#expressions)
-  - The example above has a single expression, `'Hello' + foo`, which concatenates the string literal `'Hello'` and the variable state `foo`.
+  - The example above has a single expression, `'Hello' + foo`, which concatenates the string literal `'Hello '` and the variable state `foo`.
 3. [Bindings](#bindings)
-  - The example above has a single binding, `[text]`, which causes the `<p>` element to update its text every time the bound expression's value changes.
+  - The example above has a single binding, `[text]`, which causes the `<p>` element to update its text every time the expression's value changes.
 
-Note that `amp-bind` does no evaluate expressions on page load, so there's no risk of unexpected content jumping. `amp-bind` also takes special care to ensure speed, security and performance on AMP pages.
+Note that `amp-bind` does not evaluate expressions on page load, so there's no risk of content jumping unexpectedly. `amp-bind` also takes special care to ensure speed, security and performance on AMP pages.
 
 Check out the AMP Conf 2017 talk "[Turing complete...AMP Pages?!](https://www.youtube.com/watch?v=xzCFU8b5fCU)" for a video introduction to the feature.
 
@@ -175,20 +175,20 @@ Only binding to the following components and attributes are allowed. Most bindab
 | `<amp-brightcove>` | `[data-account]`<br>`[data-embed]`<br>`[data-player]`<br>`[data-player-id]`<br>`[data-playlist-id]`<br>`[data-video-id]` | Changes the displayed Brightcove video. |
 | `<amp-carousel type=slides>` | `[slide]`* | Changes the currently displayed slide index. [See an example](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind).
 | `<amp-iframe>` | `[src]` | Changes the iframe's source URL. |
-| `<amp-img>` | `[alt]`<br>`[attribution]`<br>`[src]`<br>`[srcset]` | Various. See [amp-img attributes](https://www.ampproject.org/docs/reference/components/media/amp-img#attributes). |
+| `<amp-img>` | `[alt]`<br>`[attribution]`<br>`[src]`<br>`[srcset]` | See corresponding [amp-img attributes](https://www.ampproject.org/docs/reference/components/media/amp-img#attributes). |
 | `<amp-selector>` | `[selected]`* | Changes the currently selected children element(s)<br>identified by their `option` attribute values. Supports a comma-separated list of values for multiple selection. [See an example](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind).
-| `<amp-video>` | `[alt]`<br>`[attribution]`<br>`[controls]`<br>`[loop]`<br>`[poster]`<br>`[preload]`<br>`[src]` | Various. See [amp-video attributes](https://www.ampproject.org/docs/reference/components/media/amp-video#attributes). |
+| `<amp-video>` | `[alt]`<br>`[attribution]`<br>`[controls]`<br>`[loop]`<br>`[poster]`<br>`[preload]`<br>`[src]` | See corresponding [amp-video attributes](https://www.ampproject.org/docs/reference/components/media/amp-video#attributes). |
 | `<amp-youtube>` | `[data-videoid]` | Changes the displayed YouTube video. |
 | `<a>` | `[href]` | Changes the link. |
-| `<button>` | `[disabled]`<br>`[type]`<br>`[value]` | Various. See [button attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes). |
+| `<button>` | `[disabled]`<br>`[type]`<br>`[value]` | See corresponding [button attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes). |
 | `<fieldset>` | `[disabled]` | Enables or disables the fieldset. |
-| `<input>` | `[accept]`<br>`[accessKey]`<br>`[autocomplete]`<br>`[checked]`<br>`[disabled]`<br>`[height]`<br>`[inputmode]`<br>`[max]`<br>`[maxlength]`<br>`[min]`<br>`[minlength]`<br>`[multiple]`<br>`[pattern]`<br>`[placeholder]`<br>`[readonly]`<br>`[required]`<br>`[selectiondirection]`<br>`[size]`<br>`[spellcheck]`<br>`[step]`<br>`[type]`<br>`[value]`<br>`[width]` | Various. See [input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes). |
-| `<option>` | `[disabled]`<br>`[label]`<br>`[selected]`<br>`[value]` | Various. See [option attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#Attributes). |
-| `<optgroup>` | `[disabled]`<br>`[label]` | Various. See [optgroup attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes). |
-| `<select>` | `[autofocus]`<br>`[disabled]`<br>`[multiple]`<br>`[required]`<br>`[size]` | Various. See [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes). |
-| `<source>` | `[src]`<br>`[type]` | Various. See [source attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source#Attributes). |
-| `<track>` | `[label]`<br>`[src]`<br>`[srclang]` | Various. See [track attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes). |
-| `<textarea>` | `[autocomplete]`<br>`[autofocus]`<br>`[cols]`<br>`[disabled]`<br>`[maxlength]`<br>`[minlength]`<br>`[placeholder]`<br>`[readonly]`<br>`[required]`<br>`[rows]`<br>`[selectiondirection]`<br>`[selectionend]`<br>`[selectionstart]`<br>`[spellcheck]`<br>`[wrap]` | Various. See [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes). |
+| `<input>` | `[accept]`<br>`[accessKey]`<br>`[autocomplete]`<br>`[checked]`<br>`[disabled]`<br>`[height]`<br>`[inputmode]`<br>`[max]`<br>`[maxlength]`<br>`[min]`<br>`[minlength]`<br>`[multiple]`<br>`[pattern]`<br>`[placeholder]`<br>`[readonly]`<br>`[required]`<br>`[selectiondirection]`<br>`[size]`<br>`[spellcheck]`<br>`[step]`<br>`[type]`<br>`[value]`<br>`[width]` | See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes). |
+| `<option>` | `[disabled]`<br>`[label]`<br>`[selected]`<br>`[value]` | See corresponding [option attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#Attributes). |
+| `<optgroup>` | `[disabled]`<br>`[label]` | See corresponding [optgroup attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes). |
+| `<select>` | `[autofocus]`<br>`[disabled]`<br>`[multiple]`<br>`[required]`<br>`[size]` | See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes). |
+| `<source>` | `[src]`<br>`[type]` | See corresponding [source attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source#Attributes). |
+| `<track>` | `[label]`<br>`[src]`<br>`[srclang]` | See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes). |
+| `<textarea>` | `[autocomplete]`<br>`[autofocus]`<br>`[cols]`<br>`[disabled]`<br>`[maxlength]`<br>`[minlength]`<br>`[placeholder]`<br>`[readonly]`<br>`[required]`<br>`[rows]`<br>`[selectiondirection]`<br>`[selectionend]`<br>`[selectionstart]`<br>`[spellcheck]`<br>`[wrap]` | See corresponding [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes). |
 
 ### Expressions
 
