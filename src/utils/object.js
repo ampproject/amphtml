@@ -15,6 +15,7 @@
  */
 
 import {isObject} from '../types';
+import {user} from '../log';
 
 /* @const */
 const hasOwn_ = Object.prototype.hasOwnProperty;
@@ -60,17 +61,22 @@ function deepMerge_(target, source, maxDepth) {
   const seen = [];
   // Traversal must be breadth-first so any object encountered for the first
   // time does not have a reference  at a shallower depth. Otherwise, a
-  // recursive reference found at depth == maxDepth could cause an unexpected
+  // circular reference found at depth == maxDepth could cause an unexpected
   // change at a shallower depth if the same object exists at a shallower depth.
-  const queue = [{target, source, currentDepth: 0}];
+  const queue = [{target, source, depth: 0}];
   while (queue.length > 0) {
-    const {target, source, currentDepth} = queue.shift();
-    if (seen.includes(target) || seen.includes(source)) {
+    const {target, source, depth} = queue.shift();
+    if (seen.includes(source)) {
       // No recursive merge
+      user().error('object',
+          'deepMerge: Source object contains circular references');
       continue;
     }
-    seen.push(target, source);
-    if (currentDepth > maxDepth) {
+    // No need to add `target` as this function only iterates over the
+    // key-value pairs in `source` and thus circular references in `target`
+    // can't cause an endless loop.
+    seen.push(source);
+    if (depth > maxDepth) {
       Object.assign(target, source);
       continue;
     }
@@ -81,11 +87,7 @@ function deepMerge_(target, source, maxDepth) {
       if (hasOwn(target, key)) {
         const oldValue = target[key];
         if (isObject(newValue) && isObject(oldValue)) {
-          queue.push({
-            target: oldValue,
-            source: newValue,
-            currentDepth: currentDepth + 1,
-          });
+          queue.push({target: oldValue, source: newValue, depth: depth + 1});
           return;
         }
       }
