@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpForm} from '../../amp-form';
+import {AmpForm, AmpFormService} from '../../amp-form';
 import {timerFor} from '../../../../../src/services';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
 import {registerExtendedTemplate,} from
@@ -40,6 +40,7 @@ describes.realWin('AmpForm Integration', {
     scriptElement.setAttribute('custom-template', 'amp-mustache');
     doc.body.appendChild(scriptElement);
     registerExtendedTemplate(env.win, 'amp-mustache', AmpMustache);
+    new AmpFormService(env.ampdoc);
   });
 
   function getForm(config) {
@@ -321,10 +322,8 @@ describes.realWin('AmpForm Integration', {
         const rendered = form.querySelectorAll('[i-amphtml-rendered]');
         expect(rendered.length).to.equal(0);
 
-        // An img tag should render after the amp-img has been layed out.
-        return form.querySelector('amp-img').layoutCallback().then(() => {
-          expect(form.querySelectorAll('amp-img img').length).to.equal(1);
-        });
+        // Any amp elements inside the message should be layed out
+        expect(form.querySelectorAll('amp-img img').length).to.equal(1);
       });
     });
   });
