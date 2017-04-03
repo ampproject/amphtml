@@ -1349,7 +1349,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'on': 'visible',
         'request': 'pageview',
       },
->>>>>>> ampproject/master
     },
   },
 });
