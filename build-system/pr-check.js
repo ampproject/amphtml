@@ -123,7 +123,8 @@ function isDocFile(filePath) {
  */
 function isFlagConfig(filePath) {
   const filename = path.basename(filePath);
-  return (filename == 'prod-config.json' || filename == 'canary-config.json');
+  return (filename == 'prod-config.json' || filename == 'canary-config.json' ||
+          filename == 'pr-check.js');
 }
 
 /**
