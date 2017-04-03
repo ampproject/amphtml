@@ -42,9 +42,9 @@ import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
-import {urlReplacementsForDoc} from '../../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
-import {platformFor} from '../../../../src/platform';
+import {platformFor} from '../../../../src/services';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -176,8 +176,23 @@ describe('amp-a4a', () => {
     const child = element.querySelector(
         `iframe[src^="${SAFEFRAME_IMPL_PATH}"][name]`);
     expect(child).to.be.ok;
-    expect(child.getAttribute('name')).to.match(/[^;]+;\d+;[\s\S]+/);
-    expect(child).to.be.visible;
+    const name = child.getAttribute('name');
+    expect(name).to.match(/[^;]+;\d+;[\s\S]+/);
+    const re = /^([^;]+);(\d+);([\s\S]*)$/;
+    const match = re.exec(name);
+    expect(match).to.be.ok;
+    const contentLength = Number(match[2]);
+    const rest = match[3];
+    expect(rest.length > contentLength).to.be.true;
+    const data = JSON.parse(rest.substr(contentLength));
+    expect(data).to.be.ok;
+    verifyContext(data._context);
+  }
+
+  function verifyContext(context) {
+    expect(context).to.be.ok;
+    expect(context.sentinel).to.be.ok;
+    expect(context.sentinel).to.match(/((\d+)-\d+)/);
   }
 
   // Checks that element is an amp-ad that is rendered via nameframe.
@@ -211,10 +226,7 @@ describe('amp-a4a', () => {
     let attributes;
     expect(() => {attributes = JSON.parse(nameData);}).not.to.throw(Error);
     expect(attributes).to.be.ok;
-    expect(attributes._context).to.be.ok;
-    const sentinel = attributes._context.sentinel;
-    expect(sentinel).to.be.ok;
-    expect(sentinel).to.match(/((\d+)-\d+)/);
+    verifyContext(attributes._context);
   }
 
   describe('ads are visible', () => {
@@ -1399,6 +1411,16 @@ describe('amp-a4a', () => {
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
       expect(userErrorStub.args[0][1].message).to.be.match(/intentional/);
+      expect(userErrorStub.args[0][1].ignoreStack).to.be.undefined;
+    });
+
+    it('should configure ignoreStack when specified', () => {
+      window.AMP_MODE = {development: true};
+      a4a.promiseErrorHandler_('intentional', /* ignoreStack */ true);
+      expect(userErrorStub).to.be.calledOnce;
+      expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
+      expect(userErrorStub.args[0][1].message).to.be.match(/intentional/);
+      expect(userErrorStub.args[0][1].ignoreStack).to.equal(true);
     });
 
     it('should route error to user.error in dev mode', () => {

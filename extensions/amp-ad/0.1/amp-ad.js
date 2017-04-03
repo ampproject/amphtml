@@ -20,8 +20,8 @@ import {AmpAdCustom} from './amp-ad-custom';
 import {a4aRegistry} from '../../../ads/_a4a-config';
 import {adConfig} from '../../../ads/_config';
 import {user} from '../../../src/log';
-import {extensionsFor} from '../../../src/extensions';
-import {userNotificationManagerFor} from '../../../src/user-notification';
+import {extensionsFor} from '../../../src/services';
+import {userNotificationManagerFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {hasOwn} from '../../../src/utils/object';
 
@@ -102,4 +102,4 @@ export class AmpAd extends AMP.BaseElement {
 }
 
 AMP.registerElement('amp-ad', AmpAd, CSS);
-AMP.registerElement('amp-embed', AmpAd, CSS);
+AMP.registerElement('amp-embed', AmpAd);

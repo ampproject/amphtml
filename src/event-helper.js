@@ -15,7 +15,7 @@
  */
 
 import {internalListenImplementation} from './event-helper-listen';
-import {timerFor} from './timer';
+import {timerFor} from './services';
 import {user} from './log';
 
 /** @const {string}  */
@@ -64,30 +64,16 @@ export function listen(element, eventType, listener, opt_capture) {
  * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
-  let localElement = element;
   let localListener = listener;
-  const capture = opt_capture || false;
-  let unlisten;
-  let proxy = event => {
+  const unlisten = internalListenImplementation(element, eventType, event => {
     try {
       localListener(event);
-    } catch (e) {
-      // reportError is installed globally per window in the entry point.
-      self.reportError(e);
-      throw e;
     } finally {
+      // Ensure listener is GC'd
+      localListener = null;
       unlisten();
     }
-  };
-  unlisten = () => {
-    if (localElement) {
-      localElement.removeEventListener(eventType, proxy, capture);
-    }
-    localElement = null;
-    proxy = null;
-    localListener = null;
-  };
-  localElement.addEventListener(eventType, proxy, capture);
+  }, opt_capture);
   return unlisten;
 }
 

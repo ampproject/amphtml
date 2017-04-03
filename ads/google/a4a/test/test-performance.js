@@ -19,7 +19,7 @@ import {
   BaseLifecycleReporter,
 } from '../performance';
 import {createIframePromise} from '../../../../testing/iframe';
-import {viewerForDoc} from '../../../../src/viewer';
+import {viewerForDoc} from '../../../../src/services';
 import {toArray} from '../../../../src/types';
 import * as sinon from 'sinon';
 

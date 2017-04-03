@@ -25,7 +25,7 @@ import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {extensionsFor} from '../../../../src/extensions';
+import {extensionsFor} from '../../../../src/services';
 import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
@@ -187,7 +187,9 @@ describe('Google A4A utils', () => {
         });
         const urls = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
         const config = {urls};
-        injectActiveViewAmpAnalyticsElement(new MockA4AImpl(element), config);
+        const responseHeaders = {get: () => 'qqid_string'};
+        injectActiveViewAmpAnalyticsElement(
+            new MockA4AImpl(element), config, responseHeaders);
         const ampAnalyticsElements = element.querySelectorAll('amp-analytics');
         expect(ampAnalyticsElements.length).to.equal(1);
         const ampAnalyticsElement = ampAnalyticsElements[0];
@@ -196,16 +198,47 @@ describe('Google A4A utils', () => {
         expect(scriptElements.length).to.equal(1);
         const scriptElement = scriptElements[0];
         expect(scriptElement.getAttribute('type')).to.equal('application/json');
-        expect(JSON.parse(scriptElement.textContent)).to.deep.equal(
+        const ampAnalyticsObj = JSON.parse(scriptElement.textContent);
+        const csiRequest = ampAnalyticsObj.requests.visibilityCsi;
+        expect(csiRequest).to.not.be.null;
+        // We expect slotId == null, since no real element is created, and so
+        // no slot index is ever set.
+        expect(csiRequest).to.match(new RegExp(
+            '^https://csi\\.gstatic\\.com/csi\\?' +
+            'fromAnalytics=1&c=[0-9]+&slotId=null&qqid\\.0=[a-zA-Z_]+$'));
+        // Need to remove this request as it will vary in test execution.
+        delete ampAnalyticsObj.requests.visibilityCsi;
+        expect(ampAnalyticsObj).to.deep.equal(
           {
             transport: {beacon: false, xhrpost: false},
             requests: {
-              visibility1: urls[0], visibility2: urls[1],
+              visibility1: urls[0],
+              visibility2: urls[1],
             },
             triggers: {
               continuousVisible: {
                 on: 'visible',
                 request: ['visibility1', 'visibility2'],
+                visibilitySpec: {
+                  selector: 'amp-ad',
+                  selectionMethod: 'closest',
+                  visiblePercentageMin: 50,
+                  continuousTimeMin: 1000,
+                },
+              },
+              continuousVisibleIniLoad: {
+                on: 'ini-load',
+                request: 'visibilityCsi',
+                visibilitySpec: {
+                  selector: 'amp-ad',
+                  selectionMethod: 'closest',
+                  visiblePercentageMin: 50,
+                  continuousTimeMin: 1000,
+                },
+              },
+              continuousVisibleRenderStart: {
+                on: 'render-start',
+                request: 'visibilityCsi',
                 visibilitySpec: {
                   selector: 'amp-ad',
                   selectionMethod: 'closest',

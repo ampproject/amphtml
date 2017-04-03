@@ -22,13 +22,13 @@ import {
 } from './dom';
 import {registerServiceBuilderForDoc} from './service';
 import {dev} from './log';
-import {historyForDoc} from './history';
+import {historyForDoc} from './services';
 import {parseUrl} from './url';
-import {viewerForDoc} from './viewer';
-import {viewportForDoc} from './viewport';
-import {platformFor} from './platform';
-import {timerFor} from './timer';
-import {urlReplacementsForDoc} from './url-replacements';
+import {viewerForDoc} from './services';
+import {viewportForDoc} from './services';
+import {platformFor} from './services';
+import {timerFor} from './services';
+import {urlReplacementsForDoc} from './services';
 
 
 /**
