@@ -220,6 +220,9 @@ function main(argv) {
   const files = filesInPr(travisCommitRange);
   const buildTargets = determineBuildTargets(files);
 
+  console.log('Files in pull request: ' + files);
+  console.log('Build targets in pull request: ' + buildTargets);
+
   if (buildTargets.has('FLAG_CONFIG')) {
     files.forEach((file) => {
       if (!isFlagConfig(file)) {
