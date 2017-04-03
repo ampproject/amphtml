@@ -135,12 +135,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
+    const width = Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('height'));
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
     this.size_ = isExperimentOn(this.win, 'a4a-adsense-use-new-format')
-        && width && !isNaN(width) && height && !isNaN(height)
+        && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
