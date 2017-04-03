@@ -167,6 +167,12 @@ html.i-amphtml-ios-embed {
   overflow: hidden !important;
 }
 
+.i-amphtml-layout-awaiting-size {
+  position: absolute !important;
+  top: auto !important;
+  bottom: auto !important;
+}
+
 i-amphtml-sizer {
   display: block !important;
 }
