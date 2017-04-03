@@ -478,9 +478,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
           '\\?client=ca-adsense&format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+' +
           '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
-          '(&asnt=[0-9]+-[0-9]+)?(&dff=%22.*?%22)?' +
+          '(&asnt=[0-9]+-[0-9]+)?(&dff=(?:%22.*?%22|\'.*?\'))?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
-          '(&dff=%22.*?%22)?' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           // Depending on how the test is run, it can get different
           // results.
