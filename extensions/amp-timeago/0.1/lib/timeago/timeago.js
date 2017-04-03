@@ -72,13 +72,7 @@ function diffSec(date, nowDate) {
  * var timeago = timeagoLib(null, 'zh_CN'); // set default locale is `zh_CN`.
  * var timeago = timeagoLib('2016-09-10', 'zh_CN'); // the relative date is 2016-09-10, and locale is zh_CN, so the 2016-09-11 will be 1天前.
 **/
-function Timeago(nowDate, defaultLocale) {
-  this.nowDate = nowDate;
-  // if do not set the defaultLocale, set it with `en`
-  this.defaultLocale = defaultLocale || 'en'; // use default build-in locale
-  // for dev test
-  // this.nextInterval = nextInterval;
-}
+const Timeago = function() {};
 
 /**
  * format: format the date to *** time ago, with setting or default locale
