@@ -279,8 +279,10 @@ describes.realWin('AmpForm Integration', {
             'subscribed.');
       });
     });
+  });
 
-    it('should submit and render error if no template element is used', () => {
+  describe.skip('Submit result message', () => {
+    it('should render messages with or without a template', () => {
       const form = getForm({
         id: 'form1',
         actionXhr: baseUrl + '/form/post/error',
