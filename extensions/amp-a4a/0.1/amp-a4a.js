@@ -39,10 +39,10 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
-import {viewerForDoc} from '../../../src/viewer';
-import {xhrFor} from '../../../src/xhr';
+import {viewerForDoc} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 import {endsWith} from '../../../src/string';
-import {platformFor} from '../../../src/platform';
+import {platformFor} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
@@ -55,7 +55,7 @@ import {
 import {
   installUrlReplacementsForEmbed,
 } from '../../../src/service/url-replacements-impl';
-import {extensionsFor} from '../../../src/extensions';
+import {extensionsFor} from '../../../src/services';
 import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';

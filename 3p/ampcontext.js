@@ -200,8 +200,6 @@ export class AbstractAmpContext {
     if (!dataObject) {
       throw new Error('Could not setup metadata.');
     }
-    // TODO(alanorozco): Figure out why the dataobject can be passed in two
-    // two different formats. Could be a hidden bug.
     const context = dataObject._context || dataObject.attributes._context;
     this.location = context.location;
     this.canonicalUrl = context.canonicalUrl;

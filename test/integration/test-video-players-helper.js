@@ -15,7 +15,7 @@
  */
 
 import {listenOncePromise} from '../../src/event-helper';
-import {timerFor} from '../../src/timer';
+import {timerFor} from '../../src/services';
 import {VideoInterface, VideoEvents} from '../../src/video-interface';
 import {supportsAutoplay} from '../../src/service/video-manager-impl';
 import {

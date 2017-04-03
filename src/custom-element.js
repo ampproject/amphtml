@@ -31,9 +31,9 @@ import {
 import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
-import {resourcesForDoc} from './resources';
-import {timerFor} from './timer';
-import {vsyncFor} from './vsync';
+import {resourcesForDoc} from './services';
+import {timerFor} from './services';
+import {vsyncFor} from './services';
 import * as dom from './dom';
 import {setStyle, setStyles} from './style';
 
@@ -904,6 +904,9 @@ function createBaseCustomElementClass(win) {
           setStyle(this, 'marginLeft', opt_newMargins.left, 'px');
         }
       }
+      if (this.isAwaitingSize_()) {
+        this.sizeProvided_();
+      }
     }
 
     /**
@@ -965,6 +968,21 @@ function createBaseCustomElementClass(win) {
           this.dispatchCustomEventForTesting('amp:stubbed');
         }
       }
+    }
+
+    /**
+     * @return {boolean}
+     * @private
+     */
+    isAwaitingSize_() {
+      return this.classList.contains('i-amphtml-layout-awaiting-size');
+    }
+
+    /**
+     * @private
+     */
+    sizeProvided_() {
+      this.classList.remove('i-amphtml-layout-awaiting-size');
     }
 
     /** The Custom Elements V0 sibling to `connectedCallback`. */
