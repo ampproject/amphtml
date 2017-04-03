@@ -107,7 +107,7 @@ const SHARED_IFRAME_PROPERTIES = {
 /** @typedef {{
  *    creative: ArrayBuffer,
  *    signature: ?Uint8Array,
- *    size: ?Array<number>
+ *    size: ?{width: number, height: number}
  *  }} */
 export let AdResponseDef;
 
@@ -265,6 +265,18 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
+
+    /**
+     * Initialize this with the slot width/height attributes, and override
+     * later with what the network implementation returns via
+     * extractCreativeAndSignature.
+     *
+     * @private {?{width, height}}
+     */
+    this.creativeSize_ = {
+      width: Number(this.element.getAttribute('width')),
+      height: Number(this.element.getAttribute('height')),
+    };
 
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
@@ -551,13 +563,12 @@ export class AmpA4A extends AMP.BaseElement {
           if (!creativeParts) {
             return Promise.resolve();
           }
+          this.creativeSize_ = creativeParts.size ?
+              creativeParts.size : this.creativeSize_;
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&
               creativeParts.creative) {
             this.creativeBody_ = creativeParts.creative;
-          }
-          if (creativeParts.size && creativeParts.size.length == 2) {
-            this.handleResize(creativeParts.size[0], creativeParts.size[1]);
           }
           if (!creativeParts.signature) {
             return Promise.resolve();
@@ -896,20 +907,6 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * This function is called if the ad response contains a creative size header
-   * indicating the size of the creative. It provides an opportunity to resize
-   * the creative, if desired, before it is rendered.
-   *
-   * To be implemented by network.
-   *
-   * @param {number} width
-   * @param {number} height
-   * */
-  handleResize(width, height) {
-    user().info('A4A', `Received creative with size ${width}x${height}.`);
-  }
-
-  /**
    * Forces the UI Handler to collapse this slot.
    * @visibleForTesting
    */
@@ -1092,6 +1089,8 @@ export class AmpA4A extends AMP.BaseElement {
     const iframe = /** @type {!HTMLIFrameElement} */(
         createElementWithAttributes(
             /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
+              height: this.creativeSize_.height,
+              width: this.creativeSize_.width,
               frameborder: '0',
               allowfullscreen: '',
               allowtransparency: '',

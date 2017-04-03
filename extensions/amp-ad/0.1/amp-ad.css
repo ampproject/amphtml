@@ -53,7 +53,5 @@ amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'] > iframe {
   top: 50% !important;
   left: 50% !important;
   transform: translate(-50%, -50%);
-  min-width: 0;
-  min-height: 0;
 }
 
