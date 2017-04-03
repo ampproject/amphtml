@@ -96,9 +96,12 @@ export class StandardActions {
             }
             bind.setStateWithExpression(objectString, scope);
           } else {
-            user().error('AMP-BIND', `Please use the object-literal syntax, `
-                + `e.g. "AMP.setState({foo: 'bar'})" instead of `
+            user().warn('AMP-BIND', `Key-value syntax for AMP.setState() will `
+                + `be removed soon. Please use the object-literal syntax `
+                + `instead, e.g. "AMP.setState({foo: 'bar'})" instead of `
                 + `"AMP.setState(foo='bar')".`);
+            // Key-value args.
+            bind.setState(args);
           }
         });
         return;
