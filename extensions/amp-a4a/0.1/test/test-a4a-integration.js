@@ -381,8 +381,6 @@ describes.sandboxed('integration test: Fast Fetch', {}, () => {
       a4aRegistry['mock'] = () => {
         return true;
       };
-      // TDRL: Is this necessary?
-      installDocService(win, /* isSingleDoc */ true);
       upgradeOrRegisterElement(win, 'amp-a4a', MockA4AImpl);
       a4aElement = createElementWithAttributes(doc, 'amp-a4a', {
         width: 200,
@@ -394,13 +392,19 @@ describes.sandboxed('integration test: Fast Fetch', {}, () => {
     it('nameframe iframe should use same URL as prefetch', () => {
       return env.ampdoc.whenReady().then(() => {
         doc.body.appendChild(a4aElement);
+        a4aElement.build();
         const impl = a4aElement.implementation_;
         // TODO(tdrl): Shouldn't the runtime have run the full lifecycle of
         // this?
-        impl.buildCallback();
         impl.preconnectCallback();
+        // Note: onLayoutMeasure is bailing out early because
+        // getIntersectionElementLayoutBox() is returning
+        // slotRect = Object {left: -10000, top: -10000, width: 0, height:
+        // 0, bottom: -10000}.  I think (?) that indicates that actual
+        // layout hasn't been done.
         impl.onLayoutMeasure();
         return impl.layoutCallback().then(() => {
+          expect(xhrMock).to.be.calledOnce;
           const preconnects = doc.head.querySelectorAll(
               'link[rel=preconnect][href*=ampproject]');
           expect(preconnects).to.have.length(1);

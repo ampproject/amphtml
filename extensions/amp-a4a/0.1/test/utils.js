@@ -28,6 +28,13 @@ export const TEST_URL = 'http://iframe.localhost:' + location.port +
     '/test/fixtures/served/iframe.html?args';
 
 export class MockA4AImpl extends AmpA4A {
+
+  // For debugging.  Writes an attribute to the DOM that we can look at in
+  // debugger.
+  upgradeCallback() {
+    this.element.setAttribute('data-a4a-upgrade-type', 'mock');
+  }
+
   getAdUrl() {
     return Promise.resolve(TEST_URL);
   }
