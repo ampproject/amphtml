@@ -83,7 +83,10 @@ function isBuildSystemFile(filePath) {
   return filePath.startsWith('build-system') &&
       // Exclude textproto from build-system since we want it to trigger
       // tests and type check.
-      path.extname(filePath) != '.textproto';
+      path.extname(filePath) != '.textproto' &&
+      // Exclude config files from build-system since we want it to trigger
+      // the flag config check.
+      !isFlagConfig(filePath);
 }
 
 /**
