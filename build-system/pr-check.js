@@ -123,8 +123,7 @@ function isDocFile(filePath) {
  */
 function isFlagConfig(filePath) {
   const filename = path.basename(filePath);
-  return (filename == 'prod-config.json' || filename == 'canary-config.json' ||
-          filename == 'pr-check.js');
+  return (filename == 'prod-config.json' || filename == 'canary-config.json');
 }
 
 /**
@@ -223,8 +222,6 @@ function main(argv) {
   const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
   const files = filesInPr(travisCommitRange);
   const buildTargets = determineBuildTargets(files);
-
-  console.log('Files in pull request: ' + files);
 
   if (buildTargets.has('FLAG_CONFIG')) {
     files.forEach((file) => {

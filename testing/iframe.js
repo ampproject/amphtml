@@ -32,7 +32,7 @@ let iframeCount = 0;
 
 
 /**
- * Creates an iframe from an HTML fixture for use in tests. Test change.
+ * Creates an iframe from an HTML fixture for use in tests.
  *
  * Returns a promise for when the iframe is usable for testing that produces
  * an object with properties related to the created iframe and utility methods:
