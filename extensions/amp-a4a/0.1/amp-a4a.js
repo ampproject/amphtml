@@ -796,27 +796,19 @@ export class AmpA4A extends AMP.BaseElement {
       if (this.isCollapsed_) {
         return Promise.resolve();
       }
-      const protectedOnCreativeRender =
-        protectFunctionWrapper(this.onCreativeRender, this, err => {
-          dev().error(TAG, this.element.getAttribute('type'),
-              'Error executing onCreativeRender', err);
-        });
       if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
-        return this.renderNonAmpCreative_()
-          .then(() => protectedOnCreativeRender(false));
+        return this.renderNonAmpCreative_();
       }
       // Must be an AMP creative.
       return this.renderAmpCreative_(creativeMetaData)
-        .then(() => protectedOnCreativeRender(true))
         .catch(err => {
           // Failed to render via AMP creative path so fallback to non-AMP
           // rendering within cross domain iframe.
           user().error(TAG, this.element.getAttribute('type'),
             'Error injecting creative in friendly frame', err);
           this.promiseErrorHandler_(err);
-          return this.renderNonAmpCreative_()
-            .then(() => protectedOnCreativeRender(false));
+          return this.renderNonAmpCreative_();
         });
     }).catch(error => {
       this.promiseErrorHandler_(error);
@@ -1148,6 +1140,10 @@ export class AmpA4A extends AMP.BaseElement {
                 dev().error(TAG, this.element.getAttribute('type'),
                   'getTimingDataAsync for renderFriendlyEnd failed: ', err);
               });
+          protectFunctionWrapper(this.onCreativeRender, this, err => {
+            dev().error(TAG, this.element.getAttribute('type'),
+                'Error executing onCreativeRender', err);
+          })(true);
           // It's enough to wait for "ini-load" signal because in a FIE case
           // we know that the embed no longer consumes significant resources
           // after the initial load.
@@ -1173,6 +1169,10 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.sentinel) {
       iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
     }
+    protectFunctionWrapper(this.onCreativeRender, this, err => {
+      dev().error(TAG, this.element.getAttribute('type'),
+          'Error executing onCreativeRender', err);
+    })(false);
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
     return this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
