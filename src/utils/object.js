@@ -15,7 +15,6 @@
  */
 
 import {isObject} from '../types';
-import {user} from '../log';
 
 /* @const */
 const hasOwn_ = Object.prototype.hasOwnProperty;
@@ -54,6 +53,7 @@ export function hasOwn(obj, key) {
  * @param {number} maxDepth The maximum depth for deep merge, beyond which
  *    Object.assign will be used.
  * @return {!Object}
+ * @throws {Error} if `source` contains a circular reference
  */
 function deepMerge_(target, source, maxDepth) {
   // Keep track of seen objects to prevent infinite loops on objects with
@@ -68,13 +68,8 @@ function deepMerge_(target, source, maxDepth) {
     const {target, source, depth} = queue.shift();
     if (seen.includes(source)) {
       // No recursive merge
-      user().error('object',
-          'deepMerge: Source object contains circular references');
-      continue;
+      throw new Error('deepMerge: Source object contains circular references');
     }
-    // No need to add `target` as this function only iterates over the
-    // key-value pairs in `source` and thus circular references in `target`
-    // can't cause an endless loop.
     seen.push(source);
     if (depth > maxDepth) {
       Object.assign(target, source);
