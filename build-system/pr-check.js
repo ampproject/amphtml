@@ -123,8 +123,7 @@ function isDocFile(filePath) {
  */
 function isFlagConfig(filePath) {
   const filename = path.basename(filePath);
-  return (filename == 'prod-config.json' || filename == 'canary-config.json' ||
-          filename == 'pr-check.js');
+  return (filename == 'prod-config.json' || filename == 'canary-config.json');
 }
 
 /**
@@ -225,14 +224,13 @@ function main(argv) {
   const buildTargets = determineBuildTargets(files);
 
   console.log('Files in pull request: ' + files);
-  console.log('Build targets in pull request: ' + buildTargets);
 
   if (buildTargets.has('FLAG_CONFIG')) {
     files.forEach((file) => {
       if (!isFlagConfig(file)) {
         console.log('A pull request may not contain a mix of flag-config and ' +
             'non-flag-config files. Please make your changes in separate ' +
-            'pull requests.');
+            'pull requests. Offending file: ' + file);
         process.exit(1);
       }
     });
