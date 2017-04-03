@@ -137,7 +137,7 @@ export class AmpContext {
     if (!dataObject) {
       throw new Error('Could not setup metadata.');
     }
-    const context = dataObject._context;
+    const context = dataObject._context || dataObject.attributes._context;
     this.location = context.location;
     this.canonicalUrl = context.canonicalUrl;
     this.pageViewId = context.pageViewId;
