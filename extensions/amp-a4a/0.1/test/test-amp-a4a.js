@@ -415,19 +415,6 @@ describe('amp-a4a', () => {
           expect(xhrMock).to.be.calledOnce;
         });
       });
-
-      // Skipping since the window object for the iframe context cannot be
-      // accesed here. "window_" is being set to an HTMLIframeElement, not a
-      // Window object.
-      it.skip('should be able to create AmpContext', () => {
-        return a4a.layoutCallback().then(() => {
-          const window_ = a4aElement.querySelector(
-              'iframe[data-amp-3p-sentinel]');
-          const ac = new AmpContext(window_);
-          expect(ac).to.be.ok;
-          expect(ac.sentinel).to.be.ok;
-        });
-      });
     });
 
     describe('#renderViaNameFrame', () => {
@@ -444,19 +431,6 @@ describe('amp-a4a', () => {
           a4a.vsync_.runScheduledTasks_();
           verifyNameFrameRender(a4aElement);
           expect(xhrMock).to.be.calledOnce;
-        });
-      });
-
-      // Skipping since the window object for the iframe context cannot be
-      // accesed here. "window_" is being set to an HTMLIframeElement, not a
-      // Window object.
-      it.skip('should be able to create AmpContext', () => {
-        return a4a.layoutCallback().then(() => {
-          const window_ = a4aElement.querySelector(
-              'iframe[data-amp-3p-sentinel]');
-          const ac = new AmpContext(window_);
-          expect(ac).to.be.ok;
-          expect(ac.sentinel).to.be.ok;
         });
       });
 

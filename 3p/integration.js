@@ -438,10 +438,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     draw3p(window, data, opt_configCallback);
 
     if (isAmpContextExperimentOn()) {
-      window.context.observePageVisibility(
-          data => dispatchVisibilityChangeEvent(window, data.pageHidden));
-
-      window.context.notifyBootstrapLoaded();
+      window.context.bootstrapLoaded();
     } else {
       updateVisibilityState(window);
 

@@ -91,7 +91,7 @@ export class IntegrationAmpContext extends AbstractAmpContext {
   setEmbedType(type) {
     this.embedType_ = type;
 
-    if (type === 'facebook' || type === 'twitter') {
+    if (type === 'facebook' || type === 'twitter' || type == 'github') {
       // Only make this available to selected embeds until the
       // generic solution is available.
       this.updateDimensionsEnabled_ = true;
@@ -103,11 +103,11 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    * @param {number} height
    */
   updateDimensions(width, height) {
-    dev().assert(this.updateDimensionsEnabled_, 'Not available.');
+    user().assert(this.updateDimensionsEnabled_, 'Not available.');
     this.requestResize(width, height);
   }
 
-  notifyBootstrapLoaded() {
+  bootstrapLoaded() {
     this.client_.sendMessage('bootstrap-loaded');
   }
 
@@ -125,9 +125,10 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    * information. One example for an acceptable data item would be the
    * creative id of an ad, while the user's location would not be
    * acceptable.
+   * TODO(alanorozco): Remove duplicate in 3p/integration.js once this
+   * implementation becomes canonical.
    * @param {string} entityId See comment above for content.
    */
-  // DUPLICATE IN 3p/integration
   reportRenderedEntityIdentifier(entityId) {
     this.client_.sendMessage('entity-id', {
       id: user().assertString(entityId),
