@@ -1140,6 +1140,7 @@ describe('Viewport META', () => {
 describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   let binding;
   let win;
+  let ampdoc;
   let viewer;
 
   beforeEach(() => {
@@ -1157,8 +1158,10 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 
     installPlatformService(win);
     installVsyncService(win);
+    const ampdocService = installDocService(win, /* isSingleDoc */ true);
+    ampdoc = ampdocService.getAmpDoc(win.document);
 
-    binding = new ViewportBindingNatural_(win, viewer);
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
     binding.connect();
   });
 
@@ -1168,7 +1171,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   });
 
   it('should configure body as relative', () => {
-    binding = new ViewportBindingNatural_(win, viewer);
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
     expect(win.document.body.style.display).to.not.be.ok;
     const bodyStyles = win.getComputedStyle(win.document.body);
     expect(bodyStyles.position).to.equal('relative');
@@ -1179,7 +1182,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 
   it('should override body overflow for iOS webview', () => {
     win.document.documentElement.classList.add('i-amphtml-ios-webview');
-    binding = new ViewportBindingNatural_(win, viewer);
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
     const bodyStyles = win.getComputedStyle(win.document.body);
     expect(bodyStyles.position).to.equal('relative');
     expect(bodyStyles.overflowX).to.equal('hidden');
@@ -1309,8 +1312,8 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
     child.style.width = '200px';
     child.style.height = '300px';
     win.document.body.appendChild(child);
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
-    const ampdoc = ampdocService.getAmpDoc();
+    const ampdoc = installDocService(win, /* isSingleDoc */ true).getAmpDoc(
+        win.document);
 
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
