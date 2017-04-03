@@ -39,7 +39,6 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
 import {extensionsFor} from '../../../src/services';
-import {setStyles} from '../../../src/style';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
 /** @const {string} */
@@ -95,7 +94,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.size_ = (width && height)
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
-    let sizeStr = `${this.size_.width}x${this.size_.height}`;    const rawJson = this.element.getAttribute('json');
+    let sizeStr = `${this.size_.width}x${this.size_.height}`;
+    const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tagForChildDirectedTreatment'];
     const adTestOn = isInManualExperiment(this.element);
@@ -112,7 +112,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           Number(this.element.getAttribute('width')),
           Number(this.element.getAttribute('height')),
           multiSizeValidation == 'true');
-      sizeStr += '|' + dimensions.map(dimension => dimension.join('x')).join('|');
+      sizeStr += '|' + dimensions
+          .map(dimension => dimension.join('x'))
+          .join('|');
     }
 
     return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, [
