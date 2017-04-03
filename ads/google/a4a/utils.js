@@ -17,11 +17,11 @@
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {getAdCid} from '../../../src/ad-cid';
-import {documentInfoForDoc} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 import {createElementWithAttributes} from '../../../src/dom';
@@ -385,25 +385,36 @@ export function extractAmpAnalyticsConfig(responseHeaders, extensions) {
  * with amp-ad closest selector and min 50% visible for 1 sec.
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {?AmpAnalyticsConfigDef} inputConfig
+ * @param {?../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  */
-export function injectActiveViewAmpAnalyticsElement(a4a, inputConfig) {
+export function injectActiveViewAmpAnalyticsElement(
+    a4a, inputConfig, responseHeaders) {
   if (!inputConfig || !inputConfig.urls.length) {
     return;
   }
   const ampAnalyticsElem =
     a4a.element.ownerDocument.createElement('amp-analytics');
   ampAnalyticsElem.setAttribute('scoped', '');
+  const visibilitySpec = {
+    'selector': 'amp-ad',
+    'selectionMethod': 'closest',
+    'visiblePercentageMin': 50,
+    'continuousTimeMin': 1000,
+  };
   const config = {
     'transport': {'beacon': false, 'xhrpost': false},
     'triggers': {
       'continuousVisible': {
         'on': 'visible',
-        'visibilitySpec': {
-          'selector': 'amp-ad',
-          'selectionMethod': 'closest',
-          'visiblePercentageMin': 50,
-          'continuousTimeMin': 1000,
-        },
+        visibilitySpec,
+      },
+      'continuousVisibleIniLoad': {
+        'on': 'ini-load',
+        visibilitySpec,
+      },
+      'continuousVisibleRenderStart': {
+        'on': 'render-start',
+        visibilitySpec,
       },
     },
   };
@@ -416,6 +427,16 @@ export function injectActiveViewAmpAnalyticsElement(a4a, inputConfig) {
   // Security review needed here.
   config['requests'] = requests;
   config['triggers']['continuousVisible']['request'] = Object.keys(requests);
+  // Add CSI pingbacks.
+  const correlator = getCorrelator(a4a.win);
+  const slotId = a4a.element.getAttribute('data-amp-slot-index');
+  const qqid = responseHeaders ? responseHeaders.get(QQID_HEADER) : 'null';
+  config['requests']['visibilityCsi'] = 'https://csi.gstatic.com/csi?fromAnalytics=1' +
+      `&c=${correlator}&slotId=${slotId}&qqid.0=${qqid}`;
+  config['triggers']['continuousVisibleIniLoad']['request'] =
+      'visibilityCsi';
+  config['triggers']['continuousVisibleRenderStart']['request'] =
+      'visibilityCsi';
   const scriptElem = createElementWithAttributes(
       /** @type {!Document} */(a4a.element.ownerDocument), 'script', {
         'type': 'application/json',

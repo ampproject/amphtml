@@ -157,12 +157,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
-    id: 'make-body-block',
-    name: 'Sets the body to display:block.',
-    spec: 'https://github.com/ampproject/amphtml/issues/5310',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5319',
-  },
-  {
     id: 'make-body-relative',
     name: 'Sets the body to position:relative (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/5667',
@@ -176,7 +170,7 @@ const EXPERIMENTS = [
   {
     id: 'ios-embed-wrapper',
     name: 'A new iOS embedded viewport model that wraps the body into' +
-        ' a synthetic root',
+        ' a synthetic root (launched)',
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
   },

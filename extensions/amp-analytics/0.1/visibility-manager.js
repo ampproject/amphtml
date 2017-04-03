@@ -23,9 +23,9 @@ import {VisibilityModel} from './visibility-model';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {map} from '../../../src/utils/object';
-import {resourcesForDoc} from '../../../src/resources';
-import {viewerForDoc} from '../../../src/viewer';
-import {viewportForDoc} from '../../../src/viewport';
+import {resourcesForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
 
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
@@ -399,7 +399,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   /** @override */
   observe(element, listener) {
     this.polyfillAmpElementIfNeeded_(element);
-    this.getIntersectionObserver_().observe(element);
 
     const id = getElementId(element);
     let trackedElement = this.trackedElements_[id];
@@ -415,6 +414,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       listener(trackedElement.intersectionRatio);
     }
     trackedElement.listeners.push(listener);
+    this.getIntersectionObserver_().observe(element);
     return () => {
       const trackedElement = this.trackedElements_[id];
       if (trackedElement) {
@@ -473,6 +473,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     };
     this.unsubscribe(this.viewport_.onScroll(ticker));
     this.unsubscribe(this.viewport_.onChanged(ticker));
+    // Tick in the next event loop. That's how native InOb works.
     setTimeout(ticker);
     return intersectionObserverPolyfill;
   }

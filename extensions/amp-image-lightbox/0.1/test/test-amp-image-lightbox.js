@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-image-lightbox';
 import {

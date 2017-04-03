@@ -15,7 +15,7 @@
  */
 
 import {internalListenImplementation} from './event-helper-listen';
-import {timerFor} from './timer';
+import {timerFor} from './services';
 import {user} from './log';
 
 /** @const {string}  */
@@ -67,7 +67,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
   let localListener = listener;
   const unlisten = internalListenImplementation(element, eventType, event => {
     try {
-      localListener.call(this, event);
+      localListener(event);
     } finally {
       // Ensure listener is GC'd
       localListener = null;

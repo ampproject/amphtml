@@ -18,7 +18,8 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
-import {vsyncFor} from '../../src/vsync';
+import {resourcesForDoc} from '../../src/services';
+import {vsyncFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 import {getService, resetServiceForTesting} from '../../src/service';
@@ -51,6 +52,7 @@ describes.realWin('CustomElement register', {amp: 1}, env => {
   beforeEach(() => {
     win = env.win;
     setLoadingCheckForTests('amp-element1');
+    installResourcesServiceForDoc(window.document);
   });
 
   it('should go through stub/upgrade cycle', () => {
@@ -79,7 +81,7 @@ describes.realWin('CustomElement register', {amp: 1}, env => {
 
 describe('CustomElement', () => {
 
-  const resources = installResourcesServiceForDoc(window.document);
+  const resources = resourcesForDoc(window.document);
   let testElementCreatedCallback;
   let testElementPreconnectCallback;
   let testElementFirstAttachedCallback;
@@ -1040,6 +1042,16 @@ describe('CustomElement', () => {
     expect(element.style.width).to.equal('0px');
   });
 
+  it('should remove i-amphtml-layout-awaiting-size class when ' +
+      'size changed', () => {
+    const element = new StubElementClass();
+    expect(element.isUpgraded()).to.equal(false);
+    element.classList.add('i-amphtml-layout-awaiting-size');
+
+    expect(element).to.have.class('i-amphtml-layout-awaiting-size');
+    element.changeSize(100, 100);
+    expect(element).not.to.have.class('i-amphtml-layout-awaiting-size');
+  });
 
   describe('unlayoutCallback', () => {
 
@@ -1363,7 +1375,7 @@ describe('CustomElement Loading Indicator', () => {
     prototype: createAmpElementProto(window, 'amp-test-loader', TestElement),
   });
 
-  const resources = installResourcesServiceForDoc(window.document);
+  const resources = resourcesForDoc(window.document);
   let sandbox;
   let clock;
   let element;
@@ -1668,7 +1680,7 @@ describe('CustomElement Overflow Element', () => {
     prototype: createAmpElementProto(window, 'amp-test-overflow', TestElement),
   });
 
-  const resources = installResourcesServiceForDoc(window.document);
+  const resources = resourcesForDoc(window.document);
   let sandbox;
   let element;
   let overflowElement;

@@ -17,7 +17,6 @@
 import {writeScript} from './3p';
 import {user} from '../src/log';
 
-
 /**
  * Get the correct script for the gist.
  *
@@ -44,9 +43,13 @@ export function github(global, data) {
     'The data-gistid attribute is required for <amp-gist> %s',
     data.element);
 
-  const gistid = data.gistid;
+  let gistUrl = 'https://gist.github.com/' + encodeURIComponent(data.gistid) + '.js';
 
-  getGistJs(global, 'https://gist.github.com/' + gistid + '.js', function() {
+  if (data.file) {
+    gistUrl += '?file=' + encodeURIComponent(data.file);
+  }
+
+  getGistJs(global, gistUrl, function() {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/services';
 import {
   VariableSource,
   getNavigationData,

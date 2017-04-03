@@ -16,7 +16,7 @@
 
 import {dev} from './log';
 import {getServicePromise} from './service';
-import {timerFor} from './timer';
+import {timerFor} from './services';
 
 /**
  * A map of services that delay rendering. The key is the name of the service

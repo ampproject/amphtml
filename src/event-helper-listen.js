@@ -34,7 +34,7 @@ export function internalListenImplementation(element, eventType, listener,
   /** @type {?Function}  */
   let wrapped = event => {
     try {
-      return localListener.call(this, event);
+      return localListener(event);
     } catch (e) {
       // reportError is installed globally per window in the entry point.
       self.reportError(e);

@@ -18,7 +18,7 @@
 import '../polyfills';
 
 import {user} from '../log';
-import {fromClass} from '../service';
+import {registerServiceBuilder} from '../service';
 import {reportError} from '../error';
 
 /**
@@ -165,8 +165,7 @@ export class Timer {
 
 /**
  * @param {!Window} window
- * @return {!Timer}
  */
 export function installTimerService(window) {
-  return fromClass(window, 'timer', Timer);
+  registerServiceBuilder(window, 'timer', Timer);
 };

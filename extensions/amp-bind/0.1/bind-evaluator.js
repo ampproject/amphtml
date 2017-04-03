@@ -28,7 +28,7 @@ import {filterSplice} from '../../../src/utils/array';
 export let BindingDef;
 
 /**
- * Error that can be passed through web worker
+ * Error-like object that can be passed through web worker boundary.
  * @typedef {{
  *   message: string,
  *   stack: string,
@@ -55,7 +55,7 @@ export class BindEvaluator {
    * Parses and stores given bindings into expression objects and returns map
    * of expression string to parse errors.
    * @param {!Array<BindingDef>} bindings
-   * @return {!Object<string,EvaluatorErrorDef>},
+   * @return {!Object<string, EvaluatorErrorDef>},
    */
   addBindings(bindings) {
     const errors = Object.create(null);
@@ -63,10 +63,7 @@ export class BindEvaluator {
     bindings.forEach(binding => {
       const parsed = this.parse_(binding.expressionString);
       if (parsed.error) {
-        errors[binding.expressionString] = {
-          message: parsed.error.message,
-          stack: parsed.error.stack,
-        };
+        errors[binding.expressionString] = parsed.error;
       } else {
         this.bindings_.push(binding);
       }
@@ -121,7 +118,7 @@ export class BindEvaluator {
       }
       const {result, error} = this.evaluate_(expression, scope);
       if (error) {
-        errors[expressionString] = {message: error.message, stack: error.stack};
+        errors[expressionString] = error;
         return;
       }
       cache[expressionString] = result;
@@ -157,7 +154,7 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   result: ./bind-expression.BindExpressionResultDef,
-   *   error: Error,
+   *   error: ?EvaluatorErrorDef,
    * }}
    */
   evaluateExpression(expressionString, scope) {
@@ -177,7 +174,7 @@ export class BindEvaluator {
    * @param {string} expressionString
    * @return {{
    *   expression: BindExpression,
-   *   error: Error,
+   *   error: ?EvaluatorErrorDef,
    * }}
    * @private
    */
@@ -189,7 +186,7 @@ export class BindEvaluator {
         expression = new BindExpression(expressionString);
         this.expressions_[expressionString] = expression;
       } catch (e) {
-        error = e;
+        error = {message: e.message, stack: e.stack};
       }
     }
     return {expression, error};
@@ -201,7 +198,7 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   result: ./bind-expression.BindExpressionResultDef,
-   *   error: Error,
+   *   error: ?EvaluatorErrorDef,
    * }}
    * @private
    */
@@ -211,7 +208,7 @@ export class BindEvaluator {
     try {
       result = expression.evaluate(scope);
     } catch (e) {
-      error = e;
+      error = {message: e.message, stack: e.stack};
     }
     return {result, error};
   }
