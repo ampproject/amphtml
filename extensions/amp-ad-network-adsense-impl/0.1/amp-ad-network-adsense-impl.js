@@ -41,10 +41,7 @@ import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {
-  computedStyle,
-  setStyles,
-} from '../../../src/style';
+import {computedStyle} from '../../../src/style';
 import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
 
@@ -139,7 +136,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const height = Number(this.element.getAttribute('height'));
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
-    this.size_ = isExperimentOn(this.win, 'a4a-adsense-use-new-format')
+    this.size_ = isExperimentOn(this.win, 'a4a-use-attr-for-format')
         && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
@@ -192,7 +189,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.ampAnalyticsConfig =
       extractAmpAnalyticsConfig(responseHeaders, this.extensions_);
     this.responseHeaders_ = responseHeaders;
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders)
+        .then(adResponse => {
+          adResponse.size = this.size_;
+          return Promise.resolve(adResponse);
+        });
   }
 
   /**
@@ -256,13 +257,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     injectActiveViewAmpAnalyticsElement(
         this, this.ampAnalyticsConfig, this.responseHeaders_);
-    const iframe = this.element.querySelector('iframe');
-    if (iframe) {
-      setStyles(iframe, {
-        width: `${this.size_.width}px`,
-        height: `${this.size_.height}px`,
-      });
-    }
   }
 }
 

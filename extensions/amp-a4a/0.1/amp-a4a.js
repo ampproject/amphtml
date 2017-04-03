@@ -1198,8 +1198,8 @@ export class AmpA4A extends AMP.BaseElement {
     const iframe = createElementWithAttributes(
         /** @type {!Document} */(this.element.ownerDocument),
         'iframe', Object.assign({
-          'height': this.element.getAttribute('height'),
-          'width': this.element.getAttribute('width'),
+          'height': this.creativeSize_.height,
+          'width': this.creativeSize_.width,
           // XHR request modifies URL by adding origin as parameter.  Need to
           // append ad URL, otherwise cache will miss.
           // TODO: remove call to getCorsUrl and instead have fetch API return
@@ -1251,8 +1251,8 @@ export class AmpA4A extends AMP.BaseElement {
       const iframe = createElementWithAttributes(
           /** @type {!Document} */(this.element.ownerDocument),
           'iframe', Object.assign({
-            'height': this.element.getAttribute('height'),
-            'width': this.element.getAttribute('width'),
+            'height': this.creativeSize_.height,
+            'width': this.creativeSize_.width,
             'src': srcPath,
           }, SHARED_IFRAME_PROPERTIES));
         // TODO(bradfrizzell): change name of function and var

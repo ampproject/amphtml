@@ -184,13 +184,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     injectActiveViewAmpAnalyticsElement(
         this, this.ampAnalyticsConfig, this.responseHeaders_);
-    const iframe = this.element.querySelector('iframe');
-    if (iframe) {
-      setStyles(iframe, {
-        width: `${this.size_.width}px`,
-        height: `${this.size_.height}px`,
-      });
-    }
   }
 
   /**
