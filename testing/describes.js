@@ -489,7 +489,7 @@ class AmpFixture {
       env.ampdoc = ampdoc;
       installAmpdocServices(ampdoc, spec.params);
       adopt(win);
-    } else if (ampdocType == 'multi') {
+    } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
       adoptShadowMode(win);
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
@@ -552,6 +552,17 @@ class AmpFixture {
             env.parentWin = env.win;
             env.win = embed.win;
           });
+      completePromise = completePromise ?
+          completePromise.then(() => promise) : promise;
+    } else if (ampdocType == 'shadow') {
+      const hostElement = win.document.createElement('div');
+      win.document.body.appendChild(hostElement);
+      const importDoc = win.document.implementation.createHTMLDocument('');
+      const ret = win.AMP.attachShadowDoc(
+          hostElement, importDoc, win.location.href);
+      const ampdoc = ret.ampdoc;
+      env.ampdoc = ampdoc;
+      const promise = ampdoc.whenReady();
       completePromise = completePromise ?
           completePromise.then(() => promise) : promise;
     }

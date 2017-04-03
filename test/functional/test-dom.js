@@ -15,18 +15,17 @@
  */
 
 import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
 import {loadPromise} from '../../src/event-helper';
 import {toArray} from '../../src/types';
 
 
 
-describe('DOM', () => {
+describes.sandboxed('DOM', {}, env => {
 
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = env.sandbox;
   });
 
   afterEach(() => {
@@ -397,6 +396,27 @@ describe('DOM', () => {
         .to.equal(1);
     expect(dom.ancestorElementsByTag(element2, 'ELEMENT3').length)
         .to.be.equal(0);
+  });
+
+  it('iterateCursor should loop through every element in a NodeList', () => {
+    const fragment = document.createDocumentFragment();
+    [0, 1, 2].forEach(() => fragment.appendChild(document.createElement('i')));
+
+    const iSpy = sandbox.spy();
+    dom.iterateCursor(fragment.querySelectorAll('i'), iSpy);
+    expect(iSpy).to.be.calledThrice;
+
+    const bSpy = sandbox.spy();
+    dom.iterateCursor(fragment.querySelectorAll('b'), bSpy);
+    expect(bSpy).to.be.notCalled;
+  });
+
+  it('iterateCursor should allow null elements in a list', () => {
+    const list = ['wow', null, 'cool'];
+
+    const spy = sandbox.spy();
+    dom.iterateCursor(list, spy);
+    expect(spy).to.be.calledThrice;
   });
 
   function testScopedQuerySelector() {

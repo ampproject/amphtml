@@ -953,14 +953,18 @@ export class ViewportBindingDef {
 export class ViewportBindingNatural_ {
 
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./viewer-impl.Viewer} viewer
    */
-  constructor(win, viewer) {
+  constructor(ampdoc, viewer) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @const {!Window} */
-    this.win = win;
+    this.win = ampdoc.win;
 
     /** @const {!../service/platform-impl.Platform} */
-    this.platform_ = platformFor(win);
+    this.platform_ = platformFor(this.win);
 
     /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
@@ -1070,8 +1074,10 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getScrollTop() {
-    return this.getScrollingElement_()./*OK*/scrollTop ||
+    const pageScrollTop = this.getScrollingElement_()./*OK*/scrollTop ||
         this.win./*OK*/pageYOffset;
+    const host = this.ampdoc.getRootNode().host;
+    return (host ? pageScrollTop - host./*OK*/offsetTop : pageScrollTop);
   }
 
   /** @override */
@@ -1821,7 +1827,7 @@ function createViewport(ampdoc) {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
     }
   } else {
-    binding = new ViewportBindingNatural_(ampdoc.win, viewer);
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
   }
   return new Viewport(ampdoc, binding, viewer);
 }
