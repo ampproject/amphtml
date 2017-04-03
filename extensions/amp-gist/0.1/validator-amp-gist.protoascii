@@ -29,16 +29,16 @@ tags: {  # amp-gist
 tags: {  # <amp-gist>
   html_format: AMP
   tag_name: "AMP-GIST"
+  satisfies: "amp-gist"
   requires: "amp-gist extension .js script"
-  attrs: {
-    name: "data-gistid"
-    mandatory: true
-  }
   attrs: {
     name: "data-file"
     value: ""
   }
-  satisfies: "amp-gist"
+  attrs: {
+    name: "data-gistid"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-gist"
   amp_layout: {
