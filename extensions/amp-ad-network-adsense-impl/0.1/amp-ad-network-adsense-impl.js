@@ -41,7 +41,10 @@ import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {computedStyle} from '../../../src/style';
+import {
+  computedStyle,
+  setStyles,
+} from '../../../src/style';
 import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
 
@@ -253,6 +256,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     injectActiveViewAmpAnalyticsElement(
         this, this.ampAnalyticsConfig, this.responseHeaders_);
+    const iframe = this.element.querySelector('iframe');
+    if (iframe) {
+      setStyles(iframe, {
+        width: `${this.size_.width}px`,
+        height: `${this.size_.height}px`,
+      });
+    }
   }
 }
 
