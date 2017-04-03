@@ -277,12 +277,6 @@ describe('BindExpression', () => {
     expect(evaluate('copyAndSplice(arr, 1, 1)', {arr})).to.deep.equal([1, 3]);
     expect(evaluate('copyAndSplice(arr, 1, 1, 47)', {arr})).to
         .deep.equal([1, 47, 3]);
-
-    expect(evaluate('copyAndSet()')).to.be.null;
-    expect(evaluate('copyAndSet(arr)', {arr})).to.not.equal(arr);
-    expect(evaluate('copyAndSet(arr)', {arr})).to.deep.equal(arr);
-    expect(evaluate('copyAndSet(arr, 2)', {arr})).to.deep.equal([1, 2, null]);
-    expect(evaluate('copyAndSet(arr, 2, 47)', {arr})).to.deep.equal([1, 2, 47]);
   });
 
   it('should NOT allow access to prototype properties', () => {

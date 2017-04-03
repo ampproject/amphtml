@@ -58,32 +58,10 @@ const FUNCTION_WHITELIST = (function() {
             `copyAndSplice: ${array} is not an array; returning null.`);
         return null;
       }
-      const copy = array.slice();
-      copy.splice.apply(copy, Array.prototype.slice.call(arguments, 1));
-      return copy;
-    },
-
-    /**
-     * Similar to array[index] = item except it returns a copy of the
-     * passed-in array with the desired modification.
-     * @param {!Array} array
-     * @param {!number} index, must be an integer
-     * @param {?=} item, null if unspecified
-     */
-    'copyAndSet': function(array, index, item) {
-      if (!isArray(array)) {
-        user().warn(
-            TAG,
-            `copyAndSet: ${array} is not an array; returning null.`);
-        return null;
-      }
-      const copy = array.slice();
-      // Don't allow indexing with non-integers which is allowed in JS
-      if (typeof index === 'number'
-          && isFinite(index)
-          && Math.floor(index) === index) {
-        copy[index] = item === undefined ? null : item;
-      }
+      const copy = Array.prototype.slice.call(array);
+      Array.prototype.splice.apply(
+          copy,
+          Array.prototype.slice.call(arguments, 1));
       return copy;
     },
   };
@@ -123,7 +101,6 @@ const FUNCTION_WHITELIST = (function() {
     Math.round,
     Math.sign,
     BindArrays.copyAndSplice,
-    BindArrays.copyAndSet,
   ];
   // Creates a prototype-less map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
