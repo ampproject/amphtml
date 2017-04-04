@@ -54,8 +54,7 @@ const FUNCTION_WHITELIST = (function() {
     'copyAndSplice': function(array, start, deleteCount, items) {
       if (!isArray(array)) {
         throw new Error(
-          `copyAndSplice: ${array} is not an array; returning null.`);
-        return null;
+          `copyAndSplice: ${array} is not an array.`);
       }
       const copy = Array.prototype.slice.call(array);
       Array.prototype.splice.apply(
