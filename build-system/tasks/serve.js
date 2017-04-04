@@ -19,6 +19,10 @@ var gulp = require('gulp-help')(require('gulp'));
 var util = require('gulp-util');
 var nodemon = require('nodemon');
 
+var host = argv.host || 'localhost';
+var port = argv.port || process.env.PORT || 8000;
+var useHttps = argv.https != undefined;
+
 /**
  * Starts a simple http server at the repository root
  */
@@ -27,7 +31,10 @@ function serve() {
     script: require.resolve('../server.js'),
     watch: [require.resolve('../app.js'),
         require.resolve('../server.js')],
-    env: {'NODE_ENV': 'development'},
+    env: {'NODE_ENV': 'development',
+      'SERVE_PORT': port,
+      'SERVE_HOST': host,
+      'SERVE_USEHTTPS': useHttps},
   });
 
   util.log(util.colors.yellow('Run `gulp build` then go to '
@@ -48,9 +55,6 @@ gulp.task(
     }
 );
 
-var host = argv.host || 'localhost';
-var port = argv.port || process.env.PORT || 8000;
-var useHttps = argv.https != undefined;
 function getHost() {
   return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
 }
