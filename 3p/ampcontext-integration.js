@@ -27,8 +27,7 @@ import {dev, user} from '../src/log';
  * @param {string} type
  * @return {!Window}
  */
-// DUPLICATE IN 3p/integration
-function masterSelection(win, type) {
+export function masterSelection(win, type) {
   // The master has a special name.
   const masterName = 'frame_' + type + '_master';
   let master;

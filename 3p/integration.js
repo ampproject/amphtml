@@ -23,7 +23,10 @@
  */
 
 import './polyfills';
-import {IntegrationAmpContext} from './ampcontext-integration';
+import {
+  IntegrationAmpContext,
+  masterSelection,
+} from './ampcontext-integration';
 import {installEmbedStateListener, manageWin} from './environment';
 import {isExperimentOn} from './3p';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
@@ -375,33 +378,6 @@ export function draw3p(win, data, configCallback) {
 };
 
 /**
- * Returns the "master frame" for all widgets of a given type.
- * This frame should be used to e.g. fetch scripts that can
- * be reused across frames.
- * @param {string} type
- * @return {!Window}
- */
-function masterSelection(type) {
-  // The master has a special name.
-  const masterName = 'frame_' + type + '_master';
-  let master;
-  try {
-    // Try to get the master from the parent. If it does not
-    // exist yet we get a security exception that we catch
-    // and ignore.
-    master = window.parent.frames[masterName];
-  } catch (expected) {
-    /* ignore */
-  }
-  if (!master) {
-    // No master yet, rename ourselves to be master. Yaihh.
-    window.name = masterName;
-    master = window;
-  }
-  return master;
-}
-
-/**
  * @return {boolean} Whether this is the master iframe.
  */
 function isMaster() {
@@ -493,7 +469,7 @@ function installContextUsingStandardImpl(win) {
   // Define master related properties to be lazily read.
   Object.defineProperties(win.context, {
     master: {
-      get: () => masterSelection(data.type),
+      get: () => masterSelection(win, data.type),
     },
     isMaster: {
       get: isMaster,
