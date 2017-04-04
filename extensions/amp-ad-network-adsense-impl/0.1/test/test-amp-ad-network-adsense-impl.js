@@ -36,6 +36,7 @@ import {
   addAttributesToElement,
 } from '../../../../src/dom';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {toggleExperiment} from '../../../../src/experiments';
 
 function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
   const doc = opt_doc || document;
@@ -392,6 +393,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
      * @return The iframe promise.
      */
     function createImplTag(config) {
+      config.type = 'adsense';
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
@@ -408,10 +410,9 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       });
     }
 
-    function verifyCss(win, elem) {
-      const iframe = elem.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      const style = win.getComputedStyle(iframe);
+    function verifyCss(iframe) {
+      expect(iframe).to.be.ok;
+      const style = window.getComputedStyle(iframe);
       expect(style.top).to.equal('50%');
       expect(style.left).to.equal('50%');
       // We don't know the exact values by which the frame will be translated,
@@ -428,48 +429,49 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return createImplTag({
         width: '300',
         height: '150',
-        type: 'adsense',
       }).then(fixture => {
         expect(impl.element.getAttribute('width')).to.equal('300');
         expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(fixture.win, impl.element);
+        verifyCss(impl.element.querySelector('iframe'));
       });
     });
     it('centers iframe in slot when !height && !width', () => {
       return createImplTag({
-        type: 'adsense',
         layout: 'fixed',
       }).then(fixture => {
         expect(impl.element.getAttribute('width')).to.be.null;
         expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(fixture.win, impl.element);
+        verifyCss(impl.element.querySelector('iframe'));
       });
     });
     it('centers iframe in slot when !height && width', () => {
       return createImplTag({
         width: '300',
-        type: 'adsense',
         layout: 'fixed',
       }).then(fixture => {
         expect(impl.element.getAttribute('width')).to.equal('300');
         expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(fixture.win, impl.element);
+        verifyCss(impl.element.querySelector('iframe'));
       });
     });
     it('centers iframe in slot when height && !width', () => {
       return createImplTag({
         height: '150',
-        type: 'adsense',
         layout: 'fixed',
       }).then(fixture => {
         expect(impl.element.getAttribute('width')).to.be.null;
         expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(fixture.win, impl.element);
+        verifyCss(impl.element.querySelector('iframe'));
       });
     });
   });
 
   describe('#getAdUrl', () => {
+
+    afterEach(() =>
+        toggleExperiment(window, 'a4a-use-attr-for-format', false));
+
+
     it('formats client properly', () => {
       element.setAttribute('data-ad-client', 'SoMeClient');
       new AmpAd(element).upgradeCallback();
@@ -505,5 +507,48 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '&dtd=[0-9]+$'));
       });
     });
+    it('has correct format when width == "auto"', () => {
+      element.setAttribute('width', 'auto');
+      new AmpAd(element).upgradeCallback();
+      expect(impl.element.getAttribute('width')).to.equal('auto');
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        // With exp a4a-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
+        expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+    });
+    it('has correct format when height == "auto"', () => {
+      element.setAttribute('height', 'auto');
+      new AmpAd(element).upgradeCallback();
+      expect(impl.element.getAttribute('height')).to.equal('auto');
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        // With exp a4a-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
+        expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+    });
+    it('has correct format when a4a-use-attr-for-format is on', () => {
+      toggleExperiment(window, 'a4a-use-attr-for-format', true);
+      const width = element.getAttribute('width');
+      const height = element.getAttribute('height');
+      new AmpAd(element).upgradeCallback();
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        // With exp a4a-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
+        expect(url).to.match(new RegExp(
+            `format=${width}x${height}&w=${width}&h=${height}`)));
+    });
+    it('has correct format when width == "auto"' +
+        'and a4a-use-attr-for-format is on', () => {
+          toggleExperiment(window, 'a4a-use-attr-for-format', true);
+          element.setAttribute('width', 'auto');
+          new AmpAd(element).upgradeCallback();
+          expect(impl.element.getAttribute('width')).to.equal('auto');
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              // Ensure that "auto" doesn't appear anywhere here:
+              expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+        });
   });
 });

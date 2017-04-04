@@ -60,12 +60,37 @@
   </amp-user-notification>
 
   <h2>AdSense</h2>
-  <amp-ad width=320 height=50
+  <amp-ad width=300 height=250
       type="adsense"
-      data-ad-client="ca-pub-9543332082073187"
-      data-ad-slot="1175996171">
+      data-ad-client="ca-pub-2005682797531342"
+      data-ad-slot="7046626912">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
+
+  <amp-ad width=300 height=250
+          type="adsense"
+          data-ad-client="ca-pub-2005682797531342"
+          data-ad-slot="7046626912"
+          data-consent-notification-id="amp-user-notification">
+    <div placeholder>should only show ad after notification get dismissed</div>
+    <div fallback></div>
+  </amp-ad>
+
+  <div class=talldiv>
+    <!-- Make the second ad below the fold. -->
+  </div>
+
+  <h2>AdSense ad 2</h2>
+
+  <amp-ad width=300 height=250
+      type="adsense"
+      data-ad-client="ca-pub-2005682797531342"
+      data-ad-slot="7046626912"
+      data-adtest="on">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
 </body>
 </html>

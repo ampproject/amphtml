@@ -274,8 +274,8 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?{width, height}}
      */
     this.creativeSize_ = {
-      width: Number(this.element.getAttribute('width')),
-      height: Number(this.element.getAttribute('height')),
+      width: this.element.getAttribute('width'),
+      height: this.element.getAttribute('height'),
     };
 
     /**
@@ -538,7 +538,7 @@ export class AmpA4A extends AMP.BaseElement {
         // This block returns the ad creative and signature, if available; null
         // otherwise.
         /**
-         * @return {!Promise<?{creative: !ArrayBuffer, signature: !ArrayBuffer}>}
+         * @return {!Promise<?{AdResponseDef}>}
          */
         .then(responseParts => {
           checkStillCurrent(promiseId);
@@ -563,8 +563,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!creativeParts) {
             return Promise.resolve();
           }
-          this.creativeSize_ = creativeParts.size ?
-              creativeParts.size : this.creativeSize_;
+          this.creativeSize_ = creativeParts.size || this.creativeSize_;
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&
               creativeParts.creative) {

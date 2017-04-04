@@ -24,6 +24,7 @@ import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {toggleExperiment} from '../../../../src/experiments';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 
 function setupForAdTesting(fixture) {
@@ -79,6 +80,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
   describe('#extractCreativeAndSignature', () => {
     let loadExtensionSpy;
+    const size = {width: 200, height: 50};
 
     beforeEach(() => {
       return createIframePromise().then(fixture => {
@@ -91,6 +93,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'layout': 'fixed',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
+        impl.size_ = size;
         installExtensionsService(impl.win);
         const extensions = extensionsFor(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
@@ -106,7 +109,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             has: function() { return false; },
           }).then(adResponse => {
             expect(adResponse).to.deep.equal(
-                  {creative, signature: null, size: null});
+                  {creative, signature: null, size});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
           });
       });
@@ -124,8 +127,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             },
           }).then(adResponse => {
             expect(adResponse).to.deep.equal(
-              {creative, signature: base64UrlDecodeToBytes('AQAB'),
-               size: null});
+              {creative, signature: base64UrlDecodeToBytes('AQAB'), size});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
           });
       });
@@ -154,7 +156,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               {
                 creative,
                 signature: base64UrlDecodeToBytes('AQAB'),
-                size: null,
+                size,
               });
             expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
@@ -201,6 +203,9 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       impl = new AmpAdNetworkDoubleclickImpl(element);
     });
 
+    afterEach(() =>
+        toggleExperiment(window, 'a4a-use-attr-for-format', false));
+
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then(url => {
@@ -239,5 +244,38 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         expect(url).to.match(/&scp=excl_cat%3Dsports&/);
       });
     });
+
+    it('has correct format when height == "auto"', () => {
+      element.setAttribute('height', 'auto');
+      new AmpAd(element).upgradeCallback();
+      expect(impl.element.getAttribute('height')).to.equal('auto');
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        // With exp a4a-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
+        expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+    });
+    it('has correct format when a4a-use-attr-for-format is on', () => {
+      toggleExperiment(window, 'a4a-use-attr-for-format', true);
+      new AmpAd(element).upgradeCallback();
+      const width = impl.element.getAttribute('width');
+      const height = impl.element.getAttribute('height');
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        // With exp a4a-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
+        expect(url).to.match(new RegExp(`sz=${width}x${height}`)));
+    });
+    it('has correct format when width == "auto"' +
+        'and a4a-use-attr-for-format is on', () => {
+          toggleExperiment(window, 'a4a-use-attr-for-format', true);
+          element.setAttribute('width', 'auto');
+          new AmpAd(element).upgradeCallback();
+          expect(impl.element.getAttribute('width')).to.equal('auto');
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              // Ensure that "auto" doesn't appear anywhere here:
+              expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+        });
   });
 });

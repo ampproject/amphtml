@@ -38,6 +38,7 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
+import {isExperimentOn} from '../../../src/experiments';
 import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
@@ -91,7 +92,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const global = this.win;
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
-    this.size_ = (width && height)
+    this.size_ = isExperimentOn(this.win, 'a4a-use-attr-for-format')
+        && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
     let sizeStr = `${this.size_.width}x${this.size_.height}`;
@@ -148,11 +150,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const adResponsePromise =
         extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
     return adResponsePromise.then(adResponse => {
-      if (adResponse.size) {
-        this.handleResize_(adResponse.size.width, adResponse.size.height);
-      } else {
-        adResponse.size = this.size_;
-      }
+      // If the server returned a size, use that, otherwise use the size that
+      // we sent in the ad request.
+      adResponse.size = adResponse.size || this.size_;
+      this.handleResize_(adResponse.size.width, adResponse.size.height);
       return Promise.resolve(adResponse);
     });
   }
