@@ -268,6 +268,19 @@ describe('BindExpression', () => {
     }).to.throw(unsupportedFunctionError);
   });
 
+  it('should support BindArrays functions', () => {
+    const arr = [1, 2, 3];
+    expect(() => evaluate('copyAndSplice()')).to.throw(/not an array/);
+    expect(() => evaluate('copyAndSplice(x)', {x: 8472}))
+        .to.throw(/not an array/);
+    expect(evaluate('copyAndSplice(arr)', {arr})).to.not.equal(arr);
+    expect(evaluate('copyAndSplice(arr)', {arr})).to.deep.equal(arr);
+    expect(evaluate('copyAndSplice(arr, 1)', {arr})).to.deep.equal([1]);
+    expect(evaluate('copyAndSplice(arr, 1, 1)', {arr})).to.deep.equal([1, 3]);
+    expect(evaluate('copyAndSplice(arr, 1, 1, 47)', {arr})).to
+        .deep.equal([1, 47, 3]);
+  });
+
   it('should NOT allow access to prototype properties', () => {
     expect(evaluate('constructor')).to.be.null;
     expect(evaluate('prototype')).to.be.null;
