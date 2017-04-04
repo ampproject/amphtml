@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createCustomEvent} from '../event-helper'
+import {createCustomEvent} from '../event-helper';
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
@@ -50,9 +50,10 @@ const ELEMENTS_ACTIONS_MAP_ = {
   'AMP': ['setState'],
 };
 
+/** @const {!Object<string, !Array<string>>} */
 const WHITELISTED_INPUT_DATA_ = {
   'range': ['min', 'max', 'value'],
-}
+};
 
 /**
  * A map of method argument keys to functions that generate the argument values

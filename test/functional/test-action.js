@@ -987,7 +987,6 @@ describe('Core events', () => {
     element.setAttribute('max', '10');
     element.setAttribute('value', '5');
     const event = {target: element};
-    debugger;
     handler(event);
     expect(action.trigger).to.have.been.calledWith(
       element,
