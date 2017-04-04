@@ -18,14 +18,13 @@
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
-var argv = require('minimist')(process.argv.slice(2));
 var app = require(require.resolve('./app.js'));
 var webserver = require('gulp-webserver');
 var gulp = require('gulp-help')(require('gulp'));
 var morgan = require('morgan');
-var host = argv.host || 'localhost';
-var port = argv.port || process.env.PORT || 8000;
-var useHttps = argv.https != undefined;
+var host = process.env.SERVE_HOST;
+var port = process.env.SERVE_PORT;
+var useHttps = process.env.SERVE_USEHTTPS == 'true' ? true : false;
 
 // Start gulp webserver
 gulp.src(process.cwd())
