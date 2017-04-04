@@ -15,8 +15,8 @@
  */
 
 import {AmpForm, AmpFormService} from '../../amp-form';
-import {timerFor} from '../../../../../src/services';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
+import {poll} from '../../../../../testing/iframe';
 import {registerExtendedTemplate,} from
     '../../../../../src/service/template-impl';
 
@@ -30,12 +30,19 @@ describes.realWin('AmpForm Integration', {
   const baseUrl = 'http://localhost:31862';
   let doc;
   let sandbox;
-  let timer;
+
+  const realSetTimeout = window.setTimeout;
+  const stubSetTimeout = (callback, delay) => {
+    realSetTimeout(() => {
+      try {
+        callback();
+      } catch (e) {}
+    }, delay);
+  };
 
   beforeEach(() => {
     sandbox = env.sandbox;
     doc = env.win.document;
-    timer = timerFor(env.win);
     const scriptElement = document.createElement('script');
     scriptElement.setAttribute('custom-template', 'amp-mustache');
     doc.body.appendChild(scriptElement);
@@ -102,8 +109,10 @@ describes.realWin('AmpForm Integration', {
     return form;
   }
 
-  // Flakey timeouts on saucelabs.
-  describe.skip('on=submit:form.submit', () => {
+  const describeChrome =
+      describe.configure().skipFirefox().skipSafari().skipEdge();
+
+  describeChrome.run('on=submit:form.submit', () => {
     it('should be protected from recursive-submission', () => {
       const form = getForm({
         id: 'sameform',
@@ -113,12 +122,12 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'sameform');
       sandbox.spy(ampForm, 'handleXhrSubmit_');
       sandbox.spy(ampForm, 'handleSubmitAction_');
-      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
-      form.dispatchEvent(new Event('submit'));
+      sandbox.spy(ampForm.xhr_, 'fetch');
+      const fetch = poll('submit request sent',
+          () => ampForm.xhrSubmitPromiseForTesting());
 
-      return timer.promise(100).then(() => {
-        return fetch.returnValues[0];
-      }).then(() => {
+      form.dispatchEvent(new Event('submit'));
+      return fetch.then(() => {
         // Due to recursive nature of 'on=submit:sameform.submit' we expect
         // the action handler to be called twice, the first time for the
         // actual user submission.
@@ -134,8 +143,7 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
-  // Flakey timeouts on saucelabs.
-  describe.skip('Submit xhr-POST', () => {
+  describeChrome.run('Submit xhr-POST', () => {
     it('should submit and render success', () => {
       const form = getForm({
         id: 'form1',
@@ -148,22 +156,25 @@ describes.realWin('AmpForm Integration', {
         error: {message: 'Should not render this.', template: true},
       });
       const ampForm = new AmpForm(form, 'form1');
+      const fetch = poll('submit request sent',
+          () => ampForm.xhrSubmitPromiseForTesting());
+      const render = poll('render completes',
+          () => form.querySelector('[i-amphtml-rendered]'));
 
-      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
       form.dispatchEvent(new Event('submit'));
-
-      return timer.promise(100).then(() => {
-        return fetch.returnValues[0];
-      }).then(() => {
-        const rendered = form.querySelectorAll('[i-amphtml-rendered]');
-        expect(rendered.length).to.equal(1);
-        expect(rendered[0].textContent).to.equal(
+      return fetch.then(() => render).then(rendered => {
+        expect(rendered.textContent).to.equal(
             'Thanks John Miller for adding your interests: ' +
             'Football Basketball Writing .');
       });
     });
 
     it('should submit and render error', () => {
+      // Stubbing timeout to catch async-thrown errors and expect
+      // them. These catch errors thrown inside the catch-clause of the
+      // xhr request using rethrowAsync.
+      sandbox.stub(window, 'setTimeout', stubSetTimeout);
+
       const form = getForm({
         id: 'form1',
         actionXhr: baseUrl + '/form/post/error',
@@ -175,40 +186,24 @@ describes.realWin('AmpForm Integration', {
         },
       });
       const ampForm = new AmpForm(form, 'form1');
-      // Stubbing timeout to catch async-thrown errors and expect
-      // them. These catch errors thrown inside the catch-clause of the
-      // xhr request using rethrowAsync.
-      const errors = [];
-      const realSetTimeout = window.setTimeout;
-      sandbox.stub(window, 'setTimeout', (callback, delay) => {
-        realSetTimeout(() => {
-          try {
-            callback();
-          } catch (e) {
-            errors.push(e);
-          }
-        }, delay);
-      });
+      const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
+      const fetch = poll('submit request sent', () => fetchSpy.returnValues[0]);
+      const render = poll('render completes',
+          () => form.querySelector('[i-amphtml-rendered]'));
 
-      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
       form.dispatchEvent(new Event('submit'));
-
-      return timer.promise(100).then(() => {
-        return fetch.returnValues[0].catch(() => {});
-      }).then(() => {
-        expect(errors.length).to.equal(1);
-        expect(errors[0].message).to.match(/HTTP error 500/);
-        const rendered = form.querySelectorAll('[i-amphtml-rendered]');
-        expect(rendered.length).to.equal(1);
-        expect(rendered[0].textContent).to.equal(
-            'Oops. John Miller your email john@miller.what is already ' +
-            'subscribed.');
+      return fetch.catch(error => error).then(error => {
+        expect(error.message).to.match(/HTTP error 500/);
+        return render.then(rendered => {
+          expect(rendered.textContent).to.equal(
+              'Oops. John Miller your email john@miller.what is already ' +
+              'subscribed.');
+        });
       });
     });
   });
 
-  // Flakey timeouts on saucelabs.
-  describe.skip('Submit xhr-GET', () => {
+  describeChrome.run('Submit xhr-GET', () => {
     it('should submit and render success', () => {
       const form = getForm({
         id: 'form1',
@@ -222,13 +217,11 @@ describes.realWin('AmpForm Integration', {
         error: {message: 'Should not render this.', template: true},
       });
       const ampForm = new AmpForm(form, 'form1');
+      const fetch = poll('submit request sent',
+          () => ampForm.xhrSubmitPromiseForTesting());
 
-      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
       form.dispatchEvent(new Event('submit'));
-
-      return timer.promise(100).then(() => {
-        return fetch.returnValues[0];
-      }).then(() => {
+      return fetch.then(() => {
         const rendered = form.querySelectorAll('[i-amphtml-rendered]');
         expect(rendered.length).to.equal(1);
         expect(rendered[0].textContent).to.equal(
@@ -238,6 +231,11 @@ describes.realWin('AmpForm Integration', {
     });
 
     it('should submit and render error', () => {
+      // Stubbing timeout to catch async-thrown errors and expect
+      // them. These catch errors thrown inside the catch-clause of the
+      // xhr request using rethrowAsync.
+      sandbox.stub(window, 'setTimeout', stubSetTimeout);
+
       const form = getForm({
         id: 'form1',
         actionXhr: baseUrl + '/form/post/error',
@@ -249,40 +247,30 @@ describes.realWin('AmpForm Integration', {
         },
       });
       const ampForm = new AmpForm(form, 'form1');
-      const errors = [];
-      // Stubbing timeout to catch async-thrown errors and expect
-      // them. These catch errors thrown inside the catch-clause of the
-      // xhr request using rethrowAsync.
-      const realSetTimeout = window.setTimeout;
-      sandbox.stub(window, 'setTimeout', (callback, delay) => {
-        realSetTimeout(() => {
-          try {
-            callback();
-          } catch (e) {
-            errors.push(e);
-          }
-        }, delay);
-      });
+      const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
+      const fetch = poll('submit request sent', () => fetchSpy.returnValues[0]);
+      const render = poll('render completes',
+          () => form.querySelector('[i-amphtml-rendered]'));
 
-      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
       form.dispatchEvent(new Event('submit'));
-
-      return timer.promise(100).then(() => {
-        return fetch.returnValues[0].catch(() => {});
-      }).then(() => {
-        expect(errors.length).to.equal(1);
-        expect(errors[0].message).to.match(/HTTP error 500/);
-        const rendered = form.querySelectorAll('[i-amphtml-rendered]');
-        expect(rendered.length).to.equal(1);
-        expect(rendered[0].textContent).to.equal(
-            'Oops. John Miller your email john@miller.what is already ' +
-            'subscribed.');
+      return fetch.catch(error => error).then(error => {
+        expect(error.message).to.match(/HTTP error 500/);
+        return render.then(rendered => {
+          expect(rendered.textContent).to.equal(
+              'Oops. John Miller your email john@miller.what is already ' +
+              'subscribed.');
+        });
       });
     });
   });
 
-  describe.skip('Submit result message', () => {
+  describeChrome.run('Submit result message', () => {
     it('should render messages with or without a template', () => {
+      // Stubbing timeout to catch async-thrown errors and expect
+      // them. These catch errors thrown inside the catch-clause of the
+      // xhr request using rethrowAsync.
+      sandbox.stub(window, 'setTimeout', stubSetTimeout);
+
       const form = getForm({
         id: 'form1',
         actionXhr: baseUrl + '/form/post/error',
@@ -295,29 +283,14 @@ describes.realWin('AmpForm Integration', {
         },
       });
       const ampForm = new AmpForm(form, 'form1');
-      const errors = [];
-      // Stubbing timeout to catch async-thrown errors and expect
-      // them. These catch errors thrown inside the catch-clause of the
-      // xhr request using rethrowAsync.
-      const realSetTimeout = window.setTimeout;
-      sandbox.stub(window, 'setTimeout', (callback, delay) => {
-        realSetTimeout(() => {
-          try {
-            callback();
-          } catch (e) {
-            errors.push(e);
-          }
-        }, delay);
-      });
+      const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
+      const fetch = poll('submit request sent', () => fetchSpy.returnValues[0]);
+      const layout = poll('amp-img layout completes',
+          () => form.querySelector('amp-img img'));
 
-      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
       form.dispatchEvent(new Event('submit'));
-
-      return timer.promise(100).then(() => {
-        return fetch.returnValues[0].catch(() => {});
-      }).then(() => {
-        expect(errors.length).to.equal(1);
-        expect(errors[0].message).to.match(/HTTP error 500/);
+      return fetch.catch(error => error).then(error => {
+        expect(error.message).to.match(/HTTP error 500/);
 
         // It shouldn't have the i-amphtml-rendered attribute since no
         // template was rendered.
@@ -325,7 +298,9 @@ describes.realWin('AmpForm Integration', {
         expect(rendered.length).to.equal(0);
 
         // Any amp elements inside the message should be layed out
-        expect(form.querySelectorAll('amp-img img').length).to.equal(1);
+        return layout.then(img => {
+          expect(img.src).to.contain('/examples/img/ampicon.png');
+        });
       });
     });
   });
