@@ -39,7 +39,7 @@ export class AbstractAmpContext {
     this.cachedFrameName_ = this.win_.name || null;
 
     /** @type {?string} */
-    this.embedType_ = null
+    this.embedType_ = null;
 
     /** @type {?string} */
     this.clientId = null;
