@@ -266,8 +266,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         // numbers, but we know that the values should be numeric.
         expect(url).to.match(new RegExp(`sz=${width}x${height}`)));
     });
-    it('has correct format when width == "auto"' +
-        'and a4a-use-attr-for-format is on', () => {
+    it('has correct format when width=auto and a4a-use-attr-for-format is on',
+        () => {
           toggleExperiment(window, 'a4a-use-attr-for-format', true);
           element.setAttribute('width', 'auto');
           new AmpAd(element).upgradeCallback();

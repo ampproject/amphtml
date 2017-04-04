@@ -429,7 +429,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return createImplTag({
         width: '300',
         height: '150',
-      }).then(fixture => {
+      }).then(() => {
         expect(impl.element.getAttribute('width')).to.equal('300');
         expect(impl.element.getAttribute('height')).to.equal('150');
         verifyCss(impl.element.querySelector('iframe'));
@@ -438,7 +438,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     it('centers iframe in slot when !height && !width', () => {
       return createImplTag({
         layout: 'fixed',
-      }).then(fixture => {
+      }).then(() => {
         expect(impl.element.getAttribute('width')).to.be.null;
         expect(impl.element.getAttribute('height')).to.be.null;
         verifyCss(impl.element.querySelector('iframe'));
@@ -448,7 +448,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return createImplTag({
         width: '300',
         layout: 'fixed',
-      }).then(fixture => {
+      }).then(() => {
         expect(impl.element.getAttribute('width')).to.equal('300');
         expect(impl.element.getAttribute('height')).to.be.null;
         verifyCss(impl.element.querySelector('iframe'));
@@ -458,7 +458,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return createImplTag({
         height: '150',
         layout: 'fixed',
-      }).then(fixture => {
+      }).then(() => {
         expect(impl.element.getAttribute('width')).to.be.null;
         expect(impl.element.getAttribute('height')).to.equal('150');
         verifyCss(impl.element.querySelector('iframe'));
@@ -539,8 +539,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         expect(url).to.match(new RegExp(
             `format=${width}x${height}&w=${width}&h=${height}`)));
     });
-    it('has correct format when width == "auto"' +
-        'and a4a-use-attr-for-format is on', () => {
+    it('has correct format when width=auto and a4a-use-attr-for-format is on',
+        () => {
           toggleExperiment(window, 'a4a-use-attr-for-format', true);
           element.setAttribute('width', 'auto');
           new AmpAd(element).upgradeCallback();
