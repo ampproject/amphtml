@@ -116,15 +116,17 @@ export class AbstractAmpContext {
   }
 
   /**
-   *  Send message to runtime to start sending page visibility messages.
+   *  Listen to page visibility changes.
    *  @param {function(Object)} callback Function to call every time we receive
    *    a page visibility message.
    *  @returns {function()} that when called stops triggering the callback
    *    every time we receive a page visibility message.
    */
-  observePageVisibility(callback) {
-    return this.visibilityObservable_.add(callback);
-  };
+  onPageVisibilityChange(callback) {
+    return this.visibilityObservable_.add(data => {
+      callback({hidden: data.pageHidden});
+    });
+  }
 
   /**
    *  Send message to runtime to start sending intersection messages.
