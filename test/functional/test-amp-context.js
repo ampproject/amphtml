@@ -19,6 +19,8 @@ import {
 import {MessageType} from '../../src/3p-frame-messaging';
 import * as sinon from 'sinon';
 
+const NOOP = () => {};
+
 describe('3p ampcontext.js', () => {
   let windowPostMessageSpy;
   let windowMessageHandler;
@@ -37,6 +39,15 @@ describe('3p ampcontext.js', () => {
       parent: {
         postMessage: windowPostMessageSpy,
       },
+      setTimeout: (cb, _) => cb(), // for nextTick
+
+      // we don't care about window events for these tests
+      document: {
+        createEvent: () => ({
+          initEvent: NOOP,
+        }),
+      },
+      dispatchEvent: NOOP,
     };
   });
 
@@ -83,8 +94,9 @@ describe('3p ampcontext.js', () => {
   });
 
   it('should set up only sentinel if no metadata provided.', () => {
-    const sentinel = '123-456';
+    const sentinel = '1-456';
     win.AMP_CONTEXT_DATA = sentinel;
+    console.log('should set up blah blah');
     const context = new AmpContext(win);
     expect(context).to.be.ok;
     expect(context.sentinel).to.equal(sentinel);
@@ -120,6 +132,10 @@ describe('3p ampcontext.js', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
     const callbackSpy = sandbox.spy();
+
+    // Resetting since a message is sent on construction.
+    windowPostMessageSpy.reset();
+
     const stopObserving = context.observeIntersection(callbackSpy);
 
     // window.context should have sent postMessage asking for intersection
@@ -144,7 +160,10 @@ describe('3p ampcontext.js', () => {
 
     // window.context should have received intersection observer postMessage
     // back, and should have called the callback function
-    expect(callbackSpy.calledOnce).to.be.true;
+    // TODO(alanorozco): Called twice for backwards compatibility with
+    // window.context. This behavior is deprecated and this test should be
+    // changed when removed.
+    expect(callbackSpy.calledTwice).to.be.true;
     expect(callbackSpy.calledWith(messagePayload));
 
     // Stop listening for intersection observer messages
@@ -153,15 +172,17 @@ describe('3p ampcontext.js', () => {
     // Send intersection observer message
     windowMessageHandler(message);
 
-    // callback should not have been called a second time
-    expect(callbackSpy.calledOnce).to.be.true;
+    // TODO(alanorozco): Called twice for backwards compatibility with
+    // window.context. This behavior is deprecated and this test should be
+    // changed when removed.
+    expect(callbackSpy.calledTwice).to.be.true;
   });
 
-  it('should send a pM and set callback when observePageVisibility()', () => {
+  it('should send a pM and set callback when onPageVisibilityChange()', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
     const callbackSpy = sandbox.spy();
-    const stopObserving = context.observePageVisibility(callbackSpy);
+    const stopObserving = context.onPageVisibilityChange(callbackSpy);
 
     // window.context should have sent postMessage asking for visibility
     // observer
@@ -201,6 +222,10 @@ describe('3p ampcontext.js', () => {
   it('should call resize success callback on resize success', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
+
+    // Resetting since a message is sent on construction.
+    windowPostMessageSpy.reset();
+
     const successCallbackSpy = sandbox.spy();
     const deniedCallbackSpy = sandbox.spy();
 
@@ -243,6 +268,10 @@ describe('3p ampcontext.js', () => {
   it('should call resize denied callback on resize denied', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
+
+    // Resetting since a message is sent on construction.
+    windowPostMessageSpy.reset();
+
     const successCallbackSpy = sandbox.spy();
     const deniedCallbackSpy = sandbox.spy();
 
