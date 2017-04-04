@@ -140,9 +140,10 @@ describe('Object', () => {
 
     it('should throw on source objects with circular references', () => {
       const destObject = {};
+      destObject.a = {};
       const fromObject = {};
       fromObject.a = fromObject;
-      expect(object.deepMerge(destObject, fromObject))
+      expect(() => object.deepMerge(destObject, fromObject))
           .to.throw(/Source object contains circular references/);
     });
 
