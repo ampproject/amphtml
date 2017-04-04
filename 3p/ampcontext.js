@@ -74,7 +74,7 @@ export class AbstractAmpContext {
     /** @type {!Observable<Object>} */
     this.visibilityObservable_ = new Observable();
 
-    /** @type {!Observable<Object>} */
+    /** @type {!Observable<Array<Object>>} */
     this.intersectionObservable_ = new Observable();
 
     this.findAndSetMetadata_();
