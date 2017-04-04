@@ -78,7 +78,7 @@ The state can be initialized with the `amp-state` component:
 
 State can be mutated by the new `AMP.setState()` [action](../../spec/amp-actions-and-events.md).
 
-- `AMP.setState()` performs a recursive deep merge of its arguments with the document state up to a depth of 10.
+- `AMP.setState()` performs a deep merge of its arguments with the document state up to a depth of 10.
 - `AMP.setState()` can override data initialized by `amp-state`.
 
 ### Binding
