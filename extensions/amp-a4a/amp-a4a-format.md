@@ -324,10 +324,7 @@ HTML5 compatible.
   - __Note:__ Unlike in general AMP, `<link rel="canonical">` tags are
     prohibited.
 
-4.2.5 `<meta>`
-  - Only `<meta charset=utf8>` and `<meta name=viewport>` are allowed.
-
-4.2.6 `<style>`  
+4.2.5 `<style>`  
 
 #### 4.3 Sections
 4.3.1 `<body>`  
