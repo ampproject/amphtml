@@ -19,6 +19,7 @@ import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
+import {deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {formOrNullForElement} from '../../../src/form';
 import {isArray, toArray} from '../../../src/types';
@@ -38,6 +39,12 @@ const TAG = 'amp-bind';
  * @type {!RegExp}
  */
 const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
+
+/**
+ * Maximum depth for state merge.
+ * @type {number}
+ */
+const MAX_MERGE_DEPTH = 10;
 
 /**
  * A bound property, e.g. [property]="expression".
@@ -150,7 +157,11 @@ export class Bind {
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     // TODO(choumx): What if `state` contains references to globals?
-    Object.assign(this.scope_, state);
+    try {
+      deepMerge(this.scope_, state, MAX_MERGE_DEPTH);
+    } catch (e) {
+      user().error(TAG, 'Failed to merge scope.', e);
+    }
 
     if (!opt_skipDigest) {
       this.setStatePromise_ = this.initializePromise_.then(() => {
