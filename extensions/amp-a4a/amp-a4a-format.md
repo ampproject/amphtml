@@ -17,12 +17,7 @@ limitations under the License.
 
 # AMP A4A AD CREATIVE FORMAT
 
-![Draft standard](https://upload.wikimedia.org/wikipedia/commons/f/ff/DRAFT_ICON.png "By Reneman (Own work) [CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0)], via Wikimedia Commons")
-
-** >> WORK IN PROGRESS.  SUBJECT TO CHANGE. << **
-
-_This set of standards is still in development and is likely to be revised.
-Feedback from the community is welcome.  Please comment here or on the [Intent
+_If you'd like to propose changes to the standard, please comment on the [Intent
 to Implement](https://github.com/ampproject/amphtml/issues/4264)_.
 
 A4A (AMP for Ads) is a mechanism for rendering fast,
@@ -344,12 +339,9 @@ HTML5 compatible.
   - __Note:__ Unlike in general AMP, `<link rel="canonical">` tags are
     prohibited.
 
-4.2.5 `<meta>`
-  - Only `<meta charset=utf8>`, `<meta name=viewport>` and 
-    `<meta name=amp4ads-id>` are allowed.
-
-4.2.6 `<style>`  
-
+4.2.5 `<style>`  
+4.2.6 `<meta>`
+  
 #### 4.3 Sections
 4.3.1 `<body>`  
 4.3.2 `<article>`  
