@@ -45,6 +45,7 @@ import {vsyncFor} from '../../../src/services';
 import {actionServiceForDoc} from '../../../src/services';
 import {timerFor} from '../../../src/services';
 import {urlReplacementsForDoc} from '../../../src/services';
+import {resourcesForDoc} from '../../../src/services';
 import {
   getFormValidator,
   isCheckValiditySupported,
@@ -134,6 +135,9 @@ export class AmpForm {
 
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = actionServiceForDoc(this.form_);
+
+    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = resourcesForDoc(this.form_);
 
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
@@ -567,12 +571,23 @@ export class AmpForm {
       container.setAttribute('role', 'alert');
       container.setAttribute('aria-labeledby', messageId);
       container.setAttribute('aria-live', 'assertive');
-      return this.templates_.findAndRenderTemplate(container, data)
-          .then(rendered => {
-            rendered.id = messageId;
-            rendered.setAttribute('i-amphtml-rendered', '');
-            container.appendChild(rendered);
-          });
+
+      if (this.templates_.hasTemplate(container)) {
+        this.templates_.findAndRenderTemplate(container, data)
+            .then(rendered => {
+              rendered.id = messageId;
+              rendered.setAttribute('i-amphtml-rendered', '');
+              container.appendChild(rendered);
+            });
+      } else {
+        // TODO(vializ): This is to let AMP know that the AMP elements inside
+        // this container are now visible so they get scheduled for layout.
+        // This will be unnecessary when the AMP Layers implementation is
+        // complete. We call mutateElement here and not where the template is
+        // made visible so that we don't do redundant layout work when a
+        // template is rendered too.
+        this.resources_.mutateElement(container, () => {});
+      }
     }
   }
 
