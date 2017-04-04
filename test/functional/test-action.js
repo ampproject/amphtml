@@ -922,15 +922,12 @@ describe('Core events', () => {
   let sandbox;
   let win;
   let action;
-  let target;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(window.document, 'addEventListener');
     win = {
-      document: {
-        body: {},
-      },
+      document: {body: {}},
       services: {
         vsync: {obj: {}},
       },
@@ -938,9 +935,6 @@ describe('Core events', () => {
     };
     action = new ActionService(new AmpDocSingle(win), document);
     sandbox.stub(action, 'trigger');
-    target = document.createElement('target');
-    target.setAttribute('id', 'amp-test-1');
-
     action.vsync_ = {mutate: callback => callback()};
   });
 
@@ -979,7 +973,6 @@ describe('Core events', () => {
   });
 
   it('should trigger change event with details for whitelisted inputs', () => {
-    expect(window.document.addEventListener).to.have.been.calledWith('change');
     const handler = window.document.addEventListener.getCall(2).args[1];
     const element = document.createElement('input');
     element.setAttribute('type', 'range');

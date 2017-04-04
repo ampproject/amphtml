@@ -187,10 +187,7 @@ export class ActionService {
         });
       }
     }
-    const changeEvent = createCustomEvent(this.ampdoc.win, 'change', details);
-    changeEvent.path = event.path;
-    changeEvent.target = event.target;
-    return changeEvent;
+    return createCustomEvent(this.ampdoc.win, 'change', details);
   }
 
   /**
