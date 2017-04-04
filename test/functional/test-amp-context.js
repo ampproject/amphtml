@@ -42,7 +42,7 @@ describe('3p ampcontext.js', () => {
 
       // setTimeout is needed for nextTick.
       // makes nextTick behavior synchronous for test assertions.
-      setTimeout: (cb, _) => cb(),
+      setTimeout: cb => cb(),
 
       // we don't care about window events for these tests since that behavior
       // is deprecated.
@@ -100,7 +100,6 @@ describe('3p ampcontext.js', () => {
   it('should set up only sentinel if no metadata provided.', () => {
     const sentinel = '1-456';
     win.AMP_CONTEXT_DATA = sentinel;
-    console.log('should set up blah blah');
     const context = new AmpContext(win);
     expect(context).to.be.ok;
     expect(context.sentinel).to.equal(sentinel);
