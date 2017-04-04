@@ -21,14 +21,14 @@ AMP ads bundle commonly used ad functionality which removes bloat.  Once on the 
 "Users can't tap on ads they can't see". Faster ads lead to higher viewability and therefore higher click through rates, which ultimately leads to higher advertiser conversions.
 
 ### Safer
-It's impossible to spread malware through advertising with AMP ads. Not only are visitors safer, but advertiser brand perception cannot be negative.
+It's impossible to spread malware through advertising with AMP ads. Not only are visitors safer, but advertiser brand perception cannot be negative.`
 
 ### More Flexible
 AMP ads are designed to work on both AMP and Non-AMP webpages,  including desktop where the ad tagging library supports it. (e.g. GPT)
 
 # Current status
 
-The AMP ads format spec has been [released](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) and any creative developer can create AMP ads.A number of ad providers are working on automatically converting ads to AMP ads whenever possible. e.g. Adsense
+The AMP ads format spec has been [released](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) and any creative developer can create AMP ads. A number of ad providers are working on automatically converting ads to AMP ads whenever possible. e.g. AdSense.
 
 Here is how you can participate. If you are:
 
