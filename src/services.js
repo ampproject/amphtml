@@ -21,7 +21,6 @@ import {
   getServicePromiseForDoc,
   getExistingServiceForWindowOrNull,
   getExistingServiceForDocInEmbedScope,
-  getExistingServiceForWindow,
 } from './service';
 import {
   getElementService,
