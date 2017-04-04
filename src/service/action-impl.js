@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createCustomEvent} from '../event-helper'
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
@@ -48,6 +49,10 @@ const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
   'AMP': ['setState'],
 };
+
+const WHITELISTED_INPUT_DATA_ = {
+  'range': ['min', 'max', 'value'],
+}
 
 /**
  * A map of method argument keys to functions that generate the argument values
@@ -155,11 +160,35 @@ export class ActionService {
           this.trigger(dev().assertElement(event.target), 'tap', event);
         }
       });
-    } else if (name == 'submit' || name == 'change') {
+    } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         this.trigger(dev().assertElement(event.target), name, event);
       });
+    } else if (name == 'change') {
+      this.root_.addEventListener(name, event => {
+        const changeEvent = this.getChangeDetails_(event);
+        this.trigger(dev().assertElement(event.target), name, changeEvent);
+      });
     }
+  }
+
+  getChangeDetails_(event) {
+    const details = {};
+    const target = event.target;
+    if (event.target.tagName.toLowerCase() === 'input') {
+      const inputType = target.getAttribute('type');
+      const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
+      // TODO(kmh287): Cast numeric values to numbers?
+      if (fieldsToInclude) {
+        fieldsToInclude.forEach(field => {
+          details[field] = target[field];
+        });
+      }
+    }
+    const changeEvent = createCustomEvent(this.ampdoc.win, 'change', details);
+    changeEvent.path = event.path;
+    changeEvent.target = event.target;
+    return changeEvent;
   }
 
   /**
