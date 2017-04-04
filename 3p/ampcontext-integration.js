@@ -51,20 +51,21 @@ function masterSelection(win, type) {
 
 export class IntegrationAmpContext extends AbstractAmpContext {
 
-  /** @param {!Window} win */
-  constructor(win) {
-    super(win);
-
-    /** @private {?string} */
-    this.embedType_ = null;
-
-    /** @private {boolean} */
-    this.updateDimensionsEnabled_ = false;
-  }
-
   /** @override */
   isAbstractImplementation_() {
     return false;
+  }
+
+  /**
+   * @return {boolean}
+   * @protected
+   */
+  updateDimensionsEnabled_() {
+    // Only make this available to selected embeds until the generic solution is
+    // available.
+    return (this.embedType_ === 'facebook'
+        || this.embedType_ === 'twitter'
+        || this.embedType_ == 'github');
   }
 
   /** @return {!Window} */
@@ -87,23 +88,12 @@ export class IntegrationAmpContext extends AbstractAmpContext {
     return this.master == this.win_;
   }
 
-  /** @param {string} type */
-  setEmbedType(type) {
-    this.embedType_ = type;
-
-    if (type === 'facebook' || type === 'twitter' || type == 'github') {
-      // Only make this available to selected embeds until the
-      // generic solution is available.
-      this.updateDimensionsEnabled_ = true;
-    }
-  }
-
   /**
    * @param {number} width
    * @param {number} height
    */
   updateDimensions(width, height) {
-    user().assert(this.updateDimensionsEnabled_, 'Not available.');
+    user().assert(this.updateDimensionsEnabled_(), 'Not available.');
     this.requestResize(width, height);
   }
 

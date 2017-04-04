@@ -482,7 +482,6 @@ function installContext(win) {
  */
 function installContextUsingExperimentalImpl(win) {
   win.context = new IntegrationAmpContext(win);
-  win.context.setEmbedType(dev().assertString(data.type));
 }
 
 

@@ -39,6 +39,9 @@ export class AbstractAmpContext {
     this.cachedFrameName_ = this.win_.name || null;
 
     /** @type {?string} */
+    this.embedType_ = null
+
+    /** @type {?string} */
     this.clientId = null;
 
     /** @type {?Location} */
@@ -227,6 +230,8 @@ export class AbstractAmpContext {
     this.initialIntersection = context.initialIntersection;
     this.hidden = context.hidden;
     this.sourceUrl = context.sourceUrl;
+
+    this.embedType_ = dataObject.type || null;
   }
 
   /**
