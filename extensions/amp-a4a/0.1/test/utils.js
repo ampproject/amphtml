@@ -37,18 +37,15 @@ export class MockA4AImpl extends AmpA4A {
   }
 
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
+    const sizeArr = responseHeaders.has(SIZE_HEADER) ?
+        responseHeaders.get(SIZE_HEADER).split('x') : null;
+    const size = sizeArr ? {width: sizeArr[0], height: sizeArr[1]} : null;
     return Promise.resolve({
       creative: responseArrayBuffer,
       signature: responseHeaders.has(SIGNATURE_HEADER) ?
           base64UrlDecodeToBytes(responseHeaders.get(SIGNATURE_HEADER)) : null,
-      size: responseHeaders.has(SIZE_HEADER) ?
-          responseHeaders.get(SIZE_HEADER).split('x') : null,
+      size,
     });
-  }
-
-  /** @override */
-  handleResize() {
-    return;
   }
 
   getFallback() {
