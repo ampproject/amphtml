@@ -51,7 +51,7 @@ app.use('/serve_mode=:mode', function (req, res, next) {
     process.env.SERVE_MODE = newMode;
     info = '<h2>Serve mode changed to ' + newMode + '</h2>';
   } else {
-    info = '<h2>Serve mode ' + newMode + 'is not support. </h2>';
+    info = '<h2>Serve mode ' + newMode + ' is not support. </h2>';
   }
   res.send(info);
 });
@@ -488,6 +488,7 @@ app.use('/max/', function(req, res) {
     var info = '<h2>Current server is not serving unminified JS.</h2>'
         + '<h2>Please run "gulp serve" instead</h2>';
     res.send(info);
+    return;
   }
   proxyToAmpProxy(req, res, /* minify */ false);
 });
@@ -500,6 +501,7 @@ app.use('/min/', function(req, res) {
     var info = '<h2>Current server is not serving minified JS.</h2>'
         + '<h2>Please run "gulp serve --compiled" instead</h2>';
     res.send(info);
+    return;
   }
   proxyToAmpProxy(req, res, /* minify */ true);
 });

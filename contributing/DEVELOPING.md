@@ -56,7 +56,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test --safari`<sup>[[1]](#footnote-1)</sup>                       | Runs tests in Safari.                                                 |
 | `gulp test --firefox`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup> | Runs specific test files.                                             |
-| `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/ |
+| `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default. |
 | `npm run ava`<sup>[[1]](#footnote-1)</sup>                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
@@ -65,16 +65,17 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 
 For manual testing build AMP and start the Node.js server by running `gulp`.
 
+### Serve Mode
+There are 3 serving modes:
+- MAX mode serves unminified AMP. You want to use this during normal dev. `gulp` serves MAX mode by default.
+- MIN mode serves minified AMP. This is closer to the prod setup. This is only avaialable after running `gulp dist --fortesting`. Serve MIN mode by adding `--compiled` to `gulp` command.
+- CDN mode serves prod. This file would not reflect your local changes. Serve CDN mode by adding `--cdn` to `gulp` command.
+
+To switch serving mode in runtime. please to to http://localhost:8000/serve_mode=$mode. $mode can be `max/min/cdn`.
+
 ### Examples
 
 The content in the `examples` directory can be reached at: http://localhost:8000/examples/
-
-For each example there are 3 modes:
-
-- `/examples/abc.html` points to prod. This file would not reflect your local changes.
-- `/examples/abc.max.html` points to your local unminified AMP. You want to use this during normal dev.
-- `/examples/abc.min.html` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist --fortesting`.
-
 
 ### Document proxy
 
