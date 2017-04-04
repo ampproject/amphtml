@@ -67,8 +67,7 @@ function deepMerge_(target, source, maxDepth) {
   while (queue.length > 0) {
     const {target, source, depth} = queue.shift();
     if (seen.includes(source)) {
-      // No recursive merge
-      throw new Error('deepMerge: Source object contains circular references');
+      throw new Error('Source object contains circular references');
     }
     seen.push(source);
     if (depth > maxDepth) {

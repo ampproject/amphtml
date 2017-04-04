@@ -156,7 +156,7 @@ export class Bind {
     try {
       deepMerge(this.scope_, state, MAX_MERGE_DEPTH);
     } catch (e) {
-      user().createError(
+      user().error(
           `${TAG}: Failed to merge scope.`, e);
     }
 
