@@ -44,11 +44,22 @@ app.use(function(req, res, next) {
   next();
 });
 
+app.use('/serve_mode=:mode', function (req, res, next) {
+  const newMode = req.params.mode;
+  var info;
+  if (newMode == 'max' || newMode == 'min' || newMode == 'cdn') {
+    process.env.SERVE_MODE = newMode;
+    info = '<h2>Serve mode changed to ' + newMode + '</h2>';
+  } else {
+    info = '<h2>Serve mode ' + newMode + 'is not support. </h2>';
+  }
+  res.send(info);
+});
+
 // Deprecate usage of .min.html/.max.html
 app.use(['/examples/*.(min|max).html', '/test/manual/*.(min|max).html',
     '/dist/cache-sw.(min|max).html'],
     function (req, res, next) {
-      console.log('aaaaaaa');
       var filePath = req.baseUrl;
       res.send(generateInfo(filePath));
       return;
@@ -1062,10 +1073,15 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
 function generateInfo(filePath) {
   var mode = process.env.SERVE_MODE;
   filePath = filePath.substr(0, filePath.length - 9) + '.html';
+
   var info = '<h2>Please note that .min/.max is no longer supported</h2>' +
       '<h3>Current serving mode is ' + mode + '</h3>' +
       '<h3>Please go to <a href= ' + filePath +
-      '>Unversioned Link</a> to view the page<h3>';
+      '>Unversioned Link</a> to view the page<h3>' +
+      '<h3></h3>' +
+      '<h3><a href = /serve_mode=max>Change to max mode</a></h3>' +
+      '<h3><a href = /serve_mode=min>Change to min mode</a></h3>' +
+      '<h3><a href = /serve_mode=cdn>Change to min mode</a></h3>';
   return info;
 }
 
