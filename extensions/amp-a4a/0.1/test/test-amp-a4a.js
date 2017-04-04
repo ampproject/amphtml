@@ -627,7 +627,7 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('should set height/width on iframe matching parent amp-ad', () => {
+    it('should set height/width on iframe matching header value', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete headers[SIGNATURE_HEADER];
       headers['X-CreativeSize'] = '320x50';
