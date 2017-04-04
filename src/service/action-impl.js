@@ -166,8 +166,9 @@ export class ActionService {
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, event => {
+        const target = event.target;
         const changeEvent = this.getChangeDetails_(event);
-        this.trigger(dev().assertElement(event.target), name, changeEvent);
+        this.trigger(dev().assertElement(target), name, changeEvent);
       });
     }
   }

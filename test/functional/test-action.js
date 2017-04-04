@@ -928,10 +928,13 @@ describe('Core events', () => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(window.document, 'addEventListener');
     win = {
-      document: {body: {}},
+      document: {
+        body: {},
+      },
       services: {
         vsync: {obj: {}},
       },
+      CustomEvent: window.CustomEvent,
     };
     action = new ActionService(new AmpDocSingle(win), document);
     sandbox.stub(action, 'trigger');
@@ -969,6 +972,33 @@ describe('Core events', () => {
     const element = {tagName: 'target2', nodeType: 1};
     const event = {target: element};
     handler(event);
-    expect(action.trigger).to.have.been.calledWith(element, 'change', event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'change',
+        sinon.match.any);
+  });
+
+  it('should trigger change event with details for whitelisted inputs', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('change');
+    const handler = window.document.addEventListener.getCall(2).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('type', 'range');
+    element.setAttribute('min', '0');
+    element.setAttribute('max', '10');
+    element.setAttribute('value', '5');
+    const event = {target: element};
+    debugger;
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+      element,
+      'change',
+      sinon.match.any);
+    // Doesn't play well with sinon matchers
+    const customEvent = action.trigger.getCalls()[0].args[2];
+    expect(customEvent.detail).to.deep.equal({
+      min: '0',
+      max: '10',
+      value: '5',
+    });
   });
 });
