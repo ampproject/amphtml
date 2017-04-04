@@ -53,9 +53,8 @@ const FUNCTION_WHITELIST = (function() {
     /*eslint "no-unused-vars": 0*/
     'copyAndSplice': function(array, start, deleteCount, items) {
       if (!isArray(array)) {
-        user().warn(
-            TAG,
-            `copyAndSplice: ${array} is not an array; returning null.`);
+        throw new Error(
+          `copyAndSplice: ${array} is not an array; returning null.`);
         return null;
       }
       const copy = Array.prototype.slice.call(array);
