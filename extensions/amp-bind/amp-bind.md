@@ -143,7 +143,7 @@ This state can be initialized with the `amp-state` component:
 
 State can be mutated by the [`AMP.setState()` action](../../spec/amp-actions-and-events.md).
 
-- `AMP.setState()` performs a [shallow merge](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) of its arguments with the document state.
+- `AMP.setState()` performs a deep merge of its arguments with the document state up to a depth of 10.
 - `AMP.setState()` can override data initialized by `amp-state`.
 
 ### Bindings
