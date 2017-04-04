@@ -107,7 +107,10 @@ export class AbstractAmpContext {
         });
   }
 
-  /** @private */
+  /**
+   * TODO(alanorozco): Deprecate native event mechanism.
+   * @private
+   */
   dispatchVisibilityChangeEvent_() {
     const event = this.win_.document.createEvent('Event');
     event.data = {hidden: this.hidden};

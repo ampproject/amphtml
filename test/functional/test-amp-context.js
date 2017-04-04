@@ -39,9 +39,13 @@ describe('3p ampcontext.js', () => {
       parent: {
         postMessage: windowPostMessageSpy,
       },
-      setTimeout: (cb, _) => cb(), // for nextTick
 
-      // we don't care about window events for these tests
+      // setTimeout is needed for nextTick.
+      // makes nextTick behavior synchronous for test assertions.
+      setTimeout: (cb, _) => cb(),
+
+      // we don't care about window events for these tests since that behavior
+      // is deprecated.
       document: {
         createEvent: () => ({
           initEvent: NOOP,
