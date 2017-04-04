@@ -41,32 +41,144 @@ describe('Object', () => {
     });
   });
 
-  describe('getPath', () => {
-    const obj = {a: {aa: [{aaa: 1}, {bbb: 2}]}, b: 3, c: null};
-
-    it('should return the value of a single property', () => {
-      expect(object.getPath(obj, 'b')).to.equal(3);
+  describe('deepMerge', () => {
+    it('should deep merge objects', () => {
+      const destObject = {
+        a: 'hello world',
+        b: 'goodbye world',
+        c: {
+          d: 'foo',
+          e: {
+            f: 'bar',
+          },
+        },
+      };
+      const fromObject = {
+        b: 'hello world',
+        c: {
+          d: 'bah',
+          e: {
+            g: 'baz',
+          },
+        },
+      };
+      expect(object.deepMerge(destObject, fromObject)).to.deep.equal({
+        a: 'hello world',
+        b: 'hello world',
+        c: {
+          d: 'bah',
+          e: {
+            f: 'bar',
+            g: 'baz',
+          },
+        },
+      });
     });
 
-    it('should return the value of a deeply nested property', () => {
-      expect(object.getPath(obj, 'a.aa[0].aaa')).to.equal(1);
+    it('should NOT deep merge arrays', () => {
+      const destObject = {
+        a: [1,2,3,4,5],
+        b: {
+          c: [9,8,7,6,5],
+        },
+      };
+      const fromObject = {
+        b: {
+          c: ['h', 'i'],
+        },
+      };
+      expect(object.deepMerge(destObject, fromObject)).to.deep.equal({
+        a: [1,2,3,4,5],
+        b: {
+          c: ['h', 'i'],
+        },
+      });
     });
 
-    it('should return the value of a sub-object', () => {
-      expect(object.getPath(obj, 'a.aa')).to.jsonEqual(obj.a.aa);
+    it('should use Object.assign if merged object exceeds max depth', () => {
+      const destObject = {
+        a: {
+          b: {
+            c: {
+              d: 'e',
+              f: 'g',
+            },
+          },
+        },
+      };
+      const fromObject = {
+        a: {
+          b: {
+            c: {
+              d: 'z',
+              h: 'i',
+            },
+          },
+        },
+      };
+      expect(object.deepMerge(destObject, fromObject, 1)).to.deep.equal({
+        a: {
+          b: {
+            c: {
+              d: 'z',
+              h: 'i',
+            },
+          },
+        },
+      });
     });
 
-    it('should throw when a key cannot be found', () => {
-      expect(() => object.getPath(obj, 'foo')).to.throw(/foo/);
-      expect(() => object.getPath(obj, 'foo.bar')).to.throw(/foo\.bar/);
-      expect(() => object.getPath(obj, 'a.foo')).to.throw(/a\.foo/);
-      expect(() => object.getPath(obj, 'a.aa.bar')).to.throw(/a\.aa\.bar/);
-      expect(() => object.getPath(obj, 'a.c.bar')).to.throw(/a\.c\.bar/);
+    it('should handle destination objects with circular references', () => {
+      const destObject = {};
+      destObject.a = destObject;
+      const fromObject = {};
+      fromObject.a = {};
+      expect(object.deepMerge(destObject, fromObject)).to.deep.equal({
+        a: destObject,
+      });
     });
 
-    it('should throw for invalid paths', () => {
-      const obj = {'.': {'.': 0}}; // not supported
-      expect(() => object.getPath(obj, '...')).to.throw();
+    it('should throw on source objects with circular references', () => {
+      const destObject = {};
+      destObject.a = {};
+      const fromObject = {};
+      fromObject.a = fromObject;
+      expect(() => object.deepMerge(destObject, fromObject))
+          .to.throw(/Source object contains circular references/);
+    });
+
+    it('should merge null and undefined correctly', () => {
+      const destObject = {
+        a: null,
+        b: {
+          c: 'd',
+        },
+        e: undefined,
+        f: {
+          g: 'h',
+        },
+      };
+      const fromObject = {
+        a: {
+          i: 'j',
+        },
+        b: null,
+        e: {
+          k: 'm',
+        },
+        f: undefined,
+      };
+      expect(object.deepMerge(destObject, fromObject)).to.deep.equal({
+        a: {
+          i: 'j',
+        },
+        b: null,
+        e: {
+          k: 'm',
+        },
+        f: undefined,
+      });
     });
   });
+
 });

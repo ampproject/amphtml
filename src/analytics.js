@@ -19,7 +19,7 @@ import {
   getElementServiceIfAvailableForDoc,
 } from './element-service';
 import {createElementWithAttributes} from './dom';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 
 
 /**
@@ -69,6 +69,7 @@ export function insertAnalyticsElement(
     parentElement, config, loadAnalytics = false) {
   const doc = parentElement.ownerDocument;
   const analyticsElem = doc.createElement('amp-analytics');
+  analyticsElem.setAttribute('sandbox', 'true');
   const scriptElem = createElementWithAttributes(doc,
         'script', {
           'type': 'application/json',

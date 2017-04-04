@@ -23,7 +23,7 @@ import {
   expectPostMessage,
 } from '../../../../testing/iframe';
 import {AmpAdUIHandler} from '../amp-ad-ui';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-ad-xorigin-iframe-handler', () => {
@@ -216,18 +216,15 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     it('should trigger render-start on message "bootstrap-loaded" if' +
        ' render-start is NOT implemented', done => {
       initPromise = iframeHandler.init(iframe);
-      iframe.onload = () => {
-        expect(iframe.style.visibility).to.equal('hidden');
-        iframe.postMessageToParent({
-          sentinel: 'amp3ptest' + testIndex,
-          type: 'bootstrap-loaded',
-        });
-        initPromise.then(() => {
-          expect(iframe.style.visibility).to.equal('');
-          expect(renderStartedSpy).to.be.calledOnce;
-          done();
-        });
-      };
+      iframe.postMessageToParent({
+        sentinel: 'amp3ptest' + testIndex,
+        type: 'bootstrap-loaded',
+      });
+      const renderStartPromise = signals.whenSignal('render-start');
+      renderStartPromise.then(() => {
+        expect(renderStartedSpy).to.be.calledOnce;
+        done();
+      });
     });
 
     it('should trigger visibility on timeout', done => {

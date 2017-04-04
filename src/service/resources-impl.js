@@ -24,18 +24,18 @@ import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
-import {fromClassForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {inputFor} from '../input';
-import {viewerForDoc} from '../viewer';
-import {viewportForDoc} from '../viewport';
-import {vsyncFor} from '../vsync';
+import {viewerForDoc} from '../services';
+import {viewportForDoc} from '../services';
+import {vsyncFor} from '../services';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
-import {documentInfoForDoc} from '../document-info';
+import {documentInfoForDoc} from '../services';
 import {computedStyle} from '../style';
 
 const TAG_ = 'Resources';
@@ -102,6 +102,9 @@ export class Resources {
 
     /** @private {number} */
     this.addCount_ = 0;
+
+    /** @private {number} */
+    this.buildAttemptsCount_ = 0;
 
     /** @private {boolean} */
     this.visible_ = this.viewer_.isVisible();
@@ -309,27 +312,6 @@ export class Resources {
     });
   }
 
-  /**
-   * Returns a subset of resources which is identified as being in the current
-   * viewport.
-   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
-   * @return {!Array<!Resource>}
-   * TODO(dvoytenko, #7815): remove once the reporting regression is confirmed.
-   */
-  getResourcesInViewportLegacy(opt_isInPrerender) {
-    opt_isInPrerender = opt_isInPrerender || false;
-    const viewportRect = this.viewport_.getRect();
-    return this.resources_.filter(r => {
-      if (r.hasOwner() || !r.isDisplayed() || !r.overlaps(viewportRect)) {
-        return false;
-      }
-      if (opt_isInPrerender && !r.prerenderAllowed()) {
-        return false;
-      }
-      return true;
-    });
-  }
-
   /** @private */
   monitorInput_() {
     const input = inputFor(this.win);
@@ -468,10 +450,26 @@ export class Resources {
     } else {
       // Create and add a new resource.
       resource = new Resource((++this.resourceIdCounter_), element, this);
-      this.buildOrScheduleBuildForResource_(resource);
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
+  }
+
+  /**
+   * Limits the number of elements being build in pre-render phase to
+   * a finite number. Returns false if the number has been reached.
+   * @return {boolean}
+   */
+  grantBuildPermission() {
+    // For pre-render we want to limit the amount of CPU used, so we limit
+    // the number of elements build. For pre-render to "seem complete"
+    // we only need to build elements in the first viewport. We can't know
+    // which are actually in the viewport (because the decision is pre-layout,
+    // so we use a heuristic instead.
+    // Most documents have 10 or less AMP tags. By building 20 we should not
+    // change the behavior for the vast majority of docs, and almost always
+    // catch everything in the first viewport.
+    return this.buildAttemptsCount_++ < 20 || this.viewer_.hasBeenVisible();
   }
 
   /**
@@ -1978,8 +1976,7 @@ export let SizeDef;
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Resources}
  */
 export function installResourcesServiceForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'resources', Resources);
+  registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
 };

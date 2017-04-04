@@ -22,7 +22,7 @@ import {
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {extensionsFor} from '../../../../src/extensions';
+import {extensionsFor} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
@@ -171,7 +171,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         });
       });
     });
-    it('should contain amp_ct', () => {
+    it('should contain act', () => {
       return createIframePromise().then(fixture => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
@@ -183,7 +183,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         ampStickyAd.appendChild(element);
         fixture.doc.body.appendChild(ampStickyAd);
         return impl.getAdUrl().then(adUrl => {
-          expect(adUrl.indexOf('amp_ct=AMP-STICKY-AD') >= 0).to.be.true;
+          expect(adUrl.indexOf('act=sa') >= 0).to.be.true;
         });
       });
     });
@@ -270,20 +270,42 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
   });
 
   describe('#extractCreativeAndSignature', () => {
+    let loadExtensionSpy;
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+          'layout': 'fixed',
+        });
+        impl = new AmpAdNetworkAdsenseImpl(element);
+        installExtensionsService(impl.win);
+        const extensions = extensionsFor(impl.win);
+        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+      });
+    });
+
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(impl.extractCreativeAndSignature(
+        return impl.extractCreativeAndSignature(
           creative,
           {
             get: function() { return undefined; },
             has: function() { return false; },
-          })).to.eventually.deep.equal(
-                {creative, signature: null, size: null});
+          }).then(adResponse => {
+            expect(adResponse).to.deep.equal(
+                  {creative, signature: null, size: null});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+          });
       });
     });
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(impl.extractCreativeAndSignature(
+        return impl.extractCreativeAndSignature(
           creative,
           {
             get: function(name) {
@@ -292,10 +314,12 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             has: function(name) {
               return name === 'X-AmpAdSignature';
             },
-          })).to.eventually.deep.equal(
-              {creative,
-               signature: base64UrlDecodeToBytes('AQAB'),
+          }).then(adResponse => {
+            expect(adResponse).to.deep.equal(
+              {creative, signature: base64UrlDecodeToBytes('AQAB'),
                size: null});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+          });
       });
     });
     it('with analytics', () => {
@@ -325,14 +349,13 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 size: null,
               });
             expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
           });
       });
     });
   });
 
   describe('#onCreativeRender', () => {
-    let loadExtensionSpy;
-
     beforeEach(() => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -342,18 +365,15 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'height': '50',
           'type': 'adsense',
         });
-        installExtensionsService(fixture.win);
-        const extensions = extensionsFor(fixture.win);
         impl = new AmpAdNetworkAdsenseImpl(element);
-        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
 
     it('injects amp analytics', () => {
       const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       impl.ampAnalyticsConfig = {urls};
+      impl.responseHeaders_ = {get: () => 'qqid_string'};
       impl.onCreativeRender(false);
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
       // Exact format of amp-analytics element covered in
@@ -457,9 +477,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         expect(url).to.match(new RegExp(
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
           '\\?client=ca-adsense&format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+' +
-          '&adtest=false' +
           '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
-          '(&asnt=[0-9]+-[0-9]+)?' +
+          '(&asnt=[0-9]+-[0-9]+)?(&dff=(?:%22.*?%22|\'.*?\'))?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           // Depending on how the test is run, it can get different
@@ -470,6 +489,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +
           '&isw=[0-9]+&ish=[0-9]+' +
+          '&ea=[0-9]+&pfx=(1|0)' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
@@ -479,5 +499,3 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
   });
 });
-
-

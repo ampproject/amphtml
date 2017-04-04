@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, getFragment} from '../../../src/url';
-import {batchedXhrFor} from '../../../src/batched-xhr';
-import {getPath} from '../../../src/utils/object';
+import {assertHttpsUrl} from '../../../src/url';
+import {batchedXhrFor} from '../../../src/services';
 import {getValueForExpr} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {templatesFor} from '../../../src/template';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {templatesFor} from '../../../src/services';
+import {urlReplacementsForDoc} from '../../../src/services';
 import {user} from '../../../src/log';
 
 
@@ -65,11 +64,7 @@ export class AmpList extends AMP.BaseElement {
           if (!opts.credentials) {
             opts.requireAmpResponseSourceOrigin = false;
           }
-          const fetchPromise = batchedXhrFor(this.win).fetchJson(src, opts);
-          const fragment = getFragment(src).slice(1);
-          return fragment ?
-              fetchPromise.then(json => getPath(json, fragment)) :
-              fetchPromise;
+          return batchedXhrFor(this.win).fetchJson(src, opts);
         }).then(data => {
           user().assert(data != null, 'Response is undefined %s', this.element);
           const itemsExpr = this.element.getAttribute('items') || 'items';

@@ -52,7 +52,7 @@ import {installActionServiceForDoc} from './service/action-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
@@ -76,19 +76,18 @@ import {installXhrService} from './service/xhr-impl';
 import {installBatchedXhrService} from './service/batched-xhr-impl';
 import {
   isExperimentOn,
-  isExperimentOnAllowUrlOverride,
   toggleExperiment,
 } from './experiments';
 import {parseUrl} from './url';
-import {platformFor} from './platform';
+import {platformFor} from './services';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
-import {resourcesForDoc} from './resources';
+import {resourcesForDoc} from './services';
 import {setStyle} from './style';
-import {timerFor} from './timer';
-import {viewerForDoc} from './viewer';
-import {viewportForDoc} from './viewport';
-import {vsyncFor} from './vsync';
+import {timerFor} from './services';
+import {viewerForDoc} from './services';
+import {viewportForDoc} from './services';
+import {vsyncFor} from './services';
 import {waitForBody} from './dom';
 import * as config from './config';
 
@@ -976,7 +975,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
  *     pumped.
  */
 function maybePumpEarlyFrame(win, cb) {
-  if (!isExperimentOnAllowUrlOverride(win, 'pump-early-frame')) {
+  if (!isExperimentOn(win, 'pump-early-frame')) {
     cb();
     return;
   }

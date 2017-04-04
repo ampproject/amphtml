@@ -38,10 +38,6 @@ const GLOBAL_PROPERTY_RULES = map({
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
-  // ARIA accessibility attributes.
-  'aria-describedby': null,
-  'aria-label': null,
-  'aria-labelledby': null,
 });
 
 /**
@@ -225,7 +221,7 @@ function createElementRules_() {
     },
     'AMP-IMG': {
       'alt': null,
-      'referrerpolicy': null,
+      'attribution': null,
       'src': {
         'allowedProtocols': {
           'data': true,
@@ -243,11 +239,8 @@ function createElementRules_() {
     'AMP-VIDEO': {
       'alt': null,
       'attribution': null,
-      'autoplay': null,
       'controls': null,
       'loop': null,
-      'muted': null,
-      'placeholder': null,
       'poster': null,
       'preload': null,
       'src': {
@@ -326,6 +319,7 @@ function createElementRules_() {
       'label': null,
     },
     'SELECT': {
+      'autofocus': null,
       'disabled': null,
       'multiple': null,
       'required': null,
@@ -350,6 +344,7 @@ function createElementRules_() {
     },
     'TEXTAREA': {
       'autocomplete': null,
+      'autofocus': null,
       'cols': null,
       'disabled': null,
       'maxlength': null,

@@ -17,7 +17,6 @@
 /** @private @const */
 const LINE_LOADER_ELEMENTS = {
   'AMP-AD': true,
-  'AMP-EMBED': true,
 };
 
 /**

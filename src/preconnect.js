@@ -20,11 +20,11 @@
  */
 
 
-import {fromClass} from './service';
+import {getService, registerServiceBuilder} from './service';
 import {parseUrl} from './url';
-import {timerFor} from './timer';
-import {platformFor} from './platform';
-import {viewerForDoc} from './viewer';
+import {timerFor} from './services';
+import {platformFor} from './services';
+import {viewerForDoc} from './services';
 import {dev} from './log';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
@@ -337,21 +337,13 @@ export class Preconnect {
   }
 }
 
-
-/**
- * @param {!Window} window
- * @return {!PreconnectService}
- */
-function preconnectFor(window) {
-  return fromClass(window, 'preconnect', PreconnectService);
-}
-
-
 /**
  * @param {!Element} element
  * @return {!Preconnect}
  */
 export function preconnectForElement(element) {
-  const preconnectService = preconnectFor(element.ownerDocument.defaultView);
+  const serviceHolder = element.ownerDocument.defaultView;
+  registerServiceBuilder(serviceHolder, 'preconnect', PreconnectService);
+  const preconnectService = getService(serviceHolder, 'preconnect');
   return new Preconnect(preconnectService, element);
 }
