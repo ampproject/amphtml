@@ -35,8 +35,8 @@ export class AbstractAmpContext {
 
     // This value is cached since it could be overwritten by the master frame
     // check using a value of a different type.
-    /** @private {!string} */
-    this.cachedFrameName_ = dev().assertString(this.win_.name);
+    /** @private {?string} */
+    this.cachedFrameName_ = this.win_.name || null;
 
     /** @type {?string} */
     this.clientId = null;
@@ -198,7 +198,7 @@ export class AbstractAmpContext {
    */
   addContextToIframe(iframe) {
     // TODO(alanorozco): consider the AMP_CONTEXT_DATA case
-    iframe.name = this.cachedFrameName_;
+    iframe.name = dev().assertString(this.cachedFrameName_);
   }
 
   /**
