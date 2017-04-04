@@ -101,6 +101,7 @@ function deepMerge_(target, source, maxDepth) {
  * @param {number=} opt_maxDepth The maximum depth for deep merge,
  *     beyond which Object.assign will be used.
  * @return {!Object}
+ * @throws {Error} if `source` contains a circular reference
  */
 export function deepMerge(target, source, opt_maxDepth) {
   return deepMerge_(target, source, opt_maxDepth || Number.POSITIVE_INFINITY);

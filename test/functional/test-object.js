@@ -128,14 +128,22 @@ describe('Object', () => {
       });
     });
 
-    it('should handle objects with recursive references', () => {
+    it('should handle destination objects with circular references', () => {
       const destObject = {};
       destObject.a = destObject;
       const fromObject = {};
-      fromObject.a = fromObject;
+      fromObject.a = {};
       expect(object.deepMerge(destObject, fromObject)).to.deep.equal({
-        a: fromObject,
+        a: destObject,
       });
+    });
+
+    it('should throw on source objects with circular references', () => {
+      const destObject = {};
+      const fromObject = {};
+      fromObject.a = fromObject;
+      expect(object.deepMerge(destObject, fromObject))
+          .to.throw(/Source object contains circular references/);
     });
 
     it('should merge null and undefined correctly', () => {
