@@ -279,6 +279,53 @@ describes.realWin('AmpForm Integration', {
             'subscribed.');
       });
     });
+
+    it('should submit and render error if no template element is used', () => {
+      const form = getForm({
+        id: 'form1',
+        actionXhr: baseUrl + '/form/post/error',
+        success: {message: 'Should not render this.', template: false},
+        error: {
+          message: 'Oops! Your email is already subscribed.' +
+              '<amp-img src="/examples/img/ampicon.png" ' +
+              'width="42" height="42"></amp-img>',
+          template: false,
+        },
+      });
+      const ampForm = new AmpForm(form, 'form1');
+      const errors = [];
+      // Stubbing timeout to catch async-thrown errors and expect
+      // them. These catch errors thrown inside the catch-clause of the
+      // xhr request using rethrowAsync.
+      const realSetTimeout = window.setTimeout;
+      sandbox.stub(window, 'setTimeout', (callback, delay) => {
+        realSetTimeout(() => {
+          try {
+            callback();
+          } catch (e) {
+            errors.push(e);
+          }
+        }, delay);
+      });
+
+      const fetch = sandbox.spy(ampForm.xhr_, 'fetch');
+      form.dispatchEvent(new Event('submit'));
+
+      return timer.promise(100).then(() => {
+        return fetch.returnValues[0].catch(() => {});
+      }).then(() => {
+        expect(errors.length).to.equal(1);
+        expect(errors[0].message).to.match(/HTTP error 500/);
+
+        // It shouldn't have the i-amphtml-rendered attribute since no
+        // template was rendered.
+        const rendered = form.querySelectorAll('[i-amphtml-rendered]');
+        expect(rendered.length).to.equal(0);
+
+        // Any amp elements inside the message should be layed out
+        expect(form.querySelectorAll('amp-img img').length).to.equal(1);
+      });
+    });
   });
 
   describe.skip('Submit result message', () => {
