@@ -1311,8 +1311,8 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'custom': 'https://${apiEndpoint}/event/pixel${base}&collection=${collection}',
     },
     'transport': {
-      'beacon': false,
-      'xhrpost': false,
+      'beacon': true,
+      'xhrpost': true,
       'image': true,
     },
   },
