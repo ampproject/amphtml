@@ -74,6 +74,9 @@ export class AbstractAmpContext {
     /** @type {!Observable<Object>} */
     this.visibilityObservable_ = new Observable();
 
+    /** @type {!Observable<Object>} */
+    this.intersectionObservable_ = new Observable();
+
     this.findAndSetMetadata_();
 
     /** @protected {!IframeMessagingClient} */
@@ -131,12 +134,14 @@ export class AbstractAmpContext {
    *    every time we receive an intersection message.
    */
   observeIntersection(callback) {
-    const unlisten = this.client_.makeRequest(
-        MessageType.SEND_INTERSECTIONS,
-        MessageType.INTERSECTION,
-        intersection => {
-          callback(intersection.changes);
-        });
+    if (this.intersectionObservable_.getHandlerCount() == 0) {
+      this.client_.makeRequest(
+          MessageType.SEND_INTERSECTIONS,
+          MessageType.INTERSECTION,
+          intersection => {
+            this.intersectionObservable_.fire(intersection.changes);
+          });
+    }
 
     // Call the callback with the value that was transmitted when the
     // iframe was drawn. Called in nextTick, so that callers don't
@@ -146,7 +151,7 @@ export class AbstractAmpContext {
       callback([this.initialIntersection]);
     });
 
-    return unlisten;
+    return this.intersectionObservable_.add(callback);
   };
 
   /**
