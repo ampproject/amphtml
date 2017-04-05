@@ -46,10 +46,6 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'third_party/**/*.js',
     whitelist: [
-      // TODO(levitzky) remove next line when experiment
-      // 'a4a-adsense-use-new-format' is removed.
-      'tools/experiments/experiments.js->' +
-          'third_party/babel/custom-babel-helpers.js',
       'extensions/amp-crypto-polyfill/**/*.js->' +
           'third_party/closure-library/sha384-generated.js',
       'extensions/amp-mustache/0.1/amp-mustache.js->' +
@@ -191,9 +187,6 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/polyfills.js',
     whitelist: [
-      // TODO(levitzky) remove next line when experiment
-      // 'a4a-adsense-use-new-format' is removed.
-      'tools/experiments/experiments.js->src/polyfills.js',
       'src/amp.js->src/polyfills.js',
       'src/service.js->src/polyfills.js',
       'src/service/timer-impl.js->src/polyfills.js',
