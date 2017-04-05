@@ -20,6 +20,7 @@ import {registerElement} from '../src/custom-element';
 import {timerFor} from '../src/services';
 import {urlReplacementsForDoc} from '../src/services';
 import {viewerForDoc} from '../src/services';
+import {createElementWithAttributes} from '../src/dom';
 
 const TAG = 'amp-pixel';
 
@@ -69,9 +70,25 @@ export class AmpPixel extends BaseElement {
           .expandAsync(this.assertSource_(src))
           .then(src => {
             const image = new Image();
-            image.src = src;
+            const referrerPolicy = this.element.getAttribute('referrerpolicy');
+            // if "referrerPolicy" is not supported, use iframe wrapper
+            // to scrub the referrer.
+            if(image.referrerPolicy === undefined &&
+                referrerPolicy == 'no-referrer') {
+              this.element.appendChild(createElementWithAttributes(
+                  this.win.document, 'iframe', {
+                    src: `javascript: '<img src="${src}">'`,
+                  }));
+            } else {
+              if(referrerPolicy) {
+                image.referrerPolicy = referrerPolicy;
+                // referrerPolicy is respected only when the image is attached
+                // to DOM
+                this.element.appendChild(image);
+              }
+              image.src = src;
+            }
             dev().info(TAG, 'pixel triggered: ', src);
-            return image;
           });
     });
   }
