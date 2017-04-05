@@ -35,9 +35,7 @@ export function netletix(global, data) {
       global._netletix_amp.mandatory_data, global._netletix_amp.allowed_data);
 
   const rand = Math.round(Math.random() * 100000000);
-  const s = 'https://call.adadapter.netzathleten-media.de';
-  let ls = 'http://localhost:8080';
-  ls = (document.location.host.indexOf('localhost') > -1 ? ls : s);
+  const ls = 'https://call.adadapter.netzathleten-media.de';
 
   console.group('NETLETIX AMP:');
 

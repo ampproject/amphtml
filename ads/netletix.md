@@ -31,7 +31,7 @@ limitations under the License.
 
 ## Configuration
 
-## Mandatory parameters 
+## Mandatory parameters
 - ```data-nxkey``` (mandatory, String, non-empty)
 - ```data-nxunit``` (mandatory, String, non-empty)
 - ```data-nxwidth``` (mandatory, String, non-empty)
