@@ -20,24 +20,26 @@ import {user} from '../../../../src/log';
 import * as sinon from 'sinon';
 
 
-describe('SignInProtocol', () => {
+describes.realWin('SignInProtocol', {amp: true}, env => {
 
   const ORIGIN = 'https://example.com';
   const AUTHORITY = 'https://authority.example.net';
 
-  let sandbox;
+  let win;
+  let ampdoc;
   let viewer, viewerMock;
   let configJson;
   let errorStub;
   let signin;
 
   function create() {
-    return new SignInProtocol(window, viewer, ORIGIN, configJson);
+    return new SignInProtocol(ampdoc, viewer, ORIGIN, configJson);
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    toggleExperiment(window, 'amp-access-signin', true);
+    win = env.win;
+    ampdoc = env.ampdoc;
+    toggleExperiment(win, 'amp-access-signin', true);
 
     errorStub = sandbox.stub(user(), 'error');
 
@@ -66,8 +68,7 @@ describe('SignInProtocol', () => {
 
   afterEach(() => {
     viewerMock.verify();
-    sandbox.restore();
-    toggleExperiment(window, 'amp-access-signin', false);
+    toggleExperiment(win, 'amp-access-signin', false);
   });
 
 
@@ -80,7 +81,7 @@ describe('SignInProtocol', () => {
     });
 
     it('should be disabled without expriment', () => {
-      toggleExperiment(window, 'amp-access-signin', false);
+      toggleExperiment(win, 'amp-access-signin', false);
       const signin = create();
       expect(signin.isEnabled()).to.be.false;
       expect(signin.acceptAccessToken_).to.be.false;
