@@ -982,15 +982,12 @@ describe('Core events', () => {
     const event = {target: element};
     handler(event);
     expect(action.trigger).to.have.been.calledWith(
-      element,
-      'change',
-      sinon.match.any);
-    // Doesn't play well with sinon matchers
-    const customEvent = action.trigger.getCalls()[0].args[2];
-    expect(customEvent.detail).to.deep.equal({
-      min: '0',
-      max: '10',
-      value: '5',
-    });
+        element,
+        'change',
+        // Event doesn't seem to play well with sinon matchers
+        sinon.match(object => {
+          const detail = object.detail;
+          return detail.min == 0 && detail.max == 10 && detail.value == 5;
+        }));
   });
 });

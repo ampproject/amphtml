@@ -189,7 +189,9 @@ export class ActionService {
       // TODO(kmh287): Cast numeric values to numbers?
       if (fieldsToInclude) {
         fieldsToInclude.forEach(field => {
-          details[field] = target[field];
+          const value = target[field];
+          const valueAsNumber = parseFloat(value);
+          details[field] = valueAsNumber || value;
         });
       }
     }
