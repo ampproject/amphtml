@@ -32,9 +32,9 @@ export function kixer(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
   validateData(data, ['adslot'], []);
 
-  let in_view = false;
+  let inView = false;
   let viewed = false;
-  let view_timer = null;
+  let viewTimer = null;
 
   const d = global.document.createElement('div');
   d.id = '__kx_ad_' + data.adslot;
@@ -50,13 +50,14 @@ export function kixer(global, data) {
   };
   d.addEventListener('load', kxload, false); // Listen for the kixer load event
 
-  const kxview_check = function(coords) {
-    if (coords.intersectionRect.height > coords.boundingClientRect.height / 2) {
-      if (viewed === false && view_timer == null) {
-        view_timer = setTimeout(function() {
-          clearTimeout(view_timer);
-          view_timer = null;
-          if (in_view === true) {
+  const kxviewCheck = function(intersectionEntry) {
+    inView = intersectionEntry.intersectionRatio > 0.5;
+    if (inView === true) {
+      if (viewed === false && viewTimer == null) {
+        viewTimer = setTimeout(function() {
+          clearTimeout(viewTimer);
+          viewTimer = null;
+          if (inView === true) {
             if (typeof __kx_viewability.process_locked === 'function') {
               viewed = true;
               __kx_viewability.process_locked(data.adslot);
@@ -64,15 +65,12 @@ export function kixer(global, data) {
           }
         }, 900);
       }
-      in_view = true;
-    } else {
-      in_view = false;
     }
   };
 
   global.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {
-      kxview_check(c);
+      kxviewCheck(c);
     });
   });
 
