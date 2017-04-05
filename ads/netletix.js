@@ -72,8 +72,6 @@ export function netletix(global, data) {
           global.context.renderStart(renderconfig);
           if (event.data.width != nxwidth ||
               event.data.height != nxheight) {
-                        event.data.width,
-                        event.data.height);
             window.context.requestResize(event.data.width, event.data.height);
           }
           break;
@@ -93,11 +91,6 @@ export function netletix(global, data) {
     }
   };
   window.addEventListener('message', receiveNxAction);
-  window.context.onResizeDenied(
-    function(requestedHeight, requestedWidth) {
-    }
-  );
-
 
   if (data.async && data.async.toLowerCase() === 'true') {
     loadScript(global, url);
