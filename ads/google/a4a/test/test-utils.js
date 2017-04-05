@@ -81,7 +81,7 @@ describe('Google A4A utils', () => {
           .to.eventually.deep.equal({
             creative,
             signature: base64UrlDecodeToBytes('AQAB'),
-            size: [320, 50],
+            size: {width: 320, height: 50},
           });
     });
 

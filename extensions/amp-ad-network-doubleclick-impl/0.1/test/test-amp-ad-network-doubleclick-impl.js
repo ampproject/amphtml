@@ -24,6 +24,7 @@ import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {toggleExperiment} from '../../../../src/experiments';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 
 function setupForAdTesting(fixture) {
@@ -79,6 +80,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
   describe('#extractCreativeAndSignature', () => {
     let loadExtensionSpy;
+    const size = {width: 200, height: 50};
 
     beforeEach(() => {
       return createIframePromise().then(fixture => {
@@ -91,6 +93,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'layout': 'fixed',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
+        impl.size_ = size;
         installExtensionsService(impl.win);
         const extensions = extensionsFor(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
@@ -106,7 +109,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             has: function() { return false; },
           }).then(adResponse => {
             expect(adResponse).to.deep.equal(
-                  {creative, signature: null, size: null});
+                  {creative, signature: null, size});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
           });
       });
@@ -124,8 +127,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             },
           }).then(adResponse => {
             expect(adResponse).to.deep.equal(
-              {creative, signature: base64UrlDecodeToBytes('AQAB'),
-               size: null});
+              {creative, signature: base64UrlDecodeToBytes('AQAB'), size});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
           });
       });
@@ -154,7 +156,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               {
                 creative,
                 signature: base64UrlDecodeToBytes('AQAB'),
-                size: null,
+                size,
               });
             expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
@@ -197,9 +199,14 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       element = document.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'adsense');
+      element.setAttribute('width', '320');
+      element.setAttribute('height', '50');
       document.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
     });
+
+    afterEach(() =>
+        toggleExperiment(window, 'dc-use-attr-for-format', false));
 
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
@@ -207,16 +214,15 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         expect(url).to.match(new RegExp(
           '^https://securepubads\\.g\\.doubleclick\\.net/gampad/ads' +
           // Depending on how the test is run, it can get different results.
-          '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=A&sz=0x0&u_sd=[0-9]+' +
-          '(&asnt=[0-9]+-[0-9]+)?' +
+          '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=A&sz=320x50' +
+          '&u_sd=[0-9]+(&asnt=[0-9]+-[0-9]+)?' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
           '&c=[0-9]+&output=html&nhd=1&biw=[0-9]+&bih=[0-9]+' +
           '&adx=-?[0-9]+&ady=-?[0-9]+&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +
-          '&isw=[0-9]+&ish=[0-9]+' +
-          '&ea=0&pfx=(1|0)' +
+          '&isw=[0-9]+&ish=[0-9]+&pfx=(1|0)' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
@@ -240,5 +246,38 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         expect(url).to.match(/&scp=excl_cat%3Dsports&/);
       });
     });
+
+    it('has correct format when height == "auto"', () => {
+      element.setAttribute('height', 'auto');
+      new AmpAd(element).upgradeCallback();
+      expect(impl.element.getAttribute('height')).to.equal('auto');
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        // With exp dc-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
+        expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+    });
+    it('has correct format when dc-use-attr-for-format is on', () => {
+      toggleExperiment(window, 'dc-use-attr-for-format', true);
+      new AmpAd(element).upgradeCallback();
+      const width = impl.element.getAttribute('width');
+      const height = impl.element.getAttribute('height');
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        // With exp dc-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
+        expect(url).to.match(new RegExp(`sz=${width}x${height}`)));
+    });
+    it('has correct format when width=auto and dc-use-attr-for-format is on',
+        () => {
+          toggleExperiment(window, 'dc-use-attr-for-format', true);
+          element.setAttribute('width', 'auto');
+          new AmpAd(element).upgradeCallback();
+          expect(impl.element.getAttribute('width')).to.equal('auto');
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              // Ensure that "auto" doesn't appear anywhere here:
+              expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+        });
   });
 });

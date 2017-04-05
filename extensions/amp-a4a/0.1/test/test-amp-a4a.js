@@ -606,11 +606,9 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('should call handleResize for multi-size ads', () => {
+    it('should set height/width on iframe matching header value', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete headers[SIGNATURE_HEADER];
-      // If rendering type is safeframe, we SHOULD attach a SafeFrame.
-      headers[RENDERING_TYPE_HEADER] = 'safeframe';
       headers['X-CreativeSize'] = '320x50';
       xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
@@ -626,7 +624,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('height', 75);
         a4aElement.setAttribute('type', 'doubleclick');
         const a4a = new MockA4AImpl(a4aElement);
-        const handleResizeMock = sandbox.stub(a4a, 'handleResize');
         doc.body.appendChild(a4aElement);
         a4a.onLayoutMeasure();
         const renderPromise = a4a.layoutCallback();
@@ -636,9 +633,8 @@ describe('amp-a4a', () => {
           a4a.vsync_.runScheduledTasks_();
           const child = a4aElement.querySelector('iframe[name]');
           expect(child).to.be.ok;
-          expect(child.getAttribute('src')).to.have.string('safeframe');
-          expect(child.getAttribute('name')).to.match(/[^;]+;\d+;[\s\S]+/);
-          expect(handleResizeMock).to.be.called.once;
+          expect(child.getAttribute('width')).to.equal('320');
+          expect(child.getAttribute('height')).to.equal('50');
         });
       });
     });

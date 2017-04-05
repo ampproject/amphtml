@@ -38,6 +38,7 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
+import {isExperimentOn} from '../../../src/experiments';
 import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
@@ -71,6 +72,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
     this.responseHeaders_ = null;
+
+    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
+    this.size_ = null;
   }
 
   /** @override */
@@ -86,15 +90,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
     const global = this.win;
-    const tagWidth = this.element.getAttribute('width');
-    const tagHeight = this.element.getAttribute('height');
-    let size;
-    if (tagWidth && tagHeight) {
-      size = `${tagWidth}x${tagHeight}`;
-    } else {
-      const slotRect = this.getIntersectionElementLayoutBox();
-      size = `${slotRect.width}x${slotRect.height}`;
-    }
+    const width = Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('height'));
+    // If dc-use-attr-for-format experiment is on, we want to make our attribute
+    // check to be more strict.
+    const useAttributesForSize =
+        isExperimentOn(this.win, 'dc-use-attr-for-format')
+        ? !isNaN(width) && width > 0 && !isNaN(height) && height > 0
+        : width && height;
+    this.size_ = useAttributesForSize
+        ? {width, height}
+        : this.getIntersectionElementLayoutBox();
+    let sizeStr = `${this.size_.width}x${this.size_.height}`;
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tagForChildDirectedTreatment'];
@@ -112,17 +119,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           Number(this.element.getAttribute('width')),
           Number(this.element.getAttribute('height')),
           multiSizeValidation == 'true');
-      size += '|' + dimensions.map(dimension => dimension.join('x')).join('|');
+      sizeStr += '|' + dimensions
+          .map(dimension => dimension.join('x'))
+          .join('|');
     }
 
     return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
-      {name: 'adk', value: this.adKey_(size)},
+      {name: 'adk', value: this.adKey_(sizeStr)},
       {name: 'gdfp_req', value: '1'},
       {name: 'impl', value: 'ifr'},
       {name: 'sfv', value: 'A'},
-      {name: 'sz', value: size},
+      {name: 'sz', value: sizeStr},
       {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
       {name: 'u_sd', value: global.devicePixelRatio},
       {name: 'adtest', value: adTestOn ? 'on' : null},
@@ -138,25 +147,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  handleResize(width, height) {
-    const pWidth = this.element.getAttribute('width');
-    const pHeight = this.element.getAttribute('height');
-    // We want to resize only if neither returned dimension is larger than its
-    // primary counterpart, and if at least one of the returned dimensions
-    // differ from its primary counterpart.
-    if ((width != pWidth || height != pHeight)
-        && (width <= pWidth && height <= pHeight)) {
-      this.attemptChangeSize(height, width).catch(() => {});
-    }
-  }
-
-  /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig =
       extractAmpAnalyticsConfig(responseHeaders, this.extensions_);
     this.responseHeaders_ = responseHeaders;
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+    const adResponsePromise =
+        extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+    return adResponsePromise.then(adResponse => {
+      // If the server returned a size, use that, otherwise use the size that
+      // we sent in the ad request.
+      adResponse.size = adResponse.size || this.size_;
+      this.handleResize_(adResponse.size.width, adResponse.size.height);
+      return Promise.resolve(adResponse);
+    });
   }
 
   /** @override */
@@ -202,6 +206,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const multiSize = element.getAttribute('data-multi-size') || '';
     const string = `${slot}:${size}:${multiSize}:${domFingerprint}`;
     return stringHash32(string);
+  }
+
+  /**
+   * Attempts to resize the ad, if the returned size is smaller than the primary
+   * dimensions.
+   * @param {number} width
+   * @param {number} height
+   * @private
+   */
+  handleResize_(width, height) {
+    const pWidth = this.element.getAttribute('width');
+    const pHeight = this.element.getAttribute('height');
+    // We want to resize only if neither returned dimension is larger than its
+    // primary counterpart, and if at least one of the returned dimensions
+    // differ from its primary counterpart.
+    if ((width != pWidth || height != pHeight)
+        && (width <= pWidth && height <= pHeight)) {
+      this.attemptChangeSize(height, width).catch(() => {});
+    }
   }
 }
 
