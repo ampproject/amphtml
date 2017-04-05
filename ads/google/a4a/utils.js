@@ -445,3 +445,80 @@ export function injectActiveViewAmpAnalyticsElement(
   ampAnalyticsElem.appendChild(scriptElem);
   a4a.element.appendChild(ampAnalyticsElem);
 }
+
+/**
+ * @param {string} urlBase Base URL to which monitoring pings will be directed.
+ * @param {string} type  Ad tag type (e.g., 'adsense')
+ * @param {?string} adSlotId  Unique (within page) ID for this ad slot.
+ * @param {?string} eids  List of eids attached to tag.
+ * @return {!JSONType}  Data structure containing analytics config.  Note:
+ *   returned as an object, not as a string.
+ */
+export function getGoogleAnalyticsConfig(urlBase, type, adSlotId, eids) {
+  const eventNamesToIds = {
+    urlBuilt: '1',
+    adRequestStart: '2',
+    adRequestEnd: '3',
+    extractCreativeAndSignature: '4',
+    adResponseValidateStart: '5',
+    renderFriendlyStart: '6',  // TODO(dvoytenko): this signal and similar are actually "embed-create", not "render-start".
+    renderCrossDomainStart: '7',
+    renderFriendlyEnd: '8',
+    renderCrossDomainEnd: '9',
+    preAdThrottle: '10',
+    renderSafeFrameStart: '11',
+    throttled3p: '12',
+    adResponseValidateEnd: '13',
+    xDomIframeLoaded: '14',
+    friendlyIframeLoaded: '15',
+    adSlotCollapsed: '16',
+    adSlotUnhidden: '17',
+    layoutAdPromiseDelay: '18',
+    signatureVerifySuccess: '19',
+    networkError: '20',
+    friendlyIframeIniLoad: '21',
+  };
+  const urlParams = ['n=${namespace}',
+    'v=${csiVersion}',
+    'rls=${ampVersion}',
+    't=${tagType}',
+    'slotId=${slotId}',
+    'stageId=${stageId}',
+    'stageName=${stageName}',
+    'vx=${viewportWidth}',
+    'vy=${viewportHeight}',
+    'dx=${scrollLeft}',
+    'dy=${scrollTop}',
+  ];
+  if (eids) {
+    urlParams.push('e=${exptIds}');
+  }
+  const config = {
+    'requests': {
+      'event': urlBase + '?' + urlParams.join('&'),
+    },
+    'vars': {
+      'tagType': type,
+      'slotId': adSlotId,
+      'exptIds': eids,
+      'namespace': 'a4a',
+      'csiVersion': '2',
+    },
+    'triggers': {},  // Filled in below.
+  };
+  for (const eventName in eventNamesToIds) {
+    if (eventNamesToIds.hasOwnProperty(eventName)) {
+      config.triggers[eventName] = {
+        'on': eventName,
+        'request': 'event',
+        'selector': 'amp-ad',
+        'selectionMethod': 'closest',
+        'vars': {
+          'stageName': eventName,
+          'stageId': eventNamesToIds[eventName],
+        },
+      };
+    }
+  }
+  return config;
+}
