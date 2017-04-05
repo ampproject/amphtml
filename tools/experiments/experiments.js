@@ -277,6 +277,14 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
     spec: 'https://github.com/ampproject/amphtml/issues/6829',
   },
+  {
+    id: 'as-use-attr-for-format',
+    name: 'Use slot width/height attribute for AdSense size format',
+  },
+  {
+    id: 'dc-use-attr-for-format',
+    name: 'Use slot width/height attribute for DoubleClick size format',
+  },
 ];
 
 if (getMode().localDev) {
