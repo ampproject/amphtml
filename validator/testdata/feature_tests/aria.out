@@ -1,5 +1,5 @@
 FAIL
-feature_tests/aria.html:37:2 The attribute 'role' in tag 'amp-img' is missing or incorrect, but required by attribute 'on'. (see https://www.ampproject.org/docs/reference/amp-img) [DISALLOWED_HTML]
-feature_tests/aria.html:39:2 The attribute 'tabindex' in tag 'amp-img' is missing or incorrect, but required by attribute 'on'. (see https://www.ampproject.org/docs/reference/amp-img) [DISALLOWED_HTML]
-feature_tests/aria.html:41:2 The attribute 'role' in tag 'amp-img' is missing or incorrect, but required by attribute 'on'. (see https://www.ampproject.org/docs/reference/amp-img) [DISALLOWED_HTML]
-feature_tests/aria.html:41:2 The attribute 'tabindex' in tag 'amp-img' is missing or incorrect, but required by attribute 'on'. (see https://www.ampproject.org/docs/reference/amp-img) [DISALLOWED_HTML]
+feature_tests/aria.html:37:2 The attribute 'role' in tag 'amp-img' is missing or incorrect, but required by attribute 'on'. (see https://www.ampproject.org/docs/reference/components/media/amp-img) [DISALLOWED_HTML]
+feature_tests/aria.html:39:2 The attribute 'tabindex' in tag 'amp-img' is missing or incorrect, but required by attribute 'on'. (see https://www.ampproject.org/docs/reference/components/media/amp-img) [DISALLOWED_HTML]
+feature_tests/aria.html:41:2 The attribute 'role' in tag 'amp-img' is missing or incorrect, but required by attribute 'on'. (see https://www.ampproject.org/docs/reference/components/media/amp-img) [DISALLOWED_HTML]
+feature_tests/aria.html:41:2 The attribute 'tabindex' in tag 'amp-img' is missing or incorrect, but required by attribute 'on'. (see https://www.ampproject.org/docs/reference/components/media/amp-img) [DISALLOWED_HTML]

@@ -52,5 +52,5 @@ tags: {  # amp-access (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-access"
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-access"
 }

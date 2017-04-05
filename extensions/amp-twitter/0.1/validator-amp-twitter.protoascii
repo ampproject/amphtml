@@ -37,7 +37,7 @@ tags: {  # <amp-twitter>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-twitter"
+  spec_url: "https://www.ampproject.org/docs/reference/components/social/amp-twitter"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
