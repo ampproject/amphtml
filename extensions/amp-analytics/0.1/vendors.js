@@ -1309,7 +1309,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         '&prop.resolution=${screenWidth} × ${screenHeight}',
       'pageview': 'https://${apiEndpoint}/event/pixel${base}&collection=${pageViewName}',
       'custom': 'https://${apiEndpoint}/event/pixel${base}&collection=${collection}',
-    }
+    },
   },
   'ibeatanalytics': {
     'requests': {
