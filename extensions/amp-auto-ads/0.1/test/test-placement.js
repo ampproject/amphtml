@@ -1039,6 +1039,7 @@ describes.realWin('placement', {
 
     it('should not return a placement that\'s inside an amp-app-banner', () => {
       const anchor = document.createElement('amp-app-banner');
+      anchor.setAttribute('layout', 'nodisplay');
       anchor.id = 'anId';
       container.appendChild(anchor);
 

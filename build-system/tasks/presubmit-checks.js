@@ -291,6 +291,7 @@ var forbiddenTerms = {
       'src/service/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
+      'extensions/amp-app-banner/0.1/amp-app-banner.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
