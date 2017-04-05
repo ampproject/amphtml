@@ -204,7 +204,9 @@ export function extractGoogleAdCreativeAndSignature(
             responseHeaders.get(AMP_SIGNATURE_HEADER)));
     }
     if (responseHeaders.has(CREATIVE_SIZE_HEADER)) {
-      const sizeArr = responseHeaders.get(CREATIVE_SIZE_HEADER)
+      const sizeHeader = responseHeaders.get(CREATIVE_SIZE_HEADER);
+      dev().assert(new RegExp('[0-9]+x[0-9]+').test(sizeHeader));
+      const sizeArr = sizeHeader
           .split('x')
           .map(dim => Number(dim));
       size = {width: sizeArr[0], height: sizeArr[1]};

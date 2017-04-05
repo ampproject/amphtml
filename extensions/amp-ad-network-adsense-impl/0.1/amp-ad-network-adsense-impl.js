@@ -106,7 +106,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
     this.responseHeaders_ = null;
 
-    /** @private {?{width, height}} */
+    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
   }
 

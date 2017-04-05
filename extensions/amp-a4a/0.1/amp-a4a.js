@@ -269,7 +269,8 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Initialize this with the slot width/height attributes, and override
      * later with what the network implementation returns via
-     * extractCreativeAndSignature.
+     * extractCreativeAndSignature. Note: Either value may be 'auto' (i.e.,
+     * non-numeric).
      *
      * @private {?{width, height}}
      */
@@ -1088,6 +1089,8 @@ export class AmpA4A extends AMP.BaseElement {
     const iframe = /** @type {!HTMLIFrameElement} */(
         createElementWithAttributes(
             /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
+              // NOTE: It is possible for either width or height to be 'auto',
+              // a non-numeric value.
               height: this.creativeSize_.height,
               width: this.creativeSize_.width,
               frameborder: '0',
@@ -1154,19 +1157,22 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Shared functionality for cross-domain iframe-based rendering methods.
-   * @param {!Element} iframe Iframe to render.  Should be fully configured
-   * (all attributes set), but not yet attached to DOM.
-   * @param {!string} name
+   * @param {!Object} attributes The attributes of the iframe.
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
-  iframeRenderHelper_(iframe, name) {
-    if (name) {
-      iframe.setAttribute('name', name);
-    }
+  iframeRenderHelper_(attributes) {
+    const mergedAttributes = Object.assign(attributes, {
+      height: this.creativeSize_.height,
+      width: this.creativeSize_.width,
+    });
+
     if (this.sentinel) {
-      iframe.setAttribute('data-amp-3p-sentinel', this.sentinel);
+      mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
+    const iframe = createElementWithAttributes(
+        /** @type {!Document} */ (this.element.ownerDocument),
+        'iframe', Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES));
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
@@ -1193,22 +1199,11 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaCachedContentIframe_(adUrl) {
     this.protectedEmitLifecycleEvent_('renderCrossDomainStart');
-    /** @const {!Element} */
-    const iframe = createElementWithAttributes(
-        /** @type {!Document} */(this.element.ownerDocument),
-        'iframe', Object.assign({
-          'height': this.creativeSize_.height,
-          'width': this.creativeSize_.width,
-          // XHR request modifies URL by adding origin as parameter.  Need to
-          // append ad URL, otherwise cache will miss.
-          // TODO: remove call to getCorsUrl and instead have fetch API return
-          // modified url.
-          'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
-        }, SHARED_IFRAME_PROPERTIES));
-    // Can't get the attributes until we have the iframe, then set it.
-    const name = JSON.stringify(getContextMetadata(
-        this.win, this.element, this.sentinel));
-    return this.iframeRenderHelper_(iframe, name);
+    return this.iframeRenderHelper_({
+      src: xhrFor(this.win).getCorsUrl(this.win, adUrl),
+      name: JSON.stringify(
+          getContextMetadata(this.win, this.element, this.sentinel)),
+    });
   }
 
   /**
@@ -1246,15 +1241,7 @@ export class AmpA4A extends AMP.BaseElement {
               + ' slot %s.', method, this.element.getAttribute('id'));
           return Promise.reject('Unrecognized rendering mode request');
       }
-      /** @const {!Element} */
-      const iframe = createElementWithAttributes(
-          /** @type {!Document} */(this.element.ownerDocument),
-          'iframe', Object.assign({
-            'height': this.creativeSize_.height,
-            'width': this.creativeSize_.width,
-            'src': srcPath,
-          }, SHARED_IFRAME_PROPERTIES));
-        // TODO(bradfrizzell): change name of function and var
+      // TODO(bradfrizzell): change name of function and var
       let contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel);
       // TODO(bradfrizzell) Clean up name assigning.
@@ -1266,7 +1253,7 @@ export class AmpA4A extends AMP.BaseElement {
         name = `${SAFEFRAME_VERSION};${creative.length};${creative}` +
             `${contextMetadata}`;
       }
-      return this.iframeRenderHelper_(iframe, name);
+      return this.iframeRenderHelper_({src: srcPath, name});
     });
   }
 
