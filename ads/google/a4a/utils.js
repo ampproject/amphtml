@@ -168,7 +168,6 @@ export function googleAdUrl(
         {name: 'brdim', value: additionalDimensions(win, viewportSize)},
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
-        {name: 'ea', value: '0'},
         {name: 'pfx', value: pfx},
       ],
       unboundedQueryParams,
@@ -205,10 +204,12 @@ export function extractGoogleAdCreativeAndSignature(
             responseHeaders.get(AMP_SIGNATURE_HEADER)));
     }
     if (responseHeaders.has(CREATIVE_SIZE_HEADER)) {
-      const sizeStr = responseHeaders.get(CREATIVE_SIZE_HEADER);
-      // We should trust that the server returns the size information in the
-      // form of a WxH string.
-      size = sizeStr.split('x').map(dim => Number(dim));
+      const sizeHeader = responseHeaders.get(CREATIVE_SIZE_HEADER);
+      dev().assert(new RegExp('[0-9]+x[0-9]+').test(sizeHeader));
+      const sizeArr = sizeHeader
+          .split('x')
+          .map(dim => Number(dim));
+      size = {width: sizeArr[0], height: sizeArr[1]};
     }
   } finally {
     return Promise.resolve(/** @type {
