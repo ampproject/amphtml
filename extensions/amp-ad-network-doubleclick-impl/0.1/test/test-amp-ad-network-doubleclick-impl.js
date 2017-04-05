@@ -199,6 +199,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       element = document.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'adsense');
+      element.setAttribute('width', '320');
+      element.setAttribute('height', '50');
       document.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
     });
