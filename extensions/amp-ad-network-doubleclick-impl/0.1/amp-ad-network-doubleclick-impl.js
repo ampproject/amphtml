@@ -92,8 +92,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const global = this.win;
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
-    this.size_ = isExperimentOn(this.win, 'dc-use-attr-for-format')
-        && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
+    // If dc-use-attr-for-format experiment is on, we want to make our attribute
+    // check to be more strict.
+    debugger;
+    const useAttributesForSize =
+        isExperimentOn(this.win, 'dc-use-attr-for-format')
+        ? !isNaN(width) && width > 0 && !isNaN(height) && height > 0
+        : width && height;
+    this.size_ = useAttributesForSize
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
     let sizeStr = `${this.size_.width}x${this.size_.height}`;
