@@ -243,6 +243,12 @@ Type attribute value: `piano`
 
 Adds support for Piano.  Configuration details can be found at [vx.piano.io](http://vx.piano.io/javascript-tracking-amp).
 
+### Rakam
+
+Type attribute value: `rakam`
+
+Adds support for Rakam.io. Configuration details can be found at [Rakam Documentation](https://rakam.io/integration/amp).
+
 ### Quantcast Measurement
 
 Type attribute value: `quantcast`
