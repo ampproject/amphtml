@@ -82,7 +82,7 @@ export class AmpPixel extends BaseElement {
             } else {
               if(referrerPolicy) {
                 image.referrerPolicy = referrerPolicy;
-                // referrerPolicy is respected only when the image is attached
+                // referrerPolicy is respected only if the image is attached
                 // to DOM
                 this.element.appendChild(image);
               }
