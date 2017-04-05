@@ -186,7 +186,6 @@ export class ActionService {
     if (event.target.tagName.toLowerCase() === 'input') {
       const inputType = target.getAttribute('type');
       const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
-      // TODO(kmh287): Cast numeric values to numbers?
       if (fieldsToInclude) {
         fieldsToInclude.forEach(field => {
           const value = target[field];
