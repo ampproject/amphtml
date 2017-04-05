@@ -672,6 +672,33 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Webtrekk example -->
 
+<!-- Rakam tracking -->
+<amp-analytics type="rakam" id="rakam">
+<script type="application/json">
+{
+  "vars": {
+    "apiEndpoint": "myapiendpoint.getrakam.com",
+    "writeKey": "fhjk6hf37u2m20uvf36iig6r21cieqsclt2n2o0fsaun90sdu1aago7et04npmq8",
+    "pageViewName": "view_page"
+  },
+  "extraUrlParams": {
+    "prop._user_name": "Emre"
+  },
+  "triggers": {
+    "click": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "custom",
+      "vars": {
+        "collection": "click"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Rakam example -->
+
 <!-- Ibeat Analytics pageview tracking -->
 <amp-analytics type="ibeatanalytics" id="ibeatanalytics">
 <script type="application/json">
