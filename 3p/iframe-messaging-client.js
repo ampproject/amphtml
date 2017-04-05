@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Observable} from '../src/observable';
 import {map} from '../src/utils/object';
 import {
   listen,
@@ -36,11 +37,12 @@ export class IframeMessagingClient {
     this.hostWindow_ = win.parent;
     /** @private {?string} */
     this.sentinel_ = null;
-    /** Map messageType keys to callback functions for when we receive
-     *  that message
-     *  @private {!Object}
+    /**
+     * Map messageType keys to observables to be fired when messages of that
+     * type are received.
+     * @private {!Object}
      */
-    this.callbackFor_ = map();
+    this.observableFor_ = map();
     this.setupEventListener_();
   }
 
@@ -71,8 +73,7 @@ export class IframeMessagingClient {
     // NOTE : no validation done here. any callback can be register
     // for any callback, and then if that message is received, this
     // class *will execute* that callback
-    this.callbackFor_[messageType] = callback;
-    return () => { delete this.callbackFor_[messageType]; };
+    return this.getOrCreateObservableFor_(messageType).add(callback);
   }
 
   /**
@@ -109,10 +110,7 @@ export class IframeMessagingClient {
         return;
       }
 
-      const callback = this.callbackFor_[message.type];
-      if (callback) {
-        callback(message);
-      }
+      this.fireObservable_(message.type, message);
     });
   }
 
@@ -128,5 +126,26 @@ export class IframeMessagingClient {
    */
   setSentinel(sentinel) {
     this.sentinel_ = sentinel;
+  }
+
+  /**
+   * @param {string} messageType
+   * @return {!Observable<Object>}
+   */
+  getOrCreateObservableFor_(messageType) {
+    if (!(messageType in this.observableFor_)) {
+      this.observableFor_[messageType] = new Observable();
+    }
+    return this.observableFor_[messageType];
+  }
+
+  /**
+   * @param {string} messageType
+   * @param {Object} message
+   */
+  fireObservable_(messageType, message) {
+    if (messageType in this.observableFor_) {
+      this.observableFor_[messageType].fire(message);
+    }
   }
 }

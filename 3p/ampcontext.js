@@ -17,7 +17,6 @@ import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {nextTick} from './3p';
-import {Observable} from '../src/observable';
 import {tryParseJson} from '../src/json';
 import {isObject} from '../src/types';
 
@@ -74,12 +73,6 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.sourceUrl = null;
 
-    /** @type {!Observable<Object>} */
-    this.visibilityObservable_ = new Observable();
-
-    /** @type {!Observable<Array<Object>>} */
-    this.intersectionObservable_ = new Observable();
-
     this.findAndSetMetadata_();
 
     /** @protected {!IframeMessagingClient} */
@@ -105,7 +98,6 @@ export class AbstractAmpContext {
         MessageType.EMBED_STATE,
         data => {
           this.hidden = data.pageHidden;
-          this.visibilityObservable_.fire(data);
           this.dispatchVisibilityChangeEvent_();
         });
   }
@@ -123,13 +115,13 @@ export class AbstractAmpContext {
 
   /**
    *  Listen to page visibility changes.
-   *  @param {function(Object)} callback Function to call every time we receive
-   *    a page visibility message.
+   *  @param {function({hidden: boolean})} callback Function to call every time
+   *    we receive a page visibility message.
    *  @returns {function()} that when called stops triggering the callback
    *    every time we receive a page visibility message.
    */
   onPageVisibilityChange(callback) {
-    return this.visibilityObservable_.add(data => {
+    return this.client_.registerCallback(MessageType.EMBED_STATE, data => {
       callback({hidden: data.pageHidden});
     });
   }
@@ -142,14 +134,12 @@ export class AbstractAmpContext {
    *    every time we receive an intersection message.
    */
   observeIntersection(callback) {
-    if (this.intersectionObservable_.getHandlerCount() == 0) {
-      this.client_.makeRequest(
-          MessageType.SEND_INTERSECTIONS,
-          MessageType.INTERSECTION,
-          intersection => {
-            this.intersectionObservable_.fire(intersection.changes);
-          });
-    }
+    const unlisten = this.client_.makeRequest(
+        MessageType.SEND_INTERSECTIONS,
+        MessageType.INTERSECTION,
+        intersection => {
+          callback(intersection.changes);
+        });
 
     // Call the callback with the value that was transmitted when the
     // iframe was drawn. Called in nextTick, so that callers don't
@@ -159,7 +149,7 @@ export class AbstractAmpContext {
       callback([this.initialIntersection]);
     });
 
-    return this.intersectionObservable_.add(callback);
+    return unlisten;
   };
 
   /**
