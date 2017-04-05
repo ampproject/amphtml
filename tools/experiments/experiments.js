@@ -277,8 +277,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
     spec: 'https://github.com/ampproject/amphtml/issues/6829',
   },
-  // When removing the next two experiment, be sure to remove the relevant
-  // dep-check-config whitelists.
   {
     id: 'as-use-attr-for-format',
     name: 'Use slot width/height attribute for AdSense size format',
