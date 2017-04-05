@@ -60,14 +60,11 @@ export function netletix(global, data) {
     + '&site=' + encodeURIComponent(nxsite)
     + '&ord=' + rand;
 
-  console.group('NETLETIX AMP:');
-
   const receiveNxAction = function(event)
   {
     if (event.data.type && event.data.type.indexOf('nx-') == 0) {
       switch (event.data.type) {
         case 'nx-resize':
-          console.info('renderStart - resize if required.');
           const renderconfig = {
             'width': event.data.width,
             'height': event.data.height,
@@ -75,21 +72,17 @@ export function netletix(global, data) {
           global.context.renderStart(renderconfig);
           if (event.data.width != nxwidth ||
               event.data.height != nxheight) {
-            console.log('Requesting resize to: %s x %s.',
                         event.data.width,
                         event.data.height);
             window.context.requestResize(event.data.width, event.data.height);
           }
           break;
         case 'nx-empty':
-          console.info('noContentAvailable - trying collapse.');
           global.context.noContentAvailable();
           break;
         case 'nx-info':
-          console.info('Info: %s', event.data.message);
           break;
         case 'nx-identifier':
-          console.info('Sending AMP identifier: %s', event.data.identifier);
           window.context.reportRenderedEntityIdentifier(
             event.data.identifier
           );
@@ -102,7 +95,6 @@ export function netletix(global, data) {
   window.addEventListener('message', receiveNxAction);
   window.context.onResizeDenied(
     function(requestedHeight, requestedWidth) {
-      console.log('Resize failed: %s x %s',requestedHeight, requestedWidth);
     }
   );
 
