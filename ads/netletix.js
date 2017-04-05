@@ -78,12 +78,12 @@ export function netletix(global, data) {
         case 'nx-empty':
           global.context.noContentAvailable();
           break;
-        case 'nx-info':
-          break;
         case 'nx-identifier':
           window.context.reportRenderedEntityIdentifier(
             event.data.identifier
           );
+          break;
+        case 'nx-info':
           break;
         default:
           break;
