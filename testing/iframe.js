@@ -18,6 +18,7 @@ import {FakeLocation} from './fake-dom';
 import {Timer} from '../src/services';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
+import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {
@@ -92,11 +93,13 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         opt_beforeLoad(win);
       }
       win.addEventListener('message', (event) => {
-        if (event.data &&
+        const parsedData = parseMessageData(event.data);
+
+        if (parsedData &&
             // Either non-3P or 3P variant of the sentinel.
-            (/^amp/.test(event.data.sentinel) ||
-             /^\d+-\d+$/.test(event.data.sentinel))) {
-          messages.push(event.data);
+            (/^amp/.test(parsedData.sentinel) ||
+             /^\d+-\d+$/.test(parsedData.sentinel))) {
+          messages.push(parsedData);
         }
       })
       // Function that returns a promise for when the given event fired at
@@ -517,4 +520,17 @@ function maybeSwitchToCompiledJs(html) {
         .replace(/dist\.3p\/current\//g, 'dist.3p/current-min/');
   }
   return html;
+}
+
+
+/**
+ * @param {*} data
+ * @returns {?}
+ * @private
+ */
+function parseMessageData(data) {
+  if (typeof data == 'string' && isAmpMessage(data)) {
+    return deserializeMessage(data);
+  }
+  return data;
 }

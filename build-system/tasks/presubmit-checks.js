@@ -296,6 +296,7 @@ var forbiddenTerms = {
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
+      '3p/ampcontext-integration.js',
       'dist.3p/current/integration.js', // includes previous
     ],
   },
