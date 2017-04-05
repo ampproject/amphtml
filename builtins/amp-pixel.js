@@ -73,7 +73,7 @@ export class AmpPixel extends BaseElement {
             const referrerPolicy = this.element.getAttribute('referrerpolicy');
             // if "referrerPolicy" is not supported, use iframe wrapper
             // to scrub the referrer.
-            if(image.referrerPolicy === undefined &&
+            if (image.referrerPolicy === undefined &&
                 referrerPolicy == 'no-referrer') {
               const iframe = createElementWithAttributes(
                   this.win.document, 'iframe', {
@@ -83,7 +83,7 @@ export class AmpPixel extends BaseElement {
               dev().info(TAG, 'pixel triggered via iframe: ', src);
               return iframe;
             } else {
-              if(referrerPolicy) {
+              if (referrerPolicy) {
                 image.referrerPolicy = referrerPolicy;
                 // referrerPolicy is respected only if the image is attached
                 // to DOM
