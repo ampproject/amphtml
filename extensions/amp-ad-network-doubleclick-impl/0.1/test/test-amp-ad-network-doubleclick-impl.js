@@ -206,7 +206,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
 
     afterEach(() =>
-        toggleExperiment(window, 'a4a-use-attr-for-format', false));
+        toggleExperiment(window, 'dc-use-attr-for-format', false));
 
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
@@ -253,24 +253,24 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       expect(impl.element.getAttribute('height')).to.equal('auto');
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
-        // With exp a4a-use-attr-for-format off, we can't test for specific
+        // With exp dc-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
         expect(url).to.match(/sz=[0-9]+x[0-9]+/));
     });
-    it('has correct format when a4a-use-attr-for-format is on', () => {
-      toggleExperiment(window, 'a4a-use-attr-for-format', true);
+    it('has correct format when dc-use-attr-for-format is on', () => {
+      toggleExperiment(window, 'dc-use-attr-for-format', true);
       new AmpAd(element).upgradeCallback();
       const width = impl.element.getAttribute('width');
       const height = impl.element.getAttribute('height');
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
-        // With exp a4a-use-attr-for-format off, we can't test for specific
+        // With exp dc-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
         expect(url).to.match(new RegExp(`sz=${width}x${height}`)));
     });
-    it('has correct format when width=auto and a4a-use-attr-for-format is on',
+    it('has correct format when width=auto and dc-use-attr-for-format is on',
         () => {
-          toggleExperiment(window, 'a4a-use-attr-for-format', true);
+          toggleExperiment(window, 'dc-use-attr-for-format', true);
           element.setAttribute('width', 'auto');
           new AmpAd(element).upgradeCallback();
           expect(impl.element.getAttribute('width')).to.equal('auto');

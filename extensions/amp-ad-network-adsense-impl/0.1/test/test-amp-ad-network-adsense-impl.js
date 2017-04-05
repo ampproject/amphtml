@@ -469,7 +469,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
   describe('#getAdUrl', () => {
 
     afterEach(() =>
-        toggleExperiment(window, 'a4a-use-attr-for-format', false));
+        toggleExperiment(window, 'as-use-attr-for-format', false));
 
 
     it('formats client properly', () => {
@@ -513,7 +513,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       expect(impl.element.getAttribute('width')).to.equal('auto');
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
-        // With exp a4a-use-attr-for-format off, we can't test for specific
+        // With exp as-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
         expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
     });
@@ -523,25 +523,25 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       expect(impl.element.getAttribute('height')).to.equal('auto');
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
-        // With exp a4a-use-attr-for-format off, we can't test for specific
+        // With exp as-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
         expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
     });
-    it('has correct format when a4a-use-attr-for-format is on', () => {
-      toggleExperiment(window, 'a4a-use-attr-for-format', true);
+    it('has correct format when as-use-attr-for-format is on', () => {
+      toggleExperiment(window, 'as-use-attr-for-format', true);
       const width = element.getAttribute('width');
       const height = element.getAttribute('height');
       new AmpAd(element).upgradeCallback();
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
-        // With exp a4a-use-attr-for-format off, we can't test for specific
+        // With exp as-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
         expect(url).to.match(new RegExp(
             `format=${width}x${height}&w=${width}&h=${height}`)));
     });
-    it('has correct format when width=auto and a4a-use-attr-for-format is on',
+    it('has correct format when width=auto and as-use-attr-for-format is on',
         () => {
-          toggleExperiment(window, 'a4a-use-attr-for-format', true);
+          toggleExperiment(window, 'as-use-attr-for-format', true);
           element.setAttribute('width', 'auto');
           new AmpAd(element).upgradeCallback();
           expect(impl.element.getAttribute('width')).to.equal('auto');

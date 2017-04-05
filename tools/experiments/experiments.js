@@ -277,11 +277,15 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
     spec: 'https://github.com/ampproject/amphtml/issues/6829',
   },
-  // When removing this experiment, be sure to remove the relevant
+  // When removing the next two experiment, be sure to remove the relevant
   // dep-check-config whitelists.
   {
-    id: 'a4a-use-attr-for-format',
-    name: 'Use slot width/height attribute for size format',
+    id: 'as-use-attr-for-format',
+    name: 'Use slot width/height attribute for AdSense size format',
+  },
+  {
+    id: 'dc-use-attr-for-format',
+    name: 'Use slot width/height attribute for DoubleClick size format',
   },
 ];
 

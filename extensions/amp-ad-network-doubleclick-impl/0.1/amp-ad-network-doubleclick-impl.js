@@ -92,7 +92,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const global = this.win;
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
-    this.size_ = isExperimentOn(this.win, 'a4a-use-attr-for-format')
+    this.size_ = isExperimentOn(this.win, 'dc-use-attr-for-format')
         && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
         ? {width, height}
         : this.getIntersectionElementLayoutBox();

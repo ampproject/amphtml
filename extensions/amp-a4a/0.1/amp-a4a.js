@@ -1157,7 +1157,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Shared functionality for cross-domain iframe-based rendering methods.
-   * @param {!Object} attributes The attributes of the iframe.
+   * @param {!Object<string, string>} attributes The attributes of the iframe.
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
