@@ -44,7 +44,7 @@ tags: {  # <amp-ooyala-player>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ooyala-player"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-ooyala-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

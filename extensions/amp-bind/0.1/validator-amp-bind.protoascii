@@ -44,7 +44,7 @@ tags: {  # <amp-state> (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-bind"
 }
 tags: {  # <amp-state>
   html_format: AMP
@@ -56,5 +56,5 @@ tags: {  # <amp-state>
     name: "id"
     mandatory: true
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-bind"
 }

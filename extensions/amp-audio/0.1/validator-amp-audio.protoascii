@@ -53,7 +53,7 @@ tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   }
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-audio"
   amp_layout {
     defines_default_height: true
     # TODO(johannes): in the longer run, defines_default_width should
@@ -73,7 +73,7 @@ tags: {  # <amp-audio> for A4A (autoplay attribute disallowed)
   requires: "amp-audio extension .js script"
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-audio"
   amp_layout {
     defines_default_height: true
     defines_default_width: true

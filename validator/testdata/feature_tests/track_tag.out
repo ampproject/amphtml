@@ -4,4 +4,4 @@ feature_tests/track_tag.html:50:4 The mandatory attribute 'srclang' is missing i
 feature_tests/track_tag.html:55:11 The mandatory attribute 'srclang' is missing in tag 'audio > track[kind=subtitles]'. [DISALLOWED_HTML]
 feature_tests/track_tag.html:56:11 The mandatory attribute 'srclang' is missing in tag 'video > track[kind=subtitles]'. [DISALLOWED_HTML]
 feature_tests/track_tag.html:59:4 The mandatory attribute 'srclang' is missing in tag 'amp-video > track[kind=subtitles]'. [AMP_TAG_PROBLEM]
-feature_tests/track_tag.html:63:7 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-video) [DEPRECATION]
+feature_tests/track_tag.html:63:7 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/media/amp-video) [DEPRECATION]

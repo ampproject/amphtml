@@ -46,7 +46,7 @@ tags: {  # <amp-font>
   attrs: { name: "on-load-add-class" }
   attrs: { name: "on-load-remove-class" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-font"
+  spec_url: "https://www.ampproject.org/docs/reference/components/presentation/amp-font"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

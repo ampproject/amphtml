@@ -1,3 +1,3 @@
 PASS
 amp-sticky-ad/0.1/test/validator-amp-sticky-ad.html:28:2 The extension 'amp-sticky-ad' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-sticky-ad) [DEPRECATION]
-amp-sticky-ad/0.1/test/validator-amp-sticky-ad.html:40:7 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DEPRECATION]
+amp-sticky-ad/0.1/test/validator-amp-sticky-ad.html:40:7 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/ads/amp-ad) [DEPRECATION]

@@ -34,7 +34,7 @@ tags: {  # <amp-image-lightbox>
   # Support dimensions / sizes / etc. like an amp-lightbox.
   attrs: { name: "controls" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-lightbox"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-image-lightbox"
   amp_layout: {
     supported_layouts: NODISPLAY
   }
