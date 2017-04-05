@@ -22,8 +22,8 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isObject, isFiniteNumber} from '../../../src/types';
 import {assertHttpsUrl} from '../../../src/url';
-import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
+import {vsyncFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 
 /** @const */
 const EXPERIMENT = 'amp-viz-vega';

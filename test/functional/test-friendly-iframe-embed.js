@@ -25,10 +25,11 @@ import {
 } from '../../src/friendly-iframe-embed';
 import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
-import {extensionsFor} from '../../src/extensions';
+import {extensionsFor} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
+import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import {resourcesForDoc} from '../../src/resources';
+import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -234,6 +235,7 @@ describe('friendly-iframe-embed', () => {
     const hostSignals = new Signals();
     host.signals = () => hostSignals;
     host.renderStarted = sandbox.spy();
+    host.getLayoutBox = () => layoutRectLtwh(10, 10, 100, 200);
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '<amp-test></amp-test>',
@@ -261,6 +263,41 @@ describe('friendly-iframe-embed', () => {
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '<amp-test></amp-test>',
+    });
+    let embed;
+    return embedPromise.then(em => {
+      embed = em;
+      return embed.whenIniLoaded();
+    }).then(() => {
+      expect(embed.signals().get('ini-load')).to.be.ok;
+      return embed.whenReady();  // `whenReady` should also be complete.
+    });
+  });
+
+  it('should await initial with host', () => {
+    const rect = layoutRectLtwh(10, 10, 100, 200);
+    const host = document.createElement('amp-host');
+    const hostSignals = new Signals();
+    host.signals = () => hostSignals;
+    host.renderStarted = function() {
+      hostSignals.signal('render-start');
+    };
+    host.getLayoutBox = () => rect;
+    resourcesMock
+        .expects('getResourcesInRect')
+        .withExactArgs(
+            sinon.match(arg => arg == iframe.contentWindow),
+            sinon.match(arg =>
+                arg.left == 10 &&
+                arg.top == 10 &&
+                arg.width == 100 &&
+                arg.height == 200))
+        .returns(Promise.resolve([]))
+        .once();
+    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+      url: 'https://acme.org/url1',
+      html: '<amp-test></amp-test>',
+      host,
     });
     let embed;
     return embedPromise.then(em => {

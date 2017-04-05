@@ -20,7 +20,7 @@ import {
   ampWorkerForTesting,
 } from '../../../src/web-worker/amp-worker';
 import {installXhrService} from '../../../src/service/xhr-impl';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 import {toggleExperiment} from '../../../src/experiments';
 import * as sinon from 'sinon';
 

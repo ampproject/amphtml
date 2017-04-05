@@ -22,6 +22,7 @@ import {
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
+import {extensionsFor} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
@@ -67,7 +68,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           return ['google'];
         });
     element = createAdsenseImplElement({
-      'data-ad-client': 'adsense',
+      'data-ad-client': 'ca-adsense',
       'width': '320',
       'height': '50',
       'data-experiment-id': '8675309',
@@ -89,7 +90,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
 
     const invariantParams = {
-      'client': 'adsense',
+      'client': 'ca-adsense',
       'format': '320x50',
       'w': '320',
       'h': '50',
@@ -114,7 +115,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
             AmpAdNetworkAdsenseImpl);
         const elem = createAdsenseImplElement({
-          'data-ad-client': 'adsense',
+          'data-ad-client': 'ca-adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
@@ -170,7 +171,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         });
       });
     });
-    it('should contain amp_ct', () => {
+    it('should contain act', () => {
       return createIframePromise().then(fixture => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
@@ -182,7 +183,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         ampStickyAd.appendChild(element);
         fixture.doc.body.appendChild(ampStickyAd);
         return impl.getAdUrl().then(adUrl => {
-          expect(adUrl.indexOf('amp_ct=AMP-STICKY-AD') >= 0).to.be.true;
+          expect(adUrl.indexOf('act=sa') >= 0).to.be.true;
         });
       });
     });
@@ -196,19 +197,19 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
             AmpAdNetworkAdsenseImpl);
         const elem1 = createAdsenseImplElement({
-          'data-ad-client': 'adsense',
+          'data-ad-client': 'ca-adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
         }, fixture.doc, 'amp-a4a');
         const elem2 = createAdsenseImplElement({
-          'data-ad-client': 'adsense',
+          'data-ad-client': 'ca-adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
         }, fixture.doc, 'amp-a4a');
         const elem3 = createAdsenseImplElement({
-          'data-ad-client': 'not-adsense',
+          'data-ad-client': 'ca-not-adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
@@ -250,19 +251,18 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       expect(impl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      element = createAdsenseImplElement({'data-ad-client': 'adsense'},
+      element = createAdsenseImplElement({'data-ad-client': 'ca-adsense'},
           document, 'amp-ad-network-adsense-impl');
       impl = new AmpAdNetworkAdsenseImpl(element);
       expect(impl.isValidElement()).to.be.false;
     });
-    it.skip('should be NOT valid (missing ad client)', () => {
-      // TODO(taymonbeal): reenable this test after clarifying validation
+    it('should be NOT valid (missing ad client)', () => {
       element.setAttribute('data-ad-client', '');
       element.setAttribute('type', 'adsense');
       expect(impl.isValidElement()).to.be.false;
     });
     it('should be valid (amp-embed)', () => {
-      element = createAdsenseImplElement({'data-ad-client': 'adsense'},
+      element = createAdsenseImplElement({'data-ad-client': 'ca-adsense'},
           document, 'amp-embed');
       impl = new AmpAdNetworkAdsenseImpl(element);
       expect(impl.isValidElement()).to.be.true;
@@ -270,20 +270,42 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
   });
 
   describe('#extractCreativeAndSignature', () => {
+    let loadExtensionSpy;
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+          'layout': 'fixed',
+        });
+        impl = new AmpAdNetworkAdsenseImpl(element);
+        installExtensionsService(impl.win);
+        const extensions = extensionsFor(impl.win);
+        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+      });
+    });
+
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(impl.extractCreativeAndSignature(
+        return impl.extractCreativeAndSignature(
           creative,
           {
             get: function() { return undefined; },
             has: function() { return false; },
-          })).to.eventually.deep.equal(
-                {creative, signature: null, size: null});
+          }).then(adResponse => {
+            expect(adResponse).to.deep.equal(
+                  {creative, signature: null, size: null});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+          });
       });
     });
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(impl.extractCreativeAndSignature(
+        return impl.extractCreativeAndSignature(
           creative,
           {
             get: function(name) {
@@ -292,10 +314,12 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             has: function(name) {
               return name === 'X-AmpAdSignature';
             },
-          })).to.eventually.deep.equal(
-              {creative,
-               signature: base64UrlDecodeToBytes('AQAB'),
+          }).then(adResponse => {
+            expect(adResponse).to.deep.equal(
+              {creative, signature: base64UrlDecodeToBytes('AQAB'),
                size: null});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+          });
       });
     });
     it('with analytics', () => {
@@ -325,14 +349,13 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 size: null,
               });
             expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
           });
       });
     });
   });
 
   describe('#onCreativeRender', () => {
-    let loadExtensionSpy;
-
     beforeEach(() => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -343,16 +366,14 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'type': 'adsense',
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
-        const extensions = installExtensionsService(impl.win);
-        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
 
     it('injects amp analytics', () => {
       const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       impl.ampAnalyticsConfig = {urls};
+      impl.responseHeaders_ = {get: () => 'qqid_string'};
       impl.onCreativeRender(false);
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
       // Exact format of amp-analytics element covered in
@@ -363,16 +384,101 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
   });
 
+  describe('centering', () => {
+    /**
+     * Creates an iframe promise, and instantiates element and impl, adding the
+     * former to the document of the iframe.
+     * @param {{width, height, type}} config
+     * @return The iframe promise.
+     */
+    function createImplTag(config) {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
+        // Used to test styling which is targetted at first iframe child of
+        // amp-ad.
+        const iframe = fixture.doc.createElement('iframe');
+        element.appendChild(iframe);
+        document.body.appendChild(element);
+        impl = new AmpAdNetworkAdsenseImpl(element);
+        return fixture;
+      });
+    }
+
+    function verifyCss(win, elem) {
+      const iframe = elem.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const style = win.getComputedStyle(iframe);
+      expect(style.top).to.equal('50%');
+      expect(style.left).to.equal('50%');
+      expect(style.transform).to.equal('matrix(1, 0, 0, 1, -150, -75)');
+    }
+
+    afterEach(() => document.body.removeChild(impl.element));
+
+    it('centers iframe in slot when height && width', () => {
+      return createImplTag({
+        width: '300',
+        height: '150',
+        type: 'adsense',
+      }).then(fixture => {
+        expect(impl.element.getAttribute('width')).to.equal('300');
+        expect(impl.element.getAttribute('height')).to.equal('150');
+        verifyCss(fixture.win, impl.element);
+      });
+    });
+    it('centers iframe in slot when !height && !width', () => {
+      return createImplTag({
+        type: 'adsense',
+        layout: 'fixed',
+      }).then(fixture => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.be.null;
+        verifyCss(fixture.win, impl.element);
+      });
+    });
+    it('centers iframe in slot when !height && width', () => {
+      return createImplTag({
+        width: '300',
+        type: 'adsense',
+        layout: 'fixed',
+      }).then(fixture => {
+        expect(impl.element.getAttribute('width')).to.equal('300');
+        expect(impl.element.getAttribute('height')).to.be.null;
+        verifyCss(fixture.win, impl.element);
+      });
+    });
+    it('centers iframe in slot when height && !width', () => {
+      return createImplTag({
+        height: '150',
+        type: 'adsense',
+        layout: 'fixed',
+      }).then(fixture => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.equal('150');
+        verifyCss(fixture.win, impl.element);
+      });
+    });
+  });
+
   describe('#getAdUrl', () => {
+    it('formats client properly', () => {
+      element.setAttribute('data-ad-client', 'SoMeClient');
+      new AmpAd(element).upgradeCallback();
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/\\?client=ca-someclient/);
+      });
+    });
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
-          '\\?client=adsense&format=0x0&w=0&h=0&adtest=false' +
-          '&adk=[0-9]+&bc=1&pv=1&vis=1&wgl=1' +
-          '(&asnt=[0-9]+-[0-9]+)?' +
+          '\\?client=ca-adsense&format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+' +
+          '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
+          '(&asnt=[0-9]+-[0-9]+)?(&dff=(?:%22.*?%22|\'.*?\'))?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           // Depending on how the test is run, it can get different
@@ -383,6 +489,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +
           '&isw=[0-9]+&ish=[0-9]+' +
+          '&ea=[0-9]+&pfx=(1|0)' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +

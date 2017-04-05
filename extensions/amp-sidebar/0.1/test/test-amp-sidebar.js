@@ -17,8 +17,8 @@
 
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {platformFor} from '../../../../src/platform';
-import {timerFor} from '../../../../src/timer';
+import {platformFor} from '../../../../src/services';
+import {timerFor} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import * as sinon from 'sinon';
 import '../amp-sidebar';
@@ -96,7 +96,7 @@ describe('amp-sidebar', () => {
         callback();
       });
       impl.open_();
-      expect(iframe.doc.querySelectorAll('.-amp-sidebar-mask').length)
+      expect(iframe.doc.querySelectorAll('.i-amphtml-sidebar-mask').length)
           .to.equal(1);
     });
   });

@@ -22,14 +22,22 @@ process.end.NODE_ENV;
 // Exposed to ads.
 window.context = {};
 window.context.sentinel;
-window.context.amp3pSentinel;
 window.context.clientId;
 window.context.initialIntersection;
 window.context.sourceUrl;
 window.context.experimentToggles;
+window.context.master;
+window.context.isMaster;
 
 // Service Holder
 window.services;
+
+// Safeframe
+// TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
+/* @type {?Object} */
+window.sf_ = {};
+/* @type {?Object} */
+window.sf_.cfg;
 
 // Exposed to custom ad iframes.
 /* @type {!Function} */
@@ -47,6 +55,8 @@ window.AMP_CONFIG.thirdPartyFrameHost;
 window.AMP_CONFIG.thirdPartyFrameRegex;
 window.AMP_CONFIG.cdnUrl;
 window.AMP_CONFIG.errorReportingUrl;
+
+window.AMP_CONTEXT_DATA;
 
 // amp-viz-vega related externs.
 /**
@@ -104,7 +114,9 @@ data.pageHidden;
 data.changes;
 data._context;
 data.inViewport;
-
+data.numposts;
+data.orderBy;
+data.colorscheme;
 
 // 3p code
 var twttr;
@@ -115,6 +127,9 @@ twttr.widgets.createTweet;
 
 var FB;
 FB.init;
+
+var gist;
+gist.gistid;
 
 // Validator
 var amp;

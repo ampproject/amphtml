@@ -15,20 +15,19 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {platformFor} from '../../../../src/platform';
-import {vsyncFor} from '../../../../src/vsync';
+import {platformFor} from '../../../../src/services';
+import {vsyncFor} from '../../../../src/services';
 import {
     AmpAppBanner,
     AbstractAppBanner,
     AmpIosAppBanner,
     AmpAndroidAppBanner,
 } from '../amp-app-banner';
-import {xhrFor} from '../../../../src/xhr';
-import {timerFor} from '../../../../src/timer';
+import {xhrFor} from '../../../../src/services';
 import '../../../amp-analytics/0.1/amp-analytics';
 import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {viewerForDoc} from '../../../../src/viewer';
+import {viewerForDoc} from '../../../../src/services';
 
 describe('amp-app-banner', () => {
 
@@ -115,6 +114,7 @@ describe('amp-app-banner', () => {
 
       const banner = iframe.doc.createElement('amp-app-banner');
       banner.setAttribute('layout', 'nodisplay');
+      banner.getAmpDoc = () => iframe.ampdoc;
       if (!config.noOpenButton) {
         const openButton = iframe.doc.createElement('button');
         openButton.setAttribute('open-button', '');
@@ -218,26 +218,22 @@ describe('amp-app-banner', () => {
   describe('Choosing platform', () => {
     it('should upgrade to AmpIosAppBanner on iOS', () => {
       isIos = true;
-      return getTestFrame().then(() => {
-        const banner = new AmpAppBanner(document.createElement('div'));
-        const newInstance = banner.upgradeCallback();
-        expect(newInstance instanceof AmpIosAppBanner).to.be.true;
+      return getAppBanner({meta, manifest}).then(banner => {
+        expect(banner.implementation_).to.be.instanceof(AmpIosAppBanner);
       });
     });
 
     it('should upgrade to AmpAndroidAppBanner on Android', () => {
       isAndroid = true;
-      return getTestFrame().then(() => {
-        const banner = new AmpAppBanner(document.createElement('div'));
-        const newInstance = banner.upgradeCallback();
-        expect(newInstance instanceof AmpAndroidAppBanner).to.be.true;
+      return getAppBanner({meta, manifest}).then(banner => {
+        expect(banner.implementation_).to.be.instanceof(AmpAndroidAppBanner);
       });
     });
 
     it('should not upgrade if platform not supported', () => {
-      return getTestFrame().then(() => {
-        const banner = new AmpAppBanner(document.createElement('div'));
-        expect(banner.upgradeCallback()).to.be.null;
+      return getAppBanner({meta, manifest}).then(banner => {
+        expect(banner.implementation_).to.be.instanceof(AmpAppBanner);
+        expect(banner.implementation_.upgradeCallback()).to.be.null;
       });
     });
   });
@@ -285,11 +281,11 @@ describe('amp-app-banner', () => {
       });
     });
 
-    it('should remove banner if safari and embedded', () => {
+    it('should show banner if safari and embedded', () => {
       isSafari = true;
       isEmbedded = true;
-      return getAppBanner().then(banner => {
-        expect(banner.parentElement).to.be.null;
+      return getAppBanner({meta}).then(banner => {
+        expect(banner.parentElement).to.not.be.null;
       });
     });
 
@@ -352,7 +348,6 @@ describe('amp-app-banner', () => {
   describe('Abstract App Banner', () => {
     it('should setup click listener', () => {
       return createIframePromise(true).then(iframe => {
-        const win = iframe.win;
         const doc = iframe.doc;
         const element = doc.createElement('div');
         doc.body.appendChild(element);
@@ -363,16 +358,6 @@ describe('amp-app-banner', () => {
         const banner = new AbstractAppBanner(element);
         banner.setupOpenButton_(openButton, 'open-button', 'install-link');
         expect(openButton.addEventListener).to.have.been.calledWith('click');
-        win.open = sandbox.spy();
-        sandbox.stub(banner, 'redirectTopLocation_', () => {});
-        banner.openButtonClicked_('open-button', 'install-link');
-        expect(win.open).to.have.been.calledWith('open-button', '_top');
-        return timerFor(iframe.win).delay(() => {
-          expect(banner.redirectTopLocation_.called)
-              .to.be.true;
-          expect(banner.redirectTopLocation_)
-              .to.have.been.calledWith('install-link');
-        }, 2000);
       });
     });
 
@@ -390,7 +375,7 @@ describe('amp-app-banner', () => {
         banner.addDismissButton_();
 
         const bannerTop = element.querySelector(
-            'i-amp-app-banner-top-padding');
+            'i-amphtml-app-banner-top-padding');
         expect(bannerTop).to.exist;
         const dismissBtn = element.querySelector(
             '.amp-app-banner-dismiss-button');

@@ -17,8 +17,8 @@
 import {fromClass, getServiceForDoc} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
-import {timerFor} from '../timer';
-import {viewerForDoc} from '../viewer';
+import {timerFor} from '../services';
+import {viewerForDoc} from '../services';
 
 
 /** @private @const */

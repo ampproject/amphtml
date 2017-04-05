@@ -83,6 +83,14 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
 
+    it('should not enable a4a if useSameDomainRenderingUntilDeprecated', () => {
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('useSameDomainRenderingUntilDeprecated', 'true');
+      testFixture.doc.body.appendChild(elem);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+    });
+
     [-1, 0, 1, 2].forEach(expFlagValue => {
       it(`exp flag=${expFlagValue} should set eid attribute`, () => {
         mockWin.location = parseUrl(

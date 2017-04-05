@@ -46,17 +46,33 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src = this.getIframeSrc_();
+    this.applyFillContent(iframe);
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getIframeSrc_() {
     const account = user().assert(
         this.element.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
         this.element);
     const playerid = (this.element.getAttribute('data-player') ||
-      this.element.getAttribute('data-player-id') ||
-      'default');
+        this.element.getAttribute('data-player-id') ||
+        'default');
     const embed = (this.element.getAttribute('data-embed') || 'default');
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    let src = `https://players.brightcove.net/${encodeURIComponent(account)}/${encodeURIComponent(playerid)}_${encodeURIComponent(embed)}/index.html`;
 
+    let src = `https://players.brightcove.net/${encodeURIComponent(account)}`
+        + `/${encodeURIComponent(playerid)}`
+        + `_${encodeURIComponent(embed)}/index.html`;
     if (this.element.getAttribute('data-playlist-id')) {
       src += '?playlistId=';
       src += this.encodeId_(this.element.getAttribute('data-playlist-id'));
@@ -64,16 +80,25 @@ class AmpBrightcove extends AMP.BaseElement {
       src += '?videoId=';
       src += this.encodeId_(this.element.getAttribute('data-video-id'));
     }
-
     // Pass through data-param-* attributes as params for plugin use
     src = addParamsToUrl(src, getDataParamsFromAttributes(this.element));
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = src;
-    this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
+    return src;
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const account = mutations['data-account'];
+    const playerId = mutations['data-player'] || mutations['data-player-id'];
+    const embed = mutations['data-embed'];
+    const playlistId = mutations['data-playlist-id'];
+    const videoId = mutations['data-video-id'];
+    if (account !== undefined || playerId !== undefined
+        || playlistId !== undefined || embed !== undefined
+        || videoId !== undefined) {
+      if (this.iframe_) {
+        this.iframe_.src = this.getIframeSrc_();
+      }
+    }
   }
 
   /** @private */

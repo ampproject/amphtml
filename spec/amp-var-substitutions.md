@@ -18,18 +18,105 @@ limitations under the License.
 
 ## Overview
 
-Some components such as [`amp-pixel`](../builtins/amp-pixel.md), 
-[`amp-list`](../extensions/amp-list/amp-list.md) and [`amp-analytics`](../extensions/amp-analytics/amp-analytics.md) allow variables to be substituted in the relevant URLs. AMP provides a number of standard variable substitutions and allows each component to add their own. The rest of this document talks about the variables supported by the platform.
+Various AMP features allow variables to be used inside of strings and substituted with the corresponding actual values. For example, `amp-pixel` allows expressions like this:
 
-Anchor href's that are the target (or have a child who is the target) of a click
-are synchronously expanded.  Variables below that are asynchronous by nature
-are replaced with empty string to ensure page navigation is not delayed.  If
-the navigation is prevented, the href is still updated however later clicks
-will still update to the most current values of the variables.  Note that some
-variables will not allow for expansion for A4A creatives.  Specifics will be
-addressed at a later time.
+``` text
+<amp-pixel src="https://foo.com/pixel?RANDOM"></amp-pixel>
+```
 
-## Variables 
+`RANDOM` gets resolved to a randomly generated value and AMP replaces it in the request string:
+
+``` text
+https://foo.com/pixel?0.8390278471201
+```
+
+The following table lists the features that enable variable substitutions, as well as several properties that govern usage:
+
+<table>
+  <tr>
+    <th width="25%"><strong>AMP Feature</strong></th>
+    <th width="25%"><strong>URL limitations</strong></th>
+    <th width="25%"><strong>Requires per-use opt-in?</strong></th>
+    <th width="25%"><strong>Restrictions</strong></th>
+  </tr>
+  <tr>
+    <td width="25%"><code>amp-analytics</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md#vars">Detailed documentation</a></td>
+    <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
+    <td width="25%">No</td>
+    <td width="25%">None</td>
+  </tr>
+  <tr>
+    <td width="25%"><code>amp-list</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md#substitutions">Detailed documentation</a></td>
+    <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
+    <td width="25%">No</td>
+    <td width="25%">None</td>
+  </tr>
+  <tr>
+    <td width="25%"><code>amp-pixel</code><br><a href="https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md#substitutions">Detailed documentation</a></td>
+    <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
+    <td width="25%">No</td>
+    <td width="25%">None</td>
+  </tr>
+  <tr>
+    <td width="25%">Links (<code>&lt;a&gt;</code>)</td>
+    <td width="25%">
+      HTTPS URL and URL matching either:
+      <ul>
+        <li>Page’s source origin</li>
+        <li>Page’s canonical origin</li>
+        <li>An origin whitelisted via the <code>amp-link-variable-allowed-origin</code> <code>meta</code> tag</li>
+      </ul>
+    </td>
+    <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
+    <td width="25%">Only these variables are supported: <code>CLIENT_ID</code> and <code>QUERY_PARAM</code>.<br>See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes.</td>
+  </tr>
+  <tr>
+    <td width="25%">Form inputs<br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#variable-substitutions">Detailed documentation</a></td>
+    <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
+    <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
+    <td width="25%">See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes.</td>
+  </tr>
+</table>
+
+### Substitution timing
+
+Variable substitutions that are dependent on a user action like links and form inputs may not occur if the value has not yet been computed.
+
+Please take note of the following scenarios:
+* `CLIENT_ID` is available once it has been computed. This can be accomplished through use by another feature such as `amp-analytics` or `amp-pixel`. Note that `CLIENT_ID` may also be blocked on an `amp-user-notification` that is pending acceptance.
+* Asynchronously resolved variables are not available
+
+## Variable substitution in links
+
+Variable substitution is available in links, i.e. `<a href="..."></a>`.
+
+Only these variables are supported:
+* `CLIENT_ID`
+* `QUERY_PARAM(argument)`
+
+### Per-use opt-in
+
+Link substitution requires per-use opt-in as an added security measure and to affirm the intention to use variable substitution. This is done by specifying an additional attribute called `data-amp-replace` with a string value containing a comma-delimited listing of the desired variables to substitute. An example is below.
+
+``` text
+<a href="https://example.com?client_id=CLIENT_ID(bar)&abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID,QUERY_PARAM">Go to my site</a>
+```
+
+### Whitelisted domains for link substitution
+
+Link substitutions are restricted and will only be fulfilled for URLs matching:
+
+* The page’s source origin
+* The page’s canonical origin
+* A whitelisted origin
+
+To whitelist an origin, include a `amp-link-variable-allowed-origin` `meta` tag in the `head` of your document. To specify multiple domains, separate each domain with a space.
+
+``` text
+<meta name="amp-link-variable-allowed-origin" content="https://example.com https://example.org">
+```
+
+## Variables
 
 The tables below list the available URL variables grouped by type of usage. Further down in this document, are [descriptions](#variable-descriptions) of each of the variables, along with example usages.
 
@@ -61,7 +148,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Title](#title)                     | `TITLE`           | `${title}` |
 | [Viewer](#viewer)                   | `VIEWER`          | `${viewer}` |
 
-### Performance 
+### Performance
 
 | Variable Name  | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
@@ -126,7 +213,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Total Time](#total-time) | N/A | `${totalTime}` |
 | [Total Visible Time](#total-visible-time) | N/A | `${totalVisibleTime}` |
 
-### Miscellaneous 
+### Miscellaneous
 
 |  Variable Name | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
@@ -204,7 +291,7 @@ Provides the screen height in pixels available for the page rendering. This valu
   ```
 * **amp-analytics variable**: `${availableScreenHeight}`
   * Example value: `1480`
-  
+
 #### Available Screen Width
 
 Provides the screen width in pixels available for the page rendering. This value can be slightly more or less than the actual viewport height due to various browser quirks.
@@ -366,7 +453,7 @@ Provides the time the page takes to fire the `DOMContentLoaded` event from the t
 * **amp-analytics variable**: `${contentLoadTime}`
   * Example value: `40`
 
-#### Counter 
+#### Counter
 
 Use `COUNTER(name)` to generate an index for the given request. Counts start at 1 and are per given `name`.
 
@@ -459,14 +546,14 @@ Provides all the parameters that are defined in the [`extraUrlParams`](../extens
 
 #### First Seen Time
 
-Provides the time when at least 1px of the element is on the screen for the first time since the trigger is registered by `amp-analytics`.
+Provides the time when at least 1px of the element is on the screen for the first time since the page has become visible.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${firstSeenTime}`
 
 #### First Visible Time
 
-Provides the time when the element met visibility conditions for the first time since the trigger is registered by `amp-analytics`.
+Provides the time when the element met visibility conditions for the first time since the page has become visible.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${firstVisibleTime}`
@@ -480,21 +567,21 @@ Provides the horizontal scroll boundary that triggered a scroll event. This vari
 
 #### Last Seen Time
 
-Provides the time when at least 1px of the element is on the screen for the last time since javascript load.
+Provides the time when at least 1px of the element is on the screen for the last time since the page has become visible.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${lastSeenTime}`
 
 #### Last Visible Time
 
-Provides the time when the element met visibility conditions for the last time since javascript load.
+Provides the time when the element met visibility conditions for the last time since the page has become visible.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${lastVisibleTime}`
 
 #### Load Time Visibility
 
-Provides the percentage of element visible in the viewport at load time. This variable assumes that the page is scrolled to top.
+Provides the percentage of element visible in the viewport when the page has first become visible. This variable assumes that the page is scrolled to top.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${loadTimeVisibility}`
@@ -682,7 +769,7 @@ Provides the screen height in pixels. The value is retrieved from `window.screen
   ```
 * **amp-analytics variable**: `${screenHeight}`
   * Example value: `1600`
-  
+
 #### Screen Width
 
 Provides the screen height in pixels. The value is retrieved from `window.screen.width`.
@@ -730,7 +817,7 @@ Provides the number of pixels that the user has scrolled from top.
   ```
 * **amp-analytics variable**: `${scrollTop}`
   * Example value: `0`
-  
+
 #### Scroll Width
 
 Provides the total width of the page in pixels.
@@ -868,7 +955,7 @@ Provides the total time (in seconds) the user has been engaged with the page sin
 
 #### Total Time
 
-Provides the total time from the time page was loaded to the time a ping was sent out. The value is calculated from the time document became interactive.
+Provides the total time from the time page has become visible to the time a ping was sent out.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${totalTime}`
@@ -909,7 +996,7 @@ Provides the viewport height in pixels available for the page rendering. In cont
   <amp-pixel src="https://foo.com/pixel?viewportHeight=VIEWPORT_HEIGHT"></amp-pixel>
   ```
 * **amp-analytics variable**: `${viewportHeight}`
-  * Example value: `1600` 
+  * Example value: `1600`
 
 #### Viewport Width
 
@@ -921,4 +1008,4 @@ Provides the viewport width in pixels available for the page rendering. In contr
   <amp-pixel src="https://foo.com/pixel?viewportHeight=VIEWPORT_HEIGHT"></amp-pixel>
   ```
 * **amp-analytics variable**: `${viewportWidth}`
-  * Example value: `2560` 
+  * Example value: `2560`

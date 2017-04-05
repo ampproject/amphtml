@@ -60,8 +60,6 @@ export class AmpAnim extends AMP.BaseElement {
     st.toggle(this.img_, !this.getPlaceholder());
 
     this.element.appendChild(this.img_);
-
-    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
@@ -71,6 +69,9 @@ export class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!this.srcset_) {
+      this.srcset_ = srcsetFromElement(this.element);
+    }
     return this.updateImageSrc_();
   }
 
