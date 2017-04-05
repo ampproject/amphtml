@@ -20,6 +20,15 @@ import {writeScript, loadScript, validateData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
+/** @type {{nxasync:string}} */
+/** @type {{nxv:string}} */
+/** @type {{nxsite:string}} */
+/** @type {{nxid:string}} */
+/** @type {{nxscript:string}} */
+/** @type {{nxkey:string}} */
+/** @type {{nxunit:string}} */
+/** @type {{nxwidth:string}} */
+/** @type {{nxheight:string}} */
 
 export function netletix(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
@@ -36,6 +45,20 @@ export function netletix(global, data) {
 
   const rand = Math.round(Math.random() * 100000000);
   const ls = 'https://call.adadapter.netzathleten-media.de';
+  const nxkey = (data.nxkey ? data.nxkey : 'default');
+  const nxunit = (data.nxunit ? data.nxunit : 'default');
+  const nxwidth = (data.nxwidth ? data.nxwidth : 'fluid');
+  const nxheight = (data.nxheight ? data.nxheight : 'fluid');
+  const nxv = (data.nxv ? data.nxv : '0002');
+  const nxsite = (data.nxsite ? data.nxsite : 'none');
+  const url = ls + '/pb/'
+    + encodeURIComponent(nxkey)
+    + '?unit=' + encodeURIComponent(nxunit)
+    + '&width=' + encodeURIComponent(nxwidth)
+    + '&height=' + encodeURIComponent(nxheight)
+    + '&v=' + encodeURIComponent(nxv)
+    + '&site=' + encodeURIComponent(nxsite)
+    + '&ord=' + rand;
 
   console.group('NETLETIX AMP:');
 
@@ -50,8 +73,8 @@ export function netletix(global, data) {
             'height': event.data.height,
           };
           global.context.renderStart(renderconfig);
-          if (event.data.width != data.nxwidth ||
-              event.data.height != data.nxheight) {
+          if (event.data.width != nxwidth ||
+              event.data.height != nxheight) {
             console.log('Requesting resize to: %s x %s.',
                         event.data.width,
                         event.data.height);
@@ -82,16 +105,7 @@ export function netletix(global, data) {
       console.log('Resize failed: %s x %s',requestedHeight, requestedWidth);
     }
   );
-  const nxv = (data.nxv ? data.nxv : '0002');
-  const nxsite = (data.nxsite ? data.nxsite : '');
-  const url = ls + '/pb/'
-    + encodeURIComponent(data.nxkey)
-    + '?unit=' + encodeURIComponent(data.nxunit)
-    + '&width=' + encodeURIComponent(data.nxwidth)
-    + '&height=' + encodeURIComponent(data.nxheight)
-    + '&v=' + encodeURIComponent(nxv)
-    + '&site=' + encodeURIComponent(nxsite)
-    + '&ord=' + rand;
+
 
   if (data.async && data.async.toLowerCase() === 'true') {
     loadScript(global, url);
