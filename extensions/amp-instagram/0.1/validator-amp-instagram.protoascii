@@ -38,7 +38,7 @@ tags: {  # <amp-instagram>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-instagram"
+  spec_url: "https://www.ampproject.org/docs/reference/components/social/amp-instagram"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
