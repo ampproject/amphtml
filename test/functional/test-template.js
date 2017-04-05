@@ -19,8 +19,8 @@ import {
   installTemplatesService,
   registerExtendedTemplate,
 } from '../../src/service/template-impl';
-import {templatesFor} from '../../src/services';
 import {resetServiceForTesting} from '../../src/service';
+import {templatesFor} from '../../src/services';
 
 describes.fakeWin('Template', {}, env => {
   let templates;
