@@ -75,10 +75,13 @@ export class AmpPixel extends BaseElement {
             // to scrub the referrer.
             if(image.referrerPolicy === undefined &&
                 referrerPolicy == 'no-referrer') {
-              this.element.appendChild(createElementWithAttributes(
+              const iframe = createElementWithAttributes(
                   this.win.document, 'iframe', {
                     src: `javascript: '<img src="${src}">'`,
-                  }));
+                  });
+              this.element.appendChild(iframe);
+              dev().info(TAG, 'pixel triggered via iframe: ', src);
+              return iframe;
             } else {
               if(referrerPolicy) {
                 image.referrerPolicy = referrerPolicy;
@@ -87,8 +90,9 @@ export class AmpPixel extends BaseElement {
                 this.element.appendChild(image);
               }
               image.src = src;
+              dev().info(TAG, 'pixel triggered: ', src);
+              return image;
             }
-            dev().info(TAG, 'pixel triggered: ', src);
           });
     });
   }

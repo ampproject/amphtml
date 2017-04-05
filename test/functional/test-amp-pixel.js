@@ -116,6 +116,21 @@ describes.realWin('amp-pixel', {amp: true}, env => {
           'https://pubads.g.doubleclick.net/activity;r=111');
     });
   });
+
+  it('should respect referrerpolicy=no-referrer', () => {
+    const url = 'https://pubads.g.doubleclick.net/activity;';
+    pixel.setAttribute('referrerpolicy', 'no-referrer');
+    return trigger(url).then(() => {
+      if (new Image().referrerPolicy === undefined) {
+        const iframe = pixel.querySelector('iframe');
+        expect(iframe.src).to.contain(url);
+      } else {
+        const img = pixel.querySelector('img');
+        expect(img.referrerPolicy).to.equal('no-referrer');
+        expect(img.src).to.equal(url);
+      }
+    });
+  });
 });
 
 
