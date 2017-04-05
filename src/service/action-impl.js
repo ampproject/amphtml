@@ -174,6 +174,12 @@ export class ActionService {
     }
   }
 
+  /**
+   * Generate custom event from browser `change` event.
+   * @param {!Event} event A `change` event.
+   * @return {!Event} A custom event with a details property containing the
+   *    relevant information for the change that generated the initial event.
+   */
   getChangeDetails_(event) {
     const details = {};
     const target = event.target;
