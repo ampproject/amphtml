@@ -31,10 +31,10 @@ import {
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
-import {platformFor} from '../../src/platform';
+import {platformFor} from '../../src/services';
 import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
-import {extensionsFor} from '../../src/extensions';
+import {extensionsFor} from '../../src/services';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';

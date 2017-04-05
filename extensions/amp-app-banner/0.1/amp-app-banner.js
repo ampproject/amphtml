@@ -16,15 +16,15 @@
 
 import {Layout} from '../../../src/layout';
 import {user, dev, rethrowAsync} from '../../../src/log';
-import {platformFor} from '../../../src/platform';
-import {viewerForDoc} from '../../../src/viewer';
+import {platformFor} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {documentInfoForDoc} from '../../../src/document-info';
-import {xhrFor} from '../../../src/xhr';
+import {documentInfoForDoc} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {removeElement, openWindowDialog} from '../../../src/dom';
-import {storageForDoc} from '../../../src/storage';
-import {timerFor} from '../../../src/timer';
+import {storageForDoc} from '../../../src/services';
+import {timerFor} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {isProxyOrigin} from '../../../src/url';

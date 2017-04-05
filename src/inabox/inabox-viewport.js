@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {viewerForDoc} from '../viewer';
+import {viewerForDoc} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
 import {getServiceForDoc} from '../service';
-import {resourcesForDoc} from '../../src/resources';
+import {resourcesForDoc} from '../services';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
@@ -176,6 +176,7 @@ export class ViewportBindingInabox {
   /** @override */ setScrollTop() {/* no-op */}
   /** @override */ getScrollWidth() {return 0;}
   /** @override */ getScrollHeight() {return 0;}
+  /** @override */ getBorderTop() {return 0;}
   /** @override */ requiresFixedLayerTransfer() {return false;}
 }
 

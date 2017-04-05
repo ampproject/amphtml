@@ -19,8 +19,8 @@ import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {dev} from '../../../src/log';
 import {serializeQueryString} from '../../../src/url';
 import {getTimingDataSync} from '../../../src/service/variable-source';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
-import {viewerForDoc} from '../../../src/viewer';
+import {urlReplacementsForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or

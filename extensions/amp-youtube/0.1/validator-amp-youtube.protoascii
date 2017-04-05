@@ -38,6 +38,8 @@ tags: {  # <amp-youtube>
     mandatory: true
     value_regex: "[^=/?:]+"
   }
+  # <amp-bind>
+  attrs: { name: "[data-videoid]" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-youtube"
   amp_layout: {

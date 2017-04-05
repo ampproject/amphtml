@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {cidForDocOrNull} from './cid';
+import {cidForDocOrNull, timerFor} from './services';
 import {adConfig} from '../ads/_config';
 import {dev} from '../src/log';
-import {timerFor} from '../src/timer';
 
 /**
  * @param {AMP.BaseElement} adElement

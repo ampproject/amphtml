@@ -39,10 +39,10 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
-import {extensionsFor} from '../../../src/extensions';
+import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {computedStyle} from '../../../src/style';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
 
 /** @const {string} */
@@ -102,6 +102,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
+
+    /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
+    this.responseHeaders_ = null;
   }
 
   /** @override */
@@ -182,6 +185,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig =
       extractAmpAnalyticsConfig(responseHeaders, this.extensions_);
+    this.responseHeaders_ = responseHeaders;
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
@@ -244,7 +248,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
-    injectActiveViewAmpAnalyticsElement(this, this.ampAnalyticsConfig);
+    injectActiveViewAmpAnalyticsElement(
+        this, this.ampAnalyticsConfig, this.responseHeaders_);
   }
 }
 

@@ -15,8 +15,8 @@
  */
 
 import {Observable} from './observable';
-import {getService, registerServiceBuilder} from './service';
 import {dev} from './log';
+import {getService, registerServiceBuilder} from './service';
 import {listenOnce, listenOncePromise} from './event-helper';
 
 

@@ -21,7 +21,7 @@ import {ancestorElements} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
