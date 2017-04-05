@@ -243,6 +243,12 @@ Type attribute value: `piano`
 
 Adds support for Piano.  Configuration details can be found at [vx.piano.io](http://vx.piano.io/javascript-tracking-amp).
 
+### Rakam
+
+Type attribute value: `rakam`
+
+Adds support for Rakam.io. Configuration details can be found at [Rakam Documentation](https://rakam.io/integration/amp).
+
 ### Quantcast Measurement
 
 Type attribute value: `quantcast`
@@ -285,12 +291,6 @@ Adds support for Webtrekk. Configuration details can be found at [supportcenter.
 Type attribute value: `metrika`
 
 Adds support for Yandex Metrica.  Configuration details can be found at [Yandex Support](https://yandex.com/support/metrica/code/install-counter-amp.xml).
-
-### Rakam
-
-Type attribute value: `rakam`
-
-Adds support for Rakam.io. Configuration details can be found at [Rakam Documentation](https://rakam.io/integration/amp).
 
 ## Attributes
 
