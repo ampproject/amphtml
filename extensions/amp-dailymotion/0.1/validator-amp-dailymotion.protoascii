@@ -65,7 +65,7 @@ tags: {  # <amp-dailymotion>
     value_regex_casei: "[a-z0-9]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-dailymotion"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-dailymotion"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
