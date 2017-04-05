@@ -21,7 +21,6 @@ import {
   getServicePromiseForDoc,
   getExistingServiceForWindowOrNull,
   getExistingServiceForDocInEmbedScope,
-  getExistingServiceForWindow,
 } from './service';
 import {
   getElementService,
@@ -208,7 +207,7 @@ export function storageForDoc(nodeOrDoc) {
  */
 export function templatesFor(window) {
   return /** @type {!./service/template-impl.Templates} */ (
-      getExistingServiceForWindow(window, 'templates'));
+      getService(window, 'templates'));
 }
 
 /**

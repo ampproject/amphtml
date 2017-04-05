@@ -15,7 +15,7 @@
  */
 
 import {childElementByTag} from '../dom';
-import {fromClass} from '../service';
+import {getService, registerServiceBuilder} from '../service';
 import {dev, user} from '../log';
 
 
@@ -338,6 +338,13 @@ export class Templates {
 
 
 /**
+ * @param {!Window} win
+ */
+export function installTemplatesService(win) {
+  registerServiceBuilder(win, 'templates', Templates);
+}
+
+/**
  * Registers an extended template. This function should typically be called
  * through the registerTemplate method on the AMP runtime.
  * @param {!Window} win
@@ -346,14 +353,6 @@ export class Templates {
  * @package
  */
 export function registerExtendedTemplate(win, type, templateClass) {
-  return installTemplatesService(win).registerTemplate_(type, templateClass);
+  const templatesService = getService(win, 'templates');
+  return templatesService.registerTemplate_(type, templateClass);
 }
-
-
-/**
- * @param {!Window} window
- * @return {!Templates}
- */
-export function installTemplatesService(window) {
-  return fromClass(window, 'templates', Templates);
-};
