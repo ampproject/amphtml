@@ -94,7 +94,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const height = Number(this.element.getAttribute('height'));
     // If dc-use-attr-for-format experiment is on, we want to make our attribute
     // check to be more strict.
-    debugger;
     const useAttributesForSize =
         isExperimentOn(this.win, 'dc-use-attr-for-format')
         ? !isNaN(width) && width > 0 && !isNaN(height) && height > 0
