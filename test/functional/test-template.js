@@ -19,7 +19,8 @@ import {
   installTemplatesService,
   registerExtendedTemplate,
 } from '../../src/service/template-impl';
-
+import {resetServiceForTesting} from '../../src/service';
+import {templatesFor} from '../../src/services';
 
 describes.fakeWin('Template', {}, env => {
   let templates;
@@ -28,8 +29,13 @@ describes.fakeWin('Template', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    templates = installTemplatesService(win);
+    installTemplatesService(win);
+    templates = templatesFor(win);
     doc = win.document;
+  });
+
+  afterEach(() => {
+    resetServiceForTesting(win, 'templates');
   });
 
   class TemplateImpl extends BaseTemplate {
