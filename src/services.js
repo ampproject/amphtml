@@ -137,6 +137,14 @@ export function historyForDoc(nodeOrDoc) {
 }
 
 /**
+ * @param {!Window} win
+ * @return {!./input.Input}
+ */
+export function inputFor(win) {
+  return getService(win, 'input');
+};
+
+/**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/parallax-impl.ParallaxService}
  */
