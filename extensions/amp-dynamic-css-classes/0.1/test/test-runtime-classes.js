@@ -17,7 +17,7 @@
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {viewerForDoc} from '../../../../src/viewer';
+import {viewerForDoc} from '../../../../src/services';
 import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 import {installDynamicClassesForTesting} from '../amp-dynamic-css-classes';
 

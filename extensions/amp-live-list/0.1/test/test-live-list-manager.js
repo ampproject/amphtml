@@ -20,7 +20,7 @@ import {liveListManagerFor, LiveListManager} from '../live-list-manager';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
-import {viewerForDoc} from '../../../../src/viewer';
+import {viewerForDoc} from '../../../../src/services';
 
 describe('LiveListManager', () => {
   const jitterOffset = 1000;
