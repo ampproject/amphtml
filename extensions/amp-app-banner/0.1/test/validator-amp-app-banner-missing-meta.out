@@ -1,2 +1,2 @@
 FAIL
-amp-app-banner/0.1/test/validator-amp-app-banner-missing-meta.html:46:7 The tag 'amp-app-banner data source' is missing or incorrect, but required by 'amp-app-banner'. (see https://www.ampproject.org/docs/reference/extended/amp-add-banner.html) [AMP_TAG_PROBLEM]
+amp-app-banner/0.1/test/validator-amp-app-banner-missing-meta.html:46:7 The tag 'amp-app-banner data source' is missing or incorrect, but required by 'amp-app-banner'. (see https://www.ampproject.org/docs/reference/components/layout/amp-app-banner) [AMP_TAG_PROBLEM]

@@ -21,7 +21,7 @@ import {
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 

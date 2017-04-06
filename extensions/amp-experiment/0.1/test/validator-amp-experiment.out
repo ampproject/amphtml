@@ -1,3 +1,3 @@
 FAIL
-amp-experiment/0.1/test/validator-amp-experiment.html:47:0 The tag 'amp-experiment' appears more than once in the document. (see https://www.ampproject.org/docs/reference/extended/amp-experiment.html) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-experiment/0.1/test/validator-amp-experiment.html:47:0 The tag 'amp-experiment' appears more than once in the document. (see https://www.ampproject.org/docs/reference/components/ads/amp-experiment) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 amp-experiment/0.1/test/validator-amp-experiment.html:48:4 The tag 'script' is disallowed except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]

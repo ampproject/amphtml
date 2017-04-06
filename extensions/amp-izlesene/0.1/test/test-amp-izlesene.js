@@ -53,7 +53,7 @@ describe('amp-izlesene', () => {
     return getIzlesene('7221390', true).then(izlesene => {
       const iframe = izlesene.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

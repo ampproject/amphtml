@@ -17,7 +17,7 @@
 import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
-import {timerFor} from './timer';
+import {timerFor} from './services';
 
 /**
  * The structure that defines the rectangle used in intersection observers.

@@ -15,18 +15,27 @@
  */
 
 import {getAdNetworkConfig} from '../ad-network-config';
+import {viewportForDoc} from '../../../../src/services';
 
-describe('ad-network-config', () => {
+describes.realWin('ad-network-config', {
+  amp: {
+    canonicalUrl: 'https://foo.bar/baz',
+    runtimeOn: true,
+    ampdoc: 'single',
+  },
+}, env => {
 
   let ampAutoAdsElem;
+  let document;
 
   beforeEach(() => {
+    document = env.win.document;
     ampAutoAdsElem = document.createElement('amp-auto-ads');
-    document.body.appendChild(ampAutoAdsElem);
+    env.win.document.body.appendChild(ampAutoAdsElem);
   });
 
   afterEach(() => {
-    document.body.removeChild(ampAutoAdsElem);
+    env.win.document.body.removeChild(ampAutoAdsElem);
   });
 
   describe('AdSense', () => {
@@ -49,6 +58,22 @@ describe('ad-network-config', () => {
       expect(adNetwork.getAttributes()).to.deep.equal({
         'type': 'adsense',
         'data-ad-client': 'ca-pub-1234',
+      });
+    });
+
+    it('should get the ad constraints', () => {
+      const viewportMock = sandbox.mock(viewportForDoc(env.win.document));
+      viewportMock.expects('getSize').returns(
+          {width: 320, height: 500}).atLeast(1);
+
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.getAdConstraints()).to.deep.equal({
+        initialMinSpacing: 500,
+        subsequentMinSpacing: [
+          {adCount: 3, spacing: 1000},
+          {adCount: 6, spacing: 1500},
+        ],
+        maxAdCount: 8,
       });
     });
   });

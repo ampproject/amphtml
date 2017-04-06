@@ -1,0 +1,63 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: Video</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async custom-element="amp-brightcove" src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+
+  <style amp-custom>
+    button {
+      border: solid 1px black;
+    }
+  </style>
+</head>
+
+<body>
+  <button onclick="AMP.toggleExperiment('amp-bind');window.location.href=window.location.href;">Toggle &lt;amp-bind&gt; experiment</button>
+
+  <h2>amp-video</h2>
+  <amp-video width=480 height=270 autoplay src="https://ampbyexample.com/video/tokyo.mp4"
+      [src]="videoSrc || 'https://ampbyexample.com/video/tokyo.mp4'"
+      [controls]="videoControls || false">
+  </amp-video>
+  <p>
+    <button on="tap:AMP.setState({
+        videoSrc: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+        videoControls: true
+    })">Change amp-video</button>
+  </p>
+
+  <h2>amp-youtube</h2>
+  <amp-youtube width=480 height=270 data-videoid="lBTCB7yLs8Y"
+      [data-videoid]="youtubeId || 'lBTCB7yLs8Y'">
+  </amp-youtube>
+  <p>
+    <button on="tap:AMP.setState({
+        youtubeId: 'WrpkFROqR0Q'
+    })">Change amp-youtube</button>
+  </p>
+
+  <h2>amp-brightcove</h2>
+  <amp-brightcove width=480 height=270
+    data-account="906043040001" data-player-id="180a5658-8be8-4f33-8eba-d562ab41b40c" data-video-id="1401169490001"
+    [data-account]="brightcoveAccountId" [data-player-id]="brightcovePlayerId">
+  </amp-brightcove>
+  <p>
+    <button on="tap:AMP.setState({
+        brightcoveAccountId: '3441935391001',
+        brightcovePlayerId: 'ced36921-fd10-4944-bd78-1582084edd85'
+    })">Change amp-brightcove</button>
+  </p>
+
+  <!-- TODO: Add other video players -->
+</body>
+</html>

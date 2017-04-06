@@ -20,9 +20,9 @@ import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
 import {documentStateFor} from './document-state';
 
-import {getService} from '../service';
+import {registerServiceBuilder, getService} from '../service';
 import {installTimerService} from './timer-impl';
-import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
+import {viewerForDoc, viewerPromiseForDoc} from '../services';
 import {JankMeter} from './jank-meter';
 
 /** @const {time} */
@@ -43,7 +43,7 @@ let VsyncTaskSpecDef;
 
 
 /**
- * Abstraction over requestAnimationFrame that batches DOM read (measure)
+ * Abstraction over requestAnimationFrame (rAF) that batches DOM read (measure)
  * and write (mutate) tasks in a single frame, to eliminate layout thrashing.
  *
  * NOTE: If the document is invisible due to prerendering (this includes
@@ -108,8 +108,27 @@ export class Vsync {
     /** @const {!Function} */
     this.boundRunScheduledTasks_ = this.runScheduledTasks_.bind(this);
 
-    /** @const {!Pass} */
-    this.pass_ = new Pass(this.win, this.boundRunScheduledTasks_, FRAME_TIME);
+    /**
+     * If the doc is invisible we use this instead of rAF because rAF
+     * does not run in that scenario.
+     * However, we only do this for non-animation tasks as running
+     * animations doesn't make sense when not visible.
+     * @const {!Pass}
+     */
+    this.invisiblePass_ = new Pass(this.win, this.boundRunScheduledTasks_,
+        FRAME_TIME);
+
+    /**
+     * Similar to this.invisiblePass_, but backing up a real rAF call. If we
+     * somehow failed to know that we are throttled we use a timer (which
+     * may also be throttled but at least runs eventually) to make sure
+     * we continue to get work done.
+     * @const {!Pass}
+     */
+    this.backupPass_ = new Pass(this.win, this.boundRunScheduledTasks_,
+        // We cancel this when rAF fires and really only want it to fire
+        // if rAF doesn't work at all.
+        FRAME_TIME * 2.5);
 
     /** @private {?./viewer-impl.Viewer} */
     this.singleDocViewer_ = null;
@@ -357,8 +376,9 @@ export class Vsync {
   forceSchedule_() {
     if (this.canAnimate_()) {
       this.raf_(this.boundRunScheduledTasks_);
+      this.backupPass_.schedule();
     } else {
-      this.pass_.schedule();
+      this.invisiblePass_.schedule();
     }
   }
 
@@ -369,6 +389,7 @@ export class Vsync {
    * @private
    */
   runScheduledTasks_() {
+    this.backupPass_.cancel();
     this.scheduled_ = false;
     this.jankMeter_.onRun();
 
@@ -441,14 +462,19 @@ function callTaskNoInline(callback, state) {
   return true;
 }
 
-
 /**
  * @param {!Window} window
  * @return {!Vsync}
  */
+export function vsyncForTesting(window) {
+  installVsyncService(window);
+  return getService(window, 'vsync');
+}
+
+/**
+ * @param {!Window} window
+ */
 export function installVsyncService(window) {
-  return /** @type {!Vsync} */ (getService(window, 'vsync', () => {
-    installTimerService(window);
-    return new Vsync(window);
-  }));
+  installTimerService(window);
+  registerServiceBuilder(window, 'vsync', Vsync);
 }

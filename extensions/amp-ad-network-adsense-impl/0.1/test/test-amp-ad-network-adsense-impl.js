@@ -22,6 +22,7 @@ import {
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
+import {extensionsFor} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
@@ -35,6 +36,7 @@ import {
   addAttributesToElement,
 } from '../../../../src/dom';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {toggleExperiment} from '../../../../src/experiments';
 
 function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
   const doc = opt_doc || document;
@@ -170,7 +172,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         });
       });
     });
-    it('should contain amp_ct', () => {
+    it('should contain act', () => {
       return createIframePromise().then(fixture => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
@@ -182,7 +184,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         ampStickyAd.appendChild(element);
         fixture.doc.body.appendChild(ampStickyAd);
         return impl.getAdUrl().then(adUrl => {
-          expect(adUrl.indexOf('amp_ct=AMP-STICKY-AD') >= 0).to.be.true;
+          expect(adUrl.indexOf('act=sa') >= 0).to.be.true;
         });
       });
     });
@@ -269,20 +271,42 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
   });
 
   describe('#extractCreativeAndSignature', () => {
+    let loadExtensionSpy;
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+          'layout': 'fixed',
+        });
+        impl = new AmpAdNetworkAdsenseImpl(element);
+        installExtensionsService(impl.win);
+        const extensions = extensionsFor(impl.win);
+        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+      });
+    });
+
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(impl.extractCreativeAndSignature(
+        return impl.extractCreativeAndSignature(
           creative,
           {
             get: function() { return undefined; },
             has: function() { return false; },
-          })).to.eventually.deep.equal(
-                {creative, signature: null, size: null});
+          }).then(adResponse => {
+            expect(adResponse).to.deep.equal(
+                  {creative, signature: null, size: null});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+          });
       });
     });
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(impl.extractCreativeAndSignature(
+        return impl.extractCreativeAndSignature(
           creative,
           {
             get: function(name) {
@@ -291,10 +315,12 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             has: function(name) {
               return name === 'X-AmpAdSignature';
             },
-          })).to.eventually.deep.equal(
-              {creative,
-               signature: base64UrlDecodeToBytes('AQAB'),
+          }).then(adResponse => {
+            expect(adResponse).to.deep.equal(
+              {creative, signature: base64UrlDecodeToBytes('AQAB'),
                size: null});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+          });
       });
     });
     it('with analytics', () => {
@@ -324,14 +350,13 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 size: null,
               });
             expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
           });
       });
     });
   });
 
   describe('#onCreativeRender', () => {
-    let loadExtensionSpy;
-
     beforeEach(() => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -342,16 +367,14 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'type': 'adsense',
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
-        const extensions = installExtensionsService(impl.win);
-        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
 
     it('injects amp analytics', () => {
       const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       impl.ampAnalyticsConfig = {urls};
+      impl.responseHeaders_ = {get: () => 'qqid_string'};
       impl.onCreativeRender(false);
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
       // Exact format of amp-analytics element covered in
@@ -362,7 +385,93 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
   });
 
+  describe('centering', () => {
+    /**
+     * Creates an iframe promise, and instantiates element and impl, adding the
+     * former to the document of the iframe.
+     * @param {{width, height, type}} config
+     * @return The iframe promise.
+     */
+    function createImplTag(config) {
+      config.type = 'adsense';
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
+        // To trigger CSS styling.
+        element.setAttribute('data-a4a-upgrade-type',
+            'amp-ad-network-adsense-impl');
+        // Used to test styling which is targetted at first iframe child of
+        // amp-ad.
+        const iframe = fixture.doc.createElement('iframe');
+        element.appendChild(iframe);
+        document.body.appendChild(element);
+        impl = new AmpAdNetworkAdsenseImpl(element);
+        return fixture;
+      });
+    }
+
+    function verifyCss(iframe) {
+      expect(iframe).to.be.ok;
+      const style = window.getComputedStyle(iframe);
+      expect(style.top).to.equal('50%');
+      expect(style.left).to.equal('50%');
+      // We don't know the exact values by which the frame will be translated,
+      // as this can vary depending on whether we use the height/width
+      // attributes, or the actual size of the frame. To make this less of a
+      // hassle, we'll just match against regexp.
+      expect(style.transform).to.match(new RegExp(
+          'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
+    }
+
+    afterEach(() => document.body.removeChild(impl.element));
+
+    it('centers iframe in slot when height && width', () => {
+      return createImplTag({
+        width: '300',
+        height: '150',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.equal('300');
+        expect(impl.element.getAttribute('height')).to.equal('150');
+        verifyCss(impl.element.querySelector('iframe'));
+      });
+    });
+    it('centers iframe in slot when !height && !width', () => {
+      return createImplTag({
+        layout: 'fixed',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.be.null;
+        verifyCss(impl.element.querySelector('iframe'));
+      });
+    });
+    it('centers iframe in slot when !height && width', () => {
+      return createImplTag({
+        width: '300',
+        layout: 'fixed',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.equal('300');
+        expect(impl.element.getAttribute('height')).to.be.null;
+        verifyCss(impl.element.querySelector('iframe'));
+      });
+    });
+    it('centers iframe in slot when height && !width', () => {
+      return createImplTag({
+        height: '150',
+        layout: 'fixed',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.equal('150');
+        verifyCss(impl.element.querySelector('iframe'));
+      });
+    });
+  });
+
   describe('#getAdUrl', () => {
+
+    afterEach(() =>
+        toggleExperiment(window, 'as-use-attr-for-format', false));
+
+
     it('formats client properly', () => {
       element.setAttribute('data-ad-client', 'SoMeClient');
       new AmpAd(element).upgradeCallback();
@@ -377,9 +486,9 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
-          '\\?client=ca-adsense&format=0x0&w=0&h=0&adtest=false' +
+          '\\?client=ca-adsense&format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+' +
           '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
-          '(&asnt=[0-9]+-[0-9]+)?' +
+          '(&asnt=[0-9]+-[0-9]+)?(&dff=(?:%22.*?%22|\'.*?\'))?' +
           '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           // Depending on how the test is run, it can get different
@@ -389,7 +498,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '&adx=-?[0-9]+&ady=-?[0-9]+&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +
-          '&isw=[0-9]+&ish=[0-9]+' +
+          '&isw=[0-9]+&ish=[0-9]+&pfx=(1|0)' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
@@ -397,5 +506,48 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           '&dtd=[0-9]+$'));
       });
     });
+    it('has correct format when width == "auto"', () => {
+      element.setAttribute('width', 'auto');
+      new AmpAd(element).upgradeCallback();
+      expect(impl.element.getAttribute('width')).to.equal('auto');
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        // With exp as-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
+        expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+    });
+    it('has correct format when height == "auto"', () => {
+      element.setAttribute('height', 'auto');
+      new AmpAd(element).upgradeCallback();
+      expect(impl.element.getAttribute('height')).to.equal('auto');
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        // With exp as-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
+        expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+    });
+    it('has correct format when as-use-attr-for-format is on', () => {
+      toggleExperiment(window, 'as-use-attr-for-format', true);
+      const width = element.getAttribute('width');
+      const height = element.getAttribute('height');
+      new AmpAd(element).upgradeCallback();
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        // With exp as-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
+        expect(url).to.match(new RegExp(
+            `format=${width}x${height}&w=${width}&h=${height}`)));
+    });
+    it('has correct format when width=auto and as-use-attr-for-format is on',
+        () => {
+          toggleExperiment(window, 'as-use-attr-for-format', true);
+          element.setAttribute('width', 'auto');
+          new AmpAd(element).upgradeCallback();
+          expect(impl.element.getAttribute('width')).to.equal('auto');
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              // Ensure that "auto" doesn't appear anywhere here:
+              expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+        });
   });
 });
