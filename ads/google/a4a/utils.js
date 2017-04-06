@@ -404,12 +404,14 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
       console.log('config is ', config);
       // Security review needed here.
       config['requests'] = requests;
-      config['triggers']['continuousVisible']['request'] = Object.keys(requests);
+      config['triggers']['continuousVisible']['request'] =
+          Object.keys(requests);
       // Add CSI pingbacks.
       const correlator = getCorrelator(a4a.win);
       const slotId = a4a.element.getAttribute('data-amp-slot-index');
       const qqid = responseHeaders ? responseHeaders.get(QQID_HEADER) : 'null';
-      config['requests']['visibilityCsi'] = 'https://csi.gstatic.com/csi?fromAnalytics=1' +
+      config['requests']['visibilityCsi'] =
+          'https://csi.gstatic.com/csi?fromAnalytics=1' +
           `&c=${correlator}&slotId=${slotId}&qqid.0=${qqid}`;
       config['triggers']['continuousVisibleIniLoad']['request'] =
           'visibilityCsi';
