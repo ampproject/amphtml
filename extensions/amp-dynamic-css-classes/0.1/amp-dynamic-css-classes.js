@@ -15,8 +15,8 @@
  */
 
 import {parseUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/viewer';
-import {vsyncFor} from '../../../src/vsync';
+import {viewerForDoc} from '../../../src/services';
+import {vsyncFor} from '../../../src/services';
 
 
 /**

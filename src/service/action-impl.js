@@ -15,12 +15,15 @@
  */
 
 import {dev, user} from '../log';
-import {fromClassForDoc, installServiceInEmbedScope} from '../service';
+import {
+  registerServiceBuilderForDoc,
+  installServiceInEmbedScope,
+} from '../service';
 import {getMode} from '../mode';
 import {isArray} from '../types';
 import {map} from '../utils/object';
-import {timerFor} from '../timer';
-import {vsyncFor} from '../vsync';
+import {timerFor} from '../services';
+import {vsyncFor} from '../services';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -835,8 +838,12 @@ function isNum(c) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!ActionService}
  */
 export function installActionServiceForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'action', ActionService);
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'action',
+      ActionService,
+      /* opt_factory */ undefined,
+      /* opt_instantiate */ true);
 }

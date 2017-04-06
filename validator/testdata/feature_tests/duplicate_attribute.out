@@ -1,2 +1,2 @@
 FAIL
-feature_tests/duplicate_attribute.html:33:3 The attribute 'width' in tag 'amp-img' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/amp-img.html) [AMP_LAYOUT_PROBLEM]
+feature_tests/duplicate_attribute.html:33:3 The attribute 'width' in tag 'amp-img' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/components/media/amp-img) [AMP_LAYOUT_PROBLEM]

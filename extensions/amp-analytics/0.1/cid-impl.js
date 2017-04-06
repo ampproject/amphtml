@@ -23,7 +23,10 @@
  */
 
 import {getCookie, setCookie} from '../../../src/cookies';
-import {fromClassForDoc} from '../../../src/service';
+import {
+  registerServiceBuilderForDoc,
+  getServiceForDoc,
+} from '../../../src/service';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -31,10 +34,10 @@ import {
 } from '../../../src/url';
 import {isIframed} from '../../../src/dom';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
 import {tryParseJson} from '../../../src/json';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {user, rethrowAsync} from '../../../src/log';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
@@ -425,6 +428,7 @@ function getEntropy(win) {
  * @return {!Cid}
  * @private visible for testing
  */
-export function installCidServiceForDocForTesting(ampdoc) {
-  return fromClassForDoc(ampdoc, 'cid', Cid);
+export function cidServiceForDocForTesting(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'cid', Cid);
+  return getServiceForDoc(ampdoc, 'cid');
 }

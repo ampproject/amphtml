@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {BaseCarousel} from './base-carousel';
 
 export class BaseSlides extends BaseCarousel {

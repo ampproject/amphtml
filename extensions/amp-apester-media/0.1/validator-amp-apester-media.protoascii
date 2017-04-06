@@ -17,39 +17,15 @@
 tags: {  # amp-apester-media
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-apester-media extension .js script"
   satisfies: "amp-apester-media extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-apester-media"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-apester-media"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-apester-media"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-apester-media"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-apester-media-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-apester-media.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-apester-media>
   html_format: AMP
@@ -66,7 +42,6 @@ tags: {  # <amp-apester-media>
     value_regex: "[0-9a-zA-Z]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-apester-media.html"
   amp_layout: {
       supported_layouts: FILL
       supported_layouts: FIXED
@@ -75,4 +50,5 @@ tags: {  # <amp-apester-media>
       supported_layouts: NODISPLAY
       supported_layouts: RESPONSIVE
   }
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-apester-media"
 }

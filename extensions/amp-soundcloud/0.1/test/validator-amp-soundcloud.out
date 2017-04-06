@@ -1,4 +1,4 @@
 FAIL
-amp-soundcloud/0.1/test/validator-amp-soundcloud.html:39:2 The attribute 'data-visual' in tag 'amp-soundcloud' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html) [AMP_TAG_PROBLEM]
-amp-soundcloud/0.1/test/validator-amp-soundcloud.html:42:2 The attribute 'data-trackid' in tag 'amp-soundcloud' is set to the invalid value 'mahler_number_6.ogg'. (see https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html) [AMP_TAG_PROBLEM]
-amp-soundcloud/0.1/test/validator-amp-soundcloud.html:45:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-soundcloud'. (see https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html) [AMP_LAYOUT_PROBLEM]
+amp-soundcloud/0.1/test/validator-amp-soundcloud.html:39:2 The attribute 'data-visual' in tag 'amp-soundcloud' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/media/amp-soundcloud) [AMP_TAG_PROBLEM]
+amp-soundcloud/0.1/test/validator-amp-soundcloud.html:42:2 The attribute 'data-trackid' in tag 'amp-soundcloud' is set to the invalid value 'mahler_number_6.ogg'. (see https://www.ampproject.org/docs/reference/components/media/amp-soundcloud) [AMP_TAG_PROBLEM]
+amp-soundcloud/0.1/test/validator-amp-soundcloud.html:45:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-soundcloud'. (see https://www.ampproject.org/docs/reference/components/media/amp-soundcloud) [AMP_LAYOUT_PROBLEM]

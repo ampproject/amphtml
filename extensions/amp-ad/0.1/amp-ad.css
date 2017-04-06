@@ -18,13 +18,14 @@
  * Force the layout box of the ad iframe to be exactly as big as the actual
  * iframe. The `amp-ad` tag itself can be freely styled.
  */
-amp-ad iframe {
+amp-ad iframe,
+amp-embed iframe {
   border: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
 }
 
-.-amp-ad-default-holder {
+.i-amphtml-ad-default-holder {
   position: absolute;
   left: 0;
   right: 0;
@@ -36,7 +37,7 @@ amp-ad iframe {
   background-color: rgba(200, 200, 200, 0.5);
 }
 
-.-amp-ad-default-holder:after {
+.i-amphtml-ad-default-holder:after {
   content: "Ad";
   background-color: rgba(0, 0, 0, 0.5);
   border-radius: 2px;
@@ -46,3 +47,11 @@ amp-ad iframe {
   font-family: Arial, sans-serif;
   padding: 2px 4px;
 }
+
+amp-ad[data-a4a-upgrade-type='amp-ad-network-adsense-impl'] > iframe,
+amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'] > iframe {
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%);
+}
+

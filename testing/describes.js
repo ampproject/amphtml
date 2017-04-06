@@ -40,6 +40,7 @@ import {
   installExtensionsService,
   registerExtension,
 } from '../src/service/extensions-impl';
+import {extensionsFor} from '../src/services';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
@@ -474,7 +475,8 @@ class AmpFixture {
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
     const ampdocService = installDocService(win, singleDoc);
     env.ampdocService  = ampdocService;
-    env.extensions = installExtensionsService(win);
+    installExtensionsService(win);
+    env.extensions = extensionsFor(win);
     installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {
@@ -487,7 +489,7 @@ class AmpFixture {
       env.ampdoc = ampdoc;
       installAmpdocServices(ampdoc, spec.params);
       adopt(win);
-    } else if (ampdocType == 'multi') {
+    } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
       adoptShadowMode(win);
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
@@ -550,6 +552,17 @@ class AmpFixture {
             env.parentWin = env.win;
             env.win = embed.win;
           });
+      completePromise = completePromise ?
+          completePromise.then(() => promise) : promise;
+    } else if (ampdocType == 'shadow') {
+      const hostElement = win.document.createElement('div');
+      win.document.body.appendChild(hostElement);
+      const importDoc = win.document.implementation.createHTMLDocument('');
+      const ret = win.AMP.attachShadowDoc(
+          hostElement, importDoc, win.location.href);
+      const ampdoc = ret.ampdoc;
+      env.ampdoc = ampdoc;
+      const promise = ampdoc.whenReady();
       completePromise = completePromise ?
           completePromise.then(() => promise) : promise;
     }

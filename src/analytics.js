@@ -18,6 +18,8 @@ import {
   getElementServiceForDoc,
   getElementServiceIfAvailableForDoc,
 } from './element-service';
+import {createElementWithAttributes} from './dom';
+import {extensionsFor} from './services';
 
 
 /**
@@ -54,5 +56,41 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
       return;
     }
     analytics.triggerEvent(eventType, opt_vars);
+  });
+}
+
+/**
+ * Method to create scoped analytics element for any element.
+ * @param {!Element} parentElement
+ * @param {!JSONType} config
+ * @param {boolean=} loadAnalytics
+ */
+export function insertAnalyticsElement(
+    parentElement, config, loadAnalytics = false) {
+  const doc = parentElement.ownerDocument;
+  const analyticsElem = doc.createElement('amp-analytics');
+  analyticsElem.setAttribute('sandbox', 'true');
+  const scriptElem = createElementWithAttributes(doc,
+        'script', {
+          'type': 'application/json',
+        });
+  scriptElem.textContent = JSON.stringify(config);
+  analyticsElem.appendChild(scriptElem);
+  analyticsElem.CONFIG = config;
+
+  // Force load analytics extension if script not included in page.
+  if (loadAnalytics) {
+    // Get Extensions service and force load analytics extension.
+    const extensions = extensionsFor(parentElement.ownerDocument.defaultView);
+    extensions./*OK*/loadExtension('amp-analytics');
+    parentElement.appendChild(analyticsElem);
+    return;
+  }
+
+  analyticsForDocOrNull(parentElement).then(analytics => {
+    if (!analytics) {
+      return;
+    }
+    parentElement.appendChild(analyticsElem);
   });
 }

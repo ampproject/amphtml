@@ -73,12 +73,7 @@
           'state': T.instructions[T.state][ T.cells[T.head] ].state,
           'cells': T.instructions[T.state][ T.cells[T.head] ].write == null
               ? T.cells
-              : T.cells.slice(0, T.head).concat(
-                  [ T.instructions[T.state][ T.cells[T.head] ].write ]).concat(
-                      T.cells.slice(T.head + 1
-                  )
-              ),
-          'instructions': T.instructions
+              : copyAndSplice(T.cells, T.head, 1, T.instructions[T.state][ T.cells[T.head] ].write)
         },
         'count': T.state == 'return'
             ? T.cells[1] + 2*T.cells[2] + 4*T.cells[3] + 8*T.cells[4] + 16*T.cells[5] + 32*T.cells[6] + 64*T.cells[7] + 128*T.cells[8]
@@ -90,8 +85,7 @@
         'T': {
           'head':  0,
           'state': 'advance',
-          'cells': [-1, 0, 0, 0, 0, 0, 0, 0, 0],
-          'instructions': T.instructions
+          'cells': [-1, 0, 0, 0, 0, 0, 0, 0, 0]
         },
         'count': 0
       })">Reset</button>
@@ -101,9 +95,7 @@
   <!--
   Notes:
   1. Duplication of intermediary variables is a pain. Can we set them with multiple AMP.setState() actions?
-  2. Mutation of non-primitives is a pain. Can we make that easier? Custom function?
-  3. Overwriting nested objects due to Object.assign() is annoying. Can we merge instead?
-  4. No support for escaping quotes in strings.
+  2. No support for escaping quotes in strings.
   -->
 
   <!--
@@ -124,7 +116,6 @@
                   T.cells.slice(T.head + 1
               )
           ),
-      'instructions': T.instructions
     }
   })">Step</button>
   -->

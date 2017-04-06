@@ -26,16 +26,18 @@ import {
   stringifyViewportMeta,
   updateViewportMetaString,
 } from '../../src/service/viewport-impl';
+import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {loadPromise} from '../../src/event-helper';
+import {platformFor} from '../../src/services';
 import {setParentWindow} from '../../src/service';
-import {toggleExperiment} from '../../src/experiments';
-import {vsyncFor} from '../../src/vsync';
+import {vsyncFor} from '../../src/services';
 import * as sinon from 'sinon';
+
 
 describes.fakeWin('Viewport', {}, env => {
   let clock;
@@ -45,6 +47,7 @@ describes.fakeWin('Viewport', {}, env => {
   let viewerMock;
   let windowApi;
   let ampdoc;
+  let visibilityState;
   let viewerViewportHandler;
   let viewerScrollDocHandler;
   let updatedPaddingTop;
@@ -59,6 +62,7 @@ describes.fakeWin('Viewport', {}, env => {
 
     viewerViewportHandler = undefined;
     viewerScrollDocHandler = undefined;
+    visibilityState = 'visible';
     viewer = {
       isEmbedded: () => false,
       getParam: param => {
@@ -75,15 +79,18 @@ describes.fakeWin('Viewport', {}, env => {
         }
       },
       sendMessage: sandbox.spy(),
-      isVisible: () => true,
+      getVisibilityState: () => visibilityState,
+      isVisible: () => (visibilityState == 'visible'),
       onVisibilityChanged: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     const ampdocService = installDocService(windowApi, /* isSingleDoc */ true);
     ampdoc = ampdocService.getAmpDoc();
     installTimerService(windowApi);
+    installVsyncService(windowApi);
     installPlatformService(windowApi);
     installViewerServiceForDoc(ampdoc);
+
     binding = new ViewportBindingDef();
     viewportSize = {width: 111, height: 222};
     binding.getSize = () => {
@@ -173,6 +180,134 @@ describes.fakeWin('Viewport', {}, env => {
       ampdoc.win.parent = {};
       new Viewport(ampdoc, binding, viewer);
       expect(root).to.have.class('i-amphtml-iframed');
+    });
+
+    describe('ios-webview', () => {
+      let webviewParam;
+      let isIos;
+
+      beforeEach(() => {
+        webviewParam = '1';
+        sandbox.stub(viewer, 'getParam', param => {
+          if (param == 'webview') {
+            return webviewParam;
+          }
+          return null;
+        });
+        const platform = platformFor(ampdoc.win);
+        isIos = true;
+        sandbox.stub(platform, 'isIos', () => isIos);
+      });
+
+      it('should set ios-webview class', () => {
+        new Viewport(ampdoc, binding, viewer);
+        expect(root).to.have.class('i-amphtml-ios-webview');
+      });
+
+      it('should not set ios-webview class when not on iOS', () => {
+        isIos = false;
+        new Viewport(ampdoc, binding, viewer);
+        expect(root).to.not.have.class('i-amphtml-ios-webview');
+      });
+
+      it('should not set ios-webview class w/o webview param', () => {
+        webviewParam = null;
+        new Viewport(ampdoc, binding, viewer);
+        expect(root).to.not.have.class('i-amphtml-ios-webview');
+      });
+    });
+  });
+
+  describe('zero dimensions', () => {
+    let errorStub;
+    let randomValue;
+
+    beforeEach(() => {
+      viewport.size_ = null;
+      errorStub = sandbox.stub(dev(), 'error');
+      randomValue = 0.009;
+      sandbox.stub(Math, 'random', () => randomValue);
+    });
+
+    it('should be ok with non-zero dimensions', () => {
+      expect(viewport.getSize().width).to.equal(111);
+      expect(viewport.getSize().height).to.equal(222);
+      expect(errorStub).to.not.be.called;
+    });
+
+    it('should report zero width', () => {
+      binding.getSize = () => {
+        return {width: 0, height: viewportSize.height};
+      };
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(222);
+      expect(errorStub).to.be.calledOnce;
+      expect(errorStub).to.be.calledWith(
+          'Viewport', 'viewport has zero dimensions');
+    });
+
+    it('should report zero height', () => {
+      binding.getSize = () => {
+        return {width: viewportSize.width, height: 0};
+      };
+      expect(viewport.getSize().width).to.equal(111);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.be.calledOnce;
+      expect(errorStub).to.be.calledWith(
+          'Viewport', 'viewport has zero dimensions');
+    });
+
+    it('should report both zero width and height', () => {
+      binding.getSize = () => {
+        return {width: 0, height: 0};
+      };
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.be.calledOnce;
+      expect(errorStub).to.be.calledWith(
+          'Viewport', 'viewport has zero dimensions');
+    });
+
+    it('should report only 1% of the time', () => {
+      binding.getSize = () => {
+        return {width: 0, height: 0};
+      };
+      randomValue = 0.011;
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.not.be.called;
+    });
+
+    it('should report in prerender state', () => {
+      visibilityState = 'prerender';
+      binding.getSize = () => {
+        return {width: 0, height: 0};
+      };
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.be.calledOnce;
+      expect(errorStub).to.be.calledWith(
+          'Viewport', 'viewport has zero dimensions');
+    });
+
+    it('should NOT report in hidden state', () => {
+      visibilityState = 'hidden';
+      binding.getSize = () => {
+        return {width: 0, height: 0};
+      };
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.not.be.called;
+    });
+
+    it('should NOT report in inactive state', () => {
+      visibilityState = 'inactive';
+      binding.getSize = () => {
+        return {width: 0, height: 0};
+      };
+      expect(viewport.getSize().width).to.equal(0);
+      expect(viewport.getSize().height).to.equal(0);
+      expect(errorStub).to.not.be.called;
     });
   });
 
@@ -611,15 +746,6 @@ describes.fakeWin('Viewport', {}, env => {
     expect(viewport.getScrollHeight()).to.equal(117);
   });
 
-  it('should add class to HTML element with make-body-block experiment', () => {
-    viewer.isEmbedded = () => true;
-    toggleExperiment(windowApi, 'make-body-block', true);
-    const docElement = windowApi.document.documentElement;
-    const addStub = sandbox.stub(docElement.classList, 'add');
-    viewport = new Viewport(ampdoc, binding, viewer);
-    expect(addStub).to.be.calledWith('i-amphtml-make-body-block');
-  });
-
   it('should scroll to target position when the viewer sets scrollTop', () => {
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('setScrollTop').withArgs(117).once();
@@ -929,6 +1055,7 @@ describe('Viewport META', () => {
           /* isSingleDoc */ true);
       ampdoc = ampdocService.getAmpDoc();
       installTimerService(windowApi);
+      installVsyncService(windowApi);
       installPlatformService(windowApi);
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
@@ -1013,12 +1140,15 @@ describe('Viewport META', () => {
 describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   let binding;
   let win;
+  let ampdoc;
   let viewer;
 
   beforeEach(() => {
     env.iframe.style.width = '100px';
     env.iframe.style.height = '200px';
     win = env.win;
+    win.document.documentElement.classList.add('i-amphtml-singledoc');
+
     const child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';
@@ -1027,27 +1157,36 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     viewer = {};
 
     installPlatformService(win);
+    installVsyncService(win);
+    const ampdocService = installDocService(win, /* isSingleDoc */ true);
+    ampdoc = ampdocService.getAmpDoc(win.document);
 
-    binding = new ViewportBindingNatural_(win, viewer);
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
     binding.connect();
   });
 
-  afterEach(() => {
-    toggleExperiment(win, 'make-body-relative', false);
-  });
-
   it('should setup overflow:visible on body', () => {
-    expect(win.document.body.style.overflow).to.equal('visible');
+    expect(win.getComputedStyle(win.document.body).overflow)
+        .to.equal('visible');
   });
 
-  it('should configure make-body-relative', () => {
-    toggleExperiment(win, 'make-body-relative', true);
-    binding = new ViewportBindingNatural_(win, viewer);
+  it('should configure body as relative', () => {
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
     expect(win.document.body.style.display).to.not.be.ok;
-    expect(win.document.body.style.position).to.equal('relative');
+    const bodyStyles = win.getComputedStyle(win.document.body);
+    expect(bodyStyles.position).to.equal('relative');
     // It's important that this experiment does NOT override the previously
     // set `overflow`.
-    expect(win.document.body.style.overflow).to.equal('visible');
+    expect(bodyStyles.overflow).to.equal('visible');
+  });
+
+  it('should override body overflow for iOS webview', () => {
+    win.document.documentElement.classList.add('i-amphtml-ios-webview');
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
+    const bodyStyles = win.getComputedStyle(win.document.body);
+    expect(bodyStyles.position).to.equal('relative');
+    expect(bodyStyles.overflowX).to.equal('hidden');
+    expect(bodyStyles.overflowY).to.not.equal('hidden');
   });
 
   it('should NOT require fixed layer transferring', () => {
@@ -1173,12 +1312,11 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
     child.style.width = '200px';
     child.style.height = '300px';
     win.document.body.appendChild(child);
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
-    const ampdoc = ampdocService.getAmpDoc();
+    const ampdoc = installDocService(win, /* isSingleDoc */ true).getAmpDoc(
+        win.document);
 
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
-    installVsyncService(win);
 
     binding = new ViewportBindingNaturalIosEmbed_(win, ampdoc);
     return Promise.resolve();
@@ -1598,6 +1736,7 @@ describe('createViewport', () => {
       win = env.win;
       installPlatformService(win);
       installTimerService(win);
+      installVsyncService(win);
     });
 
     it('should bind to "natural" when not iframed', () => {
@@ -1626,6 +1765,7 @@ describe('createViewport', () => {
       win = env.win;
       installPlatformService(win);
       installTimerService(win);
+      installVsyncService(win);
     });
 
     it('should bind to "natural" when not iframed', () => {

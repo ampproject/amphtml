@@ -30,11 +30,12 @@
 
   <!--
   src value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vine-(latest|0\\.1).js"
-  The first example is valid. The latter two examples are invalid.
+  The first example is valid. The latter three examples are invalid.
   -->
-  <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-latest.js"></script>
+  <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-latest.js"> </script>
   <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
   <script async custom-element="amp-vine" src="http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
+  <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"> Only whitespace is allowed here. </script>
 
   <!--
   href value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|https://fast\\.fonts\\.net/.*"

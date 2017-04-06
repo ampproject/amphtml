@@ -16,39 +16,15 @@
 tags: {  # <script custom-element="amp-fx-flying-carpet">
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-fx-flying-carpet extension .js script"
   satisfies: "amp-fx-flying-carpet extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-fx-flying-carpet"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-fx-flying-carpet"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-fx-flying-carpet"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-fx-flying-carpet"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-fx-flying-carpet-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-fx-flying-carpet.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-fx-flying-carpet>
   html_format: AMP
@@ -60,5 +36,5 @@ tags: {  # <amp-fx-flying-carpet>
     name: "height"
     mandatory: true
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-fx-flying-carpet.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/layout/amp-fx-flying-carpet"
 }

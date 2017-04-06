@@ -25,7 +25,7 @@ import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/video-manager';
+import {videoManagerForDoc} from '../../../src/services';
 
 /**
  * @enum {number}
@@ -112,10 +112,7 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.videoid_ = user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-youtube> %s',
-        this.element);
+    this.videoid_ = this.getVideoId_();
 
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
@@ -177,8 +174,7 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // See
-    // https://developers.google.com/youtube/iframe_api_reference
+    // See https://developers.google.com/youtube/iframe_api_reference
     const iframe = this.element.ownerDocument.createElement('iframe');
     const src = this.getVideoIframeSrc_();
 
@@ -189,8 +185,6 @@ class AmpYoutube extends AMP.BaseElement {
     this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
-
-
 
     this.win.addEventListener(
         'message', event => this.handleYoutubeMessages_(event));
@@ -211,18 +205,44 @@ class AmpYoutube extends AMP.BaseElement {
     }
   }
 
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    if (mutations['data-videoid'] !== undefined) {
+      this.videoid_ = this.getVideoId_();
+      if (this.iframe_) { // `null` if element hasn't been laid out yet.
+        this.sendCommand_('loadVideoById', [this.videoid_]);
+      }
+    }
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getVideoId_() {
+    return user().assert(
+        this.element.getAttribute('data-videoid'),
+        'The data-videoid attribute is required for <amp-youtube> %s',
+        this.element);
+  }
+
   /**
    * Sends a command to the player through postMessage.
    * @param {string} command
-   * @param {Object=} opt_args
+   * @param {Array=} opt_args
    * @private
    * */
   sendCommand_(command, opt_args) {
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
-      'event': 'command',
-      'func': command,
-      'args': opt_args || '',
-    }), '*');
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        const message = JSON.stringify({
+          'event': 'command',
+          'func': command,
+          'args': opt_args || '',
+        });
+        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+      }
+    });
   }
 
   /** @private */
@@ -338,36 +358,28 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('playVideo');
-    });
+    this.sendCommand_('playVideo');
   }
 
   /**
    * @override
    */
   pause() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('pauseVideo');
-    });
+    this.sendCommand_('pauseVideo');
   }
 
   /**
    * @override
    */
   mute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('mute');
-    });
+    this.sendCommand_('mute');
   }
 
   /**
    * @override
    */
   unmute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('unMute');
-    });
+    this.sendCommand_('unMute');
   }
 
   /**

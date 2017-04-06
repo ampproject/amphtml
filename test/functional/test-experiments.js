@@ -17,7 +17,6 @@
 import {
   isCanary,
   isExperimentOn,
-  isExperimentOnAllowUrlOverride,
   experimentToggles,
   toggleExperiment,
   resetExperimentTogglesForTesting,
@@ -40,7 +39,7 @@ describe('experimentToggles', () => {
         v: '12345667',
       },
     };
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
     expect(experimentToggles(win)).to.deep.equal({
       exp1: true,
       exp2: false,
@@ -74,7 +73,7 @@ describe('isExperimentOn', () => {
   });
 
   function expectExperiment(cookieString, experimentId) {
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
     win.document.cookie = cookieString;
     return expect(isExperimentOn(win, experimentId));
   }
@@ -166,25 +165,6 @@ describe('isExperimentOn', () => {
       expectExperiment('', 'e2').to.be.false;
     });
   });
-
-  describe('isExperimentOnAllowUrlOverride', () => {
-
-    function expectUrlExperiment(hashOverride, cookieString, experimentId) {
-      win.document.cookie = cookieString;
-      win.location.hash = hashOverride;
-      return expect(isExperimentOnAllowUrlOverride(win, experimentId));
-    }
-
-    it('should accept override', () => {
-      const cookie = 'AMP_EXP=e2,e4';
-      const url = '#e-e1=1&e-e2=0&e-complexName=1';
-      expectUrlExperiment(url, cookie, 'e1').to.be.true;
-      expectUrlExperiment(url, cookie, 'e2').to.be.false;
-      expectUrlExperiment(url, cookie, 'e4').to.be.true;
-      expectUrlExperiment(url, cookie, 'unknown').to.be.false;
-      expectUrlExperiment(url, cookie, 'complexName').to.be.true;
-    });
-  });
 });
 
 describe('toggleExperiment', () => {
@@ -202,14 +182,14 @@ describe('toggleExperiment', () => {
 
   afterEach(() => {
     sandbox.restore();
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
   });
 
   function expectToggle(cookiesString, experimentId, opt_on) {
     const doc = {
       cookie: cookiesString,
     };
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
     const on = toggleExperiment({
       document: doc,
       location: {
@@ -413,19 +393,19 @@ describe('toggleExperiment', () => {
 
     // The new setting should be persisted in cookie, so cache reset should not
     // affect its status.
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
     expect(isExperimentOn(win, 'e1')).to.be.false;
 
     // Now let's explicitly toggle to true
     expect(toggleExperiment(win, 'e1', true)).to.be.true;
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Toggle transiently should still work
     expect(toggleExperiment(win, 'e1', false, true)).to.be.false;
     expect(isExperimentOn(win, 'e1')).to.be.false;
-    resetExperimentTogglesForTesting(); // cache reset should bring it back to true
+    resetExperimentTogglesForTesting(window); // cache reset should bring it back to true
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Sanity check, the global setting should never be changed.
@@ -454,7 +434,7 @@ describes.realWin('meta override', {}, env => {
           content: 'e1,e2,e3',
         }));
 
-    resetExperimentTogglesForTesting();
+    resetExperimentTogglesForTesting(window);
 
     expect(isExperimentOn(win, 'e1')).to.be.true;
     expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
@@ -466,6 +446,57 @@ describes.realWin('meta override', {}, env => {
     expect(isExperimentOn(win, 'e1')).to.be.false;
     expect(isExperimentOn(win, 'e2')).to.be.true;
     expect(isExperimentOn(win, 'e3')).to.be.false;
+  });
+});
+
+describes.fakeWin('url override', {}, env => {
+
+  let win;
+
+  beforeEach(() => {
+    win = env.win;
+  });
+
+  it('should allow override iff the experiment is whitelisted', () => {
+    win.AMP_CONFIG = {
+      'allow-url-opt-in': ['e1', 'e3', 'e4', 'e6', 'e7', 'e8'],
+      e1: 0,
+      e2: 0,
+      e4: 1,
+      e5: 1,
+    };
+    delete win.location.originalHash;
+    win.location.href = '#e-e1=1&e-e2=1&e-e3=1&e-e4=0&e-e5=0&e-e6=0&e-e7=1' +
+        '&e-e8=0';
+    win.document.cookie = 'AMP_EXP=-e7,e8';
+
+    resetExperimentTogglesForTesting(window);
+
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
+    expect(isExperimentOn(win, 'e3')).to.be.true;
+    expect(isExperimentOn(win, 'e4')).to.be.false;
+    expect(isExperimentOn(win, 'e5')).to.be.true; // e5 is not whitelisted
+    expect(isExperimentOn(win, 'e6')).to.be.false;
+    expect(isExperimentOn(win, 'e7')).to.be.true; // overrides cookies
+    expect(isExperimentOn(win, 'e8')).to.be.false; // overrides cookies
+
+    toggleExperiment(win, 'e1', false);
+    toggleExperiment(win, 'e2', true);
+    toggleExperiment(win, 'e3', false);
+    toggleExperiment(win, 'e4', true);
+    toggleExperiment(win, 'e5', false);
+    toggleExperiment(win, 'e6', true);
+    toggleExperiment(win, 'e7', false);
+    toggleExperiment(win, 'e8', true);
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+    expect(isExperimentOn(win, 'e2')).to.be.true;
+    expect(isExperimentOn(win, 'e3')).to.be.false;
+    expect(isExperimentOn(win, 'e4')).to.be.true;
+    expect(isExperimentOn(win, 'e5')).to.be.false;
+    expect(isExperimentOn(win, 'e6')).to.be.true;
+    expect(isExperimentOn(win, 'e7')).to.be.false;
+    expect(isExperimentOn(win, 'e8')).to.be.true;
   });
 });
 

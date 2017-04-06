@@ -18,38 +18,14 @@ tags: {  # amp-brid-player
   html_format: AMP
   tag_name: "SCRIPT"
   satisfies: "amp-brid-player extension .js script"
-  spec_name: "amp-brid-player extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-brid-player"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-brid-player"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-brid-player"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-brid-player"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-brid-player-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brid-player.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-brid-player>
   html_format: AMP
@@ -77,7 +53,7 @@ tags: {  # <amp-brid-player>
     value_regex: "[0-9]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brid-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-brid-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

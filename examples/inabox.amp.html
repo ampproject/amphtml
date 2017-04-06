@@ -34,23 +34,32 @@
       {
         "transport": {"beacon": false, "xhrpost": false},
         "requests": {
-          "visibility": "/ping?${type}&${elementY}"
+          "visibility": "/${type}?elementX=${elementX}&elementY=${elementY}&elementWidth=${elementWidth}&elementHeight=${elementHeight}&totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&loadTimeVisibility=${loadTimeVisibility}&backgrounded=${backgrounded}&backgroundedAtStart=${backgroundedAtStart}&firstSeenTime=${firstSeenTime}&lastSeenTime=${lastSeenTime}&firstVisibleTime=${firstVisibleTime}&lastVisibleTime=${lastVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}"
         },
         "triggers": {
-          "pageVisible": {
-            "on": "visible",
+          "visible": {
+            "on": "visible-v3",
             "request": "visibility",
-            "vars": { "type": "pageVisible" }
+            "vars": { "type": "visible" }
+          },
+          "rootVisible": {
+            "on": "visible-v3",
+            "request": "visibility",
+            "visibilitySpec": {
+              "selector": ":root",
+              "visiblePercentageMin": 0
+            },
+            "vars": { "type": "rootVisible" }
           },
           "imgVisible": {
-            "on": "visible",
+            "on": "visible-v3",
             "request": "visibility",
             "visibilitySpec": {
               "selector": "#img-2",
               "selectionMethod": "scope",
-              "visiblePercentageMin": 10
+              "visiblePercentageMin": 0
             },
-            "vars": { "type": "imgVisible" }
+            "vars": { "type": "img2Visible" }
           }
         }
       }

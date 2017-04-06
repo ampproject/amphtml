@@ -15,8 +15,10 @@
  */
 
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
-import {documentInfoForDoc} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
+import {viewportForDoc} from '../../../src/services';
+
 
 /**
  * An interface intended to be implemented by any ad-networks wishing to support
@@ -36,6 +38,12 @@ class AdNetworkConfigDef {
    * @return {!Object<string, string>}
    */
   getAttributes() {}
+
+  /**
+   * Network specific constraints on the placement of ads on the page.
+   * @return {!./ad-tracker.AdConstraints}
+   */
+  getAdConstraints() {}
 }
 
 /**
@@ -83,6 +91,20 @@ class AdSenseNetworkConfig {
     return {
       'type': 'adsense',
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+    };
+  }
+
+  /** @override */
+  getAdConstraints() {
+    const viewportHeight =
+        viewportForDoc(this.autoAmpAdsElement_).getSize().height;
+    return {
+      initialMinSpacing: viewportHeight,
+      subsequentMinSpacing: [
+        {adCount: 3, spacing: viewportHeight * 2},
+        {adCount: 6, spacing: viewportHeight * 3},
+      ],
+      maxAdCount: 8,
     };
   }
 }

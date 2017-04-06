@@ -16,9 +16,8 @@
 
 import {StandardActions} from '../../src/service/standard-actions-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {bindForDoc} from '../../src/bind';
+import {bindForDoc, historyForDoc} from '../../src/services';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
-import {historyForDoc} from '../../src/history';
 import {setParentWindow} from '../../src/service';
 
 
