@@ -24,7 +24,6 @@ import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/services';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
-import {createElementWithAttributes} from '../../../src/dom';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -358,92 +357,69 @@ export function additionalDimensions(win, viewportSize) {
 /**
  * Extracts configuration used to build amp-analytics element for active view.
  *
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
- * @param {!../../../src/service/extensions-impl.Extensions} extensions
- * @return {?AmpAnalyticsConfigDef} config or null if invalid/missing.
+ * @return {?JSONType} config or null if invalid/missing.
  */
-export function extractAmpAnalyticsConfig(responseHeaders, extensions) {
+export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
   if (responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     try {
       const analyticsConfig =
         JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
-      dev().assert(Array.isArray(analyticsConfig['url']));
-      if (analyticsConfig.url.length) {
-        extensions.loadExtension('amp-analytics');
+      console.log('anayticsConfig is ', analyticsConfig['url']);
+      dev().assert(Array.isArray(analyticsConfig['url']) &&
+          analyticsConfig['url'].length);
+      const urls = analyticsConfig.url;
+
+      const visibilitySpec = {
+        'selector': 'amp-ad',
+        'selectionMethod': 'closest',
+        'visiblePercentageMin': 50,
+        'continuousTimeMin': 1000,
+      };
+      const config = {
+        'transport': {'beacon': false, 'xhrpost': false},
+        'triggers': {
+          'continuousVisible': {
+            'on': 'visible',
+            visibilitySpec,
+          },
+          'continuousVisibleIniLoad': {
+            'on': 'ini-load',
+            visibilitySpec,
+          },
+          'continuousVisibleRenderStart': {
+            'on': 'render-start',
+            visibilitySpec,
+          },
+        },
+      };
+      const requests = {};
+      for (let idx = 1; idx <= urls.length; idx++) {
+        // TODO: Ensure url is valid and not freeform JS?
+        requests[`visibility${idx}`] = `${urls[idx - 1]}`;
       }
-      return {urls: analyticsConfig.url};
+      console.log('config is ', config);
+      // Security review needed here.
+      config['requests'] = requests;
+      config['triggers']['continuousVisible']['request'] = Object.keys(requests);
+      // Add CSI pingbacks.
+      const correlator = getCorrelator(a4a.win);
+      const slotId = a4a.element.getAttribute('data-amp-slot-index');
+      const qqid = responseHeaders ? responseHeaders.get(QQID_HEADER) : 'null';
+      config['requests']['visibilityCsi'] = 'https://csi.gstatic.com/csi?fromAnalytics=1' +
+          `&c=${correlator}&slotId=${slotId}&qqid.0=${qqid}`;
+      config['triggers']['continuousVisibleIniLoad']['request'] =
+          'visibilityCsi';
+      config['triggers']['continuousVisibleRenderStart']['request'] =
+          'visibilityCsi';
+      return config;
     } catch (err) {
       dev().error('AMP-A4A', 'Invalid analytics', err,
           responseHeaders.get(AMP_ANALYTICS_HEADER));
     }
   }
   return null;
-}
-
-/**
- * Creates amp-analytics element within a4a element using urls specified
- * with amp-ad closest selector and min 50% visible for 1 sec.
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {?AmpAnalyticsConfigDef} inputConfig
- * @param {?../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
- */
-export function injectActiveViewAmpAnalyticsElement(
-    a4a, inputConfig, responseHeaders) {
-  if (!inputConfig || !inputConfig.urls.length) {
-    return;
-  }
-  const ampAnalyticsElem =
-    a4a.element.ownerDocument.createElement('amp-analytics');
-  ampAnalyticsElem.setAttribute('scoped', '');
-  const visibilitySpec = {
-    'selector': 'amp-ad',
-    'selectionMethod': 'closest',
-    'visiblePercentageMin': 50,
-    'continuousTimeMin': 1000,
-  };
-  const config = {
-    'transport': {'beacon': false, 'xhrpost': false},
-    'triggers': {
-      'continuousVisible': {
-        'on': 'visible',
-        visibilitySpec,
-      },
-      'continuousVisibleIniLoad': {
-        'on': 'ini-load',
-        visibilitySpec,
-      },
-      'continuousVisibleRenderStart': {
-        'on': 'render-start',
-        visibilitySpec,
-      },
-    },
-  };
-  const requests = {};
-  const urls = inputConfig.urls;
-  for (let idx = 1; idx <= urls.length; idx++) {
-    // TODO: Ensure url is valid and not freeform JS?
-    requests[`visibility${idx}`] = `${urls[idx - 1]}`;
-  }
-  // Security review needed here.
-  config['requests'] = requests;
-  config['triggers']['continuousVisible']['request'] = Object.keys(requests);
-  // Add CSI pingbacks.
-  const correlator = getCorrelator(a4a.win);
-  const slotId = a4a.element.getAttribute('data-amp-slot-index');
-  const qqid = responseHeaders ? responseHeaders.get(QQID_HEADER) : 'null';
-  config['requests']['visibilityCsi'] = 'https://csi.gstatic.com/csi?fromAnalytics=1' +
-      `&c=${correlator}&slotId=${slotId}&qqid.0=${qqid}`;
-  config['triggers']['continuousVisibleIniLoad']['request'] =
-      'visibilityCsi';
-  config['triggers']['continuousVisibleRenderStart']['request'] =
-      'visibilityCsi';
-  const scriptElem = createElementWithAttributes(
-      /** @type {!Document} */(a4a.element.ownerDocument), 'script', {
-        'type': 'application/json',
-      });
-  scriptElem.textContent = JSON.stringify(config);
-  ampAnalyticsElem.appendChild(scriptElem);
-  a4a.element.appendChild(ampAnalyticsElem);
 }

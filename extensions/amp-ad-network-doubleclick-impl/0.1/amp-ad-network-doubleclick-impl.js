@@ -30,7 +30,6 @@ import {
   isGoogleAdsA4AValidEnvironment,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
-  injectActiveViewAmpAnalyticsElement,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -39,8 +38,9 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
-import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {insertAnalyticsElement} from '../../../src/analytics';
+
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
@@ -62,13 +62,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /**
      * Config to generate amp-analytics element for active view reporting.
-     * @type {?AmpAnalyticsConfigDef}
+     * @type {?JSONType}
      * @visibleForTesting
      */
     this.ampAnalyticsConfig = null;
-
-    /** @private {!../../../src/service/extensions-impl.Extensions} */
-    this.extensions_ = extensionsFor(this.win);
 
     /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
     this.responseHeaders_ = null;
@@ -149,9 +146,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig =
-      extractAmpAnalyticsConfig(responseHeaders, this.extensions_);
-    this.responseHeaders_ = responseHeaders;
+    this.ampAnalyticsConfig = extractAmpAnalyticsConfig(this, responseHeaders);
     const adResponsePromise =
         extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
     return adResponsePromise.then(adResponse => {
@@ -190,8 +185,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
-    injectActiveViewAmpAnalyticsElement(
-        this, this.ampAnalyticsConfig, this.responseHeaders_);
+    if (this.ampAnalyticsConfig) {
+      insertAnalyticsElement(this.element, this.ampAnalyticsConfig, true);
+    }
   }
 
   /**
