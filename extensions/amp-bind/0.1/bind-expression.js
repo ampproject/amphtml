@@ -51,7 +51,7 @@ const FUNCTION_WHITELIST = (function() {
      * @param {...?} items
      */
     /*eslint "no-unused-vars": 0*/
-    'copyAndSplice': function(array, start, deleteCount, items) {
+    'copyAndSplice': function copyAndSplice(array, start, deleteCount, items) {
       if (!isArray(array)) {
         throw new Error(
           `copyAndSplice: ${array} is not an array.`);
