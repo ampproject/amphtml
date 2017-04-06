@@ -154,7 +154,8 @@ describes.realWin('3P Ad (with AmpContext experiment)', {
     beforeEach(() => {
       return createFixture().then(f => {
         fixture = f;
-        toggleExperiment(fixture.win, '3p-use-ampcontext', true);
+        toggleExperiment(fixture.win, '3p-use-ampcontext', /* opt_on */ true,
+            /* opt_transientExperiment */ true);
         installPlatformService(fixture.win);
       });
     });
