@@ -54,6 +54,14 @@ export function github(global, data) {
     delete data.width;
     delete data.height;
     const gistContainer = global.document.querySelector('#c .gist');
+
+    // get all links in the embed
+    const gistLinks = global.document.querySelectorAll('.gist-meta a');
+    for (let i = 0; i < gistLinks.length; i++) {
+      // have the links open in a new tab #8587
+      gistLinks[i].target = '_BLANK';
+    }
+
     context.updateDimensions(
       gistContainer./*OK*/offsetWidth,
       gistContainer./*OK*/offsetHeight
