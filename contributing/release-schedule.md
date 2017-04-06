@@ -10,6 +10,8 @@ We push a new release of AMP to all AMP pages every week on Thursday. The more d
 
 You can always follow the current release state of AMP on our [releases page](https://github.com/ampproject/amphtml/releases). The release used by most users is marked as `Latest release` and the current Dev Channel release is marked as `Pre-release`.
 
+Announces regarding releases will be made on the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/).  (You will need to [sign up for access](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) to AMP on Slack if you haven't done so already].)
+
 ### AMP Dev Channel
 
 AMP Dev Channel is a way to opt a browser into using a newer version of the AMP JS libraries.
