@@ -21,7 +21,7 @@ import {
   HistoryBindingVirtual_,
   installHistoryServiceForDoc,
 } from '../../src/service/history-impl';
-import {historyForDoc} from '../../src/history';
+import {historyForDoc} from '../../src/services';
 import {listenOncePromise} from '../../src/event-helper';
 import {installTimerService} from '../../src/service/timer-impl';
 import {timerFor} from '../../src/services';
