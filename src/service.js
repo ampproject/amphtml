@@ -87,7 +87,11 @@ export function getExistingServiceForWindow(win, id) {
  */
 export function getExistingServiceForWindowOrNull(win, id) {
   win = getTopWindow(win);
-  return win.services && win.services[id] && win.services[id].obj;
+  if (win.services && win.services[id]) {
+    return getService(win, id);
+  } else {
+    return null;
+  }
 }
 
 /**
@@ -173,13 +177,11 @@ function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
   // It does not try to go all the way up the parent window chain. We can change
   // this in the future, but for now this gives us a better performance.
   const topWin = getTopWindow(embedWin);
-  if (embedWin != topWin &&
-          embedWin.services &&
-          embedWin.services[id] &&
-          embedWin.services[id].obj) {
-    return embedWin.services[id].obj;
+  if (embedWin != topWin && embedWin.services && embedWin.services[id]) {
+    return getServiceInternal(embedWin, embedWin, id);
+  } else {
+    return null;
   }
-  return null;
 }
 
 
@@ -586,9 +588,9 @@ function getServicePromiseOrNullInternal(holder, id) {
       return s.promise;
     } else if (s.obj) {
       return s.promise = Promise.resolve(s.obj);
-    } else {
-      dev().assert((s.build),
-          'Expected object, promise, or builder to be present');
+    } else if (s.build) {
+      s.obj = s.build();
+      return s.promise = Promise.resolve(s.obj);
     }
   }
   return null;
