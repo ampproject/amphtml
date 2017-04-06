@@ -36,7 +36,7 @@ import {listenOnce} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
-import {performanceFor} from '../../../src/services';
+import {performanceForOrNull} from '../../../src/services';
 import {resourcesForDoc} from '../../../src/services';
 import {templatesFor} from '../../../src/services';
 import {timerFor} from '../../../src/services';
@@ -150,8 +150,8 @@ export class AccessService {
     /** @private @const {!Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
 
-    /** @private @const {!Performance} */
-    this.performance_ = performanceFor(ampdoc.win);
+    /** @private @const {?Performance} */
+    this.performance_ = performanceForOrNull(ampdoc.win);
 
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, ampdoc);
@@ -189,9 +189,11 @@ export class AccessService {
 
     this.firstAuthorizationPromise_.then(() => {
       this.analyticsEvent_('access-authorization-received');
-      this.performance_.tick('aaa');
-      this.performance_.tickSinceVisible('aaav');
-      this.performance_.flush();
+      if (this.performance_) {
+        this.performance_.tick('aaa');
+        this.performance_.tickSinceVisible('aaav');
+        this.performance_.flush();
+      }
     });
   }
 
