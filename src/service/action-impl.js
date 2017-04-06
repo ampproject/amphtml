@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {createCustomEvent} from '../event-helper';
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
@@ -53,6 +52,8 @@ const ELEMENTS_ACTIONS_MAP_ = {
 /** @const {!Object<string, !Array<string>>} */
 const WHITELISTED_INPUT_DATA_ = {
   'range': ['min', 'max', 'value'],
+  'radio': ['checked'],
+  'checkbox': ['checked'],
 };
 
 /**
@@ -167,21 +168,19 @@ export class ActionService {
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, event => {
-        const target = event.target;
-        const changeEvent = this.getChangeDetails_(event);
-        this.trigger(dev().assertElement(target), name, changeEvent);
+        this.addChangeDetails_(event);
+        this.trigger(dev().assertElement(event.target), name, event);
       });
     }
   }
 
   /**
-   * Generate custom event from browser `change` event.
+   * Given a browser 'change' event, add `details` property containing the
+   * relevant information for the change that generated the initial event.
    * @param {!Event} event A `change` event.
-   * @return {!Event} A custom event with a details property containing the
-   *    relevant information for the change that generated the initial event.
    */
-  getChangeDetails_(event) {
-    const details = {};
+  addChangeDetails_(event) {
+    const detail = {};
     const target = event.target;
     if (event.target.tagName.toLowerCase() === 'input') {
       const inputType = target.getAttribute('type');
@@ -190,11 +189,11 @@ export class ActionService {
         fieldsToInclude.forEach(field => {
           const value = target[field];
           const valueAsNumber = parseFloat(value);
-          details[field] = valueAsNumber || value;
+          detail[field] = valueAsNumber || value;
         });
+        event.detail = detail;
       }
     }
-    return createCustomEvent(this.ampdoc.win, 'change', details);
   }
 
   /**

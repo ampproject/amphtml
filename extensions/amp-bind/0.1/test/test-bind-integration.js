@@ -125,6 +125,41 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
+  describe('input integration', () => {
+    it('should update dependent bindings on range input changes', () => {
+      const rangeText = fixture.doc.getElementById('rangeText');
+      const range = fixture.doc.getElementById('range');
+      expect(rangeText.textContent).to.equal('Unbound');
+      // Calling #click() the range will not generate a change event
+      // so it must be generated manually.
+      range.value = 47;
+      range.dispatchEvent(new Event('change', {bubbles: true}));
+      return waitForBindApplication().then(() => {
+        expect(rangeText.textContent).to.equal('0 <= 47 <= 100');
+      });
+    });
+
+    it('should update dependent bindings on checkbox input changes', () => {
+      const checkboxText = fixture.doc.getElementById('checkboxText');
+      const checkbox = fixture.doc.getElementById('checkbox');
+      expect(checkboxText.textContent).to.equal('Unbound');
+      checkbox.click();
+      return waitForBindApplication().then(() => {
+        expect(checkboxText.textContent).to.equal('Checked: true');
+      });
+    });
+
+    it('should update dependent bindings on radio input changes', () => {
+      const radioText = fixture.doc.getElementById('radioText');
+      const radio = fixture.doc.getElementById('radio');
+      expect(radioText.textContent).to.equal('Unbound');
+      radio.click();
+      return waitForBindApplication().then(() => {
+        expect(radioText.textContent).to.equal('Checked: true');
+      });
+    });
+  });
+
   describe('amp-carousel integration', () => {
     it('should update dependent bindings on carousel slide changes', () => {
       const slideNum = fixture.doc.getElementById('slideNum');
