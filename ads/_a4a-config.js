@@ -83,5 +83,4 @@ export const signingServerURLs = {
   'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
   'cloudflare': 'https://amp.cloudflare.com/amp-ad-verifying-keyset.json',
   'cloudflare-dev': 'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
-  'gmossp': 'https://yokogoshi-ad.devel.gmossp-sp.jp/ads/amp-ad-verifying-keyset.json',
 };
