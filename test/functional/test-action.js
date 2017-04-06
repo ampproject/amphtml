@@ -931,7 +931,6 @@ describe('Core events', () => {
       services: {
         vsync: {obj: {}},
       },
-      CustomEvent: window.CustomEvent,
     };
     action = new ActionService(new AmpDocSingle(win), document);
     sandbox.stub(action, 'trigger');
