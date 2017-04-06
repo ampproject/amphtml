@@ -458,7 +458,7 @@ function getAmpdocService(win) {
  *     Should create the service if it does not exist yet. If the factory
  *     is not given, it is an error if the service does not exist yet.
  *     Called with context.
- * @return {*}
+ * @return {Object}
  * @template T
  */
 function getServiceInternal(holder, context, id, opt_constructor, opt_factory) {
