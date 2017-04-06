@@ -51,7 +51,7 @@ export function kixer(global, data) {
   d.addEventListener('load', kxload, false); // Listen for the kixer load event
 
   const kxviewCheck = function(intersectionEntry) {
-    inView = intersectionEntry.intersectionRatio > 0.5;
+    inView = intersectionEntry.intersectionRatio > 0.5; // Half of the unit is in the viewport
     if (inView === true) {
       if (viewed === false && viewTimer == null) {
         viewTimer = setTimeout(function() {
