@@ -16,7 +16,7 @@
 
 import {FakeLocation} from './fake-dom';
 import {ampdocServiceFor} from '../src/ampdoc';
-import {installCustomElements} from
+import installCustomElements from
     'document-register-element/build/document-register-element.node';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {installDocService} from '../src/service/ampdoc-impl';
