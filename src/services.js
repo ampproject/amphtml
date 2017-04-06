@@ -48,7 +48,7 @@ export function accessServiceForDoc(nodeOrDoc) {
  */
 export function accessServiceForDocOrNull(nodeOrDoc) {
   return /** @type {!Promise<?AccessService>} */ (
-      getElementServiceIfAvailable(nodeOrDoc, 'access', 'amp-access'));
+      getElementServiceIfAvailableForDoc(nodeOrDoc, 'access', 'amp-access'));
 }
 
 /**
