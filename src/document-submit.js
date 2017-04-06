@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {actionServiceForDoc} from './action';
+import {actionServiceForDoc} from './services';
 import {getServiceForDoc} from './service';
 import {dev, user} from './log';
 import {

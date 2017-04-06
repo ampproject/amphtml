@@ -25,7 +25,7 @@ import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/video-manager';
+import {videoManagerForDoc} from '../../../src/services';
 
 /**
  * @enum {number}
@@ -234,12 +234,14 @@ class AmpYoutube extends AMP.BaseElement {
    * */
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
-      const message = JSON.stringify({
-        'event': 'command',
-        'func': command,
-        'args': opt_args || '',
-      });
-      this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        const message = JSON.stringify({
+          'event': 'command',
+          'func': command,
+          'args': opt_args || '',
+        });
+        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+      }
     });
   }
 

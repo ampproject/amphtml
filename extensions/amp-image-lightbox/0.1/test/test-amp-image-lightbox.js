@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-image-lightbox';
 import {
@@ -53,7 +53,7 @@ describe('amp-image-lightbox component', () => {
   it('should not render if not activated', () => {
     return getImageLightbox().then(lightbox => {
       const container = lightbox
-          .querySelector('.-amp-image-lightbox-container');
+          .querySelector('.i-amphtml-image-lightbox-container');
       expect(container).to.equal(null);
     });
   });
@@ -78,17 +78,20 @@ describe('amp-image-lightbox component', () => {
       impl.activate({source: ampImage});
 
       const container = lightbox
-          .querySelector('.-amp-image-lightbox-container');
+          .querySelector('.i-amphtml-image-lightbox-container');
       expect(container).to.not.equal(null);
 
-      const caption = container.querySelector('.-amp-image-lightbox-caption');
+      const caption = container.querySelector(
+          '.i-amphtml-image-lightbox-caption');
       expect(caption).to.not.equal(null);
       expect(caption).to.have.class('amp-image-lightbox-caption');
 
-      const viewer = container.querySelector('.-amp-image-lightbox-viewer');
+      const viewer = container.querySelector(
+          '.i-amphtml-image-lightbox-viewer');
       expect(viewer).to.not.equal(null);
 
-      const image = viewer.querySelector('.-amp-image-lightbox-viewer-image');
+      const image = viewer.querySelector(
+          '.i-amphtml-image-lightbox-viewer-image');
       expect(image).to.not.equal(null);
 
       // Very important. Image must have transform-origin=50% 50%.

@@ -16,6 +16,9 @@
 
 tags: {  # amp-video
   tag_name: "SCRIPT"
+  # Typically the extension_spec takes care of this, but we have
+  # a unique situation where we need to refer to this earlier in
+  # the rules processing for the also_requires_tag_warning below.
   spec_name: "amp-video extension .js script"
   extension_spec: {
     name: "amp-video"
@@ -28,6 +31,9 @@ tags: {  # amp-video
 tags: {  # <amp-video>
   tag_name: "AMP-VIDEO"
   disallowed_ancestor: "AMP-SIDEBAR"
+  # Typically we'd require the extension j/s, but for historical reasons
+  # many pages don't have it, so it ends up late loaded and we warn, instead
+  # of making this a validation error.
   also_requires_tag_warning: "amp-video extension .js script"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
@@ -61,8 +67,16 @@ tags: {  # <amp-video>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  # <amp-bind>
+  attrs: { name: "[alt]" }
+  attrs: { name: "[attribution]" }
+  attrs: { name: "[controls]" }
+  attrs: { name: "[loop]" }
+  attrs: { name: "[poster]" }
+  attrs: { name: "[preload]" }
+  attrs: { name: "[src]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

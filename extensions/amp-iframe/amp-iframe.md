@@ -79,7 +79,7 @@ The `src` attribute behaves mainly like on a standard iframe with one exception:
 source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by `src` does
 not already have a fragment.
 
-**srcdoc, frameborder, allowfullscreen, allowtransparency, referrerpolicy**
+**srcdoc, frameborder, allowfullscreen, allowpaymentrequest, allowtransparency, referrerpolicy**
 
 The attributes above should all behave like they do on standard iframes.
 

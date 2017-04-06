@@ -52,7 +52,7 @@ tags: {  # <amp-playbuzz>
     value_regex_casei: "(false|true)"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-playbuzz"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-playbuzz"
   amp_layout: {
     supported_layouts: RESPONSIVE
     supported_layouts: FIXED_HEIGHT

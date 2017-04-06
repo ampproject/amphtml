@@ -36,8 +36,15 @@ tags: {  # <amp-brightcove>
     name: "data-account"
     mandatory: true
   }
+  # <amp-bind>
+  attrs: { name: "[data-account]" }
+  attrs: { name: "[data-embed]" }
+  attrs: { name: "[data-player]" }
+  attrs: { name: "[data-player-id]" }
+  attrs: { name: "[data-playlist-id]" }
+  attrs: { name: "[data-video-id]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-brightcove"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-brightcove"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

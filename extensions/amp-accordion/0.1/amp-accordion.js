@@ -77,9 +77,9 @@ class AmpAccordion extends AMP.BaseElement {
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
       const header = sectionComponents_[0];
       const content = sectionComponents_[1];
-      header.classList.add('-amp-accordion-header');
+      header.classList.add('i-amphtml-accordion-header');
       header.setAttribute('role', 'tab');
-      content.classList.add('-amp-accordion-content');
+      content.classList.add('i-amphtml-accordion-content');
       content.setAttribute('role', 'tabpanel');
       let contentId = content.getAttribute('id');
       if (!contentId) {

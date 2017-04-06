@@ -40,6 +40,8 @@ tags: {  # <amp-ad>
   # many pages don't have it, so it ends up late loaded and we warn, instead
   # of making this a validation error.
   also_requires_tag_warning: "amp-ad extension .js script"
+  # If modifying disallowed_ancestors, then please also edit
+  # extensions/amp-auto-ads/*/placement.js
   disallowed_ancestor: "AMP-APP-BANNER"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
@@ -54,7 +56,7 @@ tags: {  # <amp-ad>
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
+  spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-ad"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -84,7 +86,7 @@ tags: {  # <amp-embed>
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
+  spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-ad"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

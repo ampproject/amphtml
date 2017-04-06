@@ -149,10 +149,10 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 
 | before | after |
 | --- | --- |
-| `<amp-img src=https://example.com/foo.png></amp-img>` | `<amp-img src=/i/s/foo.png></amp-img>` |
-| `<amp-img srcset="https://example.com/bar.png 1080w, https://example.com/bar-400.png 400w">`| `<amp-img src="/i/s/bar.png 1080w, /i/s/bar-400.png 400w">` |
-| `<amp-anim src=foo.gif></amp-anim>` | `<amp-anim src=/i/s/foo.gif></amp-anim>` |
-| `<amp-video poster=bar.png>` | `<amp-video poster=/i/s/bar.png>` |
+| `<amp-img src=https://example.com/foo.png></amp-img>` | `<amp-img src=/i/s/example.com/foo.png></amp-img>` |
+| `<amp-img srcset="https://example.com/bar.png 1080w, https://example.com/bar-400.png 400w">`| `<amp-img src="/i/s/example.com/bar.png 1080w, /i/s/example.com/bar-400.png 400w">` |
+| `<amp-anim src=foo.gif></amp-anim>` | `<amp-anim src=/i/s/example.com/foo.gif></amp-anim>` |
+| `<amp-video poster=bar.png>` | `<amp-video poster=/i/s/example.com/bar.png>` |
 
 </details>
 
@@ -234,6 +234,18 @@ AMP Cache pages should not show up in search result pages. The cache also uses [
 
 </details>
 
+#### Rewrite all `<meta>` tags to be the first children of `<head>`.
+
+Some `<meta>` tags are used by AMP Components and providing them before the AMP Component's script has loaded is important. As a result we move all `<meta>` tags to be the first children of `<head>`. An example of one of these tags is `<meta name="amp-experiments-opt-in" ...>`.
+
+<details>
+<summary>example</summary>
+
+| before | after |
+| --- | --- |
+| `<head>`<br>`<meta charset=utf-8>`<br>`...`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`<meta name="amp-experiments-opt-in" content="experiment-a,experiment-b">`<br>`</head>` | `<head>`<br>`<meta charset=utf-8>`<br>`<meta name="amp-experiments-opt-in" content="experiment-a,experiment-b">`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`...`<br>`</head>` |
+
+</details>
 
 ### Remove Tags and Attributes
 
@@ -264,19 +276,19 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 Remove any `<meta>` tags except for those that:
  - do not have attributes `content`, `itemprop`, `name` and `property`
  - have attribute `http-equiv`
- - have attribute `name` with prefix `amp-`
- - have attribute `name` with prefix `dc.`
- - have attribute `name` with prefix `i-amp-` [temporary, will be removed at a future date]
- - have attribute `name` with prefix `i-amphtml-`
- - have attribute `name` with prefix `twitter:`
+ - have attribute `name` with case-insensitive prefix `amp-`
+ - have attribute `name` with case-insensitive prefix `amp4ads-`
+ - have attribute `name` with case-insensitive prefix `dc.`
+ - have attribute `name` with case-insensitive prefix `i-amphtml-`
+ - have attribute `name` with case-insensitive prefix `twitter:`
  - have attribute `name=apple-itunes-app`
  - have attribute `name=copyright`
  - have attribute `name=referrer` [note: this may be inserted by AMP Cache]
  - have attribute `name=robots` [note: this is inserted by AMP Cache]
  - have attribute `name=viewport`
- - have attribute `property` with prefix "al:"
- - have attribute `property` with prefix "fb:"
- - have attribute `property` with prefix "og:"
+ - have attribute `property` with case-insensitive prefix "al:"
+ - have attribute `property` with case-insensitive prefix "fb:"
+ - have attribute `property` with case-insensitive prefix "og:"
 
 <details>
 <summary>example</summary>

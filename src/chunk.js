@@ -16,10 +16,9 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
-import {fromClassForDoc, getExistingServiceForDoc} from './service';
-import {isExperimentOnAllowUrlOverride} from './experiments';
+import {registerServiceBuilderForDoc, getServiceForDoc} from './service';
 import {makeBodyVisible} from './style-installer';
-import {viewerPromiseForDoc} from './viewer';
+import {viewerPromiseForDoc} from './services';
 
 /**
  * @const {string}
@@ -37,6 +36,16 @@ let deactivated = /nochunking=1/.test(self.location.hash);
 const resolved = Promise.resolve();
 
 /**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @return {!Chunks}
+ * @private
+ */
+function getChunkServiceForDoc_(nodeOrAmpDoc) {
+  registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
+}
+
+/**
  * Run the given function. For visible documents the function will be
  * called in a micro task (Essentially ASAP). If the document is
  * not visible, tasks will yield to the event loop (to give the browser
@@ -51,7 +60,7 @@ export function startupChunk(nodeOrAmpDoc, fn) {
     resolved.then(fn);
     return;
   }
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   service.runForStartup_(fn);
 }
 
@@ -74,7 +83,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
     resolved.then(fn);
     return;
   }
-  const service = getExistingServiceForDoc(nodeOrAmpDoc, 'chunk');
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   service.run(fn, priority);
 }
 
@@ -83,7 +92,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
  * @return {!Chunks}
  */
 export function chunkInstanceForTesting(nodeOrAmpDoc) {
-  return fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  return getChunkServiceForDoc_(nodeOrAmpDoc);
 }
 
 /**
@@ -107,7 +116,7 @@ export function activateChunkingForTesting() {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  */
 export function runChunksForTesting(nodeOrAmpDoc) {
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = chunkInstanceForTesting(nodeOrAmpDoc);
   const errors = [];
   while (true) {
     try {
@@ -229,12 +238,6 @@ class StartupTask extends Task {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private @const {boolean} */
-    this.active_ = isExperimentOnAllowUrlOverride(this.win_, 'chunked-amp');
-    if (!this.active_) {
-      return;
-    }
-
     /** @private {?./service/viewer-impl.Viewer} */
     this.viewer_ = null;
 
@@ -262,7 +265,7 @@ class StartupTask extends Task {
   immediateTriggerCondition_() {
     // Run in a micro task when the doc is visible. Otherwise, run after
     // having yielded to the event queue once.
-    return !this.active_ || this.isVisible_();
+    return this.isVisible_();
   }
 
   /** @override */
@@ -309,7 +312,11 @@ class Chunks {
     this.tasks_ = new PriorityQueue();
     /** @private @const {function(?IdleDeadline)} */
     this.boundExecute_ = this.execute_.bind(this);
-
+    /**
+     * True iff `schedule_()` will run at end of current event loop.
+     * @private {boolean}
+     */
+    this.scheduled_ = false;
     /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
     this.viewerPromise_ = viewerPromiseForDoc(ampDoc);
 
@@ -348,9 +355,7 @@ class Chunks {
    */
   enqueueTask_(task, priority) {
     this.tasks_.enqueue(task, priority);
-    resolved.then(() => {
-      this.schedule_();
-    });
+    this.scheduleAsap_();
   }
 
   /**
@@ -388,21 +393,19 @@ class Chunks {
     }
     const before = Date.now();
     t.runTask_(idleDeadline);
-    resolved.then(() => {
-      this.schedule_();
-    });
+    this.scheduleAsap_();
     dev().fine(TAG, t.getName_(), 'Chunk duration', Date.now() - before);
     return true;
   }
 
   /**
-   * Calls `execute_()` asynchronously.
+   * Calls `execute_()` in a micro task.
    * @param {?IdleDeadline} idleDeadline
    * @private
    */
   executeAsap_(idleDeadline) {
     resolved.then(() => {
-      this.boundExecute_(idleDeadline);
+      this.execute_(idleDeadline);
     });
   }
 
@@ -436,6 +439,20 @@ class Chunks {
     }
     // The message doesn't actually matter.
     this.win_.postMessage/*OK*/('amp-macro-task', '*');
+  }
+
+  /**
+   * Calls `schedule_()` in a micro task if not already queued.
+   * @private
+   */
+  scheduleAsap_() {
+    if (!this.scheduled_) {
+      this.scheduled_ = true;
+      resolved.then(() => {
+        this.schedule_();
+        this.scheduled_ = false;
+      });
+    }
   }
 }
 

@@ -82,10 +82,11 @@ declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true);
 declareExtension('amp-fx-parallax', '0.1', false);
 declareExtension('amp-gfycat', '0.1', false);
+declareExtension('amp-gist', '0.1', false);
 declareExtension('amp-hulu', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-image-lightbox', '0.1', true);
-declareExtension('amp-instagram', '0.1', false);
+declareExtension('amp-instagram', '0.1', true);
 declareExtension('amp-install-serviceworker', '0.1', false);
 declareExtension('amp-izlesene', '0.1', false);
 declareExtension('amp-jwplayer', '0.1', false, 'NO_TYPE_CHECK');
@@ -552,6 +553,13 @@ function checkTypes() {
     // Type check 3p/ads code.
     closureCompile(['./3p/integration.js'], './dist',
       'integration-check-types.js', {
+        externs: ['ads/ads.extern.js'],
+        include3pDirectories: true,
+        includePolyfills: true,
+        checkTypes: true,
+      }),
+    closureCompile(['./3p/ampcontext-lib.js'], './dist',
+      'ampcontext-check-types.js', {
         externs: ['ads/ads.extern.js'],
         include3pDirectories: true,
         includePolyfills: true,

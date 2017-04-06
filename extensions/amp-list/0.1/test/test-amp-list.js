@@ -16,8 +16,9 @@
 
 import {AmpList} from '../amp-list';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {templatesFor} from '../../../../src/template';
-import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
+import {batchedXhrServiceForTesting,} from
+    '../../../../src/service/batched-xhr-impl';
+import {templatesFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -38,7 +39,7 @@ describe('amp-list component', () => {
     templates = templatesFor(window);
     templatesMock = sandbox.mock(templates);
 
-    xhr = xhrServiceForTesting(window);
+    xhr = batchedXhrServiceForTesting(window);
     xhrMock = sandbox.mock(xhr);
 
     const ampdoc = ampdocServiceFor(window).getAmpDoc();
