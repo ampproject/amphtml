@@ -16,10 +16,11 @@
 import {validateData, writeScript} from '../3p/3p';
 
 /**
+ *
  * @param {!Window} global
  * @param {!Object} data
  */
 export function monetizer101(global, data) {
-    validateData(data, ['widgetId', 'widgetType', 'version'], ['config']);
-    writeScript(global, `https://prova.monetizer101.com/widget/amp/amp.js?widgetId=${data['widgetId']}&widgetType=${data['widgetType']}&version=${data['version']}&config=${data['config']}`);
+  validateData(data, ['widgetId', 'widgetType', 'version'], ['config']);
+  writeScript(global, `https://prova.monetizer101.com/widget/amp/amp.js?widgetId=${data['widgetId']}&widgetType=${data['widgetType']}&version=${data['version']}&config=${data['config']}`);
 }
