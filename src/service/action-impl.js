@@ -202,7 +202,7 @@ export class ActionService {
           } else if (expectedType === 'boolean') {
             detail[field] = !!value;
           } else {
-            detail[field] = value;
+            detail[field] = String(value);
           }
         });
         event.detail = detail;
