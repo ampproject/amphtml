@@ -120,9 +120,7 @@ describe('amp-nexxtv-player', () => {
     nexxtv.implementation_.handleNexxMessages_({
       origin: 'https://embed.nexx.cloud',
       source: iframe.contentWindow,
-      data: JSON.stringify({
-        cmd: command,
-      }),
+      data: command,
     });
   }
 });
