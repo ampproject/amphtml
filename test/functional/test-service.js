@@ -29,6 +29,8 @@ import {
   getServiceForDoc,
   getServicePromise,
   getServicePromiseForDoc,
+  getServicePromiseOrNull,
+  getServicePromiseOrNullForDoc,
   installServiceInEmbedScope,
   isDisposable,
   isEmbeddable,
@@ -207,6 +209,12 @@ describe('service', () => {
       return p.then(() => {
         expect(count).to.equal(1);
       });
+    });
+
+    it('should NOT return null promise for registered services', () => {
+      registerServiceBuilder(window, 'a', Class);
+      const p = getServicePromiseOrNull(window, 'a');
+      expect(p).to.not.be.null;
     });
 
     it('should resolve service for a child window', () => {
@@ -397,6 +405,12 @@ describe('service', () => {
           expect(factory).to.have.not.been.called;
         });
       });
+    });
+
+    it('should NOT return null promise for registered services', () => {
+      registerServiceBuilderForDoc(ampdoc, 'a', factory);
+      const p = getServicePromiseOrNullForDoc(ampdoc, 'a');
+      expect(p).to.not.be.null;
     });
 
     it('should resolve service for a child window', () => {
