@@ -409,7 +409,7 @@ describe('service', () => {
 
     it('should NOT return null promise for registered services', () => {
       registerServiceBuilderForDoc(ampdoc, 'a', factory);
-      const p = getServicePromiseOrNull(ampdoc, 'a');
+      const p = getServicePromiseOrNullForDoc(ampdoc, 'a');
       expect(p).to.not.be.null;
     });
 
