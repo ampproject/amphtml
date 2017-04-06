@@ -28,11 +28,11 @@ Common usage of this extended component might look like:
 
 Your first step will be writing the extended component JavaScript code. The
 code will be placed in the amphtml src tree at the location of
-`amphtml/extensions/amp-cat/0.1/`. However, this document only descriptes how to
+`amphtml/extensions/amp-cat/0.1/`. However, this document only describes how to
 specify validation rules for an extended component - it does not cover
 implementing its runtime behavior. For the latter, see the codelab [Creating
 your first AMP
-Component](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/)
+Component](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/).
 
 ## Validation Rules
 
@@ -152,8 +152,7 @@ to validate a tag that looks something like the following:
   html_format: AMP
 ```
 
-
-and that this tag
+This tells the validator that this tag
 should be valid in AMP format documents. Tags can also be valid in `AMP4ADS`
 format documents, if the tag should be used in an ad format. If you are unsure,
 leave the tag as an `AMP` format tag only for now. Additional formats can be
@@ -347,7 +346,7 @@ value_url: {
 ```
 This specifies that the attribute value must be a valid URL or an empty string.
 If an URL, it may be either "http" or "https" and may be relative. Note that in
-mant cases, you may only want to allow "https" as non-secure resources will
+many cases, you may only want to allow "https" as non-secure resources will
 generate mixed-mode warnings when displayed from the AMP Cache.
 
 Only one of:
@@ -391,7 +390,7 @@ attrs: {
 This document attempts to summarize some of the more commonly used rules for
 creating validator extended components. More complex rules are possible and new rule
 types can even be added as needed. If your goals are not met by the rules in
-this document, don't hesitate to contact the AMP developers and ask for
-suggestions.
+this document, [don't hesitate to
+contact](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels) the AMP developers and ask for suggestions.
 
 
