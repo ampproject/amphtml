@@ -88,7 +88,7 @@ export function getExistingServiceForWindow(win, id) {
 export function getExistingServiceForWindowOrNull(win, id) {
   win = getTopWindow(win);
   if (win.services && win.services[id]) {
-    return getService(win, id);
+    return getServiceInternal(win, win, id);
   } else {
     return null;
   }
@@ -120,11 +120,14 @@ export function getExistingServiceForWindowInEmbedScope(win, id) {
  * @return {!Object} The service.
  */
 export function getExistingServiceForDoc(nodeOrDoc, id) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
   const serviceHolder = getAmpdocServiceHolder(nodeOrDoc);
-  const exists = serviceHolder && serviceHolder.services &&
-      serviceHolder.services[id] && serviceHolder.services[id].obj;
-  return dev().assert(exists, `${id} doc service not found. Make sure it is ` +
-      `installed.`);
+  let service;
+  if (serviceHolder && serviceHolder.services && serviceHolder.services[id]) {
+    service = getServiceInternal(serviceHolder, ampdoc, id);
+  }
+  return dev().assert(/** @type (!Object) */ (service),
+      `${id} doc service not found. Make sure it is installed.`);
 }
 
 
@@ -588,7 +591,9 @@ function getServicePromiseOrNullInternal(holder, id) {
       return s.promise;
     } else if (s.obj) {
       return s.promise = Promise.resolve(s.obj);
-    } else if (s.build) {
+    } else {
+      dev().assert(s.build,
+          'Expected object, promise, or builder to be present');
       s.obj = s.build();
       return s.promise = Promise.resolve(s.obj);
     }
