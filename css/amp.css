@@ -77,7 +77,7 @@ html.i-amphtml-singledoc > body {
  * Note! For all other natural cases body's style is `body {overflow: visible}`
  * to avoid visibility issues with iframes.
  */
-html.i-amphtml-ios-webview > body {
+html.i-amphtml-webview > body {
   overflow-x: hidden !important;
   overflow-y: visible !important;
 }
