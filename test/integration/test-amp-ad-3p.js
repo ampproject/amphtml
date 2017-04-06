@@ -30,6 +30,7 @@ function createIframeWithApis(fixture) {
   let iframe;
   let ampAd;
   let lastIO = null;
+  let lastPosition = null;
   const platform = platformFor(fixture.win);
   return pollForLayout(fixture.win, 1, 5500).then(() => {
     // test amp-ad will create an iframe
@@ -104,13 +105,21 @@ function createIframeWithApis(fixture) {
     });
   }).then(() => {
     lastIO = null;
+    lastPosition = null;
     iframe.contentWindow.context.observeIntersection(changes => {
       lastIO = changes[changes.length - 1];
+    });
+    iframe.contentWindow.context.observePosition(data => {
+      lastPosition = data.target;
     });
     fixture.win.scrollTo(0, 1000);
     fixture.win.document.body.dispatchEvent(new Event('scroll'));
     return poll('wait for new IO entry', () => {
       return lastIO != null;
+    });
+  }).then(() => {
+    return poll('wait for new position', () => {
+      return lastPosition != null;
     });
   });
 }

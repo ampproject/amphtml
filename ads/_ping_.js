@@ -22,7 +22,8 @@ import {dev} from '../src/log';
  * @param {!Object} data
  */
 export function _ping_(global, data) {
-  validateData(data, [], ['valid', 'adHeight', 'adWidth', 'enableIo', 'url']);
+  validateData(data, [],
+      ['valid', 'adHeight', 'adWidth', 'enableIo', 'url', 'enablePosition']);
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
 
@@ -68,6 +69,12 @@ export function _ping_(global, data) {
         });
         // store changes to global.lastIO for testing purpose
         global.ping.lastIO = changes[changes.length - 1];
+      });
+    }
+    if (data.enablePosition) {
+      global.context.observePosition(function(data) {
+        dev().info('AMP-AD', 'Position: ' +
+            `target top ${data.target.top}, viewport top ${data.viewport.top}`);
       });
     }
   } else {

@@ -24,6 +24,8 @@ import {
 } from '../../../../testing/iframe';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {timerFor} from '../../../../src/services';
+import {PositionObserverApi} from '../../../../src/position-observer';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
 import * as sinon from 'sinon';
 
 describe('amp-ad-xorigin-iframe-handler', () => {
@@ -329,6 +331,32 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         requestedWidth: undefined,
         requestedHeight: 217,
         type: 'embed-size-changed',
+        sentinel: 'amp3ptest' + testIndex,
+      }));
+    });
+
+    it('should be able to use position API', () => {
+      sandbox.stub(adImpl, 'getVsync', () => {
+        return {
+          measure: function(callback) {
+            callback();
+          },
+        };
+      });
+      sandbox.stub(iframeHandler.positionObserver_, 'getPosition_', () => {
+        return {
+          viewport: layoutRectLtwh(0, 0, 0, 0),
+          target: layoutRectLtwh(0, 0, 0, 0),
+        };
+      });
+      iframe.postMessageToParent({
+        type: 'send-positions',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
+        viewport: layoutRectLtwh(0, 0, 0, 0),
+        target: layoutRectLtwh(0, 0, 0, 0),
+        type: 'position',
         sentinel: 'amp3ptest' + testIndex,
       }));
     });

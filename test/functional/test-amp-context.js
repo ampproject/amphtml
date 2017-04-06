@@ -181,6 +181,42 @@ describe('3p ampcontext.js', () => {
     expect(callbackSpy.calledTwice).to.be.true;
   });
 
+  it('should be able to send an position observer request', () => {
+    win.name = generateSerializedAttributes();
+    const context = new AmpContext(win);
+    const callbackSpy = sandbox.spy();
+
+    // Resetting since a message is sent on construction.
+    windowPostMessageSpy.reset();
+
+    const stopObserving = context.observePosition(callbackSpy);
+    expect(windowPostMessageSpy.calledOnce).to.be.true;
+    expect(windowPostMessageSpy.calledWith({
+      sentinel: '1-291921',
+      type: MessageType.SEND_POSITIONS,
+    }, '*'));
+
+    // send an position message down
+    const messagePayload = {
+      sentinel: '1-291921',
+      type: MessageType.POSITION,
+    };
+    const messageData = 'amp-' + JSON.stringify(messagePayload);
+    const message = {
+      source: context.client_.hostWindow_,
+      data: messageData,
+    };
+    windowMessageHandler(message);
+
+    expect(callbackSpy.calledWith(messagePayload));
+
+    callbackSpy.reset();
+    // Stop listening
+    stopObserving();
+    windowMessageHandler(message);
+    expect(callbackSpy).to.not.be.called;
+  });
+
   it('should send a pM and set callback when onPageVisibilityChange()', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);

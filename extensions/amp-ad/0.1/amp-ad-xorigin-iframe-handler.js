@@ -20,6 +20,9 @@ import {
   IntersectionObserver,
 } from '../../../src/intersection-observer';
 import {
+  PositionObserverApi,
+} from '../../../src/position-observer';
+import {
   SubscriptionApi,
   listenFor,
   listenForOncePromise,
@@ -58,6 +61,9 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
+    /** @private {?PositionObserverApi} */
+    this.positionObserver_ = null;
+
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
 
@@ -84,6 +90,10 @@ export class AmpAdXOriginIframeHandler {
 
     // Init IntersectionObserver service.
     this.intersectionObserver_ = new IntersectionObserver(
+        this.baseInstance_, this.iframe, true);
+
+    // Init PositionObserver service.
+    this.positionObserver_ = new PositionObserverApi(
         this.baseInstance_, this.iframe, true);
 
     this.embedStateApi_ = new SubscriptionApi(
@@ -288,6 +298,10 @@ export class AmpAdXOriginIframeHandler {
       this.intersectionObserver_.destroy();
       this.intersectionObserver_ = null;
     }
+    if (this.positionObserver_) {
+      this.positionObserver_.destroy();
+      this.positionObserver_ = null;
+    }
   }
 
   /**
@@ -366,9 +380,12 @@ export class AmpAdXOriginIframeHandler {
    */
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
-    // have changed. Send an intersection record if needed.
+    // have changed. Send an intersection and position record if needed.
     if (this.intersectionObserver_) {
       this.intersectionObserver_.fire();
+    }
+    if (this.positionObserver_) {
+      this.positionObserver_.fire();
     }
   }
 }
