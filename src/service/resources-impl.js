@@ -26,16 +26,16 @@ import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
 import {registerServiceBuilderForDoc} from '../service';
 import {inputFor} from '../input';
-import {viewerForDoc} from '../viewer';
-import {viewportForDoc} from '../viewport';
-import {vsyncFor} from '../vsync';
+import {viewerForDoc} from '../services';
+import {viewportForDoc} from '../services';
+import {vsyncFor} from '../services';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
-import {documentInfoForDoc} from '../document-info';
+import {documentInfoForDoc} from '../services';
 import {computedStyle} from '../style';
 
 const TAG_ = 'Resources';
@@ -309,27 +309,6 @@ export class Resources {
         }
         return true;
       });
-    });
-  }
-
-  /**
-   * Returns a subset of resources which is identified as being in the current
-   * viewport.
-   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
-   * @return {!Array<!Resource>}
-   * TODO(dvoytenko, #7815): remove once the reporting regression is confirmed.
-   */
-  getResourcesInViewportLegacy(opt_isInPrerender) {
-    opt_isInPrerender = opt_isInPrerender || false;
-    const viewportRect = this.viewport_.getRect();
-    return this.resources_.filter(r => {
-      if (r.hasOwner() || !r.isDisplayed() || !r.overlaps(viewportRect)) {
-        return false;
-      }
-      if (opt_isInPrerender && !r.prerenderAllowed()) {
-        return false;
-      }
-      return true;
     });
   }
 

@@ -88,7 +88,7 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     whitelist: [
       'build-system/pr-check.js',
-      'build-system/server.js',
+      'build-system/app.js',
       'validator/nodejs/index.js',  // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -279,6 +279,7 @@ var forbiddenTerms = {
       'extensions/amp-access/0.1/amp-login-done.js',
       'src/runtime.js',
       'src/log.js',
+      'src/web-worker/web-worker.js',
       'tools/experiments/experiments.js',
     ],
   },
@@ -290,10 +291,12 @@ var forbiddenTerms = {
       'src/service/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
+      'extensions/amp-app-banner/0.1/amp-app-banner.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
+      '3p/ampcontext-integration.js',
       'dist.3p/current/integration.js', // includes previous
     ],
   },
@@ -313,7 +316,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/ad-cid.js',
-      'src/cid.js',
+      'src/services.js',
       'src/service/cid-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
@@ -373,7 +376,7 @@ var forbiddenTerms = {
   'storageForDoc': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/storage.js',
+      'src/services.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
     ],
@@ -513,7 +516,7 @@ var forbiddenTerms = {
         'and getMode() to access config',
     whitelist: [
       'build-system/amp.extern.js',
-      'build-system/server.js',
+      'build-system/app.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
       'dist.3p/current/integration.js',
@@ -716,7 +719,7 @@ var forbiddenTermsSrcInclusive = {
         'code. Use a property of urls from src/config.js instead.',
     whitelist: [
       'ads/_a4a-config.js',
-      'build-system/server.js',
+      'build-system/app.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/config.js',

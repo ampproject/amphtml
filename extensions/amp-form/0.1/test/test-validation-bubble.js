@@ -31,7 +31,7 @@ describe('validation-bubble', () => {
 
   it('should append a dom element to the document', () => {
     return createIframePromise().then(iframe => {
-      new ValidationBubble(iframe.win);
+      new ValidationBubble(iframe.ampdoc);
       expect(iframe.doc.querySelector('.i-amphtml-validation-bubble'))
           .to.not.be.null;
     });
@@ -47,7 +47,7 @@ describe('validation-bubble', () => {
       targetEl.style.width = '200px';
       iframe.doc.body.appendChild(targetEl);
 
-      const bubble = new ValidationBubble(iframe.win);
+      const bubble = new ValidationBubble(iframe.ampdoc);
       bubble.vsync_ = {
         run: (task, state) => {
           if (task.measure) {

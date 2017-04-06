@@ -16,18 +16,34 @@
 import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
+import {nextTick} from './3p';
 import {tryParseJson} from '../src/json';
+import {isObject} from '../src/types';
 
-export class AmpContext {
+export class AbstractAmpContext {
 
   /**
    *  @param {!Window} win The window that the instance is built inside.
    */
   constructor(win) {
-    /** @private {!Window} */
+    dev().assert(!this.isAbstractImplementation_(),
+        'Should not construct AbstractAmpContext instances directly');
+
+    /** @protected {!Window} */
     this.win_ = win;
 
+    // This value is cached since it could be overwritten by the master frame
+    // check using a value of a different type.
+    /** @private {?string} */
+    this.cachedFrameName_ = this.win_.name || null;
+
     /** @type {?string} */
+    this.embedType_ = null;
+
+    /** @type {?string} */
+    this.clientId = null;
+
+    /** @type {?Location} */
     this.location = null;
 
     /** @type {?string} */
@@ -39,46 +55,101 @@ export class AmpContext {
     /** @type {?string} */
     this.sentinel = null;
 
-    // TODO(alanorozco): confirm type
-    /** @type {?} */
+    /** @type {?number} */
     this.startTime = null;
 
-    // TODO(alanorozco): confirm type
     /** @type {?string} */
     this.referrer = null;
 
+    /** @type {?boolean} */
+    this.hidden = null;
+
+    /** @type {?Object} */
+    this.mode = null;
+
+    /** @type {?Object} */
+    this.initialIntersection = null;
+
+    /** @type {?string} */
+    this.sourceUrl = null;
+
     this.findAndSetMetadata_();
+
+    /** @protected {!IframeMessagingClient} */
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.getHostWindow_());
     this.client_.setSentinel(dev().assertString(this.sentinel));
+
+    this.listenForPageVisibility_();
   }
 
   /**
-   *  Send message to runtime to start sending page visibility messages.
-   *  @param {function(Object)} callback Function to call every time we receive
-   *    a page visibility message.
+   * @return {boolean}
+   * @protected
+   */
+  isAbstractImplementation_() {
+    return true;
+  }
+
+  /** Registers an general handler for page visibility. */
+  listenForPageVisibility_() {
+    this.client_.makeRequest(
+        MessageType.SEND_EMBED_STATE,
+        MessageType.EMBED_STATE,
+        data => {
+          this.hidden = data.pageHidden;
+          this.dispatchVisibilityChangeEvent_();
+        });
+  }
+
+  /**
+   * TODO(alanorozco): Deprecate native event mechanism.
+   * @private
+   */
+  dispatchVisibilityChangeEvent_() {
+    const event = this.win_.document.createEvent('Event');
+    event.data = {hidden: this.hidden};
+    event.initEvent('amp:visibilitychange', true, true);
+    this.win_.dispatchEvent(event);
+  }
+
+  /**
+   *  Listen to page visibility changes.
+   *  @param {function({hidden: boolean})} callback Function to call every time
+   *    we receive a page visibility message.
    *  @returns {function()} that when called stops triggering the callback
    *    every time we receive a page visibility message.
    */
-  observePageVisibility(callback) {
-    return this.client_.makeRequest(
-        MessageType.SEND_EMBED_STATE,
-        MessageType.EMBED_STATE,
-        callback);
-  };
+  onPageVisibilityChange(callback) {
+    return this.client_.registerCallback(MessageType.EMBED_STATE, data => {
+      callback({hidden: data.pageHidden});
+    });
+  }
 
   /**
    *  Send message to runtime to start sending intersection messages.
-   *  @param {function(Object)} callback Function to call every time we receive
-   *  an intersection message.
+   *  @param {function(Array<Object>)} callback Function to call every time we
+   *    receive an intersection message.
    *  @returns {function()} that when called stops triggering the callback
    *    every time we receive an intersection message.
    */
   observeIntersection(callback) {
-    return this.client_.makeRequest(
+    const unlisten = this.client_.makeRequest(
         MessageType.SEND_INTERSECTIONS,
         MessageType.INTERSECTION,
-        callback);
+        intersection => {
+          callback(intersection.changes);
+        });
+
+    // Call the callback with the value that was transmitted when the
+    // iframe was drawn. Called in nextTick, so that callers don't
+    // have to specially handle the sync case.
+    // TODO(#8562): Deprecate this behavior
+    nextTick(this.win_, () => {
+      callback([this.initialIntersection]);
+    });
+
+    return unlisten;
   };
 
   /**
@@ -122,7 +193,8 @@ export class AmpContext {
    *  @param {HTMLIFrameElement} iframe The iframe we are adding the context to.
    */
   addContextToIframe(iframe) {
-    iframe.name = this.win_.name;
+    // TODO(alanorozco): consider the AMP_CONTEXT_DATA case
+    iframe.name = dev().assertString(this.cachedFrameName_);
   }
 
   /**
@@ -136,13 +208,20 @@ export class AmpContext {
     if (!dataObject) {
       throw new Error('Could not setup metadata.');
     }
-    const context = dataObject._context;
+    const context = dataObject._context || dataObject.attributes._context;
     this.location = context.location;
     this.canonicalUrl = context.canonicalUrl;
+    this.clientId = context.clientId;
     this.pageViewId = context.pageViewId;
     this.sentinel = context.sentinel;
     this.startTime = context.startTime;
     this.referrer = context.referrer;
+    this.mode = context.mode;
+    this.initialIntersection = context.initialIntersection;
+    this.hidden = context.hidden;
+    this.sourceUrl = context.sourceUrl;
+
+    this.embedType_ = dataObject.type || null;
   }
 
   /**
@@ -171,12 +250,24 @@ export class AmpContext {
     // to check the name attribute as it has been bypassed.
     // TODO(alanorozco): why the heck could AMP_CONTEXT_DATA be two different
     // types? FIX THIS.
-    if (!this.win_.AMP_CONTEXT_DATA) {
-      this.setupMetadata_(this.win_.name);
-    } else if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
-      this.sentinel = this.win_.AMP_CONTEXT_DATA;
+    if (isObject(this.win_.sf_) && this.win_.sf_.cfg) {
+      this.setupMetadata_(/** @type {!string}*/(this.win_.sf_.cfg));
+    } else if (this.win_.AMP_CONTEXT_DATA) {
+      if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
+        this.sentinel = this.win_.AMP_CONTEXT_DATA;
+      } else if (isObject(this.win_.AMP_CONTEXT_DATA)) {
+        this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
+      }
     } else {
-      this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
+      this.setupMetadata_(this.win_.name);
     }
+  }
+}
+
+
+export class AmpContext extends AbstractAmpContext {
+  /** @return {boolean} */
+  isAbstractImplementation_() {
+    return false;
   }
 }

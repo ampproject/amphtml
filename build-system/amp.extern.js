@@ -26,9 +26,18 @@ window.context.clientId;
 window.context.initialIntersection;
 window.context.sourceUrl;
 window.context.experimentToggles;
+window.context.master;
+window.context.isMaster;
 
 // Service Holder
 window.services;
+
+// Safeframe
+// TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
+/* @type {?Object} */
+window.sf_ = {};
+/* @type {?Object} */
+window.sf_.cfg;
 
 // Exposed to custom ad iframes.
 /* @type {!Function} */

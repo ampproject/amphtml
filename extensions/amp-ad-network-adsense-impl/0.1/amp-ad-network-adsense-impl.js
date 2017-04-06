@@ -24,7 +24,7 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-// import {dev} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
@@ -39,10 +39,10 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
-import {extensionsFor} from '../../../src/extensions';
+import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {computedStyle} from '../../../src/style';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
 
 /** @const {string} */
@@ -102,6 +102,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
+
+    /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
+    this.responseHeaders_ = null;
+
+    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
+    this.size_ = null;
   }
 
   /** @override */
@@ -126,15 +132,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
-    let size;
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    if (width && height) {
-      size = {width, height};
-    } else {
-      size = this.getIntersectionElementLayoutBox();
-    }
-    const format = `${size.width}x${size.height}`;
+    const width = Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('height'));
+    // Need to ensure these are numbers since width can be set to 'auto'.
+    // Checking height just in case.
+    this.size_ = isExperimentOn(this.win, 'as-use-attr-for-format')
+        && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
+        ? {width, height}
+        : this.getIntersectionElementLayoutBox();
+    const format = `${this.size_.width}x${this.size_.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
     // TODO(bcassels): Uncomment the assertion, fixing the tests.
@@ -147,8 +153,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const paramList = [
       {name: 'client', value: adClientId},
       {name: 'format', value: format},
-      {name: 'w', value: size.width},
-      {name: 'h', value: size.height},
+      {name: 'w', value: this.size_.width},
+      {name: 'h', value: this.size_.height},
       {name: 'adtest', value: adTestOn ? 'on' : null},
       {name: 'adk', value: adk},
       {name: 'raru', value: 1},
@@ -182,7 +188,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig =
       extractAmpAnalyticsConfig(responseHeaders, this.extensions_);
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+    this.responseHeaders_ = responseHeaders;
+    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders)
+        .then(adResponse => {
+          adResponse.size = this.size_;
+          return Promise.resolve(adResponse);
+        });
   }
 
   /**
@@ -244,7 +255,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
-    injectActiveViewAmpAnalyticsElement(this, this.ampAnalyticsConfig);
+    injectActiveViewAmpAnalyticsElement(
+        this, this.ampAnalyticsConfig, this.responseHeaders_);
   }
 }
 

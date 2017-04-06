@@ -16,7 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {getAttributesFromConfigObj} from './attributes';
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
 import {
   closestByTag,
   createElementWithAttributes,
@@ -202,6 +202,7 @@ export class Placement {
     const attributes = Object.assign({
       'layout': 'fixed-height',
       'height': '0',
+      'class': 'i-amphtml-layout-awaiting-size',
     }, baseAttributes, this.attributes_);
     return createElementWithAttributes(
         this.win_.document, 'amp-ad', attributes);

@@ -1,5 +1,5 @@
 FAIL
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:37:2 Tag 'amp-call-tracking' must have 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-call-tracking) [AMP_TAG_PROBLEM]
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:41:2 Tag 'amp-call-tracking' must have 1 child tags - saw 2 child tags. (see https://www.ampproject.org/docs/reference/components/amp-call-tracking) [AMP_TAG_PROBLEM]
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:47:2 The mandatory attribute 'config' is missing in tag 'amp-call-tracking'. (see https://www.ampproject.org/docs/reference/components/amp-call-tracking) [AMP_TAG_PROBLEM]
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:53:4 Tag 'div' is disallowed as child of tag 'amp-call-tracking'. Child tag must be one of ['a']. (see https://www.ampproject.org/docs/reference/components/amp-call-tracking) [AMP_TAG_PROBLEM]
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:37:2 Tag 'amp-call-tracking' must have 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/ads/amp-call-tracking) [AMP_TAG_PROBLEM]
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:41:2 Tag 'amp-call-tracking' must have 1 child tags - saw 2 child tags. (see https://www.ampproject.org/docs/reference/components/ads/amp-call-tracking) [AMP_TAG_PROBLEM]
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:47:2 The mandatory attribute 'config' is missing in tag 'amp-call-tracking'. (see https://www.ampproject.org/docs/reference/components/ads/amp-call-tracking) [AMP_TAG_PROBLEM]
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:53:4 Tag 'div' is disallowed as child of tag 'amp-call-tracking'. Child tag must be one of ['a']. (see https://www.ampproject.org/docs/reference/components/ads/amp-call-tracking) [AMP_TAG_PROBLEM]

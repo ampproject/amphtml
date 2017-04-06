@@ -18,7 +18,7 @@ import {AmpList} from '../amp-list';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {batchedXhrServiceForTesting,} from
     '../../../../src/service/batched-xhr-impl';
-import {templatesFor} from '../../../../src/template';
+import {templatesFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 

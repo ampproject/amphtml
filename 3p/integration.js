@@ -23,7 +23,10 @@
  */
 
 import './polyfills';
-import {AmpContext} from './ampcontext';
+import {
+  IntegrationAmpContext,
+  masterSelection,
+} from './ampcontext-integration';
 import {installEmbedStateListener, manageWin} from './environment';
 import {isExperimentOn} from './3p';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
@@ -120,6 +123,7 @@ import {nend} from '../ads/nend';
 import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
+import {outbrain} from '../ads/outbrain';
 import {plista} from '../ads/plista';
 import {popin} from '../ads/popin';
 import {pubmatic} from '../ads/pubmatic';
@@ -164,6 +168,7 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
   'mantis-recommend': true,
   mywidget: true,
+  outbrain: true,
   plista: true,
   smartclip: true,
   taboola: true,
@@ -273,6 +278,7 @@ register('nend', nend);
 register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);
+register('outbrain', outbrain);
 register('plista', plista);
 register('popin', popin);
 register('pubmatic', pubmatic);
@@ -372,33 +378,6 @@ export function draw3p(win, data, configCallback) {
 };
 
 /**
- * Returns the "master frame" for all widgets of a given type.
- * This frame should be used to e.g. fetch scripts that can
- * be reused across frames.
- * @param {string} type
- * @return {!Window}
- */
-function masterSelection(type) {
-  // The master has a special name.
-  const masterName = 'frame_' + type + '_master';
-  let master;
-  try {
-    // Try to get the master from the parent. If it does not
-    // exist yet we get a security exception that we catch
-    // and ignore.
-    master = window.parent.frames[masterName];
-  } catch (expected) {
-    /* ignore */
-  }
-  if (!master) {
-    // No master yet, rename ourselves to be master. Yaihh.
-    window.name = masterName;
-    master = window;
-  }
-  return master;
-}
-
-/**
  * @return {boolean} Whether this is the master iframe.
  */
 function isMaster() {
@@ -433,13 +412,16 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     manageWin(window);
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
-    updateVisibilityState(window);
 
-    // TODO(alanorozco): use IframeMessagingClient for updates when experiment
-    //                   flag is on.
-    // Subscribe to page visibility updates.
-    nonSensitiveDataPostMessage('send-embed-state');
-    nonSensitiveDataPostMessage('bootstrap-loaded');
+    if (isAmpContextExperimentOn()) {
+      window.context.bootstrapLoaded();
+    } else {
+      updateVisibilityState(window);
+
+      // Subscribe to page visibility updates.
+      nonSensitiveDataPostMessage('send-embed-state');
+      nonSensitiveDataPostMessage('bootstrap-loaded');
+    }
   } catch (e) {
     const c = window.context || {mode: {test: false}};
     if (!c.mode.test) {
@@ -450,18 +432,32 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
 };
 
 
+/** @return {boolean} */
+function isAmpContextExperimentOn() {
+  return isExperimentOn('3p-use-ampcontext');
+}
+
+
 /**
  * Installs window.context API.
  * @param {!Window} win
  */
 function installContext(win) {
-  if (isExperimentOn('3p-use-ampcontext')) {
-    // TODO(alanorozco): Enhance AmpContext to match standard implementation.
-    win.context = new AmpContext(win);
+  if (isAmpContextExperimentOn()) {
+    installContextUsingExperimentalImpl(win);
     return;
   }
 
   installContextUsingStandardImpl(win);
+}
+
+
+/**
+ * Installs window.context API.
+ * @param {!Window} win
+ */
+function installContextUsingExperimentalImpl(win) {
+  win.context = new IntegrationAmpContext(win);
 }
 
 
@@ -473,7 +469,7 @@ function installContextUsingStandardImpl(win) {
   // Define master related properties to be lazily read.
   Object.defineProperties(win.context, {
     master: {
-      get: () => masterSelection(data.type),
+      get: () => masterSelection(win, data.type),
     },
     isMaster: {
       get: isMaster,
@@ -584,13 +580,16 @@ function observeIntersection(observerCallback) {
 function updateVisibilityState(global) {
   listenParent(window, 'embed-state', function(data) {
     global.context.hidden = data.pageHidden;
-    const event = global.document.createEvent('Event');
-    event.data = {
-      hidden: data.pageHidden,
-    };
-    event.initEvent('amp:visibilitychange', true, true);
-    global.dispatchEvent(event);
+    dispatchVisibilityChangeEvent(global, data.pageHidden);
   });
+}
+
+
+function dispatchVisibilityChangeEvent(win, isHidden) {
+  const event = win.document.createEvent('Event');
+  event.data = {hidden: isHidden};
+  event.initEvent('amp:visibilitychange', true, true);
+  win.dispatchEvent(event);
 }
 
 /**

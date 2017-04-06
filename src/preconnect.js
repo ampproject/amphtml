@@ -22,9 +22,9 @@
 
 import {getService, registerServiceBuilder} from './service';
 import {parseUrl} from './url';
-import {timerFor} from './timer';
-import {platformFor} from './platform';
-import {viewerForDoc} from './viewer';
+import {timerFor} from './services';
+import {platformFor} from './services';
+import {viewerForDoc} from './services';
 import {dev} from './log';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;

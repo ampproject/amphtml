@@ -19,6 +19,7 @@ import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
+import {deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {formOrNullForElement} from '../../../src/form';
 import {isArray, toArray} from '../../../src/types';
@@ -26,7 +27,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 
@@ -38,6 +39,12 @@ const TAG = 'amp-bind';
  * @type {!RegExp}
  */
 const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
+
+/**
+ * Maximum depth for state merge.
+ * @type {number}
+ */
+const MAX_MERGE_DEPTH = 10;
 
 /**
  * A bound property, e.g. [property]="expression".
@@ -116,6 +123,10 @@ export class Bind {
     /** @const @private {boolean} */
     this.workerExperimentEnabled_ = isExperimentOn(this.win_, 'web-worker');
 
+    if (!this.workerExperimentEnabled_) {
+      this.evaluator_ = new BindEvaluator();
+    }
+
     /**
      * Resolved when the service is fully initialized.
      * @const @private {Promise}
@@ -146,7 +157,11 @@ export class Bind {
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     // TODO(choumx): What if `state` contains references to globals?
-    Object.assign(this.scope_, state);
+    try {
+      deepMerge(this.scope_, state, MAX_MERGE_DEPTH);
+    } catch (e) {
+      user().error(TAG, 'Failed to merge scope.', e);
+    }
 
     if (!opt_skipDigest) {
       this.setStatePromise_ = this.initializePromise_.then(() => {
@@ -184,12 +199,14 @@ export class Bind {
         return this.evaluator_.evaluateExpression(expression, scope);
       }
     }).then(returnValue => {
-      if (returnValue.error) {
-        user().error(TAG,
-            'AMP.setState() failed with error: ', returnValue.error);
-        throw returnValue.error;
+      const {result, error} = returnValue;
+      if (error) {
+        const userError = user().createError(`${TAG}: AMP.setState() failed `
+            + `with error: ${error.message}`);
+        userError.stack = error.stack;
+        reportError(userError);
       } else {
-        return this.setState(returnValue.result);
+        return this.setState(result);
       }
     });
     return this.setStatePromise_;
@@ -268,12 +285,12 @@ export class Bind {
             `bindings will be ignored.`);
       }
 
-      // Parse on web worker if experiment is enabled.
-      if (this.workerExperimentEnabled_) {
+      if (bindings.length == 0) {
+        return {};
+      } else if (this.workerExperimentEnabled_) {
         dev().fine(TAG, `Asking worker to parse expressions...`);
         return invokeWebWorker(this.win_, 'bind.addBindings', [bindings]);
       } else {
-        this.evaluator_ = this.evaluator_ || new BindEvaluator();
         const parseErrors = this.evaluator_.addBindings(bindings);
         return parseErrors;
       }
@@ -284,7 +301,7 @@ export class Bind {
         if (elements.length > 0) {
           const parseError = parseErrors[expressionString];
           const userError = user().createError(
-              `${TAG}: Expression syntax error in "${expressionString}". `
+              `${TAG}: Expression compilation error in "${expressionString}". `
               + parseError.message);
           userError.stack = parseError.stack;
           reportError(userError, elements[0]);
@@ -303,7 +320,6 @@ export class Bind {
    *
    * @param {!Element} node
    * @return {!Promise}
-   *
    * @private
    */
   removeBindingsForNode_(node) {
@@ -329,14 +345,17 @@ export class Bind {
       }
 
       // Remove the bindings from the evaluator.
-      if (this.workerExperimentEnabled_) {
-        dev().fine(TAG, `Asking worker to parse expressions...`);
-        return invokeWebWorker(this.win_,
-          'bind.removeBindingsWithExpressionStrings',
-          [deletedExpressions]);
-      } else {
-        this.evaluator_.removeBindingsWithExpressionStrings(deletedExpressions);
+      if (deletedExpressions.length > 0) {
+        if (this.workerExperimentEnabled_) {
+          dev().fine(TAG, `Asking worker to remove expressions...`);
+          return invokeWebWorker(this.win_,
+              'bind.removeBindingsWithExpressionStrings', [deletedExpressions]);
+        } else {
+          this.evaluator_.removeBindingsWithExpressionStrings(
+              deletedExpressions);
+        }
       }
+
       resolve();
     });
   }

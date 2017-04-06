@@ -15,7 +15,7 @@
  */
 
 import {childElementByTag} from '../dom';
-import {fromClass} from '../service';
+import {getService, registerServiceBuilder} from '../service';
 import {dev, user} from '../log';
 
 
@@ -190,25 +190,45 @@ export class Templates {
   }
 
   /**
-   * The template can be specified either via "template" attribute or as a
-   * child "template" element. When specified via "template" attribute,
-   * the value indicates the ID of the template element.
+   * Detect if a template is present inside the parent.
+   * @param {!Element} parent
+   * @return {boolean}
+   */
+  hasTemplate(parent) {
+    return !!this.maybeFindTemplate_(parent);
+  }
+
+  /**
+   * Find a specified template inside the parent. Fail if the template is
+   * not present.
    * @param {!Element} parent
    * @return {!Element}
    * @private
    */
   findTemplate_(parent) {
-    let templateElement = null;
-    const templateId = parent.getAttribute('template');
-    if (templateId) {
-      templateElement = parent.ownerDocument.getElementById(templateId);
-    } else {
-      templateElement = childElementByTag(parent, 'template');
-    }
+    const templateElement = this.maybeFindTemplate_(parent);
     user().assert(templateElement, 'Template not found for %s', parent);
     user().assert(templateElement.tagName == 'TEMPLATE',
         'Template element must be a "template" tag %s', templateElement);
     return templateElement;
+  }
+
+  /**
+   * Find a specified template inside the parent. Returns null if not present.
+   * The template can be specified either via "template" attribute or as a
+   * child "template" element. When specified via "template" attribute,
+   * the value indicates the ID of the template element.
+   * @param {!Element} parent
+   * @return {?Element}
+   * @private
+   */
+  maybeFindTemplate_(parent) {
+    const templateId = parent.getAttribute('template');
+    if (templateId) {
+      return parent.ownerDocument.getElementById(templateId);
+    } else {
+      return childElementByTag(parent, 'template');
+    }
   }
 
   /**
@@ -318,6 +338,13 @@ export class Templates {
 
 
 /**
+ * @param {!Window} win
+ */
+export function installTemplatesService(win) {
+  registerServiceBuilder(win, 'templates', Templates);
+}
+
+/**
  * Registers an extended template. This function should typically be called
  * through the registerTemplate method on the AMP runtime.
  * @param {!Window} win
@@ -326,14 +353,6 @@ export class Templates {
  * @package
  */
 export function registerExtendedTemplate(win, type, templateClass) {
-  return installTemplatesService(win).registerTemplate_(type, templateClass);
+  const templatesService = getService(win, 'templates');
+  return templatesService.registerTemplate_(type, templateClass);
 }
-
-
-/**
- * @param {!Window} window
- * @return {!Templates}
- */
-export function installTemplatesService(window) {
-  return fromClass(window, 'templates', Templates);
-};

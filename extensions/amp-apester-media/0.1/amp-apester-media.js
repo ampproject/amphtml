@@ -17,8 +17,8 @@ import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {user, dev} from '../../../src/log';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
-import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
+import {vsyncFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 
 
 /** @const */

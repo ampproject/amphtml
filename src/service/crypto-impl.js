@@ -17,7 +17,7 @@
 import {PublicKeyInfoDef} from '../crypto';
 import {registerServiceBuilder, getService} from '../service';
 import {dev} from '../log';
-import {extensionsFor} from '../extensions';
+import {extensionsFor} from '../services';
 import {stringToBytes, utf8Encode} from '../utils/bytes';
 import {
   base64UrlDecodeToBytes,

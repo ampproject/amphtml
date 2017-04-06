@@ -38,8 +38,8 @@ const TOLERANCE_ = 2;
 
 
 import {removeElement} from '../../../src/dom';
-import {timerFor} from '../../../src/timer';
-import {vsyncFor} from '../../../src/vsync';
+import {timerFor} from '../../../src/services';
+import {vsyncFor} from '../../../src/services';
 import * as style from '../../../src/style';
 
 
