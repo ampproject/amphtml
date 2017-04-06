@@ -302,7 +302,7 @@ export function vsyncFor(window) {
  */
 export function viewportForDoc(nodeOrDoc) {
   return /** @type {!./service/viewport-impl.Viewport} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'viewport'));
+      getServiceForDoc(nodeOrDoc, 'viewport'));
 }
 
 /**
