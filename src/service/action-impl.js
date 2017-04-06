@@ -189,7 +189,7 @@ export class ActionService {
         fieldsToInclude.forEach(field => {
           const value = target[field];
           const valueAsNumber = parseFloat(value);
-          detail[field] = valueAsNumber || value;
+          detail[field] = isNaN(valueAsNumber) ? value : valueAsNumber;
         });
         event.detail = detail;
       }
