@@ -407,6 +407,12 @@ describe('service', () => {
       });
     });
 
+    it('should NOT return null promise for registered services', () => {
+      registerServiceBuilderForDoc(ampdoc, 'a', factory);
+      const p = getServicePromiseOrNull(ampdoc, 'a');
+      expect(p).to.not.be.null;
+    });
+
     it('should resolve service for a child window', () => {
       ampdocMock.expects('isSingleDoc').returns(true).atLeast(1);
       const c = getServiceForDoc(node, 'c', factory);
