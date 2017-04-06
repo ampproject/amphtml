@@ -966,10 +966,7 @@ describe('Core events', () => {
     const element = {tagName: 'target2', nodeType: 1};
     const event = {target: element};
     handler(event);
-    expect(action.trigger).to.have.been.calledWith(
-        element,
-        'change',
-        sinon.match.any);
+    expect(action.trigger).to.have.been.calledWith(element, 'change', event);
   });
 
   it('should trigger change event with details for whitelisted inputs', () => {
