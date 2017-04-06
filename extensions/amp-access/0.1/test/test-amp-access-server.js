@@ -17,7 +17,6 @@
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 
 
 describes.realWin('AccessServerAdapter', {amp: true}, env => {

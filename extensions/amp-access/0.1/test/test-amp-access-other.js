@@ -15,18 +15,15 @@
  */
 
 import {AccessOtherAdapter} from '../amp-access-other';
-import * as sinon from 'sinon';
 
 
 describes.realWin('AccessOtherAdapter', {amp: true}, env => {
-  let win;
   let ampdoc;
   let validConfig;
   let context;
   let contextMock;
 
   beforeEach(() => {
-    win = env.win;
     ampdoc = env.ampdoc;
 
     validConfig = {};

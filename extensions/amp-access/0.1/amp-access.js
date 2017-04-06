@@ -27,7 +27,6 @@ import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
 import {cidForDoc} from '../../../src/services';
 import {evaluateAccessExpr} from './access-expr';
-import {getService} from '../../../src/service';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStyles} from '../../../src/style-installer';
 import {installStylesForShadowRoot} from '../../../src/shadow-embed';

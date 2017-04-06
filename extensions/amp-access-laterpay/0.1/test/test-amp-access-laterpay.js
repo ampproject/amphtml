@@ -16,7 +16,6 @@
 
 import {LaterpayVendor} from '../laterpay-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 
 
 describes.fakeWin('LaterpayVendor', {

@@ -19,12 +19,10 @@ import {AccessVendorAdapter} from '../amp-access-vendor';
 
 
 describes.realWin('AccessVendorAdapter', {amp: true}, env => {
-  let win;
   let ampdoc;
   let validConfig;
 
   beforeEach(() => {
-    win = env.win;
     ampdoc = env.ampdoc;
     validConfig = {
       'vendor': 'vendor1',
@@ -36,7 +34,7 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
 
   describe('config', () => {
     it('should load valid config', () => {
-      const adapter = new AccessVendorAdapter(win, validConfig);
+      const adapter = new AccessVendorAdapter(ampdoc, validConfig);
       expect(adapter.vendorName_).to.equal('vendor1');
       expect(adapter.getConfig()).to.deep.equal({
         vendorConfigParam: 'vendorConfigValue',
@@ -48,12 +46,12 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
     it('should require vendor name', () => {
       delete validConfig['vendor'];
       expect(() => {
-        new AccessVendorAdapter(win, validConfig);
+        new AccessVendorAdapter(ampdoc, validConfig);
       }).to.throw(/"vendor" name must be specified/);
     });
 
     it('should wait registration', () => {
-      const adapter = new AccessVendorAdapter(win, validConfig);
+      const adapter = new AccessVendorAdapter(ampdoc, validConfig);
       expect(adapter.vendorResolve_).to.exist;
       const vendor = {};
       adapter.registerVendor('vendor1', vendor);
@@ -64,14 +62,14 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
     });
 
     it('should fail registration with a wrong name', () => {
-      const adapter = new AccessVendorAdapter(win, validConfig);
+      const adapter = new AccessVendorAdapter(ampdoc, validConfig);
       expect(() => {
         adapter.registerVendor('vendor2', {});
       }).to.throw(/match the configured vendor/);
     });
 
     it('should fail re-registration', () => {
-      const adapter = new AccessVendorAdapter(win, validConfig);
+      const adapter = new AccessVendorAdapter(ampdoc, validConfig);
       expect(adapter.vendorResolve_).to.exist;
       adapter.registerVendor('vendor1', {});
       expect(() => {
@@ -81,13 +79,12 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
   });
 
   describe('runtime', () => {
-
     let adapter;
     let vendor;
     let vendorMock;
 
     beforeEach(() => {
-      adapter = new AccessVendorAdapter(win, validConfig);
+      adapter = new AccessVendorAdapter(ampdoc, validConfig);
       vendor = new AccessVendor();
       vendorMock = sandbox.mock(vendor);
       adapter.registerVendor(validConfig['vendor'], vendor);
