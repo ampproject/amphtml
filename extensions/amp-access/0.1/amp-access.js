@@ -732,9 +732,7 @@ export class AccessService {
       }));
 
       // 2. After a few seconds: register a view.
-      const timeoutId = this.timer_.delay(function() {
-        resolve();
-      }, timeToView);
+      const timeoutId = this.timer_.delay(resolve, timeToView);
       unlistenSet.push(() => this.timer_.cancel(timeoutId));
 
       // 3. If scrolled: register a view.
