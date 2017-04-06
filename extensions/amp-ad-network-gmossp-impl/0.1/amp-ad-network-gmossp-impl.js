@@ -38,10 +38,10 @@ export class AmpAdNetworkGmosspImpl extends AmpA4A {
   isValidElement() {
     return this.isAmpAdElement();
   }
-  
+
   /** @override */
   getSigningServiceNames() {
-     return ['google'];
+    return ['google'];
   }
 
   /** @override */
