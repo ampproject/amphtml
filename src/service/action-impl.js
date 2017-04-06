@@ -49,11 +49,19 @@ const ELEMENTS_ACTIONS_MAP_ = {
   'AMP': ['setState'],
 };
 
-/** @const {!Object<string, !Array<string>>} */
+/** @const {!Object<string, !Object<string, string>>} */
 const WHITELISTED_INPUT_DATA_ = {
-  'range': ['min', 'max', 'value'],
-  'radio': ['checked'],
-  'checkbox': ['checked'],
+  range: {
+    min: 'number',
+    max: 'number',
+    value: 'number',
+  },
+  radio: {
+    checked: 'boolean',
+  },
+  checkbox: {
+    checked: 'boolean',
+  },
 };
 
 /**
@@ -186,10 +194,16 @@ export class ActionService {
       const inputType = target.getAttribute('type');
       const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
       if (fieldsToInclude) {
-        fieldsToInclude.forEach(field => {
+        Object.keys(fieldsToInclude).forEach(field => {
+          const expectedType = fieldsToInclude[field];
           const value = target[field];
-          const valueAsNumber = parseFloat(value);
-          detail[field] = isNaN(valueAsNumber) ? value : valueAsNumber;
+          if (expectedType === 'number') {
+            detail[field] = Number(value);
+          } else if (expectedType === 'boolean') {
+            detail[field] = !!value;
+          } else {
+            detail[field] = value;
+          }
         });
         event.detail = detail;
       }
