@@ -203,6 +203,7 @@ as well as a link to documentation on ampproject.org for all error messages.
 ```
     allowed_versions: "0.1"
     allowed_versions: "latest"
+  }
 ```
 These fields define a list of all allowed version numbers. Currently, almost all
 extended components are at version `0.1`, and we also allow `latest` to be specified.
@@ -212,7 +213,6 @@ The combination of the `allowed_versions` and `name` fields of the
 script tag, for example `src=https://cdn.ampproject.org/v0/amp-cat-0.1.js`.
 
 ```
-  }
   attr_lists: "common-extension-attrs"
 }
 ```
