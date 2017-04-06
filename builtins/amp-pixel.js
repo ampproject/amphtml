@@ -69,30 +69,16 @@ export class AmpPixel extends BaseElement {
       return urlReplacementsForDoc(this.element)
           .expandAsync(this.assertSource_(src))
           .then(src => {
-            const image = new Image();
-            const referrerPolicy = this.element.getAttribute('referrerpolicy');
-            // if "referrerPolicy" is not supported, use iframe wrapper
-            // to scrub the referrer.
-            if (image.referrerPolicy === undefined &&
-                referrerPolicy == 'no-referrer') {
-              const iframe = createElementWithAttributes(
-                  this.win.document, 'iframe', {
-                    src: `javascript: '<img src="${src}">'`,
-                  });
-              this.element.appendChild(iframe);
-              dev().info(TAG, 'pixel triggered via iframe: ', src);
-              return iframe;
+            let pixel;
+            if (this.element.getAttribute('referrerpolicy') == 'no-referrer') {
+              pixel = createNoReferrerPixel(this.win.document, src);
+              // referrerPolicy is respected only if the image is attached
+              this.element.appendChild(pixel);
             } else {
-              if (referrerPolicy) {
-                image.referrerPolicy = referrerPolicy;
-                // referrerPolicy is respected only if the image is attached
-                // to DOM
-                this.element.appendChild(image);
-              }
-              image.src = src;
-              dev().info(TAG, 'pixel triggered: ', src);
-              return image;
+              pixel = createImagePixel(src);
             }
+            dev().info(TAG, 'pixel triggered: ', src);
+            return pixel;
           });
     });
   }
@@ -111,6 +97,44 @@ export class AmpPixel extends BaseElement {
   }
 }
 
+/**
+ * @param {Document} doc
+ * @param {string} src
+ * @returns {!Element}
+ */
+function createNoReferrerPixel(doc, src) {
+  if (isReferrerPolicySupported()) {
+    return createImagePixel(src, true);
+  } else {
+    // if "referrerPolicy" is not supported, use iframe wrapper
+    // to scrub the referrer.
+    return createElementWithAttributes(
+        doc, 'iframe', {
+          src: `javascript: '<img src="${src}">'`,
+        });
+  }
+}
+
+/**
+ * @param {string} src
+ * @param {boolean=} noReferrer
+ * @returns {!Image}
+ */
+function createImagePixel(src, noReferrer) {
+  const image = new Image();
+  image.src = src;
+  if (noReferrer) {
+    image.referrerPolicy = 'no-referrer';
+  }
+  return image;
+}
+
+/**
+ * @returns {boolean}
+ */
+function isReferrerPolicySupported() {
+  return new Image().referrerPolicy !== undefined;
+}
 
 /**
  * @param {!Window} win Destination window for the new element.
