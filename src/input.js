@@ -15,9 +15,9 @@
  */
 
 import {Observable} from './observable';
-import {fromClass} from './service';
 import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
+import {registerServiceBuilder} from './service';
 
 
 const TAG_ = 'Input';
@@ -239,11 +239,9 @@ export class Input {
   }
 }
 
-
 /**
- * @param {!Window} window
- * @return {!Input}
+ * @param {!Window} win
  */
-export function inputFor(window) {
-  return fromClass(window, 'input', Input);
-};
+export function installInputService(win) {
+  registerServiceBuilder(win, 'input', Input);
+}
