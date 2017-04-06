@@ -107,7 +107,7 @@ function createNoReferrerPixel(parentElement, src) {
     // if "referrerPolicy" is not supported, use iframe wrapper
     // to scrub the referrer.
     const iframe = createElementWithAttributes(
-        parentElement.ownerDocument, 'iframe', {
+        /** @type {!Document} */ (parentElement.ownerDocument), 'iframe', {
           src: `javascript: '<img src="${src}">'`,
         });
     parentElement.appendChild(iframe);
