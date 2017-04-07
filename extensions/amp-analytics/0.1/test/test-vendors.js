@@ -17,10 +17,8 @@
 import {ANALYTICS_CONFIG} from '../vendors';
 
 describe('analyaitcs vendors', () => {
-
   it('googleanalytics & googleanalytics-legacycookie should be identical, ' +
       'expect the Client ID cookie name', () => {
-
     const gaConfig = ANALYTICS_CONFIG['googleanalytics'];
     expect(gaConfig).not.to
         .deep.equal(ANALYTICS_CONFIG['googleanalytics-v2']);
