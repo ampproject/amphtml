@@ -43,8 +43,8 @@ export function netletix(global, data) {
   validateData(data,
       global._netletix_amp.mandatory_data, global._netletix_amp.allowed_data);
 
-  const rand = Math.round(Math.random() * 100000000);
   const ls = 'https://call.adadapter.netzathleten-media.de';
+  const rand = Math.round(Math.random() * 100000000);
   const nxkey = (data.nxkey ? data.nxkey : 'default');
   const nxunit = (data.nxunit ? data.nxunit : 'default');
   const nxwidth = (data.nxwidth ? data.nxwidth : 'fluid');
