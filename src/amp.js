@@ -41,6 +41,7 @@ import {
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
+import {resourcesForDoc} from './services';
 
 // Store the originalHash as early as possible. Trying to debug:
 // https://github.com/ampproject/amphtml/issues/6070
@@ -102,6 +103,7 @@ startupChunk(self.document, function initial() {
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');
+      resourcesForDoc(ampdoc).ampInitComplete();
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.
       perf.flush();

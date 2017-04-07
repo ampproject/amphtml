@@ -875,11 +875,14 @@ describe('Resources discoverWork', () => {
     sandbox.restore();
   });
 
-  it('should set ready-scan signal on first ready pass', () => {
+  it('should set ready-scan signal on first ready pass after amp init', () => {
     resources.isRuntimeOn_ = true;
     resources.documentReady_ = true;
     resources.firstPassAfterDocumentReady_ = true;
     sandbox.stub(resources.visibilityStateMachine_, 'setState');
+    resources.doPass_();
+    expect(resources.ampdoc.signals().get('ready-scan')).to.be.null;
+    resources.ampInitComplete();
     resources.doPass_();
     resources.isRuntimeOn_ = false;
     expect(resources.ampdoc.signals().get('ready-scan')).to.be.ok;
