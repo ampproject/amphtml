@@ -96,7 +96,7 @@ For example, the following is possible in AMP.
 
 ### Input Elements (any that fires `change` event)
 
-Including: `input[type=radio]`, `input[type=checkbox]` and `select`.
+Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and `select`.
 
 <table>
   <tr>
@@ -107,7 +107,7 @@ Including: `input[type=radio]`, `input[type=checkbox]` and `select`.
   <tr>
     <td>change</td>
     <td>Fired when the value of the element is changed.</td>
-    <td> Various, see below.</td>
+    <td>Various, see below.</td>
   </tr>
 </table>
 
