@@ -37,6 +37,7 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
+import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {computedStyle} from '../../../src/style';
 import {viewerForDoc} from '../../../src/services';
@@ -94,9 +95,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /**
      * Config to generate amp-analytics element for active view reporting.
      * @type {?JSONType}
-     * @visibleForTesting
+     * @private
      */
-    this.ampAnalyticsConfig = null;
+    this.ampAnalyticsConfig_ = null;
+
+    /** @private {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = extensionsFor(this.win);
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
@@ -178,7 +182,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig = extractAmpAnalyticsConfig(this, responseHeaders);
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
+    if (this.ampAnalyticsConfig_) {
+      // Load amp-analytics extensions
+      this.extensions_./*OK*/loadExtension('amp-analytics');
+    }
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders)
         .then(adResponse => {
           adResponse.size = this.size_;
@@ -232,7 +240,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
-    this.ampAnalyticsConfig = null;
+    this.ampAnalyticsConfig_ = null;
   }
 
   /**
@@ -245,8 +253,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
-    if (this.ampAnalyticsConfig) {
-      insertAnalyticsElement(this.element, this.ampAnalyticsConfig, true);
+    if (this.ampAnalyticsConfig_) {
+      insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
   }
 }

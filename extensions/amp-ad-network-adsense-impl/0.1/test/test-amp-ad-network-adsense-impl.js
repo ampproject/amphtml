@@ -275,6 +275,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
   });
 
   describe('#extractCreativeAndSignature', () => {
+    let loadExtensionSpy;
 
     beforeEach(() => {
       return createIframePromise().then(fixture => {
@@ -287,6 +288,9 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'layout': 'fixed',
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
+        installExtensionsService(impl.win);
+        const extensions = extensionsFor(impl.win);
+        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
 
@@ -300,7 +304,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           }).then(adResponse => {
             expect(adResponse).to.deep.equal(
                   {creative, signature: null, size: null});
-            expect(impl.ampAnalyticsConfig).to.be.null;
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
           });
       });
     });
@@ -319,7 +323,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             expect(adResponse).to.deep.equal(
               {creative, signature: base64UrlDecodeToBytes('AQAB'),
                 size: null});
-            expect(impl.ampAnalyticsConfig).to.be.null;
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
           });
       });
     });
@@ -349,8 +353,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 signature: base64UrlDecodeToBytes('AQAB'),
                 size: null,
               });
-            expect(impl.ampAnalyticsConfig).to.not.be.null;
-            // exact value of ampAnalyticsConfig covered in
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+            // exact value of ampAnalyticsConfig_ covered in
             // ads/google/test/test-utils.js
           });
       });
@@ -358,7 +362,6 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
   });
 
   describe('#onCreativeRender', () => {
-    let loadExtensionSpy;
     beforeEach(() => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -370,13 +373,11 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
         installExtensionsService(impl.win);
-        const extensions = extensionsFor(impl.win);
-        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
 
     it('injects amp analytics', () => {
-      impl.ampAnalyticsConfig = {
+      impl.ampAnalyticsConfig_ = {
         'request': 'www.example.com',
         'triggers': {
           'on': 'visible',
@@ -385,9 +386,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       impl.onCreativeRender(false);
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
-      expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig);
+      expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
       expect(ampAnalyticsElement.getAttribute('sandbox')).to.equal('true');;
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.calledOnce;
       // Exact format of amp-analytics element covered in
       // test/functional/test-analytics.js.
       // Just ensure extensions is loaded, and analytics element appended.

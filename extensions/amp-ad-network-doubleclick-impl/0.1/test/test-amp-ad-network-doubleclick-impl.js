@@ -80,6 +80,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   });
 
   describe('#extractCreativeAndSignature', () => {
+    let loadExtensionSpy;
     const size = {width: 200, height: 50};
 
     beforeEach(() => {
@@ -94,6 +95,9 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
         impl.size_ = size;
+        installExtensionsService(impl.win);
+        const extensions = extensionsFor(impl.win);
+        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
 
@@ -107,7 +111,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           }).then(adResponse => {
             expect(adResponse).to.deep.equal(
                   {creative, signature: null, size});
-            expect(impl.ampAnalyticsConfig).to.be.null;
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+
           });
       });
     });
@@ -125,7 +130,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           }).then(adResponse => {
             expect(adResponse).to.deep.equal(
               {creative, signature: base64UrlDecodeToBytes('AQAB'), size});
-            expect(impl.ampAnalyticsConfig).to.be.null;
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
           });
       });
     });
@@ -155,7 +160,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
                 signature: base64UrlDecodeToBytes('AQAB'),
                 size,
               });
-            expect(impl.ampAnalyticsConfig).to.not.be.null;
+            expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
             // exact value of ampAnalyticsConfig covered in
             // ads/google/test/test-utils.js
           });
@@ -164,7 +169,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   });
 
   describe('#onCreativeRender', () => {
-    let loadExtensionSpy;
     beforeEach(() => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -176,27 +180,24 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
         installExtensionsService(impl.win);
-        const extensions = extensionsFor(impl.win);
-        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
 
     it('injects amp analytics', () => {
-      const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-      impl.ampAnalyticsConfig = {urls};
-      impl.responseHeaders_ = {get: () => 'qqid_string'};
+      impl.ampAnalyticsConfig_ = {
+        'request': 'www.example.com',
+        'triggers': {
+          'on': 'visible',
+        },
+      };
       impl.onCreativeRender(false);
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
-      expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig);
+      expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
       expect(ampAnalyticsElement.getAttribute('sandbox')).to.equal('true');;
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.calledOnce;
       // Exact format of amp-analytics element covered in
       // test/functional/test-analytics.js.
       // Just ensure extensions is loaded, and analytics element appended.
-      urls.forEach(url => {
-        expect(ampAnalyticsElement.innerHTML.indexOf(url)).to.not.equal(-1);
-      });
     });
   });
 

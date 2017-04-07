@@ -138,8 +138,12 @@ describe('Google A4A utils', () => {
             }
           },
           has: function(name) {
-            expect(name).to.equal('X-AmpAnalytics');
-            return true;
+            if (name == 'X-AmpAnalytics') {
+              return true;
+            }
+            if (name == 'X-QQID') {
+              return true;
+            }
           },
         };
         const element = createElementWithAttributes(fixture.doc, 'amp-a4a', {
@@ -186,22 +190,14 @@ describe('Google A4A utils', () => {
             continuousVisibleIniLoad: {
               on: 'ini-load',
               request: 'visibilityCsi',
-              visibilitySpec: {
-                selector: 'amp-ad',
-                selectionMethod: 'closest',
-                visiblePercentageMin: 50,
-                continuousTimeMin: 1000,
-              },
+              selector: 'amp-ad',
+              selectionMethod: 'closest',
             },
             continuousVisibleRenderStart: {
               on: 'render-start',
               request: 'visibilityCsi',
-              visibilitySpec: {
-                selector: 'amp-ad',
-                selectionMethod: 'closest',
-                visiblePercentageMin: 50,
-                continuousTimeMin: 1000,
-              },
+              selector: 'amp-ad',
+              selectionMethod: 'closest',
             },
           },
         });

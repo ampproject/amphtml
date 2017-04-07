@@ -364,64 +364,67 @@ export function additionalDimensions(win, viewportSize) {
  * @return {?JSONType} config or null if invalid/missing.
  */
 export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
-  if (responseHeaders.has(AMP_ANALYTICS_HEADER)) {
-    try {
-      const analyticsConfig =
-        JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
-      console.log('anayticsConfig is ', analyticsConfig['url']);
-      dev().assert(Array.isArray(analyticsConfig['url']) &&
-          analyticsConfig['url'].length);
-      const urls = analyticsConfig.url;
+  if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
+    return null;
+  }
+  try {
+    const analyticsConfig =
+      JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
+    dev().assert(Array.isArray(analyticsConfig['url']));
+    const urls = analyticsConfig.url;
+    if (!urls.length) {
+      return null;
+    }
 
-      const visibilitySpec = {
-        'selector': 'amp-ad',
-        'selectionMethod': 'closest',
-        'visiblePercentageMin': 50,
-        'continuousTimeMin': 1000,
-      };
-      const config = {
-        'transport': {'beacon': false, 'xhrpost': false},
-        'triggers': {
-          'continuousVisible': {
-            'on': 'visible',
-            visibilitySpec,
-          },
-          'continuousVisibleIniLoad': {
-            'on': 'ini-load',
-            visibilitySpec,
-          },
-          'continuousVisibleRenderStart': {
-            'on': 'render-start',
-            visibilitySpec,
+    const config = {
+      'transport': {'beacon': false, 'xhrpost': false},
+      'triggers': {
+        'continuousVisible': {
+          'on': 'visible',
+          'visibilitySpec': {
+            'selector': 'amp-ad',
+            'selectionMethod': 'closest',
+            'visiblePercentageMin': 50,
+            'continuousTimeMin': 1000,
           },
         },
-      };
-      const requests = {};
-      for (let idx = 1; idx <= urls.length; idx++) {
-        // TODO: Ensure url is valid and not freeform JS?
-        requests[`visibility${idx}`] = `${urls[idx - 1]}`;
-      }
-      console.log('config is ', config);
-      // Security review needed here.
-      config['requests'] = requests;
-      config['triggers']['continuousVisible']['request'] =
-          Object.keys(requests);
-      // Add CSI pingbacks.
-      const correlator = getCorrelator(a4a.win);
-      const slotId = a4a.element.getAttribute('data-amp-slot-index');
-      const qqid = responseHeaders ? responseHeaders.get(QQID_HEADER) : 'null';
-      config['requests']['visibilityCsi'] =
-          'https://csi.gstatic.com/csi?fromAnalytics=1' +
-          `&c=${correlator}&slotId=${slotId}&qqid.0=${qqid}`;
-      config['triggers']['continuousVisibleIniLoad']['request'] =
-          'visibilityCsi';
-      config['triggers']['continuousVisibleRenderStart']['request'] =
-          'visibilityCsi';
-      return config;
-    } catch (err) {
-      dev().error('AMP-A4A', 'Invalid analytics', err,
-          responseHeaders.get(AMP_ANALYTICS_HEADER));
+        'continuousVisibleIniLoad': {
+          'on': 'ini-load',
+          'selector': 'amp-ad',
+          'selectionMethod': 'closest',
+        },
+        'continuousVisibleRenderStart': {
+          'on': 'render-start',
+          'selector': 'amp-ad',
+          'selectionMethod': 'closest',
+        },
+      },
+    };
+    const requests = {};
+    for (let idx = 1; idx <= urls.length; idx++) {
+      // TODO: Ensure url is valid and not freeform JS?
+      requests[`visibility${idx}`] = `${urls[idx - 1]}`;
     }
+    // Security review needed here.
+    config['requests'] = requests;
+    config['triggers']['continuousVisible']['request'] =
+        Object.keys(requests);
+    // Add CSI pingbacks.
+    const correlator = getCorrelator(a4a.win);
+    const slotId = a4a.element.getAttribute('data-amp-slot-index');
+    const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
+        ? responseHeaders.get(QQID_HEADER) : 'null';
+    config['requests']['visibilityCsi'] =
+        'https://csi.gstatic.com/csi?fromAnalytics=1' +
+        `&c=${correlator}&slotId=${slotId}&qqid.0=${qqid}`;
+    config['triggers']['continuousVisibleIniLoad']['request'] =
+        'visibilityCsi';
+    config['triggers']['continuousVisibleRenderStart']['request'] =
+        'visibilityCsi';
+    return config;
+  } catch (err) {
+    dev().error('AMP-A4A', 'Invalid analytics', err,
+        responseHeaders.get(AMP_ANALYTICS_HEADER));
   }
   return null;
 }

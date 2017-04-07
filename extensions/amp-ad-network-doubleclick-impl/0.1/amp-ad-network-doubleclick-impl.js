@@ -37,6 +37,7 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
+import {extensionsFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/analytics';
@@ -63,9 +64,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /**
      * Config to generate amp-analytics element for active view reporting.
      * @type {?JSONType}
-     * @visibleForTesting
+     * @private
      */
-    this.ampAnalyticsConfig = null;
+    this.ampAnalyticsConfig_ = null;
+
+    /** @private {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = extensionsFor(this.win);
 
     /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
     this.responseHeaders_ = null;
@@ -146,7 +150,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig = extractAmpAnalyticsConfig(this, responseHeaders);
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
+    if (this.ampAnalyticsConfig_) {
+      // Load amp-analytics extensions
+      this.extensions_./*OK*/loadExtension('amp-analytics');
+    }
     const adResponsePromise =
         extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
     return adResponsePromise.then(adResponse => {
@@ -172,7 +180,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
-    this.ampAnalyticsConfig = null;
+    this.ampAnalyticsConfig_ = null;
   }
 
   /**
@@ -185,8 +193,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
-    if (this.ampAnalyticsConfig) {
-      insertAnalyticsElement(this.element, this.ampAnalyticsConfig, true);
+    if (this.ampAnalyticsConfig_) {
+      insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
   }
 
