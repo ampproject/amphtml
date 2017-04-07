@@ -16,18 +16,19 @@
 
 import {FakeLocation} from './fake-dom';
 import {ampdocServiceFor} from '../src/ampdoc';
-import installCustomElements from
-    'document-register-element/build/document-register-element.node';
+import {cssText} from '../build/css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
-import {installDocService} from '../src/service/ampdoc-impl';
-import {installExtensionsService} from '../src/service/extensions-impl';
 import {
   installAmpdocServices,
   installRuntimeServices,
   registerForUnitTest,
 } from '../src/runtime';
+import installCustomElements from
+    'document-register-element/build/document-register-element.node';
+import {installDocService} from '../src/service/ampdoc-impl';
+import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStyles} from '../src/style-installer';
-import {cssText} from '../build/css';
+import {resourcesForDoc} from '../src/services';
 
 let iframeCount = 0;
 
@@ -225,6 +226,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
+      resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
       installStyles(iframe.contentWindow.document, cssText, () => {
         resolve({
