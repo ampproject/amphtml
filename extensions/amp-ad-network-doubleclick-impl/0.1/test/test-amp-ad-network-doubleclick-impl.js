@@ -26,6 +26,7 @@ import {utf8Encode} from '../../../../src/utils/bytes';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import * as sinon from 'sinon';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
@@ -196,6 +197,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
   describe('#getAdUrl', () => {
     beforeEach(() => {
+      const sandbox = sinon.sandbox.create();
       element = document.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'adsense');
@@ -203,6 +205,19 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       element.setAttribute('height', '50');
       document.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
+      // Temporary fix for local test failure.
+      sandbox.stub(impl,
+          'getIntersectionElementLayoutBox', () => {
+            return {
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+              width: 320,
+              height: 50,
+            };
+          });
+      sandbox.stub(impl, 'getAmpDoc', () => {return document;});
     });
 
     afterEach(() =>
