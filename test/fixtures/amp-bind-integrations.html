@@ -38,10 +38,18 @@
     <button update></button>
   </amp-live-list>
 
-  <p>P TAG</p>
+  <p>TEXT TAGS</p>
   <button on="tap:AMP.setState({boundText: 'hello world'})" id="changeTextButton"></button>
   <button on="tap:AMP.setState({boundClass: 'new'})" id="changeTextClassButton"></button>
   <p id="textElement" class="original" [class]="boundClass" [text]="boundText">unbound</p>
+
+  <p>INPUT</p>
+  <input type="range" min="0" max="100" value="0" on="change:AMP.setState({rangeChange: event})" id="range">
+  <p id="rangeText" [text]="rangeChange.min + ' <= ' + rangeChange.value + ' <= ' + rangeChange.max">Unbound</p>
+  <input type="checkbox" on="change:AMP.setState({checkboxChange: event})" id="checkbox">
+  <p id="checkboxText" [text]="'Checked: ' + checkboxChange.checked" id="checkboxText">Unbound</p>
+  <input type="radio" on="change:AMP.setState({radioChange: event})" id="radio">
+  <p id="radioText" [text]="'Checked: ' + radioChange.checked" id="radioText">Unbound</p>
 
   <p>CAROUSEL</p>
   <button on="tap:AMP.setState({selectedSlide: 1})" id="goToSlide1Button">slide 1!</button>
@@ -120,5 +128,6 @@
   <amp-iframe width=100 height=100 id="ampIframe" sandbox="allow-scripts allow-same-origin allow-popups"
       src="https://player.vimeo.com/video/140261016" [src]="iframe">
   </amp-iframe>
+
 </body>
 </html>
