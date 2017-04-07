@@ -36,8 +36,7 @@ export function fetchBatchedJsonFor(ampdoc, element, opt_expr) {
     const opts = {};
     if (element.hasAttribute('credentials')) {
       opts.credentials = element.getAttribute('credentials');
-    }
-    if (!opts.credentials) {
+    } else {
       opts.requireAmpResponseSourceOrigin = false;
     }
     return batchedXhrFor(ampdoc.win).fetchJson(src, opts);
@@ -45,7 +44,6 @@ export function fetchBatchedJsonFor(ampdoc, element, opt_expr) {
     if (data == null) {
       throw new Error('Response is undefined.');
     }
-    const exprData = getValueForExpr(data, opt_expr || '.');
-    return exprData;
+    return getValueForExpr(data, opt_expr || '.');
   });
 }
