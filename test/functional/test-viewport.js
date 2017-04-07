@@ -35,6 +35,7 @@ import {installVsyncService} from '../../src/service/vsync-impl';
 import {loadPromise} from '../../src/event-helper';
 import {platformFor} from '../../src/services';
 import {setParentWindow} from '../../src/service';
+import {viewportForDoc} from '../../src/services';
 import {vsyncFor} from '../../src/services';
 import * as sinon from 'sinon';
 
@@ -201,19 +202,19 @@ describes.fakeWin('Viewport', {}, env => {
 
       it('should set ios-webview class', () => {
         new Viewport(ampdoc, binding, viewer);
-        expect(root).to.have.class('i-amphtml-ios-webview');
+        expect(root).to.have.class('i-amphtml-webview');
       });
 
-      it('should not set ios-webview class when not on iOS', () => {
+      it('should set ios-webview class even when not on iOS', () => {
         isIos = false;
         new Viewport(ampdoc, binding, viewer);
-        expect(root).to.not.have.class('i-amphtml-ios-webview');
+        expect(root).to.have.class('i-amphtml-webview');
       });
 
       it('should not set ios-webview class w/o webview param', () => {
         webviewParam = null;
         new Viewport(ampdoc, binding, viewer);
-        expect(root).to.not.have.class('i-amphtml-ios-webview');
+        expect(root).to.not.have.class('i-amphtml-webview');
       });
     });
   });
@@ -1181,7 +1182,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   });
 
   it('should override body overflow for iOS webview', () => {
-    win.document.documentElement.classList.add('i-amphtml-ios-webview');
+    win.document.documentElement.classList.add('i-amphtml-webview');
     binding = new ViewportBindingNatural_(ampdoc, viewer);
     const bodyStyles = win.getComputedStyle(win.document.body);
     expect(bodyStyles.position).to.equal('relative');
@@ -1743,7 +1744,8 @@ describe('createViewport', () => {
       win.parent = win;
       const ampDoc = installDocService(win, true).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
-      const viewport = installViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
     });
 
@@ -1751,7 +1753,8 @@ describe('createViewport', () => {
       win.parent = {};
       const ampDoc = installDocService(win, true).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
-      const viewport = installViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
     });
   });
@@ -1772,7 +1775,8 @@ describe('createViewport', () => {
       win.parent = win;
       const ampDoc = installDocService(win, true).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
-      const viewport = installViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
     });
 
@@ -1781,7 +1785,8 @@ describe('createViewport', () => {
       const ampDoc = installDocService(win, true).getAmpDoc();
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => true);
-      const viewport = installViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNaturalIosEmbed_);
     });
@@ -1791,7 +1796,8 @@ describe('createViewport', () => {
       const ampDoc = installDocService(win, true).getAmpDoc();
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
-      const viewport = installViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNatural_);
     });
@@ -1801,7 +1807,8 @@ describe('createViewport', () => {
       getMode(win).development = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
-      const viewport = installViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNaturalIosEmbed_);
     });
@@ -1812,7 +1819,8 @@ describe('createViewport', () => {
       getMode(win).test = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
-      const viewport = installViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNaturalIosEmbed_);
     });
@@ -1823,7 +1831,8 @@ describe('createViewport', () => {
       getMode(win).development = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isEmbedded', () => false);
-      const viewport = installViewportServiceForDoc(ampDoc);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNatural_);
     });
