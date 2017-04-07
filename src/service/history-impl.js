@@ -836,9 +836,10 @@ function createHistory(ampdoc) {
   } else {
     // Only one global "natural" binding is allowed since it works with the
     // global history stack.
-    registerServiceBuilder(ampdoc.win,
-                           'global-history-binding',
-                           HistoryBindingNatural_);
+    registerServiceBuilder(
+        ampdoc.win,
+        'global-history-binding',
+        HistoryBindingNatural_);
     binding = getService(ampdoc.win, 'global-history-binding');
   }
   return new History(ampdoc, binding);
@@ -853,7 +854,5 @@ export function installHistoryServiceForDoc(ampdoc) {
       ampdoc,
       'history',
       /* opt_constructor */ undefined,
-      ampdoc => {
-        return createHistory(ampdoc);
-      });
+      ampdoc => createHistory(ampdoc));
 }
