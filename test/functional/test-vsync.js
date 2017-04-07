@@ -16,6 +16,7 @@
 
 import {Vsync} from '../../src/service/vsync-impl';
 import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {installTimerService} from '../../src/service/timer-impl';
 import {viewerPromiseForDoc} from '../../src/services';
 import * as sinon from 'sinon';
@@ -80,8 +81,8 @@ describe('vsync', () => {
     let vsync;
 
     beforeEach(() => {
-      const ampdocService = installDocService(win, /* isSingleDoc */ true);
-      ampdoc = ampdocService.getAmpDoc();
+      installDocService(win, /* isSingleDoc */ true);
+      ampdoc = ampdocServiceFor(win).getAmpDoc();
       win.services['viewer'] = {obj: viewer};
       vsync = new Vsync(win);
       return viewerPromiseForDoc(ampdoc);

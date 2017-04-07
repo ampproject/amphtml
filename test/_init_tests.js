@@ -17,6 +17,7 @@
 // This must load before all other tests.
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
+import {ampdocServiceFor} from '../src/ampdoc';
 import {removeElement} from '../src/dom';
 import {setReportError} from '../src/log';
 import {
@@ -234,8 +235,8 @@ function beforeTest() {
     canary: 'testSentinel',
   };
   window.AMP_TEST = true;
-  const ampdocService = installDocService(window, true);
-  const ampdoc = ampdocService.getAmpDoc(window.document);
+  installDocService(window, /* isSingleDoc */ true);
+  const ampdoc = ampdocServiceFor(window).getAmpDoc();
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
   resourcesForDoc(ampdoc).ampInitComplete();

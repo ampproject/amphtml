@@ -15,6 +15,7 @@
  */
 
 import {adConfig} from '../../ads/_config';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {createIframePromise} from '../../testing/iframe';
 import {cidServiceForDocForTesting,} from
     '../../extensions/amp-analytics/0.1/cid-impl';
@@ -39,8 +40,8 @@ describe('ad-cid', () => {
     clock = sandbox.useFakeTimers();
     element = document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
-    const ampdocService = installDocService(window, /* isSingleDoc */ true);
-    const ampdoc = ampdocService.getAmpDoc();
+    installDocService(window, /* isSingleDoc */ true);
+    const ampdoc = ampdocServiceFor(window).getAmpDoc();
     cidService = cidServiceForDocForTesting(ampdoc);
     adElement = {
       getAmpDoc: () => ampdoc,

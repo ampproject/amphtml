@@ -20,6 +20,7 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
+import {ampdocServiceFor} from '../ampdoc';
 import {startupChunk} from '../chunk';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {
@@ -63,7 +64,8 @@ try {
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  ampdocService = installDocService(self, /* isSingleDoc */ true);
+  installDocService(self,  /* isSingleDoc */ true);
+  ampdocService = ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
   makeBodyVisible(self.document);
