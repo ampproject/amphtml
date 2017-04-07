@@ -15,17 +15,16 @@
  */
 
 import {AccessOtherAdapter} from '../amp-access-other';
-import * as sinon from 'sinon';
 
-describe('AccessOtherAdapter', () => {
 
-  let sandbox;
+describes.realWin('AccessOtherAdapter', {amp: true}, env => {
+  let ampdoc;
   let validConfig;
   let context;
   let contextMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    ampdoc = env.ampdoc;
 
     validConfig = {};
 
@@ -43,7 +42,7 @@ describe('AccessOtherAdapter', () => {
 
   describe('config', () => {
     it('should load valid config', () => {
-      const adapter = new AccessOtherAdapter(window, validConfig, context);
+      const adapter = new AccessOtherAdapter(ampdoc, validConfig, context);
       expect(adapter.authorizationResponse_).to.be.null;
       expect(adapter.getConfig()).to.deep.equal({
         authorizationResponse: null,
@@ -55,7 +54,7 @@ describe('AccessOtherAdapter', () => {
     it('should load valid config with fallback object', () => {
       const obj = {'access': 'A'};
       validConfig['authorizationFallbackResponse'] = obj;
-      const adapter = new AccessOtherAdapter(window, validConfig, context);
+      const adapter = new AccessOtherAdapter(ampdoc, validConfig, context);
       expect(adapter.authorizationResponse_).to.be.equal(obj);
       expect(adapter.getConfig()).to.deep.equal({
         authorizationResponse: obj,
@@ -69,7 +68,7 @@ describe('AccessOtherAdapter', () => {
     let adapter;
 
     beforeEach(() => {
-      adapter = new AccessOtherAdapter(window, {}, context);
+      adapter = new AccessOtherAdapter(ampdoc, {}, context);
     });
 
     afterEach(() => {
