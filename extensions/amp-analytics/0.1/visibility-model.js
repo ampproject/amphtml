@@ -180,9 +180,6 @@ export class VisibilityModel {
       lastSeenTime: timeBase(this.lastSeenTime_, startTime),
       lastVisibleTime: timeBase(this.lastVisibleTime_, startTime),
       firstVisibleTime: timeBase(this.firstVisibleTime_, startTime),
-      // TODO(dvoytenko, #8259): remove once misspelling has been fixed
-      // everywhere.
-      fistVisibleTime: timeBase(this.firstVisibleTime_, startTime),
 
       // Durations.
       maxContinuousVisibleTime: this.maxContinuousVisibleTime_,

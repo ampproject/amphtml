@@ -38,7 +38,7 @@ const MAX_CONTINUOUS_TIME = 'maxContinuousVisibleTime';
 const TOTAL_VISIBLE_TIME = 'totalVisibleTime';
 const FIRST_SEEN_TIME = 'firstSeenTime';
 const LAST_SEEN_TIME = 'lastSeenTime';
-const FIRST_VISIBLE_TIME = 'fistVisibleTime';
+const FIRST_VISIBLE_TIME = 'firstVisibleTime';
 const LAST_VISIBLE_TIME = 'lastVisibleTime';
 const MIN_VISIBLE = 'minVisiblePercentage';
 const MAX_VISIBLE = 'maxVisiblePercentage';
@@ -563,10 +563,6 @@ export class Visibility {
    * @private
    */
   prepareStateForCallback_(state, layoutBox) {
-    // TODO(dvoytenko, #8259): remove once misspelling has been fixed
-    // everywhere.
-    state['firstVisibleTime'] = state[FIRST_VISIBLE_TIME];
-
     state[ELEMENT_X] = layoutBox.left;
     state[ELEMENT_Y] = layoutBox.top;
     state[ELEMENT_WIDTH] = layoutBox.width;
