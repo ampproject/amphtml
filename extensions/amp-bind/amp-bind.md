@@ -324,19 +324,19 @@ key_value:
 
 ## Debugging
 
-Testing in development mode (with the URL fragment `#development=1`) is recommended to clearly surface warnings and errors during development.
+Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development.
 
 ### Warnings
 
 In development mode, `amp-bind` will issue a warning when the default value of a bound attribute doesn't match its corresponding expression's initial result. This can help prevent unintended mutations caused by changes in other state variables. For example:
 
 ```html
-<!-- The element's default value ('def') doesn't match the initial expression result ('abc'),
+<!-- The element's default class value ('def') doesn't match the expression result for [class] ('abc'),
      so a warning will be issued in development mode. -->
-<p [text]="'abc'">def</p>
+<p [class]="'abc'" class="def"></p>
 ```
 
-In development mode, `amp-bind` will also issue a warning for undefined variables and property dereferences. This can also help prevent unintended mutations due to `null` expression results. For example:
+In development mode, `amp-bind` will also issue a warning when dereferencing undefined variables or properties. This can also help prevent unintended mutations due to `null` expression results. For example:
 
 ```html
 <amp-state id="myAmpState">
