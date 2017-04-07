@@ -120,8 +120,8 @@ Including: `input[type=radio]`, `input[type=checkbox]` and `select`.
   <tr>
     <td>Range</td>
     <td>
-      <code>event.min</code> : The minimum value of the range,<br>
-      <code>event.value</code> : The current value of the range,<br>
+      <code>event.min</code> : The minimum value of the range<br>
+      <code>event.value</code> : The current value of the range<br>
       <code>event.max</code> : The maximum value of the range<br>
     </td>
   </tr>
