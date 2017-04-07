@@ -168,8 +168,8 @@ export class Performance {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
             ? (this.win.Date.now() - docVisibleTime)
-            : 1 /* MS (magic number for prerender was complete
-                   by the time the user opened the page) */;
+            //  Prerender was complete before visibility.
+            : 0;
         this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
         this.prerenderComplete_(userPerceivedVisualCompletenesssTime);
       } else {
@@ -214,7 +214,8 @@ export class Performance {
     const data = {
       label,
       value,
-      delta: opt_delta,
+      // Delta can be 0 or negative, but will always be changed to 1.
+      delta: opt_delta != null ? Math.max(opt_delta, 1) : undefined,
     };
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);

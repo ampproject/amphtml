@@ -64,6 +64,37 @@ describes.realWin('performance', {amp: true}, env => {
           });
     });
 
+    it('should map tickDelta to non-zero tick', () => {
+      let c = 0;
+      expect(perf.events_.length).to.equal(c);
+
+      perf.tickDelta('test1', 0);
+      expect(perf.events_.length).to.equal(c + 1);
+      expect(perf.events_[c])
+          .to.be.jsonEqual({
+            label: 'test1',
+            delta: 1,
+          });
+
+      c++;
+      perf.tickDelta('test2', -1);
+      expect(perf.events_.length).to.equal(c + 1);
+      expect(perf.events_[c])
+          .to.be.jsonEqual({
+            label: 'test2',
+            delta: 1,
+          });
+
+      c++;
+      perf.tickDelta('test3', 2);
+      expect(perf.events_.length).to.equal(c + 1);
+      expect(perf.events_[c])
+          .to.be.jsonEqual({
+            label: 'test3',
+            delta: 2,
+          });
+    });
+
     it('should have max 50 queued events', () => {
       expect(perf.events_.length).to.equal(0);
 
@@ -537,7 +568,7 @@ describes.realWin('performance', {amp: true}, env => {
           expect(tickSpy).to.have.callCount(2);
           expect(tickSpy.firstCall.args[0]).to.equal('ol');
           expect(tickSpy.secondCall.args[0]).to.equal('pc');
-          expect(Number(tickSpy.secondCall.args[1])).to.equal(1);
+          expect(Number(tickSpy.secondCall.args[1])).to.equal(0);
         });
       });
     });
