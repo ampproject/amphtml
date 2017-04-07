@@ -139,10 +139,14 @@ export class Performance {
     return channelPromise.then(() => {
       this.isMessagingReady_ = true;
 
-      // forward all queued ticks to the viewer since messaging
+      // Tick the "messaging ready" signal.
+      this.tickDelta('msr', this.win.Date.now() - this.initTime_);
+
+      // Forward all queued ticks to the viewer since messaging
       // is now ready.
       this.flushQueuedTicks_();
-      // send all csi ticks through.
+
+      // Send all csi ticks through.
       this.flush();
     });
   }
