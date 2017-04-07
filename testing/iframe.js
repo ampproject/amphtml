@@ -15,7 +15,7 @@
  */
 
 import {FakeLocation} from './fake-dom';
-import {Timer} from '../src/services';
+import {Timer, resourcesForDoc} from '../src/services';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
@@ -225,6 +225,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
+      resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
       installStyles(iframe.contentWindow.document, cssText, () => {
         resolve({
