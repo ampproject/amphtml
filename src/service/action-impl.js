@@ -49,18 +49,24 @@ const ELEMENTS_ACTIONS_MAP_ = {
   'AMP': ['setState'],
 };
 
+/** @enum {string} */
+const TYPE = {
+  NUMBER: 'number',
+  BOOLEAN: 'boolean',
+};
+
 /** @const {!Object<string, !Object<string, string>>} */
 const WHITELISTED_INPUT_DATA_ = {
-  range: {
-    min: 'number',
-    max: 'number',
-    value: 'number',
+  'range': {
+    'min': TYPE.NUMBER,
+    'max': TYPE.NUMBER,
+    'value': TYPE.NUMBER,
   },
-  radio: {
-    checked: 'boolean',
+  'radio': {
+    'checked': TYPE.BOOLEAN,
   },
-  checkbox: {
-    checked: 'boolean',
+  'checkbox': {
+    'checked': TYPE.BOOLEAN,
   },
 };
 
