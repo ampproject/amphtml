@@ -30,12 +30,12 @@ const TAG = 'amp-access-vendor';
 export class AccessVendorAdapter {
 
   /**
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JSONType} configJson
    */
-  constructor(win, configJson) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, configJson) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
     /** @const @private {string} */
     this.vendorName_ = user().assert(configJson['vendor'],

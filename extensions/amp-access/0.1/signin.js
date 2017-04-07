@@ -57,15 +57,14 @@ const TAG = 'amp-access-signin';
 export class SignInProtocol {
 
   /**
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Viewer} viewer
    * @param {string} pubOrigin
    * @param {!JSONObject} configJson
    */
-  constructor(win, viewer, pubOrigin, configJson) {
-
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, viewer, pubOrigin, configJson) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
     /** @private @const {!Viewer} */
     this.viewer_ = viewer;
@@ -75,7 +74,7 @@ export class SignInProtocol {
 
     /** @private @const {boolean} */
     this.isEnabled_ =
-        isExperimentOn(this.win, TAG) &&
+        isExperimentOn(ampdoc.win, TAG) &&
         this.viewer_.isEmbedded() &&
         this.viewer_.getParam('signin') == '1';
 
