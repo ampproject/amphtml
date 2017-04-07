@@ -591,5 +591,79 @@ describes.realWin('Events', {amp: 1}, env => {
         });
       });
     });
+
+    describe('should wait on correct readyPromise', () => {
+      const selector = '.target';
+
+      it('with waitFor default value', () => {
+        // default behavior
+        // selector defined
+        expect(tracker.getReadyPromise(undefined, undefined, undefined))
+            .to.be.null;
+        // selector :root/:host
+        iniLoadTrackerMock
+          .expects('getRootSignal')
+          .returns(Promise.resolve())
+          .once();
+        const promise1 = tracker.getReadyPromise(undefined, ':root', undefined);
+        return promise1.then(() => {
+          iniLoadTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs(target)
+            .returns(Promise.resolve())
+            .once();
+          const promise2 = tracker.getReadyPromise(undefined, selector, target);
+          target.signals().signal('ini-load');
+          return promise2;
+        });
+      });
+
+      it('with waitFor NONE', () => {
+        expect(tracker.getReadyPromise('none', undefined, undefined))
+            .to.be.null;
+        expect(tracker.getReadyPromise('none', ':root', undefined))
+            .to.be.null;
+        expect(tracker.getReadyPromise('none', selector, target))
+            .to.be.null;
+      });
+
+      it('with waitFor INI_LOAD', () => {
+        expect(tracker.getReadyPromise('ini-load', undefined, undefined))
+            .to.be.null;
+        iniLoadTrackerMock
+          .expects('getRootSignal')
+          .returns(Promise.resolve())
+          .once();
+        const promise1 =
+            tracker.getReadyPromise('ini-load', ':root', undefined);
+        return promise1.then(() => {
+          iniLoadTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs(target)
+            .returns(Promise.resolve())
+            .once();
+          const promise2 =
+              tracker.getReadyPromise('ini-load', selector, target);
+          return promise2;
+        });
+      });
+
+      it('with waitFor RENDER_START', () => {
+        expect(tracker.getReadyPromise('render-start', undefined, undefined))
+            .to.be.null;
+        iniLoadTrackerMock
+          .expects('getRootSignal')
+          .returns(Promise.resolve())
+          .once();
+        const promise1 =
+            tracker.getReadyPromise('ini-load', ':root', undefined);
+        return promise1.then(() => {
+          const promise2 =
+              tracker.getReadyPromise('render-start', selector, target);
+          target.signals().signal('render-start');
+          return promise2;
+        });
+      });
+    });
   });
 });

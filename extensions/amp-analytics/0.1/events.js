@@ -22,6 +22,12 @@ import {user} from '../../../src/log';
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
 
+const WAITFOR_EVENTS_LIST = {
+  NONE: 'none',
+  INI_LOAD: 'ini-load',
+  RENDER_START: 'render-start',
+};
+
 
 /**
  * The analytics event.
@@ -348,15 +354,14 @@ export class VisibilityTracker extends EventTracker {
   add(context, eventType, config, listener) {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
+    const waitForSpec = visibilitySpec['waitFor'];
     const visibilityManager = this.root.getVisibilityManager();
 
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
-      const readyPromise = selector ?
-          this.iniLoadTracker_.getRootSignal() :
-          null;
+      const readyPromise = this.getReadyPromise(waitForSpec, selector);
       return visibilityManager.listenRoot(
           visibilitySpec,
           readyPromise,
@@ -375,10 +380,11 @@ export class VisibilityTracker extends EventTracker {
               selector,
               selectionMethod),
           `Element "${selector}" not found`);
+      const readyPromise = this.getReadyPromise(waitForSpec, selector, element);
       return visibilityManager.listenElement(
           element,
           visibilitySpec,
-          this.iniLoadTracker_.getElementSignal(element),
+          readyPromise,
           this.onEvent_.bind(this, eventType, listener, element));
     });
     return function() {
@@ -386,6 +392,43 @@ export class VisibilityTracker extends EventTracker {
         unlisten();
       });
     };
+  }
+
+  /**
+   * @param {string=} waitForSpec
+   * @param {string=} selector
+   * @param {Element=} element
+   * @return {?Promise}
+   * @visibleForTesting
+   */
+  getReadyPromise(waitForSpec, selector, element) {
+    if (waitForSpec == WAITFOR_EVENTS_LIST.NONE || !selector) {
+      // Always return null if specific asked waitFor NONE, or no selector
+      return null;
+    }
+    if (!element) {
+      // If selector is :root or :host, always wait for root ini-load
+      return this.iniLoadTracker_.getRootSignal();
+    }
+    if (!waitForSpec) {
+      // Default behavior for selector select AMP element is to wait for
+      // AMP element's ini-load
+      waitForSpec = WAITFOR_EVENTS_LIST.INI_LOAD;
+    }
+    if (typeof element.signals != 'function') {
+      return null;
+    }
+    switch (waitForSpec) {
+      case WAITFOR_EVENTS_LIST.INI_LOAD:
+        return this.iniLoadTracker_.getElementSignal(element);
+        break;
+      case WAITFOR_EVENTS_LIST.RENDER_START:
+        // may never resolve.
+        return element.signals().whenSignal(WAITFOR_EVENTS_LIST.RENDER_START);
+        break;
+      default:
+        return null;
+    }
   }
 
   /**
