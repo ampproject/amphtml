@@ -247,9 +247,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
         lastSeenTime: 2,
         lastVisibleTime: 3,
         firstVisibleTime: 4,
-        // TODO(dvoytenko, #8259): remove once misspelling has been fixed
-        // everywhere.
-        fistVisibleTime: 4,
         // Durations:
         maxContinuousVisibleTime: 10,
         totalVisibleTime: 11,
