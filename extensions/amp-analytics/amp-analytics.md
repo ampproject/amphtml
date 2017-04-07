@@ -35,7 +35,7 @@ limitations under the License.
 
 ## Overview
 
-You can use the `<amp-analytics>` element to measure activity on an AMP document. In the `<amp-analytics>` element, you specify a JSON configuration object that contains the details for what to measure and where to send the analytics data. You can send the tracking data to an analytics vendor and/or to a URL. There are many analytics vendors that are pre-configured for `<amp-analytics>`, see [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) for details. 
+You can use the `<amp-analytics>` element to measure activity on an AMP document. In the `<amp-analytics>` element, you specify a JSON configuration object that contains the details for what to measure and where to send the analytics data. You can send the tracking data to an analytics vendor and/or to a URL. There are many analytics vendors that are pre-configured for `<amp-analytics>`, see [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) for details.
 
 **Example**
 
@@ -146,7 +146,7 @@ Adds support for Cxense Insight analytics. Requires defining *var* `siteId` with
 
 Type attribute value: `dynatrace`
 
-Adds support for dynatrace. Requires defining *var* `app` with dynatrace-provided *appId* and *var* `tenant` with dynatrace-provided *tenantId*. 
+Adds support for dynatrace. Requires defining *var* `app` with dynatrace-provided *appId* and *var* `tenant` with dynatrace-provided *tenantId*.
 
 ### Eulerian Analytics
 
@@ -310,10 +310,10 @@ Example:
 <script type="application/json">
 {
   "vars": {
-    "account": "UA-12345-Y"  
+    "account": "UA-12345-Y"
   },
   "triggers": {
-    "trackPageview": {  
+    "trackPageview": {
       "on": "visible",
       "request": "pageview"
     }
