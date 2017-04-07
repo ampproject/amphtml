@@ -18,11 +18,13 @@ import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {getMode} from '../../../../src/mode';
 import {removeFragment, serializeQueryString} from '../../../../src/url';
 import {isUserErrorMessage} from '../../../../src/log';
+import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 
-describe('AccessServerJwtAdapter', () => {
 
-  let sandbox;
+describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
+  let win;
+  let ampdoc;
   let clock;
   let validConfig;
   let context;
@@ -30,8 +32,9 @@ describe('AccessServerJwtAdapter', () => {
   let meta;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
+    win = env.win;
+    ampdoc = env.ampdoc;
+    clock = lolex.install(win);
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -39,10 +42,10 @@ describe('AccessServerJwtAdapter', () => {
       'publicKeyUrl': 'https://acme.com/pk',
     };
 
-    meta = document.createElement('meta');
+    meta = win.document.createElement('meta');
     meta.setAttribute('name', 'i-amphtml-access-state');
     meta.setAttribute('content', 'STATE1');
-    document.head.appendChild(meta);
+    win.document.head.appendChild(meta);
 
     context = {
       buildUrl: () => {},
@@ -53,16 +56,12 @@ describe('AccessServerJwtAdapter', () => {
 
   afterEach(() => {
     contextMock.verify();
-    sandbox.restore();
-    if (meta.parentNode) {
-      document.head.removeChild(meta);
-    }
   });
 
 
   describe('config', () => {
     it('should load valid config', () => {
-      const adapter = new AccessServerJwtAdapter(window, validConfig, context);
+      const adapter = new AccessServerJwtAdapter(ampdoc, validConfig, context);
       expect(adapter.clientAdapter_.authorizationUrl_).to
           .equal('https://acme.com/a?rid=READER_ID');
       expect(adapter.clientAdapter_.pingbackUrl_).to
@@ -79,35 +78,35 @@ describe('AccessServerJwtAdapter', () => {
     it('should fail if config is invalid: authorization', () => {
       delete validConfig['authorization'];
       expect(() => {
-        new AccessServerJwtAdapter(window, validConfig, context);
+        new AccessServerJwtAdapter(ampdoc, validConfig, context);
       }).to.throw(/"authorization" URL must be specified/);
     });
 
     it('should fail if config is invalid: publicKeyUrl', () => {
       delete validConfig['publicKeyUrl'];
       expect(() => {
-        new AccessServerJwtAdapter(window, validConfig, context);
+        new AccessServerJwtAdapter(ampdoc, validConfig, context);
       }).to.throw(/"publicKey" or "publicKeyUrl" must be specified/);
     });
 
     it('should fail if config is invalid: http publicKeyUrl', () => {
       validConfig['publicKeyUrl'] = 'http://acme.com/pk';
       expect(() => {
-        new AccessServerJwtAdapter(window, validConfig, context);
+        new AccessServerJwtAdapter(ampdoc, validConfig, context);
       }).to.throw(/https/);
     });
 
     it('should support either publicKey or publicKeyUrl', () => {
       delete validConfig['publicKeyUrl'];
       validConfig['publicKey'] = 'key1';
-      const adapter = new AccessServerJwtAdapter(window, validConfig, context);
+      const adapter = new AccessServerJwtAdapter(ampdoc, validConfig, context);
       expect(adapter.key_).to.equal('key1');
       expect(adapter.keyUrl_).to.be.null;
     });
 
     it('should tolerate when i-amphtml-access-state is missing', () => {
-      document.head.removeChild(meta);
-      const adapter = new AccessServerJwtAdapter(window, validConfig, context);
+      win.document.head.removeChild(meta);
+      const adapter = new AccessServerJwtAdapter(ampdoc, validConfig, context);
       expect(adapter.serverState_).to.be.null;
     });
   });
@@ -123,7 +122,7 @@ describe('AccessServerJwtAdapter', () => {
     let targetElement1, targetElement2;
 
     beforeEach(() => {
-      adapter = new AccessServerJwtAdapter(window, validConfig, context);
+      adapter = new AccessServerJwtAdapter(ampdoc, validConfig, context);
       xhrMock = sandbox.mock(adapter.xhr_);
       jwtMock = sandbox.mock(adapter.jwtHelper_);
 
@@ -139,21 +138,21 @@ describe('AccessServerJwtAdapter', () => {
 
       adapter.isProxyOrigin_ = true;
 
-      responseDoc = document.createElement('div');
+      responseDoc = win.document.createElement('div');
 
-      const responseAccessData = document.createElement('script');
+      const responseAccessData = win.document.createElement('script');
       responseAccessData.setAttribute('type', 'application/json');
       responseAccessData.setAttribute('id', 'amp-access-data');
       responseAccessData.textContent = JSON.stringify({'access': 'A'});
       responseDoc.appendChild(responseAccessData);
 
-      targetElement1 = document.createElement('div');
+      targetElement1 = win.document.createElement('div');
       targetElement1.setAttribute('i-amphtml-access-id', '1/1');
-      document.body.appendChild(targetElement1);
+      win.document.body.appendChild(targetElement1);
 
-      targetElement2 = document.createElement('div');
+      targetElement2 = win.document.createElement('div');
       targetElement2.setAttribute('i-amphtml-access-id', '1/2');
-      document.body.appendChild(targetElement2);
+      win.document.body.appendChild(targetElement2);
     });
 
     afterEach(() => {
@@ -211,7 +210,7 @@ describe('AccessServerJwtAdapter', () => {
         sandbox.stub(adapter, 'fetchJwt_',
             () => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'jwt': encoded,
         });
@@ -244,7 +243,7 @@ describe('AccessServerJwtAdapter', () => {
         sandbox.stub(adapter, 'fetchJwt_',
             () => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'jwt': encoded,
         });
@@ -279,7 +278,7 @@ describe('AccessServerJwtAdapter', () => {
         sandbox.stub(adapter, 'fetchJwt_',
             () => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'jwt': encoded,
         });
@@ -311,27 +310,28 @@ describe('AccessServerJwtAdapter', () => {
       });
 
       it('should replace sections', () => {
-        const responseElement1 = document.createElement('div');
+        const responseElement1 = win.document.createElement('div');
         responseElement1.setAttribute('i-amphtml-access-id', '1/1');
         responseElement1.textContent = 'a1';
         responseDoc.appendChild(responseElement1);
 
-        const responseElement2 = document.createElement('div');
+        const responseElement2 = win.document.createElement('div');
         responseElement2.setAttribute('i-amphtml-access-id', '1/2');
         responseElement2.textContent = 'a2';
         responseDoc.appendChild(responseElement2);
 
-        const unknownResponseElement3 = document.createElement('div');
+        const unknownResponseElement3 = win.document.createElement('div');
         unknownResponseElement3.setAttribute('i-amphtml-access-id', 'a3');
         unknownResponseElement3.textContent = 'a3';
         responseDoc.appendChild(unknownResponseElement3);
 
         return adapter.replaceSections_(responseDoc).then(() => {
-          expect(document.querySelector('[i-amphtml-access-id="1/1"]')
+          expect(win.document.querySelector('[i-amphtml-access-id="1/1"]')
               .textContent).to.equal('a1');
-          expect(document.querySelector('[i-amphtml-access-id="1/2"]')
+          expect(win.document.querySelector('[i-amphtml-access-id="1/2"]')
               .textContent).to.equal('a2');
-          expect(document.querySelector('[i-amphtml-access-id=a3]')).to.be.null;
+          expect(win.document.querySelector('[i-amphtml-access-id=a3]'))
+              .to.be.null;
         });
       });
 

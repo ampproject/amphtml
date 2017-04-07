@@ -166,6 +166,9 @@ export class FakeWindow {
         undefined : new FakeStorage(this);
 
     // Timers and animation frames.
+    /** @const */
+    this.Date = window.Date;
+
     /**
      * @param {function()} handler
      * @param {number=} timeout
