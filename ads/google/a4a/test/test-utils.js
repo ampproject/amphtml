@@ -255,8 +255,6 @@ describe('Google A4A utils', () => {
 
   describe('#googleAdUrl', () => {
     it('should have the correct ifi numbers', function() {
-      // When ran locally, this test tends to exceed 2000ms timeout.
-      this.timeout(5000);
       // Reset counter for purpose of this test.
       delete window['ampAdGoogleIfiCounter'];
       return createIframePromise().then(fixture => {
