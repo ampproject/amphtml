@@ -17,6 +17,7 @@
 import {bindForDoc} from '../../../src/services';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {getMode} from '../../../src/mode';
+import {isBindEnabledFor} from './bind-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -50,8 +51,7 @@ export class AmpState extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // Allow integration test to access this class in testing mode.
-    user().assert(getMode().test || isExperimentOn(this.win, 'amp-bind'),
+    user().assert(isBindEnabledFor(this.win),
         `Experiment "amp-bind" is disabled.`);
 
     const TAG = this.getName_();

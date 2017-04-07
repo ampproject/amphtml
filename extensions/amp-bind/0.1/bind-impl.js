@@ -78,7 +78,7 @@ export class Bind {
   constructor(ampdoc) {
     // Allow integration test to access this class in testing mode.
     /** @const @private {boolean} */
-    this.enabled_ = getMode().test || isExperimentOn(ampdoc.win, TAG);
+    this.enabled_ = isBindEnabledFor(ampdoc.win);
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
@@ -927,4 +927,25 @@ export class Bind {
       this.win_.dispatchEvent(new Event(name));
     }
   }
+}
+
+/**
+ * @param {Window} win
+ * @return {boolean}
+ */
+export function isBindEnabledFor(win) {
+  // Allow integration tests access.
+  if (getMode().test) {
+    return true;
+  }
+  if (isExperimentOn(win, TAG)) {
+    return true;
+  }
+  // TODO(choumx): Replace with real origin trial feature when implemented.
+  const token =
+      win.document.head.querySelector('meta[name="amp-experiment-token"]');
+  if (token && token.getAttribute('content') === 'HfmyLgNLmblRg3Alqy164Vywr') {
+    return true;
+  }
+  return false;
 }
