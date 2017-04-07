@@ -133,7 +133,7 @@ export function extensionsFor(window) {
  */
 export function historyForDoc(nodeOrDoc) {
   return /** @type {!./service/history-impl.History} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'history'));
+      getServiceForDoc(nodeOrDoc, 'history'));
 }
 
 /**

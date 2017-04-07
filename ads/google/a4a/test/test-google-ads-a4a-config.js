@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
     googleAdsIsA4AEnabled,
@@ -133,8 +134,8 @@ describe('a4a_config', () => {
       navigator: window.navigator,
     };
     win.document.defaultView = win;
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
-    const ampdoc = ampdocService.getAmpDoc();
+    installDocService(win, /* isSingleDoc */ true);
+    const ampdoc = ampdocServiceFor(win).getAmpDoc();
     events = {};
     installDocumentStateService(win);
     installPlatformService(win);
@@ -349,8 +350,8 @@ describe('a4a_config hash param parsing', () => {
       navigator: window.navigator,
     };
     win.document.defaultView = win;
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
-    ampdoc = ampdocService.getAmpDoc();
+    installDocService(win, /* isSingleDoc */ true);
+    ampdoc = ampdocServiceFor(win).getAmpDoc();
     events = {};
     installPlatformService(win);
     installDocumentStateService(win);

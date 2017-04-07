@@ -19,6 +19,7 @@
  */
 
 import './polyfills';
+import {ampdocServiceFor} from './ampdoc';
 import {startupChunk} from './chunk';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {
@@ -41,6 +42,7 @@ import {
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
+import {resourcesForDoc} from './services';
 
 // Store the originalHash as early as possible. Trying to debug:
 // https://github.com/ampproject/amphtml/issues/6070
@@ -59,7 +61,8 @@ try {
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  ampdocService = installDocService(self, /* isSingleDoc */ true);
+  installDocService(self,  /* isSingleDoc */ true);
+  ampdocService = ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
   makeBodyVisible(self.document);
@@ -102,6 +105,7 @@ startupChunk(self.document, function initial() {
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');
+      resourcesForDoc(ampdoc).ampInitComplete();
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.
       perf.flush();

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {
   cidForDoc,
   extensionsFor,
@@ -101,8 +102,8 @@ describe('cid', () => {
       setTimeout: window.setTimeout,
     };
     fakeWin.document.defaultView = fakeWin;
-    const ampdocService = installDocService(fakeWin, /* isSingleDoc */ true);
-    ampdoc = ampdocService.getAmpDoc();
+    installDocService(fakeWin, /* isSingleDoc */ true);
+    ampdoc = ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
 
@@ -343,9 +344,8 @@ describe('cid', () => {
       navigator: window.navigator,
       services: {},
     };
-
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
-    const ampdoc2 = ampdocService.getAmpDoc();
+    installDocService(win, /* isSingleDoc */ true);
+    const ampdoc2 = ampdocServiceFor(win).getAmpDoc();
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
     installPlatformService(win);
