@@ -421,7 +421,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
         'visibilityCsi';
     config['triggers']['continuousVisibleRenderStart']['request'] =
         'visibilityCsi';
-    return config;
+    return /** @type{JSONType} */ (config);
   } catch (err) {
     dev().error('AMP-A4A', 'Invalid analytics', err,
         responseHeaders.get(AMP_ANALYTICS_HEADER));
