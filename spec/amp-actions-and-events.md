@@ -102,10 +102,36 @@ Including: `input[type=radio]`, `input[type=checkbox]` and `select`.
   <tr>
     <th>Event</th>
     <th>Description</th>
+    <th>Data</th>
   </tr>
   <tr>
     <td>change</td>
     <td>Fired when the value of the element is changed.</td>
+    <td> Various, see below.</td>
+  </tr>
+</table>
+
+#### `change` event data
+<table>
+  <tr>
+    <th>Input Type</th>
+    <th>Data</th>
+  </tr>
+  <tr>
+    <td>Range</td>
+    <td>
+      <code>event.min</code> : The minimum value of the range,
+      <code>event.value</code> : The current value of the range,
+      <code>event.max</code> : The maximum value of the range
+    </td>
+  </tr>
+  <tr>
+    <td>Radio</td>
+    <td><code>event.checked</code> : If the element is checked</td>
+  </tr>
+  <tr>
+    <td>Checkbox</td>
+    <td><code>event.checked</code> : If the element is checked</td>
   </tr>
 </table>
 
