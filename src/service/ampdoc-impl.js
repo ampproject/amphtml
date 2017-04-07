@@ -482,7 +482,5 @@ export function installDocService(win, isSingleDoc) {
       win,
       'ampdoc',
       /* opt_constructor */ undefined,
-      () => {
-        return new AmpDocService(win, isSingleDoc);
-      });
+      () => new AmpDocService(win, isSingleDoc));
 };
