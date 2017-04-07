@@ -110,7 +110,6 @@ export function googleAdUrl(
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
   return getAdCid(a4a).then(clientId => referrerPromise.then(referrer => {
     const adElement = a4a.element;
-    debugger;
     window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;
     const slotNumber = window['ampAdGoogleIfiCounter']++;
     const win = a4a.win;
