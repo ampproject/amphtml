@@ -18,6 +18,7 @@ import {
   WebLoginDialog,
   openLoginDialog,
 } from '../login-dialog';
+import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
@@ -67,8 +68,8 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
       },
     };
     windowApi.document.defaultView = windowApi;
-    const ampdocService = installDocService(windowApi, /* isSingleDoc */ true);
-    ampdoc = ampdocService.getAmpDoc();
+    installDocService(windowApi, /* isSingleDoc */ true);
+    ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
   });
 
   it('should delegate to viewer with url', () => {
@@ -191,8 +192,8 @@ describes.sandboxed('WebLoginDialog', {}, () => {
     windowApi = windowObj;
     windowApi.document.defaultView = windowApi;
     windowMock = sandbox.mock(windowApi);
-    const docService = installDocService(windowApi, /* isSingleDoc */ true);
-    ampdoc = docService.getAmpDoc();
+    installDocService(windowApi, /* isSingleDoc */ true);
+    ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
 
     dialogUrl = null;
     dialog = {
