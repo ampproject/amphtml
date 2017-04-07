@@ -90,7 +90,7 @@ describe('chunk', () => {
   }, env => {
 
     beforeEach(() => {
-      installDocService(env.win, true);
+      installDocService(env.win, /* isSingleDoc */ true);
       expect(env.win.services.viewer).to.be.undefined;
       env.win.document.hidden = false;
     });
@@ -103,7 +103,7 @@ describe('chunk', () => {
   }, env => {
 
     beforeEach(() => {
-      installDocService(env.win, true);
+      installDocService(env.win, /* isSingleDoc */ true);
       expect(env.win.services.viewer).to.be.undefined;
       env.win.document.hidden = true;
       env.win.requestIdleCallback = function() {

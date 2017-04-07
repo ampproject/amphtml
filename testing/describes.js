@@ -25,6 +25,7 @@ import {
 } from './fake-dom';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {doNotLoadExternalResourcesInTest} from './iframe';
+import {ampdocServiceFor} from '../src/ampdoc';
 import {
   adopt,
   adoptShadowMode,
@@ -473,7 +474,8 @@ class AmpFixture {
     }
     const ampdocType = spec.ampdoc || 'single';
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
-    const ampdocService = installDocService(win, singleDoc);
+    installDocService(win, singleDoc);
+    const ampdocService = ampdocServiceFor(win);
     env.ampdocService  = ampdocService;
     installExtensionsService(win);
     env.extensions = extensionsFor(win);

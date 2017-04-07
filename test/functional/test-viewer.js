@@ -15,6 +15,7 @@
  */
 
 import {Viewer} from '../../src/service/viewer-impl';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
@@ -77,8 +78,8 @@ describe('Viewer', () => {
     windowApi.history = {
       replaceState: sandbox.spy(),
     };
-    const ampdocService = installDocService(windowApi, /* isSingleDoc */ true);
-    ampdoc = ampdocService.getAmpDoc();
+    installDocService(windowApi, /* isSingleDoc */ true);
+    ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);
     events = {};
