@@ -46,6 +46,7 @@ import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
 import {getMode} from '../mode';
+import {resourcesForDoc} from '../services';
 
 getMode(self).runtime = 'inabox';
 
@@ -117,6 +118,7 @@ startupChunk(self.document, function initial() {
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');
+      resourcesForDoc(ampdoc).ampInitComplete();
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.
       perf.flush();
