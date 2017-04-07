@@ -49,6 +49,27 @@ const ELEMENTS_ACTIONS_MAP_ = {
   'AMP': ['setState'],
 };
 
+/** @enum {string} */
+const TYPE = {
+  NUMBER: 'number',
+  BOOLEAN: 'boolean',
+};
+
+/** @const {!Object<string, !Object<string, string>>} */
+const WHITELISTED_INPUT_DATA_ = {
+  'range': {
+    'min': TYPE.NUMBER,
+    'max': TYPE.NUMBER,
+    'value': TYPE.NUMBER,
+  },
+  'radio': {
+    'checked': TYPE.BOOLEAN,
+  },
+  'checkbox': {
+    'checked': TYPE.BOOLEAN,
+  },
+};
+
 /**
  * A map of method argument keys to functions that generate the argument values
  * given a local scope object. The function allows argument values to reference
@@ -155,10 +176,43 @@ export class ActionService {
           this.trigger(dev().assertElement(event.target), 'tap', event);
         }
       });
-    } else if (name == 'submit' || name == 'change') {
+    } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         this.trigger(dev().assertElement(event.target), name, event);
       });
+    } else if (name == 'change') {
+      this.root_.addEventListener(name, event => {
+        this.addChangeDetails_(event);
+        this.trigger(dev().assertElement(event.target), name, event);
+      });
+    }
+  }
+
+  /**
+   * Given a browser 'change' event, add `details` property containing the
+   * relevant information for the change that generated the initial event.
+   * @param {!Event} event A `change` event.
+   */
+  addChangeDetails_(event) {
+    const detail = {};
+    const target = event.target;
+    if (event.target.tagName.toLowerCase() === 'input') {
+      const inputType = target.getAttribute('type');
+      const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
+      if (fieldsToInclude) {
+        Object.keys(fieldsToInclude).forEach(field => {
+          const expectedType = fieldsToInclude[field];
+          const value = target[field];
+          if (expectedType === 'number') {
+            detail[field] = Number(value);
+          } else if (expectedType === 'boolean') {
+            detail[field] = !!value;
+          } else {
+            detail[field] = String(value);
+          }
+        });
+        event.detail = detail;
+      }
     }
   }
 
