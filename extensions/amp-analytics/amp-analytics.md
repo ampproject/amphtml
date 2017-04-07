@@ -524,7 +524,7 @@ Use the page visible trigger (`"on": "visible"`) to fire a request when the page
 <strong><a id="visibility-spec"></a>Visibility Spec</strong>
 
 The `visibilitySpec` is a set of conditions and properties that can be applied to `visible` or `hidden` triggers to change when they fire. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
-  - `selector` This property can be used to specify the element to which all the `visibilitySpec` conditions apply. The selector needs to point to an [AMP extended  element](https://github.xom/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags). In addition, the semantics of how the element is selected can be changed using `selectionMethod`. The value of this property can be one of:
+  - `selector` This property can be used to specify the element to which all the `visibilitySpec` conditions apply. The selector needs to point to an [AMP extended  element](https://github.com/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags). In addition, the semantics of how the element is selected can be changed using `selectionMethod`. The value of this property can be one of:
     - a css id without `selectionMethod`
     - a css id or tag name with `selectionMethod="scope"`
     - a tag name with `selectionMethod="closest"`
