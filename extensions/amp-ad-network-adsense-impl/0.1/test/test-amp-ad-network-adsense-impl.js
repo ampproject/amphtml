@@ -193,6 +193,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     it('with multiple slots', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
+      // Reset counter for purpose of this test.
+      delete window['ampAdGoogleIfiCounter'];
       return createIframePromise().then(fixture => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
@@ -219,24 +221,26 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           // Create AdsenseImpl instance.
           const impl1 = new AmpAdNetworkAdsenseImpl(addedElem1);
           return impl1.getAdUrl().then(adUrl1 => {
-            expect(adUrl1.indexOf('pv=2') >= 0).to.be.true;
-            expect(adUrl1.indexOf('prev_fmts') < 0).to.be.true;
+            expect(adUrl1).to.match(/pv=2/);
+            expect(adUrl1).to.not.match(/prev_fmts/);
+            expect(adUrl1).to.match(/ifi=1/);
             return fixture.addElement(elem2).then(addedElem2 => {
               const impl2 = new AmpAdNetworkAdsenseImpl(addedElem2);
               return impl2.getAdUrl().then(adUrl2 => {
-                expect(adUrl2.indexOf('pv=1') >= 0).to.be.true;
-                expect(adUrl2.indexOf('prev_fmts=320x50') >= 0).to.be.true;
+                expect(adUrl2).to.match(/pv=1/);
+                expect(adUrl2).to.match(/prev_fmts=320x50/);
+                expect(adUrl2).to.match(/ifi=2/);
                 return fixture.addElement(elem3).then(addedElem3 => {
                   const impl3 = new AmpAdNetworkAdsenseImpl(addedElem3);
                   return impl3.getAdUrl().then(adUrl3 => {
-                    expect(adUrl3.indexOf('pv=2') >= 0).to.be.true;
+                    expect(adUrl3).to.match(/pv=2/);
                     // By some quirk of the test infrastructure, when this test
                     // is ran individually, each added slot after the first one
                     // has a bounding rectangle of 0x0. The important thing to
                     // test here is the number of previous formats.
-                    expect(adUrl3.indexOf('prev_fmts=320x50%2C0x0') >= 0 ||
-                        adUrl3.indexOf('prev_fmts=320x50%2C320x50') >= 0,
-                        adUrl3).to.be.true;
+                    expect(adUrl3).to.match(
+                        /prev_fmts=(320x50%2C320x50|320x50%2C0x0)/);
+                    expect(adUrl3).to.match(/ifi=3/);
                   });
                 });
               });
