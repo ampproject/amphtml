@@ -15,9 +15,10 @@
  */
 
 import {
-  extractGoogleAdCreativeAndSignature,
   additionalDimensions,
   extractAmpAnalyticsConfig,
+  extractGoogleAdCreativeAndSignature,
+  googleAdUrl,
   injectActiveViewAmpAnalyticsElement,
 } from '../utils';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -248,6 +249,46 @@ describe('Google A4A utils', () => {
               },
             },
           });
+      });
+    });
+  });
+
+  describe('#googleAdUrl', () => {
+    it('should have the correct ifi numbers', function() {
+      // Reset counter for purpose of this test.
+      delete window['ampAdGoogleIfiCounter'];
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        impl.getAmpDoc = () => doc;
+
+        // Because of the way the element is constructed, it doesn't have all of
+        // the machinery that AMP expects it to have, so just no-op the
+        // irrelevant functions.
+        const noop = () => {};
+        elem.build = noop;
+        elem.getPlaceholder = noop;
+        elem.createPlaceholder = noop;
+        elem.getLayoutBox = () => {
+          return {top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0};
+        };
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.match(/ifi=1/);
+            return googleAdUrl(impl, '', 0, [], []).then(url2 => {
+              expect(url2).to.match(/ifi=2/);
+              return googleAdUrl(impl, '', 0, [], []).then(url3 => {
+                expect(url3).to.match(/ifi=3/);
+              });
+            });
+          });
+        });
       });
     });
   });
