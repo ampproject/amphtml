@@ -919,7 +919,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Callback executed when creative has successfully rendered within the
-   * publisher page.  To be overridden by network implementations as needed.
+   * publisher page but prior to load (or ini-load for friendly frame AMP
+   * creative render).  To be overridden by network implementations as needed.
    *
    * @param {boolean} isVerifiedAmpCreative whether or not the creative was
    *    verified as AMP and therefore given preferential treatment.
@@ -1173,13 +1174,18 @@ export class AmpA4A extends AMP.BaseElement {
     const iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES));
+    // TODO(keithwrightbos): noContentCallback?
+    this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
+    // Iframe is appended to element as part of xorigin frame handler init.
+    // Executive onCreativeRender after init to ensure it can get reference
+    // to frame but prior to load to allow for earlier access.
+    const loadPromise =
+        this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
     })(false);
-    // TODO(keithwrightbos): noContentCallback?
-    this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
-    return this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
+    return loadPromise;
   }
 
   /**
