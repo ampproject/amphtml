@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../3p';
+import {isExperimentOn} from './experiments';
 
 /** @private @const */
 const LINE_LOADER_ELEMENTS = {
