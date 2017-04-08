@@ -322,7 +322,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           }).then(adResponse => {
             expect(adResponse).to.deep.equal(
               {creative, signature: base64UrlDecodeToBytes('AQAB'),
-               size: null});
+                size: null});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
           });
       });
@@ -353,8 +353,9 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 signature: base64UrlDecodeToBytes('AQAB'),
                 size: null,
               });
-            expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+            // exact value of ampAnalyticsConfig_ covered in
+            // ads/google/test/test-utils.js
           });
       });
     });
@@ -371,21 +372,25 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'type': 'adsense',
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
+        installExtensionsService(impl.win);
       });
     });
 
     it('injects amp analytics', () => {
-      const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-      impl.ampAnalyticsConfig = {urls};
-      impl.responseHeaders_ = {get: () => 'qqid_string'};
+      impl.ampAnalyticsConfig_ = {
+        'request': 'www.example.com',
+        'triggers': {
+          'on': 'visible',
+        },
+      };
       impl.onCreativeRender(false);
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
+      expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
+      expect(ampAnalyticsElement.getAttribute('sandbox')).to.equal('true');;
       // Exact format of amp-analytics element covered in
-      // ads/google/test/test-utils.js.  Just ensure urls given exist somewhere.
-      urls.forEach(url => {
-        expect(ampAnalyticsElement.innerHTML.indexOf(url)).to.not.equal(-1);
-      });
+      // test/functional/test-analytics.js.
+      // Just ensure extensions is loaded, and analytics element appended.
     });
   });
 

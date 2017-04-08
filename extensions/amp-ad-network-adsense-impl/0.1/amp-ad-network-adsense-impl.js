@@ -29,9 +29,7 @@ import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
-  AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
-  injectActiveViewAmpAnalyticsElement,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -44,6 +42,7 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {computedStyle} from '../../../src/style';
 import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
+import {insertAnalyticsElement} from '../../../src/analytics';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -95,16 +94,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /**
      * Config to generate amp-analytics element for active view reporting.
-     * @type {?AmpAnalyticsConfigDef}
-     * @visibleForTesting
+     * @type {?JSONType}
+     * @private
      */
-    this.ampAnalyticsConfig = null;
+    this.ampAnalyticsConfig_ = null;
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
-
-    /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
-    this.responseHeaders_ = null;
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
@@ -186,9 +182,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig =
-      extractAmpAnalyticsConfig(responseHeaders, this.extensions_);
-    this.responseHeaders_ = responseHeaders;
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
+    if (this.ampAnalyticsConfig_) {
+      // Load amp-analytics extensions
+      this.extensions_./*OK*/loadExtension('amp-analytics');
+    }
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders)
         .then(adResponse => {
           adResponse.size = this.size_;
@@ -242,7 +240,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
-    this.ampAnalyticsConfig = null;
+    this.ampAnalyticsConfig_ = null;
   }
 
   /**
@@ -255,8 +253,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
-    injectActiveViewAmpAnalyticsElement(
-        this, this.ampAnalyticsConfig, this.responseHeaders_);
+    if (this.ampAnalyticsConfig_) {
+      insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+    }
   }
 }
 
