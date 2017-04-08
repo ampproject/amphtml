@@ -110,7 +110,8 @@ export function googleAdUrl(
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
   return getAdCid(a4a).then(clientId => referrerPromise.then(referrer => {
     const adElement = a4a.element;
-    const slotNumber = adElement.getAttribute('data-amp-slot-index');
+    window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;
+    const slotNumber = window['ampAdGoogleIfiCounter']++;
     const win = a4a.win;
     const documentInfo = documentInfoForDoc(adElement);
       // Read by GPT for GA/GPT integration.
