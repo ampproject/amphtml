@@ -376,7 +376,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
       return null;
     }
 
-    const config = {
+    const config = /** @type {JSONType}*/ ({
       'transport': {'beacon': false, 'xhrpost': false},
       'triggers': {
         'continuousVisible': {
@@ -399,7 +399,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
           'selectionMethod': 'closest',
         },
       },
-    };
+    });
     const requests = {};
     for (let idx = 1; idx <= urls.length; idx++) {
       // TODO: Ensure url is valid and not freeform JS?
@@ -421,7 +421,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
         'visibilityCsi';
     config['triggers']['continuousVisibleRenderStart']['request'] =
         'visibilityCsi';
-    return /** @type{JSONType} */ (config);
+    return config;
   } catch (err) {
     dev().error('AMP-A4A', 'Invalid analytics', err,
         responseHeaders.get(AMP_ANALYTICS_HEADER));
