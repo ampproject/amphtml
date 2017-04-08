@@ -15,7 +15,7 @@
  */
 
 import {createFixtureIframe} from '../../../../testing/iframe';
-import {bindForDoc} from '../../../../src/bind';
+import {bindForDoc} from '../../../../src/services';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 
 describe.configure().retryOnSaucelabs().run('amp-bind text integration',
