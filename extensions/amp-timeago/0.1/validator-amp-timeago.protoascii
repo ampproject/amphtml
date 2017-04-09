@@ -39,7 +39,11 @@ tags: {  # <amp-timeago>
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-timeago"
   amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
-    supported_layouts: CONTAINER
+    supported_layouts: RESPONSIVE
   }
 }
