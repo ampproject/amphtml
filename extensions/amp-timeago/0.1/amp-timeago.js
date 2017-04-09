@@ -15,6 +15,7 @@
  */
 
 import {user} from '../../../src/log';
+import {Layout} from '../../../src/layout';
 import {timeago} from './third_party/timeagojs/timeago';
 import {ar} from './third_party/timeagojs/locales/ar';
 import {be} from './third_party/timeagojs/locales/be';
@@ -123,8 +124,8 @@ export class AmpTimeAgo extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported() {
-    return true;
+  isLayoutSupported(layout) {
+    return layout === Layout.CONTAINER || layout === Layout.NODISPLAY;
   }
 }
 
