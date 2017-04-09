@@ -91,9 +91,6 @@ timeago.register('vi', vi);
 timeago.register('zhCN', zhCN);
 timeago.register('zhTW', zhTW);
 
-/** @private @const {string} */
-const DEFAULT_LOCALE_ = 'en';
-
 export class AmpTimeAgo extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -113,7 +110,8 @@ export class AmpTimeAgo extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.datetime_ = this.element.getAttribute('datetime');
-    this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE_;
+    this.locale_ = this.element.getAttribute('locale') ||
+      this.win.document.documentElement.lang;
     this.title_ = this.element.textContent;
 
     this.element.title = this.title_;
