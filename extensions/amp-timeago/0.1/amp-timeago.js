@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {user} from '../../../src/log';
 import {timeago} from './third_party/timeagojs/timeago';
 import {ar} from './third_party/timeagojs/locales/ar';
 import {be} from './third_party/timeagojs/locales/be';
@@ -109,6 +110,9 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    user().assert(this.element.textContent.length > 0,
+        'Content cannot be empty. Found in: %s', this.element);
+
     this.datetime_ = this.element.getAttribute('datetime');
     this.locale_ = this.element.getAttribute('locale') ||
       this.win.document.documentElement.lang;
