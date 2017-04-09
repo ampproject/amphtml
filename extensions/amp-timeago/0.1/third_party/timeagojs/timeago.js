@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * This is a fork of the timago.js library developed by hustcc
- * https://github.com/hustcc/timeago.js
- */
 const locales = {};
 // second, minute, hour, day, week, month, year(365 days)
 const SEC_ARRAY = [60, 60, 24, 7, 365 / 7 / 12, 12];
