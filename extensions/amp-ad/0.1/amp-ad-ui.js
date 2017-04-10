@@ -16,6 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {getAdContainer} from '../../../src/ad-helper';
+import {isExperimentOn} from '../../../src/experiments';
 
 const TAG = 'AmpAdUIHandler';
 
@@ -200,6 +201,12 @@ export class AmpAdUIHandler {
 
     const content = this.doc_.createElement('div');
     content.classList.add('i-amphtml-ad-default-holder');
+    if (isExperimentOn(this.baseInstance_.win, 'ad-loader-v1')) {
+      content.setAttribute('experiment1', '');
+    }
+    if (isExperimentOn(this.baseInstance_.win, 'ad-loader-v2')) {
+      content.setAttribute('experiment2', '');
+    }
     uiComponent.appendChild(content);
 
     this.baseInstance_.element.appendChild(uiComponent);
