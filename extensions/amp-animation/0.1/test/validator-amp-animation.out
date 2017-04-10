@@ -1,0 +1,4 @@
+FAIL
+amp-animation/0.1/test/validator-amp-animation.html:44:4 The parent tag of tag 'amp-animation' is 'span', but it can only be 'body'. (see https://www.ampproject.org/docs/reference/components/amp-animation) [AMP_TAG_PROBLEM]
+amp-animation/0.1/test/validator-amp-animation.html:56:2 The attribute 'trigger' in tag 'amp-animation' is set to the invalid value 'display'. (see https://www.ampproject.org/docs/reference/components/amp-animation) [AMP_TAG_PROBLEM]
+amp-animation/0.1/test/validator-amp-animation.html:67:2 Tag 'amp-animation' must have 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-animation) [AMP_TAG_PROBLEM]
