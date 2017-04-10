@@ -15,7 +15,12 @@
  */
 
 import {ampdocServiceFor} from '../../src/ampdoc';
-import {cidForDoc} from '../../src/services';
+import {
+  cidForDoc,
+  extensionsFor,
+  timerFor,
+  viewerForDoc,
+} from '../../src/services';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
@@ -25,7 +30,6 @@ import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
 import {cryptoFor} from '../../src/crypto';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
-import {timerFor} from '../../src/services';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -35,7 +39,6 @@ import {
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
-import {extensionsFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
@@ -113,7 +116,8 @@ describe('cid', () => {
       return Promise.resolve();
     });
 
-    viewer = installViewerServiceForDoc(ampdoc);
+    installViewerServiceForDoc(ampdoc);
+    viewer = viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
