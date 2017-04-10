@@ -169,6 +169,7 @@ module.exports = {
     'karma-chai',
     'karma-chai-as-promised',
     'karma-chrome-launcher',
+    'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
