@@ -23,9 +23,6 @@ amp-carousel {
  * Every `<amp-carousel>'s` immediate child is considered a slide in
  * the carousel.
  */
-/* TODO(dvoytenko, #6794): Remove old `-amp-replaced-content` form after the new
-   form is in PROD for 1-2 weeks. */
-.amp-carousel-slide > .-amp-replaced-content,
 .amp-carousel-slide > .i-amphtml-replaced-content {
   /*
    * Apply contain object-fit to all replaced content to avoid distorted ratios.
@@ -58,21 +55,25 @@ amp-carousel[controls] .amp-carousel-button,
 
 .amp-carousel-button-prev {
   left: 16px;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/></svg>');
   background-size: 18px 18px;
 }
 
 .amp-carousel-button-next {
   right: 16px;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff" viewBox="0 0 18 18"><path d="M9 3L7.94 4.06l4.19 4.19H3v1.5h9.13l-4.19 4.19L9 15l6-6z" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M9 3L7.94 4.06l4.19 4.19H3v1.5h9.13l-4.19 4.19L9 15l6-6z"/></svg>');
   background-size: 18px 18px;
 }
 
-:not(.amp-mode-mouse) .-amp-carousel-button-start-hint .amp-carousel-button:not(.amp-disabled) {
-  animation: -amp-carousel-hint 1s ease-in 3s 1 normal both;
+.i-amphtml-carousel-button-start-hint .amp-carousel-button:not(.amp-disabled) {
+  animation: i-amphtml-carousel-hint 1s ease-in 3s 1 normal both;
 }
 
-@keyframes -amp-carousel-hint {
+.amp-mode-mouse .i-amphtml-carousel-button-start-hint .amp-carousel-button:not(.amp-disabled) {
+  animation: none;
+}
+
+@keyframes i-amphtml-carousel-hint {
   0% {
     opacity: 1;
     visibility: visible;
@@ -90,10 +91,10 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 /* Begin SlideScroll */
-.-amp-slidescroll {
+.i-amphtml-slidescroll {
 }
 
-.-amp-slides-container {
+.i-amphtml-slides-container {
   display: flex !important;
   flex-wrap: nowrap;
   height: 100% !important;
@@ -119,11 +120,11 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 /** Only hide scroll bar for touch devices as it causes jitters on desktops */
-.-amp-slides-container.-amp-no-scroll {
+.i-amphtml-slides-container.i-amphtml-no-scroll {
   overflow-x: hidden !important;
 }
 
-.-amp-slide-item {
+.i-amphtml-slide-item {
   align-items: center !important;
   display: none !important;
   flex: 0 0 100% !important;
@@ -134,18 +135,18 @@ amp-carousel .amp-carousel-button.amp-disabled {
   width: 100% !important;
 }
 
-.-amp-slide-item > * {
+.i-amphtml-slide-item > * {
   height: 100%;
   width: 100%;
   overflow: hidden !important;
 }
 
-.-amp-slide-item-show {
+.i-amphtml-slide-item-show {
   display: flex !important;
 }
 
-.-amp-carousel-start-marker,
-.-amp-carousel-end-marker {
+.i-amphtml-carousel-start-marker,
+.i-amphtml-carousel-end-marker {
   background-color: transparent !important;
   display: block !important;
   flex: 0 0 1px !important;
@@ -155,29 +156,37 @@ amp-carousel .amp-carousel-button.amp-disabled {
   width: 1px !important;
 }
 
-.-amp-carousel-start-marker {
+.i-amphtml-carousel-start-marker {
   order: -1 !important;
   margin-left: -1px !important;
 }
 
-.-amp-carousel-end-marker {
+.i-amphtml-carousel-end-marker {
   order: 100000000 !important;
   margin-right: -1px !important;
+}
+
+.i-amphtml-slidescroll-no-snap.i-amphtml-slides-container {
+  scroll-snap-type: none !important;
+}
+
+.i-amphtml-slidescroll-no-snap .i-amphtml-slide-item {
+  scroll-snap-coordinate: none !important;
 }
 /* End SlideScroll */
 
 /* Begin ScrollableCarousel */
-.-amp-scrollable-carousel-container .amp-carousel-slide {
+.i-amphtml-scrollable-carousel-container .amp-carousel-slide {
   display: inline-block !important;
   margin-left: 8px;
 }
 
 /*TODO(dvoytenko): this has to be customizable*/
-.-amp-scrollable-carousel-container .amp-carousel-slide:first-child {
+.i-amphtml-scrollable-carousel-container .amp-carousel-slide:first-child {
   margin-left: 0px;
 }
 
-.-amp-scrollable-carousel-container {
+.i-amphtml-scrollable-carousel-container {
   white-space: nowrap !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;

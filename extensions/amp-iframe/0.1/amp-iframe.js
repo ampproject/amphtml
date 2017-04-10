@@ -24,7 +24,7 @@ import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
@@ -416,6 +416,18 @@ export class AmpIframe extends AMP.BaseElement {
     return super.getPriority();
   }
 
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const src = mutations['src'];
+    if (src !== undefined) {
+      this.iframeSrc = this.transformSrc_(src);
+      if (this.iframe_) {
+        this.iframe_.src = this.assertSource(
+            this.iframeSrc, window.location.href, this.sandbox_);
+      }
+    }
+  }
+
   /**
    * Makes the iframe visible.
    * @private
@@ -533,8 +545,7 @@ function setSandbox(element, iframe, sandbox) {
 function makeIOsScrollable(element) {
   if (element.getAttribute('scrolling') != 'no') {
     const wrapper = element.ownerDocument.createElement(
-      'i-amp-scroll-container'
-    );
+        'i-amphtml-scroll-container');
     element.appendChild(wrapper);
     return wrapper;
   }

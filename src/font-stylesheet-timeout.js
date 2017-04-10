@@ -15,7 +15,6 @@
  */
 
 import {isDocumentReady} from './document-ready';
-import {timerFor} from './timer';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,
@@ -48,9 +47,10 @@ export function fontStylesheetTimeout(win) {
   }
   const timeout = Math.max(1, 1000 - timeSinceResponseStart);
 
-  timerFor(win).delay(() => {
+  // Avoid timer dependency since this runs very early in execution.
+  win.setTimeout(() => {
     // We waited for the timeout period. There is no way to check whether
-    // the stylesheets actually loaded. For that reason we check whether
+    // the stylesheet actually loaded. For that reason we check whether
     // the document is ready instead. The link tags block the readiness
     // and they are the only external resource that does, so if the doc
     // isn't ready yet it is probably the stylesheet's fault.
@@ -73,14 +73,14 @@ export function fontStylesheetTimeout(win) {
       newLink.onload = () => {
         newLink.media = media;
       };
-      newLink.setAttribute('i-amp-timeout', timeout);
+      newLink.setAttribute('i-amphtml-timeout', timeout);
       const parent = existingLink.parentElement;
       // Insert the stylesheet. We do it right before the existing one,
       // so that
       // - we pick up its HTTP request.
-      // - CSS evaluation order doen't change.
+      // - CSS evaluation order doesn't change.
       parent.insertBefore(newLink, existingLink);
-      // And remove the blocking stylsheet.
+      // And remove the blocking stylesheet.
       parent.removeChild(existingLink);
     }
   }, timeout);

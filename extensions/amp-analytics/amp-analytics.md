@@ -22,10 +22,6 @@ limitations under the License.
     <td>Capture analytics data from an AMP document.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code></td>
   </tr>
@@ -35,12 +31,15 @@ limitations under the License.
   </tr>
 </table>
 
-## <a name="behavior"></a>Behavior
+[TOC]
 
-The `<amp-analytics>` element is used to measure activity on an AMP document. The details concerning what is measured and how that data is sent to an analytics server is specified in a JSON configuration object. It comes pre-configured to support many [analytics vendors](#analytics-vendors) out of the box.
+## Overview
 
-For example, the following `<amp-analytics>` element is configured to send a request to `https://example.com/analytics`
-when the document is first loaded, and each time an `<a>` tag is clicked:
+You can use the `<amp-analytics>` element to measure activity on an AMP document. In the `<amp-analytics>` element, you specify a JSON configuration object that contains the details for what to measure and where to send the analytics data. You can send the tracking data to an analytics vendor and/or to a URL. There are many analytics vendors that are pre-configured for `<amp-analytics>`, see [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) for details.
+
+**Example**
+
+In the following example, we send analytics data to `https://example.com/analytics` when the AMP document is first loaded, and each time an `<a>` tag is clicked:
 
 ```html
 <amp-analytics>
@@ -73,13 +72,12 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 </amp-analytics>
 ```
 
-## Analytics vendors
+**Example**
 
-By specifying the name of an analytics vendor with the `type` attribute you can quickly configure `amp-analytics` to use the respective product. Additional configuration (such as your user id) may still be necessary.
-
-Here's an example of usage of `type` for a provider called XYZ:
+In the following example, we send pageview data to an analytics vendor, Google Analytics:
 
 ```html
+<<<<<<< HEAD
 <amp-analytics type="XYZ"> ... </amp-analytics>
 ```
 ### Acquia Lift
@@ -143,6 +141,12 @@ Adds support for comScore Unified Digital Measurement™ pageview analytics. Req
 Type attribute value: `cxense`
 
 Adds support for Cxense Insight analytics. Requires defining *var* `siteId` with Cxense-provided *siteId*. More details can be found at [wiki.cxense.com](https://wiki.cxense.com/display/cust/Accelerated+Mobile+Pages+%28AMP%29+integration).
+
+### dynatrace
+
+Type attribute value: `dynatrace`
+
+Adds support for dynatrace. Requires defining *var* `app` with dynatrace-provided *appId* and *var* `tenant` with dynatrace-provided *tenantId*.
 
 ### Eulerian Analytics
 
@@ -239,6 +243,12 @@ Type attribute value: `piano`
 
 Adds support for Piano.  Configuration details can be found at [vx.piano.io](http://vx.piano.io/javascript-tracking-amp).
 
+### Rakam
+
+Type attribute value: `rakam`
+
+Adds support for Rakam.io. Configuration details can be found at [Rakam Documentation](https://rakam.io/integration/amp).
+
 ### Quantcast Measurement
 
 Type attribute value: `quantcast`
@@ -296,20 +306,35 @@ Example:
 
 ```html
 <amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>
+<amp-analytics type="googleanalytics" id="analytics1">
+<script type="application/json">
+{
+  "vars": {
+    "account": "UA-12345-Y"
+  },
+  "triggers": {
+    "trackPageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  }
+}
+</script>
+</amp-analytics>
 ```
 
-**data-credentials**
+{% call callout('Read on', type='read') %}
+Learn more about AMP Analytics in the [Deep Dive into AMP Analytics](https://www.ampproject.org/docs/guides/analytics/deep_dive_analytics) guide.
+{% endcall %}
 
-If set to `include`, this turns on the ability to read and write cookies on the request specified via the `config` attribute. This is an optional attribute.
+## Analytics vendors
 
-**data-consent-notification-id**
-
-If provided, the page will not process analytics requests until an [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with the given HTML element id is confirmed (accepted) by the user. This is an optional attribute.
+See [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) for a list of vendors that provide built-in support for `amp-analytics`.
 
 ## Configuration
 
-Configuration may be specified inline (as shown in the example above) or fetched remotely by specifying a URL in the
-`config` attribute. Additionally, built-in configuration for popular analytics vendors can be selected using
+Configuration data may be specified inline (as shown in the example above) or fetched remotely by specifying a URL in the
+`config` attribute. Additionally, built-in configuration for popular analytics vendors can be selected by using
 the `type` attribute.
 
 If configuration data from more than one of these sources is used, the configuration objects (vars, requests and triggers) will
@@ -328,6 +353,10 @@ The `<amp-analytics>` configuration object uses the following format:
     var-name: var-value,
     ...
   },
+  "extraUrlParams": {
+    extraurlparam-name: extraurlparam-value,
+    ...
+  },
   "triggers": {
     trigger-name: trigger-object,
     ...
@@ -341,7 +370,7 @@ The `<amp-analytics>` configuration object uses the following format:
 ```
 
 ### Requests
-The `requests` attribute specifies the URLs used to transmit data to an analytics platform. The `request-name` is used
+The `requests` configuration object specifies the URLs used to transmit data to an analytics platform. The `request-name` is used
 in the trigger configuration to specify what request should be sent in response to a particular event. The `request-value`
 is an https URL. These values may include placeholder tokens that can reference other requests or variables.
 
@@ -355,9 +384,9 @@ is an https URL. These values may include placeholder tokens that can reference 
 
 ### Vars
 
-`amp-analytics` defines many basic variables that can be used in requests. A list of all such variables is available in the  [`amp-analytics` Variables Guide](./analytics-vars.md). In addition, all of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) are also supported.
+The `amp-analytics` component defines many basic variables that can be used in requests. A list of all such variables is available in the  [`amp-analytics` Variables Guide](./analytics-vars.md). In addition, all of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) are also supported.
 
-The `vars` attribute in the configuration can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information.  Arrays can be used to specify a list of values that should be URL encoded separately while preserving the comma delimiter.
+The `vars` configuration object can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information.  Arrays can be used to specify a list of values that should be URL encoded separately while preserving the comma delimiter.
 
 ```javascript
 "vars": {
@@ -367,16 +396,32 @@ The `vars` attribute in the configuration can be used to define new key-value pa
 }
 ```
 
-### Triggers
-The `triggers` attribute describes when an analytics request should be sent. It contains a key-value pair of trigger-name and
- trigger-configuration. Trigger name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a
- configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
+### Extra URL Params
 
-  - `on` (required) The event to listener for. Valid values are `click`, `scroll`, `timer`, `visible`, and `hidden`.
+The `extraUrlParams` configuration object specifies additional parameters to append to the query string of a request URL via the usual "&foo=baz" convention.
+
+Here's an example that would append `&a=1&b=2&c=3` to a request:
+
+```javascript
+"extraUrlParams": {
+  "a": "1",
+  "b": "2",
+  "c": "3"
+}
+```
+
+The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that act as parameters to `String.replace()` to pre-process keys in the `extraUrlParams` configuration. For example, if an `extraUrlParams` configuration defines `"page.title": "The title of my page"` and the `extraUrlParamsReplaceMap` defines `"page.": "_p_"`, then `&_p_title=The%20title%20of%20my%20page%20` will be appended to the request.
+
+`extraUrlParamsReplaceMap` is not required to use `extraUrlParams`. If `extraUrlParamsReplaceMap` is not defined, then no string substitution will happens and the strings defined in `extraUrlParams` are used as-is.
+
+### Triggers
+
+The `triggers` configuration object describes when an analytics request should be sent. The `triggers` attribute contains a key-value pair of trigger-name and  trigger-configuration. A trigger-name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a  configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
+
+  - `on` (required) The event to listener for. Valid values are `ini-load`, `visible`, `click`, `scroll`, `timer`, and `hidden`.
   - `request` (required) Name of the request to send (as specified in the `requests` section).
-  - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify
-    vars unique to this trigger.
-  - `selector` (required when `on` is set to `click`) This configuration is used on conjunction with the `click` trigger. Please see below for details.
+  - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify vars unique to this trigger.
+  - `selector` and `selectionMethod` can be specified for some triggers, such as `click` and `visible`. See [Element selector](#element-selector) for details.
   - `scrollSpec` (required when `on` is set to `scroll`) This configuration is used on conjunction with the `scroll` trigger. Please see below for details.
   - `timerSpec` (required when `on` is set to `timer`) This configuration is used on conjunction with the `timer` trigger. Please see below for details.
   - `sampleSpec` This object is used to define how the requests can be sampled before they are sent. This setting allows sampling based on random input or other platform supported vars. The object contains configuration to specify an input that is used to generate a hash and a threshold that the hash must meet.
@@ -406,12 +451,24 @@ As an example, the following configuration can be used to sample 50% of the requ
 },
 ```
 
-#### Embed render start trigger (`"on": "render-start"`)
-AMP elements that embed other documents in iframes (e.g. ads) may report `render-start` event. This event
-is typically emitted as soon as it's possible to confirm that rendering of the embedded document has been
-started. Consult the documentation of a particular AMP element to see whether it emits this event.
 
-The trigger for the embed element has to include `selector` that points to the embedding element:
+#####  Element selector
+
+Some triggers such as `click` and `visible` allow specifying an single element or a collection of elements using the selector properties. Different triggers can apply different limitations and interpretations on selected elements, such as whether a selector applies to all matched elements or the first one, or which elements can be matched: all or only AMP elements. See the documentation for each relevant trigger for more details.
+
+The selector properties are:
+  - `selector` This property is used to find an element or a collection of elements using CSS/DOM query. The semantics of how the element is matched can be changed using `selectionMethod`. The value of this property can be one of:
+    - a valid CSS selector, e.g. `#ad1` or `amp-ad`.
+    - `:root` - a special selector that matches the document root.
+  - `selectionMethod` When specified, this property can have one of two values: `scope` or `closest`. `scope` allows selection of element within the parent element of `amp-analytics` tag. `closest` searches for the closest ancestor of the `amp-analytics` tag that satisfies the given selector. The default value is `scope`.
+
+
+#### Embed render start trigger
+
+AMP elements that embed other documents in iframes (e.g., ads) may report a render start event (`"on": "render-start"`). This event
+is typically emitted as soon as it's possible to confirm that rendering of the embedded document has started. Consult the documentation of a particular AMP element to see whether it emits this event.
+
+The trigger for the embed element must include a [`selector`](#element-selector) that points to the embedding element:
 ```javascript
 "triggers": {
   "renderStart": {
@@ -422,7 +479,7 @@ The trigger for the embed element has to include `selector` that points to the e
 }
 ```
 
-This event is also emitted by the document itself and can be configured as:
+The render start event is also emitted by the document itself and can be configured as:
 ```javascript
 "triggers": {
   "renderStart": {
@@ -432,17 +489,17 @@ This event is also emitted by the document itself and can be configured as:
 }
 ```
 
-#### Initial load trigger (`"on": "ini-load"`)
-This event is triggered when initial contents of an AMP element or an AMP document have been loaded.
+#### Initial load trigger
+
+The initial load event (`"on": "ini-load"`) is triggered when the initial contents of an AMP element or an AMP document have been loaded.
 
 The "initial load" is defined in relationship to the container and its initial size.
 More specifically:
  - For a document: all elements in the first viewport.
- - For an embed element: all content elements in the embed document that are positiond within
-   the initial size of the embed element.
+ - For an embed element: all content elements in the embed document that are positioned within the initial size of the embed element.
  - For a simple AMP element (e.g. `amp-img`): the resources itself, such as an image or a video.
 
-The trigger for an embed or an AMP element has to include `selector` that points to the element:
+The trigger for an embed or an AMP element must include a [`selector`](#element-selector) that points to the element:
 ```javascript
 "triggers": {
   "iniLoad": {
@@ -453,7 +510,7 @@ The trigger for an embed or an AMP element has to include `selector` that points
 }
 ```
 
-This event is also emitted by the document itself and can be configured as:
+The initial load event is also emitted by the document itself and can be configured as:
 ```javascript
 "triggers": {
   "iniLoad": {
@@ -463,8 +520,9 @@ This event is also emitted by the document itself and can be configured as:
 }
 ```
 
-#### Page visible trigger (`"on": "visible"`)
-Use this configuration to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`.
+#### Page and element visibility trigger
+
+Use the page visibility trigger (`"on": "visible"`) to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`.
 
 ```javascript
 "triggers": {
@@ -475,18 +533,29 @@ Use this configuration to fire a request when the page becomes visible. The firi
 }
 ```
 
-##### Visibility Spec
-Visibility spec is a set of conditions and properties that can be applied to `visible` or `hidden` triggers to change when they fire. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
-  - `selector` This property can be used to specify the element to which all the `visibilitySpec` conditions apply. The selector needs to point to an [AMP extended  element](https://github.com/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags). In addition, the semantics of how the element is selected can be changed using `selectionMethod`. The value of this property can be one of:
-    - a css id without `selectionMethod`
-    - a css id or tag name with `selectionMethod="scope"`
-    - a tag name with `selectionMethod="closest"`
-  - `selectionMethod` This property can have one of two values: `scope` and
-    `closest`. `scope` allows selection of element within the parent element of
-    `amp-analytics` tag. `closest` searches for the closest ancestor of
-    `amp-analytics` tag that satisfies the given selector.
-  - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
-  - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
+The element visibility trigger can be configured for any AMP element or a document root using [`selector`](#element-selector). The trigger will fire when the specified element matches the visibility parameters that can be customized using the `visibilitySpec`.
+
+```javascript
+"triggers": {
+  "defaultPageview": {
+    "on": "visible",
+    "request": "elementview",
+    "selector": "#ad1",
+    "visibilitySpec": {/* optional visibility spec */}
+  }
+}
+```
+
+Notice that selector can be used to only specify a single element, not a collection. The element can be either an [AMP extended  element](https://github.xom/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags) or a document root.
+
+The element visibility trigger waits for element's [`ini-load`](#initial-load-trigger) signal before matching the `visibilitySpec`.
+
+
+<strong><a id="visibility-spec"></a>Visibility Spec</strong>
+
+The `visibilitySpec` is a set of conditions and properties that can be applied to `visible` or `hidden` triggers to change when they fire. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
+  - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
+  - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `totalTimeMin` is defaulted to 0 when not specified.
   - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the lower bound (`visiblePercentageMin`) is inclusive while the upper bound (`visiblePercentageMax`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. They default to 0 and 100 when not specified.
 
 In addition to the conditions above, `visibilitySpec` also enables certain variables which are documented [here](./analytics-vars.md#visibility-variables).
@@ -496,8 +565,8 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
   "defaultPageview": {
     "on": "visible",
     "request": "pageview",
+    "selector": "#ad1",
     "visibilitySpec": {
-      "selector": "#anim-id",
       "visiblePercentageMin": 20,
       "totalTimeMin": 500,
       "continuousTimeMin": 200
@@ -506,11 +575,12 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
 }
 ```
 
-In addition to the variables provided as part of triggers you can also specify additional / overrides for [variables as data attribute](./analytics-vars.md#variables-as-data-attribute). If used, these data attributes have to be part of element specified as the `selector`
+In addition to the variables provided as part of triggers you can also specify additional / overrides for [variables as data attribute](./analytics-vars.md#variables-as-data-attribute). If used, these data attributes have to be part of element specified as the [`selector`](#element-selector).
 
-#### Click trigger (`"on": "click"`)
-Use this configuration to fire a request when a specified element is clicked. Use `selector` to control which elements will cause this request to fire:
-  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements. The value of `selector` can include variables that are defined in inline or remote config. The variables will be expanded to determine the elements to be tracked.
+
+#### Click trigger
+
+Use the click trigger (`"on": "click"`) to fire a request when a specified element is clicked. Use [`selector`](#element-selector) to control which elements will cause this request to fire. The trigger will fire for all elements matched by the specified selector.
 
 ```javascript
 "vars": {
@@ -531,8 +601,9 @@ Use this configuration to fire a request when a specified element is clicked. Us
 
 In addition to the variables provided as part of triggers you can also specify additional / overrides for [variables as data attribute](./analytics-vars.md#variables-as-data-attribute). If used, these data attributes have to be part of element specified as the `selector`
 
-#### Scroll trigger (`"on": "scroll"`)
-Use this configuration to fire a request under certain conditions when the page is scrolled. This trigger provides [special vars](./analytics-vars.md#interaction) that indicate the boundaries that triggered a request to be sent. Use `scrollSpec` to control when this will fire:
+
+#### Scroll trigger
+Use the scroll trigger (`"on": "scroll"`) to fire a request under certain conditions when the page is scrolled. This trigger provides [special vars](./analytics-vars.md#interaction) that indicate the boundaries that triggered a request to be sent. Use `scrollSpec` to control when this will fire:
   - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width. To keep the page performant, the scroll boundaries are rounded to the nearest multiple of `5`.
 
 
@@ -549,8 +620,8 @@ Use this configuration to fire a request under certain conditions when the page 
 }
 ```
 
-#### Timer trigger (`"on": "timer"`)
-Use this configuration to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
+#### Timer trigger
+Use the timer trigger (`"on": "timer"`) to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
   - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
     - `maxTimerLength` Maximum duration for which the timer will fire, in seconds.
@@ -569,8 +640,9 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
 }
 ```
 
-#### Hidden trigger (`"on": "hidden"`)
-Use this configuration to fire a request when the page becomes hidden.
+#### Hidden trigger
+
+Use the hidden trigger (`"on": "hidden"`) to fire a request when the page becomes hidden.
 
 ```javascript
 "triggers": {
@@ -598,18 +670,19 @@ A [`visibilitySpec`](#visibility-spec) can be included so that a request is only
 The above configuration translates to:
 > When page becomes hidden, fire a request if the element #anim-id has been visible (more than 20% area in viewport) for more than 3s in total.
 
-#### Access triggers (`"on": "amp-access-*"`)
 
-AMP Access system issues numerous events for different states in the access flow. See [amp-access-analytics.md](../amp-access/amp-access-analytics.md) for details.
+#### Access triggers
+
+AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "amp-access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
+
 
 ### Transport
-The `transport` attribute specifies how to send a request. The value is an object with fields that
+
+The `transport` configuration object specifies how to send a request. The value is an object with fields that
 indicate which transport methods are acceptable.
 
-  - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)
-     can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
-  - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST
-     request, with credentials, and an empty body.
+  - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)  can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
+  - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
   - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request.
 
 If more than one of the above transport methods are enabled, the precedence is `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all three methods above are enabled.
@@ -624,24 +697,38 @@ In the example below, `beacon` and `xhrpost` are set to `false`, so they will no
 }
 ```
 
+## Attributes
 
-### Extra URL Params
+These are the valid attributes for the `amp-analytics` component:
 
-The `extraUrlParams` attribute specifies additional parameters to append to the query string of a request URL via the usual "&foo=baz" convention.
 
-Here's an example that would append `&a=1&b=2&c=3` to a request:
+**type**
 
-```javascript
-"extraUrlParams": {
-  "a": "1",
-  "b": "2",
-  "c": "3"
-}
+Specifies the type of vendor.  For details, see the list of [Analytics vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html).
+
+Example:
+
+```html
+<amp-analytics type="googleanalytics" config="https://example.com/analytics.account.config.json"></amp-analytics>
 ```
 
-The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that act as parameters to String.replace() to preprocess keys in the extraUrlParams configuration. For example, if an `extraUrlParams` configuration defines `"page.title": "The title of my page"` and the `extraUrlParamsReplaceMap` defines `"page.": "_p_"`, then `&_p_title=The%20title%20of%20my%20page%20` will be appended to the request.
+**config**
 
-`extraUrlParamsReplaceMap` is not required to use `extraUrlParams`. If `extraUrlParamsReplaceMap` is not defined, then no string substitution will happens and the strings defined in `extraUrlParams` are used as-is.
+This is an optional attribute that can be used to load a configuration from a specified remote URL. The URL specified should use the HTTPS scheme. See also the `data-include-credentials` attribute below. The URL may include [AMP URL vars](../../spec/amp-var-substitutions.md). The response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+
+Example:
+
+```html
+<amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>
+```
+
+**data-credentials**
+
+If set to `include`, this turns on the ability to read and write cookies on the request specified via the `config` attribute. This is an optional attribute.
+
+**data-consent-notification-id**
+
+If provided, the page will not process analytics requests until an [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with the given HTML element id is confirmed (accepted) by the user. This is an optional attribute.
 
 ## Validation
 

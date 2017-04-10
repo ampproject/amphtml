@@ -27,7 +27,7 @@ window.addEventListener('message', function(event) {
     if (event.data.type == 'requestHeight') {
       var sentinel;
       if (event.data.is3p) {
-        sentinel = event.data.amp3pSentinel || event.data.sentinel;
+        sentinel = event.data.sentinel;
       } else {
         sentinel = 'amp';
       }
@@ -41,7 +41,7 @@ window.addEventListener('message', function(event) {
     } else if (event.data.type == 'subscribeToEmbedState') {
       var sentinel;
       if (event.data.is3p) {
-        sentinel = event.data.amp3pSentinel || event.data.sentinel;
+        sentinel = event.data.sentinel;
       } else {
         sentinel = 'amp';
       }

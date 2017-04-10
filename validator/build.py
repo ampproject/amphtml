@@ -284,7 +284,7 @@ def CompileWithClosure(js_files, closure_entry_points, output_file):
 
   cmd = [
       'java', '-jar', 'node_modules/google-closure-compiler/compiler.jar',
-      '--language_in=ECMASCRIPT6_STRICT', '--language_out=ES5_STRICT',
+      '--language_out=ES5_STRICT',
       '--js_output_file=%s' % output_file, '--only_closure_dependencies'
   ]
   cmd += ['--closure_entry_point=%s' % e for e in closure_entry_points]

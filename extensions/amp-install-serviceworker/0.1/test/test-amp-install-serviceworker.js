@@ -459,7 +459,7 @@ describes.fakeWin('url rewriter', {
     });
 
     function testRewritten() {
-      expect(anchor.getAttribute('i-amp-orig-href'))
+      expect(anchor.getAttribute('i-amphtml-orig-href'))
           .to.equal('https://example.com/doc1.amp.html');
       expect(anchor.href)
           .to.equal('https://example.com/shell#href=%2Fdoc1.amp.html');
@@ -467,7 +467,7 @@ describes.fakeWin('url rewriter', {
     }
 
     function testNotRewritten() {
-      expect(anchor.getAttribute('i-amp-orig-href')).to.be.null;
+      expect(anchor.getAttribute('i-amphtml-orig-href')).to.be.null;
       expect(anchor.href).to.equal(origHref);
     }
 
@@ -523,7 +523,7 @@ describes.fakeWin('url rewriter', {
     });
 
     it('should not rewrite already rewritten URL', () => {
-      anchor.setAttribute('i-amp-orig-href', 'rewritten');
+      anchor.setAttribute('i-amphtml-orig-href', 'rewritten');
       rewriter.handle_(event);
       expect(anchor.href).to.equal(origHref);
     });

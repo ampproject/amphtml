@@ -21,7 +21,7 @@ import {
 import '../amp-youtube';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {adopt} from '../../../../src/runtime';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import * as sinon from 'sinon';
 
@@ -288,6 +288,16 @@ describe('amp-youtube', function() {
         const successTimeout = timer.timeoutPromise(10, true);
         return Promise.race([p, successTimeout]);
       });
+    });
+  });
+
+  it('should propagate attribute mutations', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const spy = sandbox.spy(yt.implementation_, 'sendCommand_');
+      yt.setAttribute('data-videoid', 'lBTCB7yLs8Y');
+      yt.mutatedAttributesCallback({'data-videoid': 'lBTCB7yLs8Y'});
+      expect(spy).to.be.calledWith('loadVideoById',
+          sinon.match(['lBTCB7yLs8Y']));
     });
   });
 

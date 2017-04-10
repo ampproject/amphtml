@@ -24,17 +24,24 @@ import {
 import {
   CustomEventTracker,
 } from '../events';
+import {
+  VisibilityManagerForDoc,
+  VisibilityManagerForEmbed,
+} from '../visibility-manager';
 
 
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   let win;
   let ampdoc;
+  let resources, viewport;
   let root;
   let body, target, child, other;
 
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
+    resources = win.services.resources.obj;
+    viewport = win.services.viewport.obj;
     root = new AmpdocAnalyticsRoot(ampdoc);
     body = win.document.body;
 
@@ -87,6 +94,49 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   it('should resolve ini-load signal', () => {
     ampdoc.signals().signal('ready-scan');
     return root.whenIniLoaded();
+  });
+
+  it('should provide the correct rect for ini-load for main doc', () => {
+    const stub = sandbox.stub(resources, 'getResourcesInRect',
+        () => Promise.resolve([]));
+    root.whenIniLoaded();
+    expect(stub).to.be.calledOnce;
+    expect(stub.args[0][0]).to.equal(win);
+    expect(stub.args[0][1]).to.contain({
+      top: 0,
+      left: 0,
+      width: win.innerWidth,
+      height: win.innerHeight,
+    });
+  });
+
+  it('should provide the correct rect for ini-load for inabox', () => {
+    win.AMP_MODE = {runtime: 'inabox'};
+    sandbox.stub(viewport, 'getLayoutRect', element => {
+      if (element == win.document.documentElement) {
+        return {left: 10, top: 11, width: 100, height: 200};
+      }
+    });
+    const stub = sandbox.stub(resources, 'getResourcesInRect',
+        () => Promise.resolve([]));
+    root.whenIniLoaded();
+    expect(stub).to.be.calledOnce;
+    expect(stub.args[0][0]).to.equal(win);
+    expect(stub.args[0][1]).to.contain({
+      left: 10,
+      top: 11,
+      width: 100,
+      height: 200,
+    });
+  });
+
+  it('should create visibility root', () => {
+    const visibilityManager = root.getVisibilityManager();
+    expect(visibilityManager).to.be.instanceOf(VisibilityManagerForDoc);
+    expect(visibilityManager.ampdoc).to.equal(ampdoc);
+    expect(visibilityManager.parent).to.be.null;
+    // Ensure the instance is reused.
+    expect(root.getVisibilityManager()).to.equal(visibilityManager);
   });
 
 
@@ -341,6 +391,7 @@ describes.realWin('EmbedAnalyticsRoot', {
     win = env.win;
     embed = env.embed;
     ampdoc = env.ampdoc;
+    embed.host = ampdoc.win.document.createElement('amp-embed-host');
     parentRoot = new AmpdocAnalyticsRoot(ampdoc);
     root = new EmbedAnalyticsRoot(ampdoc, embed, parentRoot);
     body = win.document.body;
@@ -397,6 +448,17 @@ describes.realWin('EmbedAnalyticsRoot', {
     return root.whenIniLoaded().then(() => {
       expect(stub).to.be.calledOnce;
     });
+  });
+
+  it('should create visibility root', () => {
+    const visibilityManager = root.getVisibilityManager();
+    expect(visibilityManager).to.be.instanceOf(VisibilityManagerForEmbed);
+    expect(visibilityManager.ampdoc).to.equal(ampdoc);
+    expect(visibilityManager.embed).to.equal(embed);
+    expect(visibilityManager.parent)
+        .to.equal(parentRoot.getVisibilityManager());
+    // Ensure the instance is reused.
+    expect(root.getVisibilityManager()).to.equal(visibilityManager);
   });
 
 

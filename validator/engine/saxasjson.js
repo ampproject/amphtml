@@ -78,7 +78,7 @@ class JsonOutHandler extends amp.htmlparser.HtmlSaxHandler {
  * @return {!Array<!Array<string>>}
  * @export
  */
-amp.htmlparser.saxAsJson = function(htmlText) {
+amp.htmlparser.dumpSaxAsJson = function(htmlText) {
   const jsonArray = [];
   const handler = new JsonOutHandler(jsonArray);
   const parser = new amp.htmlparser.HtmlParser();

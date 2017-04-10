@@ -27,7 +27,13 @@
   <p>This is because the SW only activates for pages that are under its scope (`/dist`, in this case).</p>
   <hr />
   <p>Every 5 minutes, the RTV will be updated. You'll need to "skipWaiting" the SW, and your next request will stale-while-revalidate serve.
+  <p>1% of page requests will get the canary. You may use the `?canary=FLOAT` to force a canary FLOAT percent of the time.</p>
   <hr />
   <p>Shit's gonna get funky if you have an active breakpoint in the SW and request anything in `/dist`.</p>
+  <hr />
+  <h1>Current RTV: CURRENT_RTV</h1>
+  <h1>Loaded JS:</h1>
+  <ul id="loaded">
+  </ul>
 </body>
 </html>

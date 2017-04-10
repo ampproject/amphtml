@@ -24,12 +24,12 @@ import {
 } from '../../../src/url';
 import {closestByTag, removeElement} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {documentInfoForDoc} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {setStyle} from '../../../src/style';
 
 /** @private @const {string} */
@@ -191,7 +191,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
     // Preload the shell by via an iframe with `#preload` fragment.
     const iframe = win.document.createElement('iframe');
-    iframe.id = 'i-amp-shell-preload';
+    iframe.id = 'i-amphtml-shell-preload';
     iframe.setAttribute('src', shellUrl + '#preload');
 
     // Make the iframe hidden.
@@ -262,7 +262,7 @@ class UrlRewriter_ {
     }
 
     // Check if this URL was already rewritten.
-    if (target.getAttribute('i-amp-orig-href')) {
+    if (target.getAttribute('i-amphtml-orig-href')) {
       return;
     }
 
@@ -274,7 +274,7 @@ class UrlRewriter_ {
     }
 
     // Rewrite URL.
-    target.setAttribute('i-amp-orig-href', target.href);
+    target.setAttribute('i-amphtml-orig-href', target.href);
     target.href = this.shellUrl_ + '#href=' + encodeURIComponent(
         `${tgtLoc.pathname}${tgtLoc.search}${tgtLoc.hash}`);
   }

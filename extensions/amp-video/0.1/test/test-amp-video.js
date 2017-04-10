@@ -16,7 +16,7 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import '../amp-video';
 import * as sinon from 'sinon';

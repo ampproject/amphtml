@@ -15,7 +15,7 @@
  */
 
 import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
-import {deserializeMessage} from '../../../src/3p-frame';
+import {deserializeMessage} from '../../../src/3p-frame-messaging';
 
 describes.realWin('inabox-host:position-observer', {}, env => {
 

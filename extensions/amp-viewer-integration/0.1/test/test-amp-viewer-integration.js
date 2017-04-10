@@ -15,7 +15,7 @@
  */
 
 import {AmpViewerIntegration} from '../amp-viewer-integration';
-import {Messaging, WindowPortEmulator} from '../messaging.js';
+import {Messaging, WindowPortEmulator, parseMessage} from '../messaging.js';
 import {ViewerForTesting} from './viewer-for-testing.js';
 import {getSourceUrl} from '../../../../src/url';
 
@@ -311,6 +311,19 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           'Message name: name';
         expect(logErrorSpy).to.have.been.calledWith(state, errString);
       });
+    });
+
+    it('should parseMessage correctly', () => {
+      const obj = {bla: 'la'};
+      const json = JSON.stringify(obj);
+      const badJson = '{a:b';
+      let parsedCorrectly;
+      parsedCorrectly = parseMessage(json);
+      expect(parsedCorrectly.bla).to.equal('la');
+      parsedCorrectly = parseMessage(obj);
+      expect(parsedCorrectly.bla).to.equal('la');
+      expect(parseMessage('should return null')).to.be.null;
+      expect(parseMessage(badJson)).to.be.null;
     });
   });
 });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {performanceForOrNull} from '../../../src/performance';
+import {performanceForOrNull} from '../../../src/services';
 
 /**
  * Measures the time latency between "first time in viewport" and

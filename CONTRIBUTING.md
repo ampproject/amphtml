@@ -13,6 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+# Contributing to AMP HTML
+
+The AMP HTML project strongly encourages technical [contributions](https://www.ampproject.org/contribute/)!
+
+We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
+
 - [Filing issues](#filing-issues)
   * [Suggestions](#suggestions)
   * [Bugs](#bugs)
@@ -28,19 +34,13 @@ limitations under the License.
   * [Weekly design reviews](#weekly-design-reviews)
   * [See Also](#see-also)
 
-# Contributing to AMP HTML
-
-The AMP HTML project strongly encourages technical [contributions](https://www.ampproject.org/contribute/)!
-
-We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
-
 ## Filing issues
 
 ### Suggestions
 
 The AMP Project is meant to evolve with feedback.  The project and its users appreciate your thoughts on ways to improve the design or features.
 
-To make a suggestion [file an issue](https://github.com/ampproject/amphtml/issues/new) and add the [Type: Feature Request](https://github.com/ampproject/amphtml/labels/Type%3A%20Feature%20Request) label.
+To make a suggestion [file an issue](https://github.com/ampproject/amphtml/issues/new).
 
 If you are suggesting a feature that you are intending to implement, please see the [Contributing features](#contributing-features) section below for next steps.
 

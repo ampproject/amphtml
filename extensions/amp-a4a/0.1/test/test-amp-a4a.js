@@ -42,13 +42,12 @@ import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
-import {urlReplacementsForDoc} from '../../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
-import {platformFor} from '../../../../src/platform';
+import {platformFor} from '../../../../src/services';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {AmpContext} from '../../../../3p/ampcontext.js';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
@@ -130,6 +129,7 @@ describe('amp-a4a', () => {
     element.getLayoutBox = () => {
       return opt_rect || layoutRectLtwh(0, 0, 200, 50);
     };
+    element.getIntersectionChangeEntry = () => {return null;};
     const signals = new Signals();
     element.signals = () => signals;
     element.renderStarted = () => {
@@ -175,8 +175,23 @@ describe('amp-a4a', () => {
     const child = element.querySelector(
         `iframe[src^="${SAFEFRAME_IMPL_PATH}"][name]`);
     expect(child).to.be.ok;
-    expect(child.getAttribute('name')).to.match(/[^;]+;\d+;[\s\S]+/);
-    expect(child).to.be.visible;
+    const name = child.getAttribute('name');
+    expect(name).to.match(/[^;]+;\d+;[\s\S]+/);
+    const re = /^([^;]+);(\d+);([\s\S]*)$/;
+    const match = re.exec(name);
+    expect(match).to.be.ok;
+    const contentLength = Number(match[2]);
+    const rest = match[3];
+    expect(rest.length > contentLength).to.be.true;
+    const data = JSON.parse(rest.substr(contentLength));
+    expect(data).to.be.ok;
+    verifyContext(data._context);
+  }
+
+  function verifyContext(context) {
+    expect(context).to.be.ok;
+    expect(context.sentinel).to.be.ok;
+    expect(context.sentinel).to.match(/((\d+)-\d+)/);
   }
 
   // Checks that element is an amp-ad that is rendered via nameframe.
@@ -210,13 +225,7 @@ describe('amp-a4a', () => {
     let attributes;
     expect(() => {attributes = JSON.parse(nameData);}).not.to.throw(Error);
     expect(attributes).to.be.ok;
-    expect(attributes._context).to.be.ok;
-    expect(attributes._context).not.to.contain.all.keys(
-        'sentinel', 'amp3pSentinel');
-    const sentinel = attributes._context.amp3pSentinel ||
-        attributes._context.sentinel;
-    expect(sentinel).to.be.ok;
-    expect(sentinel).to.match(/((\d+)-\d+)/);
+    verifyContext(attributes._context);
   }
 
   describe('ads are visible', () => {
@@ -405,16 +414,6 @@ describe('amp-a4a', () => {
           expect(xhrMock).to.be.calledOnce;
         });
       });
-
-      it('should be able to create AmpContext', () => {
-        return a4a.layoutCallback().then(() => {
-          const window_ = a4aElement.querySelector(
-              'iframe[data-amp-3p-sentinel]');
-          const ac = new AmpContext(window_);
-          expect(ac).to.be.ok;
-          expect(ac.sentinel).to.be.ok;
-        });
-      });
     });
 
     describe('#renderViaNameFrame', () => {
@@ -431,16 +430,6 @@ describe('amp-a4a', () => {
           a4a.vsync_.runScheduledTasks_();
           verifyNameFrameRender(a4aElement);
           expect(xhrMock).to.be.calledOnce;
-        });
-      });
-
-      it('should be able to create AmpContext', () => {
-        return a4a.layoutCallback().then(() => {
-          const window_ = a4aElement.querySelector(
-              'iframe[data-amp-3p-sentinel]');
-          const ac = new AmpContext(window_);
-          expect(ac).to.be.ok;
-          expect(ac.sentinel).to.be.ok;
         });
       });
 
@@ -617,11 +606,9 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('should call handleResize for multi-size ads', () => {
+    it('should set height/width on iframe matching header value', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete headers[SIGNATURE_HEADER];
-      // If rendering type is safeframe, we SHOULD attach a SafeFrame.
-      headers[RENDERING_TYPE_HEADER] = 'safeframe';
       headers['X-CreativeSize'] = '320x50';
       xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
@@ -637,7 +624,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('height', 75);
         a4aElement.setAttribute('type', 'doubleclick');
         const a4a = new MockA4AImpl(a4aElement);
-        const handleResizeMock = sandbox.stub(a4a, 'handleResize');
         doc.body.appendChild(a4aElement);
         a4a.onLayoutMeasure();
         const renderPromise = a4a.layoutCallback();
@@ -647,9 +633,8 @@ describe('amp-a4a', () => {
           a4a.vsync_.runScheduledTasks_();
           const child = a4aElement.querySelector('iframe[name]');
           expect(child).to.be.ok;
-          expect(child.getAttribute('src')).to.have.string('safeframe');
-          expect(child.getAttribute('name')).to.match(/[^;]+;\d+;[\s\S]+/);
-          expect(handleResizeMock).to.be.called.once;
+          expect(child.getAttribute('width')).to.equal('320');
+          expect(child.getAttribute('height')).to.equal('50');
         });
       });
     });
@@ -1401,6 +1386,16 @@ describe('amp-a4a', () => {
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
       expect(userErrorStub.args[0][1].message).to.be.match(/intentional/);
+      expect(userErrorStub.args[0][1].ignoreStack).to.be.undefined;
+    });
+
+    it('should configure ignoreStack when specified', () => {
+      window.AMP_MODE = {development: true};
+      a4a.promiseErrorHandler_('intentional', /* ignoreStack */ true);
+      expect(userErrorStub).to.be.calledOnce;
+      expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
+      expect(userErrorStub.args[0][1].message).to.be.match(/intentional/);
+      expect(userErrorStub.args[0][1].ignoreStack).to.equal(true);
     });
 
     it('should route error to user.error in dev mode', () => {

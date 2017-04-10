@@ -36,7 +36,8 @@ describe('amp-instagram', () => {
     sandbox.restore();
   });
 
-  function getIns(shortcode, opt_responsive, opt_beforeLayoutCallback) {
+  function getIns(shortcode, opt_responsive,
+      opt_beforeLayoutCallback, opt_captioned) {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-instagram');
@@ -46,6 +47,9 @@ describe('amp-instagram', () => {
       ins.setAttribute('alt', 'Testing');
       if (opt_responsive) {
         ins.setAttribute('layout', 'responsive');
+      }
+      if (opt_captioned) {
+        ins.setAttribute('data-captioned', '');
       }
       ins.implementation_.getVsync = () => {
         return {
@@ -77,7 +81,14 @@ describe('amp-instagram', () => {
 
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?v=4');
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?cr=1&v=7');
+    expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
+  }
+
+  function testIframeCaptioned(iframe) {
+    expect(iframe).to.not.be.null;
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/captioned/?cr=1&v=7');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
@@ -85,6 +96,13 @@ describe('amp-instagram', () => {
   it('renders', () => {
     return getIns('fBwFP').then(ins => {
       testIframe(ins.querySelector('iframe'));
+      testImage(ins.querySelector('amp-img'));
+    });
+  });
+
+  it('renders captioned', () => {
+    return getIns('fBwFP', undefined, undefined, true).then(ins => {
+      testIframeCaptioned(ins.querySelector('iframe'));
       testImage(ins.querySelector('amp-img'));
     });
   });
@@ -158,7 +176,7 @@ describe('amp-instagram', () => {
 
       expect(attemptChangeHeight).to.be.calledOnce;
       // Height minus padding
-      expect(attemptChangeHeight.firstCall.args[0]).to.equal(newHeight - 48);
+      expect(attemptChangeHeight.firstCall.args[0]).to.equal(newHeight - 64);
     });
   });
 

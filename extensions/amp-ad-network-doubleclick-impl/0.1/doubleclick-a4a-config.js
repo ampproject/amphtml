@@ -78,6 +78,9 @@ export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
+  if (element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
+    return false;
+  }
   const a4aRequested = element.hasAttribute(BETA_ATTRIBUTE);
   // Note: Under this logic, a4aRequested shortcuts googleAdsIsA4AEnabled and,
   // therefore, carves out of the experiment branches.  Any publisher using this

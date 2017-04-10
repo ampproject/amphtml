@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-import {cidForDoc} from '../../src/cid';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {
-  installCidServiceForDocForTesting,
+  cidForDoc,
+  extensionsFor,
+  timerFor,
+  viewerForDoc,
+} from '../../src/services';
+import {
+  cidServiceForDocForTesting,
   getProxySourceOrigin,
   viewerBaseCid,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
-import {installCryptoService, Crypto,}
-    from '../../src/service/crypto-impl';
+import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
+import {cryptoFor} from '../../src/crypto';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
-import {timerFor} from '../../src/timer';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -97,20 +102,22 @@ describe('cid', () => {
       setTimeout: window.setTimeout,
     };
     fakeWin.document.defaultView = fakeWin;
-    const ampdocService = installDocService(fakeWin, /* isSingleDoc */ true);
-    ampdoc = ampdocService.getAmpDoc();
+    installDocService(fakeWin, /* isSingleDoc */ true);
+    ampdoc = ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
 
+    installExtensionsService(fakeWin);
+    const extensions = extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
-    const extensions = installExtensionsService(fakeWin);
     sandbox.stub(extensions, 'loadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(fakeWin);
       return Promise.resolve();
     });
 
-    viewer = installViewerServiceForDoc(ampdoc);
+    installViewerServiceForDoc(ampdoc);
+    viewer = viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
@@ -130,20 +137,16 @@ describe('cid', () => {
           return Promise.resolve(viewerStorage || undefined);
         });
 
-    return Promise
-        .all([installCidServiceForDocForTesting(ampdoc),
-              installCryptoService(fakeWin)])
-        .then(results => {
-          cid = results[0];
-          crypto = results[1];
-          crypto.sha384Base64 = val => {
-            if (val instanceof Uint8Array) {
-              val = '[' + Array.apply([], val).join(',') + ']';
-            }
+    cid = cidServiceForDocForTesting(ampdoc);
+    installCryptoService(fakeWin);
+    crypto = cryptoFor(fakeWin);
+    crypto.sha384Base64 = val => {
+      if (val instanceof Uint8Array) {
+        val = '[' + Array.apply([], val).join(',') + ']';
+      }
 
-            return Promise.resolve('sha384(' + val + ')');
-          };
-        });
+      return Promise.resolve('sha384(' + val + ')');
+    };
   });
 
   afterEach(() => {
@@ -326,24 +329,28 @@ describe('cid', () => {
   });
 
   it('should work without mocking', () => {
+    // Can't stub Window's readonly properties nor access properties via
+    // __proto__ (as of Chrome 57), so we must wrap individual props like so.
     const win = {
+      crypto: window.crypto,
+      document: {
+        body: {},
+      },
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/',
         search: '',
       },
+      name: window.name,
+      navigator: window.navigator,
       services: {},
-      document: {
-        body: {},
-      },
     };
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
-    const ampdoc2 = ampdocService.getAmpDoc();
-    win.__proto__ = window;
+    installDocService(win, /* isSingleDoc */ true);
+    const ampdoc2 = ampdocServiceFor(win).getAmpDoc();
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc2);
-    installCidServiceForDocForTesting(ampdoc2);
+    cidServiceForDocForTesting(ampdoc2);
     installCryptoService(win);
     return cidForDoc(ampdoc2).then(cid => {
       return cid.get('foo', hasConsent).then(c1 => {

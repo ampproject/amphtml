@@ -16,10 +16,10 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {installParallaxForDoc} from '../../../../src/service/parallax-impl';
-import {parallaxForDoc} from '../../../../src/parallax';
+import {parallaxForDoc} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
-import {viewportForDoc} from '../../../../src/viewport';
-import {vsyncFor} from '../../../../src/vsync';
+import {viewportForDoc} from '../../../../src/services';
+import {vsyncFor} from '../../../../src/services';
 
 describes.sandboxed('amp-fx-parallax', {}, () => {
   const DEFAULT_FACTOR = 1.7;

@@ -14,10 +14,12 @@
 <body>
 
   <p>Submit the form and then press a button to change the text in the below template</p>
-  <button on="tap:AMP.setState(selected=1)">1</button>
-  <button on="tap:AMP.setState(selected=2)">2</button>
-  <button on="tap:AMP.setState(selected=3)">3</button>
-  <button on="tap:AMP.setState(selected=4)">4</button>
+  <button on="tap:AMP.setState({selected: 1})">1</button>
+  <button on="tap:AMP.setState({selected: 2})">2</button>
+  <button on="tap:AMP.setState({selected: 3})">3</button>
+  <button on="tap:AMP.setState({selected: 4})">4</button>
+
+  <p [text]="'$' + selectedRange">$0</p>
 
   <h4>Enter your name and email.</h4>
   <form method="post"
@@ -25,12 +27,18 @@
         target="_blank">
       <fieldset>
           <label>
-              <span>Your name</span>
-              <input type="text" name="name" id="name1" required>
+            <span>Your name</span>
+            <input type="text" name="name" id="name1" required>
           </label>
           <label>
-              <span>Your email</span>
-              <input type="email" name="email" id="email1" required>
+            <span>Your email</span>
+            <input type="email" name="email" id="email1" required>
+          </label>
+          <label>
+            <span>Your Offer</span>
+            $100
+            <input type="range" min="100" max="200" step="10" on="change:AMP.setState({selectedRange: event.value})"/>
+            $200
           </label>
           <input type="submit" value="Subscribe">
       </fieldset>
@@ -39,7 +47,14 @@
           <template type="amp-mustache">
               Success! Thanks {{name}} for entering your email: {{email}}
 
-              <p>You have selected: <span [text]="selected ? selected : 'No selection'">0</span></p>
+              <p>You have selected: <span [text]="selected ? selected : 'No selection'">No selection</span></p>
+          </template>
+      </div>
+      <div submit-error>
+        <template type="amp-mustache">
+              Error! Failure to register: {{name}} : {{email}}
+
+              <p>You have selected: <span [text]="selected ? selected : 'No selection'">No selection</span></p>
           </template>
       </div>
   </form>
