@@ -57,21 +57,27 @@ limitations under the License.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [A simple example](#a-simple-example)
-- [How does it work?](#how-does-it-work)
-- [A slightly more complex example](#a-slightly-more-complex-example)
+- [Introduction](#introduction)
+  - [A simple example](#a-simple-example)
+  - [How does it work?](#how-does-it-work)
+  - [A slightly more complex example](#a-slightly-more-complex-example)
 - [Details](#details)
   - [State](#state)
-      - [AMP.setState()](#ampsetstate)
-  - [Bindings](#bindings)
-    - [Element-specific attributes](#element-specific-attributes)
+    - [`amp-state`](#amp-state)
+    - [AMP.setState()](#ampsetstate)
   - [Expressions](#expressions)
     - [Differences from JavaScript](#differences-from-javascript)
     - [Whitelisted functions](#whitelisted-functions)
-    - [BNF-like grammar](#bnf-like-grammar)
+  - [Bindings](#bindings)
+    - [Element-specific attributes](#element-specific-attributes)
 - [Debugging](#debugging)
   - [Warnings](#warnings)
   - [Errors](#errors)
+- [Appendix](#appendix)
+  - [Builtin Functions](#builtin-functions)
+  - [Deep State Merging](#deep-state-merging)
+    - [Deleting a variable](#deleting-a-variable)
+  - [Expression Grammar](#expression-grammar)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
