@@ -75,11 +75,13 @@ limitations under the License.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## A simple example
+## Introduction
 
 `amp-bind` allows you to add custom stateful interactivity to your AMP pages via data binding and JS-like expressions.
 
-Let's start with a simple example:
+### A simple example
+
+Consider the following example:
 
 ```html
 <p [text]="'Hello ' + foo">Hello World</p>
@@ -87,24 +89,20 @@ Let's start with a simple example:
 <button on="tap:AMP.setState({foo: 'amp-bind'})">
 ```
 
-Tapping the button causes the `<p>` element's text to change from "Hello World" to "Hello amp-bind".
+Tapping the button changes the `<p>` element's text from "Hello World" to "Hello amp-bind".
 
-## How does it work?
+### How does it work?
 
 `amp-bind` has three main components:
 
 1. [State](#state)
-  - In the example above, the state is empty before tapping the button and `{foo: 'amp-bind'}` after tapping the button.
+  - Document-scope, mutable JSON state. In the example above, the state is empty before tapping the button and `{foo: 'amp-bind'}` after tapping the button.
 2. [Expressions](#expressions)
-  - The example above has a single expression, `'Hello' + foo`, which concatenates the string literal `'Hello '` and the variable state `foo`.
+  - Javascript-like expressions that can reference the **state**. The example above has a single expression, `'Hello' + foo`, which concatenates the string literal `'Hello '` and the variable state `foo`.
 3. [Bindings](#bindings)
-  - The example above has a single binding, `[text]`, which causes the `<p>` element to update its text every time the expression's value changes.
+  - Special attributes  of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes.
 
-Note that `amp-bind` does not evaluate expressions on page load, so there's no risk of content jumping unexpectedly. `amp-bind` also takes special care to ensure speed, security and performance on AMP pages.
-
-Check out the AMP Conf 2017 talk "[Turing complete...AMP Pages?!](https://www.youtube.com/watch?v=xzCFU8b5fCU)" for a video introduction to the feature.
-
-## A slightly more complex example
+### A slightly more complex example
 
 ```html
 <!-- Store complex nested JSON data in <amp-state> elements. -->
@@ -138,13 +136,24 @@ Check out the AMP Conf 2017 talk "[Turing complete...AMP Pages?!](https://www.yo
 <button on="tap:AMP.setState({currentAnimal: 'cat'})">Set to Cat</button>
 ```
 
-In this example, tapping the button will change the following:
+When the button is pressed:
 
-1. The first `<p>` element's text will read "This is a cat".
-2. The second `<p>` element's `class` attribute will be "redBackground".
-3. The `amp-img` element will show the image of a cat.
+1. **State** is updated with `currentAnimal` defined as `'cat'`
+2. **Expressions** that depend on `currentAnimal` are evaluated.
+  - `'This is a ' + currentAnimal + '.'` => `'This is a ' + 'cat' + '.'` => `'This is a cat.'`
+  - `myAnimals[currentAnimal].style` => `myAnimals['cat'].style` => `'redBackground'`.
+  - `myAnimals[currentAnimal].imageUrl` => `myAnimals['cat'].imageUrl` => `/img/cat.jpg`
+3. **Bindings** that depend on the changed expressions are updated.
+  - The first `<p>` element's text will read "This is a cat."
+  - The second `<p>` element's `class` attribute will be "redBackground".
+  - The `amp-img` element will show the image of a cat.
+
 
 [Try out the **live demo**](https://ampbyexample.com/components/amp-bind/) for this example with code annotations!
+
+Note that `amp-bind` does not evaluate expressions on page load, so there's no risk of content jumping unexpectedly. `amp-bind` also takes special care to ensure speed, security and performance on AMP pages.
+
+Check out the AMP Conf 2017 talk "[Turing complete...AMP Pages?!](https://www.youtube.com/watch?v=xzCFU8b5fCU)" for a video introduction to the feature.
 
 ## Details
 
@@ -152,7 +161,9 @@ In this example, tapping the button will change the following:
 
 Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or **state**.
 
-This state can be initialized with the `amp-state` component:
+#### `amp-state`
+
+`amp-bind`'s state can be initialized with the `amp-state` component:
 
 ```html
 <amp-state id="myState">
@@ -164,15 +175,55 @@ This state can be initialized with the `amp-state` component:
 </amp-state>
 ```
 
-- [Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
-- An `<amp-state>` element's JSON has a maximum size of 100KB.
+[Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
 
-##### AMP.setState()
+Note that an `<amp-state>` element's JSON has a maximum size of 100KB.
 
-State can be mutated by the [`AMP.setState()` action](../../spec/amp-actions-and-events.md).
+#### AMP.setState()
 
-- `AMP.setState()` performs a deep merge of its arguments with the document state up to a depth of 10.
-- `AMP.setState()` can override data initialized by `amp-state`.
+The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) mutates `amp-bind`'s state, given a state update as an argument.
+
+```html
+<button on="tap:AMP.setState({foo: 'bar', baz: 'bah'})"></button>
+```
+
+When this button is pressed, `AMP.setState()` will [deep-merge](#deep-state-merging) the update with `amp-bind`'s state up to a dpeth of 10. All variables, including those introduced by `amp-state`, can be overidden.
+
+The state update argument to `AMP.setState()` can depend on any variables present in `amp-bind`'s state. When triggered by certain events, `AMP.setState()` also can access event-related data on the `event` property. See [Actions and Events in AMP](../../spec/amp-actions-and-events.md) for more details.
+
+### Expressions
+
+`amp-bind` expressions are similar to JavaScript. The following are all valid expressions in `amp-bind`.
+
+```javascript
+'Hello ' + 'World ' + 3
+47 * +'47'
+event.checked && (true || !!1)
+(event.value > (event.max - event.min)) / 2 ? 'Deal' : 'No deal'
+```
+
+
+#### Differences from JavaScript
+
+- Expressions may only access the containing document's [state](#state).
+- Expressions **do not** have access to globals like `window` or `document`.
+- Only [whitelisted functions](#whitelisted-functions) are allowed.
+- Custom functions, classes and some control flow statements (e.g. `for`) are disallowed.
+- Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
+- A single expression is currently capped at 50 operands for performance reasons. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
+
+The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
+
+#### Whitelisted functions
+
+| Object type | Function(s) | Example |
+| --- | --- | --- |
+| [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods) | `concat`<br>`includes`<br>`indexOf`<br>`join`<br>`lastIndexOf`<br>`slice` | `// Returns true.`<br>`[1, 2, 3].includes(1)` |
+| [`String`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods) | `charAt`<br>`charCodeAt`<br>`concat`<br>`indexOf`<br>`lastIndexOf`<br>`slice`<br>`split`<br>`substr`<br>`substring`<br>`toLowerCase`<br>`toUpperCase` | `// Returns 'abcdef'.`<br>`'abc'.concat('def')` |
+| [`Math`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math)<sup>2</sup> | `abs`<br>`ceil`<br>`floor`<br>`max`<br>`min`<br>`random`<br>`round`<br>`sign` | `// Returns 1.`<br>`abs(-1)` |
+| Bind builtins<sup>2</sup> | `copyAndSplice` | `// Returns [1, 47 ,3].`<br>`copyAndSplice([1, 2, 3], 1, 1, 47)` |
+
+<sup>2</sup>Functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
 
 ### Bindings
 
@@ -180,21 +231,21 @@ A **binding** is a special attribute of the form `[property]` that links an elem
 
 When the **state** changes, expressions are re-evaluated and the bound elements' properties are updated with the new expression results.
 
-`amp-bind` supports data bindings on three types of element state:
+`amp-bind` supports data bindings on four types of element state:
 
-| Type | Attribute | Details |
+| Type | Attribute(s) | Details |
 | --- | --- | --- |
 | [Node.textContent](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) | `[text]` | Supported on most text elements.
 | [CSS classes](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class) | `[class]` | Expression result must be a space-delimited string.
 | Size of [AMP elements](https://www.ampproject.org/docs/reference/components) | `[width]`<br>`[height]` | Changes the width and/or height of the AMP element. |
-| Element-specific attribute | [Various](#element-specific-attributes). | Boolean expression results toggle boolean attributes.
+| Element-specific attributes | [Various](#element-specific-attributes). |
 
 - For security reasons, binding to `innerHTML` is disallowed.
-- All attribute bindings are sanitized for unsafe values, e.g. URL protocols (e.g. `javascript:`).
+- All attribute bindings are sanitized for unsafe values, e.g. `javascript:`.
 
 #### Element-specific attributes
 
-Only binding to the following components and attributes are allowed. Most bindable attributes correspond to a non-bindable counterpart, e.g. for `<amp-img>`, `[src]` changes the value of `src`.
+Only binding to the following components and attributes are allowed:
 
 | Component | Attribute(s) | Behavior |
 | --- | --- | --- |
@@ -218,32 +269,145 @@ Only binding to the following components and attributes are allowed. Most bindab
 
 <sup>1</sup>Denotes bindable attributes that don't have a non-bindable counterpart.
 
-### Expressions
+Note that boolean expression results toggle boolean attributes.
 
-`amp-bind` expressions are similar to JavaScript with some important differences.
+```html
+<amp-video [controls]="expr"...>
+```
 
-#### Differences from JavaScript
+When `expr` evaluates to `true`, the `<amp-video>` element has the `controls` attribute. When `expr` evaluates to `false`, the `controls` attribute is removed.
 
-- Expressions may only access the containing document's [state](#state).
-- Expressions **do not** have access to globals like `window` or `document`.
-- Only [whitelisted functions](#whitelisted-functions) are allowed.
-- Custom functions, classes and some control flow statements (e.g. `for`) are disallowed.
-- Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
-- A single expression is currently capped at 50 operands for performance reasons. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
+## Debugging
 
-The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
+Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development.
 
-#### Whitelisted functions
+### Warnings
 
-| Object type | Function(s) | Example |
-| --- | --- | --- |
-| [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods) | `concat`<br>`includes`<br>`indexOf`<br>`join`<br>`lastIndexOf`<br>`slice` | `// Returns true.`<br>`[1, 2, 3].includes(1)` |
-| [`String`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods) | `charAt`<br>`charCodeAt`<br>`concat`<br>`indexOf`<br>`lastIndexOf`<br>`slice`<br>`split`<br>`substr`<br>`substring`<br>`toLowerCase`<br>`toUpperCase` | `// Returns 'abcdef'.`<br>`'abc'.concat('def')` |
-| [`Math`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math)<sup>2</sup> | `abs`<br>`ceil`<br>`floor`<br>`max`<br>`min`<br>`random`<br>`round`<br>`sign` | `// Returns 1.`<br>`abs(-1)` |
+In development mode, `amp-bind` will issue a warning when the default value of a bound attribute doesn't match its corresponding expression's initial result. This can help prevent unintended mutations caused by changes in other state variables. For example:
 
-<sup>2</sup>`Math` functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
+```html
+<!-- The element's default class value ('def') doesn't match the expression result for [class] ('abc'),
+     so a warning will be issued in development mode. -->
+<p [class]="'abc'" class="def"></p>
+```
 
-#### BNF-like grammar
+In development mode, `amp-bind` will also issue a warning when dereferencing undefined variables or properties. This can also help prevent unintended mutations due to `null` expression results. For example:
+
+```html
+<amp-state id="myAmpState">
+  <script type="application/json">
+    { "foo": 123 }
+  </script>
+</amp-state>
+
+<!-- The amp-state#myAmpState does not have a `bar` variable, so a warning
+     will be issued in development mode. -->
+<p [text]="myAmpState.bar">Some placeholder text.</p>
+```
+
+### Errors
+
+There are several types of runtime errors that may be encountered when working with `amp-bind`.
+
+| Type | Example | Message | Suggestion |
+| --- | --- | --- | --- |
+| Invalid binding | `<p [someBogusAttribute]="myExpression">` | *Binding to [someBogusAttribute] on <P> is not allowed.* | Make sure that only [whitelisted bindings](#element-specific-attributes) are used. |
+| Syntax error | `<p [text]="(missingClosingParens">` | *Expression compilation error in...* | Double-check the expression for typos. |
+| Non-whitelisted functions | `<p [text]="alert(1)"></p>` | *alert is not a supported function.* | Only use [whitelisted functions](#whitelisted-functions). |
+| Sanitized result | `<a href="javascript:alert(1)"></a>` | *"javascript:alert(1)" is not a valid result for [href].* | Avoid banned URL protocols or expressions that would fail the AMP Validator. |
+
+## Appendix
+
+### Builtin Functions
+
+`amp-bind` includes the following builtin functions.
+
+| Name | Description | Arguments | Examples |
+| --- | --- | --- | --- |
+| `copyAndSplice` | Similar to [Array#splice()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) except a copy of the spliced array is returned. | `array` : An array.<br>`start` : Index at which to start changing the array.<br> `deleteCount` : The number of items to delete, starting at index `start`<br> `items...` Items to add to the array, beginning at index `start`. | `// Deleting an element. Returns [1, 3]`<br>`copyAndSplice([1, 2, 3], 1, 1)`<br>`// Replacing an item. Returns ['Pizza', 'Cake', 'Ice Cream']`<br>`copyAndSplice(['Pizza', 'Cake', 'Soda'], 2, 1, 'Ice Cream')` |
+
+### Deep State Merging
+
+`amp-bind` deep-merges all state updates with bind's current state. 
+
+Consider the following example:
+
+```javascript
+{
+<!-- State is empty -->
+}
+```
+
+```html
+<button on="tap:AMP.setState({employee: {name: 'John Smith', address: '123 Fake Street', age: 47, vehicle: 'Car'}})"...></button>
+<button on="tap:AMP.setState({employee: {age: 48}})"...></button>
+```
+
+When the first button is pressed, the state changes to:
+
+```javascript
+{
+  employee: {
+    name: 'John Smith',
+    address: '123 Fake Street',
+    age: 47,
+    vehicle: 'Car',
+  }
+}
+```
+
+When the second button is pressed, `amp-bind` will **deep-merge** this state with the state introduced by the button press.
+
+```javascript
+{
+  employee: {
+    name: 'John Smith',
+    address: '123 Fake Street',
+    age: 48,
+    vehicle: 'Car',
+  }
+}
+```
+
+Whenevr `amp-bind` receives a state update, all variables from the update are written to `amp-bind`'s state with one important exception. If `amp-bind`'s state and the state update both contain the same variable **AND** both variable definitions are objects, then the objects are recursively merged to a maximum depth of ten.
+
+#### Deleting a variable
+
+Deletion of a variable must be explicitly specified in a call to `AMP.setState()`. Starting with the state from the previous example, pressing:
+
+```html
+<button on="tap:AMP.setState({employee: {vehicle: null}})"...></button>
+```
+
+Will change the state to:
+
+```javascript
+{
+  employee: {
+    name: 'John Smith',
+    address: '123 Fake Street',
+    age: 48,
+  }
+}
+```
+
+Similarly:
+
+```html
+<button on="tap:AMP.setState({employee: null})"...></button>
+```
+
+Will change the state to:
+
+```javascript
+{
+<!-- State is empty -->
+}
+```
+
+### Expression Grammar
+
+The BNF-like grammar for `amp-bind` expressions:
 
 ```text
 expr:
@@ -321,42 +485,3 @@ object:
 key_value:
   expr ':' expr
 ```
-
-## Debugging
-
-Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development.
-
-### Warnings
-
-In development mode, `amp-bind` will issue a warning when the default value of a bound attribute doesn't match its corresponding expression's initial result. This can help prevent unintended mutations caused by changes in other state variables. For example:
-
-```html
-<!-- The element's default class value ('def') doesn't match the expression result for [class] ('abc'),
-     so a warning will be issued in development mode. -->
-<p [class]="'abc'" class="def"></p>
-```
-
-In development mode, `amp-bind` will also issue a warning when dereferencing undefined variables or properties. This can also help prevent unintended mutations due to `null` expression results. For example:
-
-```html
-<amp-state id="myAmpState">
-  <script type="application/json">
-    { "foo": 123 }
-  </script>
-</amp-state>
-
-<!-- The amp-state#myAmpState does not have a `bar` variable, so a warning
-     will be issued in development mode. -->
-<p [text]="myAmpState.bar">Some placeholder text.</p>
-```
-
-### Errors
-
-There are several types of runtime errors that may be encountered when working with `amp-bind`.
-
-| Type | Example | Message | Suggestion |
-| --- | --- | --- | --- |
-| Invalid binding | `<p [someBogusAttribute]="myExpression">` | *Binding to [someBogusAttribute] on <P> is not allowed.* | Make sure that only [whitelisted bindings](#element-specific-attributes) are used. |
-| Syntax error | `<p [text]="(missingClosingParens">` | *Expression compilation error in...* | Double-check the expression for typos. |
-| Non-whitelisted functions | `<p [text]="alert(1)"></p>` | *alert is not a supported function.* | Only use [whitelisted functions](#whitelisted-functions). |
-| Sanitized result | `<a href="javascript:alert(1)"></a>` | *"javascript:alert(1)" is not a valid result for [href].* | Avoid banned URL protocols or expressions that would fail the AMP Validator. |
