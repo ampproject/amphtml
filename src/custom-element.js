@@ -950,7 +950,7 @@ function createBaseCustomElementClass(win) {
           this.dispatchCustomEventForTesting('amp:attached');
         }
       } else {
-        this.everAttached = true;
+        this.everAttached = this.everAttached || true;
 
         try {
           this.layout_ = applyLayout_(this);
