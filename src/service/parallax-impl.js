@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Observable} from '../observable';
 import {fromClassForDoc} from '../service';
 import {isExperimentOn} from '../experiments';
 import {setStyles} from '../style';
@@ -35,12 +34,6 @@ export class ParallaxService {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @private @const {!Observable} */
-    this.parallaxObservable_ = new Observable();
-
-    /** @private {number} */
-    this.previousScroll_ = 0;
-
     this.installParallaxHandlers_(ampdoc.win);
   }
 
@@ -63,7 +56,9 @@ export class ParallaxService {
         this.parallaxMutate_.bind(this, parallaxElements, viewport);
 
     viewport.onScroll(() => vsync.mutate(mutate));
-    mutate(); // initialize the elements with the current scroll position
+    viewport.onChanged(() => vsync.mutate(mutate));
+    // initialize the elements with the current scroll position
+    vsync.mutate(mutate);
   }
 
   /**
@@ -74,19 +69,12 @@ export class ParallaxService {
    * @private
    */
   parallaxMutate_(elements, viewport) {
-    const newScrollTop = viewport.getScrollTop();
-    const previousScrollTop = this.getPreviousScroll_();
-    const delta = previousScrollTop - newScrollTop;
-
     elements.forEach(element => {
       if (!element.shouldUpdate(viewport)) {
         return;
       }
-      element.update(delta);
-      this.setPreviousScroll_(newScrollTop);
+      element.update(viewport);
     });
-
-    this.fire_(newScrollTop);
   }
 
   /**
@@ -96,53 +84,6 @@ export class ParallaxService {
    */
   transform_(position) {
     return `translate3d(0,${position.toFixed(2)}px,0)`;
-  }
-
-  /**
-   * Get the previous scroll value.
-   * @return {number}
-   * @private
-   */
-  getPreviousScroll_() {
-    return this.previousScroll_;
-  }
-
-  /**
-   * Set the previous scroll value.
-   * @param {number} scroll
-   * @private
-   */
-  setPreviousScroll_(scroll) {
-    this.previousScroll_ = scroll;
-  }
-
-  /**
-   * Add listeners to parallax scroll events.
-   * @param {!function()} cb
-   * @private
-   * @visibleForTesting
-   */
-  addScrollListener_(cb) {
-    this.parallaxObservable_.add(cb);
-  }
-
-  /**
-   * Remove listeners from parallax scroll events.
-   * @param {!function()} cb
-   * @private
-   * @visibleForTesting
-   */
-  removeScrollListener_(cb) {
-    this.parallaxObservable_.remove(cb);
-  }
-
-  /**
-   * Alert listeners that a scroll has occurred.
-   * @param {number} scrollTop
-   * @private
-   */
-  fire_(scrollTop) {
-    this.parallaxObservable_.fire(scrollTop);
   }
 }
 
@@ -168,16 +109,24 @@ export class ParallaxElement {
 
     /** @private {number} */
     this.offset_ = 0;
+
+    /** @private {number} */
+    this.previousScroll_ = 0;
   }
 
   /**
    * Apply the parallax effect to the offset given how much the page
    * has moved since the last frame.
-   * @param {number} delta The movement of the base layer e.g. the page.
+   * @param {!./viewport-impl.Viewport} viewport.
    */
-  update(delta) {
+  update(viewport) {
+    const newScrollTop = viewport.getScrollTop();
+    const previousScrollTop = this.getPreviousScroll_();
+    const delta = previousScrollTop - newScrollTop;
+
     this.offset_ += delta * this.factor_;
     setStyles(this.element_, {transform: this.transform_(this.offset_)});
+    this.setPreviousScroll_(newScrollTop);
   }
 
   /**
@@ -187,9 +136,7 @@ export class ParallaxElement {
    */
   shouldUpdate(viewport) {
     const viewportRect = viewport.getRect();
-    const elementRect = viewport.getLayoutRect(this.element_);
-    elementRect.top -= viewportRect.top;
-    elementRect.bottom = elementRect.top + elementRect.height;
+    const elementRect = this.element_/*OK*/.getBoundingClientRect();
     return this.isRectInView_(elementRect, viewportRect.height);
   }
 
@@ -201,6 +148,24 @@ export class ParallaxElement {
    */
   isRectInView_(rect, viewportHeight) {
     return rect.bottom >= 0 && rect.top <= viewportHeight;
+  }
+
+  /**
+   * Get the previous scroll value.
+   * @return {number}
+   * @private
+   */
+  getPreviousScroll_() {
+    return this.previousScroll_;
+  }
+
+  /**
+   * Set the previous scroll value.
+   * @param {number} scroll
+   * @private
+   */
+  setPreviousScroll_(scroll) {
+    this.previousScroll_ = scroll;
   }
 }
 
