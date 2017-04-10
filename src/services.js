@@ -17,7 +17,6 @@
 import {
   getService,
   getServiceForDoc,
-  getExistingServiceForDoc,
   getServicePromiseForDoc,
   getExistingServiceForWindowOrNull,
   getExistingServiceForDocInEmbedScope,
@@ -150,7 +149,7 @@ export function inputFor(win) {
  */
 export function parallaxForDoc(nodeOrDoc) {
   return /** @type {!./service/parallax-impl.ParallaxService} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
+      getServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
 }
 
 /**
