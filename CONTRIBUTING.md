@@ -43,7 +43,7 @@ If you are suggesting a feature that you are intending to implement, please see 
 
 The AMP Project accepts and greatly appreciates code contributions!
 
-If you are contributing code to the AMP Project consider joining the AMP Project on GitHub by filling out [this form](https://goo.gl/forms/T65peVtfQfEoDWeD3).  (We will try to add you soon but it's a manual process so it may take a few days.)
+If you are contributing code to the AMP Project consider [joining the AMP Project on GitHub](https://goo.gl/forms/T65peVtfQfEoDWeD3).
 
 ### Tips for new open source contributors
 
