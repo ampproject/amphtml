@@ -30,6 +30,7 @@ tags: {  # <amp-state> (json)
   tag_name: "SCRIPT"
   spec_name: "amp-bind extension .json script"
   mandatory_parent: "AMP-STATE"
+  satisfies: "amp-bind extension .json script"
   requires: "amp-bind extension .js script"
   attrs: { name: "nonce" }
   attrs: {
@@ -51,10 +52,15 @@ tags: {  # <amp-state>
   tag_name: "AMP-STATE"
   satisfies: "amp-state"
   requires: "amp-bind extension .js script"
+  requires: "amp-bind extension .json script"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
     name: "id"
     mandatory: true
+  }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "SCRIPT"
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-bind"
 }
