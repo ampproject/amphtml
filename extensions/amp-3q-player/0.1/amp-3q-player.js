@@ -83,7 +83,7 @@ class Amp3QPlayer extends AMP.BaseElement {
     window.addEventListener('message',
                             event => this.sdnBridge_(event));
 
-    this.playerReadyResolver_ =  this.loadPromise(this.iframe_);
+    this.playerReadyResolver_ = this.loadPromise(this.iframe_);
     return this.playerReadyResolver_;
   }
 
@@ -122,21 +122,21 @@ class Amp3QPlayer extends AMP.BaseElement {
     }
 
     switch (data.data) {
-        case 'playing':
-            this.element.dispatchCustomEvent(VideoEvents.PLAY);
-            break;
-        case 'pause':
-            this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-            break;
-        case 'muted':
-            this.element.dispatchCustomEvent(VideoEvents.MUTED);
-            break;
-        case 'unmuted':
-            this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
-            break;
+      case 'playing':
+        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        break;
+      case 'pause':
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        break;
+      case 'muted':
+        this.element.dispatchCustomEvent(VideoEvents.MUTED);
+        break;
+      case 'unmuted':
+        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+        break;
     }
   }
-    
+
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
   /** @override */
@@ -179,14 +179,14 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   showControls() {
-      this.iframe_.contentWindow./*OK*/postMessage('showControlbar', '*');
+    this.iframe_.contentWindow./*OK*/postMessage('showControlbar', '*');
   }
 
   /** @override */
   hideControls() {
-      this.iframe_.contentWindow./*OK*/postMessage('hideControlbar', '*');
+    this.iframe_.contentWindow./*OK*/postMessage('hideControlbar', '*');
   }
-    
+
 };
 
 AMP.registerElement('amp-3q-player', Amp3QPlayer);
