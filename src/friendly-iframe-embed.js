@@ -446,8 +446,13 @@ export class FriendlyIframeEmbed {
   }
 
   setCssAnimPlayingState(running) {
-    this.win.document.documentElement.classList.toggle(
-        'i-amphtml-animations-paused', !running);
+    if (platformFor(this.win).isIos()) {
+      this.win.document.documentElement.classList.toggle(
+          'i-amphtml-animations-reset', !running);
+    } else {
+      this.win.document.documentElement.classList.toggle(
+          'i-amphtml-animations-paused', !running);
+    }
   }
 }
 

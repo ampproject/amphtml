@@ -93,12 +93,23 @@ html.i-amphtml-ios-embed {
   position: static;
 }
 
+
 /**
  * Class added to pause all aniamtions when the document is out of view.
+ * NOTE: This won't work on iOS. See 7846#issuecomment-293079217.
  */
 html.i-amphtml-animations-paused * {
   animation-play-state: paused !important;
 }
+
+
+/**
+ * Class added to pause all aniamtions when the document is out of view (iOS).
+ */
+html.i-amphtml-animations-reset * {
+  animation-name: none !important;
+}
+
 
 /** Wrapper for iOS Embed Wrapper mode. */
 #i-amphtml-wrapper {
