@@ -23,7 +23,7 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/video-manager';
+import {videoManagerForDoc} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
