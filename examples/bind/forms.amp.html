@@ -19,18 +19,26 @@
   <button on="tap:AMP.setState({selected: 3})">3</button>
   <button on="tap:AMP.setState({selected: 4})">4</button>
 
+  <p [text]="'$' + selectedRange">$0</p>
+
   <h4>Enter your name and email.</h4>
   <form method="post"
         action-xhr="/form/echo-json/post"
         target="_blank">
       <fieldset>
           <label>
-              <span>Your name</span>
-              <input type="text" name="name" id="name1" required>
+            <span>Your name</span>
+            <input type="text" name="name" id="name1" required>
           </label>
           <label>
-              <span>Your email</span>
-              <input type="email" name="email" id="email1" required>
+            <span>Your email</span>
+            <input type="email" name="email" id="email1" required>
+          </label>
+          <label>
+            <span>Your Offer</span>
+            $100
+            <input type="range" min="100" max="200" step="10" on="change:AMP.setState({selectedRange: event.value})"/>
+            $200
           </label>
           <input type="submit" value="Subscribe">
       </fieldset>

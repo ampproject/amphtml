@@ -46,7 +46,7 @@ describe('document-info', () => {
         }
       }
       const win = iframe.win;
-      installDocService(win, true);
+      installDocService(win, /* isSingleDoc */ true);
       sandbox.stub(win.Math, 'random', () => 0.123456789);
       installDocumentInfoServiceForDoc(win.document);
       return iframe.win;
@@ -72,7 +72,7 @@ describe('document-info', () => {
       },
     };
     win.document.defaultView = win;
-    installDocService(win, true);
+    installDocService(win, /* isSingleDoc */ true);
     installDocumentInfoServiceForDoc(win.document);
     expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
         'http://www.origin.com/foo/?f=0');
@@ -90,7 +90,7 @@ describe('document-info', () => {
       },
     };
     win.document.defaultView = win;
-    installDocService(win, true);
+    installDocService(win, /* isSingleDoc */ true);
     installDocumentInfoServiceForDoc(win.document);
     expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
         'http://www.origin.com/foo/?f=0');

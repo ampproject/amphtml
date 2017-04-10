@@ -32,23 +32,23 @@ import {
 
 /**
  * Returns a promise for the Access service.
- * @param {!Window} win
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<!AccessService>}
  */
-export function accessServiceFor(win) {
+export function accessServiceForDoc(nodeOrDoc) {
   return /** @type {!Promise<!AccessService>} */ (
-      getElementService(win, 'access', 'amp-access'));
+      getElementServiceForDoc(nodeOrDoc, 'access', 'amp-access'));
 }
 
 /**
  * Returns a promise for the Access service or a promise for null if the service
  * is not available on the current page.
- * @param {!Window} win
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<?AccessService>}
  */
-export function accessServiceForOrNull(win) {
+export function accessServiceForDocOrNull(nodeOrDoc) {
   return /** @type {!Promise<?AccessService>} */ (
-      getElementServiceIfAvailable(win, 'access', 'amp-access'));
+      getElementServiceIfAvailableForDoc(nodeOrDoc, 'access', 'amp-access'));
 }
 
 /**
@@ -133,7 +133,7 @@ export function extensionsFor(window) {
  */
 export function historyForDoc(nodeOrDoc) {
   return /** @type {!./service/history-impl.History} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'history'));
+      getServiceForDoc(nodeOrDoc, 'history'));
 }
 
 /**
