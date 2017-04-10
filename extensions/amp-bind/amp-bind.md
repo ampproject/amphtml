@@ -63,9 +63,10 @@ limitations under the License.
   - [A slightly more complex example](#a-slightly-more-complex-example)
 - [Details](#details)
   - [State](#state)
-    - [`amp-state`](#amp-state)
-    - [AMP.setState()](#ampsetstate)
+    - [Initializing state with `amp-state`](#initializing-state-with-amp-state)
+    - [Updating state with `AMP.setState()`](#updating-state-with-ampsetstate)
   - [Expressions](#expressions)
+    - [Examples](#examples)
     - [Differences from JavaScript](#differences-from-javascript)
     - [Whitelisted functions](#whitelisted-functions)
   - [Bindings](#bindings)
@@ -167,7 +168,7 @@ Check out the AMP Conf 2017 talk "[Turing complete...AMP Pages?!](https://www.yo
 
 Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or **state**.
 
-#### `amp-state`
+#### Initializing state with `amp-state`
 
 `amp-bind`'s state can be initialized with the `amp-state` component:
 
@@ -185,7 +186,7 @@ Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or 
 
 Note that an `<amp-state>` element's JSON has a maximum size of 100KB.
 
-#### AMP.setState()
+#### Updating state with `AMP.setState()`
 
 The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) mutates `amp-bind`'s state, given a state update as an argument.
 
@@ -195,11 +196,13 @@ The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) mutates `amp
 
 When this button is pressed, `AMP.setState()` will [deep-merge](#deep-state-merging) the update with `amp-bind`'s state up to a dpeth of 10. All variables, including those introduced by `amp-state`, can be overidden.
 
-The state update argument to `AMP.setState()` can depend on any variables present in `amp-bind`'s state. When triggered by certain events, `AMP.setState()` also can access event-related data on the `event` property. See [Actions and Events in AMP](../../spec/amp-actions-and-events.md) for more details.
+The argument to `AMP.setState()` can depend on any variables present in `amp-bind`'s state. When triggered by certain events, `AMP.setState()` also can access event-related data on the `event` property. See [Actions and Events in AMP](../../spec/amp-actions-and-events.md) for more details.
 
 ### Expressions
 
-`amp-bind` expressions are similar to JavaScript. The following are all valid expressions in `amp-bind`.
+#### Examples
+
+The following are all valid expressions in `amp-bind`.
 
 ```javascript
 'Hello ' + 'World ' + 3
@@ -227,7 +230,7 @@ The full expression grammar and implementation can be found in [bind-expr-impl.j
 | [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods) | `concat`<br>`includes`<br>`indexOf`<br>`join`<br>`lastIndexOf`<br>`slice` | `// Returns true.`<br>`[1, 2, 3].includes(1)` |
 | [`String`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods) | `charAt`<br>`charCodeAt`<br>`concat`<br>`indexOf`<br>`lastIndexOf`<br>`slice`<br>`split`<br>`substr`<br>`substring`<br>`toLowerCase`<br>`toUpperCase` | `// Returns 'abcdef'.`<br>`'abc'.concat('def')` |
 | [`Math`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math)<sup>2</sup> | `abs`<br>`ceil`<br>`floor`<br>`max`<br>`min`<br>`random`<br>`round`<br>`sign` | `// Returns 1.`<br>`abs(-1)` |
-| Bind builtins<sup>2</sup> | `copyAndSplice` | `// Returns [1, 47 ,3].`<br>`copyAndSplice([1, 2, 3], 1, 1, 47)` |
+| [Bind builtins](#builtin-functions)<sup>2</sup> | `copyAndSplice` | `// Returns [1, 47 ,3].`<br>`copyAndSplice([1, 2, 3], 1, 1, 47)` |
 
 <sup>2</sup>Functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
 
@@ -317,7 +320,7 @@ There are several types of runtime errors that may be encountered when working w
 
 | Type | Example | Message | Suggestion |
 | --- | --- | --- | --- |
-| Invalid binding | `<p [someBogusAttribute]="myExpression">` | *Binding to [someBogusAttribute] on <P> is not allowed.* | Make sure that only [whitelisted bindings](#element-specific-attributes) are used. |
+| Invalid binding | `<p [someBogusAttribute]="myExpression">` | *Binding to [someBogusAttribute] on `<P>` is not allowed.* | Make sure that only [whitelisted bindings](#element-specific-attributes) are used. |
 | Syntax error | `<p [text]="(missingClosingParens">` | *Expression compilation error in...* | Double-check the expression for typos. |
 | Non-whitelisted functions | `<p [text]="alert(1)"></p>` | *alert is not a supported function.* | Only use [whitelisted functions](#whitelisted-functions). |
 | Sanitized result | `<a href="javascript:alert(1)"></a>` | *"javascript:alert(1)" is not a valid result for [href].* | Avoid banned URL protocols or expressions that would fail the AMP Validator. |
@@ -330,7 +333,7 @@ There are several types of runtime errors that may be encountered when working w
 
 | Name | Description | Arguments | Examples |
 | --- | --- | --- | --- |
-| `copyAndSplice` | Similar to [Array#splice()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) except a copy of the spliced array is returned. | `array` : An array.<br>`start` : Index at which to start changing the array.<br> `deleteCount` : The number of items to delete, starting at index `start`<br> `items...` Items to add to the array, beginning at index `start`. | `// Deleting an element. Returns [1, 3]`<br>`copyAndSplice([1, 2, 3], 1, 1)`<br>`// Replacing an item. Returns ['Pizza', 'Cake', 'Ice Cream']`<br>`copyAndSplice(['Pizza', 'Cake', 'Soda'], 2, 1, 'Ice Cream')` |
+| `copyAndSplice` | Similar to [Array#splice()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) except a copy of the spliced array is returned. | `array` : An array.<br>`start` : Index at which to start changing the array.<br> `deleteCount` : The number of items to delete, starting at index `start`<br> `items...` Items to add to the array, beginning at index `start`. | `// Deleting an element. Returns [1, 3]`<br>`copyAndSplice([1, 2, 3], 1, 1)`<br><br>`// Replacing an item. Returns ['Pizza', 'Cake', 'Ice Cream']`<br>`copyAndSplice(['Pizza', 'Cake', 'Soda'], 2, 1, 'Ice Cream')` |
 
 ### Deep State Merging
 
