@@ -23,6 +23,8 @@
 import {
   googleAdsIsA4AEnabled,
   isInManualExperiment,
+  hasLaunchedDoubleClick,
+  hasLaunchedAdSense,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../ads/google/a4a/utils';
 import {getMode} from '../../../src/mode';
@@ -53,15 +55,27 @@ const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 // can disable profiling again, we can return these constants to being
 // private to this file.
 /** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
-export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
+export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   control: '117152660',
   experiment: '117152661',
 };
 
 /** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
-export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
+export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
+  control: '2092619',
+  experiment: '2092620',
+};
+
+/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
+export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   control: '117152680',
   experiment: '117152681',
+};
+
+/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
+export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
+  control: '2092613',
+  experiment: '2092614',
 };
 
 /** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
@@ -90,8 +104,12 @@ export function doubleclickIsA4AEnabled(win, element) {
   // shared location.
   const enableA4A = googleAdsIsA4AEnabled(
           win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES) ||
+          (hasLaunchedDoubleClick(element) ?
+             DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+             DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+          (hasLaunchedDoubleClick(element) ?
+             DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+             DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)) ||
       (a4aRequested && (isProxyOrigin(win.location) ||
        getMode(win).localDev || getMode(win).test));
   if (enableA4A && a4aRequested && !isInManualExperiment(element)) {
