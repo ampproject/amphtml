@@ -98,7 +98,7 @@ Because Extended Components may have significant impact on AMP HTML performance,
 In particular we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
 
 We have a few additional resources that provide an introduction to contributing extended components:
-* ["Building an AMP Extension"](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit?ts=58e682c2) has a detailed description of how to build an AMP component.
+* ["Building an AMP Extension"](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit) has a detailed description of how to build an AMP component.
 * ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0) provides a quick overview of the steps you need to go through to create a component with examples you can modify for your component.
 * The ["Building a new AMP component" talk at AMP Conf 2017](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) provides an introduction to contributing AMP components.
 
