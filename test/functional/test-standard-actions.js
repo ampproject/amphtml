@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {StandardActions} from '../../src/service/standard-actions-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
+import {StandardActions} from '../../src/service/standard-actions-impl';
 import {bindForDoc, historyForDoc} from '../../src/services';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
@@ -161,14 +162,15 @@ describes.sandboxed('StandardActions', {}, () => {
     });
 
     it('should implement setState', () => {
-      const setStateSpy = sandbox.spy();
-      const bind = {setState: setStateSpy};
+      const setStateWithExpressionSpy = sandbox.spy();
+      const bind = {setStateWithExpression: setStateWithExpressionSpy};
       window.services.bind = {obj: bind};
       const args = {};
+      args[OBJECT_STRING_ARGS_KEY] = '{foo: 123}';
       standardActions.handleAmpTarget({method: 'setState', args});
       return bindForDoc(standardActions.ampdoc).then(() => {
-        expect(setStateSpy).to.be.calledOnce;
-        expect(setStateSpy).to.be.calledWith(args);
+        expect(setStateWithExpressionSpy).to.be.calledOnce;
+        expect(setStateWithExpressionSpy).to.be.calledWith('{foo: 123}');
       });
     });
   });
