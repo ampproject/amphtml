@@ -1179,13 +1179,13 @@ export class AmpA4A extends AMP.BaseElement {
     // Iframe is appended to element as part of xorigin frame handler init.
     // Executive onCreativeRender after init to ensure it can get reference
     // to frame but prior to load to allow for earlier access.
-    const loadPromise =
+    const frameLoadPromise =
         this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
     })(false);
-    return loadPromise;
+    return frameLoadPromise;
   }
 
   /**
