@@ -272,7 +272,7 @@ export function videoManagerForDoc(nodeOrDoc) {
  */
 export function viewerForDoc(nodeOrDoc) {
   return /** @type {!./service/viewer-impl.Viewer} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'viewer'));
+      getServiceForDoc(nodeOrDoc, 'viewer'));
 }
 
 /**
