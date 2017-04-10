@@ -1,18 +1,3 @@
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 # Contributing to AMP HTML
 
 The AMP HTML project strongly encourages technical [contributions](https://www.ampproject.org/contribute/)!
@@ -20,8 +5,8 @@ The AMP HTML project strongly encourages technical [contributions](https://www.a
 We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
 
 - [Filing issues](#filing-issues)
-  * [Suggestions](#suggestions)
   * [Bugs](#bugs)
+  * [Suggestions](#suggestions)
 - [Contributing code](#contributing-code)
   * [Tips for new open source contributors](#tips-for-new-open-source-contributors)
   * [How to contribute code](#how-to-contribute-code)
@@ -36,14 +21,6 @@ We hope you'll become an ongoing participant in our open source community but we
 
 ## Filing issues
 
-### Suggestions
-
-The AMP Project is meant to evolve with feedback.  The project and its users appreciate your thoughts on ways to improve the design or features.
-
-To make a suggestion [file an issue](https://github.com/ampproject/amphtml/issues/new).
-
-If you are suggesting a feature that you are intending to implement, please see the [Contributing features](#contributing-features) section below for next steps.
-
 ### Bugs
 
 If you find a bug in AMP, please [file an issue](https://github.com/ampproject/amphtml/issues/new).  Members of the community are regularly monitoring issues and will try to fix open bugs quickly.
@@ -52,9 +29,21 @@ The best bug reports provide a detailed description of the issue (including scre
 
 If you want to learn more about our issues priorities and implementation guidelines check out [this document](https://github.com/ampproject/amphtml/blob/master/contributing/issue-priorities.md).
 
+Please note that questions about how to use AMP or other general questions about AMP should be asked on [Stack Overflow under the AMP HTML tag](http://stackoverflow.com/questions/tagged/amp-html) instead of filing an issue here.  Questions/issues related to Google Search should be asked on [Google's AMP forum](https://goo.gl/utQ1KZ).
+
+### Suggestions
+
+The AMP Project is meant to evolve with feedback.  The project and its users appreciate your thoughts on ways to improve the design or features.
+
+To make a suggestion [file an issue](https://github.com/ampproject/amphtml/issues/new).
+
+If you are suggesting a feature that you are intending to implement, please see the [Contributing features](#contributing-features) section below for next steps.
+
 ## Contributing code
 
 The AMP Project accepts and greatly appreciates code contributions!
+
+If you are contributing code to the AMP Project consider [joining the AMP Project on GitHub](https://goo.gl/forms/T65peVtfQfEoDWeD3).
 
 ### Tips for new open source contributors
 
