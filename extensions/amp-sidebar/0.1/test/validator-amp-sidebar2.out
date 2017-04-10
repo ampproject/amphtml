@@ -1,2 +1,0 @@
-FAIL
-amp-sidebar/0.1/test/validator-amp-sidebar2.html:40:6 Tag 'amp-accordion > section' must have 2 child tags - saw 1 child tags. [AMP_TAG_PROBLEM]
