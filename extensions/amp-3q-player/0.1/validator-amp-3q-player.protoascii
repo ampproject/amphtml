@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
+#extension_unused_unless_tag_present: "amp-3q-player"
 
 tags: {  # amp-3q-player
   html_format: AMP
@@ -20,7 +21,6 @@ tags: {  # amp-3q-player
   spec_name: "amp-3q-player extension .js script"
   satisfies: "amp-3q-player extension .js script"
   mandatory_parent: "HEAD"
-  extension_unused_unless_tag_present: "amp-3q-player"
   unique: true
   attrs: {
     name: "async"
