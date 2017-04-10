@@ -793,16 +793,17 @@ export class AmpFormService {
    */
   constructor(ampdoc) {
     /** @const @private {!Promise} */
-    this.whenFinished_ = this.installStyles_(ampdoc)
+    this.whenInitialized_ = this.installStyles_(ampdoc)
         .then(() => this.installHandlers_(ampdoc));
   }
 
   /**
    * Returns a promise that resolves when all form implementations (if any)
    * have been upgraded.
+   * @return {!Promise}
    */
-  whenFinished() {
-    return this.whenFinished_;
+  whenInitialized() {
+    return this.whenInitialized_;
   }
 
   /**

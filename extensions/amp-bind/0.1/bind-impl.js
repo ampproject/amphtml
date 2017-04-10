@@ -136,6 +136,17 @@ export class Bind {
     });
 
     /**
+     * Form implementations are not filled in until ampdoc is ready.
+     * So we must wait for that to finish before scanning form elements
+     * for dynamic components.
+     * @private {!Promise}
+     */
+    this.formInitializationPromise_ =
+        ampFormServiceForDoc(this.ampdoc).then(ampFormService => {
+          return ampFormService.whenInitialized();
+        });
+
+    /**
      * @private {?Promise}
      */
     this.setStatePromise_ = null;
@@ -406,8 +417,7 @@ export class Bind {
       if (typeof element.getDynamicElementContainers === 'function') {
         element.getDynamicElementContainers().forEach(observeElement);
       } else if (element.tagName === 'FORM') {
-        // Form implementations are not filled in until ampdoc is ready.
-        ampFormServiceForDoc(this.ampdoc).whenFinished().then(() => {
+        this.formInitializationPromise_.then(() => {
           const form = formOrNullForElement(element);
           dev().assert(form, 'could not find form implementation');
           form.getDynamicElementContainers().forEach(observeElement);
