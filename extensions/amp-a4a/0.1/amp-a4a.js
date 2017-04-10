@@ -865,6 +865,7 @@ export class AmpA4A extends AMP.BaseElement {
   viewportCallback(inViewport) {
     if (this.friendlyIframeEmbed_) {
       setFriendlyIframeEmbedVisible(this.friendlyIframeEmbed_, inViewport);
+      this.friendlyIframeEmbed_.setCssAnimPlayingState(inViewport);
     }
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);

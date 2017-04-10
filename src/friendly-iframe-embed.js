@@ -444,6 +444,11 @@ export class FriendlyIframeEmbed {
       this.visibilityObservable_.fire(this.visible_);
     }
   }
+
+  setCssAnimPlayingState(running) {
+    this.win.document.documentElement.classList.toggle(
+        'i-amphtml-animations-paused', !running);
+  }
 }
 
 
