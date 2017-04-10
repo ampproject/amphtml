@@ -386,6 +386,10 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   z-index: 2;
 }
 
+.i-amphtml-loader-moving-line[experiment] {
+  background-color: rgba(151, 151, 151, 0.65);
+}
+
 @keyframes i-amphtml-loader-line-moving {
   0% {transform: translateX(-100%);}
   100% {transform: translateX(100%);}
