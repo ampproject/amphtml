@@ -63,10 +63,9 @@ limitations under the License.
   - [A slightly more complex example](#a-slightly-more-complex-example)
 - [Details](#details)
   - [State](#state)
-    - [Initializing state with `amp-state`](#initializing-state-with-amp-state)
-    - [Updating state with `AMP.setState()`](#updating-state-with-ampsetstate)
+    - [`amp-state`](#amp-state)
+    - [AMP.setState()](#ampsetstate)
   - [Expressions](#expressions)
-    - [Examples](#examples)
     - [Differences from JavaScript](#differences-from-javascript)
     - [Whitelisted functions](#whitelisted-functions)
   - [Bindings](#bindings)
@@ -320,7 +319,7 @@ There are several types of runtime errors that may be encountered when working w
 
 | Type | Example | Message | Suggestion |
 | --- | --- | --- | --- |
-| Invalid binding | `<p [someBogusAttribute]="myExpression">` | *Binding to [someBogusAttribute] on `<P>` is not allowed.* | Make sure that only [whitelisted bindings](#element-specific-attributes) are used. |
+| Invalid binding | `<p [someBogusAttribute]="myExpression">` | *Binding to [someBogusAttribute] on `<P>`` is not allowed.* | Make sure that only [whitelisted bindings](#element-specific-attributes) are used. |
 | Syntax error | `<p [text]="(missingClosingParens">` | *Expression compilation error in...* | Double-check the expression for typos. |
 | Non-whitelisted functions | `<p [text]="alert(1)"></p>` | *alert is not a supported function.* | Only use [whitelisted functions](#whitelisted-functions). |
 | Sanitized result | `<a href="javascript:alert(1)"></a>` | *"javascript:alert(1)" is not a valid result for [href].* | Avoid banned URL protocols or expressions that would fail the AMP Validator. |
@@ -333,11 +332,11 @@ There are several types of runtime errors that may be encountered when working w
 
 | Name | Description | Arguments | Examples |
 | --- | --- | --- | --- |
-| `copyAndSplice` | Similar to [Array#splice()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) except a copy of the spliced array is returned. | `array` : An array.<br>`start` : Index at which to start changing the array.<br> `deleteCount` : The number of items to delete, starting at index `start`<br> `items...` Items to add to the array, beginning at index `start`. | `// Deleting an element. Returns [1, 3]`<br>`copyAndSplice([1, 2, 3], 1, 1)`<br><br>`// Replacing an item. Returns ['Pizza', 'Cake', 'Ice Cream']`<br>`copyAndSplice(['Pizza', 'Cake', 'Soda'], 2, 1, 'Ice Cream')` |
+| `copyAndSplice` | Similar to [Array#splice()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) except a copy of the spliced array is returned. | `array` : An array.<br>`start` : Index at which to start changing the array.<br> `deleteCount` : The number of items to delete, starting at index `start`<br> `items...` Items to add to the array, beginning at index `start`. | `// Deleting an element. Returns [1, 3]`<br>`copyAndSplice([1, 2, 3], 1, 1)`<br>`// Replacing an item. Returns ['Pizza', 'Cake', 'Ice Cream']`<br>`copyAndSplice(['Pizza', 'Cake', 'Soda'], 2, 1, 'Ice Cream')` |
 
 ### Deep State Merging
 
-`amp-bind` deep-merges all state updates with bind's current state. 
+`amp-bind` deep-merges all state updates with bind's current state. Whenevr `amp-bind` receives a state update, all variables from the update are written to `amp-bind`'s state with one important exception. If `amp-bind`'s state and the state update both contain the same variable **AND** both variable definitions are objects, then the objects are recursively merged to a maximum depth of ten.
 
 Consider the following example:
 
@@ -377,8 +376,6 @@ When the second button is pressed, `amp-bind` will **deep-merge** this state wit
   }
 }
 ```
-
-Whenevr `amp-bind` receives a state update, all variables from the update are written to `amp-bind`'s state with one important exception. If `amp-bind`'s state and the state update both contain the same variable **AND** both variable definitions are objects, then the objects are recursively merged to a maximum depth of ten.
 
 #### Deleting a variable
 
