@@ -194,6 +194,7 @@ describe('toggleExperiment', () => {
       document: doc,
       location: {
         hostname: 'test.test',
+        href: 'https://test.test/test.html',
       },
     }, experimentId, opt_on);
     const parts = doc.cookie.split(/\s*;\s*/g);
@@ -269,6 +270,7 @@ describe('toggleExperiment', () => {
       },
       location: {
         hostname: 'test.test',
+        href: 'https://test.test/test.html',
       },
     };
     toggleExperiment(win, 'transient', true, true);
@@ -327,6 +329,7 @@ describe('toggleExperiment', () => {
       },
       location: {
         hostname: 'test.test',
+        href: 'https://test.test/test.html',
       },
     };
     // Make sure some experiments are enabled in the cookie.
