@@ -283,7 +283,7 @@ export class ActionService {
     target[ACTION_QUEUE_] = {'push': handler};
 
     // Dequeue the current queue.
-    if (currentQueue) {
+    if (isArray(currentQueue)) {
       timerFor(target.ownerDocument.defaultView).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
