@@ -139,12 +139,14 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
  * implementations.
  *
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4aElement
- * @return {!./performance.GoogleAdLifecycleReporter}
+ * @param {string=} opt_namespace  CSI ping namespace.  For example, a key
+ *   of #ReporterNamespace.
+ * @return {!./performance.GoogleAdLifecycleReporter|!./performance.BaseLifecycleReporter}
  */
-export function googleLifecycleReporterFactory(a4aElement) {
+export function googleLifecycleReporterFactory(a4aElement, opt_namespace) {
+  const namespace = opt_namespace || ReporterNamespace.A4A;
   const reporter =
-      /** @type {!./performance.GoogleAdLifecycleReporter} */
-      (getLifecycleReporter(a4aElement, ReporterNamespace.A4A,
+      (getLifecycleReporter(a4aElement, namespace,
           a4aElement.element.getAttribute('data-amp-slot-index')));
   reporter.setPingParameters({
     's': 'AD_SLOT_NAMESPACE',
