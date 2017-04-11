@@ -160,7 +160,6 @@ When the button is pressed:
   - The second `<p>` element's `class` attribute will be "redBackground".
   - The `amp-img` element will show the image of a cat.
 
-
 [Try out the **live demo**](https://ampbyexample.com/components/amp-bind/) for this example with code annotations!
 
 ## Details
@@ -185,7 +184,9 @@ Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or 
 
 [Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
 
-Note that an `<amp-state>` element's JSON has a maximum size of 100KB.
+Note that an `<amp-state>` element's child JSON has a maximum size of 100KB. 
+
+`<amp-state>` can also specify a CORS URL instead of a child JSON script. See the [Appendix](#amp-state-specification) for details.
 
 #### Updating state with `AMP.setState()`
 
@@ -343,6 +344,39 @@ There are several types of runtime errors that may be encountered when working w
 | Sanitized result | `<a href="javascript:alert(1)"></a>` | *"javascript:alert(1)" is not a valid result for [href].* | Avoid banned URL protocols or expressions that would fail the AMP Validator. |
 
 ## Appendix
+
+### `<amp-state>` specification
+
+An `amp-state` element may contain either a child `<script>` element **OR** a `src` attribute containing a CORS URL to a remote JSON endpoint, but not both.
+
+```html
+<amp-state id="myLocalState">
+  <script type="application/json">
+    {
+      "foo": "bar"
+    }
+  </script>
+</amp-state>
+
+<amp-state id="myRemoteState" src="https://data.com/articles.json">
+</amp-state>
+```
+
+#### Attributes
+
+**src**
+
+The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service.
+
+The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+
+**credentials** (optional)
+
+Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
+To send credentials, pass the value of "include". If this is set, the response must follow
+the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+
+The support values are "omit" and "include". Default is "omit".
 
 ### Custom Built-in Functions
 

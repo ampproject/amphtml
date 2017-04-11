@@ -938,7 +938,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
         iframe.doc.head.appendChild(link);
 
         const replacements = urlReplacementsForDoc(iframe.ampdoc);
-        replacements.getVariableSource().getAccessService_ = () => {
+        replacements.getVariableSource().getAccessService_ = ampdoc => {
+          expect(ampdoc.isSingleDoc).to.be.function;
           if (opt_disabled) {
             return Promise.resolve(null);
           }

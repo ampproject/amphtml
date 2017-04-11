@@ -17,7 +17,6 @@
 import {
   getService,
   getServiceForDoc,
-  getExistingServiceForDoc,
   getServicePromiseForDoc,
   getExistingServiceForWindowOrNull,
   getExistingServiceForDocInEmbedScope,
@@ -32,23 +31,23 @@ import {
 
 /**
  * Returns a promise for the Access service.
- * @param {!Window} win
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<!AccessService>}
  */
-export function accessServiceFor(win) {
+export function accessServiceForDoc(nodeOrDoc) {
   return /** @type {!Promise<!AccessService>} */ (
-      getElementService(win, 'access', 'amp-access'));
+      getElementServiceForDoc(nodeOrDoc, 'access', 'amp-access'));
 }
 
 /**
  * Returns a promise for the Access service or a promise for null if the service
  * is not available on the current page.
- * @param {!Window} win
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<?AccessService>}
  */
-export function accessServiceForOrNull(win) {
+export function accessServiceForDocOrNull(nodeOrDoc) {
   return /** @type {!Promise<?AccessService>} */ (
-      getElementServiceIfAvailable(win, 'access', 'amp-access'));
+      getElementServiceIfAvailableForDoc(nodeOrDoc, 'access', 'amp-access'));
 }
 
 /**
@@ -78,13 +77,12 @@ export function batchedXhrFor(window) {
       getService(window, 'batched-xhr'));
 }
 
-// TODO(choumx): Investigate why amp-bind.Bind type reference not recognized.
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<*>}
+ * @return {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>}
  */
 export function bindForDoc(nodeOrDoc) {
-  return /** @type {!Promise<*>} */ (
+  return /** @type {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
       getElementServiceForDoc(nodeOrDoc, 'bind', 'amp-bind'));
 }
 
@@ -150,7 +148,7 @@ export function inputFor(win) {
  */
 export function parallaxForDoc(nodeOrDoc) {
   return /** @type {!./service/parallax-impl.ParallaxService} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
+      getServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
 }
 
 /**
@@ -272,7 +270,7 @@ export function videoManagerForDoc(nodeOrDoc) {
  */
 export function viewerForDoc(nodeOrDoc) {
   return /** @type {!./service/viewer-impl.Viewer} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'viewer'));
+      getServiceForDoc(nodeOrDoc, 'viewer'));
 }
 
 /**

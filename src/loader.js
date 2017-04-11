@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {isExperimentOn} from './experiments';
+
 /** @private @const */
 const LINE_LOADER_ELEMENTS = {
   'AMP-AD': true,
@@ -32,6 +34,12 @@ export function createLoaderElement(doc, elementName) {
     loader.classList.add('i-amphtml-loader-line');
     const line = doc.createElement('div');
     line.classList.add('i-amphtml-loader-moving-line');
+    // Experiment with new loader design
+    const win = doc.defaultView;
+    if (isExperimentOn(win, 'ad-loader-v1')
+        || isExperimentOn(win, 'ad-loader-v2')) {
+      line.setAttribute('experiment', '');
+    };
     loader.appendChild(line);
   } else {
     loader.classList.add('i-amphtml-loader');
