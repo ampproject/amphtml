@@ -220,6 +220,7 @@ export class AbstractAmpContext {
     this.initialIntersection = context.initialIntersection;
     this.hidden = context.hidden;
     this.sourceUrl = context.sourceUrl;
+    this.configType = context.configType;
 
     this.embedType_ = dataObject.type || null;
   }

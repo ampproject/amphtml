@@ -51,6 +51,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   attributes = getContextMetadata(parentWindow, element, sentinel,
       attributes);
   attributes.type = type;
+  attributes._context.configType = parentWindow.configType;
   Object.assign(attributes._context, opt_context);
   return attributes;
 }
@@ -276,7 +277,11 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
       '3p iframe url must not be on the same origin as the current doc' +
       'ument %s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
-      parsed.origin, meta);
+		parsed.origin, meta);
+
+  // TODO(bradfrizzell): remove this when remote.html is no longer needed.
+  parentWindow.configType = 'remoteHtml';
+
   return url + '?$internalRuntimeVersion$';
 }
 
