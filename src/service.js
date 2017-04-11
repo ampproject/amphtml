@@ -126,7 +126,7 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       /* opt_ctor */ undefined,
       () => service);
   // Force service to build
-  getService(embedWin, id);
+  getServiceInternal(embedWin, embedWin, id);
 }
 
 /**
