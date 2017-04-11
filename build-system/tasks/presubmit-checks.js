@@ -731,6 +731,12 @@ var forbiddenTermsSrcInclusive = {
       'build-system/tasks/extension-generator/index.js',
     ],
   },
+  '\\<\\<\\<\\<\\<\\<': {
+    message: 'Unresolved merge conflict.',
+  },
+  '\\>\\>\\>\\>\\>\\>': {
+    message: 'Unresolved merge conflict.',
+  },
 };
 
 // Terms that must appear in a source file.
