@@ -22,13 +22,6 @@ import {dev, user} from '../../../src/log';
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
 
-/** @enum {string} */
-const WAITFOR_EVENTS_LIST = {
-  NONE: 'none',
-  INI_LOAD: 'ini-load',
-  RENDER_START: 'render-start',
-};
-
 /**
  * @interface
  */
@@ -280,19 +273,18 @@ export class SignalTracker extends EventTracker {
     return NO_UNLISTEN;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getRootSignal(eventType) {
     dev().assert(eventType);
     return this.root.signals().whenSignal(/** @type {!string} */(eventType));
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getElementSignal(element, eventType) {
     dev().assert(eventType);
+    if (typeof element.signals != 'function') {
+      return Promise.resolve();
+    }
     return element.signals().whenSignal(/** @type {!string} */(eventType));
   }
 }
@@ -344,16 +336,12 @@ export class IniLoadTracker extends EventTracker {
     return NO_UNLISTEN;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getRootSignal() {
     return this.root.whenIniLoaded();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getElementSignal(element) {
     if (typeof element.signals != 'function') {
       return Promise.resolve();
@@ -441,11 +429,11 @@ export class VisibilityTracker extends EventTracker {
     }
     if (!waitForSpec) {
       // Default case #2 : waitFor ini-load by default
-      waitForSpec = WAITFOR_EVENTS_LIST.INI_LOAD;
+      waitForSpec = 'ini-load';
     }
 
     user().assert(SUPPORT_WAITFOR_TRACKERS[waitForSpec] !== undefined,
-        'waitFor value not supported');
+        'waitFor value %s not supported', waitForSpec);
 
     if (!SUPPORT_WAITFOR_TRACKERS[waitForSpec]) {
       // waitFor NONE, wait for nothing
