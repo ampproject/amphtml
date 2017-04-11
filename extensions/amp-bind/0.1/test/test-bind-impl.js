@@ -194,6 +194,17 @@ describes.realWin('Bind', {
     });
   });
 
+  it('should verify class bindings in dev mode', () => {
+    window.AMP_MODE = {development: true};
+    createElementWithBinding(`[class]="'foo'" class="foo"`); // No error.
+    createElementWithBinding(`[class]="'bar'"`); // Error.
+    const errorStub = env.sandbox.stub(user(), 'createError');
+    return onBindReady().then(() => {
+      expect(errorStub).to.be.calledOnce;
+      expect(errorStub).calledWithMatch(/bar/);
+    });
+  });
+
   it('should verify string attribute bindings in dev mode', () => {
     window.AMP_MODE = {development: true};
     // Only the initial value for [a] binding does not match.
