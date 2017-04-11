@@ -169,13 +169,12 @@ describes.realWin('Bind', {
 
   it('should dynamically detect new bindings under dynamic tags', () => {
     const doc = env.win.document;
-    const form = doc.createElement('form');
-    doc.getElementById('parent').appendChild(form);
+    const parent = doc.getElementById('parent');
     const dynamicTag = doc.createElement('div');
-    dynamicTag.setAttribute('submit-success', null);
-    form.appendChild(dynamicTag);
-    // Wrap form in amp-form implementation so bind can access it
-    new AmpForm(form);
+    parent.appendChild(dynamicTag);
+    parent.getDynamicElementContainers = () => {
+      return [dynamicTag];
+    }
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(0);
       const elementWithBinding = createElementWithBinding('[onePlusOne]="1+1"');

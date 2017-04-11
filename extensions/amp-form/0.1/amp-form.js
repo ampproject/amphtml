@@ -792,8 +792,18 @@ export class AmpFormService {
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    this.installStyles_(ampdoc).then(() => this.installHandlers_(ampdoc));
+    /** @const @private {!Promise} */
+    this.whenFinished_ = this.installStyles_(ampdoc)
+        .then(() => this.installHandlers_(ampdoc));
   }
+
+  /**
+   * Returns a promise that resolves when all form implementations (if any)
+   * have been upgraded.
+   */
+   whenFinished() {
+    return this.whenFinished_;
+   }
 
   /**
    * Install the amp-form CSS

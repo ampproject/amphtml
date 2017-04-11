@@ -27,7 +27,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
-import {resourcesForDoc} from '../../../src/services';
+import {ampFormServiceForDoc, resourcesForDoc} from '../../../src/services';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 
@@ -399,19 +399,20 @@ export class Bind {
       }
       const element = dev().assertElement(node);
       const tagName = element.tagName;
-
-      let dynamicElements = [];
-      if (typeof element.getDynamicElementContainers === 'function') {
-        dynamicElements = element.getDynamicElementContainers();
-      } else if (element.tagName === 'FORM') {
-        // FORM is not an amp element, so it doesn't have the getter directly.
-        const form = formOrNullForElement(element);
-        dev().assert(form, 'could not find form implementation');
-        dynamicElements = form.getDynamicElementContainers();
+      const observeElement = elementToObserve => {
+          this.mutationObserver_.observe(elementToObserve, {childList: true});
       }
-      dynamicElements.forEach(elementToObserve => {
-        this.mutationObserver_.observe(elementToObserve, {childList: true});
-      });
+
+      if (typeof element.getDynamicElementContainers === 'function') {
+        element.getDynamicElementContainers().forEach(observeElement);
+      } else if (element.tagName === 'FORM') {
+        // Form implementations are not filled in until ampdoc is ready.
+        ampFormServiceForDoc(this.ampdoc).whenFinished().then(() => {
+          const form = formOrNullForElement(element);
+          dev().assert(form, 'could not find form implementation');
+          form.getDynamicElementContainers().forEach(observeElement);
+        });
+      }
 
       let boundProperties = this.scanElement_(element);
       // Stop scanning once |limit| bindings are reached.

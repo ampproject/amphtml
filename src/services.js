@@ -69,6 +69,15 @@ export function activityForDoc(nodeOrDoc) {
 }
 
 /**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!../extensions/amp-form/0.1/amp-form.AmpFormService}
+ */
+export function ampFormServiceForDoc(nodeOrDoc) {
+  return /** @type {!../extensions/amp-form/0.1/amp-form.AmpFormService} */ (
+    getServiceForDoc(nodeOrDoc, 'amp-form'));
+}
+
+/**
  * @param {!Window} window
  * @return {!./service/batched-xhr-impl.BatchedXhr}
  */
