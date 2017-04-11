@@ -443,6 +443,7 @@ function toggleExperiment_(id, name, opt_on) {
           (on ? '1' : '0'), (on ? validUntil : 0), {
             // Set explicit domain, so the cookie gets send to sub domains.
             domain: location.hostname,
+            allowOnProxyOrigin: true,
           });
       // Reflect default experiment state.
       self.location.reload();
