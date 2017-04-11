@@ -190,7 +190,7 @@ Note that an `<amp-state>` element's child JSON has a maximum size of 100KB.
 
 #### Updating state with `AMP.setState()`
 
-The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) takes a state update and mutates `amp-bind`'s state.
+The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) merges an object literal into the state. For example:
 
 ```html
 <!-- Like JavaScript, you can reference existing
