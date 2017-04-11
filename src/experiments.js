@@ -195,6 +195,7 @@ function saveExperimentTogglesToCookie(win, toggles) {
       Date.now() + COOKIE_EXPIRATION_INTERVAL, {
         // Set explicit domain, so the cookie gets send to sub domains.
         domain: win.location.hostname,
+        allowOnProxyOrigin: true,
       });
 }
 
