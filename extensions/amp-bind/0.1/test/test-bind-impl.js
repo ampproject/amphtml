@@ -15,7 +15,6 @@
  */
 
 import * as sinon from 'sinon';
-import {AmpForm} from '../../../amp-form/0.1/amp-form';
 import {Bind} from '../bind-impl';
 import {BindExpression} from '../bind-expression';
 import {BindValidator} from '../bind-validator';
@@ -174,7 +173,7 @@ describes.realWin('Bind', {
     parent.appendChild(dynamicTag);
     parent.getDynamicElementContainers = () => {
       return [dynamicTag];
-    }
+    };
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(0);
       const elementWithBinding = createElementWithBinding('[onePlusOne]="1+1"');

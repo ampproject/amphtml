@@ -400,8 +400,8 @@ export class Bind {
       const element = dev().assertElement(node);
       const tagName = element.tagName;
       const observeElement = elementToObserve => {
-          this.mutationObserver_.observe(elementToObserve, {childList: true});
-      }
+        this.mutationObserver_.observe(elementToObserve, {childList: true});
+      };
 
       if (typeof element.getDynamicElementContainers === 'function') {
         element.getDynamicElementContainers().forEach(observeElement);

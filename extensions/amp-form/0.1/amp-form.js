@@ -801,9 +801,9 @@ export class AmpFormService {
    * Returns a promise that resolves when all form implementations (if any)
    * have been upgraded.
    */
-   whenFinished() {
+  whenFinished() {
     return this.whenFinished_;
-   }
+  }
 
   /**
    * Install the amp-form CSS
