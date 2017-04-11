@@ -25,5 +25,6 @@
   "amp-auto-ads": 1,
   "slidescroll-disable-css-snap": 1,
   "visibility-v3": 1,
-  "as-use-attr-for-format": 1
+  "as-use-attr-for-format": 1,
+  "web-worker": 1
 }
