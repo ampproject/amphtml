@@ -101,12 +101,12 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     const selected = selectedBranch == internalBranches.experiment ||
                      selectedBranch == externalBranches.experiment ||
                      selectedBranch == MANUAL_EXPERIMENT_ID;
-    return (selected == !hasLaunched(element));
+    return (selected == !hasLaunched(win, element));
   } else {
     // Page is not selected into the overall traffic experiment.
     // In other words, if A4A has launched serve A4A Fast Fetch, else serve
     // Delayed Fetch.
-    return hasLaunched(element);
+    return hasLaunched(win, element);
   }
 }
 
@@ -336,11 +336,19 @@ export function isInManualExperiment(element) {
  * control/filler do not. If it has not, then the filler and control branch do
  * serve A4A, and the experimental branch does not.
  *
+ * @param {!Window} win  Host window for the ad.
  * @param {!Element} element  Element to check for pre-launch membership.
  * @returns {boolean}
  */
-export function hasLaunched(element) {
-  return isExperimentOn(element.getAttribute('type'));
+export function hasLaunched(win, element) {
+  switch (element.getAttribute('type')) {
+    case 'adsense':
+      return isExperimentOn(win, 'a4aFastFetchAdSenseLaunched');
+    case 'doubleclick':
+      return isExperimentOn(win, 'a4aFastFetchDoubleclickLaunched');
+    default:
+      return false;
+  }
 }
 
 /**

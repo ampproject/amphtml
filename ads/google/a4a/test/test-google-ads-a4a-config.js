@@ -21,6 +21,7 @@ import {
     isInManualExperiment,
     isExternallyTriggeredExperiment,
     isInternallyTriggeredExperiment,
+    hasLaunched,
 } from '../traffic-experiments';
 import {toggleExperiment} from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
@@ -30,6 +31,7 @@ import {
   installDocumentStateService,
 } from '../../../../src/service/document-state';
 import * as sinon from 'sinon';
+import * as DoubleClickA4AConfig from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js';
 
 const EXP_ID = 'EXP_ID';
 
@@ -131,6 +133,7 @@ describe('a4a_config', () => {
         webkitSubtle: true,
       },
       navigator: window.navigator,
+      pageExperimentBranches: {}
     };
     win.document.defaultView = win;
     const ampdocService = installDocService(win, /* isSingleDoc */ true);
@@ -309,6 +312,81 @@ describe('a4a_config', () => {
       }
     });
   });
+  it('should serve Delayed Fetch when DoubleClick has not launched and page is in filler portion', () => {
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+    element.setAttribute('type', 'doubleclick');
+    expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH))).to.be.false;
+  });
+  it('should serve Delayed Fetch when DoubleClick has not launched and page is in control portion', () => {
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+    toggleExperiment(win, 'expDoubleclickA4A', true, true);
+    element.setAttribute('type', 'doubleclick');
+    win.pageExperimentBranches['expDoubleclickA4A']=DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control;
+    expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH))).to.be.false;
+  });
+  it('should serve Fast Fetch when DoubleClick has not launched and page is in experiment portion', () => {
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+    toggleExperiment(win, 'expDoubleclickA4A', true, true);
+    element.setAttribute('type', 'doubleclick');
+    win.pageExperimentBranches['expDoubleclickA4A']=DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment;
+    expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH))).to.be.true;
+  });
+  it('should serve Fast Fetch when DoubleClick has launched and page is in filler portion', () => {
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+    element.setAttribute('type', 'doubleclick');
+    expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH))).to.be.true;
+  });
+  it('should serve Fast Fetch when DoubleClick has launched and page is in control portion', () => {
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+    toggleExperiment(win, 'expDoubleclickA4A', true, true);
+    element.setAttribute('type', 'doubleclick');
+    win.pageExperimentBranches['expDoubleclickA4A']=DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control;
+    expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH))).to.be.true;
+  });
+  it('should serve Delayed Fetch when DoubleClick has launched and page is in experiment (holdback) portion', () => {
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+    toggleExperiment(win, 'expDoubleclickA4A', true, true);
+    element.setAttribute('type', 'doubleclick');
+    win.pageExperimentBranches['expDoubleclickA4A']=DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment;
+    expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH))).to.be.false;
+  });
+  // TODO(jonkeller): AdSense tests also
 });
 
 // These tests are separated because they need to invoke
