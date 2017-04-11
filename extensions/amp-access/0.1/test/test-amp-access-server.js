@@ -16,11 +16,13 @@
 
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
-import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 
-describe('AccessServerAdapter', () => {
 
-  let sandbox;
+describes.realWin('AccessServerAdapter', {amp: true}, env => {
+  let win;
+  let document;
+  let ampdoc;
   let clock;
   let validConfig;
   let context;
@@ -28,8 +30,10 @@ describe('AccessServerAdapter', () => {
   let meta;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
+    win = env.win;
+    document = win.document;
+    ampdoc = env.ampdoc;
+    clock = lolex.install(win);
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -50,16 +54,12 @@ describe('AccessServerAdapter', () => {
 
   afterEach(() => {
     contextMock.verify();
-    sandbox.restore();
-    if (meta.parentNode) {
-      document.head.removeChild(meta);
-    }
   });
 
 
   describe('config', () => {
     it('should load valid config', () => {
-      const adapter = new AccessServerAdapter(window, validConfig, context);
+      const adapter = new AccessServerAdapter(ampdoc, validConfig, context);
       expect(adapter.clientAdapter_.authorizationUrl_).to
           .equal('https://acme.com/a?rid=READER_ID');
       expect(adapter.clientAdapter_.pingbackUrl_).to
@@ -73,13 +73,13 @@ describe('AccessServerAdapter', () => {
     it('should fail if config is invalid', () => {
       delete validConfig['authorization'];
       expect(() => {
-        new AccessServerAdapter(window, validConfig, context);
+        new AccessServerAdapter(ampdoc, validConfig, context);
       }).to.throw(/"authorization" URL must be specified/);
     });
 
     it('should tolerate when i-amphtml-access-state is missing', () => {
       document.head.removeChild(meta);
-      const adapter = new AccessServerAdapter(window, validConfig, context);
+      const adapter = new AccessServerAdapter(ampdoc, validConfig, context);
       expect(adapter.serverState_).to.be.null;
     });
   });
@@ -94,7 +94,7 @@ describe('AccessServerAdapter', () => {
     let targetElement1, targetElement2;
 
     beforeEach(() => {
-      adapter = new AccessServerAdapter(window, validConfig, context);
+      adapter = new AccessServerAdapter(ampdoc, validConfig, context);
       xhrMock = sandbox.mock(adapter.xhr_);
 
       clientAdapter = {
@@ -164,7 +164,7 @@ describe('AccessServerAdapter', () => {
             }))
             .once();
         const request = {
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'vars': {
             'READER_ID': 'reader1',
@@ -205,7 +205,7 @@ describe('AccessServerAdapter', () => {
             }))
             .once();
         const request = {
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'vars': {
             'READER_ID': 'reader1',
@@ -242,7 +242,7 @@ describe('AccessServerAdapter', () => {
             }))
             .once();
         const request = {
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'vars': {
             'READER_ID': 'reader1',

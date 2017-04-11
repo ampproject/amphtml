@@ -45,7 +45,35 @@ limitations under the License.
       </ul>
     </td>
   </tr>
+  <tr>
+    <td class="col-fourty"><strong>Origin Trials</strong></td>
+    <td><a href="https://docs.google.com/a/google.com/forms/d/e/1FAIpQLSfGCAjUU4pDu84Sclw6wjGVDiFJhVr61pYTMehIt6ex4wmr1Q/viewform">Register here</a> to enable <code>amp-bind</code> for your origin.</td>
+  </tr>
 </table>
+
+## Table of contents
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [A simple example](#a-simple-example)
+- [How does it work?](#how-does-it-work)
+- [A slightly more complex example](#a-slightly-more-complex-example)
+- [Details](#details)
+  - [State](#state)
+      - [AMP.setState()](#ampsetstate)
+  - [Bindings](#bindings)
+    - [Element-specific attributes](#element-specific-attributes)
+  - [Expressions](#expressions)
+    - [Differences from JavaScript](#differences-from-javascript)
+    - [Whitelisted functions](#whitelisted-functions)
+    - [BNF-like grammar](#bnf-like-grammar)
+- [Debugging](#debugging)
+  - [Warnings](#warnings)
+  - [Errors](#errors)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## A simple example
 
@@ -137,14 +165,15 @@ This state can be initialized with the `amp-state` component:
 ```
 
 - [Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
-- An `<amp-state>` element's JSON has a maximum size of 100KB.
+- An `<amp-state>` element's child JSON has a maximum size of 100KB.
+- `<amp-state>` can also specify a CORS URL instead of a child JSON script. See the [Appendix]((#amp-state) for details.
 
-##### AMP.setState()
+#### `AMP.setState()`
 
 State can be mutated by the [`AMP.setState()` action](../../spec/amp-actions-and-events.md).
 
 - `AMP.setState()` performs a deep merge of its arguments with the document state up to a depth of 10.
-- `AMP.setState()` can override data initialized by `amp-state`.
+- `AMP.setState()` can override variables initialized by `amp-state`.
 
 ### Bindings
 
@@ -293,3 +322,79 @@ object:
 key_value:
   expr ':' expr
 ```
+
+## Debugging
+
+Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development.
+
+### Warnings
+
+In development mode, `amp-bind` will issue a warning when the default value of a bound attribute doesn't match its corresponding expression's initial result. This can help prevent unintended mutations caused by changes in other state variables. For example:
+
+```html
+<!-- The element's default class value ('def') doesn't match the expression result for [class] ('abc'),
+     so a warning will be issued in development mode. -->
+<p [class]="'abc'" class="def"></p>
+```
+
+In development mode, `amp-bind` will also issue a warning when dereferencing undefined variables or properties. This can also help prevent unintended mutations due to `null` expression results. For example:
+
+```html
+<amp-state id="myAmpState">
+  <script type="application/json">
+    { "foo": 123 }
+  </script>
+</amp-state>
+
+<!-- The amp-state#myAmpState does not have a `bar` variable, so a warning
+     will be issued in development mode. -->
+<p [text]="myAmpState.bar">Some placeholder text.</p>
+```
+
+### Errors
+
+There are several types of runtime errors that may be encountered when working with `amp-bind`.
+
+| Type | Example | Message | Suggestion |
+| --- | --- | --- | --- |
+| Invalid binding | `<p [someBogusAttribute]="myExpression">` | *Binding to [someBogusAttribute] on <P> is not allowed.* | Make sure that only [whitelisted bindings](#element-specific-attributes) are used. |
+| Syntax error | `<p [text]="(missingClosingParens">` | *Expression compilation error in...* | Double-check the expression for typos. |
+| Non-whitelisted functions | `<p [text]="alert(1)"></p>` | *alert is not a supported function.* | Only use [whitelisted functions](#whitelisted-functions). |
+| Sanitized result | `<a href="javascript:alert(1)"></a>` | *"javascript:alert(1)" is not a valid result for [href].* | Avoid banned URL protocols or expressions that would fail the AMP Validator. |
+
+## Appendix
+
+### `<amp-state>` specification
+
+Used to initialize the document-scope mutable JSON state that may be referenced by expressions in `amp-bind`. State variables initialized by an `amp-state` element are namespaced by its `id` attribute.
+
+An `amp-state` element may contain either a child `<script>` element **OR** a `src` attribute containing a CORS URL to a remote JSON endpoint, but not both.
+
+```html
+<amp-state id="myLocalState">
+  <script type="application/json">
+    {
+      "foo": "bar"
+    }
+  </script>
+</amp-state>
+
+<amp-state id="myRemoteState" src="https://data.com/articles.json">
+</amp-state>
+```
+
+#### Attributes
+
+**src**
+
+The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service.
+
+The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+
+**credentials** (optional)
+
+Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
+To send credentials, pass the value of "include". If this is set, the response must follow
+the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+
+The support values are "omit" and "include". Default is "omit".

@@ -21,31 +21,29 @@ import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {installActionServiceForDoc,} from
-    '../../../../src/service/action-impl';
 import {cidServiceForDocForTesting,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {installPerformanceService,} from
     '../../../../src/service/performance-impl';
-import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
 
-describe('AccessService', () => {
-
-  let sandbox;
+describes.fakeWin('AccessService', {
+  amp: true,
+  location: 'https://pub.com/doc1',
+}, env => {
+  let win, document;
+  let ampdoc;
   let element;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    ampdoc = env.ampdoc;
+    document = win.document;
 
-    markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
-    installActionServiceForDoc(docService.getAmpDoc());
-    cidServiceForDocForTesting(docService.getAmpDoc());
-    installPerformanceService(window);
+    cidServiceForDocForTesting(ampdoc);
+    installPerformanceService(win);
 
     element = document.createElement('script');
     element.setAttribute('id', 'amp-access');
@@ -55,23 +53,19 @@ describe('AccessService', () => {
   });
 
   afterEach(() => {
-    if (element.parentElement) {
-      document.body.removeChild(element);
-    }
-    sandbox.restore();
-    toggleExperiment(window, 'amp-access-server', false);
+    toggleExperiment(win, 'amp-access-server', false);
   });
 
   it('should disable service when no config', () => {
     document.body.removeChild(element);
-    const service = new AccessService(window);
+    const service = new AccessService(ampdoc);
     expect(service.isEnabled()).to.be.false;
     expect(service.accessElement_).to.be.undefined;
   });
 
   it('should fail if config is malformed', () => {
     expect(() => {
-      new AccessService(window);
+      new AccessService(ampdoc);
     }).to.throw(Error);
   });
 
@@ -79,7 +73,7 @@ describe('AccessService', () => {
     const config = {};
     element.textContent = JSON.stringify(config);
     expect(() => {
-      new AccessService(window);
+      new AccessService(ampdoc);
     }).to.throw(/"authorization" URL must be specified/);
   });
 
@@ -91,7 +85,7 @@ describe('AccessService', () => {
     };
     element.textContent = JSON.stringify(config);
     expect(() => {
-      new AccessService(window);
+      new AccessService(ampdoc);
     }).to.throw(/https\:/);
   });
 
@@ -102,7 +96,7 @@ describe('AccessService', () => {
       'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
-    const service = new AccessService(window);
+    const service = new AccessService(ampdoc);
     expect(service.isEnabled()).to.be.true;
     expect(service.accessElement_).to.equal(element);
     expect(service.type_).to.equal('client');
@@ -121,7 +115,7 @@ describe('AccessService', () => {
       },
     };
     element.textContent = JSON.stringify(config);
-    const service = new AccessService(window);
+    const service = new AccessService(ampdoc);
     expect(service.isEnabled()).to.be.true;
     expect(service.loginConfig_).to.deep.equal({
       'login1': 'https://acme.com/l1',
@@ -136,57 +130,57 @@ describe('AccessService', () => {
       'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('client');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('client');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessClientAdapter);
 
     config['type'] = 'client';
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('client');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('client');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessClientAdapter);
 
     config['type'] = 'server';
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('client');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('client');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessClientAdapter);
 
     config['type'] = 'server';
-    toggleExperiment(window, 'amp-access-server', true);
+    toggleExperiment(win, 'amp-access-server', true);
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('server');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('server');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessServerAdapter);
 
     // When the 'amp-access-server' experiment is enabled, documents with
     // access type 'client' are also treated as 'server'.
     config['type'] = 'client';
-    toggleExperiment(window, 'amp-access-server', true);
+    toggleExperiment(win, 'amp-access-server', true);
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('server');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('server');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessServerAdapter);
 
     config['type'] = 'other';
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('other');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('other');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessOtherAdapter);
 
     config = {};
     config['type'] = 'vendor';
     config['vendor'] = 'vendor1';
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('vendor');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('vendor');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessVendorAdapter);
 
     delete config['type'];
     config['vendor'] = 'vendor1';
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('vendor');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('vendor');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessVendorAdapter);
   });
 
@@ -196,7 +190,7 @@ describe('AccessService', () => {
       vendor: 'vendor1',
     };
     element.textContent = JSON.stringify(config);
-    const accessService = new AccessService(window);
+    const accessService = new AccessService(ampdoc);
     sandbox.stub(accessService.adapter_, 'getConfig');
     accessService.getAdapterConfig();
     expect(accessService.adapter_.getConfig.called).to.be.true;
@@ -209,23 +203,23 @@ describe('AccessService', () => {
       'login': 'https://acme.com/l',
       'jwt': true,
     };
-    toggleExperiment(window, 'amp-access-jwt', false);
+    toggleExperiment(win, 'amp-access-jwt', false);
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('client');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('client');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessClientAdapter);
 
     config['type'] = 'client';
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('client');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('client');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessClientAdapter);
 
     config['type'] = 'server';
-    toggleExperiment(window, 'amp-access-server', true);
+    toggleExperiment(win, 'amp-access-server', true);
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('server');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('server');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessServerAdapter);
   });
 
@@ -237,23 +231,23 @@ describe('AccessService', () => {
       'jwt': true,
       'publicKeyUrl': 'https://acme.com/pk',
     };
-    toggleExperiment(window, 'amp-access-jwt', true);
+    toggleExperiment(win, 'amp-access-jwt', true);
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('client');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('client');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessServerJwtAdapter);
 
     config['type'] = 'client';
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('client');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('client');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessServerJwtAdapter);
 
     config['type'] = 'server';
-    toggleExperiment(window, 'amp-access-server', true);
+    toggleExperiment(win, 'amp-access-server', true);
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('server');
-    expect(new AccessService(window).adapter_).to.be
+    expect(new AccessService(ampdoc).type_).to.equal('server');
+    expect(new AccessService(ampdoc).adapter_).to.be
         .instanceOf(AccessServerJwtAdapter);
   });
 
@@ -266,7 +260,7 @@ describe('AccessService', () => {
     };
     element.textContent = JSON.stringify(config);
     expect(() => {
-      new AccessService(window);
+      new AccessService(ampdoc);
     }).to.throw(/Unknown access type/);
   });
 
@@ -276,7 +270,7 @@ describe('AccessService', () => {
       'pingback': 'https://acme.com/p',
       'login': 'https://acme.com/l',
     });
-    const service = new AccessService(window);
+    const service = new AccessService(ampdoc);
     service.startInternal_ = sandbox.spy();
     service.start_();
     expect(service.startInternal_).to.be.calledOnce;
@@ -288,7 +282,7 @@ describe('AccessService', () => {
       'pingback': 'https://acme.com/p',
       'login': 'https://acme.com/l',
     });
-    const service = new AccessService(window);
+    const service = new AccessService(ampdoc);
     service.buildLoginUrls_ = sandbox.spy();
     service.runAuthorization_ = sandbox.spy();
     service.scheduleView_ = sandbox.spy();
@@ -310,7 +304,7 @@ describe('AccessService', () => {
       'pingback': 'https://acme.com/p',
       'login': 'https://acme.com/l',
     });
-    const service = new AccessService(window);
+    const service = new AccessService(ampdoc);
     expect(service.pubOrigin_).to.exist;
     expect(service.pubOrigin_).to.match(/^http.*/);
   });
@@ -322,7 +316,7 @@ describe('AccessService', () => {
       'login': 'https://acme.com/l',
       'authorizationFallbackResponse': {'error': true},
     });
-    const service = new AccessService(window);
+    const service = new AccessService(ampdoc);
     expect(service.authorizationFallbackResponse_).to.deep.equal(
         {'error': true});
   });
@@ -332,7 +326,7 @@ describe('AccessService', () => {
       'vendor': 'vendor1',
     };
     element.textContent = JSON.stringify(config);
-    const accessService = new AccessService(window);
+    const accessService = new AccessService(ampdoc);
     class Vendor1 {};
     const vendor1 = new Vendor1();
     accessService.registerVendor('vendor1', vendor1);
@@ -348,7 +342,7 @@ describe('AccessService', () => {
       'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
-    const accessService = new AccessService(window);
+    const accessService = new AccessService(ampdoc);
     class Vendor1 {};
     const vendor1 = new Vendor1();
     expect(() => {
@@ -358,24 +352,25 @@ describe('AccessService', () => {
 });
 
 
-describe('AccessService adapter context', () => {
-
-  let sandbox;
+describes.fakeWin('AccessService adapter context', {
+  amp: true,
+  location: 'https://pub.com/doc1',
+}, env => {
+  let win, document, ampdoc;
   let clock;
   let configElement;
   let service;
   let context;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    ampdoc = env.ampdoc;
+    document = win.document;
     clock = sandbox.useFakeTimers();
     clock.tick(0);
 
-    markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
-    installActionServiceForDoc(docService.getAmpDoc());
-    cidServiceForDocForTesting(docService.getAmpDoc());
-    installPerformanceService(window);
+    cidServiceForDocForTesting(ampdoc);
+    installPerformanceService(win);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -386,7 +381,7 @@ describe('AccessService adapter context', () => {
     });
     document.body.appendChild(configElement);
 
-    service = new AccessService(window);
+    service = new AccessService(ampdoc);
     service.readerIdPromise_ = Promise.resolve('reader1');
     context = service.adapter_.context_;
   });
@@ -395,7 +390,6 @@ describe('AccessService adapter context', () => {
     if (configElement.parentElement) {
       configElement.parentElement.removeChild(configElement);
     }
-    sandbox.restore();
   });
 
   it('should resolve URL without auth response and no authdata vars', () => {
@@ -467,9 +461,11 @@ describe('AccessService adapter context', () => {
 });
 
 
-describe('AccessService authorization', () => {
-
-  let sandbox;
+describes.fakeWin('AccessService authorization', {
+  amp: true,
+  location: 'https://pub.com/doc1',
+}, env => {
+  let win, document, ampdoc;
   let clock;
   let configElement, elementOn, elementOff, elementError;
   let cidMock;
@@ -478,15 +474,14 @@ describe('AccessService authorization', () => {
   let service;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    ampdoc = env.ampdoc;
+    document = win.document;
     clock = sandbox.useFakeTimers();
     clock.tick(0);
 
-    markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
-    installActionServiceForDoc(docService.getAmpDoc());
-    cidServiceForDocForTesting(docService.getAmpDoc());
-    installPerformanceService(window);
+    cidServiceForDocForTesting(ampdoc);
+    installPerformanceService(win);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -512,7 +507,7 @@ describe('AccessService authorization', () => {
     elementError.setAttribute('amp-access-hide', '');
     document.body.appendChild(elementError);
 
-    service = new AccessService(window);
+    service = new AccessService(ampdoc);
 
     const adapter = {
       getConfig: () => {},
@@ -562,7 +557,6 @@ describe('AccessService authorization', () => {
     }
     adapterMock.verify();
     performanceMock.verify();
-    sandbox.restore();
   });
 
   function expectGetReaderId(result) {
@@ -774,22 +768,23 @@ describe('AccessService authorization', () => {
 });
 
 
-describe('AccessService applyAuthorizationToElement_', () => {
-
-  let sandbox;
+describes.fakeWin('AccessService applyAuthorizationToElement_', {
+  amp: true,
+  location: 'https://pub.com/doc1',
+}, env => {
+  let win, document, ampdoc;
   let configElement, elementOn, elementOff;
   let templatesMock;
   let mutateElementStub;
   let service;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    ampdoc = env.ampdoc;
+    document = win.document;
 
-    markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
-    installActionServiceForDoc(docService.getAmpDoc());
-    cidServiceForDocForTesting(docService.getAmpDoc());
-    installPerformanceService(window);
+    cidServiceForDocForTesting(ampdoc);
+    installPerformanceService(win);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -810,7 +805,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
     elementOff.setAttribute('amp-access', 'NOT access');
     document.body.appendChild(elementOff);
 
-    service = new AccessService(window);
+    service = new AccessService(ampdoc);
 
     mutateElementStub = sandbox.stub(service.resources_, 'mutateElement',
         (unusedElement, mutator) => {
@@ -836,7 +831,6 @@ describe('AccessService applyAuthorizationToElement_', () => {
     if (elementOff.parentElement) {
       elementOff.parentElement.removeChild(elementOff);
     }
-    sandbox.restore();
   });
 
   function createTemplate() {
@@ -918,9 +912,11 @@ describe('AccessService applyAuthorizationToElement_', () => {
 });
 
 
-describe('AccessService pingback', () => {
-
-  let sandbox;
+describes.fakeWin('AccessService pingback', {
+  amp: true,
+  location: 'https://pub.com/doc1',
+}, env => {
+  let win, document, ampdoc;
   let clock;
   let configElement;
   let adapterMock;
@@ -930,14 +926,13 @@ describe('AccessService pingback', () => {
   let service;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    ampdoc = env.ampdoc;
+    document = win.document;
     clock = sandbox.useFakeTimers();
 
-    markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
-    installActionServiceForDoc(docService.getAmpDoc());
-    cidServiceForDocForTesting(docService.getAmpDoc());
-    installPerformanceService(window);
+    cidServiceForDocForTesting(ampdoc);
+    installPerformanceService(win);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -950,7 +945,7 @@ describe('AccessService pingback', () => {
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
 
-    service = new AccessService(window);
+    service = new AccessService(ampdoc);
 
     const adapter = {
       isPingbackEnabled: () => true,
@@ -992,7 +987,6 @@ describe('AccessService pingback', () => {
       configElement.parentElement.removeChild(configElement);
     }
     adapterMock.verify();
-    sandbox.restore();
   });
 
   function expectGetReaderId(result) {
@@ -1158,8 +1152,10 @@ describe('AccessService pingback', () => {
     service.scheduleView_(/* timeToView */ 2000);
 
     // 1. First attempt fails due to document becoming invisible.
-    const p1 = service.reportViewPromise_;
-    return Promise.resolve().then(() => {
+    let p1;
+    return ampdoc.whenReady().then(() => {
+      p1 = service.reportViewPromise_;
+      expect(p1).to.exist;
       service.viewer_.isVisible = () => false;
       visibilityChanged.fire();
       return p1;
@@ -1180,7 +1176,7 @@ describe('AccessService pingback', () => {
         expect(service.reportViewToServer_).to.have.not.been.called;
         return p2;
       });
-    }).then(() => 'SUCCESS', () => 'ERROR').then(result => {
+    }).then(() => 'SUCCESS', reason => reason).then(result => {
       expect(result).to.equal('SUCCESS');
       expect(service.reportViewToServer_).to.be.calledOnce;
       expect(service.reportViewPromise_).to.exist;
@@ -1256,9 +1252,11 @@ describe('AccessService pingback', () => {
 });
 
 
-describe('AccessService login', () => {
-
-  let sandbox;
+describes.fakeWin('AccessService login', {
+  amp: true,
+  location: 'https://pub.com/doc1',
+}, env => {
+  let win, document, ampdoc;
   let clock;
   let configElement;
   let cidMock;
@@ -1266,14 +1264,13 @@ describe('AccessService login', () => {
   let service;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    ampdoc = env.ampdoc;
+    document = win.document;
     clock = sandbox.useFakeTimers();
 
-    markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
-    installActionServiceForDoc(docService.getAmpDoc());
-    cidServiceForDocForTesting(docService.getAmpDoc());
-    installPerformanceService(window);
+    cidServiceForDocForTesting(ampdoc);
+    installPerformanceService(win);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -1286,7 +1283,7 @@ describe('AccessService login', () => {
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
 
-    service = new AccessService(window);
+    service = new AccessService(ampdoc);
 
     const cid = {
       get: () => {},
@@ -1311,7 +1308,6 @@ describe('AccessService login', () => {
     if (configElement.parentElement) {
       configElement.parentElement.removeChild(configElement);
     }
-    sandbox.restore();
   });
 
   it('should intercept global action to login', () => {
@@ -1615,20 +1611,21 @@ describe('AccessService login', () => {
 });
 
 
-describe('AccessService analytics', () => {
-
-  let sandbox;
+describes.fakeWin('AccessService analytics', {
+  amp: true,
+  location: 'https://pub.com/doc1',
+}, env => {
+  let win, document, ampdoc;
   let configElement;
   let service;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    ampdoc = env.ampdoc;
+    document = win.document;
 
-    markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
-    installActionServiceForDoc(docService.getAmpDoc());
-    cidServiceForDocForTesting(docService.getAmpDoc());
-    installPerformanceService(window);
+    cidServiceForDocForTesting(ampdoc);
+    installPerformanceService(win);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -1641,7 +1638,7 @@ describe('AccessService analytics', () => {
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
 
-    service = new AccessService(window);
+    service = new AccessService(ampdoc);
     service.enabled_ = true;
     service.getReaderId_ = () => {
       return Promise.resolve('reader1');
@@ -1653,7 +1650,6 @@ describe('AccessService analytics', () => {
     if (configElement.parentElement) {
       configElement.parentElement.removeChild(configElement);
     }
-    sandbox.restore();
   });
 
   it('should return null when not enabled', () => {

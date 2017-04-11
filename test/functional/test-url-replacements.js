@@ -15,6 +15,7 @@
  */
 
 import {Observable} from '../../src/observable';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {createIframePromise} from '../../testing/iframe';
 import {user} from '../../src/log';
 import {urlReplacementsForDoc} from '../../src/services';
@@ -144,8 +145,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
       },
     };
     win.document.defaultView = win;
-    const ampdocService = installDocService(win, true);
-    const ampdoc = ampdocService.getAmpDoc(win.document);
+    installDocService(win, /* isSingleDoc */ true);
+    const ampdoc = ampdocServiceFor(win).getAmpDoc();
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     return win;
@@ -937,7 +938,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
         iframe.doc.head.appendChild(link);
 
         const replacements = urlReplacementsForDoc(iframe.ampdoc);
-        replacements.getVariableSource().getAccessService_ = () => {
+        replacements.getVariableSource().getAccessService_ = ampdoc => {
+          expect(ampdoc.isSingleDoc).to.be.function;
           if (opt_disabled) {
             return Promise.resolve(null);
           }

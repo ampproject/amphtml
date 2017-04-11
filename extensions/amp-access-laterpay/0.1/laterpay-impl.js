@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {accessServiceFor} from '../../../src/services';
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {installStyles} from '../../../src/style-installer';
+import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeChildren} from '../../../src/dom';
@@ -91,17 +91,14 @@ export class LaterpayVendor {
    * @param {!AccessService} accessService
    */
   constructor(accessService) {
+    /** @const */
+    this.ampdoc = accessService.ampdoc;
+
     /** @const @private {!AccessService} */
     this.accessService_ = accessService;
 
-    /** @const @private {!Window} */
-    this.win_ = this.accessService_.win;
-
-    /** @const @private {!Document} */
-    this.doc_ = this.win_.document;
-
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportForDoc(this.win_.document);
+    this.viewport_ = viewportForDoc(this.ampdoc);
 
     /** @const @private {!LaterpayConfigDef} */
     this.laterpayConfig_ = this.accessService_.getAdapterConfig();
@@ -143,15 +140,22 @@ export class LaterpayVendor {
     }
 
     /** @const @private {!Timer} */
-    this.timer_ = timerFor(this.win_);
+    this.timer_ = timerFor(this.ampdoc.win);
 
     /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(this.win_);
+    this.vsync_ = vsyncFor(this.ampdoc.win);
 
     /** @const @private {!Xhr} */
-    this.xhr_ = xhrFor(this.win_);
+    this.xhr_ = xhrFor(this.ampdoc.win);
 
-    installStyles(this.win_.document, CSS, () => {}, false, TAG);
+    // Install styles.
+    if (this.ampdoc.isSingleDoc()) {
+      const root = /** @type {!Document} */ (this.ampdoc.getRootNode());
+      installStyles(root, CSS, () => {}, false, TAG);
+    } else {
+      const root = /** @type {!ShadowRoot} */ (this.ampdoc.getRootNode());
+      installStylesForShadowRoot(root, CSS, false, TAG);
+    }
   }
 
   /**
@@ -175,7 +179,7 @@ export class LaterpayVendor {
    * @return {!Promise<!JSONType>}
    */
   authorize() {
-    user().assert(isExperimentOn(this.win_, TAG),
+    user().assert(isExperimentOn(this.ampdoc.win, TAG),
         'Enable "amp-access-laterpay" experiment');
     return this.getPurchaseConfig_()
     .then(response => {
@@ -226,11 +230,19 @@ export class LaterpayVendor {
   }
 
   /**
+   * @return {!Element}
+   * @private
+   */
+  createElement_(name) {
+    return this.ampdoc.win.document.createElement(name);
+  }
+
+  /**
    * @return {!string}
    * @private
    */
   getArticleTitle_() {
-    const title = this.doc_.querySelector(
+    const title = this.ampdoc.getRootNode().querySelector(
       this.laterpayConfig_.articleTitleSelector);
     user().assert(
       title, 'No article title element found with selector %s',
@@ -244,7 +256,7 @@ export class LaterpayVendor {
    */
   getContainer_() {
     const id = TAG + '-dialog';
-    const dialogContainer = this.doc_.getElementById(id);
+    const dialogContainer = this.ampdoc.getElementById(id);
     return user().assert(
       dialogContainer,
       'No element found with id %s', id
@@ -284,7 +296,7 @@ export class LaterpayVendor {
   renderPurchaseOverlay_() {
     const dialogContainer = this.getContainer_();
     this.renderTextBlock_('header');
-    const listContainer = this.doc_.createElement('ul');
+    const listContainer = this.createElement_('ul');
     this.purchaseConfig_.premiumcontent['tp_title'] =
       this.i18n_.premiumContentTitle;
     this.purchaseConfig_.premiumcontent.description = this.getArticleTitle_();
@@ -294,7 +306,7 @@ export class LaterpayVendor {
     this.purchaseConfig_.timepasses.forEach(timepass => {
       listContainer.appendChild(this.createPurchaseOption_(timepass));
     });
-    const purchaseButton = this.doc_.createElement('button');
+    const purchaseButton = this.createElement_('button');
     purchaseButton.className = TAG + '-purchase-button';
     purchaseButton.textContent = this.i18n_.defaultButton;
     purchaseButton.disabled = true;
@@ -316,7 +328,7 @@ export class LaterpayVendor {
    */
   renderTextBlock_(area) {
     if (this.i18n_[area]) {
-      const el = this.doc_.createElement('p');
+      const el = this.createElement_('p');
       el.className = TAG + '-' + area;
       el.textContent = this.i18n_[area];
       this.getContainer_().appendChild(el);
@@ -330,17 +342,17 @@ export class LaterpayVendor {
    * @private
    */
   createPurchaseOption_(option) {
-    const li = this.doc_.createElement('li');
-    const control = this.doc_.createElement('label');
+    const li = this.createElement_('li');
+    const control = this.createElement_('label');
     control.for = option.tp_title;
     control.appendChild(this.createRadioControl_(option));
-    const metadataContainer = this.doc_.createElement('div');
+    const metadataContainer = this.createElement_('div');
     metadataContainer.className = TAG + '-metadata';
-    const title = this.doc_.createElement('span');
+    const title = this.createElement_('span');
     title.className = TAG + '-title';
     title.textContent = option.tp_title;
     metadataContainer.appendChild(title);
-    const description = this.doc_.createElement('p');
+    const description = this.createElement_('p');
     description.className = TAG + '-description';
     description.textContent = option.description;
     metadataContainer.appendChild(description);
@@ -356,7 +368,7 @@ export class LaterpayVendor {
    * @private
    */
   createRadioControl_(option) {
-    const radio = this.doc_.createElement('input');
+    const radio = this.createElement_('input');
     radio.name = 'purchaseOption';
     radio.type = 'radio';
     radio.id = option.tp_title;
@@ -381,13 +393,13 @@ export class LaterpayVendor {
   createPrice_(price) {
     const currency = Object.keys(price)[0];
     const formattedPrice = this.formatPrice_(price[currency]);
-    const valueEl = this.doc_.createElement('span');
+    const valueEl = this.createElement_('span');
     valueEl.className = TAG + '-price';
     valueEl.textContent = formattedPrice;
-    const currencyEl = this.doc_.createElement('sup');
+    const currencyEl = this.createElement_('sup');
     currencyEl.className = TAG + '-currency';
     currencyEl.textContent = currency;
-    const priceEl = this.doc_.createElement('p');
+    const priceEl = this.createElement_('p');
     priceEl.className = TAG + '-price-container';
     priceEl.appendChild(valueEl);
     priceEl.appendChild(currencyEl);
@@ -413,9 +425,9 @@ export class LaterpayVendor {
    * @return {!Node}
   */
   createAlreadyPurchasedLink_(href) {
-    const p = this.doc_.createElement('p');
+    const p = this.createElement_('p');
     p.className = TAG + '-already-purchased-link-container';
-    const a = this.doc_.createElement('a');
+    const a = this.createElement_('a');
     a.href = href;
     a.textContent = this.i18n_.alreadyPurchasedLink;
     this.alreadyPurchasedListener_ = listen(a, 'click', ev => {
@@ -471,12 +483,4 @@ export class LaterpayVendor {
   pingback() {
     return Promise.resolve();
   }
-}
-
-export function installAmpAccessLaterPay() {
-  // Register the vendor within the access service.
-  accessServiceFor(AMP.win).then(accessService => {
-    accessService.registerVendor('laterpay',
-        new LaterpayVendor(accessService));
-  });
 }
