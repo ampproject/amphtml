@@ -17,7 +17,7 @@
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {user} from '../../../src/log';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
@@ -275,13 +275,11 @@ export class SignalTracker extends EventTracker {
 
   /** @override */
   getRootSignal(eventType) {
-    dev().assert(eventType);
     return this.root.signals().whenSignal(eventType);
   }
 
   /** @override */
   getElementSignal(eventType, element) {
-    dev().assert(eventType);
     if (typeof element.signals != 'function') {
       return Promise.resolve();
     }
