@@ -16,6 +16,7 @@
 
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
+import {isCanary} from '../../../src/experiments';
 import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
@@ -169,6 +170,7 @@ export function googleAdUrl(
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
         {name: 'pfx', value: pfx},
+        {name: 'isc', value: isCanary(win) ? '1' : '0'},
       ],
       unboundedQueryParams,
       [
