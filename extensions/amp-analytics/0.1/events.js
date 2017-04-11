@@ -17,17 +17,35 @@
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
 
+/** @enum {string} */
 const WAITFOR_EVENTS_LIST = {
   NONE: 'none',
   INI_LOAD: 'ini-load',
   RENDER_START: 'render-start',
 };
 
+/**
+ * @interface
+ */
+class SignalTrackerDef {
+  /**
+   * @param {string=} unusedEventType
+   * @return {!Promise}
+   */
+  getRootSignal(unusedEventType) {}
+
+  /**
+   * @param {!Element} unusedElement
+   * @param {string=} unusedEventType
+   * @return {!Promise}
+   */
+  getElementSignal(unusedElement, unusedEventType) {}
+}
 
 /**
  * The analytics event.
@@ -216,6 +234,7 @@ export class ClickEventTracker extends EventTracker {
 
 /**
  * Tracks events based on signals.
+ * @implements {SignalTrackerDef}
  */
 export class SignalTracker extends EventTracker {
   /**
@@ -237,7 +256,7 @@ export class SignalTracker extends EventTracker {
     if (selector == ':root' || selector == ':host') {
       // Root selectors are delegated to analytics roots.
       target = this.root.getRootElement();
-      signalsPromise = Promise.resolve(this.root.signals());
+      signalsPromise = this.getRootSignal(eventType);
     } else {
       // Look for the AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
@@ -250,21 +269,37 @@ export class SignalTracker extends EventTracker {
                 selectionMethod),
             `Element "${selector}" not found`);
         target = element;
-        return element.signals();
+        return this.getElementSignal(element, eventType);
       });
     }
 
     // Wait for the target and the event signal.
-    signalsPromise.then(signals => signals.whenSignal(eventType)).then(() => {
+    signalsPromise.then(() => {
       listener(new AnalyticsEvent(target, eventType));
     });
     return NO_UNLISTEN;
   }
-}
 
+  /**
+   * @override
+   */
+  getRootSignal(eventType) {
+    dev().assert(eventType);
+    return this.root.signals().whenSignal(/** @type {!string} */(eventType));
+  }
+
+  /**
+   * @override
+   */
+  getElementSignal(element, eventType) {
+    dev().assert(eventType);
+    return element.signals().whenSignal(/** @type {!string} */(eventType));
+  }
+}
 
 /**
  * Tracks when the elements in the first viewport has been loaded - "ini-load".
+ * @implements {SignalTrackerDef}
  */
 export class IniLoadTracker extends EventTracker {
   /**
@@ -310,15 +345,14 @@ export class IniLoadTracker extends EventTracker {
   }
 
   /**
-   * @return {!Promise}
+   * @override
    */
   getRootSignal() {
     return this.root.whenIniLoaded();
   }
 
   /**
-   * @param {!Element} element
-   * @return {!Promise}
+   * @override
    */
   getElementSignal(element) {
     if (typeof element.signals != 'function') {
@@ -342,8 +376,9 @@ export class VisibilityTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-    /** @const @private */
-    this.iniLoadTracker_ = new IniLoadTracker(root);
+
+    /** @private */
+    this.waitForTrackers_ = {};
   }
 
   /** @override */
@@ -361,10 +396,9 @@ export class VisibilityTracker extends EventTracker {
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
-      const readyPromise = this.getReadyPromise(waitForSpec, selector);
       return visibilityManager.listenRoot(
           visibilitySpec,
-          readyPromise,
+          this.getReadyPromise(waitForSpec, selector),
           this.onEvent_.bind(
               this, eventType, listener, this.root.getRootElement()));
     }
@@ -380,11 +414,10 @@ export class VisibilityTracker extends EventTracker {
               selector,
               selectionMethod),
           `Element "${selector}" not found`);
-      const readyPromise = this.getReadyPromise(waitForSpec, selector, element);
       return visibilityManager.listenElement(
           element,
           visibilitySpec,
-          readyPromise,
+          this.getReadyPromise(waitForSpec, selector, element),
           this.onEvent_.bind(this, eventType, listener, element));
     });
     return function() {
@@ -395,40 +428,39 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /**
-   * @param {string=} waitForSpec
-   * @param {string=} selector
+   * @param {string|undefined} waitForSpec
+   * @param {string|undefined} selector
    * @param {Element=} element
    * @return {?Promise}
    * @visibleForTesting
    */
   getReadyPromise(waitForSpec, selector, element) {
-    if (waitForSpec == WAITFOR_EVENTS_LIST.NONE || !selector) {
-      // Always return null if specific asked waitFor NONE, or no selector
+    if (!selector) {
+      // Default case #1: wait for nothing if selector is not specified.
       return null;
-    }
-    if (!element) {
-      // If selector is :root or :host, always wait for root ini-load
-      return this.iniLoadTracker_.getRootSignal();
     }
     if (!waitForSpec) {
-      // Default behavior for selector select AMP element is to wait for
-      // AMP element's ini-load
+      // Default case #2 : waitFor ini-load by default
       waitForSpec = WAITFOR_EVENTS_LIST.INI_LOAD;
     }
-    if (typeof element.signals != 'function') {
+
+    user().assert(SUPPORT_WAITFOR_TRACKERS[waitForSpec] !== undefined,
+        'waitFor value not supported');
+
+    if (!SUPPORT_WAITFOR_TRACKERS[waitForSpec]) {
+      // waitFor NONE, wait for nothing
       return null;
     }
-    switch (waitForSpec) {
-      case WAITFOR_EVENTS_LIST.INI_LOAD:
-        return this.iniLoadTracker_.getElementSignal(element);
-        break;
-      case WAITFOR_EVENTS_LIST.RENDER_START:
-        // may never resolve.
-        return element.signals().whenSignal(WAITFOR_EVENTS_LIST.RENDER_START);
-        break;
-      default:
-        return null;
+
+    if (!this.waitForTrackers_[waitForSpec]) {
+      this.waitForTrackers_[waitForSpec] =
+        new SUPPORT_WAITFOR_TRACKERS[waitForSpec](this.root);
     }
+
+    const waitForTracker = this.waitForTrackers_[waitForSpec];
+    // Wait for root signal if there's no element selected.
+    return element ? waitForTracker.getElementSignal(element, waitForSpec)
+        : waitForTracker.getRootSignal(waitForSpec);
   }
 
   /**
@@ -449,3 +481,10 @@ export class VisibilityTracker extends EventTracker {
     listener(new AnalyticsEvent(target, eventType, state));
   }
 }
+
+/** @const @private */
+const SUPPORT_WAITFOR_TRACKERS = {
+  'none': null,
+  'ini-load': IniLoadTracker,
+  'render-start': SignalTracker,
+};
