@@ -285,6 +285,16 @@ const EXPERIMENTS = [
     id: 'dc-use-attr-for-format',
     name: 'Use slot width/height attribute for DoubleClick size format',
   },
+  {
+    id: 'ad-loader-v1',
+    name: 'New ad loader version 1',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
+  },
+  {
+    id: 'ad-loader-v2',
+    name: 'New ad loader version 2',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
+  },
 ];
 
 if (getMode().localDev) {
@@ -433,6 +443,7 @@ function toggleExperiment_(id, name, opt_on) {
           (on ? '1' : '0'), (on ? validUntil : 0), {
             // Set explicit domain, so the cookie gets send to sub domains.
             domain: location.hostname,
+            allowOnProxyOrigin: true,
           });
       // Reflect default experiment state.
       self.location.reload();

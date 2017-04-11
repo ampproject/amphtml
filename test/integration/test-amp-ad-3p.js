@@ -137,7 +137,7 @@ describes.realWin('3P Ad', {
     });
 
     it('create an iframe with APIs', function() {
-      createIframeWithApis.call(this, fixture);
+      return createIframeWithApis.call(this, fixture);
     });
   });
 });
@@ -161,7 +161,7 @@ describes.realWin('3P Ad (with AmpContext experiment)', {
     });
 
     it('create an iframe with APIs', function() {
-      createIframeWithApis.call(this, fixture);
+      return createIframeWithApis.call(this, fixture);
     });
   });
 });
