@@ -636,7 +636,6 @@ describe('Action method', () => {
   it('should invoke on non-AMP but whitelisted element', () => {
     const handlerSpy = sandbox.spy();
     const target = document.createElement('form');
-    debugger;
     action.installActionHandler(target, handlerSpy);
     action.invoke_(target, 'submit', /* args */ null,
         'button', 'tap');
@@ -793,7 +792,6 @@ describe('Action interceptor', () => {
 
     const handler = sandbox.spy();
     action.installActionHandler(target, handler);
-    expect(Array.isArray(getQueue())).to.be.false;
     expect(handler).to.have.not.been.called;
 
     clock.tick(10);
@@ -812,7 +810,6 @@ describe('Action interceptor', () => {
     expect(inv1.event).to.equal('event2');
 
     action.invoke_(target, 'method3', /* args */ null, 'source3', 'event3');
-    expect(Array.isArray(getQueue())).to.be.false;
     expect(handler).to.have.callCount(3);
     const inv2 = handler.getCall(2).args[0];
     expect(inv2.target).to.equal(target);

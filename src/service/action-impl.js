@@ -280,6 +280,8 @@ export class ActionService {
     /** @const {Array<!ActionInvocation>} */
     const currentQueue = target[ACTION_QUEUE_];
 
+    target[ACTION_HANDLER_] = handler;
+
     // Dequeue the current queue.
     if (isArray(currentQueue)) {
       timerFor(target.ownerDocument.defaultView).delay(() => {
@@ -291,7 +293,6 @@ export class ActionService {
             dev().error(TAG_, 'Action execution failed:', invocation, e);
           }
         });
-        target[ACTION_HANDLER_] = handler;
         target[ACTION_QUEUE_].length = 0;
       }, 1);
     }
