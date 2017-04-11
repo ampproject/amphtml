@@ -75,6 +75,8 @@ limitations under the License.
   - [Warnings](#warnings)
   - [Errors](#errors)
 - [Appendix](#appendix)
+  - [`<amp-state>` specification](#amp-state-specification)
+    - [Attributes](#attributes)
   - [Custom Built-in Functions](#custom-built-in-functions)
   - [Deep-merge with `AMP.setState()`](#deep-merge-with-ampsetstate)
     - [Removing a variable](#removing-a-variable)
