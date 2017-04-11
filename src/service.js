@@ -119,12 +119,14 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       'Service override can only be installed in embed window: %s', id);
   dev().assert(!getExistingServiceForEmbedWinOrNull(embedWin, id),
       'Service override has already been installed: %s', id);
-  registerServiceBuilder(
+  registerServiceInternal(
+      embedWin,
       embedWin,
       id,
       /* opt_ctor */ undefined,
-      () => service,
-      /* opt_instantiate */ true);
+      () => service);
+  // Force service to build
+  getService(embedWin, id);
 }
 
 /**
@@ -187,6 +189,7 @@ export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   if (!isServiceRegistered(holder, id)) {
+    dev().assert(opt_factory, 'Factory not given and service missing %s', id);
     registerServiceBuilderForDoc(
         ampdoc,
         id,
@@ -670,9 +673,10 @@ export function resetServiceForTesting(holder, id) {
 /**
  * @param {!Object} holder Object holding the service instance.
  * @param {string} id of the service.
+ * @return {boolean}
  */
 function isServiceRegistered(holder, id) {
   const service = holder.services && holder.services[id];
   // All registered services must have either an implementation or a builder.
-  return service && (service.build || service.obj);
+  return !!(service && (service.build || service.obj));
 }

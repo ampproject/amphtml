@@ -21,7 +21,7 @@ import {
   disposeServicesForDoc,
   getExistingServiceForDocInEmbedScope,
   getExistingServiceInEmbedScope,
-  getExistingService,
+  getExistingServiceOrNull,
   getParentWindowFrameElement,
   getService,
   getServiceForDoc,
@@ -137,14 +137,13 @@ describe('service', () => {
 
     it('should return the service when it exists', () => {
       const c1 = getService(window, 'c', factory);
-      const c2 = getExistingService(window, 'c');
+      const c2 = getExistingServiceOrNull(window, 'c');
       expect(c1).to.equal(c2);
     });
 
-    it('should throw before creation', () => {
-      getService(window, 'another service to avoid NPE', () => {});
+    it('should throw before creation if factory is not provided', () => {
       expect(() => {
-        getExistingService(window, 'c');
+        getService(window, 'c');
       }).to.throw();
     });
 
@@ -209,13 +208,13 @@ describe('service', () => {
       const child = {};
       setParentWindow(child, window);
       expect(getService(child, 'c', factory)).to.equal(c);
-      expect(getExistingService(child, 'c')).to.equal(c);
+      expect(getExistingServiceOrNull(child, 'c')).to.equal(c);
 
       // A grandchild.
       const grandchild = {};
       setParentWindow(grandchild, child);
       expect(getService(grandchild, 'c', factory)).to.equal(c);
-      expect(getExistingService(grandchild, 'c')).to.equal(c);
+      expect(getExistingServiceOrNull(grandchild, 'c')).to.equal(c);
     });
 
     describe('embed service', () => {
@@ -252,13 +251,13 @@ describe('service', () => {
         expect(getExistingServiceInEmbedScope(childWin, 'c'))
             .to.equal(overridenService);
         // Top-level service doesn't change.
-        expect(getExistingService(window, 'c'))
+        expect(getExistingServiceOrNull(window, 'c'))
             .to.equal(topService);
 
         // Notice that only direct overrides are allowed for now. This is
         // arbitrary can change in the future to allow hierarchical lookup
         // up the window chain.
-        expect(getExistingService(grandchildWin, 'c'))
+        expect(getExistingServiceOrNull(grandchildWin, 'c'))
             .to.equal(topService);
       });
     });
