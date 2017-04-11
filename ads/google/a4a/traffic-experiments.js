@@ -40,12 +40,6 @@ const EXTERNALLY_SELECTED_ID = '2088461';
 /** @type {!string} @private */
 const INTERNALLY_SELECTED_ID = '2088462';
 
-/** @type {!string} @private */
-const HAS_LAUNCHED_DOUBLECLICK_ID = '2092621';
-
-/** @type {!string} @private */
-const HAS_LAUNCHED_ADSENSE_ID = '2092772';
-
 /**
  * Check whether Google Ads supports the A4A rendering pathway for a given ad
  * Element on a given Window.  The tests we use are:
@@ -90,7 +84,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
   randomlySelectUnsetPageExperiments(win, experimentInfo);
   if (isExperimentOn(win, experimentName)) {
     // Page is selected into the overall traffic experiment.
-    // In other words, if pre-launch serve A4A, else don't.
+    // In other words, if A4A has not yet launched serve A4A Fast Fetch,
+    // else serve Delayed Fetch.
     const selectedBranch = getPageExperimentBranch(win, experimentName);
     addExperimentIdToElement(selectedBranch, element);
     // Detect how page was selected into the overall experimentName.
@@ -106,11 +101,12 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     const selected = selectedBranch == internalBranches.experiment ||
                      selectedBranch == externalBranches.experiment ||
                      selectedBranch == MANUAL_EXPERIMENT_ID;
-    return (selected == !hasLaunchedDoubleClick(element)); // TODO Not necessarily DoubleClick!
+    return (selected == !hasLaunched(element));
   } else {
     // Page is not selected into the overall traffic experiment.
-    // In other words, if post-launch serve A4A, else don't
-    return hasLaunchedDoubleClick(element); // TODO Not necessarily DoubleClick!
+    // In other words, if A4A has launched serve A4A Fast Fetch, else serve
+    // Delayed Fetch.
+    return hasLaunched(element);
   }
 }
 
@@ -335,7 +331,7 @@ export function isInManualExperiment(element) {
 }
 
 /**
- * Predicate to check whether A4A has launched yet or not, for DoubleClick ads.
+ * Predicate to check whether A4A has launched yet or not.
  * If it has not yet launched, then the experimental branch serves A4A, and
  * control/filler do not. If it has not, then the filler and control branch do
  * serve A4A, and the experimental branch does not.
@@ -343,21 +339,8 @@ export function isInManualExperiment(element) {
  * @param {!Element} element  Element to check for pre-launch membership.
  * @returns {boolean}
  */
-export function hasLaunchedDoubleClick(element) {
-  return isInExperiment(element, HAS_LAUNCHED_DOUBLECLICK_ID);
-}
-
-/**
- * Predicate to check whether A4A has launched yet or not, for AdSense ads.
- * If it has not yet launched, then the experimental branch serves A4A, and
- * control/filler do not. If it has not, then the filler and control branch do
- * serve A4A, and the experimental branch does not.
- *
- * @param {!Element} element  Element to check for pre-launch membership.
- * @returns {boolean}
- */
-export function hasLaunchedAdSense(element) {
-  return isInExperiment(element, HAS_LAUNCHED_ADSENSE_ID);
+export function hasLaunched(element) {
+  return isExperimentOn(element.getAttribute('type'));
 }
 
 /**

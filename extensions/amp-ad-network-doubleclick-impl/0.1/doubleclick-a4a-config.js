@@ -23,8 +23,7 @@
 import {
   googleAdsIsA4AEnabled,
   isInManualExperiment,
-  hasLaunchedDoubleClick,
-  hasLaunchedAdSense,
+  hasLaunched,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../ads/google/a4a/utils';
 import {getMode} from '../../../src/mode';
@@ -104,10 +103,10 @@ export function doubleclickIsA4AEnabled(win, element) {
   // shared location.
   const enableA4A = googleAdsIsA4AEnabled(
           win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          (hasLaunchedDoubleClick(element) ?
+          (hasLaunched(element) ?
              DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
              DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
-          (hasLaunchedDoubleClick(element) ?
+          (hasLaunched(element) ?
              DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
              DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)) ||
       (a4aRequested && (isProxyOrigin(win.location) ||
