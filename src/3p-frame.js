@@ -51,7 +51,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   attributes = getContextMetadata(parentWindow, element, sentinel,
       attributes);
   attributes.type = type;
-  attributes._context.configType = parentWindow.configType;
+  attributes._context.remoteConfigType = parentWindow.remoteConfigType;
   Object.assign(attributes._context, opt_context);
   return attributes;
 }
@@ -254,6 +254,8 @@ export function getRandom(win) {
 /**
  * Returns the custom base URL for 3p bootstrap iframes if it exists.
  * Otherwise null.
+ * Side effect: Sets parentWindow.remoteConfigType to 'remoteHtml' if
+ * we are returning the custom base url.
  * @param {!Window} parentWindow
  * @param {boolean=} opt_strictForUnitTest
  * @return {?string}
@@ -280,7 +282,7 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
 		parsed.origin, meta);
 
   // TODO(bradfrizzell): remove this when remote.html is no longer needed.
-  parentWindow.configType = 'remoteHtml';
+  parentWindow.remoteConfigType = RemoteConfigTypes.REMOTE_HTML;
 
   return url + '?$internalRuntimeVersion$';
 }
@@ -320,3 +322,11 @@ export function generateSentinelAndContext(iframe, window) {
 export function resetCountForTesting() {
   count = {};
 }
+
+/* Enum of remoteConfigTypes
+ * @enum {string}
+ */
+export const RemoteConfigTypes = {
+  NONE: 'none',
+  REMOTE_HTML: 'remoteHtml',
+};

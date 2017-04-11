@@ -284,6 +284,12 @@ describe('3p-frame', () => {
     });
   });
 
+  it('should assign remoteConfigType if using custom bootstrap url', () => {
+    addCustomBootstrap('https://example.com/boot/remote.html');
+    getBootstrapBaseUrl(window);
+    expect(window.remoteConfigType).to.equal('remoteHtml');
+  });
+
   it('should make sub domains (unique)', () => {
     expect(getSubDomain(window)).to.match(/^d-\d+$/);
     expect(getSubDomain(window)).to.not.equal('d-00');
