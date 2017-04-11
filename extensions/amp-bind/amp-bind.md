@@ -60,7 +60,7 @@ limitations under the License.
 - [Introduction](#introduction)
 - [A simple example](#a-simple-example)
 - [How does it work?](#how-does-it-work)
-  - [A slightly more complex example](#a-slightly-more-complex-example)
+- [A slightly more complex example](#a-slightly-more-complex-example)
 - [Details](#details)
   - [State](#state)
     - [Initializing state with `amp-state`](#initializing-state-with-amp-state)
@@ -114,7 +114,7 @@ Tapping the button changes the `<p>` element's text from "Hello World" to "Hello
 
 Note that `amp-bind` does not evaluate expressions on page load, so there's no risk of content jumping unexpectedly. `amp-bind` also takes special care to ensure speed, security and performance on AMP pages.
 
-### A slightly more complex example
+## A slightly more complex example
 
 ```html
 <!-- Store complex nested JSON data in <amp-state> elements. -->
