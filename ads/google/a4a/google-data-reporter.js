@@ -103,7 +103,7 @@ function isInReportableBranch(ampElement, namespace) {
  * @param {string} namespace
  * @param {number|string} slotId A unique numeric identifier in the page for
  *    the given element's slot.
- * @return {!GoogleAdLifecycleReporter|!BaseLifecycleReporter}
+ * @return {!./performance.BaseLifecycleReporter}
  */
 export function getLifecycleReporter(ampElement, namespace, slotId) {
   // Carve-outs: We only want to enable profiling pingbacks when:
@@ -136,12 +136,14 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
 
 /**
  * Creates or reinitializes a lifecycle reporter for Google ad network
- * implementations.
+ * implementations.  (I.e., 'type="doubleclick"' and 'type="adsense"'.)  For
+ * non-Google networks, returns a BaseLifecycleReporter -- a stub reporter that
+ * generates no outputs.
  *
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4aElement
  * @param {string=} opt_namespace  CSI ping namespace.  For example, a key
  *   of #ReporterNamespace.
- * @return {!./performance.GoogleAdLifecycleReporter|!./performance.BaseLifecycleReporter}
+ * @return {!./performance.BaseLifecycleReporter}
  */
 export function googleLifecycleReporterFactory(a4aElement, opt_namespace) {
   const namespace = opt_namespace || ReporterNamespace.A4A;
