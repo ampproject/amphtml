@@ -27,17 +27,17 @@ const NO_UNLISTEN = function() {};
  */
 class SignalTrackerDef {
   /**
-   * @param {string=} unusedEventType
+   * @param {string} unusedEventType
    * @return {!Promise}
    */
   getRootSignal(unusedEventType) {}
 
   /**
+   * @param {string} unusedEventType
    * @param {!Element} unusedElement
-   * @param {string=} unusedEventType
    * @return {!Promise}
    */
-  getElementSignal(unusedElement, unusedEventType) {}
+  getElementSignal(unusedEventType, unusedElement) {}
 }
 
 /**
@@ -262,7 +262,7 @@ export class SignalTracker extends EventTracker {
                 selectionMethod),
             `Element "${selector}" not found`);
         target = element;
-        return this.getElementSignal(element, eventType);
+        return this.getElementSignal(eventType, element);
       });
     }
 
@@ -276,16 +276,16 @@ export class SignalTracker extends EventTracker {
   /** @override */
   getRootSignal(eventType) {
     dev().assert(eventType);
-    return this.root.signals().whenSignal(/** @type {!string} */(eventType));
+    return this.root.signals().whenSignal(eventType);
   }
 
   /** @override */
-  getElementSignal(element, eventType) {
+  getElementSignal(eventType, element) {
     dev().assert(eventType);
     if (typeof element.signals != 'function') {
       return Promise.resolve();
     }
-    return element.signals().whenSignal(/** @type {!string} */(eventType));
+    return element.signals().whenSignal(eventType);
   }
 }
 
@@ -326,7 +326,7 @@ export class IniLoadTracker extends EventTracker {
                 selectionMethod),
             `Element "${selector}" not found`);
         target = element;
-        return this.getElementSignal(element);
+        return this.getElementSignal('ini-load', element);
       });
     }
     // Wait for the target and the event.
@@ -342,7 +342,7 @@ export class IniLoadTracker extends EventTracker {
   }
 
   /** @override */
-  getElementSignal(element) {
+  getElementSignal(unusedEventType, element) {
     if (typeof element.signals != 'function') {
       return Promise.resolve();
     }
@@ -423,13 +423,15 @@ export class VisibilityTracker extends EventTracker {
    * @visibleForTesting
    */
   getReadyPromise(waitForSpec, selector, element) {
-    if (!selector) {
-      // Default case #1: wait for nothing if selector is not specified.
-      return null;
-    }
     if (!waitForSpec) {
-      // Default case #2 : waitFor ini-load by default
-      waitForSpec = 'ini-load';
+      // Default case:
+      if (!selector) {
+        // waitFor nothing is selector is not defined
+        waitForSpec = 'none';
+      } else {
+        // otherwise wait for ini-load by default
+        waitForSpec = 'ini-load';
+      }
     }
 
     user().assert(SUPPORT_WAITFOR_TRACKERS[waitForSpec] !== undefined,
@@ -447,7 +449,7 @@ export class VisibilityTracker extends EventTracker {
 
     const waitForTracker = this.waitForTrackers_[waitForSpec];
     // Wait for root signal if there's no element selected.
-    return element ? waitForTracker.getElementSignal(element, waitForSpec)
+    return element ? waitForTracker.getElementSignal(waitForSpec, element)
         : waitForTracker.getRootSignal(waitForSpec);
   }
 
