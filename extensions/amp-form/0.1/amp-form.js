@@ -20,7 +20,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {documentInfoForDoc} from '../../../src/services';
 import {iterateCursor} from '../../../src/dom';
-import {setFormForElement} from '../../../src/form';
+import {formOrNullForElement, setFormForElement} from '../../../src/form';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -841,7 +841,8 @@ export class AmpFormService {
     }
 
     iterateCursor(forms, (form, index) => {
-      if (!form.classList.contains('i-amphtml-form')) {
+      const existingAmpForm = formOrNullForElement(form);
+      if (!existingAmpForm) {
         new AmpForm(form, `amp-form-${index}`);
       }
     });

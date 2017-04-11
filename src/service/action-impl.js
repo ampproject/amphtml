@@ -41,6 +41,9 @@ const ACTION_MAP_ = '__AMP_ACTION_MAP__' + Math.random();
 const ACTION_QUEUE_ = '__AMP_ACTION_QUEUE__';
 
 /** @const {string} */
+const ACTION_HANDLER_ = '__AMP_ACTION_HANDLER__';
+
+/** @const {string} */
 const DEFAULT_METHOD_ = 'activate';
 
 /** @const {!Object<string,!Array<string>>} */
@@ -269,18 +272,13 @@ export class ActionService {
         target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
         'AMP element or a whitelisted target element is expected: %s', debugid);
 
-    /** @const {!Array<!ActionInvocation>} */
-    const currentQueue = target[ACTION_QUEUE_];
-    if (currentQueue) {
-      dev().assert(
-        isArray(currentQueue),
-        'Expected queue to be an array: %s',
-        debugid
-      );
+    if (target[ACTION_HANDLER_]) {
+      // Already installed
+      return;
     }
 
-    // Override queue with the handler.
-    target[ACTION_QUEUE_] = {'push': handler};
+    /** @const {Array<!ActionInvocation>} */
+    const currentQueue = target[ACTION_QUEUE_];
 
     // Dequeue the current queue.
     if (isArray(currentQueue)) {
@@ -293,6 +291,8 @@ export class ActionService {
             dev().error(TAG_, 'Action execution failed:', invocation, e);
           }
         });
+        target[ACTION_HANDLER_] = handler;
+        target[ACTION_QUEUE_].length = 0;
       }, 1);
     }
   }
@@ -389,10 +389,13 @@ export class ActionService {
     const targetId = target.getAttribute('id') || '';
     if ((targetId && targetId.substring(0, 4) == 'amp-') ||
         (supportedActions && supportedActions.indexOf(method) != -1)) {
-      if (!target[ACTION_QUEUE_]) {
-        target[ACTION_QUEUE_] = [];
+      const handler = target[ACTION_HANDLER_];
+      if (handler) {
+        handler(invocation);
+      } else {
+        target[ACTION_QUEUE_] = target[ACTION_QUEUE_] || [];
+        target[ACTION_QUEUE_].push(invocation);
       }
-      target[ACTION_QUEUE_].push(invocation);
       return;
     }
 

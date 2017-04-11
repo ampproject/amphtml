@@ -636,6 +636,7 @@ describe('Action method', () => {
   it('should invoke on non-AMP but whitelisted element', () => {
     const handlerSpy = sandbox.spy();
     const target = document.createElement('form');
+    debugger;
     action.installActionHandler(target, handlerSpy);
     action.invoke_(target, 'submit', /* args */ null,
         'button', 'tap');
