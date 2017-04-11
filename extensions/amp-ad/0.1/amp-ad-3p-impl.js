@@ -222,7 +222,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
-    this.lifecycleReporter.sendPing('preAdThrottle');
+    this.emitLifecycleEvent('preAdThrottle');
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
@@ -238,7 +238,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // because both happen inside a cross-domain iframe.  Separating them
       // here, though, allows us to measure the impact of ad throttling via
       // incrementLoadingAds().
-      this.lifecycleReporter.sendPing('adRequestStart');
+      this.emitLifecycleEvent('adRequestStart');
       const iframe = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
@@ -265,7 +265,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
     }
-    this.lifecycleReporter.sendPing('adSlotCleared');
+    this.emitLifecycleEvent('adSlotCleared');
     return true;
   }
 
