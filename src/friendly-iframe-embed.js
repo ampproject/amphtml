@@ -24,7 +24,7 @@ import {extensionsFor} from './services';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {resourcesForDoc} from './services';
+import {platformFor, resourcesForDoc} from './services';
 import {setStyle, setStyles} from './style';
 
 
