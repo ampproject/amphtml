@@ -184,21 +184,20 @@ Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or 
 
 [Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
 
-Note that an `<amp-state>` element's child JSON has a maximum size of 100KB. 
-
-`<amp-state>` can also specify a CORS URL instead of a child JSON script. See the [Appendix](#amp-state-specification) for details.
+- An `<amp-state>` element's child JSON has a maximum size of 100KB. 
+- An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [Appendix](#amp-state-specification) for details.
 
 #### Updating state with `AMP.setState()`
 
-The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) merges an object literal into the state. For example:
+The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) merges an object literal into the state. For example, when the bewlow button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state. 
 
 ```html
 <!-- Like JavaScript, you can reference existing
-variables in the values of the state update object literal. -->
+variables in the values of the  object literal. -->
 <button on="tap:AMP.setState({foo: 'bar', baz: myAmpState.someVariable})"></button>
 ```
 
-When this button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the update with the state up to a depth of 10. All variables, including those introduced by `amp-state`, can be overidden.
+In general, nested objects will be merged up to a maximum depth of 10. All variables, including those introduced by `amp-state`, can be overidden.
 
 When triggered by certain events, `AMP.setState()` also can access event-related data on the `event` property. 
 
@@ -388,7 +387,7 @@ The support values are "omit" and "include". Default is "omit".
 
 ### Deep-merge with `AMP.setState()`
 
-When `AMP.setState()` is called `amp-bind` deep-merges the provided object literal with the current state. All variables from the object literal are written to the state directly except for nested objects, which are recursively merged.
+When `AMP.setState()` is called `amp-bind` deep-merges the provided object literal with the current state. All variables from the object literal are written to the state directly except for nested objects, which are recursively merged. Primitives and arrays are in the state are always overwritten by variables of the same name in the object literal.
 
 Consider the following example:
 
@@ -415,7 +414,7 @@ When the first button is pressed, the state changes to:
 }
 ```
 
-When the second button is pressed, `amp-bind` will **deep-merge** this state with the state introduced by the button press.
+When the second button is pressed, `amp-bind` will recursively merge the object literal argument, `{employee: {age: 64}}`, into the existing state.
 
 ```javascript
 {
@@ -426,6 +425,10 @@ When the second button is pressed, `amp-bind` will **deep-merge** this state wit
   }
 }
 ```
+
+`employee.age` has been updated, however `employee.name` and `employee.vehicle` keys have not changed.
+
+Please note that `amp-bind` will throw an error if you call `AMP.setState()` with an object literal that contains circular references.
 
 #### Removing a variable
 
