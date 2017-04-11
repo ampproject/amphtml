@@ -34,8 +34,9 @@ import {
   moveLayoutRect,
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
-import {timerFor} from '../../../src/services';
+import {timerFor, platformFor} from '../../../src/services';
 import {user, dev} from '../../../src/log';
+import {startsWith} from '../../../src/string';
 import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
@@ -798,7 +799,17 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     this.unlistenViewport_ = this.getViewport().onChanged(() => {
       if (this.active_) {
-        this.imageViewer_.measure();
+        // In IOS 10.3, the measured size of an element is incorrect if the
+        // element size depends on window size directly and the measurement
+        // happens in window.resize event. Adding a timeout for correct
+        // measurement. See https://github.com/ampproject/amphtml/issues/8479
+        if (startsWith(platformFor(this.win).getIosVersionString(), '10.3')) {
+          timerFor(this.win).delay(() => {
+            this.imageViewer_.measure();
+          }, 500);
+        } else {
+          this.imageViewer_.measure();
+        }
       }
     });
 
