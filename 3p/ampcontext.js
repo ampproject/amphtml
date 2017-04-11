@@ -73,6 +73,9 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.sourceUrl = null;
 
+    /** @type {?string} */
+    this.remoteConfigType = null;
+
     this.findAndSetMetadata_();
 
     /** @protected {!IframeMessagingClient} */
