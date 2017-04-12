@@ -343,11 +343,11 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           },
         };
       });
-      sandbox.stub(iframeHandler.positionObserver_, 'getPosition_', () => {
-        return {
+      sandbox.stub/*OK*/(iframeHandler.positionObserver_, 'getPosition_', () => {
+        return Promise.resolve({
           viewport: layoutRectLtwh(0, 0, 0, 0),
           target: layoutRectLtwh(0, 0, 0, 0),
-        };
+        });
       });
       iframe.postMessageToParent({
         type: 'send-positions',

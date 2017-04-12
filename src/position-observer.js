@@ -47,44 +47,45 @@ export class PositionObserverApi {
     this.subscriptionApi_ = new SubscriptionApi(
         iframe, MessageType.SEND_POSITIONS, opt_is3p || false, () => {
           // Sending one immediately
-          this.fire();
+          this.sendPositionMessage_();
           this.startSendingPosition_();
         });
 
     /** @const {function()} */
     this.fire = rateLimit(this.baseElement_.win, () => {
-      console.log('ratelimit');
-      this.baseElement_.getVsync().measure(() => {
-        console.log('eeeee');
-        this.subscriptionApi_.send(MessageType.POSITION, this.getPosition_());
-      });
+      this.sendPositionMessage_();
     }, MIN_EVENT_INTERVAL_IN_MS);
 
-    /** @private {?Function} */
-    this.unlistenOnDestroy_ = null;
+    /** @private {!Array<function()>} */
+    this.unlistenOnDestroy_ = [];
   }
 
   /**
-   * Function to start listening to viewport event and observe element position.
+   * Starts listening to viewport event to observe the element's position.
    * @private
    */
   startSendingPosition_() {
     // TODO: register element to positionObserver once layer manager supports
-    const unlistenViewportScroll = this.viewport_.onScroll(this.fire);
-    const unlistenViewportChange = this.viewport_.onChange(this.fire);
-    this.unlistenOnDestroy_ = () => {
-      unlistenViewportScroll();
-      unlistenViewportChange();
-    };
+    this.unlistenOnDestroy_.push(this.viewport_.onScroll(this.fire));
+    this.unlistenOnDestroy_.push(this.viewport_.onChanged(this.fire));
+  }
+
+  /**
+   * @private
+   */
+  sendPositionMessage_() {
+    this.getPosition_().then(position => {
+      this.subscriptionApi_.send(MessageType.POSITION, position);
+    });
   }
 
   /**
    * Clean all listeners
    */
   destroy() {
-    if (this.unlistenOnDestroy_) {
-      this.unlistenOnDestroy_();
-      this.unlistenOnDestroy_ = null;
+    for (let i = this.unlistenOnDestroy_.length - 1; i >= 0; i--) {
+      this.unlistenOnDestroy_[i]();
+      this.unlistenOnDestroy_.pop();
     }
     if (this.subscriptionApi_) {
       this.subscriptionApi_.destroy();
@@ -94,14 +95,17 @@ export class PositionObserverApi {
 
   /**
    * Get the position info.
-   * Note: need to call in vsync
-   * @return {PositionEntryDef}
+   * @return {!Promise<!PositionEntryDef>}
    */
   getPosition_() {
-    return {
-      viewport: this.viewport_.getRect(),
-      target: this.baseElement_.getLayoutBox(),
-    };
+    return new Promise(resolve => {
+      this.baseElement_.getVsync().measure(() => {
+        resolve({
+          viewport: this.viewport_.getRect(),
+          target: this.baseElement_.getLayoutBox(),
+        });
+      });
+    });
   }
 }
 

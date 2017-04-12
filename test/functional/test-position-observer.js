@@ -41,7 +41,6 @@ describes.realWin('PositionObserverApi', {
     sandbox.stub(baseElement, 'getViewport', () => {
       return {
         getRect: () => {
-          console.log("asdfsdf");
           return layoutRectLtwh(1, 2, 3, 4);
         },
       };
@@ -55,13 +54,12 @@ describes.realWin('PositionObserverApi', {
     posObserver = new PositionObserverApi(baseElement, iframe);
   });
 
-  it('should send one immediately wit correct value', () => {
-    const sendSpy = sandbox.spy(posObserver.subscriptionApi_, 'send');
-    posObserver.fire();
-    expect(sendSpy).to.be.calledOnce;
-    expect(sendSpy).to.be.calledWith('position', {
-      viewport: layoutRectLtwh(1, 2, 3, 4),
-      target: layoutRectLtwh(5, 6, 7, 8),
+  it('should get position with correct value', () => {
+    return posObserver.getPosition_().then(position => {
+      expect(position).to.deep.equal({
+        viewport: layoutRectLtwh(1, 2, 3, 4),
+        target: layoutRectLtwh(5, 6, 7, 8),
+      });
     });
   });
 });
