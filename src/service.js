@@ -119,9 +119,9 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       'Service override can only be installed in embed window: %s', id);
   dev().assert(!getExistingServiceForEmbedWinOrNull(embedWin, id),
       'Service override has already been installed: %s', id);
-  registerServicebuilder(
-      embedwin,
-      embedwin,
+  registerServiceBuilder(
+      embedWin,
+      id,
       /* opt_ctor */ undefined,
       () => service,
       /* opt_instantiate */ true);
@@ -432,9 +432,8 @@ function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
   // The service may have been requested already, in which case there is a
   // pending promise that needs to fulfilled.
   if (s.promise && s.resolve) {
-    const obj = s.build();
-    s.obj = obj;
-    s.resolve(obj);
+    s.obj = s.build();
+    s.resolve(/** @type {!Object} */(s.obj));
     s.build = null;
   }
 }
@@ -450,18 +449,19 @@ function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
  * @template T
  */
 function getServiceInternal(holder, context, id) {
+  dev().assert(isServiceRegistered(holder, id),
+      `Expected service ${id} to be registered`);
   const services = getServices(holder);
-  let s = dev().assert(services[id], `Expected service ${id} to be registered`);
+  const s = services[id];
   if (!s.obj) {
-    if (s.build) {
-      s.obj = s.build();
-      s.build = null;
-    }
+    dev().assert(s.build, `Service ${id} registered without builder nor impl.`);
+    s.obj = s.build();
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
     if (s.promise && s.resolve) {
-      s.resolve(s.obj);
+      s.resolve(/** @type {!Object} */(s.obj));
     }
+    s.build = null;
   }
   return s.obj;
 }
@@ -482,18 +482,17 @@ function getServicePromiseInternal(holder, id) {
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
   let resolve;
-  const p = new Promise(r => {
+  const promise = new Promise(r => {
     resolve = r;
   });
   const services = getServices(holder);
   services[id] = {
-      obj: null,
-      promise: p,
-      resolve,
-      build: null,
-    };
-  }
-  return p;
+    obj: null,
+    promise,
+    resolve,
+    build: null,
+  };
+  return promise;
 }
 
 
@@ -670,10 +669,10 @@ export function resetServiceForTesting(holder, id) {
 
 /**
  * @param {!Object} holder Object holding the service instance.
- * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
- * @return {boolean} True if the service is registered, false otherwise.
  */
 function isServiceRegistered(holder, id) {
-  return !!(holder.services && holder.services[id]);
+  const service = holder.services && holder.services[id];
+  // All registered services must have either an implementation or a builder.
+  return service && (service.build || service.obj);
 }

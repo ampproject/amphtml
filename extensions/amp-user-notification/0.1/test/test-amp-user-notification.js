@@ -19,6 +19,7 @@ import {
   UserNotificationManager,
 } from '../amp-user-notification';
 import {createIframePromise} from '../../../../testing/iframe';
+import {getServiceForDoc} from '../../../../src/service';
 import * as sinon from 'sinon';
 
 
