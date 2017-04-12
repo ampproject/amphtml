@@ -236,6 +236,9 @@ function createElementRules_() {
     'AMP-SELECTOR': {
       'selected': null,
     },
+    'AMP-STATE': {
+      'src': null,
+    },
     'AMP-VIDEO': {
       'alt': null,
       'attribution': null,

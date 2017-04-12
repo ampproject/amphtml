@@ -62,9 +62,7 @@ export class AmpState extends AMP.BaseElement {
     // Fetch JSON from endpoint at `src` attribute if it exists,
     // otherwise parse child script tag.
     if (this.element.hasAttribute('src')) {
-      fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
-        this.updateState_(json, /* opt_isInit */ true);
-      });
+      this.fetchSrcAndUpdateState_(/* opt_isInit */ true);
       if (this.element.children.length > 0) {
         user().error(TAG, 'Should not have children if src attribute exists.');
       }
@@ -88,9 +86,27 @@ export class AmpState extends AMP.BaseElement {
   }
 
   /** @override */
+  mutatedAttributesCallback(mutations) {
+    const src = mutations['src'];
+    if (src !== undefined) {
+      this.fetchSrcAndUpdateState_(/* opt_isInit */ false);
+    }
+  }
+
+  /** @override */
   renderOutsideViewport() {
     // We want the state data to be available wherever it is in the document.
     return true;
+  }
+
+  /**
+   * @param {boolean=} opt_isInit
+   * @private
+   */
+  fetchSrcAndUpdateState_(opt_isInit) {
+    fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
+      this.updateState_(json, opt_isInit);
+    });
   }
 
   /**

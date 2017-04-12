@@ -645,11 +645,51 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   });
 });
 
+// Data for example: http://localhost:8000/examples/bind/xhr.amp.max.html
 app.use('/bind/form/get', function(req, res, next) {
   assertCors(req, res, ['GET']);
   res.json({
     bindXhrResult: 'I was fetched from the server!'
   });
+});
+
+// Data for example: http://localhost:8000/examples/bind/ecommerce.amp.max.html
+app.use('/bind/ecommerce/sizes', function(req, res, next) {
+  assertCors(req, res, ['GET']);
+  setTimeout(() => {
+    var prices = {
+      "0": {
+        "sizes": ["XS"]
+      },
+      "1": {
+        "sizes": ["S", "M", "L"]
+      },
+      "2": {
+        "sizes": ["XL"]
+      },
+      "3": {
+        "sizes": ["M", "XL"]
+      },
+      "4": {
+        "sizes": ["S", "L"]
+      },
+      "5": {
+        "sizes": ["S", "XL"]
+      },
+      "6": {
+        "sizes": ["XS", "M"]
+      },
+      "7": {
+        "sizes": ["M", "L", "XL"]
+      },
+      "8": {
+        "sizes": ["XS", "M", "XL"]
+      }
+    };
+    const object = {};
+    object[req.query.shirt] = prices[req.query.shirt];
+    res.json(object);
+  }, 1000); // Simulate network delay.
 });
 
 // Simulated Cloudflare signed Ad server

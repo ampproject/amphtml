@@ -30,11 +30,17 @@
 
   <h2>E-commerce</h2>
 
-  <amp-img width=400 height=400 src="./shirts/black.jpg" [src]="shirts[selectedIndex].src"></amp-img>
+  <amp-img width=400 height=400 src="./shirts/black.jpg" [src]="shirts[selectedIndex].image"></amp-img>
 
   <p>COLOR: <span [text]="shirts[selectedIndex].color">black</span></p>
 
-  <p>SIZE: <span [text]="shirts[selectedIndex].sizes.join(', ')">XS</span></p>
+  <p>SIZE:
+    <span [text]="shirts[selectedIndex].sizes
+        ? shirts[selectedIndex].sizes.join(', ')
+        : 'Fetching available sizes...'">
+      XS
+    </span>
+  </p>
 
   <amp-selector on="select:AMP.setState({selectedIndex: event.targetOption})">
     <amp-img width=50 height=50 src="./shirts/black.jpg" option=0></amp-img>
@@ -48,53 +54,51 @@
     <amp-img width=50 height=50 src="./shirts/wine.jpg" option=8></amp-img>
   </amp-selector>
 
-  <amp-state id="shirts">
+  <!--
+    Available shirts, maps unique identifier to {color, image}. Sizes are fetched remotely.
+
+    When a shirt color is selected, `selectedIndex` changes which causes this
+    <amp-state> to perform an XHR to the new [src] value. Upon completion,
+    the XHR response is merged into the state under its "id" attribute ("shirts").
+  -->
+  <amp-state id="shirts" [src]="'/bind/ecommerce/sizes?shirt=' + selectedIndex">
     <script type="application/json">
       {
         "0": {
           "color": "black",
-          "src": "./shirts/black.jpg",
-          "sizes": ["XS"]
+          "image": "./shirts/black.jpg"
         },
         "1": {
           "color": "blue",
-          "src": "./shirts/blue.jpg",
-          "sizes": ["S", "M", "L"]
+          "image": "./shirts/blue.jpg"
         },
         "2": {
           "color": "brown",
-          "src": "./shirts/brown.jpg",
-          "sizes": ["XL"]
+          "image": "./shirts/brown.jpg"
         },
         "3": {
           "color": "dark green",
-          "src": "./shirts/dark-green.jpg",
-          "sizes": ["M", "XL"]
+          "image": "./shirts/dark-green.jpg"
         },
         "4": {
           "color": "gray",
-          "src": "./shirts/gray.jpg",
-          "sizes": ["S", "L"]
+          "image": "./shirts/gray.jpg"
         },
         "5": {
           "color": "light gray",
-          "src": "./shirts/light-gray.jpg",
-          "sizes": ["S", "XL"]
+          "image": "./shirts/light-gray.jpg"
         },
         "6": {
           "color": "navy",
-          "src": "./shirts/navy.jpg",
-          "sizes": ["XS", "M"]
+          "image": "./shirts/navy.jpg"
         },
         "7": {
           "color": "white",
-          "src": "./shirts/white.jpg",
-          "sizes": ["M", "L", "XL"]
+          "image": "./shirts/white.jpg"
         },
         "8": {
           "color": "wine",
-          "src": "./shirts/wine.jpg",
-          "sizes": ["XS", "M", "XL"]
+          "image": "./shirts/wine.jpg"
         }
       }
     </script>
