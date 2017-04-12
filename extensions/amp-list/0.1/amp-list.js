@@ -57,6 +57,8 @@ export class AmpList extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const srcMutation = mutations['src']
     if (srcMutation) {
+      // TODO(kmh287) Should we allow developers to use bind as a means of
+      // refreshing amp-list data from the same source?
       const oldSrc = this.element.getAttribute('src');
       if (srcMutation !== oldSrc) {
         populateList_();
@@ -65,6 +67,8 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Request list data from `src` and return a promise that resolves when
+   * the list has been populated with rendered list items.
    * @return {!Promise}
    */
   populateList_() {

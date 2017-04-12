@@ -233,6 +233,13 @@ function createElementRules_() {
         'alternativeName': 'src',
       },
     },
+    'AMP-LIST': {
+      // TODO(kmh287): Add AMP validator support
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+    },
     'AMP-SELECTOR': {
       'selected': null,
     },
