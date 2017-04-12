@@ -67,9 +67,12 @@ amp-embed iframe {
   border-radius: 5px;
 }
 
-amp-ad[type=adsense] > iframe {
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+amp-ad[data-a4a-upgrade-type="amp-ad-network-adsense-impl"] > iframe {
   top: 50% !important;
   left: 50% !important;
+  min-height: 0;
+  min-width: 0;
   transform: translate(-50%, -50%);
 }
 
