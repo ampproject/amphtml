@@ -419,10 +419,10 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders, opt_initTime) {
         ? responseHeaders.get(QQID_HEADER) : 'null';
     const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
         `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}`;
-    const now =
-        Number(getTimingDataSync(a4a.win, 'navigationStart') || Date.now());
+    const now = a4a.win.performance && a4a.win.performance.now ?
+        a4a.win.performance.now() : Date.now();
     opt_initTime = opt_initTime || 0;
-    const time = now - opt_initTime;
+    const time = Math.round(now - opt_initTime);
     config['requests']['iniLoadCsi'] = baseCsiUrl +
         `&met.a4a.${slotId}=iniLoadCsi.${time}`;
     config['requests']['renderStartCsi'] = baseCsiUrl +
