@@ -92,6 +92,8 @@ const FUNCTION_WHITELIST = (function() {
     Math.random,
     Math.round,
     Math.sign,
+    encodeURI,
+    encodeURIComponent,
     copyAndSplice,
   ];
   // Creates a prototype-less map of function name to the function itself.

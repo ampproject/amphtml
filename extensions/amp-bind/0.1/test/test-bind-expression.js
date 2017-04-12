@@ -268,6 +268,11 @@ describe('BindExpression', () => {
     }).to.throw(unsupportedFunctionError);
   });
 
+  it('should support encodeURI and encodeURIComponent', () => {
+    expect(evaluate('encodeURI("Hello World")')).to.equal('Hello%20World');
+    expect(evaluate('encodeURIComponent("#foo=bar")')).to.equal('%23foo%3Dbar');
+  });
+
   it('should support BindArrays functions', () => {
     const arr = [1, 2, 3];
     expect(() => evaluate('copyAndSplice()')).to.throw(/not an array/);
@@ -440,8 +445,6 @@ describe('BindExpression', () => {
     expect(() => { evaluate('parseInt()'); }).to.throw();
     expect(() => { evaluate('decodeURI()'); }).to.throw();
     expect(() => { evaluate('decodeURIComponent()'); }).to.throw();
-    expect(() => { evaluate('encodeURI()'); }).to.throw();
-    expect(() => { evaluate('encodeURIComponent()'); }).to.throw();
     expect(() => { evaluate('escape()'); }).to.throw();
     expect(() => { evaluate('unescape()'); }).to.throw();
 
