@@ -70,10 +70,10 @@ export function activityForDoc(nodeOrDoc) {
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<../extensions/amp-form/0.1/amp-form.AmpFormService>}
+ * @return {!Promise<!../extensions/amp-form/0.1/amp-form.AmpFormService>}
  */
 export function ampFormServiceForDoc(nodeOrDoc) {
-  return /** @type {!Promise<../extensions/amp-form/0.1/amp-form.AmpFormService>} */ ( // eslint-disable-line max-len
+  return /** @type {!Promise<!../extensions/amp-form/0.1/amp-form.AmpFormService>} */ ( // eslint-disable-line max-len
     getElementServiceForDoc(nodeOrDoc, 'amp-form', 'amp-form'));
 }
 
