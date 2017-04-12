@@ -153,6 +153,7 @@ export function googleLifecycleReporterFactory(element, opt_namespace) {
           element.element.getAttribute('data-amp-slot-index')));
   reporter.setPingParameters({
     's': 'AD_SLOT_NAMESPACE',
+    'dt': 'NAV_TIMING(navigationStart)',
     'v': '2',
     'c': 'AD_PAGE_CORRELATOR',
     'rls': 'AMP_VERSION',
