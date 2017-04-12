@@ -184,7 +184,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+   * @return {!../../../ads/google/a4a/performance.BaseLifecycleReporter}
    */
   initLifecycleReporter() {
     return googleLifecycleReporterFactory(this);
