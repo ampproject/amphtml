@@ -76,14 +76,16 @@ class Amp3QPlayer extends AMP.BaseElement {
         'The data-id attribute is required for <amp-3q-player> %s',
         this.element);
 
-    const src = 'https://playout.3qsdn.com/' + encodeURIComponent(dataId) + '?autoplay=false&amp=true';
+    const src = 'https://playout.3qsdn.com/' + encodeURIComponent(dataId) + '?autoplay=true&amp=true';
     this.iframe_.src = src;
 
     this.win.addEventListener('message',
                             event => this.sdnBridge_(event));
 
     this.playerReadyResolver_ = this.loadPromise(this.iframe_);
-    return this.playerReadyResolver_;
+    return this.playerReadyResolver_.then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
   }
 
   /** @override */
@@ -113,9 +115,6 @@ class Amp3QPlayer extends AMP.BaseElement {
   }
 
   sdnBridge_(event) {
-
-    //console.log('sdnPlayer: '+event.data);
-
     if (event.source) {
       if (event.source != this.iframe_.contentWindow) {
         return;
@@ -144,10 +143,9 @@ class Amp3QPlayer extends AMP.BaseElement {
   }
 
   sdnPostMessage_(message) {
-    console.log('sdnPlayer postMessage: ' + message);
-    if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(message, '*');
-    }
+        if (this.iframe_ && this.iframe_.contentWindow) {
+        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+      }
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
