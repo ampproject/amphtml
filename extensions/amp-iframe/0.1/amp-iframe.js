@@ -65,8 +65,8 @@ export class AmpIframe extends AMP.BaseElement {
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
     user().assert(
-        isSecureUrl(url) || url.protocol == 'data:',
-        'Invalid <amp-iframe> src. Must start with https://. Found %s',
+        isSecureUrl(url) || url.protocol == 'data:' || src.indexOf('//') == 0,
+        'Invalid <amp-iframe> src. Must start with https:// or //. Found %s',
         this.element);
     const containerUrl = parseUrl(containerSrc);
     user().assert(
