@@ -400,7 +400,6 @@ Only binding to the following components and attributes are allowed:
   </tr>
 </table>
 
-
 <sup>1</sup>Denotes bindable attributes that don't have a non-bindable counterpart.
 
 ## Debugging
