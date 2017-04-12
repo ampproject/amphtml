@@ -37,6 +37,7 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
+import {dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
@@ -201,13 +202,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.ampAnalyticsConfig_) {
       insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
-    const frame = this.element.querySelector('iframe');
-    if (frame) {
-      setStyles(frame, {
-        width: `${this.size_.width}px`,
-        height: `${this.size_.height}px`,
-      });
-    }
+    dev().assert(!!this.iframe);
+    setStyles(this.frame, {
+      width: `${this.size_.width}px`,
+      height: `${this.size_.height}px`,
+    });
   }
 
   /**

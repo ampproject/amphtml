@@ -321,6 +321,12 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isCollapsed_ = false;
+
+    /**
+     * The outer most iframe loaded by this ad slot.
+     * {?HTMLIframeElement}
+     */
+    this.iframe = null;
   }
 
   /** @override */
@@ -1087,7 +1093,7 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
     this.protectedEmitLifecycleEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
-    const iframe = /** @type {!HTMLIFrameElement} */(
+    this.iframe = /** @type {!HTMLIFrameElement} */(
         createElementWithAttributes(
             /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
               // NOTE: It is possible for either width or height to be 'auto',
@@ -1110,7 +1116,7 @@ export class AmpA4A extends AMP.BaseElement {
       });
     }
     return installFriendlyIframeEmbed(
-        iframe, this.element, {
+        this.iframe, this.element, {
           host: this.element,
           url: this.adUrl_,
           html: creativeMetaData.minifiedCreative,
@@ -1171,7 +1177,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
-    const iframe = createElementWithAttributes(
+    this.iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES));
     // TODO(keithwrightbos): noContentCallback?
@@ -1180,7 +1186,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Executive onCreativeRender after init to ensure it can get reference
     // to frame but prior to load to allow for earlier access.
     const frameLoadPromise =
-        this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
+        this.xOriginIframeHandler_.init(this.iframe, /* opt_isA4A */ true);
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);

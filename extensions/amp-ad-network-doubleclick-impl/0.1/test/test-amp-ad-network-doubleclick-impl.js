@@ -191,6 +191,10 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         },
       };
       impl.onCreativeRender(false);
+      // Next two lines are to ensure that internal parts not relevant for this
+      // test are properly set.
+      impl.size_ = {width: 200, height: 50};
+      impl.iframe = impl.win.document.createElement('iframe');
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
       expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
@@ -200,6 +204,91 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       // Just ensure extensions is loaded, and analytics element appended.
     });
   });
+
+  describe('centering', () => {
+    /**
+     * Creates an iframe promise, and instantiates element and impl, adding the
+     * former to the document of the iframe.
+     * @param {{width, height, type}} config
+     * @return The iframe promise.
+     */
+    function createImplTag(config) {
+      config.type = 'doubleclick';
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
+        // To trigger CSS styling.
+        element.setAttribute('data-a4a-upgrade-type',
+            'amp-ad-network-doubleclick-impl');
+        // Used to test styling which is targetted at first iframe child of
+        // amp-ad.
+        const iframe = fixture.doc.createElement('iframe');
+        element.appendChild(iframe);
+        document.body.appendChild(element);
+        impl = new AmpAdNetworkDoubleClickImpl(element);
+        impl.iframe = iframe;
+        return fixture;
+      });
+    }
+
+    function verifyCss(iframe, expectedSize) {
+      expect(iframe).to.be.ok;
+      const style = window.getComputedStyle(iframe);
+      expect(style.top).to.equal('50%');
+      expect(style.left).to.equal('50%');
+      expect(style.width).to.equal(expectedSize.width);
+      expect(style.height).to.equal(expectedSize.height);
+      // We don't know the exact values by which the frame will be translated,
+      // as this can vary depending on whether we use the height/width
+      // attributes, or the actual size of the frame. To make this less of a
+      // hassle, we'll just match against regexp.
+      expect(style.transform).to.match(new RegExp(
+          'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
+    }
+
+    afterEach(() => document.body.removeChild(impl.element));
+
+    it('centers iframe in slot when height && width', () => {
+      return createImplTag({
+        width: '300',
+        height: '150',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.equal('300');
+        expect(impl.element.getAttribute('height')).to.equal('150');
+        verifyCss(impl.iframe, {width: '300', height: '150'});
+      });
+    });
+    it('centers iframe in slot when !height && !width', () => {
+      return createImplTag({
+        layout: 'fixed',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.be.null;
+        verifyCss(impl.iframe, {width: 'auto', height: 'auto'});
+      });
+    });
+    it('centers iframe in slot when !height && width', () => {
+      return createImplTag({
+        width: '300',
+        layout: 'fixed',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.equal('300');
+        expect(impl.element.getAttribute('height')).to.be.null;
+        verifyCss(impl.iframe, {width: '300', height: 'auto'});
+      });
+    });
+    it('centers iframe in slot when height && !width', () => {
+      return createImplTag({
+        height: '150',
+        layout: 'fixed',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.equal('150');
+        verifyCss(impl.iframe, {width: 'auto', height: '150'});
+      });
+    });
+  });
+
 
   describe('#getAdUrl', () => {
     beforeEach(() => {

@@ -37,6 +37,7 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
+import {dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
@@ -259,13 +260,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.ampAnalyticsConfig_) {
       insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
-    const frame = this.element.querySelector('iframe');
-    if (frame) {
-      setStyles(frame, {
-        width: `${this.size_.width}px`,
-        height: `${this.size_.height}px`,
-      });
-    }
+    dev().assert(!!this.iframe);
+    setStyles(this.iframe, {
+      width: `${this.size_.width}px`,
+      height: `${this.size_.height}px`,
+    });
   }
 }
 
