@@ -104,6 +104,7 @@ function isInReportableBranch(ampElement, namespace) {
  * @param {number|string} slotId A unique numeric identifier in the page for
  *    the given element's slot.
  * @return {!./performance.BaseLifecycleReporter}
+ * @visibleForTesting
  */
 export function getLifecycleReporter(ampElement, namespace, slotId) {
   // Carve-outs: We only want to enable profiling pingbacks when:
