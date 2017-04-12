@@ -247,7 +247,18 @@ function proxyToAmpProxy(req, res, minify) {
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
     const inabox = req.query['inabox'] == '1';
-    body = replaceUrls(minify ? 'min' : 'max', body, getUrlPrefix(req), inabox);
+    const urlPrefix = getUrlPrefix(req);
+    body = replaceUrls(minify ? 'min' : 'max', body, urlPrefix, inabox);
+    if (inabox) {
+      // Allow CORS requests for A4A.
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Origin',
+          req.headers.origin || urlPrefix);
+      res.setHeader('Access-Control-Expose-Headers',
+          'AMP-Access-Control-Allow-Source-Origin');
+      res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+          req.query.__amp_source_origin);
+    }
     res.status(response.statusCode).send(body);
   });
 }

@@ -1048,6 +1048,11 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderNonAmpCreative_() {
+    if (this.element.getAttribute('disable3pfallback') == 'true') {
+      user().warn(TAG, this.element.getAttribute('type'),
+        'fallback to 3p disabled');
+      return Promise.resolve(false);
+    }
     this.promiseErrorHandler_(
         new Error('fallback to 3p'),
         /* ignoreStack */ true);
