@@ -51,13 +51,16 @@ limitations under the License.
   </tr>
 </table>
 
+`amp-bind` allows you to add custom stateful interactivity to your AMP pages via data binding and JS-like expressions.
+
+Check out the AMP Conf 2017 talk "[Turing complete...AMP Pages?!](https://www.youtube.com/watch?v=xzCFU8b5fCU)" for a video introduction to the feature.
+
 ## Table of contents
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [Introduction](#introduction)
 - [A simple example](#a-simple-example)
 - [How does it work?](#how-does-it-work)
 - [A slightly more complex example](#a-slightly-more-complex-example)
@@ -83,12 +86,6 @@ limitations under the License.
   - [Expression Grammar](#expression-grammar)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-## Introduction
-
-`amp-bind` allows you to add custom stateful interactivity to your AMP pages via data binding and JS-like expressions.
-
-Check out the AMP Conf 2017 talk "[Turing complete...AMP Pages?!](https://www.youtube.com/watch?v=xzCFU8b5fCU)" for a video introduction to the feature.
 
 ## A simple example
 
