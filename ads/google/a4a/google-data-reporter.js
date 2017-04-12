@@ -140,16 +140,16 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
  * non-Google networks, returns a BaseLifecycleReporter -- a stub reporter that
  * generates no outputs.
  *
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4aElement
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A|!../../../extensions/amp-ad/0.1/amp-ad-3p-impl.AmpAd3PImpl} element
  * @param {string=} opt_namespace  CSI ping namespace.  For example, a key
  *   of #ReporterNamespace.
  * @return {!./performance.BaseLifecycleReporter}
  */
-export function googleLifecycleReporterFactory(a4aElement, opt_namespace) {
+export function googleLifecycleReporterFactory(element, opt_namespace) {
   const namespace = opt_namespace || ReporterNamespace.A4A;
   const reporter =
-      (getLifecycleReporter(a4aElement, namespace,
-          a4aElement.element.getAttribute('data-amp-slot-index')));
+      (getLifecycleReporter(element, namespace,
+          element.element.getAttribute('data-amp-slot-index')));
   reporter.setPingParameters({
     's': 'AD_SLOT_NAMESPACE',
     'v': '2',
@@ -162,8 +162,8 @@ export function googleLifecycleReporterFactory(a4aElement, opt_namespace) {
     'stageIdx': 'AD_SLOT_EVENT_ID',
     'met.AD_SLOT_NAMESPACE.AD_SLOT_ID':
         'AD_SLOT_EVENT_NAME.AD_SLOT_TIME_TO_EVENT',
-    'e.AD_SLOT_ID': a4aElement.element.getAttribute(EXPERIMENT_ATTRIBUTE),
-    'adt.AD_SLOT_ID': a4aElement.element.getAttribute('type'),
+    'e.AD_SLOT_ID': element.element.getAttribute(EXPERIMENT_ATTRIBUTE),
+    'adt.AD_SLOT_ID': element.element.getAttribute('type'),
     // Page-level visibility times: `firstVisibleTime.T,.lastVisibleTime.T`.
     'met.AD_SLOT_NAMESPACE':
         'firstVisibleTime.AD_PAGE_FIRST_VISIBLE_TIME' +
