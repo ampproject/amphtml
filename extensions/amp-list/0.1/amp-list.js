@@ -15,6 +15,7 @@
  */
 
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {getMode} from '../../..//src/mode';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
@@ -41,6 +42,9 @@ export class AmpList extends AMP.BaseElement {
     if (!this.container_.hasAttribute('role')) {
       this.container_.setAttribute('role', 'list');
     }
+
+    /** @type {Promise} */
+    this.mutationPromise_ = null;
   }
 
   /** @override */
@@ -57,11 +61,9 @@ export class AmpList extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const srcMutation = mutations['src']
     if (srcMutation) {
-      // TODO(kmh287) Should we allow developers to use bind as a means of
-      // refreshing amp-list data from the same source?
-      const oldSrc = this.element.getAttribute('src');
-      if (srcMutation !== oldSrc) {
-        this.populateList_();
+      const p = this.populateList_();
+      if (getMode().test) {
+        this.mutationPromise_ = p;
       }
     }
   }
@@ -106,6 +108,11 @@ export class AmpList extends AMP.BaseElement {
         this.attemptChangeHeight(scrollHeight).catch(() => {});
       }
     });
+  }
+
+  /** @return {Promise} */
+  mutationPromiseForTesting() {
+    return this.mutationPromise_;
   }
 }
 
