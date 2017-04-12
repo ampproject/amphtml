@@ -167,14 +167,20 @@ describe('Google A4A utils', () => {
         expect(renderStartCsiRequest).to.not.be.null;
         // We expect slotId == null, since no real element is created, and so
         // no slot index is ever set.
-        expect(iniLoadCsiRequest).to.match(new RegExp(
-            '^https://csi\\.gstatic\\.com/csi\\?' +
-            's=a4a&c=[0-9]+&slotId=null&qqid\\.null=[a-zA-Z_]+' +
-            '&met\\.a4a\\.null=iniLoadCsi\\.[0-9]+$'));
-        expect(renderStartCsiRequest).to.match(new RegExp(
-            '^https://csi\\.gstatic\\.com/csi\\?' +
-            's=a4a&c=[0-9]+&slotId=null&qqid\\.null=[a-zA-Z_]+' +
-            '&met\\.a4a\\.null=renderStartCsi\\.[0-9]+$'));
+        const getRegExps = metricName => [
+            /^https:\/\/csi\.gstatic\.com\/csi\?/,
+            /s=a4a/,
+            /&c=[0-9]+/,
+            /&slotId=null/,
+            /&qqid\.null=[a-zA-Z_]+/,
+            new RegExp(`&met\\.a4a\\.null=${metricName}\\.[0-9]+`),
+            /&dt=[0-9]+/];
+        getRegExps('iniLoadCsi').forEach(regExp => {
+          expect(iniLoadCsiRequest).to.match(regExp);
+        });
+        getRegExps('renderStartCsi').forEach(regExp => {
+          expect(renderStartCsiRequest).to.match(regExp);
+        });
         // Need to remove this request as it will vary in test execution.
         delete config.requests.iniLoadCsi;
         delete config.requests.renderStartCsi;

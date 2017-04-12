@@ -258,4 +258,12 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   getInitTime() {
     return this.initTime_;
   }
+
+  /**
+   * Returns the time delta between initialization and now.
+   * @return {number} The time delta in ms.
+   */
+  getDeltaTime() {
+    return Math.round(this.getDeltaTime_());
+  }
 }

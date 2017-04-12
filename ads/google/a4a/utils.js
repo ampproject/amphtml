@@ -361,11 +361,15 @@ export function additionalDimensions(win, viewportSize) {
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
- * @param {number=} initTime The time in milliseconds as the baseline time.
- *   TODO(levitzky) Remove this param once AV numbers stabilize.
+ * @param {number=} opt_deltaTime The time difference, in ms, between the
+ *   lifecycle reporter's initialization and now.
+ * @param {number=} opt_initTime The initialization time, in ms, of the
+ *   lifecycle reporter.
+ *   TODO(levitzky) Remove the above two params once AV numbers stabilize.
  * @return {?JSONType} config or null if invalid/missing.
  */
-export function extractAmpAnalyticsConfig(a4a, responseHeaders, opt_initTime) {
+export function extractAmpAnalyticsConfig(
+    a4a, responseHeaders, opt_deltaTime, opt_initTime) {
   if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     return null;
   }
@@ -416,16 +420,15 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders, opt_initTime) {
     const slotId = a4a.element.getAttribute('data-amp-slot-index');
     const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
         ? responseHeaders.get(QQID_HEADER) : 'null';
-    const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
-        `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}`;
-    const now = a4a.win.performance && a4a.win.performance.now ?
-        a4a.win.performance.now() : Date.now();
     opt_initTime = opt_initTime || 0;
-    const time = Math.round(now - opt_initTime);
+    opt_deltaTime = opt_deltaTime || 0;
+    const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
+        `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
+        `&dt=${opt_initTime}`;
     config['requests']['iniLoadCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=iniLoadCsi.${time}`;
+        `&met.a4a.${slotId}=iniLoadCsi.${opt_deltaTime}`;
     config['requests']['renderStartCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=renderStartCsi.${time}`;
+        `&met.a4a.${slotId}=renderStartCsi.${opt_deltaTime}`;
     config['triggers']['continuousVisibleIniLoad']['request'] =
         'iniLoadCsi';
     config['triggers']['continuousVisibleRenderStart']['request'] =
