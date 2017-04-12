@@ -234,7 +234,6 @@ function createElementRules_() {
       },
     },
     'AMP-LIST': {
-      // TODO(kmh287): Add AMP validator support
       'src': {
         'allowedProtocols': {
           'https': true,
