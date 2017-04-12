@@ -44,7 +44,7 @@ export class AmpState extends AMP.BaseElement {
   activate(invocation) {
     const event = invocation.event;
     if (event && event.detail) {
-      this.updateState_(event.detail.response);
+      this.updateState_(event.detail.response, /* isInit */ false);
     }
   }
 
@@ -62,7 +62,7 @@ export class AmpState extends AMP.BaseElement {
     // Fetch JSON from endpoint at `src` attribute if it exists,
     // otherwise parse child script tag.
     if (this.element.hasAttribute('src')) {
-      this.fetchSrcAndUpdateState_(/* opt_isInit */ true);
+      this.fetchSrcAndUpdateState_(/* isInit */ true);
       if (this.element.children.length > 0) {
         user().error(TAG, 'Should not have children if src attribute exists.');
       }
@@ -74,7 +74,7 @@ export class AmpState extends AMP.BaseElement {
           const json = tryParseJson(firstChild.textContent, e => {
             user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
           });
-          this.updateState_(json, /* opt_isInit */ true);
+          this.updateState_(json, /* isInit */ true);
         } else {
           user().error(TAG,
               'State should be in a <script> tag with type="application/json"');
@@ -89,7 +89,7 @@ export class AmpState extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const src = mutations['src'];
     if (src !== undefined) {
-      this.fetchSrcAndUpdateState_(/* opt_isInit */ false);
+      this.fetchSrcAndUpdateState_(/* isInit */ false);
     }
   }
 
@@ -100,21 +100,21 @@ export class AmpState extends AMP.BaseElement {
   }
 
   /**
-   * @param {boolean=} opt_isInit
+   * @param {boolean} isInit
    * @private
    */
-  fetchSrcAndUpdateState_(opt_isInit) {
+  fetchSrcAndUpdateState_(isInit) {
     fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
-      this.updateState_(json, opt_isInit);
+      this.updateState_(json, isInit);
     });
   }
 
   /**
    * @param {*} json
-   * @param {boolean=} opt_isInit
+   * @param {boolean} isInit
    * @private
    */
-  updateState_(json, opt_isInit) {
+  updateState_(json, isInit) {
     if (json === undefined || json === null) {
       return;
     }
@@ -122,7 +122,7 @@ export class AmpState extends AMP.BaseElement {
     const state = Object.create(null);
     state[id] = json;
     bindForDoc(this.getAmpDoc()).then(bind => {
-      bind.setState(state, opt_isInit);
+      bind.setState(state, isInit);
     });
   }
 
