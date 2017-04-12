@@ -76,11 +76,10 @@ class Amp3QPlayer extends AMP.BaseElement {
         'The data-id attribute is required for <amp-3q-player> %s',
         this.element);
 
-
     const src = 'https://playout.3qsdn.com/' + encodeURIComponent(dataId) + '?autoplay=false&amp=true';
     this.iframe_.src = src;
 
-    window.addEventListener('message',
+    this.win.addEventListener('message',
                             event => this.sdnBridge_(event));
 
     this.playerReadyResolver_ = this.loadPromise(this.iframe_);
@@ -113,8 +112,15 @@ class Amp3QPlayer extends AMP.BaseElement {
     }
   }
 
-  /** @private */
   sdnBridge_(event) {
+
+    //console.log('sdnPlayer: '+event.data);
+
+    if (event.source) {
+      if (event.source != this.iframe_.contentWindow) {
+        return;
+      }
+    }
 
     const data = isObject(event.data) ? event.data : tryParseJson(event.data);
     if (data === undefined) {
@@ -125,7 +131,7 @@ class Amp3QPlayer extends AMP.BaseElement {
       case 'playing':
         this.element.dispatchCustomEvent(VideoEvents.PLAY);
         break;
-      case 'pause':
+      case 'paused':
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
         break;
       case 'muted':
@@ -137,34 +143,33 @@ class Amp3QPlayer extends AMP.BaseElement {
     }
   }
 
+  sdnPostMessage_(message) {
+    console.log('sdnPlayer postMessage: ' + message);
+    if (this.iframe_ && this.iframe_.contentWindow) {
+          this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+        }
+  }
+
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
   /** @override */
-  play(unusedIsAutoplay) {
-    this.playerReadyResolver_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('play2', '*');
-    });
+  play() {
+    this.sdnPostMessage_('play2');
   }
 
   /** @override */
   pause() {
-    this.playerReadyResolver_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('pause', '*');
-    });
+    this.sdnPostMessage_('pause');
   }
 
   /** @override */
   mute() {
-    this.playerReadyResolver_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('mute', '*');
-    });
+    this.sdnPostMessage_('mute');
   }
 
   /** @override */
   unmute() {
-    this.playerReadyResolver_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('unmute', '*');
-    });
+    this.sdnPostMessage_('unmute');
   }
 
   /** @override */
@@ -179,12 +184,12 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   showControls() {
-    this.iframe_.contentWindow./*OK*/postMessage('showControlbar', '*');
+    this.sdnPostMessage_('showControlbar');
   }
 
   /** @override */
   hideControls() {
-    this.iframe_.contentWindow./*OK*/postMessage('hideControlbar', '*');
+    this.sdnPostMessage_('hideControlbar');
   }
 
 };
