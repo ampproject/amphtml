@@ -237,7 +237,11 @@ function createElementRules_() {
       'selected': null,
     },
     'AMP-STATE': {
-      'src': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
     },
     'AMP-VIDEO': {
       'alt': null,
