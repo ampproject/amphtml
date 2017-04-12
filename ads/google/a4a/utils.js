@@ -138,6 +138,9 @@ export function googleAdUrl(
         ? '1' : '0';
     queryParams.push({name: 'act', value:
       Object.keys(containerTypeSet).join()});
+    if (isCanary(win)) {
+      queryParams.push({name: 'isc', value: '1'});
+    }
     const allQueryParams = queryParams.concat(
       [
         {
@@ -170,7 +173,6 @@ export function googleAdUrl(
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
         {name: 'pfx', value: pfx},
-        {name: 'isc', value: isCanary(win) ? '1' : '0'},
       ],
       unboundedQueryParams,
       [

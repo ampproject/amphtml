@@ -262,7 +262,7 @@ describe('Google A4A utils', () => {
         });
       });
     });
-    it('should specify if canary or not', () => {
+    it('should specify that this is canary', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
@@ -273,12 +273,35 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
+        impl.win.AMP_CONFIG = impl.win.AMP_CONFIG || {};
+        impl.win.AMP_CONFIG.canary = true;
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.match(/isc=(1|0)/);
+            expect(url1).to.match(/isc=1/);
           });
         });
       });
     });
+    it('should not specify that this is canary', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.AMP_CONFIG = impl.win.AMP_CONFIG || {};
+        impl.win.AMP_CONFIG.canary = false;
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.not.match(/isc=1/);
+          });
+        });
+      });
+    });
+
   });
 });
