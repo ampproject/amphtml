@@ -757,6 +757,10 @@ describe('Action interceptor', () => {
     return target['__AMP_ACTION_QUEUE__'];
   }
 
+  function getActionHandler() {
+    return target['__AMP_ACTION_HANDLER__'];
+  }
+
 
   it('should not initialize until called', () => {
     expect(getQueue()).to.be.undefined;
@@ -788,10 +792,12 @@ describe('Action interceptor', () => {
     action.invoke_(target, 'method2', /* args */ null, 'source2', 'event2');
 
     expect(Array.isArray(getQueue())).to.be.true;
+    expect(getActionHandler()).to.be.undefined;
     expect(getQueue()).to.have.length(2);
 
     const handler = sandbox.spy();
     action.installActionHandler(target, handler);
+    expect(getActionHandler()).to.not.be.undefined;
     expect(handler).to.have.not.been.called;
 
     clock.tick(10);
