@@ -85,15 +85,14 @@ For any public AMP document like: http://output.jsbin.com/pegizoq/quiet
 
 You can access is with the local JS at
 
-- normal sources: http://localhost:8000/max/output.jsbin.com/pegizoq/quiet
-- minified: http://localhost:8000/min/output.jsbin.com/pegizoq/quiet
+http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet
 
-When accessing `min` urls make sure you run `gulp dist` with the `--fortesting`
+Note local proxy will serve minified or unminified JS based on current serve mode. When serve mode is `cdn` local proxy will serve remote JS.
+When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
 flag so that we do not strip out the localhost code paths. (We do some
 code elimination to trim down the file size for the file we deploy to production)
 
-If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/min/s/output.jsbin.com/pegizoq/quiet
-
+If the origin resource is on HTTPS, the URLs are http://localhost:8000/proxy/s/output.jsbin.com/pegizoq/quiet
 
 ### A4A envelope (/a4a/, /a4a-3p/)
 

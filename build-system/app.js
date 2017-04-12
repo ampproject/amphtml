@@ -28,6 +28,7 @@ var jsdom = require('jsdom');
 var path = require('path');
 var request = require('request');
 var url = require('url');
+// SERVE_MODE is defaulted to be 'max' if not specified
 var mode = process.env.SERVE_MODE;
 
 app.use(bodyParser.json());
@@ -51,7 +52,7 @@ app.use('/serve_mode=:mode', function (req, res, next) {
     process.env.SERVE_MODE = newMode;
     info = '<h2>Serve mode changed to ' + newMode + '</h2>';
   } else {
-    info = '<h2>Serve mode ' + newMode + ' is not support. </h2>';
+    info = '<h2>Serve mode ' + newMode + ' is not supported. </h2>';
   }
   res.send(info);
 });
@@ -224,7 +225,7 @@ app.use('/share-tracking/get-outgoing-fragment', function(req, res) {
 
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.
-function proxyToAmpProxy(req, res, minify) {
+function proxyToAmpProxy(req, res, mode) {
   var url = 'https://cdn.ampproject.org/'
       + (req.query['amp_js_v'] ? 'v' : 'c')
       + req.url;
@@ -238,7 +239,7 @@ function proxyToAmpProxy(req, res, minify) {
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
     const inabox = req.query['inabox'] == '1';
     const urlPrefix = getUrlPrefix(req);
-    body = replaceUrls(minify ? 'min' : 'max', body, urlPrefix, inabox);
+    body = replaceUrls(mode, body, urlPrefix, inabox);
     if (inabox) {
       // Allow CORS requests for A4A.
       const origin = req.headers.origin || urlPrefix;
@@ -480,30 +481,12 @@ app.use('/impression-proxy/', function(req, res) {
   res.send(body);
 });
 
-// Proxy with unminified JS.
+// Proxy with local JS.
 // Example:
-// http://localhost:8000/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/max/', function(req, res) {
-  if (mode != 'max') {
-    var info = '<h2>Current server is not serving unminified JS.</h2>'
-        + '<h2>Please run "gulp serve" instead</h2>';
-    res.send(info);
-    return;
-  }
-  proxyToAmpProxy(req, res, /* minify */ false);
-});
-
-// Proxy with minified JS.
-// Example:
-// http://localhost:8000/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/min/', function(req, res) {
-  if (mode != 'min') {
-    var info = '<h2>Current server is not serving minified JS.</h2>'
-        + '<h2>Please run "gulp serve --compiled" instead</h2>';
-    res.send(info);
-    return;
-  }
-  proxyToAmpProxy(req, res, /* minify */ true);
+// http://localhost:8000/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+app.use('/proxy/', function(req, res) {
+  var mode = process.env.SERVE_MODE;
+  proxyToAmpProxy(req, res, mode);
 });
 
 // Nest the response in an iframe.
@@ -1083,7 +1066,7 @@ function generateInfo(filePath) {
       '<h3></h3>' +
       '<h3><a href = /serve_mode=max>Change to max mode</a></h3>' +
       '<h3><a href = /serve_mode=min>Change to min mode</a></h3>' +
-      '<h3><a href = /serve_mode=cdn>Change to min mode</a></h3>';
+      '<h3><a href = /serve_mode=cdn>Change to cdn mode</a></h3>';
   return info;
 }
 
