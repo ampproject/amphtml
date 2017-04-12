@@ -60,7 +60,28 @@ export function parseUrl(url, opt_nocache) {
   if (fromCache) {
     return fromCache;
   }
+
+  const info = parseUrlWithA(a, url);
+
+  // Freeze during testing to avoid accidental mutation.
+  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
+
+  if (opt_nocache) {
+    return frozen;
+  }
+  return cache[url] = frozen;
+}
+
+/**
+ * Returns a Location-like object for the given URL. If it is relative,
+ * the URL gets resolved.
+ * @param {!HTMLAnchorElement} a
+ * @param {string} url
+ * @return {!Location}
+ */
+export function parseUrlWithA(a, url) {
   a.href = url;
+
   // IE11 doesn't provide full URL components when parsing relative URLs.
   // Assigning to itself again does the trick.
   // TODO(lannka, #3449): Remove all the polyfills once we don't support IE11
@@ -104,13 +125,7 @@ export function parseUrl(url, opt_nocache) {
   } else {
     info.origin = info.protocol + '//' + info.host;
   }
-  // Freeze during testing to avoid accidental mutation.
-  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
-
-  if (opt_nocache) {
-    return frozen;
-  }
-  return cache[url] = frozen;
+  return info;
 }
 
 /**
