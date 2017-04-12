@@ -68,6 +68,11 @@ export class AmpList extends AMP.BaseElement {
     }
   }
 
+  /** @override */
+  getDynamicElementContainers() {
+    return this.container_;
+  }
+
   /**
    * Request list data from `src` and return a promise that resolves when
    * the list has been populated with rendered list items.
