@@ -146,8 +146,8 @@ class Amp3QPlayer extends AMP.BaseElement {
   sdnPostMessage_(message) {
     console.log('sdnPlayer postMessage: ' + message);
     if (this.iframe_ && this.iframe_.contentWindow) {
-          this.iframe_.contentWindow./*OK*/postMessage(message, '*');
-        }
+      this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+    }
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
