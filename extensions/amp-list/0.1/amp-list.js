@@ -15,7 +15,9 @@
  */
 
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeChildren} from '../../../src/dom';
 import {templatesFor} from '../../../src/services';
 import {user} from '../../../src/log';
 
@@ -48,10 +50,28 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    return populateList_();
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const srcMutation = mutations['src']
+    if (srcMutation) {
+      const oldSrc = this.element.getAttribute('src');
+      if (srcMutation !== oldSrc) {
+        populateList_();
+      }
+    }
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  populateList_() {
     const itemsExpr = this.element.getAttribute('items') || 'items';
     return fetchBatchedJsonFor(
         this.getAmpDoc(), this.element, itemsExpr).then(items => {
-          user().assert(items && Array.isArray(items),
+          user().assert(isArray(items),
               'Response must contain an array at "%s". %s',
               itemsExpr, this.element);
           return templatesFor(this.win).findAndRenderTemplateArray(
@@ -66,6 +86,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   rendered_(elements) {
+    removeChildren(this.container_);
     elements.forEach(element => {
       if (!element.hasAttribute('role')) {
         element.setAttribute('role', 'listitem');
