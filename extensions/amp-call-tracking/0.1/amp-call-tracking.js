@@ -15,10 +15,10 @@
  */
 
 import {assertHttpsUrl} from '../../../src/url';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {urlReplacementsForDoc} from '../../../src/services';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 
 
 /**
@@ -67,7 +67,7 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return isLayoutSizeDefined(layout) || layout == Layout.CONTAINER;
   }
 
   /** @override */
@@ -80,16 +80,17 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return urlReplacementsForDoc(this.getAmpDoc()).expandAsync(this.configUrl_)
+    return urlReplacementsForDoc(this.getAmpDoc())
+      .expandAsync(user().assertString(this.configUrl_))
       .then(url => fetch_(this.win, url))
       .then(data => {
-        user().assert(data.phoneNumber,
+        user().assert('phoneNumber' in data,
           'Response must contain a non-empty phoneNumber field %s',
           this.element);
 
-        this.hyperlink_.setAttribute('href', `tel:${data.phoneNumber}`);
-        this.hyperlink_.textContent = data.formattedPhoneNumber
-            || data.phoneNumber;
+        this.hyperlink_.setAttribute('href', `tel:${data['phoneNumber']}`);
+        this.hyperlink_.textContent = data['formattedPhoneNumber']
+            || data['phoneNumber'];
       });
   }
 }

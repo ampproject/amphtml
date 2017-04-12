@@ -68,7 +68,9 @@ Example: `on="tap:target1.actionA,target2.actionB"`
 ## Globally defined Events and Actions
 Currently AMP defines `tap` event globally that you can listen to on any HTML element (including amp-elements).
 
-AMP also defines a `hide` action globally that you can trigger on any HTML element.
+AMP also defines `hide`, `show` and `toggleVisibility` actions globally that you can trigger on any HTML element.
+
+{% call callout('Note', type='note') %}Note: {% endcall %} An element can only be shown if it was previously hidden by a `hide` or `toggleVisibility` action, or by using the [`hidden`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden) attribute. `show` does not support elements hidden by CSS `display:none` or AMP's `layout=nodisplay`
 
 For example, the following is possible in AMP.
 
@@ -94,16 +96,42 @@ For example, the following is possible in AMP.
 
 ### Input Elements (any that fires `change` event)
 
-Including: `input[type=radio]`, `input[type=checkbox]` and `select`.
+Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and `select`.
 
 <table>
   <tr>
     <th>Event</th>
     <th>Description</th>
+    <th>Data</th>
   </tr>
   <tr>
     <td>change</td>
     <td>Fired when the value of the element is changed.</td>
+    <td>Various, see below.</td>
+  </tr>
+</table>
+
+#### `change` event data
+<table>
+  <tr>
+    <th>Input Type</th>
+    <th>Data</th>
+  </tr>
+  <tr>
+    <td>Range</td>
+    <td>
+      <code>event.min</code> : The minimum value of the range<br>
+      <code>event.value</code> : The current value of the range<br>
+      <code>event.max</code> : The maximum value of the range<br>
+    </td>
+  </tr>
+  <tr>
+    <td>Radio</td>
+    <td><code>event.checked</code> : If the element is checked</td>
+  </tr>
+  <tr>
+    <td>Checkbox</td>
+    <td><code>event.checked</code> : If the element is checked</td>
   </tr>
 </table>
 
@@ -312,6 +340,6 @@ actions that apply to the whole document.
   </tr>
   <tr>
     <td>setState</td>
-    <td>Updates local bindable state. Requires <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>.</td>
+    <td>Updates <code>amp-bind</code>'s state. See <a href="../extensions/amp-bind/amp-bind.md#ampsetstate">details</a>.</td>
   </tr>
 </table>

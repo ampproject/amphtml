@@ -63,7 +63,7 @@ describe('ie-media-bug', () => {
   it('should bypass polling when matchMedia is not broken', () => {
     platformMock.expects('isIe').returns(true);
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .returns({matches: true})
         .once();
     windowMock.expects('setInterval').never();
@@ -77,7 +77,7 @@ describe('ie-media-bug', () => {
 
     // Scheduling pass.
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .returns({matches: false})
         .once();
     const intervalId = 111;
@@ -104,7 +104,7 @@ describe('ie-media-bug', () => {
     clock.tick(10);
     windowMock = sandbox.mock(windowApi);
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .returns({matches: false})
         .once();
     windowMock.expects('clearInterval').never();
@@ -117,7 +117,7 @@ describe('ie-media-bug', () => {
     clock.tick(10);
     windowMock = sandbox.mock(windowApi);
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .returns({matches: true})
         .once();
     windowMock.expects('clearInterval').withExactArgs(intervalId).once();
@@ -135,7 +135,7 @@ describe('ie-media-bug', () => {
 
     // Scheduling pass.
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .returns({matches: false})
         .atLeast(2);
     const intervalId = 111;
@@ -176,7 +176,7 @@ describe('ie-media-bug', () => {
     platformMock.expects('isIe').returns(true);
 
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .throws(new Error('intentional'))
         .once();
     windowMock.expects('setInterval').never();

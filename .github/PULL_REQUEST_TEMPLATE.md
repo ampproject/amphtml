@@ -11,7 +11,8 @@ Bullet points like
 - Implements aspect X
 - Leaves out feature Y because of A
 - Improves performance by B
+- Improves accessibility by C
 
 really help with making this more readable.
 
-Fixes/Implements/Related-to #1 (enter issue number, except in rare cases where none exists).
+Fixes/Closes/Related-to #1 (enter issue number, except in rare cases where none exists).

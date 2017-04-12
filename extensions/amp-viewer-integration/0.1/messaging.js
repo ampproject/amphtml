@@ -16,6 +16,7 @@
 
 
 import {listen} from '../../../src/event-helper';
+import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
@@ -41,6 +42,25 @@ const MessageType = {
  * }}
  */
 export let Message;
+
+/**
+ * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
+ */
+export let RequestHandler;
+
+/**
+  * @param {*} message
+  * @return {?Message}
+  */
+export function parseMessage(message) {
+  if (typeof message != 'string') {
+    return /** @type {Message} */(message);
+  }
+  if (message.charAt(0) != '{') {
+    return null;
+  }
+  return /** @type {?Message} */ (tryParseJson(message) || null);
+}
 
 /**
  * @fileoverview This class is a de-facto implementation of MessagePort
@@ -95,21 +115,55 @@ export class Messaging {
    * Conversation (messaging protocol) between me and Bob.
    * @param {!Window} win
    * @param {!MessagePort|!WindowPortEmulator} port
+   * @param {boolean} opt_isWebview
    */
-  constructor(win, port) {
+  constructor(win, port, opt_isWebview) {
     /** @const {!Window} */
     this.win = win;
     /** @const @private {!MessagePort|!WindowPortEmulator} */
     this.port_ = port;
+    /** @const @private */
+    this.isWebview_ = !!opt_isWebview;
     /** @private {!number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};
-    /**  @private {?function(string, *, boolean):(!Promise<*>|undefined)} */
-    this.requestProcessor_ = null;
+    /**
+     * A map from message names to request handlers.
+     * @private {!Object<string, !RequestHandler>}
+     */
+    this.messageHandlers_ = {};
+
+    /** @private {?RequestHandler} */
+    this.defaultHandler_ = null;
 
     this.port_.addEventListener('message', this.handleMessage_.bind(this));
     this.port_.start();
+  }
+
+  /**
+   * Registers a method that will handle requests sent to the specified
+   * message name.
+   * @param {string} messageName The name of the message to handle.
+   * @param {!RequestHandler} requestHandler
+   */
+  registerHandler(messageName, requestHandler) {
+    this.messageHandlers_[messageName] = requestHandler;
+  }
+
+  /**
+   * Unregisters the handler for the specified message name.
+   * @param {string} messageName The name of the message to unregister.
+   */
+  unregisterHandler(messageName) {
+    delete this.messageHandlers_[messageName];
+  }
+
+  /**
+   * @param {?RequestHandler} requestHandler
+   */
+  setDefaultHandler(requestHandler) {
+    this.defaultHandler_ = requestHandler;
   }
 
   /**
@@ -120,8 +174,10 @@ export class Messaging {
    */
   handleMessage_(event) {
     dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
-    /** @type {Message} */
-    const message = event.data;
+    const message = parseMessage(event.data);
+    if (!message) {
+      return;
+    }
     if (message.type == MessageType.REQUEST) {
       this.handleRequest_(message);
     } else if (message.type == MessageType.RESPONSE) {
@@ -199,7 +255,8 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
-    this.port_./*OK*/postMessage(message);
+    this.port_./*OK*/postMessage(
+      this.isWebview_ ? JSON.stringify(message) : message);
   }
 
   /**
@@ -211,14 +268,19 @@ export class Messaging {
    */
   handleRequest_(message) {
     dev().fine(TAG, 'handleRequest_', message);
-    if (!this.requestProcessor_) {
+
+    let handler = this.messageHandlers_[message.name];
+    if (!handler) {
+      handler = this.defaultHandler_;
+    }
+    if (!handler) {
       throw new Error(
         'Cannot handle request because handshake is not yet confirmed!');
     }
-    const requestId = message.requestid;
+
+    const promise = handler(message.name, message.data, !!message.rsvp);
     if (message.rsvp) {
-      const promise =
-        this.requestProcessor_(message.name, message.data, message.rsvp);
+      const requestId = message.requestid;
       if (!promise) {
         this.sendResponseError_(
           requestId, message.name, new Error('no response'));
@@ -247,19 +309,12 @@ export class Messaging {
       delete this.waitingForResponse_[requestId];
       if (message.error) {
         this.logError_(TAG + ': handleResponse_ error: ', message.error);
-        pending.reject(new Error(message.error));
+        pending.reject(
+          new Error(`Request ${message.name} failed: ${message.error}`));
       } else {
-        pending.resolve(message.data);
+        pending.resolve(message);
       }
     }
-  }
-
-  /**
-   * @param {function(string, *, boolean):(!Promise<*>|undefined)}
-   *    requestProcessor
-   */
-  setRequestProcessor(requestProcessor) {
-    this.requestProcessor_ = requestProcessor;
   }
 
   /**

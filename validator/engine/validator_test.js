@@ -238,7 +238,7 @@ describe('ValidatorCssLengthValidation', () => {
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
         'in tag \'style amp-custom\' is too long - we saw 50001 bytes ' +
         'whereas the limit is 50000 bytes. ' +
-        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '(see https://www.ampproject.org/docs/reference/spec' +
         '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
@@ -254,7 +254,7 @@ describe('ValidatorCssLengthValidation', () => {
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
         'in tag \'style amp-custom\' is too long - we saw 50002 bytes ' +
         'whereas the limit is 50000 bytes. ' +
-        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '(see https://www.ampproject.org/docs/reference/spec' +
         '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
@@ -360,8 +360,9 @@ describe('CssLength', () => {
 /**
  * Helper for ValidatorRulesMakeSense.
  * @param {!amp.validator.AttrSpec} attrSpec
+ * @param {!amp.validator.ValidatorRules} rules
  */
-function attrRuleShouldMakeSense(attrSpec) {
+function attrRuleShouldMakeSense(attrSpec, rules) {
   const attrSpecNameRegex = new RegExp('[^A-Z]+');
   // name
   it('attr_spec name defined', () => {
@@ -396,10 +397,22 @@ function attrRuleShouldMakeSense(attrSpec) {
          });
     }
   }
-  // blacklisted_value_regex
+  if (attrSpec.valueRegex !== null) {
+    it('value_regex valid', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
+      expect(isValidRegex(regex)).toBe(true);
+    });
+  }
+  if (attrSpec.valueRegexCasei !== null) {
+    it('value_regex_casei valid', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
+      expect(isValidRegex(regex)).toBe(true);
+    });
+  }
   if (attrSpec.blacklistedValueRegex !== null) {
     it('blacklisted_value_regex valid', () => {
-      expect(isValidRegex(attrSpec.blacklistedValueRegex)).toBe(true);
+      const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
+      expect(isValidRegex(regex)).toBe(true);
     });
   }
   // value_url must have at least one allowed protocol.
@@ -466,8 +479,14 @@ describe('ValidatorRulesMakeSense', () => {
   it('tags defined', () => {
     expect(rules.tags.length).toBeGreaterThan(0);
   });
-  it('attr_lists defined', () => {
-    expect(rules.attrLists.length).toBeGreaterThan(0);
+  it('direct_attr_lists defined', () => {
+    expect(rules.directAttrLists.length).toBeGreaterThan(0);
+  });
+  it('global_attrs defined', () => {
+    expect(rules.globalAttrs.length).toBeGreaterThan(0);
+  });
+  it('amp_layout_attrs defined', () => {
+    expect(rules.ampLayoutAttrs.length).toBeGreaterThan(0);
   });
   it('min_validator_revision_required defined', () => {
     expect(rules.minValidatorRevisionRequired).toBeGreaterThan(0);
@@ -500,7 +519,11 @@ describe('ValidatorRulesMakeSense', () => {
     });
     // spec_name can't be empty and must be unique.
     it('unique spec_name or if none then unique tag_name', () => {
-      if (tagSpec.specName !== null) {
+      if (tagSpec.extensionSpec !== null) {
+        const specName = tagSpec.extensionSpec.name + ' extension .js script';
+        expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
+        specNameIsUnique[specName] = 0;
+      } else if (tagSpec.specName !== null) {
         expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
         specNameIsUnique[tagSpec.specName] = 0;
       } else {
@@ -586,41 +609,74 @@ describe('ValidatorRulesMakeSense', () => {
                     attrSpec.valueRegex !== null).toBe(true);
            });
       }
-      // <script> tags with a `custom-element` attribute are extensions. We
-      // have a few additional checks for these.
-      if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'custom-element') {
-        // We want all extensions to be unique in the document. For now,
-        // we have made this a warning for existing extension and a requirement
-        // for new extensions.
-        it(attrSpec.value + ' extension requires that it is unique', () => {
-          expect(tagSpec.unique || tagSpec.uniqueWarning).toBe(true);
+      // TagSpecs with an ExtensionSpec are extensions. We have a few
+      // additional checks for these.
+      if (tagSpec.extensionSpec !== null) {
+        const extensionSpec = tagSpec.extensionSpec;
+        it('extension must have a name field value', () => {
+          expect(extensionSpec.name).toBeDefined();
         });
+        it('extension ' + extensionSpec.name + ' must have at least two ' +
+               'allowed_versions, latest and a numeric version, e.g `1.0`',
+           () => {
+             expect(extensionSpec.allowedVersions).toBeGreaterThan(1);
+           });
+        it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
+               'or a numeric value',
+           () => {
+             for (const versionString of extensionSpec.allowedVersions) {
+               expect(versionString).toMatch(/^(latest|[0-9.])$/);
+             }
+             for (const versionString of extensionSpec.deprecatedVersions) {
+               expect(versionString).toMatch(/^(latest|[0-9.])$/);
+             }
+           });
+        it('extension ' + extensionSpec.name + ' deprecated_versions must be ' +
+               'subset of allowed_versions',
+           () => {
+             var allowedVersions = {};
+             for (const versionString of extensionSpec.allowedVersions) {
+               expect(versionString).toMatch(/^(latest|[0-9.])$/);
+             }
+             for (const versionString of extensionSpec.deprecatedVersions) {
+               expect(allowedVersions.hasOwnProperty(versionString)).toBe(true);
+             }
+           });
+        it('extension ' + extensionSpec.name + ' must include the ' +
+               'attr_list: "common-extension-attrs"` attr_list ',
+           () => {
+             expect(tagSpec.attrLists.length).toEqual(1);
+             expect(tagSpec.attrLists[0]).toEqual('common-extension-attrs');
+           });
         // We want the extension to be present only when there is a matching
         // tag on the page which requires the extension. These extensions don't
         // have a single matching tag, so we allow these extensions to not
         // also require an additional tag.
         const extensionExceptions = {
-          // these extensions match up to more than one matching
-          // tagspec, a mechanism we don't currently have in place.
-          'amp-ad': 0,
           // This can be present based on 'amp-access', which isn't allowed in
           // AMP4ADS, which makes checking tricky.
           'amp-analytics': 0,
-          'amp-form': 0,
+          // There are two variants of amp-audio, one for each html_format.
+          // The references break when we filter by format, so currently this
+          // does not require another tag to indicate usage.
+          // TODO(gregable): Fix above.
           'amp-audio': 0,
           // amp-dynamic-css-classes corresponds to no specific tag.
           'amp-dynamic-css-classes': 0,
-          // amp-slides is deprecated in favor of amp-carousel
+          // amp-slides is deprecated in favor of amp-carousel, so we don't
+          // want to be recommending adding <amp-slides> to any page.
           'amp-slides': 0
         };
-        if (!extensionExceptions.hasOwnProperty(attrSpec.value)) {
-          it(tagSpec.tagName + ' is missing requires or' +
-              ' extension_unused_unless_tag_present', () => {
-            expect(
-                tagSpec.requires.length +
-                tagSpec.extensionUnusedUnlessTagPresent.length)
-                .toBeGreaterThan(0);
-          });
+        if (!extensionExceptions.hasOwnProperty(extensionSpec.name)) {
+          it('Extension ' + extensionSpec.name + ' does not identify' +
+                 ' any required tags indicating usage. Please add a `requires:`' +
+                 ' field to the TagSpec.',
+             () => {
+               expect(
+                   tagSpec.requires.length +
+                   tagSpec.extensionSpec.deprecatedRecommendsUsageOfTag.length)
+                   .toBeGreaterThan(0);
+             });
         }
       }
 
@@ -737,21 +793,9 @@ describe('ValidatorRulesMakeSense', () => {
     expect(subtractDiff(allRequires, allSatisfies)).toEqual([]);
   });
 
-  // attr_lists
-  const attrListNameIsUnique = {};
-  for (const attrList of rules.attrLists) {
-    it('unique attr_list name', () => {
-      expect(attrListNameIsUnique.hasOwnProperty(attrList.name)).toBe(false);
-      attrListNameIsUnique[attrList.name] = 0;
-    });
-    it('attr_list has attrs', () => {
-      expect(attrList.attrs.length).toBeGreaterThan(0);
-    });
-  }
-
   // attr_specs within rules.
   for (const attrSpec of rules.attrs) {
-    attrRuleShouldMakeSense(attrSpec);
+    attrRuleShouldMakeSense(attrSpec, rules);
   }
 
   // Verify that for every error code in our enum, we have exactly one format

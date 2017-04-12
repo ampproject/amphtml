@@ -80,7 +80,7 @@ The value for the `target` attribute must be either `_blank` or `_top`.
 
 **action** (optional for GET, invalid for POST)
 
-For GET submissions, at least one of `action` or `action-xhr` must be provided. 
+For GET submissions, at least one of `action` or `action-xhr` must be provided.
 
 This attribute is required for `method=GET`. The value must be an `https` URL and must not be a link to a CDN (does **NOT** link to https://cdn.ampproject.org). For `method=POST`, the `action` attribute is invalid, use  `action-xhr` instead.
 
@@ -105,7 +105,7 @@ See [Security Considerations](#security-considerations) for notes on how to secu
 
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
 
-**custom-validation-reporting** (optional) 
+**custom-validation-reporting** (optional)
 
 Enables and selects a custom validation reporting strategy, valid values are one of: `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
 
@@ -164,7 +164,7 @@ For example, a common use case is to submit a form on input change (selecting a 
 See the [full example here](../../examples/forms.amp.html).
 
 ### Analytics Triggers
-`amp-form` triggers two events you can track in your `amp-analytics` config: `amp-form-submit-success` and `amp-form-submit-error`.
+`amp-form` triggers three events you can track in your `amp-analytics` config: `amp-form-submit`, `amp-form-submit-success`, and `amp-form-submit-error`.
 
 You can configure your analytics to send these events as in the example below.
 
@@ -173,9 +173,14 @@ You can configure your analytics to send these events as in the example below.
   <script type="application/json">
     {
       "requests": {
-        "event": "https://www.example.com/analytics/event?eid=${eventId}"
+        "event": "https://www.example.com/analytics/event?eid=${eventId}",
+        "searchEvent": "https://www.example.com/analytics/search?formId=${formId}&query=${formFields[query]}"
       },
       "triggers": {
+        "formSubmit": {
+          "on": "amp-form-submit",
+          "request": "searchEvent"
+        },
         "formSubmitSuccess": {
           "on": "amp-form-submit-success",
           "request": "event",
@@ -195,6 +200,23 @@ You can configure your analytics to send these events as in the example below.
   </script>
 </amp-analytics>
 ```
+
+The `amp-form-submit` event fires when a form request is initiated. The `amp-form-submit` event generates a set of variables that correspond to the specific form and the fields in the form. These variables can be used for analytics.
+
+For example, the following form has two fields:
+
+```html
+<form action-xhr="/register" method="POST" id="registration_form">
+  <input type="text" name="user_name" />
+  <input type="password" name="user_password" />
+  <input type="submit" value="Sign up" />
+</form>
+```
+When the `amp-form-submit` event fires, it generates the following variables containing the values that were specified in the form:
+
+* `formId`
+* `formFields[user_name]`
+* `formFields[user_password]`
 
 ## Success/Error Response Rendering
 `amp-form` allows publishers to render the responses using [Extended Templates](../../spec/amp-html-format.md#extended-templates).
@@ -250,9 +272,9 @@ See the [full example here](../../examples/forms.amp.html).
 
 Note that you'd also have to update your `Access-Control-Expose-Headers` response header to include `AMP-Redirect-To` to the list of allowed headers.
 
-The redirect URL must be absolute HTTPS URL otherwise AMP will throw an error and redirection won't happen. 
+The redirect URL must be absolute HTTPS URL otherwise AMP will throw an error and redirection won't happen.
 
-**Known Issue**: Due to an [issue in Safari iOS](https://bugs.webkit.org/show_bug.cgi?id=165627) redirecting to deep linked URLs (URLs that would actually end up opening a native app) might fail when the AMP document is embedded. This is [tracked in this issue](https://github.com/ampproject/amphtml/issues/6953). 
+**Known Issue**: Due to an [issue in Safari iOS](https://bugs.webkit.org/show_bug.cgi?id=165627) redirecting to deep linked URLs (URLs that would actually end up opening a native app) might fail when the AMP document is embedded. This is [tracked in this issue](https://github.com/ampproject/amphtml/issues/6953).
 
 ```
 AMP-Redirect-To: https://example.com/forms/thank-you
@@ -324,7 +346,7 @@ For validation messages, if your element contains no text content inside, AMP wi
 
 ### Reporting Strategies
 
-Specify one of the following reporting options for the `custom-validation-reporting` attribute: 
+Specify one of the following reporting options for the `custom-validation-reporting` attribute:
 
 #### Show First on Submit
 The `show-first-on-submit` reporting option mimics the browser's default behavior when default validation kicks in. It shows the first validation error it finds and stops there.
@@ -336,8 +358,6 @@ The `show-all-on-submit` reporting option shows all validation errors on all inv
 The `as-you-go` reporting option allows your user to see validation messages as they're interacting with the input. For example, if the user types an invalid email address, the user will see the error right away.  Once they correct the value, the error goes away.
 
 ## Variable Substitutions
-__(<a href="https://www.ampproject.org/docs/reference/experimental.html">experimental</a>)__
-
 `amp-form` allows [platform variable substitutions](../../spec/amp-var-substitutions.md) for inputs that are hidden and that have the `data-amp-replace` attribute. On each form submission, `amp-form` finds all `input[type=hidden][data-amp-replace]` inside the form and applies variable substitutions to its `value` attribute and replaces it with the result of the substitution.
 
 You must provide the variables you are using for each substitution on each input by specifying a space-separated string of the variables used in `data-amp-replace` (see example below). AMP will not replace variables that are not explicitly specified.
@@ -371,7 +391,7 @@ Once the user tries to submit the form, AMP will try to resolve the variables an
 </form>
 ```
 
-Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in the whitelist through `data-amp-replace` attribute on the first field. 
+Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in the whitelist through `data-amp-replace` attribute on the first field.
 
 Substitutions will happen on every subsequent submission. Read more about [variable substitutions in AMP](../../spec/amp-var-substitutions.md).
 
@@ -386,5 +406,5 @@ In general, keep in mind the following points when accepting input from the user
 * Only use POST for state changing requests.
 * Use non-XHR GET for navigational purposes only, e.g. Search.
     * non-XHR GET requests are not going to receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism.
-    * In general use XHR/non-XHR GET requests for navigational or information retrieval only. 
-* non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers. And the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later, please file an issue if you think this is needed. 
+    * In general use XHR/non-XHR GET requests for navigational or information retrieval only.
+* non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers. And the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later, please file an issue if you think this is needed.

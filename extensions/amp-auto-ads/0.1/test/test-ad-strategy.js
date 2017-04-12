@@ -32,8 +32,14 @@ describes.realWin('amp-strategy', {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    container = env.win.document.createElement('div');
+
     env.win.frameElement.style.height = '1000px';
+
+    const belowFoldSpacer = document.createElement('div');
+    belowFoldSpacer.style.height = '1000px';
+    env.win.document.body.appendChild(belowFoldSpacer);
+
+    container = env.win.document.createElement('div');
     env.win.document.body.appendChild(container);
   });
 
@@ -68,19 +74,21 @@ describes.realWin('amp-strategy', {
         const placements = getPlacementsFromConfigObj(env.win, configObj);
         expect(placements).to.have.lengthOf(2);
 
-        const adStrategy = new AdStrategy('adsense', placements, [
-          {
-            name: 'custom-att-1',
-            value: 'val-1',
-          },
-          {
-            name: 'custom-att-2',
-            value: 'val-2',
-          },
-        ], new AdTracker([], 0), 1);
+        const attributes = {
+          'type': 'adsense',
+          'data-custom-att-1': 'val-1',
+          'data-custom-att-2': 'val-2',
+        };
 
-        return adStrategy.run().then(success => {
-          expect(success).to.equal(true);
+        const adTracker = new AdTracker([], {
+          initialMinSpacing: 0,
+          subsequentMinSpacing: [],
+          maxAdCount: 1,
+        });
+        const adStrategy = new AdStrategy(placements, attributes, adTracker);
+
+        return adStrategy.run().then(result => {
+          expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
           expect(anchor1.childNodes).to.have.lengthOf(1);
           expect(anchor2.childNodes).to.have.lengthOf(0);
           const adElement = anchor1.childNodes[0];
@@ -125,19 +133,21 @@ describes.realWin('amp-strategy', {
       return Promise.resolve(PlacementState.REIZE_FAILED);
     });
 
-    const adStrategy = new AdStrategy('adsense', placements, [
-      {
-        name: 'custom-att-1',
-        value: 'val-1',
-      },
-      {
-        name: 'custom-att-2',
-        value: 'val-2',
-      },
-    ], new AdTracker([], 0), 1);
+    const attributes = {
+      'type': 'adsense',
+      'data-custom-att-1': 'val-1',
+      'data-custom-att-2': 'val-2',
+    };
 
-    return adStrategy.run().then(success => {
-      expect(success).to.equal(true);
+    const adTracker = new AdTracker([], {
+      initialMinSpacing: 0,
+      subsequentMinSpacing: [],
+      maxAdCount: 1,
+    });
+    const adStrategy = new AdStrategy(placements, attributes, adTracker);
+
+    return adStrategy.run().then(result => {
+      expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
       expect(anchor1.childNodes).to.have.lengthOf(0);
       expect(anchor2.childNodes).to.have.lengthOf(1);
       const adElement = anchor2.childNodes[0];
@@ -187,19 +197,21 @@ describes.realWin('amp-strategy', {
     const placements = getPlacementsFromConfigObj(env.win, configObj);
     expect(placements).to.have.lengthOf(2);
 
-    const adStrategy = new AdStrategy('adsense', placements, [
-      {
-        name: 'custom-att-1',
-        value: 'val-1',
-      },
-      {
-        name: 'custom-att-2',
-        value: 'val-2',
-      },
-    ], new AdTracker([], 200), 2);
+    const attributes = {
+      'type': 'adsense',
+      'data-custom-att-1': 'val-1',
+      'data-custom-att-2': 'val-2',
+    };
 
-    return adStrategy.run().then(success => {
-      expect(success).to.equal(false);
+    const adTracker = new AdTracker([], {
+      initialMinSpacing: 200,
+      subsequentMinSpacing: [],
+      maxAdCount: 2,
+    });
+    const adStrategy = new AdStrategy(placements, attributes, adTracker);
+
+    return adStrategy.run().then(result => {
+      expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
       expect(anchor1.childNodes).to.have.lengthOf(1);
       expect(anchor2.childNodes).to.have.lengthOf(0);
       const adElement = anchor1.childNodes[0];
@@ -249,19 +261,21 @@ describes.realWin('amp-strategy', {
     const placements = getPlacementsFromConfigObj(env.win, configObj);
     expect(placements).to.have.lengthOf(2);
 
-    const adStrategy = new AdStrategy('adsense', placements, [
-      {
-        name: 'custom-att-1',
-        value: 'val-1',
-      },
-      {
-        name: 'custom-att-2',
-        value: 'val-2',
-      },
-    ], new AdTracker([], 200), 2);
+    const attributes = {
+      'type': 'adsense',
+      'data-custom-att-1': 'val-1',
+      'data-custom-att-2': 'val-2',
+    };
 
-    return adStrategy.run().then(success => {
-      expect(success).to.equal(true);
+    const adTracker = new AdTracker([], {
+      initialMinSpacing: 200,
+      subsequentMinSpacing: [],
+      maxAdCount: 2,
+    });
+    const adStrategy = new AdStrategy(placements, attributes, adTracker);
+
+    return adStrategy.run().then(result => {
+      expect(result).to.deep.equal({adsPlaced: 2, totalAdsOnPage: 2});
       expect(anchor1.childNodes).to.have.lengthOf(1);
       expect(anchor2.childNodes).to.have.lengthOf(1);
       const adElement1 = anchor1.childNodes[0];
@@ -319,19 +333,21 @@ describes.realWin('amp-strategy', {
     const placements = getPlacementsFromConfigObj(env.win, configObj);
     expect(placements).to.have.lengthOf(2);
 
-    const adStrategy = new AdStrategy('adsense', placements, [
-      {
-        name: 'custom-att-1',
-        value: 'val-1',
-      },
-      {
-        name: 'custom-att-2',
-        value: 'val-2',
-      },
-    ], new AdTracker([fakeExistingAd], 200), 2);
+    const attributes = {
+      'type': 'adsense',
+      'data-custom-att-1': 'val-1',
+      'data-custom-att-2': 'val-2',
+    };
 
-    return adStrategy.run().then(success => {
-      expect(success).to.equal(true);
+    const adTracker = new AdTracker([fakeExistingAd], {
+      initialMinSpacing: 200,
+      subsequentMinSpacing: [],
+      maxAdCount: 2,
+    });
+    const adStrategy = new AdStrategy(placements, attributes, adTracker);
+
+    return adStrategy.run().then(result => {
+      expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 2});
       expect(anchor1.childNodes).to.have.lengthOf(1);
       expect(anchor2.childNodes).to.have.lengthOf(0);
       const adElement1 = anchor1.childNodes[0];
@@ -342,59 +358,58 @@ describes.realWin('amp-strategy', {
     });
   });
 
-  it('should report strategy as unsuccessful when unable to place either ad',
-      () => {
-        const anchor1 = document.createElement('div');
-        anchor1.id = 'anchor1Id';
-        container.appendChild(anchor1);
+  it('should report unable to place either ad', () => {
+    const anchor1 = document.createElement('div');
+    anchor1.id = 'anchor1Id';
+    container.appendChild(anchor1);
 
-        const anchor2 = document.createElement('div');
-        anchor2.id = 'anchor2Id';
-        container.appendChild(anchor2);
+    const anchor2 = document.createElement('div');
+    anchor2.id = 'anchor2Id';
+    container.appendChild(anchor2);
 
-        const configObj = {
-          placements: [
-            {
-              anchor: {
-                selector: 'DIV#anchor1Id',
-              },
-              pos: 2,
-              type: 1,
-            },
-            {
-              anchor: {
-                selector: 'DIV#anchor2Id',
-              },
-              pos: 2,
-              type: 1,
-            },
-          ],
-        };
-        const placements = getPlacementsFromConfigObj(env.win, configObj);
-
-        expect(placements).to.have.lengthOf(2);
-        sandbox.stub(placements[0], 'placeAd', () => {
-          return Promise.resolve(PlacementState.REIZE_FAILED);
-        });
-        sandbox.stub(placements[1], 'placeAd', () => {
-          return Promise.resolve(PlacementState.REIZE_FAILED);
-        });
-
-        const adStrategy = new AdStrategy('adsense', placements, [
-          {
-            name: 'custom-att-1',
-            value: 'val-1',
+    const configObj = {
+      placements: [
+        {
+          anchor: {
+            selector: 'DIV#anchor1Id',
           },
-          {
-            name: 'custom-att-2',
-            value: 'val-2',
+          pos: 2,
+          type: 1,
+        },
+        {
+          anchor: {
+            selector: 'DIV#anchor2Id',
           },
-        ], new AdTracker([], 0), 1);
+          pos: 2,
+          type: 1,
+        },
+      ],
+    };
+    const placements = getPlacementsFromConfigObj(env.win, configObj);
 
-        return adStrategy.run().then(success => {
-          expect(success).to.equal(false);
-          expect(anchor1.childNodes).to.have.lengthOf(0);
-          expect(anchor2.childNodes).to.have.lengthOf(0);
-        });
-      });
+    expect(placements).to.have.lengthOf(2);
+    sandbox.stub(placements[0], 'placeAd', () => {
+      return Promise.resolve(PlacementState.REIZE_FAILED);
+    });
+    sandbox.stub(placements[1], 'placeAd', () => {
+      return Promise.resolve(PlacementState.REIZE_FAILED);
+    });
+
+    const attributes = {
+      'type': 'adsense',
+    };
+
+    const adTracker = new AdTracker([], {
+      initialMinSpacing: 0,
+      subsequentMinSpacing: [],
+      maxAdCount: 1,
+    });
+    const adStrategy = new AdStrategy(placements, attributes, adTracker);
+
+    return adStrategy.run().then(result => {
+      expect(result).to.deep.equal({adsPlaced: 0, totalAdsOnPage: 0});
+      expect(anchor1.childNodes).to.have.lengthOf(0);
+      expect(anchor2.childNodes).to.have.lengthOf(0);
+    });
+  });
 });

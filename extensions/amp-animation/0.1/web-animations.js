@@ -313,10 +313,7 @@ export class MeasureScanner extends Scanner {
     const promises = [];
     for (let i = 0; i < this.targets_.length; i++) {
       const element = this.targets_[i];
-      // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
-      // form is in PROD for 1-2 weeks.
-      if (element.classList.contains('-amp-element') ||
-          element.classList.contains('i-amphtml-element')) {
+      if (element.classList.contains('i-amphtml-element')) {
         const resource = resources.getResourceForElement(element);
         promises.push(resource.loadedOnce());
       }

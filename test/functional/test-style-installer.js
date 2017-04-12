@@ -16,9 +16,13 @@
 
 import {getStyle} from '../../src/style';
 import * as rds from '../../src/render-delaying-services';
-import {installPerformanceService} from '../../src/service/performance-impl';
+import {
+  installPerformanceService,
+  performanceFor,
+} from '../../src/service/performance-impl';
 import {createIframePromise} from '../../testing/iframe';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
+import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 
@@ -28,6 +32,7 @@ describe('Styles', () => {
   let sandbox;
   let win;
   let doc;
+  let resources;
   let ampdoc;
   let tickSpy;
   let schedulePassSpy;
@@ -38,10 +43,11 @@ describe('Styles', () => {
       sandbox = sinon.sandbox.create();
       win = iframe.win;
       doc = win.document;
-      const perf = installPerformanceService(doc.defaultView);
+      installPerformanceService(doc.defaultView);
+      const perf = performanceFor(doc.defaultView);
       tickSpy = sandbox.spy(perf, 'tick');
-
-      const resources = installResourcesServiceForDoc(doc);
+      installResourcesServiceForDoc(doc);
+      resources = resourcesForDoc(doc);
       ampdoc = resources.ampdoc;
       schedulePassSpy = sandbox.spy(resources, 'schedulePass');
       waitForServicesStub = sandbox.stub(rds, 'waitForServices');
@@ -66,6 +72,14 @@ describe('Styles', () => {
       expect(getStyle(doc.body, 'visibility')).to.equal('visible');
       expect(getStyle(doc.body, 'animation')).to.equal('none');
       expect(ampdoc.signals().get('render-start')).to.be.ok;
+    });
+
+    it('should ignore resources failures for render-start', () => {
+      sandbox.stub(resources, 'renderStarted', () => {
+        throw new Error('intentional');
+      });
+      styles.makeBodyVisible(doc);
+      expect(ampdoc.signals().get('render-start')).to.be.null;
     });
 
     it('should wait for render delaying services', done => {

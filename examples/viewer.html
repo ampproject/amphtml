@@ -222,7 +222,7 @@
         prerenderSize: this.prerenderSize_,
         origin: parseUrl(window.location.href).origin,
         csi: this.csi_,
-        cap: 'foo,a2a',
+        cap: 'foo,a2a,swipe',
       };
       log('Params:' + JSON.stringify(params));
 
@@ -422,54 +422,46 @@
     };
 
     Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.processRequest_');
-      if (type == 'documentLoaded') {
-        return this.documentReady_();
+      log('Viewer.prototype.processRequest_', type);
+      switch(type) {
+        case 'documentLoaded':
+          return this.documentReady_();
+        case 'requestFullOverlay':
+          return this.requestFullOverlay_();
+        case 'cancelFullOverlay':
+          return this.cancelFullOverlay_();
+        case 'pushHistory':
+          return this.pushHistory_(data.stackIndex);
+        case 'popHistory':
+          return this.popHistory_(data.stackIndex);
+        case 'broadcast':
+          return this.broadcast_(data);
+        case 'unloaded':
+          log('unloaded');
+          return this.handleUnload_();
+        case 'tick':
+          log('[CSI] tick. label:', data.label);
+          return;
+        case 'a2a':
+          log('a2a navigation', data);
+          return;
+        case 'sendCsi':
+          log('[CSI] sendCsi.');
+          return;
+        case 'touchstart':
+        case 'touchmove':
+        case 'touchend':
+          log('touch event!', type);
+          return;
+        case 'documentHeight':
+        case 'setFlushParams':
+        case 'prerenderComplete':
+        case 'scroll':
+        case 'replaceHistory':
+          return;
+        default:
+          return Promise.reject('request not supported: ' + type);
       }
-      if (type == 'requestFullOverlay') {
-        return this.requestFullOverlay_();
-      }
-      if (type == 'cancelFullOverlay') {
-        return this.cancelFullOverlay_();
-      }
-      if (type == 'pushHistory') {
-        return this.pushHistory_(data.stackIndex);
-      }
-      if (type == 'popHistory') {
-        return this.popHistory_(data.stackIndex);
-      }
-      if (type == 'broadcast') {
-        return this.broadcast_(data);
-      }
-      if (type == 'setFlushParams') {
-        return;
-      }
-      if (type == 'prerenderComplete') {
-        return;
-      }
-      if (type == 'tick') {
-        log('[CSI] tick. label:', data.label);
-        return;
-      }
-      if (type == 'sendCsi') {
-        log('[CSI] sendCsi.');
-        return;
-      }
-      if (type == 'scroll') {
-        return;
-      }
-      if (type == 'a2a') {
-        log('a2a navigation', data);
-        return;
-      }
-      if (type == 'unloaded') {
-        log('unloaded');
-        return this.handleUnload_();
-      }
-      if (type == 'documentHeight') {
-        return;
-      }
-      return Promise.reject('request not supported: ' + type);
     };
 
     Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
@@ -477,7 +469,7 @@
       if (this.messaging_) {
         this.messaging_ = null;
       }
-      return goog.Promise.resolve();
+      return Promise.resolve();
     };
 
     Viewer.prototype.sendRequest_ = function(type, data, awaitResponse) {

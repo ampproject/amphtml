@@ -15,8 +15,10 @@
  */
 
 import {dev} from '../../../src/log';
-import {resourcesForDoc} from '../../../src/resources';
+import {getAttributesFromConfigObj} from './attributes';
+import {resourcesForDoc} from '../../../src/services';
 import {
+  closestByTag,
   createElementWithAttributes,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -28,19 +30,7 @@ const TAG = 'amp-auto-ads';
  * TODO: Specify this via the configuration.
  * @const
  */
-const TARGET_AD_WIDTH_PX = 320;
-
-/**
- * TODO: Specify this via the configuration.
- * @const
- */
 const TARGET_AD_HEIGHT_PX = 100;
-
-/**
- * @export
- * @typedef {{name: string, value: (boolean|number|string)}}
- */
-export let DataAttributeDef;
 
 /**
  * @enum {number}
@@ -62,6 +52,16 @@ const Position = {
   LAST_CHILD: 3,  // Placement should be the last child of the anchor element.
   AFTER: 4,  // Placement should be the sibling after the anchor element.
 };
+
+/**
+ * Should be kept in sync with the disallowed_ancestors in
+ * extensions/amp-ad/.../validator-amp-ad.protoascii.
+ * @const {!Array<string>}
+ */
+const BLACKLISTED_ANCESTOR_TAGS = [
+  'AMP-SIDEBAR',
+  'AMP-APP-BANNER',
+];
 
 /**
  * @const {!Object<!Position, !function(!Element, !Element)>}
@@ -88,9 +88,11 @@ export class Placement {
    * @param {!Element} anchorElement
    * @param {!Position} position
    * @param {!function(!Element, !Element)} injector
+   * @param {!Object<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
-  constructor(win, resources, anchorElement, position, injector, opt_margins) {
+  constructor(win, resources, anchorElement, position, injector, attributes,
+      opt_margins) {
     /** @const @private {!Window} */
     this.win_ = win;
 
@@ -105,6 +107,9 @@ export class Placement {
 
     /** @const @private {!function(!Element, !Element)} */
     this.injector_ = injector;
+
+    /** @const @private {!Object<string, string>} */
+    this.attributes_ = attributes;
 
     /**
      * @const
@@ -159,22 +164,24 @@ export class Placement {
   }
 
   /**
-   * @param {string} type
-   * @param {!Array<!DataAttributeDef>} dataAttributes
+   * @param {!Object<string, string>} baseAttributes Any attributes to add to
+   *     injected <amp-ad>. Specific attributes will override defaults, but be
+   *     overridden by placement specific attributes defined in the
+   *     configuration.
    * @param {!./ad-tracker.AdTracker} adTracker
    * @return {!Promise<!PlacementState>}
    */
-  placeAd(type, dataAttributes, adTracker) {
+  placeAd(baseAttributes, adTracker) {
     return this.getEstimatedPosition().then(yPosition => {
       return adTracker.isTooNearAnAd(yPosition).then(tooNear => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
-        this.adElement_ = this.createAdElement_(type, dataAttributes);
+        this.adElement_ = this.createAdElement_(baseAttributes);
         this.injector_(this.anchorElement_, this.adElement_);
         return this.resources_.attemptChangeSize(this.adElement_,
-            TARGET_AD_HEIGHT_PX, TARGET_AD_WIDTH_PX, this.margins_)
+            TARGET_AD_HEIGHT_PX, undefined, this.margins_)
                 .then(() => {
                   this.state_ = PlacementState.PLACED;
                   return this.state_;
@@ -187,21 +194,16 @@ export class Placement {
   }
 
   /**
-   * @param {string} type
-   * @param {!Array<!DataAttributeDef>} dataAttributes
+   * @param {!Object<string, string>} baseAttributes
    * @return {!Element}
    * @private
    */
-  createAdElement_(type, dataAttributes) {
-    const attributes = {
-      type,
-      'layout': 'responsive',
-      'width': '0',
+  createAdElement_(baseAttributes) {
+    const attributes = Object.assign({
+      'layout': 'fixed-height',
       'height': '0',
-    };
-    for (let i = 0; i < dataAttributes.length; ++i) {
-      attributes['data-' + dataAttributes[i].name] = dataAttributes[i].value;
-    }
+      'class': 'i-amphtml-layout-awaiting-size',
+    }, baseAttributes, this.attributes_);
     return createElementWithAttributes(
         this.win_.document, 'amp-ad', attributes);
   }
@@ -261,14 +263,12 @@ function getPlacementsFromObject(win, placementObj, placements) {
     }
   }
   anchorElements.forEach(anchorElement => {
-    if ((placementObj['pos'] == Position.BEFORE ||
-         placementObj['pos'] == Position.AFTER) &&
-        !anchorElement.parentNode) {
-      dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
+    if (!isPositionValid(anchorElement, placementObj['pos'])) {
       return;
     }
+    const attributes = getAttributesFromConfigObj(placementObj);
     placements.push(new Placement(win, resourcesForDoc(anchorElement),
-        anchorElement, placementObj['pos'], injector, margins));
+        anchorElement, placementObj['pos'], injector, attributes, margins));
   });
 }
 
@@ -311,4 +311,27 @@ function getAnchorElements(rootElement, anchorObj) {
     return subElements;
   }
   return elements;
+}
+
+/**
+ * @param {!Element} anchorElement
+ * @param {!Position} position
+ * @return {boolean}
+ */
+function isPositionValid(anchorElement, position) {
+  const elementToCheckOrNull =
+      position == Position.BEFORE || position == Position.AFTER ?
+          anchorElement.parentElement : anchorElement;
+  if (!elementToCheckOrNull) {
+    dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
+    return false;
+  }
+  const elementToCheck = dev().assertElement(elementToCheckOrNull);
+  return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
+    if (closestByTag(elementToCheck, tagName)) {
+      dev().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
+      return true;
+    }
+    return false;
+  });
 }

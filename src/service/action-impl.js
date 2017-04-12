@@ -15,12 +15,15 @@
  */
 
 import {dev, user} from '../log';
-import {fromClassForDoc, installServiceInEmbedScope} from '../service';
+import {
+  registerServiceBuilderForDoc,
+  installServiceInEmbedScope,
+} from '../service';
 import {getMode} from '../mode';
 import {isArray} from '../types';
 import {map} from '../utils/object';
-import {timerFor} from '../timer';
-import {vsyncFor} from '../vsync';
+import {timerFor} from '../services';
+import {vsyncFor} from '../services';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -44,6 +47,27 @@ const DEFAULT_METHOD_ = 'activate';
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
   'AMP': ['setState'],
+};
+
+/** @enum {string} */
+const TYPE = {
+  NUMBER: 'number',
+  BOOLEAN: 'boolean',
+};
+
+/** @const {!Object<string, !Object<string, string>>} */
+const WHITELISTED_INPUT_DATA_ = {
+  'range': {
+    'min': TYPE.NUMBER,
+    'max': TYPE.NUMBER,
+    'value': TYPE.NUMBER,
+  },
+  'radio': {
+    'checked': TYPE.BOOLEAN,
+  },
+  'checkbox': {
+    'checked': TYPE.BOOLEAN,
+  },
 };
 
 /**
@@ -152,10 +176,43 @@ export class ActionService {
           this.trigger(dev().assertElement(event.target), 'tap', event);
         }
       });
-    } else if (name == 'submit' || name == 'change') {
+    } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         this.trigger(dev().assertElement(event.target), name, event);
       });
+    } else if (name == 'change') {
+      this.root_.addEventListener(name, event => {
+        this.addChangeDetails_(event);
+        this.trigger(dev().assertElement(event.target), name, event);
+      });
+    }
+  }
+
+  /**
+   * Given a browser 'change' event, add `details` property containing the
+   * relevant information for the change that generated the initial event.
+   * @param {!Event} event A `change` event.
+   */
+  addChangeDetails_(event) {
+    const detail = {};
+    const target = event.target;
+    if (event.target.tagName.toLowerCase() === 'input') {
+      const inputType = target.getAttribute('type');
+      const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
+      if (fieldsToInclude) {
+        Object.keys(fieldsToInclude).forEach(field => {
+          const expectedType = fieldsToInclude[field];
+          const value = target[field];
+          if (expectedType === 'number') {
+            detail[field] = Number(value);
+          } else if (expectedType === 'boolean') {
+            detail[field] = !!value;
+          } else {
+            detail[field] = String(value);
+          }
+        });
+        event.detail = detail;
+      }
     }
   }
 
@@ -835,8 +892,12 @@ function isNum(c) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!ActionService}
  */
 export function installActionServiceForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'action', ActionService);
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'action',
+      ActionService,
+      /* opt_factory */ undefined,
+      /* opt_instantiate */ true);
 }

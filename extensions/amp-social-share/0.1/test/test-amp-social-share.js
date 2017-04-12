@@ -18,7 +18,7 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 import '../amp-social-share';
-import {platformFor} from '../../../../src/platform';
+import {platformFor} from '../../../../src/services';
 
 adopt(window);
 
@@ -88,20 +88,20 @@ describe('amp-social-share', () => {
     return createIframePromise().then(iframe => {
       const share = iframe.doc.createElement('amp-social-share');
       share.setAttribute('type', 'unknown-provider');
-      expect(() => {
-        share.tryUpgrade_();
-        share.build(true);
-      }).to.throw('data-share-endpoint attribute is required');
+      iframe.doc.body.appendChild(share);
+      return expect(share.whenBuilt())
+          .to.be.eventually.rejectedWith(
+            /data-share-endpoint attribute is required/
+          );
     });
   });
 
   it('errors if type is missing', () => {
     return createIframePromise().then(iframe => {
       const share = iframe.doc.createElement('amp-social-share');
-      expect(() => {
-        share.tryUpgrade_();
-        share.build(true);
-      }).to.throw('type attribute is required');
+      iframe.doc.body.appendChild(share);
+      return expect(share.whenBuilt())
+          .to.be.eventually.rejectedWith(/type attribute is required/);
     });
   });
 
@@ -109,10 +109,11 @@ describe('amp-social-share', () => {
     return createIframePromise().then(iframe => {
       const share = iframe.doc.createElement('amp-social-share');
       share.setAttribute('type', 'hello world');
-      expect(() => {
-        share.tryUpgrade_();
-        share.build(true);
-      }).to.throw('Space characters are not allowed in type attribute value');
+      iframe.doc.body.appendChild(share);
+      return expect(share.whenBuilt())
+          .to.be.eventually.rejectedWith(
+            /Space characters are not allowed in type attribute value/
+          );
     });
   });
 

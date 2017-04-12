@@ -78,7 +78,7 @@ export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
-  if (!!win.document.querySelector('meta[name=amp-3p-iframe-src]')) {
+  if (element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
     return false;
   }
   const a4aRequested = element.hasAttribute(BETA_ATTRIBUTE);

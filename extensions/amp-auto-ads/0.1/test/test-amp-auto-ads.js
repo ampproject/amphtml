@@ -16,8 +16,9 @@
 
 import {AmpAutoAds} from '../amp-auto-ads';
 import {toggleExperiment} from '../../../../src/experiments';
-import {xhrFor} from '../../../../src/xhr';
+import {xhrFor} from '../../../../src/services';
 import {waitForChild} from '../../../../src/dom';
+import {viewportForDoc} from '../../../../src/services';
 
 describes.realWin('amp-auto-ads', {
   amp: {
@@ -38,6 +39,7 @@ describes.realWin('amp-auto-ads', {
   let ampAutoAds;
   let ampAutoAdsElem;
   let xhr;
+  let configObj;
 
   beforeEach(() => {
     // There seem to be a lot of tests that don't clean up after themselves,
@@ -52,6 +54,10 @@ describes.realWin('amp-auto-ads', {
 
     toggleExperiment(env.win, 'amp-auto-ads', true);
     sandbox = env.sandbox;
+
+    const viewportMock = sandbox.mock(viewportForDoc(env.win.document));
+    viewportMock.expects('getSize').returns(
+        {width: 320, height: 500}).atLeast(1);
 
     container = env.win.document.createElement('div');
     env.win.document.body.appendChild(container);
@@ -87,40 +93,42 @@ describes.realWin('amp-auto-ads', {
     ampAutoAdsElem = env.win.document.createElement('amp-auto-ads');
     env.win.document.body.appendChild(ampAutoAdsElem);
 
+    configObj = {
+      placements: [
+        {
+          anchor: {
+            selector: 'DIV#anId1',
+          },
+          pos: 2,
+          type: 1,
+        },
+        {
+          anchor: {
+            selector: 'DIV#anId2',
+          },
+          pos: 2,
+          type: 1,
+        },
+        {
+          anchor: {
+            selector: 'DIV#anId3',
+          },
+          pos: 2,
+          type: 1,
+        },
+        {
+          anchor: {
+            selector: 'DIV#anId4',
+          },
+          pos: 2,
+          type: 1,
+        },
+      ],
+    };
+
     xhr = xhrFor(env.win);
     xhr.fetchJson = () => {
-      return Promise.resolve({
-        placements: [
-          {
-            anchor: {
-              selector: 'DIV#anId1',
-            },
-            pos: 2,
-            type: 1,
-          },
-          {
-            anchor: {
-              selector: 'DIV#anId2',
-            },
-            pos: 2,
-            type: 1,
-          },
-          {
-            anchor: {
-              selector: 'DIV#anId3',
-            },
-            pos: 2,
-            type: 1,
-          },
-          {
-            anchor: {
-              selector: 'DIV#anId4',
-            },
-            pos: 2,
-            type: 1,
-          },
-        ],
-      });
+      return Promise.resolve(configObj);
     };
     sandbox.spy(xhr, 'fetchJson');
 
@@ -149,6 +157,72 @@ describes.realWin('amp-auto-ads', {
         verifyAdElement(anchor1.childNodes[0]);
         verifyAdElement(anchor2.childNodes[0]);
         verifyAdElement(anchor4.childNodes[0]);
+        resolve();
+      });
+    });
+  });
+
+  it('should insert ads with the config provided attributes', () => {
+    configObj.attributes = {
+      'bad-name': 'should be filtered',
+      'data-custom-att-1': 'val-1',
+      'data-custom-att-2': 'val-2',
+    };
+
+    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+    ampAutoAdsElem.setAttribute('type', 'adsense');
+    ampAutoAds.buildCallback();
+
+    return new Promise(resolve => {
+      waitForChild(anchor4, parent => {
+        return parent.childNodes.length > 0;
+      }, () => {
+        expect(anchor1.childNodes).to.have.lengthOf(1);
+        expect(anchor1.childNodes[0].getAttribute('data-custom-att-1'))
+            .to.equal('val-1');
+        expect(anchor1.childNodes[0].getAttribute('data-custom-att-2'))
+            .to.equal('val-2');
+
+        expect(anchor2.childNodes).to.have.lengthOf(1);
+        expect(anchor2.childNodes[0].getAttribute('data-custom-att-1'))
+            .to.equal('val-1');
+        expect(anchor2.childNodes[0].getAttribute('data-custom-att-2'))
+            .to.equal('val-2');
+
+        expect(anchor4.childNodes).to.have.lengthOf(1);
+        expect(anchor4.childNodes[0].getAttribute('data-custom-att-1'))
+            .to.equal('val-1');
+        expect(anchor4.childNodes[0].getAttribute('data-custom-att-2'))
+            .to.equal('val-2');
+        resolve();
+      });
+    });
+  });
+
+  it('should override ad network type with config provided attribute', () => {
+    configObj.attributes = {
+      'type': 'doubleclick',
+    };
+
+    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+    ampAutoAdsElem.setAttribute('type', 'adsense');
+    ampAutoAds.buildCallback();
+
+    return new Promise(resolve => {
+      waitForChild(anchor4, parent => {
+        return parent.childNodes.length > 0;
+      }, () => {
+        expect(anchor1.childNodes).to.have.lengthOf(1);
+        expect(anchor1.childNodes[0].getAttribute('type'))
+            .to.equal('doubleclick');
+
+        expect(anchor2.childNodes).to.have.lengthOf(1);
+        expect(anchor2.childNodes[0].getAttribute('type'))
+            .to.equal('doubleclick');
+
+        expect(anchor4.childNodes).to.have.lengthOf(1);
+        expect(anchor4.childNodes[0].getAttribute('type'))
+            .to.equal('doubleclick');
         resolve();
       });
     });

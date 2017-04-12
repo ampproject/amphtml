@@ -22,16 +22,13 @@ import {
   startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {toggleExperiment} from '../../src/experiments';
-import {viewerForDoc, viewerPromiseForDoc} from '../../src/viewer';
+import {viewerForDoc, viewerPromiseForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 
 describe('chunk', () => {
 
-  let experimentOn;
   beforeEach(() => {
-    experimentOn = true;
     activateChunkingForTesting();
   });
 
@@ -45,7 +42,6 @@ describe('chunk', () => {
     let fakeWin;
 
     beforeEach(() => {
-      toggleExperiment(env.win, 'chunked-amp', experimentOn);
       fakeWin = env.win;
       // If there is a viewer, wait for it, so we run with it being
       // installed.
@@ -94,7 +90,7 @@ describe('chunk', () => {
   }, env => {
 
     beforeEach(() => {
-      installDocService(env.win, true);
+      installDocService(env.win, /* isSingleDoc */ true);
       expect(env.win.services.viewer).to.be.undefined;
       env.win.document.hidden = false;
     });
@@ -107,7 +103,7 @@ describe('chunk', () => {
   }, env => {
 
     beforeEach(() => {
-      installDocService(env.win, true);
+      installDocService(env.win, /* isSingleDoc */ true);
       expect(env.win.services.viewer).to.be.undefined;
       env.win.document.hidden = true;
       env.win.requestIdleCallback = function() {
@@ -158,7 +154,6 @@ describe('chunk', () => {
       }
 
       beforeEach(() => {
-        toggleExperiment(env.win, 'chunked-amp', experimentOn);
         fakeWin = env.win;
         const viewer = viewerForDoc(env.win.document);
         env.sandbox.stub(viewer, 'isVisible', () => {
@@ -179,21 +174,6 @@ describe('chunk', () => {
           done = d;
         });
       });
-    });
-
-    describe('invisible experiment off', () => {
-      beforeEach(() => {
-        experimentOn = false;
-        env.win.postMessage = () => {
-          throw new Error('No calls expected: postMessage');
-        };
-        env.win.requestIdleCallback = () => {
-          throw new Error('No calls expected: requestIdleCallback');
-        };
-        env.win.location.resetHref('test#visibilityState=hidden');
-      });
-
-      basicTests(env);
     });
 
     describe('invisible', () => {

@@ -56,7 +56,7 @@ tags: {  # amp-analytics
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-analytics"
 }
 tags: {  # amp-analytics (json)
   tag_name: "SCRIPT"
@@ -75,7 +75,7 @@ tags: {  # amp-analytics (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-analytics"
 }
 # This tag isn't intended to be used by publishers directly, but may be
 # emitted by the AMP cache.
@@ -101,7 +101,7 @@ tags: {  # amp-ad-metadata (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-analytics"
 }
 tags: {  # <amp-analytics>
   tag_name: "AMP-ANALYTICS"
@@ -117,5 +117,5 @@ tags: {  # <amp-analytics>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-analytics"
 }

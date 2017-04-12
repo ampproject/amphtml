@@ -28,6 +28,15 @@ import {filterSplice} from '../../../src/utils/array';
 export let BindingDef;
 
 /**
+ * Error-like object that can be passed through web worker boundary.
+ * @typedef {{
+ *   message: string,
+ *   stack: string,
+ * }}
+ */
+let EvaluatorErrorDef;
+
+/**
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
@@ -39,14 +48,14 @@ export class BindEvaluator {
     this.validator_ = new BindValidator();
 
     /** @const @private {!Object<string, !BindExpression>} */
-    this.expressionCache_ = Object.create(null);
+    this.expressions_ = Object.create(null);
   }
 
   /**
    * Parses and stores given bindings into expression objects and returns map
    * of expression string to parse errors.
    * @param {!Array<BindingDef>} bindings
-   * @return {!Object<string,!Error>}
+   * @return {!Object<string, EvaluatorErrorDef>},
    */
   addBindings(bindings) {
     const errors = Object.create(null);
@@ -68,12 +77,14 @@ export class BindEvaluator {
    */
   removeBindingsWithExpressionStrings(expressionStrings) {
     const expressionsToRemove = Object.create(null);
-    for (let i = 0; i < expressionStrings.length; i++) {
-      expressionsToRemove[expressionStrings[i]] = true;
-    }
+
+    expressionStrings.forEach(expressionString => {
+      delete this.expressions_[expressionString];
+      expressionsToRemove[expressionString] = true;
+    });
 
     filterSplice(this.bindings_, binding =>
-      !expressionsToRemove[binding.expressionString]);
+        !expressionsToRemove[binding.expressionString]);
   }
 
   /**
@@ -82,25 +93,27 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   results: !Object<string, ./bind-expression.BindExpressionResultDef>,
-   *   errors: !Object<string, !Error>,
+   *   errors: !Object<string, !EvaluatorErrorDef>,
    * }}
    */
   evaluateBindings(scope) {
     /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
-    const cache = {};
-    /** @type {!Object<string, !Error>} */
-    const errors = {};
+    const cache = Object.create(null);
+    /** @type {!Object<string, !EvaluatorErrorDef>} */
+    const errors = Object.create(null);
 
+    // First, evaluate all of the expression strings in the bindings.
     this.bindings_.forEach(binding => {
-      const {tagName, property, expressionString} = binding;
+      const expressionString = binding.expressionString;
       // Skip if we've already evaluated this expression string.
       if (cache[expressionString] !== undefined || errors[expressionString]) {
         return;
       }
-      const expression = this.expressionCache_[expressionString];
+      const expression = this.expressions_[expressionString];
       if (!expression) {
-        errors[expressionString] = new Error(
-            `Expression "${expressionString} is not cached."`);
+        const error =
+            new Error(`Expression "${expressionString}"" is not cached.`);
+        errors[expressionString] = {message: error.message, stack: error.stack};
         return;
       }
       const {result, error} = this.evaluate_(expression, scope);
@@ -108,14 +121,30 @@ export class BindEvaluator {
         errors[expressionString] = error;
         return;
       }
+      cache[expressionString] = result;
+    });
+
+    // Then, validate each binding and delete invalid expression results.
+    this.bindings_.forEach(binding => {
+      const {tagName, property, expressionString} = binding;
+      const result = cache[expressionString];
+      if (result === undefined) {
+        return;
+      }
+      // IMPORTANT: We need to validate expression results on each binding
+      // since validity depends on the `tagName` and `property` rather than
+      // just the `result`.
       const resultString = this.stringValueOf_(property, result);
-      if (this.validator_.isResultValid(tagName, property, resultString)) {
-        cache[expressionString] = result;
-      } else {
-        errors[expressionString] = new Error(
-            `"${result}" is not a valid result for [${property}].`);
+      if (!this.validator_.isResultValid(tagName, property, resultString)) {
+        // TODO(choumx): If this expression string is used in another
+        // tagName/property which is valid, we ought to allow it.
+        delete cache[expressionString];
+        const error =
+            new Error(`"${result}" is not a valid result for [${property}].`);
+        errors[expressionString] = {message: error.message, stack: error.stack};
       }
     });
+
     return {results: cache, errors};
   }
 
@@ -125,7 +154,7 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   result: ./bind-expression.BindExpressionResultDef,
-   *   error: Error,
+   *   error: ?EvaluatorErrorDef,
    * }}
    */
   evaluateExpression(expressionString, scope) {
@@ -145,19 +174,19 @@ export class BindEvaluator {
    * @param {string} expressionString
    * @return {{
    *   expression: BindExpression,
-   *   error: Error,
+   *   error: ?EvaluatorErrorDef,
    * }}
    * @private
    */
   parse_(expressionString) {
-    let expression = this.expressionCache_[expressionString];
+    let expression = this.expressions_[expressionString];
     let error = null;
     if (!expression) {
       try {
         expression = new BindExpression(expressionString);
-        this.expressionCache_[expressionString] = expression;
+        this.expressions_[expressionString] = expression;
       } catch (e) {
-        error = e;
+        error = {message: e.message, stack: e.stack};
       }
     }
     return {expression, error};
@@ -169,7 +198,7 @@ export class BindEvaluator {
    * @param {!Object} scope
    * @return {{
    *   result: ./bind-expression.BindExpressionResultDef,
-   *   error: Error,
+   *   error: ?EvaluatorErrorDef,
    * }}
    * @private
    */
@@ -179,7 +208,7 @@ export class BindEvaluator {
     try {
       result = expression.evaluate(scope);
     } catch (e) {
-      error = e;
+      error = {message: e.message, stack: e.stack};
     }
     return {result, error};
   }
@@ -190,6 +219,15 @@ export class BindEvaluator {
    */
   bindingsForTesting() {
     return this.bindings_;
+  }
+
+  /**
+   * Returns the expression cache for testing.
+   * @return {!Object<string, !BindExpression>}
+   * @visibleForTesting
+   */
+  expressionsForTesting() {
+    return this.expressions_;
   }
 
   /**

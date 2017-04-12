@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {actionServiceForDoc} from './action';
+import {actionServiceForDoc} from './services';
 import {getServiceForDoc} from './service';
 import {dev, user} from './log';
 import {
@@ -54,7 +54,7 @@ export function onDocumentFormSubmit_(e) {
 
   // amp-form extension will add novalidate to all forms to manually trigger
   // validation. In that case `novalidate` doesn't have the same meaning.
-  const isAmpFormMarked = form.classList.contains('-amp-form');
+  const isAmpFormMarked = form.classList.contains('i-amphtml-form');
   let shouldValidate;
   if (isAmpFormMarked) {
     shouldValidate = !form.hasAttribute('amp-novalidate');

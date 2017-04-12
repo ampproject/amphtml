@@ -46,10 +46,25 @@ var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
-  // TODO(dvoytenko, #6463): Enable this check once the current uses have
-  // been cleaned up.
-  // '(^-amp-|\\W-amp-)': 'Switch to new internal class form',
-  // '(^i-amp-|\\Wi-amp-)': 'Switch to new internal ID form',
+  // TODO(dvoytenko, #8464): cleanup whitelist.
+  '(^-amp-|\\W-amp-)': {
+    message: 'Switch to new internal class form',
+    whitelist: [
+      'build-system/tasks/extension-generator/index.js',
+      'css/amp.css',
+      'extensions/amp-pinterest/0.1/amp-pinterest.css',
+      'extensions/amp-pinterest/0.1/follow-button.js',
+      'extensions/amp-pinterest/0.1/pin-widget.js',
+      'extensions/amp-pinterest/0.1/pinit-button.js',
+    ],
+  },
+  '(^i-amp-|\\Wi-amp-)': {
+    message: 'Switch to new internal ID form',
+    whitelist: [
+      'build-system/tasks/extension-generator/index.js',
+      'css/amp.css',
+    ],
+  },
   'describe\\.only': '',
   'describes.*\\.only': '',
   'it\\.only': '',
@@ -73,7 +88,7 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     whitelist: [
       'build-system/pr-check.js',
-      'build-system/server.js',
+      'build-system/app.js',
       'validator/nodejs/index.js',  // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -97,7 +112,7 @@ var forbiddenTerms = {
     message: realiasGetMode,
     whitelist: [
       'src/mode-object.js',
-      'src/3p-frame.js',
+      'src/iframe-attributes.js',
       'src/log.js',
       'dist.3p/current/integration.js',
     ],
@@ -154,7 +169,7 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
-  'installCidServiceForDocForTesting': {
+  'cidServiceForDocForTesting': {
     message: privateServiceFactory,
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
@@ -264,6 +279,7 @@ var forbiddenTerms = {
       'extensions/amp-access/0.1/amp-login-done.js',
       'src/runtime.js',
       'src/log.js',
+      'src/web-worker/web-worker.js',
       'tools/experiments/experiments.js',
     ],
   },
@@ -275,10 +291,13 @@ var forbiddenTerms = {
       'src/service/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
+      'extensions/amp-app-banner/0.1/amp-app-banner.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
+      '3p/ampcontext-integration.js',
+      'dist.3p/current/integration.js', // includes previous
     ],
   },
   '\\.sendMessageAwaitResponse\\(': {
@@ -297,7 +316,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/ad-cid.js',
-      'src/cid.js',
+      'src/services.js',
       'src/service/cid-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
@@ -318,6 +337,8 @@ var forbiddenTerms = {
       'build-system/test-server.js',
       'src/cookies.js',
       'extensions/amp-analytics/0.1/cid-impl.js',
+      'extensions/amp-analytics/0.1/vendors.js',
+      'testing/fake-dom.js',
     ],
   },
   'getCookie\\W': {
@@ -355,7 +376,7 @@ var forbiddenTerms = {
   'storageForDoc': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/storage.js',
+      'src/services.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
     ],
@@ -423,6 +444,16 @@ var forbiddenTerms = {
       'src/inabox/inabox-viewer.js',
     ],
   },
+  'internalListenImplementation': {
+    message: 'Use `listen()` in either `event-helper` or `3p-frame-messaging`' +
+        ', depending on your use case.',
+    whitelist: [
+      'src/3p-frame-messaging.js',
+      'src/event-helper.js',
+      'src/event-helper-listen.js',
+      'dist.3p/current/integration.js',  // includes previous
+    ],
+  },
   'setTimeout.*throw': {
     message: 'Use dev.error or user.error instead.',
     whitelist: [
@@ -485,7 +516,7 @@ var forbiddenTerms = {
         'and getMode() to access config',
     whitelist: [
       'build-system/amp.extern.js',
-      'build-system/server.js',
+      'build-system/app.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
       'dist.3p/current/integration.js',
@@ -494,6 +525,7 @@ var forbiddenTerms = {
       'src/mode.js',
       'src/service-worker/core.js',
       'src/worker-error-reporting.js',
+      'tools/experiments/experiments.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -507,7 +539,13 @@ var forbiddenTerms = {
       'src/service-worker/shell.js',
       'src/worker-error-reporting.js',
     ],
-  }
+  },
+  'new CustomEvent\\(': {
+    message: 'Use createCustomEvent() helper instead.',
+    whitelist: [
+      'src/event-helper.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
@@ -567,6 +605,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.changeSize\\(': bannedTermsHelpString,
   '\\.attemptChangeHeight\\(0\\)': 'please consider using `attemptCollapse()`',
   '\\.collapse\\(': bannedTermsHelpString,
+  '\\.expand\\(': bannedTermsHelpString,
   '\\.focus\\(': bannedTermsHelpString,
   '\\.getBBox\\(': bannedTermsHelpString,
   '\\.getBoundingClientRect\\(': bannedTermsHelpString,
@@ -607,9 +646,11 @@ var forbiddenTermsSrcInclusive = {
       'src/service/lightbox-manager-discovery.js',
       'src/service/crypto-impl.js',
       'src/shadow-embed.js',
+      'src/analytics.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'ads/google/a4a/utils.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
     ],
   },
   'loadElementClass': {
@@ -637,6 +678,7 @@ var forbiddenTermsSrcInclusive = {
       'src/friendly-iframe-embed.js',
       'src/service/performance-impl.js',
       'src/service/url-replacements-impl.js',
+      'src/service/variable-source.js',
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
@@ -672,6 +714,28 @@ var forbiddenTermsSrcInclusive = {
       'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
     ],
+  },
+  '(cdn|3p)\\.ampproject\\.': {
+    message: 'The CDN domain should typically not be hardcoded in source ' +
+        'code. Use a property of urls from src/config.js instead.',
+    whitelist: [
+      'ads/_a4a-config.js',
+      'build-system/app.js',
+      'dist.3p/current/integration.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+      'src/config.js',
+      'testing/local-amp-chrome-extension/background.js',
+      'tools/errortracker/errortracker.go',
+      'validator/nodejs/index.js',
+      'validator/webui/serve-standalone.go',
+      'build-system/tasks/extension-generator/index.js',
+    ],
+  },
+  '\\<\\<\\<\\<\\<\\<': {
+    message: 'Unresolved merge conflict.',
+  },
+  '\\>\\>\\>\\>\\>\\>': {
+    message: 'Unresolved merge conflict.',
   },
 };
 
@@ -800,7 +864,8 @@ function hasAnyTerms(file) {
 
   hasTerms = matchTerms(file, forbiddenTerms);
 
-  var isTestFile = /^test-/.test(basename) || /^_init_tests/.test(basename);
+  var isTestFile = /^test-/.test(basename) || /^_init_tests/.test(basename)
+      || /_test\.js$/.test(basename);
   if (!isTestFile) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }

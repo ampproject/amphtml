@@ -21,9 +21,9 @@ import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/services';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {platformFor} from '../../../src/platform';
+import {platformFor} from '../../../src/services';
 
 
 class AmpSocialShare extends AMP.BaseElement {
@@ -88,10 +88,12 @@ class AmpSocialShare extends AMP.BaseElement {
     const urlReplacements = urlReplacementsForDoc(this.getAmpDoc());
     urlReplacements.expandAsync(hrefWithVars).then(href => {
       this.href_ = href;
-      // mailto: protocol breaks when opened in _blank on iOS Safari.
+      // mailto:, whatsapp: protocols breaks when opened in _blank on iOS Safari
       const isMailTo = /^mailto:$/.test(parseUrl(href).protocol);
+      const isWhatsApp = /^whatsapp:$/.test(parseUrl(href).protocol);
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
-      this.target_ = (isIosSafari && isMailTo) ? '_top' : '_blank';
+      this.target_ = (isIosSafari && (isMailTo || isWhatsApp))
+          ? '_top' : '_blank';
     });
 
     this.element.setAttribute('role', 'link');

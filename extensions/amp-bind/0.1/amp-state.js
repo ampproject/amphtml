@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {bindForDoc} from '../../../src/bind';
+import {bindForDoc} from '../../../src/services';
+import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -48,28 +50,40 @@ export class AmpState extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-bind'),
+    // Allow integration test to access this class in testing mode.
+    user().assert(getMode().test || isExperimentOn(this.win, 'amp-bind'),
         `Experiment "amp-bind" is disabled.`);
 
     const TAG = this.getName_();
 
-    toggle(this.element, false);
+    toggle(this.element, /* opt_display */ false);
     this.element.setAttribute('aria-hidden', 'true');
 
-    const children = this.element.children;
-    if (children.length == 1) {
-      const child = children[0];
-      if (isJsonScriptTag(child)) {
-        const json = tryParseJson(children[0].textContent, e => {
-          user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
-        });
+    // Fetch JSON from endpoint at `src` attribute if it exists,
+    // otherwise parse child script tag.
+    if (this.element.hasAttribute('src')) {
+      fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
         this.updateState_(json, /* opt_isInit */ true);
-      } else {
-        user().error(TAG,
-            'State should be in a <script> tag with type="application/json"');
+      });
+      if (this.element.children.length > 0) {
+        user().error(TAG, 'Should not have children if src attribute exists.');
       }
-    } else if (children.length > 1) {
-      user().error(TAG, 'Should contain only one <script> child.');
+    } else {
+      const children = this.element.children;
+      if (children.length == 1) {
+        const firstChild = children[0];
+        if (isJsonScriptTag(firstChild)) {
+          const json = tryParseJson(firstChild.textContent, e => {
+            user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
+          });
+          this.updateState_(json, /* opt_isInit */ true);
+        } else {
+          user().error(TAG,
+              'State should be in a <script> tag with type="application/json"');
+        }
+      } else if (children.length > 1) {
+        user().error(TAG, 'Should contain only one <script> child.');
+      }
     }
   }
 

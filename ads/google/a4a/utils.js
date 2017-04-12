@@ -17,14 +17,13 @@
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {getAdCid} from '../../../src/ad-cid';
-import {documentInfoForDoc} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
-import {createElementWithAttributes} from '../../../src/dom';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -45,10 +44,11 @@ const AmpAdImplementation = {
 };
 
 /** @const {!Object} */
-export const ValidAdContainerTypes = [
-  'AMP-STICKY-AD',
-  'AMP-FX-FLYING-CARPET',
-];
+export const ValidAdContainerTypes = {
+  'AMP-STICKY-AD': 'sa',
+  'AMP-FX-FLYING-CARPET': 'fc',
+  'AMP-LIGHTBOX': 'lb',
+};
 
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
@@ -92,7 +92,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
 }
 
 /**
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a class instance
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
  * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
@@ -109,7 +109,8 @@ export function googleAdUrl(
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
   return getAdCid(a4a).then(clientId => referrerPromise.then(referrer => {
     const adElement = a4a.element;
-    const slotNumber = adElement.getAttribute('data-amp-slot-index');
+    window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;
+    const slotNumber = window['ampAdGoogleIfiCounter']++;
     const win = a4a.win;
     const documentInfo = documentInfoForDoc(adElement);
       // Read by GPT for GA/GPT integration.
@@ -121,10 +122,21 @@ export function googleAdUrl(
     const viewportRect = viewport.getRect();
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
-    if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
-      queryParams.push({name: 'amp_ct',
-                        value: adElement.parentElement.tagName});
+    // Detect container types.
+    const containerTypeSet = {};
+    for (let el = adElement.parentElement, counter = 0;
+        el && counter < 20; el = el.parentElement, counter++) {
+      const tagName = el.tagName.toUpperCase();
+      if (ValidAdContainerTypes[tagName]) {
+        containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+      }
     }
+    const pfx =
+        (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
+         || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
+        ? '1' : '0';
+    queryParams.push({name: 'act', value:
+      Object.keys(containerTypeSet).join()});
     const allQueryParams = queryParams.concat(
       [
         {
@@ -156,6 +168,7 @@ export function googleAdUrl(
         {name: 'brdim', value: additionalDimensions(win, viewportSize)},
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
+        {name: 'pfx', value: pfx},
       ],
       unboundedQueryParams,
       [
@@ -175,7 +188,6 @@ export function googleAdUrl(
   }));
 }
 
-
 /**
  * @param {!ArrayBuffer} creative
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
@@ -192,10 +204,12 @@ export function extractGoogleAdCreativeAndSignature(
             responseHeaders.get(AMP_SIGNATURE_HEADER)));
     }
     if (responseHeaders.has(CREATIVE_SIZE_HEADER)) {
-      const sizeStr = responseHeaders.get(CREATIVE_SIZE_HEADER);
-      // We should trust that the server returns the size information in the
-      // form of a WxH string.
-      size = sizeStr.split('x').map(dim => Number(dim));
+      const sizeHeader = responseHeaders.get(CREATIVE_SIZE_HEADER);
+      dev().assert(new RegExp('[0-9]+x[0-9]+').test(sizeHeader));
+      const sizeArr = sizeHeader
+          .split('x')
+          .map(dim => Number(dim));
+      size = {width: sizeArr[0], height: sizeArr[1]};
     }
   } finally {
     return Promise.resolve(/** @type {
@@ -343,70 +357,74 @@ export function additionalDimensions(win, viewportSize) {
 /**
  * Extracts configuration used to build amp-analytics element for active view.
  *
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
- * @return {?AmpAnalyticsConfigDef} config or null if invalid/missing.
+ * @return {?JSONType} config or null if invalid/missing.
  */
-export function extractAmpAnalyticsConfig(responseHeaders) {
-  if (responseHeaders.has(AMP_ANALYTICS_HEADER)) {
-    try {
-      const analyticsConfig =
-        JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
-      dev().assert(Array.isArray(analyticsConfig['url']));
-      return {urls: analyticsConfig.url};
-    } catch (err) {
-      dev().error('AMP-A4A', 'Invalid analytics', err,
-          responseHeaders.get(AMP_ANALYTICS_HEADER));
+export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
+  if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
+    return null;
+  }
+  try {
+    const analyticsConfig =
+      JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
+    dev().assert(Array.isArray(analyticsConfig['url']));
+    const urls = analyticsConfig.url;
+    if (!urls.length) {
+      return null;
     }
-  }
-  return null;
-}
 
-/**
- * Creates amp-analytics element within a4a element using urls specified
- * with amp-ad closest selector and min 50% visible for 1 sec.
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {!../../../src/service/extensions-impl.Extensions} extensions
- * @param {?AmpAnalyticsConfigDef} inputConfig
- */
-export function injectActiveViewAmpAnalyticsElement(
-    a4a, extensions, inputConfig) {
-  if (!inputConfig || !inputConfig.urls.length) {
-    return;
-  }
-  extensions.loadExtension('amp-analytics');
-  const ampAnalyticsElem =
-    a4a.element.ownerDocument.createElement('amp-analytics');
-  ampAnalyticsElem.setAttribute('scoped', '');
-  const config = {
-    'transport': {'beacon': false, 'xhrpost': false},
-    'triggers': {
-      'continuousVisible': {
-        'on': 'visible',
-        'visibilitySpec': {
+    const config = /** @type {JSONType}*/ ({
+      'transport': {'beacon': false, 'xhrpost': false},
+      'triggers': {
+        'continuousVisible': {
+          'on': 'visible',
+          'visibilitySpec': {
+            'selector': 'amp-ad',
+            'selectionMethod': 'closest',
+            'visiblePercentageMin': 50,
+            'continuousTimeMin': 1000,
+          },
+        },
+        'continuousVisibleIniLoad': {
+          'on': 'ini-load',
           'selector': 'amp-ad',
           'selectionMethod': 'closest',
-          'visiblePercentageMin': 50,
-          'continuousTimeMin': 1000,
+        },
+        'continuousVisibleRenderStart': {
+          'on': 'render-start',
+          'selector': 'amp-ad',
+          'selectionMethod': 'closest',
         },
       },
-    },
-  };
-  const requests = {};
-  const urls = inputConfig.urls;
-  for (let idx = 1; idx <= urls.length; idx++) {
-    // TODO: Ensure url is valid and not freeform JS?
-    requests[`visibility${idx}`] = `${urls[idx - 1]}`;
+    });
+    const requests = {};
+    for (let idx = 1; idx <= urls.length; idx++) {
+      // TODO: Ensure url is valid and not freeform JS?
+      requests[`visibility${idx}`] = `${urls[idx - 1]}`;
+    }
+    // Security review needed here.
+    config['requests'] = requests;
+    config['triggers']['continuousVisible']['request'] =
+        Object.keys(requests);
+    // Add CSI pingbacks.
+    const correlator = getCorrelator(a4a.win);
+    const slotId = a4a.element.getAttribute('data-amp-slot-index');
+    const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
+        ? responseHeaders.get(QQID_HEADER) : 'null';
+    config['requests']['visibilityCsi'] =
+        'https://csi.gstatic.com/csi?fromAnalytics=1' +
+        `&c=${correlator}&slotId=${slotId}&qqid.0=${qqid}`;
+    config['triggers']['continuousVisibleIniLoad']['request'] =
+        'visibilityCsi';
+    config['triggers']['continuousVisibleRenderStart']['request'] =
+        'visibilityCsi';
+    return config;
+  } catch (err) {
+    dev().error('AMP-A4A', 'Invalid analytics', err,
+        responseHeaders.get(AMP_ANALYTICS_HEADER));
   }
-  // Security review needed here.
-  config['requests'] = requests;
-  config['triggers']['continuousVisible']['request'] = Object.keys(requests);
-  const scriptElem = createElementWithAttributes(
-      /** @type {!Document} */(a4a.element.ownerDocument), 'script', {
-        'type': 'application/json',
-      });
-  scriptElem.textContent = JSON.stringify(config);
-  ampAnalyticsElem.appendChild(scriptElem);
-  a4a.element.appendChild(ampAnalyticsElem);
+  return null;
 }

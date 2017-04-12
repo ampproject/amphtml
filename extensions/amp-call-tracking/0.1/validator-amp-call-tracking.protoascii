@@ -17,39 +17,14 @@
 tags: {  # amp-call-tracking
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-call-tracking extension .js script"
   satisfies: "amp-call-tracking extension .js script"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "amp-call-tracking"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-call-tracking"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-call-tracking"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-call-tracking"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-call-tracking-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-call-tracking.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-call-tracking>
   html_format: AMP
@@ -69,14 +44,13 @@ tags: {  # <amp-call-tracking>
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "A"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-call-tracking.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-call-tracking"
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
-    supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
 }

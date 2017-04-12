@@ -17,7 +17,7 @@
 import {ampdocServiceFor} from '../../src/ampdoc';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {VideoEvents} from '../../src/video-interface';
-import {videoManagerForDoc} from '../../src/video-manager';
+import {videoManagerForDoc} from '../../src/services';
 import {
   installVideoManagerForDoc,
   supportsAutoplay,
