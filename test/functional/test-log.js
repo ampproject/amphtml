@@ -569,7 +569,7 @@ describe('Logging', () => {
       } catch (e) {
         error = e;
       }
-      expect(error.message).to.equal('first second third');
+      expect(error.message).to.match(/^first second third/);
     });
 
     it('should rethrow error with original error and messages', () => {
