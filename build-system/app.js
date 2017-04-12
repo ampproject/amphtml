@@ -566,6 +566,7 @@ app.use('/a4a(|-3p)/', function(req, res) {
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/FORCE3P/g, force3p)
+        .replace(/DISABLE3PFALLBACK/g, !force3p)
         .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_URL/g, adUrl)
         .replace(/AD_WIDTH/g, req.query.width || '300')
