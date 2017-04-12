@@ -51,7 +51,7 @@ limitations under the License.
 
 **data-eid**
 
-The ID of the video. For example, `4Dk5F2PYTtrgciuvloH3UA` is the eid in the following URL: https://secure.hulu.com/embed.html?eid=4Dk5F2PYTtrgciuvloH3UA.
+The ID of the video. For example, `4Dk5F2PYTtrgciuvloH3UA` is the eid in the following URL: https://player.hulu.com/site/dash/mobile_embed.html?eid=4Dk5F2PYTtrgciuvloH3UA.
 
 **common attributes**
 
