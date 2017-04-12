@@ -114,7 +114,7 @@ describe('amp-list component', () => {
         element, initialItems)
         .returns(renderPromise);
     listMock.expects('getVsync').returns({
-      measure: func => {}
+      measure: () => {},
     }).twice();
     return list.layoutCallback().then(() => {
       return Promise.all([xhrPromise, renderPromise]);
@@ -137,7 +137,7 @@ describe('amp-list component', () => {
       expect(list.container_.contains(itemElement)).to.be.false;
       expect(list.container_.contains(itemElement2)).to.be.true;
       expect(list.container_.contains(itemElement3)).to.be.true;
-    })
+    });
   });
 
   it('should fail to load b/c data is absent', () => {
