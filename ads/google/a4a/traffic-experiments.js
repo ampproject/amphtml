@@ -136,7 +136,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  * @param {!string} controlBranchId  Experiment ID string for control branch of
  *   the overall experiment.
  * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
- *   (i.e., a4a) branch of the overall experiment.
+ *   branch of the overall experiment.
  * @param {!string} manualId  ID of the manual experiment.
  * @return {boolean}  Whether the experiment state was set from a command-line
  *   parameter or not.

@@ -387,6 +387,87 @@ describe('a4a_config', () => {
             DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
             DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH))).to.be.false;
   });
+  it('should serve Delayed Fetch when DoubleClick has not launched and client selects into filler portion',  () => {
+    win.location.search = '?exp=a4a:0';
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+    element.setAttribute('type', 'doubleclick');
+    expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)), 'googleAdsIsA4AEnabled').to.be.false;
+    expect(win.document.cookie).to.be.null;
+  });
+  it('should serve Delayed Fetch when DoubleClick has not launched and client selects into control portion',  () => {
+    win.location.search = '?exp=a4a:1';
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+    element.setAttribute('type', 'doubleclick');
+    expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)), 'googleAdsIsA4AEnabled').to.be.false;
+    expect(win.document.cookie).to.be.null;
+  });
+  it('should serve Fast Fetch when DoubleClick has not launched and client selects into experiment portion',  () => {
+    win.location.search = '?exp=a4a:2';
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+    element.setAttribute('type', 'doubleclick');
+    //debugger;
+    expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)), 'googleAdsIsA4AEnabled').to.be.true;
+    expect(win.document.cookie).to.be.null;
+  });
+  it('should serve Fast Fetch when DoubleClick has launched and client selects into filler portion',  () => {
+    win.location.search = '?exp=a4a:0';
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+    element.setAttribute('type', 'doubleclick');
+    expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)), 'googleAdsIsA4AEnabled').to.be.true;
+    expect(win.document.cookie).to.be.null;
+  });
+  it('should serve Fast Fetch when DoubleClick has launched and client selects into control portion',  () => {
+    win.location.search = '?exp=a4a:1';
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+    element.setAttribute('type', 'doubleclick');
+    //debugger;
+    expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)), 'googleAdsIsA4AEnabled').to.be.true;
+    expect(win.document.cookie).to.be.null;
+  });
+  it('should serve Delayed Fetch when DoubleClick has launched and client selects into experiment portion',  () => {
+    win.location.search = '?exp=a4a:2';
+    toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+    element.setAttribute('type', 'doubleclick');
+    //debugger;
+    expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
+        (hasLaunched(win, element) ?
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DoubleClickA4AConfig.DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)), 'googleAdsIsA4AEnabled').to.be.false;
+    expect(win.document.cookie).to.be.null;
+  });
   // TODO(jonkeller): AdSense tests also
 });
 
