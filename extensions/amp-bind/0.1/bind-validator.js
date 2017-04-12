@@ -239,6 +239,7 @@ function createElementRules_() {
         'allowedProtocols': {
           'https': true,
         },
+      },
     },
     'AMP-SELECTOR': {
       'selected': null,

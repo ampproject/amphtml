@@ -50,7 +50,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return populateList_();
+    return this.populateList_();
   }
 
   /** @override */
@@ -61,7 +61,7 @@ export class AmpList extends AMP.BaseElement {
       // refreshing amp-list data from the same source?
       const oldSrc = this.element.getAttribute('src');
       if (srcMutation !== oldSrc) {
-        populateList_();
+        this.populateList_();
       }
     }
   }
