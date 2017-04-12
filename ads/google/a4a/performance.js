@@ -99,6 +99,18 @@ export class BaseLifecycleReporter {
   reset() {
     this.extraVariables_ = new Object(null);
   }
+
+  /**
+   * Returns the initialization time of this reporter.
+   * @return {number} The initialization time in ms.
+   */
+  getInitTime() {}
+
+  /**
+   * Returns the time delta between initialization and now.
+   * @return {number} The time delta in ms.
+   */
+  getDeltaTime() {}
 }
 
 export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
@@ -142,8 +154,8 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     /** @private {time} @const */
     this.initTime_ = initTime;
 
-    /** @private {!function():number} @const */
-    this.getDeltaTime_ = (win.performance && win.performance.now.bind(
+    /** @const {!function():number} */
+    this.getDeltaTime = (win.performance && win.performance.now.bind(
             win.performance)) || (() => {return Date.now() - this.initTime_;});
 
     /** (Not constant b/c this can be overridden for testing.) @private */
@@ -192,7 +204,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    */
   buildPingAddress_(name) {
     const stageId = LIFECYCLE_STAGES[name] || 9999;
-    const delta = Math.round(this.getDeltaTime_());
+    const delta = Math.round(this.getDeltaTime());
     // Note: extraParams can end up empty if (a) this.extraVariables_ is empty
     // or (b) if all values are themselves empty or null.
     let extraParams = serializeQueryString(this.extraVariables_);
@@ -257,13 +269,5 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    */
   getInitTime() {
     return this.initTime_;
-  }
-
-  /**
-   * Returns the time delta between initialization and now.
-   * @return {number} The time delta in ms.
-   */
-  getDeltaTime() {
-    return Math.round(this.getDeltaTime_());
   }
 }

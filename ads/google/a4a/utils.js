@@ -369,7 +369,7 @@ export function additionalDimensions(win, viewportSize) {
  * @return {?JSONType} config or null if invalid/missing.
  */
 export function extractAmpAnalyticsConfig(
-    a4a, responseHeaders, opt_deltaTime, opt_initTime) {
+    a4a, responseHeaders, opt_deltaTime = -1, opt_initTime = -1) {
   if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     return null;
   }
@@ -420,11 +420,10 @@ export function extractAmpAnalyticsConfig(
     const slotId = a4a.element.getAttribute('data-amp-slot-index');
     const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
         ? responseHeaders.get(QQID_HEADER) : 'null';
-    opt_initTime = opt_initTime || 0;
-    opt_deltaTime = opt_deltaTime || 0;
     const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
         `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
         `&dt=${opt_initTime}`;
+    opt_deltaTime = Math.round(opt_deltaTime);
     config['requests']['iniLoadCsi'] = baseCsiUrl +
         `&met.a4a.${slotId}=iniLoadCsi.${opt_deltaTime}`;
     config['requests']['renderStartCsi'] = baseCsiUrl +
