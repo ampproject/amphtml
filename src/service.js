@@ -533,7 +533,9 @@ function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
   // The service may have been requested already, in which case there is a
   // pending promise that needs to fulfilled.
   if (s.promise && s.resolve) {
-    s.resolve(s.build());
+    const obj = s.build();
+    s.obj = obj;
+    s.resolve(obj);
   }
 }
 
