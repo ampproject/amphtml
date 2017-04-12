@@ -15,7 +15,7 @@
  */
 
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
-import {getMode} from '../../..//src/mode';
+import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
