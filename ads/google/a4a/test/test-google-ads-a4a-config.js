@@ -330,7 +330,7 @@ describe('a4a_config', () => {
       }
       expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
         externalBranches, internalBranches)).to.be.false;
-  });
+    });
   it('should serve Delayed Fetch to unlaunched DoubleClick control',
     () => {
       toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
@@ -352,15 +352,15 @@ describe('a4a_config', () => {
       }
       expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
         externalBranches, internalBranches)).to.be.false;
-  });
+    });
   it('should serve Fast Fetch to unlaunched DoubleClick experiment',
     () => {
       toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
       toggleExperiment(win, 'expDoubleclickA4A', true, true);
       element.setAttribute('type', 'doubleclick');
-      let pre_launch =
+      const preLaunch =
         expts.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
-      win.pageExperimentBranches['expDoubleclickA4A'] = pre_launch.experiment;
+      win.pageExperimentBranches['expDoubleclickA4A'] = preLaunch.experiment;
       let externalBranches, internalBranches;
       if (isExperimentOn(win, 'a4aFastFetchDoubleclickLaunched')) {
         externalBranches =
@@ -375,7 +375,7 @@ describe('a4a_config', () => {
       }
       expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
         externalBranches, internalBranches)).to.be.true;
-  });
+    });
   it('should serve Fast Fetch to launched DoubleClick filler',
     () => {
       toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
@@ -394,7 +394,7 @@ describe('a4a_config', () => {
       }
       expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
         externalBranches, internalBranches)).to.be.true;
-  });
+    });
   it('should serve Fast Fetch to launched DoubleClick control',
     () => {
       toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
@@ -416,15 +416,15 @@ describe('a4a_config', () => {
       }
       expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
         externalBranches, internalBranches)).to.be.true;
-  });
+    });
   it('should serve Delayed Fetch to launched DoubleClick experiment (holdback)',
     () => {
       toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
       toggleExperiment(win, 'expDoubleclickA4A', true, true);
       element.setAttribute('type', 'doubleclick');
-      let post_launch =
+      const postLaunch =
           expts.DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;
-      win.pageExperimentBranches['expDoubleclickA4A'] = post_launch.experiment;
+      win.pageExperimentBranches['expDoubleclickA4A'] = postLaunch.experiment;
       let externalBranches, internalBranches;
       if (isExperimentOn(win, 'a4aFastFetchDoubleclickLaunched')) {
         externalBranches =
@@ -439,7 +439,7 @@ describe('a4a_config', () => {
       }
       expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
         externalBranches, internalBranches)).to.be.false;
-  });
+    });
   it('should serve Delayed Fetch to unlaunched DoubleClick filler (URL)',
     () => {
       win.location.search = '?exp=a4a:0';
@@ -460,7 +460,7 @@ describe('a4a_config', () => {
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
         externalBranches, internalBranches)).to.be.false;
       expect(win.document.cookie).to.be.null;
-  });
+    });
   it('should serve Delayed Fetch to unlaunched DoubleClick control (URL)',
     () => {
       win.location.search = '?exp=a4a:1';
@@ -481,7 +481,7 @@ describe('a4a_config', () => {
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
         externalBranches, internalBranches)).to.be.false;
       expect(win.document.cookie).to.be.null;
-  });
+    });
   it('should serve Fast Fetch to unlaunched DoubleClick experiment (URL)',
     () => {
       win.location.search = '?exp=a4a:2';
@@ -502,7 +502,7 @@ describe('a4a_config', () => {
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
         externalBranches, internalBranches)).to.be.true;
       expect(win.document.cookie).to.be.null;
-  });
+    });
   it('should serve Fast Fetch to launched DoubleClick filler (URL)',
     () => {
       win.location.search = '?exp=a4a:0';
@@ -523,7 +523,7 @@ describe('a4a_config', () => {
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
         externalBranches, internalBranches)).to.be.true;
       expect(win.document.cookie).to.be.null;
-  });
+    });
   it('should serve Fast Fetch to launched DoubleClick control (URL)',
     () => {
       win.location.search = '?exp=a4a:1';
@@ -544,7 +544,7 @@ describe('a4a_config', () => {
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
         externalBranches, internalBranches)).to.be.true;
       expect(win.document.cookie).to.be.null;
-  });
+    });
   it('should serve Delayed Fetch to launched DoubleClick experiment (URL)',
     () => {
       win.location.search = '?exp=a4a:2';
@@ -565,7 +565,7 @@ describe('a4a_config', () => {
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
         externalBranches, internalBranches)).to.be.false;
       expect(win.document.cookie).to.be.null;
-  });
+    });
   // TODO(jonkeller): AdSense tests also
 });
 
