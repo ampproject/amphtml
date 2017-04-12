@@ -161,15 +161,23 @@ describe('Google A4A utils', () => {
 
         url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
         const config = extractAmpAnalyticsConfig(a4a, headers);
-        const csiRequest = config.requests.visibilityCsi;
-        expect(csiRequest).to.not.be.null;
+        const iniLoadCsiRequest = config.requests.iniLoadCsi;
+        const renderStartCsiRequest = config.requests.renderStartCsi;
+        expect(iniLoadCsiRequest).to.not.be.null;
+        expect(renderStartCsiRequest).to.not.be.null;
         // We expect slotId == null, since no real element is created, and so
         // no slot index is ever set.
-        expect(csiRequest).to.match(new RegExp(
+        expect(iniLoadCsiRequest).to.match(new RegExp(
             '^https://csi\\.gstatic\\.com/csi\\?' +
-            'fromAnalytics=1&c=[0-9]+&slotId=null&qqid\\.0=[a-zA-Z_]+$'));
+            's=a4a&c=[0-9]+&slotId=null&qqid\\.null=[a-zA-Z_]+' +
+            '&met\\.a4a\\.null=iniLoadCsi\\.[0-9]+$'));
+        expect(renderStartCsiRequest).to.match(new RegExp(
+            '^https://csi\\.gstatic\\.com/csi\\?' +
+            's=a4a&c=[0-9]+&slotId=null&qqid\\.null=[a-zA-Z_]+' +
+            '&met\\.a4a\\.null=renderStartCsi\\.[0-9]+$'));
         // Need to remove this request as it will vary in test execution.
-        delete config.requests.visibilityCsi;
+        delete config.requests.iniLoadCsi;
+        delete config.requests.renderStartCsi;
         expect(config).to.deep.equal({
           transport: {beacon: false, xhrpost: false},
           requests: {
@@ -189,13 +197,13 @@ describe('Google A4A utils', () => {
             },
             continuousVisibleIniLoad: {
               on: 'ini-load',
-              request: 'visibilityCsi',
+              request: 'iniLoadCsi',
               selector: 'amp-ad',
               selectionMethod: 'closest',
             },
             continuousVisibleRenderStart: {
               on: 'render-start',
-              request: 'visibilityCsi',
+              request: 'renderStartCsi',
               selector: 'amp-ad',
               selectionMethod: 'closest',
             },

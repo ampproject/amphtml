@@ -250,4 +250,12 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.element_.parentNode.insertBefore(pingElement, this.element_);
     dev().info('PING', url);
   }
+
+  /**
+   * Returns the initialization time of this reporter.
+   * @return {number} The initialization time in ms.
+   */
+  getInitTime() {
+    return this.initTime_;
+  }
 }

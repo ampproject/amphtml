@@ -22,6 +22,7 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/services';
+import {getTimingDataSync} from '../../../src/service/variable-source';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 
@@ -361,9 +362,11 @@ export function additionalDimensions(win, viewportSize) {
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
+ * @param {number=} initTime The time in milliseconds as the baseline time.
+ *   TODO(levitzky) Remove this param once AV numbers stabilize.
  * @return {?JSONType} config or null if invalid/missing.
  */
-export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
+export function extractAmpAnalyticsConfig(a4a, responseHeaders, opt_initTime) {
   if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     return null;
   }
@@ -414,13 +417,20 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     const slotId = a4a.element.getAttribute('data-amp-slot-index');
     const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
         ? responseHeaders.get(QQID_HEADER) : 'null';
-    config['requests']['visibilityCsi'] =
-        'https://csi.gstatic.com/csi?fromAnalytics=1' +
-        `&c=${correlator}&slotId=${slotId}&qqid.0=${qqid}`;
+    const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
+        `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}`;
+    const now =
+        Number(getTimingDataSync(a4a.win, 'navigationStart') || Date.now());
+    opt_initTime = opt_initTime || 0;
+    const time = now - opt_initTime;
+    config['requests']['iniLoadCsi'] = baseCsiUrl +
+        `&met.a4a.${slotId}=iniLoadCsi.${time}`;
+    config['requests']['renderStartCsi'] = baseCsiUrl +
+        `&met.a4a.${slotId}=renderStartCsi.${time}`;
     config['triggers']['continuousVisibleIniLoad']['request'] =
-        'visibilityCsi';
+        'iniLoadCsi';
     config['triggers']['continuousVisibleRenderStart']['request'] =
-        'visibilityCsi';
+        'renderStartCsi';
     return config;
   } catch (err) {
     dev().error('AMP-A4A', 'Invalid analytics', err,
