@@ -27,7 +27,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
-import {resourcesForDoc} from '../../../src/services';
+import {ampFormServiceForDoc, resourcesForDoc} from '../../../src/services';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 
@@ -134,6 +134,17 @@ export class Bind {
     this.initializePromise_ = this.ampdoc.whenReady().then(() => {
       return this.initialize_();
     });
+
+    /**
+     * Form implementations are not filled in until ampdoc is ready.
+     * So we must wait for that to finish before scanning form elements
+     * for dynamic components.
+     * @private {!Promise}
+     */
+    this.formInitializationPromise_ =
+        ampFormServiceForDoc(this.ampdoc).then(ampFormService => {
+          return ampFormService.whenInitialized();
+        });
 
     /**
      * @private {?Promise}
@@ -399,19 +410,19 @@ export class Bind {
       }
       const element = dev().assertElement(node);
       const tagName = element.tagName;
-
-      let dynamicElements = [];
-      if (typeof element.getDynamicElementContainers === 'function') {
-        dynamicElements = element.getDynamicElementContainers();
-      } else if (element.tagName === 'FORM') {
-        // FORM is not an amp element, so it doesn't have the getter directly.
-        const form = formOrNullForElement(element);
-        dev().assert(form, 'could not find form implementation');
-        dynamicElements = form.getDynamicElementContainers();
-      }
-      dynamicElements.forEach(elementToObserve => {
+      const observeElement = elementToObserve => {
         this.mutationObserver_.observe(elementToObserve, {childList: true});
-      });
+      };
+
+      if (typeof element.getDynamicElementContainers === 'function') {
+        element.getDynamicElementContainers().forEach(observeElement);
+      } else if (element.tagName === 'FORM') {
+        this.formInitializationPromise_.then(() => {
+          const form = formOrNullForElement(element);
+          dev().assert(form, 'could not find form implementation');
+          form.getDynamicElementContainers().forEach(observeElement);
+        });
+      }
 
       let boundProperties = this.scanElement_(element);
       // Stop scanning once |limit| bindings are reached.
