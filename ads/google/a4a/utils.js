@@ -22,7 +22,6 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/services';
-import {getTimingDataSync} from '../../../src/service/variable-source';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 
