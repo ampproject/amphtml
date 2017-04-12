@@ -23,11 +23,11 @@
 import {
   googleAdsIsA4AEnabled,
   isInManualExperiment,
-  hasLaunched,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../ads/google/a4a/utils';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
@@ -101,14 +101,17 @@ export function doubleclickIsA4AEnabled(win, element) {
   // TODO(tdrl): The "is this site eligible" logic has gotten scattered around
   // and is now duplicated.  It should be cleaned up and factored into a single,
   // shared location.
+  let externalBranches, internalBranches;
+  if (isExperimentOn(win, 'a4aFastFetchDoubleclickLaunched')) {
+    externalBranches = DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;
+    internalBranches = DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;
+  } else {
+    externalBranches = DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+    internalBranches = DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+  }
   const enableA4A = googleAdsIsA4AEnabled(
           win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          (hasLaunched(element) ?
-             DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
-             DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH),
-          (hasLaunched(element) ?
-             DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
-             DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)) ||
+          externalBranches, internalBranches) ||
       (a4aRequested && (isProxyOrigin(win.location) ||
        getMode(win).localDev || getMode(win).test));
   if (enableA4A && a4aRequested && !isInManualExperiment(element)) {
