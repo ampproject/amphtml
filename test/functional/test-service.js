@@ -375,8 +375,19 @@ describe('service', () => {
     it('should not instantiate service when registered', () => {
       registerServiceBuilderForDoc(ampdoc, 'fake service', factory);
       expect(count).to.equal(0);
+      getServicePromiseForDoc(ampdoc, 'fake service');
       getServiceForDoc(ampdoc, 'fake service');
       expect(count).to.equal(1);
+    });
+
+    it('should not instantiate service when registered (race)', () => {
+      getServicePromiseForDoc(ampdoc, 'fake service');
+      registerServiceBuilderForDoc(ampdoc, 'fake service', factory);
+      expect(count).to.equal(1);
+      getServiceForDoc(ampdoc, 'fake service');
+      return Promise.resolve().then(() => {
+        expect(count).to.equal(1);
+      });
     });
 
     it('should work without a factory', () => {
