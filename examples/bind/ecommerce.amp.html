@@ -60,6 +60,28 @@
     When a shirt color is selected, `selectedIndex` changes which causes this
     <amp-state> to perform an XHR to the new [src] value. Upon completion,
     the XHR response is merged into the state under its "id" attribute ("shirts").
+
+    This has the limitation that data returned by the XHR must have the same
+    hierarchical structure as the existing data.
+
+    For example, the XHR must return something like:
+      {
+        "3": {
+          "sizes": ["S", "L"]
+        }
+      }
+
+    By contrast, it must NOT return something like:
+      {
+        "sizes": ["S", "L"]
+      }
+
+    In order to support the latter, we'd need to:
+      - Add support for a new action event, AND
+      - Force quotation marks for literal keys, AND
+      - Reintroduce variables in object keys (removed in #7582)
+
+    <amp-state [src]="..." on="fetch:AMP.setState({"shirts": {selectedIndex: event.response}})"
   -->
   <amp-state id="shirts" [src]="'/bind/ecommerce/sizes?shirt=' + selectedIndex">
     <script type="application/json">
