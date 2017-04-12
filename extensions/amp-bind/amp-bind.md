@@ -191,11 +191,11 @@ Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or 
 
 #### Updating state with `AMP.setState()`
 
-The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) merges an object literal into the state. For example, when the bewlow button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state. 
+The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) merges an object literal into the state. For example, when the below button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state. 
 
 ```html
 <!-- Like JavaScript, you can reference existing
-variables in the values of the  object literal. -->
+     variables in the values of the  object literal. -->
 <button on="tap:AMP.setState({foo: 'bar', baz: myAmpState.someVariable})"></button>
 ```
 
@@ -204,8 +204,8 @@ In general, nested objects will be merged up to a maximum depth of 10. All varia
 When triggered by certain events, `AMP.setState()` also can access event-related data on the `event` property. 
 
 ```html
-<!-- The "change" event of this <input> element
-contains a "value" variable that can be referenced via "event.value". -->
+<!-- The "change" event of this <input> element contains 
+     a "value" variable that can be referenced via "event.value". -->
 <input type="range" on="change:AMP.setState({myRangeValue: event.value})">
 ```
 
@@ -232,15 +232,10 @@ The full expression grammar and implementation can be found in [bind-expr-impl.j
 The following are all valid expressions.
 
 ```javascript
-// 'Hello World 3'
-'Hello ' + 'World ' + 3
-// 2209
-47 * +'47'
-// Boolean value of event.checked
-event.checked && (true || !!1)
-// 'Deal' if `event.value` is greater than
-// the median of the range, else 'No deal'
-event.value > ((event.max - event.min) / 2) ? 'Deal' : 'No deal'
+1 + '1'           // 11
+1 + (+'1')        // 2
+!0                // true
+null || 'default' // 'default'
 ```
 
 #### Whitelisted functions
