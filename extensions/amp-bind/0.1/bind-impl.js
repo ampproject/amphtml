@@ -750,12 +750,13 @@ export class Bind {
 
       case 'class':
         initialValue = [];
-        // Ignore internal AMP classes.
         for (let i = 0; i < element.classList.length; i++) {
           const cssClass = element.classList[i];
+          // Ignore internal AMP classes.
           if (AMP_CSS_RE.test(cssClass)) {
-            initialValue.push(cssClass);
+            continue;
           }
+          initialValue.push(cssClass);
         }
         /** @type {!Array<string>} */
         let classes = [];
