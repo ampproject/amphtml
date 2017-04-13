@@ -1101,7 +1101,6 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
     this.protectedEmitLifecycleEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
-    dev().assert(!this.iframe);
     this.iframe = /** @type {!HTMLIFrameElement} */(
         createElementWithAttributes(
             /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
@@ -1186,7 +1185,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
-    dev().assert(!this.iframe);
     this.iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES));

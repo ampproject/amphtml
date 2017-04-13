@@ -68,11 +68,16 @@ amp-embed iframe {
 }
 
 amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
-amp-ad[data-a4a-upgrade-type="amp-ad-network-adsense-impl"] > iframe {
+amp-ad[type="adsense"] > iframe {
   top: 50% !important;
   left: 50% !important;
+  transform: translate(-50%, -50%);
+}
+
+
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+amp-ad[data-a4a-upgrade-type="amp-ad-network-adsense-impl"] > iframe {
   min-height: 0;
   min-width: 0;
-  transform: translate(-50%, -50%);
 }
 
