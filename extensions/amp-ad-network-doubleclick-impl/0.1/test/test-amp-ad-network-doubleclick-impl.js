@@ -256,7 +256,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.equal('300');
         expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, {width: '300', height: '150'});
+        verifyCss(impl.iframe, size);
       });
     });
     it('centers iframe in slot when !height && !width', () => {
