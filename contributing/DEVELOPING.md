@@ -106,14 +106,13 @@ A4A can be run either of these two modes:
 The following forms are supported:
 
 - local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
-- proxied document with normal sources: http://localhost:8000/a4a[-3p]/max/output.jsbin.com/pegizoq/quiet
-- proxied document with minified sources: http://localhost:8000/a4a[-3p]/min/output.jsbin.com/pegizoq/quiet
+- proxied document with local sources: http://localhost:8000/a4a[-3p]/proxy/output.jsbin.com/pegizoq/quiet
 
-When accessing `min` urls make sure you run `gulp dist` with the `--fortesting`
+When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
 flag so that we do not strip out the localhost code paths. (We do some
 code elimination to trim down the file size for the file we deploy to production)
 
-If the origin resource is on HTTPS, the URLs are http://localhost:8000/a4a[-3p]/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/a4a[-3p]/min/s/output.jsbin.com/pegizoq/quiet
+If the origin resource is on HTTPS, the URLs are http://localhost:8000/a4a[-3p]/proxy/s/output.jsbin.com/pegizoq/quiet
 
 Notice that all documents are assumed to have a "fake" signature. Thus, this functionality is only available in the
 `localDev` mode.
@@ -134,8 +133,7 @@ Make sure to run gulp with `--with_inabox` flag.
 The following forms are supported:
 
 - local document: http://localhost:8000/inabox/examples/animations.amp.max.html
-- proxied document with normal sources: http://localhost:8000/inabox/max/output.jsbin.com/pegizoq/quiet
-- proxied document with minified sources: http://localhost:8000/inabox/min/output.jsbin.com/pegizoq/quiet
+- proxied document with local sources: http://localhost:8000/inabox/proxy/output.jsbin.com/pegizoq/quiet
 
 Additionally, the following query parameters can be provided:
 
