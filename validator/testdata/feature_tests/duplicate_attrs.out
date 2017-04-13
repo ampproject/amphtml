@@ -1,0 +1,2 @@
+FAIL
+feature_tests/duplicate_attrs.html:28:2 The attribute 'custom-element' in tag 'amp-image-lightbox extension .js script' is set to the invalid value 'duplicate'. (see https://www.ampproject.org/docs/reference/components/amp-image-lightbox) [AMP_TAG_PROBLEM]

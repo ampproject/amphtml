@@ -3026,12 +3026,38 @@ function validateAttributeInExtension(
 
   const extensionSpec = tagSpec.extensionSpec;
   // TagSpecs with extensions will only be evaluated if their dispatch_key
-  // matches, which is based on this custom-element field.
+  // matches, which is based on this custom-element field. However, duplicate
+  // attributes with the same name can still cause us to see an invalid
+  // attribute here.
   if (!extensionSpec.isCustomTemplate && attrName === 'custom-element') {
-    goog.asserts.assert(extensionSpec.name === attrValue);
+    if (extensionSpec.name !== attrValue) {
+      if (amp.validator.LIGHT) {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      } else {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */[attrName, getTagSpecName(tagSpec), attrValue],
+            tagSpec.specUrl, result);
+      }
+      return true;
+    }
     return true;
   } else if (extensionSpec.isCustomTemplate && attrName === 'custom-template') {
-    goog.asserts.assert(extensionSpec.name === attrValue);
+    if (extensionSpec.name !== attrValue) {
+      if (amp.validator.LIGHT) {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      } else {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */[attrName, getTagSpecName(tagSpec), attrValue],
+            tagSpec.specUrl, result);
+      }
+      return true;
+    }
     return true;
   } else if (attrName === 'src') {
     const srcUrlRe =
