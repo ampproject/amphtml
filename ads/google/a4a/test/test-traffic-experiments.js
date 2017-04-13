@@ -47,8 +47,6 @@ import {EXPERIMENT_ATTRIBUTE} from '../utils';
 import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
 
-const EXP_ID = 'EXP_ID';
-
 /** @private @const Tag used in dev log messages */
 const TAG_ = 'test-amp-ad';
 
@@ -411,7 +409,6 @@ describe('all-traffic-experiments-tests', () => {
       installViewerServiceForDoc(ampdoc);
       element = document.createElement('div');
       document.body.appendChild(element);
-      toggleExperiment(win, EXP_ID, true, true);
     });
 
     afterEach(() => {
