@@ -16,9 +16,7 @@
 
 import {bindForDoc} from '../../../src/services';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
-import {getMode} from '../../../src/mode';
 import {isBindEnabledFor} from './bind-impl';
-import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';

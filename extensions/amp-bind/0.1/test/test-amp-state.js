@@ -25,7 +25,7 @@ describe('AmpState', () => {
   let updateStub;
 
   function getAmpState() {
-    return createIframePromise(true, undefined).then(iframe => {
+    return createIframePromise(true).then(iframe => {
       const el = iframe.doc.createElement('amp-state');
       el.setAttribute('id', 'myAmpState');
       return iframe.addElement(el);
