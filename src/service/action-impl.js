@@ -273,7 +273,7 @@ export class ActionService {
         'AMP element or a whitelisted target element is expected: %s', debugid);
 
     if (target[ACTION_HANDLER_]) {
-      // Already installed
+      dev().error(TAG_, `Action handler already installed for ${target}`);
       return;
     }
 
