@@ -60,7 +60,7 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   mutatedAttributesCallback(mutations) {
     const srcMutation = mutations['src'];
-    if (srcMutation) {
+    if (srcMutation != undefined) {
       const p = this.populateList_();
       if (getMode().test) {
         this.mutationPromise_ = p;
@@ -115,10 +115,14 @@ export class AmpList extends AMP.BaseElement {
     });
   }
 
-  /** @return {Promise} */
+  /**
+   * @return {Promise}
+   * @visibleForTesting
+   */
   mutationPromiseForTesting() {
     return this.mutationPromise_;
   }
+
 }
 
 AMP.registerElement('amp-list', AmpList);
