@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {RENDERING_TYPE_HEADER} from '../amp-a4a';
 import {
     MockA4AImpl,
     SIGNATURE_HEADER,
@@ -37,6 +38,9 @@ import {
 import {utf8Encode} from '../../../../src/utils/bytes';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {loadPromise} from '../../../../src/event-helper';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {getMode} from '../../../../src/mode';
+import {getDefaultBootstrapBaseUrl} from '../../../../src/3p-frame';
 import * as sinon from 'sinon';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
@@ -325,4 +329,90 @@ describe('integration test: a4a', () => {
   // all tests, so that we know precisely when errors are being reported and
   // to whom.
   it('should propagate errors out and report them to upstream error log');
+});
+
+describes.sandboxed('integration test: Fast Fetch', {}, () => {
+  describes.realWin('render methods', {amp: true}, env => {
+    let xhrMock;
+    let mockResponse;
+    let a4aElement;
+    let headers;
+    let win;
+    let doc;
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      // Fool AMP into thinking that it's not in dev or test mode so that
+      // getDefaultBootstrapBaseUrl will actually randomize, rather than
+      // returning a fixed localhost address.
+      getMode().localDev = false;
+      getMode().test = false;
+      xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
+      // Expect key set fetches for signing services.
+      const fetchJsonMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+      for (const serviceName in signingServerURLs) {
+        fetchJsonMock.withArgs(signingServerURLs[serviceName],
+          {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(
+            Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+      }
+      // Expect ad request.
+      headers = {};
+      headers[RENDERING_TYPE_HEADER] = 'nameframe';
+      mockResponse = {
+        arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
+        bodyUsed: false,
+        headers: new FetchResponseHeaders({
+          getResponseHeader(name) {
+            return headers[name];
+          },
+        }),
+      };
+      xhrMock.withArgs(TEST_URL, {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      adConfig['mock'] = {};
+      a4aRegistry['mock'] = () => {
+        return true;
+      };
+      upgradeOrRegisterElement(win, 'amp-a4a', MockA4AImpl);
+      a4aElement = createElementWithAttributes(doc, 'amp-a4a', {
+        width: 200,
+        height: 50,
+        type: 'mock',
+      });
+    });
+
+    it('nameframe iframe should use same URL as prefetch', () => {
+      return env.ampdoc.whenReady().then(() => {
+        doc.body.appendChild(a4aElement);
+        a4aElement.build();
+        const impl = a4aElement.implementation_;
+        // TODO(tdrl): Shouldn't the runtime have run the full lifecycle of
+        // this?
+        impl.preconnectCallback();
+        // Note: onLayoutMeasure is bailing out early because
+        // getIntersectionElementLayoutBox() is returning
+        // slotRect = Object {left: -10000, top: -10000, width: 0, height:
+        // 0, bottom: -10000}.  I think (?) that indicates that actual
+        // layout hasn't been done.
+        impl.onLayoutMeasure();
+        return impl.layoutCallback().then(() => {
+          expect(xhrMock).to.be.calledOnce;
+          const preconnects = doc.head.querySelectorAll(
+              'link[rel=preconnect][href*=ampproject]');
+          expect(preconnects).to.have.length(1);
+          const preconnectUrl = preconnects[0].href;
+          expect(preconnectUrl).to.match(/https:\/\/d-[0-9]*.ampproject.net/);
+          expectRenderedInXDomainIframe(a4aElement, 'nameframe.html');
+        });
+      });
+    });
+  });
 });
