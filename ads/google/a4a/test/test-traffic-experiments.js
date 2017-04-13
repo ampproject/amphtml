@@ -540,13 +540,13 @@ describe('all-traffic-experiments-tests', () => {
         branchId:
           DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
       },
-      // TODO(jonkeller): AdSense tests also
+      // TODO(jonkeller): Need AdSense tests also
     ];
 
     tests.forEach((test) => {
       let desc = `should serve ` +
                  `${test.shouldServeFastFetch ? 'Fast' : 'Delayed'} Fetch to ` +
-                 `${test.hasLaunched ? "launched" : "unlaunched"} ` +
+                 `${test.hasLaunched ? 'launched' : 'unlaunched'} ` +
                  `${test.adType} ${test.branchType} ` +
                  `${test.urlParam ? 'via URL ' : ''}`;
       it(desc, () => {
@@ -555,17 +555,16 @@ describe('all-traffic-experiments-tests', () => {
           test.hasLaunched, true);
         if (test.urlParam) {
           win.location.search = test.urlParam;
-        }
-        if (test.branchId != null && !test.urlParam) {
+        } else if (test.branchId != null) {
           toggleExperiment(win, 'expDoubleclickA4A', true, true);
           forceExperimentBranch(win, 'expDoubleclickA4A', test.branchId);
         }
         const external = test.hasLaunched ?
-            DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
-            DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
         const internal = test.hasLaunched ?
-            DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
-            DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
         expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
           external, internal)).to.equal(test.shouldServeFastFetch);
         expectCorrectBranchOnly(element, test.branchId);
