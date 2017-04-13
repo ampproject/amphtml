@@ -540,10 +540,10 @@ describe('all-traffic-experiments-tests', () => {
 
     tests.forEach(test => {
       const desc = `should serve ` +
-                   `${test.shouldServeFastFetch ? 'Fast' : 'Delayed'} Fetch to ` +
-                   `${test.hasLaunched ? 'launched' : 'unlaunched'} ` +
-                   `${test.adType} ${test.branchType} ` +
-                   `${test.urlParam ? 'via URL ' : ''}`;
+        `${test.shouldServeFastFetch ? 'Fast' : 'Delayed'} Fetch to ` +
+        `${test.hasLaunched ? 'launched' : 'unlaunched'} ` +
+        `${test.adType} ${test.branchType} ` +
+        `${test.urlParam ? 'via URL ' : ''}`;
       it(desc, () => {
         element.setAttribute('type', test.adType);
         toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched',

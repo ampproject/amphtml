@@ -23,7 +23,7 @@ import {
     isExternallyTriggeredExperiment,
     isInternallyTriggeredExperiment,
 } from '../traffic-experiments';
-import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
