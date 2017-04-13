@@ -233,7 +233,7 @@ export function isBlacklisted(version) {
    * @type {AmpVersion}
    */
   const ampVersion = version.substr(2);
-  return BLACKLIST.indexOf(ampVersion) > -1;
+  return BLACKLIST.includes(ampVersion) === true;
 }
 
 /**
@@ -466,7 +466,7 @@ function purge(cache, version, pathname, diversions) {
       } else {
         // We will only delete a diversion if we know for certain the versions
         // that are diversions.
-        if (!diversions || diversions.indexOf(cachedData.rtv) > -1) {
+        if (!diversions || diversions.includes(cachedData.rtv) === true) {
           continue;
         }
       }
