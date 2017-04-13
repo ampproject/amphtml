@@ -31,6 +31,7 @@ import {
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {createIframePromise} from '../../../../testing/iframe';
+import * as sinon from 'sinon';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
@@ -43,6 +44,22 @@ function setupForAdTesting(fixture) {
   const ampStyle = doc.createElement('style');
   ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
   doc.head.appendChild(ampStyle);
+}
+
+// Because of the way the element is constructed, it doesn't have all of the
+// machinery that AMP expects it to have, so just no-op the irrelevant
+// functions.
+function noopMethods(impl, doc, sandbox) {
+  const noop = () => {};
+  impl.element.build = noop;
+  impl.element.getPlaceholder = noop;
+  impl.element.createPlaceholder = noop;
+  sandbox.stub(impl, 'getAmpDoc', () => doc);
+  sandbox.stub(impl, 'getIntersectionElementLayoutBox', () => {
+    return {
+      top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0,
+    };
+  });
 }
 
 describe('Google A4A utils', () => {
@@ -231,7 +248,15 @@ describe('Google A4A utils', () => {
   });
 
   describe('#googleAdUrl', () => {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
     it('should have the correct ifi numbers', function() {
+      // When ran locally, this test tends to exceed 2000ms timeout.
+      this.timeout(5000);
       // Reset counter for purpose of this test.
       delete window['ampAdGoogleIfiCounter'];
       return createIframePromise().then(fixture => {
@@ -243,18 +268,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        impl.getAmpDoc = () => doc;
-
-        // Because of the way the element is constructed, it doesn't have all of
-        // the machinery that AMP expects it to have, so just no-op the
-        // irrelevant functions.
-        const noop = () => {};
-        elem.build = noop;
-        elem.getPlaceholder = noop;
-        elem.createPlaceholder = noop;
-        elem.getLayoutBox = () => {
-          return {top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0};
-        };
+        noopMethods(impl, doc, sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
             expect(url1).to.match(/ifi=1/);
@@ -268,5 +282,46 @@ describe('Google A4A utils', () => {
         });
       });
     });
+    it('should specify that this is canary', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.AMP_CONFIG = impl.win.AMP_CONFIG || {};
+        impl.win.AMP_CONFIG.canary = true;
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.contain('isc=1');
+          });
+        });
+      });
+    });
+    it('should not specify that this is canary', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.AMP_CONFIG = impl.win.AMP_CONFIG || {};
+        impl.win.AMP_CONFIG.canary = false;
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.not.match(/isc=1/);
+          });
+        });
+      });
+    });
+
   });
 });
