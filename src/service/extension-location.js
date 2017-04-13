@@ -51,6 +51,5 @@ export function calculateExtensionScriptUrl(location, extensionId, isLocalDev) {
  */
 export function calculateEntryPointScriptUrl(location, entryPoint, isLocalDev) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
-  // QQQ: why we don't use .max version for test here?
   return `${base}/${entryPoint}.js`;
 }

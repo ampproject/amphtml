@@ -816,7 +816,6 @@ app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
         });
         return;
       }
-      // TODO: May need to use compiled version in gulp test. Need comfirm first.
       if (mode == 'max') {
         var fileUrl = req.url;
         req.url = fileUrl.substr(0, fileUrl.length - 3) + '.max.js';
