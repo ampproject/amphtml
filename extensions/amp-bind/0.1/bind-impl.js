@@ -930,7 +930,7 @@ export class Bind {
 }
 
 /**
- * @param {Window} win
+ * @param {!Window} win
  * @return {boolean}
  */
 export function isBindEnabledFor(win) {
