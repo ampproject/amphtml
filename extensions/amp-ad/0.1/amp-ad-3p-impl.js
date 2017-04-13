@@ -32,8 +32,12 @@ import {
   ReporterNamespace,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {isInExperiment} from '../../../ads/google/a4a/traffic-experiments';
+import {
+  buildAmpAnalyticsConfig,
+  getCorrelator,
+} from '../../../ads/google/a4a/utils';
 import {DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,} from
-'../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js';
+'../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js'; // eslint-disable-line
 import {user, dev} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -256,9 +260,18 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       if ((this.adType == 'adsense' ||
           this.adType == 'doubleclick') &&
           isInExperiment(this.element,
-                         DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.CONTROL)
+                         DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control)
          ) {
-        insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+        const correlator = getCorrelator(this.win);
+        const slotId = this.element.getAttribute('data-amp-slot-index');
+        const urls = [
+          'https://csi.gstatic.com/csi?fromAnalytics=1' +
+              `&c=${correlator}&slotId=${slotId}&a4a=1`,
+        ];
+        insertAnalyticsElement(
+            this.element,
+            buildAmpAnalyticsConfig(this.win, this.element, urls, false),
+            true);
       }
       return frameLoadPromise;
     });
