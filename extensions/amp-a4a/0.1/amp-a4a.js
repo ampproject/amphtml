@@ -814,6 +814,12 @@ export class AmpA4A extends AMP.BaseElement {
       if (this.isCollapsed_) {
         return Promise.resolve();
       }
+      // If this.iframe already exists, bail out here. This should only happen in
+      // testing context, not in production.
+      if (this.iframe) {
+        this.protectedEmitLifecycleEvent_('iframeAlreadyExists');
+        return Promise.resolve();
+      }
       if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_();
