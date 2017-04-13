@@ -71,8 +71,8 @@ export function doubleclick(global, data) {
   } else {
     const dice = Math.random();
     const href = global.context.location.href;
-    if ((href.includes('google_glade=0') === true || dice < experimentFraction)
-        && href.indexOf('google_glade=1') === false) {
+    if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
+        && href.indexOf('google_glade=1') < 0) {
       doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL);
     } else {
       const exp = (dice < 2 * experimentFraction) ?

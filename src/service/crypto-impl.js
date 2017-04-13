@@ -71,8 +71,7 @@ export class Crypto {
               e => {
                 // Chrome doesn't allow the usage of Crypto API under
                 // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
-                const includesSecure = e.message.includes('secure origin');
-                if (e.message && includesSecure === false) {
+                if (e.message && e.message.indexOf('secure origin') < 0) {
                   // Log unexpected fallback.
                   dev().error(TAG, FALLBACK_MSG, e);
                 }

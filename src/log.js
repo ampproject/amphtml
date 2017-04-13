@@ -38,7 +38,7 @@ export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
  * @return {boolean} Whether this message was a user error.
  */
 export function isUserErrorMessage(message) {
-  return message.includes(USER_ERROR_SENTINEL) === true;
+  return message.indexOf(USER_ERROR_SENTINEL) >= 0;
 }
 
 
@@ -384,7 +384,7 @@ export class Log {
     if (this.suffix_) {
       if (!error.message) {
         error.message = this.suffix_;
-      } else if (error.message.includes(this.suffix_) === false) {
+      } else if (error.message.indexOf(this.suffix_) == -1) {
         error.message += this.suffix_;
       }
     } else if (isUserErrorMessage(error.message)) {

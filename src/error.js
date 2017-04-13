@@ -419,7 +419,7 @@ export function detectJsEngineFromStack() {
   } catch (e) {
     const stack = e.stack;
     // Firefox uses a "<." to show prototype method.
-    if (stack.includes('<.t@') === true) {
+    if (stack.indexOf('<.t@') > -1) {
       return 'Firefox';
     }
 
@@ -438,7 +438,7 @@ export function detectJsEngineFromStack() {
     }
 
     // Finally, chrome includes the error message in the stack.
-    if (stack.includes('message') === true) {
+    if (stack.indexOf('message') > -1) {
       return 'Chrome';
     }
   }
