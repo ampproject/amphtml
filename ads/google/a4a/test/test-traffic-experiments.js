@@ -22,9 +22,6 @@ import {
   getPageExperimentBranch,
   mergeExperimentIds,
   isInExperiment,
-  isInManualExperiment,
-  isExternallyTriggeredExperiment,
-  isInternallyTriggeredExperiment,
   randomlySelectUnsetPageExperiments,
   validateExperimentIds,
   googleAdsIsA4AEnabled,
@@ -373,13 +370,11 @@ describe('all-traffic-experiments-tests', () => {
   describe('A4A Launch Flags', () => {
     let sandbox;
     let win;
-    let rand;
     let events;
     let element;
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
-      rand = sandbox.stub(Math, 'random');
       win = {
         AMP_MODE: {
           localDev: true,
@@ -543,12 +538,12 @@ describe('all-traffic-experiments-tests', () => {
       // TODO(jonkeller): Need AdSense tests also
     ];
 
-    tests.forEach((test) => {
-      let desc = `should serve ` +
-                 `${test.shouldServeFastFetch ? 'Fast' : 'Delayed'} Fetch to ` +
-                 `${test.hasLaunched ? 'launched' : 'unlaunched'} ` +
-                 `${test.adType} ${test.branchType} ` +
-                 `${test.urlParam ? 'via URL ' : ''}`;
+    tests.forEach(test => {
+      const desc = `should serve ` +
+                   `${test.shouldServeFastFetch ? 'Fast' : 'Delayed'} Fetch to ` +
+                   `${test.hasLaunched ? 'launched' : 'unlaunched'} ` +
+                   `${test.adType} ${test.branchType} ` +
+                   `${test.urlParam ? 'via URL ' : ''}`;
       it(desc, () => {
         element.setAttribute('type', test.adType);
         toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched',
