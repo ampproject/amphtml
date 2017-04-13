@@ -36,8 +36,6 @@ import {
   buildAmpAnalyticsConfig,
   getCorrelator,
 } from '../../../ads/google/a4a/utils';
-import {DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,} from
-'../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js'; // eslint-disable-line
 import {user, dev} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -259,8 +257,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
       if ((this.adType == 'adsense' ||
           this.adType == 'doubleclick') &&
-          isInExperiment(this.element,
-                         DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control)
+          (isInExperiment(this.element,  /** Dblclk a4acontrol */'117152660')
+          || isInExperiment(
+              this.element,  /** Adsense a4a control */ '117152650'))
          ) {
         const correlator = getCorrelator(this.win);
         const slotId = this.element.getAttribute('data-amp-slot-index');
@@ -271,7 +270,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         insertAnalyticsElement(
             this.element,
             buildAmpAnalyticsConfig(this.win, this.element, urls, false),
-            true);
+            /** Load amp-analytics extension */ true);
       }
       return frameLoadPromise;
     });

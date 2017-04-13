@@ -400,15 +400,15 @@ export function extractAmpAnalyticsConfig(
  * Builds the Amp Analytics configuration object.
  *
  * @param {!Window} win
- * @param {!element} element
- * @param {!Array.<string>} urls Array of urls to send pings to.
- * @param {!boolean} isA4a
+ * @param {!Element} element
+ * @param {!Array} urls Array of urls to send pings to.
+ * @param {boolean} isA4a
  * @param {string=} opt_qqid
  * @param {number=} opt_deltaTime The time difference, in ms, between the
  *   lifecycle reporter's initialization and now.
  * @param {number=} opt_initTime The initialization time, in ms, of the
  *   lifecycle reporter.
- * @return {?JSONType} config
+ * @return {!JSONType} config
  */
 export function buildAmpAnalyticsConfig(
     win, element, urls, isA4a, opt_qqid, opt_deltaTime, opt_initTime) {
@@ -454,7 +454,7 @@ export function buildAmpAnalyticsConfig(
   const adType = element.getAttribute('type');
   const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
       `&c=${correlator}&slotId=${slotId}` +
-      `&a4a=` + (isA4a ? '2' : '1') +
+      (isA4a ? `&df=1&adType=${adType}` : '') +
       (!!opt_qqid ? `&qqid.${slotId}=${opt_qqid}` : '') +
       `&dt=${opt_initTime}` +
       (eids != 'null' ? `&e.${slotId}=${eids}` : ``) +
