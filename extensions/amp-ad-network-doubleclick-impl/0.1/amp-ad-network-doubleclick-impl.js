@@ -202,8 +202,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.ampAnalyticsConfig_) {
       insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
-    dev().assert(!!this.iframe);
-    setStyles(this.frame, {
+    setStyles(dev().assertElement(this.iframe), {
       width: `${this.size_.width}px`,
       height: `${this.size_.height}px`,
     });

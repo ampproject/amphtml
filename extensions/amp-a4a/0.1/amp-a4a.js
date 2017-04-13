@@ -1105,7 +1105,7 @@ export class AmpA4A extends AMP.BaseElement {
               allowtransparency: '',
               scrolling: 'no',
             }));
-    this.applyFillContent(iframe);
+    this.applyFillContent(this.iframe);
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
       creativeMetaData.customStylesheets.forEach(s => {

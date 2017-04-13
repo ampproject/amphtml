@@ -225,7 +225,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         const iframe = fixture.doc.createElement('iframe');
         element.appendChild(iframe);
         document.body.appendChild(element);
-        impl = new AmpAdNetworkDoubleClickImpl(element);
+        impl = new AmpAdNetworkDoubleclickImpl(element);
         impl.iframe = iframe;
         return fixture;
       });
