@@ -89,7 +89,7 @@ export function getExistingServiceOrNull(win, id) {
  */
 export function getExistingServiceInEmbedScope(win, id) {
   // First, try to resolve via local (embed) window.
-  const local = getExistingServiceForEmbedWinOrNull(win, id);
+  const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
   if (local) {
     return local;
   }
@@ -110,7 +110,7 @@ export function getExistingServiceForDocInEmbedScope(nodeOrDoc, id) {
     // If a node is passed, try to resolve via this node.
     const win = /** @type {!Document} */ (
         nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
-    const local = getExistingServiceForEmbedWinOrNull(win, id);
+    const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
     if (local) {
       return local;
     }
@@ -129,7 +129,7 @@ export function installServiceInEmbedScope(embedWin, id, service) {
   const topWin = getTopWindow(embedWin);
   dev().assert(embedWin != topWin,
       'Service override can only be installed in embed window: %s', id);
-  dev().assert(!getExistingServiceForEmbedWinOrNull(embedWin, id),
+  dev().assert(!getLocalExistingServiceForEmbedWinOrNull(embedWin, id),
       'Service override has already been installed: %s', id);
   registerServiceInternal(
       embedWin,
@@ -146,7 +146,7 @@ export function installServiceInEmbedScope(embedWin, id, service) {
  * @param {string} id
  * @return {?Object}
  */
-function getExistingServiceForEmbedWinOrNull(embedWin, id) {
+function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
   // Note that this method currently only resolves against the given window.
   // It does not try to go all the way up the parent window chain. We can change
   // this in the future, but for now this gives us a better performance.
@@ -167,9 +167,9 @@ function getExistingServiceForEmbedWinOrNull(embedWin, id) {
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(!Window):T=} opt_factory Should create the service
- *     if it does not exist yet. If the factory is not given, it is an error
- *     if the service does not exist yet.
+ * @param {function(!Window):T=} opt_factory Factory to create the service
+ *     if the service does not exist yet. It is an error if the service does
+ *     not exist and the caller does not provide opt_factory.
  * @template T
  * @return {T}
  */
@@ -262,8 +262,9 @@ export function getServicePromiseOrNull(win, id) {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @param {function(!./service/ampdoc-impl.AmpDoc):T=} opt_factory
- *     Should create the service if it does not exist yet. If the factory is
- *     not given, it is an error if the service does not exist yet.
+ *     Factory to create the service if the service does not exist yet.
+ *     It is an error if the service does not exist and the caller does
+ *     not provide opt_factory.
  * @return {T}
  * @template T
  */
@@ -416,7 +417,7 @@ function getServiceInternal(holder, context, id) {
     s.obj = s.build();
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
-    if (s.promise && s.resolve) {
+    if (s.resolve) {
       s.resolve(/** @type {!Object} */(s.obj));
     }
     s.build = null;
@@ -459,7 +460,7 @@ function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
 
   // The service may have been requested already, in which case there is a
   // pending promise that needs to fulfilled.
-  if (s.promise && s.resolve) {
+  if (s.resolve) {
     s.obj = s.build();
     s.resolve(/** @type {!Object} */(s.obj));
     s.build = null;
