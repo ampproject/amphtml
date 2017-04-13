@@ -725,19 +725,8 @@ export class AmpA4A extends AMP.BaseElement {
           this.updatePriority(0);
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
-          const extensions = extensionsFor(this.win);
-          creativeMetaDataDef.extensions.forEach(
-            extension => {
-              const extensionId = extension['custom-element'];
-              const extensionSrc = extension['src'];
-              const versionStartIndex = extensionSrc.indexOf(extensionId) +
-                  extensionId.length + 1;
-              // -3 because the src string always ends with '.js'.
-              const versionEndIndex = extensionSrc.length - 3;
-              const extensionVer = extensionSrc.substring(
-                  versionStartIndex, versionEndIndex);
-              extensions.loadExtension(extensionId, extensionVer);
-            });
+          this.loadExtensions_(/** @type {!Array<!Object<string, string>>} */
+              (creativeMetaDataDef.extensions));
           return creativeMetaDataDef;
         })
         .catch(error => {
@@ -1539,6 +1528,26 @@ export class AmpA4A extends AMP.BaseElement {
           creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
       return null;
     }
+  }
+
+  /**
+   * Loads the necessary extension scripts, as specified in the metadata.
+   * @param {!Array<!Object<string, string>>} extensionList
+   */
+  loadExtensions_(extensionList) {
+    const extensions = extensionsFor(this.win);
+    extensionList.forEach(
+        extension => {
+          const extensionId = extension['custom-element'];
+          const extensionSrc = extension['src'];
+          const versionStartIndex = extensionSrc.indexOf(extensionId) +
+              extensionId.length + 1;
+          // -3 because the src string always ends with '.js'.
+          const versionEndIndex = extensionSrc.length - 3;
+          const extensionVer = extensionSrc.substring(
+              versionStartIndex, versionEndIndex);
+          extensions.loadExtension(extensionId, extensionVer);
+        });
   }
 
   /**

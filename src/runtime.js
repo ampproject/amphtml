@@ -1092,7 +1092,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   scriptInHead.removeAttribute('custom-element');
   scriptInHead.setAttribute('i-amphtml-loaded-new-version', fnOrStruct.n);
   extensionsFor(win).loadExtension(fnOrStruct.n,
-      /* use default version */ null,
+      /* use default version */ undefined,
       /* stubbing not needed, should have already happened. */ false);
   return true;
 }

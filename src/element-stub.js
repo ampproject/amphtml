@@ -33,7 +33,7 @@ export class ElementStub extends BaseElement {
     if (!loadingChecked[name]) {
       loadingChecked[name] = true;
       extensionsFor(this.win).loadExtension(
-          name, /* default version */ null, /* stubElement */ false);
+          name, /* default version */ undefined, /* stubElement */ false);
     }
     stubbedElements.push(this);
   }

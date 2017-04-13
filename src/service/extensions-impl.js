@@ -38,7 +38,10 @@ import {
 import {installImg} from '../../builtins/amp-img';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installStyles} from '../style-installer';
-import {calculateExtensionScriptUrl} from './extension-location';
+import {
+  calculateExtensionScriptUrl,
+  DefaultExtensionVersion,
+} from './extension-location';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
@@ -84,9 +87,6 @@ let ExtensionDef;
  * @private
  */
 let ExtensionHolderDef;
-
-// The version used when none is specified.
-const DefaultExtensionVersion = '0.1';
 
 
 /**
@@ -253,7 +253,7 @@ export class Extensions {
    * Returns the promise that will be resolved when the extension has been
    * loaded. If necessary, adds the extension script to the page.
    * @param {string} extensionId
-   * @param {?string=} extensionVer
+   * @param {string=} extensionVer
    * @param {boolean=} stubElement
    * @return {!Promise<!ExtensionDef>}
    */
