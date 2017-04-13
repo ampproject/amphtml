@@ -269,8 +269,10 @@ describe('BindExpression', () => {
   });
 
   it('should support encodeURI and encodeURIComponent', () => {
-    expect(evaluate('encodeURI("Hello World")')).to.equal('Hello%20World');
-    expect(evaluate('encodeURIComponent("#foo=bar")')).to.equal('%23foo%3Dbar');
+    expect(evaluate('encodeURI("http://www.google.com/s p a c e.html")'))
+        .to.equal('http://www.google.com/s%20p%20a%20c%20e.html');
+    expect(evaluate('encodeURIComponent("hello world")'))
+        .to.equal('hello%20world');
   });
 
   it('should support BindArrays functions', () => {
