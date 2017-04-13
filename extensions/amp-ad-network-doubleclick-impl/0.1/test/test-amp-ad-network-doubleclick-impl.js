@@ -179,6 +179,10 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'type': 'doubleclick',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
+        // Next two lines are to ensure that internal parts not relevant for this
+        // test are properly set.
+        impl.size_ = {width: 200, height: 50};
+        impl.iframe = impl.win.document.createElement('iframe');
         installExtensionsService(impl.win);
       });
     });
@@ -191,10 +195,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         },
       };
       impl.onCreativeRender(false);
-      // Next two lines are to ensure that internal parts not relevant for this
-      // test are properly set.
-      impl.size_ = {width: 200, height: 50};
-      impl.iframe = impl.win.document.createElement('iframe');
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
       expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
@@ -206,6 +206,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   });
 
   describe('centering', () => {
+    const size = {width: '300px', height: '150px'};
     /**
      * Creates an iframe promise, and instantiates element and impl, adding the
      * former to the document of the iframe.
@@ -264,7 +265,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.be.null;
         expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, {width: 'auto', height: 'auto'});
+        verifyCss(impl.iframe, size);
       });
     });
     it('centers iframe in slot when !height && width', () => {
@@ -274,7 +275,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.equal('300');
         expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, {width: '300', height: 'auto'});
+        verifyCss(impl.iframe, size);
       });
     });
     it('centers iframe in slot when height && !width', () => {
@@ -284,7 +285,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.be.null;
         expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, {width: 'auto', height: '150'});
+        verifyCss(impl.iframe, size);
       });
     });
   });
