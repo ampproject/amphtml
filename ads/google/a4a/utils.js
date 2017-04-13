@@ -16,6 +16,7 @@
 
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
+import {isCanary} from '../../../src/experiments';
 import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
@@ -137,6 +138,9 @@ export function googleAdUrl(
         ? '1' : '0';
     queryParams.push({name: 'act', value:
       Object.keys(containerTypeSet).join()});
+    if (isCanary(win)) {
+      queryParams.push({name: 'isc', value: '1'});
+    }
     const allQueryParams = queryParams.concat(
       [
         {
