@@ -73,7 +73,7 @@ rel="canonical">` tag.
 
 - Media: Videos must not enable autoplay.  This includes 
 both the `<amp-video>`
-   tag as well as autoplay on `<amp-anim>`, `<amp-carousel>`, and 3P video 
+   tag as well as autoplay on `<amp-anim>`, and 3P video 
    tags such as `<amp-youtube>`.
 
    _Rationale_: Autoplay forces video content to be downloaded immediately, 
