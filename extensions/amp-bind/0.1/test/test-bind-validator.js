@@ -196,6 +196,18 @@ describe('BindValidator', () => {
       expect(val.canBind('AMP-SELECTOR', 'selected')).to.be.true;
     });
 
+    it('should support <amp-state>', () => {
+      expect(val.canBind('AMP-STATE', 'src')).to.be.true;
+
+      // src
+      expect(val.isResultValid(
+          'AMP-STATE', 'src', 'https://foo.com/bar.json')).to.be.true;
+      expect(val.isResultValid(
+          'AMP-STATE', 'src', 'http://foo.com/bar.json')).to.be.false;
+      expect(val.isResultValid(
+          'AMP-STATE', 'src', 'data://foo.com/bar.json')).to.be.false;
+    });
+
     it('should support <amp-video>', () => {
       expect(val.canBind('AMP-VIDEO', 'loop')).to.be.true;
       expect(val.canBind('AMP-VIDEO', 'poster')).to.be.true;
