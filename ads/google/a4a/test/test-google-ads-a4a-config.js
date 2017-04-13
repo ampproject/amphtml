@@ -117,6 +117,7 @@ describe('a4a_config', () => {
         pathname: '/fnord',
         origin: 'https://cdn.ampproject.org',
         hash: '',
+        hostname: 'cdn.ampproject.org',
       },
       document: {
         nodeType: /* DOCUMENT */ 9,
@@ -132,6 +133,7 @@ describe('a4a_config', () => {
         webkitSubtle: true,
       },
       navigator: window.navigator,
+      pageExperimentBranches: {},
     };
     win.document.defaultView = win;
     installDocService(win, /* isSingleDoc */ true);
