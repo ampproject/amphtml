@@ -16,6 +16,7 @@
 
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
+import {isCanary} from '../../../src/experiments';
 import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
@@ -137,6 +138,9 @@ export function googleAdUrl(
         ? '1' : '0';
     queryParams.push({name: 'act', value:
       Object.keys(containerTypeSet).join()});
+    if (isCanary(win)) {
+      queryParams.push({name: 'isc', value: '1'});
+    }
     const allQueryParams = queryParams.concat(
       [
         {
@@ -361,9 +365,15 @@ export function additionalDimensions(win, viewportSize) {
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
+ * @param {number=} opt_deltaTime The time difference, in ms, between the
+ *   lifecycle reporter's initialization and now.
+ * @param {number=} opt_initTime The initialization time, in ms, of the
+ *   lifecycle reporter.
+ *   TODO(levitzky) Remove the above two params once AV numbers stabilize.
  * @return {?JSONType} config or null if invalid/missing.
  */
-export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
+export function extractAmpAnalyticsConfig(
+    a4a, responseHeaders, opt_deltaTime = -1, opt_initTime = -1) {
   if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     return null;
   }
@@ -414,13 +424,23 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     const slotId = a4a.element.getAttribute('data-amp-slot-index');
     const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
         ? responseHeaders.get(QQID_HEADER) : 'null';
-    config['requests']['visibilityCsi'] =
-        'https://csi.gstatic.com/csi?fromAnalytics=1' +
-        `&c=${correlator}&slotId=${slotId}&qqid.0=${qqid}`;
+    const eids = encodeURIComponent(
+        a4a.element.getAttribute(EXPERIMENT_ATTRIBUTE));
+    const adType = a4a.element.getAttribute('type');
+    const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
+        `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
+        `&dt=${opt_initTime}` +
+        (eids != 'null' ? `&e.${slotId}=${eids}` : ``) +
+        `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
+    opt_deltaTime = Math.round(opt_deltaTime);
+    config['requests']['iniLoadCsi'] = baseCsiUrl +
+        `&met.a4a.${slotId}=iniLoadCsi.${opt_deltaTime}`;
+    config['requests']['renderStartCsi'] = baseCsiUrl +
+        `&met.a4a.${slotId}=renderStartCsi.${opt_deltaTime}`;
     config['triggers']['continuousVisibleIniLoad']['request'] =
-        'visibilityCsi';
+        'iniLoadCsi';
     config['triggers']['continuousVisibleRenderStart']['request'] =
-        'visibilityCsi';
+        'renderStartCsi';
     return config;
   } catch (err) {
     dev().error('AMP-A4A', 'Invalid analytics', err,
