@@ -166,15 +166,16 @@ describe('Google A4A utils', () => {
         expect(iniLoadCsiRequest).to.not.be.null;
         expect(renderStartCsiRequest).to.not.be.null;
         // We expect slotId == null, since no real element is created, and so
-        // no slot index is ever set.
+        // no slot index is ever set. Additionally, below it is possible to
+        // have negative times, but only in in unit tests, never in production.
         const getRegExps = metricName => [
           /^https:\/\/csi\.gstatic\.com\/csi\?/,
           /s=a4a/,
           /&c=[0-9]+/,
           /&slotId=null/,
           /&qqid\.null=[a-zA-Z_]+/,
-          new RegExp(`&met\\.a4a\\.null=${metricName}\\.[0-9]+`),
-          /&dt=[0-9]+/];
+          new RegExp(`&met\\.a4a\\.null=${metricName}\\.-?[0-9]+`),
+          /&dt=-?[0-9]+/];
         getRegExps('iniLoadCsi').forEach(regExp => {
           expect(iniLoadCsiRequest).to.match(regExp);
         });
