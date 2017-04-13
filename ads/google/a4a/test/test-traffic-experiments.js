@@ -14,20 +14,44 @@
  * limitations under the License.
  */
 
-
+import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
   RANDOM_NUMBER_GENERATORS,
   addExperimentIdToElement,
   getPageExperimentBranch,
   mergeExperimentIds,
   isInExperiment,
+  isInManualExperiment,
+  isExternallyTriggeredExperiment,
+  isInternallyTriggeredExperiment,
   randomlySelectUnsetPageExperiments,
   validateExperimentIds,
+  googleAdsIsA4AEnabled,
+  forceExperimentBranch,
 } from '../traffic-experiments';
-import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
+import {
+  isExperimentOn,
+  toggleExperiment,
+  resetExperimentTogglesForTesting,
+} from '../../../../src/experiments';
+import {installPlatformService} from '../../../../src/service/platform-impl';
+import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
+import {resetServiceForTesting} from '../../../../src/service';
+import {
+  installDocumentStateService,
+} from '../../../../src/service/document-state';
+import {
+  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+  DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+  DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+} from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js'; // eslint-disable-line
 import {EXPERIMENT_ATTRIBUTE} from '../utils';
 import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
+
+const EXP_ID = 'EXP_ID';
 
 /** @private @const Tag used in dev log messages */
 const TAG_ = 'test-amp-ad';
@@ -345,5 +369,220 @@ describe('all-traffic-experiments-tests', () => {
       expect(isInExperiment(element, 'gunk')).to.be.true;
       expect(isInExperiment(element, 'zort')).to.be.true;
     });
+  });
+
+  describe('A4A Launch Flags', () => {
+    let sandbox;
+    let win;
+    let rand;
+    let events;
+    let element;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      rand = sandbox.stub(Math, 'random');
+      win = {
+        AMP_MODE: {
+          localDev: true,
+        },
+        location: {
+          href: 'https://cdn.ampproject.org/fnord',
+          pathname: '/fnord',
+          origin: 'https://cdn.ampproject.org',
+          hash: '',
+          hostname: 'cdn.ampproject.org',
+        },
+        document: {
+          nodeType: /* DOCUMENT */ 9,
+          hidden: false,
+          cookie: null,
+          visibilityState: 'visible',
+          addEventListener: function(type, listener) {
+            events[type] = listener;
+          },
+        },
+        crypto: {
+          subtle: true,
+          webkitSubtle: true,
+        },
+        navigator: window.navigator,
+        pageExperimentBranches: {},
+      };
+      win.document.defaultView = win;
+      installDocService(win, /* isSingleDoc */ true);
+      const ampdoc = ampdocServiceFor(win).getAmpDoc();
+      events = {};
+      installDocumentStateService(win);
+      installPlatformService(win);
+      installViewerServiceForDoc(ampdoc);
+      element = document.createElement('div');
+      element.setAttribute('type', 'doubleclick');
+      document.body.appendChild(element);
+      toggleExperiment(win, EXP_ID, true, true);
+    });
+
+    afterEach(() => {
+      resetServiceForTesting(win, 'viewer');
+      sandbox.restore();
+      document.body.removeChild(element);
+    });
+
+    function checkAgainstOtherBranches(element, eid) {
+      const branchIds = [
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+      ];
+      for (const branchId in branchIds) {
+        if (branchId === eid) {
+          expect(isInExperiment(element, branchId)).to.be.true;
+        } else {
+          expect(isInExperiment(element, branchId)).to.be.false;
+        }
+      }
+    }
+
+    it('should serve Delayed Fetch to unlaunched DoubleClick filler',
+      () => {
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.false;
+        checkAgainstOtherBranches(element, null);
+      });
+    it('should serve Delayed Fetch to unlaunched DoubleClick control',
+      () => {
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+        toggleExperiment(win, 'expDoubleclickA4A', true, true);
+        const branchId =
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control;
+        forceExperimentBranch(win, 'expDoubleclickA4A', branchId);
+        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.false;
+        expect(isInExperiment(element,branchId)).to.be.true;
+        checkAgainstOtherBranches(element, branchId);
+      });
+    it('should serve Fast Fetch to unlaunched DoubleClick experiment',
+      () => {
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+        toggleExperiment(win, 'expDoubleclickA4A', true, true);
+        const branchId =
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment;
+        forceExperimentBranch(win, 'expDoubleclickA4A', branchId);
+        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.true;
+        expect(isInExperiment(element,branchId)).to.be.true;
+        checkAgainstOtherBranches(element, branchId);
+      });
+    it('should serve Fast Fetch to launched DoubleClick filler',
+      () => {
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.true;
+        checkAgainstOtherBranches(element, null);
+      });
+    it('should serve Fast Fetch to launched DoubleClick control',
+      () => {
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+        toggleExperiment(win, 'expDoubleclickA4A', true, true);
+        const branchId =
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control;
+        forceExperimentBranch(win, 'expDoubleclickA4A', branchId);
+        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.true;
+        expect(isInExperiment(element,branchId)).to.be.true;
+        checkAgainstOtherBranches(element, branchId);
+      });
+    it('should serve Delayed Fetch to launched DoubleClick experiment (holdback)',
+      () => {
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+        toggleExperiment(win, 'expDoubleclickA4A', true, true);
+        const branchId =
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment;
+        forceExperimentBranch(win, 'expDoubleclickA4A', branchId);
+        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.false;
+        expect(isInExperiment(element,branchId)).to.be.true;
+        checkAgainstOtherBranches(element, branchId);
+      });
+    it('should serve Delayed Fetch to unlaunched DoubleClick filler (URL)',
+      () => {
+        win.location.search = '?exp=a4a:0';
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.false;
+        expect(win.document.cookie).to.be.null;
+        checkAgainstOtherBranches(element, null);
+      });
+    it('should serve Delayed Fetch to unlaunched DoubleClick control (URL)',
+      () => {
+        win.location.search = '?exp=a4a:1';
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.false;
+        expect(win.document.cookie).to.be.null;
+        const branchId =
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control;
+        checkAgainstOtherBranches(element, branchId);
+      });
+    it('should serve Fast Fetch to unlaunched DoubleClick experiment (URL)',
+      () => {
+        win.location.search = '?exp=a4a:2';
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.true;
+        expect(win.document.cookie).to.be.null;
+        const branchId =
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment;
+        checkAgainstOtherBranches(element, branchId);
+      });
+    it('should serve Fast Fetch to launched DoubleClick filler (URL)',
+      () => {
+        win.location.search = '?exp=a4a:0';
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.true;
+        expect(win.document.cookie).to.be.null;
+        checkAgainstOtherBranches(element, null);
+      });
+    it('should serve Fast Fetch to launched DoubleClick control (URL)',
+      () => {
+        win.location.search = '?exp=a4a:1';
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.true;
+        expect(win.document.cookie).to.be.null;
+        const branchId =
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control;
+        checkAgainstOtherBranches(element, branchId);
+      });
+    it('should serve Delayed Fetch to launched DoubleClick experiment (URL)',
+      () => {
+        win.location.search = '?exp=a4a:2';
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
+        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.false;
+        expect(win.document.cookie).to.be.null;
+        const branchId =
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment;
+        checkAgainstOtherBranches(element, branchId);
+      });
+    // TODO(jonkeller): AdSense tests also
   });
 });

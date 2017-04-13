@@ -101,6 +101,10 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     const selected = selectedBranch == internalBranches.experiment ||
                      selectedBranch == externalBranches.experiment ||
                      selectedBranch == MANUAL_EXPERIMENT_ID;
+    // Not launched, control branch -> Delayed Fetch
+    // Not launched, experimental branch -> Fast Fetch
+    // Launched, control branch -> Fast Fetch
+    // Launched, experimental branch -> Delayed Fetch (for holdback)
     return (selected == !hasLaunched(win, element));
   } else {
     // Page is not selected into the overall traffic experiment.
