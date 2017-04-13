@@ -16,8 +16,7 @@
 
 import {bindForDoc} from '../../../src/services';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
-import {getMode} from '../../../src/mode';
-import {isExperimentOn} from '../../../src/experiments';
+import {isBindEnabledFor} from './bind-impl';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -44,14 +43,13 @@ export class AmpState extends AMP.BaseElement {
   activate(invocation) {
     const event = invocation.event;
     if (event && event.detail) {
-      this.updateState_(event.detail.response);
+      this.updateState_(event.detail.response, /* isInit */ false);
     }
   }
 
   /** @override */
   buildCallback() {
-    // Allow integration test to access this class in testing mode.
-    user().assert(getMode().test || isExperimentOn(this.win, 'amp-bind'),
+    user().assert(isBindEnabledFor(this.win),
         `Experiment "amp-bind" is disabled.`);
 
     const TAG = this.getName_();
@@ -62,9 +60,7 @@ export class AmpState extends AMP.BaseElement {
     // Fetch JSON from endpoint at `src` attribute if it exists,
     // otherwise parse child script tag.
     if (this.element.hasAttribute('src')) {
-      fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
-        this.updateState_(json, /* opt_isInit */ true);
-      });
+      this.fetchSrcAndUpdateState_(/* isInit */ true);
       if (this.element.children.length > 0) {
         user().error(TAG, 'Should not have children if src attribute exists.');
       }
@@ -76,7 +72,7 @@ export class AmpState extends AMP.BaseElement {
           const json = tryParseJson(firstChild.textContent, e => {
             user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
           });
-          this.updateState_(json, /* opt_isInit */ true);
+          this.updateState_(json, /* isInit */ true);
         } else {
           user().error(TAG,
               'State should be in a <script> tag with type="application/json"');
@@ -88,17 +84,35 @@ export class AmpState extends AMP.BaseElement {
   }
 
   /** @override */
+  mutatedAttributesCallback(mutations) {
+    const src = mutations['src'];
+    if (src !== undefined) {
+      this.fetchSrcAndUpdateState_(/* isInit */ false);
+    }
+  }
+
+  /** @override */
   renderOutsideViewport() {
     // We want the state data to be available wherever it is in the document.
     return true;
   }
 
   /**
-   * @param {*} json
-   * @param {boolean=} opt_isInit
+   * @param {boolean} isInit
    * @private
    */
-  updateState_(json, opt_isInit) {
+  fetchSrcAndUpdateState_(isInit) {
+    fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
+      this.updateState_(json, isInit);
+    });
+  }
+
+  /**
+   * @param {*} json
+   * @param {boolean} isInit
+   * @private
+   */
+  updateState_(json, isInit) {
     if (json === undefined || json === null) {
       return;
     }
@@ -106,7 +120,7 @@ export class AmpState extends AMP.BaseElement {
     const state = Object.create(null);
     state[id] = json;
     bindForDoc(this.getAmpDoc()).then(bind => {
-      bind.setState(state, opt_isInit);
+      bind.setState(state, isInit);
     });
   }
 
