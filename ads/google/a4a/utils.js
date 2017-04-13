@@ -361,9 +361,14 @@ export function additionalDimensions(win, viewportSize) {
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
+ * @param {number=} opt_deltaTime The time difference, in ms, between the
+ *   lifecycle reporter's initialization and now.
+ * @param {number=} opt_initTime The initialization time, in ms, of the
+ *   lifecycle reporter.
  * @return {?JSONType} config or null if invalid/missing.
  */
-export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
+export function extractAmpAnalyticsConfig(
+    a4a, responseHeaders, opt_deltaTime, opt_initTime) {
   if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     return null;
   }
@@ -376,8 +381,9 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
       return null;
     }
     const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
-      ? responseHeaders.get(QQID_HEADER) : 'null';
-    return buildAmpAnalyticsConfig(a4a.win, a4a.element, urls, true, qqid);
+        ? responseHeaders.get(QQID_HEADER) : 'null';
+    return buildAmpAnalyticsConfig(
+        a4a.win, a4a.element, urls, true, qqid, opt_deltaTime, opt_initTime);
 
   } catch (err) {
     dev().error('AMP-A4A', 'Invalid analytics', err,
@@ -394,9 +400,14 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
  * @param {!Array.<string>} urls Array of urls to send pings to.
  * @param {!boolean} isA4a
  * @param {string=} opt_qqid
+ * @param {number=} opt_deltaTime The time difference, in ms, between the
+ *   lifecycle reporter's initialization and now.
+ * @param {number=} opt_initTime The initialization time, in ms, of the
+ *   lifecycle reporter.
  * @return {?JSONType} config
  */
-export function buildAmpAnalyticsConfig(win, element, urls, isA4a, opt_qqid) {
+export function buildAmpAnalyticsConfig(
+    win, element, urls, isA4a, opt_qqid, opt_deltaTime, opt_initTime) {
   const config = /** @type {JSONType}*/ ({
     'transport': {'beacon': false, 'xhrpost': false},
     'triggers': {
@@ -434,16 +445,25 @@ export function buildAmpAnalyticsConfig(win, element, urls, isA4a, opt_qqid) {
   // TODO(bradfrizzell@) talk to tdrl@ about this
   const correlator = getCorrelator(win);
   const slotId = element.getAttribute('data-amp-slot-index');
-
-  config['requests']['visibilityCsi'] =
-      'https://csi.gstatic.com/csi?fromAnalytics=1' +
+  const eids = encodeURIComponent(
+      element.getAttribute(EXPERIMENT_ATTRIBUTE));
+  const adType = element.getAttribute('type');
+  const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
       `&c=${correlator}&slotId=${slotId}` +
       `&a4a=` + (isA4a ? '2' : '1') +
-      (!!opt_qqid ? `&qqid.0=${opt_qqid}` : '');
+      (!!opt_qqid ? `&qqid.${slotId}=${opt_qqid}` : '') +
+      `&dt=${opt_initTime}` +
+      (eids != 'null' ? `&e.${slotId}=${eids}` : ``) +
+      `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
+  opt_deltaTime = Math.round(opt_deltaTime);
+  config['requests']['iniLoadCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=iniLoadCsi.${opt_deltaTime}`;
+  config['requests']['renderStartCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=renderStartCsi.${opt_deltaTime}`;
   config['triggers']['continuousVisibleIniLoad']['request'] =
-      'visibilityCsi';
+      'iniLoadCsi';
   config['triggers']['continuousVisibleRenderStart']['request'] =
-      'visibilityCsi';
+      'renderStartCsi';
   return config;
 
 }
