@@ -3026,12 +3026,12 @@ function validateAttributeInExtension(
 
   const extensionSpec = tagSpec.extensionSpec;
   // TagSpecs with extensions will only be evaluated if their dispatch_key
-  // matches, which is based on this custom-element field.
+  // matches, which is based on this custom-element/custom-template field.
   if (!extensionSpec.isCustomTemplate && attrName === 'custom-element') {
-    goog.asserts.assert(extensionSpec.name === attrValue);
+    goog.asserts.assert(extensionSpec.name == attrValue);
     return true;
   } else if (extensionSpec.isCustomTemplate && attrName === 'custom-template') {
-    goog.asserts.assert(extensionSpec.name === attrValue);
+    goog.asserts.assert(extensionSpec.name == attrValue);
     return true;
   } else if (attrName === 'src') {
     const srcUrlRe =
@@ -4274,6 +4274,8 @@ amp.validator.ValidationHandler =
       }
       return;
     }
+    let resultForBestAttempt = new amp.validator.ValidationResult();
+    resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
     // At this point, we have dispatch keys, tagspecs, or both.
     // The strategy is to look for a matching dispatch key first. A matching
     // dispatch key does not guarantee that the dispatched tagspec will also
@@ -4282,8 +4284,6 @@ amp.validator.ValidationHandler =
     // If we don't find a matching dispatch key, we must try all of the
     // tagspecs to see if any of them match. If there are no tagspecs, we want
     // to return a GENERAL_DISALLOWED_TAG error.
-    let resultForBestAttempt = new amp.validator.ValidationResult();
-    resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
     // calling HasDispatchKeys here is only an optimization to skip the loop
     // over encountered attributes in the case where we have no dispatches.
     if (tagSpecDispatch.hasDispatchKeys()) {
@@ -4304,6 +4304,32 @@ amp.validator.ValidationHandler =
             // validate using whatever the tagspec requests.
             attrValue.toLowerCase(), this.context_.getTagStack().getParent());
         if (maybeTagSpecId !== -1) {
+          // Dispatch keys cause trouble if there are multiple attributes with
+          // the dispatch key name. Detect this and emit an error.
+          for (let j = 0; j < encounteredAttrs.length; j += 2) {
+            if (j == i) continue;
+            let otherAttrName = encounteredAttrs[j].toLowerCase();
+            if (otherAttrName == attrName) {
+              let otherAttrValue = encounteredAttrs[j + 1];
+              if (otherAttrName === otherAttrValue) {
+                otherAttrValue = '';
+              }
+              if (otherAttrValue !== attrValue) {
+                if (amp.validator.LIGHT) {
+                  this.validationResult_.status =
+                      amp.validator.ValidationResult.Status.FAIL;
+                } else {
+                  this.context_.addError(
+                      amp.validator.ValidationError.Severity.ERROR,
+                      amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                      this.context_.getDocLocator(),
+                      [attrName, tagName.toLowerCase(), otherAttrValue],
+                      /* url */ '', this.validationResult_);
+                }
+                return;
+              }
+            }
+          }
           validateTagAgainstSpec(
               this.rules_, maybeTagSpecId, this.context_, encounteredAttrs,
               resultForBestAttempt);
