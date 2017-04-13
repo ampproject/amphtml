@@ -16,6 +16,7 @@
 
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
+import {isCanary} from '../../../src/experiments';
 import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
@@ -137,6 +138,9 @@ export function googleAdUrl(
         ? '1' : '0';
     queryParams.push({name: 'act', value:
       Object.keys(containerTypeSet).join()});
+    if (isCanary(win)) {
+      queryParams.push({name: 'isc', value: '1'});
+    }
     const allQueryParams = queryParams.concat(
       [
         {
@@ -365,10 +369,11 @@ export function additionalDimensions(win, viewportSize) {
  *   lifecycle reporter's initialization and now.
  * @param {number=} opt_initTime The initialization time, in ms, of the
  *   lifecycle reporter.
+ *   TODO(levitzky) Remove the above two params once AV numbers stabilize.
  * @return {?JSONType} config or null if invalid/missing.
  */
 export function extractAmpAnalyticsConfig(
-    a4a, responseHeaders, opt_deltaTime, opt_initTime) {
+    a4a, responseHeaders, opt_deltaTime = -1, opt_initTime = -1) {
   if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     return null;
   }
@@ -384,7 +389,6 @@ export function extractAmpAnalyticsConfig(
         ? responseHeaders.get(QQID_HEADER) : 'null';
     return buildAmpAnalyticsConfig(
         a4a.win, a4a.element, urls, true, qqid, opt_deltaTime, opt_initTime);
-
   } catch (err) {
     dev().error('AMP-A4A', 'Invalid analytics', err,
         responseHeaders.get(AMP_ANALYTICS_HEADER));
