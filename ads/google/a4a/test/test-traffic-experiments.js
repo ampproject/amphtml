@@ -33,7 +33,6 @@ import {
 import {
   isExperimentOn,
   toggleExperiment,
-  resetExperimentTogglesForTesting,
 } from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
@@ -416,7 +415,6 @@ describe('all-traffic-experiments-tests', () => {
       installPlatformService(win);
       installViewerServiceForDoc(ampdoc);
       element = document.createElement('div');
-      element.setAttribute('type', 'doubleclick');
       document.body.appendChild(element);
       toggleExperiment(win, EXP_ID, true, true);
     });
@@ -443,138 +441,136 @@ describe('all-traffic-experiments-tests', () => {
       }
     }
 
-    it('should serve Delayed Fetch to unlaunched DoubleClick filler',
-      () => {
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
+    const tests = [
+      {
+        branchType: 'filler',
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        branchId: null,
+      },
+      {
+        branchType: 'control',
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+      },
+      {
+        branchType: 'experiment',
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: true,
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        branchType: 'filler',
+        branchId: null,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        branchType: 'control',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: false,
+        branchType: 'experiment',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        urlParam: '?exp=a4a:0',
+        branchType: 'filler',
+        branchId: null,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        urlParam: '?exp=a4a:1',
+        branchType: 'control',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: true,
+        urlParam: '?exp=a4a:2',
+        branchType: 'experiment',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        urlParam: '?exp=a4a:0',
+        branchType: 'filler',
+        branchId: null,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        urlParam: '?exp=a4a:1',
+        branchType: 'control',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: false,
+        urlParam: '?exp=a4a:2',
+        branchType: 'experiment',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+      },
+      // TODO(jonkeller): AdSense tests also
+    ];
+
+    tests.forEach((test) => {
+      let desc = `should serve ` +
+                 `${test.shouldServeFastFetch ? 'Fast' : 'Delayed'} Fetch to ` +
+                 `${test.hasLaunched ? "launched" : "unlaunched"} ` +
+                 `${test.adType} ${test.branchType} ` +
+                 `${test.urlParam ? 'via URL ' : ''}`;
+      it(desc, () => {
+        element.setAttribute('type', test.adType);
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched',
+          test.hasLaunched, true);
+        if (test.urlParam) {
+          win.location.search = test.urlParam;
+        }
+        if (test.branchId != null && !test.urlParam) {
+          toggleExperiment(win, 'expDoubleclickA4A', true, true);
+          forceExperimentBranch(win, 'expDoubleclickA4A', test.branchId);
+        }
+        const external = test.hasLaunched ?
+            DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+        const internal = test.hasLaunched ?
+            DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+            DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
         expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.false;
-        expectCorrectBranchOnly(element, null);
-      });
-    it('should serve Delayed Fetch to unlaunched DoubleClick control',
-      () => {
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
-        toggleExperiment(win, 'expDoubleclickA4A', true, true);
-        const branchId =
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control;
-        forceExperimentBranch(win, 'expDoubleclickA4A', branchId);
-        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.false;
-        expectCorrectBranchOnly(element, branchId);
-      });
-    it('should serve Fast Fetch to unlaunched DoubleClick experiment',
-      () => {
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
-        toggleExperiment(win, 'expDoubleclickA4A', true, true);
-        const branchId =
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment;
-        forceExperimentBranch(win, 'expDoubleclickA4A', branchId);
-        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.true;
-        expectCorrectBranchOnly(element, branchId);
-      });
-    it('should serve Fast Fetch to launched DoubleClick filler',
-      () => {
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
-        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.true;
-        expectCorrectBranchOnly(element, null);
-      });
-    it('should serve Fast Fetch to launched DoubleClick control',
-      () => {
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
-        toggleExperiment(win, 'expDoubleclickA4A', true, true);
-        const branchId =
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control;
-        forceExperimentBranch(win, 'expDoubleclickA4A', branchId);
-        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.true;
-        expectCorrectBranchOnly(element, branchId);
-      });
-    it('should serve Delayed Fetch to launched DoubleClick experiment (holdback)',
-      () => {
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
-        toggleExperiment(win, 'expDoubleclickA4A', true, true);
-        const branchId =
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment;
-        forceExperimentBranch(win, 'expDoubleclickA4A', branchId);
-        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.false;
-        expectCorrectBranchOnly(element, branchId);
-      });
-    it('should serve Delayed Fetch to unlaunched DoubleClick filler (URL)',
-      () => {
-        win.location.search = '?exp=a4a:0';
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
-        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.false;
+          external, internal)).to.equal(test.shouldServeFastFetch);
+        expectCorrectBranchOnly(element, test.branchId);
         expect(win.document.cookie).to.be.null;
-        expectCorrectBranchOnly(element, null);
       });
-    it('should serve Delayed Fetch to unlaunched DoubleClick control (URL)',
-      () => {
-        win.location.search = '?exp=a4a:1';
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
-        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.false;
-        expect(win.document.cookie).to.be.null;
-        const branchId =
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control;
-        expectCorrectBranchOnly(element, branchId);
-      });
-    it('should serve Fast Fetch to unlaunched DoubleClick experiment (URL)',
-      () => {
-        win.location.search = '?exp=a4a:2';
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', false, true);
-        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH)).to.be.true;
-        expect(win.document.cookie).to.be.null;
-        const branchId =
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment;
-        expectCorrectBranchOnly(element, branchId);
-      });
-    it('should serve Fast Fetch to launched DoubleClick filler (URL)',
-      () => {
-        win.location.search = '?exp=a4a:0';
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
-        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.true;
-        expect(win.document.cookie).to.be.null;
-        expectCorrectBranchOnly(element, null);
-      });
-    it('should serve Fast Fetch to launched DoubleClick control (URL)',
-      () => {
-        win.location.search = '?exp=a4a:1';
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
-        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.true;
-        expect(win.document.cookie).to.be.null;
-        const branchId =
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control;
-        expectCorrectBranchOnly(element, branchId);
-      });
-    it('should serve Delayed Fetch to launched DoubleClick experiment (URL)',
-      () => {
-        win.location.search = '?exp=a4a:2';
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched', true, true);
-        expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH)).to.be.false;
-        expect(win.document.cookie).to.be.null;
-        const branchId =
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment;
-        expectCorrectBranchOnly(element, branchId);
-      });
-    // TODO(jonkeller): AdSense tests also
+    });
   });
 });
