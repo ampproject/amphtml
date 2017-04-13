@@ -686,10 +686,10 @@ function assertActionForParser(s, context, condition, opt_message) {
 function assertTokenForParser(s, context, tok, types, opt_value) {
   if (opt_value !== undefined) {
     assertActionForParser(s, context,
-        types.indexOf(tok.type) >= 0 && tok.value == opt_value,
+        types.includes(tok.type) === true && tok.value == opt_value,
         `; expected [${opt_value}]`);
   } else {
-    assertActionForParser(s, context, types.indexOf(tok.type) >= 0);
+    assertActionForParser(s, context, types.includes(tok.type) === true);
   }
   return tok;
 }

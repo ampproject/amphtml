@@ -595,7 +595,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     const paramString = s.join('&');
-    if (request.indexOf('${extraUrlParams}') >= 0) {
+    if (request.includes('${extraUrlParams}') === true) {
       return request.replace('${extraUrlParams}', paramString);
     } else {
       return appendEncodedParamStringToUrl(request, paramString);
