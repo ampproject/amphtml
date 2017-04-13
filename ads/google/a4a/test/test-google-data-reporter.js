@@ -30,8 +30,10 @@ import {
     ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
 } from '../../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';  // eslint-disable-line max-len
 import {
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
 } from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
 
 /**
@@ -65,15 +67,19 @@ describe('#getLifecycleReporter', () => {
   const EXPERIMENT_BRANCH_EIDS = [
     ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment,
     ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
     '117152632',
   ];
   const CONTROL_BRANCH_EIDS = [
     ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control,
     ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
   ];
 
   ['adsense', 'doubleclick'].forEach(type => {
@@ -192,7 +198,7 @@ describe('#getLifecycleReporter', () => {
         fakeElt.setAttribute('data-amp-slot-index', '22');
         fakeElt.setAttribute('type', 'doubleclick');
         fakeElt.setAttribute(EXPERIMENT_ATTRIBUTE,
-            DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment);
+            DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment);
         env.win.document.body.appendChild(fakeElt);
         env.win.ampAdPageCorrelator = 7777777;
         const a4aContainer = {
@@ -212,6 +218,8 @@ describe('#getLifecycleReporter', () => {
         expect(pingElements.length).to.equal(1);
         const pingUrl = pingElements[0].getAttribute('src');
         expect(pingUrl).to.be.ok;
+        const experimentId =
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment;
         const expectedParams = [
           's=a4a',
           'c=7777777',
@@ -222,7 +230,7 @@ describe('#getLifecycleReporter', () => {
           'stageName=renderFriendlyStart',
           'stageIdx=6',
           'met.a4a.22=renderFriendlyStart.[0-9]+',
-          `e.22=${DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment}`,
+          `e.22=${experimentId}`,
           'adt.22=doubleclick',
           'met.a4a=firstVisibleTime.[0-9]+%2ClastVisibleTime.[0-9]+',
         ];

@@ -16,7 +16,7 @@
 
 import {
   doubleclickIsA4AEnabled,
-  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
   DOUBLECLICK_A4A_BETA_BRANCHES,
   BETA_ATTRIBUTE,
 } from '../doubleclick-a4a-config';
@@ -172,8 +172,9 @@ describe('doubleclick-a4a-config', () => {
       expect(elem0.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
       expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.true;
-      expect(isInExperiment(elem1,
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment)).to.be.true;
+      const experimentId =
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment;
+      expect(isInExperiment(elem1, experimentId)).to.be.true;
     });
   });
 });
