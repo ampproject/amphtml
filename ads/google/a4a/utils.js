@@ -420,9 +420,14 @@ export function extractAmpAnalyticsConfig(
     const slotId = a4a.element.getAttribute('data-amp-slot-index');
     const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
         ? responseHeaders.get(QQID_HEADER) : 'null';
+    const eids = encodeURIComponent(
+        a4a.element.getAttribute(EXPERIMENT_ATTRIBUTE));
+    const adType = a4a.element.getAttribute('type');
     const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
         `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
-        `&dt=${opt_initTime}`;
+        `&dt=${opt_initTime}` +
+        (eids != 'null' ? `&e.${slotId}=${eids}` : ``) +
+        `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
     opt_deltaTime = Math.round(opt_deltaTime);
     config['requests']['iniLoadCsi'] = baseCsiUrl +
         `&met.a4a.${slotId}=iniLoadCsi.${opt_deltaTime}`;

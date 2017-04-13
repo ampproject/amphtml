@@ -150,6 +150,7 @@ describe('Google A4A utils', () => {
           'width': '200',
           'height': '50',
           'type': 'adsense',
+          'data-experiment-id': '00000001,0000002',
         });
         const a4a = new MockA4AImpl(element);
         url = 'not an array';
@@ -175,7 +176,11 @@ describe('Google A4A utils', () => {
           /&slotId=null/,
           /&qqid\.null=[a-zA-Z_]+/,
           new RegExp(`&met\\.a4a\\.null=${metricName}\\.-?[0-9]+`),
-          /&dt=-?[0-9]+/];
+          /&dt=-?[0-9]+/,
+          /e\.null=00000001%2C0000002/,
+          /rls=\$internalRuntimeVersion\$/,
+          /adt.null=(doubleclick|adsense)/,
+        ];
         getRegExps('iniLoadCsi').forEach(regExp => {
           expect(iniLoadCsiRequest).to.match(regExp);
         });
