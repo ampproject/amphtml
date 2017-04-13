@@ -323,7 +323,8 @@ export class AmpA4A extends AMP.BaseElement {
     this.isCollapsed_ = false;
 
     /**
-     * The outer most iframe loaded by this ad slot.
+     * Frame in which the creative renders (friendly if validated AMP, xdomain
+     * otherwise).
      * {?HTMLIframeElement}
      */
     this.iframe = null;
@@ -854,6 +855,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
+    this.iframe = null;
     this.isVerifiedAmpCreative_ = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
@@ -1093,6 +1095,7 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
     this.protectedEmitLifecycleEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
+    dev().assert(!this.iframe);
     this.iframe = /** @type {!HTMLIFrameElement} */(
         createElementWithAttributes(
             /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
@@ -1177,6 +1180,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
+    dev().assert(!this.iframe);
     this.iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES));
