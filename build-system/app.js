@@ -132,7 +132,7 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   const unauthorized = 'Unauthorized Request';
   var origin;
 
-  if (validMethods.indexOf(req.method) == -1) {
+  if (validMethods.includes(req.method) === false) {
     res.statusCode = 405;
     res.end(JSON.stringify({message: invalidMethod}));
     throw invalidMethod;
@@ -883,7 +883,7 @@ function getUrlPrefix(req) {
 function addQueryParam(url, param, value) {
   const paramValue =
       encodeURIComponent(param) + '=' + encodeURIComponent(value);
-  if (url.indexOf('?') == -1) {
+  if (url.includes('?') === false) {
     url += '?' + paramValue;
   } else {
     url += '&' + paramValue;

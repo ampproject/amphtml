@@ -384,7 +384,7 @@ export class Log {
     if (this.suffix_) {
       if (!error.message) {
         error.message = this.suffix_;
-      } else if (error.message.indexOf(this.suffix_) == -1) {
+      } else if (error.message.includes(this.suffix_) === false) {
         error.message += this.suffix_;
       }
     } else if (isUserErrorMessage(error.message)) {

@@ -161,7 +161,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             // Remember them for debugging purposes.
             const extraneousParams = [];
             for (const name in actualQueryParams) {
-              if (!(name in urlParams) && variableParams.indexOf(name) < 0) {
+              if (!(name in urlParams) && variableParams.includes(name) === false) {
                 extraneousParams.push(`${name}=${actualQueryParams[name]}`);
               }
             }

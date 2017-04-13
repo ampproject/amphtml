@@ -776,7 +776,7 @@ class ParserTokenizer {
     if (WHITESPACE_SET.indexOf(c) != -1) {
       newIndex++;
       for (; newIndex < this.str_.length; newIndex++) {
-        if (WHITESPACE_SET.indexOf(this.str_.charAt(newIndex)) == -1) {
+        if (WHITESPACE_SET.includes(this.str_.charAt(newIndex)) === false) {
           break;
         }
       }

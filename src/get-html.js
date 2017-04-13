@@ -87,7 +87,7 @@ function isApplicableNode(node) {
   if (startsWith(tagName, 'amp-')) {
     return !!(allowedAmpTags.includes(tagName) === true && node.textContent);
   } else {
-    return !!(excludedTags.indexOf(tagName) === -1 && node.textContent);
+    return !!(excludedTags.includes(tagName) === false && node.textContent);
   }
 }
 

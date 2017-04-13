@@ -837,7 +837,7 @@ class ChildTagMatcher {
     this.numChildTagsSeen_++;  // Increment this first to allow early exit.
     if (childTags.childTagNameOneof.length > 0) {
       const names = childTags.childTagNameOneof;
-      if (names.indexOf(tagName) === -1) {
+      if (names.includes(tagName) === false) {
         if (!amp.validator.LIGHT) {
           const allowedNames = '[\'' + names.join('\', \'') + '\']';
           context.addError(
@@ -859,7 +859,7 @@ class ChildTagMatcher {
     if (childTags.firstChildTagNameOneof.length > 0 &&
         (this.numChildTagsSeen_ - 1) === 0) {
       const names = childTags.firstChildTagNameOneof;
-      if (names.indexOf(tagName) == -1) {
+      if (names.includes(tagName) === false) {
         if (!amp.validator.LIGHT) {
           const allowedNames = '[\'' + names.join('\', \'') + '\']';
           context.addError(
@@ -2806,7 +2806,7 @@ function validateLayout(parsedTagSpec, context, attrsByKey, result) {
   }
 
   // Does the tag support the computed layout?
-  if (spec.ampLayout.supportedLayouts.indexOf(layout) === -1) {
+  if (spec.ampLayout.supportedLayouts.includes(layout) === false) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
     } else {
@@ -3287,7 +3287,7 @@ function validateAttributes(
   // The "at least 1" part of mandatory_oneof: If none of the
   // alternatives were present, we report that an attribute is missing.
   for (const mandatoryOneof of parsedTagSpec.getMandatoryOneofs()) {
-    if (mandatoryOneofsSeen.indexOf(mandatoryOneof) === -1) {
+    if (mandatoryOneofsSeen.includes(mandatoryOneof) === false) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -3973,7 +3973,7 @@ class ParsedValidatorRules {
         continue;
       }
       const alternative = tagSpec.mandatoryAlternatives;
-      if (satisfied.indexOf(alternative) === -1) {
+      if (satisfied.includes(alternative) === false) {
         if (amp.validator.LIGHT) {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
           return;

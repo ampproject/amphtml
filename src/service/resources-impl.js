@@ -500,7 +500,7 @@ export class Resources {
         }
       } else if (!resource.element.isBuilt()) {
         if (!checkForDupes ||
-            this.pendingBuildResources_.indexOf(resource) == -1) {
+            this.pendingBuildResources_.includes(resource) === false) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
           this.buildReadyResources_(scheduleWhenBuilt);

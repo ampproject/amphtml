@@ -236,7 +236,7 @@ export const ShadowCSS = {
       scoped = parts.map(function(p) {
         // remove :host since it should be unnecessary
         var t = p.trim().replace(polyfillHostRe, '');
-        if (t && (splits.indexOf(t) < 0) && (t.indexOf(attrName) < 0)) {
+        if (t && (splits.includes(t) === false) && (t.includes(attrName) === false)) {
           p = t.replace(/([^:]*)(:*)(.*)/, '$1' + attrName + '$2$3');
         }
         return p;

@@ -160,7 +160,7 @@ export class VariableSource {
    * @return {!VariableSource}
    */
   set(varName, syncResolver) {
-    dev().assert(varName.indexOf('RETURN') == -1);
+    dev().assert(varName.includes('RETURN') === false);
     this.replacements_[varName] =
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].sync = syncResolver;
@@ -179,7 +179,7 @@ export class VariableSource {
    * @return {!VariableSource}
    */
   setAsync(varName, asyncResolver) {
-    dev().assert(varName.indexOf('RETURN') == -1);
+    dev().assert(varName.includes('RETURN') === false);
     this.replacements_[varName] =
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].async = asyncResolver;
