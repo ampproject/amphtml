@@ -283,6 +283,7 @@ Only binding to the following components and attributes are allowed:
 | `<amp-iframe>` | `[src]` | Changes the iframe's source URL. |
 | `<amp-img>` | `[alt]`<br>`[attribution]`<br>`[src]`<br>`[srcset]` | See corresponding [amp-img attributes](https://www.ampproject.org/docs/reference/components/media/amp-img#attributes). |
 | `<amp-selector>` | `[selected]`<sup>1</sup> | Changes the currently selected children element(s)<br>identified by their `option` attribute values. Supports a comma-separated list of values for multiple selection. [See an example](https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind).
+| `<amp-state>` | `[src]` | Fetches JSON from the new URL and merges it into the existing state. |
 | `<amp-video>` | `[alt]`<br>`[attribution]`<br>`[controls]`<br>`[loop]`<br>`[poster]`<br>`[preload]`<br>`[src]` | See corresponding [amp-video attributes](https://www.ampproject.org/docs/reference/components/media/amp-video#attributes). |
 | `<amp-youtube>` | `[data-videoid]` | Changes the displayed YouTube video. |
 | `<a>` | `[href]` | Changes the link. |
