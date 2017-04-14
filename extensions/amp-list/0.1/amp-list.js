@@ -70,7 +70,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   getDynamicElementContainers() {
-    return this.container_;
+    return [this.container_];
   }
 
   /**
