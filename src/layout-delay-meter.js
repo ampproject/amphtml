@@ -64,10 +64,9 @@ export class LayoutDelayMeter {
   }
 
   tryMeasureDelay_() {
-
-    //if (!this.performance_ || !this.performance_.isPerformanceTrackingOn()) {
-    //  return;
-    //}
+    if (!this.performance_ || !this.performance_.isPerformanceTrackingOn()) {
+      return;
+    }
     if (this.done_) {
       // Already measured.
       return;
