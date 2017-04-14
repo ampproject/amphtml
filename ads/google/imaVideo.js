@@ -811,6 +811,7 @@ function onMessage(event) {
         } else {
           muteAdsManagerOnLoaded = true;
         }
+        window.parent.postMessage({event: VideoEvents.MUTED}, '*');
         break;
       case 'unMute':
         videoPlayer.volume = 1;
@@ -820,6 +821,7 @@ function onMessage(event) {
         } else {
           muteAdsManagerOnLoaded = false;
         }
+        window.parent.postMessage({event: VideoEvents.UNMUTED}, '*');
         break;
       case 'resize':
         wrapperDiv.style.width = msg.args.width + 'px';

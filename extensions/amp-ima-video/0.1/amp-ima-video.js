@@ -1,11 +1,14 @@
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {listenFor} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/video-manager';
+import {videoManagerForDoc} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -64,6 +67,7 @@ class AmpImaVideo extends AMP.BaseElement {
     this.win.addEventListener(
         'message', event => this.handlePlayerMessages_(event));
 
+    installVideoManagerForDoc(this.element);
     videoManagerForDoc(this.win.document).register(this);
 
     return loadPromise(iframe).then(() => this.playerReadyPromise_);
@@ -121,7 +125,9 @@ class AmpImaVideo extends AMP.BaseElement {
     const data = isObject(event.data) ? event.data : tryParseJson(event.data);
     if (data.event == VideoEvents.LOAD ||
         data.event == VideoEvents.PLAY ||
-        data.event == VideoEvents.PAUSE) {
+        data.event == VideoEvents.PAUSE ||
+        data.event == VideoEvents.MUTED ||
+        data.event == VideoEvents.UNMUTED) {
       console.log('Firing ' + data.event);
       if (data.event == VideoEvents.LOAD) {
         this.playerReadyResolver_(this.iframe_);
