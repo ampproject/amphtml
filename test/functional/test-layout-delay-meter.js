@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {LayoutDelayMeter} from '../layout-delay-meter';
+import {LayoutDelayMeter} from '../../src/layout-delay-meter';
 import {
   installPerformanceService,
   performanceFor,
-} from '../../../../src/service/performance-impl';
+} from '../../src/service/performance-impl';
 import * as lolex from 'lolex';
 
 describes.realWin('layout-delay-meter', {
