@@ -19,6 +19,7 @@ import {
   getElementServiceIfAvailableForDoc,
 } from './element-service';
 import {createElementWithAttributes} from './dom';
+import {getAmpdoc} from './service';
 import {extensionsFor} from './services';
 
 
@@ -30,9 +31,8 @@ import {extensionsFor} from './services';
 export function analyticsForDoc(nodeOrDoc, loadAnalytics = false) {
   if (loadAnalytics) {
     // Get Extensions service and force load analytics extension.
-    const win = /** @type {!Document} */ (
-        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
-    extensionsFor(win)./*OK*/loadExtension('amp-analytics');
+    const ampdoc = getAmpdoc(nodeOrDoc);
+    extensionsFor(ampdoc.win)./*OK*/loadExtension('amp-analytics');
   }
   return (/** @type {!Promise<
             !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
