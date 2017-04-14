@@ -698,7 +698,7 @@ class MultidocManager {
     }, 50);
 
     // Store reference.
-    if (this.shadowRoots_.includes(shadowRoot) === false) {
+    if (!this.shadowRoots_.includes(shadowRoot)) {
       this.shadowRoots_.push(shadowRoot);
     }
 
@@ -802,7 +802,7 @@ class MultidocManager {
             } else {
               // Non-src version of script.
               const type = n.getAttribute('type') || 'application/javascript';
-              if (type.includes('javascript') === false) {
+              if (!type.includes('javascript')) {
                 shadowRoot.appendChild(this.win.document.importNode(n, true));
                 dev().fine(TAG, '- non-src script: ', n);
               } else {

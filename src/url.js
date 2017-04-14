@@ -371,8 +371,7 @@ export function getSourceUrl(url) {
       ? 'https://' + decodeURIComponent(path[3])
       : 'http://' + decodeURIComponent(domainOrHttpsSignal);
   // Sanity test that what we found looks like a domain.
-  const includesDot = origin.includes('.');
-  user().assert(includesDot === true, 'Expected a . in origin %s', origin);
+  user().assert(origin.includes('.'), 'Expected a . in origin %s', origin);
   path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);
   return origin + path.join('/') + removeAmpJsParams(url.search) +
       (url.hash || '');

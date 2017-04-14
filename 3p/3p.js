@@ -154,7 +154,7 @@ export function validateSrcPrefix(prefix, src) {
  * @param {string} src
  */
 export function validateSrcContains(string, src) {
-  if (src.includes(string) === false) {
+  if (!src.includes(string)) {
     throw new Error('Invalid src ' + src);
   }
 }
@@ -277,7 +277,7 @@ function validateAllowedFields(data, allowedFields) {
     if (!data.hasOwnProperty(field) || field in defaultAvailableFields) {
       continue;
     }
-    if (allowedFields.includes(field) === false) {
+    if (!allowedFields.includes(field)) {
       // Throw in a timeout, because we do not want to interrupt execution,
       // because that would make each removal an instant backward incompatible
       // change.

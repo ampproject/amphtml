@@ -110,7 +110,7 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
     url = encodeURI(this.replacements(url, values));
 
     // include other data attributes as query parameters
-    let pre = url.includes('?') === false ? '?' : '&';
+    let pre = !url.includes('?') ? '?' : '&';
     for (let i = 0; i < el.attributes.length; i++) {
       const attrib = el.attributes[i];
       if (attrib.specified && startsWith(attrib.name, 'data-')

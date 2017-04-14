@@ -220,7 +220,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (this.isSandbox_) {
           const eventType = trigger['on'];
           if (isEnumValue(AnalyticsEventType, eventType) &&
-              WHITELIST_EVENT_IN_SANDBOX.includes(eventType) === false) {
+              !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)) {
             user().error(TAG, eventType + 'is not supported for amp-analytics' +
             ' in scope');
             continue;
@@ -595,7 +595,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     const paramString = s.join('&');
-    if (request.includes('${extraUrlParams}') === true) {
+    if (request.includes('${extraUrlParams}')) {
       return request.replace('${extraUrlParams}', paramString);
     } else {
       return appendEncodedParamStringToUrl(request, paramString);

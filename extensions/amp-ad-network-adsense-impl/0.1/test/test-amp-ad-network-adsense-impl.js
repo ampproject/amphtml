@@ -161,8 +161,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             // Remember them for debugging purposes.
             const extraneousParams = [];
             for (const name in actualQueryParams) {
-              const includeNames = variableParams.includes(name);
-              if (!(name in urlParams) && includeNames === false) {
+              if (!(name in urlParams) && !variableParams.includes(name)) {
                 extraneousParams.push(`${name}=${actualQueryParams[name]}`);
               }
             }
@@ -185,7 +184,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         ampStickyAd.appendChild(element);
         fixture.doc.body.appendChild(ampStickyAd);
         return impl.getAdUrl().then(adUrl => {
-          expect(adUrl.includes('act=sa') === true).to.be.true;
+          expect(adUrl.includes('act=sa')).to.be.true;
         });
       });
     });

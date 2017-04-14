@@ -231,7 +231,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     });
     if (oldPos != newPos) {
       this.withinWindow_(oldPos, cell => {
-        if (seen.includes(cell) === false) {
+        if (!seen.includes(cell)) {
           this.updateInViewport(cell, false);
           this.schedulePause(cell);
         }

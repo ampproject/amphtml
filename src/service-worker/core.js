@@ -233,7 +233,7 @@ export function isBlacklisted(version) {
    * @type {AmpVersion}
    */
   const ampVersion = version.substr(2);
-  return BLACKLIST.includes(ampVersion) === true;
+  return BLACKLIST.includes(ampVersion);
 }
 
 /**
@@ -466,7 +466,7 @@ function purge(cache, version, pathname, diversions) {
       } else {
         // We will only delete a diversion if we know for certain the versions
         // that are diversions.
-        if (!diversions || diversions.includes(cachedData.rtv) === true) {
+        if (!diversions || diversions.includes(cachedData.rtv)) {
           continue;
         }
       }
@@ -544,7 +544,7 @@ export function getCachedVersion(cache, requestVersion, requestPath) {
       // The main binary (arguably the most important file to cache) is given a
       // heavy weight, while the first requested file is given a slight weight.
       // Everything else increments normally.
-      if (pathname.includes('/', 1) === false) {
+      if (!pathname.includes('/', 1)) {
         // Main binary
         count += 5;
       } else if (requestPath === pathname) {

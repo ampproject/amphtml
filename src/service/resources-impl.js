@@ -499,8 +499,7 @@ export class Resources {
           this.schedulePass();
         }
       } else if (!resource.element.isBuilt()) {
-        if (!checkForDupes ||
-            this.pendingBuildResources_.includes(resource) === false) {
+        if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
           this.buildReadyResources_(scheduleWhenBuilt);

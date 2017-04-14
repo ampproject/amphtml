@@ -181,7 +181,7 @@ function compile(entryModuleFilenames, outputDir,
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
     entryModuleFilenames.forEach(function(filename) {
-      if (filename.includes('extensions/') === false) {
+      if (!filename.includes('extensions/')) {
         return;
       }
       var path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');

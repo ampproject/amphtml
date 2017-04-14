@@ -390,7 +390,7 @@ class AmpLightbox extends AMP.BaseElement {
     });
     if (oldPos != newPos) {
       this.forEachVisibleChild_(oldPos, cell => {
-        if (seen.includes(cell) === false) {
+        if (!seen.includes(cell)) {
           this.updateInViewport(cell, false);
         }
       });

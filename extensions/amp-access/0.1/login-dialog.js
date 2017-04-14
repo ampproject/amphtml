@@ -307,6 +307,6 @@ function buildLoginUrl(url, returnUrl) {
     return url.replace(RETURN_URL_REGEX, encodeURIComponent(returnUrl));
   }
   return url +
-      (url.includes('?') === false ? '?' : '&') +
+      (!url.includes('?') ? '?' : '&') +
       'return=' + encodeURIComponent(returnUrl);
 }

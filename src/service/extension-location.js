@@ -76,7 +76,7 @@ export function calculateEntryPointScriptUrl(location, entryPoint, isLocalDev,
  */
 function isMax(location) {
   const path = location.pathname;
-  return path.includes('.max') === true || path.includes('/max/') === true;
+  return path.includes('.max') || path.includes('/max/');
 }
 
 /**
@@ -86,5 +86,5 @@ function isMax(location) {
  */
 function isMin(location) {
   const path = location.pathname;
-  return path.includes('.min') === true || path.substr(0, 5) == '/min/';
+  return path.includes('.min') || path.substr(0, 5) == '/min/';
 }

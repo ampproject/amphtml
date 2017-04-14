@@ -269,7 +269,7 @@ export class AmpAdXOriginIframeHandler {
       // unlayout already called
       return;
     }
-    this.freeXOriginIframe(this.iframe.name.includes('_master') === true);
+    this.freeXOriginIframe(this.iframe.name.includes('_master'));
     this.uiHandler_.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
   }
 

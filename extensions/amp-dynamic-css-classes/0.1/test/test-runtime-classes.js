@@ -36,7 +36,7 @@ describe('dynamic classes are inserted at runtime', () => {
     const classList = [];
     classList.add = classList.push;
     classList.contains = function(c) {
-      return this.includes(c) === true;
+      return this.includes(c);
     };
     body = {
       nodeType: /* ELEMENT */ 1,

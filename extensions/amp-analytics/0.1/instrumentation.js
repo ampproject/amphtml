@@ -501,7 +501,7 @@ export class InstrumentationService {
    */
   isTriggerAllowed_(triggerType, element) {
     if (element.ownerDocument.defaultView != this.ampdoc.win) {
-      return ALLOWED_IN_EMBED.includes(triggerType) === true;
+      return ALLOWED_IN_EMBED.includes(triggerType);
     }
     return true;
   }

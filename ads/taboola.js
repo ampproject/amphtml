@@ -38,7 +38,7 @@ export function taboola(global, data) {
 
   // copy none blacklisted attribute to the 'params' map
   Object.keys(data).forEach(k => {
-    if (blackList.includes(k) === false) {
+    if (!blackList.includes(k)) {
       params[k] = data[k];
     }
   });

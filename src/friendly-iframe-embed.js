@@ -461,7 +461,7 @@ export function whenContentIniLoad(context, hostWin, rect) {
       .then(resources => {
         const promises = [];
         resources.forEach(r => {
-          if (EXCLUDE_INI_LOAD.includes(r.element.tagName) === false) {
+          if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
             promises.push(r.loadedOnce());
           }
         });

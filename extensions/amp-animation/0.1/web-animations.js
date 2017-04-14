@@ -454,7 +454,7 @@ export class MeasureScanner extends Scanner {
             this.context_.resolveTarget(targetSpec) :
             targetSpec,
         `Target not found: "${targetSpec}"`);
-    if (this.targets_.includes(target) === false) {
+    if (!this.targets_.includes(target)) {
       this.targets_.push(target);
     }
     return target;
