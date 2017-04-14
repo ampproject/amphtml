@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {installUrlReplacementsForEmbed,}
-    from '../../src/service/url-replacements-impl';
+import {
+  installUrlReplacementsForEmbed,
+} from '../../src/service/url-replacements-impl';
 import {VariableSource} from '../../src/service/variable-source';
-
+import {createElementWithAttributes} from '../../src/dom';
+import {isReferrerPolicySupported} from '../../builtins/amp-pixel';
 
 describes.realWin('amp-pixel', {amp: true}, env => {
   let win;
@@ -32,13 +34,19 @@ describes.realWin('amp-pixel', {amp: true}, env => {
       whenFirstVisibleResolver = resolve;
     });
     sandbox.stub(viewer, 'whenFirstVisible', () => whenFirstVisiblePromise);
+    createPixel('https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+  });
+
+  function createPixel(src, referrerPolicy) {
     pixel = win.document.createElement('amp-pixel');
-    pixel.setAttribute('src',
-        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+    pixel.setAttribute('src', src);
+    if (referrerPolicy) {
+      pixel.setAttribute('referrerpolicy', referrerPolicy);
+    }
     win.document.body.appendChild(pixel);
     pixel.build();
     implementation = pixel.implementation_;
-  });
+  }
 
   /**
    * @param {string=} opt_src
@@ -118,18 +126,23 @@ describes.realWin('amp-pixel', {amp: true}, env => {
   });
 
   it('should respect referrerpolicy=no-referrer', () => {
-    const url = 'https://pubads.g.doubleclick.net/activity;';
-    pixel.setAttribute('referrerpolicy', 'no-referrer');
-    return trigger(url).then(() => {
-      if (new Image().referrerPolicy === undefined) {
-        const iframe = pixel.querySelector('iframe');
-        expect(iframe.src).to.contain(url);
-      } else {
-        const img = pixel.querySelector('img');
-        expect(img.referrerPolicy).to.equal('no-referrer');
-        expect(img.src).to.equal(url);
+    const url = 'https://pubads.g.doubleclick.net/activity';
+    createPixel(url, 'no-referrer');
+    return trigger(url).then(element => {
+      if (isReferrerPolicySupported()) {
+        expect(element.referrerPolicy).to.equal('no-referrer');
       }
+      expect(element.src).to.equal(url);
     });
+  });
+
+  it('should throw for referrerpolicy with value other than ' +
+      'no-referrer', () => {
+    expect(() => {
+      createPixel(
+          'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
+          'origin');
+    }).to.throw(/referrerpolicy/);
   });
 });
 

@@ -49,6 +49,16 @@ export class AmpPixel extends BaseElement {
     // Element is invisible.
     this.element.setAttribute('aria-hidden', 'true');
 
+    /** @private {?string} */
+    this.referrerPolicy_ = this.element.getAttribute('referrerpolicy');
+    if (this.referrerPolicy_) {
+      // Safari doesn't support referrerPolicy yet. We're using an
+      // iframe based trick to remove referrer, which apparently can
+      // only do "no-referrer".
+      user().assert(this.referrerPolicy_ == 'no-referrer',
+          `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".`
+          + ' Only "no-referrer" is supported');
+    }
     // Trigger, but only when visible.
     const viewer = viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.trigger_.bind(this));
@@ -69,12 +79,9 @@ export class AmpPixel extends BaseElement {
       return urlReplacementsForDoc(this.element)
           .expandAsync(this.assertSource_(src))
           .then(src => {
-            let pixel;
-            if (this.element.getAttribute('referrerpolicy') == 'no-referrer') {
-              pixel = createNoReferrerPixel(this.element, src);
-            } else {
-              pixel = createImagePixel(src);
-            }
+            const pixel = this.referrerPolicy_
+                ? createNoReferrerPixel(this.element, src)
+                : createImagePixel(src);
             dev().info(TAG, 'pixel triggered: ', src);
             return pixel;
           });
@@ -130,10 +137,13 @@ function createImagePixel(src, noReferrer) {
 }
 
 /**
+ * Check if element attribute "referrerPolicy" is supported by the browser.
+ * At this moment (4/14/2017), Safari does not support it yet.
+ *
  * @returns {boolean}
  */
-function isReferrerPolicySupported() {
-  return new Image().referrerPolicy !== undefined;
+export function isReferrerPolicySupported() {
+  return 'referrerPolicy' in Image.prototype;
 }
 
 /**
