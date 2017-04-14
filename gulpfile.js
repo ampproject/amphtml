@@ -25,7 +25,6 @@ var cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
-var karmaDefault = require('./build-system/tasks/karma.conf');
 var lazypipe = require('lazypipe');
 var minimatch = require('minimatch');
 var minimist = require('minimist');
@@ -35,20 +34,10 @@ var watchify = require('watchify');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
-var Karma = require('karma').Server;
-var config = require('./build-system/config');
-var fs = require('fs');
-var path = require('path');
-var util = require('gulp-util');
-var webserver = require('gulp-webserver');
-var app = require('./build-system/test-server').app;
-
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 var cssOnly = argv['css-only'];
 
 require('./build-system/tasks');
-
-var execSync = require('child_process').execSync;
 
 var hostname = argv.hostname || 'cdn.ampproject.org';
 var hostname3p = argv.hostname3p || '3p.ampproject.net';
