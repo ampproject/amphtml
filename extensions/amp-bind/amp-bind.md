@@ -243,6 +243,7 @@ null || 'default' // 'default'
 | [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods) | `concat`<br>`includes`<br>`indexOf`<br>`join`<br>`lastIndexOf`<br>`slice` | `// Returns true.`<br>`[1, 2, 3].includes(1)` |
 | [`String`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods) | `charAt`<br>`charCodeAt`<br>`concat`<br>`indexOf`<br>`lastIndexOf`<br>`slice`<br>`split`<br>`substr`<br>`substring`<br>`toLowerCase`<br>`toUpperCase` | `// Returns 'abcdef'.`<br>`'abc'.concat('def')` |
 | [`Math`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math)<sup>2</sup> | `abs`<br>`ceil`<br>`floor`<br>`max`<br>`min`<br>`random`<br>`round`<br>`sign` | `// Returns 1.`<br>`abs(-1)` |
+| [`Global`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects)<sup>2</sup> | `encodeURI`<br>`encodeURIComponent`<br>|`// Returns 'hello%20world'`<br>`encodeURIComponent('hello world')`
 | [Custom built-ins](#custom-built-in-functions)<sup>2</sup> | `copyAndSplice` | `// Returns [1, 47 ,3].`<br>`copyAndSplice([1, 2, 3], 1, 1, 47)` |
 
 <sup>2</sup>Functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
