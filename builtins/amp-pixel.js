@@ -106,6 +106,8 @@ export class AmpPixel extends BaseElement {
  * @param {!Element} parentElement
  * @param {string} src
  * @returns {!Element}
+ * TODO(lannka): add an integration test to make sure the referrer header is
+ * removed in the pixel image request.
  */
 function createNoReferrerPixel(parentElement, src) {
   if (isReferrerPolicySupported()) {
