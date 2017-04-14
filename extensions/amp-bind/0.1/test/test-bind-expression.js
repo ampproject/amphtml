@@ -271,8 +271,8 @@ describe('BindExpression', () => {
   it('should support encodeURI and encodeURIComponent', () => {
     expect(evaluate('encodeURI("http://www.google.com/s p a c e.html")'))
         .to.equal('http://www.google.com/s%20p%20a%20c%20e.html');
-    expect(evaluate('encodeURIComponent("hello world")'))
-        .to.equal('hello%20world');
+    expect(evaluate('encodeURIComponent("http://www.google.com/foo?foo=bar")'))
+        .to.equal('http%3A%2F%2Fwww.google.com%2Ffoo%3Ffoo%3Dbar');
   });
 
   it('should support BindArrays functions', () => {
