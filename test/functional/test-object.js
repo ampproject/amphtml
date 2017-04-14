@@ -179,6 +179,16 @@ describe('Object', () => {
         f: undefined,
       });
     });
+
+    it('should short circuit when merging the same object', () => {
+      const destObject = {
+        set a(val) {
+          throw new Error('deep merge tried to merge object with itself');
+        },
+      };
+      expect(object.deepMerge(destObject, destObject)).to.not.throw;
+    });
+
   });
 
 });
