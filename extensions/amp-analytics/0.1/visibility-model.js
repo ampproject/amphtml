@@ -230,6 +230,8 @@ export class VisibilityModel {
    * @private
    */
   updateCounters_(visibility) {
+    dev().assert(visibility >= 0 && visibility <= 1,
+        'invalid visibility value: %s', visibility);
     const now = Date.now();
 
     if (visibility > 0) {
