@@ -28,11 +28,7 @@ import {timerFor} from '../../src/services';
 import {BaseElement} from '../../src/base-element';
 import * as sinon from 'sinon';
 
-describes.realWin('analytics', {
-  amp: {
-    extensions: ['amp-analytics'],
-  },
-}, env => {
+describes.realWin('analytics', {amp: true}, env => {
   let sandbox;
   let timer;
   let ampdoc;
@@ -110,6 +106,8 @@ describes.realWin('analytics', {
       return timer.promise(50).then(() => {
         const analyticsEle = baseEle.element.querySelector('amp-analytics');
         expect(analyticsEle).to.not.be.null;
+        expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
+        expect(analyticsEle.getAttribute('trigger')).to.equal('immediate');
         const script = (analyticsEle).querySelector('script');
         expect(script.textContent).to.jsonEqual(JSON.stringify(config));
         expect(analyticsEle.CONFIG).to.jsonEqual(config);

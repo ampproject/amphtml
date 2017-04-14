@@ -63,6 +63,7 @@ describe('amp-analytics', function() {
   let crypto;
   let ampdoc;
   let ins;
+  let viewer;
 
   const jsonMockResponses = {
     'config1': '{"vars": {"title": "remote"}}',
@@ -104,6 +105,7 @@ describe('amp-analytics', function() {
       windowApi = iframe.win;
       ampdoc = new AmpDocSingle(windowApi);
       cidServiceForDocForTesting(ampdoc);
+      viewer = windowApi.services.viewer.obj;
       ins = instrumentationServiceForDocForTesting(ampdoc);
       installVariableService(iframe.win);
       installUserNotificationManager(iframe.win);
@@ -263,11 +265,35 @@ describe('amp-analytics', function() {
     el.connectedCallback();
     analytics.createdCallback();
     analytics.buildCallback();
+    // Initialization has not started.
+    expect(analytics.iniPromise_).to.be.null;
     sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
 
     return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy).to.have.not.been.called;
     });
+  });
+
+  it('does start initialization when requested', () => {
+    const config = JSON.stringify(trivialConfig);
+    const el = windowApi.document.createElement('amp-analytics');
+    el.setAttribute('trigger', 'immediate');
+    el.textContent = config;
+    const whenFirstVisibleStub = sandbox.stub(
+        viewer,
+        'whenFirstVisible', () => new Promise(function() {}));
+    const analytics = new AmpAnalytics(el);
+    el.getAmpDoc = () => ampdoc;
+    analytics.buildCallback();
+    const iniPromise = analytics.iniPromise_;
+    expect(iniPromise).to.be.ok;
+    expect(el.style.display).to.equal('none');
+    // Viewer.whenFirstVisible is the first blocking call to initialize.
+    expect(whenFirstVisibleStub).to.be.calledOnce;
+
+    // Repeated call, returns pre-created promise.
+    expect(analytics.ensureInitialized_()).to.equal(iniPromise);
+    expect(whenFirstVisibleStub).to.be.calledOnce;
   });
 
   it('does not send a hit when multiple child tags exist', function() {
