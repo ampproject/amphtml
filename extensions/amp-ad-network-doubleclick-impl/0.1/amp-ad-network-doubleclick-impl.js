@@ -184,12 +184,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  unlayoutCallback() {
-    super.unlayoutCallback();
+  resetSlot() {
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
     this.ampAnalyticsConfig_ = null;
+    if (this.iframe) {
+      this.element.removeChild(this.iframe);
+    }
   }
 
   /**

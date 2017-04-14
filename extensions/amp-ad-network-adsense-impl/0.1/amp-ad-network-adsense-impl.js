@@ -239,18 +239,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.lifecycleReporter_.sendPing(eventName);
   }
 
-  /** @override */
-  unlayoutCallback() {
-    super.unlayoutCallback();
-    this.element.setAttribute('data-amp-slot-index',
-        this.win.ampAdSlotIdCounter++);
-    this.lifecycleReporter_ = this.initLifecycleReporter();
-    if (this.uniqueSlotId_) {
-      sharedState.removeSlot(this.uniqueSlotId_);
-    }
-    this.ampAnalyticsConfig_ = null;
-  }
-
   /**
    * @return {!../../../ads/google/a4a/performance.BaseLifecycleReporter}
    */
@@ -271,6 +259,20 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       width: `${this.size_.width}px`,
       height: `${this.size_.height}px`,
     });
+  }
+
+  /** @override */
+  resetSlot() {
+    this.element.setAttribute('data-amp-slot-index',
+        this.win.ampAdSlotIdCounter++);
+    this.lifecycleReporter_ = this.initLifecycleReporter();
+    if (this.uniqueSlotId_) {
+      sharedState.removeSlot(this.uniqueSlotId_);
+    }
+    this.ampAnalyticsConfig_ = null;
+    if (this.iframe) {
+      this.element.removeChild(this.iframe);
+    }
   }
 }
 
