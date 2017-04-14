@@ -545,7 +545,7 @@ describe('Logging', () => {
       rethrowAsync('intended');
       expect(() => {
         clock.tick(1);
-      }).to.throw(Error, /^intended$/);
+      }).to.throw(Error, /^intended/);
     });
 
     it('should rethrow a single error', () => {
@@ -558,7 +558,7 @@ describe('Logging', () => {
         error = e;
       }
       expect(error).to.equal(orig);
-      expect(error.message).to.equal('intended');
+      expect(error.message).to.match(/^intended/);
     });
 
     it('should rethrow error with many messages', () => {
