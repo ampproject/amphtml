@@ -67,13 +67,18 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
  */
 export function insertAnalyticsElement(
     parentElement, config, loadAnalytics = false) {
-  const doc = parentElement.ownerDocument;
-  const analyticsElem = doc.createElement('amp-analytics');
-  analyticsElem.setAttribute('sandbox', 'true');
-  const scriptElem = createElementWithAttributes(doc,
-        'script', {
-          'type': 'application/json',
-        });
+  const doc = /** @type {!Document} */ (parentElement.ownerDocument);
+  const analyticsElem = createElementWithAttributes(
+      doc,
+      'amp-analytics', {
+        'sandbox': 'true',
+        'trigger': 'immediate',
+      });
+  const scriptElem = createElementWithAttributes(
+      doc,
+      'script', {
+        'type': 'application/json',
+      });
   scriptElem.textContent = JSON.stringify(config);
   analyticsElem.appendChild(scriptElem);
   analyticsElem.CONFIG = config;
