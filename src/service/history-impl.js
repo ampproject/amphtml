@@ -756,7 +756,7 @@ export class HistoryBindingVirtual_ {
     return this.viewer_.sendMessageAwaitResponse(
         'pushHistory', {stackIndex: this.stackIndex_}).then(() => {
           return this.stackIndex_;
-        }).catch(reason => {
+        }, reason => {
           trace.message += reason;
           dev().error(TAG_, trace);
           throw reason;
@@ -774,7 +774,7 @@ export class HistoryBindingVirtual_ {
         'popHistory', {stackIndex: this.stackIndex_}).then(() => {
           this.updateStackIndex_(stackIndex - 1);
           return this.stackIndex_;
-        }).catch(reason => {
+        }, reason => {
           trace.message += reason;
           dev().error(TAG_, trace);
           throw reason;
