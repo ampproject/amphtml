@@ -421,9 +421,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.updateCounters_(0);
       expect(vh.matchesVisibility_).to.be.false;
 
-      vh.updateCounters_(-1);
-      expect(vh.matchesVisibility_).to.be.false;
-
       vh.updateCounters_(0.0001);
       expect(vh.matchesVisibility_).to.be.true;
 
@@ -432,9 +429,16 @@ describes.sandboxed('VisibilityModel', {}, () => {
 
       vh.updateCounters_(1);
       expect(vh.matchesVisibility_).to.be.true;
+    });
 
-      vh.updateCounters_(1.00001);
-      expect(vh.matchesVisibility_).to.be.false;
+    it('should NOT allow invalid values', () => {
+      const vh = new VisibilityModel(NO_SPEC, NO_CALC);
+      expect(() => {
+        vh.updateCounters_(-1);
+      }).to.throw(/invalid visibility value/);
+      expect(() => {
+        vh.updateCounters_(1.00001);
+      }).to.throw(/invalid visibility value/);
     });
 
     it('should match custom visibility position', () => {
@@ -443,9 +447,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
         visiblePercentageMax: 90,
       }, NO_CALC);
       vh.updateCounters_(0);
-      expect(vh.matchesVisibility_).to.be.false;
-
-      vh.updateCounters_(-1);
       expect(vh.matchesVisibility_).to.be.false;
 
       vh.updateCounters_(0.1);
@@ -461,9 +462,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(vh.matchesVisibility_).to.be.false;
 
       vh.updateCounters_(1);
-      expect(vh.matchesVisibility_).to.be.false;
-
-      vh.updateCounters_(1.00001);
       expect(vh.matchesVisibility_).to.be.false;
     });
 
