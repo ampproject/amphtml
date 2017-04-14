@@ -20,11 +20,7 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
-import {
-  removeChildren,
-  createElementWithAttributes,
-} from '../../../src/dom';
-
+import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
 import {
   installAnchorClickInterceptor,
