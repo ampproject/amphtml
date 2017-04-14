@@ -597,44 +597,49 @@ export class Bind {
    */
   apply_(results) {
     const applyPromises = this.boundElements_.map(boundElement => {
-      const {element, boundProperties} = boundElement;
 
-      // TODO(choumx): We should avoid triggering a mutation if the expression
-      // results don't affect this element.
-      const applyPromise = this.resources_.mutateElement(element, () => {
+      const boundProperties = boundElement.boundProperties;
+      const propertyUpdates = [];
+      let height, width;
+
+      boundProperties.forEach(boundProperty => {
+        const {property, expressionString, previousResult} = boundProperty;
+        const newValue = results[expressionString];
+        if (newValue === undefined ||
+            this.shallowEquals_(newValue, previousResult)) {
+          user().fine(TAG, `Expression result unchanged or missing: ` +
+              `"${expressionString}"`);
+          return;
+        }
+
+        boundProperty.previousResult = newValue;
+        user().fine(TAG, `New expression result: ` +
+            `"${expressionString}" -> ${newValue}`);
+        propertyUpdates.push({boundProperty, newValue});
+        switch (property) {
+          case 'width':
+            width = isFiniteNumber(newValue) ? Number(newValue) : width;
+            break;
+          case 'height':
+            height = isFiniteNumber(newValue) ? Number(newValue) : height;
+            break;
+        }
+      });
+
+      if (propertyUpdates.length == 0) {
+        return Promise.resolve();
+      }
+
+      const element = boundElement.element;
+      return this.resources_.mutateElement(element, () => {
         const mutations = {};
-        let width, height;
 
-        boundProperties.forEach(boundProperty => {
-          const {property, expressionString, previousResult} =
-              boundProperty;
-
-          const newValue = results[expressionString];
-
-          // Don't apply if the result hasn't changed or is missing.
-          if (newValue === undefined ||
-              this.shallowEquals_(newValue, previousResult)) {
-            user().fine(TAG, `Expression result unchanged or missing: ` +
-                `"${expressionString}"`);
-            return;
-          } else {
-            boundProperty.previousResult = newValue;
-          }
-          user().fine(TAG, `New expression result: ` +
-              `"${expressionString}" -> ${newValue}`);
-
-          const mutation = this.applyBinding_(boundProperty, element, newValue);
+        propertyUpdates.forEach(update => {
+          const mutation = this.applyBinding_(update.boundProperty,
+            element,
+            update.newValue);
           if (mutation) {
             mutations[mutation.name] = mutation.value;
-          }
-
-          switch (property) {
-            case 'width':
-              width = isFiniteNumber(newValue) ? Number(newValue) : width;
-              break;
-            case 'height':
-              height = isFiniteNumber(newValue) ? Number(newValue) : height;
-              break;
           }
         });
 
@@ -657,7 +662,6 @@ export class Bind {
           }
         }
       });
-      return applyPromise;
     });
     return Promise.all(applyPromises);
   }
