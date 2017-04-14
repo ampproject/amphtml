@@ -70,6 +70,9 @@ function deepMerge_(target, source, maxDepth) {
       throw new Error('Source object contains circular references');
     }
     seen.push(source);
+    if (target === source) {
+      continue;
+    }
     if (depth > maxDepth) {
       Object.assign(target, source);
       continue;
