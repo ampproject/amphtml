@@ -59,6 +59,8 @@ tags: {  # <amp-state> with json child
     name: "id"
     mandatory: true
   }
+  # <amp-bind>
+  attrs: { name: "[src]" }
   child_tags: {
     mandatory_num_child_tags: 1
     first_child_tag_name_oneof: "SCRIPT"
@@ -86,8 +88,10 @@ tags: {  # <amp-state> with src
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  # <amp-bind>
+  attrs: { name: "[src]" }
   child_tags: {
     mandatory_num_child_tags: 0
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-bind"
 }
