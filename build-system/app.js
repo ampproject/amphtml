@@ -123,51 +123,6 @@ app.use('/form/redirect-to/post', function(req, res) {
   res.end('{}');
 });
 
-
-function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
-  const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
-  const invalidMethod = req.method + ' method is not allowed. Use POST.';
-  const invalidOrigin = 'Origin header is invalid.';
-  const invalidSourceOrigin = '__amp_source_origin parameter is invalid.';
-  const unauthorized = 'Unauthorized Request';
-  var origin;
-
-  if (validMethods.indexOf(req.method) == -1) {
-    res.statusCode = 405;
-    res.end(JSON.stringify({message: invalidMethod}));
-    throw invalidMethod;
-  }
-
-  if (req.headers.origin) {
-    origin = req.headers.origin;
-    if (!ORIGIN_REGEX.test(req.headers.origin)) {
-      res.statusCode = 500;
-      res.end(JSON.stringify({message: invalidOrigin}));
-      throw invalidOrigin;
-    }
-
-    if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
-      res.statusCode = 500;
-      res.end(JSON.stringify({message: invalidSourceOrigin}));
-      throw invalidSourceOrigin;
-    }
-  } else if (req.headers['amp-same-origin'] == 'true') {
-    origin = getUrlPrefix(req);
-  } else {
-    res.statusCode = 401;
-    res.end(JSON.stringify({message: unauthorized}));
-    throw unauthorized;
-  }
-
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Expose-Headers',
-      ['AMP-Access-Control-Allow-Source-Origin']
-          .concat(opt_exposeHeaders || []).join(', '));
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-      req.query.__amp_source_origin);
-}
-
 app.use('/form/echo-json/post', function(req, res) {
   assertCors(req, res, ['POST']);
   var form = new formidable.IncomingForm();
@@ -251,13 +206,8 @@ function proxyToAmpProxy(req, res, minify) {
     body = replaceUrls(minify ? 'min' : 'max', body, urlPrefix, inabox);
     if (inabox) {
       // Allow CORS requests for A4A.
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Allow-Origin',
-          req.headers.origin || urlPrefix);
-      res.setHeader('Access-Control-Expose-Headers',
-          'AMP-Access-Control-Allow-Source-Origin');
-      res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-          req.query.__amp_source_origin);
+      const origin = req.headers.origin || urlPrefix;
+      enableCors(req, res, origin);
     }
     res.status(response.statusCode).send(body);
   });
@@ -556,7 +506,7 @@ app.use('/a4a(|-3p)/', function(req, res) {
   var adUrl = req.url;
   var templatePath = '/build-system/server-a4a-template.html';
   var urlPrefix = getUrlPrefix(req);
-  if (force3p && !adUrl.startsWith('/m') &&
+  if (!adUrl.startsWith('/m') &&
       urlPrefix.indexOf('//localhost') != -1) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
@@ -642,6 +592,11 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
     }
 
     file = replaceUrls(mode, file, '', inabox);
+
+    if (inabox && req.headers.origin && req.query.__amp_source_origin) {
+      // Allow CORS requests for A4A.
+      enableCors(req, res, req.headers.origin);
+    }
 
     // Extract amp-ad for the given 'type' specified in URL query.
     if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
@@ -929,6 +884,54 @@ function addQueryParam(url, param, value) {
     url += '&' + paramValue;
   }
   return url;
+}
+
+function enableCors(req, res, origin, opt_exposeHeaders) {
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Expose-Headers',
+      ['AMP-Access-Control-Allow-Source-Origin']
+          .concat(opt_exposeHeaders || []).join(', '));
+  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+      req.query.__amp_source_origin);
+}
+
+function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
+  const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
+  const invalidMethod = req.method + ' method is not allowed. Use POST.';
+  const invalidOrigin = 'Origin header is invalid.';
+  const invalidSourceOrigin = '__amp_source_origin parameter is invalid.';
+  const unauthorized = 'Unauthorized Request';
+  var origin;
+
+  if (validMethods.indexOf(req.method) == -1) {
+    res.statusCode = 405;
+    res.end(JSON.stringify({message: invalidMethod}));
+    throw invalidMethod;
+  }
+
+  if (req.headers.origin) {
+    origin = req.headers.origin;
+    if (!ORIGIN_REGEX.test(req.headers.origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({message: invalidOrigin}));
+      throw invalidOrigin;
+    }
+
+    if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({message: invalidSourceOrigin}));
+      throw invalidSourceOrigin;
+    }
+  } else if (req.headers['amp-same-origin'] == 'true') {
+    origin = getUrlPrefix(req);
+  } else {
+    res.statusCode = 401;
+    res.end(JSON.stringify({message: unauthorized}));
+    throw unauthorized;
+  }
+
+  enableCors(req, res, origin, opt_exposeHeaders);
 }
 
 module.exports = app;
