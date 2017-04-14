@@ -80,7 +80,7 @@ export class LayoutDelayMeter {
     this.performance_.tickDelta(this.label_, delay);
     // have to flush after tickDelta to prevent being overridden.
     this.performance_.flush();
-    dev().info('DELAY', this.label_ + ':' + delay);
+    dev().info('LAYOUT DELAY', this.label_ + ':' + delay + 'ms');
     this.done_ = true;
   }
 }
