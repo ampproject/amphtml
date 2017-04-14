@@ -15,10 +15,12 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {CommonSignals} from '../src/common-signals';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
 import {srcsetFromElement} from '../src/srcset';
 import {user} from '../src/log';
+import {analyticsForDoc} from '../src/analytics';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -110,6 +112,21 @@ export class AmpImg extends BaseElement {
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
+
+    // DO NOT SUBMIT: test for visibility API.
+    analyticsForDoc(this.getAmpDoc(), true).then(analytics => {
+      const vis = analytics.getAnalyticsRoot(this.element).getVisibilityManager();
+      // Can be any promise or `null`.
+      const readyPromise = Promise.race([
+        this.signals().whenSignal(CommonSignals.INI_LOAD),
+        this.signals().whenSignal(CommonSignals.LOAD_END),
+      ]);
+      // Element must be an AMP element at this time.
+      vis.listenElement(this.element, {visiblePercentageMin: 50}, readyPromise,
+          event => {
+            console.log('DO NOT SUBMIT: visibility triggered for ', this.element);
+          });
+    });
   }
 
   /** @override */
