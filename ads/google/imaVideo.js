@@ -1,5 +1,5 @@
 import {isObject} from '../../src/types';
-import {loadScript} from '../../3p/3p'
+import {loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json';
 import {VideoEvents} from '../../src/video-interface';
 
@@ -26,123 +26,123 @@ const seekDot = '\u25cf\ufe0e';
 const fullscreenChars = '\u25ad\ufe0e';
 
 // Div wrapping our entire DOM.
-var wrapperDiv;
+let wrapperDiv;
 
 // Div containing big play button. Rendered before player starts.
-var bigPlayDiv;
+let bigPlayDiv;
 
 // Div contianing play button. Double-nested for alignment.
-var playButtonDiv;
+let playButtonDiv;
 
 // Node containing play button characters.
-var bigPlayButtonNode;
+let bigPlayButtonNode;
 
 // Div containing player controls.
-var controlsDiv;
+let controlsDiv;
 
 // Div containing play or pause button.
-var playPauseDiv;
+let playPauseDiv;
 
 // Node contianing play or pause characters.
-var playPauseNode;
+let playPauseNode;
 
 // Div containing player time.
-var timeDiv;
+let timeDiv;
 
 // Node containing the player time text.
-var timeNode;
+let timeNode;
 
 // Wrapper for progress bar DOM elements.
-var progressBarWrapperDiv;
+let progressBarWrapperDiv;
 
 // Line for progress bar.
-var progressLine;
+let progressLine;
 
 // Line for total time in progress bar.
-var totalTimeLine;
+let totalTimeLine;
 
 // Div containing the marker for the progress.
-var progressMarkerDiv;
+let progressMarkerDiv;
 
 // Div for fullscreen icon.
-var fullscreenDiv;
+let fullscreenDiv;
 
 // Div for ad container.
-var adContainerDiv;
+let adContainerDiv;
 
 // Div for content player.
-var contentDiv;
+let contentDiv;
 
 // Content player.
-var videoPlayer;
+let videoPlayer;
 
 // Event indicating user interaction.
-var interactEvent
+let interactEvent;
 
 // Event for mouse down.
-var mouseDownEvent;
+let mouseDownEvent;
 
 // Event for mouse move.
-var mouseMoveEvent;
+let mouseMoveEvent;
 
 // Event for mouse up.
-var mouseUpEvent;
+let mouseUpEvent;
 
 // Percent of the way through the video the user has seeked. Used for seek
 // events.
-var seekPercent;
+let seekPercent;
 
 // Flag tracking whether or not content has played to completion.
-var contentComplete;
+let contentComplete;
 
 // Flag tracking if an ad request has failed.
-var adRequestFailed;
+let adRequestFailed;
 
 // IMA SDK AdDisplayContainer object.
-var adDisplayContainer;
+let adDisplayContainer;
 
 // IMA SDK AdsLoader object.
-var adsLoader;
+let adsLoader;
 
 // IMA SDK AdsManager object;
-var adsManager;
+let adsManager;
 
 // Timer for UI updates.
-var uiTicker;
+let uiTicker;
 
 // Tracks the current state of the player.
-var playerState;
+let playerState;
 
 // Flag for whether or not we are currently in fullscreen mode.
-var fullscreen;
+let fullscreen;
 
 // Width the player should be in fullscreen mode.
-var fullscreenWidth;
+let fullscreenWidth;
 
 // Height the player should be in fullscreen mode.
-var fullscreenHeight;
+let fullscreenHeight;
 
 // Flag tracking if ads are currently active.
-var adsActive;
+let adsActive;
 
 // Flag tracking if playback has started.
-var playbackStarted;
+let playbackStarted;
 
 // Timer used to hide controls after user action.
-var hideControlsTimeout;
+let hideControlsTimeout;
 
 // Flag tracking if we need to mute the ads manager once it loads. Used for
 // autoplay.
-var muteAdsManagerOnLoaded;
+let muteAdsManagerOnLoaded;
 
 // Flag tracking if we are in native fullscreen mode. Used for iPhone.
-var nativeFullscreen;
+let nativeFullscreen;
 
 // Used if the adsManager needs to be resized on load.
-var adsManagerWidthOnLoad, adsManagerHeightOnLoad;
+let adsManagerWidthOnLoad, adsManagerHeightOnLoad;
 
 // Initial video dimensions.
-var videoWidth, videoHeight;
+let videoWidth, videoHeight;
 
 /**
  * Loads the IMA SDK library.
@@ -341,11 +341,11 @@ export function imaVideo(global, data) {
     progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
     fullscreenDiv.addEventListener(interactEvent, onFullscreenClick);
 
-    var fullScreenEvents = [
+    const fullScreenEvents = [
       'fullscreenchange',
       'mozfullscreenchange',
       'webkitfullscreenchange'];
-    for (key in fullScreenEvents) {
+    for (const key in fullScreenEvents) {
       global.document.addEventListener(
           fullScreenEvents[key],
           onFullscreenChange,
@@ -369,7 +369,7 @@ export function imaVideo(global, data) {
 
     videoPlayer.addEventListener('ended', onContentEnded);
 
-    var adsRequest = new google.ima.AdsRequest();
+    const adsRequest = new google.ima.AdsRequest();
     adsRequest.adTagUrl = data.tag;
     adsRequest.linearAdSlotWidth = videoWidth;
     adsRequest.linearAdSlotHeight = videoHeight;
@@ -439,7 +439,7 @@ export function onContentEnded() {
  * @visibleForTesting
  */
 export function onAdsManagerLoaded(adsManagerLoadedEvent) {
-  var adsRenderingSettings = new google.ima.AdsRenderingSettings();
+  const adsRenderingSettings = new google.ima.AdsRenderingSettings();
   adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
   adsRenderingSettings.uiElements =
       [google.ima.UiElements.AD_ATTRIBUTION, google.ima.UiElements.COUNTDOWN];
@@ -488,7 +488,6 @@ export function onAdError(error) {
  */
 export function onContentPauseRequested() {
   if (adsManagerWidthOnLoad) {
-    console.log('content pause requested, resizing to ' + adsManagerWidthOnLoad + 'x' + adsManagerHeightOnLoad);
     adsManager.resize(
       adsManagerWidthOnLoad,
       adsManagerHeightOnLoad,
@@ -523,7 +522,7 @@ export function onContentResumeRequested() {
 /**
  * Called when our ui timer goes off. Updates the player UI.
  */
-function uiTickerClick(currentTime, duration) {
+function uiTickerClick() {
   updateUi(videoPlayer.currentTime, videoPlayer.duration);
 }
 
@@ -535,7 +534,7 @@ function uiTickerClick(currentTime, duration) {
 export function updateUi(currentTime, duration) {
   timeNode.textContent =
       formatTime(currentTime) + ' / ' + formatTime(duration);
-  progressPercent =
+  const progressPercent =
       Math.floor((currentTime / duration) * 100);
   progressLine.style.width = progressPercent + '%';
   progressMarkerDiv.style.left = (progressPercent - 1) + '%';
@@ -551,14 +550,14 @@ export function formatTime(time) {
   if (isNaN(time)) {
     return '00:00';
   }
-  var timeString = '';
-  var hours = Math.floor(time / 3600);
+  let timeString = '';
+  const hours = Math.floor(time / 3600);
   if (hours > 0) {
     timeString += hours + ':';
   }
-  var minutes = Math.floor((time % 3600) / 60);
+  const minutes = Math.floor((time % 3600) / 60);
   timeString += zeroPad(minutes) + ':';
-  var seconds = Math.floor(time - ((hours * 3600) + (minutes * 60)));
+  const seconds = Math.floor(time - ((hours * 3600) + (minutes * 60)));
   timeString += zeroPad(seconds);
   return timeString;
 }
@@ -569,7 +568,7 @@ export function formatTime(time) {
  * @visibleForTesting
  */
 export function zeroPad(input) {
-  input = input + '';
+  input = String(input);
   return input.length == 1 ? '0' + input : input;
 }
 
@@ -602,12 +601,12 @@ function onProgressClickEnd() {
  * Detects when the user clicks and drags on the progress bar.
  */
 function onProgressMove(event) {
-  var progressWrapperPosition = getPagePosition(progressBarWrapperDiv);
-  var progressListStart = progressWrapperPosition.x;
-  var progressListWidth = progressBarWrapperDiv.offsetWidth;
+  const progressWrapperPosition = getPagePosition(progressBarWrapperDiv);
+  const progressListStart = progressWrapperPosition.x;
+  const progressListWidth = progressBarWrapperDiv.offsetWidth;
 
   // Handle Android Chrome touch events.
-  var eventX = event.clientX || event.touches[0].pageX;
+  const eventX = event.clientX || event.touches[0].pageX;
 
   seekPercent = (eventX - progressListStart) / progressListWidth;
   if (seekPercent < 0) {
@@ -622,7 +621,8 @@ function onProgressMove(event) {
  * Returns the x,y coordinates of the given element relative to the window.
  */
 function getPagePosition(el) {
-  for (var lx=0, ly=0;
+  let lx, ly;
+  for (lx = 0, ly = 0;
       el != null; lx += el.offsetLeft, ly += el.offsetTop, el = el.offsetParent)
     {};
   return {x: lx,y: ly};
@@ -686,7 +686,7 @@ export function pauseVideo(event) {
 function onFullscreenClick() {
   if (fullscreen) {
     // The video is currently in fullscreen mode
-    var cancelFullscreen = global.document.exitFullscreen ||
+    const cancelFullscreen = global.document.exitFullscreen ||
         global.document.exitFullScreen ||
         global.document.webkitCancelFullScreen ||
         global.document.mozCancelFullScreen;
@@ -695,7 +695,8 @@ function onFullscreenClick() {
     }
   } else {
     // Try to enter fullscreen mode in the browser
-    var requestFullscreen = global.document.documentElement.requestFullscreen ||
+    const requestFullscreen =
+        global.document.documentElement.requestFullscreen ||
         global.document.documentElement.webkitRequestFullscreen ||
         global.document.documentElement.mozRequestFullscreen ||
         global.document.documentElement.requestFullScreen ||
@@ -723,25 +724,18 @@ function onFullscreenClick() {
  */
 function onFullscreenChange() {
   if (fullscreen) {
-    // The user just exited fullscreen
-    //if (nativeFullscreen) {
-    //  videoPlayer.webkitExitFullscreen();
-    //} else {
-      // Resize the ad container
-      console.log('exited fullscreen, resizing to ' + videoWidth + 'x' + videoHeight);
-      adsManager.resize(videoWidth, videoHeight, google.ima.ViewMode.NORMAL);
-      adsManagerWidthOnLoad = null;
-      adsManagerHeightOnLoad = null;
-      // Return the video to its original size and position
-      wrapperDiv.style.width = videoWidth + 'px';
-      wrapperDiv.style.height = videoHeight + 'px';
-    //}
+    // Resize the ad container
+    adsManager.resize(videoWidth, videoHeight, google.ima.ViewMode.NORMAL);
+    adsManagerWidthOnLoad = null;
+    adsManagerHeightOnLoad = null;
+    // Return the video to its original size and position
+    wrapperDiv.style.width = videoWidth + 'px';
+    wrapperDiv.style.height = videoHeight + 'px';
     fullscreen = false;
   } else {
     // The user just entered fullscreen
     if (!nativeFullscreen) {
       // Resize the ad container
-      console.log('entering fullscreen, resizing to ' + fullscreenWidth + 'x' + fullscreenHeight);
       adsManager.resize(
           fullscreenWidth, fullscreenHeight, google.ima.ViewMode.FULLSCREEN);
       adsManagerWidthOnLoad = null;
@@ -788,7 +782,6 @@ function onMessage(event) {
     return; // We only process valid JSON.
   }
   if (msg.event && msg.func) {
-    console.log('Got ' + msg.func);
     switch (msg.func) {
       case 'playVideo':
         if (playbackStarted) {
@@ -829,11 +822,9 @@ function onMessage(event) {
         bigPlayDiv.style.width = msg.args.width + 'px';
         bigPlayDiv.style.height = msg.args.height + 'px';
         if (adsActive) {
-          console.log('ads active, resizing to ' + msg.args.width + 'x' + msg.args.height);
           adsManager.resize(
               msg.args.width, msg.args.height, google.ima.ViewMode.NORMAL);
         } else {
-          console.log('ads not active, will resize to ' + msg.args.width + 'x' + msg.args.height);
           adsManagerWidthOnLoad = msg.args.width;
           adsManagerHeightOnLoad = msg.args.height;
         }
@@ -848,11 +839,11 @@ function onMessage(event) {
  * @visibleForTesting
  */
 export function getPropertiesForTesting() {
-  return { adContainerDiv, adRequestFailed, adsActive, adsManagerWidthOnLoad,
+  return {adContainerDiv, adRequestFailed, adsActive, adsManagerWidthOnLoad,
     adsManagerHeightOnLoad, contentComplete, controlsDiv, hideControlsTimeout,
     interactEvent, pauseChars, playbackStarted, playChar, playerState,
-    PlayerStates, playPauseDiv, playPauseNode, playChar, progressLine,
-    progressMarkerDiv, timeNode, uiTicker, videoPlayer };
+    PlayerStates, playPauseDiv, playPauseNode, progressLine,
+    progressMarkerDiv, timeNode, uiTicker, videoPlayer};
 }
 
 /**

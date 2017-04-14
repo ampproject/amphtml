@@ -46,7 +46,7 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
       const video = iframe.doc.body.querySelector('#ima-content-player');
       expect(video).not.to.be.undefined;
@@ -63,7 +63,7 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
       const video = iframe.doc.body.querySelector('#ima-ad-container');
       expect(video).not.to.be.undefined;
@@ -80,21 +80,21 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var bigPlayDivMock = {
+      const bigPlayDivMock = {
         style: {
-          display: ''
+          display: '',
         },
-        removeEventListener: function() {}
+        removeEventListener: function() {},
       };
       const removeEventListenerSpy = sandbox.spy(
           bigPlayDivMock, 'removeEventListener');
-      var adDisplayContainerMock = { initialize: function() {} };
+      const adDisplayContainerMock = {initialize: function() {}};
       const initSpy = sandbox.spy(adDisplayContainerMock, 'initialize');
-      var videoPlayerMock = {load: function() {} };
+      const videoPlayerMock = {load: function() {}};
       const loadSpy = sandbox.spy(videoPlayerMock, 'load');
-      const playAdsSpy = sandbox.spy(imaVideoObj, 'playAds');
+      //const playAdsSpy = sandbox.spy(imaVideoObj, 'playAds');
       imaVideoObj.setBigPlayDivForTesting(bigPlayDivMock);
       imaVideoObj.setAdDisplayContainerForTesting(adDisplayContainerMock);
       imaVideoObj.setVideoPlayerForTesting(videoPlayerMock);
@@ -124,25 +124,25 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var postMessage;
+      //let testPostMessage;
       // TODO - How do I test messages posted back to the main window?
-      window.addEventListener('message', (msg) => {
-        postMessage = msg;
-      });
+      /*window.addEventListener('message', msg => {
+        testPostMessage = msg;
+      });*/
       window.google = {
         ima: {
           ViewMode: {
-            NORMAL: 'normal'
-          }
-        }
+            NORMAL: 'normal',
+          },
+        },
       };
-      var mockAdsManager = {};
+      const mockAdsManager = {};
       mockAdsManager.init = function() {};
       mockAdsManager.start = function() {};
-      var initSpy = sandbox.spy(mockAdsManager, 'init');
-      var startSpy = sandbox.spy(mockAdsManager, 'start');
+      const initSpy = sandbox.spy(mockAdsManager, 'init');
+      const startSpy = sandbox.spy(mockAdsManager, 'start');
       imaVideoObj.setAdsManagerForTesting(mockAdsManager);
       imaVideoObj.setVideoWidthAndHeightForTesting(100, 200);
 
@@ -151,7 +151,7 @@ describe('amp-ima-video', () => {
       expect(initSpy).to.be.calledWith(100, 200, 'normal');
       // TODO - How do I test messages posted back to the main window? This is
       // being called before the event is thrown so it fails.
-      //expect(postMessage.data).to.have.property('event');
+      //expect(testPostMessage.data).to.have.property('event');
       expect(startSpy).to.be.called;
     });
   });
@@ -166,20 +166,20 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var postMessage;
+      //let testPostMessage;
       // TODO - How do I test messages posted back to the main window?
-      window.addEventListener('message', (msg) => {
-        postMessage = msg;
-      });
-      const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
+      /*window.addEventListener('message', msg => {
+        testPostMessage = msg;
+      });*/
+      //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
 
       imaVideoObj.playAds();
 
       // TODO - How do I test messages posted back to the main window? This is
       // being called before the event is thrown so it fails.
-      //expect(postMessage.data).to.have.property('event');
+      //expect(testPostMessage.data).to.have.property('event');
       // TODO - Fix when I can spy on internals.
       //expect(playVideoSpy).to.be.called;
       // Just here so the test passes until I fix above issues
@@ -197,9 +197,9 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var mockAdsLoader = { contentComplete: function() {} };
+      const mockAdsLoader = {contentComplete: function() {}};
       const completeSpy = sandbox.spy(mockAdsLoader, 'contentComplete');
       imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
 
@@ -220,44 +220,45 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var postMessage;
+      //let testPostMessage;
       // TODO - How do I test messages posted back to the main window?
-      window.addEventListener('message', (msg) => {
-        postMessage = msg;
-      });
-      var mockAdsRenderingSettings = {};
-      window.google = {}
-      window.google.ima = {}
+      /*window.addEventListener('message', msg => {
+        testPostMessage = msg;
+      });*/
+      const mockAdsRenderingSettings = {};
+      window.google = {};
+      window.google.ima = {};
       window.google.ima.AdsRenderingSettings = function() {
         return mockAdsRenderingSettings;
       };
       window.google.ima.UiElements = {
         AD_ATTRIBUTION: 'adattr',
-        COUNTDOWN: 'countdown'
+        COUNTDOWN: 'countdown',
       };
       window.google.ima.AdErrorEvent = {};
       window.google.ima.AdErrorEvent.Type = {
-        AD_ERROR: 'aderror'
+        AD_ERROR: 'aderror',
       };
       window.google.ima.AdEvent = {};
       window.google.ima.AdEvent.Type = {
         CONTENT_PAUSE_REQUESTED: 'cpr',
-        CONTENT_RESUME_REQUESTED: 'crr'
+        CONTENT_RESUME_REQUESTED: 'crr',
       };
-      var mockAdsManager = {
+      const mockAdsManager = {
         addEventListener: function() {},
-        setVolume: function() {}
+        setVolume: function() {},
       };
-      var mockAdsManagerLoadedEvent = {
+      const mockAdsManagerLoadedEvent = {
         getAdsManager: function() {
           return mockAdsManager;
-        }
+        },
       };
-      var amleSpy = sandbox.spy(mockAdsManagerLoadedEvent, 'getAdsManager');
-      var addEventListenerSpy = sandbox.spy(mockAdsManager, 'addEventListener');
-      var mockVideoPlayer = {};
+      const amleSpy = sandbox.spy(mockAdsManagerLoadedEvent, 'getAdsManager');
+      const addEventListenerSpy =
+          sandbox.spy(mockAdsManager, 'addEventListener');
+      const mockVideoPlayer = {};
       imaVideoObj.setVideoPlayerForTesting(mockVideoPlayer);
       imaVideoObj.setMuteAdsManagerOnLoadedForTesting(false);
 
@@ -275,7 +276,7 @@ describe('amp-ima-video', () => {
       expect(addEventListenerSpy).to.be.calledWith('crr');
       // TODO - How do I test messages posted back to the main window? This is
       // being called before the event is thrown so it fails.
-      //expect(postMessage.data).to.have.property('event');
+      //expect(testPostMessage.data).to.have.property('event');
     });
   });
 
@@ -289,45 +290,46 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var postMessage;
+      //let testPostMessage;
       // TODO - How do I test messages posted back to the main window?
-      window.addEventListener('message', (msg) => {
-        postMessage = msg;
-      });
-      var mockAdsRenderingSettings = {};
-      window.google = {}
-      window.google.ima = {}
+      /*window.addEventListener('message', msg => {
+        testPostMessage = msg;
+      });*/
+      const mockAdsRenderingSettings = {};
+      window.google = {};
+      window.google.ima = {};
       window.google.ima.AdsRenderingSettings = function() {
         return mockAdsRenderingSettings;
       };
       window.google.ima.UiElements = {
         AD_ATTRIBUTION: 'adattr',
-        COUNTDOWN: 'countdown'
+        COUNTDOWN: 'countdown',
       };
       window.google.ima.AdErrorEvent = {};
       window.google.ima.AdErrorEvent.Type = {
-        AD_ERROR: 'aderror'
+        AD_ERROR: 'aderror',
       };
       window.google.ima.AdEvent = {};
       window.google.ima.AdEvent.Type = {
         CONTENT_PAUSE_REQUESTED: 'cpr',
-        CONTENT_RESUME_REQUESTED: 'crr'
+        CONTENT_RESUME_REQUESTED: 'crr',
       };
-      var mockAdsManager = {
+      const mockAdsManager = {
         addEventListener: function() {},
-        setVolume: function() {}
+        setVolume: function() {},
       };
-      var mockAdsManagerLoadedEvent = {
+      const mockAdsManagerLoadedEvent = {
         getAdsManager: function() {
           return mockAdsManager;
-        }
+        },
       };
-      var amleSpy = sandbox.spy(mockAdsManagerLoadedEvent, 'getAdsManager');
-      var addEventListenerSpy = sandbox.spy(mockAdsManager, 'addEventListener');
-      var setVolumeSpy = sandbox.spy(mockAdsManager, 'setVolume');
-      var mockVideoPlayer = {};
+      const amleSpy = sandbox.spy(mockAdsManagerLoadedEvent, 'getAdsManager');
+      const addEventListenerSpy =
+          sandbox.spy(mockAdsManager, 'addEventListener');
+      const setVolumeSpy = sandbox.spy(mockAdsManager, 'setVolume');
+      const mockVideoPlayer = {};
       imaVideoObj.setVideoPlayerForTesting(mockVideoPlayer);
       imaVideoObj.setMuteAdsManagerOnLoadedForTesting(true);
 
@@ -346,7 +348,7 @@ describe('amp-ima-video', () => {
       expect(setVolumeSpy).to.be.calledWith(0);
       // TODO - How do I test messages posted back to the main window? This is
       // being called before the event is thrown so it fails.
-      //expect(postMessage.data).to.have.property('event');
+      //expect(testPostMessage.data).to.have.property('event');
     });
   });
 
@@ -360,14 +362,14 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var postMessage;
+      //let testPostMessage;
       // TODO - How do I test messages posted back to the main window?
-      window.addEventListener('message', (msg) => {
-        postMessage = msg;
-      });
-      const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
+      /*window.addEventListener('message', msg => {
+        testPostMessage = msg;
+      });*/
+      //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
 
       imaVideoObj.onAdsLoaderError();
 
@@ -387,11 +389,11 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var adsManagerMock = {destroy: function() {} };
+      const adsManagerMock = {destroy: function() {}};
       const destroySpy = sandbox.spy(adsManagerMock, 'destroy');
-      const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
+      //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
       imaVideoObj.setAdsManagerForTesting(adsManagerMock);
 
       imaVideoObj.onAdError();
@@ -412,14 +414,14 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var videoMock = {};
+      const videoMock = {};
       videoMock.removeEventListener = function() {};
       videoMock.pause = function() {};
       const removeEventListenerSpy =
           sandbox.spy(videoMock, 'removeEventListener');
-      const hideControlsSpy = sandbox.spy(imaVideoObj, 'hideControls');
+      //const hideControlsSpy = sandbox.spy(imaVideoObj, 'hideControls');
       const pauseSpy = sandbox.spy(videoMock, 'pause');
       imaVideoObj.setVideoPlayerForTesting(videoMock);
 
@@ -447,24 +449,24 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var videoMock = {};
+      const videoMock = {};
       videoMock.removeEventListener = function() {};
       videoMock.pause = function() {};
       const removeEventListenerSpy =
           sandbox.spy(videoMock, 'removeEventListener');
-      const hideControlsSpy = sandbox.spy(imaVideoObj, 'hideControls');
+      //const hideControlsSpy = sandbox.spy(imaVideoObj, 'hideControls');
       const pauseSpy = sandbox.spy(videoMock, 'pause');
       imaVideoObj.setVideoPlayerForTesting(videoMock);
-      var adsManagerMock = {};
+      const adsManagerMock = {};
       adsManagerMock.resize = function() {};
       window.google = {
         ima: {
           ViewMode: {
-            NORMAL: 'normal'
-          }
-        }
+            NORMAL: 'normal',
+          },
+        },
       };
       const resizeSpy = sandbox.spy(adsManagerMock, 'resize');
       imaVideoObj.setAdsManagerDimensionsOnLoadForTesting(100, 200);
@@ -500,13 +502,13 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var videoMock = {};
+      const videoMock = {};
       videoMock.addEventListener = function() {};
       videoMock.play = function() {};
       const addEventListenerSpy = sandbox.spy(videoMock, 'addEventListener');
-      const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
+      //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
       imaVideoObj.setVideoPlayerForTesting(videoMock);
       imaVideoObj.setContentCompleteForTesting(false);
 
@@ -531,13 +533,13 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var videoMock = {};
+      const videoMock = {};
       videoMock.addEventListener = function() {};
       videoMock.play = function() {};
       const addEventListenerSpy = sandbox.spy(videoMock, 'addEventListener');
-      const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
+      //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
       imaVideoObj.setVideoPlayerForTesting(videoMock);
       imaVideoObj.setContentCompleteForTesting(true);
 
@@ -562,24 +564,24 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
 
-      imaVideoObj.updateUi(0, 60)
+      imaVideoObj.updateUi(0, 60);
       expect(imaVideoObj.getPropertiesForTesting().timeNode.textContent)
           .to.eql('00:00 / 01:00');
       expect(imaVideoObj.getPropertiesForTesting().progressLine.style.width)
           .to.eql('0%');
       expect(imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left)
           .to.eql('-1%');
-      imaVideoObj.updateUi(30, 60)
+      imaVideoObj.updateUi(30, 60);
       expect(imaVideoObj.getPropertiesForTesting().timeNode.textContent)
           .to.eql('00:30 / 01:00');
       expect(imaVideoObj.getPropertiesForTesting().progressLine.style.width)
           .to.eql('50%');
       expect(imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left)
           .to.eql('49%');
-      imaVideoObj.updateUi(60, 60)
+      imaVideoObj.updateUi(60, 60);
       expect(imaVideoObj.getPropertiesForTesting().timeNode.textContent)
           .to.eql('01:00 / 01:00');
       expect(imaVideoObj.getPropertiesForTesting().progressLine.style.width)
@@ -599,22 +601,22 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
 
-      var formattedTime = imaVideoObj.formatTime(0)
+      let formattedTime = imaVideoObj.formatTime(0);
       expect(formattedTime).to.eql('00:00');
-      formattedTime = imaVideoObj.formatTime(55)
+      formattedTime = imaVideoObj.formatTime(55);
       expect(formattedTime).to.eql('00:55');
-      formattedTime = imaVideoObj.formatTime(60)
+      formattedTime = imaVideoObj.formatTime(60);
       expect(formattedTime).to.eql('01:00');
-      formattedTime = imaVideoObj.formatTime(65)
+      formattedTime = imaVideoObj.formatTime(65);
       expect(formattedTime).to.eql('01:05');
-      formattedTime = imaVideoObj.formatTime(3600)
+      formattedTime = imaVideoObj.formatTime(3600);
       expect(formattedTime).to.eql('1:00:00');
-      formattedTime = imaVideoObj.formatTime(3605)
+      formattedTime = imaVideoObj.formatTime(3605);
       expect(formattedTime).to.eql('1:00:05');
-      formattedTime = imaVideoObj.formatTime(3665)
+      formattedTime = imaVideoObj.formatTime(3665);
       expect(formattedTime).to.eql('1:01:05');
     });
   });
@@ -629,10 +631,10 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
 
-      var padded = imaVideoObj.zeroPad(11);
+      let padded = imaVideoObj.zeroPad(11);
       expect(padded).to.eql('11');
       padded = imaVideoObj.zeroPad(1);
       expect(padded).to.eql('01');
@@ -650,11 +652,11 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
       imaVideoObj.setPlayerStateForTesting(
           imaVideoObj.getPropertiesForTesting().PlayerStates.PAUSED);
-      const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
+      //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
 
       imaVideoObj.onPlayPauseClick();
 
@@ -674,11 +676,11 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
       imaVideoObj.setPlayerStateForTesting(
           imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING);
-      const pauseVideoSpy = sandbox.spy(imaVideoObj, 'pauseVideo');
+      //const pauseVideoSpy = sandbox.spy(imaVideoObj, 'pauseVideo');
 
       imaVideoObj.onPlayPauseClick();
 
@@ -697,15 +699,15 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      const showControlsSpy = sandbox.spy(imaVideoObj, 'showControls');
-      var postMessage;
+      //const showControlsSpy = sandbox.spy(imaVideoObj, 'showControls');
+      //let testPostMessage;
       // TODO - How do I test messages posted back to the main window?
-      window.addEventListener('message', (msg) => {
-        postMessage = msg;
-      });
-      var videoMock = {};
+      /*window.addEventListener('message', msg => {
+        testPostMessage = msg;
+      });*/
+      const videoMock = {};
       videoMock.play = function() {};
       const playSpy = sandbox.spy(videoMock, 'play');
       imaVideoObj.setVideoPlayerForTesting(videoMock);
@@ -725,7 +727,7 @@ describe('amp-ima-video', () => {
         .to.eql(imaVideoObj.getPropertiesForTesting().pauseChars);
       // TODO - How do I test messages posted back to the main window? This is
       // being called before the event is thrown so it fails.
-      //expect(postMessage.data).to.have.property('event');
+      //expect(testPostMessage.data).to.have.property('event');
       expect(playSpy).to.have.been.called;
     });
   });
@@ -740,20 +742,20 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var videoMock = {};
+      const videoMock = {};
       videoMock.pause = function() {};
       const pauseSpy = sandbox.spy(videoMock, 'pause');
       imaVideoObj.setVideoPlayerForTesting(videoMock);
-      const showControlsSpy = sandbox.spy(imaVideoObj, 'showControls');
+      //const showControlsSpy = sandbox.spy(imaVideoObj, 'showControls');
       imaVideoObj.getPropertiesForTesting().playerState =
           imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING;
-      var postMessage;
+      //let testPostMessage;
       // TODO - How do I test messages posted back to the main window?
-      window.addEventListener('message', (msg) => {
-        postMessage = msg;
-      });
+      /*window.addEventListener('message', msg => {
+        testPostMessage = msg;
+      });*/
 
       imaVideoObj.pauseVideo({});
 
@@ -769,7 +771,7 @@ describe('amp-ima-video', () => {
               .to.eql('');
       // TODO - How do I test messages posted back to the main window? This is
       // being called before the event is thrown so it fails.
-      //expect(postMessage.data).to.have.property('event');
+      //expect(testPostMessage.data).to.have.property('event');
     });
   });
 
@@ -783,22 +785,23 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
-      var videoMock = {};
+      const videoMock = {};
       videoMock.pause = function() {};
       videoMock.removeEventListener = function() {};
       const pauseSpy = sandbox.spy(videoMock, 'pause');
-      removeEventListenerSpy = sandbox.spy(videoMock, 'removeEventListener');
+      const removeEventListenerSpy =
+        sandbox.spy(videoMock, 'removeEventListener');
       imaVideoObj.setVideoPlayerForTesting(videoMock);
-      const showControlsSpy = sandbox.spy(imaVideoObj, 'showControls');
+      //const showControlsSpy = sandbox.spy(imaVideoObj, 'showControls');
       imaVideoObj.getPropertiesForTesting().playerState =
           imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING;
-      var postMessage;
+      //let testPostMessage;
       // TODO - How do I test messages posted back to the main window?
-      window.addEventListener('message', (msg) => {
-        postMessage = msg;
-      });
+      /*window.addEventListener('message', msg => {
+        testPostMessage = msg;
+      });*/
 
       imaVideoObj.pauseVideo({type: 'webkitendfullscreen'});
 
@@ -814,7 +817,7 @@ describe('amp-ima-video', () => {
               .to.eql('');
       // TODO - How do I test messages posted back to the main window? This is
       // being called before the event is thrown so it fails.
-      //expect(postMessage.data).to.have.property('event');
+      //expect(testPostMessage.data).to.have.property('event');
       expect(removeEventListenerSpy).to.have.been.called;
     });
   });
@@ -829,7 +832,7 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
       imaVideoObj.getPropertiesForTesting().playerState =
           imaVideoObj.getPropertiesForTesting().PlayerStates.PAUSED;
@@ -854,7 +857,7 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
       imaVideoObj.setPlayerStateForTesting(
           imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING);
@@ -878,7 +881,7 @@ describe('amp-ima-video', () => {
         width: 640,
         height: 360,
         src: srcUrl,
-        tag: adTagUrl
+        tag: adTagUrl,
       });
 
       imaVideoObj.hideControls();

@@ -30,10 +30,9 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  preconnectCallback(onLayout) {
+  preconnectCallback() {
     this.preconnect.preload(
         'https://imasdk.googleapis.com/js/sdkloader/ima3.js', 'script');
-    //    'https://storage.googleapis.com/gvabox/sbusolits/h5/debug/ima3.js', 'script');
     preloadBootstrap(this.win, this.preconnect);
   }
 
@@ -63,7 +62,6 @@ class AmpImaVideo extends AMP.BaseElement {
       this.playerReadyResolver_ = resolve;
     });
 
-    console.log('Listening for messages');
     this.win.addEventListener(
         'message', event => this.handlePlayerMessages_(event));
 
@@ -90,10 +88,9 @@ class AmpImaVideo extends AMP.BaseElement {
   /** @override */
   onLayoutMeasure() {
     if (this.iframe_) {
-      console.log('onLayoutMeasure iframe dimens: ' + this.iframe_.offsetWidth + 'x' + this.iframe_.offsetHeight);
       this.sendCommand_('resize', {
         'width': this.iframe_.offsetWidth,
-        'height': this.iframe_.offsetHeight
+        'height': this.iframe_.offsetHeight,
       });
     }
   }
@@ -122,17 +119,17 @@ class AmpImaVideo extends AMP.BaseElement {
       return;  // Doesn't look like JSON.
     }
 
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
-    if (data.event == VideoEvents.LOAD ||
-        data.event == VideoEvents.PLAY ||
-        data.event == VideoEvents.PAUSE ||
-        data.event == VideoEvents.MUTED ||
-        data.event == VideoEvents.UNMUTED) {
-      console.log('Firing ' + data.event);
-      if (data.event == VideoEvents.LOAD) {
-        this.playerReadyResolver_(this.iframe_);
+    if (isObject(event.data)) {
+      if (event.data.event == VideoEvents.LOAD ||
+          event.data.event == VideoEvents.PLAY ||
+          event.data.event == VideoEvents.PAUSE ||
+          event.data.event == VideoEvents.MUTED ||
+          event.data.event == VideoEvents.UNMUTED) {
+        if (event.data.event == VideoEvents.LOAD) {
+          this.playerReadyResolver_(this.iframe_);
+        }
+        this.element.dispatchCustomEvent(event.data.event);
       }
-      this.element.dispatchCustomEvent(data.event);
     }
   }
 
@@ -154,7 +151,6 @@ class AmpImaVideo extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
-    console.log('PLAY');
     this.playerReadyPromise_.then(() => {
       this.sendCommand_('playVideo');
     });
@@ -164,7 +160,6 @@ class AmpImaVideo extends AMP.BaseElement {
    * @override
    */
   pause() {
-    console.log('PAUSE');
     this.playerReadyPromise_.then(() => {
       this.sendCommand_('pauseVideo');
     });
@@ -174,7 +169,6 @@ class AmpImaVideo extends AMP.BaseElement {
    * @override
    */
   mute() {
-    console.log('MUTE');
     this.playerReadyPromise_.then(() => {
       this.sendCommand_('mute');
     });
@@ -184,7 +178,6 @@ class AmpImaVideo extends AMP.BaseElement {
    * @override
    */
   unmute() {
-    console.log('UNMUTE');
     this.playerReadyPromise_.then(() => {
       this.sendCommand_('unMute');
     });

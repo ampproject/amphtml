@@ -63,11 +63,11 @@ describe('amp-ima-video', () => {
     const video = fixture.doc.createElement('amp-ima-video');
     video.setAttribute('width', 640);
     video.setAttribute('height', 360);
-    video.setAttribute('data-width', "640");
-    video.setAttribute('data-height', "360");
-    video.setAttribute('data-src', "http://rmcdn.2mdn.net/Demo/vast_inspector/android.mp4");
-    video.setAttribute('data-tag', "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator=");
-    video.setAttribute('data-poster', "/examples/img/ima-poster.png");
+    video.setAttribute('data-width', '640');
+    video.setAttribute('data-height', '360');
+    video.setAttribute('data-src', 'http://rmcdn.2mdn.net/Demo/vast_inspector/android.mp4');
+    video.setAttribute('data-tag', 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator=');
+    video.setAttribute('data-poster', '/examples/img/ima-poster.png');
     return video;
   });
 });
