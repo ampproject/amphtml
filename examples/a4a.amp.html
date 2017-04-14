@@ -53,76 +53,21 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2>Fake ad network as 3p</h2>
-  <amp-ad width="300" height="400"
-      type="fake"
+  <h2>TripleLift ad network</h2>
+  <amp-ad width="297" height="410"
+      type="triplelift"
       data-use-a4a="true"
-      data-vars-analytics-var="bar"
-      src="fake_amp.json.html">
+      src="https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
 
-  <h2>Adsense</h2>
-  <amp-ad width=300 height=250
-      type="adsense"
-      data-ad-client="ca-pub-2005682797531342"
-      data-ad-slot="7046626912">
-    <div placeholder></div>
-    <div fallback></div>
-  </amp-ad>
-
-  <h2>Adsense w/o placeholder and fallback</h2>
-  <amp-ad width=300 height=300
-      type="adsense"
-      data-ad-client="ca-pub-2005682797531342"
-      data-ad-slot="7046626912">
-  </amp-ad>
-
-  <h2>Doubleclick</h2>
-  <amp-ad width=320 height=50
-      type="doubleclick"
-      data-slot="/4119129/mobile_ad_banner">
-    <div placeholder></div>
-    <div fallback></div>
-  </amp-ad>
-
-  <h2>Doubleclick w/o placeholder and fallback</h2>
-  <amp-ad width=320 height=50
-      type="doubleclick"
-      data-slot="/4119129/mobile_ad_banner">
-  </amp-ad>
-
-  <h2>Doubleclick w/ JSON based parameters</h2>
-  <amp-ad width=320 height=50
-      type="doubleclick"
-      data-slot="/4119129/mobile_ad_banner"
-      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
-    <div placeholder></div>
-    <div fallback></div>
-  </amp-ad>
-
-  <h2>Doubleclick no ad</h2>
-  <amp-ad width=300 height=200
-      type="doubleclick"
-      data-slot="/4119129/doesnt-exist">
-    <div placeholder></div>
-    <div fallback></div>
-  </amp-ad>
-
-  <h2>Doubleclick no ad w/o fallback</h2>
-  <amp-ad width=300 height=200
-      type="doubleclick"
-      data-slot="/4119129/doesnt-exist">
-    <div placeholder></div>
-  </amp-ad>
-
-  <h2>Doubleclick with overriden size</h2>
-  <amp-ad width=420 height=100
-      data-override-width=320 data-override-height=50
-      type="doubleclick"
-      data-slot="/4119129/mobile_ad_banner"
-      class="red">
+  <h2>Fake cloudflare as ad network ad</h2>
+  <amp-ad width="300" height="150"
+      type="cloudflare"
+      data-cf-network="cloudflare"
+      data-cf-a4a="true"
+      src="/fake_a4a.json.html">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>

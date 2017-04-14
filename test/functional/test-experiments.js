@@ -15,14 +15,41 @@
  */
 
 import {
-  isDevChannel,
-  isDevChannelVersionDoNotUse_,
+  isCanary,
   isExperimentOn,
-  isExperimentOnAllowUrlOverride,
+  experimentToggles,
   toggleExperiment,
-  resetExperimentToggles_,
+  resetExperimentTogglesForTesting,
+  getExperimentToglesFromCookieForTesting,
 } from '../../src/experiments';
+import {createElementWithAttributes} from '../../src/dom';
 import * as sinon from 'sinon';
+
+describe('experimentToggles', () => {
+  it('should return experiment status map', () => {
+    const win = {
+      document: {
+        cookie: 'AMP_EXP=-exp3,exp4,exp5',
+      },
+      AMP_CONFIG: {
+        exp1: 1,
+        exp2: 0,
+        exp3: 1,
+        exp4: 0,
+        v: '12345667',
+      },
+    };
+    resetExperimentTogglesForTesting(window);
+    expect(experimentToggles(win)).to.deep.equal({
+      exp1: true,
+      exp2: false,
+      exp3: false, // overridden in cookie
+      exp4: true, // overridden in cookie
+      exp5: true,
+      // "v" should not appear here
+    });
+  });
+});
 
 describe('isExperimentOn', () => {
   let win;
@@ -42,11 +69,11 @@ describe('isExperimentOn', () => {
   });
 
   afterEach(() => {
-    resetExperimentToggles_();
     sandbox.restore();
   });
 
   function expectExperiment(cookieString, experimentId) {
+    resetExperimentTogglesForTesting(window);
     win.document.cookie = cookieString;
     return expect(isExperimentOn(win, experimentId));
   }
@@ -71,6 +98,13 @@ describe('isExperimentOn', () => {
       expectExperiment('AMP_EXP=e2,e1', 'e1').to.be.true;
       expectExperiment('AMP_EXP=e2 , e1', 'e1').to.be.true;
     });
+
+    it('should return "off" when disabling value is in the list', () => {
+      expectExperiment('AMP_EXP=-e1', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=e2,-e1', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=-e1,e2', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=e2 , -e1', 'e1').to.be.false;
+    });
   });
 
   describe('with global flag', () => {
@@ -82,14 +116,19 @@ describe('isExperimentOn', () => {
 
     it('should fall back to global flag', () => {
       const cookie = 'AMP_EXP=e2,e4';
-      win.AMP_CONFIG['e1'] = true;
+      win.AMP_CONFIG['e1'] = 1;
       win.AMP_CONFIG['e2'] = 1;
       win.AMP_CONFIG['e3'] = 0;
-      win.AMP_CONFIG['e4'] = false;
+      win.AMP_CONFIG['e4'] = 0;
       expectExperiment(cookie, 'e1').to.be.true;
       expectExperiment(cookie, 'e2').to.be.true;
       expectExperiment(cookie, 'e3').to.be.false;
       expectExperiment(cookie, 'e4').to.be.true;
+    });
+
+    it('should return "off" when disabling value is in the list', () => {
+      win.AMP_CONFIG['e1'] = true;
+      expectExperiment('AMP_EXP=-e1', 'e1').to.be.false;
     });
 
     it('should return "off" when not in cookie flag or global flag', () => {
@@ -99,7 +138,6 @@ describe('isExperimentOn', () => {
     it('should calc if experiment should be "on"', () => {
       win.AMP_CONFIG['e1'] = 1;
       expectExperiment('', 'e1').to.be.true;
-      resetExperimentToggles_();
 
       win.AMP_CONFIG['e2'] = 0;
       expectExperiment('', 'e2').to.be.false;
@@ -119,42 +157,12 @@ describe('isExperimentOn', () => {
     });
 
     it('should cache calc value', () => {
-      const randomStub = sandbox.stub(Math, 'random');
-      randomStub.onFirstCall().returns(0.4);
-      randomStub.onSecondCall().returns(0.4);
-      randomStub.returns(0.9);
+      sandbox.stub(Math, 'random').returns(0.4);
       win.AMP_CONFIG['e1'] = 0.5;
       win.AMP_CONFIG['e2'] = 0.1;
 
-      expect(Math.random()).to.equal(0.4);
       expectExperiment('', 'e1').to.be.true;
-
-      // it should continue to be true even though random() is not
-      // less than the experiment value which is 0.5
-      expect(Math.random()).to.equal(0.9);
-      expectExperiment('', 'e1').to.be.true;
-
-      expect(Math.random()).to.equal(0.9);
       expectExperiment('', 'e2').to.be.false;
-    });
-  });
-
-  describe('isExperimentOnAllowUrlOverride', () => {
-
-    function expectUrlExperiment(hashOverride, cookieString, experimentId) {
-      win.document.cookie = cookieString;
-      win.location.hash = hashOverride;
-      return expect(isExperimentOnAllowUrlOverride(win, experimentId));
-    }
-
-    it('should accept override', () => {
-      const cookie = 'AMP_EXP=e2,e4';
-      const url = '#e-e1=1&e-e2=0&e-complexName=1';
-      expectUrlExperiment(url, cookie, 'e1').to.be.true;
-      expectUrlExperiment(url, cookie, 'e2').to.be.false;
-      expectUrlExperiment(url, cookie, 'e4').to.be.true;
-      expectUrlExperiment(url, cookie, 'unknown').to.be.false;
-      expectUrlExperiment(url, cookie, 'complexName').to.be.true;
     });
   });
 });
@@ -174,18 +182,26 @@ describe('toggleExperiment', () => {
 
   afterEach(() => {
     sandbox.restore();
-    resetExperimentToggles_();
+    resetExperimentTogglesForTesting(window);
   });
 
   function expectToggle(cookiesString, experimentId, opt_on) {
     const doc = {
       cookie: cookiesString,
     };
-    const on = toggleExperiment({document: doc}, experimentId, opt_on);
+    resetExperimentTogglesForTesting(window);
+    const on = toggleExperiment({
+      document: doc,
+      location: {
+        hostname: 'test.test',
+        href: 'https://test.test/test.html',
+      },
+    }, experimentId, opt_on);
     const parts = doc.cookie.split(/\s*;\s*/g);
     if (parts.length > 1) {
       expect(parts[1]).to.equal('path=/');
-      expect(parts[2]).to.equal('expires=' + expTime);
+      expect(parts[2]).to.equal('domain=test.test');
+      expect(parts[3]).to.equal('expires=' + expTime);
     }
     return expect(`${on}; ${decodeURIComponent(parts[0])}`);
   }
@@ -203,9 +219,9 @@ describe('toggleExperiment', () => {
   });
 
   it('should toggle "off" when value is in the list', () => {
-    expectToggle('AMP_EXP=e1', 'e1').to.equal('false; AMP_EXP=');
-    expectToggle('AMP_EXP=e1,e2', 'e1').to.equal('false; AMP_EXP=e2');
-    expectToggle('AMP_EXP=e2,e1', 'e1').to.equal('false; AMP_EXP=e2');
+    expectToggle('AMP_EXP=e1', 'e1').to.equal('false; AMP_EXP=-e1');
+    expectToggle('AMP_EXP=e1,e2', 'e1').to.equal('false; AMP_EXP=-e1,e2');
+    expectToggle('AMP_EXP=e2,e1', 'e1').to.equal('false; AMP_EXP=e2,-e1');
   });
 
   it('should set "on" when requested', () => {
@@ -214,8 +230,9 @@ describe('toggleExperiment', () => {
   });
 
   it('should set "off" when requested', () => {
-    expectToggle('AMP_EXP=e2,e1', 'e1', false).to.equal('false; AMP_EXP=e2');
-    expectToggle('AMP_EXP=e1', 'e1', false).to.equal('false; AMP_EXP=');
+    expectToggle(
+        'AMP_EXP=e2,e1', 'e1', false).to.equal('false; AMP_EXP=e2,-e1');
+    expectToggle('AMP_EXP=e1', 'e1', false).to.equal('false; AMP_EXP=-e1');
   });
 
   it('should not set cookies when toggling and transientExperiment', () => {
@@ -251,29 +268,54 @@ describe('toggleExperiment', () => {
       document: {
         cookie: '',
       },
+      location: {
+        hostname: 'test.test',
+        href: 'https://test.test/test.html',
+      },
     };
+    toggleExperiment(win, 'transient', true, true);
     toggleExperiment(win, 'e1', true);
-    expect(win.document.cookie).to.contain('e1');
     toggleExperiment(win, 'e2', true, false);
-    expect(win.document.cookie).to.contain('e2');
     toggleExperiment(win, 'e3', true, undefined);
-    expect(win.document.cookie).to.contain('e3');
     toggleExperiment(win, 'e4', undefined, false);
-    expect(win.document.cookie).to.contain('e4');
+
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.not.have.property('transient');
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e1', true);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e2', true);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e3', true);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e4', true);
+
     // All of those experiment states should be durable in the window
     // environment.
+    expect(isExperimentOn(win, 'transient'), 'transient is on').to.be.true;
     expect(isExperimentOn(win, 'e1'), 'e1 is on').to.be.true;
     expect(isExperimentOn(win, 'e2'), 'e2 is on').to.be.true;
     expect(isExperimentOn(win, 'e3'), 'e3 is on').to.be.true;
     expect(isExperimentOn(win, 'e4'), 'e4 is on').to.be.true;
+
+    toggleExperiment(win, 'transient', false, true);
     toggleExperiment(win, 'e1', false);
-    expect(win.document.cookie).to.not.contain('e1');
     toggleExperiment(win, 'e2', false, false);
-    expect(win.document.cookie).to.not.contain('e2');
     toggleExperiment(win, 'e3', false, undefined);
-    expect(win.document.cookie).to.not.contain('e3');
     toggleExperiment(win, 'e4', undefined, false);
-    expect(win.document.cookie).to.not.contain('e4');
+
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.not.have.property('transient');
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e1', false);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e2', false);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e3', false);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e4', false);
+
+    expect(isExperimentOn(win, 'transient'), 'transient is on').to.be.false;
     expect(isExperimentOn(win, 'e1'), 'e1 is on').to.be.false;
     expect(isExperimentOn(win, 'e2'), 'e2 is on').to.be.false;
     expect(isExperimentOn(win, 'e3'), 'e3 is on').to.be.false;
@@ -284,6 +326,10 @@ describe('toggleExperiment', () => {
     const win = {
       document: {
         cookie: '',
+      },
+      location: {
+        hostname: 'test.test',
+        href: 'https://test.test/test.html',
       },
     };
     // Make sure some experiments are enabled in the cookie.
@@ -328,23 +374,136 @@ describe('toggleExperiment', () => {
     expect(isExperimentOn(win, 'e5'), 'e5').to.be.true;
     expect(isExperimentOn(win, 'e6'), 'e6').to.be.false;
   });
+
+  it('should override global settings', () => {
+    const win = {
+      document: {
+        cookie: '',
+      },
+      'AMP_CONFIG': {
+        'e1': 1,
+      },
+      location: {
+        hostname: 'test.test',
+      },
+    };
+
+    // e1 is on, according to the AMP_CONFIG global setting
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+    // toggleExperiment should override the global setting
+    expect(toggleExperiment(win, 'e1')).to.be.false;
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+
+    // The new setting should be persisted in cookie, so cache reset should not
+    // affect its status.
+    resetExperimentTogglesForTesting(window);
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+
+    // Now let's explicitly toggle to true
+    expect(toggleExperiment(win, 'e1', true)).to.be.true;
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+    resetExperimentTogglesForTesting(window);
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+
+    // Toggle transiently should still work
+    expect(toggleExperiment(win, 'e1', false, true)).to.be.false;
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+    resetExperimentTogglesForTesting(window); // cache reset should bring it back to true
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+
+    // Sanity check, the global setting should never be changed.
+    expect(win.AMP_CONFIG.e1).to.equal(1);
+  });
 });
 
-describe('isDevChannel', () => {
+describes.realWin('meta override', {}, env => {
 
-  function expectDevChannel(cookiesString) {
-    return expect(isDevChannel({
-      document: {
-        cookie: cookiesString,
-      },
-    }));
-  }
+  let win;
 
-  it('should return value based on cookie', () => {
-    expectDevChannel('AMP_EXP=other').to.be.false;
-    resetExperimentToggles_();
-    expectDevChannel('AMP_EXP=dev-channel').to.be.true;
+  beforeEach(() => {
+    win = env.win;
   });
+
+  it('should allow override iff the experiment is whitelisted', () => {
+    win.AMP_CONFIG = {
+      'allow-doc-opt-in': ['e1', 'e3'],
+      e1: 0,
+      e2: 0,
+    };
+
+    win.document.head.appendChild(
+        createElementWithAttributes(win.document, 'meta', {
+          name: 'amp-experiments-opt-in',
+          content: 'e1,e2,e3',
+        }));
+
+    resetExperimentTogglesForTesting(window);
+
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
+    expect(isExperimentOn(win, 'e3')).to.be.true;
+
+    toggleExperiment(win, 'e1', false);
+    toggleExperiment(win, 'e2', true);
+    toggleExperiment(win, 'e3', false);
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+    expect(isExperimentOn(win, 'e2')).to.be.true;
+    expect(isExperimentOn(win, 'e3')).to.be.false;
+  });
+});
+
+describes.fakeWin('url override', {}, env => {
+
+  let win;
+
+  beforeEach(() => {
+    win = env.win;
+  });
+
+  it('should allow override iff the experiment is whitelisted', () => {
+    win.AMP_CONFIG = {
+      'allow-url-opt-in': ['e1', 'e3', 'e4', 'e6', 'e7', 'e8'],
+      e1: 0,
+      e2: 0,
+      e4: 1,
+      e5: 1,
+    };
+    delete win.location.originalHash;
+    win.location.href = '#e-e1=1&e-e2=1&e-e3=1&e-e4=0&e-e5=0&e-e6=0&e-e7=1' +
+        '&e-e8=0';
+    win.document.cookie = 'AMP_EXP=-e7,e8';
+
+    resetExperimentTogglesForTesting(window);
+
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
+    expect(isExperimentOn(win, 'e3')).to.be.true;
+    expect(isExperimentOn(win, 'e4')).to.be.false;
+    expect(isExperimentOn(win, 'e5')).to.be.true; // e5 is not whitelisted
+    expect(isExperimentOn(win, 'e6')).to.be.false;
+    expect(isExperimentOn(win, 'e7')).to.be.true; // overrides cookies
+    expect(isExperimentOn(win, 'e8')).to.be.false; // overrides cookies
+
+    toggleExperiment(win, 'e1', false);
+    toggleExperiment(win, 'e2', true);
+    toggleExperiment(win, 'e3', false);
+    toggleExperiment(win, 'e4', true);
+    toggleExperiment(win, 'e5', false);
+    toggleExperiment(win, 'e6', true);
+    toggleExperiment(win, 'e7', false);
+    toggleExperiment(win, 'e8', true);
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+    expect(isExperimentOn(win, 'e2')).to.be.true;
+    expect(isExperimentOn(win, 'e3')).to.be.false;
+    expect(isExperimentOn(win, 'e4')).to.be.true;
+    expect(isExperimentOn(win, 'e5')).to.be.false;
+    expect(isExperimentOn(win, 'e6')).to.be.true;
+    expect(isExperimentOn(win, 'e7')).to.be.false;
+    expect(isExperimentOn(win, 'e8')).to.be.true;
+  });
+});
+
+describe('isCanary', () => {
 
   it('should return value based on binary version', () => {
     const win = {
@@ -352,8 +511,9 @@ describe('isDevChannel', () => {
         canary: 0,
       },
     };
-    expect(isDevChannelVersionDoNotUse_(win)).to.be.false;
+    expect(isCanary(win)).to.be.false;
     win.AMP_CONFIG.canary = 1;
-    expect(isDevChannelVersionDoNotUse_(win)).to.be.true;
+    expect(isCanary(win)).to.be.true;
   });
 });
+

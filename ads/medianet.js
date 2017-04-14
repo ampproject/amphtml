@@ -20,7 +20,7 @@ import {doubleclick} from '../ads/google/doubleclick';
 
 const mandatoryParams = ['tagtype', 'cid'],
   optionalParams = [
-    'timeout',
+    'timeout', 'crid', 'misc',
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
@@ -49,7 +49,75 @@ export function medianet(global, data) {
 
   if (data.tagtype === 'headerbidder') { //parameter tagtype is used to identify the product the publisher is using. Going ahead we plan to support more product types.
     loadHBTag(global, data, publisherUrl, referrerUrl);
+  } else if (data.tagtype === 'cm' && data.crid) {
+    loadCMTag(global, data, publisherUrl, referrerUrl);
+  } else {
+    global.context.noContentAvailable();
   }
+}
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ * @param {!string} publisherUrl
+ * @param {?string} referrerUrl
+ */
+function loadCMTag(global, data, publisherUrl, referrerUrl) {
+  /*eslint "google-camelcase/google-camelcase": 0*/
+  function setMacro(type) {
+    if (!type) {
+      return;
+    }
+    const name = 'medianet_' + type;
+    if (data.hasOwnProperty(type)) {
+      global[name] = data[type];
+    }
+  }
+
+  function setAdditionalData() {
+    data.requrl = publisherUrl || '';
+    data.refurl = referrerUrl || '';
+    data.versionId = '211213';
+
+    setMacro('width');
+    setMacro('height');
+    setMacro('crid');
+    setMacro('requrl');
+    setMacro('refurl');
+    setMacro('versionId');
+    setMacro('misc');
+  }
+
+  function setCallbacks() {
+    global._mNAmp = {
+      renderStartCb: opt_data => {
+        global.context.renderStart(opt_data);
+      },
+      reportRenderedEntityIdentifierCb: ampId => {
+        global.context.reportRenderedEntityIdentifier(ampId);
+      },
+      noContentAvailableCb: () => {
+        global.context.noContentAvailable();
+      },
+    };
+  }
+
+  function loadScript() {
+    let url = 'https://contextual.media.net/ampnmedianet.js?';
+    url += 'cid=' + encodeURIComponent(data.cid);
+    url += '&https=1';
+    url += '&requrl=' + encodeURIComponent(data.requrl);
+    url += '&refurl=' + encodeURIComponent(data.refurl);
+    writeScript(global, url);
+  }
+
+  function init() {
+    setAdditionalData();
+    setCallbacks();
+    loadScript();
+  }
+
+  init();
 }
 
 /**

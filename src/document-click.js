@@ -18,23 +18,31 @@ import {
   closestByTag,
   openWindowDialog,
   escapeCssSelectorIdent,
+  isIframed,
 } from './dom';
-import {fromClassForDoc} from './service';
+import {registerServiceBuilderForDoc} from './service';
 import {dev} from './log';
-import {historyForDoc} from './history';
+import {historyForDoc} from './services';
 import {parseUrl} from './url';
-import {viewerForDoc} from './viewer';
-import {viewportForDoc} from './viewport';
-import {platformFor} from './platform';
-import {timerFor} from './timer';
-import {urlReplacementsForDoc} from './url-replacements';
+import {viewerForDoc} from './services';
+import {viewportForDoc} from './services';
+import {platformFor} from './services';
+import {timerFor} from './services';
+import {urlReplacementsForDoc} from './services';
 
 
 /**
+ * Install click handler service for ampdoc. Immediately instantiates the
+ * the click handler service.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installGlobalClickListenerForDoc(ampdoc) {
-  fromClassForDoc(ampdoc, 'clickhandler', ClickHandler);
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'clickhandler',
+      ClickHandler,
+      /* opt_factory */ undefined,
+      /* opt_instantiate */ true);
 }
 
 
@@ -65,8 +73,8 @@ export class ClickHandler {
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
     /** @private @const {boolean} */
-    this.isIframed_ = (this.viewer_.isIframed() &&
-        this.viewer_.isOvertakeHistory());
+    this.isIframed_ =
+        isIframed(this.ampdoc.win) && this.viewer_.isOvertakeHistory();
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);

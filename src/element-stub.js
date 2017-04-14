@@ -16,7 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {dev} from './log';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 
 /** @type {!Array} */
 export const stubbedElements = [];
@@ -48,6 +48,12 @@ export class ElementStub extends BaseElement {
     // element.
     return true;
   }
+
+  /** @override */
+  reconstructWhenReparented() {
+    // No real state so no reason to reconstruct.
+    return false;
+  }
 }
 
 
@@ -62,4 +68,13 @@ export function resetLoadingCheckForTests() {
       delete loadingChecked[key];
     }
   }
+}
+
+
+/**
+ * @param {string} name
+ * @visibleForTesting
+ */
+export function setLoadingCheckForTests(name) {
+  loadingChecked[name] = true;
 }

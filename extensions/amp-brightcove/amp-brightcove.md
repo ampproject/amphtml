@@ -93,9 +93,13 @@ Keys and values will be URI encoded. Keys will be camel cased.
 - `data-param-language="de"` becomes `&language=de`
 - `data-param-custom-ad-data="key:value;key2:value2"` becomes `&customAdData=key%3Avalue%3Bkey2%3Avalue2`
 
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
 ## Player configuration
 
-This script should be added to the configuration of Brightcove Players used with this component. This allows the AMP document to pause the player. Only the script need be added, no plugin name or JSON are needed.
+The followings script should be added to the configuration of Brightcove Players used with this component. This allows the AMP document to pause the player. Only the script need be added, no plugin name or JSON are needed.
 
 * http://players.brightcove.net/906043040001/plugins/postmessage_pause.js
 

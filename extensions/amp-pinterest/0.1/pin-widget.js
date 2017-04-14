@@ -17,7 +17,7 @@
 import {assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 
 import {Util} from './util';
 
@@ -65,12 +65,13 @@ export class PinWidget {
   fetchPin() {
     const baseUrl = 'https://widgets.pinterest.com/v3/pidgets/pins/info/?';
     const query = `pin_ids=${this.pinId}&sub=www&base_scheme=https`;
-    return this.xhr.fetchJson(baseUrl + query)
-      .then(response => {
-        try {
-          return response.data[0];
-        } catch (e) { return null; }
-      });
+    return this.xhr.fetchJson(baseUrl + query, {
+      requireAmpResponseSourceOrigin: false,
+    }).then(response => {
+      try {
+        return response.data[0];
+      } catch (e) { return null; }
+    });
   }
 
   renderPin(pin) {
@@ -87,8 +88,13 @@ export class PinWidget {
       Util.log('&type=pidget&pin_count=1');
     }
 
+    // Apply a CSS class when the layout is responsive
+    if (this.layout === 'responsive') {
+      className += ' -amp-pinterest-embed-pin-responsive';
+    }
+
     const structure = Util.make(this.element.ownerDocument, {'span': {}});
-    structure.className = className + ' -amp-fill-content';
+    structure.className = className + ' i-amphtml-fill-content';
 
     const container = Util.make(this.element.ownerDocument, {'span': {
       'className': '-amp-pinterest-embed-pin-inner',
@@ -221,6 +227,7 @@ export class PinWidget {
   render() {
     this.pinUrl = this.element.getAttribute('data-url');
     this.width = this.element.getAttribute('data-width');
+    this.layout = this.element.getAttribute('layout');
 
     this.pinId = '';
     try {

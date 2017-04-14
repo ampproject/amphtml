@@ -18,7 +18,7 @@ import {getServiceForDoc} from '../service';
 import {getSourceOrigin} from '../url';
 import {dev} from '../log';
 import {recreateNonProtoObject} from '../json';
-import {viewerForDoc} from '../viewer';
+import {viewerForDoc} from '../services';
 
 /** @const */
 const TAG = 'Storage';
@@ -111,7 +111,7 @@ export class Storage {
       this.storePromise_ = this.binding_.loadBlob(this.origin_)
           .then(blob => blob ? JSON.parse(atob(blob)) : {})
           .catch(reason => {
-            dev().error(TAG, 'Failed to load store: ', reason);
+            dev().expectedError(TAG, 'Failed to load store: ', reason);
             return {};
           })
           .then(obj => new Store(obj));
@@ -286,10 +286,33 @@ export class LocalStorageBinding {
     this.win = win;
 
     /** @private @const {boolean} */
-    this.isLocalStorageSupported_ = 'localStorage' in this.win;
+    this.isLocalStorageSupported_ = this.checkIsLocalStorageSupported_();
 
     if (!this.isLocalStorageSupported_) {
-      dev().error(TAG, 'localStorage not supported.');
+      const error = new Error('localStorage not supported.');
+      dev().expectedError(TAG, error);
+    }
+  }
+
+  /**
+   * Determines whether localStorage API is supported by ensuring it is declared
+   * and does not throw an exception when used.
+   * @return {boolean}
+   * @private
+   */
+  checkIsLocalStorageSupported_() {
+    try {
+      if (!('localStorage' in this.win)) {
+        return false;
+      }
+
+      // We do not care about the value fetched from local storage; we only care
+      // whether the call throws an exception or not.  As such, we can look up
+      // any arbitrary key.
+      this.win.localStorage.getItem('test');
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -344,15 +367,15 @@ export class ViewerStorageBinding {
 
   /** @override */
   loadBlob(origin) {
-    return this.viewer_.sendMessage('loadStore', {origin}, true).then(
+    return this.viewer_.sendMessageAwaitResponse('loadStore', {origin}).then(
       response => response['blob']
     );
   }
 
   /** @override */
   saveBlob(origin, blob) {
-    return /** @type {!Promise} */ (this.viewer_.sendMessage(
-        'saveStore', {origin, blob}, true));
+    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
+        'saveStore', {origin, blob}));
   }
 }
 

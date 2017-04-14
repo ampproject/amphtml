@@ -17,19 +17,10 @@
 import {
   GoogleAdLifecycleReporter,
   BaseLifecycleReporter,
-  getLifecycleReporter,
 } from '../performance';
-import {EXPERIMENT_ATTRIBUTE} from '../traffic-experiments';
-import {childElements} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
-import {
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
-} from '../../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';  // eslint-disable-line max-len
-import {
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
-} from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
+import {viewerForDoc} from '../../../../src/services';
+import {toArray} from '../../../../src/types';
 import * as sinon from 'sinon';
 
 /**
@@ -45,15 +36,6 @@ function expectMatchesAll(address, matchList) {
 }
 
 /**
- * Whether `element` is an `img` DOM node.
- * @param {!Element} element
- * @returns {boolean}
- */
-function isImgNode(element) {
-  return element.tagName == 'IMG';
-}
-
-/**
  * Verify that `element` has at least one sibling DOM node that is an
  * `img` tag whose `src` matches all of the patterns in `matchList`.
  *
@@ -61,8 +43,7 @@ function isImgNode(element) {
  * @param {!Array<!RegExp>} matchList
  */
 function expectHasSiblingImgMatchingAll(element, matchList) {
-  const imgSiblings = childElements(
-      element.parentElement, e => isImgNode(e));
+  const imgSiblings = toArray(element.parentElement.querySelectorAll('img'));
   expect(imgSiblings).to.not.be.empty;
   const result = imgSiblings.some(e => {
     const src = e.getAttribute('src');
@@ -72,120 +53,39 @@ function expectHasSiblingImgMatchingAll(element, matchList) {
       .to.be.true;
 }
 
-// From
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions?redirectlocale=en-US&redirectslug=JavaScript%2FGuide%2FRegular_Expressions
-/**
- * Escape a string for use as a literal inside a regular expression.
- * @param {!string} string
- * @returns {!string}
- * @private
- */
-function escapeRegExp_(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}
+describe('BaseLifecycleReporter', () => {
+  describes.fakeWin('', {}, env => {
+    let doc;
+    beforeEach(() => {
+      doc = env.win.document;
+    });
 
-/**
- * Construct a lifecycle reporter for an element with a given eid in one of
- * the reporting namespaces.  If eid is not specified, creates an element with
- * no eid.
- * @param {string} namespace
- * @param {string} ad type
- * @param {string=} opt_eid
- * @returns {*}
- */
-function buildElementWithEid(namespace, type, opt_eid) {
-  return createIframePromise(false).then(iframeFixture => {
-    const win = iframeFixture.win;
-    const doc = iframeFixture.doc;
-    const elem = doc.createElement('div');
-    elem.setAttribute('type', type);
-    if (opt_eid) {
-      elem.setAttribute(EXPERIMENT_ATTRIBUTE, opt_eid);
-    }
-    doc.body.appendChild(elem);
-    const pseudoAmpElement = {
-      win,
-      element: elem,
-    };
-    return getLifecycleReporter(pseudoAmpElement, namespace, 0, 0);
-  });
-}
+    it('should not modify the DOM', () => {
+      expect(doc.querySelector('img')).not.to.be.ok;
+      const reporter = new BaseLifecycleReporter();
+      reporter.sendPing('foo');
+      expect(doc.querySelector('img')).not.to.be.ok;
+    });
 
-describe('#getLifecycleReporter', () => {
-  const EXPERIMENT_BRANCH_EIDS = [
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment,
-    '117152632',
-  ];
-  const CONTROL_BRANCH_EIDS = [
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control,
-  ];
-
-  ['adsense', 'doubleclick'].forEach(type => {
-    EXPERIMENT_BRANCH_EIDS.forEach(eid => {
-      it(`should return real reporter for a4a eid = ${eid}`, () => {
-        return buildElementWithEid('a4a', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
-        });
-      });
-
-      it(`should return a null reporter for amp eid = ${eid}`, () => {
-        return buildElementWithEid('amp', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
-      });
-
-      it(`should return null reporter for bogus namespace eid = ${eid}`, () => {
-        return buildElementWithEid('fnord', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
-      });
-
-      it(`should return null reporter for non-Google ad, eid = ${eid}`, () => {
-        return buildElementWithEid('a4a', 'a9', eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
+    it('should store single parameters', () => {
+      const reporter = new BaseLifecycleReporter();
+      expect(reporter.extraVariables_).to.be.empty;
+      reporter.setPingParameter('x', 3);
+      reporter.setPingParameter('y', 'kumquat');
+      expect(reporter.extraVariables_).to.deep.equal({
+        x: '3',
+        y: 'kumquat',
       });
     });
 
-    CONTROL_BRANCH_EIDS.forEach(eid => {
-      it(`should return null reporter for a4a eid = ${eid}`, () => {
-        return buildElementWithEid('a4a', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
-      });
-
-      it(`should return a real reporter for amp eid = ${eid}`, () => {
-        return buildElementWithEid('amp', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
-        });
-      });
-
-      it(`should return null reporter for bogus namespace eid = ${eid}`, () => {
-        return buildElementWithEid('fnord', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
-      });
-
-      it(`should return null reporter for non-Google ad, eid = ${eid}`, () => {
-        return buildElementWithEid('amp', 'a9', eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
-      });
+    it('should ignore null-ish parameter values', () => {
+      const reporter = new BaseLifecycleReporter();
+      expect(reporter.extraVariables_).to.be.empty;
+      reporter.setPingParameter('x', null);
+      reporter.setPingParameter('y', '');
+      reporter.setPingParameter('z', undefined);
+      expect(reporter.extraVariables_).to.be.empty;
     });
-
-    for (const namespace in ['a4a', 'amp']) {
-      it(`should return null reporter for ${namespace} and no eid`, () => {
-        return buildElementWithEid(namespace, type).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
-      });
-    }
   });
 });
 
@@ -199,12 +99,23 @@ describe('GoogleAdLifecycleReporter', () => {
     iframe = createIframePromise(false).then(iframeFixture => {
       const win = iframeFixture.win;
       const doc = iframeFixture.doc;
+      const viewer = viewerForDoc(doc);
       const elem = doc.createElement('div');
       doc.body.appendChild(elem);
       const reporter = new GoogleAdLifecycleReporter(
-          win, elem, 'test_foo', 0, 0);
+          win, elem, 'test_foo', 42);
       reporter.setPingAddress('/');
-      return {win, doc, elem, reporter};
+      reporter.setPingParameters({
+        's': 'AD_SLOT_NAMESPACE',
+        'rls': 'AMP_VERSION',
+        'c': 'AD_PAGE_CORRELATOR',
+        'it.AD_SLOT_ID': 'AD_SLOT_TIME_TO_EVENT',
+        's_n_id': 'AD_SLOT_EVENT_NAME.AD_SLOT_EVENT_ID',
+        'p_v': 'AD_PAGE_VISIBLE',
+        'p_v1': 'AD_PAGE_FIRST_VISIBLE_TIME',
+        'p_v2': 'AD_PAGE_LAST_VISIBLE_TIME',
+      });
+      return {win, doc, viewer, elem, reporter};
     });
   });
   afterEach(() => {
@@ -213,19 +124,25 @@ describe('GoogleAdLifecycleReporter', () => {
 
   describe('#sendPing', () => {
     it('should request a single ping and insert into DOM', () => {
-      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+      return iframe.then(({viewer, elem, reporter}) => {
+        const iniTime = reporter.initTime_;
+        sandbox.stub(viewer, 'getFirstVisibleTime', () => iniTime + 11);
+        sandbox.stub(viewer, 'getLastVisibleTime', () => iniTime + 12);
         expect(emitPingSpy).to.not.be.called;
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
-          /[&?]s=test_foo/,
-          // In unit tests, internalRuntimeVersion is not substituted.
-          /[&?]rls=\$internalRuntimeVersion\$/,
-          /[&?]c=[0-9]+/,
-          /[&?]it=[^&?]*adRequestStart\.[0-9]+/,
-          /[&?]it=[^&?]*adRequestStart_0\.[0-9]+/,
-          /[&?]rt=stage\.2+/,
+          /[&?]s=test_foo(&|$)/,
+          // In unit tests, internalRuntimeVersion is not substituted.  %24 ==
+          // ASCII encoding of '$'.
+          /[&?]rls=%24internalRuntimeVersion%24(&|$)/,
+          /[&?]c=[0-9]+(&|$)/,
+          /[&?]it.42=[0-9]+(&|$)/,
+          /[&?]s_n_id=adRequestStart.2(&|$)/,
+          /[&?]p_v=1(&|$)/,
+          /[&?]p_v1=11(&|$)/,
+          /[&?]p_v2=12(&|$)/,
         ];
         expectMatchesAll(arg, expectations);
         expectHasSiblingImgMatchingAll(elem, expectations);
@@ -235,7 +152,7 @@ describe('GoogleAdLifecycleReporter', () => {
     it('should request multiple pings and write all to the DOM', () => {
       return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
         const stages = {
-          adSlotBuilt: '0',
+          adSlotCleared: '-1',
           urlBuilt: '1',
           adRequestStart: '2',
           adRequestEnd: '3',
@@ -245,7 +162,6 @@ describe('GoogleAdLifecycleReporter', () => {
           renderCrossDomainStart: '7',
           renderFriendlyEnd: '8',
           renderCrossDomainEnd: '9',
-          adSlotCleared: '20',
         };
         expect(emitPingSpy).to.not.be.called;
         let count = 0;
@@ -257,13 +173,13 @@ describe('GoogleAdLifecycleReporter', () => {
         count = 0;
         for (const k in stages) {
           const expectations = [
-            /[&?]s=test_foo/,
-            // In unit tests, internalRuntimeVersion is not substituted.
-            /[&?]rls=\$internalRuntimeVersion\$/,
-            /[&?]c=[0-9]+/,
-            new RegExp(`[&?]it=[^&?]*${k}\.[0-9]+`),
-            new RegExp(`[&?]it=[^&?]*${k}_0\.[0-9]+`),
-            new RegExp(`[&?]rt=stage\.${stages[k]}`),
+            /[&?]s=test_foo(&|$)/,
+            // In unit tests, internalRuntimeVersion is not substituted.  %24 ==
+            // ASCII encoding of '$'.
+            /[&?]rls=%24internalRuntimeVersion%24(&|$)/,
+            /[&?]c=[0-9]+(&|$)/,
+            /[&?]it.42=[0-9]+(&|$)/,
+            RegExp(`[&?]s_n_id=${k}.${stages[k]}(&|$)`),
           ];
           const arg = emitPingSpy.getCall(count++).args[0];
           expectMatchesAll(arg, expectations);
@@ -288,8 +204,13 @@ describe('GoogleAdLifecycleReporter', () => {
           elem.setAttribute('id', i);
           doc.body.appendChild(elem);
           const reporter = new GoogleAdLifecycleReporter(win, elem, 'test_foo',
-              1, i + 1);
+              i + 1);
           reporter.setPingAddress('/');
+          reporter.setPingParameters({
+            's': 'AD_SLOT_NAMESPACE',
+            'c': 'AD_PAGE_CORRELATOR',
+            'it.AD_SLOT_ID': 'AD_SLOT_TIME_TO_EVENT',
+          });
           allReporters.push(reporter);
         }
         allReporters.forEach(r => {
@@ -298,15 +219,17 @@ describe('GoogleAdLifecycleReporter', () => {
           }
         });
         expect(emitPingSpy.callCount).to.equal(nSlots * nStages);
-        const allImgNodes = childElements(doc.body, x => isImgNode(x));
+        const allImgNodes = toArray(doc.querySelectorAll('img'));
         expect(allImgNodes.length).to.equal(nSlots * nStages);
-        const commonCorrelator = '1';
+        let commonCorrelator;
         const slotCounts = {};
         allImgNodes.forEach(n => {
           const src = n.getAttribute('src');
-          expect(src).to.match(/[?&]s=test_foo/);
+          expect(src).to.match(/[?&]s=test_foo(&|$)/);
+          expect(src).to.match(/[?&]c=[0-9]+/);
           const corr = /[?&]c=([0-9]+)/.exec(src)[1];
-          const slotId = /[?&]rt=[^&?]*slotId\.([0-9]+)[&?,]/.exec(src)[1];
+          commonCorrelator = commonCorrelator || corr;
+          const slotId = /[?&]it.([0-9]+)=[0-9]+(&|$)/.exec(src)[1];
           expect(corr).to.equal(commonCorrelator);
           slotCounts[slotId] = slotCounts[slotId] || 0;
           ++slotCounts[slotId];
@@ -317,79 +240,160 @@ describe('GoogleAdLifecycleReporter', () => {
         }
       });
     });
+  });
 
-    it('should capture eid', () => {
-      return iframe.then(({win, doc, unusedElem, reporter}) => {
+  describe('#setPingParameter', () => {
+    it('should pass through static ping variables', () => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
+        reporter.setPingParameter('zort', 314159);
+        reporter.setPingParameter('gack', 'flubble');
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
-        // No e= param when no EID is present on element.
-        expect(arg).to.not.match(/[&?]e=/);
-        const elem2 = doc.createElement('div');
-        elem2.setAttribute(EXPERIMENT_ATTRIBUTE, '123456');
-        doc.body.appendChild(elem2);
-        const reporter2 = new GoogleAdLifecycleReporter(win, elem2, 'test_foo');
-        reporter2.setPingAddress('/');
-        reporter2.sendPing('adRequestStart');
-        expect(emitPingSpy).to.be.calledTwice;
-        const arg2 = emitPingSpy.getCall(1).args[0];
-        // Now there should be an e= param.
-        expect(arg2).to.match(/[&?]e=123456/);
+        const expectations = [
+          // Be sure that existing ping not deleted by args.
+          /[&?]s=test_foo/,
+          /zort=314159/,
+          /gack=flubble/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
-    it('eid should be URL encoded', () => {
-      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-        // The following string is deliberately a script URL to test that
-        // the ping system correctly URL encodes such strings.
-        /* eslint-disable no-script-url */
-        const rawEid =
-            'javascript:{doSomethingHeinous("https://malware.central.com");}';
-        /* eslint-enable no-script-url */
-        elem.setAttribute(EXPERIMENT_ATTRIBUTE, rawEid);
+    it('does not allow empty args', () => {
+      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
-        reporter.sendPing('onLayoutMeasure');
+        reporter.setPingParameter('', '');
+        reporter.setPingParameter('foo', '');
+        reporter.setPingParameter('bar', null);
+        reporter.setPingParameter('baz', undefined);
+        reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
-        const encodedEid = encodeURIComponent(rawEid);
-        expect(arg).to.match(new RegExp(`[&?]e=${escapeRegExp_(encodedEid)}`));
+        expect(arg).not.to.match(/\&=?\&/);
+        expect(arg).not.to.match(/[&?]foo/);
+        expect(arg).not.to.match(/[&?]bar/);
+        expect(arg).not.to.match(/[&?]baz/);
+      });
+    });
+
+    it('does allow value === 0', () => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+        expect(emitPingSpy).to.not.be.called;
+        reporter.setPingParameter('foo', 0);
+        reporter.setPingParameter('bar', 0.0);
+        reporter.setPingParameter('baz', -0);
+        reporter.sendPing('adRequestStart');
+        expect(emitPingSpy).to.be.calledOnce;
+        const arg = emitPingSpy.getCall(0).args[0];
+        const expectations = [
+          /foo=0/,
+          /bar=0/,
+          /baz=0/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);
+      });
+    });
+
+    it('should uri encode extra params', () => {
+      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
+        expect(emitPingSpy).to.not.be.called;
+        reporter.setPingParameter('evil',
+            '<script src="https://evil.com">doEvil()</script>');
+        reporter.setPingParameter(
+            '<script src="https://very.evil.com">doMoreEvil()</script>', 3);
+        reporter.sendPing('adRequestStart');
+        expect(emitPingSpy).to.be.calledOnce;
+        const arg = emitPingSpy.getCall(0).args[0];
+        expect(arg).not.to.have.string(
+            '<script src="https://evil.com">doEvil()</script>');
+        expect(arg).to.have.string('&evil=' + encodeURIComponent(
+                '<script src="https://evil.com">doEvil()</script>'));
+        expect(arg).not.to.have.string(
+            '<script src="https://very.evil.com">doMoreEvil()</script>');
+        expect(arg).to.have.string('&' + encodeURIComponent(
+                '<script src="https://very.evil.com">doMoreEvil()</script>') +
+            '=3');
+      });
+    });
+
+    it('should expand URL parameters in extra params', () => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+        expect(emitPingSpy).to.not.be.called;
+        reporter.setPingParameter('zort', 'RANDOM');
+        reporter.sendPing('adRequestStart');
+        expect(emitPingSpy).to.be.calledOnce;
+        const arg = emitPingSpy.getCall(0).args[0];
+        const expectations = [
+          // Be sure that existing ping not deleted by args.
+          /[&?]s=test_foo/,
+          /zort=[0-9.]+/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
   });
 
-  describe('#setQqid', () => {
-    it('should populate qqid after set', () => {
-      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
+  describe('#setPingParameters', () => {
+    it('should do nothing on an an empty input', () => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+        const setPingParameterSpy = sandbox.spy(reporter, 'setPingParameter');
         expect(emitPingSpy).to.not.be.called;
-        reporter.sendPing('buildUrl');
+        reporter.setPingParameters({});
+        reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
-        let arg = emitPingSpy.getCall(0).args[0];
-        expect(arg).to.not.match(/qqid/);
-        reporter.setQqid('zort');
-        reporter.sendPing('renderViaIframe');
-        expect(emitPingSpy).to.be.calledTwice;
-        arg = emitPingSpy.getCall(1).args[0];
-        expect(arg).to.match(/&qqid\.0=zort/);
+        expect(setPingParameterSpy).not.to.be.called;
+        const arg = emitPingSpy.getCall(0).args[0];
+        const expectations = [
+          // Be sure that existing ping not deleted by args.
+          /[&?]s=test_foo/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
-    it('qqid should be url encoded', () => {
-      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
+    it('should set a singleton input', () => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+        const setPingParameterSpy = sandbox.spy(reporter, 'setPingParameter');
         expect(emitPingSpy).to.not.be.called;
-        // The following string is deliberately a script URL to test that
-        // the ping system correctly URL encodes such strings.
-        /* eslint-disable no-script-url */
-        const rawQqid =
-            'javascript:{doSomethingHeinous("https://malware.central.com");}';
-        /* eslint-enable no-script-url */
-        const encodedQqid = encodeURIComponent(rawQqid);
-        reporter.setQqid(rawQqid);
-        reporter.sendPing('renderViaIframe');
+        reporter.setPingParameters({zort: '12345'});
+        reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
+        expect(setPingParameterSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
-        expect(arg).to.match(
-            new RegExp(`[&?]qqid\.0=${escapeRegExp_(encodedQqid)}`));
+        const expectations = [
+          // Be sure that existing ping not deleted by args.
+          /[&?]s=test_foo/,
+          /zort=12345/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);
+      });
+    });
+
+    it('should set multiple inputs', () => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+        const setPingParameterSpy = sandbox.spy(reporter, 'setPingParameter');
+        expect(emitPingSpy).to.not.be.called;
+        reporter.setPingParameters({zort: '12345', gax: 99, flub: 0});
+        reporter.sendPing('adRequestStart');
+        expect(emitPingSpy).to.be.calledOnce;
+        expect(setPingParameterSpy).to.be.calledThrice;
+        const arg = emitPingSpy.getCall(0).args[0];
+        const expectations = [
+          // Be sure that existing ping not deleted by args.
+          /[&?]s=test_foo/,
+          /zort=12345/,
+          /gax=99/,
+          /flub=0/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
   });

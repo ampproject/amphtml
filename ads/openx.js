@@ -42,11 +42,11 @@ function assign(target, source) {
  * @param {!Object} data
  */
 export function openx(global, data) {
-  const openxData = ['host', 'nc', 'auid', 'dfpSlot', 'dfp'];
+  const openxData = ['host', 'nc', 'auid', 'dfpSlot', 'dfp', 'openx'];
   const dfpData = assign({}, data); // Make a copy for dfp.
+
   // TODO: check mandatory fields
   validateData(data, [], openxData);
-
   // Consolidate Doubleclick inputs for forwarding -
   // conversion rules are explained in openx.md.
   if (data.dfpSlot) {
@@ -73,13 +73,14 @@ export function openx(global, data) {
   // Decide how to render.
   if (data.host) {
     let jssdk = `https://${data.host}/mw/1.0/jstag`;
-    if (data.nc && data.dfpSlot) { // Use DFP Bidder
+
+    if (data.nc && data.dfpSlot) {
       jssdk += '?nc=' + encodeURIComponent(data.nc);
-      writeScript(global, jssdk, () => {
-        /*eslint "google-camelcase/google-camelcase": 0*/
-        OX._requestArgs['amp'] = 1;
-        doubleclick(global, dfpData);
-      });
+      if (data.auid) {
+        advanceImplementation(global, jssdk, dfpData, data);
+      } else {
+        standardImplementation(global, jssdk, dfpData);
+      }
     } else if (data.auid) { // Just show an ad.
       global.OX_cmds = [
         () => {
@@ -87,10 +88,14 @@ export function openx(global, data) {
           const oxAnchor = global.document.createElement('div');
           global.document.body.appendChild(oxAnchor);
           /*eslint "google-camelcase/google-camelcase": 0*/
-          OX._requestArgs['amp'] = 1;
+          OX._requestArgs['bc'] = 'amp';
           oxRequest.addAdUnit(data.auid);
           oxRequest.setAdSizes([data.width + 'x' + data.height]);
+          if (data.openx && data.openx.customVars) {
+            setCustomVars(oxRequest, filterCustomVar(data.openx.customVars));
+          }
           oxRequest.getOrCreateAdUnit(data.auid).set('anchor', oxAnchor);
+          global.context.renderStart();
           oxRequest.load();
         },
       ];
@@ -99,4 +104,58 @@ export function openx(global, data) {
   } else if (data.dfpSlot) { // Fall back to a DFP ad.
     doubleclick(global, dfpData);
   }
+}
+
+function standardImplementation(global, jssdk, dfpData) {
+  writeScript(global, jssdk, () => {
+    /*eslint "google-camelcase/google-camelcase": 0*/
+    doubleclick(global, dfpData);
+  });
+}
+
+function advanceImplementation(global, jssdk, dfpData, data) {
+  const size = [data.width + 'x' + data.height];
+  let customVars = {};
+  if (data.openx && data.openx.customVars) {
+    customVars = filterCustomVar(data.openx.customVars);
+  }
+  global.OX_bidder_options = {
+    bidderType: 'hb_amp',
+    callback: () => {
+      const priceMap = global.oxhbjs && global.oxhbjs.getPriceMap();
+      const slot = priceMap && priceMap['c'];
+      const targeting = slot ?
+        `${slot.size}_${slot.price},hb-bid-${slot.bid_id}` : 'none_t';
+      dfpData.targeting = dfpData.targeting || {};
+      assign(dfpData.targeting, {oxb: targeting});
+      doubleclick(global, dfpData);
+    },
+  };
+  global.OX_bidder_ads = [[data.dfpSlot, size, 'c', customVars]];
+  loadScript(global, jssdk);
+}
+
+function setCustomVars(oxRequest, customVars) {
+  const customVarKeys = Object.keys(customVars);
+  customVarKeys.forEach(customVarKey => {
+    const customVarValue = customVars[customVarKey];
+    if (Array.isArray(customVarValue)) {
+      customVarValue.forEach(value => {
+        oxRequest.addVariable(customVarKey, value);
+      });
+    } else {
+      oxRequest.addVariable(customVarKey, customVarValue);
+    }
+  });
+}
+
+function filterCustomVar(customVars) {
+  const filterPattern = /^[A-Za-z0-9._]{1,20}$/;
+  const filteredKeys = Object.keys(customVars)
+    .filter(key => filterPattern.test(key));
+  const filteredCustomVar = {};
+  filteredKeys.forEach(key => {
+    filteredCustomVar[key.toLowerCase()] = customVars[key];
+  });
+  return filteredCustomVar;
 }

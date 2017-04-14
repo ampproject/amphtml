@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {adopt} from '../../../../src/runtime';
 import {
   getElement,
   isPositiveNumber_,
@@ -23,330 +22,26 @@ import {
   Visibility,
 } from '../visibility-impl';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
-import {isFiniteNumber} from '../../../../src/types';
+import * as inob from '../../../../src/intersection-observer-polyfill';
 import {VisibilityState} from '../../../../src/visibility-state';
-import {viewerForDoc} from '../../../../src/viewer';
-import {viewportForDoc} from '../../../../src/viewport';
+import {viewerForDoc} from '../../../../src/services';
 import {loadPromise} from '../../../../src/event-helper';
 
 import * as sinon from 'sinon';
 import {setParentWindow} from '../../../../src/service';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {
-  installResourcesServiceForDoc,
-} from '../../../../src/service/resources-impl';
 import {documentStateFor} from '../../../../src/service/document-state';
+import * as lolex from 'lolex';
 
-adopt(window);
-
-describe('amp-analytics.visibility', () => {
-
-  let sandbox;
-  let visibility;
-  let getIntersectionStub;
-  let viewportScrollTopStub;
-  let viewportScrollLeftStub;
-  let callbackStub;
-  let clock;
-  let ampElement;
+describes.realWin('amp-analytics.visibility', {amp: true}, env => {
   let ampdoc;
-  let resourceLoadedResolver;
-
-  const INTERSECTION_0P = makeIntersectionEntry([100, 100, 100, 100],
-      [0, 0, 100, 100]);
-  const INTERSECTION_1P = makeIntersectionEntry([90, 90, 100, 100],
-      [0, 0, 100, 100]);
-  const INTERSECTION_50P = makeIntersectionEntry([50, 0, 100, 100],
-      [0, 0, 100, 100]);
+  let doc;
+  let win;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
-    const docState = documentStateFor(window);
-    sandbox.stub(docState, 'isHidden', () => false);
-    ampdoc = new AmpDocSingle(window);
-    installResourcesServiceForDoc(ampdoc);
-    installPlatformService(window);
-    installTimerService(window);
-
-    ampElement = document.createElement('amp-analytics');
-    ampElement.id = 'abc';
-    document.body.appendChild(ampElement);
-
-    const getIdStub = sandbox.stub();
-    getIdStub.returns('0');
-    getIntersectionStub = sandbox.stub();
-    callbackStub = sandbox.stub();
-    ampElement.getResourceId = getIdStub;
-
-    const viewport = viewportForDoc(ampdoc);
-    viewportScrollTopStub = sandbox.stub(viewport, 'getScrollTop');
-    viewportScrollTopStub.returns(0);
-    viewportScrollLeftStub = sandbox.stub(viewport, 'getScrollLeft');
-    viewportScrollLeftStub.returns(0);
-    viewerForDoc(ampdoc).setVisibilityState_(VisibilityState.VISIBLE);
-    visibility = new Visibility(ampdoc);
-
-    const resourceLoadedPromise =
-        new Promise(resolve => resourceLoadedResolver = resolve);
-    const resource = {
-      getLayoutBox: () => {},
-      element: {getIntersectionChangeEntry: getIntersectionStub},
-      getId: getIdStub,
-      hasLoadedOnce: () => true,
-      loadedOnce: () => resourceLoadedPromise,
-    };
-    sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
-        .returns(resource);
-    // no way to stub performance API so stub a private method instead
-    sandbox.stub(visibility, 'getTotalTime_').returns(1234);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(ampElement);
-    sandbox.restore();
-  });
-
-  function makeIntersectionEntry(boundingClientRect, rootBounds) {
-    boundingClientRect = layoutRectLtwh.apply(null, boundingClientRect);
-    rootBounds = layoutRectLtwh.apply(null, rootBounds);
-    const intersect = rectIntersection(boundingClientRect, rootBounds);
-    const ratio = (intersect.width * intersect.height)
-        / (boundingClientRect.width * boundingClientRect.height);
-    return {
-      intersectionRect: intersect,
-      boundingClientRect,
-      rootBounds,
-      intersectionRatio: ratio,
-      target: ampElement,
-    };
-  }
-
-  function listen(intersectionChange, config, expectedCalls, opt_expectedVars,
-      opt_visible) {
-    opt_visible = opt_visible === undefined ? true : opt_visible;
-    getIntersectionStub.returns(intersectionChange);
-    config['selector'] = '#abc';
-    visibility.listenOnce(config, callbackStub, opt_visible, ampElement);
-    clock.tick(20);
-    verifyExpectedVars(expectedCalls, opt_expectedVars);
-  }
-
-  function verifyChange(intersectionChange, expectedCalls, opt_expectedVars) {
-    getIntersectionStub.returns(intersectionChange);
-    visibility.scrollListener_();
-    verifyExpectedVars(expectedCalls, opt_expectedVars);
-  }
-
-  function verifyExpectedVars(expectedCalls, opt_expectedVars) {
-    expect(callbackStub.callCount).to.equal(expectedCalls);
-    if (opt_expectedVars && expectedCalls > 0) {
-      for (let c = 0; c < opt_expectedVars.length; c++) {
-        sinon.assert.calledWith(callbackStub.getCall(c), opt_expectedVars[c]);
-      }
-    }
-  }
-
-  it('fires for trivial on=visible config', () => {
-    listen(INTERSECTION_50P, {
-      visiblePercentageMin: 0, visiblePercentageMax: 100}, 1);
-  });
-
-  it('fires for trivial on=hidden config', () => {
-    listen(INTERSECTION_50P, {
-      visiblePercentageMin: 0, visiblePercentageMax: 100}, 0, undefined, false);
-
-    visibility.viewer_.setVisibilityState_(VisibilityState.HIDDEN);
-    expect(callbackStub.callCount).to.equal(1);
-  });
-
-  it('fires for non-trivial on=visible config', () => {
-    viewportScrollTopStub.returns(13);
-    viewportScrollLeftStub.returns(5);
-    listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
-          {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0);
-
-    const intersection =
-        makeIntersectionEntry([30, 10, 100, 100], [0, 0, 100, 100]);
-    verifyChange(intersection, 1, [sinon.match({
-      backgrounded: '0',
-      backgroundedAtStart: '0',
-      elementX: '35', // 5 + 30
-      elementY: '23', // 13 + 10
-      elementWidth: '100',
-      elementHeight: '100',
-      loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100,
-      minVisiblePercentage: '63',
-      maxVisiblePercentage: '63',
-      totalTime: sinon.match(value => {
-        return isFiniteNumber(Number(value));
-      }),
-    })]);
-  });
-
-  it('fires for non-trivial on=hidden config', () => {
-    listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
-          {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0, undefined,
-          false);
-
-    verifyChange(INTERSECTION_50P, 0, undefined);
-    visibility.viewer_.setVisibilityState_(VisibilityState.HIDDEN);
-    verifyExpectedVars(1, [sinon.match({
-      backgrounded: '1',
-      backgroundedAtStart: '0',
-      elementX: '50',
-      elementY: '0',
-      elementWidth: '100',
-      elementHeight: '100',
-      loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100
-      totalTime: sinon.match(value => {
-        return isFiniteNumber(Number(value));
-      }),
-    })]);
-  });
-
-  it('fires only once', () => {
-    listen(INTERSECTION_50P, {
-      visiblePercentageMin: 49, visiblePercentageMax: 80,
-    }, 1);
-
-    verifyChange(INTERSECTION_0P, 1);
-    verifyChange(INTERSECTION_50P, 1);
-  });
-
-  it('fires with just totalTimeMin condition', () => {
-    listen(INTERSECTION_0P, {totalTimeMin: 1000}, 0);
-
-    clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
-
-    clock.tick(1);
-    expect(callbackStub.callCount).to.equal(1);
-    sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
-      totalVisibleTime: '1000',
-    }));
-  });
-
-  it('fires with just continuousTimeMin condition', () => {
-    listen(INTERSECTION_0P, {continuousTimeMin: 1000}, 0);
-
-    clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
-
-    clock.tick(1);
-    expect(callbackStub.callCount).to.equal(1);
-  });
-
-  it('fires with totalTimeMin=1k and visiblePercentageMin=0', () => {
-    listen(INTERSECTION_0P, {totalTimeMin: 1000, visiblePercentageMin: 1}, 0);
-
-    verifyChange(INTERSECTION_1P, 0);
-    clock.tick(1000);
-    verifyChange(INTERSECTION_50P, 0);
-
-    clock.tick(1000);
-    expect(callbackStub.callCount).to.equal(1);
-    // There is a 20ms offset in some timedurations because of initial
-    // timeout in the listenOnce logic.
-    sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
-      maxContinuousVisibleTime: '1000',
-      totalVisibleTime: '1000',
-      firstSeenTime: '20',
-      fistVisibleTime: '1020',
-      lastSeenTime: '2020',
-      lastVisibleTime: '2020',
-    }));
-  });
-
-  it('fires for continuousTimeMin=1k and totalTimeMin=2k', () => {
-    // This test counts time from when the ad is loaded.
-    listen(INTERSECTION_0P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
-
-    clock.tick(1000);
-    verifyChange(INTERSECTION_0P, 0);
-
-    clock.tick(1000);
-    expect(callbackStub.callCount).to.equal(1);
-  });
-
-  it('fires for continuousTimeMin=1k and visiblePercentageMin=50', () => {
-    // This test counts time from when the ad is loaded.
-    listen(INTERSECTION_50P,
-        {continuousTimeMin: 1000, visiblePercentageMin: 49}, 0);
-
-    clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
-
-    clock.tick(1000);
-    verifyChange(INTERSECTION_50P, 0);
-
-    clock.tick(100);
-    expect(callbackStub.callCount).to.equal(0);
-    clock.tick(900);
-    expect(callbackStub.callCount).to.equal(1);
-    sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
-      maxContinuousVisibleTime: '1000',
-      minVisiblePercentage: '50',
-      maxVisiblePercentage: '50',
-      totalVisibleTime: '1999',
-    }));
-  });
-
-  it('populates backgroundedAtStart=1', () => {
-    visibility.backgroundedAtStart_ = true;
-    listen(INTERSECTION_50P, {
-      visiblePercentageMin: 0, visiblePercentageMax: 100}, 1, [sinon.match({
-        'backgroundedAtStart': '1',
-      })]);
-  });
-
-  it('populates backgroundedAtStart=0', () => {
-    const viewerStub = sandbox.stub(visibility.viewer_, 'getVisibilityState');
-    viewerStub.returns(VisibilityState.VISIBLE);
-    visibility.backgroundedAtStart_ = false;
-    listen(INTERSECTION_50P, {
-      visiblePercentageMin: 0, visiblePercentageMax: 100}, 1, [sinon.match({
-        'backgroundedAtStart': '0',
-        'backgrounded': '0',
-      })]);
-
-    viewerStub.returns(VisibilityState.HIDDEN);
-    visibility.visibilityListener_();
-    viewerStub.returns(VisibilityState.VISIBLE);
-    listen(INTERSECTION_50P, {
-      visiblePercentageMin: 0, visiblePercentageMax: 100}, 2, [
-        sinon.match({}),
-        sinon.match({
-          'backgroundedAtStart': '0',
-          'backgrounded': '1',
-        })]);
-  });
-
-  describe('populates backgrounded variable', () => {
-    let viewerStub;
-    beforeEach(() => {
-      viewerStub = sandbox.stub(visibility.viewer_, 'getVisibilityState');
-    });
-
-    function verifyState(state, expectedValue) {
-      it('for visibility state=' + state, () => {
-        viewerStub.returns(state);
-        visibility.visibilityListener_();
-        viewerStub.returns(VisibilityState.VISIBLE);
-
-        listen(INTERSECTION_50P, {
-          visiblePercentageMin: 0, visiblePercentageMax: 100}, 1, [sinon.match({
-            'backgrounded': expectedValue,
-          })]);
-      });
-    }
-
-    verifyState(VisibilityState.VISIBLE, '0');
-    verifyState(VisibilityState.HIDDEN, '1');
-    verifyState(VisibilityState.PAUSED, '1');
-    verifyState(VisibilityState.INACTIVE, '1');
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
   });
 
   describe('isVisibilitySpecValid', () => {
@@ -368,9 +63,9 @@ describe('amp-analytics.visibility', () => {
     isSpecValid({}, false);
     isSpecValid({selector: 'abc'}, false);
     isSpecValid({selector: '#a', continuousTimeMax: 10, continuousTimeMin: 100},
-      false);
+        false);
     isSpecValid({selector: '#a', continuousTimeMax: 100, continuousTimeMin: 10},
-      true);
+        true);
     isSpecValid({selector: '#a', visiblePercentageMax: 101}, false);
   });
 
@@ -393,7 +88,7 @@ describe('amp-analytics.visibility', () => {
       it('isValidPercentage_(' + value + ')', () => {
         expect(isValidPercentage_(value)).to.equal(expectedResult);
       });
-    };
+    }
 
     [1, 0, undefined, 100].forEach(num => {
       checkValidPercentage(num, true);
@@ -405,40 +100,36 @@ describe('amp-analytics.visibility', () => {
   });
 
   describe('getElement', () => {
-    let div, img1, img2, analytics, iframe, ampEl, iframeAmpDoc,
-      iframeAnalytics;
+    let div, img1, img2, analytics, iframe, ampEl, iframeAmpDoc;
+    let iframeAnalytics;
     beforeEach(() => {
-      ampEl = document.createElement('span');
-      ampEl.className = '-amp-element';
+      ampEl = doc.createElement('span');
+      ampEl.className = 'i-amphtml-element';
       ampEl.id = 'ampEl';
-      iframe = document.createElement('iframe');
-      div = document.createElement('div');
+      iframe = doc.createElement('iframe');
+      div = doc.createElement('div');
       div.id = 'div';
-      img1 = document.createElement('amp-img');
+      img1 = doc.createElement('amp-img');
       img1.id = 'img1';
-      img2 = document.createElement('amp-img');
+      img2 = doc.createElement('amp-img');
       img2.id = 'img2';
-      analytics = document.createElement('amp-analytics');
+      analytics = doc.createElement('amp-analytics');
       analytics.id = 'analytics';
       img1.appendChild(analytics);
       img1.appendChild(img2);
       div.appendChild(img1);
       iframe.srcdoc = div.outerHTML;
-      document.body.appendChild(ampEl);
-      document.body.appendChild(div);
+      doc.body.appendChild(ampEl);
+      doc.body.appendChild(div);
 
       const loaded = loadPromise(iframe);
       ampEl.appendChild(iframe);
       iframeAmpDoc = new AmpDocSingle(iframe.contentWindow);
       return loaded.then(() => {
-        setParentWindow(iframe.contentWindow, window);
+        setParentWindow(iframe.contentWindow, win);
         iframeAnalytics = iframe.contentDocument.querySelector(
             'amp-analytics');
       });
-    });
-
-    afterEach(() => {
-      document.body.removeChild(ampEl);
     });
 
     it('finds element by id', () => {
@@ -487,44 +178,99 @@ describe('amp-analytics.visibility', () => {
     });
   });
 
-  describe
-  .configure()
-  .skip(() => typeof IntersectionObserver == 'undefined')
-  .run('listenOnceV2', () => {
-
+  describe('listenOnce', () => {
+    let resourceLoadedResolver;
+    let clock;
+    let scrollTop;
     let inObCallback;
     let observeSpy;
     let unobserveSpy;
     let callbackSpy1;
     let callbackSpy2;
+    let visibility;
+    let ampElement;
 
     beforeEach(() => {
+      clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+
+      const docState = documentStateFor(win);
+      sandbox.stub(docState, 'isHidden', () => false);
+
+      ampElement = doc.createElement('amp-analytics');
+      ampElement.id = 'abc';
+      doc.body.appendChild(ampElement);
+
       observeSpy = sandbox.stub();
       unobserveSpy = sandbox.stub();
       callbackSpy1 = sandbox.stub();
       callbackSpy2 = sandbox.stub();
-      sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
-        inObCallback = callback;
-        return {
-          observe: observeSpy,
-          unobserve: unobserveSpy,
-        };
+      if (inob.nativeIntersectionObserverSupported(ampdoc.win)) {
+        sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
+          inObCallback = callback;
+          return {
+            observe: observeSpy,
+            unobserve: unobserveSpy,
+          };
+        });
+      } else {
+        sandbox.stub(inob, 'IntersectionObserverPolyfill', callback => {
+          inObCallback = callback;
+          return {
+            observe: observeSpy,
+            unobserve: unobserveSpy,
+            tick: sandbox.stub(),
+          };
+        });
+      }
+    });
+
+    it('"visible" trigger should work with simple spec', () => {
+      const viewer = viewerForDoc(ampdoc);
+      viewer.setVisibilityState_(VisibilityState.VISIBLE);
+      visibility = createVisibility();
+
+      visibility.listenOnce({
+        selector: '#abc',
+      }, callbackSpy1, true, ampElement);
+
+      resourceLoadedResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(100);
+        fireIntersect(25); // visible
+        expect(callbackSpy1).to.be.calledWith({
+          backgrounded: '0',
+          backgroundedAtStart: '0',
+          elementHeight: '100',
+          elementWidth: '100',
+          elementX: '0',
+          elementY: '75',
+          firstSeenTime: '100',
+          firstVisibleTime: '100',
+          lastSeenTime: '100',
+          lastVisibleTime: '100',
+          loadTimeVisibility: '25',
+          maxVisiblePercentage: '25',
+          minVisiblePercentage: '25',
+          totalVisibleTime: '0',
+          maxContinuousVisibleTime: '0',
+          totalTime: '1234',
+        });
       });
     });
 
-    afterEach(() => {
-      inObCallback = null;
-    });
+    it('"visible" trigger should work with no duration condition', () => {
+      viewerForDoc(ampdoc).setVisibilityState_(VisibilityState.VISIBLE);
+      visibility = createVisibility();
 
-    it('should work for visible=true spec', () => {
-
-      visibility.listenOnceV2({
+      visibility.listenOnce({
         selector: '#abc',
         visiblePercentageMin: 20,
       }, callbackSpy1, true, ampElement);
 
       // add multiple triggers on the same element
-      visibility.listenOnceV2({
+      visibility.listenOnce({
         selector: '#abc',
         visiblePercentageMin: 30,
       }, callbackSpy2, true, ampElement);
@@ -551,7 +297,7 @@ describe('amp-analytics.visibility', () => {
           elementX: '0',
           elementY: '75',
           firstSeenTime: '135',
-          fistVisibleTime: '235', // 135 + 100
+          firstVisibleTime: '235', // 135 + 100
           lastSeenTime: '235',
           lastVisibleTime: '235',
           loadTimeVisibility: '5',
@@ -575,7 +321,7 @@ describe('amp-analytics.visibility', () => {
           elementX: '0',
           elementY: '65',
           firstSeenTime: '135',
-          fistVisibleTime: '335', // 235 + 100
+          firstVisibleTime: '335', // 235 + 100
           lastSeenTime: '335',
           lastVisibleTime: '335',
           loadTimeVisibility: '5',
@@ -590,8 +336,12 @@ describe('amp-analytics.visibility', () => {
       });
     });
 
-    it('should work for visible=true with duration condition', () => {
-      visibility.listenOnceV2({
+    it('"visible" trigger should work with duration condition', () => {
+      const viewer = viewerForDoc(ampdoc);
+      viewer.setVisibilityState_(VisibilityState.VISIBLE);
+      visibility = createVisibility();
+
+      visibility.listenOnce({
         selector: '#abc',
         continuousTimeMin: 1000,
         visiblePercentageMin: 0,
@@ -611,6 +361,15 @@ describe('amp-analytics.visibility', () => {
 
         clock.tick(100);
         fireIntersect(5); // visible again.
+
+        clock.tick(100);
+        // Enters background. this will reset the timer for continuous time
+        viewer.setVisibilityState_(VisibilityState.HIDDEN);
+
+        clock.tick(2000); // this 2s should not be counted in visible time
+        expect(callbackSpy1).to.not.be.called;
+        viewer.setVisibilityState_(VisibilityState.VISIBLE); // now we're back
+
         clock.tick(100);
         fireIntersect(35); // keep being visible
         expect(callbackSpy1).to.not.be.called;
@@ -618,30 +377,191 @@ describe('amp-analytics.visibility', () => {
         expect(callbackSpy1).to.not.be.called;
         clock.tick(1);  // now fire
         expect(callbackSpy1).to.be.calledWith({
-          backgrounded: '0',
+          backgrounded: '1',
           backgroundedAtStart: '0',
           elementHeight: '100',
           elementWidth: '100',
           elementX: '0',
           elementY: '65',
           firstSeenTime: '100',
-          fistVisibleTime: '100',
-          lastSeenTime: '2199',
-          lastVisibleTime: '2199',
+          firstVisibleTime: '100',
+          lastSeenTime: '4299',
+          lastVisibleTime: '4299',
           loadTimeVisibility: '25',
           maxVisiblePercentage: '35',
           minVisiblePercentage: '5',
-          totalVisibleTime: '1999',
+          totalVisibleTime: '2099',
           maxContinuousVisibleTime: '1000',
           totalTime: '1234',
         });
       });
     });
 
+    it('"backgrounded" & "backgroundedAtStart" should be populated', () => {
+      const viewer = viewerForDoc(ampdoc);
+      viewer.setVisibilityState_(VisibilityState.HIDDEN);
+      visibility = createVisibility();
+
+      visibility.listenOnce({
+        selector: '#abc',
+        visiblePercentageMin: 0,
+      }, callbackSpy1, true, ampElement);
+
+      viewer.setVisibilityState_(VisibilityState.VISIBLE);
+      resourceLoadedResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(100);
+        fireIntersect(25); // visible
+        expect(callbackSpy1).to.be.calledWith(sinon.match({
+          backgroundedAtStart: '1',
+          backgrounded: '1',
+        }));
+      });
+    });
+
+    it('"visible" trigger should fire once', () => {
+      const viewer = viewerForDoc(ampdoc);
+      viewer.setVisibilityState_(VisibilityState.VISIBLE);
+      visibility = createVisibility();
+
+      visibility.listenOnce({
+        selector: '#abc',
+        visiblePercentageMin: 10,
+      }, callbackSpy1, true, ampElement);
+
+      resourceLoadedResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(100);
+        fireIntersect(25); // visible
+        expect(callbackSpy1).to.be.calledOnce;
+
+        callbackSpy1.reset();
+        clock.tick(100);
+        fireIntersect(0); // invisible
+        clock.tick(100);
+        fireIntersect(25); // visible again
+        expect(callbackSpy1).to.not.be.called;
+      });
+    });
+
+    it('"hidden" trigger should work with duration condition', () => {
+      const viewer = viewerForDoc(ampdoc);
+      viewer.setVisibilityState_(VisibilityState.VISIBLE);
+      visibility = createVisibility();
+
+      visibility.listenOnce({
+        selector: '#abc',
+        continuousTimeMin: 1000,
+        visiblePercentageMin: 10,
+      }, callbackSpy1, false /* hidden trigger */, ampElement);
+
+      resourceLoadedResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(25); // visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(1000);
+        fireIntersect(15); // visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(1000); // continuous visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(1); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        viewer.setVisibilityState_(VisibilityState.HIDDEN);
+        expect(callbackSpy1).to.be.called;
+
+        expect(callbackSpy1).to.be.calledWith({
+          backgrounded: '1',
+          backgroundedAtStart: '0',
+          elementHeight: '100',
+          elementWidth: '100',
+          elementX: '0',
+          elementY: '99',
+          firstSeenTime: '100',
+          firstVisibleTime: '200',
+          lastSeenTime: '2500',
+          lastVisibleTime: '2400',
+          loadTimeVisibility: '5',
+          maxVisiblePercentage: '25',
+          minVisiblePercentage: '15',
+          totalVisibleTime: '1200',
+          maxContinuousVisibleTime: '1100',
+          totalTime: '1234',
+        });
+      });
+    });
+
+    function createVisibility() {
+      const visibility = new Visibility(ampdoc);
+
+      const getIdStub = sandbox.stub();
+      getIdStub.returns('0');
+      const getIntersectionStub = sandbox.stub();
+      ampElement.getResourceId = getIdStub;
+
+      scrollTop = 10;
+      const resourceLoadedPromise =
+          new Promise(resolve => resourceLoadedResolver = resolve);
+      const resource = {
+        getLayoutBox: () => layoutRectLtwh(0, scrollTop, 100, 100),
+        element: {getIntersectionChangeEntry: getIntersectionStub},
+        getId: getIdStub,
+        hasLoadedOnce: () => true,
+        loadedOnce: () => resourceLoadedPromise,
+      };
+      sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
+          .returns(resource);
+      sandbox.stub(
+          visibility.resourcesService_, 'getResourceForElementOptional')
+              .returns(resource);
+      // no way to stub performance API so stub a private method instead
+      sandbox.stub(visibility, 'getTotalTime_').returns(1234);
+      return visibility;
+    }
+
     function fireIntersect(intersectPercent) {
+      scrollTop = 100 - intersectPercent;
       const entry = makeIntersectionEntry(
-          [0, 100 - intersectPercent, 100, 100], [0, 0, 100, 100]);
+          [0, scrollTop, 100, 100], [0, 0, 100, 100]);
       inObCallback([entry]);
     }
   });
 });
+
+function makeIntersectionEntry(boundingClientRect, rootBounds) {
+  boundingClientRect = layoutRectLtwh.apply(null, boundingClientRect);
+  rootBounds = layoutRectLtwh.apply(null, rootBounds);
+  const intersect = rectIntersection(boundingClientRect, rootBounds);
+  const ratio = (intersect.width * intersect.height)
+      / (boundingClientRect.width * boundingClientRect.height);
+  return {
+    intersectionRect: intersect,
+    boundingClientRect,
+    rootBounds,
+    intersectionRatio: ratio,
+    target: null,
+  };
+}

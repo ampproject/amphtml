@@ -47,69 +47,61 @@ This ServiceWorker runs whenever the AMP file is served from the origin where yo
 
 See [this article](https://medium.com/@cramforce/amps-and-websites-in-the-age-of-the-service-worker-8369841dc962) for how ServiceWorkers can help with making the AMP experience awesome with ServiceWorkers.
 
-Example
+Example:
 
 ```html
-
-  <amp-install-serviceworker
-      src="https://www.your-domain.com/serviceworker.js"
-      data-iframe-src="https://www.your-domain.com/install-serviceworker.html"
-      layout="nodisplay">
-  </amp-install-serviceworker>
-
+<amp-install-serviceworker
+  src="https://www.your-domain.com/serviceworker.js"
+  data-iframe-src="https://www.your-domain.com/install-serviceworker.html"
+  layout="nodisplay">
+</amp-install-serviceworker>
 ```
 
 ## Attributes
 
-### `src`
+**src** (required)
 
-URL of the ServiceWorker to register.
+The URL of the ServiceWorker to register.
 
-### `data-iframe-src` (optional)
+**data-iframe-src** (optional)
 
-URL of a HTML document that install a ServiceWorker.
+The URL of an HTML document that installs a ServiceWorker.
 
-### `layout`
+**layout**
 
 Must have the value `nodisplay`.
 
-### `data-no-service-worker-fallback-url-match`
+**data-no-service-worker-fallback-url-match**
 
-A regular expression that matches URLs to be rewritten to navigate via shell for no-service-worker fallback.
-See [Shell URL rewrite](#shell-url-rewrite) section for more details.
-
-The value must be a valid JavaScript RegExp string, for instance:
+The is a regular expression that matches URLs to be rewritten to navigate via shell for no-service-worker fallback. See [Shell URL rewrite](#shell-url-rewrite) section for more details. The value must be a valid JavaScript RegExp string. For example:
  - `amp.html`
  - `.*amp`
  - `.*\.amp\.html`
  - `.*\/amp$`
 
-### `data-no-service-worker-fallback-shell-url`
+**data-no-service-worker-fallback-shell-url**
 
-The URL to the shell to use to rewrite URL navigations for no-service-worker fallback.
-See [Shell URL rewrite](#shell-url-rewrite) section for more details.
-
-The value must be an URL on the same origin as the AMP document itself.
+The URL to the shell to use to rewrite URL navigations for no-service-worker fallback. See [Shell URL rewrite](#shell-url-rewrite) section for more details. The value must be an URL on the same origin as the AMP document itself.
 
 ## Shell URL rewrite
 
-When service workers are not available or not yet active, it's possible to configure URL rewrite to direct
-navigations to the shell. This way, e.g. AMP Runtime can redirect navigation to the "shell" instead of
+When service workers are not available or not yet active, it's possible to configure URL rewrite to direct navigations to the shell. This way, for example, AMP Runtime can redirect navigation to the "shell" instead of
 a "leaf" AMP document.
 
 This fallback is only used when the document is opened on the source origin, and NOT on proxy origin.
 
 The URL rewrite is configured using `data-no-service-worker-fallback-url-match` and `data-no-service-worker-fallback-shell-url`
 attributes as following:
-```
+
+```html
 <amp-install-serviceworker layout="nodisplay"
-      src="https://www.your-domain.com/serviceworker.js"
-      data-no-service-worker-fallback-url-match=".*\.amp.html"
-      data-no-service-worker-fallback-shell-url="https://pub.com/shell">
+    src="https://www.your-domain.com/serviceworker.js"
+    data-no-service-worker-fallback-url-match=".*\.amp\.html"
+    data-no-service-worker-fallback-shell-url="https://pub.com/shell">
 </amp-install-serviceworker>
 ```
 
-Here:
+Where:
  - `data-no-service-worker-fallback-shell-url` specifies the link for AMP+PWA shell. It's required to be on the source origin as the AMP document.
  - `data-no-service-worker-fallback-url-match` is a JavaScript regular expression that describes how to match “in-shell” links vs non-in-shell links.
  - Both of these attributes must be present to trigger URL rewrite.
@@ -121,17 +113,16 @@ URL rewrite works as following:
  4. AMP Runtime will intercept the “in-shell” navigations (which will often be AMP-to-AMP navigations) and if the service worker is not running, rewrite the navigation URL to proceed to the “shell”-based URL.
  5. The shell will startup and run the requested navigation via its router. Typically the shell will immediately execute history.replaceState(href).
 
-A URL is rewritten in the form `shell-url#href={encodeURIComponent(href)}`. E.g.:
-```
+A URL is rewritten in the form `shell-url#href={encodeURIComponent(href)}`. For example:
+```text
 https://pub.com/doc.amp.html
-
 -->
-
 https://pub.com/shell#href=%2Fdoc.amp.html
 ```
 
 Besides rewriting URLs, `amp-install-serviceworker` also will try to preload the shell. This is done by creating an iframe with `#preload` fragment:
-```
+
+```html
 <iframe src="https://pub.com/shell#preload" hidden sandbox="allow-scripts allow-same-origin"></iframe>
 ```
 

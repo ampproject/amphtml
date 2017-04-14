@@ -25,7 +25,7 @@ amp-sidebar {
   outline: none;
   overflow-x: hidden !important;
   overflow-y: auto !important;
-  z-index: 9999 !important;
+  z-index: 2147483647 !important;
   -webkit-overflow-scrolling: touch;
   will-change: transform;
 }
@@ -49,7 +49,7 @@ amp-sidebar[side] {
   transition: transform 233ms cubic-bezier(0,0,.21,1);
 }
 
-.-amp-sidebar-mask {
+.i-amphtml-sidebar-mask {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
@@ -59,5 +59,5 @@ amp-sidebar[side] {
   /* Prevent someone from making this a full-sceen image */
   background-image: none !important;
   background-color: #000;
-  z-index: 9998 !important;
+  z-index: 2147483646 !important;
 }

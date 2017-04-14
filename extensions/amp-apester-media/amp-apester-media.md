@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -60,12 +60,12 @@ Playlist Mode:
 ###Single Mode: 
 **data-apester-media-id**
 
-The ID of the media, an integer.
+The ID of the media, a string.
 
 ###Playlist Mode: 
 **data-apester-channel-token**
 
-The token of the channel, an integer.
+The token of the channel, a string.
 
 ## Validation
 

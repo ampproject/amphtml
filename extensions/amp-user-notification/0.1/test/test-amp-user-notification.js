@@ -50,7 +50,6 @@ describe('amp-user-notification', () => {
   function getUserNotification(attrs = {}) {
     return createIframePromise().then(iframe_ => {
       iframe = iframe_;
-      iframe.win.ampExtendedElements = {};
       storage = getExistingServiceForDoc(iframe.ampdoc, 'storage');
       storageMock = sandbox.mock(storage);
       return buildElement(iframe.doc, iframe.ampdoc, attrs);
@@ -68,7 +67,7 @@ describe('amp-user-notification', () => {
     button.setAttribute('on', 'tap:' + elem.getAttribute('id') + 'dismiss');
     elem.appendChild(button);
 
-    elem.tryUpgrade_();
+    doc.body.appendChild(elem);
     const impl = elem.implementation_;
     impl.storagePromise_ = Promise.resolve(storage);
     impl.userNotificationManager_ = {
@@ -198,8 +197,8 @@ describe('amp-user-notification', () => {
 
       return impl.shouldShow().then(shouldShow => {
         expect(shouldShow).to.equal(true);
-        expect(cidStub.callCount).to.equal(1);
-        expect(showEndpointStub.callCount).to.equal(1);
+        expect(cidStub).to.be.calledOnce;
+        expect(showEndpointStub).to.be.calledOnce;
       });
     });
   });
@@ -245,8 +244,8 @@ describe('amp-user-notification', () => {
 
       return impl.shouldShow().then(shouldShow => {
         expect(shouldShow).to.equal(true);
-        expect(cidStub.callCount).to.equal(1);
-        expect(showEndpointStub.callCount).to.equal(1);
+        expect(cidStub).to.be.calledOnce;
+        expect(showEndpointStub).to.be.calledOnce;
       });
     });
   });
@@ -268,8 +267,8 @@ describe('amp-user-notification', () => {
 
       return impl.shouldShow().then(shouldShow => {
         expect(shouldShow).to.equal(false);
-        expect(cidStub.callCount).to.equal(1);
-        expect(showEndpointStub.callCount).to.equal(1);
+        expect(cidStub).to.be.calledOnce;
+        expect(showEndpointStub).to.be.calledOnce;
       });
     });
   });
@@ -307,8 +306,8 @@ describe('amp-user-notification', () => {
 
       return impl.shouldShow().then(shouldShow => {
         expect(shouldShow).to.equal(true);
-        expect(cidStub.callCount).to.equal(1);
-        expect(showEndpointStub.callCount).to.equal(1);
+        expect(cidStub).to.be.calledOnce;
+        expect(showEndpointStub).to.be.calledOnce;
       });
     });
   });
@@ -341,7 +340,7 @@ describe('amp-user-notification', () => {
       const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
 
       impl.dismiss();
-      expect(postDismissStub.callCount).to.equal(1);
+      expect(postDismissStub).to.be.calledOnce;
     });
   });
 
@@ -357,7 +356,7 @@ describe('amp-user-notification', () => {
       const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
 
       impl.dismiss();
-      expect(postDismissStub.callCount).to.equal(0);
+      expect(postDismissStub).to.have.not.been.called;
     });
   });
 
@@ -374,7 +373,7 @@ describe('amp-user-notification', () => {
       const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
 
       impl.dismiss();
-      expect(postDismissStub.callCount).to.equal(1);
+      expect(postDismissStub).to.be.calledOnce;
     });
   });
 
@@ -391,7 +390,7 @@ describe('amp-user-notification', () => {
       const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
 
       impl.dismiss();
-      expect(postDismissStub.callCount).to.equal(1);
+      expect(postDismissStub).to.be.calledOnce;
     });
   });
 
@@ -414,7 +413,7 @@ describe('amp-user-notification', () => {
         expect(el).to.not.have.class('amp-active');
         return impl.show().then(() => {
           expect(el).to.have.class('amp-active');
-          expect(addToFixedLayerStub.callCount).to.equal(1);
+          expect(addToFixedLayerStub).to.be.calledOnce;
           expect(addToFixedLayerStub.getCall(0).args[0]).to.equal(el);
         });
       });
@@ -473,7 +472,7 @@ describe('amp-user-notification', () => {
         expect(el).to.not.have.class('amp-active');
         expect(el).to.have.class('amp-hidden');
         expect(stub2.calledOnce).to.be.true;
-        expect(removeFromFixedLayerStub.callCount).to.equal(1);
+        expect(removeFromFixedLayerStub).to.be.calledOnce;
         expect(removeFromFixedLayerStub.getCall(0).args[0]).to.equal(el);
       });
     });

@@ -15,9 +15,9 @@
  */
 
 import {Observable} from './observable';
-import {fromClass} from './service';
 import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
+import {registerServiceBuilder} from './service';
 
 
 const TAG_ = 'Input';
@@ -44,7 +44,7 @@ export class Input {
     /** @private {!Function} */
     this.boundOnMouseDown_ = this.onMouseDown_.bind(this);
 
-    /** @private {?Function} */
+    /** @private {?function(!Event)} */
     this.boundOnMouseMove_ = null;
 
     /** @private {?Function} */
@@ -85,7 +85,7 @@ export class Input {
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
       this.boundOnMouseMove_ =
-        /** @private {!Function} */ (this.onMouseMove_.bind(this));
+          /** @private {function(!Event)} */ (this.onMouseMove_.bind(this));
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
   }
@@ -231,18 +231,17 @@ export class Input {
     // Repeat, if attempts allow.
     this.mouseConfirmAttemptCount_++;
     if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
-      listenOnce(this.win.document, 'mousemove', this.boundOnMouseMove_);
+      listenOnce(this.win.document, 'mousemove',
+          /** @type {function(!Event)} */ (this.boundOnMouseMove_));
     } else {
       dev().fine(TAG_, 'mouse detection failed');
     }
   }
 }
 
-
 /**
- * @param {!Window} window
- * @return {!Input}
+ * @param {!Window} win
  */
-export function inputFor(window) {
-  return fromClass(window, 'input', Input);
-};
+export function installInputService(win) {
+  registerServiceBuilder(win, 'input', Input);
+}

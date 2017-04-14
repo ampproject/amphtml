@@ -16,51 +16,28 @@
 
 tags: {  # amp-twitter
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-twitter extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-twitter extension .js script"
+  extension_spec: {
+    name: "amp-twitter"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-twitter"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-twitter"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-twitter-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-twitter.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-twitter>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-TWITTER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-twitter extension .js script"
+  requires: "amp-twitter extension .js script"
   attrs: {
     name: "data-tweetid"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-twitter.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/social/amp-twitter"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

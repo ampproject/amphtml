@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+import '../amp-carousel';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 
-describe('ScrollableCarousel', () => {
-
+describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
   let sandbox;
+  let win;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    win = env.win;
   });
 
   afterEach(() => {
@@ -63,18 +65,21 @@ describe('ScrollableCarousel', () => {
 
       // create container
       expect(carousel.getElementsByClassName(
-          '-amp-scrollable-carousel-container').length).to.equal(1);
+          'i-amphtml-scrollable-carousel-container').length).to.equal(1);
       const container = carousel.getElementsByClassName(
-          '-amp-scrollable-carousel-container')[0];
-      expect(container.style.overflowX).to.equal('auto');
-      expect(container.style.overflowY).to.equal('hidden');
-      expect(container.style.whiteSpace).to.equal('nowrap');
+          'i-amphtml-scrollable-carousel-container')[0];
+      const containerStyle = win.getComputedStyle(container, null);
+
+      expect(containerStyle.getPropertyValue('overflow-x')).to.equal('auto');
+      expect(containerStyle.getPropertyValue('overflow-y')).to.equal('hidden');
+      expect(containerStyle.getPropertyValue('white-space')).to.equal('nowrap');
 
       // build child slides
-      expect(container.getElementsByClassName('amp-carousel-slide').length)
-          .to.equal(7);
-      expect(container.getElementsByClassName('amp-carousel-slide')[0]
-          .style.display).to.equal('inline-block');
+      const carouselSlideEls =
+        container.getElementsByClassName('amp-carousel-slide');
+      const slideStyle = win.getComputedStyle(carouselSlideEls[0], null);
+      expect(carouselSlideEls.length).to.equal(7);
+      expect(slideStyle.getPropertyValue('display')).to.equal('inline-block');
 
       // show control buttons correctly
       expect(impl.hasPrev()).to.be.false;
@@ -101,7 +106,7 @@ describe('ScrollableCarousel', () => {
       expect(impl.container_./*OK*/scrollLeft).to.equal(300);
 
       // load new slides in viewport
-      expect(updateInViewportSpy.callCount).to.equal(5);
+      expect(updateInViewportSpy).to.have.callCount(5);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[2], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[3], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[4], true);
@@ -115,13 +120,13 @@ describe('ScrollableCarousel', () => {
       expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[1]);
 
       // schedule layout for new slides
-      expect(scheduleLayoutSpy.callCount).to.equal(3);
+      expect(scheduleLayoutSpy).to.have.callCount(3);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[2]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[3]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[4]);
 
       // preload slides in viewport
-      expect(schedulePreloadSpy.callCount).to.equal(3);
+      expect(schedulePreloadSpy).to.have.callCount(3);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[4]);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[5]);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[6]);
@@ -155,7 +160,7 @@ describe('ScrollableCarousel', () => {
       expect(impl.container_./*OK*/scrollLeft).to.equal(588);
 
       // load new slides in viewport
-      expect(updateInViewportSpy.callCount).to.equal(5);
+      expect(updateInViewportSpy).to.have.callCount(5);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[4], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[5], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[6], true);
@@ -169,13 +174,13 @@ describe('ScrollableCarousel', () => {
       expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[3]);
 
       // schedule layout for new slides
-      expect(scheduleLayoutSpy.callCount).to.equal(3);
+      expect(scheduleLayoutSpy).to.have.callCount(3);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[4]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[5]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[6]);
 
       // preload slides in viewport
-      expect(schedulePreloadSpy.callCount).to.equal(0);
+      expect(schedulePreloadSpy).to.have.not.been.called;
 
       // set control buttons correctly
       expect(impl.hasPrev()).to.be.true;
@@ -207,7 +212,7 @@ describe('ScrollableCarousel', () => {
       expect(impl.container_./*OK*/scrollLeft).to.equal(288);
 
       // load new slides in viewport
-      expect(updateInViewportSpy.callCount).to.equal(5);
+      expect(updateInViewportSpy).to.have.callCount(5);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[2], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[3], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[4], true);
@@ -221,13 +226,13 @@ describe('ScrollableCarousel', () => {
       expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[6]);
 
       // schedule layout for new slides
-      expect(scheduleLayoutSpy.callCount).to.equal(3);
+      expect(scheduleLayoutSpy).to.have.callCount(3);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[2]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[3]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[4]);
 
       // preload slides in viewport
-      expect(schedulePreloadSpy.callCount).to.equal(3);
+      expect(schedulePreloadSpy).to.have.callCount(3);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[0]);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[1]);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[2]);
@@ -263,7 +268,7 @@ describe('ScrollableCarousel', () => {
       expect(impl.container_./*OK*/scrollLeft).to.equal(0);
 
       // load new slides in viewport
-      expect(updateInViewportSpy.callCount).to.equal(5);
+      expect(updateInViewportSpy).to.have.callCount(5);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[0], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[1], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[2], true);
@@ -277,13 +282,13 @@ describe('ScrollableCarousel', () => {
       expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[4]);
 
       // schedule layout for new slides
-      expect(scheduleLayoutSpy.callCount).to.equal(3);
+      expect(scheduleLayoutSpy).to.have.callCount(3);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[0]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[1]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[2]);
 
       // preload slides in viewport
-      expect(schedulePreloadSpy.callCount).to.equal(0);
+      expect(schedulePreloadSpy).to.have.not.been.called;
 
       // set control buttons correctly
       expect(impl.hasPrev()).to.be.false;

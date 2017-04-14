@@ -13,30 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import './polyfills';
-import {listen} from '../src/event-helper';
-import {getRandom} from '../src/3p-frame';
-import {map} from '../src/types';
-import {user} from '../src/log';
-import {startsWith} from '../src/string';
+import {Observable} from '../src/observable';
+import {map} from '../src/utils/object';
+import {
+  listen,
+  serializeMessage,
+  deserializeMessage,
+} from '../src/3p-frame-messaging';
+import {getMode} from '../src/mode';
+import {dev} from '../src/log';
 
-/**
- * @abstract
- */
 export class IframeMessagingClient {
 
   /**
-   *  @param {Window} win A window object.
+   *  @param {!Window} win A window object.
    */
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
-    /** Map messageType keys to callback functions for when we receive
-     *  that message
-     *  @private {!Object}
+    /** @private {?string} */
+    this.rtvVersion_ = getMode().rtvVersion || null;
+    /** @private {!Window} */
+    this.hostWindow_ = win.parent;
+    /** @private {?string} */
+    this.sentinel_ = null;
+    /**
+     * Map messageType keys to observables to be fired when messages of that
+     * type are received.
+     * @private {!Object}
      */
-    this.callbackFor_ = map();
+    this.observableFor_ = map();
     this.setupEventListener_();
+  }
+
+  /**
+   * Make an event listening request to the host window.
+   *
+   * @param {string} requestType The type of the request message.
+   * @param {string} responseType The type of the response message.
+   * @param {function(Object)} callback The callback function to call
+   *   when a message with type responseType is received.
+   */
+  makeRequest(requestType, responseType, callback) {
+    const unlisten = this.registerCallback(responseType, callback);
+    this.sendMessage(requestType);
+    return unlisten;
   }
 
   /**
@@ -45,24 +66,27 @@ export class IframeMessagingClient {
    *   All future calls will overwrite any previously registered
    *   callbacks.
    * @param {string} messageType The type of the message.
-   * @param {function(object)} callback The callback function to call
+   * @param {function(Object)} callback The callback function to call
    *   when a message with type messageType is received.
    */
-  registerCallback_(messageType, callback) {
+  registerCallback(messageType, callback) {
     // NOTE : no validation done here. any callback can be register
     // for any callback, and then if that message is received, this
     // class *will execute* that callback
-    this.callbackFor_[messageType] = callback;
-    return () => { delete this.callbackFor_[messageType]; };
+    return this.getOrCreateObservableFor_(messageType).add(callback);
   }
 
   /**
    *  Send a postMessage to Host Window
-   *  @param {object} message The message to send.
-   *  @private
+   *  @param {string} type The type of message to send.
+   *  @param {Object=} opt_payload The payload of message to send.
    */
-  messageHost_(message) {
-    this.getHostWindow().postMessage/*OK*/(message, '*');
+  sendMessage(type, opt_payload) {
+    this.hostWindow_.postMessage/*OK*/(
+        serializeMessage(
+            type, dev().assertString(this.sentinel_),
+            opt_payload, this.rtvVersion_),
+        '*');
   }
 
   /**
@@ -75,71 +99,53 @@ export class IframeMessagingClient {
    * @private
    */
   setupEventListener_() {
-    listen(this.win_, 'message', message => {
+    listen(this.win_, 'message', event => {
       // Does it look a message from AMP?
-      if (message.source != this.getHostWindow()) {
-        return;
-      }
-      if (!message.data) {
-        return;
-      }
-      if (!startsWith(String(message.data), 'amp-')) {
+      if (event.source != this.hostWindow_) {
         return;
       }
 
-      // See if we can parse the payload.
-      try {
-        const payload = JSON.parse(message.data.substring(4));
-        // Check the sentinel as well.
-        if (payload.sentinel == this.getSentinel() &&
-            this.callbackFor_[payload.type]) {
-          try {
-            // We should probably report exceptions within callback
-            const callback = this.callbackFor_[payload.type];
-            callback(payload);
-          } catch (err) {
-            user().error(
-                'IFRAME-MSG',
-                `- Error in registered callback ${payload.type}`,
-                err);
-          }
-        }
-      } catch (e) {
-        // JSON parsing failed. Ignore the message.
+      const message = deserializeMessage(event.data);
+      if (!message || message.sentinel != this.sentinel_) {
+        return;
       }
+
+      this.fireObservable_(message.type, message);
     });
   }
 
   /**
-   *  This must be overwritten by classes that extend this base class
-   *  As implemented, this will only work for messaging the parent iframe.
+   * @param {!Window} win
    */
-  getSentinel() {
-    if (!this.sentinel) {
-      this.sentinel = this.generateSentinel_();
-    }
-    return this.sentinel;
+  setHostWindow(win) {
+    this.hostWindow_ = win;
   }
 
   /**
-   *  Only valid for the trivial case when we will always be messaging our parent
-   *  Should be overwritten for subclasses
+   * @param {string} sentinel
    */
-  getHostWindow() {
-    if (!this.hostWindow) {
-      this.hostWindow = this.generateWindow_();
-    }
-    return this.hostWindow;
+  setSentinel(sentinel) {
+    this.sentinel_ = sentinel;
   }
 
   /**
-   *  @private
+   * @param {string} messageType
+   * @return {!Observable<Object>}
    */
-  generateWindow_() {
-    return this.win_.parent;
+  getOrCreateObservableFor_(messageType) {
+    if (!(messageType in this.observableFor_)) {
+      this.observableFor_[messageType] = new Observable();
+    }
+    return this.observableFor_[messageType];
   }
 
-  generateSentinel_() {
-    return '0-' + getRandom(this.win_);
+  /**
+   * @param {string} messageType
+   * @param {Object} message
+   */
+  fireObservable_(messageType, message) {
+    if (messageType in this.observableFor_) {
+      this.observableFor_[messageType].fire(message);
+    }
   }
-};
+}

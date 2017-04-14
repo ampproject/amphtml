@@ -151,13 +151,13 @@ Here is an example response, assuming two slots named simply 1 and 2:
 ```json
 {
     "1": {
-        "src":"https:\/\/my-ad-server.com\/my-advertisement.gif",
-        "href":"https:\/\/bachtrack.com",
+        "src":"https://my-ad-server.com/my-advertisement.gif",
+        "href":"https://bachtrack.com",
         "info":"Info1"
     },
     "2": {
         "src":"data:image/gif;base64,R0lGODlhyAAiALM...DfD0QAADs=",
-        "href":"http:\/\/onestoparts.com",
+        "href":"http://onestoparts.com",
         "info":"Info2"
     }
 }
@@ -166,15 +166,59 @@ If no slot was specified, the server returns a single template rather than an ar
 
 ```json
 {
-    "src":"https:\/\/my-ad-server.com\/my-advertisement.gif",
-    "href":"https:\/\/bachtrack.com",
+    "src":"https://my-ad-server.com/my-advertisement.gif",
+    "href":"https://bachtrack.com",
     "info":"Info1"
 }
 ```
+The ad server must enforce [AMP CORS](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+Here is an example set of the relevant response headers:
+```
+Access-Control-Allow-Origin:https://cdn.ampproject.org
+Access-Control-Expose-Headers:AMP-Access-Control-Allow-Source-Origin
+AMP-Access-Control-Allow-Source-Origin:https://my-ad-server.com
+```
+
+## Analytics
+
+To get analytics of how your ads are performing, use the [amp-analyics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md) tag.
+
+Here is an example of how to make it work with Google Analytics events. Note that the variables can be set either by the code
+that displays the page (as in `eventAction`) or in variables passed back by the ad server (as in `eventCategory` and `eventLabel`).
+
+```html
+<amp-ad type="custom" layout="responsive" width="300" height="250" 
+    data-url="https://mysite/my-ad-server">
+    <template type="amp-mustache" id="my-amp-template-id">
+        <a href="{{href}}" data-vars-event-label="{{evehtLabel}}" data-vars-event-category="{{category}}">
+            <amp-img layout='responsive' width="300" height="250" src="{{artwork}}"></amp-img>
+        </a>
+    </template>  
+</amp-ad>
+<amp-analytics type='googleanalytics'>
+<script type='application/json'>
+{
+    "requests": {
+        "vars": {
+            "account":"UA-9999999-9"
+        },
+        "triggers": {
+            "trackAmpAd": {
+            "on": "click",
+            "selector": "amp-ad a",
+            "request": "event",
+            "vars":{
+                "eventCategory": "${eventCategory}",
+                "eventAction": "My Ad Click Action",
+                "eventLabel": "${eventLabel}"
+            }
+        }
+    }
+}
+</script>
+</amp-analytics>
+```
+
 ## To do
 
-Add support for json variables - and perhaps other variable substitutions in the way amp-list does
-
-Give some advice for how to use amp-analytics
-
-Do some proper support for different layouts - right now, there's strange behaviour if you use responsive
+Add support for json variables in the data-url - and perhaps other variable substitutions in the way amp-list does

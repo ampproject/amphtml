@@ -19,6 +19,8 @@ var dirname = require('path').dirname;
 var exec = require('child_process').exec;
 var fs = require('fs-extra');
 var gulp = require('gulp');
+// imageDiff is currently a bad dependency as it has a fixed node 0.8 engine
+// requirement.
 var imageDiff = require('gulp-image-diff');
 var util = require('gulp-util');
 

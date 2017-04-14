@@ -56,15 +56,20 @@ is live blogs: coverage for breaking news or live events where the user can stay
 on or keep returning to the same page to see new updates as they come in. Common
 examples are award shows, sporting events, and elections.
 
+To learn how to use `amp-live-list` in a blog, see the [Create a Live Blog](https://www.ampproject.org/docs/get_started/live_blog) tutorial.
+
 ## How it works
 
 In the background, while an AMP page using `<amp-live-list>` is displayed on the client, the AMP runtime polls the origin document on the host for updates. When the client receives a response, it then [filters](#server-side-filtering) and dynamically inserts those updates back into the page on the client. Publishers can customize the polling rate in order to control the number of incoming requests, and AMP caches like the Google AMP Cache can perform optimizations to reduce the server response payload, saving client bandwidth and CPU cycles.
 
 The `amp-live-list` component has 3 sections. We'll refer to these sections as
-"reference points" and they are denoted by an attribute. The 3 reference points are
-`update`, `items` and `pagination` and must be a direct child of the `amp-live-list`
-component. `update` and `items` are mandatory while `pagination` is optional.
-See "Reference Points" section below for further details.
+"reference points" and they are denoted by an attribute. These reference points must be a direct child of the `amp-live-list` component. The 3 reference points are:
+
+* `update`  (mandatory)
+* `items`  (mandatory)
+* `pagination` (optional)
+
+For more details, see the ["Reference Points"](#reference-points) section below.
 
 Example:
 
@@ -109,10 +114,10 @@ point is not shown for either updates (using `data-update-time`) or tombstone
 (using `data-tombstone`) operations without an insert (newly discovered id's)
 operation.
 
-**NOTE**: When using `position: fixed` we highly recommend
-to use an id selector or a css selector with no other css combinators, as complex
-combinators cannot be moved into the fixed layer (fixed layer  is an iOS workaround
-for webkit's fixed position bug **TODO: add webkit bug id here**).
+{% call callout('Note', type='note') %}
+When using `position: fixed` we highly recommend that you use an id selector or a css selector with no other css combinators, because complex combinators cannot be moved into the fixed layer (fixed layer is an iOS workaround
+for webkit's fixed position [bug](https://bugs.webkit.org/show_bug.cgi?id=154399).
+{% endcall %}
 
 The actual action handler may be at a descendant and does not have to be at the
 `update` reference point. the `amp-live-list` component then has an internal
@@ -146,7 +151,7 @@ We recommend having a small subtree underneath this reference point as the
 the server in case the page count had increased. We don't do any special
 diffing and just outright replace the contents.
 
-## Update Behavior and User Experience (Work in Progress)
+## Update Behavior and User Experience
 
 When updates are discovered by the client from polling the server document, any
 newly discovered `id`'s from children of the `items` reference point will turn
@@ -195,7 +200,7 @@ See the documentation for [Server side filtering](../amp-live-list/amp-live-list
 
 ## Attributes
 
-Usuaully attribute requirements are only enforced on the actual component but
+Usually attribute requirements are only enforced on the actual component but
 because we need to anchor and make decisions on the client, we will also need
 to require an `items` and `update` attribute on a direct child of
 `amp-live-list`.  Children of the `items` reference point will also have
@@ -355,7 +360,7 @@ the lowest one.
     max-height: 0;
   }
 
-  // We need to override the `display: none` to be able to see
+  // We need to override "display: none" to be able to see
   // the transition effect on the 2nd live list.
   #live-list-2 > .amp-hidden[update] {
     display: block;
@@ -398,3 +403,6 @@ the lowest one.
   </div>
 </amp-live-list>
 ```
+
+## Validation
+See [amp-live-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/0.1/validator-amp-live-list.protoascii) in the AMP validator specification.

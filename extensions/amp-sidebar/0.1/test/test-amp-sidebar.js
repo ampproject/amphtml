@@ -17,8 +17,8 @@
 
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {platformFor} from '../../../../src/platform';
-import {timerFor} from '../../../../src/timer';
+import {platformFor} from '../../../../src/services';
+import {timerFor} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import * as sinon from 'sinon';
 import '../amp-sidebar';
@@ -96,7 +96,7 @@ describe('amp-sidebar', () => {
         callback();
       });
       impl.open_();
-      expect(iframe.doc.querySelectorAll('.-amp-sidebar-mask').length)
+      expect(iframe.doc.querySelectorAll('.i-amphtml-sidebar-mask').length)
           .to.equal(1);
     });
   });
@@ -110,9 +110,9 @@ describe('amp-sidebar', () => {
       expect(closeButton).to.exist;
       expect(closeButton.tagName).to.equal('BUTTON');
       assertScreenReaderElement(closeButton);
-      expect(impl.close_.callCount).to.equal(0);
+      expect(impl.close_).to.have.not.been.called;
       closeButton.click();
-      expect(impl.close_.callCount).to.equal(1);
+      expect(impl.close_).to.be.calledOnce;
     });
   });
 
@@ -152,17 +152,17 @@ describe('amp-sidebar', () => {
       expect(sidebarElement.getAttribute('role')).to.equal('menu');
       expect(obj.iframe.doc.activeElement).to.equal(sidebarElement);
       expect(sidebarElement.style.display).to.equal('');
-      expect(timer.cancel.callCount).to.equal(1);
-      expect(impl.scheduleLayout.callCount).to.equal(1);
-      expect(historyPushSpy.callCount).to.equal(1);
-      expect(historyPopSpy.callCount).to.equal(0);
+      expect(timer.cancel).to.be.calledOnce;
+      expect(impl.scheduleLayout).to.be.calledOnce;
+      expect(historyPushSpy).to.be.calledOnce;
+      expect(historyPopSpy).to.have.not.been.called;
       expect(impl.historyId_).to.not.equal('-1');
 
       // second call to open_() should be a no-op and not increase call counts.
       impl.open_();
-      expect(impl.scheduleLayout.callCount).to.equal(1);
-      expect(historyPushSpy.callCount).to.equal(1);
-      expect(historyPopSpy.callCount).to.equal(0);
+      expect(impl.scheduleLayout).to.be.calledOnce;
+      expect(historyPushSpy).to.be.calledOnce;
+      expect(historyPopSpy).to.have.not.been.called;
 
     });
   });
@@ -203,15 +203,15 @@ describe('amp-sidebar', () => {
       expect(sidebarElement.hasAttribute('open')).to.be.false;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
       expect(sidebarElement.style.display).to.equal('none');
-      expect(timer.cancel.callCount).to.equal(1);
-      expect(impl.schedulePause.callCount).to.equal(1);
-      expect(historyPopSpy.callCount).to.equal(1);
+      expect(timer.cancel).to.be.calledOnce;
+      expect(impl.schedulePause).to.be.calledOnce;
+      expect(historyPopSpy).to.be.calledOnce;
       expect(impl.historyId_).to.equal(-1);
 
       // second call to close_() should be a no-op and not increase call counts.
       impl.close_();
-      expect(impl.schedulePause.callCount).to.equal(1);
-      expect(historyPopSpy.callCount).to.equal(1);
+      expect(impl.schedulePause).to.be.calledOnce;
+      expect(historyPopSpy).to.be.calledOnce;
     });
   });
 
@@ -238,12 +238,12 @@ describe('amp-sidebar', () => {
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
       expect(obj.iframe.doc.activeElement).to.equal(sidebarElement);
       expect(sidebarElement.style.display).to.equal('');
-      expect(impl.scheduleLayout.callCount).to.equal(1);
+      expect(impl.scheduleLayout).to.be.calledOnce;
       impl.toggle_();
       expect(sidebarElement.hasAttribute('open')).to.be.false;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
       expect(sidebarElement.style.display).to.equal('none');
-      expect(impl.schedulePause.callCount).to.equal(1);
+      expect(impl.schedulePause).to.be.calledOnce;
     });
   });
 
@@ -278,15 +278,95 @@ describe('amp-sidebar', () => {
       expect(sidebarElement.hasAttribute('open')).to.be.false;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
       expect(sidebarElement.style.display).to.equal('none');
-      expect(impl.schedulePause.callCount).to.equal(1);
+      expect(impl.schedulePause).to.be.calledOnce;
     });
   });
 
+  it('should reflect state of the sidebar', () => {
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const impl = sidebarElement.implementation_;
+      impl.schedulePause = sandbox.spy();
+      impl.scheduleResume = sandbox.spy();
+      impl.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      sandbox.stub(timer, 'delay', function(callback) {
+        callback();
+      });
+      expect(impl.isOpen_()).to.be.false;
+      expect(impl.schedulePause).to.have.not.been.called;
+      expect(impl.scheduleResume).to.have.not.been.called;
+      impl.toggle_();
+      expect(impl.isOpen_()).to.be.true;
+      expect(impl.schedulePause).to.have.not.been.called;
+      expect(impl.scheduleResume).to.be.calledOnce;
+      impl.toggle_();
+      expect(impl.isOpen_()).to.be.false;
+      expect(impl.schedulePause).to.be.calledOnce;
+      expect(impl.scheduleResume).to.be.calledOnce;
+      impl.toggle_();
+      expect(impl.isOpen_()).to.be.true;
+      expect(impl.schedulePause).to.be.calledOnce;
+      expect(impl.scheduleResume).to.have.callCount(2);
+      impl.toggle_();
+      expect(impl.isOpen_()).to.be.false;
+      expect(impl.schedulePause).to.have.callCount(2);
+      expect(impl.scheduleResume).to.have.callCount(2);
+    });
+  });
 
-  it('should close sidebar if clicked on anchor', () => {
+  it.skip('should fix scroll leaks on ios safari', () => {
+    sandbox.stub(platform, 'isIos').returns(true);
+    sandbox.stub(platform, 'isSafari').returns(true);
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const impl = sidebarElement.implementation_;
+      impl.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      sandbox.stub(timer, 'delay', function(callback) {
+        callback();
+      });
+      const scrollLeakSpy = sandbox.spy(impl, 'fixIosElasticScrollLeak_');
+      impl.buildCallback();
+      expect(scrollLeakSpy).to.be.calledOnce;
+    });
+  });
+
+  it.skip('should adjust for IOS safari bottom bar', () => {
+    sandbox.stub(platform, 'isIos').returns(true);
+    sandbox.stub(platform, 'isSafari').returns(true);
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const impl = sidebarElement.implementation_;
+      impl.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      sandbox.stub(timer, 'delay', function(callback) {
+        callback();
+      });
+      const compensateIosBottombarSpy =
+          sandbox.spy(impl, 'compensateIosBottombar_');
+      const initalChildrenCount = sidebarElement.children.length;
+      impl.open_();
+      expect(compensateIosBottombarSpy).to.be.calledOnce;
+      // 10 lis + one top padding element inserted
+      expect(sidebarElement.children.length).to.equal(initalChildrenCount + 1);
+    });
+  });
+
+  it('should close sidebar if clicked on a non-local anchor', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
       const anchor = sidebarElement.getElementsByTagName('a')[0];
+      anchor.href = '#newloc';
       const impl = sidebarElement.implementation_;
       impl.schedulePause = sandbox.spy();
       impl.vsync_ = {
@@ -306,16 +386,113 @@ describe('amp-sidebar', () => {
       if (eventObj.initEvent) {
         eventObj.initEvent('click', true, true);
       }
+      sandbox.stub(sidebarElement, 'getAmpDoc', () => {
+        return {
+          win: {
+            location: {
+              href: window.location.href,
+            },
+          },
+        };
+      });
       anchor.dispatchEvent ?
           anchor.dispatchEvent(eventObj) :
           anchor.fireEvent('onkeydown', eventObj);
       expect(sidebarElement.hasAttribute('open')).to.be.false;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
       expect(sidebarElement.style.display).to.equal('none');
-      expect(impl.schedulePause.callCount).to.equal(1);
+      expect(impl.schedulePause).to.be.calledOnce;
     });
   });
 
+  it('should not close sidebar if clicked on a new origin navigation', () => {
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const anchor = sidebarElement.getElementsByTagName('a')[0];
+      anchor.href = '#newloc';
+      const impl = sidebarElement.implementation_;
+      impl.schedulePause = sandbox.spy();
+      impl.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      sandbox.stub(timer, 'delay', function(callback) {
+        callback();
+      });
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
+      impl.open_();
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      const eventObj = document.createEventObject ?
+          document.createEventObject() : document.createEvent('Events');
+      if (eventObj.initEvent) {
+        eventObj.initEvent('click', true, true);
+      }
+      sandbox.stub(sidebarElement, 'getAmpDoc', () => {
+        return {
+          win: {
+            location: {
+              // Mocking navigating from example.com -> localhost:9876
+              href: 'http://example.com',
+            },
+          },
+        };
+      });
+      anchor.dispatchEvent ?
+          anchor.dispatchEvent(eventObj) :
+          anchor.fireEvent('onkeydown', eventObj);
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(sidebarElement.style.display).to.equal('');
+      expect(impl.schedulePause).to.have.not.been.called;
+    });
+  });
+
+  it('should not close sidebar if clicked on new page navigation', () => {
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const anchor = sidebarElement.getElementsByTagName('a')[0];
+      anchor.href = '#newloc';
+      const impl = sidebarElement.implementation_;
+      impl.schedulePause = sandbox.spy();
+      impl.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      sandbox.stub(timer, 'delay', function(callback) {
+        callback();
+      });
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
+      impl.open_();
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      const eventObj = document.createEventObject ?
+          document.createEventObject() : document.createEvent('Events');
+      if (eventObj.initEvent) {
+        eventObj.initEvent('click', true, true);
+      }
+      sandbox.stub(sidebarElement, 'getAmpDoc', () => {
+        return {
+          win: {
+            location: {
+              // Mocking navigating from
+              // /context.html?old=context -> /context.html
+              href: 'http://localhost:9876/context.html?old=context',
+            },
+          },
+        };
+      });
+      anchor.dispatchEvent ?
+          anchor.dispatchEvent(eventObj) :
+          anchor.fireEvent('onkeydown', eventObj);
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(sidebarElement.style.display).to.equal('');
+      expect(impl.schedulePause).to.have.not.been.called;
+    });
+  });
 
   it('should not close sidebar if clicked on non-anchor', () => {
     return getAmpSidebar().then(obj => {
@@ -346,87 +523,7 @@ describe('amp-sidebar', () => {
       expect(sidebarElement.hasAttribute('open')).to.be.true;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
       expect(sidebarElement.style.display).to.equal('');
-      expect(impl.schedulePause.callCount).to.equal(0);
-    });
-  });
-
-  it('should reflect state of the sidebar', () => {
-    return getAmpSidebar().then(obj => {
-      const sidebarElement = obj.ampSidebar;
-      const impl = sidebarElement.implementation_;
-      impl.schedulePause = sandbox.spy();
-      impl.scheduleResume = sandbox.spy();
-      impl.vsync_ = {
-        mutate: function(callback) {
-          callback();
-        },
-      };
-      sandbox.stub(timer, 'delay', function(callback) {
-        callback();
-      });
-      expect(impl.isOpen_()).to.be.false;
-      expect(impl.schedulePause.callCount).to.equal(0);
-      expect(impl.scheduleResume.callCount).to.equal(0);
-      impl.toggle_();
-      expect(impl.isOpen_()).to.be.true;
-      expect(impl.schedulePause.callCount).to.equal(0);
-      expect(impl.scheduleResume.callCount).to.equal(1);
-      impl.toggle_();
-      expect(impl.isOpen_()).to.be.false;
-      expect(impl.schedulePause.callCount).to.equal(1);
-      expect(impl.scheduleResume.callCount).to.equal(1);
-      impl.toggle_();
-      expect(impl.isOpen_()).to.be.true;
-      expect(impl.schedulePause.callCount).to.equal(1);
-      expect(impl.scheduleResume.callCount).to.equal(2);
-      impl.toggle_();
-      expect(impl.isOpen_()).to.be.false;
-      expect(impl.schedulePause.callCount).to.equal(2);
-      expect(impl.scheduleResume.callCount).to.equal(2);
-    });
-  });
-
-  it.skip('should fix scroll leaks on ios safari', () => {
-    sandbox.stub(platform, 'isIos').returns(true);
-    sandbox.stub(platform, 'isSafari').returns(true);
-    return getAmpSidebar().then(obj => {
-      const sidebarElement = obj.ampSidebar;
-      const impl = sidebarElement.implementation_;
-      impl.vsync_ = {
-        mutate: function(callback) {
-          callback();
-        },
-      };
-      sandbox.stub(timer, 'delay', function(callback) {
-        callback();
-      });
-      const scrollLeakSpy = sandbox.spy(impl, 'fixIosElasticScrollLeak_');
-      impl.buildCallback();
-      expect(scrollLeakSpy.callCount).to.equal(1);
-    });
-  });
-
-  it.skip('should adjust for IOS safari bottom bar', () => {
-    sandbox.stub(platform, 'isIos').returns(true);
-    sandbox.stub(platform, 'isSafari').returns(true);
-    return getAmpSidebar().then(obj => {
-      const sidebarElement = obj.ampSidebar;
-      const impl = sidebarElement.implementation_;
-      impl.vsync_ = {
-        mutate: function(callback) {
-          callback();
-        },
-      };
-      sandbox.stub(timer, 'delay', function(callback) {
-        callback();
-      });
-      const compensateIosBottombarSpy =
-          sandbox.spy(impl, 'compensateIosBottombar_');
-      const initalChildrenCount = sidebarElement.children.length;
-      impl.open_();
-      expect(compensateIosBottombarSpy.callCount).to.equal(1);
-      // 10 lis + one top padding element inserted
-      expect(sidebarElement.children.length).to.equal(initalChildrenCount + 1);
+      expect(impl.schedulePause).to.have.not.been.called;
     });
   });
 });

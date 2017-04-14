@@ -17,7 +17,7 @@
 import {listenOncePromise} from '../../src/event-helper';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementProto} from '../../src/custom-element';
-import {timerFor} from '../../src/timer';
+import {timerFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('BaseElement', () => {
@@ -25,9 +25,11 @@ describe('BaseElement', () => {
   let sandbox;
   let customElement;
   let element;
+
   document.registerElement('amp-test-element', {
     prototype: createAmpElementProto(window, 'amp-test-element', BaseElement),
   });
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     customElement = document.createElement('amp-test-element');
@@ -36,6 +38,14 @@ describe('BaseElement', () => {
 
   afterEach(() => {
     sandbox.restore();
+  });
+
+  it('should delegate update priority to resources', () => {
+    const resources = window.services.resources.obj;
+    customElement.getResources = () => resources;
+    const updatePriorityStub = sandbox.stub(resources, 'updatePriority');
+    element.updatePriority(1);
+    expect(updatePriorityStub).to.be.calledOnce;
   });
 
   it('propagateAttributes - niente', () => {
@@ -85,14 +95,14 @@ describe('BaseElement', () => {
     const handler = sandbox.spy();
     element.registerAction('method1', handler);
     element.executeAction({method: 'method1'}, false);
-    expect(handler.callCount).to.equal(1);
+    expect(handler).to.be.calledOnce;
   });
 
   it('should execute "activate" action without registration', () => {
     const handler = sandbox.spy();
     element.activate = handler;
     element.executeAction({method: 'activate'}, false);
-    expect(handler.callCount).to.equal(1);
+    expect(handler).to.be.calledOnce;
   });
 
   describe('forwardEvents', () => {

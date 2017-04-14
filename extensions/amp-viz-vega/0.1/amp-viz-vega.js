@@ -22,8 +22,8 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isObject, isFiniteNumber} from '../../../src/types';
 import {assertHttpsUrl} from '../../../src/url';
-import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
+import {vsyncFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 
 /** @const */
 const EXPERIMENT = 'amp-viz-vega';
@@ -158,8 +158,9 @@ export class AmpVizVega extends AMP.BaseElement {
       // calls. We may want to intercept all "urls" in spec and do the loading
       // and parsing ourselves.
 
-      return xhrFor(this.win).fetchJson(dev().assertString(this.src_))
-      .then(data => {
+      return xhrFor(this.win).fetchJson(dev().assertString(this.src_), {
+        requireAmpResponseSourceOrigin: false,
+      }).then(data => {
         this.data_ = data;
       });
     }

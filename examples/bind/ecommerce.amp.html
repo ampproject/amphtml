@@ -1,0 +1,129 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: E-commerce</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+
+  <style amp-custom>
+    .selected {
+      border: solid 1px red;
+    }
+    button {
+      border: solid 1px black;
+    }
+    amp-img {
+      border: solid 1px white;
+    }
+  </style>
+</head>
+
+<body>
+  <button onclick="AMP.toggleExperiment('amp-bind');window.location.href=window.location.href;">Toggle &lt;amp-bind&gt; experiment</button>
+  <button onclick="AMP.toggleExperiment('amp-selector');window.location.href=window.location.href;">Toggle &lt;amp-selector&gt; experiment</button>
+
+  <h2>E-commerce</h2>
+
+  <amp-img width=400 height=400 src="./shirts/black.jpg" [src]="shirts[selectedIndex].image"></amp-img>
+
+  <p>COLOR: <span [text]="shirts[selectedIndex].color">black</span></p>
+
+  <p>SIZE:
+    <span [text]="shirts[selectedIndex].sizes
+        ? shirts[selectedIndex].sizes.join(', ')
+        : 'Fetching available sizes...'">
+      XS
+    </span>
+  </p>
+
+  <amp-selector on="select:AMP.setState({selectedIndex: event.targetOption})">
+    <amp-img width=50 height=50 src="./shirts/black.jpg" option=0></amp-img>
+    <amp-img width=50 height=50 src="./shirts/blue.jpg" option=1></amp-img>
+    <amp-img width=50 height=50 src="./shirts/brown.jpg" option=2></amp-img>
+    <amp-img width=50 height=50 src="./shirts/dark-green.jpg" option=3></amp-img>
+    <amp-img width=50 height=50 src="./shirts/gray.jpg" option=4></amp-img>
+    <amp-img width=50 height=50 src="./shirts/light-gray.jpg" option=5></amp-img>
+    <amp-img width=50 height=50 src="./shirts/navy.jpg" option=6></amp-img>
+    <amp-img width=50 height=50 src="./shirts/white.jpg" option=7></amp-img>
+    <amp-img width=50 height=50 src="./shirts/wine.jpg" option=8></amp-img>
+  </amp-selector>
+
+  <!--
+    Available shirts, maps unique identifier to {color, image}. Sizes are fetched remotely.
+
+    When a shirt color is selected, `selectedIndex` changes which causes this
+    <amp-state> to perform an XHR to the new [src] value. Upon completion,
+    the XHR response is merged into the state under its "id" attribute ("shirts").
+
+    This has the limitation that data returned by the XHR must have the same
+    hierarchical structure as the existing data.
+
+    For example, the XHR must return something like:
+      {
+        "3": {
+          "sizes": ["S", "L"]
+        }
+      }
+
+    By contrast, it must NOT return something like:
+      {
+        "sizes": ["S", "L"]
+      }
+
+    In order to support the latter, we'd need to:
+      - Add support for a new action event, AND
+      - Force quotation marks for literal keys, AND
+      - Reintroduce variables in object keys (removed in #7582)
+
+    <amp-state [src]="..." on="fetch:AMP.setState({"shirts": {selectedIndex: event.response}})"
+  -->
+  <amp-state id="shirts" [src]="'/bind/ecommerce/sizes?shirt=' + selectedIndex">
+    <script type="application/json">
+      {
+        "0": {
+          "color": "black",
+          "image": "./shirts/black.jpg"
+        },
+        "1": {
+          "color": "blue",
+          "image": "./shirts/blue.jpg"
+        },
+        "2": {
+          "color": "brown",
+          "image": "./shirts/brown.jpg"
+        },
+        "3": {
+          "color": "dark green",
+          "image": "./shirts/dark-green.jpg"
+        },
+        "4": {
+          "color": "gray",
+          "image": "./shirts/gray.jpg"
+        },
+        "5": {
+          "color": "light gray",
+          "image": "./shirts/light-gray.jpg"
+        },
+        "6": {
+          "color": "navy",
+          "image": "./shirts/navy.jpg"
+        },
+        "7": {
+          "color": "white",
+          "image": "./shirts/white.jpg"
+        },
+        "8": {
+          "color": "wine",
+          "image": "./shirts/wine.jpg"
+        }
+      }
+    </script>
+  </amp-state>
+</body>
+</html>

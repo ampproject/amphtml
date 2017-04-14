@@ -35,7 +35,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see contact us [https://www.zedo.com/contact-us/]
+For semantics of configuration, please see contact us [support@zedo.com]
+
 
 ### Required parameters
 

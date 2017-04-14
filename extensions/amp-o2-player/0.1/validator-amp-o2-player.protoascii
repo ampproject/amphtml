@@ -16,52 +16,32 @@
 
 tags: {  # amp-o2-player
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-o2-player extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-o2-player extension .js script"
+  extension_spec: {
+    name: "amp-o2-player"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-o2-player"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-o2-player"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-o2-player-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2-player.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-o2-player>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-O2-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-o2-player extension .js script"
-  attrs: { name: "data-pid" mandatory: true }
-  attrs: { name: "data-bcid" mandatory: true }
-  attrs: { name: "data-bid" }
-  attrs: { name: "data-vid" }
-  # If data-embed is missing, the default value is "default".
+  requires: "amp-o2-player extension .js script"
+  attrs: {
+    name: "data-bcid"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-pid"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-o2-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

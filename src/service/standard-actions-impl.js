@@ -14,11 +14,25 @@
  * limitations under the License.
  */
 
-import {actionServiceForDoc} from '../action';
-import {fromClassForDoc} from '../service';
-import {installResourcesServiceForDoc} from './resources-impl';
-import {toggle} from '../style';
+import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
+import {Layout, getLayoutClass} from '../layout';
+import {actionServiceForDoc} from '../services';
+import {bindForDoc} from '../services';
+import {dev, user} from '../log';
+import {registerServiceBuilderForDoc} from '../service';
+import {historyForDoc} from '../services';
+import {resourcesForDoc} from '../services';
+import {computedStyle, getStyle, toggle} from '../style';
+import {vsyncFor} from '../services';
 
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function isShowable(element) {
+  return getStyle(element, 'display') == 'none'
+      || element.hasAttribute('hidden');
+}
 
 /**
  * This service contains implementations of some of the most typical actions,
@@ -31,11 +45,14 @@ export class StandardActions {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @const @private {!./action-impl.ActionService} */
     this.actions_ = actionServiceForDoc(ampdoc);
 
     /** @const @private {!./resources-impl.Resources} */
-    this.resources_ = installResourcesServiceForDoc(ampdoc);
+    this.resources_ = resourcesForDoc(ampdoc);
 
     this.installActions_(this.actions_);
   }
@@ -50,7 +67,46 @@ export class StandardActions {
    * @private
    */
   installActions_(actionService) {
+    actionService.addGlobalTarget('AMP', this.handleAmpTarget.bind(this));
     actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
+    actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
+    actionService.addGlobalMethodHandler(
+      'toggleVisibility', this.handleToggle.bind(this));
+  }
+
+  /**
+   * Handles global `AMP` actions.
+   *
+   * See `amp-actions-and-events.md` for documentation.
+   *
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleAmpTarget(invocation) {
+    switch (invocation.method) {
+      case 'setState':
+        bindForDoc(this.ampdoc).then(bind => {
+          const args = invocation.args;
+          const objectString = args[OBJECT_STRING_ARGS_KEY];
+          if (objectString) {
+            // Object string arg.
+            const scope = Object.create(null);
+            const event = invocation.event;
+            if (event && event.detail) {
+              scope['event'] = event.detail;
+            }
+            bind.setStateWithExpression(objectString, scope);
+          } else {
+            user().error('AMP-BIND', `Please use the object-literal syntax, `
+                + `e.g. "AMP.setState({foo: 'bar'})" instead of `
+                + `"AMP.setState(foo='bar')".`);
+          }
+        });
+        return;
+      case 'goBack':
+        historyForDoc(this.ampdoc).goBack();
+        return;
+    }
+    throw user().createError('Unknown AMP action ', invocation.method);
   }
 
   /**
@@ -59,23 +115,82 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleHide(invocation) {
-    const target = invocation.target;
+    const target = dev().assertElement(invocation.target);
+
     this.resources_.mutateElement(target, () => {
-      if (target.classList.contains('-amp-element')) {
+      if (target.classList.contains('i-amphtml-element')) {
         target./*OK*/collapse();
       } else {
         toggle(target, false);
       }
     });
   }
+
+  /**
+   * Handles "show" action. This is a very simple action where "display: none"
+   * is removed from the target element.
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleShow(invocation) {
+    const target = dev().assertElement(invocation.target);
+    const ownerWindow = target.ownerDocument.defaultView;
+
+    if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
+      user().warn(
+          'STANDARD-ACTIONS',
+          'Elements with layout=nodisplay cannot be dynamically shown.',
+          target);
+
+      return;
+    }
+
+    vsyncFor(ownerWindow).measure(() => {
+      if (computedStyle(ownerWindow, target).display == 'none' &&
+          !isShowable(target)) {
+
+        user().warn(
+            'STANDARD-ACTIONS',
+            'Elements can only be dynamically shown when they have the ' +
+            '"hidden" attribute set or when they were dynamically hidden.',
+            target);
+      }
+    });
+
+    // deferMutate will only work on AMP elements
+    if (target.classList.contains('i-amphtml-element')) {
+      this.resources_.deferMutate(target, () => {
+        target./*OK*/expand();
+      });
+    } else {
+      this.resources_.mutateElement(target, () => {
+        toggle(target, true);
+        target.removeAttribute('hidden');
+      });
+    }
+  }
+
+  /**
+   * Handles "toggle" action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleToggle(invocation) {
+    if (isShowable(dev().assertElement(invocation.target))) {
+      this.handleShow(invocation);
+    } else {
+      this.handleHide(invocation);
+    }
+  }
 }
 
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!StandardActions}
  */
 export function installStandardActionsForDoc(ampdoc) {
-  return fromClassForDoc(
-      ampdoc, 'standard-actions', StandardActions);
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'standard-actions',
+      StandardActions,
+      /* opt_factory */ undefined,
+      /* opt_instantiate */ true);
 };

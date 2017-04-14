@@ -23,11 +23,17 @@ import {
   resetCountForTesting,
   resetBootstrapBaseUrlForTesting,
 } from '../../src/3p-frame';
-import {documentInfoForDoc} from '../../src/document-info';
+import {
+  serializeMessage,
+  deserializeMessage,
+} from '../../src/3p-frame-messaging';
+import {dev} from '../../src/log';
+import {documentInfoForDoc} from '../../src/services';
 import {loadPromise} from '../../src/event-helper';
+import {toggleExperiment} from '../../src/experiments';
 import {preconnectForElement} from '../../src/preconnect';
 import {validateData} from '../../3p/3p';
-import {viewerForDoc} from '../../src/viewer';
+import {viewerForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('3p-frame', () => {
@@ -87,6 +93,7 @@ describe('3p-frame', () => {
     });
   });
 
+  // TODO(bradfrizzell) break this out into a test-iframe-attributes
   it('should create an iframe', () => {
     window.AMP_MODE = {
       localDev: true,
@@ -95,7 +102,8 @@ describe('3p-frame', () => {
       test: false,
       version: '$internalRuntimeVersion$',
     };
-
+    toggleExperiment(window, 'exp-a', true);
+    toggleExperiment(window, 'exp-b', true);
     clock.tick(1234567888);
     const link = document.createElement('link');
     link.setAttribute('rel', 'canonical');
@@ -153,14 +161,20 @@ describe('3p-frame', () => {
     expect(locationHref).to.not.be.empty;
     const docInfo = documentInfoForDoc(window.document);
     expect(docInfo.pageViewId).to.not.be.empty;
-    const amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
+    const name = JSON.parse(decodeURIComponent(iframe.name));
+    const sentinel = name.attributes._context['sentinel'];
     const fragment =
         '{"testAttr":"value","ping":"pong","width":50,"height":100,' +
-        '"type":"_ping_"' +
-        ',"_context":{"referrer":"http://acme.org/",' +
-        '"canonicalUrl":"https://foo.bar/baz",' +
+        '"type":"_ping_",' +
+        '"_context":{"referrer":"http://acme.org/",' +
+        '"ampcontextVersion": "$internalRuntimeVersion$",' +
+        '"ampcontextFilepath": "https://cdn.ampproject.org/' +
+        '$internalRuntimeVersion$/ampcontext-v0.js",' +
+        '"canonicalUrl":"' + docInfo.canonicalUrl + '",' +
         '"sourceUrl":"' + locationHref + '",' +
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
+        '"initialIntersection": ' +
+        JSON.stringify(div.getIntersectionChangeEntry()) + ',' +
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
         '"mode":{"localDev":true,"development":false,"minified":false,' +
         '"test":false,"version":"$internalRuntimeVersion$"}' +
@@ -170,7 +184,8 @@ describe('3p-frame', () => {
         // Note also that running it using --files uses different DOM.
         ',"domFingerprint":"1725030182"' +
         ',"startTime":1234567888' +
-        ',"amp3pSentinel":"' + amp3pSentinel + '"' +
+        ',"experimentToggles":{"exp-a":true,"exp-b":true}' +
+        ',"sentinel":"' + sentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
         height + ',"bottom":' + height + ',"right":' + width +
@@ -178,25 +193,27 @@ describe('3p-frame', () => {
         '{"width":100,"height":200},"intersectionRect":{' +
         '"left":0,"top":0,"width":0,"height":0,"bottom":0,' +
         '"right":0,"x":0,"y":0}}}}';
-    const srcParts = src.split('#');
-    expect(srcParts[0]).to.equal(
+    expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-    const expectedFragment = JSON.parse(srcParts[1]);
     const parsedFragment = JSON.parse(fragment);
     // Since DOM fingerprint changes between browsers and documents, to have
     // stable tests, we can only verify its existence.
-    expect(expectedFragment._context.domFingerprint).to.exist;
-    delete expectedFragment._context.domFingerprint;
+    expect(name.attributes._context.domFingerprint).to.exist;
+    delete name.attributes._context.domFingerprint;
     delete parsedFragment._context.domFingerprint;
-    expect(expectedFragment).to.deep.equal(parsedFragment);
+    // Value changes between tests.
+    // TODO: Switch test to isolated window.
+    expect(name.attributes._context.experimentToggles).to.exist;
+    delete name.attributes._context.experimentToggles;
+    delete parsedFragment._context.experimentToggles;
+    expect(name.attributes).to.deep.jsonEqual(parsedFragment);
 
     // Switch to same origin for inner tests.
-    iframe.src = '/dist.3p/current/frame.max.html#' + fragment;
-
+    iframe.src = '/dist.3p/current/frame.max.html';
     document.body.appendChild(iframe);
     return loadPromise(iframe).then(() => {
       const win = iframe.contentWindow;
-      expect(win.context.canonicalUrl).to.equal('https://foo.bar/baz');
+      expect(win.context.canonicalUrl).to.equal(docInfo.canonicalUrl);
       expect(win.context.sourceUrl).to.equal(locationHref);
       expect(win.context.location.href).to.equal(locationHref);
       expect(win.context.location.origin).to.equal('http://localhost:9876');
@@ -213,7 +230,6 @@ describe('3p-frame', () => {
       document.head.removeChild(link);
     });
   });
-
 
   it('should pick the right bootstrap url for local-dev mode', () => {
     window.AMP_MODE = {localDev: true};
@@ -332,12 +348,108 @@ describe('3p-frame', () => {
     };
 
     container.appendChild(div);
-    const name = getIframe(window, div).name;
+    const name = JSON.parse(getIframe(window, div).name);
     resetBootstrapBaseUrlForTesting(window);
     resetCountForTesting();
-    const newName = getIframe(window, div).name;
-    expect(name).to.match(/d-\d+.ampproject.net__ping__0/);
-    expect(newName).to.match(/d-\d+.ampproject.net__ping__0/);
+    const newName = JSON.parse(getIframe(window, div).name);
+    expect(name.host).to.match(/d-\d+.ampproject.net/);
+    expect(name.type).to.match(/ping/);
+    expect(name.count).to.match(/1/);
+    expect(newName.host).to.match(/d-\d+.ampproject.net/);
+    expect(newName.type).to.match(/ping/);
+    expect(newName.count).to.match(/1/);
     expect(newName).not.to.equal(name);
+  });
+
+  describe('serializeMessage', () => {
+    it('should work without payload', () => {
+      const message = serializeMessage('msgtype', 'msgsentinel');
+      expect(message.indexOf('amp-')).to.equal(0);
+      expect(deserializeMessage(message)).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+      });
+    });
+
+    it('should work with payload', () => {
+      const message = serializeMessage('msgtype', 'msgsentinel', {
+        type: 'type_override', // override should be ignored
+        sentinel: 'sentinel_override', // override should be ignored
+        x: 1,
+        y: 'abc',
+      });
+      expect(deserializeMessage(message)).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+        x: 1,
+        y: 'abc',
+      });
+    });
+
+    it('should work with rtvVersion', () => {
+      const message = serializeMessage('msgtype', 'msgsentinel', {
+        type: 'type_override', // override should be ignored
+        sentinel: 'sentinel_override', // override should be ignored
+        x: 1,
+        y: 'abc',
+      }, 'rtv123');
+      expect(deserializeMessage(message)).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+        x: 1,
+        y: 'abc',
+      });
+    });
+  });
+
+  describe('deserializeMessage', () => {
+    it('should deserialize valid message', () => {
+      const message = deserializeMessage(
+          'amp-{"type":"msgtype","sentinel":"msgsentinel","x":1,"y":"abc"}');
+      expect(message).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+        x: 1,
+        y: 'abc',
+      });
+    });
+
+    it('should deserialize valid message with rtv version', () => {
+      const message = deserializeMessage(
+          'amp-rtv123{"type":"msgtype","sentinel":"msgsentinel",' +
+          '"x":1,"y":"abc"}');
+      expect(message).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+        x: 1,
+        y: 'abc',
+      });
+    });
+
+    it('should return null if the input not a string', () => {
+      expect(deserializeMessage({x: 1, y: 'abc'})).to.be.null;
+    });
+
+    it('should return null if the input does not start with amp-', () => {
+      expect(deserializeMessage(
+          'noamp-{"type":"msgtype","sentinel":"msgsentinel"}')).to.be.null;
+    });
+
+    it('should return null if the input is not a json', () => {
+      const errorStub = sandbox.stub(dev(), 'error');
+      expect(deserializeMessage('amp-other')).to.be.null;
+      expect(errorStub).to.not.be.called;
+    });
+
+    it('should return null if failed to parse the input', () => {
+      const errorStub = sandbox.stub(dev(), 'error');
+      expect(deserializeMessage(
+          'amp-{"type","sentinel":"msgsentinel"}')).to.be.null;
+      expect(errorStub).to.be.calledOnce;
+
+      expect(deserializeMessage(
+          'amp-{"type":"msgtype"|"sentinel":"msgsentinel"}')).to.be.null;
+      expect(errorStub).to.be.calledTwice;
+    });
   });
 });

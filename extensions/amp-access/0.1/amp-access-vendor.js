@@ -30,16 +30,22 @@ const TAG = 'amp-access-vendor';
 export class AccessVendorAdapter {
 
   /**
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JSONType} configJson
    */
-  constructor(win, configJson) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, configJson) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
     /** @const @private {string} */
     this.vendorName_ = user().assert(configJson['vendor'],
         '"vendor" name must be specified');
+
+    /** @const @private {JSONType} */
+    this.vendorConfig_ = configJson[this.vendorName_];
+
+    /** @const @private {boolean} */
+    this.isPingbackEnabled_ = !configJson['noPingback'];
 
     /** @const @private {!Promise<!./access-vendor.AccessVendor>} */
     this.vendorPromise_ = new Promise(resolve => {
@@ -50,9 +56,7 @@ export class AccessVendorAdapter {
 
   /** @override */
   getConfig() {
-    return {
-      'vendor': this.vendorName_,
-    };
+    return this.vendorConfig_;
   }
 
   /**
@@ -83,7 +87,7 @@ export class AccessVendorAdapter {
 
   /** @override */
   isPingbackEnabled() {
-    return true;
+    return this.isPingbackEnabled_;
   }
 
   /** @override */

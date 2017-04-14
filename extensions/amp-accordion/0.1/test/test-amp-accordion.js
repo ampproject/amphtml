@@ -201,4 +201,37 @@ describes.sandboxed('amp-accordion', {}, () => {
       expect(Object.keys(impl.currentState_)).to.have.length(1);
     });
   });
+
+  it('two accordions should not affect each other', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const ampAccordion1 = obj.ampAccordion;
+      const ampAccordion2 = iframe.doc.createElement('amp-accordion');
+      ampAccordion2.implementation_.mutateElement = fn => fn();
+      for (let i = 0; i < 3; i++) {
+        const section = iframe.doc.createElement('section');
+        section.innerHTML = '<h2>Section ' + i +
+            '<span>nested stuff<span></h2><div id=\'test' + i +
+            '\'>Loreum ipsum</div>';
+        ampAccordion2.appendChild(section);
+      }
+      return iframe.addElement(ampAccordion2).then(() => {
+        ampAccordion1.implementation_.buildCallback();
+        const headerElements1 = ampAccordion1.querySelectorAll(
+          'section > *:first-child');
+        const clickEventElement = {
+          currentTarget: headerElements1[0],
+          preventDefault: sandbox.spy(),
+        };
+        ampAccordion1.implementation_.onHeaderClick_(clickEventElement);
+        ampAccordion2.implementation_.buildCallback();
+        const headerElements2 = ampAccordion2.querySelectorAll(
+          'section > *:first-child');
+        expect(headerElements1[0].parentNode.hasAttribute('expanded'))
+            .to.be.true;
+        expect(headerElements2[0].parentNode.hasAttribute('expanded'))
+            .to.be.false;
+      });
+    });
+  });
 });

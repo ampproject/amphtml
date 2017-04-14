@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-selector-0.1.css';
+import {actionServiceForDoc} from '../../../src/services';
 import {closest} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev} from '../../../src/log';
 
 export class AmpSelector extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -37,6 +39,9 @@ export class AmpSelector extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isDisabled_ = false;
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
   }
 
   /** @override */
@@ -46,8 +51,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-selector'),
-        `Experiment amp-selector is disabled.`);
+    this.action_ = actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
     this.isDisabled_ = this.element.hasAttribute('disabled');
 
@@ -65,6 +69,48 @@ export class AmpSelector extends AMP.BaseElement {
     if (!this.isDisabled_) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
     }
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const selected = mutations['selected'];
+    if (selected !== undefined) {
+      this.selectedAttributeMutated_(selected);
+    }
+  }
+
+  /**
+   * Handles mutation of the `selected` attribute.
+   * @param {null|boolean|string|number|Array|Object} newValue
+   * @private
+   */
+  selectedAttributeMutated_(newValue) {
+    if (newValue === null) {
+      this.clearAllSelections_();
+      return;
+    }
+    let selectedArray = Array.isArray(newValue) ? newValue : [newValue];
+    // Only use first value if multiple selection is disabled.
+    if (!this.isMultiple_) {
+      selectedArray = selectedArray.slice(0, 1);
+    }
+    // Convert array values to strings and create map for fast lookup.
+    const selectedMap = selectedArray.reduce((map, value) => {
+      map[value] = true;
+      return map;
+    }, Object.create(null));
+    // Iterate through elements and toggle selection as necessary.
+    for (let i = 0; i < this.options_.length; i++) {
+      const element = this.options_[i];
+      const option = element.getAttribute('option');
+      if (selectedMap[option]) {
+        this.setSelection_(element);
+      } else {
+        this.clearSelection_(element);
+      }
+    }
+    // Update inputs.
+    this.setInputs_();
   }
 
   /**
@@ -89,13 +135,17 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
-   * Creates inputs for the currently selected elements.
+   * Creates inputs for the currently selected elements and returns a string
+   * array of their option values.
+   * @note Ignores elements that have `disabled` attribute set.
+   * @return {!Array<string>}
    * @private
    */
   setInputs_() {
+    const selectedValues = [];
     const elementName = this.element.getAttribute('name');
     if (!elementName || this.isDisabled_) {
-      return;
+      return selectedValues;
     }
     const formId = this.element.getAttribute('form');
 
@@ -108,17 +158,20 @@ export class AmpSelector extends AMP.BaseElement {
     this.selectedOptions_.forEach(option => {
       if (!option.hasAttribute('disabled')) {
         const hidden = doc.createElement('input');
+        const value = option.getAttribute('option');
         hidden.setAttribute('type', 'hidden');
         hidden.setAttribute('name', elementName);
-        hidden.setAttribute('value', option.getAttribute('option'));
+        hidden.setAttribute('value', value);
         if (formId) {
           hidden.setAttribute('form', formId);
         }
         this.inputs_.push(hidden);
         fragment.appendChild(hidden);
+        selectedValues.push(value);
       }
     });
     this.element.appendChild(fragment);
+    return selectedValues;
   }
 
   /**
@@ -136,15 +189,34 @@ export class AmpSelector extends AMP.BaseElement {
     if (!el || el.hasAttribute('disabled')) {
       return;
     }
-    if (el.hasAttribute('selected')) {
-      if (this.isMultiple_) {
-        this.clearSelection_(el);
-        this.setInputs_();
+
+    this.mutateElement(() => {
+      /** @type {?Array<string>} */
+      let selectedValues;
+      if (el.hasAttribute('selected')) {
+        if (this.isMultiple_) {
+          this.clearSelection_(el);
+          selectedValues = this.setInputs_();
+        }
+      } else {
+        this.setSelection_(el);
+        selectedValues = this.setInputs_();
       }
-    } else {
-      this.setSelection_(el);
-      this.setInputs_();
-    }
+
+      // Don't trigger action if selected values haven't changed.
+      if (selectedValues) {
+        // Trigger 'select' event with two data params:
+        // 'targetOption' - option value of the selected or deselected element.
+        // 'selectedOptions' - array of option values of selected elements.
+        const name = 'select';
+        const selectEvent =
+            createCustomEvent(this.win, `amp-selector.${name}`, {
+              targetOption: el.getAttribute('option'),
+              selectedOptions: selectedValues,
+            });
+        this.action_.trigger(this.element, name, selectEvent);
+      }
+    });
   }
 
   /**
@@ -162,17 +234,29 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
+   * Clears all selected options.
+   * @private
+   */
+  clearAllSelections_() {
+    while (this.selectedOptions_.length > 0) {
+      // Clear selected options for single select.
+      const el = this.selectedOptions_.pop();
+      this.clearSelection_(el);
+    }
+  }
+
+  /**
    * Marks a given element as selected and clears the others if required.
    * @param {!Element} element.
    * @private
    */
   setSelection_(element) {
+    // Exit if `element` is already selected.
+    if (this.selectedOptions_.indexOf(element) >= 0) {
+      return;
+    }
     if (!this.isMultiple_) {
-      while (this.selectedOptions_.length > 0) {
-        // Clear selected options for single select.
-        const el = this.selectedOptions_.pop();
-        this.clearSelection_(el);
-      }
+      this.clearAllSelections_();
     }
     element.setAttribute('selected', '');
     element.setAttribute('aria-selected', 'true');
@@ -180,4 +264,4 @@ export class AmpSelector extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-selector', AmpSelector);
+AMP.registerElement('amp-selector', AmpSelector, CSS);

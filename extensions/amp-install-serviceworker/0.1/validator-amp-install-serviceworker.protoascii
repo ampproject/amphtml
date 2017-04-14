@@ -17,42 +17,21 @@
 tags: {  # amp-install-serviceworker
   html_format: AMP  # Ads cannot install serviceworkers
   tag_name: "SCRIPT"
-  spec_name: "amp-install-serviceworker extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-install-serviceworker extension .js script"
+  extension_spec: {
+    name: "amp-install-serviceworker"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-install-serviceworker"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    value: "amp-install-serviceworker"
-    mandatory: true
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-install-serviceworker-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-install-serviceworker.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-install-serviceworker>
   html_format: AMP  # Ads cannot install serviceworkers
   tag_name: "AMP-INSTALL-SERVICEWORKER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-install-serviceworker extension .js script"
+  requires: "amp-install-serviceworker extension .js script"
   attrs: {
     name: "src"
     mandatory: true
@@ -62,7 +41,16 @@ tags: {  # <amp-install-serviceworker>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-install-serviceworker.html"
+  attrs: {
+    name: "data-iframe-src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-install-serviceworker"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

@@ -16,10 +16,10 @@
 
 import {dev, rethrowAsync} from './log';
 import {documentStateFor} from './service/document-state';
-import {performanceFor} from './performance';
+import {performanceFor} from './services';
+import {resourcesForDoc} from './services';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
-import {resourcesForDoc} from './resources';
 
 
 const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
@@ -33,7 +33,7 @@ const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
  *
  * @param {!Document} doc The document that should get the new styles.
  * @param {string} cssText
- * @param {function()} cb Called when the new styles are available.
+ * @param {function(!Element)} cb Called when the new styles are available.
  *     Not using a promise, because this is synchronous when possible.
  *     for better performance.
  * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
@@ -56,14 +56,14 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   // For this reason we poll until the style becomes available.
   // Sync case.
   if (styleLoaded(doc, style)) {
-    cb();
+    cb(style);
     return style;
   }
   // Poll until styles are available.
   const interval = setInterval(() => {
     if (styleLoaded(doc, style)) {
       clearInterval(interval);
-      cb();
+      cb(style);
     }
   }, 4);
   return style;
@@ -80,6 +80,28 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
  * @return {!Element}
  */
 export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
+  // Check if it has already been created.
+  if (isRuntimeCss && cssRoot.runtimeStyleElement) {
+    return cssRoot.runtimeStyleElement;
+  }
+
+  // Check if the style has already been added by the server layout.
+  if (cssRoot.parentElement &&
+      cssRoot.parentElement.hasAttribute('i-amphtml-layout') &&
+      (isRuntimeCss || ext && ext != 'amp-custom')) {
+    const existing =
+        isRuntimeCss ?
+        cssRoot.querySelector('style[amp-runtime]') :
+        cssRoot./*OK*/querySelector(`style[amp-extension=${ext}]`);
+    if (existing) {
+      if (isRuntimeCss) {
+        cssRoot.runtimeStyleElement = existing;
+      }
+      return existing;
+    }
+  }
+
+  // Create the new style element and append to cssRoot.
   const style = doc.createElement('style');
   style./*OK*/textContent = cssText;
   let afterElement = null;
@@ -109,16 +131,20 @@ export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
  *     be blocked on key services being loaded.
  */
 export function makeBodyVisible(doc, opt_waitForServices) {
+  /** @const {!Window} */
+  const win = doc.defaultView;
+  if (win[bodyVisibleSentinel]) {
+    return;
+  }
   const set = () => {
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',
       animation: 'none',
     });
+    renderStartedNoInline(doc);
   };
   try {
-    /** @const {!Window} */
-    const win = doc.defaultView;
     documentStateFor(win).onBodyAvailable(() => {
       if (win[bodyVisibleSentinel]) {
         return;
@@ -152,6 +178,30 @@ export function makeBodyVisible(doc, opt_waitForServices) {
     rethrowAsync(e);
   }
 }
+
+
+/**
+ * @param {!Document} doc
+ */
+function renderStartedNoInline(doc) {
+  try {
+    resourcesForDoc(doc).renderStarted();
+  } catch (e) {
+    // `makeBodyVisible` is called in the error-processing cycle and thus
+    // could be triggered when runtime's initialization is incomplete which
+    // would cause unrelated errors to be thrown here.
+  }
+}
+
+
+/**
+ * Indicates that the body is always visible. For instance, in case of PWA.
+ * @param {!Window} win
+ */
+export function bodyAlwaysVisible(win) {
+  win[bodyVisibleSentinel] = true;
+}
+
 
 /**
  * Checks whether a style element was registered in the DOM.

@@ -56,8 +56,10 @@ Current list of extended components by category:
 | [`amp-brightcove`](amp-brightcove/amp-brightcove.md) | Displays a Brightcove Video Cloud or Perform player. |
 | [`amp-dailymotion`](amp-dailymotion/amp-dailymotion.md) | Displays a [Dailymotion](https://www.dailymotion.com) video. |
 | [`amp-gfycat`](amp-gfycat/amp-gfycat.md) | Displays a [Gfycat](https://gfycat.com) video GIF. |
+| [`amp-izlesene`](amp-izlesene/amp-izlesene.md) | Displays a Izlesene video. |
 | [`amp-jwplayer`](amp-jwplayer/amp-jwplayer.md) | Displays a cloud-hosted [JW Player](https://www.jwplayer.com/). |
 | [`amp-kaltura-player`](amp-kaltura-player/amp-kaltura-player.md) | Displays the Kaltura Player as used in [Kaltura's Video Platform](https://corp.kaltura.com/). |
+| [`amp-ooyala-player`](amp-ooyala-player/amp-ooyala-player.md) | Displays an [`Ooyala`](http://ooyala.com) player. |
 | [`amp-reach-player`](amp-reach-player/amp-reach-player.md) | Displays a [Beachfront Reach](https://beachfrontreach.com/) video player. |
 | [`amp-soundcloud`](amp-soundcloud/amp-soundcloud.md) | Displays a [Soundcloud](https://soundcloud.com/) clip. |
 | [`amp-springboard-player`](amp-springboard-player/amp-springboard-player.md) | Displays a [Springboard Platform](http://publishers.springboardplatform.com/users/login) video player |
@@ -120,6 +122,7 @@ Current list of extended components by category:
 | [`amp-social-share`](amp-social-share/amp-social-share.md) | Displays a social share button. |
 | [`amp-twitter`](amp-twitter/amp-twitter.md) | Displays a Twitter tweet. |
 | [`amp-vine`](amp-vine/amp-vine.md) | Displays a Vine simple embed. |
+| [`amp-facebook-comments`](amp-facebook-comments/amp-facebook-comments.md) | Displays Facebook comments plugin. |
 
 
 ## AMP HTML Extended Templates

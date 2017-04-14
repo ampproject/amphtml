@@ -19,7 +19,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
-import {map} from '../../../src/types';
+import {map} from '../../../src/utils/object';
 
 /** @const */
 const TAG = 'amp-accordion-session-state-optout';
@@ -77,9 +77,9 @@ class AmpAccordion extends AMP.BaseElement {
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
       const header = sectionComponents_[0];
       const content = sectionComponents_[1];
-      header.classList.add('-amp-accordion-header');
+      header.classList.add('i-amphtml-accordion-header');
       header.setAttribute('role', 'tab');
-      content.classList.add('-amp-accordion-content');
+      content.classList.add('i-amphtml-accordion-content');
       content.setAttribute('role', 'tabpanel');
       let contentId = content.getAttribute('id');
       if (!contentId) {
@@ -104,7 +104,7 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   getSessionStorageKey_() {
-    const id_ = this.element.id;
+    const id_ = this.element.id || this.element.getResourceId();
     const url = removeFragment(this.win.location.href);
     return `amp-${id_}-${url}`;
   }
@@ -170,7 +170,7 @@ class AmpAccordion extends AMP.BaseElement {
         section.setAttribute('expanded', '');
         header.setAttribute('aria-expanded', 'true');
       }
-    }, content);
+    }, section);
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
   }

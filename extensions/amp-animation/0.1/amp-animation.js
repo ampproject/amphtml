@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
+import {MeasureScanner} from './web-animations';
+import {Pass} from '../../../src/pass';
+import {WebAnimationPlayState} from './web-animation-types';
 import {childElementByTag} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {getFriendlyIframeEmbedOptional,}
+    from '../../../src/friendly-iframe-embed';
+import {getParentWindowFrameElement} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
-import {MeasureScanner} from './web-animations';
+import {listen} from '../../../src/event-helper';
+import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
+import {user} from '../../../src/log';
+import {viewerForDoc} from '../../../src/services';
 
 const TAG = 'amp-animation';
 
@@ -30,17 +38,46 @@ export class AmpAnimation extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {boolean} */
+    this.triggerOnVisibility_ = false;
+
+    /** @private {boolean} */
+    this.visible_ = false;
+
+    /** @private {boolean} */
+    this.triggered_ = false;
+
+    /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
+    this.embed_ = null;
+
     /** @private {?JSONType} */
     this.configJson_ = null;
 
     /** @private {?./web-animations.WebAnimationRunner} */
     this.runner_ = null;
+
+    /** @private {?Pass} */
+    this.restartPass_ = null;
   }
 
   /** @override */
   buildCallback() {
     user().assert(isExperimentOn(this.win, TAG),
         `Experiment "${TAG}" is disabled.`);
+
+    // TODO(dvoytenko): Remove once we support direct parent visibility.
+    user().assert(this.element.parentNode == this.element.ownerDocument.body,
+        `${TAG} is only allowed as a direct child of <body> element.` +
+        ' This restriction will be removed soon.');
+
+    // Trigger.
+    const trigger = this.element.getAttribute('trigger');
+    if (trigger) {
+      this.triggerOnVisibility_ = user().assert(
+          trigger == 'visibility',
+          'Only allowed value for "trigger" is "visibility": %s',
+          this.element);
+    }
 
     // Parse config.
     const scriptElement = user().assert(
@@ -49,10 +86,146 @@ export class AmpAnimation extends AMP.BaseElement {
     this.configJson_ = tryParseJson(scriptElement.textContent, error => {
       throw user().createError('failed to parse animation script', error);
     });
+
+    if (this.triggerOnVisibility_) {
+      // Make the element minimally displayed to make sure that `layoutCallback`
+      // is called.
+      setStyles(this.element, {
+        visibility: 'hidden',
+        width: '1px',
+        height: '1px',
+        display: 'block',
+        position: 'fixed',
+      });
+    }
+
+    // Restart with debounce.
+    this.restartPass_ = new Pass(
+        this.win,
+        this.startOrResume_.bind(this),
+        /* delay */ 50);
+
+    // Visibility.
+    const ampdoc = this.getAmpDoc();
+    const frameElement = getParentWindowFrameElement(this.element, ampdoc.win);
+    const embed =
+        frameElement ? getFriendlyIframeEmbedOptional(frameElement) : null;
+    if (embed) {
+      this.embed_ = embed;
+      this.setVisible_(embed.isVisible());
+      embed.onVisibilityChanged(() => {
+        this.setVisible_(embed.isVisible());
+      });
+      listen(this.embed_.win, 'resize', () => this.onResize_());
+    } else {
+      const viewer = viewerForDoc(ampdoc);
+      this.setVisible_(viewer.isVisible());
+      viewer.onVisibilityChanged(() => {
+        this.setVisible_(viewer.isVisible());
+      });
+      this.getViewport().onChanged(e => {
+        if (e.relayoutAll) {
+          this.onResize_();
+        }
+      });
+    }
+  }
+
+  /** @override */
+  layoutCallback() {
+    if (this.triggerOnVisibility_) {
+      this.activate();
+    }
+    return Promise.resolve();
+  }
+
+  /** @override */
+  pauseCallback() {
+    this.setVisible_(false);
   }
 
   /** @override */
   activate() {
+    // The animation has been triggered, but there's no guarantee that it
+    // will actually be running.
+    this.triggered_ = true;
+    if (this.visible_) {
+      this.startOrResume_();
+    }
+  }
+
+  /**
+   */
+  finish() {
+    this.triggered_ = false;
+    if (this.runner_) {
+      this.runner_.finish();
+      this.runner_ = null;
+    }
+  }
+
+  /**
+   * @param {boolean} visible
+   * @private
+   */
+  setVisible_(visible) {
+    if (this.visible_ != visible) {
+      this.visible_ = visible;
+      if (this.triggered_) {
+        if (this.visible_) {
+          this.startOrResume_();
+        } else {
+          this.pause_();
+        }
+      }
+    }
+  }
+
+  /** @private */
+  onResize_() {
+    // Store the previous `triggered` value since `cancel` may reset it.
+    const triggered = this.triggered_;
+
+    // Stop animation right away.
+    if (this.runner_) {
+      this.runner_.cancel();
+      this.runner_ = null;
+    }
+
+    // Restart the animation, but debounce to avoid re-starting it multiple
+    // times per restart.
+    this.triggered_ = triggered;
+    if (this.triggered_ && this.visible_) {
+      this.restartPass_.schedule();
+    }
+  }
+
+  /**
+   * @return {?Promise}
+   * @private
+   */
+  startOrResume_() {
+    if (!this.triggered_ || !this.visible_) {
+      return null;
+    }
+
+    if (this.runner_) {
+      this.runner_.resume();
+      return null;
+    }
+
+    return this.createRunner_().then(runner => {
+      this.runner_ = runner;
+      this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
+      this.runner_.start();
+    });
+  }
+
+  /**
+   * @return {!Promise<!./web-animations.WebAnimationRunner>}
+   * @private
+   */
+  createRunner_() {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
@@ -63,19 +236,51 @@ export class AmpAnimation extends AMP.BaseElement {
       installWebAnimations(this.win);
     }
 
-    const measurer = new MeasureScanner(this.win, {
-      resolveTarget: id => this.getAmpDoc().getElementById(id),
-    }, /* validate */ true);
     const vsync = this.getVsync();
-    vsync.measurePromise(() => {
-      measurer.scan(configJson);
-      return measurer.createRunner(this.element.getResources());
-    }).then(runner => {
-      this.runner_ = runner;
-      this.runner_.play();
+    const readyPromise = this.embed_ ? this.embed_.whenReady() :
+        this.getAmpDoc().whenReady();
+    return readyPromise.then(() => {
+      const measurer = new MeasureScanner(this.win, {
+        resolveTarget: this.resolveTarget_.bind(this),
+      }, /* validate */ true);
+      return vsync.measurePromise(() => {
+        measurer.scan(configJson);
+        return measurer.createRunner(this.element.getResources());
+      });
     });
+  }
+
+  /**
+   * @param {string} id
+   * @return {?Element}
+   * @private
+   */
+  resolveTarget_(id) {
+    if (this.embed_) {
+      return this.embed_.win.document.getElementById(id);
+    }
+    return this.getAmpDoc().getElementById(id);
+  }
+
+  /** @private */
+  pause_() {
+    if (this.runner_) {
+      this.runner_.pause();
+    }
+  }
+
+  /**
+   * @param {!WebAnimationPlayState} playState
+   * @private
+   */
+  playStateChanged_(playState) {
+    if (playState == WebAnimationPlayState.FINISHED) {
+      this.finish();
+    }
   }
 }
 
 
-AMP.registerElement(TAG, AmpAnimation);
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerElement(TAG, AmpAnimation);
+});

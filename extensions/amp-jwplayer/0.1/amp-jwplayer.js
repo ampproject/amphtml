@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 
@@ -85,6 +86,15 @@ class AmpJWPlayer extends AMP.BaseElement {
       this.iframe_.contentWindow./*OK*/postMessage('pause',
         'https://content.jwplatform.com');
     }
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true; // Call layoutCallback again.
   }
 
   /** @override */

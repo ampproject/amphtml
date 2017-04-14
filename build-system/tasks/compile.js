@@ -20,6 +20,7 @@ var closureCompiler = require('gulp-closure-compiler');
 var gulp = require('gulp');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
+var util = require('gulp-util');
 var internalRuntimeVersion = require('../internal-version').VERSION;
 var internalRuntimeToken = require('../internal-version').TOKEN;
 var rimraf = require('rimraf');
@@ -41,16 +42,26 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
       inProgress++;
       compile(entryModuleFilename, outputDir, outputFilename, options)
           .then(function() {
+            if (process.env.TRAVIS) {
+              // When printing simplified log in travis, use dot for each task.
+              process.stdout.write('.');
+            }
             inProgress--;
             next();
             resolve();
           }, function(e) {
-            console./*OK*/error('Compilation error', e.message);
+            console./*OK*/error(util.colors.red('Compilation error',
+                e.message));
             process.exit(1);
           });
     }
     function next() {
       if (!queue.length) {
+        // When printing simplified log in travis, print EOF after
+        // all closure compiling task are done.
+        if (process.env.TRAVIS) {
+          process.stdout.write('\n');
+        }
         return;
       }
       if (inProgress < MAX_PARALLEL_CLOSURE_INVOCATIONS) {
@@ -85,8 +96,9 @@ function compile(entryModuleFilenames, outputDir,
     const checkTypes = options.checkTypes || argv.typecheck_only;
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
-    console./*OK*/log('Starting closure compiler for', entryModuleFilenames);
-
+    if (!process.env.TRAVIS) {
+      util.log('Starting closure compiler for', entryModuleFilenames);
+    }
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
     if (!options.preventRemoveAndMakeDir) {
@@ -129,13 +141,18 @@ function compile(entryModuleFilenames, outputDir,
       // Strange access/login related files.
       'build/all/v0/*.js',
       // A4A has these cross extension deps.
-      'extensions/**/*-config.js',
+      'extensions/amp-ad-network*/**/*-config.js',
       'extensions/amp-ad/**/*.js',
       'extensions/amp-a4a/**/*.js',
       // Currently needed for crypto.js and visibility.js.
       // Should consider refactoring.
       'extensions/amp-analytics/**/*.js',
-      'src/**/*.js',
+      // For amp-bind in the web worker (ww.js).
+      'extensions/amp-bind/**/*.js',
+      // Needed to access form impl from other extensions
+      'extensions/amp-form/**/*.js',
+      'src/*.js',
+      'src/!(inabox)*/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
       '!extensions/amp-access/0.1/amp-login-done.js',
@@ -248,6 +265,7 @@ function compile(entryModuleFilenames, outputDir,
         jscomp_off: ['unknownDefines'],
         define: [],
         hide_warnings_for: [
+          'third_party/caja/',
           'third_party/closure-library/sha384-generated.js',
           'third_party/d3/',
           'third_party/vega/',
@@ -303,8 +321,9 @@ function compile(entryModuleFilenames, outputDir,
     var stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./*OK*/error('Error compiling', entryModuleFilenames);
-          console./*OK*/error(err.message);
+          console./*OK*/error(util.colors.red('Error compiling',
+              entryModuleFilenames));
+          console./*OK*/error(util.colors.red(err.message));
           process.exit(1);
         });
 
@@ -316,8 +335,10 @@ function compile(entryModuleFilenames, outputDir,
         .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
         .pipe(gulp.dest(outputDir))
         .on('end', function() {
-          console./*OK*/log('Compiled', entryModuleFilename, 'to',
-              outputDir + '/' + outputFilename, 'via', intermediateFilename);
+          if (!process.env.TRAVIS) {
+            util.log('Compiled', entryModuleFilename, 'to',
+                outputDir + '/' + outputFilename, 'via', intermediateFilename);
+          }
           gulp.src(intermediateFilename + '.map')
               .pipe(rename(outputFilename + '.map'))
               .pipe(gulp.dest(outputDir))

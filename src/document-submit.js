@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {actionServiceForDoc} from './services';
 import {getServiceForDoc} from './service';
 import {dev, user} from './log';
 import {
@@ -46,14 +47,14 @@ export function onDocumentFormSubmit_(e) {
     return;
   }
 
-  const form = e.target;
+  const form = dev().assertElement(e.target);
   if (!form || form.tagName != 'FORM') {
     return;
   }
 
   // amp-form extension will add novalidate to all forms to manually trigger
   // validation. In that case `novalidate` doesn't have the same meaning.
-  const isAmpFormMarked = form.classList.contains('-amp-form');
+  const isAmpFormMarked = form.classList.contains('i-amphtml-form');
   let shouldValidate;
   if (isAmpFormMarked) {
     shouldValidate = !form.hasAttribute('amp-novalidate');
@@ -78,19 +79,29 @@ export function onDocumentFormSubmit_(e) {
   const action = form.getAttribute('action');
   const actionXhr = form.getAttribute('action-xhr');
   const method = (form.getAttribute('method') || 'GET').toUpperCase();
-  if (method == 'GET') {
-    // TODO(#5670): Make action optional for method=GET when action-xhr is provided.
-    user().assert(action,
-        'form action attribute is required for method=GET: %s', form);
-    assertHttpsUrl(action, dev().assertElement(form), 'action');
+
+  if (actionXhr) {
+    assertHttpsUrl(actionXhr, form, 'action-xhr');
+    user().assert(!isProxyOrigin(actionXhr),
+        'form action-xhr should not be on AMP CDN: %s', form);
+    checkCorsUrl(actionXhr);
+  }
+  if (action) {
+    assertHttpsUrl(action, form, 'action');
     user().assert(!isProxyOrigin(action),
         'form action should not be on AMP CDN: %s', form);
     checkCorsUrl(action);
+  }
+
+  if (method == 'GET') {
+    user().assert(actionXhr || action,
+        'form action-xhr or action attribute is required for method=GET: %s',
+        form);
   } else if (method == 'POST') {
     if (action) {
-      e.preventDefault();
-      user().assert(false,
-          'form action attribute is invalid for method=POST: %s', form);
+      const TAG = 'form';
+      user().error(TAG,
+          'action attribute is invalid for method=POST: %s', form);
     }
 
     if (!actionXhr) {
@@ -102,13 +113,26 @@ export function onDocumentFormSubmit_(e) {
     }
   }
 
-  // TODO(#5607): Only require this with method=GET.
   const target = form.getAttribute('target');
-  user().assert(target,
-      'form target attribute is required: %s', form);
-  user().assert(target == '_blank' || target == '_top',
-      'form target=%s is invalid can only be _blank or _top: %s', target, form);
+  if (target) {
+    user().assert(target == '_blank' || target == '_top',
+        'form target=%s is invalid can only be _blank or _top: %s',
+        target, form);
+  } else {
+    form.setAttribute('target', '_top');
+  }
+
+  // For xhr submissions relay the submission event through action service to
+  // allow us to wait for amp-form (and possibly its dependencies) to execute
+  // the actual submission. For non-XHR GET we let the submission go through
+  // to allow _blank target to work.
   if (actionXhr) {
-    checkCorsUrl(actionXhr);
+    e.preventDefault();
+
+    // It's important to stop propagation of the submission to avoid double
+    // handling of the event in cases were we are delegating to action service
+    // to deliver the submission event.
+    e.stopImmediatePropagation();
+    actionServiceForDoc(form).execute(form, 'submit', /*args*/ null, form, e);
   }
 }

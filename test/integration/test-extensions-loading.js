@@ -18,13 +18,13 @@ import {createFixtureIframe} from '../../testing/iframe';
 
 // Checks if an amp element gets upgraded.
 function checkElementUpgrade(element) {
-  expect(element).to.have.class('-amp-element');
-  expect(element).to.have.class('-amp-layout-responsive');
-  expect(element).to.have.class('-amp-layout-size-defined');
+  expect(element).to.have.class('i-amphtml-element');
+  expect(element).to.have.class('i-amphtml-layout-responsive');
+  expect(element).to.have.class('i-amphtml-layout-size-defined');
   expect(element).to.not.have.class('amp-notbuilt');
-  expect(element).to.not.have.class('-amp-notbuilt');
+  expect(element).to.not.have.class('i-amphtml-notbuilt');
   expect(element).to.not.have.class('amp-unresolved');
-  expect(element).to.not.have.class('-amp-unresolved');
+  expect(element).to.not.have.class('i-amphtml-unresolved');
 }
 
 /**
@@ -46,7 +46,7 @@ function testLoadOrderFixture(fixtureName, testElements) {
       const testElement = fixture.doc.querySelectorAll(testElements[i])[0];
       checkElementUpgrade(testElement);
       if (testElement.tagName == 'AMP-FIT-TEXT') {
-        expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
+        expect(fixture.doc.getElementsByClassName('i-amphtml-fit-text-content'))
           .to.have.length(1);
       }
     }

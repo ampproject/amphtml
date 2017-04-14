@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays an instagram embed.</td>
+    <td>Displays an Instagram embed.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -41,11 +41,11 @@ limitations under the License.
 
 ## Behavior
 
-The `width` and `height` attributes are special for the instagram embed.
-These should be the actual width and height of the instagram image.
-The system automatically adds space for the "chrome" that instagram adds around the image.
+The `width` and `height` attributes are special for the Instagram embed.
+These should be the actual width and height of the Instagram image.
+The system automatically adds space for the "chrome" that Instagram adds around the image.
 
-Many instagrams are square. When you set `layout="responsive"` any value where `width` and `height` are the same will work.
+Many Instagrams are square. When you set `layout="responsive"` any value where `width` and `height` are the same will work.
 
 Example:
 ```html
@@ -57,22 +57,25 @@ Example:
 </amp-instagram>
 ```
 
-If the instagram is not square you will need to enter the actual dimensions of the image.
+If the Instagram is not square you will need to enter the actual dimensions of the image.
 
 When using non-responsive layout you will need to account for the extra space added for the "instagram chrome" around the image. This is currently 48px above and below the image and 8px on the sides.
 
 ## Attributes
 
-<!---
-`src` attribute hasn't been documented. Should it be?
-Also, can the tag include both data-shortcode and src or are they mutually exclusive?
--->
-
 **data-shortcode**
 
-The instagram data-shortcode found in every instagram photo URL.
+The instagram data-shortcode is found in every instagram photo URL.
 
-E.g. in https://instagram.com/p/fBwFP fBwFP is the data-shortcode.
+For example, in https://instagram.com/p/fBwFP, `fBwFP` is the data-shortcode.
+
+**data-captioned**
+
+Include the Instagram caption.  `amp-instagram` will attept to resize to the correct hight including the caption.
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

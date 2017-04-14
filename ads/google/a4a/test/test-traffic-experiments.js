@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-
+import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
-  EXPERIMENT_ATTRIBUTE,
   RANDOM_NUMBER_GENERATORS,
   addExperimentIdToElement,
   getPageExperimentBranch,
@@ -24,11 +24,26 @@ import {
   isInExperiment,
   randomlySelectUnsetPageExperiments,
   validateExperimentIds,
+  googleAdsIsA4AEnabled,
+  forceExperimentBranch,
 } from '../traffic-experiments';
 import {
   isExperimentOn,
-  resetExperimentToggles_,
+  toggleExperiment,
 } from '../../../../src/experiments';
+import {installPlatformService} from '../../../../src/service/platform-impl';
+import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
+import {resetServiceForTesting} from '../../../../src/service';
+import {
+  installDocumentStateService,
+} from '../../../../src/service/document-state';
+import {
+  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+  DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+  DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+} from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js'; // eslint-disable-line
+import {EXPERIMENT_ATTRIBUTE} from '../utils';
 import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
 
@@ -66,8 +81,6 @@ describe('all-traffic-experiments-tests', () => {
       accurateRandomStub = sandbox.stub().returns(-1);
       cachedAccuratePrng = RANDOM_NUMBER_GENERATORS.accuratePrng;
       RANDOM_NUMBER_GENERATORS.accuratePrng = accurateRandomStub;
-      // Clear any experiment state that happens to be left around.
-      resetExperimentToggles_();
     });
     afterEach(() => {
       sandbox.restore();
@@ -76,7 +89,7 @@ describe('all-traffic-experiments-tests', () => {
 
     it('handles empty experiments list', () => {
       // Opt out of experiment.
-      sandbox.win.AMP_CONFIG['testExperimentId'] = 0.0;
+      toggleExperiment(sandbox.win, 'testExperimentId', false, true);
       randomlySelectUnsetPageExperiments(sandbox.win, {});
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.false;
@@ -84,7 +97,7 @@ describe('all-traffic-experiments-tests', () => {
     });
     it('handles experiment not diverted path', () => {
       // Opt out of experiment.
-      sandbox.win.AMP_CONFIG['testExperimentId'] = 0.0;
+      toggleExperiment(sandbox.win, 'testExperimentId', false, true);
       randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.false;
@@ -92,10 +105,10 @@ describe('all-traffic-experiments-tests', () => {
           'testExperimentId')).to.not.be.ok;
     });
     it('handles experiment diverted path: control', () => {
-      // Force experiment on by setting its triggering probability to 1, then
+      // Force experiment on.
+      toggleExperiment(sandbox.win, 'testExperimentId', true, true);
       // force the control branch to be chosen by making the accurate PRNG
       // return a value < 0.5.
-      sandbox.win.AMP_CONFIG['testExperimentId'] = 1.0;
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
       randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
@@ -104,10 +117,10 @@ describe('all-traffic-experiments-tests', () => {
           testExperimentSet['testExperimentId'].control);
     });
     it('handles experiment diverted path: experiment', () => {
-      // Force experiment on by setting its triggering probability to 1, then
-      // force the experiment branch to be chosen by making the accurate PRNG
+      // Force experiment on.
+      toggleExperiment(sandbox.win, 'testExperimentId', true, true);
+      // Force the experiment branch to be chosen by making the accurate PRNG
       // return a value > 0.5.
-      sandbox.win.AMP_CONFIG['testExperimentId'] = 1.0;
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.6);
       randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
@@ -116,12 +129,11 @@ describe('all-traffic-experiments-tests', () => {
           testExperimentSet['testExperimentId'].experiment);
     });
     it('handles multiple experiments', () => {
-      sandbox.win.AMP_CONFIG = {};
-      const config = sandbox.win.AMP_CONFIG;
-      config['expt_0'] = 1.0;
-      config['expt_1'] = 0.0;
-      config['expt_2'] = 1.0;
-      config['expt_3'] = 1.0;
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      toggleExperiment(sandbox.win, 'expt_1', false, true);
+      toggleExperiment(sandbox.win, 'expt_2', true, true);
+      toggleExperiment(sandbox.win, 'expt_3', true, true);
+
       const experimentInfo = {
         'expt_0': {
           control: '0_c',
@@ -157,9 +169,7 @@ describe('all-traffic-experiments-tests', () => {
     });
     it('handles multi-way branches', () => {
       dev().info(TAG_, 'Testing multi-way branches');
-      sandbox.win.AMP_CONFIG = {};
-      const config = sandbox.win.AMP_CONFIG;
-      config['expt_0'] = 1.0;
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
       const experimentInfo = {
         'expt_0': {
           b0: '0_0',
@@ -177,12 +187,11 @@ describe('all-traffic-experiments-tests', () => {
           '0_3');
     });
     it('handles multiple experiments with multi-way branches', () => {
-      sandbox.win.AMP_CONFIG = {};
-      const config = sandbox.win.AMP_CONFIG;
-      config['expt_0'] = 1.0;
-      config['expt_1'] = 0.0;
-      config['expt_2'] = 1.0;
-      config['expt_3'] = 1.0;
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      toggleExperiment(sandbox.win, 'expt_1', false, true);
+      toggleExperiment(sandbox.win, 'expt_2', true, true);
+      toggleExperiment(sandbox.win, 'expt_3', true, true);
+
       const experimentInfo = {
         'expt_0': {
           b0: '0_0',
@@ -239,11 +248,8 @@ describe('all-traffic-experiments-tests', () => {
           experiment: '108642',
         },
       };
-      sandbox.win.AMP_CONFIG = {};
-      const config = sandbox.win.AMP_CONFIG;
-      config['fooExpt'] = 0.0;
+      toggleExperiment(sandbox.win, 'fooExpt', false, true);
       randomlySelectUnsetPageExperiments(sandbox.win, exptAInfo);
-      config['fooExpt'] = 1.0;
       randomlySelectUnsetPageExperiments(sandbox.win, exptBInfo);
       // Even though we tried to set up a second time, using a config
       // parameter that should ensure that the experiment was activated, the
@@ -356,6 +362,206 @@ describe('all-traffic-experiments-tests', () => {
       expect(isInExperiment(element, 'frob')).to.be.true;
       expect(isInExperiment(element, 'gunk')).to.be.true;
       expect(isInExperiment(element, 'zort')).to.be.true;
+    });
+  });
+
+  describe('A4A Launch Flags', () => {
+    let sandbox;
+    let win;
+    let events;
+    let element;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      win = {
+        AMP_MODE: {
+          localDev: true,
+        },
+        location: {
+          href: 'https://cdn.ampproject.org/fnord',
+          pathname: '/fnord',
+          origin: 'https://cdn.ampproject.org',
+          hash: '',
+          hostname: 'cdn.ampproject.org',
+        },
+        document: {
+          nodeType: /* DOCUMENT */ 9,
+          hidden: false,
+          cookie: null,
+          visibilityState: 'visible',
+          addEventListener: function(type, listener) {
+            events[type] = listener;
+          },
+        },
+        crypto: {
+          subtle: true,
+          webkitSubtle: true,
+        },
+        navigator: window.navigator,
+        pageExperimentBranches: {},
+      };
+      win.document.defaultView = win;
+      installDocService(win, /* isSingleDoc */ true);
+      const ampdoc = ampdocServiceFor(win).getAmpDoc();
+      events = {};
+      installDocumentStateService(win);
+      installPlatformService(win);
+      installViewerServiceForDoc(ampdoc);
+      element = document.createElement('div');
+      document.body.appendChild(element);
+    });
+
+    afterEach(() => {
+      resetServiceForTesting(win, 'viewer');
+      sandbox.restore();
+      document.body.removeChild(element);
+    });
+
+    function expectCorrectBranchOnly(element, expectedBranchId) {
+      const branchIds = [
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+      ];
+      for (const bId in branchIds) {
+        expect(isInExperiment(element, bId)).to.equal(bId === expectedBranchId);
+      }
+    }
+
+    const tests = [
+      {
+        branchType: 'filler',
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        branchId: null,
+      },
+      {
+        branchType: 'control',
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+      },
+      {
+        branchType: 'experiment',
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: true,
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        branchType: 'filler',
+        branchId: null,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        branchType: 'control',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: false,
+        branchType: 'experiment',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        urlParam: '?exp=a4a:0',
+        branchType: 'filler',
+        branchId: null,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        urlParam: '?exp=a4a:1',
+        branchType: 'control',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: true,
+        urlParam: '?exp=a4a:2',
+        branchType: 'experiment',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        urlParam: '?exp=a4a:0',
+        branchType: 'filler',
+        branchId: null,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        urlParam: '?exp=a4a:1',
+        branchType: 'control',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: false,
+        urlParam: '?exp=a4a:2',
+        branchType: 'experiment',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+      },
+      // TODO(jonkeller): Need AdSense tests also
+    ];
+
+    tests.forEach(test => {
+      const desc = `should serve ` +
+        `${test.shouldServeFastFetch ? 'Fast' : 'Delayed'} Fetch to ` +
+        `${test.hasLaunched ? 'launched' : 'unlaunched'} ` +
+        `${test.adType} ${test.branchType} ` +
+        `${test.urlParam ? 'via URL ' : ''}`;
+      it(desc, () => {
+        element.setAttribute('type', test.adType);
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched',
+          test.hasLaunched, true);
+        if (test.urlParam) {
+          win.location.search = test.urlParam;
+        } else if (test.branchId != null) {
+          toggleExperiment(win, 'expDoubleclickA4A', true, true);
+          forceExperimentBranch(win, 'expDoubleclickA4A', test.branchId);
+        }
+        const external = test.hasLaunched ?
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+        const internal = test.hasLaunched ?
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+          external, internal)).to.equal(test.shouldServeFastFetch);
+        expectCorrectBranchOnly(element, test.branchId);
+        expect(win.document.cookie).to.be.null;
+      });
     });
   });
 });

@@ -18,17 +18,32 @@ import {
   MeasureScanner,
   WebAnimationRunner,
 } from '../web-animations';
+import {
+  WebAnimationPlayState,
+} from '../web-animation-types';
 import {isArray, isObject} from '../../../../src/types';
+import {user} from '../../../../src/log';
 
 
 describes.sandboxed('MeasureScanner', {}, () => {
   let target1, target2;
+  let warnStub;
 
   beforeEach(() => {
     target1 = document.createElement('div');
     target2 = document.createElement('div');
     document.body.appendChild(target1);
     document.body.appendChild(target2);
+    sandbox.stub(window, 'matchMedia', query => {
+      if (query == 'match') {
+        return {matches: true};
+      }
+      if (query == 'not-match') {
+        return {matches: false};
+      }
+      throw new Error('unknown query: ' + query);
+    });
+    warnStub = sandbox.stub(user(), 'warn');
   });
 
   afterEach(() => {
@@ -62,6 +77,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({duration: 'Infinity'}).duration).to.equal(Infinity);
     expect(() => scanTiming({duration: 'a'})).to.throw(/"duration" is invalid/);
     expect(() => scanTiming({duration: -1})).to.throw(/"duration" is invalid/);
+    expect(warnStub).to.not.be.called;
   });
 
   it('should parse/validate timing delay', () => {
@@ -70,12 +86,14 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({delay: 10}).delay).to.equal(10);
     expect(() => scanTiming({delay: 'a'})).to.throw(/"delay" is invalid/);
     expect(() => scanTiming({delay: -1})).to.throw(/"delay" is invalid/);
+    expect(warnStub).to.not.be.called;
 
     expect(scanTiming({}).endDelay).to.equal(0);
     expect(scanTiming({endDelay: 0}).endDelay).to.equal(0);
     expect(scanTiming({endDelay: 10}).endDelay).to.equal(10);
     expect(() => scanTiming({endDelay: 'a'})).to.throw(/"endDelay" is invalid/);
     expect(() => scanTiming({endDelay: -1})).to.throw(/"endDelay" is invalid/);
+    expect(warnStub).to.not.be.called;
   });
 
   it('should parse/validate timing iterations', () => {
@@ -94,6 +112,17 @@ describes.sandboxed('MeasureScanner', {}, () => {
         .to.throw(/"iterationStart" is invalid/);
     expect(() => scanTiming({iterationStart: -1}))
         .to.throw(/"iterationStart" is invalid/);
+  });
+
+  it('should warn if timing is fractional', () => {
+    // Fractional values are allowed, but warning is shown.
+    expect(scanTiming({duration: 0.1}).duration).to.equal(0.1);
+    expect(scanTiming({delay: 0.1}).delay).to.equal(0.1);
+    expect(scanTiming({endDelay: 0.1}).endDelay).to.equal(0.1);
+    expect(warnStub).to.have.callCount(3);
+    expect(warnStub.args[0][1]).to.match(/"duration" is fractional/);
+    expect(warnStub.args[1][1]).to.match(/"delay" is fractional/);
+    expect(warnStub.args[2][1]).to.match(/"endDelay" is fractional/);
   });
 
   it('should parse/validate timing easing', () => {
@@ -293,6 +322,30 @@ describes.sandboxed('MeasureScanner', {}, () => {
     ]);
   });
 
+  it('should check media in top animation', () => {
+    const requests = scan({
+      duration: 500,
+      media: 'not-match',
+      animations: [
+        {target: target1, keyframes: {}},
+        {target: target2, duration: 300, keyframes: {}},
+      ],
+    });
+    expect(requests).to.have.length(0);
+  });
+
+  it('should check media in sub-animations', () => {
+    const requests = scan({
+      duration: 500,
+      animations: [
+        {media: 'not-match', target: target1, keyframes: {}},
+        {media: 'match', target: target2, duration: 300, keyframes: {}},
+      ],
+    });
+    expect(requests).to.have.length(1);
+    expect(requests[0].target).to.equal(target2);
+  });
+
 
   describes.fakeWin('createRunner', {amp: 1}, env => {
     let resources;
@@ -361,26 +414,63 @@ describes.sandboxed('MeasureScanner', {}, () => {
 describes.sandboxed('WebAnimationRunner', {}, () => {
   let target1, target2;
   let target1Mock, target2Mock;
+  let keyframes1, keyframes2;
+  let timing1, timing2;
+  let anim1, anim2;
+  let anim1Mock, anim2Mock;
+  let playStateSpy;
+  let runner;
+
+  class WebAnimationStub {
+    play() {
+      throw new Error('not implemented');
+    }
+    pause() {
+      throw new Error('not implemented');
+    }
+    reverse() {
+      throw new Error('not implemented');
+    }
+    finish() {
+      throw new Error('not implemented');
+    }
+    cancel() {
+      throw new Error('not implemented');
+    }
+  }
 
   beforeEach(() => {
-    target1 = {animate: () => {}};
+    keyframes1 = {};
+    keyframes2 = {};
+    timing1 = {};
+    timing2 = {};
+    anim1 = new WebAnimationStub();
+    anim2 = new WebAnimationStub();
+    anim1Mock = sandbox.mock(anim1);
+    anim2Mock = sandbox.mock(anim2);
+
+    target1 = {animate: () => anim1};
     target1Mock = sandbox.mock(target1);
-    target2 = {animate: () => {}};
+    target2 = {animate: () => anim2};
     target2Mock = sandbox.mock(target2);
+
+    runner = new WebAnimationRunner([
+      {target: target1, keyframes: keyframes1, timing: timing1},
+      {target: target2, keyframes: keyframes2, timing: timing2},
+    ]);
+
+    playStateSpy = sandbox.spy();
+    runner.onPlayStateChanged(playStateSpy);
   });
 
   afterEach(() => {
     target1Mock.verify();
     target2Mock.verify();
+    anim1Mock.verify();
+    anim2Mock.verify();
   });
 
   it('should call start on all animatons', () => {
-    const keyframes1 = {};
-    const keyframes2 = {};
-    const timing1 = {};
-    const timing2 = {};
-    const anim1 = {};
-    const anim2 = {};
     target1Mock.expects('animate')
         .withExactArgs(keyframes1, timing1)
         .returns(anim1)
@@ -389,13 +479,119 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
         .withExactArgs(keyframes2, timing2)
         .returns(anim2)
         .once();
-    const runner = new WebAnimationRunner([
-      {target: target1, keyframes: keyframes1, timing: timing1},
-      {target: target2, keyframes: keyframes2, timing: timing2},
-    ]);
-    runner.play();
+
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
     expect(runner.players_).to.have.length(2);
     expect(runner.players_[0]).equal(anim1);
     expect(runner.players_[1]).equal(anim2);
+    expect(playStateSpy).to.be.calledOnce;
+    expect(playStateSpy.args[0][0]).to.equal(WebAnimationPlayState.RUNNING);
+  });
+
+  it('should fail to start twice', () => {
+    runner.start();
+    expect(() => {
+      runner.start();
+    }).to.throw();
+  });
+
+  it('should complete all animations are complete', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1.onfinish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim2.onfinish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
+
+    expect(playStateSpy).to.be.calledTwice;
+    expect(playStateSpy.args[0][0]).to.equal(WebAnimationPlayState.RUNNING);
+    expect(playStateSpy.args[1][0]).to.equal(WebAnimationPlayState.FINISHED);
+  });
+
+  it('should pause all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('pause').once();
+    anim2Mock.expects('pause').once();
+    runner.pause();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+  });
+
+  it('should only allow pause when started', () => {
+    expect(() => {
+      runner.pause();
+    }).to.throw();
+  });
+
+  it('should resume all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('pause').once();
+    anim2Mock.expects('pause').once();
+    runner.pause();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+
+    anim1Mock.expects('play').once();
+    anim2Mock.expects('play').once();
+    runner.resume();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+  });
+
+  it('should only allow resume when started', () => {
+    expect(() => {
+      runner.resume();
+    }).to.throw();
+  });
+
+  it('should reverse all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('reverse').once();
+    anim2Mock.expects('reverse').once();
+    runner.reverse();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+  });
+
+  it('should only allow reverse when started', () => {
+    expect(() => {
+      runner.reverse();
+    }).to.throw();
+  });
+
+  it('should finish all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('finish').once();
+    anim2Mock.expects('finish').once();
+    runner.finish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
+  });
+
+  it('should ignore finish when not started', () => {
+    runner.finish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+  });
+
+  it('should cancel all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('cancel').once();
+    anim2Mock.expects('cancel').once();
+    runner.cancel();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+  });
+
+  it('should ignore cancel when not started', () => {
+    runner.cancel();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
   });
 });

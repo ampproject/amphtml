@@ -23,11 +23,17 @@ import {
 } from '../../../../src/service';
 import {loadPromise} from '../../../../src/event-helper';
 import {installTimerService} from '../../../../src/service/timer-impl';
-import * as sinon from 'sinon';
 
 
-describe('amp-install-serviceworker', () => {
+describes.realWin('amp-install-serviceworker', {
+  amp: {
+    runtimeOn: false,
+    ampdoc: 'single',
+    extensions: ['amp-install-serviceworker'],
+  },
+}, env => {
 
+  let doc;
   let clock;
   let sandbox;
   let container;
@@ -35,25 +41,19 @@ describe('amp-install-serviceworker', () => {
   let maybeInstallUrlRewriteStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    doc = env.win.document;
+    sandbox = env.sandbox;
     clock = sandbox.useFakeTimers();
-    ampdoc = ampdocServiceFor(window).getAmpDoc();
-    container = document.createElement('div');
-    document.body.appendChild(container);
+    ampdoc = ampdocServiceFor(env.win).getAmpDoc();
+    container = doc.createElement('div');
+    env.win.document.body.appendChild(container);
     maybeInstallUrlRewriteStub = sandbox.stub(
         AmpInstallServiceWorker.prototype,
         'maybeInstallUrlRewrite_');
   });
 
-  afterEach(() => {
-    sandbox.restore();
-    if (container.parentNode) {
-      container.parentNode.removeChild(container);
-    }
-  });
-
   it('should install for same origin', () => {
-    const install = document.createElement('div');
+    const install = doc.createElement('div');
     container.appendChild(install);
     install.setAttribute('src', 'https://example.com/sw.js');
     const implementation = new AmpInstallServiceWorker(install);
@@ -84,7 +84,7 @@ describe('amp-install-serviceworker', () => {
   });
 
   it('should be ok without service worker.', () => {
-    const install = document.createElement('amp-install-serviceworker');
+    const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://example.com/sw.js');
@@ -100,7 +100,7 @@ describe('amp-install-serviceworker', () => {
   });
 
   it('should do nothing with non-matching origins', () => {
-    const install = document.createElement('amp-install-serviceworker');
+    const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://other-origin.com/sw.js');
@@ -122,7 +122,7 @@ describe('amp-install-serviceworker', () => {
   });
 
   it('should do nothing on proxy without iframe URL', () => {
-    const install = document.createElement('amp-install-serviceworker');
+    const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://cdn.ampproject.org/sw.js');
@@ -146,9 +146,10 @@ describe('amp-install-serviceworker', () => {
     expect(install.children).to.have.length(0);
   });
 
+  // Rewrite as proper mock window test.
   describe('proxy iframe injection', () => {
 
-    let documentInfo;
+    let docInfo;
     let install;
     let implementation;
     let whenVisible;
@@ -177,21 +178,21 @@ describe('amp-install-serviceworker', () => {
         setTimeout: window.setTimeout,
         clearTimeout: window.clearTimeout,
         document: {
-          nodeType: /* document */ 9,
-          createElement: document.createElement.bind(document),
+          nodeType: /* doc */ 9,
+          createElement: doc.createElement.bind(doc),
         },
       };
       installTimerService(win);
       win.document.defaultView = win;
       implementation.win = win;
-      documentInfo = {
+      docInfo = {
         canonicalUrl: 'https://www.example.com/path',
         sourceUrl: 'https://source.example.com/path',
       };
-      resetServiceForTesting(window, 'documentInfo');
-      getServiceForDoc(document, 'documentInfo', () => {
+      resetServiceForTesting(env.win, 'documentInfo');
+      getServiceForDoc(doc, 'documentInfo', () => {
         return {
-          get: () => documentInfo,
+          get: () => docInfo,
         };
       });
       whenVisible = Promise.resolve();
@@ -222,7 +223,7 @@ describe('amp-install-serviceworker', () => {
         deferredMutate = fn;
       };
       return whenVisible.then(() => {
-        clock.tick(19999);
+        clock.tick(9999);
         expect(deferredMutate).to.be.undefined;
         expect(iframe).to.be.undefined;
         clock.tick(1);
@@ -242,7 +243,7 @@ describe('amp-install-serviceworker', () => {
         testIframe);
 
     it('should inject iframe on proxy if provided (valid source)', () => {
-      documentInfo = {
+      docInfo = {
         canonicalUrl: 'https://canonical.example.com/path',
         sourceUrl: 'https://www.example.com/path',
       };
@@ -458,7 +459,7 @@ describes.fakeWin('url rewriter', {
     });
 
     function testRewritten() {
-      expect(anchor.getAttribute('i-amp-orig-href'))
+      expect(anchor.getAttribute('i-amphtml-orig-href'))
           .to.equal('https://example.com/doc1.amp.html');
       expect(anchor.href)
           .to.equal('https://example.com/shell#href=%2Fdoc1.amp.html');
@@ -466,7 +467,7 @@ describes.fakeWin('url rewriter', {
     }
 
     function testNotRewritten() {
-      expect(anchor.getAttribute('i-amp-orig-href')).to.be.null;
+      expect(anchor.getAttribute('i-amphtml-orig-href')).to.be.null;
       expect(anchor.href).to.equal(origHref);
     }
 
@@ -522,7 +523,7 @@ describes.fakeWin('url rewriter', {
     });
 
     it('should not rewrite already rewritten URL', () => {
-      anchor.setAttribute('i-amp-orig-href', 'rewritten');
+      anchor.setAttribute('i-amphtml-orig-href', 'rewritten');
       rewriter.handle_(event);
       expect(anchor.href).to.equal(origHref);
     });

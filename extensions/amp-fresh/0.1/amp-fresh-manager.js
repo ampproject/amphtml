@@ -15,10 +15,13 @@
  */
 
 import {addParamToUrl} from '../../../src/url';
-import {fromClassForDoc} from '../../../src/service';
+import {
+  registerServiceBuilderForDoc,
+  getServiceForDoc,
+} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 
 
 /** @const */
@@ -78,7 +81,9 @@ export class AmpFreshManager {
     const url = addParamToUrl(this.ampdoc.win.location.href,
         'amp-fresh', String(Date.now()));
     return Promise.all([
-      xhrFor(this.ampdoc.win).fetchDocument(url),
+      xhrFor(this.ampdoc.win).fetchDocument(url, {
+        requireAmpResponseSourceOrigin: false,
+      }),
       this.ampdoc.whenReady(),
     ]).then(args => args[0]);
   }
@@ -116,7 +121,15 @@ export class AmpFreshManager {
 /**
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  */
-export function getOrInsallAmpFreshManager(nodeOrDoc) {
+export function installAmpFreshManagerForDoc(nodeOrDoc) {
+  registerServiceBuilderForDoc(nodeOrDoc, 'ampFreshManager', AmpFreshManager);
+}
+
+/**
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!AmpFreshManager}
+ */
+export function ampFreshManagerForDoc(nodeOrDoc) {
   return /** @type {!AmpFreshManager} */ (
-      fromClassForDoc(nodeOrDoc, 'ampFreshManager', AmpFreshManager));
+      getServiceForDoc(nodeOrDoc, 'ampFreshManager'));
 }

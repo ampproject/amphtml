@@ -12,6 +12,7 @@
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js?10"></script>
     <style amp-custom>
         input.user-invalid {
             background-color: #dc4e41;
@@ -113,6 +114,15 @@
             color: black;
             position: absolute;
         }
+        amp-selector [option] {
+            box-sizing: border-box !important;
+            display: inline-block;
+            position: relative !important;
+        }
+        amp-selector[disabled],
+        amp-selector [disabled] {
+            opacity: .20;
+        }
     </style>
 </head>
 <body>
@@ -157,6 +167,8 @@
 <h4>Search (GET non-xhr cross origin - current host > httpbin.org)</h4>
 <form method="get" action="https://httpbin.org/html" target="_blank">
     <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
         <label>
             <span>Search for</span>
             <input type="search" name="term" required>
@@ -191,6 +203,8 @@
       action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
       target="_blank">
     <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
         <label>
             <span>Search for</span>
             <input type="search" name="term" required>
@@ -210,6 +224,8 @@
       action-xhr="/form/echo-json/post"
       target="_blank">
     <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
         <label>
             <span>Your name</span>
             <input type="text" name="name" id="name1" required>
@@ -222,15 +238,12 @@
     </fieldset>
 
     <div submit-success>
-        <template type="amp-mustache">
-            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
-        to confirm!
-        </template>
+      Success! Thanks for subscribing! Please make sure to check your email
+      to confirm!
     </div>
     <div submit-error>
-        <template type="amp-mustache">
-            Oops! {{name}}, We apologies something went wrong. Please try again later.
-        </template>
+      <amp-img width="32" height="32" src="/examples/x-icon.png"></amp-img>
+      Oops! We apologize, something went wrong. Please try again later.
     </div>
 </form>
 
@@ -240,6 +253,8 @@
       action-xhr="http://amp.localhost:8000/form/echo-json/post"
       target="_blank">
     <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
         <label>
             <span>Your name</span>
             <input type="text" name="name" id="name2" required>
@@ -265,11 +280,11 @@
 </form>
 
 <h4>Subscribe to our weekly Newsletter (xhr + submit events)</h4>
-
+<div id="msg">This message will hide when the form is submitted</div>
 <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank"
-      on="submit-success:success-lightbox;submit-error:error-lightbox">
+      on="submit:msg.hide;submit-success:success-lightbox;submit-error:error-lightbox">
     <fieldset>
         <label>
             <span>Your name</span>
@@ -451,8 +466,8 @@
       action-xhr="/form/json/poll1"
       target="_blank"
       custom-validation-reporting="as-you-go">
-    <input name="clientId" type="hidden" default-value="CLIENT_ID(poll)">
-    <input name="canonicalUrl" type="hidden" default-value="CANONICAL_URL">
+    <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+    <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
     <fieldset>
         <p>What is your favorite flightless bird?</p>
         <ul>
@@ -505,6 +520,7 @@
 <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank">
+    <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
     <fieldset>
         <label>
             <span>Your name</span>
@@ -533,6 +549,74 @@
     </div>
 </form>
 
+
+<h4>amp-selector example</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
+    <amp-selector layout="container" name="multi_image_select" multiple>
+        <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=50 height=50 option="1" selected></amp-img>
+        <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=50 height=50 option="2"></amp-img>
+        <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=50 height=50 option="3" selected></amp-img>
+        <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=50 height=50 option="4"></amp-img>
+    </amp-selector>
+    <input type="Submit">
+</form>
+
+
+
+<h4 id="header1">Redirect After POST (works only if running on localhost)</h4>
+<form method="post"
+      action-xhr="http://iframe.localhost:8000/form/redirect-to/post"
+      target="_top">
+    <fieldset>
+        <label>
+            <span>Send us a message</span>
+            <input type="text" name="message" id="message1" required>
+        </label>
+        <input type="submit" value="Send">
+    </fieldset>
+</form>
+
+<h4>Recursive Event-Action-Event-Action Test - Should only submit once</h4>
+<form method="post"
+      id="myform"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      on="submit:myform.submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name3" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email3" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+
+    <div class="form-message invalid-message">
+        There are some input that needs fixing. Please fix them.
+    </div>
+    <div class="form-message valid-message">
+        Everything looks good, you can submit now!
+    </div>
+    <div class="form-message submitting-message">
+        Please hold on while we submit your answer!
+    </div>
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
+            to confirm!
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
+    </div>
+</form>
 
 </body>
 </html>

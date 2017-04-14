@@ -1,7 +1,8 @@
 FAIL
-feature_tests/incorrect_custom_style.html:38:28 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://www.ampproject.org/docs/reference/spec.html#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
-feature_tests/incorrect_custom_style.html:47:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://www.ampproject.org/docs/reference/spec.html#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
-feature_tests/incorrect_custom_style.html:50:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'absolute:'. (see https://www.ampproject.org/docs/reference/spec.html#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:38:28 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:47:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:50:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'absolute:'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
 feature_tests/incorrect_custom_style.html:29:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@import'. [AUTHOR_STYLESHEET_PROBLEM]
 feature_tests/incorrect_custom_style.html:33:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@viewport'. [AUTHOR_STYLESHEET_PROBLEM]
 feature_tests/incorrect_custom_style.html:34:24 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@notallowednested'. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:27:2 The text (CDATA) inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]

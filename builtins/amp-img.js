@@ -20,6 +20,12 @@ import {registerElement} from '../src/custom-element';
 import {srcsetFromElement} from '../src/srcset';
 import {user} from '../src/log';
 
+/**
+ * Attributes to propagate to internal image when changed externally.
+ * @type {!Array<string>}
+ */
+const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
+      'aria-describedby', 'aria-labelledby'];
 
 export class AmpImg extends BaseElement {
 
@@ -41,10 +47,26 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
+  mutatedAttributesCallback(mutations) {
+    if (mutations['src'] !== undefined || mutations['srcset'] !== undefined) {
+      this.srcset_ = srcsetFromElement(this.element);
+      // This element may not have been laid out yet.
+      if (this.img_) {
+        this.updateImageSrc_();
+      }
+    }
+
+    if (this.img_) {
+      const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
+          value => mutations[value] !== undefined);
+      this.propagateAttributes(
+          attrs, this.img_, /* opt_removeMissingAttrs */ true);
+    }
+  }
+
+  /** @override */
   buildCallback() {
     this.isPrerenderAllowed_ = !this.element.hasAttribute('noprerender');
-
-    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
@@ -59,6 +81,9 @@ export class AmpImg extends BaseElement {
   initialize_() {
     if (this.img_) {
       return;
+    }
+    if (!this.srcset_) {
+      this.srcset_ = srcsetFromElement(this.element);
     }
     this.allowImgLoadFallback_ = true;
     // If this amp-img IS the fallback then don't allow it to have its own
@@ -81,8 +106,7 @@ export class AmpImg extends BaseElement {
         'be correctly propagated for the underlying <img> element.');
     }
 
-    this.propagateAttributes(['alt', 'referrerpolicy', 'aria-label',
-      'aria-describedby', 'aria-labelledby'], this.img_);
+    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
@@ -96,6 +120,11 @@ export class AmpImg extends BaseElement {
   /** @override */
   isRelayoutNeeded() {
     return true;
+  }
+
+  /** @override */
+  reconstructWhenReparented() {
+    return false;
   }
 
   /** @override */
@@ -133,9 +162,9 @@ export class AmpImg extends BaseElement {
     return this.loadPromise(this.img_).then(() => {
       // Clean up the fallback if the src has changed.
       if (!this.allowImgLoadFallback_ &&
-          this.img_.classList.contains('-amp-ghost')) {
+          this.img_.classList.contains('i-amphtml-ghost')) {
         this.getVsync().mutate(() => {
-          this.img_.classList.remove('-amp-ghost');
+          this.img_.classList.remove('i-amphtml-ghost');
           this.toggleFallback(false);
         });
       }
@@ -144,7 +173,7 @@ export class AmpImg extends BaseElement {
 
   onImgLoadingError_() {
     this.getVsync().mutate(() => {
-      this.img_.classList.add('-amp-ghost');
+      this.img_.classList.add('i-amphtml-ghost');
       this.toggleFallback(true);
     });
   }

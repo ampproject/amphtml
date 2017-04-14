@@ -14,46 +14,61 @@
  * limitations under the License.
  */
 
-import {cidFor} from '../../src/cid';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {
-  installCidService,
+  cidForDoc,
+  extensionsFor,
+  timerFor,
+  viewerForDoc,
+} from '../../src/services';
+import {
+  cidServiceForDocForTesting,
   getProxySourceOrigin,
+  viewerBaseCid,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
-import {installCryptoService, Crypto,}
-    from '../../extensions/amp-analytics/0.1/crypto-impl';
+import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
+import {cryptoFor} from '../../src/crypto';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
-import {timerFor} from '../../src/timer';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {
+  installCryptoPolyfill,
+} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
+import {
+  installExtensionsService,
+} from '../../src/service/extensions-impl';
 import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
 
 describe('cid', () => {
 
-  let isIframed;
   let sandbox;
   let clock;
   let fakeWin;
   let ampdoc;
+  let viewer;
   let storage;
   let viewerStorage;
   let cid;
   let crypto;
-  let viewerBaseCidStub;
+  let viewerSendMessageStub;
   let whenFirstVisible;
+  let trustedViewer;
+  let shouldSendMessageTimeout;
 
   const hasConsent = Promise.resolve();
   const timer = timerFor(window);
 
   beforeEach(() => {
     let call = 1;
-    isIframed = false;
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
+    trustedViewer = true;
+    shouldSendMessageTimeout = false;
     storage = {};
     viewerStorage = null;
     fakeWin = {
@@ -84,43 +99,54 @@ describe('cid', () => {
         body: {},
       },
       navigator: window.navigator,
-      ampExtendedElements: {
-        'amp-analytics': true,
-      },
       setTimeout: window.setTimeout,
     };
     fakeWin.document.defaultView = fakeWin;
-    const ampdocService = installDocService(fakeWin, /* isSingleDoc */ true);
-    ampdoc = ampdocService.getAmpDoc();
+    installDocService(fakeWin, /* isSingleDoc */ true);
+    ampdoc = ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
-    const viewer = installViewerServiceForDoc(ampdoc);
-    sandbox.stub(viewer, 'isIframed', function() {
-      return isIframed;
+
+    installExtensionsService(fakeWin);
+    const extensions = extensionsFor(fakeWin);
+    // stub extensions service to provide crypto-polyfill
+    sandbox.stub(extensions, 'loadExtension', extensionId => {
+      expect(extensionId).to.equal('amp-crypto-polyfill');
+      installCryptoPolyfill(fakeWin);
+      return Promise.resolve();
     });
+
+    installViewerServiceForDoc(ampdoc);
+    viewer = viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
-    viewerBaseCidStub = sandbox.stub(viewer, 'baseCid', function(opt_data) {
-      if (opt_data) {
-        viewerStorage = opt_data;
-      }
-      return Promise.resolve(viewerStorage || undefined);
-    });
-
-    return Promise
-        .all([installCidService(fakeWin), installCryptoService(fakeWin)])
-        .then(results => {
-          cid = results[0];
-          crypto = results[1];
-          crypto.sha384Base64 = val => {
-            if (val instanceof Uint8Array) {
-              val = '[' + Array.apply([], val).join(',') + ']';
-            }
-
-            return Promise.resolve('sha384(' + val + ')');
-          };
+    sandbox.stub(viewer, 'isTrustedViewer',
+        () => Promise.resolve(trustedViewer));
+    viewerSendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
+        (eventType, opt_data) => {
+          if (eventType != 'cid') {
+            return Promise.reject();
+          }
+          if (shouldSendMessageTimeout) {
+            return timer.promise(15000);
+          }
+          if (opt_data) {
+            viewerStorage = opt_data;
+          }
+          return Promise.resolve(viewerStorage || undefined);
         });
+
+    cid = cidServiceForDocForTesting(ampdoc);
+    installCryptoService(fakeWin);
+    crypto = cryptoFor(fakeWin);
+    crypto.sha384Base64 = val => {
+      if (val instanceof Uint8Array) {
+        val = '[' + Array.apply([], val).join(',') + ']';
+      }
+
+      return Promise.resolve('sha384(' + val + ')');
+    };
   });
 
   afterEach(() => {
@@ -209,7 +235,7 @@ describe('cid', () => {
   });
 
   it('should read from viewer storage if embedded', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     const expectedBaseCid = 'from-viewer';
     viewerStorage = JSON.stringify({
       time: 0,
@@ -219,24 +245,65 @@ describe('cid', () => {
       compare('e1', `sha384(${expectedBaseCid}http://www.origin.come1)`),
       compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`),
     ]).then(() => {
-      expect(viewerBaseCidStub).to.be.calledOnce;
-      expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
+      expect(viewerSendMessageStub).to.be.calledOnce;
+      expect(viewerSendMessageStub).to.be.calledWith('cid');
 
       // Ensure it's called only once since we cache it in memory.
       return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
     }).then(() => {
-      expect(viewerBaseCidStub).to.be.calledOnce;
-      expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
+      expect(viewerSendMessageStub).to.be.calledOnce;
       return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
     });
   });
 
+  it('should read from viewer storage if embedded and convert cid to ' +
+      'new format', () => {
+    fakeWin.parent = {};
+    const expectedBaseCid = 'from-viewer';
+    // baseCid returned by legacy API
+    viewerStorage = expectedBaseCid;
+    return Promise.all([
+      compare('e1', `sha384(${expectedBaseCid}http://www.origin.come1)`),
+      compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`),
+    ]).then(() => {
+      expect(viewerSendMessageStub).to.be.calledOnce;
+      expect(viewerSendMessageStub).to.be.calledWith('cid');
+    });
+  });
+
+  it('should not read from untrusted viewer', () => {
+    fakeWin.parent = {};
+    trustedViewer = false;
+    const viewerBaseCid = 'from-viewer';
+    viewerStorage = JSON.stringify({
+      time: 0,
+      cid: viewerBaseCid,
+    });
+    return Promise.all([
+      compare('e1', 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come1)'),
+      compare('e2', 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)'),
+    ]).then(() => {
+      expect(viewerSendMessageStub).to.not.be.called;
+    });
+  });
+
+  it('should time out reading from viewer', () => {
+    shouldSendMessageTimeout = true;
+    const promise = viewerBaseCid(ampdoc);
+    return Promise.resolve().then(() => {
+      clock.tick(10001);
+      return promise;
+    }).then(cid => {
+      expect(cid).to.be.undefined;
+    });
+  });
+
   it('should store to viewer storage if embedded', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     const expectedBaseCid = 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])';
     return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
         .then(() => {
-          expect(viewerBaseCidStub).to.be.calledWith(JSON.stringify({
+          expect(viewerSendMessageStub).to.be.calledWith('cid', JSON.stringify({
             time: 0,
             cid: expectedBaseCid,
           }));
@@ -245,13 +312,13 @@ describe('cid', () => {
           return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
         })
         .then(() => {
-          expect(viewerBaseCidStub).to.be.calledWith(sinon.match.string);
+          expect(viewerSendMessageStub).to.be.calledWith(sinon.match.string);
           return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
         });
   });
 
   it('should prefer value in storage if present', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     storage['amp-cid'] = JSON.stringify({
       cid: 'in-storage',
       time: Date.now(),
@@ -262,23 +329,30 @@ describe('cid', () => {
   });
 
   it('should work without mocking', () => {
+    // Can't stub Window's readonly properties nor access properties via
+    // __proto__ (as of Chrome 57), so we must wrap individual props like so.
     const win = {
+      crypto: window.crypto,
+      document: {
+        body: {},
+      },
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/',
+        search: '',
       },
+      name: window.name,
+      navigator: window.navigator,
       services: {},
-      ampExtendedElements: {
-        'amp-analytics': true,
-      },
     };
-    win.__proto__ = window;
+    installDocService(win, /* isSingleDoc */ true);
+    const ampdoc2 = ampdocServiceFor(win).getAmpDoc();
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
     installPlatformService(win);
-    installViewerServiceForDoc(ampdoc).isIframed = () => false;
-    installCidService(win);
+    installViewerServiceForDoc(ampdoc2);
+    cidServiceForDocForTesting(ampdoc2);
     installCryptoService(win);
-    return cidFor(win).then(cid => {
+    return cidForDoc(ampdoc2).then(cid => {
       return cid.get('foo', hasConsent).then(c1 => {
         return cid.get('foo', hasConsent).then(c2 => {
           expect(c1).to.equal(c2);
@@ -311,7 +385,7 @@ describe('cid', () => {
   });
 
   it('should expire on read after 365 days when embedded', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     const expectedBaseCid = 'from-viewer';
     viewerStorage = JSON.stringify({
       time: 0,
@@ -352,7 +426,7 @@ describe('cid', () => {
   });
 
   it('should set last access time once a day when embedded', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     const expected = 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
     function getStoredTime() {
       return JSON.parse(viewerStorage).time;
@@ -438,7 +512,7 @@ describe('cid', () => {
   });
 
   it('should not wait persistence consent for viewer storage', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     const persistencePromise = new Promise(() => {/* never resolves */});
     return cid.get('e2', hasConsent, persistencePromise).then(() => {
       expect(viewerStorage).to.equal(JSON.stringify({

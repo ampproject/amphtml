@@ -16,49 +16,27 @@
 
 tags: {  # amp-lightbox
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-lightbox extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-lightbox extension .js script"
+  extension_spec: {
+    name: "amp-lightbox"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-lightbox"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-lightbox"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-lightbox-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-lightbox.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-lightbox>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-LIGHTBOX"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-lightbox extension .js script"
+  requires: "amp-lightbox extension .js script"
   attrs: { name: "controls" }
   attrs: { name: "from" }
+  attrs: { name: "scrollable" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-lightbox.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/layout/amp-lightbox"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

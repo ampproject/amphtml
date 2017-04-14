@@ -16,26 +16,38 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {actionServiceForDoc} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
-import {platformFor} from '../../../src/platform';
-import {timerFor} from '../../../src/timer';
-import {dev} from '../../../src/log';
+import {platformFor} from '../../../src/services';
+import {timerFor} from '../../../src/services';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {isExperimentOn} from '../../../src/experiments';
+import {startsWith} from '../../../src/string';
 
 /** @const {string} */
-const SHOWN_CSS_CLASS = '-amp-slide-item-show';
+const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
 
 /** @const {number} */
 const NATIVE_SNAP_TIMEOUT = 35;
 
 /** @const {number} */
+const IOS_CUSTOM_SNAP_TIMEOUT = 45;
+
+/** @const {number} */
 const NATIVE_TOUCH_TIMEOUT = 120;
 
 /** @const {number} */
+const IOS_TOUCH_TIMEOUT = 45;
+
+/** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
+
+const TAG = 'AMP-CAROUSEL';
 
 export class AmpSlideScroll extends BaseSlides {
 
@@ -81,8 +93,17 @@ export class AmpSlideScroll extends BaseSlides {
      */
     this.elasticScrollState_ = 0;
 
-    /** @private {?number} */
+    /**
+     * If not laid out yet, null. Otherwise, index of current displayed slide.
+     * @private {?number}
+     */
     this.slideIndex_ = null;
+
+    /**
+     * The slide index that should be shown on first layout.
+     * @private {number}
+     */
+    this.initialSlideIndex_ = 0;
 
     /** @private {number} */
     this.slideWidth_ = 0;
@@ -97,39 +118,60 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
+
+    /** @private {boolean} */
+    this.shouldDisableCssSnap_ = isExperimentOn(this.win,
+        'slidescroll-disable-css-snap') &&
+        startsWith(platformFor(this.win).getIosVersionString(), '10.3');
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
+
   /** @override */
   buildSlides() {
     this.vsync_ = this.getVsync();
+    this.action_ = actionServiceForDoc(this.element);
 
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
-    this.element.classList.add('-amp-slidescroll');
+
+    if (this.shouldDisableCssSnap_) {
+      this.hasNativeSnapPoints_ = false;
+    }
+
+    this.element.classList.add('i-amphtml-slidescroll');
 
     this.slides_ = this.getRealChildren();
 
     this.noOfSlides_ = this.slides_.length;
 
     this.slidesContainer_ = this.win.document.createElement('div');
-    this.slidesContainer_.classList.add('-amp-slides-container');
+    this.slidesContainer_.classList.add('i-amphtml-slides-container');
     // Let screen reader know that this is a live area and changes
     // to it (such after pressing next) should be announced to the
     // user.
     this.slidesContainer_.setAttribute('aria-live', 'polite');
 
+    // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
+    // https://bugs.webkit.org/show_bug.cgi?id=169800
+    if (this.shouldDisableCssSnap_) {
+      this.slidesContainer_.classList.add('i-amphtml-slidescroll-no-snap');
+    }
+
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
       const start = this.win.document.createElement('div');
-      start.classList.add('-amp-carousel-start-marker');
+      start.classList.add('i-amphtml-carousel-start-marker');
       this.slidesContainer_.appendChild(start);
 
       const end = this.win.document.createElement('div');
-      end.classList.add('-amp-carousel-end-marker');
+      end.classList.add('i-amphtml-carousel-end-marker');
       this.slidesContainer_.appendChild(end);
     }
 
@@ -140,7 +182,8 @@ export class AmpSlideScroll extends BaseSlides {
       const slideWrapper = this.win.document.createElement('div');
       slide.classList.add('amp-carousel-slide');
       slideWrapper.appendChild(slide);
-      slideWrapper.classList.add('-amp-slide-item');
+      slideWrapper.classList.add('i-amphtml-slide-item');
+
       this.slidesContainer_.appendChild(slideWrapper);
       this.slideWrappers_.push(slideWrapper);
     });
@@ -153,17 +196,30 @@ export class AmpSlideScroll extends BaseSlides {
         'scroll', this.scrollHandler_.bind(this));
 
     this.slidesContainer_.addEventListener(
-          'touchmove', this.touchMoveHandler_.bind(this));
+        'touchmove', this.touchMoveHandler_.bind(this));
 
-    if (this.hasNativeSnapPoints_) {
-      this.slidesContainer_.addEventListener(
-          'touchend', this.touchEndHandler_.bind(this));
-    }
+    this.slidesContainer_.addEventListener(
+        'touchend', this.touchEndHandler_.bind(this));
+
+    this.registerAction('goToSlide', invocation => {
+      const args = invocation.args;
+      if (args) {
+        this.showSlideWhenReady_(args['index']);
+      }
+    });
   }
 
   /** @override */
   isLoopingEligible() {
     return this.noOfSlides_ > 2;
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const slide = mutations['slide'];
+    if (slide !== undefined) {
+      this.showSlideWhenReady_(slide);
+    }
   }
 
   /**
@@ -190,6 +246,8 @@ export class AmpSlideScroll extends BaseSlides {
       if (this.scrollTimeout_) {
         timerFor(this.win).cancel(this.scrollTimeout_);
       }
+      const timeout = this.shouldDisableCssSnap_ ? IOS_TOUCH_TIMEOUT
+          : NATIVE_TOUCH_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
       this.touchEndTimeout_ = timerFor(this.win).delay(() => {
         const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
@@ -199,7 +257,7 @@ export class AmpSlideScroll extends BaseSlides {
         }
         this.updateOnScroll_(currentScrollLeft);
         this.touchEndTimeout_ = null;
-      }, NATIVE_TOUCH_TIMEOUT);
+      }, timeout);
     }
     this.hasTouchMoved_ = false;
   }
@@ -218,7 +276,7 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   layoutCallback() {
     if (this.slideIndex_ === null) {
-      this.showSlide_(0);
+      this.showSlide_(this.initialSlideIndex_);
     }
     return Promise.resolve();
   }
@@ -259,7 +317,7 @@ export class AmpSlideScroll extends BaseSlides {
               (dir == 1 && !hasPrev) ? 0 : this.slideWidth_;
           this.customSnap_(currentScrollLeft, dir);
         } else {
-          this.showSlide_(newIndex);
+          this.showSlideAndTriggerAction_(newIndex);
         }
       }
     }
@@ -276,13 +334,13 @@ export class AmpSlideScroll extends BaseSlides {
     }
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
-    if (!this.hasNativeSnapPoints_) {
+    if (!this.isIos_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
 
     if (!this.touchEndTimeout_) {
-      const timeout =
-          this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT;
+      const timeout = this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : (
+          this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = timerFor(this.win).delay(() => {
 
@@ -312,7 +370,7 @@ export class AmpSlideScroll extends BaseSlides {
         this.elasticScrollState_ = 0;
       });
     } else if (this.elasticScrollState_ == 1 &&
-          currentScrollLeft <= this.previousScrollLeft_) {
+        currentScrollLeft <= this.previousScrollLeft_) {
       // Elastic Scroll is reversing direction take control.
       this.customSnap_(currentScrollLeft).then(() => {
         this.elasticScrollState_ = 0;
@@ -350,14 +408,13 @@ export class AmpSlideScroll extends BaseSlides {
       // Snap and stay.
       toScrollLeft = hasPrev ? this.slideWidth_ : 0;
     } else if (diff == 1 ||
-          (diff != -1 && diff == -1 * (this.noOfSlides_ - 1))) {
+        (diff != -1 && diff == -1 * (this.noOfSlides_ - 1))) {
       // Move fwd.
       toScrollLeft = hasPrev ? this.slideWidth_ * 2 : this.slideWidth_;
     } else if (diff == -1 || diff == this.noOfSlides_ - 1) {
       // Move backward.
       toScrollLeft = 0;
     }
-
     return this.animateScrollLeft_(currentScrollLeft, toScrollLeft).then(() => {
       this.updateOnScroll_(toScrollLeft);
     });
@@ -411,17 +468,17 @@ export class AmpSlideScroll extends BaseSlides {
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
       //TODO (camelburrito): Identify more platforms that require
-      // -amp-no-scroll.
+      // i-amphtml-no-scroll.
       if (this.isIos_) {
         // Make the container non scrollable to stop scroll events.
-        this.slidesContainer_.classList.add('-amp-no-scroll');
+        this.slidesContainer_.classList.add('i-amphtml-no-scroll');
       }
       // Scroll to new slide and update scrollLeft to the correct slide.
-      this.showSlide_(newIndex);
+      this.showSlideAndTriggerAction_(newIndex);
       this.vsync_.mutate(() => {
         if (this.isIos_) {
           // Make the container scrollable again to enable user swiping.
-          this.slidesContainer_.classList.remove('-amp-no-scroll');
+          this.slidesContainer_.classList.remove('i-amphtml-no-scroll');
         }
         this.snappingInProgress_ = false;
       });
@@ -429,16 +486,37 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
+   * Parses given value as integer and shows the slide with that index value
+   * when element has been laid out.
+   * @param {*} value
+   * @private
+   */
+  showSlideWhenReady_(value) {
+    const index = parseInt(value, 10);
+    if (isFinite(index)) {
+      // If we haven't been laid out yet, set `initialSlideIndex_` instead.
+      if (this.slideIndex_ === null) {
+        this.initialSlideIndex_ = index;
+      } else {
+        this.showSlide_(index);
+      }
+    } else {
+      user().warn(TAG, 'Invalid [slide] value: %s', value);
+    }
+  }
+
+  /**
    * Makes the slide corresponding to the given index and the slides surrounding
-   *    it available for display.
+   *     it available for display.
+   * @note Element must be laid out.
    * @param {number} newIndex Index of the slide to be displayed.
    * @private
    */
   showSlide_(newIndex) {
     const noOfSlides_ = this.noOfSlides_;
     if (newIndex < 0 ||
-      newIndex >= noOfSlides_ ||
-      this.slideIndex_ == newIndex) {
+        newIndex >= noOfSlides_ ||
+        this.slideIndex_ == newIndex) {
       return;
     }
     const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
@@ -479,6 +557,20 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+  }
+
+  /**
+   * Shows the slide at the given index and triggers a `slideChange` event.
+   * @param {number} newIndex
+   * @private
+   */
+  showSlideAndTriggerAction_(newIndex) {
+    this.showSlide_(newIndex);
+
+    const name = 'slideChange';
+    const event =
+        createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+    this.action_.trigger(this.element, name, event);
   }
 
   /**

@@ -14,59 +14,66 @@
  * limitations under the License.
  */
 
-import {timerFor} from './timer';
+import {internalListenImplementation} from './event-helper-listen';
+import {timerFor} from './services';
 import {user} from './log';
 
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
+/**
+ * Returns a CustomEvent with a given type and detail; supports fallback for IE.
+ * @param {!Window} win
+ * @param {string} type
+ * @param {Object} detail
+ * @return {!Event}
+ */
+export function createCustomEvent(win, type, detail) {
+  if (win.CustomEvent) {
+    return new win.CustomEvent(type, {detail});
+  } else {
+    // Deprecated fallback for IE.
+    const e = win.document.createEvent('CustomEvent');
+    e.initCustomEvent(
+        type, /* canBubble */ false, /* cancelable */ false, detail);
+    return e;
+  }
+}
 
 /**
  * Listens for the specified event on the element.
- * @param {?EventTarget} element
+ * @param {!EventTarget} element
  * @param {string} eventType
- * @param {?function(Event)} listener
+ * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
  * @return {!UnlistenDef}
  */
 export function listen(element, eventType, listener, opt_capture) {
-  const capture = opt_capture || false;
-  element.addEventListener(eventType, listener, capture);
-  return () => {
-    if (element) {
-      element.removeEventListener(eventType, listener, capture);
-    }
-    listener = null;
-    element = null;
-  };
+  return internalListenImplementation(
+      element, eventType, listener, opt_capture);
 }
 
 
 /**
  * Listens for the specified event on the element and removes the listener
  * as soon as event has been received.
- * @param {?EventTarget} element
+ * @param {!EventTarget} element
  * @param {string} eventType
- * @param {?function(Event)} listener
+ * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
  * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
-  const capture = opt_capture || false;
-  let unlisten;
-  let proxy = event => {
-    listener(event);
-    unlisten();
-  };
-  unlisten = () => {
-    if (element) {
-      element.removeEventListener(eventType, proxy, capture);
+  let localListener = listener;
+  const unlisten = internalListenImplementation(element, eventType, event => {
+    try {
+      localListener(event);
+    } finally {
+      // Ensure listener is GC'd
+      localListener = null;
+      unlisten();
     }
-    element = null;
-    proxy = null;
-    listener = null;
-  };
-  element.addEventListener(eventType, proxy, capture);
+  }, opt_capture);
   return unlisten;
 }
 

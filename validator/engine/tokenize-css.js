@@ -58,7 +58,7 @@ goog.provide('parse_css.TokenType');
 goog.provide('parse_css.URLToken');
 goog.provide('parse_css.WhitespaceToken');
 goog.provide('parse_css.tokenize');
-goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
+goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError');
 
 /**
@@ -295,7 +295,9 @@ class Tokenizer {
 
     // Line number information.
     let eofToken;
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (amp.validator.LIGHT) {
+      eofToken = parse_css.TRIVIAL_EOF_TOKEN;
+    } else {
       /** @private @type {!Array<number>} */
       this.lineByPos_ = [];
       /** @private @type {!Array<number>} */
@@ -315,21 +317,18 @@ class Tokenizer {
       eofToken = new parse_css.EOFToken();
       eofToken.line = currentLine;
       eofToken.col = currentCol;
-    } else {
-      eofToken = parse_css.TRIVIAL_EOF_TOKEN;
     }
 
     let iterationCount = 0;
     while (!this.eof(this.next())) {
       const token = this.consumeAToken();
       if (token.tokenType === parse_css.TokenType.ERROR) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          this.errors_.push(/** @type {!parse_css.ErrorToken} */ (token));
-        } else {
+        if (amp.validator.LIGHT) {
           this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
           this.tokens_ = [];
           return;
         }
+        this.errors_.push(/** @type {!parse_css.ErrorToken} */ (token));
       } else {
         this.tokens_.push(token);
       }
@@ -360,7 +359,9 @@ class Tokenizer {
   /**
    * @return {!Array<!parse_css.Token>}
    */
-  getTokens() { return this.tokens_; }
+  getTokens() {
+    return this.tokens_;
+  }
 
   /**
    * Returns the codepoint at the given position.
@@ -421,7 +422,7 @@ class Tokenizer {
     this.consumeComments();
     this.consume();
     const mark = new parse_css.Token();
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (!amp.validator.LIGHT) {
       mark.line = this.getLine();
       mark.col = this.getCol();
     }
@@ -430,10 +431,10 @@ class Tokenizer {
       while (whitespace(this.next())) {
         this.consume();
       }
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.WhitespaceToken());
+      if (amp.validator.LIGHT) {
+        return TRIVIAL_WHITESPACE_TOKEN;
       }
-      return TRIVIAL_WHITESPACE_TOKEN;
+      return mark.copyPosTo(new parse_css.WhitespaceToken());
     } else if (this.code_ === /* '"' */ 0x22) {
       return mark.copyPosTo(this.consumeAStringToken());
     } else if (this.code_ === /* '#' */ 0x23) {
@@ -451,64 +452,64 @@ class Tokenizer {
         }
         return mark.copyPosTo(token);
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DELIM_TOKEN_23;
         }
-        return TRIVIAL_DELIM_TOKEN_23;
+        return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '$' */ 0x24) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          mark.copyPosTo(new parse_css.SuffixMatchToken());
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_SUFFIX_MATCH_TOKEN;
         }
-        return TRIVIAL_SUFFIX_MATCH_TOKEN;
+        return mark.copyPosTo(new parse_css.SuffixMatchToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DELIM_TOKEN_24;
         }
-        return TRIVIAL_DELIM_TOKEN_24;
+        return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* ''' */ 0x27) {
       return mark.copyPosTo(this.consumeAStringToken());
     } else if (this.code_ === /* '(' */ 0x28) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.OpenParenToken());
+      if (amp.validator.LIGHT) {
+        return TRIVIAL_OPEN_PAREN_TOKEN;
       }
-      return TRIVIAL_OPEN_PAREN_TOKEN;
+      return mark.copyPosTo(new parse_css.OpenParenToken());
     } else if (this.code_ === /* ')' */ 0x29) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.CloseParenToken());
+      if (amp.validator.LIGHT) {
+        return TRIVIAL_CLOSE_PAREN_TOKEN;
       }
-      return TRIVIAL_CLOSE_PAREN_TOKEN;
+      return mark.copyPosTo(new parse_css.CloseParenToken());
     } else if (this.code_ === /* '*' */ 0x2a) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.SubstringMatchToken());
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_SUBSTRING_MATCH_TOKEN;
         }
-        return TRIVIAL_SUBSTRING_MATCH_TOKEN;
+        return mark.copyPosTo(new parse_css.SubstringMatchToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DELIM_TOKEN_2A;
         }
-        return TRIVIAL_DELIM_TOKEN_2A;
+        return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '+' */ 0x2b) {
       if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
         return mark.copyPosTo(this.consumeANumericToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DELIM_TOKEN_2B;
         }
-        return TRIVIAL_DELIM_TOKEN_2B;
+        return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* ',' */ 0x2c) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.CommaToken());
+      if (amp.validator.LIGHT) {
+        return TRIVIAL_COMMA_TOKEN;
       }
-      return TRIVIAL_COMMA_TOKEN;
+      return mark.copyPosTo(new parse_css.CommaToken());
     } else if (this.code_ === /* '-' */ 0x2d) {
       if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
@@ -516,52 +517,52 @@ class Tokenizer {
       } else if (
           this.next(1) === /* '-' */ 0x2d && this.next(2) === /* '>' */ 0x3e) {
         this.consume(2);
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.CDCToken());
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_CDC_TOKEN;
         }
-        return TRIVIAL_CDC_TOKEN;
+        return mark.copyPosTo(new parse_css.CDCToken());
       } else if (this./*OK*/ startsWithAnIdentifier()) {
         this.reconsume();
         return mark.copyPosTo(this.consumeAnIdentlikeToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DELIM_TOKEN_2D;
         }
-        return TRIVIAL_DELIM_TOKEN_2D;
+        return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '.' */ 0x2e) {
       if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
         return mark.copyPosTo(this.consumeANumericToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DELIM_TOKEN_2E;
         }
-        return TRIVIAL_DELIM_TOKEN_2E;
+        return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* ':' */ 0x3a) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.ColonToken());
+      if (amp.validator.LIGHT) {
+        return TRIVIAL_COLON_TOKEN;
       }
-      return TRIVIAL_COLON_TOKEN;
+      return mark.copyPosTo(new parse_css.ColonToken());
     } else if (this.code_ === /* ';' */ 0x3b) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.SemicolonToken());
+      if (amp.validator.LIGHT) {
+        return TRIVIAL_SEMICOLON_TOKEN;
       }
-      return TRIVIAL_SEMICOLON_TOKEN;
+      return mark.copyPosTo(new parse_css.SemicolonToken());
     } else if (this.code_ === /* '<' */ 0x3c) {
       if (this.next(1) === /* '!' */ 0x21 && this.next(2) === /* '-' */ 0x2d &&
           this.next(3) === /* '-' */ 0x2d) {
         this.consume(3);
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.CDOToken());
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_CDO_TOKEN;
         }
-        return TRIVIAL_CDO_TOKEN;
+        return mark.copyPosTo(new parse_css.CDOToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DELIM_TOKEN_3C;
         }
-        return TRIVIAL_DELIM_TOKEN_3C;
+        return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '@' */ 0x40) {
       if (this.wouldStartAnIdentifier(
@@ -570,91 +571,91 @@ class Tokenizer {
         token.value = this.consumeAName();
         return mark.copyPosTo(token);
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DELIM_TOKEN_40;
         }
-        return TRIVIAL_DELIM_TOKEN_40;
+        return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '[' */ 0x5b) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.OpenSquareToken());
+      if (amp.validator.LIGHT) {
+        return TRIVIAL_OPEN_SQUARE_TOKEN;
       }
-      return TRIVIAL_OPEN_SQUARE_TOKEN;
+      return mark.copyPosTo(new parse_css.OpenSquareToken());
     } else if (this.code_ === /* '\' */ 0x5c) {
       if (this./*OK*/ startsWithAValidEscape()) {
         this.reconsume();
         return mark.copyPosTo(this.consumeAnIdentlikeToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          // This condition happens if we are in consumeAToken (this method),
-          // the current codepoint is 0x5c (\) and the next codepoint is a
-          // newline (\n).
-          return mark.copyPosTo(new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code
-                  .CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
-              ['style']));
+        if (amp.validator.LIGHT) {
+          return parse_css.TRIVIAL_ERROR_TOKEN;
         }
-        return parse_css.TRIVIAL_ERROR_TOKEN;
+        // This condition happens if we are in consumeAToken (this method),
+        // the current codepoint is 0x5c (\) and the next codepoint is a
+        // newline (\n).
+        return mark.copyPosTo(new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code
+                .CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
+            ['style']));
       }
     } else if (this.code_ === /* ']' */ 0x5d) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.CloseSquareToken());
+      if (amp.validator.LIGHT) {
+        return TRIVIAL_CLOSE_SQUARE_TOKEN;
       }
-      return TRIVIAL_CLOSE_SQUARE_TOKEN;
+      return mark.copyPosTo(new parse_css.CloseSquareToken());
     } else if (this.code_ === /* '^' */ 0x5e) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.PrefixMatchToken());
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_PREFIX_MATCH_TOKEN;
         }
-        return TRIVIAL_PREFIX_MATCH_TOKEN;
+        return mark.copyPosTo(new parse_css.PrefixMatchToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DELIM_TOKEN_5E;
         }
-        return TRIVIAL_DELIM_TOKEN_5E;
+        return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '{' */ 0x7b) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.OpenCurlyToken());
+      if (amp.validator.LIGHT) {
+        return TRIVIAL_OPEN_CURLY_TOKEN;
       }
-      return TRIVIAL_OPEN_CURLY_TOKEN;
+      return mark.copyPosTo(new parse_css.OpenCurlyToken());
     } else if (this.code_ === /* '|' */ 0x7c) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DashMatchToken());
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DASH_MATCH_TOKEN;
         }
-        return TRIVIAL_DASH_MATCH_TOKEN;
+        return mark.copyPosTo(new parse_css.DashMatchToken());
       } else if (this.next() === /* '|' */ 0x7c) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.ColumnToken());
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_COLUMN_TOKEN;
         }
-        return TRIVIAL_COLUMN_TOKEN;
+        return mark.copyPosTo(new parse_css.ColumnToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DELIM_TOKEN_7C;
         }
-        return TRIVIAL_DELIM_TOKEN_7C;
+        return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '}' */ 0x7d) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.CloseCurlyToken());
+      if (amp.validator.LIGHT) {
+        return TRIVIAL_CLOSE_CURLY_TOKEN;
       }
-      return TRIVIAL_CLOSE_CURLY_TOKEN;
+      return mark.copyPosTo(new parse_css.CloseCurlyToken());
     } else if (this.code_ === /* '~' */ 0x7e) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.IncludeMatchToken());
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_CLOSE_CURLY_TOKEN;
         }
-        return TRIVIAL_CLOSE_CURLY_TOKEN;
+        return mark.copyPosTo(new parse_css.IncludeMatchToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.LIGHT) {
+          return TRIVIAL_DELIM_TOKEN_7E;
         }
-        return TRIVIAL_DELIM_TOKEN_7E;
+        return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (digit(this.code_)) {
       this.reconsume();
@@ -663,10 +664,10 @@ class Tokenizer {
       this.reconsume();
       return mark.copyPosTo(this.consumeAnIdentlikeToken());
     } else if (this.eof()) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.EOFToken());
+      if (amp.validator.LIGHT) {
+        return parse_css.TRIVIAL_EOF_TOKEN;
       }
-      return parse_css.TRIVIAL_EOF_TOKEN;
+      return mark.copyPosTo(new parse_css.EOFToken());
     } else {
       const token = new parse_css.DelimToken(this.code_);
       return mark.copyPosTo(token);
@@ -679,7 +680,7 @@ class Tokenizer {
    */
   consumeComments() {
     const mark = new parse_css.Token();
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (!amp.validator.LIGHT) {
       mark.line = this.getLine();
       mark.col = this.getCol();
     }
@@ -691,15 +692,15 @@ class Tokenizer {
           this.consume();
           break;
         } else if (this.eof()) {
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          if (amp.validator.LIGHT) {
+            this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
+          } else {
             // For example "h1 { color: red; } \* " would emit this parse error
             // at the end of the string.
             this.errors_.push(mark.copyPosTo(new parse_css.ErrorToken(
                 amp.validator.ValidationError.Code
                     .CSS_SYNTAX_UNTERMINATED_COMMENT,
                 ['style'])));
-          } else {
-            this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
           }
           return;
         }
@@ -753,8 +754,9 @@ class Tokenizer {
         token.value = name;
         return token;
       } else if (
-          whitespace(this.next()) && (this.next(2) === /* '"' */ 0x22 ||
-                                      this.next(2) === /* ''' */ 0x27)) {
+          whitespace(this.next()) &&
+          (this.next(2) === /* '"' */ 0x22 ||
+           this.next(2) === /* ''' */ 0x27)) {
         const token = new parse_css.FunctionToken();
         token.value = name;
         return token;
@@ -793,13 +795,12 @@ class Tokenizer {
         return token;
       } else if (newline(this.code_)) {
         this.reconsume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING,
-              ['style']);
-        } else {
+        if (amp.validator.LIGHT) {
           return parse_css.TRIVIAL_ERROR_TOKEN;
         }
+        return new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING,
+            ['style']);
       } else if (this.code_ === /* '\' */ 0x5c) {
         if (this.eof(this.next())) {
           continue;
@@ -841,36 +842,31 @@ class Tokenizer {
           return token;
         } else {
           this.consumeTheRemnantsOfABadURL();
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            return new parse_css.ErrorToken(
-                amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
-                ['style']);
-          } else {
+          if (amp.validator.LIGHT) {
             return parse_css.TRIVIAL_ERROR_TOKEN;
           }
+          return new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
         }
       } else if (
           this.code_ === /* '"' */ 0x22 || this.code_ === /* ''' */ 0x27 ||
           this.code_ === /* '(' */ 0x28 || nonPrintable(this.code_)) {
         this.consumeTheRemnantsOfABadURL();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
-        } else {
+        if (amp.validator.LIGHT) {
           return parse_css.TRIVIAL_ERROR_TOKEN;
         }
+        return new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
       } else if (this.code_ === /* '\' */ 0x5c) {
         if (this./*OK*/ startsWithAValidEscape()) {
           token.value += stringFromCode(this.consumeEscape());
         } else {
           this.consumeTheRemnantsOfABadURL();
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            return new parse_css.ErrorToken(
-                amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
-                ['style']);
-          } else {
+          if (amp.validator.LIGHT) {
             return parse_css.TRIVIAL_ERROR_TOKEN;
           }
+          return new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
         }
       } else {
         token.value += stringFromCode(this.code_);
@@ -903,7 +899,11 @@ class Tokenizer {
         this.consume();
       }
       let value = parseInt(
-          digits.map(function(x) { return String.fromCharCode(x); }).join(''),
+          digits
+              .map(function(x) {
+                return String.fromCharCode(x);
+              })
+              .join(''),
           16);
       if (value > maxAllowedCodepoint) {
         value = 0xfffd;
@@ -1224,7 +1224,7 @@ const TokenType_NamesById = [
  */
 parse_css.Token = class {
   constructor() {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (!amp.validator.LIGHT) {
       /** @type {number} */
       this.line = 1;
       /** @type {number} */
@@ -1239,7 +1239,7 @@ parse_css.Token = class {
    * @template T
    */
   copyPosTo(other) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (!amp.validator.LIGHT) {
       other.line = this.line;
       other.col = this.col;
     }
@@ -1249,7 +1249,7 @@ parse_css.Token = class {
 /** @type {!parse_css.TokenType} */
 parse_css.Token.prototype.tokenType = parse_css.TokenType.UNKNOWN;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
+if (!amp.validator.LIGHT) {
   /** @return {!Object} */
   parse_css.Token.prototype.toJSON = function() {
     return {
@@ -1267,23 +1267,25 @@ if (amp.validator.GENERATE_DETAILED_ERRORS) {
  */
 parse_css.ErrorToken = class extends parse_css.Token {
   /**
-   * @param {!amp.validator.ValidationError.Code} code
-   * @param {!Array<string>} params
+   * @param {amp.validator.ValidationError.Code=} opt_code
+   * @param {!Array<string>=} opt_params
    */
-  constructor(code, params) {
+  constructor(opt_code, opt_params) {
     super();
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (!amp.validator.LIGHT) {
+      goog.asserts.assert(opt_code !== undefined);
+      goog.asserts.assert(opt_params !== undefined);
       /** @type {!amp.validator.ValidationError.Code} */
-      this.code = code;
+      this.code = opt_code;
       /** @type {!Array<string>} */
-      this.params = params;
+      this.params = opt_params;
     }
   }
 };
 /** @type {!parse_css.TokenType} */
 parse_css.ErrorToken.prototype.tokenType = parse_css.TokenType.ERROR;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
+if (!amp.validator.LIGHT) {
   /** @inheritDoc */
   parse_css.ErrorToken.prototype.toJSON = function() {
     const json = parse_css.Token.prototype.toJSON.call(this);
@@ -1293,11 +1295,12 @@ if (amp.validator.GENERATE_DETAILED_ERRORS) {
   };
 }
 
-/**
- * @type {!parse_css.ErrorToken}
- */
-parse_css.TRIVIAL_ERROR_TOKEN = new parse_css.ErrorToken(
-    amp.validator.ValidationError.Code.UNKNOWN_CODE, []);
+if (amp.validator.LIGHT) {
+  /**
+   * @type {!parse_css.ErrorToken}
+   */
+  parse_css.TRIVIAL_ERROR_TOKEN = new parse_css.ErrorToken();
+}
 
 parse_css.WhitespaceToken = class extends parse_css.Token {};
 /** @type {!parse_css.TokenType} */
@@ -1456,7 +1459,7 @@ const TRIVIAL_DELIM_TOKEN_5E = new parse_css.DelimToken(0x5E);
 const TRIVIAL_DELIM_TOKEN_7C = new parse_css.DelimToken(0x7C);
 const TRIVIAL_DELIM_TOKEN_7E = new parse_css.DelimToken(0x7E);
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
+if (!amp.validator.LIGHT) {
   /** @inheritDoc */
   parse_css.DelimToken.prototype.toJSON = function() {
     const json = parse_css.Token.prototype.toJSON.call(this);
@@ -1476,9 +1479,11 @@ parse_css.StringValuedToken = class extends parse_css.Token {
    * @param {string} str
    * @return {boolean}
    */
-  ASCIIMatch(str) { return this.value.toLowerCase() === str.toLowerCase(); }
+  ASCIIMatch(str) {
+    return this.value.toLowerCase() === str.toLowerCase();
+  }
 };
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
+if (!amp.validator.LIGHT) {
   /** @inheritDoc */
   parse_css.StringValuedToken.prototype.toJSON = function() {
     const json = parse_css.Token.prototype.toJSON.call(this);
@@ -1512,7 +1517,7 @@ parse_css.HashToken = class extends parse_css.StringValuedToken {
 /** @type {!parse_css.TokenType} */
 parse_css.HashToken.prototype.tokenType = parse_css.TokenType.HASH;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
+if (!amp.validator.LIGHT) {
   /** @inheritDoc */
   parse_css.HashToken.prototype.toJSON = function() {
     const json = parse_css.StringValuedToken.prototype.toJSON.call(this);
@@ -1543,7 +1548,7 @@ parse_css.NumberToken = class extends parse_css.Token {
 /** @type {!parse_css.TokenType} */
 parse_css.NumberToken.prototype.tokenType = parse_css.TokenType.NUMBER;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
+if (!amp.validator.LIGHT) {
   /** @inheritDoc */
   parse_css.NumberToken.prototype.toJSON = function() {
     const json = parse_css.Token.prototype.toJSON.call(this);
@@ -1566,7 +1571,7 @@ parse_css.PercentageToken = class extends parse_css.Token {
 /** @type {!parse_css.TokenType} */
 parse_css.PercentageToken.prototype.tokenType = parse_css.TokenType.PERCENTAGE;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
+if (!amp.validator.LIGHT) {
   /** @inheritDoc */
   parse_css.PercentageToken.prototype.toJSON = function() {
     const json = parse_css.Token.prototype.toJSON.call(this);
@@ -1592,7 +1597,7 @@ parse_css.DimensionToken = class extends parse_css.Token {
 /** @type {!parse_css.TokenType} */
 parse_css.DimensionToken.prototype.tokenType = parse_css.TokenType.DIMENSION;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
+if (!amp.validator.LIGHT) {
   /** @inheritDoc */
   parse_css.DimensionToken.prototype.toJSON = function() {
     const json = parse_css.Token.prototype.toJSON.call(this);

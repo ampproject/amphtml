@@ -61,7 +61,7 @@ let JSONValueDef;
 export function recreateNonProtoObject(obj) {
   const copy = Object.create(null);
   for (const k in obj) {
-    if (!obj.hasOwnProperty(k)) {
+    if (!hasOwnProperty(obj, k)) {
       continue;
     }
     const v = obj[k];
@@ -82,6 +82,11 @@ export function recreateNonProtoObject(obj) {
  * @return {?JSONValueDef|undefined}
  */
 export function getValueForExpr(obj, expr) {
+  // The `.` indicates "the object itself".
+  if (expr == '.') {
+    return obj;
+  }
+  // Otherwise, navigate via properties.
   const parts = expr.split('.');
   let value = obj;
   for (let i = 0; i < parts.length; i++) {
@@ -92,7 +97,7 @@ export function getValueForExpr(obj, expr) {
     }
     if (!isObject(value) ||
             value[part] === undefined ||
-            value.hasOwnProperty && !value.hasOwnProperty(part)) {
+            !hasOwnProperty(value, part)) {
       value = undefined;
       break;
     }
@@ -119,4 +124,18 @@ export function tryParseJson(json, opt_onFailed) {
     }
     return undefined;
   }
+}
+
+
+/**
+ * @param {*} obj
+ * @param {string} key
+ * @return {boolean}
+ */
+function hasOwnProperty(obj, key) {
+  if (obj == null || typeof obj != 'object') {
+    return false;
+  }
+  return Object.prototype.hasOwnProperty.call(
+      /** @type {!Object} */ (obj), key);
 }

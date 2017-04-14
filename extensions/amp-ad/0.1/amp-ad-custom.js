@@ -16,8 +16,8 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
-import {templatesFor} from '../../../src/template';
-import {xhrFor} from '../../../src/xhr';
+import {templatesFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {removeChildren} from '../../../src/dom';
@@ -96,17 +96,18 @@ export class AmpAdCustom extends AMP.BaseElement {
             null;
       }
       // Set UI state
-      this.uiHandler.setDisplayState(
-        templateData !== null && typeof templateData == 'object' ?
-        AdDisplayState.LOADED_RENDER_START : AdDisplayState.LOADED_NO_CONTENT);
-      templatesFor(this.win).findAndRenderTemplate(element, templateData)
-        .then(renderedElement => {
-        // Get here when the template has been rendered
-        // Clear out the template and replace it by the rendered version
-          removeChildren(element);
-          element.appendChild(renderedElement);
-          return this;
-        });
+      if (templateData !== null && typeof templateData == 'object') {
+        this.uiHandler.setDisplayState(AdDisplayState.LOADED_RENDER_START);
+        templatesFor(this.win).findAndRenderTemplate(element, templateData)
+          .then(renderedElement => {
+          // Get here when the template has been rendered
+          // Clear out the template and replace it by the rendered version
+            removeChildren(element);
+            element.appendChild(renderedElement);
+          });
+      } else {
+        this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      }
     });
   }
 

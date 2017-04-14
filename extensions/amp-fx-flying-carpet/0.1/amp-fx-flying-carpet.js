@@ -16,8 +16,9 @@
 
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {setStyle} from '../../../src/style';
+import {listen} from '../../../src/event-helper';
 
 class AmpFlyingCarpet extends AMP.BaseElement {
 
@@ -74,8 +75,8 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     this.children_.forEach(child => this.setAsOwner(child));
 
     const clip = doc.createElement('div');
-    clip.setAttribute('class', '-amp-fx-flying-carpet-clip');
-    container.setAttribute('class', '-amp-fx-flying-carpet-container');
+    clip.setAttribute('class', 'i-amphtml-fx-flying-carpet-clip');
+    container.setAttribute('class', 'i-amphtml-fx-flying-carpet-container');
 
     childNodes.forEach(child => container.appendChild(child));
     clip.appendChild(container);
@@ -84,6 +85,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     this.getViewport().addToFixedLayer(container);
   }
 
+  /** @override */
   onLayoutMeasure() {
     const width = this.getLayoutWidth();
     this.getVsync().mutate(() => {
@@ -91,55 +93,76 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     });
   }
 
+  /** @override */
   viewportCallback(inViewport) {
     this.updateInViewport(this.children_, inViewport);
   }
 
-  assertPosition() {
+  /**
+   * Asserts that the flying carpet does not appear in the first or last
+   * viewport.
+   * @private
+   */
+  assertPosition_() {
     const layoutBox = this.element.getLayoutBox();
     const viewport = this.getViewport();
     const viewportHeight = viewport.getHeight();
     const docHeight = viewport.getScrollHeight();
     // Hmm, can the page height change and affect us?
+    const minTop = viewportHeight * 0.75;
+    const maxTop = docHeight - viewportHeight * 0.95;
     user().assert(
-      layoutBox.top >= viewportHeight,
-      '<amp-fx-flying-carpet> elements must be positioned after the first ' +
-      'viewport: %s Current position: %s. Min: %s',
+      layoutBox.top >= minTop,
+      '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
+      ' first viewport: %s Current position: %s. Min: %s',
       this.element,
       layoutBox.top,
-      viewportHeight
-    );
+      minTop);
     user().assert(
-      layoutBox.bottom <= docHeight - viewportHeight,
+      layoutBox.top <= maxTop,
       '<amp-fx-flying-carpet> elements must be positioned before the last ' +
       'viewport: %s Current position: %s. Max: %s',
       this.element,
-      layoutBox.bottom,
-      docHeight - viewportHeight
-    );
+      layoutBox.top,
+      maxTop);
   }
 
+  /** @override */
   layoutCallback() {
     try {
-      this.assertPosition();
+      this.assertPosition_();
     } catch (e) {
       // Collapse the element if the effect is broken by the viewport location.
       this./*OK*/collapse();
       throw e;
     }
     this.scheduleLayout(this.children_);
+    listen(this.element, 'amp:built', this.layoutBuiltChild_.bind(this));
     return Promise.resolve();
   }
 
+  /**
+   * Listens for children element to be built, and schedules their layout.
+   * Necessary since not all children will be built by the time the
+   * flying-carpet has its #layoutCallback called.
+   * @param {!Event} event
+   * @private
+   */
+  layoutBuiltChild_(event) {
+    const child = dev().assertElement(event.target);
+    if (child.getOwner() === this.element) {
+      this.scheduleLayout(child);
+    }
+  }
+
+  /** @override */
   collapsedCallback(child) {
     const index = this.children_.indexOf(child);
     if (index > -1) {
       this.children_.splice(index, 1);
       this.totalChildren_--;
       if (this.totalChildren_ == 0) {
-        return this.attemptChangeHeight(0).then(() => {
-          this./*OK*/collapse();
-        }, () => {});
+        return this.attemptCollapse().catch(() => {});
       }
     }
   }

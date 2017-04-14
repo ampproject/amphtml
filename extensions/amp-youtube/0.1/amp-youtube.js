@@ -18,12 +18,14 @@ import {getDataParamsFromAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
-import {timerFor} from '../../../src/timer';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/video-manager';
+import {videoManagerForDoc} from '../../../src/services';
 
 /**
  * @enum {number}
@@ -57,6 +59,9 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?string}  */
     this.videoid_ = null;
 
+    /** @private {?boolean}  */
+    this.muted_ = false;
+
     /** @private {?Element} */
     this.iframe_ = null;
 
@@ -75,7 +80,11 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.preload(this.getVideoIframeSrc_());
+    // NOTE: When preload `as=document` is natively supported in browsers
+    // we can switch to preloading the full source. For now this doesn't
+    // work, because we preload with a different type and in that case
+    // responses are only picked up if they are cacheable.
+    this.preconnect.url(this.getVideoIframeSrc_());
     // Host that YT uses to serve JS needed by player.
     this.preconnect.url('https://s.ytimg.com', opt_onLayout);
     // Load high resolution placeholder images for videos in prerender mode.
@@ -103,10 +112,11 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.videoid_ = user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-youtube> %s',
-        this.element);
+    this.videoid_ = this.getVideoId_();
+
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
 
     // TODO(#3216): amp-youtube has a special case where 404s are not easily caught
     // hence the following hacky-solution.
@@ -115,6 +125,9 @@ class AmpYoutube extends AMP.BaseElement {
     if (!this.getPlaceholder()) {
       this.buildImagePlaceholder_();
     }
+
+    installVideoManagerForDoc(this.element);
+    videoManagerForDoc(this.element).register(this);
   }
 
   /** @return {string} */
@@ -161,8 +174,7 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // See
-    // https://developers.google.com/youtube/iframe_api_reference
+    // See https://developers.google.com/youtube/iframe_api_reference
     const iframe = this.element.ownerDocument.createElement('iframe');
     const src = this.getVideoIframeSrc_();
 
@@ -174,23 +186,10 @@ class AmpYoutube extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
-
     this.win.addEventListener(
         'message', event => this.handleYoutubeMessages_(event));
 
-    videoManagerForDoc(this.win.document).register(this);
-
     return this.loadPromise(iframe)
-        .then(() => {
-          // Make sure the YT player is ready for this. For some reason YT player
-          // would send couple of messages but then stop. Waiting for a bit before
-          // sending the 'listening' event seems to fix that and allow YT
-          // Player to send messages continuously.
-          return timerFor(this.win).promise(300);
-        })
         .then(() => this.listenToFrame_())
         .then(() => this.playerReadyPromise_);
   }
@@ -206,18 +205,44 @@ class AmpYoutube extends AMP.BaseElement {
     }
   }
 
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    if (mutations['data-videoid'] !== undefined) {
+      this.videoid_ = this.getVideoId_();
+      if (this.iframe_) { // `null` if element hasn't been laid out yet.
+        this.sendCommand_('loadVideoById', [this.videoid_]);
+      }
+    }
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getVideoId_() {
+    return user().assert(
+        this.element.getAttribute('data-videoid'),
+        'The data-videoid attribute is required for <amp-youtube> %s',
+        this.element);
+  }
+
   /**
    * Sends a command to the player through postMessage.
    * @param {string} command
-   * @param {Object=} opt_args
+   * @param {Array=} opt_args
    * @private
    * */
   sendCommand_(command, opt_args) {
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
-      'event': 'command',
-      'func': command,
-      'args': opt_args || '',
-    }), '*');
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        const message = JSON.stringify({
+          'event': 'command',
+          'func': command,
+          'args': opt_args || '',
+        });
+        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+      }
+    });
   }
 
   /** @private */
@@ -244,6 +269,13 @@ class AmpYoutube extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
         this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      }
+    } else if (data.event == 'infoDelivery' &&
+        data.info && data.info.muted !== undefined) {
+      if (this.muted_ != data.info.muted) {
+        this.muted_ = data.info.muted;
+        const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
+        this.element.dispatchCustomEvent(evt);
       }
     }
   }
@@ -326,36 +358,28 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('playVideo');
-    });
+    this.sendCommand_('playVideo');
   }
 
   /**
    * @override
    */
   pause() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('pauseVideo');
-    });
+    this.sendCommand_('pauseVideo');
   }
 
   /**
    * @override
    */
   mute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('mute');
-    });
+    this.sendCommand_('mute');
   }
 
   /**
    * @override
    */
   unmute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('unMute');
-    });
+    this.sendCommand_('unMute');
   }
 
   /**

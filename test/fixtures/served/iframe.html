@@ -23,9 +23,14 @@ function getAmpWindow(sentinel) {
 }
 
 window.addEventListener('message', function(event) {
-  if (event.data && event.data.sentinel == 'amp-test') {
+  if (event.data) {
     if (event.data.type == 'requestHeight') {
-      var sentinel = event.data.is3p ? event.data.amp3pSentinel : 'amp';
+      var sentinel;
+      if (event.data.is3p) {
+        sentinel = event.data.sentinel;
+      } else {
+        sentinel = 'amp';
+      }
       getAmpWindow(sentinel)./*OK*/postMessage(
           {
             sentinel: sentinel,
@@ -34,7 +39,12 @@ window.addEventListener('message', function(event) {
             width: event.data.width,
           }, '*');
     } else if (event.data.type == 'subscribeToEmbedState') {
-      var sentinel = event.data.is3p ? event.data.amp3pSentinel : 'amp';
+      var sentinel;
+      if (event.data.is3p) {
+        sentinel = event.data.sentinel;
+      } else {
+        sentinel = 'amp';
+      }
       getAmpWindow(sentinel)./*OK*/postMessage(
           {
             sentinel: sentinel,

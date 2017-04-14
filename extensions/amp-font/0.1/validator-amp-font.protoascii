@@ -15,46 +15,21 @@
 #
 
 tags: {  # amp-font
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-font extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-font extension .js script"
+  extension_spec: {
+    name: "amp-font"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-font"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-font"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-font-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-font.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-font>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-FONT"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-font extension .js script"
+  requires: "amp-font extension .js script"
   attrs: {
     name: "font-family"
     mandatory: true
@@ -71,7 +46,7 @@ tags: {  # <amp-font>
   attrs: { name: "on-load-add-class" }
   attrs: { name: "on-load-remove-class" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-font.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/presentation/amp-font"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

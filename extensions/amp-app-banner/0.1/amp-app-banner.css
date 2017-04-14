@@ -26,7 +26,7 @@ amp-app-banner {
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }
 
-i-amp-app-banner-top-padding {
+i-amphtml-app-banner-top-padding {
   position: absolute;
   top: 0;
   left: 0;
@@ -43,7 +43,7 @@ i-amp-app-banner-top-padding {
   height: 28px;
   top: -28px;
   right: 0;
-  background-image: url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2213px%22%20height%3D%2213px%22%20viewBox%3D%22341%208%2013%2013%22%20version%3D%221.1%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20xmlns%3Axlink%3D%22http%3A//www.w3.org/1999/xlink%22%3E%3Cg%20id%3D%22ic_close_black_24dp%22%20stroke%3D%22none%22%20stroke-width%3D%221%22%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%20transform%3D%22translate%28341.000000%2C%208.000000%29%22%3E%3Cpolygon%20id%3D%22Shape%22%20fill%3D%22%234F4F4F%22%20points%3D%2213%201.30928571%2011.6907143%200%206.5%205.19071429%201.30928571%200%200%201.30928571%205.19071429%206.5%200%2011.6907143%201.30928571%2013%206.5%207.80928571%2011.6907143%2013%2013%2011.6907143%207.80928571%206.5%22%3E%3C/polygon%3E%3C/g%3E%3C/svg%3E');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="13" height="13" viewBox="341 8 13 13" xmlns="http://www.w3.org/2000/svg"><path fill="#4F4F4F" d="M354 9.31L352.69 8l-5.19 5.19L342.31 8 341 9.31l5.19 5.19-5.19 5.19 1.31 1.31 5.19-5.19 5.19 5.19 1.31-1.31-5.19-5.19z" fill-rule="evenodd"/></svg>');
   background-size: 13px 13px;
   background-position: 9px center;
   background-color: #fff;

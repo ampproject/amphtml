@@ -13,14 +13,7 @@
   amp-selector [option] {
     box-sizing: border-box !important;
     display: inline-block;
-    transition: border 0.30s ease-in-out;
-    border: 1px solid transparent;
     position: relative !important;
-  }
-
-  amp-selector [selected] {
-    box-shadow: 0 0 5px rgba(81, 203, 238, 1);
-    border: 1px solid rgba(81, 203, 238, 1);
   }
   amp-selector[disabled],
   amp-selector [disabled] {
@@ -32,7 +25,6 @@
   <script async src="../../dist/amp.js"></script>
 </head>
 <body>
-  <button onclick="AMP.toggleExperiment('amp-selector');window.location.href=window.location.href;">Toggle Experiment</button>
   <form action="/test/manual/amp-selector.amp.html" method="get" target="_blank" id="form1">
   <amp-selector layout="container" name="single_image_select">
     <div option="xyz" selected>Select me</div>

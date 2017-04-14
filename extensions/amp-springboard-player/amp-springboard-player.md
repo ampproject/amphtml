@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>An <code>amp-springboard-player</code> displays the Springboard Player used in <a href="http://publishers.springboardplatform.com">Springboard</a> Video Platform.
+    <td>Displays the Springboard Player used in the <a href="http://publishers.springboardplatform.com">Springboard</a> Video Platform.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -35,15 +35,14 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/springboard-player.amp.html">springboard-player.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-springboard-player/">Annotated code example for amp-springboard-player</a></td>
+  </tr>
   </tr>
 </table>
 
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
-
-Examples:
 
 ```html
 <amp-springboard-player
@@ -59,29 +58,33 @@ Examples:
 
 ## Attributes
 
-**data-site-id**
+**data-site-id** (required)
 
-The SpringBoard site id. Specific to every partner.
+The SpringBoard site ID. Specific to every partner.
 
-**data-mode**
+**data-mode** (required)
 
-The SpringBoard player mode (video|playlist).
+The SpringBoard player mode: `video` or `playlist`.
 
-**data-content-id**
+**data-content-id** (required)
 
-The SpringBoard player content id (video or playlist id).
+The SpringBoard player content ID (video or playlist ID).
 
-**data-player-id**
+**data-player-id** (required)
 
 The Springboard player ID.
 
-**data-domain**
+**data-domain** (required)
 
 The Springboard partner domain.
 
-**data-items**
+**data-items** (required)
 
-The number of videos in playlist
+The number of videos in the playlist.
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

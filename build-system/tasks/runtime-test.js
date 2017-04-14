@@ -18,27 +18,26 @@ var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp-help')(require('gulp'));
 var Karma = require('karma').Server;
 var config = require('../config');
-var karmaConfig = config.karma;
-var extend = require('util')._extend;
 var fs = require('fs');
 var path = require('path');
 var util = require('gulp-util');
 var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
-
+var karmaDefault = require('./karma.conf');
 
 /**
  * Read in and process the configuration settings for karma
  * @return {!Object} Karma configuration
  */
 function getConfig() {
-  var obj = Object.create(null);
   if (argv.safari) {
-    return extend(obj, karmaConfig.safari);
+    return Object.assign({}, karmaDefault, {browsers: ['Safari']});
   }
-
   if (argv.firefox) {
-    return extend(obj, karmaConfig.firefox);
+    return Object.assign({}, karmaDefault, {browsers: ['Firefox']});
+  }
+  if (argv.edge) {
+    return Object.assign({}, karmaDefault, {browsers: ['Edge']});
   }
 
   if (argv.saucelabs) {
@@ -48,13 +47,26 @@ function getConfig() {
     if (!process.env.SAUCE_ACCESS_KEY) {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
-    const c = extend(obj, karmaConfig.saucelabs);
-    if (argv.oldchrome) {
-      c.browsers = ['SL_Chrome_45'];
-    }
+    return Object.assign({}, karmaDefault, {
+      reporters: ['dots', 'saucelabs'],
+      browsers: argv.oldchrome
+          ? ['SL_Chrome_45']
+          : [
+            'SL_Chrome_android',
+            'SL_Chrome_latest',
+            'SL_Chrome_45',
+            'SL_Firefox_latest',
+            //'SL_Safari_8' // Disabled due to flakiness and low market share
+            'SL_Safari_9',
+            'SL_Edge_latest',
+            //'SL_iOS_8_4', // Disabled due to flakiness and low market share
+            'SL_iOS_9_1',
+            'SL_iOS_10_0',
+            //'SL_IE_11',
+          ],
+    });
   }
-
-  return extend(obj, karmaConfig.default);
+  return karmaDefault;
 }
 
 function getAdTypes() {
@@ -107,7 +119,6 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
   }
 
   var c = getConfig();
-  var browsers = [];
 
   if (argv.watch || argv.w) {
     c.singleRun = false;
@@ -125,6 +136,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     c.files = config.testPaths;
   }
 
+  // c.client is available in test browser via window.parent.karma.config
   c.client.amp = {
     useCompiledJs: !!argv.compiled,
     saucelabs: !!argv.saucelabs,
@@ -161,6 +173,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     'saucelabs': '  Runs test on saucelabs (requires setup)',
     'safari': '  Runs tests in Safari',
     'firefox': '  Runs tests in Firefox',
+    'edge': '  Runs tests in Edge',
     'integration': 'Run only integration tests.',
     'compiled': 'Changes integration tests to use production JS ' +
         'binaries for execution',

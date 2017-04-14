@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
+import {AdTracker, getExistingAds} from './ad-tracker';
+import {AdStrategy} from './ad-strategy';
 import {dev, user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
-import {getConfigUrl} from './config-url';
+import {xhrFor} from '../../../src/services';
+import {getAdNetworkConfig} from './ad-network-config';
 import {isExperimentOn} from '../../../src/experiments';
+import {getAttributesFromConfigObj} from './attributes';
+import {getPlacementsFromConfigObj} from './placement';
 
 /** @const */
 const TAG = 'amp-auto-ads';
+
 
 export class AmpAutoAds extends AMP.BaseElement {
 
@@ -31,12 +36,16 @@ export class AmpAutoAds extends AMP.BaseElement {
     const type = this.element.getAttribute('type');
     user().assert(type, 'Missing type attribute');
 
-    const configUrl = getConfigUrl(type, this.element);
-    if (!configUrl) {
-      return;
-    }
-    this.getConfig_(configUrl).then(() => {
-      // TODO: Use the configuration to place ads.
+    const adNetwork = getAdNetworkConfig(type, this.element);
+    user().assert(adNetwork, 'No AdNetworkConfig for type: ' + type);
+
+    this.getConfig_(adNetwork.getConfigUrl()).then(configObj => {
+      const placements = getPlacementsFromConfigObj(this.win, configObj);
+      const attributes = Object.assign(adNetwork.getAttributes(),
+          getAttributesFromConfigObj(configObj));
+      const adTracker =
+          new AdTracker(getExistingAds(this.win), adNetwork.getAdConstraints());
+      new AdStrategy(placements, attributes, adTracker).run();
     });
   }
 
@@ -46,15 +55,18 @@ export class AmpAutoAds extends AMP.BaseElement {
   }
 
   /**
-   * Tries to load an auto-ads configuration from the given URL.
+   * Tries to load an auto-ads configuration from the given URL. This uses a
+   * non-credentialed request.
    * @param {string} configUrl
-   * @return {!Promise<?JSONType>}
+   * @return {!Promise<!JSONType>}
    * @private
    */
   getConfig_(configUrl) {
+    // Non-credentialed request
     const xhrInit = {
       mode: 'cors',
       method: 'GET',
+      credentials: 'omit',
       requireAmpResponseSourceOrigin: false,
     };
     return xhrFor(this.win)

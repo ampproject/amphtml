@@ -15,6 +15,7 @@
  */
 
 import {writeScript, validateData} from '../3p/3p';
+import {parseUrl} from '../src/url';
 
 /**
  * @param {!Window} global
@@ -32,23 +33,19 @@ export function contentad(global, data) {
   cadDiv.id = 'contentad' + global.wid;
   window.document.body.appendChild(cadDiv);
 
-  /* Capture or pass URL */
-  const host = window.context.location.host;
-  const domain = data.url || window.atob(data.d);
-  let adUrl = window.context.location.href;
-  /* Identify and remove CDN path */
-  const myreg = new RegExp(':\/\/.*?(?=([a-z0-9\-]+\.?)?' + domain + ')', 'i');
-  adUrl = adUrl.replace(myreg, '://');
-  if (data.url || !adUrl.includes(domain)) {
-    adUrl = adUrl.replace(host, domain);
+  /* Pass Source URL */
+  let sourceUrl = window.context.sourceUrl;
+  if (data.url) {
+    const domain = data.url || window.atob(data.d);
+    sourceUrl = sourceUrl.replace(parseUrl(sourceUrl).host, domain);
   }
 
   /* Build API URL */
-  const cadApi = 'https://api.content.ad/Scripts/widget2.aspx'
+  const cadApi = 'https://api.content-ad.net/Scripts/widget2.aspx'
     + '?id=' + encodeURIComponent(global.id)
     + '&d=' + encodeURIComponent(global.d)
     + '&wid=' + global.wid
-    + '&url=' + encodeURIComponent(adUrl)
+    + '&url=' + encodeURIComponent(sourceUrl)
     + '&cb=' + Date.now();
 
   /* Call Content.ad Widget */

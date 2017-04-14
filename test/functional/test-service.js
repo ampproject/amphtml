@@ -26,12 +26,16 @@ import {
   getExistingServiceForWindow,
   getParentWindowFrameElement,
   getService,
-  getServicePromise,
   getServiceForDoc,
+  getServicePromise,
   getServicePromiseForDoc,
+  getServicePromiseOrNull,
+  getServicePromiseOrNullForDoc,
   installServiceInEmbedScope,
   isDisposable,
   isEmbeddable,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
@@ -100,14 +104,14 @@ describe('service', () => {
       const a2 = getService(window, 'a', factory);
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(window);
 
       const b1 = getService(window, 'b', factory);
       const b2 = getService(window, 'b', factory);
       expect(b1).to.equal(b2);
       expect(b1).to.not.equal(a1);
-      expect(factory.callCount).to.equal(2);
+      expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(window);
     });
 
@@ -124,11 +128,26 @@ describe('service', () => {
       expect(b1).to.not.equal(a1);
     });
 
+    it('should not instantiate service when registered', () => {
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(0);
+      getService(window, 'a');
+      expect(count).to.equal(1);
+    });
+
+    it('should only instantiate the service once', () => {
+      registerServiceBuilder(window, 'b', Class);
+      expect(count).to.equal(0);
+      getService(window, 'b');
+      getService(window, 'b');
+      expect(count).to.equal(1);
+    });
+
     it('should work without a factory', () => {
       const c1 = getService(window, 'c', factory);
       const c2 = getService(window, 'c');
       expect(c1).to.equal(c2);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
     });
 
     it('should return the service when it exists', () => {
@@ -150,7 +169,7 @@ describe('service', () => {
       }).to.throw(/not given and service missing not-present/);
     });
 
-    it('should provide a promise that resolves when registered', () => {
+    it('should provide a promise that resolves when instantiated', () => {
       const p1 = getServicePromise(window, 'e1');
       const p2 = getServicePromise(window, 'e1');
       getService(window, 'e1', function() {
@@ -160,9 +179,42 @@ describe('service', () => {
         expect(s1).to.equal('from e1');
         return p2.then(s2 => {
           expect(s2).to.equal(s1);
-          expect(factory.callCount).to.equal(0);
+          expect(factory).to.have.not.been.called;
         });
       });
+    });
+
+    it('should resolve existing service promise on registering service', () => {
+      const p = getServicePromise(window, 'a');
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(1);
+      return p.then(() => {
+        expect(count).to.equal(1);
+      });
+    });
+
+    it('should resolve service promise if service is registered', () => {
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(0);
+      return getServicePromise(window, 'a').then(() => {
+        expect(count).to.equal(1);
+      });
+    });
+
+    it('should provide promise without clobbering registered services', () => {
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(0);
+      const p = getServicePromise(window, 'a');
+      expect(getService(window, 'a')).to.not.throw;
+      return p.then(() => {
+        expect(count).to.equal(1);
+      });
+    });
+
+    it('should NOT return null promise for registered services', () => {
+      registerServiceBuilder(window, 'a', Class);
+      const p = getServicePromiseOrNull(window, 'a');
+      expect(p).to.not.be.null;
     });
 
     it('should resolve service for a child window', () => {
@@ -266,7 +318,7 @@ describe('service', () => {
       const a2 = getServiceForDoc(node, 'a', factory);
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.exist;
       expect(ampdoc.services).to.not.exist;
@@ -277,7 +329,7 @@ describe('service', () => {
       expect(b1).to.equal(b2);
       expect(b1).to.equal(b3);
       expect(b1).to.not.equal(a1);
-      expect(factory.callCount).to.equal(2);
+      expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
       expect(windowApi.services['b']).to.exist;
       expect(ampdoc.services).to.not.exist;
@@ -292,7 +344,7 @@ describe('service', () => {
       expect(a1).to.equal(a2);
       expect(a1).to.equal(a3);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.exist;
       expect(ampdoc.services).to.not.exist;
@@ -305,7 +357,7 @@ describe('service', () => {
       const a2 = getServiceForDoc(node, 'a', factory);
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.not.exist;
       expect(ampdoc.services['a']).to.exist;
@@ -314,17 +366,35 @@ describe('service', () => {
       const b2 = getServiceForDoc(node, 'b', factory);
       expect(b1).to.equal(b2);
       expect(b1).to.not.equal(a1);
-      expect(factory.callCount).to.equal(2);
+      expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
       expect(windowApi.services['b']).to.not.exist;
       expect(ampdoc.services['b']).to.exist;
+    });
+
+    it('should not instantiate service when registered', () => {
+      registerServiceBuilderForDoc(ampdoc, 'fake service', factory);
+      expect(count).to.equal(0);
+      getServicePromiseForDoc(ampdoc, 'fake service');
+      getServiceForDoc(ampdoc, 'fake service');
+      expect(count).to.equal(1);
+    });
+
+    it('should not instantiate service when registered (race)', () => {
+      getServicePromiseForDoc(ampdoc, 'fake service');
+      registerServiceBuilderForDoc(ampdoc, 'fake service', factory);
+      expect(count).to.equal(1);
+      getServiceForDoc(ampdoc, 'fake service');
+      return Promise.resolve().then(() => {
+        expect(count).to.equal(1);
+      });
     });
 
     it('should work without a factory', () => {
       const c1 = getServiceForDoc(node, 'c', factory);
       const c2 = getServiceForDoc(node, 'c');
       expect(c1).to.equal(c2);
-      expect(factory.callCount).to.equal(1);
+      expect(factory).to.be.calledOnce;
     });
 
     it('should fail without factory on initial setup', () => {
@@ -333,7 +403,7 @@ describe('service', () => {
       }).to.throw(/not given and service missing not-present/);
     });
 
-    it('should provide a promise that resolves when registered', () => {
+    it('should provide a promise that resolves when instantiated', () => {
       const p1 = getServicePromiseForDoc(node, 'e1');
       const p2 = getServicePromiseForDoc(node, 'e1');
       getServiceForDoc(node, 'e1', function() {
@@ -343,9 +413,15 @@ describe('service', () => {
         expect(s1).to.equal('from e1');
         return p2.then(s2 => {
           expect(s2).to.equal(s1);
-          expect(factory.callCount).to.equal(0);
+          expect(factory).to.have.not.been.called;
         });
       });
+    });
+
+    it('should NOT return null promise for registered services', () => {
+      registerServiceBuilderForDoc(ampdoc, 'a', factory);
+      const p = getServicePromiseOrNullForDoc(ampdoc, 'a');
+      expect(p).to.not.be.null;
     });
 
     it('should resolve service for a child window', () => {

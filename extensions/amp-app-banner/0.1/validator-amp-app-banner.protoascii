@@ -16,54 +16,35 @@
 tags: {  # <script custom-element="amp-sticky-ad">
   html_format: AMP  # Ads are not allowed inside ads.
   tag_name: "SCRIPT"
-  spec_name: "amp-app-banner extension .js script"
-  also_requires_tag: "amp-app-banner"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-app-banner extension .js script"
+  requires: "amp-app-banner"
+  extension_spec: {
+    name: "amp-app-banner"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-app-banner"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-app-banner-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-app-banner.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-app-banner>
   html_format: AMP
   tag_name: "AMP-APP-BANNER"
   spec_name: "amp-app-banner"
+  satisfies: "amp-app-banner"
   mandatory_parent: "BODY"
-
   requires: "amp-app-banner data source"
-  also_requires_tag: "amp-app-banner extension .js script"
+  requires: "amp-app-banner extension .js script"
   # The "amp-app-banner button[open-button]" tag is in
   # validator-main.protoascii and in turn has an "AMP-APP-BANNER"
   # mandatory_parent.
-  also_requires_tag: "amp-app-banner button[open-button]"
+  requires: "amp-app-banner button[open-button]"
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
-  attrs: { name: "id" mandatory: true }
   unique: true
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-add-banner.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/layout/amp-app-banner"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

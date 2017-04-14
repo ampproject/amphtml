@@ -52,9 +52,11 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     'analytics.amp.html',
     'analytics-notification.amp.html',
     'everything.amp.html',
-    'facebook.amp.html',
+    // TODO: uncomment when validator is deployed:
+    // 'facebook.amp.html',
     'gfycat.amp.html',
     'instagram.amp.html',
+    'ooyalaplayer.amp.html',
     'released.amp.html',
     'soundcloud.amp.html',
     'springboard-player.amp.html',
@@ -73,7 +75,6 @@ describe.configure().retryOnSaucelabs().run('example', function() {
    * @constructor {!Array<!RegExp>}
    */
   const errorWhitelist = [
-    /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
     /DISALLOWED_TAG content/,  // Experiments with shadow slots
   ];
 

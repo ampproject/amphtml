@@ -18,21 +18,26 @@ import {AccessVendor} from '../access-vendor';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 
 
-describes.sandboxed('AccessVendorAdapter', {}, () => {
+describes.realWin('AccessVendorAdapter', {amp: true}, env => {
+  let ampdoc;
   let validConfig;
 
   beforeEach(() => {
+    ampdoc = env.ampdoc;
     validConfig = {
       'vendor': 'vendor1',
+      'vendor1': {
+        'vendorConfigParam': 'vendorConfigValue',
+      },
     };
   });
 
   describe('config', () => {
     it('should load valid config', () => {
-      const adapter = new AccessVendorAdapter(window, validConfig);
+      const adapter = new AccessVendorAdapter(ampdoc, validConfig);
       expect(adapter.vendorName_).to.equal('vendor1');
       expect(adapter.getConfig()).to.deep.equal({
-        vendor: 'vendor1',
+        vendorConfigParam: 'vendorConfigValue',
       });
       expect(adapter.isAuthorizationEnabled()).to.be.true;
       expect(adapter.isPingbackEnabled()).to.be.true;
@@ -41,12 +46,12 @@ describes.sandboxed('AccessVendorAdapter', {}, () => {
     it('should require vendor name', () => {
       delete validConfig['vendor'];
       expect(() => {
-        new AccessVendorAdapter(window, validConfig);
+        new AccessVendorAdapter(ampdoc, validConfig);
       }).to.throw(/"vendor" name must be specified/);
     });
 
     it('should wait registration', () => {
-      const adapter = new AccessVendorAdapter(window, validConfig);
+      const adapter = new AccessVendorAdapter(ampdoc, validConfig);
       expect(adapter.vendorResolve_).to.exist;
       const vendor = {};
       adapter.registerVendor('vendor1', vendor);
@@ -57,14 +62,14 @@ describes.sandboxed('AccessVendorAdapter', {}, () => {
     });
 
     it('should fail registration with a wrong name', () => {
-      const adapter = new AccessVendorAdapter(window, validConfig);
+      const adapter = new AccessVendorAdapter(ampdoc, validConfig);
       expect(() => {
         adapter.registerVendor('vendor2', {});
       }).to.throw(/match the configured vendor/);
     });
 
     it('should fail re-registration', () => {
-      const adapter = new AccessVendorAdapter(window, validConfig);
+      const adapter = new AccessVendorAdapter(ampdoc, validConfig);
       expect(adapter.vendorResolve_).to.exist;
       adapter.registerVendor('vendor1', {});
       expect(() => {
@@ -74,13 +79,12 @@ describes.sandboxed('AccessVendorAdapter', {}, () => {
   });
 
   describe('runtime', () => {
-
     let adapter;
     let vendor;
     let vendorMock;
 
     beforeEach(() => {
-      adapter = new AccessVendorAdapter(window, validConfig);
+      adapter = new AccessVendorAdapter(ampdoc, validConfig);
       vendor = new AccessVendor();
       vendorMock = sandbox.mock(vendor);
       adapter.registerVendor(validConfig['vendor'], vendor);

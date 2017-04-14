@@ -17,14 +17,14 @@
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {platformFor} from '../platform';
-import {fromClassForDoc} from '../service';
+import {platformFor} from '../services';
+import {registerServiceBuilderForDoc} from '../service';
 import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
 import {VideoEvents, VideoAttributes} from '../video-interface';
-import {viewerForDoc} from '../viewer';
-import {viewportForDoc} from '../viewport';
-import {vsyncFor} from '../vsync';
+import {viewerForDoc} from '../services';
+import {viewportForDoc} from '../services';
+import {vsyncFor} from '../services';
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it
@@ -63,6 +63,8 @@ export class VideoManager {
   register(video) {
     dev().assert(video);
 
+    this.registerCommonActions_(video);
+
     // TODO(aghassemi): Remove this later. For now, VideoManager only matters
     // for autoplay videos so no point in registering arbitrary videos yet.
     if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
@@ -77,6 +79,22 @@ export class VideoManager {
     const entry = new VideoEntry(this.ampdoc_, video);
     this.maybeInstallVisibilityObserver_(entry);
     this.entries_.push(entry);
+  }
+
+  /**
+   * Register common actions such as play, pause, etc... on the video element
+   * so they can be called using AMP Actions.
+   * For example: <button on="tap:myVideo.play">
+   *
+   *
+   * @param {!../video-interface.VideoInterface} video
+   * @private
+   */
+  registerCommonActions_(video) {
+    video.registerAction('play', video.play.bind(video, /*isAutoplay*/ false));
+    video.registerAction('pause', video.pause.bind(video));
+    video.registerAction('mute', video.mute.bind(video));
+    video.registerAction('unmute', video.unmute.bind(video));
   }
 
   /**
@@ -307,7 +325,7 @@ class VideoEntry {
    */
   createAutoplayAnimation_() {
     const doc = this.ampdoc_.win.document;
-    const anim = doc.createElement('i-amp-video-eq');
+    const anim = doc.createElement('i-amphtml-video-eq');
     anim.classList.add('amp-video-eq');
     // Four columns for the equalizer.
     for (let i = 1; i <= 4; i++) {
@@ -323,8 +341,8 @@ class VideoEntry {
       anim.appendChild(column);
     }
     const platform = platformFor(this.ampdoc_.win);
-    if (platform.isSafari() && platform.isIos()) {
-      // iOS Safari can not pause hardware accelerated animations.
+    if (platform.isIos()) {
+      // iOS can not pause hardware accelerated animations.
       anim.setAttribute('unpausable', '');
     }
     return anim;
@@ -344,8 +362,8 @@ class VideoEntry {
    */
   createAutoplayMask_() {
     const doc = this.ampdoc_.win.document;
-    const mask = doc.createElement('i-amp-video-mask');
-    mask.classList.add('-amp-fill-content');
+    const mask = doc.createElement('i-amphtml-video-mask');
+    mask.classList.add('i-amphtml-fill-content');
     return mask;
   }
 
@@ -462,9 +480,8 @@ export function clearSupportsAutoplayCacheForTesting() {
 }
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!VideoManager}
+ * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
  */
-export function installVideoManagerForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'video-manager', VideoManager);
+export function installVideoManagerForDoc(nodeOrDoc) {
+  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
 };

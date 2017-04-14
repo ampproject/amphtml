@@ -54,6 +54,14 @@ export const LogLevel = {
   FINE: 4,
 };
 
+/**
+ * Sets reportError function. Called from error.js to break cyclic
+ * dependency.
+ * @param {function(*, !Element=)|undefined} fn
+ */
+export function setReportError(fn) {
+  self.reportError = fn;
+}
 
 /**
  * Logging class.
@@ -179,15 +187,46 @@ export class Log {
    * asynchronously.
    * @param {string} tag
    * @param {...*} var_args
+   * @return {!Error|undefined}
+   * @private
    */
-  error(tag, var_args) {
+  error_(tag, var_args) {
     if (this.level_ >= LogLevel.ERROR) {
       this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
     } else {
       const error = createErrorVargs.apply(null,
           Array.prototype.slice.call(arguments, 1));
       this.prepareError_(error);
-      this.win.setTimeout(() => {throw error;});
+      return error;
+    }
+  }
+
+  /**
+   * Reports an error message.
+   * @param {string} tag
+   * @param {...*} var_args
+   * @return {!Error|undefined}
+   */
+  error(tag, var_args) {
+    const error = this.error_.apply(this, arguments);
+    if (error) {
+      // reportError is installed globally per window in the entry point.
+      self.reportError(error);
+    }
+  }
+
+  /**
+   * Reports an error message and marks with an expected property. If the
+   * logging is disabled, the error is rethrown asynchronously.
+   * @param {string} tag
+   * @param {...*} var_args
+   */
+  expectedError(tag, var_args) {
+    const error = this.error_.apply(this, arguments);
+    if (error) {
+      error.expected = true;
+      // reportError is installed globally per window in the entry point.
+      self.reportError(error);
     }
   }
 
@@ -199,6 +238,18 @@ export class Log {
   createError(var_args) {
     const error = createErrorVargs.apply(null, arguments);
     this.prepareError_(error);
+    return error;
+  }
+
+  /**
+   * Creates an error object with its expected property set to true.
+   * @param {...*} var_args
+   * @return {!Error}
+   */
+  createExpectedError(var_args) {
+    const error = createErrorVargs.apply(null, arguments);
+    this.prepareError_(error);
+    error.expected = true;
     return error;
   }
 
@@ -246,6 +297,8 @@ export class Log {
       e.associatedElement = firstElement;
       e.messageArray = messageArray;
       this.prepareError_(e);
+      // reportError is installed globally per window in the entry point.
+      self.reportError(e);
       throw e;
     }
     return shouldBeTrueish;
@@ -270,14 +323,14 @@ export class Log {
   }
 
   /**
-   * Throws an error if the first argument isn't a string.
+   * Throws an error if the first argument isn't a string. The string can
+   * be empty.
    *
-   * Otherwise see `assert` for usage
+   * For more details see `assert`.
    *
    * @param {*} shouldBeString
    * @param {string=} opt_message The assertion message
-   * @return {string} The value of shouldBeTrueish.
-   * @template T
+   * @return {string} The string value. Can be an empty string.
    */
   /*eslint "google-camelcase/google-camelcase": 2*/
   assertString(shouldBeString, opt_message) {
@@ -287,13 +340,15 @@ export class Log {
   }
 
   /**
-   * Throws an error if the first argument isn't a number.
+   * Throws an error if the first argument isn't a number. The allowed values
+   * include `0` and `NaN`.
    *
-   * Otherwise see `assert` for usage
+   * For more details see `assert`.
    *
    * @param {*} shouldBeNumber
    * @param {string=} opt_message The assertion message
-   * @return {number} The value of shouldBeTrueish.
+   * @return {number} The number value. The allowed values include `0`
+   *   and `NaN`.
    */
   assertNumber(shouldBeNumber, opt_message) {
     this.assert(typeof shouldBeNumber == 'number',
@@ -332,6 +387,8 @@ export class Log {
       } else if (error.message.indexOf(this.suffix_) == -1) {
         error.message += this.suffix_;
       }
+    } else if (isUserErrorMessage(error.message)) {
+      error.message = error.message.replace(USER_ERROR_SENTINEL, '');
     }
   }
 }
@@ -342,10 +399,11 @@ export class Log {
  * @return {string}
  */
 function toString(val) {
-  if (val instanceof Element) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
-  return val;
+  return /** @type {string} */ (val);
 }
 
 
@@ -395,7 +453,11 @@ function createErrorVargs(var_args) {
  */
 export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
-  setTimeout(() => {throw error;});
+  setTimeout(() => {
+    // reportError is installed globally per window in the entry point.
+    self.reportError(error);
+    throw error;
+  });
 }
 
 

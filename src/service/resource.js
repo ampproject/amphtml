@@ -20,7 +20,8 @@ import {
   moveLayoutRect,
 } from '../layout-rect';
 import {dev} from '../log';
-import {toggle} from '../style';
+import {startsWith} from '../string';
+import {toggle, computedStyle} from '../style';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -85,10 +86,10 @@ export class Resource {
 
   /**
    * @param {!Element} element
-   * @return {?Resource}
+   * @return {Resource}
    */
   static forElementOptional(element) {
-    return /** @type {!Resource} */ (element[RESOURCE_PROP_]);
+    return /** @type {Resource} */ (element[RESOURCE_PROP_]);
   }
 
   /**
@@ -105,7 +106,7 @@ export class Resource {
     element[OWNER_PROP_] = owner;
 
     // Need to clear owner cache for all child elements
-    const cachedElements = element.getElementsByClassName('-amp-element');
+    const cachedElements = element.getElementsByClassName('i-amphtml-element');
     for (let i = 0; i < cachedElements.length; i++) {
       const ele = cachedElements[i];
       if (Resource.forElementOptional(ele)) {
@@ -134,8 +135,11 @@ export class Resource {
     /** @const {!Window} */
     this.hostWin = element.ownerDocument.defaultView;
 
-    /** @private {!./resources-impl.Resources} */
+    /** @const @private {!./resources-impl.Resources} */
     this.resources_ = resources;
+
+    /** @const @private {boolean} */
+    this.isPlaceholder_ = element.hasAttribute('placeholder');
 
     /** @private {boolean} */
     this.blacklisted_ = false;
@@ -146,6 +150,9 @@ export class Resource {
     /** @private {!ResourceState} */
     this.state_ = element.isBuilt() ? ResourceState.NOT_LAID_OUT :
         ResourceState.NOT_BUILT;
+
+    /** @private {number} */
+    this.priorityOverride_ = -1;
 
     /** @private {number} */
     this.layoutCount_ = 0;
@@ -240,7 +247,18 @@ export class Resource {
    * @return {number}
    */
   getPriority() {
+    if (this.priorityOverride_ != -1) {
+      return this.priorityOverride_;
+    }
     return this.element.getPriority();
+  }
+
+  /**
+   * Overrides the element's priority.
+   * @param {number} newPriority
+   */
+  updatePriority(newPriority) {
+    this.priorityOverride_ = newPriority;
   }
 
   /**
@@ -264,7 +282,8 @@ export class Resource {
    * for details.
    */
   build() {
-    if (this.blacklisted_ || !this.element.isUpgraded()) {
+    if (this.blacklisted_ || !this.element.isUpgraded()
+        || !this.resources_.grantBuildPermission()) {
       return;
     }
     try {
@@ -280,6 +299,8 @@ export class Resource {
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+    // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+    // in PROD.
     this.element.dispatchCustomEvent('amp:built');
   }
 
@@ -295,9 +316,11 @@ export class Resource {
    * awaiting the measure and possibly layout.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
+   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    */
-  changeSize(newHeight, newWidth) {
-    this.element./*OK*/changeSize(newHeight, newWidth);
+  changeSize(newHeight, newWidth, opt_newMargins) {
+    this.element./*OK*/changeSize(newHeight, newWidth, opt_newMargins);
+
     // Schedule for re-layout.
     if (this.state_ != ResourceState.NOT_BUILT) {
       this.state_ = ResourceState.NOT_LAID_OUT;
@@ -309,15 +332,20 @@ export class Resource {
    * @param {boolean} overflown
    * @param {number|undefined} requestedHeight
    * @param {number|undefined} requestedWidth
+   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined}
+   *     requestedMargins
    */
-  overflowCallback(overflown, requestedHeight, requestedWidth) {
+  overflowCallback(overflown, requestedHeight, requestedWidth,
+      requestedMargins) {
     if (overflown) {
       this.pendingChangeSize_ = {
         height: requestedHeight,
         width: requestedWidth,
+        margins: requestedMargins,
       };
     }
-    this.element.overflowCallback(overflown, requestedHeight, requestedWidth);
+    this.element.overflowCallback(overflown, requestedHeight, requestedWidth,
+        requestedMargins);
   }
 
   resetPendingChangeSize() {
@@ -336,6 +364,21 @@ export class Resource {
    * transitioned to the "ready for layout" state.
    */
   measure() {
+    // Check if the element is ready to be measured.
+    // Placeholders are special. They are technically "owned" by parent AMP
+    // elements, sized by parents, but laid out independently. This means
+    // that placeholders need to at least wait until the parent element
+    // has been stubbed. We can tell whether the parent has been stubbed
+    // by whether a resource has been attached to it.
+    if (this.isPlaceholder_ &&
+        this.element.parentElement &&
+        // Use prefix to recognize AMP element. This is necessary because stub
+        // may not be attached yet.
+        startsWith(this.element.parentElement.tagName, 'AMP-') &&
+        !(RESOURCE_PROP_ in this.element.parentElement)) {
+      return;
+    }
+
     this.isMeasureRequested_ = false;
 
     let box = this.resources_.getViewport().getLayoutRect(this.element);
@@ -353,8 +396,8 @@ export class Resource {
           isFixed = true;
           break;
         }
-        if (viewport.isDeclaredFixed(n) &&
-                win./*OK*/getComputedStyle(n).position == 'fixed') {
+        if (viewport.isDeclaredFixed(n)
+            && computedStyle(win, n).position == 'fixed') {
           isFixed = true;
           break;
         }
@@ -403,6 +446,20 @@ export class Resource {
         0, 0);
     this.isFixed_ = false;
     this.element.updateLayoutBox(this.layoutBox_);
+    const owner = this.getOwner();
+    if (owner) {
+      owner.collapsedCallback(this.element);
+    }
+  }
+
+  /**
+   * Completes expand: ensures that the element is not `display:none` and
+   * updates measurements.
+   */
+  completeExpand() {
+    toggle(this.element, true);
+    this.element.removeAttribute('hidden');
+    this.requestMeasure();
   }
 
   /**
@@ -764,5 +821,14 @@ export class Resource {
   unload() {
     this.pause();
     this.unlayout();
+  }
+
+  /**
+   * Disconnect the resource. Mainly intended for embed resources that do not
+   * receive `disconnectedCallback` naturally via CE API.
+   */
+  disconnect() {
+    delete this.element[RESOURCE_PROP_];
+    this.element.disconnectedCallback();
   }
 }

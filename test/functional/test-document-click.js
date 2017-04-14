@@ -22,7 +22,6 @@ import {
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
 import * as sinon from 'sinon';
-import {toggleExperiment} from '../../src/experiments';
 
 describe('test-document-click onDocumentElementClick_', () => {
   let sandbox;
@@ -127,40 +126,40 @@ describe('test-document-click onDocumentElementClick_', () => {
       tgt.href = 'https://www.google.com/some-other-path';
       onDocumentElementClick_(evt, ampdoc, viewport, history);
 
-      expect(getElementByIdSpy.callCount).to.equal(0);
-      expect(querySelectorSpy.callCount).to.equal(0);
-      expect(preventDefaultSpy.callCount).to.equal(0);
-      expect(scrollIntoViewSpy.callCount).to.equal(0);
+      expect(getElementByIdSpy).to.have.not.been.called;
+      expect(querySelectorSpy).to.have.not.been.called;
+      expect(preventDefaultSpy).to.have.not.been.called;
+      expect(scrollIntoViewSpy).to.have.not.been.called;
     });
 
     it('should not do anything on origin change', () => {
       tgt.href = 'https://maps.google.com/some-path#link';
       onDocumentElementClick_(evt, ampdoc, viewport, history);
 
-      expect(getElementByIdSpy.callCount).to.equal(0);
-      expect(querySelectorSpy.callCount).to.equal(0);
-      expect(preventDefaultSpy.callCount).to.equal(0);
-      expect(scrollIntoViewSpy.callCount).to.equal(0);
+      expect(getElementByIdSpy).to.have.not.been.called;
+      expect(querySelectorSpy).to.have.not.been.called;
+      expect(preventDefaultSpy).to.have.not.been.called;
+      expect(scrollIntoViewSpy).to.have.not.been.called;
     });
 
     it('should not do anything when there is no hash', () => {
       tgt.href = 'https://www.google.com/some-path';
       onDocumentElementClick_(evt, ampdoc, viewport, history);
 
-      expect(getElementByIdSpy.callCount).to.equal(0);
-      expect(querySelectorSpy.callCount).to.equal(0);
-      expect(preventDefaultSpy.callCount).to.equal(0);
-      expect(scrollIntoViewSpy.callCount).to.equal(0);
+      expect(getElementByIdSpy).to.have.not.been.called;
+      expect(querySelectorSpy).to.have.not.been.called;
+      expect(preventDefaultSpy).to.have.not.been.called;
+      expect(scrollIntoViewSpy).to.have.not.been.called;
     });
 
     it('should not do anything on a query change', () => {
       tgt.href = 'https://www.google.com/some-path?hello=foo#link';
       onDocumentElementClick_(evt, ampdoc, viewport, history);
 
-      expect(getElementByIdSpy.callCount).to.equal(0);
-      expect(querySelectorSpy.callCount).to.equal(0);
-      expect(preventDefaultSpy.callCount).to.equal(0);
-      expect(scrollIntoViewSpy.callCount).to.equal(0);
+      expect(getElementByIdSpy).to.have.not.been.called;
+      expect(querySelectorSpy).to.have.not.been.called;
+      expect(preventDefaultSpy).to.have.not.been.called;
+      expect(scrollIntoViewSpy).to.have.not.been.called;
     });
   });
 
@@ -177,60 +176,60 @@ describe('test-document-click onDocumentElementClick_', () => {
 
     it('should call getElementById on document', () => {
       getElementByIdSpy.returns(elem);
-      expect(getElementByIdSpy.callCount).to.equal(0);
+      expect(getElementByIdSpy).to.have.not.been.called;
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(getElementByIdSpy.callCount).to.equal(1);
-      expect(querySelectorSpy.callCount).to.equal(0);
+      expect(getElementByIdSpy).to.be.calledOnce;
+      expect(querySelectorSpy).to.have.not.been.called;
     });
 
     it('should always call preventDefault', () => {
       getElementByIdSpy.returns(null);
       querySelectorSpy.returns(null);
-      expect(preventDefaultSpy.callCount).to.equal(0);
+      expect(preventDefaultSpy).to.have.not.been.called;
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(preventDefaultSpy.callCount).to.equal(1);
+      expect(preventDefaultSpy).to.be.calledOnce;
     });
 
     it('should not do anything if no anchor is found', () => {
       evt.target = document.createElement('span');
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(getElementByIdSpy.callCount).to.equal(0);
-      expect(querySelectorSpy.callCount).to.equal(0);
+      expect(getElementByIdSpy).to.have.not.been.called;
+      expect(querySelectorSpy).to.have.not.been.called;
     });
 
     it('should call querySelector on document if element with id is not ' +
        'found', () => {
       getElementByIdSpy.returns(null);
-      expect(getElementByIdSpy.callCount).to.equal(0);
+      expect(getElementByIdSpy).to.have.not.been.called;
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(getElementByIdSpy.callCount).to.equal(1);
-      expect(querySelectorSpy.callCount).to.equal(1);
+      expect(getElementByIdSpy).to.be.calledOnce;
+      expect(querySelectorSpy).to.be.calledOnce;
     });
 
     it('should not call scrollIntoView if element with id is not found or ' +
        'anchor with name is not found, but should still update URL', () => {
       getElementByIdSpy.returns(null);
       querySelectorSpy.returns(null);
-      expect(getElementByIdSpy.callCount).to.equal(0);
+      expect(getElementByIdSpy).to.have.not.been.called;
 
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(getElementByIdSpy.callCount).to.equal(1);
-      expect(scrollIntoViewSpy.callCount).to.equal(0);
-      expect(replaceStateForTargetSpy.callCount).to.equal(1);
+      expect(getElementByIdSpy).to.be.calledOnce;
+      expect(scrollIntoViewSpy).to.have.not.been.called;
+      expect(replaceStateForTargetSpy).to.be.calledOnce;
       expect(replaceStateForTargetSpy.args[0][0]).to.equal('#test');
     });
 
     it('should call scrollIntoView if element with id is found', () => {
       getElementByIdSpy.returns(elem);
 
-      expect(replaceStateForTargetSpy.callCount).to.equal(0);
-      expect(scrollIntoViewSpy.callCount).to.equal(0);
+      expect(replaceStateForTargetSpy).to.have.not.been.called;
+      expect(scrollIntoViewSpy).to.have.not.been.called;
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(replaceStateForTargetSpy.callCount).to.equal(1);
+      expect(replaceStateForTargetSpy).to.be.calledOnce;
       expect(replaceStateForTargetSpy.args[0][0]).to.equal('#test');
       replaceStateForTargetResolver();
       return replaceStateForTargetPromise.then(() => {
-        expect(scrollIntoViewSpy.callCount).to.equal(2);
+        expect(scrollIntoViewSpy).to.have.callCount(2);
         expect(timerFuncSpy).to.be.calledOnce;
       });
     });
@@ -239,14 +238,14 @@ describe('test-document-click onDocumentElementClick_', () => {
       getElementByIdSpy.returns(null);
       querySelectorSpy.returns(elem);
 
-      expect(replaceStateForTargetSpy.callCount).to.equal(0);
-      expect(scrollIntoViewSpy.callCount).to.equal(0);
+      expect(replaceStateForTargetSpy).to.have.not.been.called;
+      expect(scrollIntoViewSpy).to.have.not.been.called;
       onDocumentElementClick_(evt, ampdoc, viewport, history);
       replaceStateForTargetResolver();
       return replaceStateForTargetPromise.then(() => {
-        expect(scrollIntoViewSpy.callCount).to.equal(2);
+        expect(scrollIntoViewSpy).to.have.callCount(2);
         expect(timerFuncSpy).to.be.calledOnce;
-        expect(replaceStateForTargetSpy.callCount).to.equal(1);
+        expect(replaceStateForTargetSpy).to.be.calledOnce;
         expect(replaceStateForTargetSpy.args[0][0]).to.equal('#test');
       });
     });
@@ -283,8 +282,8 @@ describe('test-document-click onDocumentElementClick_', () => {
 
       // Click -> push.
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(scrollIntoViewSpy.callCount).to.equal(0);
-      expect(replaceStateForTargetSpy.callCount).to.equal(1);
+      expect(scrollIntoViewSpy).to.have.not.been.called;
+      expect(replaceStateForTargetSpy).to.be.calledOnce;
       expect(replaceStateForTargetSpy.args[0][0]).to.equal('#test');
     });
 
@@ -295,7 +294,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       // Click -> push.
       onDocumentElementClick_(evt, ampdoc, viewport, history,
           /* isIosSafari*/ true, /* isIframed */ false);
-      expect(replaceStateForTargetSpy.callCount).to.equal(1);
+      expect(replaceStateForTargetSpy).to.be.calledOnce;
       expect(replaceStateForTargetSpy.args[0][0]).to.equal('#test');
     });
   });
@@ -317,7 +316,7 @@ describe('test-document-click onDocumentElementClick_', () => {
           /* isIosSafari */ false, /* isIframed */ true);
       expect(win.open).to.be.called;
       expect(win.open).to.be.calledWith('ftp://example.com/a', '_blank');
-      expect(preventDefaultSpy.callCount).to.equal(1);
+      expect(preventDefaultSpy).to.be.calledOnce;
     });
 
     it('should not do anything not embedded', () => {
@@ -325,7 +324,7 @@ describe('test-document-click onDocumentElementClick_', () => {
           /* isIosSafari */ false, /* isIframed */ false);
       expect(win.open).to.not.be.called;
       expect(win.open).to.not.be.calledWith('ftp://example.com/a', '_blank');
-      expect(preventDefaultSpy.callCount).to.equal(0);
+      expect(preventDefaultSpy).to.have.not.been.called;
     });
   });
 
@@ -347,7 +346,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(win.open.called).to.be.true;
       expect(win.open.calledWith(
           'whatsapp://send?text=hello', '_top')).to.be.true;
-      expect(preventDefaultSpy.callCount).to.equal(1);
+      expect(preventDefaultSpy).to.be.calledOnce;
     });
 
     it('should not do anything on when not embedded', () => {
@@ -356,7 +355,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(win.open).to.not.be.called;
       expect(win.open).to.not.be.calledWith(
           'whatsapp://send?text=hello', '_top');
-      expect(preventDefaultSpy.callCount).to.equal(0);
+      expect(preventDefaultSpy).to.have.not.been.called;
     });
 
     it('should not do anything for mailto: protocol', () => {
@@ -364,21 +363,21 @@ describe('test-document-click onDocumentElementClick_', () => {
       onDocumentElementClick_(evt, ampdoc, viewport, history,
           /* isIosSafari*/ true, /* isIframed */ true);
       expect(win.open.called).to.be.false;
-      expect(preventDefaultSpy.callCount).to.equal(0);
+      expect(preventDefaultSpy).to.have.not.been.called;
     });
 
     it('should not do anything on other non-safari iOS', () => {
       onDocumentElementClick_(evt, ampdoc, viewport, history,
           /* isIosSafari*/ false, /* isIframed */ true);
       expect(win.open.called).to.be.false;
-      expect(preventDefaultSpy.callCount).to.equal(0);
+      expect(preventDefaultSpy).to.have.not.been.called;
     });
 
     it('should not do anything on other platforms', () => {
       onDocumentElementClick_(evt, ampdoc, viewport, history,
           /* isIosSafari*/ false, /* isIframed */ true);
       expect(win.top.location.href).to.equal('https://google.com');
-      expect(preventDefaultSpy.callCount).to.equal(0);
+      expect(preventDefaultSpy).to.have.not.been.called;
     });
   });
 
@@ -387,7 +386,6 @@ describe('test-document-click onDocumentElementClick_', () => {
       querySelectorSpy.returns({
         href: 'https://www.google.com',
       });
-      toggleExperiment(win, 'link-url-replace', true);
       tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
       tgt.setAttribute('data-amp-replace', 'QUERY_PARAM');
       onDocumentElementClick_(evt, ampdoc, viewport, history);
@@ -399,20 +397,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       querySelectorSpy.returns({
         href: 'https://www.google.com',
       });
-      toggleExperiment(win, 'link-url-replace', true);
       tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
-      onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(tgt.href).to.equal(
-           'https://www.google.com/link?out=QUERY_PARAM(hello)');
-    });
-
-    it('should not expand a link with experiment off', () => {
-      querySelectorSpy.returns({
-        href: 'https://www.google.com',
-      });
-      toggleExperiment(win, 'link-url-replace', false);
-      tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
-      tgt.setAttribute('data-amp-replace', 'QUERY_PARAM');
       onDocumentElementClick_(evt, ampdoc, viewport, history);
       expect(tgt.href).to.equal(
            'https://www.google.com/link?out=QUERY_PARAM(hello)');

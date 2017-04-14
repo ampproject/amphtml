@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 import '../amp-hulu';
 import {adopt} from '../../../../src/runtime';
 
@@ -23,7 +26,8 @@ adopt(window);
 describe('amp-hulu', () => {
 
   function getHulu(eid, opt_responsive) {
-    return createIframePromise().then(iframe => {
+    return createIframePromise(/*opt_runtimeOff*/ true).then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const hulu = iframe.doc.createElement('amp-hulu');
       hulu.setAttribute('data-eid', eid);
       hulu.setAttribute('width', '111');
@@ -36,19 +40,20 @@ describe('amp-hulu', () => {
   }
 
   it('renders', () => {
-    return getHulu('Bx6H30RBVFNpOe-iiOxp3A').then(hulu => {
+    return getHulu('4Dk5F2PYTtrgciuvloH3UA').then(hulu => {
       const iframe = hulu.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal('https://secure.hulu.com/dash/mobile_embed.html?eid=Bx6H30RBVFNpOe-iiOxp3A');
+      expect(iframe.src)
+          .to.equal('https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=4Dk5F2PYTtrgciuvloH3UA');
     });
   });
 
   it('renders responsively', () => {
-    return getHulu('Bx6H30RBVFNpOe-iiOxp3A', true).then(hulu => {
+    return getHulu('4Dk5F2PYTtrgciuvloH3UA', true).then(hulu => {
       const iframe = hulu.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

@@ -1,2 +1,3 @@
 PASS
-feature_tests/spec_example.html:59:7 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://www.ampproject.org/docs/reference/amp-ad.html) [DEPRECATION]
+feature_tests/spec_example.html:59:7 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/ads/amp-ad) [DEPRECATION]
+feature_tests/spec_example.html:59:7 The extension 'amp-carousel extension .js script' was found on this page, but is unused (no 'amp-carousel' tag seen). This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [DEPRECATION]

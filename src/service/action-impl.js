@@ -15,11 +15,21 @@
  */
 
 import {dev, user} from '../log';
-import {fromClassForDoc, installServiceInEmbedScope} from '../service';
+import {
+  registerServiceBuilderForDoc,
+  installServiceInEmbedScope,
+} from '../service';
 import {getMode} from '../mode';
-import {isArray, map} from '../types';
-import {timerFor} from '../timer';
-import {vsyncFor} from '../vsync';
+import {isArray} from '../types';
+import {map} from '../utils/object';
+import {timerFor} from '../services';
+import {vsyncFor} from '../services';
+
+/**
+ * ActionInfoDef args key that maps to the an unparsed object literal string.
+ * @const {string}
+ */
+export const OBJECT_STRING_ARGS_KEY = '__AMP_OBJECT_STRING__';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -31,24 +41,56 @@ const ACTION_MAP_ = '__AMP_ACTION_MAP__' + Math.random();
 const ACTION_QUEUE_ = '__AMP_ACTION_QUEUE__';
 
 /** @const {string} */
+const ACTION_HANDLER_ = '__AMP_ACTION_HANDLER__';
+
+/** @const {string} */
 const DEFAULT_METHOD_ = 'activate';
 
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
+  'AMP': ['setState'],
 };
+
+/** @enum {string} */
+const TYPE = {
+  NUMBER: 'number',
+  BOOLEAN: 'boolean',
+};
+
+/** @const {!Object<string, !Object<string, string>>} */
+const WHITELISTED_INPUT_DATA_ = {
+  'range': {
+    'min': TYPE.NUMBER,
+    'max': TYPE.NUMBER,
+    'value': TYPE.NUMBER,
+  },
+  'radio': {
+    'checked': TYPE.BOOLEAN,
+  },
+  'checkbox': {
+    'checked': TYPE.BOOLEAN,
+  },
+};
+
+/**
+ * A map of method argument keys to functions that generate the argument values
+ * given a local scope object. The function allows argument values to reference
+ * data in the event that generated the action.
+ * @typedef {Object<string,function(!Object):string>}
+ */
+let ActionInfoArgsDef;
 
 /**
  * @typedef {{
  *   event: string,
  *   target: string,
  *   method: string,
- *   args: ?JSONType,
+ *   args: ?ActionInfoArgsDef,
  *   str: string
  * }}
  */
 let ActionInfoDef;
-
 
 /**
  * The structure that contains all details of the action method invocation.
@@ -59,14 +101,14 @@ let ActionInfoDef;
  */
 export class ActionInvocation {
   /**
-   * @param {!Element} target
+   * @param {!Node} target
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
   constructor(target, method, args, source, event) {
-    /** @const {!Element} */
+    /** @const {!Node} */
     this.target = target;
     /** @const {string} */
     this.method = method;
@@ -102,6 +144,9 @@ export class ActionService {
     this.root_ = opt_root || ampdoc.getRootNode();
 
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
+    this.globalTargets_ = map();
+
+    /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = map();
 
     /** @private {!./vsync-impl.Vsync} */
@@ -134,11 +179,53 @@ export class ActionService {
           this.trigger(dev().assertElement(event.target), 'tap', event);
         }
       });
-    } else if (name == 'submit' || name == 'change') {
+    } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         this.trigger(dev().assertElement(event.target), name, event);
       });
+    } else if (name == 'change') {
+      this.root_.addEventListener(name, event => {
+        this.addChangeDetails_(event);
+        this.trigger(dev().assertElement(event.target), name, event);
+      });
     }
+  }
+
+  /**
+   * Given a browser 'change' event, add `details` property containing the
+   * relevant information for the change that generated the initial event.
+   * @param {!Event} event A `change` event.
+   */
+  addChangeDetails_(event) {
+    const detail = {};
+    const target = event.target;
+    if (event.target.tagName.toLowerCase() === 'input') {
+      const inputType = target.getAttribute('type');
+      const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
+      if (fieldsToInclude) {
+        Object.keys(fieldsToInclude).forEach(field => {
+          const expectedType = fieldsToInclude[field];
+          const value = target[field];
+          if (expectedType === 'number') {
+            detail[field] = Number(value);
+          } else if (expectedType === 'boolean') {
+            detail[field] = !!value;
+          } else {
+            detail[field] = String(value);
+          }
+        });
+        event.detail = detail;
+      }
+    }
+  }
+
+  /**
+   * Registers the action target that will receive all designated actions.
+   * @param {string} name
+   * @param {function(!ActionInvocation)} handler
+   */
+  addGlobalTarget(name, handler) {
+    this.globalTargets_[name] = handler;
   }
 
   /**
@@ -178,26 +265,25 @@ export class ActionService {
    * @param {function(!ActionInvocation)} handler
    */
   installActionHandler(target, handler) {
-    const debugid = target.tagName + '#' + target.id;
-    dev().assert((target.id && target.id.substring(0, 4) == 'amp-') ||
+    // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
+    const targetId = target.getAttribute('id') || '';
+    const debugid = target.tagName + '#' + targetId;
+    dev().assert((targetId && targetId.substring(0, 4) == 'amp-') ||
         target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
         'AMP element or a whitelisted target element is expected: %s', debugid);
 
-    /** @const {!Array<!ActionInvocation>} */
-    const currentQueue = target[ACTION_QUEUE_];
-    if (currentQueue) {
-      dev().assert(
-        isArray(currentQueue),
-        'Expected queue to be an array: %s',
-        debugid
-      );
+    if (target[ACTION_HANDLER_]) {
+      dev().error(TAG_, `Action handler already installed for ${target}`);
+      return;
     }
 
-    // Override queue with the handler.
-    target[ACTION_QUEUE_] = {'push': handler};
+    /** @const {Array<!ActionInvocation>} */
+    const currentQueue = target[ACTION_QUEUE_];
+
+    target[ACTION_HANDLER_] = handler;
 
     // Dequeue the current queue.
-    if (currentQueue) {
+    if (isArray(currentQueue)) {
       timerFor(target.ownerDocument.defaultView).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
@@ -207,6 +293,7 @@ export class ActionService {
             dev().error(TAG_, 'Action execution failed:', invocation, e);
           }
         });
+        target[ACTION_QUEUE_].length = 0;
       }, 1);
     }
   }
@@ -224,14 +311,31 @@ export class ActionService {
       return;
     }
 
-    const target = this.root_.getElementById(action.actionInfo.target);
-    if (!target) {
-      this.actionInfoError_('target not found', action.actionInfo, target);
-      return;
-    }
+    for (let i = 0; i < action.actionInfos.length; i++) {
+      const actionInfo = action.actionInfos[i];
+      // Replace any variables in args with data in `event`.
+      const args = applyActionInfoArgs(actionInfo.args, event);
 
-    this.invoke_(target, action.actionInfo.method, action.actionInfo.args,
-        action.node, event, action.actionInfo);
+      // Global target, e.g. `AMP`.
+      const globalTarget = this.globalTargets_[actionInfo.target];
+      if (globalTarget) {
+        const invocation = new ActionInvocation(
+            this.root_,
+            actionInfo.method,
+            args,
+            action.node,
+            event);
+        globalTarget(invocation);
+      } else {
+        const target = this.root_.getElementById(actionInfo.target);
+        if (target) {
+          this.invoke_(target, actionInfo.method, args,
+              action.node, event, actionInfo);
+        } else {
+          this.actionInfoError_('target not found', actionInfo, target);
+        }
+      }
+    }
   }
 
   /**
@@ -282,12 +386,17 @@ export class ActionService {
 
     // Special elements with AMP ID or known supported actions.
     const supportedActions = ELEMENTS_ACTIONS_MAP_[lowerTagName];
-    if ((target.id && target.id.substring(0, 4) == 'amp-') ||
+    // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
+    const targetId = target.getAttribute('id') || '';
+    if ((targetId && targetId.substring(0, 4) == 'amp-') ||
         (supportedActions && supportedActions.indexOf(method) != -1)) {
-      if (!target[ACTION_QUEUE_]) {
-        target[ACTION_QUEUE_] = [];
+      const handler = target[ACTION_HANDLER_];
+      if (handler) {
+        handler(invocation);
+      } else {
+        target[ACTION_QUEUE_] = target[ACTION_QUEUE_] || [];
+        target[ACTION_QUEUE_].push(invocation);
       }
-      target[ACTION_QUEUE_].push(invocation);
       return;
     }
 
@@ -300,16 +409,15 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} actionEventType
-   * @return {?{node: !Element, actionInfo: !ActionInfoDef}}
+   * @return {?{node: !Element, actionInfos: !Array<!ActionInfoDef>}}
    */
   findAction_(target, actionEventType) {
     // Go from target up the DOM tree and find the applicable action.
     let n = target;
-    let actionInfo = null;
     while (n) {
-      actionInfo = this.matchActionInfo_(n, actionEventType);
-      if (actionInfo) {
-        return {node: n, actionInfo};
+      const actionInfos = this.matchActionInfos_(n, actionEventType);
+      if (actionInfos) {
+        return {node: n, actionInfos: dev().assert(actionInfos)};
       }
       n = n.parentElement;
     }
@@ -319,9 +427,9 @@ export class ActionService {
   /**
    * @param {!Element} node
    * @param {string} actionEventType
-   * @return {?ActionInfoDef}
+   * @return {?Array<!ActionInfoDef>}
    */
-  matchActionInfo_(node, actionEventType) {
+  matchActionInfos_(node, actionEventType) {
     const actionMap = this.getActionMap_(node);
     if (!actionMap) {
       return null;
@@ -331,7 +439,7 @@ export class ActionService {
 
   /**
    * @param {!Element} node
-   * @return {?Object<string, ActionInfoDef>}
+   * @return {?Object<string, !Array<!ActionInfoDef>>}
    */
   getActionMap_(node) {
     let actionMap = node[ACTION_MAP_];
@@ -350,7 +458,7 @@ export class ActionService {
 /**
  * @param {string} s
  * @param {!Element} context
- * @return {?Object<string, ActionInfoDef>}
+ * @return {?Object<string, !Array<!ActionInfoDef>>}
  * @private Visible for testing only.
  */
 export function parseActionMap(s, context) {
@@ -367,72 +475,60 @@ export function parseActionMap(s, context) {
     if (tok.type == TokenType.EOF ||
             tok.type == TokenType.SEPARATOR && tok.value == ';') {
       // Expected, ignore.
-    } else if (tok.type == TokenType.LITERAL) {
+    } else if (tok.type == TokenType.LITERAL || tok.type == TokenType.ID) {
 
       // Format: event:target.method
 
       // Event: "event:"
       const event = tok.value;
 
-      // Target: ":target."
-      assertToken(toks.next(), TokenType.SEPARATOR, ':');
-      const target = assertToken(toks.next(), TokenType.LITERAL).value;
+      // Target: ":target." separator
+      assertToken(toks.next(), [TokenType.SEPARATOR], ':');
 
-      // Method: ".method". Method is optional.
-      let method = DEFAULT_METHOD_;
-      let args = null;
-      peek = toks.peek();
-      if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
-        toks.next();  // Skip '.'
-        method = assertToken(toks.next(), TokenType.LITERAL).value || method;
+      const actions = [];
 
-        // Optionally, there may be arguments: "(key = value, key = value)".
+      // Handlers for event
+      do {
+        const target = assertToken(
+            toks.next(), [TokenType.LITERAL, TokenType.ID]).value;
+
+        // Method: ".method". Method is optional.
+        let method = DEFAULT_METHOD_;
+        let args = null;
+
         peek = toks.peek();
-        if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
-          toks.next();  // Skip '('.
-          do {
-            tok = toks.next();
+        if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
+          toks.next();  // Skip '.'
+          method = assertToken(
+              toks.next(), [TokenType.LITERAL, TokenType.ID]).value || method;
 
-            // Format: key = value, ....
-            if (tok.type == TokenType.SEPARATOR &&
-                    (tok.value == ',' || tok.value == ')')) {
-              // Expected: ignore.
-            } else if (tok.type == TokenType.LITERAL) {
-              // Key: "key = "
-              const argKey = tok.value;
-              assertToken(toks.next(), TokenType.SEPARATOR, '=');
-              const argValue =
-                  assertToken(toks.next(/* convertValue */ true),
-                      TokenType.LITERAL).value;
-              if (!args) {
-                args = map();
-              }
-              args[argKey] = argValue;
-              peek = toks.peek();
-              assertAction(
-                  peek.type == TokenType.SEPARATOR &&
-                  (peek.value == ',' || peek.value == ')'),
-                  'Expected either [,] or [)]');
-            } else {
-              // Unexpected token.
-              assertAction(false, `; unexpected token [${tok.value || ''}]`);
-            }
-          } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
+          // Optionally, there may be arguments: "(key = value, key = value)".
+          peek = toks.peek();
+          if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
+            toks.next();  // Skip '('
+            args = tokenizeMethodArguments(toks, assertToken, assertAction);
+          }
         }
-      }
 
-      const action = {
-        event,
-        target,
-        method,
-        args: (args && getMode().test && Object.freeze) ?
-            Object.freeze(args) : args,
-        str: s,
-      };
+        actions.push({
+          event,
+          target,
+          method,
+          args: (args && getMode().test && Object.freeze) ?
+              Object.freeze(args) : args,
+          str: s,
+        });
+
+        peek = toks.peek();
+
+      } while (peek.type == TokenType.SEPARATOR && peek.value == ','
+          && toks.next()); // skip "," when found
+
       if (!actionMap) {
         actionMap = map();
       }
-      actionMap[action.event] = action;
+
+      actionMap[event] = actions;
     } else {
       // Unexpected token.
       assertAction(false, `; unexpected token [${tok.value || ''}]`);
@@ -441,6 +537,131 @@ export function parseActionMap(s, context) {
   } while (tok.type != TokenType.EOF);
 
   return actionMap;
+}
+
+/**
+ * Tokenizes and returns method arguments, e.g. target.method(arguments).
+ * @param {!ParserTokenizer} toks
+ * @param {!Function} assertToken
+ * @param {!Function} assertAction
+ * @return {ActionInfoArgsDef}
+ * @private
+ */
+function tokenizeMethodArguments(toks, assertToken, assertAction) {
+  let peek = toks.peek();
+  let tok;
+  let args = null;
+  // Object literal. Format: {...}
+  if (peek.type == TokenType.OBJECT) {
+    // Don't parse object literals. Tokenize as a single expression
+    // fragment and delegate to specific action handler.
+    args = map();
+    const value = toks.next().value;
+    args[OBJECT_STRING_ARGS_KEY] = () => value;
+    assertToken(toks.next(), [TokenType.SEPARATOR], ')');
+  } else {
+    // Key-value pairs. Format: key = value, ....
+    do {
+      tok = toks.next();
+      const type = tok.type;
+      const value = tok.value;
+      if (type == TokenType.SEPARATOR && (value == ',' || value == ')')) {
+        // Expected: ignore.
+      } else if (type == TokenType.LITERAL || type == TokenType.ID) {
+        // Key: "key = "
+        assertToken(toks.next(), [TokenType.SEPARATOR], '=');
+        // Value is either a literal or a variable: "foo.bar.baz"
+        tok = assertToken(toks.next(/* convertValue */ true),
+            [TokenType.LITERAL, TokenType.ID]);
+        const argValueTokens = [tok];
+        // Variables have one or more dereferences: ".identifier"
+        if (tok.type == TokenType.ID) {
+          for (peek = toks.peek();
+              peek.type == TokenType.SEPARATOR && peek.value == '.';
+              peek = toks.peek()) {
+            tok = toks.next(); // Skip '.'.
+            tok = assertToken(toks.next(false), [TokenType.ID]);
+            argValueTokens.push(tok);
+          }
+        }
+        const argValue = getActionInfoArgValue(argValueTokens);
+        if (!args) {
+          args = map();
+        }
+        args[value] = argValue;
+        peek = toks.peek();
+        assertAction(
+            peek.type == TokenType.SEPARATOR &&
+            (peek.value == ',' || peek.value == ')'),
+            'Expected either [,] or [)]');
+      } else {
+        // Unexpected token.
+        assertAction(false, `; unexpected token [${tok.value || ''}]`);
+      }
+    } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
+  }
+  return args;
+}
+
+/**
+ * Returns a function that generates a method argument value for a given token.
+ * The function takes a single object argument `data`.
+ * If the token is an identifier `foo`, the function returns `data[foo]`.
+ * Otherwise, the function returns the token value.
+ * @param {Array<!TokenDef>} tokens
+ * @return {?function(!Object):string}
+ * @private
+ */
+function getActionInfoArgValue(tokens) {
+  if (tokens.length == 0) {
+    return null;
+  }
+  if (tokens.length == 1) {
+    return () => tokens[0].value;
+  } else {
+    return data => {
+      let current = data;
+      // Traverse properties of `data` per token values.
+      for (let i = 0; i < tokens.length; i++) {
+        const value = tokens[i].value;
+        if (current && current.hasOwnProperty(value)) {
+          current = current[value];
+        } else {
+          return null;
+        }
+      }
+      // Only allow dereferencing of primitives.
+      const type = typeof current;
+      if (type === 'string' || type === 'number' || type === 'boolean') {
+        return current;
+      } else {
+        return null;
+      }
+    };
+  }
+}
+
+/**
+ * Generates method arg values for each key in the given ActionInfoArgsDef
+ * with the data in the given event.
+ * @param {?ActionInfoArgsDef} args
+ * @param {?Event} event
+ * @return {?JSONType}
+ * @private Visible for testing only.
+ */
+export function applyActionInfoArgs(args, event) {
+  if (!args) {
+    return args;
+  }
+  const data = {};
+  if (event && event.detail) {
+    data['event'] = event.detail;
+  }
+  const applied = map();
+  Object.keys(args).forEach(key => {
+    applied[key] = args[key].call(null, data);
+  });
+  return applied;
 }
 
 /**
@@ -460,23 +681,22 @@ function assertActionForParser(s, context, condition, opt_message) {
 /**
  * @param {string} s
  * @param {!Element} context
- * @param {!{type: TokenType, value: *}} tok
- * @param {TokenType} type
+ * @param {!TokenDef} tok
+ * @param {Array<TokenType>} types
  * @param {*=} opt_value
- * @return {!{type: TokenType, value: *}}
+ * @return {!TokenDef}
  * @private
  */
-function assertTokenForParser(s, context, tok, type, opt_value) {
+function assertTokenForParser(s, context, tok, types, opt_value) {
   if (opt_value !== undefined) {
     assertActionForParser(s, context,
-        tok.type == type && tok.value == opt_value,
+        types.indexOf(tok.type) >= 0 && tok.value == opt_value,
         `; expected [${opt_value}]`);
   } else {
-    assertActionForParser(s, context, tok.type == type);
+    assertActionForParser(s, context, types.indexOf(tok.type) >= 0);
   }
   return tok;
 }
-
 
 /**
  * @enum {number}
@@ -486,7 +706,14 @@ const TokenType = {
   EOF: 1,
   SEPARATOR: 2,
   LITERAL: 3,
+  ID: 4,
+  OBJECT: 5,
 };
+
+/**
+ * @typedef {{type: TokenType, value: *}}
+ */
+let TokenDef;
 
 /** @private @const {string} */
 const WHITESPACE_SET = ' \t\n\r\f\v\u00A0\u2028\u2029';
@@ -498,8 +725,11 @@ const SEPARATOR_SET = ';:.()=,|!';
 const STRING_SET = '"\'';
 
 /** @private @const {string} */
-const SPECIAL_SET = WHITESPACE_SET + SEPARATOR_SET + STRING_SET;
+const OBJECT_SET = '{}';
 
+/** @private @const {string} */
+const SPECIAL_SET =
+    WHITESPACE_SET + SEPARATOR_SET + STRING_SET + OBJECT_SET;
 
 /** @private */
 class ParserTokenizer {
@@ -517,7 +747,7 @@ class ParserTokenizer {
   /**
    * Returns the next token and advances the position.
    * @param {boolean=} opt_convertValues
-   * @return {!{type: TokenType, value: *}}
+   * @return {!TokenDef}
    */
   next(opt_convertValues) {
     const tok = this.next_(opt_convertValues || false);
@@ -528,7 +758,7 @@ class ParserTokenizer {
   /**
    * Returns the next token but keeps the current position.
    * @param {boolean=} opt_convertValues
-   * @return {!{type: TokenType, value: *}}
+   * @return {!TokenDef}
    */
   peek(opt_convertValues) {
     return this.next_(opt_convertValues || false);
@@ -604,7 +834,31 @@ class ParserTokenizer {
       return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
-    // A key
+    // Object literal.
+    if (c == '{') {
+      let numberOfBraces = 1;
+      let end = -1;
+      for (let i = newIndex + 1; i < this.str_.length; i++) {
+        const char = this.str_[i];
+        if (char == '{') {
+          numberOfBraces++;
+        } else if (char == '}') {
+          numberOfBraces--;
+        }
+        if (numberOfBraces <= 0) {
+          end = i;
+          break;
+        }
+      }
+      if (end == -1) {
+        return {type: TokenType.INVALID, index: newIndex};
+      }
+      const value = this.str_.substring(newIndex, end + 1);
+      newIndex = end;
+      return {type: TokenType.OBJECT, value, index: newIndex};
+    }
+
+    // Advance until next special character.
     let end = newIndex + 1;
     for (; end < this.str_.length; end++) {
       if (SPECIAL_SET.indexOf(this.str_.charAt(end)) != -1) {
@@ -612,10 +866,21 @@ class ParserTokenizer {
       }
     }
     const s = this.str_.substring(newIndex, end);
-    const value = convertValues && (s == 'true' || s == 'false') ?
-        s == 'true' : s;
     newIndex = end - 1;
-    return {type: TokenType.LITERAL, value, index: newIndex};
+
+    // Boolean literal.
+    if (convertValues && (s == 'true' || s == 'false')) {
+      const value = (s == 'true');
+      return {type: TokenType.LITERAL, value, index: newIndex};
+    }
+
+    // Identifier.
+    if (!isNum(s.charAt(0))) {
+      return {type: TokenType.ID, value: s, index: newIndex};
+    }
+
+    // Key.
+    return {type: TokenType.LITERAL, value: s, index: newIndex};
   }
 }
 
@@ -631,8 +896,12 @@ function isNum(c) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!ActionService}
  */
 export function installActionServiceForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'action', ActionService);
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'action',
+      ActionService,
+      /* opt_factory */ undefined,
+      /* opt_instantiate */ true);
 }

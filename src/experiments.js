@@ -34,44 +34,15 @@ const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 /** @const {time} */
 const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
-/** @const {string} */
-const CANARY_EXPERIMENT_ID = 'dev-channel';
-
-/** @type {Object<string, boolean>|undefined} */
-let toggles_;
+/** @type {Object<string, boolean>} */
+let toggles_ = null;
 
 /**
- * A wrapper to avoid a static side-effect.
- * @return {!Object<string, boolean>}
- */
-function experimentToggles() {
-  return toggles_ || (toggles_ = Object.create(null));
-}
-
-
-/**
- * Whether the scripts come from a dev channel.
+ * Whether we are in canary.
  * @param {!Window} win
  * @return {boolean}
  */
-export function isDevChannel(win) {
-  if (isExperimentOn(win, CANARY_EXPERIMENT_ID)) {
-    return true;
-  }
-  if (isDevChannelVersionDoNotUse_(win)) {
-    return true;
-  }
-  return false;
-}
-
-
-/**
- * Whether the version corresponds to the dev-channel binary.
- * @param {!Window} win
- * @return {boolean}
- * @private Visible for testing only!
- */
-export function isDevChannelVersionDoNotUse_(win) {
+export function isCanary(win) {
   return !!(win.AMP_CONFIG && win.AMP_CONFIG.canary);
 }
 
@@ -83,59 +54,9 @@ export function isDevChannelVersionDoNotUse_(win) {
  * @return {boolean}
  */
 export function isExperimentOn(win, experimentId) {
-  const toggles = experimentToggles();
-  if (experimentId in toggles) {
-    return toggles[experimentId];
-  }
-  return toggles[experimentId] = calcExperimentOn(win, experimentId);
+  const toggles = experimentToggles(win);
+  return !!toggles[experimentId];
 }
-
-/**
- * Check whether an experiment is on while allowing viewers to force
- * the experiment state via a viewer URL param of the form:
- * `e-$experimentId=1` (on) or `e-$experimentId=0` (off).
- * NOTE: This should only be used if it is needed and if turning the
- * experiment on or off does not have security implications.
- * @param {!Window} win
- * @param {string} experimentId
- * @return {boolean}
- */
-export function isExperimentOnAllowUrlOverride(win, experimentId) {
-  const hash = win.location.originalHash || win.location.hash;
-  if (hash) {
-    // Note: If this is used a lot, this should be optimized to only
-    // parse once per page load.
-    const param = parseQueryString(hash)['e-' + experimentId];
-    if (param == '1') {
-      return true;
-    }
-    if (param == '0') {
-      return false;
-    }
-  }
-  return isExperimentOn(win, experimentId);
-}
-
-/**
- * Calculate whether the specified experiment is on or off based off of the
- * cookieFlag or the global config frequency given.
- * @param {!Window} win
- * @param {string} experimentId
- * @return {boolean}
- */
-function calcExperimentOn(win, experimentId) {
-  const cookieFlag = getExperimentIds(win).indexOf(experimentId) != -1;
-  if (cookieFlag) {
-    return true;
-  }
-
-  if (win.AMP_CONFIG && win.AMP_CONFIG.hasOwnProperty(experimentId)) {
-    const frequency = win.AMP_CONFIG[experimentId];
-    return Math.random() < frequency;
-  }
-  return false;
-}
-
 
 /**
  * Toggles the experiment on or off. Returns the actual value of the experiment
@@ -151,57 +72,151 @@ function calcExperimentOn(win, experimentId) {
  */
 export function toggleExperiment(win, experimentId, opt_on,
     opt_transientExperiment) {
-  const toggles = experimentToggles();
-  const experimentIds = getExperimentIds(win);
-  const currentlyOn = (experimentIds.indexOf(experimentId) != -1) ||
-      (experimentId in toggles && toggles[experimentId]);
-  const on = opt_on !== undefined ? opt_on : !currentlyOn;
+  const currentlyOn = isExperimentOn(win, experimentId);
+  const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
-    if (on) {
-      experimentIds.push(experimentId);
-      toggles[experimentId] = true;
-    } else {
-      experimentIds.splice(experimentIds.indexOf(experimentId), 1);
-      toggles[experimentId] = false;
-    }
+    const toggles = experimentToggles(win);
+    toggles[experimentId] = on;
+
     if (!opt_transientExperiment) {
-      saveExperimentIds(win, experimentIds);
+      const cookieToggles = getExperimentTogglesFromCookie(win);
+      cookieToggles[experimentId] = on;
+      saveExperimentTogglesToCookie(win, cookieToggles);
     }
   }
   return on;
 }
 
+/**
+ * Calculate whether the experiment is on or off based off of the
+ * cookieFlag or the global config frequency given.
+ * @param {!Window} win
+ * @return {!Object<string, boolean>}
+ */
+export function experimentToggles(win) {
+  if (toggles_) {
+    return toggles_;
+  }
+  toggles_ = Object.create(null);
+
+  // Read the default config of this build.
+  if (win.AMP_CONFIG) {
+    for (const experimentId in win.AMP_CONFIG) {
+      const frequency = win.AMP_CONFIG[experimentId];
+      if (typeof frequency === 'number' && frequency >= 0 && frequency <= 1) {
+        toggles_[experimentId] = Math.random() < frequency;
+      }
+    }
+  }
+
+  // Read document level override from meta tag.
+  if (win.AMP_CONFIG
+      && Array.isArray(win.AMP_CONFIG['allow-doc-opt-in'])
+      && win.AMP_CONFIG['allow-doc-opt-in'].length > 0) {
+    const allowed = win.AMP_CONFIG['allow-doc-opt-in'];
+    const meta =
+        win.document.head.querySelector('meta[name="amp-experiments-opt-in"]');
+    if (meta) {
+      const optedInExperiments = meta.getAttribute('content').split(',');
+      for (let i = 0; i < optedInExperiments.length; i++) {
+        if (allowed.indexOf(optedInExperiments[i]) != -1) {
+          toggles_[optedInExperiments[i]] = true;
+        }
+      }
+    }
+  }
+
+  Object.assign(toggles_, getExperimentTogglesFromCookie(win));
+
+  if (win.AMP_CONFIG
+      && Array.isArray(win.AMP_CONFIG['allow-url-opt-in'])
+      && win.AMP_CONFIG['allow-url-opt-in'].length > 0) {
+    const allowed = win.AMP_CONFIG['allow-url-opt-in'];
+    const hash = win.location.originalHash || win.location.hash;
+    const params = parseQueryString(hash);
+    for (let i = 0; i < allowed.length; i++) {
+      const param = params[`e-${allowed[i]}`];
+      if (param == '1') {
+        toggles_[allowed[i]] = true;
+      }
+      if (param == '0') {
+        toggles_[allowed[i]] = false;
+      }
+    }
+  }
+  return toggles_;
+}
+
+/**
+ * Returns the cached experiments toggles, or null if they have not been
+ * computed yet.
+ * @return {Object<string, boolean>}
+ */
+export function experimentTogglesOrNull() {
+  return toggles_;
+}
 
 /**
  * Returns a set of experiment IDs currently on.
  * @param {!Window} win
- * @return {!Array<string>}
+ * @return {!Object<string, boolean>}
  */
-function getExperimentIds(win) {
-  if (win._experimentCookie) {
-    return win._experimentCookie;
-  }
+function getExperimentTogglesFromCookie(win) {
   const experimentCookie = getCookie(win, COOKIE_NAME);
-  return win._experimentCookie = (
-      experimentCookie ? experimentCookie.split(/\s*,\s*/g) : []);
-}
+  const tokens = experimentCookie ? experimentCookie.split(/\s*,\s*/g) : [];
 
+  const toggles = Object.create(null);
+  for (let i = 0; i < tokens.length; i++) {
+    if (tokens[i].length == 0) {
+      continue;
+    }
+    if (tokens[i][0] == '-') {
+      toggles[tokens[i].substr(1)] = false;
+    } else {
+      toggles[tokens[i]] = true;
+    }
+  }
+
+  return toggles;
+}
 
 /**
  * Saves a set of experiment IDs currently on.
  * @param {!Window} win
- * @param {!Array<string>} experimentIds
+ * @param {!Object<string, boolean>} toggles
  */
-function saveExperimentIds(win, experimentIds) {
-  win._experimentCookie = null;
+function saveExperimentTogglesToCookie(win, toggles) {
+  const experimentIds = [];
+  for (const experiment in toggles) {
+    experimentIds.push((toggles[experiment] === false ? '-' : '') + experiment);
+  }
+
   setCookie(win, COOKIE_NAME, experimentIds.join(','),
-      Date.now() + COOKIE_EXPIRATION_INTERVAL);
+      Date.now() + COOKIE_EXPIRATION_INTERVAL, {
+        // Set explicit domain, so the cookie gets send to sub domains.
+        domain: win.location.hostname,
+        allowOnProxyOrigin: true,
+      });
+}
+
+/**
+ * See getExperimentTogglesFromCookie().
+ * @param {!Window} win
+ * @return {!Object<string, boolean>}
+ * @visibleForTesting
+ */
+export function getExperimentToglesFromCookieForTesting(win) {
+  return getExperimentTogglesFromCookie(win);
 }
 
 /**
  * Resets the experimentsToggle cache for testing purposes.
+ * @param {!Window} win
  * @visibleForTesting
  */
-export function resetExperimentToggles_() {
-  toggles_ = undefined;
+export function resetExperimentTogglesForTesting(win) {
+  setCookie(win, COOKIE_NAME, '', 0, {
+    domain: win.location.hostname,
+  });
+  toggles_ = null;
 }

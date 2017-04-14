@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-var path = require('path');
-
-var karmaConf = path.resolve('karma.conf.js');
-
 var commonTestPaths = [
   'test/_init_tests.js',
   'test/fixtures/*.html',
@@ -61,53 +57,15 @@ var testPaths = commonTestPaths.concat([
 
 var integrationTestPaths = commonTestPaths.concat([
   'test/integration/**/*.js',
+  'test/functional/test-error.js',
   'extensions/**/test/integration/**/*.js',
 ]);
-
-var karmaDefault = {
-  configFile: karmaConf,
-  singleRun: true,
-  client: {
-    mocha: {
-      // Longer timeout on Travis; fail quickly at local.
-      timeout: process.env.TRAVIS ? 10000 : 2000
-    },
-    captureConsole: false,
-  },
-  browserDisconnectTimeout: 10000,
-  browserDisconnectTolerance: 2,
-  browserNoActivityTimeout: 4 * 60 * 1000,
-  captureTimeout: 4 * 60 * 1000,
-};
-
-var karma = {
-  default: karmaDefault,
-  firefox: extend(karmaDefault, {browsers: ['Firefox']}),
-  safari: extend(karmaDefault, {browsers: ['Safari']}),
-  saucelabs: extend(karmaDefault, {
-    reporters: ['dots', 'saucelabs'],
-    browsers: [
-      'SL_Chrome_android',
-      'SL_Chrome_latest',
-      'SL_Chrome_45',
-      'SL_Firefox_latest',
-      'SL_Safari_8',
-      'SL_Safari_9',
-      'SL_Edge_latest',
-      'SL_iOS_8_4',
-      'SL_iOS_9_1',
-      'SL_iOS_10_0',
-      //'SL_IE_11',
-    ],
-  })
-};
 
 /** @const  */
 module.exports = {
   commonTestPaths: commonTestPaths,
   testPaths: testPaths,
   integrationTestPaths: integrationTestPaths,
-  karma: karma,
   lintGlobs: [
     '**/*.js',
     '!**/*.extern.js',
@@ -147,7 +105,3 @@ module.exports = {
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };
-
-function extend(orig, add) {
-  return Object.assign({}, orig, add);
-}

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {cidForOrNull} from './cid';
+import {cidForDocOrNull, timerFor} from './services';
 import {adConfig} from '../ads/_config';
 import {dev} from '../src/log';
-import {timerFor} from '../src/timer';
 
 /**
  * @param {AMP.BaseElement} adElement
@@ -33,11 +32,11 @@ export function getAdCid(adElement) {
   if (!scope) {
     return Promise.resolve();
   }
-  const cidPromise = cidForOrNull(adElement.win).then(cidService => {
+  const cidPromise = cidForDocOrNull(adElement.getAmpDoc()).then(cidService => {
     if (!cidService) {
       return;
     }
-    return cidService.get(dev().assertString(scope), Promise.resolve())
+    return cidService.get(dev().assertString(scope), Promise.resolve(undefined))
     .catch(error => {
       // Not getting a CID is not fatal.
       dev().error('AD-CID', error);

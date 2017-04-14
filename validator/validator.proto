@@ -58,7 +58,9 @@ message UrlSpec {
   optional bool allow_relative = 2 [default = true];
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3 [default = false];
-  // Must be lowercase.
+  // Must be lowercase. Subdomains of disallowed domains are also disallowed,
+  // so if 'example.com' is disallowed then 'www.example.com' is also disallowed
+  // but 'some-example.com' is allowed.
   repeated string disallowed_domain = 4;
 }
 
@@ -167,7 +169,7 @@ message CssSpec {
   optional bool validate_amp4ads = 5;
 }
 
-// NEXT AVAILABLE TAG: 8
+// NEXT AVAILABLE TAG: 9
 message CdataSpec {
   // If set, the cdata contents cannot be greater than this length, in bytes.
   optional int32 max_bytes = 1 [ default = -1 ];
@@ -185,6 +187,9 @@ message CdataSpec {
   // If at least one CssSpec is provided, this cdata field will be parsed
   // as CSS3, and any parsing errors will become validation errors.
   optional CssSpec css_spec = 7;
+  // If set to true, then only whitespace may be in the cdata contents.
+  // This is useful for script tags that reference extensions etc.
+  optional bool whitespace_only = 8;
   // } end oneof
 
   // If any of these regexes match, then this cdata spec does not validate.
@@ -275,11 +280,45 @@ message ReferencePoint {
   optional bool unique = 3;
 }
 
+// Specs specific to AMP Extensions. This is a field within TagSpec that
+// replaces the standard tagspec list of attributes, requirements, etc.
+// NEXT AVAILABLE TAG: 7
+message ExtensionSpec {
+  // e.g. "amp-video". This is used both as the attribute value for the
+  // 'custom-element' attribute value as well as part of the 'src' attribute
+  // value.
+  optional string name = 1;
+  // e.g. "0.1", "1.0", "latest".
+  repeated string allowed_versions = 2;
+  // deprecated_versions must be a strict subset of allowed_versions. If
+  // the version matches a deprecated_versions field, validation will emit
+  // a warning.
+  repeated string deprecated_versions = 3;
+
+  // Most extensions are custom-elements. For custom-template extensions, this
+  // value needs to be set true. E.g: amp-mustache.
+  optional bool is_custom_template = 4 [default = false];
+
+  // For older tags, implemented before the 'requires' TagSpec feature,
+  // we use deprecated_recommends_usage_of_tag to emit a warning if the
+  // TagSpec is unused. New tags should set 'requires' in the TagSpec to some
+  // string to enforce that the tag is used.
+  //
+  // Some extensions, such as `amp-dynamic-css-classes`, do not have an
+  // associated tag in the document indicating usage. For such tags, both
+  // of these may be unset.
+  repeated string deprecated_recommends_usage_of_tag = 5;
+
+  // For older tags, we did not originally require that the tag only be included
+  // once, so those tags are grandfathered in for multiple inclusion in the file
+  optional bool deprecated_allow_duplicates = 6 [default = false];
+}
+
 // Tags that are not covered by at least one of these specs are disallowed.
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 26
+// NEXT AVAILABLE TAG: 28
 message TagSpec {
   // The HtmlFormat field tells the validator which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
@@ -305,6 +344,11 @@ message TagSpec {
   // parameters for error messages and other usages that require or
   // benefit from a unique identifier.
   optional string spec_name = 2;
+
+  // If provided, this is a SCRIPT tag defining an amp custom element
+  // extension. The other fields, such as expected attributes, will be
+  // validated by the extension spec rules.
+  optional ExtensionSpec extension_spec = 27;
 
   // If true, a tag conforming to this tag spec must occur at least once
   // within the document.
@@ -334,10 +378,7 @@ message TagSpec {
   repeated string disallowed_ancestor = 13;
 
   // If set, other tags - identified by their detail string - must be
-  // present as well.
-  repeated string also_requires_tag = 14;
-  // Same as also_requires_tag, but rather than invalidating a document if not
-  // present, emits a deprecation warning.
+  // present as well or a warning will be issued (will not invalidate doc).
   repeated string also_requires_tag_warning = 22;
   // Expresses a generic condition which is satisfied if this tag is found. Used
   // in combination with the `requires` attribute on a different tag.
@@ -379,11 +420,14 @@ message TagSpec {
 
   // If set, specifies which AMP Layouts are supported by this element.
   optional AmpLayout amp_layout = 11;
+
+  // Deprecated fields, do not reuse.
+  extensions 14, 26;
 }
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 15
+// NEXT AVAILABLE TAG: 16
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -394,25 +438,15 @@ message ValidatorRules {
 
   // Spec URL for information about mustache templates.
   optional string template_spec_url = 8;
-  // If we encounter a manufactured body tag, this flag determines if
-  // it is treated as an error or a warning.
-  // TODO(gregable): Eventually change this to true and remove the code
-  // for it, making the error permanent.
-  optional bool manufactured_body_tag_is_error = 11 [default = false];
-  // Spec URL for information about manufactured body tags.
-  optional string manufactured_body_spec_url = 12;
 
-  // If enabled, reference points can define additinal reference points
-  // for child elements.
-  // TODO(powdercloud): Flip to true and remove this flag.
-  optional bool reference_points_can_define_reference_points = 14
-      [default = false];
+  // Spec URL for information about styles and amp-custom stylesheet
+  optional string styles_spec_url = 15;
 
   repeated ErrorFormat error_formats = 9;
   repeated ErrorSpecificity error_specificity = 13;
 
   // Deprecated fields, do not reuse.
-  extensions 5, 2;
+  extensions 2, 5, 11, 12, 14;
 }
 
 // We categorize error messages into higher-level groups. This makes it
@@ -469,16 +503,19 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 79
+  // NEXT AVAILABLE TAG: 83
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
     WARNING_TAG_REQUIRED_BY_MISSING = 76;
+    WARNING_EXTENSION_UNUSED = 79;
+    WARNING_EXTENSION_DEPRECATED_VERSION = 80;
     ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;
     DISALLOWED_ATTR = 3;
+    DISALLOWED_STYLE_ATTR = 81;
     INVALID_ATTR_VALUE = 4;
     ATTR_VALUE_REQUIRED_BY_LAYOUT = 27;
     IMPLIED_LAYOUT_INVALID = 22;
@@ -493,6 +530,7 @@ message ValidationError {
     STYLESHEET_TOO_LONG = 50;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
+    NON_WHITESPACE_CDATA_ENCOUNTERED = 82;
     DEV_MODE_ENABLED = 10;  // Deprecated, remove after 2016-04-01.
     DEPRECATED_ATTR = 11;
     DEPRECATED_TAG = 12;
@@ -518,7 +556,6 @@ message ValidationError {
     DISALLOWED_CHILD_TAG_NAME = 57;
     DISALLOWED_FIRST_CHILD_TAG_NAME = 58;
     DISALLOWED_MANUFACTURED_BODY = 64;
-    DEPRECATED_MANUFACTURED_BODY = 65;
     CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT = 66;
     MANDATORY_REFERENCE_POINT_MISSING = 67;
     DUPLICATE_REFERENCE_POINT = 68;

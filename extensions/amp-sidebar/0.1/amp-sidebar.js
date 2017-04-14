@@ -18,11 +18,12 @@ import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
-import {historyForDoc} from '../../../src/history';
-import {platformFor} from '../../../src/platform';
+import {historyForDoc} from '../../../src/services';
+import {platformFor} from '../../../src/services';
 import {setStyles, toggle} from '../../../src/style';
-import {vsyncFor} from '../../../src/vsync';
-import {timerFor} from '../../../src/timer';
+import {removeFragment, parseUrl} from '../../../src/url';
+import {vsyncFor} from '../../../src/services';
+import {timerFor} from '../../../src/services';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -82,7 +83,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.viewport_ = this.getViewport();
 
-    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */true);
+    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =
@@ -120,7 +121,7 @@ export class AmpSidebar extends AMP.BaseElement {
     const screenReaderCloseButton = this.document_.createElement('button');
     // TODO(aghassemi, #4146) i18n
     screenReaderCloseButton.textContent = 'Close the sidebar';
-    screenReaderCloseButton.classList.add('-amp-screen-reader');
+    screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => {
@@ -132,22 +133,37 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
+    // TODO(mkhatib, #6589): Consider exposing onLocalNavigation from
+    // document-click service to simplifiy this.
     this.element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
-        this.close_();
+        const tgtLoc = parseUrl(target.href);
+        const currentHref = this.getAmpDoc().win.location.href;
+        // Important: Only close sidebar (and hence pop sidebar history entry)
+        // when navigating locally, Chrome might cancel navigation request
+        // due to after-navigation history manipulation inside a timer callback.
+        // See this issue for more details:
+        // https://github.com/ampproject/amphtml/issues/6585
+        if (removeFragment(target.href) != removeFragment(currentHref)) {
+          return;
+        }
+
+        if (tgtLoc.hash) {
+          this.close_();
+        }
       }
     }, true);
   }
 
- /**
-  * Returns true if the sidebar is opened.
-  * @returns {boolean}
-  * @private
-  */
- isOpen_() {
-   return this.element.hasAttribute('open');
- }
+  /**
+   * Returns true if the sidebar is opened.
+   * @returns {boolean}
+   * @private
+   */
+  isOpen_() {
+    return this.element.hasAttribute('open');
+  }
 
   /** @override */
   activate() {
@@ -175,7 +191,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.isOpen_()) {
       return;
     }
-    this.viewport_.disableTouchZoom();
+    this.viewport_.enterOverlayMode();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
       this.openMask_();
@@ -212,7 +228,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (!this.isOpen_()) {
       return;
     }
-    this.viewport_.restoreOriginalTouchZoom();
+    this.viewport_.leaveOverlayMode();
     this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
@@ -241,11 +257,11 @@ export class AmpSidebar extends AMP.BaseElement {
   openMask_() {
     if (!this.maskElement_) {
       const mask = this.document_.createElement('div');
-      mask.classList.add('-amp-sidebar-mask');
+      mask.classList.add('i-amphtml-sidebar-mask');
       mask.addEventListener('click', () => {
         this.close_();
       });
-      this.element.parentNode.appendChild(mask);
+      this.element.ownerDocument.body.appendChild(mask);
       mask.addEventListener('touchmove', e => {
         e.preventDefault();
       });

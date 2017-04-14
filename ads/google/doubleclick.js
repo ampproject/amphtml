@@ -16,8 +16,9 @@
 
 import {makeCorrelator} from './correlator';
 import {validateData, loadScript} from '../../3p/3p';
-import {dev, user} from '../../src/log';
+import {dev} from '../../src/log';
 import {setStyles} from '../../src/style';
+import {getMultiSizeDimensions} from './utils';
 
 /**
  * @enum {number}
@@ -49,7 +50,7 @@ export function doubleclick(global, data) {
   if (global.context.clientId) {
     // Read by GPT/Glade for GA/Doubleclick integration.
     global.gaGlobal = {
-      vid: global.context.clientId,
+      cid: global.context.clientId,
       hid: global.context.pageViewId,
     };
   }
@@ -82,52 +83,6 @@ export function doubleclick(global, data) {
 }
 
 /**
- * A helper function for determining whether a given width or height violates
- * some condition.
- *
- * Checks the width and height against their corresponding conditions. If
- * either of the conditions fail, the errorBuilder function will be called with
- * the appropriate arguments, its result will be logged to user().error, and
- * validateDimensions will return false. Otherwise, validateDimensions will
- * only return true.
- *
- * @param {(number|string)} width
- * @param {(number|string)} height
- * @param {!function((number|string)): boolean} widthCond
- * @param {!function((number|string)): boolean} heightCond
- * @param {!function(!{badDim: string, badVal: (string|number)}): string}
- *    errorBuilder A function that will produce an informative error message.
- * @return {boolean}
- */
-function validateDimensions(width, height, widthCond, heightCond,
-    errorBuilder) {
-  let badParams = null;
-  if (widthCond(width) && heightCond(height)) {
-    badParams = {
-      badDim: 'width and height',
-      badVal: width + 'x' + height,
-    };
-  }
-  else if (widthCond(width)) {
-    badParams = {
-      badDim: 'width',
-      badVal: width,
-    };
-  }
-  else if (heightCond(height)) {
-    badParams = {
-      badDim: 'height',
-      badVal: height,
-    };
-  }
-  if (badParams) {
-    user().error('AMP-AD', errorBuilder(badParams));
-    return false;
-  }
-  return true;
-}
-
-/**
  * @param {!Window} global
  * @param {!Object} data
  * @param {!GladeExperiment} gladeExperiment
@@ -138,77 +93,19 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
     parseInt(data.overrideHeight || data.height, 10),
   ]];
 
-  // Get multi-size ad request data, if any, and validate it in the following
-  // ways:
-  // 1) Ensure that the data string is a comma-separated list of sizes of the
-  //    form WxH;
-  // 2) that each secondary dimension is strictly less than its primary
-  //    dimension counterpart;
-  // 3) and, if data-mutli-size-validation is not set to false, that each
-  //    secondary dimension is at least 2/3rds of its primary dimension
-  //    counterpart.
+  // Handle multi-size data parsing, validation, and inclusion into dimensions.
   const multiSizeDataStr = data.multiSize || null;
   if (multiSizeDataStr) {
-    const sizesStr = multiSizeDataStr.split(',');
-    sizesStr.forEach(sizeStr => {
+    const primarySize = dimensions[0];
+    const primaryWidth = primarySize[0];
+    const primaryHeight = primarySize[1];
 
-      const size = sizeStr.split('x');
-
-      // Make sure that each size is specified in the form val1xval2.
-      if (size.length != 2) {
-        user().error('AMP-AD', `Invalid multi-size data format '${sizeStr}'.`);
-        return;
-      }
-
-      const widthStr = size[0];
-      const heightStr = size[1];
-
-      // Make sure that both dimensions given are numbers.
-      if (!validateDimensions(widthStr, heightStr,
-            w => isNaN(Number(w)),
-            h => isNaN(Number(h)),
-            ({badDim, badVal}) =>
-            `Invalid ${badDim} of ${badVal} given for secondary size.`)) {
-        return;
-      }
-
-      const width = Number(widthStr);
-      const height = Number(heightStr);
-      const primarySize = dimensions[0];
-      const primaryWidth = primarySize[0];
-      const primaryHeight = primarySize[1];
-
-      // Check that secondary size is not larger than primary size.
-      if (!validateDimensions(width, height,
-            w => w > primaryWidth,
-            h => h > primaryHeight,
-            ({badDim, badVal}) => `Secondary ${badDim} ${badVal} ` +
-              `can't be larger than the primary ${badDim}.`)) {
-        return;
-      }
-
-      // Check that if multi-size-validation is on, that the secondary sizes
-      // are at least minRatio of the primary size.
-      const validate = data.multiSizeValidation || 'true';
-      if (validate != 'false' && validate != false) {
-
-        // The minimum ratio of each secondary dimension to its corresponding
-        // primary dimension.
-        const minRatio = 2 / 3;
-        const minWidth = minRatio * primaryWidth;
-        const minHeight = minRatio * primaryHeight;
-        if (!validateDimensions(width, height,
-              w => w < minWidth,
-              h => h < minHeight,
-              ({badDim, badVal}) => `Secondary ${badDim} ${badVal} is ` +
-              `smaller than 2/3rds of the primary ${badDim}.`)) {
-          return;
-        }
-      }
-
-      // Passed all checks! Push additional size to dimensions.
-      dimensions.push([width, height]);
-    });
+    getMultiSizeDimensions(
+        multiSizeDataStr,
+        primaryWidth,
+        primaryHeight,
+        (data.multiSizeValidation || 'true') == 'true',
+        dimensions);
   }
 
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {

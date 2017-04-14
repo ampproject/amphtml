@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {fromClass, getServiceForDoc} from '../service';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+  getService,
+} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
-import {timerFor} from '../timer';
-import {viewerForDoc} from '../viewer';
+import {timerFor} from '../services';
+import {viewerForDoc} from '../services';
 
 
 /** @private @const */
@@ -111,6 +115,26 @@ export class History {
   }
 
   /**
+   * Requests navigation one step back. This request is only satisifed
+   * when the history has at least one step to go back in the context
+   * of this document.
+   * @return {!Promise}
+   */
+  goBack() {
+    return this.enque_(() => {
+      if (this.stackIndex_ <= 0) {
+        // Nothing left to pop.
+        return Promise.resolve();
+      }
+      // Pop the current state. The binding will ignore the request if
+      // it cannot satisfy it.
+      return this.binding_.pop(this.stackIndex_).then(stackIndex => {
+        this.onStackIndexUpdated_(stackIndex);
+      });
+    });
+  }
+
+  /**
    * Helper method to handle navigation to a local target, e.g. When a user clicks an
    * anchor link to a local hash - <a href="#section1">Go to section 1</a>.
    *
@@ -125,6 +149,27 @@ export class History {
     }).then(() => {
       this.binding_.replaceStateForTarget(target);
     });
+  }
+
+  /**
+   * Get the fragment from the url or the viewer.
+   * Strip leading '#' in the fragment
+   * @return {!Promise<string>}
+   */
+  getFragment() {
+    return this.binding_.getFragment();
+  }
+
+  /**
+   * Update the page url fragment
+   * @param {string} fragment
+   * @return {!Promise}
+   */
+  updateFragment(fragment) {
+    if (fragment[0] == '#') {
+      fragment = fragment.substr(1);
+    }
+    return this.binding_.updateFragment(fragment);
   }
 
   /**
@@ -249,6 +294,20 @@ class HistoryBindingInterface {
    * @param unusedTarget
    */
   replaceStateForTarget(unusedTarget) {}
+
+  /**
+   * Get the fragment from the url or the viewer.
+   * Strip leading '#' in the fragment
+   * @return {!Promise<string>}
+   */
+  getFragment() {}
+
+  /**
+   * Update the page url fragment
+   * @param {string} unusedFragment
+   * @return {!Promise}
+   */
+  updateFragment(unusedFragment) {}
 }
 
 
@@ -312,7 +371,10 @@ export class HistoryBindingNatural_ {
           history.replaceState.bind(history);
       pushState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
-        this.origPushState_(state, opt_title, opt_url);
+        this.origPushState_(state, opt_title,
+            // A bug in edge causes paths to become undefined if URL is
+            // undefined, filed here: https://goo.gl/KlImZu
+            opt_url || null);
       };
       replaceState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
@@ -617,6 +679,22 @@ export class HistoryBindingNatural_ {
       }
     }
   }
+
+  /** @override */
+  getFragment() {
+    let hash = this.win.location.hash;
+    /* Strip leading '#' */
+    hash = hash.substr(1);
+    return Promise.resolve(hash);
+  }
+
+  /** @override */
+  updateFragment(fragment) {
+    if (this.win.history.replaceState) {
+      this.win.history.replaceState({}, '', '#' + fragment);
+    }
+    return Promise.resolve();
+  }
 }
 
 
@@ -649,7 +727,7 @@ export class HistoryBindingVirtual_ {
     this.onStackIndexUpdated_ = null;
 
     /** @private {!UnlistenDef} */
-    this.unlistenOnHistoryPopped_ = this.viewer_.onHistoryPoppedEvent(
+    this.unlistenOnHistoryPopped_ = this.viewer_.onMessage('historyPopped',
         this.onHistoryPopped_.bind(this));
   }
 
@@ -673,9 +751,10 @@ export class HistoryBindingVirtual_ {
   push() {
     // Current implementation doesn't wait for response from viewer.
     this.updateStackIndex_(this.stackIndex_ + 1);
-    return this.viewer_.postPushHistory(this.stackIndex_).then(() => {
-      return this.stackIndex_;
-    });
+    return this.viewer_.sendMessageAwaitResponse(
+        'pushHistory', {stackIndex: this.stackIndex_}).then(() => {
+          return this.stackIndex_;
+        });
   }
 
   /** @override */
@@ -683,18 +762,19 @@ export class HistoryBindingVirtual_ {
     if (stackIndex > this.stackIndex_) {
       return Promise.resolve(this.stackIndex_);
     }
-    return this.viewer_.postPopHistory(stackIndex).then(() => {
-      this.updateStackIndex_(stackIndex - 1);
-      return this.stackIndex_;
-    });
+    return this.viewer_.sendMessageAwaitResponse(
+        'popHistory', {stackIndex: this.stackIndex_}).then(() => {
+          this.updateStackIndex_(stackIndex - 1);
+          return this.stackIndex_;
+        });
   }
 
   /**
-   * @param {!./viewer-impl.ViewerHistoryPoppedEventDef} event
+   * @param {!JSONType} data
    * @private
    */
-  onHistoryPopped_(event) {
-    this.updateStackIndex_(event.newStackIndex);
+  onHistoryPopped_(data) {
+    this.updateStackIndex_(data['newStackIndex']);
   }
 
   /**
@@ -710,6 +790,34 @@ export class HistoryBindingVirtual_ {
         this.onStackIndexUpdated_(stackIndex);
       }
     }
+  }
+
+  /** @override */
+  getFragment() {
+    if (!this.viewer_.hasCapability('fragment')) {
+      return Promise.resolve('');
+    }
+    return this.viewer_.sendMessageAwaitResponse('getFragment', undefined,
+        /* cancelUnsent */true).then(
+        hash => {
+          if (!hash) {
+            return '';
+          }
+          /* Strip leading '#'*/
+          if (hash[0] == '#') {
+            hash = hash.substr(1);
+          }
+          return hash;
+        });
+  }
+
+  /** @override */
+  updateFragment(fragment) {
+    if (!this.viewer_.hasCapability('fragment')) {
+      return Promise.resolve();
+    }
+    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
+        'replaceHistory', {fragment}, /* cancelUnsent */true));
   }
 }
 
@@ -728,8 +836,11 @@ function createHistory(ampdoc) {
   } else {
     // Only one global "natural" binding is allowed since it works with the
     // global history stack.
-    binding = fromClass(ampdoc.win, 'global-history-binding',
+    registerServiceBuilder(
+        ampdoc.win,
+        'global-history-binding',
         HistoryBindingNatural_);
+    binding = getService(ampdoc.win, 'global-history-binding');
   }
   return new History(ampdoc, binding);
 }
@@ -737,9 +848,11 @@ function createHistory(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!History}
  */
 export function installHistoryServiceForDoc(ampdoc) {
-  return /** @type {!History} */ (getServiceForDoc(ampdoc, 'history',
-      ampdoc => createHistory(ampdoc)));
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'history',
+      /* opt_constructor */ undefined,
+      ampdoc => createHistory(ampdoc));
 }

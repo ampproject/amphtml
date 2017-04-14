@@ -14,47 +14,19 @@
  * limitations under the License.
  */
 
-import {accessServiceFor} from '../../../src/access-service';
-import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+import {LaterpayVendor} from './laterpay-impl';
+import {accessServiceForDoc} from '../../../src/services';
 
 
-/**
- * @implements {AccessVendor}
- */
-export class LaterpayVendor {
-
-  /**
-   * @param {!AccessService} accessService
-   */
-  constructor(accessService) {
-    /** @private @const */
-    this.accessService_ = accessService;
-    // TODO: implement
-  }
-
-  /**
-   * @return {!Promise<!JSONType>}
-   */
-  authorize() {
-    const win = this.accessService_.win;
-    user().assert(isExperimentOn(win, 'amp-access-laterpay'),
-        'Enable "amp-access-laterpay" experiment');
-    // TODO: implement
-    return Promise.resolve({access: true});
-  }
-
-  /**
-   * @return {!Promise}
-   */
-  pingback() {
-    // TODO: implement
-    return Promise.resolve();
-  }
-}
-
-
-// Register the vendor within the access service.
-accessServiceFor(AMP.win).then(accessService => {
-  accessService.registerVendor('laterpay', new LaterpayVendor(accessService));
+AMP.extension('amp-access-laterpay', '0.1', function(AMP) {
+  AMP.registerServiceForDoc(
+      'laterpay',
+      /* ctor */ undefined,
+      ampdoc => {
+        return accessServiceForDoc(ampdoc).then(accessService => {
+          const vendor = new LaterpayVendor(accessService);
+          accessService.registerVendor('laterpay', vendor);
+          return vendor;
+        });
+      });
 });

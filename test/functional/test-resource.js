@@ -18,15 +18,15 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import {viewerForDoc} from '../../src/viewer';
+import {viewerForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 
 describe('Resource', () => {
-
   let sandbox;
   let element;
   let elementMock;
+  let attributes;
   let resources;
   let resource;
   let viewportMock;
@@ -34,10 +34,12 @@ describe('Resource', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
+    attributes = {};
     element = {
       ownerDocument: {defaultView: window},
       tagName: 'AMP-AD',
       style: {},
+      hasAttribute: name => (name in attributes),
       isBuilt: () => false,
       isUpgraded: () => false,
       prerenderAllowed: () => false,
@@ -53,9 +55,19 @@ describe('Resource', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
+      disconnectedCallback: () => {},
       togglePlaceholder: () => sandbox.spy(),
       getPriority: () => 2,
       dispatchCustomEvent: () => {},
+      fakeComputedStyle: {
+        marginTop: '1px',
+        marginRight: '2px',
+        marginBottom: '3px',
+        marginLeft: '4px',
+      },
+      nodeType: 1,
+      removeAttribute: () => {},
+      setAttribute: () => {},
     };
     elementMock = sandbox.mock(element);
 
@@ -64,6 +76,14 @@ describe('Resource', () => {
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     viewportMock = sandbox.mock(resources.viewport_);
+
+    resources.win = {
+      document,
+      getComputedStyle: el => {
+        return el.fakeComputedStyle ?
+            el.fakeComputedStyle : window.getComputedStyle(el);
+      },
+    };
   });
 
   afterEach(() => {
@@ -104,6 +124,18 @@ describe('Resource', () => {
     expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
   });
 
+  it('should not build if permission is not granted', () => {
+    let permission = false;
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    sandbox.stub(resources, 'grantBuildPermission', () => permission);
+    resource.build();
+    expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+
+    permission = true;
+    resource.build();
+    expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+  });
+
   it('should blacklist on build failure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').throws('Failed').once();
@@ -140,10 +172,7 @@ describe('Resource', () => {
         return false;
       },
     };
-    resource.resources_ = {
-      win: window,
-      getViewport: () => viewport,
-    };
+    resource.resources_.getViewport = () => viewport;
     expect(() => {
       resource.measure();
     }).to.not.throw();
@@ -305,6 +334,61 @@ describe('Resource', () => {
     expect(resource.isFixed()).to.be.true;
   });
 
+  describe('placeholder measure', () => {
+    let rect;
+
+    beforeEach(() => {
+      attributes['placeholder'] = '';
+      element.parentElement = document.createElement('amp-iframe');
+      element.parentElement.__AMP__RESOURCE = {};
+      elementMock.expects('isUpgraded').returns(true).atLeast(1);
+      elementMock.expects('build').once();
+      resource = new Resource(1, element, resources);
+      resource.build();
+
+      rect = {left: 11, top: 12, width: 111, height: 222};
+    });
+
+    it('should measure placeholder with stubbed parent', () => {
+      elementMock.expects('getBoundingClientRect').returns(rect).once();
+      resource.measure();
+
+      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.hasBeenMeasured()).to.be.true;
+    });
+
+    it('should NOT measure placeholder with unstubbed parent', () => {
+      // Parent is not stubbed yet, w/o __AMP__RESOURCE.
+      delete element.parentElement.__AMP__RESOURCE;
+
+      elementMock.expects('getBoundingClientRect').never();
+      resource.measure();
+
+      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+      expect(resource.hasBeenMeasured()).to.be.false;
+    });
+
+    it('should support abnormal case with no parent', () => {
+      delete element.parentElement;
+
+      elementMock.expects('getBoundingClientRect').returns(rect).once();
+      resource.measure();
+
+      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.hasBeenMeasured()).to.be.true;
+    });
+
+    it('should support abnormal case with non-AMP parent', () => {
+      element.parentElement = document.createElement('div');
+
+      elementMock.expects('getBoundingClientRect').returns(rect).once();
+      resource.measure();
+
+      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.hasBeenMeasured()).to.be.true;
+    });
+  });
+
   it('should hide and update layout box on collapse', () => {
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
     resource.isFixed_ = true;
@@ -313,12 +397,40 @@ describe('Resource', () => {
           return data.width == 0 && data.height == 0;
         }))
         .once();
-
+    const owner = {
+      collapsedCallback: sandbox.spy(),
+    };
+    sandbox.stub(resource, 'getOwner', () => {
+      return owner;
+    });
     resource.completeCollapse();
     expect(resource.element.style.display).to.equal('none');
     expect(resource.getLayoutBox().width).to.equal(0);
     expect(resource.getLayoutBox().height).to.equal(0);
     expect(resource.isFixed()).to.be.false;
+    expect(owner.collapsedCallback).to.be.calledOnce;
+  });
+
+  it('should show and request measure on expand', () => {
+    resource.element.style.display = 'none';
+    resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
+    resource.isFixed_ = false;
+    resource.requestMeasure = sandbox.stub();
+
+    resource.completeExpand();
+    expect(resource.element.style.display).to.not.equal('none');
+    expect(resource.requestMeasure).to.be.calledOnce;
+  });
+
+  it('should show and request measure on expand', () => {
+    resource.element.style.display = 'none';
+    resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
+    resource.isFixed_ = false;
+    resource.requestMeasure = sandbox.stub();
+
+    resource.completeExpand();
+    expect(resource.element.style.display).to.not.equal('none');
+    expect(resource.requestMeasure).to.be.calledOnce;
   });
 
 
@@ -490,16 +602,34 @@ describe('Resource', () => {
 
   it('should change size and update state', () => {
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    elementMock.expects('changeSize').withExactArgs(111, 222).once();
-    resource.changeSize(111, 222);
+    elementMock.expects('changeSize').withExactArgs(111, 222,
+        {top: 1, right: 2, bottom: 3, left: 4}).once();
+    resource.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
     expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
   });
 
   it('should change size but not state', () => {
     resource.state_ = ResourceState.NOT_BUILT;
-    elementMock.expects('changeSize').withExactArgs(111, 222).once();
-    resource.changeSize(111, 222);
+    elementMock.expects('changeSize').withExactArgs(111, 222,
+        {top: 1, right: 2, bottom: 3, left: 4}).once();
+    resource.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+  });
+
+  it('should update priority', () => {
+    expect(resource.getPriority()).to.equal(2);
+
+    resource.updatePriority(2);
+    expect(resource.getPriority()).to.equal(2);
+
+    resource.updatePriority(3);
+    expect(resource.getPriority()).to.equal(3);
+
+    resource.updatePriority(1);
+    expect(resource.getPriority()).to.equal(1);
+
+    resource.updatePriority(0);
+    expect(resource.getPriority()).to.equal(0);
   });
 
 
@@ -536,12 +666,14 @@ describe('Resource', () => {
       const parent = {
         ownerDocument: {defaultView: window},
         tagName: 'PARENT',
+        hasAttribute: () => false,
         isBuilt: () => false,
         contains: () => true,
       };
       child = {
         ownerDocument: {defaultView: window},
         tagName: 'CHILD',
+        hasAttribute: () => false,
         isBuilt: () => false,
         contains: () => true,
         parentElement: parent,
@@ -549,6 +681,7 @@ describe('Resource', () => {
       grandChild = {
         ownerDocument: {defaultView: window},
         tagName: 'GRANDCHILD',
+        hasAttribute: () => false,
         isBuilt: () => false,
         contains: () => true,
         getElementsByClassName: () => {return [];},
@@ -724,6 +857,14 @@ describe('Resource', () => {
         expect(resource.isInViewport_).to.equal(false);
         expect(resource.paused_).to.equal(true);
       });
+
+      it('should call disconnectedCallback on remove for built ele', () => {
+        expect(Resource.forElementOptional(resource.element))
+            .to.equal(resource);
+        elementMock.expects('disconnectedCallback').once();
+        resource.disconnect();
+        expect(Resource.forElementOptional(resource.element)).to.not.exist;
+      });
     });
   });
 
@@ -747,43 +888,6 @@ describe('Resource', () => {
       resource.resume();
     });
   });
-
-  describe('getResourcesInViewport', () => {
-    let resource1;
-    let resource2;
-
-    beforeEach(() => {
-      resource1 = {
-        hasOwner: () => false,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        prerenderAllowed: () => true,
-        overlaps: () => true,
-      };
-      resource2 = {
-        hasOwner: () => false,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        prerenderAllowed: () => true,
-        overlaps: () => false,
-      };
-      resources.resources_ = [resource1, resource2];
-    });
-
-    it('should return a subset of resources that are currently ' +
-       'in the viewport', () => {
-      expect(resources.get().length).to.equal(2);
-      expect(resources.getResourcesInViewport().length).to.equal(1);
-    });
-
-    it('should not return resources that are not allowed to prerender if ' +
-       'in prerender mode', () => {
-      resource1.prerenderAllowed = () => false;
-      expect(resources.get().length).to.equal(2);
-      expect(resources.getResourcesInViewport(false).length).to.equal(1);
-      expect(resources.getResourcesInViewport(true).length).to.equal(0);
-    });
-  });
 });
 
 describe('Resource renderOutsideViewport', () => {
@@ -800,6 +904,7 @@ describe('Resource renderOutsideViewport', () => {
     element = {
       ownerDocument: {defaultView: window},
       tagName: 'AMP-AD',
+      hasAttribute: () => false,
       isBuilt: () => false,
       isUpgraded: () => false,
       prerenderAllowed: () => false,

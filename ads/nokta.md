@@ -34,7 +34,7 @@ limitations under the License.
 
 For semantics of configuration, please see ad network documentation.
 
-### Pubmine Required parameters
+### Required parameters
 
 | Parameter     | Description |
 |:------------- |:-------------|

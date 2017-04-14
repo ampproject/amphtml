@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>An <code>amp-o2-player</code> component displays the AOL O2Player.</td>
+    <td>Displays the AOL O2Player.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
@@ -28,6 +28,10 @@ limitations under the License.
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-o2-player" src="https://cdn.ampproject.org/v0/amp-o2-player-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+   <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
@@ -54,30 +58,36 @@ Example:
 
 ## Attributes
 
-**data-pid**
+**data-pid** (required)
 
-The O2Player player id.
+The Player ID for the O2Player.
 
-**data-bcid**
+**data-bcid** (required)
 
-The O2Player bcid.
+The Buyer Company ID (bcid) for the O2Player.
 
 **data-bid**
 
-The O2Player bid.
+The Playlist ID (bid) for the O2Player.
 
-**data-vid**
+**data-vid** 
 
-The O2Player video id.
+The Video ID (vid) for the O2Player.
 
 **data-macros**
 
-The O2Player macros.
+The macros for the O2Player.
 
-## Validation errors
+**common attributes**
 
-The following lists validation errors specific to the `amp-o2-player` tag
-(see also `amp-o2-player` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/0.1/validator-amp-o2-player.protoascii)):
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Validation 
+
+See [amp-o2-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/0.1/validator-amp-o2-player.protoascii) in the AMP validator specification.
+
+The following lists validation errors specific to the `amp-o2-player` tag:
+
 
 <table>
   <tr>

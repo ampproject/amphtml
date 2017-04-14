@@ -19,7 +19,7 @@ import {listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {urls} from '../../../src/config';
 
 /** @const */
@@ -33,17 +33,17 @@ const RETURN_URL_REGEX = new RegExp('RETURN_URL');
  * Opens the login dialog for the specified URL. If the login dialog succeeds,
  * the returned promised is resolved with the dialog's response. Otherwise, the
  * returned promise is rejected.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string|!Promise<string>} urlOrPromise
  * @return {!Promise<string>}
  */
-export function openLoginDialog(win, urlOrPromise) {
-  const viewer = viewerForDoc(win.document);
+export function openLoginDialog(ampdoc, urlOrPromise) {
+  const viewer = viewerForDoc(ampdoc);
   const overrideDialog = parseInt(viewer.getParam('dialog'), 10);
   if (overrideDialog) {
     return new ViewerLoginDialog(viewer, urlOrPromise).open();
   }
-  return new WebLoginDialog(win, viewer, urlOrPromise).open();
+  return new WebLoginDialog(ampdoc.win, viewer, urlOrPromise).open();
 }
 
 
@@ -79,9 +79,9 @@ class ViewerLoginDialog {
     return urlPromise.then(url => {
       const loginUrl = buildLoginUrl(url, 'RETURN_URL');
       dev().fine(TAG, 'Open viewer dialog: ', loginUrl);
-      return this.viewer.sendMessage('openDialog', {
+      return this.viewer.sendMessageAwaitResponse('openDialog', {
         'url': loginUrl,
-      }, true);
+      });
     });
   }
 }

@@ -20,44 +20,32 @@
  */
 
 import '../../third_party/babel/custom-babel-helpers';
-import {dev, initLogConstructor} from '../../src/log';
-
-initLogConstructor();
+import {dev, initLogConstructor, setReportError} from '../../src/log';
+import {reportError} from '../../src/error';
+import {InaboxMessagingHost} from './inabox-messaging-host';
 
 const TAG = 'inabox-host';
-
 run(self);
 
+/**
+ * @param win {!Window}
+ */
 function run(win) {
-  win['ampInaboxPendingMessages'].forEach(message => {
-    processMessage(win, message);
-  });
-
-  win.addEventListener('message', processMessage.bind(null, win));
-}
-
-function processMessage(win, message) {
-  if (!isInaboxMessage(message.data)) {
+  // Prevent double initialization
+  if (win['ampInaboxInitialized']) {
+    dev().info(TAG, 'Skip a 2nd attempt of initializing AMP inabox host.');
     return;
   }
-  const iframeElement =
-      getFrameElement(win, win['ampInaboxIframes'], message.source);
-  // TODO: build a map from source to iframeElement.
-  dev().info(TAG, '[' + iframeElement.id + '] ' + message.data);
-}
 
-function getFrameElement(win, iframes, source) {
-  while (source.parent !== win && source !== win.top) {
-    source = source.parent;
-  }
+  win['ampInaboxInitialized'] = true;
+  initLogConstructor();
+  setReportError(reportError);
 
-  for (let i = 0; i < iframes.length; i++) {
-    if (iframes[i].contentWindow === source) {
-      return iframes[i];
-    }
-  }
-}
+  const host = new InaboxMessagingHost(win, win['ampInaboxIframes']);
 
-function isInaboxMessage(message) {
-  return typeof message === 'string' && message.indexOf('amp-inabox:') == 0;
+  win['ampInaboxPendingMessages'].forEach(message => {
+    host.processMessage(message);
+  });
+
+  win.addEventListener('message', host.processMessage.bind(host));
 }

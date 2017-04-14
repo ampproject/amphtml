@@ -16,11 +16,13 @@
 
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
-import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 
-describe('AccessServerAdapter', () => {
 
-  let sandbox;
+describes.realWin('AccessServerAdapter', {amp: true}, env => {
+  let win;
+  let document;
+  let ampdoc;
   let clock;
   let validConfig;
   let context;
@@ -28,8 +30,10 @@ describe('AccessServerAdapter', () => {
   let meta;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
+    win = env.win;
+    document = win.document;
+    ampdoc = env.ampdoc;
+    clock = lolex.install(win);
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -37,7 +41,7 @@ describe('AccessServerAdapter', () => {
     };
 
     meta = document.createElement('meta');
-    meta.setAttribute('name', 'i-amp-access-state');
+    meta.setAttribute('name', 'i-amphtml-access-state');
     meta.setAttribute('content', 'STATE1');
     document.head.appendChild(meta);
 
@@ -50,16 +54,12 @@ describe('AccessServerAdapter', () => {
 
   afterEach(() => {
     contextMock.verify();
-    sandbox.restore();
-    if (meta.parentNode) {
-      document.head.removeChild(meta);
-    }
   });
 
 
   describe('config', () => {
     it('should load valid config', () => {
-      const adapter = new AccessServerAdapter(window, validConfig, context);
+      const adapter = new AccessServerAdapter(ampdoc, validConfig, context);
       expect(adapter.clientAdapter_.authorizationUrl_).to
           .equal('https://acme.com/a?rid=READER_ID');
       expect(adapter.clientAdapter_.pingbackUrl_).to
@@ -73,13 +73,13 @@ describe('AccessServerAdapter', () => {
     it('should fail if config is invalid', () => {
       delete validConfig['authorization'];
       expect(() => {
-        new AccessServerAdapter(window, validConfig, context);
+        new AccessServerAdapter(ampdoc, validConfig, context);
       }).to.throw(/"authorization" URL must be specified/);
     });
 
-    it('should tolerate when i-amp-access-state is missing', () => {
+    it('should tolerate when i-amphtml-access-state is missing', () => {
       document.head.removeChild(meta);
-      const adapter = new AccessServerAdapter(window, validConfig, context);
+      const adapter = new AccessServerAdapter(ampdoc, validConfig, context);
       expect(adapter.serverState_).to.be.null;
     });
   });
@@ -94,7 +94,7 @@ describe('AccessServerAdapter', () => {
     let targetElement1, targetElement2;
 
     beforeEach(() => {
-      adapter = new AccessServerAdapter(window, validConfig, context);
+      adapter = new AccessServerAdapter(ampdoc, validConfig, context);
       xhrMock = sandbox.mock(adapter.xhr_);
 
       clientAdapter = {
@@ -119,11 +119,11 @@ describe('AccessServerAdapter', () => {
       responseDoc.appendChild(responseAccessData);
 
       targetElement1 = document.createElement('div');
-      targetElement1.setAttribute('i-amp-access-id', '1/1');
+      targetElement1.setAttribute('i-amphtml-access-id', '1/1');
       document.body.appendChild(targetElement1);
 
       targetElement2 = document.createElement('div');
-      targetElement2.setAttribute('i-amp-access-id', '1/2');
+      targetElement2.setAttribute('i-amphtml-access-id', '1/2');
       document.body.appendChild(targetElement2);
     });
 
@@ -164,7 +164,7 @@ describe('AccessServerAdapter', () => {
             }))
             .once();
         const request = {
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'vars': {
             'READER_ID': 'reader1',
@@ -178,6 +178,7 @@ describe('AccessServerAdapter', () => {
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
+              requireAmpResponseSourceOrigin: false,
             })
             .returns(Promise.resolve(responseDoc))
             .once();
@@ -188,7 +189,7 @@ describe('AccessServerAdapter', () => {
         return adapter.authorize().then(response => {
           expect(response).to.exist;
           expect(response.access).to.equal('A');
-          expect(replaceSectionsStub.callCount).to.equal(1);
+          expect(replaceSectionsStub).to.be.calledOnce;
         });
       });
 
@@ -204,7 +205,7 @@ describe('AccessServerAdapter', () => {
             }))
             .once();
         const request = {
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'vars': {
             'READER_ID': 'reader1',
@@ -218,6 +219,7 @@ describe('AccessServerAdapter', () => {
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
+              requireAmpResponseSourceOrigin: false,
             })
             .returns(Promise.reject('intentional'))
             .once();
@@ -240,7 +242,7 @@ describe('AccessServerAdapter', () => {
             }))
             .once();
         const request = {
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'vars': {
             'READER_ID': 'reader1',
@@ -254,6 +256,7 @@ describe('AccessServerAdapter', () => {
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
+              requireAmpResponseSourceOrigin: false,
             })
             .returns(new Promise(() => {}))  // Never resolved.
             .once();
@@ -270,26 +273,26 @@ describe('AccessServerAdapter', () => {
 
       it('should replace sections', () => {
         const responseElement1 = document.createElement('div');
-        responseElement1.setAttribute('i-amp-access-id', '1/1');
+        responseElement1.setAttribute('i-amphtml-access-id', '1/1');
         responseElement1.textContent = 'a1';
         responseDoc.appendChild(responseElement1);
 
         const responseElement2 = document.createElement('div');
-        responseElement2.setAttribute('i-amp-access-id', '1/2');
+        responseElement2.setAttribute('i-amphtml-access-id', '1/2');
         responseElement2.textContent = 'a2';
         responseDoc.appendChild(responseElement2);
 
         const unknownResponseElement3 = document.createElement('div');
-        unknownResponseElement3.setAttribute('i-amp-access-id', 'a3');
+        unknownResponseElement3.setAttribute('i-amphtml-access-id', 'a3');
         unknownResponseElement3.textContent = 'a3';
         responseDoc.appendChild(unknownResponseElement3);
 
         return adapter.replaceSections_(responseDoc).then(() => {
-          expect(document.querySelector('[i-amp-access-id="1/1"]').textContent)
-              .to.equal('a1');
-          expect(document.querySelector('[i-amp-access-id="1/2"]').textContent)
-              .to.equal('a2');
-          expect(document.querySelector('[i-amp-access-id=a3]')).to.be.null;
+          expect(document.querySelector('[i-amphtml-access-id="1/1"]')
+              .textContent).to.equal('a1');
+          expect(document.querySelector('[i-amphtml-access-id="1/2"]')
+              .textContent).to.equal('a2');
+          expect(document.querySelector('[i-amphtml-access-id=a3]')).to.be.null;
         });
       });
     });

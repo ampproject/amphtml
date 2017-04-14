@@ -15,60 +15,85 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {Layout} from '../src/layout';
-import {urlReplacementsForDoc} from '../src/url-replacements';
+import {dev, user} from '../src/log';
 import {registerElement} from '../src/custom-element';
-import {toggle} from '../src/style';
-import {user} from '../src/log';
+import {timerFor} from '../src/services';
+import {urlReplacementsForDoc} from '../src/services';
+import {viewerForDoc} from '../src/services';
+
+const TAG = 'amp-pixel';
+
 
 /**
- * @param {!Window} win Destination window for the new element.
- * @this {undefined}  // Make linter happy
- * @return {undefined}
+ * A simple analytics instrument. Fires as an impression signal.
  */
-export function installPixel(win) {
-  class AmpPixel extends BaseElement {
+export class AmpPixel extends BaseElement {
 
-    /** @override */
-    getPriority() {
-      // Loads after other content.
-      return 1;
-    }
+  /** @override */
+  constructor(element) {
+    super(element);
 
-    /** @override */
-    isLayoutSupported(layout) {
-      return layout == Layout.FIXED;
-    }
+    /** @private {?Promise<!Image>} */
+    this.triggerPromise_ = null;
+  }
 
-    /** @override */
-    buildCallback() {
-      // Consider the element invisible.
-      this.element.setAttribute('aria-hidden', 'true');
-    }
+  /** @override */
+  isLayoutSupported(unusedLayout) {
+    // No matter what layout is: the pixel is always non-displayed.
+    return true;
+  }
 
-    /** @override */
-    layoutCallback() {
-      // Now that we are rendered, stop rendering the element to reduce
-      // resource consumption.
-      toggle(this.element, false);
+  /** @override */
+  buildCallback() {
+    // Element is invisible.
+    this.element.setAttribute('aria-hidden', 'true');
+
+    // Trigger, but only when visible.
+    const viewer = viewerForDoc(this.getAmpDoc());
+    viewer.whenFirstVisible().then(this.trigger_.bind(this));
+  }
+
+  /**
+   * Triggers the signal.
+   * @private
+   */
+  trigger_() {
+    // Delay(1) provides a rudimentary "idle" signal.
+    // TODO(dvoytenko): use an improved idle signal when available.
+    this.triggerPromise_ = timerFor(this.win).promise(1).then(() => {
       const src = this.element.getAttribute('src');
-      return urlReplacementsForDoc(this.getAmpDoc())
-          .expandAsync(this.assertSource(src))
+      if (!src) {
+        return;
+      }
+      return urlReplacementsForDoc(this.element)
+          .expandAsync(this.assertSource_(src))
           .then(src => {
             const image = new Image();
             image.src = src;
-            this.element.appendChild(image);
+            dev().info(TAG, 'pixel triggered: ', src);
+            return image;
           });
-    }
+    });
+  }
 
-    assertSource(src) {
-      user().assert(
-          /^(https\:\/\/|\/\/)/i.test(src),
-          'The <amp-pixel> src attribute must start with ' +
-          '"https://" or "//". Invalid value: ' + src);
-      return src;
-    }
-  };
+  /**
+   * @param {?string} src
+   * @return {string}
+   * @private
+   */
+  assertSource_(src) {
+    user().assert(
+        /^(https\:\/\/|\/\/)/i.test(src),
+        'The <amp-pixel> src attribute must start with ' +
+        '"https://" or "//". Invalid value: ' + src);
+    return /** @type {string} */ (src);
+  }
+}
 
-  registerElement(win, 'amp-pixel', AmpPixel);
+
+/**
+ * @param {!Window} win Destination window for the new element.
+ */
+export function installPixel(win) {
+  registerElement(win, TAG, AmpPixel);
 }

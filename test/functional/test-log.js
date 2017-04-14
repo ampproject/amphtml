@@ -21,6 +21,7 @@ import {
   dev,
   isUserErrorMessage,
   rethrowAsync,
+  setReportError,
   user,
 } from '../../src/log';
 import * as sinon from 'sinon';
@@ -105,12 +106,12 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(4);
+      expect(logSpy).to.have.callCount(4);
       expect(logSpy.args[0][1]).to.equal('[fine]');
       expect(logSpy.args[1][1]).to.equal('[info]');
       expect(logSpy.args[2][1]).to.equal('[warn]');
       expect(logSpy.args[3][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should log correctly for INFO', () => {
@@ -122,11 +123,11 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(3);
+      expect(logSpy).to.have.callCount(3);
       expect(logSpy.args[0][1]).to.equal('[info]');
       expect(logSpy.args[1][1]).to.equal('[warn]');
       expect(logSpy.args[2][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should log correctly for WARN', () => {
@@ -138,10 +139,10 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(2);
+      expect(logSpy).to.have.callCount(2);
       expect(logSpy.args[0][1]).to.equal('[warn]');
       expect(logSpy.args[1][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should log correctly for ERROR', () => {
@@ -153,81 +154,70 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(1);
+      expect(logSpy).to.be.calledOnce;
       expect(logSpy.args[0][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should report ERROR even when OFF and coallesce messages', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
-      win.setTimeout = () => {};
-      let timeoutCallback;
-      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
-        timeoutCallback = callback;
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
       });
 
       log.error('TAG', 'intended', new Error('test'));
 
-      expect(logSpy.callCount).to.equal(0);
-      expect(timeoutStub.callCount).to.equal(1);
-      expect(timeoutCallback).to.exist;
-      try {
-        timeoutCallback();
-        throw new Error('must not be here');
-      } catch (e) {
-        expect(e).to.be.instanceof(Error);
-        expect(e.message).to.match(/intended\: test/);
-        expect(isUserErrorMessage(e.message)).to.be.false;
-      }
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/intended\: test/);
+      expect(reportedError.expected).to.be.undefined;
+      expect(isUserErrorMessage(reportedError.message)).to.be.false;
+    });
+
+    it('should report ERROR and mark with expected flag', () => {
+      const log = new Log(win, RETURNS_OFF);
+      expect(log.level_).to.equal(LogLevel.OFF);
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
+      });
+
+      log.expectedError('TAG', 'intended', new Error('test'));
+
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/intended\: test/);
+      expect(reportedError.expected).to.be.true;
     });
 
     it('should report ERROR when OFF from a single message', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
-      win.setTimeout = () => {};
-      let timeoutCallback;
-      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
-        timeoutCallback = callback;
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
       });
 
       log.error('TAG', 'intended');
 
-      expect(logSpy.callCount).to.equal(0);
-      expect(timeoutStub.callCount).to.equal(1);
-      expect(timeoutCallback).to.exist;
-      try {
-        timeoutCallback();
-        throw new Error('must not be here');
-      } catch (e) {
-        expect(e).to.be.instanceof(Error);
-        expect(e.message).to.match(/intended/);
-        expect(isUserErrorMessage(e.message)).to.be.false;
-      }
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/intended/);
+      expect(isUserErrorMessage(reportedError.message)).to.be.false;
     });
 
     it('should report ERROR when OFF from a single error object', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
-      win.setTimeout = () => {};
-      let timeoutCallback;
-      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
-        timeoutCallback = callback;
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
       });
 
       log.error('TAG', new Error('test'));
 
-      expect(logSpy.callCount).to.equal(0);
-      expect(timeoutStub.callCount).to.equal(1);
-      expect(timeoutCallback).to.exist;
-      try {
-        timeoutCallback();
-        throw new Error('must not be here');
-      } catch (e) {
-        expect(e).to.be.instanceof(Error);
-        expect(e.message).to.match(/test/);
-        expect(isUserErrorMessage(e.message)).to.be.false;
-      }
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/test/);
+      expect(isUserErrorMessage(reportedError.message)).to.be.false;
     });
   });
 
@@ -302,7 +292,8 @@ describe('Logging', () => {
       log = new Log(win, RETURNS_FINE, USER_ERROR_SENTINEL);
     });
 
-    it('should fail', () => {
+    // TODO(amphtml): Unskip when #8387 is fixed.
+    it.skip('should fail', () => {
       expect(function() {
         log.assert(false, 'xyz');
       }).to.throw(/xyz/);
@@ -382,8 +373,15 @@ describe('Logging', () => {
       expect(false).to.be.true;
     });
 
+    it('should create expected error from message', () => {
+      const error = log.createExpectedError('test');
+      expect(error).to.be.instanceof(Error);
+      expect(error.expected).to.be.true;
+    });
+
     it('should create suffixed errors from message', () => {
       const error = log.createError('test');
+      expect(error.expected).to.be.undefined;
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
       expect(error.message).to.contain('test');
@@ -405,6 +403,15 @@ describe('Logging', () => {
       expect(message.indexOf(USER_ERROR_SENTINEL)).to.not.equal(-1);
       message = message.replace(USER_ERROR_SENTINEL, '');
       expect(message.indexOf(USER_ERROR_SENTINEL)).to.equal(-1);
+    });
+
+    it('should strip suffix if not available', () => {
+      const error = log.createError(new Error('test'));
+      expect(isUserErrorMessage(error.message)).to.be.true;
+
+      const noSuffixLog = new Log(win, RETURNS_FINE);
+      noSuffixLog.createError(error);
+      expect(isUserErrorMessage(error.message)).to.be.false;
     });
 
     it('should create other-suffixed errors', () => {
@@ -435,6 +442,35 @@ describe('Logging', () => {
     });
   });
 
+  describe('assertString', () => {
+    let log;
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('should return non-empty string', () => {
+      expect(log.assertString('a')).to.equal('a');
+    });
+
+    it('should return empty string', () => {
+      expect(log.assertString('')).to.equal('');
+    });
+
+    it('should fail with on non string', () => {
+      expect(() => log.assertString({}))
+          .to.throw('String expected: ');
+      expect(() => log.assertString(3))
+          .to.throw('String expected: ');
+      expect(() => log.assertString(null))
+          .to.throw('String expected: ');
+      expect(() => log.assertString(undefined))
+          .to.throw('String expected: ');
+      expect(() => log.assertString([]))
+          .to.throw('String expected: ');
+    });
+  });
+
   describe('assertNumber', () => {
     let log;
 
@@ -444,12 +480,20 @@ describe('Logging', () => {
 
     it('should return the number value', () => {
       expect(log.assertNumber(3)).to.equal(3);
-      const nan = log.assertNumber(NaN);
-      expect(nan).to.not.equal(nan);
+    });
+
+    it('should return zero', () => {
+      expect(log.assertNumber(0)).to.equal(0);
+    });
+
+    it('should return NaN', () => {
+      expect(log.assertNumber(NaN)).to.be.NaN;
     });
 
     it('should fail with on non number', () => {
       expect(() => log.assertNumber({}))
+          .to.throw('Number expected: ');
+      expect(() => log.assertNumber('a'))
           .to.throw('Number expected: ');
       expect(() => log.assertNumber(null))
           .to.throw('Number expected: ');
@@ -501,7 +545,7 @@ describe('Logging', () => {
       rethrowAsync('intended');
       expect(() => {
         clock.tick(1);
-      }).to.throw(Error, /^intended$/);
+      }).to.throw(Error, /^intended/);
     });
 
     it('should rethrow a single error', () => {
@@ -514,7 +558,7 @@ describe('Logging', () => {
         error = e;
       }
       expect(error).to.equal(orig);
-      expect(error.message).to.equal('intended');
+      expect(error.message).to.match(/^intended/);
     });
 
     it('should rethrow error with many messages', () => {
@@ -525,7 +569,7 @@ describe('Logging', () => {
       } catch (e) {
         error = e;
       }
-      expect(error.message).to.equal('first second third');
+      expect(error.message).to.match(/^first second third/);
     });
 
     it('should rethrow error with original error and messages', () => {

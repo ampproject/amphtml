@@ -16,20 +16,20 @@
 
 import {Observable} from '../observable';
 import {findIndex} from '../utils/array';
+import {map} from '../utils/object';
 import {documentStateFor} from './document-state';
-import {getServiceForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {dev} from '../log';
+import {isIframed} from '../dom';
 import {
-  getSourceUrl,
   parseQueryString,
   parseUrl,
   removeFragment,
   isProxyOrigin,
 } from '../url';
-import {timerFor} from '../timer';
+import {timerFor} from '../services';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
-import {tryParseJson} from '../json';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -70,7 +70,6 @@ const TRUSTED_VIEWER_HOSTS = [
   /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
 ];
 
-
 /**
  * An AMP representation of the Viewer. This class doesn't do any work itself
  * but instead delegates everything to the actual viewer. This class and the
@@ -92,7 +91,7 @@ export class Viewer {
     this.win = ampdoc.win;
 
     /** @private @const {boolean} */
-    this.isIframed_ = (this.win.parent && this.win.parent != this.win);
+    this.isIframed_ = isIframed(this.win);
 
     /** @const {!./document-state.DocumentState} */
     this.docState_ = documentStateFor(this.win);
@@ -112,20 +111,14 @@ export class Viewer {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {number} */
-    this.paddingTop_ = 0;
+    /** @private {!Object<string, !Observable<!JSONType>>} */
+    this.messageObservables_ = map();
 
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
 
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
-
-    /** @private {!Observable<!JSONType>} */
-    this.viewportObservable_ = new Observable();
-
-    /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
-    this.historyPoppedObservable_ = new Observable();
 
     /** @private {!Observable<!JSONType>} */
     this.broadcastObservable_ = new Observable();
@@ -155,6 +148,9 @@ export class Viewer {
 
     /** @private {?time} */
     this.firstVisibleTime_ = null;
+
+    /** @private {?time} */
+    this.lastVisibleTime_ = null;
 
     /** @private {?Function} */
     this.messagingReadyResolver_ = null;
@@ -203,10 +199,6 @@ export class Viewer {
     this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
         this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
-
-    this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
-        this.paddingTop_;
-    dev().fine(TAG_, '- padding-top:', this.paddingTop_);
 
     /**
      * Whether the AMP document is embedded in a webview.
@@ -333,7 +325,7 @@ export class Viewer {
           } else {
             resolve(this.win.document.referrer);
             if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
-              dev().error(TAG_, 'Untrusted viewer referrer override: ' +
+              dev().expectedError(TAG_, 'Untrusted viewer referrer override: ' +
                   this.unconfirmedReferrerUrl_ + ' at ' +
                   this.messagingOrigin_);
               this.unconfirmedReferrerUrl_ = this.win.document.referrer;
@@ -397,9 +389,11 @@ export class Viewer {
    */
   onVisibilityChange_() {
     if (this.isVisible()) {
+      const now = Date.now();
       if (!this.firstVisibleTime_) {
-        this.firstVisibleTime_ = Date.now();
+        this.firstVisibleTime_ = now;
       }
+      this.lastVisibleTime_ = now;
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
     }
@@ -447,18 +441,10 @@ export class Viewer {
       this.sendMessage('a2a', {
         url,
         requestedBy,
-      }, /* awaitResponse */ false);
+      });
     } else {
       this.win.top.location.href = url;
     }
-  }
-
-  /**
-   * Whether the document is embedded in a iframe.
-   * @return {boolean}
-   */
-  isIframed() {
-    return this.isIframed_;
   }
 
   /**
@@ -596,20 +582,21 @@ export class Viewer {
   }
 
   /**
+   * Returns the time when the document has become visible for the last time.
+   * If document has not yet become visible, the returned value is `null`.
+   * @return {?time}
+   */
+  getLastVisibleTime() {
+    return this.lastVisibleTime_;
+  }
+
+  /**
    * How much the viewer has requested the runtime to prerender the document.
    * The values are in number of screens.
    * @return {number}
    */
   getPrerenderSize() {
     return this.prerenderSize_;
-  }
-
-  /**
-   * Returns the top padding requested by the viewer.
-   * @return {number}
-   */
-  getPaddingTop() {
-    return this.paddingTop_;
   }
 
   /**
@@ -712,171 +699,18 @@ export class Viewer {
   }
 
   /**
-   * Adds a "viewport" event listener for viewer events.
+   * Adds a eventType listener for viewer events.
+   * @param {string} eventType
    * @param {function(!JSONType)} handler
    * @return {!UnlistenDef}
    */
-  onViewportEvent(handler) {
-    return this.viewportObservable_.add(handler);
-  }
-
-  /**
-   * Adds a "history popped" event listener for viewer events.
-   * @param {function(ViewerHistoryPoppedEventDef)} handler
-   * @return {!UnlistenDef}
-   */
-  onHistoryPoppedEvent(handler) {
-    return this.historyPoppedObservable_.add(handler);
-  }
-
-  /**
-   * Triggers "documentLoaded" event for the viewer.
-   * TODO: move this to resources-impl, and use sendMessage()
-   */
-  postDocumentReady() {
-    this.sendMessageCancelUnsent('documentLoaded', {
-      title: this.win.document.title,
-      sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
-    }, false);
-  }
-
-  /**
-   * Triggers "scroll" event for the viewer.
-   * @param {number} scrollTop
-   * TODO: move this to viewport-impl
-   */
-  postScroll(scrollTop) {
-    this.sendMessageCancelUnsent(
-        'scroll', {scrollTop}, false);
-  }
-
-  /**
-   * Requests full overlay mode from the viewer. Returns a promise that yields
-   * when the viewer has switched to full overlay mode.
-   * @return {!Promise}
-   * TODO: move this to viewport-impl and use sendMessage()
-   */
-  requestFullOverlay() {
-    return /** @type {!Promise} */ (
-        this.sendMessageCancelUnsent('requestFullOverlay', {}, true));
-  }
-
-  /**
-   * Requests to cancel full overlay mode from the viewer. Returns a promise
-   * that yields when the viewer has switched off full overlay mode.
-   * @return {!Promise}
-   * TODO: move this to viewport-impl and use sendMessage()
-   */
-  cancelFullOverlay() {
-    return /** @type {!Promise} */ (
-        this.sendMessageCancelUnsent('cancelFullOverlay', {}, true));
-  }
-
-  /**
-   * Triggers "pushHistory" event for the viewer.
-   * @param {number} stackIndex
-   * @return {!Promise}
-   * TODO: move this to history-impl and use sendMessage()
-   */
-  postPushHistory(stackIndex) {
-    return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
-        'pushHistory', {stackIndex}, true));
-  }
-
-  /**
-   * Triggers "popHistory" event for the viewer.
-   * @param {number} stackIndex
-   * @return {!Promise}
-   * TODO: move this to history-impl and use sendMessage()
-   */
-  postPopHistory(stackIndex) {
-    return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
-        'popHistory', {stackIndex}, true));
-  }
-
-  /**
-   * Get/set the Base CID from/to the viewer.
-   * @param {string=} opt_data Stringified JSON object {cid, time}.
-   * @return {!Promise<string|undefined>}
-   * TODO: move this to cid-impl
-   */
-  baseCid(opt_data) {
-    return this.isTrustedViewer().then(trusted => {
-      if (!trusted) {
-        return undefined;
-      }
-      const cidPromise = this.sendMessage('cid', opt_data, true)
-          .then(data => {
-            // For backward compatibility: #4029
-            if (data && !tryParseJson(data)) {
-              return JSON.stringify({
-                time: Date.now(), // CID returned from old API is always fresh
-                cid: data,
-              });
-            }
-            return data;
-          });
-      // Getting the CID may take some time (waits for JS file to
-      // load, might hit GC), but we do not wait indefinitely. Typically
-      // it should resolve in milli seconds.
-      return timerFor(this.win).timeoutPromise(10000, cidPromise, 'base cid')
-          .catch(error => {
-            dev().error(TAG_, error);
-            return undefined;
-          });
-    });
-  }
-
-  /**
-   * Get the fragment from the url or the viewer.
-   * Strip leading '#' in the fragment
-   * @return {!Promise<string>}
-   * TODO: move this to history-impl
-   */
-  getFragment() {
-    if (!this.isEmbedded_) {
-      let hash = this.win.location.hash;
-      /* Strip leading '#' */
-      hash = hash.substr(1);
-      return Promise.resolve(hash);
+  onMessage(eventType, handler) {
+    let observable = this.messageObservables_[eventType];
+    if (!observable) {
+      observable = new Observable();
+      this.messageObservables_[eventType] = observable;
     }
-    if (!this.hasCapability('fragment')) {
-      return Promise.resolve('');
-    }
-    return this.sendMessageCancelUnsent('fragment', undefined, true).then(
-        hash => {
-          if (!hash) {
-            return '';
-          }
-          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
-              'should start with #');
-          /* Strip leading '#' */
-          return hash.substr(1);
-        });
-  }
-
-  /**
-   * Update the fragment of the viewer if embedded in a viewer,
-   * otherwise update the page url fragment
-   * The fragment variable should contain leading '#'
-   * @param {string} fragment
-   * @return {!Promise}
-   * TODO: move this to history-impl, and use sendMessage()
-   */
-  updateFragment(fragment) {
-    dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
-        'should start with #');
-    if (!this.isEmbedded_) {
-      if (this.win.history.replaceState) {
-        this.win.history.replaceState({}, '', fragment);
-      }
-      return Promise.resolve();
-    }
-    if (!this.hasCapability('fragment')) {
-      return Promise.resolve();
-    }
-    return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
-        'fragment', {fragment}, true));
+    return observable.add(handler);
   }
 
   /**
@@ -888,21 +722,6 @@ export class Viewer {
    * @export
    */
   receiveMessage(eventType, data, unusedAwaitResponse) {
-    if (eventType == 'viewport') {
-      if (data['paddingTop'] !== undefined) {
-        this.paddingTop_ = data['paddingTop'];
-        this.viewportObservable_.fire(
-          /** @type {!JSONType} */ (data));
-        return Promise.resolve();
-      }
-      return undefined;
-    }
-    if (eventType == 'historyPopped') {
-      this.historyPoppedObservable_.fire({
-        newStackIndex: data['newStackIndex'],
-      });
-      return Promise.resolve();
-    }
     if (eventType == 'visibilitychange') {
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
@@ -914,6 +733,11 @@ export class Viewer {
     if (eventType == 'broadcast') {
       this.broadcastObservable_.fire(
           /** @type {!JSONType|undefined} */ (data));
+      return Promise.resolve();
+    }
+    const observable = this.messageObservables_[eventType];
+    if (observable) {
+      observable.fire(data);
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
@@ -931,7 +755,7 @@ export class Viewer {
     if (this.messageDeliverer_) {
       throw new Error('message channel can only be initialized once');
     }
-    if (!origin) {
+    if (origin == null) {
       throw new Error('message channel must have an origin');
     }
     dev().fine(TAG_, 'message channel established with origin: ', origin);
@@ -942,7 +766,7 @@ export class Viewer {
     }
     if (this.trustedViewerResolver_) {
       this.trustedViewerResolver_(
-          origin ? this.isTrustedViewerOrigin_(origin) : false);
+        origin ? this.isTrustedViewerOrigin_(origin) : false);
     }
     if (this.viewerOriginResolver_) {
       this.viewerOriginResolver_(origin || '');
@@ -963,44 +787,70 @@ export class Viewer {
   }
 
   /**
-   * Sends the message to the viewer. This method will wait for the messaging
-   * channel to be established. If the messaging channel times out, the
-   * promise will fail.
+   * Sends the message to the viewer without waiting for any response.
+   * If cancelUnsent is true, the previous message of the same message type will
+   * be canceled.
    *
    * This is a restricted API.
    *
    * @param {string} eventType
    * @param {*} data
-   * @param {boolean} awaitResponse
-   * @return {!Promise<*>|undefined} the response promise if awaitResponse is
-   *     true, otherwise undefined
+   * @param {boolean=} cancelUnsent
    */
-  sendMessage(eventType, data, awaitResponse) {
-    if (!this.messagingReadyPromise_) {
-      return Promise.reject(getChannelError());
-    }
-    return this.messagingReadyPromise_.then(() => {
-      return this.messageDeliverer_(eventType, data, awaitResponse);
-    });
+  sendMessage(eventType, data, cancelUnsent = false) {
+    this.sendMessageInternal_(eventType, data, cancelUnsent, false);
   }
 
   /**
-   * Sends the message to the viewer. This method queues up the message if the
-   * communication channel isn't established yet. The message will cancel an
-   * unsent message of the same type if seen in the queue.
+   * Sends the message to the viewer and wait for response.
+   * If cancelUnsent is true, the previous message of the same message type will
+   * be canceled.
+   *
+   * This is a restricted API.
    *
    * @param {string} eventType
    * @param {*} data
-   * @param {boolean} awaitResponse
-   * @return {?Promise<*>|undefined} the response promise if awaitResponse is
-   *     true, otherwise undefined
+   * @param {boolean=} cancelUnsent
+   * @return {!Promise<*>} the response promise
    */
-  sendMessageCancelUnsent(eventType, data, awaitResponse) {
+  sendMessageAwaitResponse(eventType, data, cancelUnsent = false) {
+    return this.sendMessageInternal_(eventType, data, cancelUnsent, true);
+  }
+
+  /**
+   * Sends the message to the viewer.
+   *
+   * @param {string} eventType
+   * @param {*} data
+   * @param {boolean} cancelUnsent
+   * @param {boolean} awaitResponse
+   * @return {!Promise<*>} the response promise
+   */
+  sendMessageInternal_(eventType, data, cancelUnsent, awaitResponse) {
     if (this.messageDeliverer_) {
-      return this.messageDeliverer_(eventType, data, awaitResponse);
+      // Certain message deliverers return fake "Promise" instances called
+      // "Thenables". Convert from these values into trusted Promise instances,
+      // assimilating with the resolved (or rejected) internal value.
+      return /** @type {!Promise<*>} */ (Promise.resolve(this.messageDeliverer_(
+          eventType, data, awaitResponse)));
     }
 
-    const found = findIndex(this.messageQueue_, m => m.eventType == eventType);
+    if (!this.messagingReadyPromise_) {
+      if (awaitResponse) {
+        return Promise.reject(getChannelError());
+      } else {
+        return Promise.resolve();
+      }
+    }
+
+    if (!cancelUnsent) {
+      return this.messagingReadyPromise_.then(() => {
+        return this.messageDeliverer_(eventType, data, awaitResponse);
+      });
+    }
+
+    const found = findIndex(this.messageQueue_,
+        m => m.eventType == eventType);
 
     let message;
     if (found != -1) {
@@ -1021,7 +871,7 @@ export class Viewer {
       };
     }
     this.messageQueue_.push(message);
-    return awaitResponse ? message.responsePromise : undefined;
+    return message.responsePromise;
   }
 
   /**
@@ -1036,11 +886,8 @@ export class Viewer {
       // Messaging is not expected.
       return;
     }
-    this.messagingMaybePromise_.then(() => {
-      if (this.messageDeliverer_) {
-        this.messageDeliverer_('broadcast', message, false);
-      }
-    });
+
+    this.sendMessage('broadcast', message);
   }
 
   /**
@@ -1094,14 +941,6 @@ function getChannelError(opt_reason) {
 }
 
 /**
- * @typedef {{
- *   newStackIndex: number
- * }}
- */
-export let ViewerHistoryPoppedEventDef;
-
-
-/**
  * Sets the viewer visibility state. This calls is restricted to runtime only.
  * @param {!VisibilityState} state
  * @restricted
@@ -1114,9 +953,9 @@ export function setViewerVisibilityState(viewer, state) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
- * @return {!Viewer}
  */
 export function installViewerServiceForDoc(ampdoc, opt_initParams) {
-  return getServiceForDoc(ampdoc, 'viewer',
-      () => new Viewer(ampdoc, opt_initParams));
+  registerServiceBuilderForDoc(ampdoc, 'viewer', () => {
+    return new Viewer(ampdoc, opt_initParams);
+  });
 }

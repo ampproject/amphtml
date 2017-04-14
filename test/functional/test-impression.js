@@ -20,8 +20,8 @@ import {
   resetTrackImpressionPromiseForTesting,
 } from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
-import {viewerForDoc} from '../../src/viewer';
-import {xhrFor} from '../../src/xhr';
+import {viewerForDoc} from '../../src/services';
+import {xhrFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('impression', () => {
@@ -59,7 +59,7 @@ describe('impression', () => {
     toggleExperiment(window, 'alp', true);
     viewer.getParam.withArgs('click').returns('');
     maybeTrackImpression(window);
-    expect(xhr.fetchJson.callCount).to.equal(0);
+    expect(xhr.fetchJson).to.have.not.been.called;
     return getTrackImpressionPromise().should.be.fulfilled;
   });
 
@@ -67,7 +67,7 @@ describe('impression', () => {
     toggleExperiment(window, 'alp', true);
     viewer.getParam.withArgs('click').returns('http://www.example.com');
     maybeTrackImpression(window);
-    expect(xhr.fetchJson.callCount).to.equal(0);
+    expect(xhr.fetchJson).to.have.not.been.called;
     return getTrackImpressionPromise().should.be.fulfilled;
   });
 
@@ -75,15 +75,14 @@ describe('impression', () => {
     toggleExperiment(window, 'alp', true);
     viewer.getParam.withArgs('click').returns('https://www.example.com');
     maybeTrackImpression(window);
-    expect(xhr.fetchJson.callCount).to.equal(0);
+    expect(xhr.fetchJson).to.have.not.been.called;
     return Promise.resolve().then(() => {
-      expect(xhr.fetchJson.callCount).to.equal(1);
+      expect(xhr.fetchJson).to.be.calledOnce;
       const url = xhr.fetchJson.lastCall.args[0];
       const params = xhr.fetchJson.lastCall.args[1];
       expect(url).to.equal('https://www.example.com');
       expect(params).to.jsonEqual({
         credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
       });
     });
   });
@@ -155,9 +154,7 @@ describe('impression', () => {
       });
     };
     const prevHref = window.location.href;
-    console.log(prevHref);
     window.history.replaceState(null, '', prevHref + '?bar=foo&test=4321');
-    console.log(window.location.href);
     maybeTrackImpression(window);
     return Promise.resolve().then(() => {
       return Promise.resolve().then(() => {

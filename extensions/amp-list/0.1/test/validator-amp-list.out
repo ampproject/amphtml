@@ -1,5 +1,5 @@
 FAIL
-amp-list/0.1/test/validator-amp-list.html:36:2 The attribute 'wdith' may not appear in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/extended/amp-list.html) [AMP_TAG_PROBLEM]
-amp-list/0.1/test/validator-amp-list.html:41:2 The mandatory attribute 'src' is missing in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/extended/amp-list.html) [AMP_TAG_PROBLEM]
-amp-list/0.1/test/validator-amp-list.html:46:2 The implied layout 'CONTAINER' is not supported by tag 'amp-list'. (see https://www.ampproject.org/docs/reference/extended/amp-list.html) [AMP_LAYOUT_PROBLEM]
-amp-list/0.1/test/validator-amp-list.html:50:7 The tag 'amp-list extension .js script' is missing or incorrect, but required by 'amp-list'. (see https://www.ampproject.org/docs/reference/extended/amp-list.html) [AMP_TAG_PROBLEM]
+amp-list/0.1/test/validator-amp-list.html:36:2 The attribute 'wdith' may not appear in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-list) [AMP_TAG_PROBLEM]
+amp-list/0.1/test/validator-amp-list.html:41:2 The mandatory attribute 'src' is missing in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-list) [AMP_TAG_PROBLEM]
+amp-list/0.1/test/validator-amp-list.html:46:2 The implied layout 'CONTAINER' is not supported by tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-list) [AMP_LAYOUT_PROBLEM]
+amp-list/0.1/test/validator-amp-list.html:50:7 The tag 'amp-list extension .js script' is missing or incorrect, but required by 'amp-list'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-list) [AMP_TAG_PROBLEM]

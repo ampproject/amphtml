@@ -16,8 +16,9 @@
 
 import {AmpList} from '../amp-list';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {templatesFor} from '../../../../src/template';
-import {installXhrService} from '../../../../src/service/xhr-impl';
+import {batchedXhrServiceForTesting,} from
+    '../../../../src/service/batched-xhr-impl';
+import {templatesFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -38,7 +39,7 @@ describe('amp-list component', () => {
     templates = templatesFor(window);
     templatesMock = sandbox.mock(templates);
 
-    xhr = installXhrService(window);
+    xhr = batchedXhrServiceForTesting(window);
     xhrMock = sandbox.mock(xhr);
 
     const ampdoc = ampdocServiceFor(window).getAmpDoc();
@@ -94,6 +95,30 @@ describe('amp-list component', () => {
     });
   });
 
+  it('should fail to load b/c data is absent', () => {
+    xhrMock.expects('fetchJson')
+        .returns(Promise.resolve({})).once();
+    templatesMock.expects('findAndRenderTemplateArray').never();
+    return expect(list.layoutCallback()).to.eventually.be
+        .rejectedWith(/Response must contain an array/);
+  });
+
+  it('should load and render with a different root', () => {
+    const different = [
+      {title: 'Title1'},
+    ];
+    element.setAttribute('items', 'different');
+    const itemElement = document.createElement('div');
+    xhrMock.expects('fetchJson')
+        .returns(Promise.resolve({different})).once();
+    templatesMock.expects('findAndRenderTemplateArray')
+        .withExactArgs(element, different)
+        .returns(Promise.resolve([itemElement])).once();
+    return list.layoutCallback().then(() => {
+      expect(list.container_.contains(itemElement)).to.be.true;
+    });
+  });
+
   it('should set accessibility roles', () => {
     const items = [
       {title: 'Title1'},
@@ -144,8 +169,7 @@ describe('amp-list component', () => {
     element.setAttribute('credentials', 'include');
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
         sinon.match(opts => {
-          return opts.credentials == 'include' &&
-              opts.requireAmpResponseSourceOrigin;
+          return opts.credentials == 'include';
         }))
         .returns(xhrPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(

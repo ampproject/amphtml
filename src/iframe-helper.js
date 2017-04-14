@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
-import {parseUrl} from './url';
 import {filterSplice} from './utils/array';
+import {parseUrl} from './url';
+import {tryParseJson} from './json';
 
 /**
  * Sentinel used to force unlistening after a iframe is detached.
@@ -132,8 +134,8 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
         break;
       }
     } else if (triggerWin == contentWindow ||
-               isDescendantWindow(contentWindow, triggerWin)) {
-      // 3P code path, we may accept messages from nested frames.
+        isDescendantWindow(contentWindow, triggerWin)) {
+      // 3p code path, we may accept messages from nested frames.
       windowEvents = we;
       break;
     }
@@ -196,7 +198,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
       return;
     }
     const data = parseIfNeeded(event.data);
-    if (!data.sentinel) {
+    if (!data || !data.sentinel) {
       return;
     }
 
@@ -375,22 +377,26 @@ function getSentinel_(iframe, opt_is3P) {
 }
 
 /**
- * Json parses event.data if it needs to be
- * @returns {!Object} object message
+ * JSON parses event.data if it needs to be
+ * @param {*} data
+ * @returns {?Object} object message
  * @private
  */
 function parseIfNeeded(data) {
-  const shouldBeParsed = typeof data === 'string'
-      && data.charAt(0) === '{';
-  if (shouldBeParsed) {
-    try {
-      data = JSON.parse(data);
-    } catch (e) {
-      dev().warn('IFRAME-HELPER', 'Postmessage could not be parsed. ' +
-          'Is it in a valid JSON format?', e);
+  if (typeof data == 'string') {
+    if (data.charAt(0) == '{') {
+      data = tryParseJson(data, e => {
+        dev().warn('IFRAME-HELPER',
+            'Postmessage could not be parsed. ' +
+            'Is it in a valid JSON format?', e);
+      }) || null;
+    } else if (isAmpMessage(data)) {
+      data = deserializeMessage(data);
+    } else {
+      data = null;
     }
   }
-  return /** @type {!Object} */ (data);
+  return /** @type {?Object} */ (data);
 }
 
 

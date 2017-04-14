@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import {adoptServiceForEmbed, fromClass, setParentWindow} from '../service';
+import {
+  adoptServiceForEmbed,
+  registerServiceBuilder,
+  setParentWindow,
+} from '../service';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
+  stubElementInChildWindow,
+  upgradeElementInChildWindow,
 } from '../custom-element';
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
@@ -31,12 +37,11 @@ import {
 import {installImg} from '../../builtins/amp-img';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installStyles} from '../style-installer';
-import {installVideo} from '../../builtins/amp-video';
-import {urls} from '../config';
-
+import {calculateExtensionScriptUrl} from './extension-location';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
+const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 
 /**
  * The structure that contains the declaration of a custom element.
@@ -83,13 +88,11 @@ let ExtensionHolderDef;
 /**
  * Install extensions service.
  * @param {!Window} window
- * @return {!Extensions}
  * @restricted
  */
 export function installExtensionsService(window) {
-  return fromClass(window, 'extensions', Extensions);
+  registerServiceBuilder(window, 'extensions', Extensions);
 }
-
 
 /**
  * Register and process the specified extension. The factory is called
@@ -388,14 +391,18 @@ export class Extensions {
     // Adopt embeddable services.
     adoptServicesForEmbed(childWin);
 
-    // Install built-ins.
-    copyBuiltinElementsToChildWindow(childWin);
+    // Install built-ins and legacy elements.
+    copyBuiltinElementsToChildWindow(topWin, childWin);
+    stubLegacyElements(childWin);
 
     const promises = [];
     extensionIds.forEach(extensionId => {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       stubElementIfNotKnown(topWin, extensionId);
+      if (LEGACY_ELEMENTS.indexOf(extensionId) == -1) {
+        stubElementInChildWindow(childWin, extensionId);
+      }
 
       // Install CSS.
       const promise = this.loadExtension(extensionId).then(extension => {
@@ -406,10 +413,19 @@ export class Extensions {
         // Adopt the custom element.
         const elementDef = extension.elements[extensionId];
         if (elementDef && elementDef.css) {
-          installStyles(childWin.document, elementDef.css, () => {},
-              /* isRuntime */ false, extensionId);
+          return new Promise(resolve => {
+            installStyles(
+                childWin.document,
+                /** @type {string} */ (elementDef.css),
+                /* completeCallback */ resolve,
+                /* isRuntime */ false,
+                extensionId);
+          });
         }
-        copyElementToChildWindow(childWin, extensionId);
+      }).then(() => {
+        // Notice that stubbing happens much sooner above
+        // (see stubElementInChildWindow).
+        upgradeElementInChildWindow(topWin, childWin, extensionId);
       });
       promises.push(promise);
     });
@@ -511,7 +527,7 @@ export class Extensions {
       return false;
     }
     if (holder.scriptPresent === undefined) {
-      const scriptInHead = this.win.document.head.querySelector(
+      const scriptInHead = this.win.document.head./*OK*/querySelector(
           `[custom-element="${extensionId}"]`);
       holder.scriptPresent = !!scriptInHead;
     }
@@ -529,72 +545,17 @@ export class Extensions {
     scriptElement.async = true;
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
-    const loc = this.win.location;
+    scriptElement.setAttribute('i-amphtml-inserted', '');
+    let loc = this.win.location;
+    if (getMode().test && this.win.testLocation) {
+      loc = this.win.testLocation;
+    }
     const useCompiledJs = shouldUseCompiledJs();
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
         getMode().localDev, getMode().test, useCompiledJs);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
-}
-
-
-/**
- * Calculate the base url for any scripts.
- * @param {!Location} location The window's location
- * @param {boolean=} isLocalDev
- * @param {boolean=} isTest
- * @return {string}
- */
-export function calculateScriptBaseUrl(location, isLocalDev, isTest) {
-  if (isLocalDev) {
-    if (isTest || isMax(location) || isMin(location)) {
-      return `${location.protocol}//${location.host}/dist`;
-    }
-  }
-  return urls.cdn;
-}
-
-/**
- * Calculate script url for amp-ad.
- * @param {!Location} location The window's location
- * @param {string} extensionId
- * @param {boolean=} isLocalDev
- * @param {boolean=} isTest
- * @param {boolean=} isUsingCompiledJs
- * @return {string}
- */
-export function calculateExtensionScriptUrl(location, extensionId, isLocalDev,
-    isTest, isUsingCompiledJs) {
-  const base = calculateScriptBaseUrl(location, isLocalDev, isTest);
-  if (isLocalDev) {
-    if ((isTest && !isUsingCompiledJs) || isMax(location)) {
-      return `${base}/v0/${extensionId}-0.1.max.js`;
-    }
-    return `${base}/v0/${extensionId}-0.1.js`;
-  }
-  return `${base}/rtv/${getMode().rtvVersion}/v0/${extensionId}-0.1.js`;
-}
-
-
-/**
- * Is this path to a max (unminified) version?
- * @param {!Location} location
- * @return {boolean}
- */
-function isMax(location) {
-  const path = location.pathname;
-  return path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/';
-}
-
-/**
- * Is this path to a minified version?
- * @param {!Location} location
- * @return {boolean}
- */
-function isMin(location) {
-  const path = location.pathname;
-  return path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/';
 }
 
 
@@ -615,18 +576,27 @@ function shouldUseCompiledJs() {
 export function installBuiltinElements(win) {
   installImg(win);
   installPixel(win);
-  installVideo(win);
 }
 
 
 /**
  * Copy builtins to a child window.
+ * @param {!Window} parentWin
  * @param {!Window} childWin
  */
-function copyBuiltinElementsToChildWindow(childWin) {
-  copyElementToChildWindow(childWin, 'amp-img');
-  copyElementToChildWindow(childWin, 'amp-pixel');
-  copyElementToChildWindow(childWin, 'amp-video');
+function copyBuiltinElementsToChildWindow(parentWin, childWin) {
+  copyElementToChildWindow(parentWin, childWin, 'amp-img');
+  copyElementToChildWindow(parentWin, childWin, 'amp-pixel');
+}
+
+
+/**
+ * @param {!Window} win
+ */
+export function stubLegacyElements(win) {
+  LEGACY_ELEMENTS.forEach(name => {
+    stubElementIfNotKnown(win, name);
+  });
 }
 
 

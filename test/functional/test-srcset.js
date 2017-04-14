@@ -275,6 +275,18 @@ describe('Srcset construct', () => {
     }).to.throw(/Either dpr or width must be specified/);
   });
 
+  it('should not allow 0-width descriptor', () => {
+    expect(() => {
+      new Srcset([{url: 'image-1000', width: 0}]);
+    }).to.throw(/Either dpr or width must be specified/);
+  });
+
+  it('should not allow 0-dpr descriptor', () => {
+    expect(() => {
+      new Srcset([{url: 'image-1000', dpr: 0}]);
+    }).to.throw(/Either dpr or width must be specified/);
+  });
+
   it('should enforce only one type of descriptor total', () => {
     expect(() => {
       new Srcset([{url: 'image-1000', width: 100}, {url: 'image-2x', dpr: 2}]);
@@ -324,13 +336,15 @@ describe('Srcset select', () => {
     expect(srcset.select(1100, 1).url).to.equal('image-1000');
     expect(srcset.select(1000, 1).url).to.equal('image-1000');
     expect(srcset.select(900, 1).url).to.equal('image-1000');
+    expect(srcset.select(800, 1).url).to.equal('image-1000');
+    // select image-1000
     expect(srcset.select(700, 1).url).to.equal('image-1000');
     expect(srcset.select(600, 1).url).to.equal('image-500');
     expect(srcset.select(500, 1).url).to.equal('image-500');
     expect(srcset.select(400, 1).url).to.equal('image-500');
     expect(srcset.select(300, 1).url).to.equal('image-250');
     expect(srcset.select(200, 1).url).to.equal('image-250');
-    expect(srcset.select(100, 1).url).to.equal('image');
+    expect(srcset.select(100, 1).url).to.equal('image-250');
     expect(srcset.select(50, 1).url).to.equal('image');
     expect(srcset.select(1, 1).url).to.equal('image');
 
@@ -339,6 +353,7 @@ describe('Srcset select', () => {
     expect(srcset.select(1100, 2).url).to.equal('image-1000');
     expect(srcset.select(1000, 2).url).to.equal('image-1000');
     expect(srcset.select(900, 2).url).to.equal('image-1000');
+    expect(srcset.select(800, 2).url).to.equal('image-1000');
     expect(srcset.select(700, 2).url).to.equal('image-1000');
     expect(srcset.select(600, 2).url).to.equal('image-1000');
     expect(srcset.select(500, 2).url).to.equal('image-1000');
@@ -346,8 +361,43 @@ describe('Srcset select', () => {
     expect(srcset.select(300, 2).url).to.equal('image-500');
     expect(srcset.select(200, 2).url).to.equal('image-500');
     expect(srcset.select(100, 2).url).to.equal('image-250');
-    expect(srcset.select(50, 2).url).to.equal('image');
+    expect(srcset.select(50, 2).url).to.equal('image-250');
     expect(srcset.select(1, 2).url).to.equal('image');
+  });
+
+  it('select by width with preference toward higher width', () => {
+    const srcset = new Srcset([
+        {url: 'image-1000', width: 1000},
+        {url: 'image-500', width: 500},
+        {url: 'image-250', width: 250},
+        {url: 'image', width: 50},
+    ]);
+
+    // For DPR=1 and 2.
+    // Bull's eye.
+    expect(srcset.select(500, 1).url).to.equal('image-500');
+    expect(srcset.select(250, 2).url).to.equal('image-500');
+
+    // Right in between: (1000 + 500)/2 = 750 -> preference for the higher
+    // value.
+    expect(srcset.select(750, 1).url).to.equal('image-1000');
+    expect(srcset.select(375, 2).url).to.equal('image-1000');
+
+    // Even higher: 850 -> higher value.
+    expect(srcset.select(850, 1).url).to.equal('image-1000');
+    expect(srcset.select(425, 2).url).to.equal('image-1000');
+
+    // Slightly lower: ~10% -> 740 -> still higher value.
+    expect(srcset.select(740, 1).url).to.equal('image-1000');
+    expect(srcset.select(370, 2).url).to.equal('image-1000');
+
+    // Lower than threshold but difference ratio (730/500 = 1.46) too high -> higher value
+    expect(srcset.select(730, 1).url).to.equal('image-1000');
+    expect(srcset.select(365, 2).url).to.equal('image-1000');
+
+    // Lower than threshold and difference ratio (600/500 = 1.2) is low enough -> lower value
+    expect(srcset.select(600, 1).url).to.equal('image-500');
+    expect(srcset.select(300, 2).url).to.equal('image-500');
   });
 
   it('select by dpr', () => {

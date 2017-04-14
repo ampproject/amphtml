@@ -57,36 +57,28 @@ Classic Mode:
     data-color="ff5500"></amp-soundcloud>
 ```
 
-## Required attributes
+## Attributes
 
-**data-trackid**
+**data-trackid** (required)
 
 The ID of the track, an integer.
 
-## Optional attributes
-
-**data-secret-token**
+**data-secret-token** (optional)
 
 The secret token of the track, if it is private.
 
-**data-visual**
+**data-visual** (optional)
 
-Value: `"true"` or `"false"`
+If set to `true`, displays full-width "Visual" mode; otherwise, it displays as "Classic" mode. The default value is `false`.
 
-Default value: `"false"`
+**data-color** (optional)
 
-If set to true, displays full width "Visual" mode. Otherwise, displays "Classic"
-mode.
+This attribute is a custom color override for the "Classic" mode. The attribute is ignored in "Visual" mode. Specify a hexadecimal color value, without the leading # (e.g., `data-color="e540ff"`).
 
-**data-color**
 
-Value: Hexadecimal color value (without the leading #).
-E.g. `data-color="e540ff"`
+**width** and **height**
 
-Custom color override for the "Classic" mode. Ignored in "Visual" mode.
-
-**width and height**
-Layout is `fixed-height` and will fill all the available horizontal space. This is ideal for "Classic" mode, but for "Visual", height is recommended to be 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.
+The layout for `amp-soundcloud` is set to `fixed-height` and it fills all of the available horizontal space. This is ideal for the "Classic" mode, but for "Visual" mode, it's recommended that the height is 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.
 
 ## Validation
 

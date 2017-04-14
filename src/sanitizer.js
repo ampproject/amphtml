@@ -25,6 +25,8 @@ import {
 import {parseSrcset} from './srcset';
 import {user} from './log';
 import {urls} from './config';
+import {map} from './utils/object';
+import {startsWith} from './string';
 
 
 /** @private @const {string} */
@@ -106,6 +108,9 @@ const WHITELISTED_ATTRS = [
   'href',
   'on',
   'placeholder',
+  /* Attributes added for amp-bind */
+  // TODO(kmh287): Add more whitelisted attributes for bind?
+  'text',
 ];
 
 
@@ -124,7 +129,6 @@ const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ '<script',
   /*eslint no-script-url: 0*/ '</script',
 ];
-
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
 const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = {
@@ -186,9 +190,19 @@ export function sanitizeHtml(html) {
         }
         return;
       }
+      const bindAttribsIndices = map();
+      // Special handling for attributes for amp-bind which are formatted as
+      // [attr]. The brackets are restored at the end of this function.
+      for (let i = 0; i < attribs.length; i += 2) {
+        const attr = attribs[i];
+        if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
+          bindAttribsIndices[i] = true;
+          attribs[i] = attr.slice(1, -1);
+        }
+      }
       if (BLACKLISTED_TAGS[tagName]) {
         ignore++;
-      } else if (tagName.indexOf('amp-') != 0) {
+      } else if (!startsWith(tagName, 'amp-')) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
@@ -198,11 +212,12 @@ export function sanitizeHtml(html) {
         } else {
           attribs = scrubbed.attribs;
           // Restore some of the attributes that AMP is directly responsible
-          // for, such as "on".
+          // for, such as "on"
           for (let i = 0; i < attribs.length; i += 2) {
-            if (WHITELISTED_ATTRS.indexOf(attribs[i]) != -1) {
+            const attrib = attribs[i];
+            if (WHITELISTED_ATTRS.includes(attrib)) {
               attribs[i + 1] = savedAttribs[i + 1];
-            } else if (attribs[i].search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
+            } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
             }
           }
@@ -251,10 +266,14 @@ export function sanitizeHtml(html) {
           continue;
         }
         emit(' ');
-        emit(attrName);
+        if (bindAttribsIndices[i]) {
+          emit('[' + attrName + ']');
+        } else {
+          emit(attrName);
+        }
         emit('="');
         if (attrValue) {
-          emit(htmlSanitizer.escapeAttrib(resolveAttrValue(
+          emit(htmlSanitizer.escapeAttrib(rewriteAttributeValue(
               tagName, attrName, attrValue)));
         }
         emit('"');
@@ -311,12 +330,20 @@ export function sanitizeFormattingHtml(html) {
 export function isValidAttr(tagName, attrName, attrValue) {
 
   // "on*" attributes are not allowed.
-  if (attrName.indexOf('on') == 0 && attrName != 'on') {
+  if (startsWith(attrName, 'on') && attrName != 'on') {
     return false;
   }
 
   // Inline styles are not allowed.
   if (attrName == 'style') {
+    return false;
+  }
+
+  // See validator-main.protoascii
+  // https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
+  if (attrName == 'class' &&
+      attrValue &&
+      /(^|\W)i-amphtml-/i.test(attrValue)) {
     return false;
   }
 
@@ -336,7 +363,8 @@ export function isValidAttr(tagName, attrName, attrValue) {
     return false;
   }
 
-  // Remove blacklisted values for specific attributes e.g. input[type=image].
+  // Remove blacklisted values for specific attributes for specific tags
+  // e.g. input[type=image].
   const attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
   if (attrBlacklist) {
     const blacklistedValuesRegex = attrBlacklist[attrName];
@@ -350,14 +378,15 @@ export function isValidAttr(tagName, attrName, attrValue) {
 }
 
 /**
- * Resolves the attribute value. The main purpose is to rewrite URLs as
- * described in `resolveUrlAttr`.
+ * If (tagName, attrName) is a CDN-rewritable URL attribute, returns the
+ * rewritten URL value. Otherwise, returns the unchanged `attrValue`.
+ * @see resolveUrlAttr for rewriting rules.
  * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
  * @return {string}
  */
-function resolveAttrValue(tagName, attrName, attrValue) {
+export function rewriteAttributeValue(tagName, attrName, attrValue) {
   if (attrName == 'src' || attrName == 'href' || attrName == 'srcset') {
     return resolveUrlAttr(tagName, attrName, attrValue, self.location);
   }
@@ -383,7 +412,7 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
 
-  if (attrName == 'href' && attrValue.indexOf('#') != 0) {
+  if (attrName == 'href' && !startsWith(attrValue, '#')) {
     return resolveRelativeUrl(attrValue, baseUrl);
   }
 

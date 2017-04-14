@@ -31,7 +31,7 @@ export function adsense(global, data) {
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
     global.gaGlobal = {
-      vid: global.context.clientId,
+      cid: global.context.clientId,
       hid: global.context.pageViewId,
     };
   }

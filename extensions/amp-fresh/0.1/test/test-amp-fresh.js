@@ -16,7 +16,10 @@
 
 import * as sinon from 'sinon';
 import {AmpFresh} from '../amp-fresh';
-import {getOrInsallAmpFreshManager} from '../amp-fresh-manager';
+import {
+  ampFreshManagerForDoc,
+  installAmpFreshManagerForDoc,
+} from '../amp-fresh-manager';
 import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -35,7 +38,8 @@ describe('amp-fresh', () => {
     const span = document.createElement('span');
     span.textContent = 'hello';
     elem.appendChild(span);
-    manager = getOrInsallAmpFreshManager(window.document);
+    installAmpFreshManagerForDoc(window.document);
+    manager = ampFreshManagerForDoc(window.document);
     fresh = new AmpFresh(elem);
     sandbox = sinon.sandbox.create();
     fresh.mutateElement = function(cb) {
@@ -54,9 +58,9 @@ describe('amp-fresh', () => {
 
   it('should register to manager', () => {
     const registerSpy = sandbox.spy(manager, 'register');
-    expect(registerSpy.callCount).to.equal(0);
+    expect(registerSpy).to.have.not.been.called;
     fresh.buildCallback();
-    expect(registerSpy.callCount).to.equal(1);
+    expect(registerSpy).to.be.calledOnce;
   });
 
   it('should replace its subtree', () => {
