@@ -195,7 +195,7 @@ export class BindExpression {
 
       case AstNodeType.INVOCATION:
         // Built-in functions don't have a caller object.
-        const isBuiltIn = (args[0] === null);
+        const isBuiltIn = (args[0] === undefined);
 
         const caller = this.eval_(args[0], scope);
         const params = this.eval_(args[1], scope);
@@ -210,6 +210,11 @@ export class BindExpression {
             unsupportedError = `${method} is not a supported function.`;
           }
         } else {
+          if (caller === null) {
+            user().warn(TAG, `Cannot invoke method ${method} on null; ` +
+                `returning null.`);
+            return null;
+          }
           const callerType = Object.prototype.toString.call(caller);
           const whitelist = FUNCTION_WHITELIST[callerType];
           if (whitelist) {
@@ -370,6 +375,7 @@ export class BindExpression {
     user().warn(TAG, `Cannot read property ${JSON.stringify(member)} of ` +
         `${JSON.stringify(target)}; returning null.`);
   }
+
 
   /**
    * Returns true if input array contains a plain object.
