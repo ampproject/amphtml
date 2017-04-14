@@ -164,6 +164,14 @@ export class InstrumentationService {
   }
 
   /**
+   * @param {!Node} context
+   * @return {!./analytics-root.AnalyticsRoot}
+   */
+  getAnalyticsRoot(context) {
+    return this.findRoot_(context);
+  }
+
+  /**
    * @param {!Element} analyticsElement
    * @return {!AnalyticsGroup}
    */
