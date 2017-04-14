@@ -421,7 +421,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             impl.unlayoutCallback();
             expect(resetSlotSpy).to.be.called.once;
             expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
-            expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
+            expect(impl.element.querySelector('div[fallback]')).to.be.ok;
             expect(impl.element.querySelector('iframe')).to.be.null;
             expect(impl.iframe).to.be.null;
             expect(impl.ampAnalyticsConfig_).to.be.null;
