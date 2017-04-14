@@ -19,19 +19,26 @@ import {
   getElementServiceIfAvailableForDoc,
 } from './element-service';
 import {createElementWithAttributes} from './dom';
+import {getAmpdoc} from './service';
 import {extensionsFor} from './services';
 
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {boolean=} loadAnalytics
  * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
  */
-export function analyticsForDoc(nodeOrDoc) {
+export function analyticsForDoc(nodeOrDoc, loadAnalytics = false) {
+  if (loadAnalytics) {
+    // Get Extensions service and force load analytics extension.
+    const ampdoc = getAmpdoc(nodeOrDoc);
+    extensionsFor(ampdoc.win)./*OK*/loadExtension('amp-analytics');
+  }
   return (/** @type {!Promise<
             !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
           >} */ (getElementServiceForDoc(
                 nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
-};
+}
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
@@ -42,7 +49,7 @@ export function analyticsForDocOrNull(nodeOrDoc) {
             ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
           >} */ (getElementServiceIfAvailableForDoc(
                 nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
-};
+}
 
 /**
  * Helper method to trigger analytics event if amp-analytics is available.
