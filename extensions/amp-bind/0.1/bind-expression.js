@@ -376,7 +376,6 @@ export class BindExpression {
         `${JSON.stringify(target)}; returning null.`);
   }
 
-
   /**
    * Returns true if input array contains a plain object.
    * @param {!Array} array
