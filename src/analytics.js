@@ -67,7 +67,7 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
  */
 export function insertAnalyticsElement(
     parentElement, config, loadAnalytics = false) {
-  const doc = parentElement.ownerDocument;
+  const doc = /** @type {!Document} */ (parentElement.ownerDocument);
   const analyticsElem = createElementWithAttributes(
       doc,
       'amp-analytics', {
