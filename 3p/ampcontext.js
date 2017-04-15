@@ -53,7 +53,7 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.clientId = null;
 
-    /** @public {?string|undefined} */
+    /** @type {?string|undefined} */
     this.container = null;
 
     /** @type {?Object<String, *>} */
@@ -86,7 +86,7 @@ export class AbstractAmpContext {
     /** @type {?number} */
     this.startTime = null;
 
-    /** @public {?string} */
+    /** @type {?string} */
     this.tagName = null;
 
     this.findAndSetMetadata_();
@@ -120,7 +120,8 @@ export class AbstractAmpContext {
 
   /**
    * TODO(alanorozco): Deprecate native event mechanism.
-   * @private
+   * 
+   
    */
   dispatchVisibilityChangeEvent_() {
     const event = this.win_.document.createEvent('Event');
