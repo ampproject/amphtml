@@ -582,7 +582,7 @@ describe('Logging', () => {
         error = e;
       }
       expect(error).to.equal(orig);
-      expect(error.message).to.equal('first second third: intended');
+      expect(error.message).to.match(/^first second third: intended/);
     });
 
     it('should preserve error suffix', () => {
