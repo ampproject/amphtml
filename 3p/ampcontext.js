@@ -153,6 +153,24 @@ export class AbstractAmpContext {
   };
 
   /**
+   *  Send message to runtime to start sending position messages.
+   *  @param {function(Object)} callback Function to call every time we
+   *    receive a position info message.
+   *  @returns {function()} that when called stops triggering the callback
+   *    every time we receive a position info message.
+   */
+  observePosition(callback) {
+    const unlisten = this.client_.makeRequest(
+        MessageType.SEND_POSITIONS,
+        MessageType.POSITION,
+        data => {
+          callback(data);
+        });
+
+    return unlisten;
+  };
+
+  /**
    *  Send message to runtime requesting to resize ad to height and width.
    *    This is not guaranteed to succeed. All this does is make the request.
    *  @param {number} width The new width for the ad we are requesting.
