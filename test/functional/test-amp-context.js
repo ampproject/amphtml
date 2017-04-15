@@ -17,6 +17,7 @@ import {
   AmpContext,
 } from '../../3p/ampcontext';
 import {MessageType} from '../../src/3p-frame-messaging';
+import {RemoteConfigTypes} from '../../src/3p-frame.js';
 import * as sinon from 'sinon';
 
 const NOOP = () => {};
@@ -64,37 +65,19 @@ describe('3p ampcontext.js', () => {
   it('should add metadata to window.context using name as per 3P.', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
-    expect(context).to.be.ok;
-    expect(context.location).to.equal('foo.com');
-    expect(context.canonicalUrl).to.equal('foo.com');
-    expect(context.pageViewId).to.equal('1');
-    expect(context.sentinel).to.equal('1-291921');
-    expect(context.startTime).to.equal(0);
-    expect(context.referrer).to.equal('baz.net');
+    verifyContext(context);
   });
 
   it('should add metadata to window.context using name as per A4A.', () => {
     win.name = generateSerializedAttributesA4A();
     const context = new AmpContext(win);
-    expect(context).to.be.ok;
-    expect(context.location).to.equal('foo.com');
-    expect(context.canonicalUrl).to.equal('foo.com');
-    expect(context.pageViewId).to.equal('1');
-    expect(context.sentinel).to.equal('1-291921');
-    expect(context.startTime).to.equal(0);
-    expect(context.referrer).to.equal('baz.net');
+    verifyContext(context, true);
   });
 
   it('should add metadata to window.context using window var.', () => {
     win.AMP_CONTEXT_DATA = generateAttributes();
     const context = new AmpContext(win);
-    expect(context).to.be.ok;
-    expect(context.location).to.equal('foo.com');
-    expect(context.canonicalUrl).to.equal('foo.com');
-    expect(context.pageViewId).to.equal('1');
-    expect(context.sentinel).to.equal('1-291921');
-    expect(context.startTime).to.equal(0);
-    expect(context.referrer).to.equal('baz.net');
+    verifyContext(context);
   });
 
   it('should set up only sentinel if no metadata provided.', () => {
@@ -329,6 +312,7 @@ function generateAttributes(opt_sentinel) {
     sentinel,
     startTime: 0,
     referrer: 'baz.net',
+    remoteConfigType: 'remoteHtml',
   };
 
   return name;
@@ -367,4 +351,17 @@ function generateIncorrectAttributes() {
   };
 
   return JSON.stringify(name);
+}
+
+function verifyContext(context, isA4a) {
+  expect(context).to.be.ok;
+  expect(context.location).to.equal('foo.com');
+  expect(context.canonicalUrl).to.equal('foo.com');
+  expect(context.pageViewId).to.equal('1');
+  expect(context.sentinel).to.equal('1-291921');
+  expect(context.startTime).to.equal(0);
+  expect(context.referrer).to.equal('baz.net');
+  if (!isA4a) {
+    expect(context.remoteConfigType).to.equal(RemoteConfigTypes.REMOTE_HTML);
+  }
 }

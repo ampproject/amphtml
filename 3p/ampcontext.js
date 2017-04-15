@@ -73,6 +73,9 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.sourceUrl = null;
 
+    /** @type {?string} */
+    this.remoteConfigType = null;
+
     this.findAndSetMetadata_();
 
     /** @protected {!IframeMessagingClient} */
@@ -220,6 +223,7 @@ export class AbstractAmpContext {
     this.initialIntersection = context.initialIntersection;
     this.hidden = context.hidden;
     this.sourceUrl = context.sourceUrl;
+    this.remoteConfigType = context.remoteConfigType;
 
     this.embedType_ = dataObject.type || null;
   }
