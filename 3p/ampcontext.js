@@ -120,8 +120,7 @@ export class AbstractAmpContext {
 
   /**
    * TODO(alanorozco): Deprecate native event mechanism.
-   * 
-   
+   * @private
    */
   dispatchVisibilityChangeEvent_() {
     const event = this.win_.document.createEvent('Event');
