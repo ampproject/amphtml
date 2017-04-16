@@ -312,8 +312,6 @@ describe('amp-youtube', function() {
       expect(obj.iframe_).to.be.null;
       expect(placeholder.style.display).to.be.equal('');
       expect(obj.playerState_).to.be.equal(2);
-      expect(obj.playerReadyPromise_).to.be.null;
-      expect(obj.playerReadyResolver_).to.be.null;
     });
   });
 <<<<<<< HEAD
