@@ -24,12 +24,12 @@ import {createElementWithAttributes} from '../src/dom';
  */
 export function adfox(global, data) {
 
-    validateData(data, [
-        'adfoxParams',
-        'ownerId',
-    ]);
+  validateData(data, [
+    'adfoxParams',
+    'ownerId',
+  ]);
 
-    loadAdFox(global, () => initAdFox(global, data));
+  loadAdFox(global, () => initAdFox(global, data));
 }
 
 /**
@@ -37,7 +37,7 @@ export function adfox(global, data) {
  * @param {!Function} cb
  */
 function loadAdFox(global, cb) {
-    loadScript(global, 'https://yastatic.net/pcode/adfox/loader.js', cb);
+  loadScript(global, 'https://yastatic.net/pcode/adfox/loader.js', cb);
 }
 
 /**
@@ -45,10 +45,10 @@ function loadAdFox(global, cb) {
  * @param {string} name
  */
 function createContainer(global, name) {
-    const d = createElementWithAttributes(global.document, 'div', {
-        id: name
-    });
-    global.document.getElementById('c').appendChild(d);
+  const d = createElementWithAttributes(global.document, 'div', {
+    id: name,
+  });
+  global.document.getElementById('c').appendChild(d);
 }
 
 /**
@@ -56,20 +56,20 @@ function createContainer(global, name) {
  * @param {Object} data
  */
 function initAdFox(global, data) {
-    const container_name = 'adfox_container';
-    const params = JSON.parse(data.adfoxParams);
+  const containerName = 'adfox_container';
+  const params = JSON.parse(data.adfoxParams);
 
-    createContainer(global, container_name);
+  createContainer(global, containerName);
 
-    global.Ya.adfoxCode.create({
-        ownerId: data.ownerId,
-        containerId: container_name,
-        params: params,
-        onLoad: (data) => checkLoading(global, data),
-        onRender: () => window.context.renderStart(),
-        onError: () => window.context.noContentAvailable(),
-        onStub: () => window.context.noContentAvailable()
-    });
+  global.Ya.adfoxCode.create({
+    ownerId: data.ownerId,
+    containerId: containerName,
+    params,
+    onLoad: data => checkLoading(global, data),
+    onRender: () => window.context.renderStart(),
+    onError: () => window.context.noContentAvailable(),
+    onStub: () => window.context.noContentAvailable(),
+  });
 }
 
 /**
@@ -77,14 +77,14 @@ function initAdFox(global, data) {
  * @param {!Object} data
  */
 function checkLoading(global, data) {
-    if (data.bundleName === 'banner.direct') {
-        const dblParams = {
-            blockId: data.bundleParams.blockId,
-            data: data.bundleParams.data,
-            isAdfox: true
-        };
+  if (data.bundleName === 'banner.direct') {
+    const dblParams = {
+      blockId: data.bundleParams.blockId,
+      data: data.bundleParams.data,
+      isAdfox: true,
+    };
 
-        yandex(global, dblParams);
-        return false;
-    }
+    yandex(global, dblParams);
+    return false;
+  }
 }
