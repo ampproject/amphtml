@@ -43,6 +43,10 @@ export class AmpList extends AMP.BaseElement {
       this.container_.setAttribute('role', 'list');
     }
 
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
+
     /** @type {Promise} */
     this.mutationPromise_ = null;
   }
