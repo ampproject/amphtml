@@ -40,5 +40,7 @@ tags: {  # <amp-timeago>
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-timeago"
   amp_layout: {
     supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
   }
 }
