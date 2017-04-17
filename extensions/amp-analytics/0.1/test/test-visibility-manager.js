@@ -202,9 +202,10 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     const modelsCalled = sandbox.spy();
     const otherTarget = win.document.createElement('div');
     const spec = {totalTimeMin: 10};
-    root.listenRoot(spec, null, modelsCalled);
-    root.listenElement(otherTarget, spec, null, modelsCalled);
-    root.listenElement(otherTarget, {totalTimeMin: 20}, null, modelsCalled);
+    root.listenRoot(spec, null, null, modelsCalled);
+    root.listenElement(otherTarget, spec, null, null, modelsCalled);
+    root.listenElement(
+        otherTarget, {totalTimeMin: 20}, null, null, modelsCalled);
     expect(root.models_).to.have.length(3);
     root.models_.forEach(model => {
       model.unsubscribe(modelsDisposed);
@@ -261,7 +262,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     const inOb = root.getIntersectionObserver_();
 
     const rootElement = win.document.documentElement;
-    root.listenElement(rootElement, {}, null, eventResolver);
+    root.listenElement(rootElement, {}, null, null, eventResolver);
     expect(root.models_).to.have.length(1);
     const model = root.models_[0];
     expect(inOb.observeEntries_).to.have.length(1);
@@ -297,7 +298,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     clock.tick(1);
     const disposed = sandbox.spy();
     const spec = {totalTimeMin: 10};
-    root.listenRoot(spec, null, eventResolver);
+    root.listenRoot(spec, null, null, eventResolver);
 
     expect(root.models_).to.have.length(1);
     const model = root.models_[0];
@@ -334,7 +335,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     const readyPromise = Promise.resolve().then(() => {
       clock.tick(21);
     });
-    root.listenRoot(spec, readyPromise, eventResolver);
+    root.listenRoot(spec, readyPromise, null, eventResolver);
 
     expect(root.models_).to.have.length(1);
     const model = root.models_[0];
@@ -357,11 +358,33 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     });
   });
 
+  it('should pass func to create readyReportPromise to model', () => {
+    let testPromiseResolver;
+    const disposed = sandbox.spy();
+    const testPromise = new Promise(resolve => {
+      testPromiseResolver = resolve;
+    });
+    root.listenRoot({}, null, () => {
+      return testPromise;
+    }, eventResolver);
+    expect(root.models_).to.have.length(1);
+    const model = root.models_[0];
+    model.unsubscribe(disposed);
+    clock.tick(11);
+    testPromiseResolver();
+    return eventPromise.then(state => {
+      expect(disposed).to.be.calledOnce;
+      expect(state.totalVisibleTime).to.equal(11);
+      expect(state.totalTime).to.equal(11);
+      expect(state.maxContinuousVisibleTime).to.equal(11);
+    });
+  });
+
   it('should unlisten root', () => {
     clock.tick(1);
     const disposed = sandbox.spy();
     const spec = {totalTimeMin: 10};
-    const unlisten = root.listenRoot(spec, null, eventResolver);
+    const unlisten = root.listenRoot(spec, null, null, eventResolver);
 
     expect(root.models_).to.have.length(1);
     expect(Object.keys(root.trackedElements_)).to.have.length(0);
@@ -379,7 +402,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     const disposed = sandbox.spy();
     const target = win.document.createElement('div');
     const spec = {totalTimeMin: 10};
-    root.listenElement(target, spec, null, eventResolver);
+    root.listenElement(target, spec, null, null, eventResolver);
 
     expect(root.models_).to.have.length(1);
     const model = root.models_[0];
@@ -461,7 +484,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     // Listen to the first spec.
     const disposed1 = sandbox.spy();
     const spec1 = {totalTimeMin: 10};
-    root.listenElement(target, spec1, null, eventResolver);
+    root.listenElement(target, spec1, null, null, eventResolver);
     expect(root.models_).to.have.length(1);
     const model1 = root.models_[0];
     expect(model1.spec_.totalTimeMin).to.equal(10);
@@ -487,7 +510,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     const eventPromise2 = new Promise(resolve => {
       eventResolver2 = resolve;
     });
-    root.listenElement(target, spec2, null, eventResolver2);
+    root.listenElement(target, spec2, null, null, eventResolver2);
     expect(root.models_).to.have.length(2);
     const model2 = root.models_[1];
     expect(model2.spec_.totalTimeMin).to.equal(20);
@@ -535,7 +558,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     sandbox.stub(resources, 'getResourceForElementOptional',
         () => resource);
     const spec = {totalTimeMin: 10};
-    root.listenElement(target, spec, null, eventResolver);
+    root.listenElement(target, spec, null, null, eventResolver);
 
     const inOb = root.getIntersectionObserver_();
     inOb.callback([{
@@ -675,11 +698,11 @@ describes.realWin('EmbedAnalyticsRoot', {
   it('should depend on parent for visibility', () => {
     const callbackSpy = sandbox.spy();
     const otherTarget = win.document.createElement('div');
-    root.listenRoot({}, null, callbackSpy);
+    root.listenRoot({}, null, null, callbackSpy);
     expect(root.models_).to.have.length(1);
     const rootModel = root.models_[0];
 
-    root.listenElement(otherTarget, {}, null, callbackSpy);
+    root.listenElement(otherTarget, {}, null, null, callbackSpy);
     expect(root.models_).to.have.length(2);
     const elementModel = root.models_[1];
 
@@ -770,6 +793,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
   let eventPromise, eventResolver;
   let eventPromise2, eventResolver2;
   let readyPromise, readyResolver;
+  let readyReportPromise, readyReportResolver;
 
   beforeEach(() => {
     win = env.win;
@@ -798,6 +822,9 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
 
     readyPromise = new Promise(resolve => {
       readyResolver = resolve;
+    });
+    readyReportPromise = new Promise(resolve => {
+      readyReportResolver = resolve;
     });
     eventPromise = new Promise(resolve => {
       eventResolver = resolve;
@@ -868,12 +895,17 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     viewer.setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new VisibilityManagerForDoc(ampdoc);
 
-    visibility.listenElement(ampElement, {}, readyPromise, eventResolver);
+    visibility.listenElement(ampElement, {}, readyPromise, () => {
+      return readyReportPromise;
+    }, eventResolver);
 
     return Promise.resolve().then(() => {
       clock.tick(100);
       fireIntersect(25); // visible
       readyResolver();
+    }).then(() => {
+      clock.tick(5);
+      readyReportResolver();
       return eventPromise;
     }).then(state => {
       expect(state).to.contains({
@@ -884,13 +916,13 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
         elementX: 0,
         elementY: 75,
         firstSeenTime: 100,
-        lastSeenTime: 100,
-        lastVisibleTime: 100,
+        lastSeenTime: 105,
+        lastVisibleTime: 105,
         loadTimeVisibility: 25,
         maxVisiblePercentage: 25,
         minVisiblePercentage: 25,
-        totalVisibleTime: 0,
-        maxContinuousVisibleTime: 0,
+        totalVisibleTime: 5,
+        maxContinuousVisibleTime: 5,
       });
     });
   });
@@ -903,6 +935,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
         ampElement,
         {visiblePercentageMin: 20},
         readyPromise,
+        null,
         eventResolver);
 
     // add multiple triggers on the same element
@@ -910,6 +943,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
         ampElement,
         {visiblePercentageMin: 30},
         readyPromise,
+        null,
         eventResolver2);
 
     // "observe" should not have been called since resource not loaded yet.
@@ -976,6 +1010,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
         ampElement,
         {continuousTimeMin: 1000},
         readyPromise,
+        null,
         eventResolver);
     const model = visibility.models_[0];
 
@@ -1040,6 +1075,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
         ampElement,
         {},
         readyPromise,
+        null,
         eventResolver);
 
     viewer.setVisibilityState_(VisibilityState.VISIBLE);

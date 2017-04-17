@@ -455,6 +455,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               matchEmptySpec,
               /* readyPromise */ null,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -482,6 +483,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               matchEmptySpec,
               readyPromise,
+              null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -510,6 +512,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               config.visibilitySpec,
               readyPromise,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -540,6 +543,7 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               config.visibilitySpec,
               readyPromise,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -580,6 +584,7 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               matchEmptySpec,
               readyPromise,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -676,6 +681,18 @@ describes.realWin('Events', {amp: 1}, env => {
             return promise2;
           });
         });
+      });
+    });
+
+    describe('should create correct readyReportPromise', () => {
+      it('with viewer hidden', () => {
+        sandbox.stub(tracker.root, 'getViewer', () => {
+          return {
+            isVisible: () => {return false;},
+          };
+        });
+        const promise = tracker.createReportReadyPromise_();
+        return promise;
       });
     });
   });

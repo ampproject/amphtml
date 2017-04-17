@@ -377,6 +377,11 @@ export class VisibilityTracker extends EventTracker {
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
     const visibilityManager = this.root.getVisibilityManager();
+    // special polyfill for eventType: 'hidden'
+    let createReadyReportPromiseFunc = null;
+    if (eventType == 'hidden-v3') {
+      createReadyReportPromiseFunc = this.createReportReadyPromise_.bind(this);
+    }
 
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
@@ -385,6 +390,7 @@ export class VisibilityTracker extends EventTracker {
       return visibilityManager.listenRoot(
           visibilitySpec,
           this.getReadyPromise(waitForSpec, selector),
+          createReadyReportPromiseFunc,
           this.onEvent_.bind(
               this, eventType, listener, this.root.getRootElement()));
     }
@@ -404,6 +410,7 @@ export class VisibilityTracker extends EventTracker {
           element,
           visibilitySpec,
           this.getReadyPromise(waitForSpec, selector, element),
+          createReadyReportPromiseFunc,
           this.onEvent_.bind(this, eventType, listener, element));
     });
     return function() {
@@ -411,6 +418,29 @@ export class VisibilityTracker extends EventTracker {
         unlisten();
       });
     };
+  }
+
+  /**
+   * @return {!Promise}
+   * @visibleForTesting
+   */
+  createReportReadyPromise_() {
+    const viewer = this.root.getViewer();
+    let resolver = null;
+    const viewerHiddenPromise = new Promise(resolve => {
+      resolver = resolve;
+    });
+
+    if (!viewer.isVisible()) {
+      return Promise.resolve();
+    }
+    viewer.onVisibilityChanged(() => {
+      if (!viewer.isVisible()) {
+        resolver();
+      }
+    });
+
+    return viewerHiddenPromise;
   }
 
   /**
