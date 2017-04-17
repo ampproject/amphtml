@@ -41,7 +41,9 @@ import {
   vsyncFor,
 } from '../../src/services';
 import {setParentWindow} from '../../src/service';
+import {whenDocumentReady} from '../../src/document-ready';
 import * as sinon from 'sinon';
+
 
 describes.fakeWin('Viewport', {}, env => {
   let clock;
@@ -1543,6 +1545,17 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
 
   it('should NOT require fixed layer transferring', () => {
     expect(binding.requiresFixedLayerTransfer()).to.be.true;
+  });
+
+  it('should start w/o overscroll and set it on doc ready', () => {
+    const root = win.document.documentElement;
+    expect(root).to.not.have.class('i-amphtml-ios-overscroll');
+    expect(root.style.webkitOverflowScrolling).to.not.equal('touch');
+    expect(binding.wrapper_.style.webkitOverflowScrolling).to.not
+        .equal('touch');
+    return whenDocumentReady(win.document).then(() => {
+      expect(root).to.have.class('i-amphtml-ios-overscroll');
+    });
   });
 
   it('should have UI setup', () => {
