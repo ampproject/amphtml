@@ -89,7 +89,6 @@ html.i-amphtml-webview > body {
  */
 html.i-amphtml-ios-embed {
   overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
   position: static;
 }
 
@@ -97,7 +96,6 @@ html.i-amphtml-ios-embed {
 #i-amphtml-wrapper {
   overflow-x: hidden !important;
   overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -105,6 +103,15 @@ html.i-amphtml-ios-embed {
   bottom: 0 !important;
   margin: 0 !important;
   display: block !important;
+}
+
+/**
+ * Overflow scrolling is set separately on iOS, after DOMReady due to various
+ * rendering bugs. See #8798 for details.
+ */
+html.i-amphtml-ios-embed.i-amphtml-ios-overscroll,
+html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
+  -webkit-overflow-scrolling: touch !important;
 }
 
 #i-amphtml-wrapper > body {

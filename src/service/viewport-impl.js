@@ -1538,6 +1538,13 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.setupDone_ = false;
     waitForBody(this.win.document, this.setup_.bind(this));
 
+    // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
+    // iOS rendering bugs. See #8798 for details.
+    whenDocumentReady(this.win.document).then(() => {
+      this.win.document.documentElement.classList.add(
+          'i-amphtml-ios-overscroll');
+    });
+
     dev().fine(TAG_, 'initialized ios-embed-wrapper viewport');
   }
 
