@@ -267,11 +267,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7670',
   },
   {
-    id: 'amp-gist',
-    name: 'Embed a GitHub gist',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8467',
-  },
-  {
     id: '3p-use-ampcontext',
     name: 'Use AmpContext for window.context messaging',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',

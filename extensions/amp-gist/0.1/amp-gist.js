@@ -30,11 +30,7 @@
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
 import {Layout} from '../../../src/layout';
-
-const TAG = 'amp-gist';
 
 export class AmpGist extends AMP.BaseElement {
 
@@ -57,12 +53,6 @@ export class AmpGist extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED_HEIGHT;
-  }
-
-  /** @override */
-  buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment "${TAG}" is disabled.`);
   }
 
   /** @override */
