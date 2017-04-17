@@ -28,7 +28,7 @@ export function taboola(global, data) {
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
   validateData(data, ['publisher', 'placement', 'mode',
-    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'others']]);
+    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'other']]);
 
   // setup default values for referrer and url
   const params = {
@@ -38,7 +38,7 @@ export function taboola(global, data) {
 
   // copy none blacklisted attribute to the 'params' map
   Object.keys(data).forEach(k => {
-    if (!blackList.includes(k)) {
+    if (blackList.indexOf(k) === -1) {
       params[k] = data[k];
     }
   });

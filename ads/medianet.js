@@ -132,7 +132,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
     let currentParam = '';
     for (let i = 0; i < allParams.length; i++) {
       currentParam = allParams[i];
-      if (!dfpParams.includes(currentParam) && data[currentParam]) {
+      if (dfpParams.indexOf(currentParam) === -1 && data[currentParam]) {
         delete data[currentParam];
       }
     }

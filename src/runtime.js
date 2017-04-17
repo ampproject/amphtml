@@ -802,7 +802,7 @@ class MultidocManager {
             } else {
               // Non-src version of script.
               const type = n.getAttribute('type') || 'application/javascript';
-              if (!type.includes('javascript')) {
+              if (type.indexOf('javascript') == -1) {
                 shadowRoot.appendChild(this.win.document.importNode(n, true));
                 dev().fine(TAG, '- non-src script: ', n);
               } else {

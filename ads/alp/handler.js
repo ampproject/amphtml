@@ -73,7 +73,7 @@ export function handleClick(e, opt_viewerNavigate) {
   const fragment = 'click=' + encodeURIComponent(
       addParamToUrl(link.a.href, 'amp', '1', /* opt_addToFront */ true));
   let destination = link.eventualUrl;
-  if (!link.eventualUrl.includes('#')) {
+  if (link.eventualUrl.indexOf('#') == -1) {
     destination += '#' + fragment;
   } else {
     destination += '&' + fragment;
@@ -224,7 +224,7 @@ export function getA2AAncestor(win) {
   // Not a security property. We just check whether the
   // viewer might support A2A. More domains can be added to whitelist
   // as needed.
-  if (!top.includes('.google.')) {
+  if (top.indexOf('.google.') == -1) {
     return null;
   }
   const amp = origins[origins.length - 2];

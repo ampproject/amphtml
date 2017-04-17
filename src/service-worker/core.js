@@ -233,7 +233,7 @@ export function isBlacklisted(version) {
    * @type {AmpVersion}
    */
   const ampVersion = version.substr(2);
-  return BLACKLIST.includes(ampVersion);
+  return BLACKLIST.indexOf(ampVersion) > -1;
 }
 
 /**

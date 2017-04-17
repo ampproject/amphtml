@@ -386,7 +386,7 @@
       var context = this, names, index, lookupHit = false;
 
       while (context) {
-        if (name.includes('.')) {
+        if (name.indexOf('.') > 0) {
           value = context.view;
           names = name.split('.');
           index = 0;
