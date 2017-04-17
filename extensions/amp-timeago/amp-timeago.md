@@ -33,7 +33,13 @@ limitations under the License.
 
 ## Behavior
 
-The <code>amp-timeago</code> component is a wrapper around the <a href="https://github.com/hustcc/timeago.js">timeago.js</a> project for use on AMP pages.
+The <code>amp-timeago</code> component is based on the <a href="https://github.com/hustcc/timeago.js">timeago.js</a> project for use on AMP pages.
+
+Example:
+
+```html
+<amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="es">Saturday 11 April 2017 00.37</amp-timeago>
+```
 
 ## Attributes
 
