@@ -34,6 +34,7 @@ export const MessageType = {
   EMBED_SIZE: 'embed-size',
   EMBED_SIZE_CHANGED: 'embed-size-changed',
   EMBED_SIZE_DENIED: 'embed-size-denied',
+  NO_CONTENT: 'no-content',
 
   // For amp-inabox
   SEND_POSITIONS: 'send-positions',
