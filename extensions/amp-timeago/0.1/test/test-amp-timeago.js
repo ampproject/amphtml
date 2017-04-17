@@ -27,15 +27,19 @@ describes.realWin('amp-timeago', {
   beforeEach(() => {
     win = env.win;
     element = win.document.createElement('amp-timeago');
-
     const date = new Date();
     date.setDate(date.getDate() - 2);
     element.setAttribute('datetime', date.toISOString());
+    element.textContent = date.toString();
+    element.setAttribute('layout', 'fixed');
+    element.setAttribute('width', '160px');
+    element.setAttribute('height', '20px');
     win.document.body.appendChild(element);
   });
 
   it('should display 2 days ago when built', () => {
     element.build();
-    expect(element.textContent).to.equal('2 days ago');
+    const timeElement = element.querySelector('time');
+    expect(timeElement.textContent).to.equal('2 days ago');
   });
 });

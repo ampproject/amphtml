@@ -15,6 +15,7 @@
  */
 
 import {user} from '../../../src/log';
+import {Layout} from '../../../src/layout';
 import {timeago} from './third_party/timeagojs/timeago';
 import {ar} from './third_party/timeagojs/locales/ar';
 import {be} from './third_party/timeagojs/locales/be';
@@ -119,12 +120,17 @@ export class AmpTimeAgo extends AMP.BaseElement {
     this.title_ = this.element.textContent;
 
     this.element.title = this.title_;
-    this.element.textContent = timeago(this.datetime_, this.locale_);
+    this.element.textContent = '';
+
+    const timeElement = document.createElement('time');
+    timeElement.setAttribute('datetime', this.datetime_);
+    timeElement.textContent = timeago(this.datetime_, this.locale_);
+    this.element.appendChild(timeElement);
   }
 
   /** @override */
-  isLayoutSupported() {
-    return true;
+  isLayoutSupported(layout) {
+    return layout === Layout.FIXED;
   }
 }
 
