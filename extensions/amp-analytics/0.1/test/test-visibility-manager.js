@@ -39,7 +39,7 @@ class IntersectionObserverStub {
     if (this.disconnected) {
       throw new Error('disconnected');
     }
-    if (this.elements.indexOf(element) == -1) {
+    if (!this.elements.includes(element)) {
       this.elements.push(element);
     }
   }
