@@ -15,7 +15,6 @@
  */
 
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
-import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
@@ -39,6 +38,7 @@ export class AmpList extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
+
     if (!this.container_.hasAttribute('role')) {
       this.container_.setAttribute('role', 'list');
     }
@@ -46,9 +46,6 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
     }
-
-    /** @type {Promise} */
-    this.mutationPromise_ = null;
   }
 
   /** @override */
@@ -65,10 +62,7 @@ export class AmpList extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const srcMutation = mutations['src'];
     if (srcMutation != undefined) {
-      const p = this.populateList_();
-      if (getMode().test) {
-        this.mutationPromise_ = p;
-      }
+      this.populateList_();
     }
   }
 
@@ -117,14 +111,6 @@ export class AmpList extends AMP.BaseElement {
         this.attemptChangeHeight(scrollHeight).catch(() => {});
       }
     });
-  }
-
-  /**
-   * @return {Promise}
-   * @visibleForTesting
-   */
-  mutationPromiseForTesting() {
-    return this.mutationPromise_;
   }
 
 }

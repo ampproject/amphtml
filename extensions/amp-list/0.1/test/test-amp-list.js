@@ -128,15 +128,10 @@ describe('amp-list component', () => {
       templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
           element, newItems)
           .returns(newRenderPromise).once();
+      const spy = sinon.spy(list, 'populateList_');
       element.setAttribute('src', 'https://data2.com/list.json');
       list.mutatedAttributesCallback({'src': 'https://data2.com/list.json'});
-      return list.mutationPromiseForTesting();
-    }).then(() => {
-      return Promise.all([xhrPromise, renderPromise]);
-    }).then(() => {
-      expect(list.container_.contains(itemElement)).to.be.false;
-      expect(list.container_.contains(itemElement2)).to.be.true;
-      expect(list.container_.contains(itemElement3)).to.be.true;
+      expect(spy).to.be.calledOnce;
     });
   });
 
