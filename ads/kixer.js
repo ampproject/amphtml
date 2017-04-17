@@ -52,9 +52,9 @@ export function kixer(global, data) {
 
   const kxviewCheck = function(intersectionEntry) {
     inView = intersectionEntry.intersectionRatio > 0.5; // Half of the unit is in the viewport
-    if (inView === true) {
+    if (inView) {
       if (viewed === false && viewTimer == null) {
-        viewTimer = setTimeout(function() {
+        viewTimer = setTimeout(function() { // Timeout to check again in 900ms if the ad is still in the viewport
           clearTimeout(viewTimer);
           viewTimer = null;
           if (inView === true) {
