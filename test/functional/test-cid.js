@@ -139,6 +139,7 @@ describe('cid', () => {
 
     cid = cidServiceForDocForTesting(ampdoc);
     installCryptoService(fakeWin);
+    crypto = cryptoFor(fakeWin);
   });
 
   afterEach(() => {
@@ -154,11 +155,20 @@ describe('cid', () => {
           'custom-cid-scope',
           'tSSEaSFEU2-vkEO0Mb9HZejJui-npGRhXf3fD3H3iWeYQrjkQOTaRYdPyFTogNXA');
     });
+
+    it('should hash domain name and scope', () => {
+      fakeWin.location.href =
+          'https://cdn.ampproject.org/v/www.DIFFERENT.com/foo/?f=0';
+      // domain name: 'http://www.different.com'
+      // scope: 'another-custom-cid-scope'
+      return compare(
+          'another-custom-cid-scope',
+          '25lYHB6Luck8Z5ddpiB-FBbj2pa9zx3WdnJlZVgFneJRcFsDT3kIoPoi6k6-oxrB');
+    });
   });
 
   describe('with crypto stub', () => {
     beforeEach(() => {
-      crypto = cryptoFor(fakeWin);
       crypto.sha384Base64 = val => {
         if (val instanceof Uint8Array) {
           val = '[' + Array.apply([], val).join(',') + ']';
