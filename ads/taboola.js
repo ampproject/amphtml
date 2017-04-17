@@ -28,7 +28,7 @@ export function taboola(global, data) {
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
   validateData(data, ['publisher', 'placement', 'mode',
-    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'other']]);
+    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'others']]);
 
   // setup default values for referrer and url
   const params = {

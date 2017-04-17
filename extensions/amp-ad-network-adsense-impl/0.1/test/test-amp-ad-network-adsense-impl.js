@@ -184,7 +184,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         ampStickyAd.appendChild(element);
         fixture.doc.body.appendChild(ampStickyAd);
         return impl.getAdUrl().then(adUrl => {
-          expect(adUrl.includes('act=sa')).to.be.true;
+          expect(adUrl.indexOf('act=sa') >= 0).to.be.true;
         });
       });
     });
