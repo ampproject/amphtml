@@ -147,7 +147,24 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
       testFiles = testFiles.concat(glob.sync(testPaths[index]));
     }
     testFiles = shuffleArray(testFiles);
-    c.files = [].concat(config.commonTestPaths, testFiles);
+    // we need to replace the test init with something that won't match
+    // any file.
+    testFiles[testFiles.indexOf('test/_init_tests.js')] = '_WONTMATCH.qqq';
+    c.files = config.commonTestPaths.concat(testFiles);
+
+  } else if (argv.glob) {
+    var testPaths = [
+      'test/**/*.js',
+      'ads/**/test/test-*.js',
+      'extensions/**/test/**/*.js',
+    ];
+
+    var testFiles = [];
+
+    for (index in testPaths) {
+      testFiles = testFiles.concat(glob.sync(testPaths[index]));
+    }
+    c.files = config.commonTestPaths.concat(testFiles);
 
   } else {
     c.files = config.testPaths;
