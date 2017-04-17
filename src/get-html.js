@@ -54,7 +54,7 @@ export function getHtml(win, selector, attrs) {
 function appendToResult(node, attrs, result) {
   const stack = [node];
   const allowedAttrs = attrs.filter(attr => {
-    return allowedAttributes.indexOf(attr) > -1;
+    return allowedAttributes.includes(attr);
   });
 
   while (stack.length > 0) {
@@ -85,9 +85,9 @@ function isApplicableNode(node) {
   const tagName = node.tagName.toLowerCase();
 
   if (startsWith(tagName, 'amp-')) {
-    return !!(allowedAmpTags.indexOf(tagName) > -1 && node.textContent);
+    return !!(allowedAmpTags.includes(tagName) && node.textContent);
   } else {
-    return !!(excludedTags.indexOf(tagName) === -1 && node.textContent);
+    return !!(!excludedTags.includes(tagName) && node.textContent);
   }
 }
 

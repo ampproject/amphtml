@@ -698,7 +698,7 @@ class MultidocManager {
     }, 50);
 
     // Store reference.
-    if (this.shadowRoots_.indexOf(shadowRoot) == -1) {
+    if (!this.shadowRoots_.includes(shadowRoot)) {
       this.shadowRoots_.push(shadowRoot);
     }
 

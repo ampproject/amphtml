@@ -242,7 +242,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (this.isSandbox_) {
           const eventType = trigger['on'];
           if (isEnumValue(AnalyticsEventType, eventType) &&
-              WHITELIST_EVENT_IN_SANDBOX.indexOf(eventType) == -1) {
+              !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)) {
             user().error(TAG, eventType + 'is not supported for amp-analytics' +
             ' in scope');
             continue;
