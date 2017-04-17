@@ -25,7 +25,7 @@ export function holder(global, data) {
   const wcl = global.context.location;
   const n = navigator.userAgent;
   let l = '&r' + Math.round((Math.random() * 10000000)) + '&h' + wcl.href;
-  if (!(n.includes('Safari') && !n.includes('Chrome'))) {
+  if (!n.includes('Safari') && n.includes('Chrome')) {
     l += '&c1';
   }
   data.queue = l;
