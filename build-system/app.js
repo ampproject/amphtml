@@ -123,6 +123,7 @@ app.use('/form/redirect-to/post', function(req, res) {
   res.end('{}');
 });
 
+
 app.use('/form/echo-json/post', function(req, res) {
   assertCors(req, res, ['POST']);
   var form = new formidable.IncomingForm();
@@ -729,7 +730,7 @@ app.get('/dist/rtv/9[89]*/*.js', function(req, res, next) {
 
   setTimeout(() => {
     // Cause a delay, to show the "stale-while-revalidate"
-    if (req.path.indexOf('v0.js') > -1) {
+    if (req.path.includes('v0.js')) {
       var path = req.path.replace(/rtv\/\d+/, '');
       return fs.readFileAsync(process.cwd() + path, 'utf8')
         .then(file => {
@@ -878,7 +879,7 @@ function getUrlPrefix(req) {
 function addQueryParam(url, param, value) {
   const paramValue =
       encodeURIComponent(param) + '=' + encodeURIComponent(value);
-  if (url.indexOf('?') == -1) {
+  if (!url.includes('?')) {
     url += '?' + paramValue;
   } else {
     url += '&' + paramValue;

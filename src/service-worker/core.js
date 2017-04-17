@@ -466,7 +466,7 @@ function purge(cache, version, pathname, diversions) {
       } else {
         // We will only delete a diversion if we know for certain the versions
         // that are diversions.
-        if (!diversions || diversions.indexOf(cachedData.rtv) > -1) {
+        if (!diversions || diversions.includes(cachedData.rtv)) {
           continue;
         }
       }
@@ -544,7 +544,7 @@ export function getCachedVersion(cache, requestVersion, requestPath) {
       // The main binary (arguably the most important file to cache) is given a
       // heavy weight, while the first requested file is given a slight weight.
       // Everything else increments normally.
-      if (pathname.indexOf('/', 1) === -1) {
+      if (!pathname.includes('/', 1)) {
         // Main binary
         count += 5;
       } else if (requestPath === pathname) {
