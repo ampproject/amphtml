@@ -128,7 +128,7 @@ describe('amp-list component', () => {
       templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
           element, newItems)
           .returns(newRenderPromise).once();
-      const spy = sinon.spy(list, 'populateList_');
+      const spy = sandbox.spy(list, 'populateList_');
       element.setAttribute('src', 'https://data2.com/list.json');
       list.mutatedAttributesCallback({'src': 'https://data2.com/list.json'});
       expect(spy).to.be.calledOnce;
