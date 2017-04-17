@@ -46,6 +46,13 @@ If the resource requested by the `amp-img` component fails to load, the space wi
 
 A placeholder background color or other visual can be set using CSS selector and style on the element itself.
 
+Besides a placeholder background color you may set a child element
+(a `div` for example) with a `placeholder` attribute and this will be
+displayed and be visible until the image has fully loaded. If no `placeholder`
+element is given, a default placeholder animation is placed (3 loading dots)
+until the image has fully loaded. (We are working giving the user the
+ability to override or restyle the default loading animation placeholder)
+
 The `amp-img` includes attributes for denoting attribution via the attribution attribute.
 
 Additional image features like captions can be implemented with standard HTML - using the `figure` and `figcaption` elements, for example.
