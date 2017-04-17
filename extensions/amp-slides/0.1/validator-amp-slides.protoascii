@@ -14,6 +14,9 @@
 # limitations under the license.
 #
 
+# This tag no longer exists. It has been folded into amp-carousel. See
+# https://github.com/ampproject/amphtml/issues/5981
+# However, some pages are still including the javascript file.
 tags: {  # amp-slides
   html_format: AMP
   tag_name: "SCRIPT"
@@ -24,4 +27,6 @@ tags: {  # amp-slides
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
+  deprecation: "amp-carousel"
+  deprecation_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
 }
