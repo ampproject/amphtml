@@ -401,9 +401,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             width: '300',
             height: '150',
           }).then(() => {
-            const resetSlotSpy = sandbox.spy(
-                AmpAdNetworkDoubleclickImpl.prototype, 'resetSlot');
-
+            const slotIdBefore = impl.element.getAttribute(
+                'data-amp-slot-index');
             impl.layoutMeasureExecuted_ = true;
             impl.uiHandler = {setDisplayState: () => {}};
             const placeholder = document.createElement('div');
