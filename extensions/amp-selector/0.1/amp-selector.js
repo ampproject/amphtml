@@ -20,7 +20,20 @@ import {closest} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
+/**
+ * Set of namespaces that can be set for lifecycle reporters.
+ *
+ * @enum {string}
+ */
+const KB_SUPPORT_MODE = {
+  NONE: 'none',
+  FOCUS: 'focus',
+  SELECT: 'select',
+};
+
+
 export class AmpSelector extends AMP.BaseElement {
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -44,7 +57,10 @@ export class AmpSelector extends AMP.BaseElement {
     this.action_ = null;
 
     /** @private {number} */
-    this.focusedIndex = 0;
+    this.focusedIndex_ = 0;
+
+    /** @private {?KBSupportMode} */
+    this.kbSupportMode_ = KB_SUPPORT_MODE.FOCUS;
   }
 
   /** @override */
@@ -68,10 +84,24 @@ export class AmpSelector extends AMP.BaseElement {
       this.element.setAttribute('aria-disabled', 'true');
     }
 
+    const kbSupportMode = this.element.getAttribute('keyboard-support');
+    if (kbSupportMode == 'none') {
+      this.kbSupportMode_ = KB_SUPPORT_MODE.NONE;
+    } else if (kbSupportMode = 'select') {
+      this.kbSupportMode_ = KB_SUPPORT_MODE.SELECT;
+      user().assert(!this.isMultiple_,
+        '[keyboard-support=select] not supported for ' +
+        'multiple selection amp-selector');
+    } else {
+      this.kbSupportMode_ = KB_SUPPORT_MODE.FOCUS;
+    }
+
     this.init_();
     if (!this.isDisabled_) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
-      this.element.addEventListener('keydown', this.keyHandler_.bind(this));
+      if (this.kbSupportMode_ !== KB_SUPPORT_MODE.NONE) {
+        this.element.addEventListener('keydown', this.keyHandler_.bind(this));
+      }
     }
   }
 
@@ -184,18 +214,11 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
-   * Handles the change event for the selectables.
-   * @param {!Event} event
+   * Handles user selection on an option.
+   * @param {!Element} el The element selected.
    */
-  clickHandler_(event) {
-    let el = dev().assertElement(event.target);
-    if (!el) {
-      return;
-    }
-    if (!el.hasAttribute('option')) {
-      el = closest(el, e => e.hasAttribute('option'), this.element);
-    }
-    if (!el || el.hasAttribute('disabled')) {
+  onOptionSelected_(el) {
+    if (el.hasAttribute('disabled')) {
       return;
     }
 
@@ -228,42 +251,60 @@ export class AmpSelector extends AMP.BaseElement {
     });
   }
 
-  keyHandler_(event) {
+  /**
+   * Handles click events for the selectables.
+   * @param {!Event} event
+   */
+  clickHandler_(event) {
+    let el = dev().assertElement(event.target);
+    if (!el) {
+      return;
+    }
+    if (!el.hasAttribute('option')) {
+      el = closest(el, e => e.hasAttribute('option'), this.element);
+    }
+    if (el) {
+      onOptionSelected_(el);
+    }
+  }
 
+  /**
+   * Handles keyboard events for the selectables.
+   * @param {!Event} event
+   */
+  keyHandler_(event) {
     if (!this.element.contains(this.element.ownerDocument.activeElement)) {
       return;
     }
 
     // Make currently selected option unfocusable
-    this.options_[this.focusedIndex].tabIndex = -1;
+    this.options_[this.focusedIndex_].tabIndex = -1;
 
     switch(event.keyCode) {
-      // TODO(kmh287): Clean this up?
       case 37: // Left
       case 38: // Up
         event.preventDefault();
-        if (this.focusedIndex == 0) {
-          this.focusedIndex = this.options_.length - 1;
+        if (this.focusedIndex_ == 0) {
+          this.focusedIndex_ = this.options_.length - 1;
         } else {
-          this.focusedIndex = this.focusedIndex - 1;
+          this.focusedIndex_ = this.focusedIndex_ - 1;
         }
         break;
       case 39: // Right
       case 40: // Down
         event.preventDefault();
-        if (this.focusedIndex == this.options_.length - 1) {
-          this.focusedIndex = 0;
+        if (this.focusedIndex_ == this.options_.length - 1) {
+          this.focusedIndex_ = 0;
         } else {
-          this.focusedIndex = this.focusedIndex + 1;
+          this.focusedIndex_ = this.focusedIndex_ + 1;
         }
         break;
     }
 
     // Focus newly selected option
-    const newSelectedOption = this.options_[this.focusedIndex];
+    const newSelectedOption = this.options_[this.focusedIndex_];
     newSelectedOption.tabIndex = 0;
     newSelectedOption.focus();
-    this.element.setAttribute('aria-activedescendant', newSelectedOption.id);
   }
 
   /**
