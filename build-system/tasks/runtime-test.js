@@ -20,6 +20,7 @@ var gulp = require('gulp-help')(require('gulp'));
 var glob = require('glob');
 var Karma = require('karma').Server;
 var config = require('../config');
+var read = require('file-reader');
 var fs = require('fs');
 var path = require('path');
 var util = require('gulp-util');
@@ -135,6 +136,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
   } else if (argv.randomize) {
+    /** Randomize the order of the test running */
     var testPaths = [
       'test/**/*.js',
       'ads/**/test/test-*.js',
@@ -148,9 +150,17 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     }
     testFiles = shuffleArray(testFiles);
     // we need to replace the test init with something that won't match
-    // any file.
+    // any file. _init_tests gets added twice due to the regex matching.
     testFiles[testFiles.indexOf('test/_init_tests.js')] = '_WONTMATCH.qqq';
     c.files = config.commonTestPaths.concat(testFiles);
+
+    util.log(util.colors.blue(JSON.stringify(c.files)));
+    util.log(util.colors.yellow("Save the above files in a .json file to reuse"));
+
+  } else if (argv.testlist) {
+    var file = read.file(argv.testlist);
+    util.log(file);
+    c.files = file;
 
   } else if (argv.glob) {
     var testPaths = [
@@ -165,7 +175,6 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
       testFiles = testFiles.concat(glob.sync(testPaths[index]));
     }
     c.files = config.commonTestPaths.concat(testFiles);
-
   } else {
     c.files = config.testPaths;
   }
@@ -220,6 +229,8 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     'oldchrome': 'Runs test with an old chrome. Saucelabs only.',
     'grep': 'Runs tests that match the pattern',
     'files': 'Runs tests for specific files',
+    'randomize': 'Runs entire test suite in random order',
+    'testlist': 'Runs tests specified in JSON by supplied file',
   }
 });
 

@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "document-register-element": "1.1.1",
+    "file-reader": "^1.1.1",
     "promise-pjs": "1.1.2",
     "web-animations-js": "2.2.2"
   },
