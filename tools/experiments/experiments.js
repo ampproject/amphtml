@@ -267,11 +267,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7670',
   },
   {
-    id: 'amp-gist',
-    name: 'Embed a GitHub gist',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8467',
-  },
-  {
     id: '3p-use-ampcontext',
     name: 'Use AmpContext for window.context messaging',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
@@ -443,6 +438,7 @@ function toggleExperiment_(id, name, opt_on) {
           (on ? '1' : '0'), (on ? validUntil : 0), {
             // Set explicit domain, so the cookie gets send to sub domains.
             domain: location.hostname,
+            allowOnProxyOrigin: true,
           });
       // Reflect default experiment state.
       self.location.reload();

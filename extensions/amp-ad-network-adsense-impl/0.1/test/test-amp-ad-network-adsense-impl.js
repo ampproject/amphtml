@@ -161,7 +161,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             // Remember them for debugging purposes.
             const extraneousParams = [];
             for (const name in actualQueryParams) {
-              if (!(name in urlParams) && variableParams.indexOf(name) < 0) {
+              if (!(name in urlParams) && !variableParams.includes(name)) {
                 extraneousParams.push(`${name}=${actualQueryParams[name]}`);
               }
             }
@@ -383,6 +383,10 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'on': 'visible',
         },
       };
+      // Next two lines are to ensure that internal parts not relevant for this
+      // test are properly set.
+      impl.size_ = {width: 200, height: 50};
+      impl.iframe = impl.win.document.createElement('iframe');
       impl.onCreativeRender(false);
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
@@ -415,6 +419,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         element.appendChild(iframe);
         document.body.appendChild(element);
         impl = new AmpAdNetworkAdsenseImpl(element);
+        impl.iframe = iframe;
         return fixture;
       });
     }
@@ -424,6 +429,10 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       const style = window.getComputedStyle(iframe);
       expect(style.top).to.equal('50%');
       expect(style.left).to.equal('50%');
+      // We expect these set, but the exact dimensions will be determined by the
+      // IOb.
+      expect(style.width).to.be.ok;
+      expect(style.height).to.be.ok;
       // We don't know the exact values by which the frame will be translated,
       // as this can vary depending on whether we use the height/width
       // attributes, or the actual size of the frame. To make this less of a
@@ -441,7 +450,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.equal('300');
         expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.element.querySelector('iframe'));
+        verifyCss(impl.iframe);
       });
     });
     it('centers iframe in slot when !height && !width', () => {
@@ -450,7 +459,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.be.null;
         expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.element.querySelector('iframe'));
+        verifyCss(impl.iframe);
       });
     });
     it('centers iframe in slot when !height && width', () => {
@@ -460,7 +469,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.equal('300');
         expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.element.querySelector('iframe'));
+        verifyCss(impl.iframe);
       });
     });
     it('centers iframe in slot when height && !width', () => {
@@ -470,7 +479,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.be.null;
         expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.element.querySelector('iframe'));
+        verifyCss(impl.iframe);
       });
     });
   });

@@ -87,7 +87,6 @@ import {setStyle} from './style';
 import {timerFor} from './services';
 import {viewerForDoc} from './services';
 import {viewportForDoc} from './services';
-import {vsyncFor} from './services';
 import {waitForBody} from './dom';
 import * as config from './config';
 
@@ -310,6 +309,27 @@ function adoptShared(global, opts, callback) {
   function installAutoLoadExtensions() {
     if (!getMode().test && isExperimentOn(global, 'amp-lightbox-viewer-auto')) {
       extensionsFor(global).loadExtension('amp-lightbox-viewer');
+    }
+  }
+
+  // Handle high priority extensions now, and if necessary issue
+  // requests for new extensions (used for experimental version
+  // locking).
+  for (let i = 0; i < preregisteredExtensions.length; i++) {
+    const fnOrStruct = preregisteredExtensions[i];
+    if (maybeLoadCorrectVersion(global, fnOrStruct)) {
+      preregisteredExtensions.splice(i--, 1);
+    }
+    else if (typeof fnOrStruct == 'function' || fnOrStruct.p == 'high') {
+      try {
+        installExtension(fnOrStruct);
+      } catch (e) {
+        // Throw errors outside of loop in its own micro task to
+        // avoid on error stopping other extensions from loading.
+        dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
+      }
+      // We handled the entry. Remove from set for future execution.
+      preregisteredExtensions.splice(i--, 1);
     }
   }
 
@@ -678,7 +698,7 @@ class MultidocManager {
     }, 50);
 
     // Store reference.
-    if (this.shadowRoots_.indexOf(shadowRoot) == -1) {
+    if (!this.shadowRoots_.includes(shadowRoot)) {
       this.shadowRoots_.push(shadowRoot);
     }
 
@@ -989,9 +1009,5 @@ function maybePumpEarlyFrame(win, cb) {
     cb();
     return;
   }
-  const vsync = vsyncFor(win);
-  // Need to wait 2 full frames to reliably paint in between.
-  vsync.mutate(() => {
-    vsync.mutate(cb);
-  });
+  timerFor(win).delay(cb, 1);
 }

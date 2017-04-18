@@ -39,7 +39,7 @@ class IntersectionObserverStub {
     if (this.disconnected) {
       throw new Error('disconnected');
     }
-    if (this.elements.indexOf(element) == -1) {
+    if (!this.elements.includes(element)) {
       this.elements.push(element);
     }
   }
@@ -423,6 +423,34 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
       expect(state.elementX).to.be.undefined;
     });
+  });
+
+  it('should protect from invalid intersection values', () => {
+    const target = win.document.createElement('div');
+    root.listenElement(target, {}, null, eventResolver);
+    expect(root.models_).to.have.length(1);
+    const model = root.models_[0];
+
+    const inOb = root.getIntersectionObserver_();
+    expect(model.getVisibility_()).to.equal(0);
+
+    // Valid value.
+    inOb.callback([{target, intersectionRatio: 0.3}]);
+    expect(model.getVisibility_()).to.equal(0.3);
+
+    // Invalid negative value.
+    inOb.callback([{target, intersectionRatio: -0.01}]);
+    expect(model.getVisibility_()).to.equal(0);
+
+    inOb.callback([{target, intersectionRatio: -1000}]);
+    expect(model.getVisibility_()).to.equal(0);
+
+    // Invalid overflow value.
+    inOb.callback([{target, intersectionRatio: 1.01}]);
+    expect(model.getVisibility_()).to.equal(1);
+
+    inOb.callback([{target, intersectionRatio: 1000}]);
+    expect(model.getVisibility_()).to.equal(1);
   });
 
   it('should listen on a element with different specs', () => {

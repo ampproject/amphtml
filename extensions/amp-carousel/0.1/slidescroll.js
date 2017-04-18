@@ -604,7 +604,7 @@ export class AmpSlideScroll extends BaseSlides {
         continue;
       }
       // Hide if not shown anymore
-      if (indexArr.indexOf(i) == -1) {
+      if (!indexArr.includes(i)) {
         if (this.shouldLoop) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }

@@ -223,7 +223,7 @@ describes.realWin('amp-install-serviceworker', {
         deferredMutate = fn;
       };
       return whenVisible.then(() => {
-        clock.tick(19999);
+        clock.tick(9999);
         expect(deferredMutate).to.be.undefined;
         expect(iframe).to.be.undefined;
         clock.tick(1);

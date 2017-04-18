@@ -308,7 +308,7 @@ export function sanitizeHtml(html) {
 export function sanitizeFormattingHtml(html) {
   return htmlSanitizer.sanitizeWithPolicy(html,
       function(tagName, unusedAttrs) {
-        if (WHITELISTED_FORMAT_TAGS.indexOf(tagName) == -1) {
+        if (!WHITELISTED_FORMAT_TAGS.includes(tagName)) {
           return null;
         }
         return {

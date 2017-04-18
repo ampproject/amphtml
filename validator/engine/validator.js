@@ -859,7 +859,7 @@ class ChildTagMatcher {
     if (childTags.firstChildTagNameOneof.length > 0 &&
         (this.numChildTagsSeen_ - 1) === 0) {
       const names = childTags.firstChildTagNameOneof;
-      if (names.indexOf(tagName) == -1) {
+      if (!names.includes(tagName)) {
         if (!amp.validator.LIGHT) {
           const allowedNames = '[\'' + names.join('\', \'') + '\']';
           context.addError(
@@ -1047,10 +1047,10 @@ class ReferencePointMatcher {
    */
   explainsAttribute(attrName) {
     const matched = this.getReferencePointsMatched();
-    if (matched.length == 0) return false;
+    if (matched.length === 0) return false;
 
     const tagSpecId = matched[matched.length - 1];
-    if (tagSpecId == -1) return false;
+    if (tagSpecId === -1) return false;
 
     const tagSpec = this.parsedValidatorRules_.getByTagSpecId(tagSpecId);
     return tagSpec.hasAttrWithName(attrName);
@@ -1541,7 +1541,7 @@ class CdataMatcher {
       if (amp.validator.VALIDATE_CSS) {
         this.matchCss_(cdata, cdataSpec.cssSpec, context, validationResult);
         if (amp.validator.LIGHT &&
-            validationResult.status ==
+            validationResult.status ===
                 amp.validator.ValidationResult.Status.FAIL) {
           return;
         }
@@ -2213,7 +2213,7 @@ function validateUrlAndProtocol(
     }
     return;
   }
-  if (!spec.allowRelative && (!url.hasProtocol || url.protocol.length == 0)) {
+  if (!spec.allowRelative && (!url.hasProtocol || url.protocol.length === 0)) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
     } else {
@@ -2347,7 +2347,7 @@ function validateNonTemplateAttrValueAgainstSpec(
     // Allow spec's with value: "" to also be equal to their attribute
     // name (e.g. script's spec: async has value: "" so both async and
     // async="async" is okay in a script tag).
-    if ((spec.value == '') && (attrValue == attrName)) {
+    if ((spec.value === '') && (attrValue === attrName)) {
       return;
     }
     if (amp.validator.LIGHT) {
@@ -2806,7 +2806,7 @@ function validateLayout(parsedTagSpec, context, attrsByKey, result) {
   }
 
   // Does the tag support the computed layout?
-  if (spec.ampLayout.supportedLayouts.indexOf(layout) === -1) {
+  if (!spec.ampLayout.supportedLayouts.includes(layout)) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
     } else {
@@ -2954,7 +2954,7 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
         context.getDocLocator(),
         /* params */[attrName, getTagSpecName(parsedTagSpec.getSpec())],
         context.getRules().getTemplateSpecUrl(), result);
-  } else if (attrName == 'style') {
+  } else if (attrName === 'style') {
     context.addError(
         amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.DISALLOWED_STYLE_ATTR,
@@ -3026,7 +3026,7 @@ function validateAttributeInExtension(
 
   const extensionSpec = tagSpec.extensionSpec;
   // TagSpecs with extensions will only be evaluated if their dispatch_key
-  // matches, which is based on this custom-element field.
+  // matches, which is based on this custom-element/custom-template field.
   if (!extensionSpec.isCustomTemplate && attrName === 'custom-element') {
     goog.asserts.assert(extensionSpec.name === attrValue);
     return true;
@@ -3283,11 +3283,11 @@ function validateAttributes(
       triggersToCheck.push(attrSpec);
     }
   }
-  if (result.status == amp.validator.ValidationResult.Status.FAIL) return;
+  if (result.status === amp.validator.ValidationResult.Status.FAIL) return;
   // The "at least 1" part of mandatory_oneof: If none of the
   // alternatives were present, we report that an attribute is missing.
   for (const mandatoryOneof of parsedTagSpec.getMandatoryOneofs()) {
-    if (mandatoryOneofsSeen.indexOf(mandatoryOneof) === -1) {
+    if (!mandatoryOneofsSeen.includes(mandatoryOneof)) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -3973,7 +3973,7 @@ class ParsedValidatorRules {
         continue;
       }
       const alternative = tagSpec.mandatoryAlternatives;
-      if (satisfied.indexOf(alternative) === -1) {
+      if (!satisfied.includes(alternative)) {
         if (amp.validator.LIGHT) {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
           return;
@@ -4134,7 +4134,7 @@ amp.validator.ValidationHandler =
    * @override
    */
   setDocLocator(locator) {
-    if (locator == null) {
+    if (locator === null) {
       goog.asserts.fail('Null DocLocator set');
     } else {
       this.context_.setDocLocator(locator);
@@ -4274,6 +4274,8 @@ amp.validator.ValidationHandler =
       }
       return;
     }
+    let resultForBestAttempt = new amp.validator.ValidationResult();
+    resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
     // At this point, we have dispatch keys, tagspecs, or both.
     // The strategy is to look for a matching dispatch key first. A matching
     // dispatch key does not guarantee that the dispatched tagspec will also
@@ -4282,8 +4284,6 @@ amp.validator.ValidationHandler =
     // If we don't find a matching dispatch key, we must try all of the
     // tagspecs to see if any of them match. If there are no tagspecs, we want
     // to return a GENERAL_DISALLOWED_TAG error.
-    let resultForBestAttempt = new amp.validator.ValidationResult();
-    resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
     // calling HasDispatchKeys here is only an optimization to skip the loop
     // over encountered attributes in the case where we have no dispatches.
     if (tagSpecDispatch.hasDispatchKeys()) {
@@ -4304,6 +4304,32 @@ amp.validator.ValidationHandler =
             // validate using whatever the tagspec requests.
             attrValue.toLowerCase(), this.context_.getTagStack().getParent());
         if (maybeTagSpecId !== -1) {
+          // Dispatch keys cause trouble if there are multiple attributes with
+          // the dispatch key name. Detect this and emit an error.
+          for (let j = 0; j < encounteredAttrs.length; j += 2) {
+            if (j === i) continue;
+            let otherAttrName = encounteredAttrs[j].toLowerCase();
+            if (otherAttrName === attrName) {
+              let otherAttrValue = encounteredAttrs[j + 1];
+              if (otherAttrName === otherAttrValue) {
+                otherAttrValue = '';
+              }
+              if (otherAttrValue !== attrValue) {
+                if (amp.validator.LIGHT) {
+                  this.validationResult_.status =
+                      amp.validator.ValidationResult.Status.FAIL;
+                } else {
+                  this.context_.addError(
+                      amp.validator.ValidationError.Severity.ERROR,
+                      amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                      this.context_.getDocLocator(),
+                      [attrName, tagName.toLowerCase(), otherAttrValue],
+                      /* url */ '', this.validationResult_);
+                }
+                return;
+              }
+            }
+          }
           validateTagAgainstSpec(
               this.rules_, maybeTagSpecId, this.context_, encounteredAttrs,
               resultForBestAttempt);
@@ -4457,7 +4483,7 @@ if (!amp.validator.LIGHT) {
     }
     let errors;
     if (errorCategoryFilter === null) {
-      if (status == amp.validator.ValidationResult.Status.FAIL) {
+      if (status === amp.validator.ValidationResult.Status.FAIL) {
         terminal.error('AMP validation had errors:');
       } else {
         terminal.warn('AMP validation had warnings:');
@@ -4663,7 +4689,7 @@ amp.validator.categorizeError = function(error) {
   }
   // E.g. "Tag 'amp-accordion > section' must have 2 child tags - saw
   // 3 child tags."
-  if (error.code ==
+  if (error.code ===
       amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS) {
     if (goog.string./*OK*/ startsWith(error.params[0], 'amp-')) {
       return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
@@ -4673,9 +4699,9 @@ amp.validator.categorizeError = function(error) {
   // e.g. "Tag 'div' is disallowed as first child of tag
   // 'amp-accordion > section'. Allowed first child tag names are
   // ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']."
-  if (error.code ==
+  if (error.code ===
           amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME ||
-      error.code ==
+      error.code ===
           amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME) {
     if (goog.string./*OK*/ startsWith(error.params[0], 'amp-') ||
         goog.string./*OK*/ startsWith(error.params[1], 'amp-')) {
@@ -4711,7 +4737,7 @@ amp.validator.categorizeError = function(error) {
 
   // E.g. "The inline 'style' attribute is not allowed in AMP documents. Use
   // 'style amp-custom' tag instead."
-  if (error.code == amp.validator.ValidationError.Code.DISALLOWED_STYLE_ATTR)
+  if (error.code === amp.validator.ValidationError.Code.DISALLOWED_STYLE_ATTR)
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
 
   // E.g. "CSS syntax error in tag 'style amp-custom' - unterminated string."
@@ -4754,19 +4780,19 @@ amp.validator.categorizeError = function(error) {
        error.code ===
            amp.validator.ValidationError.Code
                .CSS_SYNTAX_DISALLOWED_RELATIVE_URL ||
-       error.code ==
+       error.code ===
            amp.validator.ValidationError.Code
                .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE ||
-       error.code ==
+       error.code ===
            amp.validator.ValidationError.Code
                .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT ||
-       error.code ==
+       error.code ===
            amp.validator.ValidationError.Code
                .CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE ||
-       error.code ==
+       error.code ===
            amp.validator.ValidationError.Code
                .CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH ||
-       error.code ==
+       error.code ===
            amp.validator.ValidationError.Code
                .CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION) &&
       isAuthorStylesheet(error.params[0])) {
@@ -4956,11 +4982,11 @@ amp.validator.categorizeError = function(error) {
   // E.g. "Invalid URL protocol 'http:' for attribute 'src' in tag
   // 'amp-iframe'." Note: Parameters in the format strings appear out
   // of order so that error.params(1) is the tag for all four of these.
-  if (error.code == amp.validator.ValidationError.Code.MISSING_URL ||
-      error.code == amp.validator.ValidationError.Code.INVALID_URL ||
-      error.code == amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL ||
-      error.code == amp.validator.ValidationError.Code.DISALLOWED_DOMAIN ||
-      error.code ==
+  if (error.code === amp.validator.ValidationError.Code.MISSING_URL ||
+      error.code === amp.validator.ValidationError.Code.INVALID_URL ||
+      error.code === amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL ||
+      error.code === amp.validator.ValidationError.Code.DISALLOWED_DOMAIN ||
+      error.code ===
           amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL) {
     if (goog.string./*OK*/ startsWith(error.params[1], 'amp-')) {
       return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
@@ -4968,7 +4994,7 @@ amp.validator.categorizeError = function(error) {
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   // E.g. "The dimension '1x' in attribute 'srcset' appears more than once."
-  if (error.code == amp.validator.ValidationError.Code.DUPLICATE_DIMENSION) {
+  if (error.code === amp.validator.ValidationError.Code.DUPLICATE_DIMENSION) {
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   return amp.validator.ErrorCategory.Code.GENERIC;

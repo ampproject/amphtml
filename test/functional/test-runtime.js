@@ -46,13 +46,14 @@ describes.fakeWin('runtime', {
   location: 'https://cdn.ampproject.org/c/s/www.example.com/path',
 }, env => {
   let win;
+  let clock;
   let ampdocService;
   let ampdocServiceMock;
   let extensionElementIndex;
-  let vsync;
 
   beforeEach(() => {
     win = env.win;
+    clock = env.sandbox.useFakeTimers();
     extensionElementIndex = 0;
     ampdocService = {
       isSingleDoc: () => true,
@@ -68,7 +69,7 @@ describes.fakeWin('runtime', {
     ampdocService.getAmpDoc = () => ampdoc;
     installPlatformService(win);
     installTimerService(win);
-    vsync = vsyncForTesting(win);
+    vsyncForTesting(win);
     installAmpdocServices(ampdoc);
   });
 
@@ -210,6 +211,12 @@ describes.fakeWin('runtime', {
     toggleExperiment(win, 'pump-early-frame', true);
     let progress = '';
     const queueExtensions = win.AMP;
+    const highPriority = regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += 'high';
+    });
+    highPriority.p = 'high';
+    win.AMP.push(highPriority);
     win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '1';
@@ -218,34 +225,40 @@ describes.fakeWin('runtime', {
       expect(amp).to.equal(win.AMP);
       progress += '2';
     }));
+    win.AMP.push(() => {
+      progress += 'function';
+    });
     win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '3';
     }));
-    expect(queueExtensions).to.have.length(3);
+    expect(queueExtensions).to.have.length(5);
     adopt(win);
     runChunksForTesting(win.document);
-    expect(queueExtensions).to.have.length(3);
-    vsync.runScheduledTasks_();
-    expect(queueExtensions).to.have.length(3);
-    expect(progress).to.equal('');
-    // New extension arrives before inital ran.
-    win.AMP.push(regularExtension(amp => {
-      expect(amp).to.equal(win.AMP);
-      progress += '4';
-    }));
-    expect(queueExtensions).to.have.length(4);
-    vsync.runScheduledTasks_();
-    expect(queueExtensions).to.have.length(0);
-    runChunksForTesting(win.document);
-    expect(progress).to.equal('1234');
-    win.AMP.push(regularExtension(amp => {
-      expect(amp).to.equal(win.AMP);
-      progress += '5';
-    }));
-    runChunksForTesting(win.document);
-    expect(progress).to.equal('12345');
-    expect(queueExtensions).to.have.length(0);
+    return Promise.resolve().then(() => {
+      expect(progress).to.equal('highfunction');
+      expect(queueExtensions).to.have.length(3);
+      clock.tick();
+      expect(queueExtensions).to.have.length(3);
+      expect(progress).to.equal('highfunction');
+      // New extension arrives before inital ran.
+      win.AMP.push(regularExtension(amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += '4';
+      }));
+      expect(queueExtensions).to.have.length(4);
+      clock.tick(1);
+      expect(queueExtensions).to.have.length(0);
+      runChunksForTesting(win.document);
+      expect(progress).to.equal('highfunction1234');
+      win.AMP.push(regularExtension(amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += '5';
+      }));
+      runChunksForTesting(win.document);
+      expect(progress).to.equal('highfunction12345');
+      expect(queueExtensions).to.have.length(0);
+    });
   });
 
   it('support struct AMP.push raw functions and high priority', () => {

@@ -164,6 +164,14 @@ export class InstrumentationService {
   }
 
   /**
+   * @param {!Node} context
+   * @return {!./analytics-root.AnalyticsRoot}
+   */
+  getAnalyticsRoot(context) {
+    return this.findRoot_(context);
+  }
+
+  /**
    * @param {!Element} analyticsElement
    * @return {!AnalyticsGroup}
    */
@@ -501,7 +509,7 @@ export class InstrumentationService {
    */
   isTriggerAllowed_(triggerType, element) {
     if (element.ownerDocument.defaultView != this.ampdoc.win) {
-      return ALLOWED_IN_EMBED.indexOf(triggerType) > -1;
+      return ALLOWED_IN_EMBED.includes(triggerType);
     }
     return true;
   }

@@ -69,6 +69,8 @@ function createIframeWithApis(fixture) {
     expect(context.container).to.be.defined;
     expect(context.initialIntersection).to.be.defined;
     // check for rootBounds as native IO doesn't support it with CORS
+    expect(context.initialLayoutRect).to.be.defined;
+    expect(context.initialLayoutRect.top).to.be.defined;
     expect(context.initialIntersection.rootBounds).to.be.defined;
     expect(context.isMaster).to.be.defined;
     expect(context.computeInMasterFrame).to.be.defined;
@@ -137,7 +139,7 @@ describes.realWin('3P Ad', {
     });
 
     it('create an iframe with APIs', function() {
-      createIframeWithApis.call(this, fixture);
+      return createIframeWithApis.call(this, fixture);
     });
   });
 });
@@ -161,7 +163,7 @@ describes.realWin('3P Ad (with AmpContext experiment)', {
     });
 
     it('create an iframe with APIs', function() {
-      createIframeWithApis.call(this, fixture);
+      return createIframeWithApis.call(this, fixture);
     });
   });
 });

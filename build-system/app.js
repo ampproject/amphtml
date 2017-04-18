@@ -124,50 +124,6 @@ app.use('/form/redirect-to/post', function(req, res) {
 });
 
 
-function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
-  const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
-  const invalidMethod = req.method + ' method is not allowed. Use POST.';
-  const invalidOrigin = 'Origin header is invalid.';
-  const invalidSourceOrigin = '__amp_source_origin parameter is invalid.';
-  const unauthorized = 'Unauthorized Request';
-  var origin;
-
-  if (validMethods.indexOf(req.method) == -1) {
-    res.statusCode = 405;
-    res.end(JSON.stringify({message: invalidMethod}));
-    throw invalidMethod;
-  }
-
-  if (req.headers.origin) {
-    origin = req.headers.origin;
-    if (!ORIGIN_REGEX.test(req.headers.origin)) {
-      res.statusCode = 500;
-      res.end(JSON.stringify({message: invalidOrigin}));
-      throw invalidOrigin;
-    }
-
-    if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
-      res.statusCode = 500;
-      res.end(JSON.stringify({message: invalidSourceOrigin}));
-      throw invalidSourceOrigin;
-    }
-  } else if (req.headers['amp-same-origin'] == 'true') {
-    origin = getUrlPrefix(req);
-  } else {
-    res.statusCode = 401;
-    res.end(JSON.stringify({message: unauthorized}));
-    throw unauthorized;
-  }
-
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Expose-Headers',
-      ['AMP-Access-Control-Allow-Source-Origin']
-          .concat(opt_exposeHeaders || []).join(', '));
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-      req.query.__amp_source_origin);
-}
-
 app.use('/form/echo-json/post', function(req, res) {
   assertCors(req, res, ['POST']);
   var form = new formidable.IncomingForm();
@@ -247,7 +203,13 @@ function proxyToAmpProxy(req, res, minify) {
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
     const inabox = req.query['inabox'] == '1';
-    body = replaceUrls(minify ? 'min' : 'max', body, getUrlPrefix(req), inabox);
+    const urlPrefix = getUrlPrefix(req);
+    body = replaceUrls(minify ? 'min' : 'max', body, urlPrefix, inabox);
+    if (inabox) {
+      // Allow CORS requests for A4A.
+      const origin = req.headers.origin || urlPrefix;
+      enableCors(req, res, origin);
+    }
     res.status(response.statusCode).send(body);
   });
 }
@@ -545,7 +507,7 @@ app.use('/a4a(|-3p)/', function(req, res) {
   var adUrl = req.url;
   var templatePath = '/build-system/server-a4a-template.html';
   var urlPrefix = getUrlPrefix(req);
-  if (force3p && !adUrl.startsWith('/m') &&
+  if (!adUrl.startsWith('/m') &&
       urlPrefix.indexOf('//localhost') != -1) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
@@ -555,6 +517,7 @@ app.use('/a4a(|-3p)/', function(req, res) {
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template
         .replace(/FORCE3P/g, force3p)
+        .replace(/DISABLE3PFALLBACK/g, !force3p)
         .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_URL/g, adUrl)
         .replace(/AD_WIDTH/g, req.query.width || '300')
@@ -631,6 +594,11 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
 
     file = replaceUrls(mode, file, '', inabox);
 
+    if (inabox && req.headers.origin && req.query.__amp_source_origin) {
+      // Allow CORS requests for A4A.
+      enableCors(req, res, req.headers.origin);
+    }
+
     // Extract amp-ad for the given 'type' specified in URL query.
     if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
       var ads = file.match(new RegExp('<(amp-ad|amp-embed) [^>]*[\'"]'
@@ -645,11 +613,51 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   });
 });
 
+// Data for example: http://localhost:8000/examples/bind/xhr.amp.max.html
 app.use('/bind/form/get', function(req, res, next) {
   assertCors(req, res, ['GET']);
   res.json({
     bindXhrResult: 'I was fetched from the server!'
   });
+});
+
+// Data for example: http://localhost:8000/examples/bind/ecommerce.amp.max.html
+app.use('/bind/ecommerce/sizes', function(req, res, next) {
+  assertCors(req, res, ['GET']);
+  setTimeout(() => {
+    var prices = {
+      "0": {
+        "sizes": ["XS"]
+      },
+      "1": {
+        "sizes": ["S", "M", "L"]
+      },
+      "2": {
+        "sizes": ["XL"]
+      },
+      "3": {
+        "sizes": ["M", "XL"]
+      },
+      "4": {
+        "sizes": ["S", "L"]
+      },
+      "5": {
+        "sizes": ["S", "XL"]
+      },
+      "6": {
+        "sizes": ["XS", "M"]
+      },
+      "7": {
+        "sizes": ["M", "L", "XL"]
+      },
+      "8": {
+        "sizes": ["XS", "M", "XL"]
+      }
+    };
+    const object = {};
+    object[req.query.shirt] = prices[req.query.shirt];
+    res.json(object);
+  }, 1000); // Simulate network delay.
 });
 
 // Simulated Cloudflare signed Ad server
@@ -722,7 +730,7 @@ app.get('/dist/rtv/9[89]*/*.js', function(req, res, next) {
 
   setTimeout(() => {
     // Cause a delay, to show the "stale-while-revalidate"
-    if (req.path.indexOf('v0.js') > -1) {
+    if (req.path.includes('v0.js')) {
       var path = req.path.replace(/rtv\/\d+/, '');
       return fs.readFileAsync(process.cwd() + path, 'utf8')
         .then(file => {
@@ -871,12 +879,60 @@ function getUrlPrefix(req) {
 function addQueryParam(url, param, value) {
   const paramValue =
       encodeURIComponent(param) + '=' + encodeURIComponent(value);
-  if (url.indexOf('?') == -1) {
+  if (!url.includes('?')) {
     url += '?' + paramValue;
   } else {
     url += '&' + paramValue;
   }
   return url;
+}
+
+function enableCors(req, res, origin, opt_exposeHeaders) {
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Expose-Headers',
+      ['AMP-Access-Control-Allow-Source-Origin']
+          .concat(opt_exposeHeaders || []).join(', '));
+  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+      req.query.__amp_source_origin);
+}
+
+function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
+  const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
+  const invalidMethod = req.method + ' method is not allowed. Use POST.';
+  const invalidOrigin = 'Origin header is invalid.';
+  const invalidSourceOrigin = '__amp_source_origin parameter is invalid.';
+  const unauthorized = 'Unauthorized Request';
+  var origin;
+
+  if (validMethods.indexOf(req.method) == -1) {
+    res.statusCode = 405;
+    res.end(JSON.stringify({message: invalidMethod}));
+    throw invalidMethod;
+  }
+
+  if (req.headers.origin) {
+    origin = req.headers.origin;
+    if (!ORIGIN_REGEX.test(req.headers.origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({message: invalidOrigin}));
+      throw invalidOrigin;
+    }
+
+    if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({message: invalidSourceOrigin}));
+      throw invalidSourceOrigin;
+    }
+  } else if (req.headers['amp-same-origin'] == 'true') {
+    origin = getUrlPrefix(req);
+  } else {
+    res.statusCode = 401;
+    res.end(JSON.stringify({message: unauthorized}));
+    throw unauthorized;
+  }
+
+  enableCors(req, res, origin, opt_exposeHeaders);
 }
 
 module.exports = app;

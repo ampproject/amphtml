@@ -70,12 +70,13 @@ Container for analytics tags. Positioned far away from top to make sure that doe
     "visibility": {
       "on": "visible",
       "request": "visibility",
+      "selector": "#anim-id",
       "visibilitySpec": {
-        "selector": "#anim-id",
         "visiblePercentageMin": 20,
         "visiblePercentageMax": 80,
         "totalTimeMin": 5000,
-        "continuousTimeMin": 2000
+        "continuousTimeMin": 2000,
+        "waitFor": "ini-load"
       },
       "vars": {
         "type": "visibility"
@@ -234,7 +235,7 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
     "pageview": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html?h=${h}&d=${d}&url=${url}&k=${k}&ts=${ts}&ch=${ch}&sid=${sid}&at=${at}&ref=${ref}&aid=${aid}&loc=${loc}&ct=${ct}&cat=${cat}&scat=${scat}&ac=${ac}&tg=${tg}&ctids=${ctids}&pts=${pts}&auth=${auth}&pos=${pos}&utmvsi=${utmvsi}&utmcsr=${utmcsr}&utmccn=${utmccn}&utmcmd=${utmcmd}&utma=${utma}&iBeatField=${iBeatField}"
   },
   "vars": {
-    "aid":"99999999"    
+    "aid":"99999999"
   },
   "triggers": {
     "defaultPageview": {

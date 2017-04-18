@@ -159,7 +159,7 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 #### Anchor tags must have a target of `_blank` or `_top`
 
 *Condition*:
-If `<a>` tag does not have attribute `target=_blank` or `target=_top` then add `target=_top`. All other `target` values are rewritten to `_top`.
+If `<a>` tag does not have attribute `target=_blank` or `target=_top` then add a `target=`. This added `target=` will be either be `target=_blank` or `target=_top`. If the document has `<base target=...>` of either `_top` or `_blank` then use that value. Otherwise all other `target` values are rewritten to `_top`.
 
 <details>
 <summary>example</summary>
@@ -169,6 +169,7 @@ If `<a>` tag does not have attribute `target=_blank` or `target=_top` then add `
 | `<a href=https://example.com/foo.html>Lorem ipsum</a>` | `<a href=https://example.com/foo.html target=_top>Lorem ipsum</a>` |
 | `<a href=https://example.com/bar.html target=_blank>Lorem ipsum</a>` | `<a href=https://example.com/bar.html target=_blank>Lorem ipsum</a>` |
 | `<a href=https://example.com/baz.html target=window>Lorem ipsum</a>` | `<a href=https://example.com/baz.html target=_top>Lorem ipsum</a>` |
+| `<head>`<br>`...`<br>`<base target=_blank>`<br>`...`<br>`</head>`<br>`<body>`<br>`...`<br>`<a href=https://example.com/foo.html>Lorem ipsum</a>`<br>`...`<br>`</body>` | `<head>`<br>`...`<br>`<base target=_blank>`<br>`...`<br>`</head>`<br>`<body>`<br>`...`<br>`<a href=https://example.com/foo.html target=_blank>Lorem ipsum</a>`<br>`...`<br>`</body>` |
 
 </details>
 

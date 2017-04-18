@@ -16,6 +16,8 @@
 
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
+import {removeElement} from '../../../src/dom';
+import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {
@@ -73,6 +75,9 @@ class AmpYoutube extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /**
@@ -186,12 +191,36 @@ class AmpYoutube extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
+    this.unlistenMessage_ = listen(
+      this.win,
+      'message',
+      this.handleYoutubeMessages_.bind(this)
+    );
+
     this.win.addEventListener(
-        'message', event => this.handleYoutubeMessages_(event));
+      'message', event => this.handleYoutubeMessages_(event)
+    );
 
     return this.loadPromise(iframe)
         .then(() => this.listenToFrame_())
         .then(() => this.playerReadyPromise_);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+    this.playerState_ = PlayerStates.PAUSED;
+
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+    return true;  // Call layoutCallback again.
   }
 
   /** @override */
