@@ -60,7 +60,7 @@ export function kixer(global, data) {
           if (inView === true) {
             if (typeof __kx_viewability.process_locked === 'function') {
               viewed = true;
-              __kx_viewability.process_locked(data.adslot);
+              __kx_viewability.process_locked(data.adslot); // Fire kixer view
             }
           }
         }, 900);
