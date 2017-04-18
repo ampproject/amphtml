@@ -58,8 +58,6 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.viewport_ = this.getViewport();
-
-    toggle(this.element, true);
     this.element.classList.add('i-amphtml-sticky-ad-layout');
     const children = this.getRealChildren();
     user().assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
@@ -67,6 +65,15 @@ class AmpStickyAd extends AMP.BaseElement {
 
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
+
+    this.ad_.whenBuilt().then(() => {
+      this.mutateElement(() => {
+        toggle(this.element, true);
+      }).then(() => {
+        this.scheduleMeasure(this.ad_);
+      });
+    });
+
     const paddingBar = this.win.document.createElement(
          'amp-sticky-ad-top-padding');
     this.element.insertBefore(paddingBar, this.ad_);
@@ -163,11 +170,7 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   scheduleLayoutForAd_() {
-    if (this.ad_.isBuilt()) {
-      this.layoutAd_();
-    } else {
-      this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
-    }
+    this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
   }
 
   /**
