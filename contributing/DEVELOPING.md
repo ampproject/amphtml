@@ -174,7 +174,20 @@ To run the tests on Sauce Labs:
    ```
 * It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
-## Deploying AMP on Cloud for testing on devices
+
+## Testing on devices
+
+### Testing with ngrok
+
+It's much faster to debug with local build (`gulp` + `http://localhost:8000/`). In Chrome you can use [DevTools port forwarding](https://developers.google.com/web/tools/chrome-devtools/remote-debugging/local-server). However, iOS Safari does not give a similar option. Instead, you can use [ngrok](https://ngrok.com/). Just [download](https://ngrok.com/download) the ngrok binary for your platform and run it like this:
+```
+ngrok http 8000
+```
+
+Once started, the ngrok will print URLs for both `http` and `https`. E.g. `http://73774d8c.ngrok.io/` and `https://73774d8c.ngrok.io/`. These URLs can be used to debug on iOS and elsewhere.
+
+
+### Testing with Heroku
 
 For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) , please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
 
@@ -184,6 +197,7 @@ To correctly get ads and third party working when testing on hosted services
 you will need set the `AMP_TESTING_HOST` environment variable. (On heroku this
 is done through
 `heroku config:set AMP_TESTING_HOST=my-heroku-subdomain.herokuapp.com`)
+
 
 ## Repository Layout
 <pre>
