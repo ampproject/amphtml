@@ -96,7 +96,7 @@ export class Performance {
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => {
-      this.tick('ol');
+      this.onload_();
       this.flush();
     });
   }
@@ -149,6 +149,18 @@ export class Performance {
       // Send all csi ticks through.
       this.flush();
     });
+  }
+
+  onload_() {
+    this.tick('ol');
+    // Detect deprecated first pain time API
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
+    // We'll use this until something better is available.
+    if (this.win.chrome && typeof this.win.chrome.loadTimes == 'function') {
+      this.tickDelta('fp',
+          this.win.chrome.loadTimes().firstPaintTime * 1000 -
+              this.win.performance.timing.navigationStart);
+    }
   }
 
   /**
