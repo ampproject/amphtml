@@ -50,7 +50,7 @@
     "fs-extra": "0.27.0",
     "gulp": "3.9.1",
     "gulp-closure-compiler": "0.4.0",
-    "gulp-eslint": "1.1.0",
+    "gulp-eslint": "2.0.0",
     "gulp-exec": "2.1.2",
     "gulp-file": "0.2.0",
     "gulp-git": "1.7.2",
