@@ -42,6 +42,9 @@ export class AmpSelector extends AMP.BaseElement {
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
+
+    /** @private {number} */
+    this.focusedIndex = 0;
   }
 
   /** @override */
@@ -68,6 +71,7 @@ export class AmpSelector extends AMP.BaseElement {
     this.init_();
     if (!this.isDisabled_) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
+      this.element.addEventListener('keydown', this.keyHandler_.bind(this));
     }
   }
 
@@ -118,7 +122,8 @@ export class AmpSelector extends AMP.BaseElement {
    */
   init_() {
     const options = [].slice.call(this.element.querySelectorAll('[option]'));
-    options.forEach(option => {
+    for (let i = 0; i < options.length; i++) {
+      const option = options[i];
       option.setAttribute('role', 'option');
       if (option.hasAttribute('disabled')) {
         option.setAttribute('aria-disabled', 'true');
@@ -128,9 +133,13 @@ export class AmpSelector extends AMP.BaseElement {
       } else {
         this.clearSelection_(option);
       }
-      option.setAttribute('tabindex', '0');
+      if (i == 0) {
+        option.setAttribute('tabindex', '-1');
+      } else {
+        option.setAttribute('tabIndex', '0');
+      }
       this.options_.push(option);
-    });
+    }
     this.setInputs_();
   }
 
@@ -217,6 +226,44 @@ export class AmpSelector extends AMP.BaseElement {
         this.action_.trigger(this.element, name, selectEvent);
       }
     });
+  }
+
+  keyHandler_(event) {
+
+    if (!this.element.contains(this.element.ownerDocument.activeElement)) {
+      return;
+    }
+
+    // Make currently selected option unfocusable
+    this.options_[this.focusedIndex].tabIndex = -1;
+
+    switch(event.keyCode) {
+      // TODO(kmh287): Clean this up?
+      case 37: // Left
+      case 38: // Up
+        event.preventDefault();
+        if (this.focusedIndex == 0) {
+          this.focusedIndex = this.options_.length - 1;
+        } else {
+          this.focusedIndex = this.focusedIndex - 1;
+        }
+        break;
+      case 39: // Right
+      case 40: // Down
+        event.preventDefault();
+        if (this.focusedIndex == this.options_.length - 1) {
+          this.focusedIndex = 0;
+        } else {
+          this.focusedIndex = this.focusedIndex + 1;
+        }
+        break;
+    }
+
+    // Focus newly selected option
+    const newSelectedOption = this.options_[this.focusedIndex];
+    newSelectedOption.tabIndex = 0;
+    newSelectedOption.focus();
+    this.element.setAttribute('aria-activedescendant', newSelectedOption.id);
   }
 
   /**
