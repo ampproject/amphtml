@@ -79,7 +79,7 @@
     "karma-fixture": "0.2.6",
     "karma-html2js-preprocessor": "0.1.0",
     "karma-mocha": "0.2.2",
-    "karma-safari-launcher": "0.1.1",
+    "karma-safari-launcher": "1.0.0",
     "karma-sauce-launcher": "0.3.1",
     "karma-sinon-chai": "1.2.0",
     "lazypipe": "1.0.1",
