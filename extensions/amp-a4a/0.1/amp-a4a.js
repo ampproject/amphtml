@@ -166,6 +166,11 @@ export const LIFECYCLE_STAGES = {
   signatureVerifySuccess: '19',
   networkError: '20',
   friendlyIframeIniLoad: '21',
+  visHalf: '22',
+  visHalfIniLoad: '23',
+  firstVisible: '24',
+  visLoadAndOneSec: '25',
+  iniLoad: '26'
 };
 
 /**

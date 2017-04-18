@@ -21,6 +21,8 @@ import {serializeQueryString} from '../../../src/url';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {viewerForDoc} from '../../../src/services';
+import {CommonSignals} from '../../../src/common-signals';
+import {analyticsForDoc} from '../../../src/analytics';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -269,5 +271,44 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    */
   getInitTime() {
     return this.initTime_;
+  }
+
+  addPingsForVisibility(element, ampDoc, readyPromise) {
+    analyticsForDoc(ampDoc, true).then(analytics => {
+      const vis = analytics.getAnalyticsRoot(element).getVisibilityManager();
+      // Can be any promise or `null`.
+      // Element must be an AMP element at this time.
+      // 50% vis w/o ini load
+      vis.listenElement(element, {visiblePercentageMin: 50}, null,
+                        event => {
+                          this.sendPing(LIFECYCLE_STAGES.visHalf);
+                        });
+      // 50% vis w ini load
+      vis.listenElement(element,
+                        {visiblePercentageMin: 50},
+                        readyPromise,
+                        event => {
+                          this.sendPing(LIFECYCLE_STAGES.visHalfIniLoad);
+                        });
+      // first visible
+      vis.listenElement(element, {visiblePercentageMin: 1}, null,
+                        event => {
+                          this.sendPing(LIFECYCLE_STAGES.firstVisible);
+                        });
+      // ini-load
+      vis.listenElement(element, {waitFor: 'ini-load'},
+                        readyPromise,
+                        event => {
+                          this.sendPing(LIFECYCLE_STAGES.iniLoad);
+                        });
+
+      // 50% vis, ini-load and 1 sec
+      vis.listenElement(element,
+                        {visiblePercentageMin: 1, waitFor: 'ini-load', totalTimeMin: 1000},
+                        readyPromise,
+                        event => {
+                          this.sendPing(LIFECYCLE_STAGES.visLoadAndOneSec);
+                        });
+    });
   }
 }
