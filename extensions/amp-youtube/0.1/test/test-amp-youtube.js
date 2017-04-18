@@ -301,6 +301,31 @@ describe('amp-youtube', function() {
     });
   });
 
+  it('should remove iframe after unlayoutCallback', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const placeholder = yt.querySelector('[placeholder]');
+      const obj = yt.implementation_;
+      const unlistenSpy = sandbox.spy(obj, 'unlistenMessage_');
+      obj.unlayoutCallback();
+      expect(unlistenSpy).to.have.been.called;
+      expect(yt.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(placeholder.style.display).to.be.equal('');
+      expect(obj.playerState_).to.be.equal(2);
+    });
+  });
+
+  it('should propagate attribute mutations', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const spy = sandbox.spy(yt.implementation_, 'sendCommand_');
+      yt.setAttribute('data-videoid', 'lBTCB7yLs8Y');
+      yt.mutatedAttributesCallback({'data-videoid': 'lBTCB7yLs8Y'});
+      expect(spy).to.be.calledWith('loadVideoById',
+          sinon.match(['lBTCB7yLs8Y']));
+
+    });
+  });
+
   function sendFakeInfoDeliveryMessage(yt, iframe, info) {
     yt.implementation_.handleYoutubeMessages_({
       origin: 'https://www.youtube.com',
