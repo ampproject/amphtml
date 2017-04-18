@@ -22,6 +22,7 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isObject} from '../../../src/types';
+import {listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
 
@@ -36,6 +37,9 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
 
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
@@ -54,15 +58,9 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    this.iframe_ = iframe;
-
-    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
-    this.applyFillContent(iframe, true);
-    this.element.appendChild(iframe);
-
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
 
     installVideoManagerForDoc(this.element);
     videoManagerForDoc(this.element).register(this);
@@ -70,20 +68,29 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-
     const dataId = user().assert(
         this.element.getAttribute('data-id'),
         'The data-id attribute is required for <amp-3q-player> %s',
         this.element);
 
-    const src = 'https://playout.3qsdn.com/' + encodeURIComponent(dataId) + '?autoplay=true&amp=true';
-    this.iframe_.src = src;
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+    this.applyFillContent(iframe, true);
+    iframe.src = 'https://playout.3qsdn.com/' +
+        encodeURIComponent(dataId) + '?autoplay=true&amp=true';
+    this.element.appendChild(iframe);
 
-    this.win.addEventListener('message',
-                            event => this.sdnBridge_(event));
+    this.iframe_ = iframe;
 
-    this.playerReadyResolver_ = this.loadPromise(this.iframe_);
-    return this.playerReadyResolver_.then(() => {
+    this.unlistenMessage_ = listen(
+      this.win,
+      'message',
+      this.sdnBridge_.bind(this)
+    );
+
+    return this.loadPromise(this.iframe_).then(() => {
+      this.playerReadyResolver_();
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
   }
@@ -93,6 +100,9 @@ class Amp3QPlayer extends AMP.BaseElement {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
+    }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
     }
     return true;
   }
@@ -143,9 +153,11 @@ class Amp3QPlayer extends AMP.BaseElement {
   }
 
   sdnPostMessage_(message) {
-        if (this.iframe_ && this.iframe_.contentWindow) {
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
         this.iframe_.contentWindow./*OK*/postMessage(message, '*');
       }
+    });
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
@@ -189,7 +201,6 @@ class Amp3QPlayer extends AMP.BaseElement {
   hideControls() {
     this.sdnPostMessage_('hideControlbar');
   }
-
 };
 
 AMP.registerElement('amp-3q-player', Amp3QPlayer);
