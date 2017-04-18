@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-selector-0.1.css';
 import {actionServiceForDoc} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 /**
  * Set of namespaces that can be set for lifecycle reporters.
@@ -87,7 +87,7 @@ export class AmpSelector extends AMP.BaseElement {
     const kbSupportMode = this.element.getAttribute('keyboard-support');
     if (kbSupportMode == 'none') {
       this.kbSupportMode_ = KB_SUPPORT_MODE.NONE;
-    } else if (kbSupportMode = 'select') {
+    } else if (kbSupportMode == 'select') {
       this.kbSupportMode_ = KB_SUPPORT_MODE.SELECT;
       user().assert(!this.isMultiple_,
         '[keyboard-support=select] not supported for ' +
@@ -148,12 +148,45 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
+   * Determine which option should receive focus first and set tabIndex
+   * on all options accordingly.
+   * @private
+   */
+  setInitialFocusElement_() {
+    let firstEnabled;
+    let firstSelected;
+    this.options_.forEach(option => {
+      // Never put focus on disabled options
+      if (!option.hasAttribute('disabled')) {
+        firstEnabled = firstEnabled || option;
+        if (option.hasAttribute('selected')) {
+          firstSelected = firstSelected || option;
+        }
+      }
+      option.tabIndex = -1;
+    });
+    let initialFocusedElement;
+    if (this.isMultiple_) {
+      initialFocusedElement = firstEnabled;
+    } else {
+      // Focus should go to the option with the sleected attribute,
+      // if one exists.
+      initialFocusedElement = firstSelected || firstEnabled;
+    }
+    // If no options are enabled, focus on first option
+    initialFocusedElement = initialFocusedElement || this.options_[0];
+    if (initialFocusedElement) {
+      initialFocusedElement.tabIndex = 0;
+    }
+  }
+
+  /**
    * @private
    */
   init_() {
     const options = [].slice.call(this.element.querySelectorAll('[option]'));
-    for (let i = 0; i < options.length; i++) {
-      const option = options[i];
+    let initialFocusedElement;
+    options.forEach(option => {
       option.setAttribute('role', 'option');
       if (option.hasAttribute('disabled')) {
         option.setAttribute('aria-disabled', 'true');
@@ -163,13 +196,9 @@ export class AmpSelector extends AMP.BaseElement {
       } else {
         this.clearSelection_(option);
       }
-      if (i == 0) {
-        option.setAttribute('tabindex', '-1');
-      } else {
-        option.setAttribute('tabIndex', '0');
-      }
       this.options_.push(option);
-    }
+    });
+    this.setInitialFocusElement_();
     this.setInputs_();
   }
 
@@ -264,7 +293,7 @@ export class AmpSelector extends AMP.BaseElement {
       el = closest(el, e => e.hasAttribute('option'), this.element);
     }
     if (el) {
-      onOptionSelected_(el);
+      this.onOptionSelected_(el);
     }
   }
 
@@ -277,7 +306,8 @@ export class AmpSelector extends AMP.BaseElement {
       return;
     }
 
-    // Make currently selected option unfocusable
+    // Make currently selected option unfocusable so that it can't be reached
+    // by pressing tab.
     this.options_[this.focusedIndex_].tabIndex = -1;
 
     switch(event.keyCode) {
@@ -285,6 +315,8 @@ export class AmpSelector extends AMP.BaseElement {
       case 38: // Up
         event.preventDefault();
         if (this.focusedIndex_ == 0) {
+          // Selecting past the last option should
+          // loop back to the beginning.
           this.focusedIndex_ = this.options_.length - 1;
         } else {
           this.focusedIndex_ = this.focusedIndex_ - 1;
@@ -294,6 +326,8 @@ export class AmpSelector extends AMP.BaseElement {
       case 40: // Down
         event.preventDefault();
         if (this.focusedIndex_ == this.options_.length - 1) {
+          // Selecting before the first option should
+          // loop back to the beginning.
           this.focusedIndex_ = 0;
         } else {
           this.focusedIndex_ = this.focusedIndex_ + 1;
@@ -305,6 +339,9 @@ export class AmpSelector extends AMP.BaseElement {
     const newSelectedOption = this.options_[this.focusedIndex_];
     newSelectedOption.tabIndex = 0;
     newSelectedOption.focus();
+    if (!this.isMultiple_ && this.kbSupportMode_ == KB_SUPPORT_MODE.SELECT) {
+      this.onOptionSelected_(newSelectedOption);
+    }
   }
 
   /**
