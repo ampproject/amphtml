@@ -19,9 +19,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {templatesFor} from '../../../src/services';
 import {user} from '../../../src/log';
 
-/** @const {string} */
-const TAG = 'amp-list';
-
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
  * the spec.
@@ -60,8 +57,7 @@ export class AmpList extends AMP.BaseElement {
           return templatesFor(this.win).findAndRenderTemplateArray(
               this.element, items).then(this.rendered_.bind(this));
         }, error => {
-          user().error(TAG,
-              'Error fetching amp-list JSON data', error, this.element);
+          throw user().createError('Error fetching amp-list', error);
         });
   }
 
