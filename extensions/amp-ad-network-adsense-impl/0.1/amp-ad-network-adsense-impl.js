@@ -108,6 +108,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
+
+    /** @private {?Element} */
+    this.ampAnalyticsElement_ = null;
   }
 
   /** @override */
@@ -250,7 +253,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
-      insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      this.ampAnalyticsElement_ =
+          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
@@ -270,11 +274,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
-    if (this.ampAnalyticsConfig_) {
-      this.ampAnalyticsConfig_.parentElement.removeChild(
-          this.ampAnalyticsConfig_);
-      this.ampAnalyticsConfig_ = null;
+    if (this.ampAnalyticsElement_) {
+      this.ampAnalyticsElement_.parentElement.removeChild(
+          this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ = null;
     }
+    this.ampAnalyticsConfig_ = null;
   }
 }
 

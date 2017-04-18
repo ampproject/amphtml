@@ -574,10 +574,10 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             fallback.setAttribute('fallback', '');
             impl.element.appendChild(placeholder);
             impl.element.appendChild(fallback);
-            // For the purposes of this test, we only care that this is of type
-            // Element.
-            impl.ampAnalyticsConfig_ = document.createElement('amp-analytics');
-            impl.element.appendChild(impl.ampAnalyticsConfig_);
+            impl.ampAnalyticsConfig_ = {};
+            impl.ampAnalyticsElement_ =
+                document.createElement('amp-analytics');
+            impl.element.appendChild(impl.ampAnalyticsElement_);
 
             expect(impl.iframe).to.be.ok;
             expect(impl.ampAnalyticsConfig_).to.be.ok;
@@ -590,6 +590,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             expect(impl.element.querySelector('amp-analytics')).to.be.null;
             expect(impl.iframe).to.be.null;
             expect(impl.ampAnalyticsConfig_).to.be.null;
+            expect(impl.ampAnalyticsElement_).to.be.null;
             expect(impl.element.getAttribute('data-amp-slot-index')).to
                 .equal(String(Number(slotIdBefore) + 1));
           });
