@@ -262,7 +262,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  resetSlot() {
+  unlayoutCallback() {
+    super.unlayoutCallback();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
@@ -270,9 +271,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
     this.ampAnalyticsConfig_ = null;
-    if (this.iframe) {
-      this.element.removeChild(this.iframe);
-    }
   }
 }
 

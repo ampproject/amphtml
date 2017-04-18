@@ -401,8 +401,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             width: '300',
             height: '150',
           }).then(() => {
-            const slotIdBefore = impl.element.getAttribute(
-                'data-amp-slot-index');
             const resetSlotSpy = sandbox.spy(
                 AmpAdNetworkDoubleclickImpl.prototype, 'resetSlot');
 
@@ -419,7 +417,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             expect(impl.iframe).to.be.ok;
             expect(impl.ampAnalyticsConfig_).to.be.ok;
             impl.unlayoutCallback();
-            expect(resetSlotSpy).to.be.called.once;
             expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
             expect(impl.element.querySelector('div[fallback]')).to.be.ok;
             expect(impl.element.querySelector('iframe')).to.be.null;

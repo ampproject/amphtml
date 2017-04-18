@@ -565,8 +565,6 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           }).then(() => {
             const slotIdBefore = impl.element.getAttribute(
                 'data-amp-slot-index');
-            const resetSlotSpy = sandbox.spy(AmpAdNetworkAdsenseImpl.prototype,
-                'resetSlot');
 
             impl.layoutMeasureExecuted_ = true;
             impl.uiHandler = {setDisplayState: () => {}};
@@ -581,7 +579,6 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             expect(impl.iframe).to.be.ok;
             expect(impl.ampAnalyticsConfig_).to.be.ok;
             impl.unlayoutCallback();
-            expect(resetSlotSpy).to.be.called.once;
             expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
             expect(impl.element.querySelector('div[fallback]')).to.be.ok;
             expect(impl.element.querySelector('iframe')).to.be.null;

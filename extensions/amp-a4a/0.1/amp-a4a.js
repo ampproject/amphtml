@@ -845,7 +845,6 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override  */
   unlayoutCallback() {
     this.protectedEmitLifecycleEvent_('adSlotCleared');
-    this.resetSlot();
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
     this.isCollapsed_ = false;
 
@@ -860,10 +859,15 @@ export class AmpA4A extends AMP.BaseElement {
       return true;
     }
 
+    // Remove rendering frame, if it exists.
+    if (this.iframe) {
+      this.element.removeChild(this.iframe);
+      this.iframe = null;
+    }
+
     this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
-    this.iframe = null;
     this.isVerifiedAmpCreative_ = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
@@ -876,15 +880,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.promiseId_++;
     return true;
   }
-
-  /**
-   * To be overriden by implementing network.
-   * This function is called in unlayoutCallback(), and provides a hook for
-   * implementing networks to perform any custom resetting logic. This function
-   * is the first thing called by unlayoutCallback(), except for the
-   * adSlotCleared ping event, which is emitted first.
-   */
-  resetSlot() {}
 
   /** @override  */
   viewportCallback(inViewport) {
