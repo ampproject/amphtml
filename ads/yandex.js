@@ -60,7 +60,7 @@ function addToQueue(global, data) {
 }
 
 /**
- * @param {?Window} global
+ * @param {!Window} global
  * @param {string} id
  */
 function createContainer(global, id) {
