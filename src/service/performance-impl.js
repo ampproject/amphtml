@@ -174,7 +174,13 @@ export class Performance {
             ? (this.win.Date.now() - docVisibleTime)
             //  Prerender was complete before visibility.
             : 0;
-        this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
+        this.viewer_.whenFirstVisible().then(() => {
+          // We only tick this if the page eventually becomes visible,
+          // since otherwise we heavily skew the metric towards the
+          // 0 case, since pre-renders that are never used are highly
+          // likely to fully load before they are never used :)
+          this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
+        });
         this.prerenderComplete_(userPerceivedVisualCompletenesssTime);
       } else {
         // If it didnt start in prerender, no need to calculate anything

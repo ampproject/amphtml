@@ -569,22 +569,29 @@ describes.realWin('performance', {amp: true}, env => {
           expect(tickSpy).to.have.callCount(3);
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy).to.have.callCount(4);
+            expect(tickSpy).to.have.callCount(3);
             expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
-            expect(tickSpy.withArgs('pc')).to.be.calledOnce;
-            expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
+            return whenFirstVisiblePromise.then(() => {
+              expect(tickSpy).to.have.callCount(4);
+              expect(tickSpy.withArgs('pc')).to.be.calledOnce;
+              expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
+            });
           });
         });
       });
 
-      it('should tick `pc` with `delta=1` when viewport is complete ' +
+      it('should tick `pc` with `delta=0` when viewport is complete ' +
          'before user request document to be visible', () => {
         clock.tick(300);
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(tickSpy.withArgs('ol')).to.be.calledOnce;
-          expect(tickSpy.withArgs('pc')).to.be.calledOnce;
-          expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
+          expect(tickSpy.withArgs('pc')).to.have.callCount(0);
+          whenFirstVisibleResolve();
+          return whenFirstVisiblePromise.then(() => {
+            expect(tickSpy.withArgs('pc')).to.be.calledOnce;
+            expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
+          });
         });
       });
     });
