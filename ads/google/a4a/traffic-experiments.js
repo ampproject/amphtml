@@ -40,6 +40,12 @@ const EXTERNALLY_SELECTED_ID = '2088461';
 /** @type {!string} @private */
 const INTERNALLY_SELECTED_ID = '2088462';
 
+/** @type {!string} @private */
+const ADSENSE_COUNT_ON_RENDER = '2093326';
+
+/** @type {!string} @private */
+const DOUBLECLICK_COUNT_ON_RENDER = '2093327';
+
 /**
  * Check whether Google Ads supports the A4A rendering pathway for a given ad
  * Element on a given Window.  The tests we use are:
@@ -133,6 +139,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   - `2`: Ad is on the experimental branch of the overall A4A-vs-3p iframe
  *     experiment.  Ad will render via the A4A path, including early ad
  *     request and (possibly) early rendering in shadow DOM or iframe.
+ *   - `3`: Behaves the same as 1, but participates in an experiment to
+ *     measure impact of Delayed Fetch when counted on render
  *
  * @param {!Window} win  Window.
  * @param {!Element} element Ad tag Element.
@@ -165,9 +173,24 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '0': null, // TODO Ensure does not generate exp id
     '1': controlBranchId,
     '2': treatmentBranchId,
+    '3': hasLaunched(win, element) ? treatmentBranchId : controlBranchId, // DF
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
+    if (arg == '3') {
+      switch (element.getAttribute('type')) {
+        case 'adsense':
+          toggleExperiment(win, ADSENSE_COUNT_ON_RENDER, true, true);
+          break;
+        case 'doubleclick':
+          toggleExperiment(win, DOUBLECLICK_COUNT_ON_RENDER, true, true);
+          break;
+        default:
+          dev().warn('A4A-CONFIG', 'Unknown a4a ad type parameter: ',
+              element.getAttribute('type'),
+              ' expected doubleclick or adsense');
+      }
+    }
     return true;
   } else {
     dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,
