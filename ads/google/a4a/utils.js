@@ -117,7 +117,8 @@ export function googleAdUrl(
       // Read by GPT for GA/GPT integration.
     win.gaGlobal = win.gaGlobal ||
       {cid: clientId, hid: documentInfo.pageViewId};
-    const slotRect = a4a.getIntersectionElementLayoutBox();
+    const slotRect = a4a.getPageLayoutBox ?
+        a4a.getPageLayoutBox() : a4a.getLayoutBox();
     const screen = win.screen;
     const viewport = a4a.getViewport();
     const viewportRect = viewport.getRect();

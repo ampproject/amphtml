@@ -55,9 +55,9 @@ function noopMethods(impl, doc, sandbox) {
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
   sandbox.stub(impl, 'getAmpDoc', () => doc);
-  sandbox.stub(impl, 'getIntersectionElementLayoutBox', () => {
+  sandbox.stub(impl, 'getPageLayoutBox', () => {
     return {
-      top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0,
+      top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
     };
   });
 }
@@ -282,6 +282,29 @@ describe('Google A4A utils', () => {
         });
       });
     });
+
+    it('should set ad position', function() {
+      // When ran locally, this test tends to exceed 2000ms timeout.
+      this.timeout(5000);
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.match(/ady=11/);
+            expect(url1).to.match(/adx=12/);
+          });
+        });
+      });
+    });
+
     it('should specify that this is canary', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
