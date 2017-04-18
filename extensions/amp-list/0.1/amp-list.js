@@ -57,7 +57,7 @@ export class AmpList extends AMP.BaseElement {
           return templatesFor(this.win).findAndRenderTemplateArray(
               this.element, items).then(this.rendered_.bind(this));
         }, error => {
-          user().assert(false, error.message, this.element);
+          throw user().createError('Error fetching amp-list', error);
         });
   }
 
