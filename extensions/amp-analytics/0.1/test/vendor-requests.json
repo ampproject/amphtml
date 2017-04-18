@@ -206,4 +206,7 @@
     "base": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html",
     "pageview": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_",
   },
+  "oewa": {
+    "pageview": "$url?s=$s&amp=$amp&cp=$cp&hn=_canonical_host_&path=_canonical_path_"
+  },
 }
