@@ -148,6 +148,15 @@ describe('3p-frame', () => {
       };
     };
 
+    div.getLayoutBox = function() {
+      return {
+        left: 0,
+        top: 0,
+        width: 100,
+        height: 200,
+      };
+    };
+
     const viewer = viewerForDoc(window.document);
     const viewerMock = sandbox.mock(viewer);
     viewerMock.expects('getUnconfirmedReferrerUrl')
@@ -173,6 +182,8 @@ describe('3p-frame', () => {
         '"canonicalUrl":"' + docInfo.canonicalUrl + '",' +
         '"sourceUrl":"' + locationHref + '",' +
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
+        '"layoutBox": ' +
+        JSON.stringify(div.getLayoutBox()) + ',' +
         '"initialIntersection": ' +
         JSON.stringify(div.getIntersectionChangeEntry()) + ',' +
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +

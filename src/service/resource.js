@@ -493,12 +493,7 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
-    if (!this.isFixed_) {
-      return this.layoutBox_;
-    }
-    const viewport = this.resources_.getViewport();
-    return moveLayoutRect(this.layoutBox_, viewport.getScrollLeft(),
-        viewport.getScrollTop());
+    return this.layoutBox_;
   }
 
   /**
@@ -509,6 +504,22 @@ export class Resource {
     // Before the first measure, there will be no initial layoutBox.
     // Luckily, layoutBox will be present but essentially useless.
     return this.initialLayoutBox_ || this.layoutBox_;
+  }
+
+  /**
+   * Returns a previously measured layout box, related to viewport. This mainly
+   * affects fixed elements.
+   * @return {!../layout-rect.LayoutRectDef}
+   */
+  getViewportLayoutBox() {
+    if (!this.isFixed_) {
+      return this.layoutBox_;
+    }
+    // Make fixed elements relative to the current viewport.
+    // TODO(dvoytenko): this will be no longer necessary for layers.
+    const viewport = this.resources_.getViewport();
+    return moveLayoutRect(this.layoutBox_, viewport.getScrollLeft(),
+        viewport.getScrollTop());
   }
 
   /**
@@ -534,7 +545,7 @@ export class Resource {
    * @return {boolean}
    */
   overlaps(rect) {
-    return layoutRectsOverlap(this.getLayoutBox(), rect);
+    return layoutRectsOverlap(this.getViewportLayoutBox(), rect);
   }
 
   /**
@@ -569,7 +580,7 @@ export class Resource {
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
     const viewportBox = this.resources_.getViewport().getRect();
-    const layoutBox = this.getLayoutBox();
+    const layoutBox = this.getViewportLayoutBox();
     const scrollDirection = this.resources_.getScrollDirection();
     const multipler = Math.max(renders, 0);
     let scrollPenalty = 1;

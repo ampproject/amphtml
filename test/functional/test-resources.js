@@ -47,7 +47,7 @@ describe('Resources', () => {
     // Task 1 is right in the middle of the viewport and priority 0
     const task_in_viewport_p0 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
@@ -59,7 +59,7 @@ describe('Resources', () => {
     // Task 2 is in the viewport and priority 1
     const task_in_viewport_p1 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
@@ -71,7 +71,7 @@ describe('Resources', () => {
     // Task 3 is above viewport and priority 0
     const task_above_viewport_p0 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
         },
         isFixed() {
@@ -83,7 +83,7 @@ describe('Resources', () => {
     // Task 4 is above viewport and priority 1
     const task_above_viewport_p1 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
         },
         isFixed() {
@@ -95,7 +95,7 @@ describe('Resources', () => {
     // Task 5 is below viewport and priority 0
     const task_below_viewport_p0 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
         },
         isFixed() {
@@ -107,7 +107,7 @@ describe('Resources', () => {
     // Task 6 is below viewport and priority 1
     const task_below_viewport_p1 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
         },
         isFixed() {
@@ -119,7 +119,7 @@ describe('Resources', () => {
     // Task 7 is fixed right in the middle of the viewport and priority 0
     const task_fixed_in_viewport_p0 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
@@ -131,7 +131,7 @@ describe('Resources', () => {
     // Task 8 is fixed in the viewport and priority 1
     const task_fixed_in_viewport_p1 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
@@ -143,7 +143,7 @@ describe('Resources', () => {
     // Task 9 is fixed above viewport and priority 0
     const task_fixed_above_viewport_p0 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
         },
         isFixed() {
@@ -155,7 +155,7 @@ describe('Resources', () => {
     // Task 10 is fixed above viewport and priority 1
     const task_fixed_above_viewport_p1 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
         },
         isFixed() {
@@ -167,7 +167,7 @@ describe('Resources', () => {
     // Task 11 is fixed below viewport and priority 0
     const task_fixed_below_viewport_p0 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
         },
         isFixed() {
@@ -179,7 +179,7 @@ describe('Resources', () => {
     // Task 12 is fixed below viewport and priority 1
     const task_fixed_below_viewport_p1 = {
       resource: {
-        getLayoutBox() {
+        getViewportLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
         },
         isFixed() {

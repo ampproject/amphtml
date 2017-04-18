@@ -1061,7 +1061,7 @@ export class Resources {
         const request = requestsChangeSize[i];
         /** @const {!Resource} */
         const resource = request.resource;
-        const box = resource.getLayoutBox();
+        const box = resource.getViewportLayoutBox();
         const iniBox = resource.getInitialLayoutBox();
 
         let topMarginDiff = 0;
@@ -1181,7 +1181,7 @@ export class Resources {
           mutate: state => {
             let minTop = -1;
             scrollAdjSet.forEach(request => {
-              const box = request.resource.getLayoutBox();
+              const box = request.resource.getViewportLayoutBox();
               minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
               request.resource./*OK*/changeSize(
                   request.newHeight, request.newWidth, request.marginChange ?
@@ -1486,7 +1486,7 @@ export class Resources {
    */
   calcTaskScore_(task) {
     const viewport = this.viewport_.getRect();
-    const box = task.resource.getLayoutBox();
+    const box = task.resource.getViewportLayoutBox();
     let posPriority = Math.floor((box.top - viewport.top) / viewport.height);
     if (Math.sign(posPriority) != this.getScrollDirection()) {
       posPriority *= 2;

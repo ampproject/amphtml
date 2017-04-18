@@ -82,6 +82,8 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
         expect(context.referrer).to.contain('http://localhost:' + location.port);
       }
       expect(context.pageViewId).to.be.greaterThan(0);
+      expect(context.layoutBox).to.be.defined;
+      expect(context.layoutBox.top).to.be.defined;
       expect(context.initialIntersection).to.be.defined;
       expect(context.initialIntersection.rootBounds).to.be.defined;
       expect(context.data.tagForChildDirectedTreatment).to.equal(0);
