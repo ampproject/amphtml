@@ -69,6 +69,11 @@ export class AmpPixel extends BaseElement {
    * @private
    */
   trigger_() {
+    if (this.triggerPromise_) {
+      // TODO(dvoytenko, #8780): monitor, confirm if there's a bug and remove.
+      dev().error(TAG, 'duplicate pixel');
+      return this.triggerPromise_;
+    }
     // Delay(1) provides a rudimentary "idle" signal.
     // TODO(dvoytenko): use an improved idle signal when available.
     this.triggerPromise_ = timerFor(this.win).promise(1).then(() => {

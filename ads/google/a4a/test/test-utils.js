@@ -15,17 +15,16 @@
  */
 
 import {
-  extractGoogleAdCreativeAndSignature,
   additionalDimensions,
   extractAmpAnalyticsConfig,
-  injectActiveViewAmpAnalyticsElement,
+  extractGoogleAdCreativeAndSignature,
+  googleAdUrl,
 } from '../utils';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {extensionsFor} from '../../../../src/services';
 import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
@@ -45,6 +44,22 @@ function setupForAdTesting(fixture) {
   const ampStyle = doc.createElement('style');
   ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
   doc.head.appendChild(ampStyle);
+}
+
+// Because of the way the element is constructed, it doesn't have all of the
+// machinery that AMP expects it to have, so just no-op the irrelevant
+// functions.
+function noopMethods(impl, doc, sandbox) {
+  const noop = () => {};
+  impl.element.build = noop;
+  impl.element.getPlaceholder = noop;
+  impl.element.createPlaceholder = noop;
+  sandbox.stub(impl, 'getAmpDoc', () => doc);
+  sandbox.stub(impl, 'getIntersectionElementLayoutBox', () => {
+    return {
+      top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0,
+    };
+  });
 }
 
 describe('Google A4A utils', () => {
@@ -126,129 +141,187 @@ describe('Google A4A utils', () => {
   });
 
   describe('#ActiveView AmpAnalytics integration', () => {
-    let sandbox;
-    beforeEach(() => {
-      sandbox = sinon.sandbox.create();
-    });
-
-    it('should extract config from headers', () => {
+    it('should extract correct config from header', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const extensions = extensionsFor(fixture.win);
-        const loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
-        let url = ['https://foo.com?a=b', 'https://bar.com?d=f'];
+        let url;
         const headers = {
           get: function(name) {
-            expect(name).to.equal('X-AmpAnalytics');
-            return JSON.stringify({url});
+            if (name == 'X-AmpAnalytics') {
+              return JSON.stringify({url});
+            }
+            if (name == 'X-QQID') {
+              return 'qqid_string';
+            }
           },
           has: function(name) {
-            expect(name).to.equal('X-AmpAnalytics');
-            return true;
+            if (name == 'X-AmpAnalytics') {
+              return true;
+            }
+            if (name == 'X-QQID') {
+              return true;
+            }
           },
         };
-        expect(extractAmpAnalyticsConfig(headers, extensions))
-          .to.deep.equal({urls: url});
+        const element = createElementWithAttributes(fixture.doc, 'amp-a4a', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+          'data-experiment-id': '00000001,0000002',
+        });
+        const a4a = new MockA4AImpl(element);
         url = 'not an array';
-        expect(extractAmpAnalyticsConfig(headers, extensions)).to.not.be.ok;
-        url = ['https://foo.com?a=b', 'https://bar.com?d=f'];
+        expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
+        expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null;
+        url = [];
+        expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
+        expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null;
+
+        url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
+        const config = extractAmpAnalyticsConfig(a4a, headers);
+        const iniLoadCsiRequest = config.requests.iniLoadCsi;
+        const renderStartCsiRequest = config.requests.renderStartCsi;
+        expect(iniLoadCsiRequest).to.not.be.null;
+        expect(renderStartCsiRequest).to.not.be.null;
+        // We expect slotId == null, since no real element is created, and so
+        // no slot index is ever set. Additionally, below it is possible to
+        // have negative times, but only in in unit tests, never in production.
+        const getRegExps = metricName => [
+          /^https:\/\/csi\.gstatic\.com\/csi\?/,
+          /s=a4a/,
+          /&c=[0-9]+/,
+          /&slotId=null/,
+          /&qqid\.null=[a-zA-Z_]+/,
+          new RegExp(`&met\\.a4a\\.null=${metricName}\\.-?[0-9]+`),
+          /&dt=-?[0-9]+/,
+          /e\.null=00000001%2C0000002/,
+          /rls=\$internalRuntimeVersion\$/,
+          /adt.null=(doubleclick|adsense)/,
+        ];
+        getRegExps('iniLoadCsi').forEach(regExp => {
+          expect(iniLoadCsiRequest).to.match(regExp);
+        });
+        getRegExps('renderStartCsi').forEach(regExp => {
+          expect(renderStartCsiRequest).to.match(regExp);
+        });
+        // Need to remove this request as it will vary in test execution.
+        delete config.requests.iniLoadCsi;
+        delete config.requests.renderStartCsi;
+        expect(config).to.deep.equal({
+          transport: {beacon: false, xhrpost: false},
+          requests: {
+            visibility1: url[0],
+            visibility2: url[1],
+          },
+          triggers: {
+            continuousVisible: {
+              on: 'visible',
+              request: ['visibility1', 'visibility2'],
+              visibilitySpec: {
+                selector: 'amp-ad',
+                selectionMethod: 'closest',
+                visiblePercentageMin: 50,
+                continuousTimeMin: 1000,
+              },
+            },
+            continuousVisibleIniLoad: {
+              on: 'ini-load',
+              request: 'iniLoadCsi',
+              selector: 'amp-ad',
+              selectionMethod: 'closest',
+            },
+            continuousVisibleRenderStart: {
+              on: 'render-start',
+              request: 'renderStartCsi',
+              selector: 'amp-ad',
+              selectionMethod: 'closest',
+            },
+          },
+        });
         headers.has = function(name) {
           expect(name).to.equal('X-AmpAnalytics');
           return false;
         };
-        expect(extractAmpAnalyticsConfig(headers, extensions)).to.not.be.ok;
-        expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called.once;
+        expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
+      });
+    });
+  });
+
+  describe('#googleAdUrl', () => {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    it('should have the correct ifi numbers', function() {
+      // When ran locally, this test tends to exceed 2000ms timeout.
+      this.timeout(5000);
+      // Reset counter for purpose of this test.
+      delete window['ampAdGoogleIfiCounter'];
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.match(/ifi=1/);
+            return googleAdUrl(impl, '', 0, [], []).then(url2 => {
+              expect(url2).to.match(/ifi=2/);
+              return googleAdUrl(impl, '', 0, [], []).then(url3 => {
+                expect(url3).to.match(/ifi=3/);
+              });
+            });
+          });
+        });
+      });
+    });
+    it('should specify that this is canary', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.AMP_CONFIG = impl.win.AMP_CONFIG || {};
+        impl.win.AMP_CONFIG.canary = true;
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.contain('isc=1');
+          });
+        });
+      });
+    });
+    it('should not specify that this is canary', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.AMP_CONFIG = impl.win.AMP_CONFIG || {};
+        impl.win.AMP_CONFIG.canary = false;
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.not.match(/isc=1/);
+          });
+        });
       });
     });
 
-    it('should not create amp-analytics element if no urls', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        const element = createElementWithAttributes(doc, 'amp-a4a', {
-          'width': '200',
-          'height': '50',
-          'type': 'adsense',
-        });
-        const config = {urls: []};
-        injectActiveViewAmpAnalyticsElement(new MockA4AImpl(element), config);
-        const ampAnalyticsElements = element.querySelectorAll('amp-analytics');
-        expect(ampAnalyticsElements.length).to.equal(0);
-      });
-    });
-    it('should load extension and create amp-analytics element', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        const element = createElementWithAttributes(doc, 'amp-a4a', {
-          'width': '200',
-          'height': '50',
-          'type': 'adsense',
-        });
-        const urls = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
-        const config = {urls};
-        const responseHeaders = {get: () => 'qqid_string'};
-        injectActiveViewAmpAnalyticsElement(
-            new MockA4AImpl(element), config, responseHeaders);
-        const ampAnalyticsElements = element.querySelectorAll('amp-analytics');
-        expect(ampAnalyticsElements.length).to.equal(1);
-        const ampAnalyticsElement = ampAnalyticsElements[0];
-        expect(ampAnalyticsElement.getAttribute('scoped')).to.equal('');
-        const scriptElements = ampAnalyticsElement.querySelectorAll('script');
-        expect(scriptElements.length).to.equal(1);
-        const scriptElement = scriptElements[0];
-        expect(scriptElement.getAttribute('type')).to.equal('application/json');
-        const ampAnalyticsObj = JSON.parse(scriptElement.textContent);
-        const csiRequest = ampAnalyticsObj.requests.visibilityCsi;
-        expect(csiRequest).to.not.be.null;
-        // We expect slotId == null, since no real element is created, and so
-        // no slot index is ever set.
-        expect(csiRequest).to.match(new RegExp(
-            '^https://csi\\.gstatic\\.com/csi\\?' +
-            'fromAnalytics=1&c=[0-9]+&slotId=null&qqid\\.0=[a-zA-Z_]+$'));
-        // Need to remove this request as it will vary in test execution.
-        delete ampAnalyticsObj.requests.visibilityCsi;
-        expect(ampAnalyticsObj).to.deep.equal(
-          {
-            transport: {beacon: false, xhrpost: false},
-            requests: {
-              visibility1: urls[0],
-              visibility2: urls[1],
-            },
-            triggers: {
-              continuousVisible: {
-                on: 'visible',
-                request: ['visibility1', 'visibility2'],
-                visibilitySpec: {
-                  selector: 'amp-ad',
-                  selectionMethod: 'closest',
-                  visiblePercentageMin: 50,
-                  continuousTimeMin: 1000,
-                },
-              },
-              continuousVisibleIniLoad: {
-                on: 'ini-load',
-                request: 'visibilityCsi',
-                visibilitySpec: {
-                  selector: 'amp-ad',
-                  selectionMethod: 'closest',
-                  visiblePercentageMin: 50,
-                  continuousTimeMin: 1000,
-                },
-              },
-              continuousVisibleRenderStart: {
-                on: 'render-start',
-                request: 'visibilityCsi',
-                visibilitySpec: {
-                  selector: 'amp-ad',
-                  selectionMethod: 'closest',
-                  visiblePercentageMin: 50,
-                  continuousTimeMin: 1000,
-                },
-              },
-            },
-          });
-      });
-    });
   });
 });

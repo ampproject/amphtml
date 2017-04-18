@@ -137,7 +137,7 @@ describes.realWin('3P Ad', {
     });
 
     it('create an iframe with APIs', function() {
-      createIframeWithApis.call(this, fixture);
+      return createIframeWithApis.call(this, fixture);
     });
   });
 });
@@ -154,13 +154,14 @@ describes.realWin('3P Ad (with AmpContext experiment)', {
     beforeEach(() => {
       return createFixture().then(f => {
         fixture = f;
-        toggleExperiment(fixture.win, '3p-use-ampcontext', true);
+        toggleExperiment(fixture.win, '3p-use-ampcontext', /* opt_on */ true,
+            /* opt_transientExperiment */ true);
         installPlatformService(fixture.win);
       });
     });
 
     it('create an iframe with APIs', function() {
-      createIframeWithApis.call(this, fixture);
+      return createIframeWithApis.call(this, fixture);
     });
   });
 });

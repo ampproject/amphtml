@@ -193,6 +193,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     it('with multiple slots', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
+      // Reset counter for purpose of this test.
+      delete window['ampAdGoogleIfiCounter'];
       return createIframePromise().then(fixture => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
@@ -219,24 +221,26 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           // Create AdsenseImpl instance.
           const impl1 = new AmpAdNetworkAdsenseImpl(addedElem1);
           return impl1.getAdUrl().then(adUrl1 => {
-            expect(adUrl1.indexOf('pv=2') >= 0).to.be.true;
-            expect(adUrl1.indexOf('prev_fmts') < 0).to.be.true;
+            expect(adUrl1).to.match(/pv=2/);
+            expect(adUrl1).to.not.match(/prev_fmts/);
+            expect(adUrl1).to.match(/ifi=1/);
             return fixture.addElement(elem2).then(addedElem2 => {
               const impl2 = new AmpAdNetworkAdsenseImpl(addedElem2);
               return impl2.getAdUrl().then(adUrl2 => {
-                expect(adUrl2.indexOf('pv=1') >= 0).to.be.true;
-                expect(adUrl2.indexOf('prev_fmts=320x50') >= 0).to.be.true;
+                expect(adUrl2).to.match(/pv=1/);
+                expect(adUrl2).to.match(/prev_fmts=320x50/);
+                expect(adUrl2).to.match(/ifi=2/);
                 return fixture.addElement(elem3).then(addedElem3 => {
                   const impl3 = new AmpAdNetworkAdsenseImpl(addedElem3);
                   return impl3.getAdUrl().then(adUrl3 => {
-                    expect(adUrl3.indexOf('pv=2') >= 0).to.be.true;
+                    expect(adUrl3).to.match(/pv=2/);
                     // By some quirk of the test infrastructure, when this test
                     // is ran individually, each added slot after the first one
                     // has a bounding rectangle of 0x0. The important thing to
                     // test here is the number of previous formats.
-                    expect(adUrl3.indexOf('prev_fmts=320x50%2C0x0') >= 0 ||
-                        adUrl3.indexOf('prev_fmts=320x50%2C320x50') >= 0,
-                        adUrl3).to.be.true;
+                    expect(adUrl3).to.match(
+                        /prev_fmts=(320x50%2C320x50|320x50%2C0x0)/);
+                    expect(adUrl3).to.match(/ifi=3/);
                   });
                 });
               });
@@ -318,7 +322,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           }).then(adResponse => {
             expect(adResponse).to.deep.equal(
               {creative, signature: base64UrlDecodeToBytes('AQAB'),
-               size: null});
+                size: null});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
           });
       });
@@ -349,8 +353,9 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 signature: base64UrlDecodeToBytes('AQAB'),
                 size: null,
               });
-            expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+            // exact value of ampAnalyticsConfig_ covered in
+            // ads/google/test/test-utils.js
           });
       });
     });
@@ -367,21 +372,29 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           'type': 'adsense',
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
+        installExtensionsService(impl.win);
       });
     });
 
     it('injects amp analytics', () => {
-      const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-      impl.ampAnalyticsConfig = {urls};
-      impl.responseHeaders_ = {get: () => 'qqid_string'};
+      impl.ampAnalyticsConfig_ = {
+        'request': 'www.example.com',
+        'triggers': {
+          'on': 'visible',
+        },
+      };
+      // Next two lines are to ensure that internal parts not relevant for this
+      // test are properly set.
+      impl.size_ = {width: 200, height: 50};
+      impl.iframe = impl.win.document.createElement('iframe');
       impl.onCreativeRender(false);
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
+      expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
+      expect(ampAnalyticsElement.getAttribute('sandbox')).to.equal('true');;
       // Exact format of amp-analytics element covered in
-      // ads/google/test/test-utils.js.  Just ensure urls given exist somewhere.
-      urls.forEach(url => {
-        expect(ampAnalyticsElement.innerHTML.indexOf(url)).to.not.equal(-1);
-      });
+      // test/functional/test-analytics.js.
+      // Just ensure extensions is loaded, and analytics element appended.
     });
   });
 
@@ -406,6 +419,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         element.appendChild(iframe);
         document.body.appendChild(element);
         impl = new AmpAdNetworkAdsenseImpl(element);
+        impl.iframe = iframe;
         return fixture;
       });
     }
@@ -415,6 +429,10 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       const style = window.getComputedStyle(iframe);
       expect(style.top).to.equal('50%');
       expect(style.left).to.equal('50%');
+      // We expect these set, but the exact dimensions will be determined by the
+      // IOb.
+      expect(style.width).to.be.ok;
+      expect(style.height).to.be.ok;
       // We don't know the exact values by which the frame will be translated,
       // as this can vary depending on whether we use the height/width
       // attributes, or the actual size of the frame. To make this less of a
@@ -432,7 +450,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.equal('300');
         expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.element.querySelector('iframe'));
+        verifyCss(impl.iframe);
       });
     });
     it('centers iframe in slot when !height && !width', () => {
@@ -441,7 +459,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.be.null;
         expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.element.querySelector('iframe'));
+        verifyCss(impl.iframe);
       });
     });
     it('centers iframe in slot when !height && width', () => {
@@ -451,7 +469,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.equal('300');
         expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.element.querySelector('iframe'));
+        verifyCss(impl.iframe);
       });
     });
     it('centers iframe in slot when height && !width', () => {
@@ -461,7 +479,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       }).then(() => {
         expect(impl.element.getAttribute('width')).to.be.null;
         expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.element.querySelector('iframe'));
+        verifyCss(impl.iframe);
       });
     });
   });
@@ -484,26 +502,11 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       new AmpAd(element).upgradeCallback();
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url => {
+        // Regex shortened because of
+        // https://github.com/ampproject/amphtml/issues/8635
         expect(url).to.match(new RegExp(
           '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
-          '\\?client=ca-adsense&format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+' +
-          '&adk=[0-9]+&raru=1&bc=1&pv=1&vis=1&wgl=1' +
-          '(&asnt=[0-9]+-[0-9]+)?(&dff=(?:%22.*?%22|\'.*?\'))?' +
-          '&prev_fmts=320x50(%2C[0-9]+x[0-9]+)*' +
-          '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
-          // Depending on how the test is run, it can get different
-          // results.
-          '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
-          '&c=[0-9]+&output=html&nhd=1&eid=8675309&biw=[0-9]+&bih=[0-9]+' +
-          '&adx=-?[0-9]+&ady=-?[0-9]+&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
-          '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
-          '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +
-          '&isw=[0-9]+&ish=[0-9]+&pfx=(1|0)' +
-          '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
-          '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
-          '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
-          '&ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
-          '&dtd=[0-9]+$'));
+          '\\?client=ca-adsense&format='));
       });
     });
     it('has correct format when width == "auto"', () => {

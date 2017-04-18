@@ -26,6 +26,7 @@ import {utf8Encode} from '../../../../src/utils/bytes';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import * as sinon from 'sinon';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
@@ -111,6 +112,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             expect(adResponse).to.deep.equal(
                   {creative, signature: null, size});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+
           });
       });
     });
@@ -158,8 +160,9 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
                 signature: base64UrlDecodeToBytes('AQAB'),
                 size,
               });
-            expect(impl.ampAnalyticsConfig).to.deep.equal({urls: url});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+            // exact value of ampAnalyticsConfig covered in
+            // ads/google/test/test-utils.js
           });
       });
     });
@@ -176,26 +179,121 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'type': 'doubleclick',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
+        // Next two lines are to ensure that internal parts not relevant for this
+        // test are properly set.
+        impl.size_ = {width: 200, height: 50};
+        impl.iframe = impl.win.document.createElement('iframe');
+        installExtensionsService(impl.win);
       });
     });
 
     it('injects amp analytics', () => {
-      const urls = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-      impl.ampAnalyticsConfig = {urls};
-      impl.responseHeaders_ = {get: () => 'qqid_string'};
+      impl.ampAnalyticsConfig_ = {
+        'request': 'www.example.com',
+        'triggers': {
+          'on': 'visible',
+        },
+      };
       impl.onCreativeRender(false);
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
+      expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
+      expect(ampAnalyticsElement.getAttribute('sandbox')).to.equal('true');;
       // Exact format of amp-analytics element covered in
-      // ads/google/test/test-utils.js.  Just ensure urls given exist somewhere.
-      urls.forEach(url => {
-        expect(ampAnalyticsElement.innerHTML.indexOf(url)).to.not.equal(-1);
+      // test/functional/test-analytics.js.
+      // Just ensure extensions is loaded, and analytics element appended.
+    });
+  });
+
+  describe('centering', () => {
+    const size = {width: '300px', height: '150px'};
+    /**
+     * Creates an iframe promise, and instantiates element and impl, adding the
+     * former to the document of the iframe.
+     * @param {{width, height, type}} config
+     * @return The iframe promise.
+     */
+    function createImplTag(config) {
+      config.type = 'doubleclick';
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
+        // To trigger CSS styling.
+        element.setAttribute('data-a4a-upgrade-type',
+            'amp-ad-network-doubleclick-impl');
+        // Used to test styling which is targetted at first iframe child of
+        // amp-ad.
+        const iframe = fixture.doc.createElement('iframe');
+        element.appendChild(iframe);
+        document.body.appendChild(element);
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+        impl.iframe = iframe;
+        return fixture;
+      });
+    }
+
+    function verifyCss(iframe, expectedSize) {
+      expect(iframe).to.be.ok;
+      const style = window.getComputedStyle(iframe);
+      expect(style.top).to.equal('50%');
+      expect(style.left).to.equal('50%');
+      expect(style.width).to.equal(expectedSize.width);
+      expect(style.height).to.equal(expectedSize.height);
+      // We don't know the exact values by which the frame will be translated,
+      // as this can vary depending on whether we use the height/width
+      // attributes, or the actual size of the frame. To make this less of a
+      // hassle, we'll just match against regexp.
+      expect(style.transform).to.match(new RegExp(
+          'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
+    }
+
+    afterEach(() => document.body.removeChild(impl.element));
+
+    it('centers iframe in slot when height && width', () => {
+      return createImplTag({
+        width: '300',
+        height: '150',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.equal('300');
+        expect(impl.element.getAttribute('height')).to.equal('150');
+        verifyCss(impl.iframe, size);
+      });
+    });
+    it('centers iframe in slot when !height && !width', () => {
+      return createImplTag({
+        layout: 'fixed',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.be.null;
+        verifyCss(impl.iframe, size);
+      });
+    });
+    it('centers iframe in slot when !height && width', () => {
+      return createImplTag({
+        width: '300',
+        layout: 'fixed',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.equal('300');
+        expect(impl.element.getAttribute('height')).to.be.null;
+        verifyCss(impl.iframe, size);
+      });
+    });
+    it('centers iframe in slot when height && !width', () => {
+      return createImplTag({
+        height: '150',
+        layout: 'fixed',
+      }).then(() => {
+        expect(impl.element.getAttribute('width')).to.be.null;
+        expect(impl.element.getAttribute('height')).to.equal('150');
+        verifyCss(impl.iframe, size);
       });
     });
   });
 
+
   describe('#getAdUrl', () => {
     beforeEach(() => {
+      const sandbox = sinon.sandbox.create();
       element = document.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'adsense');
@@ -203,6 +301,19 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       element.setAttribute('height', '50');
       document.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
+      // Temporary fix for local test failure.
+      sandbox.stub(impl,
+          'getIntersectionElementLayoutBox', () => {
+            return {
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+              width: 320,
+              height: 50,
+            };
+          });
+      sandbox.stub(impl, 'getAmpDoc', () => {return document;});
     });
 
     afterEach(() =>
@@ -215,7 +326,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           '^https://securepubads\\.g\\.doubleclick\\.net/gampad/ads' +
           // Depending on how the test is run, it can get different results.
           '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=A&sz=320x50' +
-          '&u_sd=[0-9]+(&asnt=[0-9]+-[0-9]+)?' +
+          '&u_sd=[0-9]+(&asnt=[0-9]+-[0-9]+)?(&isc=1)?' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
           '&c=[0-9]+&output=html&nhd=1&biw=[0-9]+&bih=[0-9]+' +

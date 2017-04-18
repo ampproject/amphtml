@@ -196,6 +196,11 @@
     "pageload": "https://pp.lp4.io/pl?i=$id&ct=_dom_interactive_time_&rt=_page_download_time_&pt=_page_load_time_&p=_canonical_url_&c=amp&t=$type&s=$section&_t=amp&_r=_random_",
     "ping": "https://pp.lp4.io/u?i=$id&u=_client_id_&p=_canonical_url_&uActive=true&isPing=yes&c=amp&t=$type&s=$section&_t=amp&_r=_random_",
   },
+  "rakam": {
+    "base": "?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_",
+    "pageview": "https://$apiEndpoint/event/pixel?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=$pageViewName",
+    "custom": "https://$apiEndpoint/event/pixel?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=$collection"
+  },
   "ibeatanalytics": {
     "host": "https://ibeats.indiatimes.com",
     "base": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html",

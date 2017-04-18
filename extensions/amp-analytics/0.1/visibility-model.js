@@ -180,9 +180,6 @@ export class VisibilityModel {
       lastSeenTime: timeBase(this.lastSeenTime_, startTime),
       lastVisibleTime: timeBase(this.lastVisibleTime_, startTime),
       firstVisibleTime: timeBase(this.firstVisibleTime_, startTime),
-      // TODO(dvoytenko, #8259): remove once misspelling has been fixed
-      // everywhere.
-      fistVisibleTime: timeBase(this.firstVisibleTime_, startTime),
 
       // Durations.
       maxContinuousVisibleTime: this.maxContinuousVisibleTime_,
@@ -233,6 +230,8 @@ export class VisibilityModel {
    * @private
    */
   updateCounters_(visibility) {
+    dev().assert(visibility >= 0 && visibility <= 1,
+        'invalid visibility value: %s', visibility);
     const now = Date.now();
 
     if (visibility > 0) {

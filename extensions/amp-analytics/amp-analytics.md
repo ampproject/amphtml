@@ -35,7 +35,7 @@ limitations under the License.
 
 ## Overview
 
-You can use the `<amp-analytics>` element to measure activity on an AMP document. In the `<amp-analytics>` element, you specify a JSON configuration object that contains the details for what to measure and where to send the analytics data. You can send the tracking data to an analytics vendor and/or to a URL. There are many analytics vendors that are pre-configured for `<amp-analytics>`, see [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) for details. 
+You can use the `<amp-analytics>` element to measure activity on an AMP document. In the `<amp-analytics>` element, you specify a JSON configuration object that contains the details for what to measure and where to send the analytics data. You can send the tracking data to an analytics vendor and/or to a URL. There are many analytics vendors that are pre-configured for `<amp-analytics>`, see [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) for details.
 
 **Example**
 
@@ -72,225 +72,11 @@ In the following example, we send analytics data to `https://example.com/analyti
 </amp-analytics>
 ```
 
-**Example**
-
-In the following example, we send pageview data to an analytics vendor, Google Analytics:
-
-```html
-<<<<<<< HEAD
-<amp-analytics type="XYZ"> ... </amp-analytics>
-```
-### Acquia Lift
-
-Type attribute value: `acquialift`
-
-Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` must be specified. More information about Acquia Lift can be found at [https://docs.acquia.com/lift](https://docs.acquia.com/lift).
-
-Please consult the documentation from your vendor, which may be linked in the sections below. You can also look at the [vendors.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/0.1/vendors.js) file for further information on each vendor's configuration.
-
-### Adobe Analytics
-
-Type attribute value: `adobeanalytics`
-
-Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [marketing.adobe.com](https://marketing.adobe.com/resources/help/en_US/sc/implement/accelerated-mobile-pages.html).
-
-### AFS Analytics
-
-Type attribute value: `afsanalytics`
-
-Adds support for AFS Analytics. Additionally, the `websiteid` and `server` variables must be specified. More details for adding AFS Analytics support can be found at [afsanalytics.com](https://www.afsanalytics.com/articles/developers/).
-
-### AT Internet
-
-Type attribute value: `atinternet`
-
-Adds support for AT Internet. More details for adding AT Internet support can be found at [developers.atinternet-solutions.com](http://developers.atinternet-solutions.com/javascript-en/advanced-features-javascript-en/accelerated-mobile-pages-amp-javascript-en/).
-
-### Burt
-
-Type attribute value: `burt`
-
-Adds support for Burt. Additionally, the `trackingKey` variable must be specified. It's also possible to specify the optional variables `category` and `subCategory`. More details can be found at [burtcorp.com](http://burtcorp.com).
-
-### Chartbeat
-
-Type attribute value: `chartbeat`
-
-Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/integrations.html#amp).
-
-### ColAnalytics
-
-Type attribute value: `colanalytics`
-
-Adds support for ColAnalytics. Additionally, you must specify a value for `id`.
-
-### Clicky Web Analytics
-
-Type attribute value: `clicky`
-
-Adds support for Clicky Web Analytics. More details for adding Clicky support can be found at [clicky.com](https://clicky.com/help/apps-plugins).
-
-### comScore
-
-Type attribute value: `comscore`
-
-Adds support for comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*. More information can be found at [comscore.com](http://www.comscore.com).
-
-### Cxense
-
-Type attribute value: `cxense`
-
-Adds support for Cxense Insight analytics. Requires defining *var* `siteId` with Cxense-provided *siteId*. More details can be found at [wiki.cxense.com](https://wiki.cxense.com/display/cust/Accelerated+Mobile+Pages+%28AMP%29+integration).
-
-### dynatrace
-
-Type attribute value: `dynatrace`
-
-Adds support for dynatrace. Requires defining *var* `app` with dynatrace-provided *appId* and *var* `tenant` with dynatrace-provided *tenantId*. 
-
-### Eulerian Analytics
-
-Type attribute value: `euleriananalytics`
-
-Adds support for Eulerian Technologies Analytics. Requires defining *var* `analyticsHost` with Eulerian delegated domain. More details can be found at [eulerian.wiki](https://eulerian.wiki).
-
-### Gemius
-
-Type attribute value: `gemius`
-
-Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provided `prefix` and `identifier` variables must be specified. It's also possible to specify the optional variable `extraparams` (key1=value1|key2=value2). More details can be found at [gemius.com](https://www.gemius.com).
-
-### Google Analytics
-
-Type attribute value: `googleanalytics`
-
-Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
-
-### INFOnline / IVW
-
-Type attribute value: `infonline`
-
-Adds support for [INFOnline](https://www.infonline.de) / [IVW](http://www.ivw.de). Requires a copy of [amp-analytics-infonline.html](https://3p.ampproject.net/custom/amp-analytics-infonline.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. Example: if your AMP files are hosted on `www.example.com`, then `amp-analytics-infonline.html` needs to be on another subdomain such as `iframe.example.com` or `assets.example.com`.
-
-Additionally, the following variables must be defined:
-
-* `st`: Angebotskennung
-* `co`: comment
-* `cp`: code
-* `url`: HTTPS location of `amp-analytics-infonline.html`
-
-More details for adding INFOnline / IVW support can be found at [www.infonline.de](https://www.infonline.de/downloads/web-mew-und-ctv/).
-
-### Krux
-
-Type attribute value: `krux`
-
-Adds support for Krux.  Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
-
-### Linkpulse
-
-Type attribute value: `linkpulse`
-
-Adds support for Linkpulse. Configuration details can be found at [docs.linkpulse.com](http://docs.linkpulse.com)
-
-### Lotame
-
-Type attribute value: `lotame`
-
-Adds support for Lotame.  More information and configuration details can be found at [mylotame.force.com](https://mylotame.force.com/s/article/Google-AMP).
-
-### Médiamétrie
-
-Type attribute value: `mediametrie`
-
-Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`. Vars `level1` to `level4` are optional.  More information can be found at [mediametrie.com](http://www.mediametrie.com/).
-
-### mParticle
-
-Type attribute value: `mparticle`
-
-Adds support for mParticle. More details for adding mParticle support can be found at [docs.mparticle.com](http://docs.mparticle.com/?javascript#amp).
-
-### OEWA
-
-Type attribute value: `oewa`
-
-There is a variation called `oewadirect` wich does not use iframe-ping solution - and has a better client detection, by using AMP CLIENT_ID, this is currently EXPERIMENTAL,
-and as of today (01.07.2015) prohibited by the OEWA - as it does not use `oewa2.js`
-
-Adds support for [OEWA](https://www.oewa.at). Requires a copy of [amp-analytics-oewa.html](http://www.oewa.at/fileadmin/downloads/amp-analytics-oewa.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. Example: if your AMP files are hosted on `www.example.com`, then `amp-analytics-oewa.html` needs to be on another subdomain such as `oewa-amp.example.com`.
-
-Additionally, the following variables must be defined:
-
-in vars-section:
-* `s`: offer
-* `cp`: categorypath
-
-in requests-section:
-* `url`: HTTPS location of `amp-analytics-oewa.html`
-
-More details for adding ÖWA, support can be found [here](http://www.oewa.at/basic/implementierung).
-
-### Parsely
-
-Type attribute value: `parsely`
-
-Adds support for Parsely. Configuration details can be found at [parsely.com/docs](http://parsely.com/docs/integration/tracking/google-amp.html).
-
-### Piano
-
-Type attribute value: `piano`
-
-Adds support for Piano.  Configuration details can be found at [vx.piano.io](http://vx.piano.io/javascript-tracking-amp).
-
-### Quantcast Measurement
-
-Type attribute value: `quantcast`
-
-Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
-
-### Segment
-
-Type attribute value: `segment`
-
-Adds support for segment page views and events.
-To see the full list of fields that you can send, see [Segment Spec](https://segment.com/docs/spec/).
-
-### SOASTA mPulse
-
-Type attribute value: `mpulse`
-
-Adds support for [SOASTA mPulse](https://www.soasta.com/mPulse). Configuration details can be found at [docs.soasta.com](http://docs.soasta.com/).
-
-### SimpleReach
-
-Type attribute value: `simplereach`
-
-Adds support for SimpleReach.  Configuration details can be found at [simplereach.com/docs](http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation)
-
-### Snowplow Analytics
-
-Type attribute value: `snowplow`
-
-Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [github.com/snowplow/snowplow/wiki](https://github.com/snowplow/snowplow/wiki/Google-AMP-Tracker).
-
-### Webtrekk
-
-Type attribute value: `webtrekk`
-
-Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
-
-### Yandex Metrica
-
-Type attribute value: `metrika`
-
-Adds support for Yandex Metrica.  Configuration details can be found at [Yandex Support](https://yandex.com/support/metrica/code/install-counter-amp.xml).
-
 ## Attributes
 
 **type**
 
-Specifies the type of vendor.  For details, see the [Analytics vendors](#analytics-vendors) section above.
+Specifies the type of vendor.  For details, see the [Analytics vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) page.
 
 **config**
 
@@ -304,10 +90,10 @@ Example:
 <script type="application/json">
 {
   "vars": {
-    "account": "UA-12345-Y"  
+    "account": "UA-12345-Y"
   },
   "triggers": {
-    "trackPageview": {  
+    "trackPageview": {
       "on": "visible",
       "request": "pageview"
     }
@@ -415,7 +201,7 @@ The `triggers` configuration object describes when an analytics request should b
   - `on` (required) The event to listener for. Valid values are `ini-load`, `visible`, `click`, `scroll`, `timer`, and `hidden`.
   - `request` (required) Name of the request to send (as specified in the `requests` section).
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify vars unique to this trigger.
-  - `selector` (required when `on` is set to `click`) This configuration is used on conjunction with the `click` trigger. Please see below for details.
+  - `selector` and `selectionMethod` can be specified for some triggers, such as `click` and `visible`. See [Element selector](#element-selector) for details.
   - `scrollSpec` (required when `on` is set to `scroll`) This configuration is used on conjunction with the `scroll` trigger. Please see below for details.
   - `timerSpec` (required when `on` is set to `timer`) This configuration is used on conjunction with the `timer` trigger. Please see below for details.
   - `sampleSpec` This object is used to define how the requests can be sampled before they are sent. This setting allows sampling based on random input or other platform supported vars. The object contains configuration to specify an input that is used to generate a hash and a threshold that the hash must meet.
@@ -445,12 +231,24 @@ As an example, the following configuration can be used to sample 50% of the requ
 },
 ```
 
+
+#####  Element selector
+
+Some triggers such as `click` and `visible` allow specifying an single element or a collection of elements using the selector properties. Different triggers can apply different limitations and interpretations on selected elements, such as whether a selector applies to all matched elements or the first one, or which elements can be matched: all or only AMP elements. See the documentation for each relevant trigger for more details.
+
+The selector properties are:
+  - `selector` This property is used to find an element or a collection of elements using CSS/DOM query. The semantics of how the element is matched can be changed using `selectionMethod`. The value of this property can be one of:
+    - a valid CSS selector, e.g. `#ad1` or `amp-ad`.
+    - `:root` - a special selector that matches the document root.
+  - `selectionMethod` When specified, this property can have one of two values: `scope` or `closest`. `scope` allows selection of element within the parent element of `amp-analytics` tag. `closest` searches for the closest ancestor of the `amp-analytics` tag that satisfies the given selector. The default value is `scope`.
+
+
 #### Embed render start trigger
 
 AMP elements that embed other documents in iframes (e.g., ads) may report a render start event (`"on": "render-start"`). This event
 is typically emitted as soon as it's possible to confirm that rendering of the embedded document has started. Consult the documentation of a particular AMP element to see whether it emits this event.
 
-The trigger for the embed element must include a `selector` that points to the embedding element:
+The trigger for the embed element must include a [`selector`](#element-selector) that points to the embedding element:
 ```javascript
 "triggers": {
   "renderStart": {
@@ -481,7 +279,7 @@ More specifically:
  - For an embed element: all content elements in the embed document that are positioned within the initial size of the embed element.
  - For a simple AMP element (e.g. `amp-img`): the resources itself, such as an image or a video.
 
-The trigger for an embed or an AMP element must include a `selector` that points to the element:
+The trigger for an embed or an AMP element must include a [`selector`](#element-selector) that points to the element:
 ```javascript
 "triggers": {
   "iniLoad": {
@@ -502,9 +300,9 @@ The initial load event is also emitted by the document itself and can be configu
 }
 ```
 
-#### Page visible trigger
+#### Page and element visibility trigger
 
-Use the page visible trigger (`"on": "visible"`) to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`.
+Use the page visibility trigger (`"on": "visible"`) to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`.
 
 ```javascript
 "triggers": {
@@ -515,16 +313,29 @@ Use the page visible trigger (`"on": "visible"`) to fire a request when the page
 }
 ```
 
+The element visibility trigger can be configured for any AMP element or a document root using [`selector`](#element-selector). The trigger will fire when the specified element matches the visibility parameters that can be customized using the `visibilitySpec`.
+
+```javascript
+"triggers": {
+  "defaultPageview": {
+    "on": "visible",
+    "request": "elementview",
+    "selector": "#ad1",
+    "visibilitySpec": {/* optional visibility spec */}
+  }
+}
+```
+
+Notice that selector can be used to only specify a single element, not a collection. The element can be either an [AMP extended  element](https://github.xom/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags) or a document root.
+
+The element visibility trigger waits for element's [`ini-load`](#initial-load-trigger) signal before matching the `visibilitySpec`.
+
+
 <strong><a id="visibility-spec"></a>Visibility Spec</strong>
 
 The `visibilitySpec` is a set of conditions and properties that can be applied to `visible` or `hidden` triggers to change when they fire. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
-  - `selector` This property can be used to specify the element to which all the `visibilitySpec` conditions apply. The selector needs to point to an [AMP extended  element](https://github.xom/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags). In addition, the semantics of how the element is selected can be changed using `selectionMethod`. The value of this property can be one of:
-    - a css id without `selectionMethod`
-    - a css id or tag name with `selectionMethod="scope"`
-    - a tag name with `selectionMethod="closest"`
-  - `selectionMethod` This property can have one of two values: `scope` and `closest`. `scope` allows selection of element within the parent element of `amp-analytics` tag. `closest` searches for the closest ancestor of `amp-analytics` tag that satisfies the given selector.
-  - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
-  - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
+  - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
+  - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `totalTimeMin` is defaulted to 0 when not specified.
   - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the lower bound (`visiblePercentageMin`) is inclusive while the upper bound (`visiblePercentageMax`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. They default to 0 and 100 when not specified.
 
 In addition to the conditions above, `visibilitySpec` also enables certain variables which are documented [here](./analytics-vars.md#visibility-variables).
@@ -534,8 +345,8 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
   "defaultPageview": {
     "on": "visible",
     "request": "pageview",
+    "selector": "#ad1",
     "visibilitySpec": {
-      "selector": "#anim-id",
       "visiblePercentageMin": 20,
       "totalTimeMin": 500,
       "continuousTimeMin": 200
@@ -544,12 +355,12 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
 }
 ```
 
-In addition to the variables provided as part of triggers you can also specify additional / overrides for [variables as data attribute](./analytics-vars.md#variables-as-data-attribute). If used, these data attributes have to be part of element specified as the `selector`
+In addition to the variables provided as part of triggers you can also specify additional / overrides for [variables as data attribute](./analytics-vars.md#variables-as-data-attribute). If used, these data attributes have to be part of element specified as the [`selector`](#element-selector).
+
 
 #### Click trigger
 
-Use the click trigger (`"on": "click"`) to fire a request when a specified element is clicked. Use `selector` to control which elements will cause this request to fire:
-  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements. The value of `selector` can include variables that are defined in inline or remote config. The variables will be expanded to determine the elements to be tracked.
+Use the click trigger (`"on": "click"`) to fire a request when a specified element is clicked. Use [`selector`](#element-selector) to control which elements will cause this request to fire. The trigger will fire for all elements matched by the specified selector.
 
 ```javascript
 "vars": {
@@ -569,6 +380,7 @@ Use the click trigger (`"on": "click"`) to fire a request when a specified eleme
 ```
 
 In addition to the variables provided as part of triggers you can also specify additional / overrides for [variables as data attribute](./analytics-vars.md#variables-as-data-attribute). If used, these data attributes have to be part of element specified as the `selector`
+
 
 #### Scroll trigger
 Use the scroll trigger (`"on": "scroll"`) to fire a request under certain conditions when the page is scrolled. This trigger provides [special vars](./analytics-vars.md#interaction) that indicate the boundaries that triggered a request to be sent. Use `scrollSpec` to control when this will fire:
@@ -638,9 +450,11 @@ A [`visibilitySpec`](#visibility-spec) can be included so that a request is only
 The above configuration translates to:
 > When page becomes hidden, fire a request if the element #anim-id has been visible (more than 20% area in viewport) for more than 3s in total.
 
+
 #### Access triggers
 
 AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "amp-access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
+
 
 ### Transport
 

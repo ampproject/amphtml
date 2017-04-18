@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import {cidForDoc} from '../../src/services';
+import {ampdocServiceFor} from '../../src/ampdoc';
+import {
+  cidForDoc,
+  extensionsFor,
+  timerFor,
+  viewerForDoc,
+} from '../../src/services';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
@@ -24,7 +30,6 @@ import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
 import {cryptoFor} from '../../src/crypto';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
-import {timerFor} from '../../src/services';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -34,7 +39,6 @@ import {
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
-import {extensionsFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
@@ -98,8 +102,8 @@ describe('cid', () => {
       setTimeout: window.setTimeout,
     };
     fakeWin.document.defaultView = fakeWin;
-    const ampdocService = installDocService(fakeWin, /* isSingleDoc */ true);
-    ampdoc = ampdocService.getAmpDoc();
+    installDocService(fakeWin, /* isSingleDoc */ true);
+    ampdoc = ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
 
@@ -112,7 +116,8 @@ describe('cid', () => {
       return Promise.resolve();
     });
 
-    viewer = installViewerServiceForDoc(ampdoc);
+    installViewerServiceForDoc(ampdoc);
+    viewer = viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
@@ -339,9 +344,8 @@ describe('cid', () => {
       navigator: window.navigator,
       services: {},
     };
-
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
-    const ampdoc2 = ampdocService.getAmpDoc();
+    installDocService(win, /* isSingleDoc */ true);
+    const ampdoc2 = ampdocServiceFor(win).getAmpDoc();
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
     installPlatformService(win);

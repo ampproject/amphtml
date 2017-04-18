@@ -87,7 +87,11 @@ export function getExistingServiceForWindow(win, id) {
  */
 export function getExistingServiceForWindowOrNull(win, id) {
   win = getTopWindow(win);
-  return win.services && win.services[id] && win.services[id].obj;
+  if (win.services && win.services[id]) {
+    return getServiceInternal(win, win, id);
+  } else {
+    return null;
+  }
 }
 
 /**
@@ -116,11 +120,14 @@ export function getExistingServiceForWindowInEmbedScope(win, id) {
  * @return {!Object} The service.
  */
 export function getExistingServiceForDoc(nodeOrDoc, id) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
   const serviceHolder = getAmpdocServiceHolder(nodeOrDoc);
-  const exists = serviceHolder && serviceHolder.services &&
-      serviceHolder.services[id] && serviceHolder.services[id].obj;
-  return dev().assert(exists, `${id} doc service not found. Make sure it is ` +
-      `installed.`);
+  let service;
+  if (serviceHolder && serviceHolder.services && serviceHolder.services[id]) {
+    service = getServiceInternal(serviceHolder, ampdoc, id);
+  }
+  return dev().assert(/** @type (!Object) */ (service),
+      `${id} doc service not found. Make sure it is installed.`);
 }
 
 
@@ -173,13 +180,11 @@ function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
   // It does not try to go all the way up the parent window chain. We can change
   // this in the future, but for now this gives us a better performance.
   const topWin = getTopWindow(embedWin);
-  if (embedWin != topWin &&
-          embedWin.services &&
-          embedWin.services[id] &&
-          embedWin.services[id].obj) {
-    return embedWin.services[id].obj;
+  if (embedWin != topWin && embedWin.services && embedWin.services[id]) {
+    return getServiceInternal(embedWin, embedWin, id);
+  } else {
+    return null;
   }
-  return null;
 }
 
 
@@ -456,7 +461,7 @@ function getAmpdocService(win) {
  *     Should create the service if it does not exist yet. If the factory
  *     is not given, it is an error if the service does not exist yet.
  *     Called with context.
- * @return {*}
+ * @return {Object}
  * @template T
  */
 function getServiceInternal(holder, context, id, opt_constructor, opt_factory) {
@@ -528,7 +533,9 @@ function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
   // The service may have been requested already, in which case there is a
   // pending promise that needs to fulfilled.
   if (s.promise && s.resolve) {
-    s.resolve(s.build());
+    const obj = s.build();
+    s.obj = obj;
+    s.resolve(obj);
   }
 }
 
@@ -587,8 +594,10 @@ function getServicePromiseOrNullInternal(holder, id) {
     } else if (s.obj) {
       return s.promise = Promise.resolve(s.obj);
     } else {
-      dev().assert((s.build),
+      dev().assert(s.build,
           'Expected object, promise, or builder to be present');
+      s.obj = s.build();
+      return s.promise = Promise.resolve(s.obj);
     }
   }
   return null;

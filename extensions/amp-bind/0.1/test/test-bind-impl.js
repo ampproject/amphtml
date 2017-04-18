@@ -15,7 +15,6 @@
  */
 
 import * as sinon from 'sinon';
-import {AmpForm} from '../../../amp-form/0.1/amp-form';
 import {Bind} from '../bind-impl';
 import {BindExpression} from '../bind-expression';
 import {BindValidator} from '../bind-validator';
@@ -169,13 +168,12 @@ describes.realWin('Bind', {
 
   it('should dynamically detect new bindings under dynamic tags', () => {
     const doc = env.win.document;
-    const form = doc.createElement('form');
-    doc.getElementById('parent').appendChild(form);
+    const parent = doc.getElementById('parent');
     const dynamicTag = doc.createElement('div');
-    dynamicTag.setAttribute('submit-success', null);
-    form.appendChild(dynamicTag);
-    // Wrap form in amp-form implementation so bind can access it
-    new AmpForm(form);
+    parent.appendChild(dynamicTag);
+    parent.getDynamicElementContainers = () => {
+      return [dynamicTag];
+    };
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(0);
       const elementWithBinding = createElementWithBinding('[onePlusOne]="1+1"');
@@ -191,6 +189,17 @@ describes.realWin('Bind', {
     expect(element.getAttribute('onePlusOne')).to.equal(null);
     return onBindReady().then(() => {
       expect(element.getAttribute('onePlusOne')).to.equal(null);
+    });
+  });
+
+  it('should verify class bindings in dev mode', () => {
+    window.AMP_MODE = {development: true};
+    createElementWithBinding(`[class]="'foo'" class="foo"`); // No error.
+    createElementWithBinding(`[class]="'bar'" class="qux"`); // Error.
+    const errorStub = env.sandbox.stub(user(), 'createError');
+    return onBindReady().then(() => {
+      expect(errorStub).to.be.calledOnce;
+      expect(errorStub).calledWithMatch(/bar/);
     });
   });
 

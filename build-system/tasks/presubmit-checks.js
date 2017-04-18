@@ -649,7 +649,8 @@ var forbiddenTermsSrcInclusive = {
       'src/analytics.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'ads/google/a4a/utils.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
     ],
   },
   'loadElementClass': {
@@ -729,6 +730,12 @@ var forbiddenTermsSrcInclusive = {
       'validator/webui/serve-standalone.go',
       'build-system/tasks/extension-generator/index.js',
     ],
+  },
+  '\\<\\<\\<\\<\\<\\<': {
+    message: 'Unresolved merge conflict.',
+  },
+  '\\>\\>\\>\\>\\>\\>': {
+    message: 'Unresolved merge conflict.',
   },
 };
 

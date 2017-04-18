@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {fromClass, getServiceForDoc} from '../service';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+  getService,
+} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {timerFor} from '../services';
@@ -747,9 +751,15 @@ export class HistoryBindingVirtual_ {
   push() {
     // Current implementation doesn't wait for response from viewer.
     this.updateStackIndex_(this.stackIndex_ + 1);
+    // TODO(dvoytenko, #8785): cleanup after tracing.
+    const trace = new Error('pushHistory trace: ');
     return this.viewer_.sendMessageAwaitResponse(
         'pushHistory', {stackIndex: this.stackIndex_}).then(() => {
           return this.stackIndex_;
+        }, reason => {
+          trace.message += reason;
+          dev().error(TAG_, trace);
+          throw reason;
         });
   }
 
@@ -758,10 +768,16 @@ export class HistoryBindingVirtual_ {
     if (stackIndex > this.stackIndex_) {
       return Promise.resolve(this.stackIndex_);
     }
+    // TODO(dvoytenko, #8785): cleanup after tracing.
+    const trace = new Error('popHistory trace: ');
     return this.viewer_.sendMessageAwaitResponse(
         'popHistory', {stackIndex: this.stackIndex_}).then(() => {
           this.updateStackIndex_(stackIndex - 1);
           return this.stackIndex_;
+        }, reason => {
+          trace.message += reason;
+          dev().error(TAG_, trace);
+          throw reason;
         });
   }
 
@@ -832,8 +848,11 @@ function createHistory(ampdoc) {
   } else {
     // Only one global "natural" binding is allowed since it works with the
     // global history stack.
-    binding = fromClass(ampdoc.win, 'global-history-binding',
+    registerServiceBuilder(
+        ampdoc.win,
+        'global-history-binding',
         HistoryBindingNatural_);
+    binding = getService(ampdoc.win, 'global-history-binding');
   }
   return new History(ampdoc, binding);
 }
@@ -841,9 +860,11 @@ function createHistory(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!History}
  */
 export function installHistoryServiceForDoc(ampdoc) {
-  return /** @type {!History} */ (getServiceForDoc(ampdoc, 'history',
-      ampdoc => createHistory(ampdoc)));
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'history',
+      /* opt_constructor */ undefined,
+      ampdoc => createHistory(ampdoc));
 }
