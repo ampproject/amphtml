@@ -147,6 +147,14 @@ describe('3p-frame', () => {
         },
       };
     };
+    div.getPageLayoutBox = function() {
+      return {
+        left: 0,
+        top: 0,
+        width: 100,
+        height: 200,
+      };
+    };
 
     const viewer = viewerForDoc(window.document);
     const viewerMock = sandbox.mock(viewer);
@@ -173,6 +181,8 @@ describe('3p-frame', () => {
         '"canonicalUrl":"' + docInfo.canonicalUrl + '",' +
         '"sourceUrl":"' + locationHref + '",' +
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
+        '"initialLayoutRect": ' +
+        JSON.stringify(div.getPageLayoutBox()) + ',' +
         '"initialIntersection": ' +
         JSON.stringify(div.getIntersectionChangeEntry()) + ',' +
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
@@ -344,6 +354,14 @@ describe('3p-frame', () => {
         right: 0,
         x: 0,
         y: 0,
+      };
+    };
+    div.getPageLayoutBox = function() {
+      return {
+        left: 0,
+        top: 0,
+        width: 100,
+        height: 200,
       };
     };
 

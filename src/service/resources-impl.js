@@ -408,11 +408,11 @@ export class Resources {
    */
   ensuredMeasured_(resource) {
     if (resource.hasBeenMeasured()) {
-      return Promise.resolve(resource.getLayoutBox());
+      return Promise.resolve(resource.getPageLayoutBox());
     }
     return this.vsync_.measurePromise(() => {
       resource.measure();
-      return resource.getLayoutBox();
+      return resource.getPageLayoutBox();
     });
   }
 
@@ -1628,7 +1628,7 @@ export class Resources {
   completeScheduleChangeSize_(resource, newHeight, newWidth, marginChange,
       force, opt_callback) {
     resource.resetPendingChangeSize();
-    const layoutBox = resource.getLayoutBox();
+    const layoutBox = resource.getPageLayoutBox();
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
         (newWidth === undefined || newWidth == layoutBox.width) &&
         (marginChange === undefined || !areMarginsChanged(

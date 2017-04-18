@@ -39,7 +39,7 @@ Reasons include:
 
 ## The iframe sandbox
 
-The ad itself is hosted within a document that has an origin different from the primary page. The iframe by default loads a [bootstrap HTML](../3p/frame.max.html), which provides a container `div` to hold your content together with a set of APIs. Note that the container `div` (with `id="c"`) is absolute positioned and takes the whole space of the iframe, so you will want to append your content as a child of the container (don't append to `body`).  
+The ad itself is hosted within a document that has an origin different from the primary page. The iframe by default loads a [bootstrap HTML](../3p/frame.max.html), which provides a container `div` to hold your content together with a set of APIs. Note that the container `div` (with `id="c"`) is absolute positioned and takes the whole space of the iframe, so you will want to append your content as a child of the container (don't append to `body`).
 
 ### Available information
 We will provide the following information to the ad:
@@ -105,9 +105,13 @@ Example usage:
   unlisten();
 ```
 
-##### Initial position
+##### Initial layout rect
 
-The value `window.context.initialIntersection` contains the initial intersection record at the time the iframe was created.
+The value `window.context.initialLayoutRect` contains the initial rect of the ad's position in the page.
+
+##### Initial viewport intersection
+
+The value `window.context.initialIntersection` contains the initial viewport intersection record at the time the iframe was created.
 
 #### Page visibility
 

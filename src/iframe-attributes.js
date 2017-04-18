@@ -51,6 +51,8 @@ export function getContextMetadata(
 
   // TODO(alanorozco): Redesign data structure so that fields not exposed by
   // AmpContext are not part of this object.
+  const layoutRect = element.getPageLayoutBox ?
+      element.getPageLayoutBox() : element.getLayoutBox();
   attributes._context = {
     ampcontextVersion: '$internalRuntimeVersion$',
     ampcontextFilepath: urls.cdn + '/$internalRuntimeVersion$' +
@@ -67,6 +69,12 @@ export function getContextMetadata(
     mode: getModeObject(),
     canary: isCanary(parentWindow),
     hidden: !viewer.isVisible(),
+    initialLayoutRect: layoutRect ? {
+      left: layoutRect.left,
+      top: layoutRect.top,
+      width: layoutRect.width,
+      height: layoutRect.height,
+    } : null,
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
     experimentToggles: experimentToggles(parentWindow),
