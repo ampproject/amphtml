@@ -177,6 +177,9 @@ describe('Resource', () => {
       resource.measure();
     }).to.not.throw();
     expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 100, 300, 100));
+    // pageLayoutBox == layoutBox
+    expect(resource.getPageLayoutBox()).to.eql(
+        layoutRectLtwh(0, 100, 300, 100));
   });
 
   it('should allow measure even when not built', () => {
@@ -307,17 +310,22 @@ describe('Resource', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect').returns(
         layoutRectLtwh(0, 0, 10, 10)).once();
+    viewportMock.expects('getScrollTop').returns(11).atLeast(0);
     element.offsetParent = {
       isAlwaysFixed: () => true,
     };
     resource.measure();
     expect(resource.isFixed()).to.be.true;
+    // layoutBox != pageLayoutBox
+    expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 11, 10, 10));
+    expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
   it('should calculate fixed for fixed-style parent', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect').returns(
         layoutRectLtwh(0, 0, 10, 10)).once();
+    viewportMock.expects('getScrollTop').returns(11).atLeast(0);
     const fixedParent = document.createElement('div');
     fixedParent.style.position = 'fixed';
     document.body.appendChild(fixedParent);
@@ -332,6 +340,9 @@ describe('Resource', () => {
         .once();
     resource.measure();
     expect(resource.isFixed()).to.be.true;
+    // layoutBox != pageLayoutBox
+    expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 11, 10, 10));
+    expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
   describe('placeholder measure', () => {

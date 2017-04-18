@@ -23,6 +23,7 @@ process.end.NODE_ENV;
 window.context = {};
 window.context.sentinel;
 window.context.clientId;
+window.context.initialLayoutRect;
 window.context.initialIntersection;
 window.context.sourceUrl;
 window.context.experimentToggles;

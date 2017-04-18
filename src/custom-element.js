@@ -1100,11 +1100,24 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns a previously measured layout box adjusted to the viewport. This
+     * mainly affects fixed-position elements that are adjusted to be always
+     * relative to the document position in the viewport.
      * @return {!./layout-rect.LayoutRectDef}
      * @final @this {!Element}
      */
     getLayoutBox() {
       return this.getResources().getResourceForElement(this).getLayoutBox();
+    }
+
+    /**
+     * Returns a previously measured layout box relative to the page. The
+     * fixed-position elements are relative to the top of the document.
+     * @return {!./layout-rect.LayoutRectDef}
+     * @final @this {!Element}
+     */
+    getPageLayoutBox() {
+      return this.getResources().getResourceForElement(this).getPageLayoutBox();
     }
 
     /**

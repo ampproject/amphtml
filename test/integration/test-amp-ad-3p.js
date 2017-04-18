@@ -69,6 +69,8 @@ function createIframeWithApis(fixture) {
     expect(context.container).to.be.defined;
     expect(context.initialIntersection).to.be.defined;
     // check for rootBounds as native IO doesn't support it with CORS
+    expect(context.initialLayoutRect).to.be.defined;
+    expect(context.initialLayoutRect.top).to.be.defined;
     expect(context.initialIntersection.rootBounds).to.be.defined;
     expect(context.isMaster).to.be.defined;
     expect(context.computeInMasterFrame).to.be.defined;

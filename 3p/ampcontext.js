@@ -63,6 +63,9 @@ export class AbstractAmpContext {
     this.hidden = null;
 
     /** @type {?Object} */
+    this.initialLayoutRect = null;
+
+    /** @type {?Object} */
     this.initialIntersection = null;
 
     /** @type {?Location} */
@@ -239,6 +242,7 @@ export class AbstractAmpContext {
     this.container = context.container;
     this.data = context.tagName;
     this.hidden = context.hidden;
+    this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
     this.location = context.location;
     this.mode = context.mode;
