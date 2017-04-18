@@ -41,7 +41,7 @@ function addToQueue(global, data) {
     createContainer(global, renderTo);
 
     // Show Ad in container
-    window.Ya.Context.AdvManager.render({
+    global.Ya.Context.AdvManager.render({
       blockId: data.blockId,
       statId: data.statId,
       renderTo,
@@ -49,12 +49,12 @@ function addToQueue(global, data) {
       async: true,
       onRender: () => {
         // Move adfox queue
-        if (data.isAdfox && window.Ya.adfoxCode.onRender) {
-          window.Ya.adfoxCode.onRender();
+        if (data.isAdfox && global.Ya.adfoxCode.onRender) {
+          global.Ya.adfoxCode.onRender();
         }
       },
     }, () => {
-      window.context.noContentAvailable();
+      global.context.noContentAvailable();
     });
   });
 }

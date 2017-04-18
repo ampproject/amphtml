@@ -66,9 +66,9 @@ function initAdFox(global, data) {
     containerId: containerName,
     params,
     onLoad: data => checkLoading(global, data),
-    onRender: () => window.context.renderStart(),
-    onError: () => window.context.noContentAvailable(),
-    onStub: () => window.context.noContentAvailable(),
+    onRender: () => global.context.renderStart(),
+    onError: () => global.context.noContentAvailable(),
+    onStub: () => global.context.noContentAvailable(),
   });
 }
 
