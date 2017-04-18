@@ -314,8 +314,7 @@ describe('amp-youtube', function() {
       expect(obj.playerState_).to.be.equal(2);
     });
   });
-<<<<<<< HEAD
-=======
+
   it('should propagate attribute mutations', () => {
     return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
       const spy = sandbox.spy(yt.implementation_, 'sendCommand_');
@@ -326,7 +325,6 @@ describe('amp-youtube', function() {
 
     });
   });
->>>>>>> Fix specs
 
   function sendFakeInfoDeliveryMessage(yt, iframe, info) {
     yt.implementation_.handleYoutubeMessages_({

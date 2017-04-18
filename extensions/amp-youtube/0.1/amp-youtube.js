@@ -216,7 +216,7 @@ class AmpYoutube extends AMP.BaseElement {
       this.unlistenMessage_();
     }
     this.playerState_ = PlayerStates.PAUSED;
-    
+
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
