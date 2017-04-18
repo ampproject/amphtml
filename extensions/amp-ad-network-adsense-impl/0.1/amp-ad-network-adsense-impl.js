@@ -270,7 +270,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
-    this.ampAnalyticsConfig_ = null;
+    if (this.ampAnalyticsConfig_) {
+      this.ampAnalyticsConfig_.parentElement.removeChild(
+          this.ampAnalyticsConfig_);
+      this.ampAnalyticsConfig_ = null;
+    }
   }
 }
 

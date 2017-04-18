@@ -411,14 +411,20 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             fallback.setAttribute('fallback', '');
             impl.element.appendChild(placeholder);
             impl.element.appendChild(fallback);
-            impl.ampAnalyticsConfig_ = {};
+            // For the purposes of this test, we only care that this is of type
+            // Element.
+            impl.ampAnalyticsConfig_ = document.createElement('amp-analytics');
+            impl.element.appendChild(impl.ampAnalyticsConfig_);
 
             expect(impl.iframe).to.be.ok;
             expect(impl.ampAnalyticsConfig_).to.be.ok;
+            expect(impl.element.querySelector('iframe')).to.be.ok;
+            expect(impl.element.querySelector('amp-analytics')).to.be.ok;
             impl.unlayoutCallback();
             expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
             expect(impl.element.querySelector('div[fallback]')).to.be.ok;
             expect(impl.element.querySelector('iframe')).to.be.null;
+            expect(impl.element.querySelector('amp-analytics')).to.be.null;
             expect(impl.iframe).to.be.null;
             expect(impl.ampAnalyticsConfig_).to.be.null;
             expect(impl.element.getAttribute('data-amp-slot-index')).to

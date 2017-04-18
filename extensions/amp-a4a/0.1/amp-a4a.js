@@ -861,7 +861,7 @@ export class AmpA4A extends AMP.BaseElement {
 
     // Remove rendering frame, if it exists.
     if (this.iframe) {
-      this.element.removeChild(this.iframe);
+      this.iframe.parentElement.removeChild(this.iframe);
       this.iframe = null;
     }
 
