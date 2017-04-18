@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {timerFor} from '../../../src/services';
+import {addScreenReaderButton} from '../../../src/a11y';
 
 /**
  * @abstract
@@ -64,27 +65,21 @@ export class BaseCarousel extends AMP.BaseElement {
 
 
   buildButtons() {
-    this.prevButton_ = this.element.ownerDocument.createElement('div');
-    this.prevButton_.classList.add('amp-carousel-button');
-    this.prevButton_.classList.add('amp-carousel-button-prev');
-    this.prevButton_.setAttribute('role', 'button');
     // TODO(erwinm): Does label need i18n support in the future? or provide
     // a way to be overridden.
-    this.prevButton_.setAttribute('aria-label', 'Previous item in carousel');
-    this.prevButton_.onclick = () => {
-      this.interactionPrev();
-    };
-    this.element.appendChild(this.prevButton_);
+    this.prevButton_ = addScreenReaderButton(this.element,
+      'Previous item in carousel', () => this.interactionPrev());
+    this.prevButton_.classList.add('amp-carousel-button');
+    this.prevButton_.classList.add('amp-carousel-button-prev');
 
-    this.nextButton_ = this.element.ownerDocument.createElement('div');
+    this.nextButton_ = addScreenReaderButton(this.element,
+      'Next item in carousel', () => this.interactionNext());
     this.nextButton_.classList.add('amp-carousel-button');
     this.nextButton_.classList.add('amp-carousel-button-next');
-    this.nextButton_.setAttribute('role', 'button');
-    this.nextButton_.setAttribute('aria-label', 'Next item in carousel');
-    this.nextButton_.onclick = () => {
-      this.interactionNext();
-    };
-    this.element.appendChild(this.nextButton_);
+
+    // Remove the a11y class so the buttons are visible for the hint
+    this.prevButton_.classList.remove('i-amphtml-screen-reader');
+    this.nextButton_.classList.remove('i-amphtml-screen-reader');
   }
 
   /** @override */
@@ -154,7 +149,11 @@ export class BaseCarousel extends AMP.BaseElement {
       const className = 'i-amphtml-carousel-button-start-hint';
       this.element.classList.add(className);
       timerFor(this.win).delay(() => {
-        this.deferMutate(() => this.element.classList.remove(className));
+        this.deferMutate(() => {
+          this.element.classList.remove(className);
+          this.prevButton_.classList.add('i-amphtml-screen-reader');
+          this.nextButton_.classList.add('i-amphtml-screen-reader');
+        });
       }, 4000);
     });
   }

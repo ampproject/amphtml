@@ -35,6 +35,16 @@ export function camelCaseToTitleCase(camelCase) {
 }
 
 /**
+ * whatACoolTitle -> what-a-cool-title
+ * WebkitWhatACoolTitle -> -webkit-what-a-cool-title
+ * @param {string} camelOrTitleCase
+ * @return {string} snake cased string
+ */
+export function toSnakeCase(camelOrTitleCase) {
+  return camelOrTitleCase.replace(/([A-Z])/g, '-$1').toLowerCase();
+}
+
+/**
  * Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
@@ -93,12 +103,21 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
  * @param {*} value
  * @param {string=} opt_units
  * @param {boolean=} opt_bypassCache
+ * @param {boolean=} opt_important
  */
-export function setStyle(element, property, value, opt_units, opt_bypassCache) {
-  const propertyName = getVendorJsPropertyName(element.style, property,
+export function setStyle(element, property, value, opt_units, opt_bypassCache,
+    opt_important) {
+  const style = element.style;
+  const propertyName = getVendorJsPropertyName(style, property,
       opt_bypassCache);
   if (propertyName) {
-    element.style[propertyName] = opt_units ? value + opt_units : value;
+    if (opt_important) {
+      style.setProperty(toSnakeCase(propertyName),
+          /** @type {string} */ (opt_units ? value + opt_units : value),
+          opt_important ? 'important' : undefined);
+    } else {
+      element.style[propertyName] = opt_units ? value + opt_units : value;
+    }
   }
 }
 
