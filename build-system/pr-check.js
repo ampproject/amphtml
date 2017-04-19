@@ -30,6 +30,29 @@ const minimist = require('minimist');
 const gulp = 'node_modules/gulp/bin/gulp.js';
 
 /**
+ * Starts a timer to measure the execution time of the given function.
+ * @param {string} functionName
+ * @return {DOMHighResTimeStamp}
+ */
+function startTimer(functionName) {
+  const startTime = performance.now();
+  console.log(`\npr-check.js: Starting ${functionName}...\n`);
+}
+
+/**
+ * Stops the timer for the given function and prints the execution time.
+ * @param {string} functionName
+ * @return {DOMHighResTimeStamp}
+ */
+function stopTimer(functionName, startTime) {
+  const endTime = performance.now();
+  const executionTime = new Date(endTime - startTime);
+  console.log(
+      `\npr-check.js: Done executing ${functionName}. Total time: +
+      ${executionTime.getMinutes()}m ${executionTime.getSeconds()}s.\n`);
+}
+
+/**
  * Executes the provided command, returning its stdout as an array of lines.
  * This will throw an exception if something goes wrong.
  * @param {string} cmd
@@ -164,16 +187,21 @@ function determineBuildTargets(filePaths) {
 
 const command = {
   testBuildSystem: function() {
+    const startTime = startTimer('testBuildSystem');
     execOrDie('npm run ava');
+    stopTimer('testBuildSystem', startTime);
   },
   buildRuntime: function() {
+    const startTime = startTimer('buildRuntime');
     execOrDie(`${gulp} clean`);
     execOrDie(`${gulp} lint`);
     execOrDie(`${gulp} build`);
     execOrDie(`${gulp} check-types`);
     execOrDie(`${gulp} dist --fortesting`);
+    stopTimer('buildRuntime', startTime);
   },
   testRuntime: function() {
+    const startTime = startTimer('testRuntime');
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
     execOrDie(`${gulp} dep-check`);
@@ -185,15 +213,22 @@ const command = {
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
     execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+    stopTimer('testRuntime', startTime);
   },
   presubmit: function() {
+    const startTime = startTimer('presubmit');
     execOrDie(`${gulp} presubmit`);
+    stopTimer('presubmit', startTime);
   },
   buildValidatorWebUI: function() {
+    const startTime = startTimer('buildValidatorWebUI');
     execOrDie('cd validator/webui && python build.py');
+    stopTimer('buildValidatorWebUI', startTime);
   },
   buildValidator: function() {
+    const startTime = startTimer('buildValidator');
     execOrDie('cd validator && python build.py');
+    stopTimer('buildValidator', startTime);
   },
 };
 
@@ -213,10 +248,12 @@ function runAllCommands() {
  * @returns {number}
  */
 function main(argv) {
+  const startTime = startTimer('pr-check.js');
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
     console.log('Running all commands on push build.');
     runAllCommands();
+    stopTimer('pr-check.js', startTime);
     return 0;
   }
   const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
@@ -229,6 +266,7 @@ function main(argv) {
         console.log('A pull request may not contain a mix of flag-config and ' +
             'non-flag-config files. Please make your changes in separate ' +
             'pull requests. First offending file: ' + file);
+        stopTimer('pr-check.js', startTime);
         process.exit(1);
       }
     });
@@ -236,6 +274,7 @@ function main(argv) {
 
   if (buildTargets.length == 1 && buildTargets.has('DOCS')) {
     console.log('Only docs were updated, stopping build process.');
+    stopTimer('pr-check.js', startTime);
     return 0;
   }
 
@@ -282,6 +321,7 @@ function main(argv) {
     command.buildValidator();
   }
 
+  stopTimer('pr-check.js', startTime);
   return 0;
 }
 
