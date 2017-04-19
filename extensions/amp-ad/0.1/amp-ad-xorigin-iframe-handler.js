@@ -219,8 +219,7 @@ export class AmpAdXOriginIframeHandler {
       }
     });
 
-    this.baseInstance_.lifecycleReporter.addPingsForVisibility(
-        this.element_, this.baseInstance_.signals());
+    this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
 
     // The actual ad load is eariliest of iframe.onload event and no-content.
     return Promise.race([iframeLoadPromise, noContentPromise]);

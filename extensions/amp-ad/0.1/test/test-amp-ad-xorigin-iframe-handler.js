@@ -56,7 +56,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       return null;
     };
     adImpl.lifecycleReporter = {
-      addPingsForVisibility: (unusedElement, unusedSignals) => {},
+      addPingsForVisibility: unusedElement => {},
     };
     document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
