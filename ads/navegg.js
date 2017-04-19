@@ -23,13 +23,14 @@ import {doubleclick} from '../ads/google/doubleclick';
  */
 export function navegg(global, data) {
   const acc = data.acc;
-  let seg;
+  let seg, nvg = function() {};;
   delete data.acc;
+  nvg.prototype.getProfile = function() {};
   loadScript(global, 'https://tag.navdmp.com/amp.1.0.0.min.js', () => {
-    global[`nvg${acc}`] = new global['AMPNavegg']({
+    nvg = global[`nvg${acc}`] = new global['AMPNavegg']({
       acc,
     });
-    global[`nvg${acc}`].getProfile(nvgTargeting => {
+    nvg.getProfile(nvgTargeting => {
       for (seg in nvgTargeting) {
         data.targeting[seg] = nvgTargeting[seg];
       };
