@@ -358,8 +358,10 @@ export function getErrorReportUrl(message, filename, line, col, error,
       url += `&args=${encodeURIComponent(JSON.stringify(error.args))}`;
     }
 
-    if (!isUserError && !error.ignoreStack) {
-      url += `&s=${encodeURIComponent(error.stack || '')}`;
+    if (!isUserError && !error.ignoreStack && error.stack) {
+      // Shorten
+      const stack = (error.stack || '').substr(0, 1000);
+      url += `&s=${encodeURIComponent(stack)}`;
     }
 
     error.message += ' _reported_';
@@ -376,8 +378,11 @@ export function getErrorReportUrl(message, filename, line, col, error,
 
   // Google App Engine maximum URL length.
   if (url.length >= 2072) {
-    url = url.substr(0, 2072 - 10 /* length of suffix */)
-        + '&SHORTENED';
+    url = url.substr(0, 2072 - 8 /* length of suffix */)
+        // Full remove last URL encoded entity.
+        .replace(/\%[^&%]+$/, '')
+        // Sentinel
+        + '&SHORT=1';
   }
   return url;
 }
