@@ -55,13 +55,11 @@ export class BaseLifecycleReporter {
   /**
    * To be overridden.
    *
-   * @param {!Element} element Amp ad element we are measuring.
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
-   * @param {!Object} signals Signals object for element.
+   * @param {!Element} unusedElement Amp ad element we are measuring.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpDoc
+   * @param {!Object} unusedSignals Signals object for element.
    */
-  addPingsForVisibility(element, ampDoc, signals) {
-    return null;
-  }
+  addPingsForVisibility(unusedElement, unusedAmpDoc, unusedSignals) {}
 
   /**
    * A beacon function that will be called at various stages of the lifecycle.
