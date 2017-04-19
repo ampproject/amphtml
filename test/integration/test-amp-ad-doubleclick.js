@@ -47,9 +47,7 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
     }
   });
 
-  // TODO(#3561): unmute the test.
-  // it.configure().skipEdge().run('should create an iframe loaded', function() {
-  it.skip('should create an iframe loaded', function() {
+  it.configure().skipEdge().run('should create an iframe loaded', function() {
     this.timeout(20000);
     let iframe;
     let ampAd;
@@ -65,7 +63,7 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
       expect(iframe.src).to.contain('categoryExclusions');
       expect(iframe.src).to.contain('health');
       expect(iframe.src).to.contain('tagForChildDirectedTreatment');
-      expect(iframe.src).to.match(/http\:\/\/localhost:9876\/base\/dist\.3p\//);
+      expect(iframe.src).to.match(/http\:\/\/localhost:9876\/dist\.3p\//);
     }).then(() => {
       return poll('frame to load', () => {
         return iframe.contentWindow && iframe.contentWindow.document &&
