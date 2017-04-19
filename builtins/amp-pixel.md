@@ -42,6 +42,10 @@ The `amp-pixel` component behaves like a simple tracking pixel `img`. It takes a
 ## Attributes
 
 **src** (required)
+The value is the URL of a remote endpoint.
+
+**referrerpolicy** (optional)
+Similar as the `referrerpolicy` on `<img>`, however `no-referrer` is the only accepted value. If `referrerpolicy=no-referrer` is provided, the `referrer` header in the HTTP request will be removed.
 
 A simple URL to send a GET request to when the tracking pixel is loaded.
 
