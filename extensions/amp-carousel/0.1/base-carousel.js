@@ -65,8 +65,7 @@ export class BaseCarousel extends AMP.BaseElement {
 
 
   buildButtons() {
-    // TODO(erwinm): Does label need i18n support in the future? or provide
-    // a way to be overridden.
+    // TODO(aghassemi erwinm, #4146) i18n
     this.prevButton_ = addScreenReaderButton(this.element,
       'Previous item in carousel', () => this.interactionPrev());
     this.prevButton_.classList.add('amp-carousel-button');

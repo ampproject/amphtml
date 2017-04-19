@@ -58,7 +58,7 @@ export function initializeScreenReaderButton(parent, accessibleButton) {
   accessibleButton.classList.add('i-amphtml-screen-reader');
 
   // Separate each by 2px.
-  setStyle(accessibleButton, 'margin-left', `${count * 2}`, 'px',
+  setStyle(accessibleButton, 'margin-left', count * 2, 'px',
       /* opt_bypassCache */ undefined, /* opt_important */ true);
 
   return accessibleButton;
