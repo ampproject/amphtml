@@ -170,7 +170,7 @@ export const LIFECYCLE_STAGES = {
   visHalfIniLoad: '23',
   firstVisible: '24',
   visLoadAndOneSec: '25',
-  iniLoad: '26'
+  iniLoad: '26',
 };
 
 /**

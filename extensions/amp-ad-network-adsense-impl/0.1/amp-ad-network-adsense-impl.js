@@ -31,7 +31,6 @@ import {
   isGoogleAdsA4AValidEnvironment,
   extractAmpAnalyticsConfig,
 } from '../../../ads/google/a4a/utils';
-import {CommonSignals} from '../../../src/common-signals';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,

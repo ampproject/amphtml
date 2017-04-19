@@ -273,6 +273,13 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     return this.initTime_;
   }
 
+  /**
+   * Adds CSI pings for various visibility measurements on element.
+   *
+   * @param {!Element} element Amp ad element we are measuring.
+   * @param {!Document} ampDoc The AMP Doc for the element.
+   * @param {!Object} signals Signals object for element.
+   */
   addPingsForVisibility(element, ampDoc, signals) {
     const readyPromise = Promise.race([
       signals.whenSignal(CommonSignals.INI_LOAD),
@@ -284,39 +291,35 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
       // Element must be an AMP element at this time.
       // 50% vis w/o ini load
       vis.listenElement(element, {visiblePercentageMin: 50}, null,
-                        event => {
-                          debugger;
-                          this.sendPing(LIFECYCLE_STAGES.visHalf);
+                        () => {
+                          this.sendPing('visHalf');
                         });
       // 50% vis w ini load
       vis.listenElement(element,
                         {visiblePercentageMin: 50},
                         readyPromise,
-                        event => {
-                          debugger;
-                          this.sendPing(LIFECYCLE_STAGES.visHalfIniLoad);
+                        () => {
+                          this.sendPing('visHalfIniLoad');
                         });
       // first visible
       vis.listenElement(element, {visiblePercentageMin: 1}, null,
-                        event => {
-                          debugger;
-                          this.sendPing(LIFECYCLE_STAGES.firstVisible);
+                        () => {
+                          this.sendPing('firstVisible');
                         });
       // ini-load
       vis.listenElement(element, {waitFor: 'ini-load'},
                         readyPromise,
-                        event => {
-                          debugger;
-                          this.sendPing(LIFECYCLE_STAGES.iniLoad);
+                        () => {
+                          this.sendPing('iniLoad');
                         });
 
       // 50% vis, ini-load and 1 sec
       vis.listenElement(element,
-                        {visiblePercentageMin: 1, waitFor: 'ini-load', totalTimeMin: 1000},
+                        {visiblePercentageMin: 1, waitFor: 'ini-load',
+                         totalTimeMin: 1000},
                         readyPromise,
-                        event => {
-                          debugger;
-                          this.sendPing(LIFECYCLE_STAGES.visLoadAndOneSec);
+                        () => {
+                          this.sendPing('visLoadAndOneSec');
                         });
     });
   }

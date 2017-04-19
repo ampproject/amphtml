@@ -131,6 +131,7 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
     toggleExperiment(win, experimentName, true, true);
   }
   randomlySelectUnsetPageExperiments(win, PROFILING_BRANCHES);
+
   if ((type == 'doubleclick' || type == 'adsense') &&
       isInReportableBranch(ampElement, namespace) &&
       isExperimentOn(win, experimentName)) {
@@ -201,4 +202,3 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   pingParameters[renderingMethodKey] = headers.get(renderingMethodHeader);
   reporter.setPingParameters(pingParameters);
 }
-

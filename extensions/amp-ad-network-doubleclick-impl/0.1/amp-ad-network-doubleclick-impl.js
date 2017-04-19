@@ -43,9 +43,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/analytics';
 import {setStyles} from '../../../src/style';
-import {CommonSignals} from '../../../src/common-signals';
-import {analyticsForDoc} from '../../../src/analytics';
-
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
