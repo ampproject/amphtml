@@ -85,7 +85,7 @@ describes.realWin('amp-selector', {
       const event = {
         keyCode: key,
         preventDefault: () => {},
-      }
+      };
       impl.keyHandler_(event);
     }
 
@@ -603,8 +603,8 @@ describes.realWin('amp-selector', {
             multiple: true,
           },
           config: {
-            count: 3
-          }
+            count: 3,
+          },
         });
         ampSelector.children[1].setAttribute('selected', '');
         ampSelector.build();

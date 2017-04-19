@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {actionServiceForDoc} from '../../../src/services';
-import {childElement, closest} from '../../../src/dom';
+import {closest} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 
@@ -59,7 +59,7 @@ export class AmpSelector extends AMP.BaseElement {
     /** @private {number} */
     this.focusedIndex_ = 0;
 
-    /** @private {?KBSupportMode} */
+    /** @private {!KB_SUPPORT} */
     this.kbSupportMode_ = KB_SUPPORT.FOCUS;
   }
 
@@ -243,7 +243,6 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Handles user selection on an option.
    * @param {!Element} el The element selected.
-   * @return {!Promise} Resolves when element has been mutated.
    */
   onOptionSelected_(el) {
     if (el.hasAttribute('disabled')) {
@@ -333,7 +332,7 @@ export class AmpSelector extends AMP.BaseElement {
     // Focus newly selected option
     const newSelectedOption = this.options_[this.focusedIndex_];
     newSelectedOption.tabIndex = 0;
-    newSelectedOption.focus();
+    newSelectedOption./*REVIEW*/focus();
     if (!this.isMultiple_ && this.kbSupportMode_ == KB_SUPPORT.SELECT) {
       this.onOptionSelected_(newSelectedOption);
     }
