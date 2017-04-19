@@ -450,7 +450,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
   it('should protect from invalid intersection values', () => {
     const target = win.document.createElement('div');
-    root.listenElement(target, {}, null, eventResolver);
+    root.listenElement(target, {}, null, null, eventResolver);
     expect(root.models_).to.have.length(1);
     const model = root.models_[0];
 

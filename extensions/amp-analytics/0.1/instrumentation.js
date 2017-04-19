@@ -105,7 +105,7 @@ const EVENT_TRACKERS = {
     klass: VisibilityTracker,
   },
   'hidden-v3': {
-    name: 'visible-v3',
+    name: 'visible-v3', // Reuse tracker with visibility
     allowedFor: ALLOWED_FOR_ALL,
     klass: VisibilityTracker,
   },

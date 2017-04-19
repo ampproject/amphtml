@@ -433,7 +433,9 @@ export class VisibilityTracker extends EventTracker {
 
     return new Promise(resolve => {
       viewer.onVisibilityChanged(() => {
-        resolve();
+        if (!viewer.isVisible()) {
+          resolve();
+        }
       });
     });
   }
