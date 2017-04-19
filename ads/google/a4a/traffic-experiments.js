@@ -40,12 +40,6 @@ const EXTERNALLY_SELECTED_ID = '2088461';
 /** @type {!string} @private */
 const INTERNALLY_SELECTED_ID = '2088462';
 
-/** @type {!string} @private */
-const ADSENSE_COUNT_ON_RENDER = '2093326';
-
-/** @type {!string} @private */
-const DOUBLECLICK_COUNT_ON_RENDER = '2093327';
-
 /**
  * Check whether Google Ads supports the A4A rendering pathway for a given ad
  * Element on a given Window.  The tests we use are:
@@ -68,11 +62,13 @@ const DOUBLECLICK_COUNT_ON_RENDER = '2093327';
  * @param {!ExperimentInfo} internalBranches experiment and control branch IDs to
  *   use when experiment is triggered internally (i.e., via client-side
  *   selection).
+ * @param {!string} controlWithDelayedId  Experiment ID string for the branch
+ *   that counts Delayed Fetch on render
  * @return {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
-    externalBranches, internalBranches) {
+    externalBranches, internalBranches, controlWithDelayedId) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
     return false;
@@ -80,7 +76,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
 
   const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
       experimentName, externalBranches.control,
-      externalBranches.experiment, MANUAL_EXPERIMENT_ID);
+      externalBranches.experiment, MANUAL_EXPERIMENT_ID, controlWithDelayedId);
   const experimentInfo = {};
   experimentInfo[experimentName] = internalBranches;
   // Note: Because the same experimentName is being used everywhere here,
@@ -150,11 +146,13 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
  *   branch of the overall experiment.
  * @param {!string} manualId  ID of the manual experiment.
+ * @param {!string} controlWithDelayedId  Experiment ID string for the branch
+ *   that counts Delayed Fetch on render
  * @return {boolean}  Whether the experiment state was set from a command-line
  *   parameter or not.
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
-    controlBranchId, treatmentBranchId, manualId) {
+    controlBranchId, treatmentBranchId, manualId, controlWithDelayedId) {
   const expParam = viewerForDoc(element).getParam('exp') ||
       parseQueryString(win.location.search)['exp'];
   if (!expParam) {
@@ -173,24 +171,10 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '0': null, // TODO Ensure does not generate exp id
     '1': controlBranchId,
     '2': treatmentBranchId,
-    '3': hasLaunched(win, element) ? treatmentBranchId : controlBranchId, // DF
+    '3': controlWithDelayedId,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
-    if (arg == '3') {
-      switch (element.getAttribute('type')) {
-        case 'adsense':
-          toggleExperiment(win, ADSENSE_COUNT_ON_RENDER, true, true);
-          break;
-        case 'doubleclick':
-          toggleExperiment(win, DOUBLECLICK_COUNT_ON_RENDER, true, true);
-          break;
-        default:
-          dev().warn('A4A-CONFIG', 'Unknown a4a ad type parameter: ',
-              element.getAttribute('type'),
-              ' expected doubleclick or adsense');
-      }
-    }
     return true;
   } else {
     dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,

@@ -60,6 +60,9 @@ export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
   experiment: '117152671',
 };
 
+/** @type {!string} @private */
+const ADSENSE_COUNT_ON_RENDER = '2093326';
+
 /**
  * @param {!Window} win
  * @param {!Element} element
@@ -70,5 +73,6 @@ export function adsenseIsA4AEnabled(win, element) {
       googleAdsIsA4AEnabled(
         win, element, ADSENSE_A4A_EXPERIMENT_NAME,
         ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-        ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES);
+        ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
+        ADSENSE_COUNT_ON_RENDER);
 }
