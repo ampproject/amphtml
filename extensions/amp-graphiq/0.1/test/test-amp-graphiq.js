@@ -86,7 +86,8 @@ describe('amp-graphiq', () => {
     expect(iframe).to.not.be.null;
     expect(iframe.src).to.equal('https://w.graphiq.com/w/dUuriXJo2qx' +
       '?data-width=600&data-height=512' +
-      '&data-href=https%3A%2F%2Fwww.graphiq.com%2Fvlp%2FdUuriXJo2qx');
+      '&data-href=https%3A%2F%2Fwww.graphiq.com%2Fvlp%2FdUuriXJo2qx' +
+      '&data-amp-version=true');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Graphiq: Testing');
   }
@@ -143,7 +144,8 @@ describe('amp-graphiq', () => {
       origin: 'https://w.graphiq.com',
       source: iframe.contentWindow,
       data: JSON.stringify({
-        method: 'resize',
+        sentinel: 'amp',
+        type: 'embed-size',
         height,
       }),
     });

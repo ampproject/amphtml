@@ -106,7 +106,8 @@ class AmpGraphiq extends AMP.BaseElement {
     iframe.src = 'https://w.graphiq.com/w/' + encodeURIComponent(this.widgetId_) +
         '?data-width=' + encodeURIComponent(initialWidth) +
         '&data-height=' + encodeURIComponent(initialHeight) +
-        '&data-href=' + encodeURIComponent(this.href_);
+        '&data-href=' + encodeURIComponent(this.href_) +
+        '&data-amp-version=true';
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -136,7 +137,7 @@ class AmpGraphiq extends AMP.BaseElement {
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data.method == 'resize') {
+    if (data.type === 'embed-size' && data.sentinel === 'amp') {
       const height = data.height;
       this.getVsync().measure(() => {
         this.attemptChangeHeight(height).catch(() => {});
