@@ -26,5 +26,6 @@
   "slidescroll-disable-css-snap": 1,
   "visibility-v3": 1,
   "a4aFastFetchDoubleclickLaunched": 0,
-  "a4aFastFetchAdSenseLaunched": 0
+  "a4aFastFetchAdSenseLaunched": 0,
+  "pump-early-frame": 1
 }
