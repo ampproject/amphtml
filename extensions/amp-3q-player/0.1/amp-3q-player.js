@@ -133,8 +133,6 @@ class Amp3QPlayer extends AMP.BaseElement {
       return;
     }
 
-    console.log(data.data);
-
     switch (data.data) {
       case 'ready':
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
