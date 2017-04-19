@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {actionServiceForDoc} from '../../../src/services';
-import {closest} from '../../../src/dom';
+import {childElement, closest} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 
@@ -25,7 +25,7 @@ import {dev, user} from '../../../src/log';
  *
  * @enum {string}
  */
-const KB_SUPPORT_MODE = {
+const KB_SUPPORT = {
   NONE: 'none',
   FOCUS: 'focus',
   SELECT: 'select',
@@ -60,7 +60,7 @@ export class AmpSelector extends AMP.BaseElement {
     this.focusedIndex_ = 0;
 
     /** @private {?KBSupportMode} */
-    this.kbSupportMode_ = KB_SUPPORT_MODE.FOCUS;
+    this.kbSupportMode_ = KB_SUPPORT.FOCUS;
   }
 
   /** @override */
@@ -86,20 +86,21 @@ export class AmpSelector extends AMP.BaseElement {
 
     const kbSupportMode = this.element.getAttribute('keyboard-support');
     if (kbSupportMode == 'none') {
-      this.kbSupportMode_ = KB_SUPPORT_MODE.NONE;
+      this.kbSupportMode_ = KB_SUPPORT.NONE;
     } else if (kbSupportMode == 'select') {
-      this.kbSupportMode_ = KB_SUPPORT_MODE.SELECT;
+      this.kbSupportMode_ = KB_SUPPORT.SELECT;
       user().assert(!this.isMultiple_,
         '[keyboard-support=select] not supported for ' +
         'multiple selection amp-selector');
     } else {
-      this.kbSupportMode_ = KB_SUPPORT_MODE.FOCUS;
+      this.kbSupportMode_ = KB_SUPPORT.FOCUS;
     }
+    this.element.setAttribute('keyboard-support', this.kbSupportMode_);
 
     this.init_();
     if (!this.isDisabled_) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
-      if (this.kbSupportMode_ !== KB_SUPPORT_MODE.NONE) {
+      if (this.kbSupportMode_ !== KB_SUPPORT.NONE) {
         this.element.addEventListener('keydown', this.keyHandler_.bind(this));
       }
     }
@@ -143,6 +144,7 @@ export class AmpSelector extends AMP.BaseElement {
         this.clearSelection_(element);
       }
     }
+    this.updateFocus_();
     // Update inputs.
     this.setInputs_();
   }
@@ -150,31 +152,28 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Determine which option should receive focus first and set tabIndex
    * on all options accordingly.
+   * In multi-select selectors, focus should just go to the first option.
+   * In single-select selectors, focus should go to the initially selected
+   * option, or to the first option if none are initially selected.
    * @private
    */
-  setInitialFocusElement_() {
-    let firstEnabled;
-    let firstSelected;
-    this.options_.forEach(option => {
-      // Never put focus on disabled options
-      if (!option.hasAttribute('disabled')) {
-        firstEnabled = firstEnabled || option;
-        if (option.hasAttribute('selected')) {
-          firstSelected = firstSelected || option;
-        }
+  updateFocus_() {
+    let firstSelectedIndex = -1;
+    for (let i = 0; i < this.options_.length; i++) {
+      const option = this.options_[i];
+      if (firstSelectedIndex == -1 && option.hasAttribute('selected')) {
+        firstSelectedIndex = i;
       }
       option.tabIndex = -1;
-    });
-    let initialFocusedElement;
-    if (this.isMultiple_) {
-      initialFocusedElement = firstEnabled;
-    } else {
-      // Focus should go to the option with the sleected attribute,
-      // if one exists.
-      initialFocusedElement = firstSelected || firstEnabled;
     }
-    // If no options are enabled, focus on first option
-    initialFocusedElement = initialFocusedElement || this.options_[0];
+    let initialFocusedElementIndex;
+    if (this.isMultiple_ || firstSelectedIndex == -1) {
+      initialFocusedElementIndex = 0;
+    } else {
+      initialFocusedElementIndex = firstSelectedIndex;
+    }
+    this.focusedIndex_ = initialFocusedElementIndex;
+    const initialFocusedElement = this.options_[initialFocusedElementIndex];
     if (initialFocusedElement) {
       initialFocusedElement.tabIndex = 0;
     }
@@ -185,7 +184,6 @@ export class AmpSelector extends AMP.BaseElement {
    */
   init_() {
     const options = [].slice.call(this.element.querySelectorAll('[option]'));
-    let initialFocusedElement;
     options.forEach(option => {
       option.setAttribute('role', 'option');
       if (option.hasAttribute('disabled')) {
@@ -198,7 +196,7 @@ export class AmpSelector extends AMP.BaseElement {
       }
       this.options_.push(option);
     });
-    this.setInitialFocusElement_();
+    this.updateFocus_();
     this.setInputs_();
   }
 
@@ -245,6 +243,7 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Handles user selection on an option.
    * @param {!Element} el The element selected.
+   * @return {!Promise} Resolves when element has been mutated.
    */
   onOptionSelected_(el) {
     if (el.hasAttribute('disabled')) {
@@ -264,8 +263,9 @@ export class AmpSelector extends AMP.BaseElement {
         selectedValues = this.setInputs_();
       }
 
-      // Don't trigger action if selected values haven't changed.
+      // Don't change focus trigger action if selected values haven't changed.
       if (selectedValues) {
+        this.updateFocus_();
         // Trigger 'select' event with two data params:
         // 'targetOption' - option value of the selected or deselected element.
         // 'selectedOptions' - array of option values of selected elements.
@@ -302,15 +302,10 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   keyHandler_(event) {
-    if (!this.element.contains(this.element.ownerDocument.activeElement)) {
-      return;
-    }
-
-    // Make currently selected option unfocusable so that it can't be reached
-    // by pressing tab.
+    // Make currently selected option unfocusable
     this.options_[this.focusedIndex_].tabIndex = -1;
 
-    switch(event.keyCode) {
+    switch (event.keyCode) {
       case 37: // Left
       case 38: // Up
         event.preventDefault();
@@ -339,7 +334,7 @@ export class AmpSelector extends AMP.BaseElement {
     const newSelectedOption = this.options_[this.focusedIndex_];
     newSelectedOption.tabIndex = 0;
     newSelectedOption.focus();
-    if (!this.isMultiple_ && this.kbSupportMode_ == KB_SUPPORT_MODE.SELECT) {
+    if (!this.isMultiple_ && this.kbSupportMode_ == KB_SUPPORT.SELECT) {
       this.onOptionSelected_(newSelectedOption);
     }
   }

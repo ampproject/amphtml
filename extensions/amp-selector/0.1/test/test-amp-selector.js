@@ -80,6 +80,15 @@ describes.realWin('amp-selector', {
       return ampSelector;
     }
 
+    function keyPress(ampSelector, key) {
+      const impl = ampSelector.implementation_;
+      const event = {
+        keyCode: key,
+        preventDefault: () => {},
+      }
+      impl.keyHandler_(event);
+    }
+
     it('should build properly', () => {
       let ampSelector = getSelector({});
       let impl = ampSelector.implementation_;
@@ -556,6 +565,148 @@ describes.realWin('amp-selector', {
           sandbox.match.has('detail', sandbox.match.has('targetOption', '3'));
       expect(triggerSpy).to.have.been.calledWith(
           ampSelector, 'select', /* CustomEvent */ eventMatcher);
+    });
+
+    describe('keyboard-support', () => {
+
+      it('should have `focus` mode by default', () => {
+        const ampSelector = getSelector({});
+        ampSelector.build();
+        expect(ampSelector.getAttribute('keyboard-support')).to.equal('focus');
+      });
+
+      it('should initially focus selected option ONLY if ' +
+         'it exists for single-select, otherwise first option', () => {
+        const selectorWithNoSelection = getSelector({});
+        selectorWithNoSelection.build();
+        expect(selectorWithNoSelection.children[0].tabIndex).to.equal(0);
+        for (let i = 1; i < selectorWithNoSelection.children.length; i++) {
+          // No other options should be reachable by
+          expect(selectorWithNoSelection.children[i].tabIndex).to.equal(-1);
+        }
+
+        const selectorWithSelection = getSelector({
+          config: {
+            count: 3,
+          },
+        });
+        selectorWithSelection.children[1].setAttribute('selected', '');
+        selectorWithSelection.build();
+        expect(selectorWithSelection.children[0].tabIndex).to.equal(-1);
+        expect(selectorWithSelection.children[1].tabIndex).to.equal(0);
+        expect(selectorWithSelection.children[2].tabIndex).to.equal(-1);
+      });
+
+      it('should initially focus first option for multi-select', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            multiple: true,
+          },
+          config: {
+            count: 3
+          }
+        });
+        ampSelector.children[1].setAttribute('selected', '');
+        ampSelector.build();
+        expect(ampSelector.children[0].tabIndex).to.equal(0);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+      });
+
+      it('should NOT update focus when keyboard-support is disabled', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            'keyboard-support': 'none',
+          },
+          config: {
+            count: 3,
+          },
+        });
+        const addEventSpy = sandbox.spy(ampSelector, 'addEventListener');
+        ampSelector.build();
+        expect(addEventSpy.calledWith('click')).to.be.true;
+        expect(addEventSpy.calledWith('keydown')).to.be.false;
+      });
+
+      it('should update focus when the user presses the arrow keys when ' +
+         'keyboard-support is enabled', () => {
+        const ampSelector = getSelector({
+          config: {
+            count: 3,
+          },
+        });
+        ampSelector.build();
+        expect(ampSelector.children[0].tabIndex).to.equal(0);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+        // Right
+        keyPress(ampSelector, 39);
+        expect(ampSelector.children[0].tabIndex).to.equal(-1);
+        expect(ampSelector.children[1].tabIndex).to.equal(0);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+        // Left
+        keyPress(ampSelector, 37);
+        expect(ampSelector.children[0].tabIndex).to.equal(0);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+      });
+
+      it('should update focus for single-select when ' +
+         'selection is changed without user interaction', () => {
+        const ampSelector = getSelector({
+          config: {
+            count: 3,
+          },
+        });
+        ampSelector.children[1].setAttribute('selected', '');
+        ampSelector.build();
+        expect(ampSelector.children[0].tabIndex).to.equal(-1);
+        expect(ampSelector.children[1].tabIndex).to.equal(0);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+
+        ampSelector.implementation_.mutatedAttributesCallback({selected: 2});
+        expect(ampSelector.children[0].tabIndex).to.equal(-1);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(0);
+      });
+
+      it('should NOT allow `select` mode for multi-select selectors', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            'keyboard-support': 'select',
+            multiple: true,
+          },
+        });
+        expect(() => ampSelector.build())
+            .to.throw(/not supported for multiple selection amp-selector​​​/);
+      });
+
+      it('should ONLY change selection in `select` mode', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            'keyboard-support': 'select',
+          },
+          config: {
+            count: 3,
+          },
+        });
+        ampSelector.build();
+        const impl = ampSelector.implementation_;
+        impl.mutateElement = fn => fn();
+        expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+        expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+        expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+        // Down
+        keyPress(ampSelector, 40);
+        expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+        expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+        expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+        // Up
+        keyPress(ampSelector, 38);
+        expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+        expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+        expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+      });
     });
   });
 });
