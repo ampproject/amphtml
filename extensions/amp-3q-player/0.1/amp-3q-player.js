@@ -89,10 +89,7 @@ class Amp3QPlayer extends AMP.BaseElement {
       this.sdnBridge_.bind(this)
     );
 
-    return this.loadPromise(this.iframe_).then(() => {
-      this.playerReadyResolver_();
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
+    return this.loadPromise(this.iframe_);
   }
 
   /** @override */
@@ -136,7 +133,13 @@ class Amp3QPlayer extends AMP.BaseElement {
       return;
     }
 
+    console.log(data.data);
+
     switch (data.data) {
+      case 'ready':
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+          this.playerReadyResolver_();
+        break;
       case 'playing':
         this.element.dispatchCustomEvent(VideoEvents.PLAY);
         break;
