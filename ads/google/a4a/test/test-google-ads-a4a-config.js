@@ -312,10 +312,10 @@ describe('a4a_config', () => {
       }
     });
 
-    it(`should force control param from URL when pattern=${urlBase}`, () => {
+    it(`should force controlMeasureOnRender param from URL when pattern=${urlBase}`, () => {
       win.location.search = urlBase.replace('PARAM', 'a4a:3');
       // Should not register as 'A4A enabled', but should still attach the
-      // control experiment ID.
+      // controlMeasureOnRender experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
       expect(win.document.cookie).to.be.null;
