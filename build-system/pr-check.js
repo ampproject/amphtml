@@ -36,7 +36,9 @@ const gulp = 'node_modules/gulp/bin/gulp.js';
  */
 function startTimer(functionName) {
   const startTime = Date.now();
-  console.log(`\npr-check.js: Starting ${functionName}...\n`);
+  console.log(
+      `%c pr-check.js: Starting ${functionName}...`,
+      'color: green; font-weight: bold;');
 }
 
 /**
@@ -47,9 +49,12 @@ function startTimer(functionName) {
 function stopTimer(functionName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
+  const mins = executionTime.getMinutes();
+  const secs = executionTime.getSeconds();
   console.log(
-      `\npr-check.js: Done executing ${functionName}. Total time: +
-      ${executionTime.getMinutes()}m ${executionTime.getSeconds()}s.\n`);
+      `%c pr-check.js: Done executing ${functionName}. \
+      Total time: ${mins}m ${secs}s.`,
+      'color: green; font-weight: bold;');
 }
 
 /**
