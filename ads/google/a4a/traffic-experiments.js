@@ -144,7 +144,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   the overall experiment.
  * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
  *   branch of the overall experiment.
- * @param {!string} controlMeasureOnRender  Experiment ID string for the branch
+ * @param {?string} controlMeasureOnRender  Experiment ID string for the branch
  *   that counts Delayed Fetch on render
  * @param {!string} manualId  ID of the manual experiment.
  * @return {boolean}  Whether the experiment state was set from a command-line
