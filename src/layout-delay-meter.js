@@ -78,9 +78,7 @@ export class LayoutDelayMeter {
     const delay = this.win_.Math.max(
         this.firstLayoutTime_ - this.firstInViewportTime_, 0);
     this.performance_.tickDelta(this.label_, delay);
-    // have to flush after tickDelta to prevent being overridden.
-    this.performance_.flush();
-    dev().info('LAYOUT DELAY', this.label_ + ':' + delay + 'ms');
+    this.performance_.throttledFlush();
     this.done_ = true;
   }
 }

@@ -42,7 +42,7 @@ describes.realWin('layout-delay-meter', {
     clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
     tickSpy = sandbox.spy(perf, 'tickDelta');
 
-    meter = new LayoutDelayMeter(win);
+    meter = new LayoutDelayMeter(win, 2);
   });
 
   it('should tick when there is a delay', () => {
