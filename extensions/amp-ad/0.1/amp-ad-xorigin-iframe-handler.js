@@ -219,8 +219,9 @@ export class AmpAdXOriginIframeHandler {
       }
     });
 
-    if (this.element_.attributes.type.nodeValue == 'adsense' ||
-        this.element_.attributes.type.nodeValue == 'doubleclick') {
+    if ((this.element_.attributes.type.nodeValue == 'adsense' ||
+        this.element_.attributes.type.nodeValue == 'doubleclick') &&
+        this.baseInstance_.lifecycleReporter.addPingsForVisibility) {
       this.baseInstance_.lifecycleReporter.addPingsForVisibility(
           this.element_, this.baseInstance_.getAmpDoc(),
           this.baseInstance_.signals());

@@ -53,6 +53,17 @@ export class BaseLifecycleReporter {
   }
 
   /**
+   * To be overridden.
+   *
+   * @param {!Element} element Amp ad element we are measuring.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+   * @param {!Object} signals Signals object for element.
+   */
+  addPingsForVisibility(element, ampDoc, signals) {
+    return null;
+  }
+
+  /**
    * A beacon function that will be called at various stages of the lifecycle.
    *
    * To be overriden by network specific implementations.
@@ -277,8 +288,9 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * Adds CSI pings for various visibility measurements on element.
    *
    * @param {!Element} element Amp ad element we are measuring.
-   * @param {!Document} ampDoc The AMP Doc for the element.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
    * @param {!Object} signals Signals object for element.
+   * @override
    */
   addPingsForVisibility(element, ampDoc, signals) {
     const readyPromise = Promise.race([
