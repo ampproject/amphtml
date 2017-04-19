@@ -19,7 +19,7 @@ import {
   expectBodyToBecomeVisible,
 } from '../../testing/iframe';
 
-describe.skip('integration amp-carousel', () => {
+describe('integration amp-carousel', () => {
 
   let fixture;
   beforeEach(() => {
