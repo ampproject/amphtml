@@ -36,6 +36,7 @@ import {timerFor} from './services';
 import {vsyncFor} from './services';
 import * as dom from './dom';
 import {setStyle, setStyles} from './style';
+import {BlankBoxMeter} from './service/blank-box-meter';
 
 
 const TAG_ = 'CustomElement';
@@ -68,6 +69,10 @@ const UpgradeState = {
   UPGRADE_FAILED: 3,
   UPGRADE_IN_PROGRESS: 4,
 };
+
+
+/** {!./service/blank-box-counter.BlankBoxCounter} */
+const blankBoxCounter = new BlankBoxMeter(self);
 
 
 /**
@@ -1107,7 +1112,7 @@ function createBaseCustomElementClass(win) {
      * @final @this {!Element}
      */
     getLayoutBox() {
-      return this.getResources().getResourceForElement(this).getLayoutBox();
+      return this.getResource().getLayoutBox();
     }
 
     /**
@@ -1125,7 +1130,7 @@ function createBaseCustomElementClass(win) {
      * @final @this {!Element}
      */
     getOwner() {
-      return this.getResources().getResourceForElement(this).getOwner();
+      return this.getResource().getOwner();
     }
 
     /**
@@ -1136,7 +1141,7 @@ function createBaseCustomElementClass(win) {
      */
     getIntersectionChangeEntry() {
       const box = this.implementation_.getIntersectionElementLayoutBox();
-      const owner = this.getResources().getResourceForElement(this).getOwner();
+      const owner = this.getOwner();
       const viewportBox = this.implementation_.getViewport().getRect();
       // TODO(jridgewell, #4826): We may need to make this recursive.
       const ownerBox = owner && owner.getLayoutBox();
@@ -1144,11 +1149,19 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns the resource of the element.
+     * @return {!./service/resource.Resource}
+     */
+    getResource() {
+      return this.getResources().getResourceForElement(this);
+    }
+
+    /**
      * Returns the resource ID of the element.
      * @return {number}
      */
     getResourceId() {
-      return this.getResources().getResourceForElement(this).getId();
+      return this.getResource().getId();
     }
 
     /**
@@ -1188,6 +1201,7 @@ function createBaseCustomElementClass(win) {
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
       return promise.then(() => {
+        blankBoxCounter.layoutComplete(this.getResource());
         if (isLoadEvent) {
           this.signals_.signal(CommonSignals.LOAD_END);
         }
@@ -1210,6 +1224,7 @@ function createBaseCustomElementClass(win) {
               CommonSignals.LOAD_END, /** @type {!Error} */ (reason));
         }
         this.layoutCount_++;
+        blankBoxCounter.layoutComplete(this.getResource());
         this.toggleLoading_(false, /* cleanup */ true);
         throw reason;
       });
@@ -1226,6 +1241,9 @@ function createBaseCustomElementClass(win) {
      */
     viewportCallback(inViewport) {
       assertNotTemplate(this);
+      if (inViewport) {
+        blankBoxCounter.enterViewport(this.getResource());
+      }
       this.isInViewport_ = inViewport;
       if (this.layoutCount_ == 0) {
         if (!inViewport) {

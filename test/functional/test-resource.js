@@ -168,6 +168,9 @@ describe('Resource', () => {
       getLayoutRect() {
         return layoutRectLtwh(0, 100, 300, 100);
       },
+      getFirstViewportRect() {
+        return layoutRectLtwh(0, 0, 300, 100);
+      },
       isDeclaredFixed() {
         return false;
       },
@@ -229,6 +232,44 @@ describe('Resource', () => {
     resource.measure();
     expect(resource.getLayoutBox().top).to.equal(22);
     expect(resource.getInitialLayoutBox().top).to.equal(12);
+  });
+
+  it('should return isInFirstViewport true', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('build').once();
+    viewportMock.expects('getFirstViewportRect')
+        .returns(layoutRectLtwh(0, 0, 100, 100))
+        .once();
+    resource.build();
+
+    element.getBoundingClientRect = () =>
+        ({left: 30, top: 20, width: 100, height: 100});
+    resource.measure();
+    expect(resource.isInFirstViewport()).to.be.true;
+
+    element.getBoundingClientRect = () =>
+        ({left: 101, top: 101, width: 100, height: 100});
+    resource.measure();
+    expect(resource.isInFirstViewport()).to.be.true;
+  });
+
+  it('should return isInFirstViewport false', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('build').once();
+    viewportMock.expects('getFirstViewportRect')
+        .returns(layoutRectLtwh(0, 0, 100, 100))
+        .once();
+    resource.build();
+
+    element.getBoundingClientRect = () =>
+        ({left: 101, top: 101, width: 100, height: 100});
+    resource.measure();
+    expect(resource.isInFirstViewport()).to.be.false;
+
+    element.getBoundingClientRect = () =>
+        ({left: 30, top: 20, width: 100, height: 100});
+    resource.measure();
+    expect(resource.isInFirstViewport()).to.be.false;
   });
 
   it('should noop request measure when not built', () => {

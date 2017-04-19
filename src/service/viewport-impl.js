@@ -95,6 +95,12 @@ export class Viewport {
      */
     this.size_ = null;
 
+    /**
+     * Used to cache the rect of the first viewport.
+     * @private {?../layout-rect.LayoutRectDef}
+     */
+    this.firstViewportRect_ = null;
+
     /** @private {?number} */
     this./*OK*/scrollTop_ = null;
 
@@ -348,6 +354,18 @@ export class Viewport {
           layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
     }
     return this.rect_;
+  }
+
+  /**
+   * Returns the first viewport rect.
+   * @return {!../layout-rect.LayoutRectDef}}
+   */
+  getFirstViewportRect() {
+    if (this.firstViewportRect_ == null) {
+      const size = this.getSize();
+      this.firstViewportRect_ = layoutRectLtwh(0, 0, size.width, size.height);
+    }
+    return this.firstViewportRect_;
   }
 
   /**
