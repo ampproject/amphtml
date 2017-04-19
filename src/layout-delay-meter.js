@@ -15,7 +15,6 @@
  */
 
 import {performanceForOrNull} from './services';
-import {dev} from './log';
 
 const LABEL_MAP = {
   0: 'cld',
