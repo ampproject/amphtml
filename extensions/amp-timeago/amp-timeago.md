@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td><code>amp-timeago</code> is used to format date with `*** time ago`. eg: '3 hours ago'.</td>
+    <td>Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 hours ago).</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -29,16 +29,20 @@ limitations under the License.
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-0.1.js">&lt;/script></code></td>
   </tr>
+  <tr>
+    <td width="40%"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>fixed, fixed-height, responsive</td>
+  </tr>
 </table>
 
 ## Behavior
 
-The <code>amp-timeago</code> component is based on the <a href="https://github.com/hustcc/timeago.js">timeago.js</a> project for use on AMP pages.
+Provides fuzzy timestamps that you can use on your AMP pages. This component is based on <a href="https://github.com/hustcc/timeago.js">timeago.js</a>.
 
 Example:
 
 ```html
-<amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="es">Saturday 11 April 2017 00.37</amp-timeago>
+<amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2017 00.37</amp-timeago>
 ```
 
 ## Attributes
@@ -49,7 +53,7 @@ An ISO datetime. E.g. 2017-03-10T01:00:00Z.
 
 **locale** (optional)
 
-One of the following locale options can be specified:
+By default, the local is set to <code>en</code>; however, you can specify one of the following locales:
 
 <ul>
   <li>ar (Arabic)</li>
@@ -90,5 +94,3 @@ One of the following locale options can be specified:
   <li>zh_CN (Chinese)</li>
   <li>zh_TW (Taiwanese)</li>
 </ul>
-
-Defaults to *en*.
