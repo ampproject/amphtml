@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {computeInMasterFrame, loadScript} from '../3p/3p';
+import {loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 
 /* global Navegg: false */
@@ -25,14 +25,12 @@ import {doubleclick} from '../ads/google/doubleclick';
  */
 export function navegg(global, data) {
     let acc = data.acc;
-    let ampPromise = Promise.resolve();
     delete(data.acc);
-    loadScript(global, 'http://local.amp.com.br/amp.js', () => {
+    loadScript(global, 'https://tag.navdmp.com/amp.1.0.0.min.js', () => {
         global[`nvg${acc}`] = new global['AMPNavegg']({
            acc: acc,
         });
-        global[`nvg${acc}`].getProfile().then(function(nvg_targeting){
-            console.log('nvg_targeting',nvg_targeting);
+        global[`nvg${acc}`].getProfile((nvg_targeting) => {
             for(var seg in nvg_targeting){
                 data.targeting[seg] =nvg_targeting[seg];
             };
