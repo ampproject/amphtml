@@ -149,7 +149,7 @@ export class Bind {
           if (ampFormService) {
             return ampFormService.whenInitialized();
           } else {
-            return Promise.reject(new Error('Form service not present'));
+            throw new Error('Form service not present');
           }
         });
 
