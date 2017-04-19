@@ -276,7 +276,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
     dev().assert(this.ampAnalyticsElement_);
-    if(this.ampAnalyticsElement_ && this.ampAnalyticsElement_.parentElement) {
+    if (this.ampAnalyticsElement_ && this.ampAnalyticsElement_.parentElement) {
       this.ampAnalyticsElement_.parentElement.removeChild(
           this.ampAnalyticsElement_);
       this.ampAnalyticsElement_ = null;
