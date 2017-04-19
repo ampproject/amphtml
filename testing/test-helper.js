@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {xhrServiceForTesting} from '../src/service/xhr-impl';
 import {getService, getServiceForDoc} from '../src/service';
 
 export function stubService(sandbox, win, serviceId, method) {
@@ -57,4 +58,24 @@ export function assertScreenReaderElement(element) {
   expect(computedStyle.getPropertyValue('padding')).to.equal('0px');
   expect(computedStyle.getPropertyValue('display')).to.equal('block');
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
+}
+
+/////////////////
+// Request Bank
+// A server side temporary request storage which is useful for testing
+// browser sent HTTP requests.
+/////////////////
+const REQUEST_URL = '//localhost:9876/request-bank/';
+
+export function depositRequestUrl(id) {
+  return REQUEST_URL + 'deposit/' + id;
+}
+
+export function withdrawRequest(win, id) {
+  const url = REQUEST_URL + 'withdraw/' + id;
+  return xhrServiceForTesting(win).fetchJson(url, {
+    method: 'GET',
+    ampCors: false,
+    credentials: 'omit',
+  });
 }
