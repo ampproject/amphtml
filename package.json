@@ -36,7 +36,7 @@
     "babel-eslint": "6.1.2",
     "babelify": "6.4.0",
     "baconipsum": "0.1.2",
-    "bluebird": "3.0.5",
+    "bluebird": "3.4.6",
     "body-parser": "1.14.2",
     "browserify": "14.0.0",
     "chai": "3.5.0",
