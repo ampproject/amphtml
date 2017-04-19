@@ -14,11 +14,31 @@
  * limitations under the License.
  */
 
-import {timerFor} from './timer';
+import {internalListenImplementation} from './event-helper-listen';
+import {timerFor} from './services';
 import {user} from './log';
 
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
+
+/**
+ * Returns a CustomEvent with a given type and detail; supports fallback for IE.
+ * @param {!Window} win
+ * @param {string} type
+ * @param {Object} detail
+ * @return {!Event}
+ */
+export function createCustomEvent(win, type, detail) {
+  if (win.CustomEvent) {
+    return new win.CustomEvent(type, {detail});
+  } else {
+    // Deprecated fallback for IE.
+    const e = win.document.createEvent('CustomEvent');
+    e.initCustomEvent(
+        type, /* canBubble */ false, /* cancelable */ false, detail);
+    return e;
+  }
+}
 
 /**
  * Listens for the specified event on the element.
@@ -29,28 +49,8 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
  * @return {!UnlistenDef}
  */
 export function listen(element, eventType, listener, opt_capture) {
-  let localElement = element;
-  let localListener = listener;
-  /** @type {?Function}  */
-  let wrapped = event => {
-    try {
-      return localListener.call(this, event);
-    } catch (e) {
-      // reportError is installed globally per window in the entry point.
-      self.reportError(e);
-      throw e;
-    }
-  };
-  const capture = opt_capture || false;
-  localElement.addEventListener(eventType, wrapped, capture);
-  return () => {
-    if (localElement) {
-      localElement.removeEventListener(eventType, wrapped, capture);
-    }
-    localListener = null;
-    localElement = null;
-    wrapped = null;
-  };
+  return internalListenImplementation(
+      element, eventType, listener, opt_capture);
 }
 
 
@@ -64,30 +64,16 @@ export function listen(element, eventType, listener, opt_capture) {
  * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
-  let localElement = element;
   let localListener = listener;
-  const capture = opt_capture || false;
-  let unlisten;
-  let proxy = event => {
+  const unlisten = internalListenImplementation(element, eventType, event => {
     try {
       localListener(event);
-    } catch (e) {
-      // reportError is installed globally per window in the entry point.
-      self.reportError(e);
-      throw e;
     } finally {
+      // Ensure listener is GC'd
+      localListener = null;
       unlisten();
     }
-  };
-  unlisten = () => {
-    if (localElement) {
-      localElement.removeEventListener(eventType, proxy, capture);
-    }
-    localElement = null;
-    proxy = null;
-    localListener = null;
-  };
-  localElement.addEventListener(eventType, proxy, capture);
+  }, opt_capture);
   return unlisten;
 }
 

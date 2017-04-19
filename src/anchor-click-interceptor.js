@@ -18,7 +18,7 @@ import {
   closestByTag,
 } from './dom';
 import {dev} from './log';
-import {urlReplacementsForDoc} from './url-replacements';
+import {urlReplacementsForDoc} from './services';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';

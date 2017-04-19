@@ -16,15 +16,14 @@
 
 import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
-import {actionServiceForDoc} from '../action';
-import {bindForDoc} from '../bind';
+import {actionServiceForDoc} from '../services';
+import {bindForDoc} from '../services';
 import {dev, user} from '../log';
-import {fromClassForDoc} from '../service';
-import {historyForDoc} from '../history';
-import {installResourcesServiceForDoc} from './resources-impl';
+import {registerServiceBuilderForDoc} from '../service';
+import {historyForDoc} from '../services';
+import {resourcesForDoc} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
-import {vsyncFor} from '../vsync';
-
+import {vsyncFor} from '../services';
 
 /**
  * @param {!Element} element
@@ -53,7 +52,7 @@ export class StandardActions {
     this.actions_ = actionServiceForDoc(ampdoc);
 
     /** @const @private {!./resources-impl.Resources} */
-    this.resources_ = installResourcesServiceForDoc(ampdoc);
+    this.resources_ = resourcesForDoc(ampdoc);
 
     this.installActions_(this.actions_);
   }
@@ -97,8 +96,9 @@ export class StandardActions {
             }
             bind.setStateWithExpression(objectString, scope);
           } else {
-            // Key-value args.
-            bind.setState(args);
+            user().error('AMP-BIND', `Please use the object-literal syntax, `
+                + `e.g. "AMP.setState({foo: 'bar'})" instead of `
+                + `"AMP.setState(foo='bar')".`);
           }
         });
         return;
@@ -185,9 +185,12 @@ export class StandardActions {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!StandardActions}
  */
 export function installStandardActionsForDoc(ampdoc) {
-  return fromClassForDoc(
-      ampdoc, 'standard-actions', StandardActions);
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'standard-actions',
+      StandardActions,
+      /* opt_factory */ undefined,
+      /* opt_instantiate */ true);
 };

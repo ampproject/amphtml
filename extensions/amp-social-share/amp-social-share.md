@@ -94,23 +94,24 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>Email</td>
     <td>
       <ul>
-        <li><code>subject</code>: optional, defaults to: Current page title</li>
-        <li><code>body</code>: optional, defaults to: <code>rel=canonical</code> URL</li></ul>
+        <li><code>data-param-subject</code>: optional, defaults to: Current page title</li>
+        <li><code>data-param-body</code>: optional, defaults to: <code>rel=canonical</code> URL</li></ul>
     </td>
   </tr>
   <tr>
     <td>Facebook</td>
     <td>
       <ul>
-        <li><code>href</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
-        <li><code>app_id</code>: required, defaults to: none. This parameter is required for the <a href="https://developers.facebook.com/docs/sharing/reference/share-dialog">Facebook Share dialog</a>.</li></ul>
+        <li><code>data-param-app_id</code>: <strong>required</strong>, defaults to: none. This parameter is required for the <a href="https://developers.facebook.com/docs/sharing/reference/share-dialog">Facebook Share dialog</a>.</li>
+        <li><code>data-param-href</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
+        </ul>
     </td>
   </tr>
   <tr>
     <td>LinkedIn</td>
     <td>
       <ul>
-        <li><code>url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
+        <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
       </ul>
     </td>
   </tr>
@@ -119,8 +120,8 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>Pinterest</td>
     <td>
       <ul>
-        <li><code>url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
-        <li><code>description</code>: optional, defaults to: Current page title</li>
+        <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
+        <li><code>data-param-description</code>: optional, defaults to: Current page title</li>
       </ul>
     </td>
   </tr>
@@ -129,7 +130,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>G+</td>
     <td>
       <ul>
-        <li><code>url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
+        <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
       </ul>
     </td>
   </tr>
@@ -137,8 +138,8 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>Tumblr</td>
     <td>
       <ul>
-        <li><code>url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
-        <li><code>text</code>: optional, defaults to: Current page title</li>
+        <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
+        <li><code>data-param-text</code>: optional, defaults to: Current page title</li>
       </ul>
     </td>
   </tr>
@@ -146,8 +147,8 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>Twitter</td>
     <td>
       <ul>
-        <li><code>url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
-        <li><code>text</code>: optional, defaults to: Current page title</li>
+        <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
+        <li><code>data-param-text</code>: optional, defaults to: Current page title</li>
       </ul>
     </td>
   </tr>
@@ -155,7 +156,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>Whatsapp</td>
     <td>
       <ul>
-        <li><code>text</code>: optional, defaults to: "Current page title - current page URL"</li>
+        <li><code>data-param-text</code>: optional, defaults to: "Current page title - current page URL"</li>
       </ul>
     </td>
   </tr>
@@ -163,7 +164,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td><a href="https://developers.google.com/web/updates/2016/10/navigator-share">Web Share API</a> (available in Chrome as an <a href="https://github.com/jpchase/OriginTrials/blob/gh-pages/developer-guide.md">origin trial</a>)</td>
     <td>
       <ul>
-        <li><code>text</code>: optional, defaults to: "Current page title"</li>
+        <li><code>data-param-text</code>: optional, defaults to: "Current page title"</li>
         <li><code>data-mode</code>: optional, if set to <code>replace</code>, all other share options are removed.</li>
       </ul>
     </td>

@@ -17,6 +17,7 @@
 // This must load before all other tests.
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
+import {ampdocServiceFor} from '../src/ampdoc';
 import {removeElement} from '../src/dom';
 import {setReportError} from '../src/log';
 import {
@@ -26,7 +27,7 @@ import {
 } from '../src/runtime';
 import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {platformFor} from '../src/platform';
+import {platformFor, resourcesForDoc} from '../src/services';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {
   resetAccumulatedErrorMessagesForTesting,
@@ -234,10 +235,11 @@ function beforeTest() {
     canary: 'testSentinel',
   };
   window.AMP_TEST = true;
-  const ampdocService = installDocService(window, true);
-  const ampdoc = ampdocService.getAmpDoc(window.document);
+  installDocService(window, /* isSingleDoc */ true);
+  const ampdoc = ampdocServiceFor(window).getAmpDoc();
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
+  resourcesForDoc(ampdoc).ampInitComplete();
 }
 
 // Global cleanup of tags added during tests. Cool to add more
@@ -263,6 +265,7 @@ afterEach(function() {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
+
   const forgotGlobal = !!global.sandbox;
   if (forgotGlobal) {
     // The error will be thrown later to give possibly other sandboxes a
@@ -282,7 +285,7 @@ afterEach(function() {
   }
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
-  resetExperimentTogglesForTesting();
+  resetExperimentTogglesForTesting(window);
   setReportError(reportError);
 });
 

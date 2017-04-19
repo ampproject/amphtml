@@ -337,13 +337,14 @@ describe('Srcset select', () => {
     expect(srcset.select(1000, 1).url).to.equal('image-1000');
     expect(srcset.select(900, 1).url).to.equal('image-1000');
     expect(srcset.select(800, 1).url).to.equal('image-1000');
-    expect(srcset.select(700, 1).url).to.equal('image-500');
+    // select image-1000
+    expect(srcset.select(700, 1).url).to.equal('image-1000');
     expect(srcset.select(600, 1).url).to.equal('image-500');
     expect(srcset.select(500, 1).url).to.equal('image-500');
     expect(srcset.select(400, 1).url).to.equal('image-500');
     expect(srcset.select(300, 1).url).to.equal('image-250');
     expect(srcset.select(200, 1).url).to.equal('image-250');
-    expect(srcset.select(100, 1).url).to.equal('image');
+    expect(srcset.select(100, 1).url).to.equal('image-250');
     expect(srcset.select(50, 1).url).to.equal('image');
     expect(srcset.select(1, 1).url).to.equal('image');
 
@@ -360,7 +361,7 @@ describe('Srcset select', () => {
     expect(srcset.select(300, 2).url).to.equal('image-500');
     expect(srcset.select(200, 2).url).to.equal('image-500');
     expect(srcset.select(100, 2).url).to.equal('image-250');
-    expect(srcset.select(50, 2).url).to.equal('image');
+    expect(srcset.select(50, 2).url).to.equal('image-250');
     expect(srcset.select(1, 2).url).to.equal('image');
   });
 
@@ -390,9 +391,13 @@ describe('Srcset select', () => {
     expect(srcset.select(740, 1).url).to.equal('image-1000');
     expect(srcset.select(370, 2).url).to.equal('image-1000');
 
-    // Lower than threshold: 730 -> go for lower value.
-    expect(srcset.select(730, 1).url).to.equal('image-500');
-    expect(srcset.select(365, 2).url).to.equal('image-500');
+    // Lower than threshold but difference ratio (730/500 = 1.46) too high -> higher value
+    expect(srcset.select(730, 1).url).to.equal('image-1000');
+    expect(srcset.select(365, 2).url).to.equal('image-1000');
+
+    // Lower than threshold and difference ratio (600/500 = 1.2) is low enough -> lower value
+    expect(srcset.select(600, 1).url).to.equal('image-500');
+    expect(srcset.select(300, 2).url).to.equal('image-500');
   });
 
   it('select by dpr', () => {

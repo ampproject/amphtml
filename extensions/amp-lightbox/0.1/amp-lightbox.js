@@ -18,14 +18,106 @@ import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {childElementByTag} from '../../../src/dom.js';
 import {dev} from '../../../src/log';
-import {historyForDoc} from '../../../src/history';
-import {vsyncFor} from '../../../src/vsync';
-import {timerFor} from '../../../src/timer';
+import {getParentWindowFrameElement} from '../../../src/service';
+import {historyForDoc} from '../../../src/services';
+import {isExperimentOn} from '../../../src/experiments';
+import {vsyncFor} from '../../../src/services';
+import {timerFor} from '../../../src/services';
 import * as st from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
+
+/** @const {string} */
+const A4A_PROTOTYPE_EXPERIMENT = 'amp-lightbox-a4a-proto';
+
+
+
+/**
+ * @param {!HTMLBodyElement} bodyElement
+ * @return {!Element}
+ */
+ // TODO(alanorozco):
+//   Move this where it makes sense (possibly FriendlyIframeEmbed?)
+function getAdBannerRoot(bodyElement) {
+  return dev().assertElement(childElementByTag(
+      dev().assertElement(bodyElement), 'amp-ad-banner'));
+}
+
+
+// TODO(alanorozco):
+//   Move this where it makes sense (possibly FriendlyIframeEmbed?)
+/**
+ * @param {!HTMLIFrameElement} iframe
+ * @param {!Window} topLevelWindow
+ */
+function enterFrameFullOverlayMode(iframe, topLevelWindow) {
+  // TODO(alanorozco): use viewport service
+  // TODO(alanorozco): move ad banner resizing logic to its extension class
+  // TODO(alanorozco): check for FriendlyIframeEmbed.win.document as iframeDoc
+  //                   fallback.
+  const iframeDoc = iframe.contentDocument;
+  const iframeBody = /** @type {!HTMLBodyElement} */ (iframeDoc.body);
+  const adBannerRoot = getAdBannerRoot(iframeBody);
+
+  vsyncFor(topLevelWindow).run({
+    measure: state => {
+      const iframeRect = iframe./*OK*/getBoundingClientRect();
+
+      const winWidth = topLevelWindow./*OK*/innerWidth;
+      const winHeight = topLevelWindow./*OK*/innerHeight;
+
+      state.adBannerRootStyle = {
+        'position': 'absolute',
+        'top': st.px(iframeRect.top),
+        'right': st.px(winWidth - iframeRect.right),
+        'left': st.px(iframeRect.left),
+        'bottom': st.px(winHeight - iframeRect.bottom),
+        'height': st.px(iframeRect.bottom - iframeRect.top),
+      };
+    },
+    mutate: state => {
+      st.setStyle(iframeBody, 'background', 'transparent');
+
+      st.setStyles(iframe, {
+        'position': 'fixed',
+      });
+
+      st.setStyles(adBannerRoot, state.adBannerRootStyle);
+    },
+  }, {});
+}
+
+
+// TODO(alanorozco):
+//   Move this where it makes sense (possibly FriendlyIframeEmbed?)
+/**
+ * @param {!HTMLIFrameElement} iframe
+ * @param {!Window} topLevelWindow
+ */
+function leaveFrameFullOverlayMode(iframe, topLevelWindow) {
+  const iframeDoc = iframe.contentDocument;
+  const iframeBody = /** @type {!HTMLBodyElement} */ (iframeDoc.body);
+  const adBannerRoot = getAdBannerRoot(iframeBody);
+
+  vsyncFor(topLevelWindow).mutate(() => {
+    st.setStyles(adBannerRoot, {
+      'position': null,
+      'top': null,
+      'right': null,
+      'left': null,
+      'bottom': null,
+      'height': null,
+    });
+
+    st.setStyles(iframe, {
+      'position': null,
+    });
+  });
+}
+
 
 class AmpLightbox extends AMP.BaseElement {
 
@@ -124,6 +216,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
+    this.maybeEnterFrameFullOverlayMode_();
     this.getViewport().enterLightboxMode();
 
     if (this.isScrollable_) {
@@ -159,6 +252,48 @@ class AmpLightbox extends AMP.BaseElement {
     this.active_ = true;
   }
 
+  /** @private */
+  maybeEnterFrameFullOverlayMode_() {
+    if (!isExperimentOn(this.getAmpDoc().win, A4A_PROTOTYPE_EXPERIMENT)) {
+      return;
+    }
+
+    if (this.isInMainDocument_()) {
+      return;
+    }
+
+    enterFrameFullOverlayMode(this.getIframe_(), this.getAmpDoc().win);
+  }
+
+  /** @private */
+  maybeLeaveFrameFullOverlayMode_() {
+    if (!isExperimentOn(this.getAmpDoc().win, A4A_PROTOTYPE_EXPERIMENT)) {
+      return;
+    }
+
+    if (this.isInMainDocument_()) {
+      return;
+    }
+
+    leaveFrameFullOverlayMode(this.getIframe_(), this.getAmpDoc().win);
+  }
+
+  /** @return {boolean} */
+  isInMainDocument_() {
+    return this.getAmpDoc().win == this.win;
+  }
+
+  /**
+   * @return {!HTMLIFrameElement}
+   * @private
+   */
+  getIframe_() {
+    const frameElement = getParentWindowFrameElement(this.element,
+        this.getAmpDoc().win);
+
+    return /** @type {!HTMLIFrameElement} */ (dev().assert(frameElement));
+  }
+
   /**
    * Handles closing the lightbox when the ESC key is pressed.
    * @param {!Event} event.
@@ -181,6 +316,7 @@ class AmpLightbox extends AMP.BaseElement {
       st.setStyle(this.element, 'webkitOverflowScrolling', '');
     }
     this.getViewport().leaveLightboxMode();
+    this.maybeLeaveFrameFullOverlayMode_();
     this./*OK*/collapse();
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
@@ -254,7 +390,7 @@ class AmpLightbox extends AMP.BaseElement {
     });
     if (oldPos != newPos) {
       this.forEachVisibleChild_(oldPos, cell => {
-        if (seen.indexOf(cell) == -1) {
+        if (!seen.includes(cell)) {
           this.updateInViewport(cell, false);
         }
       });

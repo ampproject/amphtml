@@ -18,9 +18,9 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {extensionsFor} from '../../../../src/extensions';
+import {extensionsFor} from '../../../../src/services';
 import {stubService} from '../../../../testing/test-helper';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('Ad loader', () => {
@@ -140,8 +140,10 @@ describe('Ad loader', () => {
           const meta = doc.createElement('meta');
           meta.setAttribute('name', 'amp-3p-iframe-src');
           meta.setAttribute('content', 'https://example.com/remote.html');
-          doc.head.append(meta);
-          a4aRegistry['zort'] = () => true;
+          doc.head.appendChild(meta);
+          a4aRegistry['zort'] = () => {
+            throw new Error('predicate should not execute if remote.html!');
+          };
           ampAdElement.setAttribute('type', 'zort');
           const upgraded = new AmpAd(ampAdElement).upgradeCallback();
           return expect(upgraded).to.eventually.be.instanceof(AmpAd3PImpl);

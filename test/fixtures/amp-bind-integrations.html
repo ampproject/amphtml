@@ -1,0 +1,133 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind integration test</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    .original {
+      background-color:green;
+    }
+    .new {
+      background-color:blue;
+    }
+
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script src="/dist/amp.js"></script>
+  <script custom-element="amp-bind" src="/dist/v0/amp-bind-0.1.max.js"></script>
+  <script custom-element="amp-brightcove" src="/dist/v0/amp-brightcove-0.1.max.js"></script>
+  <script custom-element="amp-carousel" src="/dist/v0/amp-carousel-0.1.max.js"></script>
+  <script custom-element="amp-iframe" src="/dist/v0/amp-iframe-0.1.max.js"></script>
+  <script custom-element="amp-live-list" src="/dist/v0/amp-live-list-0.1.max.js"></script>
+  <script custom-element="amp-selector" src="/dist/v0/amp-selector-0.1.max.js"></script>
+  <script custom-element="amp-youtube" src="/dist/v0/amp-youtube-0.1.max.js"></script>
+</head>
+
+<body>
+
+  <button on="tap:AMP.setState({})" id="triggerBindApplicationButton"></button>
+
+  <p>DYNAMIC TAGS</p>
+  <!-- Live list is used for generic dynamic tag testing  -->
+  <amp-live-list id="dynamicTag" data-poll-interval="15000" data-max-items-per-page="2">
+    <div items>
+      <!-- Children added in test -->
+    </div>
+    <button update></button>
+  </amp-live-list>
+
+  <p>TEXT TAGS</p>
+  <button on="tap:AMP.setState({boundText: 'hello world'})" id="changeTextButton"></button>
+  <button on="tap:AMP.setState({boundClass: 'new'})" id="changeTextClassButton"></button>
+  <p id="textElement" class="original" [class]="boundClass" [text]="boundText">unbound</p>
+
+  <p>INPUT</p>
+  <input type="range" min="0" max="100" value="0" on="change:AMP.setState({rangeChange: event})" id="range">
+  <p id="rangeText" [text]="rangeChange.min + ' <= ' + rangeChange.value + ' <= ' + rangeChange.max">Unbound</p>
+  <input type="checkbox" on="change:AMP.setState({checkboxChange: event})" id="checkbox">
+  <p id="checkboxText" [text]="'Checked: ' + checkboxChange.checked" id="checkboxText">Unbound</p>
+  <input type="radio" on="change:AMP.setState({radioChange: event})" id="radio">
+  <p id="radioText" [text]="'Checked: ' + radioChange.checked" id="radioText">Unbound</p>
+
+  <p>CAROUSEL</p>
+  <button on="tap:AMP.setState({selectedSlide: 1})" id="goToSlide1Button">slide 1!</button>
+  <p id="slideNum" [text]="selectedSlide">0</p>
+  <amp-carousel width="300" height="100" type="slides"  id="carousel" on="slideChange:AMP.setState({selectedSlide: event.index})" [slide]="selectedSlide">
+    <amp-img src="http://www.google.com/image1" height="200" width="200"></amp-img>
+    <amp-img src="http://www.google.com/image1" height="200" width="200"></amp-img>
+    <amp-img src="http://www.google.com/image1" height="200" width="200"></amp-img>
+  </amp-carousel>
+
+  <p>AMP-IMG</p>
+  <button on="tap:AMP.setState({imageSrc: 'http://www.google.com/image2'})" id="changeImgSrcButton"></button>
+  <button on="tap:AMP.setState({imageSrc: '?__amp_source_origin'})" id="invalidSrcButton"></button>
+  <button on="tap:AMP.setState({imageSrc: 'ftp://foo:bar@192.168.1.1/lol.jpg'})" id="ftpSrcButton"></button>
+  <button on="tap:AMP.setState({imageSrc: 'tel:1-555-867-5309'})" id="telSrcButton"></button>
+  <button on="tap:AMP.setState({imageAlt: 'hello world'})" id="changeImgAltButton"></button>
+  <button on="tap:AMP.setState({imageWidth: 300, imageHeight: 300})" id="changeImgDimensButton"></button>
+
+  <amp-img id="image"
+    src="http://www.google.com/image1" [src]="imageSrc"
+    alt="unbound" [alt]="imageAlt"
+    width="200" [width]="imageWidth"
+    height="200" [height]="imageHeight"
+    layout="responsive"></amp-img>
+
+  <p>AMP-SELECTOR</p>
+  <button on="tap:AMP.setState({selected: 2})" id="changeSelectionButton">Change selection to 2!</button>
+  <p id=selectionText [text]="selected">None</p>
+  <amp-selector layout="container" [selected]="selected" on="select:AMP.setState({selected: event.targetOption})">
+    <amp-img src="/image0.jpg" width="60" height="40" option="1" id="selectorImg1"></amp-img>
+    <amp-img src="/image1.jpg" width="60" height="40" option="2" id="selectorImg2"></amp-img>
+    <amp-img src="/image2.jpg" width="60" height="40" option="3" id="selectorImg3"></amp-img>
+  </amp-selector>
+
+  <p>AMP-VIDEO</p>
+  <button on="tap:AMP.setState({videoSrc: 'https://www.google.com/bound.webm'})" id="changeVidSrcButton"></button>
+  <button on="tap:AMP.setState({videoSrc: 'http://www.google.com/justhttp.ogg'})" id="httpVidSrcButton"></button>
+  <button on="tap:AMP.setState({videoSrc: '?__amp_source_origin'})" id="disallowedVidUrlButton"></button>
+  <button on="tap:AMP.setState({videoAlt: 'hello world'})" id="changeVidAltButton"></button>
+  <button on="tap:AMP.setState({videoWidth: 300, videoHeight: 300})" id="changeVidDimensButton"></button>
+  <button on="tap:AMP.setState({videoControls: true})" id="showVidControlsButton"></button>
+  <button on="tap:AMP.setState({videoControls: false})" id="hideVidControlsButton"></button>
+  <amp-video layout="responsive" id="video"
+    src="https://www.google.com/unbound.webm" [src]="videoSrc"
+    alt="unbound" [alt]="videoAlt"
+    width="200" [width]="videoWidth"
+    height="200" [height]="videoHeight"
+    [controls]="videoControls">
+  </amp-video>
+
+  <p>AMP-LIVE-LIST</p>
+  <button on="tap:AMP.setState({liveListText: 'hello world'})" id="changeLiveListTextButton"></button>
+  <amp-live-list id="liveList" data-poll-interval="20000" data-max-items-per-page="2">
+    <button update id="liveListUpdateButton" on="tap:liveList.update"></button>
+    <div items id="liveListItems">
+      <div id="liveListItem1" data-sort-time="123456789">
+        <p [text]="liveListText">unbound</p>
+      </div>
+    </div>
+  </amp-live-list>
+
+  <p>AMP-YOUTUBE</p>
+  <button on="tap:AMP.setState({youtube: 'bound'})" id="youtubeButton"></button>
+  <amp-youtube width=480 height=270 id="youtube" data-videoid="unbound"
+      [data-videoid]="youtube">
+  </amp-youtube>
+
+  <p>AMP-BRIGHTCOVE</p>
+  <button id="brightcoveButton" on="tap:AMP.setState({brightcove: 'bound'})">Change amp-brightcove</button>
+  <amp-brightcove width=480 height=270 id="brightcove" [data-account]="brightcove"
+      data-account="906043040001" data-video-id="1401169490001" data-player="180a5658-8be8-4f33-8eba-d562ab41b40c">
+  </amp-brightcove>
+
+  <p>AMP-IFRAME</p>
+  <button id="iframeButton" on="tap:AMP.setState({iframe: 'https://giphy.com/embed/DKG1OhBUmxL4Q'})">Change amp-iframe</button>
+  <amp-iframe width=100 height=100 id="ampIframe" sandbox="allow-scripts allow-same-origin allow-popups"
+      src="https://player.vimeo.com/video/140261016" [src]="iframe">
+  </amp-iframe>
+
+</body>
+</html>

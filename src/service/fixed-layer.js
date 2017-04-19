@@ -16,7 +16,7 @@
 
 import {dev, user} from '../log';
 import {endsWith} from '../string';
-import {platformFor} from '../platform';
+import {platformFor} from '../services';
 import {getStyle, setStyle, setStyles, computedStyle} from '../style';
 
 const TAG = 'FixedLayer';
@@ -40,15 +40,19 @@ export class FixedLayer {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!./vsync-impl.Vsync} vsync
+   * @param {number} borderTop
    * @param {number} paddingTop
    * @param {boolean} transfer
    */
-  constructor(ampdoc, vsync, paddingTop, transfer) {
+  constructor(ampdoc, vsync, borderTop, paddingTop, transfer) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const */
     this.vsync_ = vsync;
+
+    /** @const @private {number} */
+    this.borderTop_ = borderTop;
 
     /** @private {number} */
     this.paddingTop_ = paddingTop;
@@ -309,9 +313,14 @@ export class FixedLayer {
           let top = styles.top;
           const currentOffsetTop = element./*OK*/offsetTop;
           const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
-          if ((top == 'auto' || isImplicitAuto) && top != '0px') {
+          if ((top == 'auto' || isImplicitAuto) && top != '0px' ||
+              // This is workaround for http://crbug.com/703816 in Chrome where
+              // `getComputedStyle().top` returns `0px` instead of `auto`.
+              (isSticky && top == '0px' && isImplicitAuto &&
+                  currentOffsetTop != 0)) {
             top = '';
-            if (currentOffsetTop == this.committedPaddingTop_) {
+            if (currentOffsetTop ==
+                    this.committedPaddingTop_ + this.borderTop_) {
               top = '0px';
             }
           }
@@ -451,7 +460,7 @@ export class FixedLayer {
     } else {
       // A new entry.
       const id = 'F' + (this.counter_++);
-      element.setAttribute('i-amp-fixedid', id);
+      element.setAttribute('i-amphtml-fixedid', id);
       if (isFixed) {
         element[DECLARED_FIXED_PROP] = true;
       } else {
@@ -573,8 +582,8 @@ export class FixedLayer {
     if (!fe.placeholder) {
       // Never been transfered before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
-      fe.placeholder = this.ampdoc.win.document.createElement('i-amp-fp');
-      fe.placeholder.setAttribute('i-amp-fixedid', fe.id);
+      fe.placeholder = this.ampdoc.win.document.createElement('i-amphtml-fp');
+      fe.placeholder.setAttribute('i-amphtml-fixedid', fe.id);
       setStyle(fe.placeholder, 'display', 'none');
     }
 

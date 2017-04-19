@@ -44,7 +44,8 @@ describe('amp-hulu', () => {
       const iframe = hulu.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal('https://secure.hulu.com/dash/mobile_embed.html?amp=1&eid=4Dk5F2PYTtrgciuvloH3UA');
+      expect(iframe.src)
+          .to.equal('https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=4Dk5F2PYTtrgciuvloH3UA');
     });
   });
 

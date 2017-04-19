@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
     googleAdsIsA4AEnabled,
@@ -26,7 +27,9 @@ import {toggleExperiment} from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
-import {documentStateFor} from '../../../../src/service/document-state';
+import {
+  installDocumentStateService,
+} from '../../../../src/service/document-state';
 import * as sinon from 'sinon';
 
 const EXP_ID = 'EXP_ID';
@@ -114,6 +117,7 @@ describe('a4a_config', () => {
         pathname: '/fnord',
         origin: 'https://cdn.ampproject.org',
         hash: '',
+        hostname: 'cdn.ampproject.org',
       },
       document: {
         nodeType: /* DOCUMENT */ 9,
@@ -129,12 +133,13 @@ describe('a4a_config', () => {
         webkitSubtle: true,
       },
       navigator: window.navigator,
+      pageExperimentBranches: {},
     };
     win.document.defaultView = win;
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
-    const ampdoc = ampdocService.getAmpDoc();
+    installDocService(win, /* isSingleDoc */ true);
+    const ampdoc = ampdocServiceFor(win).getAmpDoc();
     events = {};
-    documentStateFor(win);
+    installDocumentStateService(win);
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
     element = document.createElement('div');
@@ -347,11 +352,11 @@ describe('a4a_config hash param parsing', () => {
       navigator: window.navigator,
     };
     win.document.defaultView = win;
-    const ampdocService = installDocService(win, /* isSingleDoc */ true);
-    ampdoc = ampdocService.getAmpDoc();
+    installDocService(win, /* isSingleDoc */ true);
+    ampdoc = ampdocServiceFor(win).getAmpDoc();
     events = {};
     installPlatformService(win);
-    documentStateFor(win);
+    installDocumentStateService(win);
     const attrs = {};
     element = {
       nodeType: /* ELEMENT */ 1,

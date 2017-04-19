@@ -15,18 +15,20 @@
  */
 
 import {FakeLocation} from './fake-dom';
-import {Timer} from '../src/timer';
-import installCustomElements from
-    'document-register-element/build/document-register-element.node';
-import {installDocService} from '../src/service/ampdoc-impl';
-import {installExtensionsService} from '../src/service/extensions-impl';
+import {ampdocServiceFor} from '../src/ampdoc';
+import {cssText} from '../build/css';
+import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {
   installAmpdocServices,
   installRuntimeServices,
   registerForUnitTest,
 } from '../src/runtime';
+import installCustomElements from
+    'document-register-element/build/document-register-element.node';
+import {installDocService} from '../src/service/ampdoc-impl';
+import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStyles} from '../src/style-installer';
-import {cssText} from '../build/css';
+import {resourcesForDoc} from '../src/services';
 
 let iframeCount = 0;
 
@@ -92,11 +94,13 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         opt_beforeLoad(win);
       }
       win.addEventListener('message', (event) => {
-        if (event.data &&
+        const parsedData = parseMessageData(event.data);
+
+        if (parsedData &&
             // Either non-3P or 3P variant of the sentinel.
-            (/^amp/.test(event.data.sentinel) ||
-             /^\d+-\d+$/.test(event.data.sentinel))) {
-          messages.push(event.data);
+            (/^amp/.test(parsedData.sentinel) ||
+             /^\d+-\d+$/.test(parsedData.sentinel))) {
+          messages.push(parsedData);
         }
       })
       // Function that returns a promise for when the given event fired at
@@ -215,13 +219,14 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
-      const ampdocService = installDocService(iframe.contentWindow, true);
-      const ampdoc = ampdocService.getAmpDoc(iframe.contentWindow.document);
+      installDocService(iframe.contentWindow, /* isSingleDoc */ true);
+      const ampdoc = ampdocServiceFor(iframe.contentWindow).getAmpDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
+      resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
       installStyles(iframe.contentWindow.document, cssText, () => {
         resolve({
@@ -517,4 +522,17 @@ function maybeSwitchToCompiledJs(html) {
         .replace(/dist\.3p\/current\//g, 'dist.3p/current-min/');
   }
   return html;
+}
+
+
+/**
+ * @param {*} data
+ * @returns {?}
+ * @private
+ */
+function parseMessageData(data) {
+  if (typeof data == 'string' && isAmpMessage(data)) {
+    return deserializeMessage(data);
+  }
+  return data;
 }

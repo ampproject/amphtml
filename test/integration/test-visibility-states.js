@@ -20,8 +20,8 @@ import {
 } from '../../testing/iframe.js';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementProto} from '../../src/custom-element';
-import {viewerForDoc} from '../../src/viewer';
-import {resourcesForDoc} from '../../src/resources';
+import {viewerForDoc} from '../../src/services';
+import {resourcesForDoc} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import * as sinon from 'sinon';
 

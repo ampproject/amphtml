@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {StandardActions} from '../../src/service/standard-actions-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {bindForDoc} from '../../src/bind';
+import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
+import {StandardActions} from '../../src/service/standard-actions-impl';
+import {bindForDoc, historyForDoc} from '../../src/services';
+import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
 
 
@@ -24,6 +26,7 @@ describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
   let mutateElementStub;
   let deferMutateStub;
+  let ampdoc;
 
   function createElement() {
     return document.createElement('div');
@@ -70,7 +73,8 @@ describes.sandboxed('StandardActions', {}, () => {
   }
 
   beforeEach(() => {
-    standardActions = new StandardActions(new AmpDocSingle(window));
+    ampdoc = new AmpDocSingle(window);
+    standardActions = new StandardActions(ampdoc);
     mutateElementStub = stubMutate('mutateElement');
     deferMutateStub = stubMutate('deferMutate');
   });
@@ -150,21 +154,23 @@ describes.sandboxed('StandardActions', {}, () => {
 
   describe('"AMP" global target', () => {
     it('should implement goBack', () => {
-      const history = window.services.history.obj;
+      installHistoryServiceForDoc(ampdoc);
+      const history = historyForDoc(ampdoc);
       const goBackStub = sandbox.stub(history, 'goBack');
       standardActions.handleAmpTarget({method: 'goBack'});
       expect(goBackStub).to.be.calledOnce;
     });
 
     it('should implement setState', () => {
-      const setStateSpy = sandbox.spy();
-      const bind = {setState: setStateSpy};
+      const setStateWithExpressionSpy = sandbox.spy();
+      const bind = {setStateWithExpression: setStateWithExpressionSpy};
       window.services.bind = {obj: bind};
       const args = {};
+      args[OBJECT_STRING_ARGS_KEY] = '{foo: 123}';
       standardActions.handleAmpTarget({method: 'setState', args});
       return bindForDoc(standardActions.ampdoc).then(() => {
-        expect(setStateSpy).to.be.calledOnce;
-        expect(setStateSpy).to.be.calledWith(args);
+        expect(setStateWithExpressionSpy).to.be.calledOnce;
+        expect(setStateWithExpressionSpy).to.be.calledWith('{foo: 123}');
       });
     });
   });

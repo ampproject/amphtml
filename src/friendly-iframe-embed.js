@@ -20,11 +20,11 @@ import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {resourcesForDoc} from './resources';
+import {resourcesForDoc} from './services';
 import {setStyle, setStyles} from './style';
 
 
@@ -312,6 +312,9 @@ export class FriendlyIframeEmbed {
     /** @const {?AmpElement} */
     this.host = spec.host || null;
 
+    /** @const @private {time} */
+    this.startTime_ = Date.now();
+
     /**
      * Starts out as invisible. The interpretation of this flag is up to
      * the emded parent.
@@ -335,6 +338,13 @@ export class FriendlyIframeEmbed {
   destroy() {
     resourcesForDoc(this.iframe).removeForChildWindow(this.win);
     disposeServicesForEmbed(this.win);
+  }
+
+  /**
+   * @return {time}
+   */
+  getStartTime() {
+    return this.startTime_;
   }
 
   /** @return {!Signals} */
@@ -387,9 +397,18 @@ export class FriendlyIframeEmbed {
     }
 
     // Initial load signal signal.
+    let rect;
+    if (this.host) {
+      rect = this.host.getLayoutBox();
+    } else {
+      rect = layoutRectLtwh(
+          0, 0,
+          this.win./*OK*/innerWidth,
+          this.win./*OK*/innerHeight);
+    }
     Promise.all([
       this.whenReady(),
-      whenContentIniLoad(this.iframe, this.win),
+      whenContentIniLoad(this.iframe, this.win, rect),
     ]).then(() => {
       this.signals_.signal(CommonSignals.INI_LOAD);
     });
@@ -433,17 +452,16 @@ export class FriendlyIframeEmbed {
  * have been loaded in the initially visible set.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
  * @param {!Window} hostWin
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @return {!Promise}
  */
-export function whenContentIniLoad(context, hostWin) {
-  const width = hostWin./*OK*/innerWidth;
-  const height = hostWin./*OK*/innerHeight;
-  const rect = layoutRectLtwh(0, 0, width, height);
+export function whenContentIniLoad(context, hostWin, rect) {
   return resourcesForDoc(context)
       .getResourcesInRect(hostWin, rect)
       .then(resources => {
         const promises = [];
         resources.forEach(r => {
-          if (EXCLUDE_INI_LOAD.indexOf(r.element.tagName) == -1) {
+          if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
             promises.push(r.loadedOnce());
           }
         });

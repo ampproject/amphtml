@@ -18,7 +18,7 @@
 import '../polyfills';
 
 import {user} from '../log';
-import {fromClass} from '../service';
+import {registerServiceBuilder} from '../service';
 import {reportError} from '../error';
 
 /**
@@ -103,21 +103,13 @@ export class Timer {
    * Returns a promise that will resolve after the delay. Optionally, the
    * resolved value can be provided as opt_result argument.
    * @param {number=} opt_delay
-   * @param {RESULT=} opt_result
-   * @return {!Promise<RESULT>}
-   * @template RESULT
+   * @return {!Promise}
    */
-  promise(opt_delay, opt_result) {
+  promise(opt_delay) {
     return new Promise(resolve => {
       let timerKey;
-      if (opt_result === undefined) {
-        // Avoid wrapping in closure if no specific result is produced.
-        timerKey = this.delay(resolve, opt_delay);
-      } else {
-        timerKey = this.delay(() => {
-          resolve(opt_result);
-        }, opt_delay);
-      }
+      // Avoid wrapping in closure if no specific result is produced.
+      timerKey = this.delay(resolve, opt_delay);
       if (timerKey == -1) {
         throw new Error('Failed to schedule timer.');
       }
@@ -150,12 +142,30 @@ export class Timer {
     }
     return Promise.race([delayPromise, opt_racePromise]);
   }
+
+  /**
+   * Returns a promise that resolves after `predicate` returns true.
+   * Polls with interval `delay`
+   * @param {number} delay
+   * @param {function():boolean} predicate
+   * @return {!Promise}
+   */
+  poll(delay, predicate) {
+    return new Promise(resolve => {
+      const interval = this.win.setInterval(() => {
+        if (predicate()) {
+          this.win.clearInterval(interval);
+          resolve();
+        }
+      }, delay);
+    });
+  }
+
 }
 
 /**
  * @param {!Window} window
- * @return {!Timer}
  */
 export function installTimerService(window) {
-  return fromClass(window, 'timer', Timer);
+  registerServiceBuilder(window, 'timer', Timer);
 };

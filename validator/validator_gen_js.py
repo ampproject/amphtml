@@ -340,10 +340,11 @@ def ValueToString(descriptor, field_desc, value):
 SKIP_FIELDS_FOR_LIGHT = [
     'also_requires_tag_warning',
     'deprecation_url',
+    'deprecated_versions',
     'error_formats',
     'error_specificity',
     'errors',
-    'extension_unused_unless_tag_present',
+    'deprecated_recommends_usage_of_tag',
     'html_format',
     'max_bytes_spec_url',
     'min_validator_revision_required',
@@ -352,6 +353,7 @@ SKIP_FIELDS_FOR_LIGHT = [
     'template_spec_url',
     'unique_warning',
     'validator_revision',
+    'blacklisted_cdata_regex',
 ]
 SKIP_CLASSES_FOR_LIGHT = ['amp.validator.ValidationError',
                           'amp.validator.ErrorFormat']
@@ -379,6 +381,7 @@ CONSTRUCTOR_ARG_FIELDS = [
 # See TagSpecName for how it's computed. This is a string, and this
 # code generator replaces these fields with tag ids, which are numbers.
 TAG_SPEC_NAME_REFERENCE_FIELD = [
+    'amp.validator.ExtensionSpec.deprecated_recommends_usage_of_tag',
     'amp.validator.ReferencePoint.tag_spec_name',
     'amp.validator.TagSpec.also_requires_tag_warning',
     'amp.validator.TagSpec.extension_unused_unless_tag_present',
@@ -394,7 +397,14 @@ ATTR_LIST_NAME_REFERENCE_FIELD = ['amp.validator.TagSpec.attr_lists']
 # the AttrSpecs.
 SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.AttrList.attrs',
+    'amp.validator.AttrSpec.blacklisted_value_regex',
+    'amp.validator.AttrSpec.mandatory_oneof',
+    'amp.validator.AttrSpec.value_regex',
+    'amp.validator.AttrSpec.value_regex_casei',
+    'amp.validator.AttrTriggerSpec.if_value_regex',
+    'amp.validator.CdataSpec.cdata_regex',
     'amp.validator.TagSpec.attrs',
+    'amp.validator.TagSpec.mandatory_alternatives',
     'amp.validator.TagSpec.requires',
     'amp.validator.TagSpec.satisfies',
 ]
@@ -511,6 +521,9 @@ def PrintClassFor(descriptor, msg_desc, light, out):
         out.Line('/**%s @type {%s} */' % (export_or_empty, type_name))
         out.Line('this.%s = %s;' % (UnderscoreToCamelCase(field.name),
                                     assigned_value))
+    if msg_desc.full_name == 'amp.validator.CdataSpec':
+      out.Line('/** @type {?number} */')
+      out.Line('this.combinedBlacklistedCdataRegex = null;')
     if msg_desc.full_name == 'amp.validator.ValidatorRules':
       out.Line('/** @type {!Array<!string>} */')
       out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
@@ -739,6 +752,14 @@ def PrintObject(descriptor, msg, registry, light, out):
       continue
     out.Line('%s.%s = %s;' % (this_message_reference,
                               UnderscoreToCamelCase(field.name), value))
+  if (msg.DESCRIPTOR.full_name == 'amp.validator.CdataSpec' and
+      msg.blacklisted_cdata_regex):
+    combined_blacklisted_cdata_regex = '(%s)' % '|'.join([
+        r.regex for r in msg.blacklisted_cdata_regex])
+    out.Line('%s.%s = %d;' % (
+        this_message_reference,
+        'combinedBlacklistedCdataRegex',
+        registry.InternString(combined_blacklisted_cdata_regex)))
 
 
 def DispatchKeyForTagSpecOrNone(tag_spec):
@@ -939,8 +960,8 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format, light,
       rules_reference, json.dumps(amp_layout_attrs)))
 
   # We emit these after the last call to registry.InternString.
-  out.Line('%s.internedStrings = ["%s"];' %
-           (rules_reference, '","'.join(registry.InternedStrings())))
+  out.Line('%s.internedStrings = %s;' %
+           (rules_reference, json.dumps(registry.InternedStrings())))
 
   out.Line('return %s;' % rules_reference)
   out.PopIndent()

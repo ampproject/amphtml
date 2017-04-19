@@ -25,7 +25,7 @@
 import {isGoogleAdsA4AValidEnvironment, EXPERIMENT_ATTRIBUTE} from './utils';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{control: string, experiment: string}} */
@@ -67,39 +67,51 @@ const INTERNALLY_SELECTED_ID = '2088462';
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
     externalBranches, internalBranches) {
-  if (isGoogleAdsA4AValidEnvironment(win)) {
-    const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
-        experimentName, externalBranches.control,
-        externalBranches.experiment, MANUAL_EXPERIMENT_ID);
-    const experimentInfo = {};
-    experimentInfo[experimentName] = internalBranches;
-    // Note: Because the same experimentName is being used everywhere here,
-    // randomlySelectUnsetPageExperiments won't add new IDs if
-    // maybeSetExperimentFromUrl has already set something for this
-    // experimentName.
-    randomlySelectUnsetPageExperiments(win, experimentInfo);
-    if (isExperimentOn(win, experimentName)) {
-      // Page is selected into the overall traffic experiment.
-      const selectedBranch = getPageExperimentBranch(win, experimentName);
-      addExperimentIdToElement(selectedBranch, element);
-      // Detect how page was selected into the overall experimentName.
-      if (isSetFromUrl) {
-        addExperimentIdToElement(EXTERNALLY_SELECTED_ID, element);
-      } else {
-        // Must be internally selected.
-        addExperimentIdToElement(INTERNALLY_SELECTED_ID, element);
-      }
-      // Detect whether page is on the "experiment" (i.e., use A4A rendering
-      // pathway) branch of the overall traffic experiment or it's on the
-      // "control" (i.e., use traditional, 3p iframe rendering pathway).
-      return selectedBranch == internalBranches.experiment ||
-          selectedBranch == externalBranches.experiment ||
-          selectedBranch == MANUAL_EXPERIMENT_ID;
-    }
+  if (!isGoogleAdsA4AValidEnvironment(win)) {
+    // Serving location doesn't qualify for A4A treatment
+    return false;
   }
-  // Serving location doesn't qualify for A4A treatment or page is not in the
-  // traffic experiment.
-  return false;
+
+  const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
+      experimentName, externalBranches.control,
+      externalBranches.experiment, MANUAL_EXPERIMENT_ID);
+  const experimentInfo = {};
+  experimentInfo[experimentName] = internalBranches;
+  // Note: Because the same experimentName is being used everywhere here,
+  // randomlySelectUnsetPageExperiments won't add new IDs if
+  // maybeSetExperimentFromUrl has already set something for this
+  // experimentName.
+  randomlySelectUnsetPageExperiments(win, experimentInfo);
+  if (isExperimentOn(win, experimentName)) {
+    // Page is selected into the overall traffic experiment.
+    // In other words, if A4A has not yet launched serve A4A Fast Fetch,
+    // else serve Delayed Fetch.
+    const selectedBranch = getPageExperimentBranch(win, experimentName);
+    addExperimentIdToElement(selectedBranch, element);
+    // Detect how page was selected into the overall experimentName.
+    if (isSetFromUrl) {
+      addExperimentIdToElement(EXTERNALLY_SELECTED_ID, element);
+    } else {
+      // Must be internally selected.
+      addExperimentIdToElement(INTERNALLY_SELECTED_ID, element);
+    }
+    // Detect whether page is on the "experiment" (i.e., use A4A rendering
+    // pathway) branch of the overall traffic experiment or it's on the
+    // "control" (i.e., use traditional, 3p iframe rendering pathway).
+    const selected = selectedBranch == internalBranches.experiment ||
+                     selectedBranch == externalBranches.experiment ||
+                     selectedBranch == MANUAL_EXPERIMENT_ID;
+    // Not launched, control branch -> Delayed Fetch
+    // Not launched, experimental branch -> Fast Fetch
+    // Launched, control branch -> Fast Fetch
+    // Launched, experimental branch -> Delayed Fetch (for holdback)
+    return (selected == !hasLaunched(win, element));
+  } else {
+    // Page is not selected into the overall traffic experiment.
+    // In other words, if A4A has launched serve A4A Fast Fetch, else serve
+    // Delayed Fetch.
+    return hasLaunched(win, element);
+  }
 }
 
 /**
@@ -128,7 +140,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  * @param {!string} controlBranchId  Experiment ID string for control branch of
  *   the overall experiment.
  * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
- *   (i.e., a4a) branch of the overall experiment.
+ *   branch of the overall experiment.
  * @param {!string} manualId  ID of the manual experiment.
  * @return {boolean}  Whether the experiment state was set from a command-line
  *   parameter or not.
@@ -150,7 +162,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
   const arg = a4aParam.split(':', 2)[1];
   const argMapping = {
     '-1': manualId,
-    '0': null,
+    '0': null, // TODO Ensure does not generate exp id
     '1': controlBranchId,
     '2': treatmentBranchId,
   };
@@ -320,6 +332,27 @@ export function isInExperiment(element, id) {
  */
 export function isInManualExperiment(element) {
   return isInExperiment(element, MANUAL_EXPERIMENT_ID);
+}
+
+/**
+ * Predicate to check whether A4A has launched yet or not.
+ * If it has not yet launched, then the experimental branch serves A4A, and
+ * control/filler do not. If it has not, then the filler and control branch do
+ * serve A4A, and the experimental branch does not.
+ *
+ * @param {!Window} win  Host window for the ad.
+ * @param {!Element} element  Element to check for pre-launch membership.
+ * @returns {boolean}
+ */
+export function hasLaunched(win, element) {
+  switch (element.getAttribute('type')) {
+    case 'adsense':
+      return isExperimentOn(win, 'a4aFastFetchAdSenseLaunched');
+    case 'doubleclick':
+      return isExperimentOn(win, 'a4aFastFetchDoubleclickLaunched');
+    default:
+      return false;
+  }
 }
 
 /**

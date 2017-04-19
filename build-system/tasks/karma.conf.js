@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-var app = require('../server').app;
-
 /**
  * @param {!Object} config
  */
@@ -171,6 +169,7 @@ module.exports = {
     'karma-chai',
     'karma-chai-as-promised',
     'karma-chrome-launcher',
+    'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
@@ -179,7 +178,9 @@ module.exports = {
     'karma-sauce-launcher',
     'karma-sinon-chai',
     {
-      'middleware:custom': ['factory', function() {return app;}],
+      'middleware:custom': ['factory', function() {
+        return require(require.resolve('../app.js'));
+      }],
     },
   ],
 };

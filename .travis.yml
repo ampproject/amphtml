@@ -13,6 +13,9 @@ addons:
   hosts:
     - ads.localhost
     - iframe.localhost
+    # Requested by some tests because they need a valid font host,
+    # but should not resolve in tests.
+    - fonts.googleapis.com
   apt:
     packages:
     - protobuf-compiler

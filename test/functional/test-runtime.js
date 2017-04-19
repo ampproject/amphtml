@@ -30,9 +30,11 @@ import {
 } from '../../src/service';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {platformFor} from '../../src/platform';
+import {vsyncForTesting} from '../../src/service/vsync-impl';
+import {platformFor} from '../../src/services';
 import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
+import {extensionsFor} from '../../src/services';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
@@ -44,12 +46,14 @@ describes.fakeWin('runtime', {
   location: 'https://cdn.ampproject.org/c/s/www.example.com/path',
 }, env => {
   let win;
+  let clock;
   let ampdocService;
   let ampdocServiceMock;
   let extensionElementIndex;
 
   beforeEach(() => {
     win = env.win;
+    clock = env.sandbox.useFakeTimers();
     extensionElementIndex = 0;
     ampdocService = {
       isSingleDoc: () => true,
@@ -65,6 +69,7 @@ describes.fakeWin('runtime', {
     ampdocService.getAmpDoc = () => ampdoc;
     installPlatformService(win);
     installTimerService(win);
+    vsyncForTesting(win);
     installAmpdocServices(ampdoc);
   });
 
@@ -139,7 +144,7 @@ describes.fakeWin('runtime', {
     expect(win.document.documentElement.style.cursor).to.equal('pointer');
   });
 
-  it('should execute scheduled extensions & execute new extensions', () => {
+  const extensionRegistrationTest = () => {
     let progress = '';
     const queueExtensions = win.AMP;
     win.AMP.push(regularExtension(amp => {
@@ -172,6 +177,88 @@ describes.fakeWin('runtime', {
     runChunksForTesting(win.document);
     expect(progress).to.equal('12345');
     expect(queueExtensions).to.have.length(0);
+  };
+  it('should execute scheduled extensions & execute new extensions',
+      extensionRegistrationTest);
+
+  it('should not maybePumpEarlyFrame when body not yet present', () => {
+    toggleExperiment(win, 'pump-early-frame', true);
+    // Make document.body be null on first invocation to simulate
+    // JS executing before the rest of the doc has been parsed.
+    const body = win.document.body;
+    let accessedOnce = false;
+    Object.defineProperty(win.document, 'body', {
+      get: () => {
+        if (accessedOnce) {
+          return body;
+        }
+        accessedOnce = true;
+        return null;
+      },
+    });
+    extensionRegistrationTest();
+  });
+
+  it('should not maybePumpEarlyFrame ' +
+      'when a renderDelayingExtension is present', () => {
+    toggleExperiment(win, 'pump-early-frame', true);
+    win.document.body.appendChild(
+            document.createElement('amp-experiment'));
+    extensionRegistrationTest();
+  });
+
+  it('should maybePumpEarlyFrame and delay extension execution', () => {
+    toggleExperiment(win, 'pump-early-frame', true);
+    let progress = '';
+    const queueExtensions = win.AMP;
+    const highPriority = regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += 'high';
+    });
+    highPriority.p = 'high';
+    win.AMP.push(highPriority);
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '1';
+    }));
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '2';
+    }));
+    win.AMP.push(() => {
+      progress += 'function';
+    });
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '3';
+    }));
+    expect(queueExtensions).to.have.length(5);
+    adopt(win);
+    runChunksForTesting(win.document);
+    return Promise.resolve().then(() => {
+      expect(progress).to.equal('highfunction');
+      expect(queueExtensions).to.have.length(3);
+      clock.tick();
+      expect(queueExtensions).to.have.length(3);
+      expect(progress).to.equal('highfunction');
+      // New extension arrives before inital ran.
+      win.AMP.push(regularExtension(amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += '4';
+      }));
+      expect(queueExtensions).to.have.length(4);
+      clock.tick(1);
+      expect(queueExtensions).to.have.length(0);
+      runChunksForTesting(win.document);
+      expect(progress).to.equal('highfunction1234');
+      win.AMP.push(regularExtension(amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += '5';
+      }));
+      runChunksForTesting(win.document);
+      expect(progress).to.equal('highfunction12345');
+      expect(queueExtensions).to.have.length(0);
+    });
   });
 
   it('support struct AMP.push raw functions and high priority', () => {
@@ -225,7 +312,8 @@ describes.fakeWin('runtime', {
 
         expect(progress).to.equal('1HIGHAB2');
 
-        const extensions = ext.installExtensionsService(win);
+        ext.installExtensionsService(win);
+        const extensions = extensionsFor(win);
         const ext1 = extensions.waitForExtension('ext1');
         const ext2 = extensions.waitForExtension('ext2');
         return Promise.all([ext1, ext2]);
@@ -367,7 +455,8 @@ describes.fakeWin('runtime', {
 
     beforeEach(() => {
       adopt(win);
-      extensions = ext.installExtensionsService(win);
+      ext.installExtensionsService(win);
+      extensions = extensionsFor(win);
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 
@@ -516,7 +605,8 @@ describes.fakeWin('runtime', {
 
     beforeEach(() => {
       adoptShadowMode(win);
-      extensions = ext.installExtensionsService(win);
+      ext.installExtensionsService(win);
+      extensions = extensionsFor(win);
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 

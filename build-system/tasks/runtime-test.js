@@ -33,9 +33,11 @@ function getConfig() {
   if (argv.safari) {
     return Object.assign({}, karmaDefault, {browsers: ['Safari']});
   }
-
   if (argv.firefox) {
     return Object.assign({}, karmaDefault, {browsers: ['Firefox']});
+  }
+  if (argv.edge) {
+    return Object.assign({}, karmaDefault, {browsers: ['Edge']});
   }
 
   if (argv.saucelabs) {
@@ -171,6 +173,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     'saucelabs': '  Runs test on saucelabs (requires setup)',
     'safari': '  Runs tests in Safari',
     'firefox': '  Runs tests in Firefox',
+    'edge': '  Runs tests in Edge',
     'integration': 'Run only integration tests.',
     'compiled': 'Changes integration tests to use production JS ' +
         'binaries for execution',
