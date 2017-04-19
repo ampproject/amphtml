@@ -266,13 +266,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
 
-    const readyPromise = Promise.race([
-      this.signals().whenSignal(CommonSignals.INI_LOAD),
-      this.signals().whenSignal(CommonSignals.LOAD_END),
-    ]);
-
     this.lifecycleReporter_.addPingsForVisibility(
-        this.element, this.getAmpDoc(), readyPromise);
+        this.element, this.getAmpDoc(), this.signals());
 
     setStyles(dev().assertElement(this.iframe), {
       width: `${this.size_.width}px`,

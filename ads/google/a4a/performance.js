@@ -273,7 +273,11 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     return this.initTime_;
   }
 
-  addPingsForVisibility(element, ampDoc, readyPromise) {
+  addPingsForVisibility(element, ampDoc, signals) {
+    const readyPromise = Promise.race([
+      signals.whenSignal(CommonSignals.INI_LOAD),
+      signals.whenSignal(CommonSignals.LOAD_END),
+    ]);
     analyticsForDoc(ampDoc, true).then(analytics => {
       const vis = analytics.getAnalyticsRoot(element).getVisibilityManager();
       // Can be any promise or `null`.
@@ -281,6 +285,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
       // 50% vis w/o ini load
       vis.listenElement(element, {visiblePercentageMin: 50}, null,
                         event => {
+                          debugger;
                           this.sendPing(LIFECYCLE_STAGES.visHalf);
                         });
       // 50% vis w ini load
@@ -288,17 +293,20 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
                         {visiblePercentageMin: 50},
                         readyPromise,
                         event => {
+                          debugger;
                           this.sendPing(LIFECYCLE_STAGES.visHalfIniLoad);
                         });
       // first visible
       vis.listenElement(element, {visiblePercentageMin: 1}, null,
                         event => {
+                          debugger;
                           this.sendPing(LIFECYCLE_STAGES.firstVisible);
                         });
       // ini-load
       vis.listenElement(element, {waitFor: 'ini-load'},
                         readyPromise,
                         event => {
+                          debugger;
                           this.sendPing(LIFECYCLE_STAGES.iniLoad);
                         });
 
@@ -307,6 +315,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
                         {visiblePercentageMin: 1, waitFor: 'ini-load', totalTimeMin: 1000},
                         readyPromise,
                         event => {
+                          debugger;
                           this.sendPing(LIFECYCLE_STAGES.visLoadAndOneSec);
                         });
     });

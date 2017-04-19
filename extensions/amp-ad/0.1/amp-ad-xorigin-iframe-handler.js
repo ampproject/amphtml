@@ -222,47 +222,9 @@ export class AmpAdXOriginIframeHandler {
 
     if (this.element_.attributes.type.nodeValue == 'adsense' ||
         this.element_.attributes.type.nodeValue == 'doubleclick') {
-      analyticsForDoc(this.baseInstance_.getAmpDoc(), true).then(analytics => {
-        const vis = analytics.getAnalyticsRoot(this.element_).getVisibilityManager();
-
-        // 50% vis w/o ini load
-        vis.listenElement(this.element_, {visiblePercentageMin: 50}, null,
-                          event => {
-                            console.log(event);
-                          });
-
-        // 50% vis w ini load
-        vis.listenElement(this.element,
-                          {visiblePercentageMin: 50, waitFor: 'ini-load'},
-                          this.signals().whenSignal(CommonSignals.INI_LOAD),
-                          event => {
-                            console.log(event);
-                          });
-        // first visible
-        vis.listenElement(this.element, {visiblePercentageMin: 1}, null,
-                          event => {
-                            console.log(event);
-                          });
-        // ini-load
-        vis.listenElement(this.element, {waitFor: 'ini-load'},
-                          this.signals().whenSignal(CommonSignals.INI_LOAD),
-                          event => {
-                            console.log(event);
-                          });
-        // load
-        vis.listenElement(this.element, {waitFor: 'load'},
-                          this.signals().whenSignal(CommonSignals.LOAD_END),
-                          event => {
-                            console.log(event);
-                          });
-        // 50% vis, ini-load and 1 sec
-        vis.listenElement(this.element,
-                          {visiblePercentageMin: 1, waitFor: 'ini-load', totalTimeMin: 1},
-                          this.signals().whenSignal(CommonSignals.INI_LOAD),
-                          event => {
-                            console.log(event);
-                          });
-      });
+      this.lifecycleReporter_.addPingsForVisibility(
+          this.element_, this.baseInstance_.getAmpDoc(),
+          this.baseInstance_.signals());
     }
 
     // The actual ad load is eariliest of iframe.onload event and no-content.
