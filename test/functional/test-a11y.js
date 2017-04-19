@@ -108,6 +108,7 @@ function assertScreenReaderElement(element, opt_marginLeft) {
   expect(computedStyle.getPropertyValue('padding')).to.equal('0px');
   expect(computedStyle.getPropertyValue('display')).to.equal('block');
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
+  expect(computedStyle.getPropertyValue('transform')).to.equal('none');
 
   if (opt_marginLeft != null && opt_marginLeft !== 0) {
     expect(computedStyle.getPropertyValue('margin')).to.equal(

@@ -237,6 +237,7 @@ i-amphtml-sizer {
   /* ensure no other style sets display to none */
   display: block !important;
   visibility: visible !important;
+  transform: none !important;
 }
 
 /* For author styling. */
