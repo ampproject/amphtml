@@ -17,24 +17,23 @@
 import {loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 
-/* global Navegg: false */
-
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function navegg(global, data) {
-    let acc = data.acc;
-    delete(data.acc);
-    loadScript(global, 'https://tag.navdmp.com/amp.1.0.0.min.js', () => {
-        global[`nvg${acc}`] = new global['AMPNavegg']({
-           acc: acc,
-        });
-        global[`nvg${acc}`].getProfile((nvg_targeting) => {
-            for(var seg in nvg_targeting){
-                data.targeting[seg] =nvg_targeting[seg];
-            };
-            doubleclick(global, data);
-        });
+  const acc = data.acc;
+  let seg;
+  delete data.acc;
+  loadScript(global, 'https://tag.navdmp.com/amp.1.0.0.min.js', () => {
+    global[`nvg${acc}`] = new global['AMPNavegg']({
+      acc,
+    });
+    global[`nvg${acc}`].getProfile(nvgTargeting => {
+      for (seg in nvgTargeting) {
+        data.targeting[seg] = nvgTargeting[seg];
+      };
+      doubleclick(global, data);
+    });
   });
 }
