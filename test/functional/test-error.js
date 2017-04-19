@@ -262,7 +262,6 @@ describe('reportErrorToServer', () => {
     expect(query.f).to.equal('foo.js');
     expect(query.l).to.equal('11');
     expect(query.c).to.equal('22');
-    expect(url.href).to.not.contain('SHORTENED');
   });
 
   it('should accumulate errors', () => {
@@ -278,22 +277,6 @@ describe('reportErrorToServer', () => {
 
     expect(query.m).to.equal('3');
     expect(query.ae).to.equal('1,2');
-  });
-
-  it('should accumulate errors', () => {
-    let message = 'TEST';
-    for (let i = 0; i < 4000; i++) {
-      message += 'a';
-    }
-    const url = parseUrl(getErrorReportUrl(undefined, undefined, undefined,
-        undefined, new Error(message),true));
-    const query = parseQueryString(url.search);
-    expect(url.href.indexOf(
-        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
-
-    expect(query.m).to.match(/^TEST/);
-    expect(url.href).to.have.length(2072);
-    expect(url.href).to.contain('SHORTENED');
   });
 
   it('should not double report', () => {
