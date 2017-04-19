@@ -426,21 +426,16 @@ export class VisibilityTracker extends EventTracker {
    */
   createReportReadyPromise_() {
     const viewer = this.root.getViewer();
-    let resolver = null;
-    const viewerHiddenPromise = new Promise(resolve => {
-      resolver = resolve;
-    });
 
     if (!viewer.isVisible()) {
       return Promise.resolve();
     }
-    viewer.onVisibilityChanged(() => {
-      if (!viewer.isVisible()) {
-        resolver();
-      }
-    });
 
-    return viewerHiddenPromise;
+    return new Promise(resolve => {
+      viewer.onVisibilityChanged(() => {
+        resolve();
+      });
+    });
   }
 
   /**

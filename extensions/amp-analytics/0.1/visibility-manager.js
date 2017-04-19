@@ -200,7 +200,7 @@ export class VisibilityManager {
    * `readyPromise` is resolved, if specified.
    * @param {!Object<string, *>} spec
    * @param {?Promise} readyPromise
-   * @param {?function()} createReportPromiseFunc
+   * @param {?function():!Promise} createReportPromiseFunc
    * @param {function(!Object<string, *>)} callback
    * @return {!UnlistenDef}
    */
@@ -219,7 +219,7 @@ export class VisibilityManager {
    * @param {!Element} element
    * @param {!Object<string, *>} spec
    * @param {?Promise} readyPromise
-   * @param {?function()} createReportPromiseFunc
+   * @param {?function():!Promise} createReportPromiseFunc
    * @param {function(!Object<string, *>)} callback
    * @return {!UnlistenDef}
    */
@@ -236,7 +236,7 @@ export class VisibilityManager {
    * @param {!VisibilityModel} model
    * @param {!Object<string, *>} spec
    * @param {?Promise} readyPromise
-   * @param {?function()} createReportPromiseFunc
+   * @param {?function():!Promise} createReportPromiseFunc
    * @param {function(!Object<string, *>)} callback
    * @param {!Element=} opt_element
    * @return {!UnlistenDef}

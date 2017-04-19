@@ -105,7 +105,7 @@ const EVENT_TRACKERS = {
     klass: VisibilityTracker,
   },
   'hidden-v3': {
-    name: 'hidden-v3',
+    name: 'visible-v3',
     allowedFor: ALLOWED_FOR_ALL,
     klass: VisibilityTracker,
   },
@@ -570,15 +570,13 @@ export class AnalyticsGroup {
    */
   addTrigger(config, handler) {
     let eventType = dev().assertString(config['on']);
-    let trackerType = eventType;
     // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
     if ((eventType == 'visible' || eventType == 'hidden')
         && this.visibilityV3_) {
       eventType += '-v3';
-      trackerType = 'visible-v3';
     }
-    let trackerProfile = EVENT_TRACKERS[trackerType];
-    if (!trackerProfile && !isEnumValue(AnalyticsEventType, trackerType)) {
+    let trackerProfile = EVENT_TRACKERS[eventType];
+    if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
       trackerProfile = EVENT_TRACKERS['custom'];
     }
     if (trackerProfile) {

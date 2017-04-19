@@ -411,6 +411,7 @@ describes.realWin('Events', {amp: 1}, env => {
     let eventResolver, eventPromise;
     let saveCallback;
     let matchEmptySpec;
+    let matchFunc;
 
     beforeEach(() => {
       tracker = new VisibilityTracker(root);
@@ -428,6 +429,15 @@ describes.realWin('Events', {amp: 1}, env => {
 
       matchEmptySpec = sinon.match(arg => {
         return Object.keys(arg).length == 0;
+      });
+      matchFunc = sinon.match(arg => {
+        if (typeof arg == 'function') {
+          const promise = arg();
+          if (typeof promise.then == 'function') {
+            return true;
+          }
+        }
+        return false;
       });
       saveCallback = sinon.match(arg => {
         if (typeof arg == 'function') {
@@ -598,6 +608,30 @@ describes.realWin('Events', {amp: 1}, env => {
       });
     });
 
+    it('should pass func to get reportReady with "hidden" trigger', () => {
+      const config = {visibilitySpec: {selector: '.target', waitFor: 'none'}};
+      visibilityManagerMock
+        .expects('listenElement')
+        .withExactArgs(
+            target,
+            config.visibilitySpec,
+            /* readyPromise */ null,
+            /* createReadyReportPromiseFunc */ matchFunc,
+            saveCallback)
+        .returns(null)
+        .once();
+      tracker.add(analyticsElement, 'hidden-v3', config, eventResolver);
+      // NOTE: createReadyReportPromiseFunc is
+      // fully tested in test-visibility-manager
+      return root.ampdoc.whenReady().then(() => {
+        saveCallback.callback({totalVisibleTime: 10});
+        return eventPromise.then(event => {
+          expect(event.vars.totalVisibleTime).to.equal(10);
+          expect(event.type).to.equal('hidden-v3');
+        });
+      });
+    });
+
     describe('should wait on correct readyPromise', () => {
       const selector = '.target';
 
@@ -686,13 +720,15 @@ describes.realWin('Events', {amp: 1}, env => {
 
     describe('should create correct readyReportPromise', () => {
       it('with viewer hidden', () => {
-        sandbox.stub(tracker.root, 'getViewer', () => {
+        const stub = sandbox.stub(tracker.root, 'getViewer', () => {
           return {
             isVisible: () => {return false;},
           };
         });
         const promise = tracker.createReportReadyPromise_();
-        return promise;
+        return promise.then(() => {
+          expect(stub).to.be.calledOnce;
+        });
       });
     });
   });
