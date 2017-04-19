@@ -35,6 +35,7 @@ import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
+import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {dev} from '../../../src/log';
@@ -275,9 +276,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
-    if (this.ampAnalyticsElement_ && this.ampAnalyticsElement_.parentElement) {
-      this.ampAnalyticsElement_.parentElement.removeChild(
-          this.ampAnalyticsElement_);
+    if (this.ampAnalyticsElement_) {
+      removeElement(this.ampAnalyticsElement_);
       this.ampAnalyticsElement_ = null;
     }
     this.ampAnalyticsConfig_ = null;

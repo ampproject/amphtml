@@ -37,6 +37,7 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
+import {removeElement} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
@@ -192,9 +193,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
-    if (this.ampAnalyticsElement_ && this.ampAnalyticsElement_.parentElement) {
-      this.ampAnalyticsElement_.parentElement.removeChild(
-          this.ampAnalyticsElement_);
+    if (this.ampAnalyticsElement_) {
+      removeElement(this.ampAnalyticsElement_);
       this.ampAnalyticsElement_ = null;
     }
     this.ampAnalyticsConfig_ = null;
