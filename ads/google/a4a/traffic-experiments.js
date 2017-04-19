@@ -28,7 +28,7 @@ import {dev} from '../../../src/log';
 import {viewerForDoc} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
-/** @typedef {{control: string, experiment: string, controlMeasureOnRender: string}} */
+/** @typedef {{control: string, experiment: string, controlMeasureOnRender: ?string}} */
 export let ExperimentInfo;
 
 /** @type {!string} @private */
