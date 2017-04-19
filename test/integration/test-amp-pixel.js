@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import {installXhrService} from '../../src/service/xhr-impl';
-import {xhrFor} from '../../src/services';
+import {
+  depositRequestUrl,
+  withdrawRequest,
+} from '../../testing/test-helper';
 
-const REQUEST_URL = '//localhost:9876/request-pool/';
-
-describes.realWin('AmpForm Integration', {
+describes.realWin('amp-pixel integration test', {
   amp: {
     runtimeOn: true,
     ampdoc: 'single',
   },
+  allowExternalResources: true,
 }, env => {
 
   let win;
@@ -36,33 +37,22 @@ describes.realWin('AmpForm Integration', {
 
   it('should keep referrer', () => {
     const pixel = doc.createElement('amp-pixel');
-    pixel.setAttribute('src', REQUEST_URL + '/set/has-referrer');
+    pixel.setAttribute('src', depositRequestUrl('has-referrer'));
     doc.body.appendChild(pixel);
 
-    return getRequestHeader(REQUEST_URL + '/get/has-referrer').then(headers => {
-      expect(headers.referer).to.be.ok;
+    return withdrawRequest(win, 'has-referrer').then(request => {
+      expect(request.headers.referer).to.be.ok;
     });
   });
 
   it('should remove referrer', () => {
     const pixel = doc.createElement('amp-pixel');
-    pixel.setAttribute('src', REQUEST_URL + '/set/no-referrer');
+    pixel.setAttribute('src', depositRequestUrl('no-referrer'));
     pixel.setAttribute('referrerpolicy', 'no-referrer');
     doc.body.appendChild(pixel);
 
-    return getRequestHeader(REQUEST_URL + '/get/no-referrer').then(headers => {
-      expect(headers.referer).to.not.be.ok;
+    return withdrawRequest(win, 'no-referrer').then(request => {
+      expect(request.headers.referer).to.not.be.ok;
     });
   });
-
-  function getRequestHeader(url) {
-    installXhrService(win);
-    return xhrFor(win).fetchJson(url, {
-      method: 'GET',
-      ampCors: false,
-      credentials: 'omit',
-    }).then(response => {
-      return response.headers;
-    });
-  }
 });

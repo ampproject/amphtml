@@ -30,7 +30,18 @@ var request = require('request');
 var url = require('url');
 
 app.use(bodyParser.json());
-app.use('/request-pool', require('./request-pool'));
+app.use('/request-bank', require('./request-bank'));
+
+// Append ?csp=1 to the URL to turn on the CSP header.
+// TODO: shall we turn on CSP all the time?
+app.use(function(req, res, next) {
+  if (req.query.csp) {
+    res.set({
+      'content-security-policy': "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com; report-uri https://csp-collector.appspot.com/csp/amp",
+    });
+  }
+  next();
+});
 
 app.use('/pwa', function(req, res, next) {
   var file;

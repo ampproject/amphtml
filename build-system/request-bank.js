@@ -14,33 +14,47 @@
  * limitations under the License.
  */
 
+/**
+ * A server side temporary request storage which is useful for testing
+ * browser sent HTTP requests.
+ */
 var app = require('express').Router();
 
-var pool = {};
-app.get('/set/:id', function(req, res) {
-  if (typeof pool[req.params.id] === 'function') {
-    pool[req.params.id](req);
+var bank = {};
+
+/**
+ * Deposit a request. An ID has to be specified. Will override previous request
+ * if the same ID already exists.
+ */
+app.get('/deposit/:id', function(req, res) {
+  if (typeof bank[req.params.id] === 'function') {
+    bank[req.params.id](req);
   } else {
-    pool[req.params.id] = req;
+    bank[req.params.id] = req;
   }
   res.end();
 });
 
-app.get('/get/:id', function(req, res) {
-  var result = pool[req.params.id];
+/**
+ * Withdraw a request. If the request of the given ID is already in the bank,
+ * return it immediately. Otherwise wait until it gets deposited
+ * The same request cannot be withdrawn twice at the same time.
+ */
+app.get('/withdraw/:id', function(req, res) {
+  var result = bank[req.params.id];
   if (typeof result === 'function') {
-    return res.status(500).send('another client is waiting for this ID');
+    return res.status(500).send('another client is withdrawing this ID');
   }
   const callback = function(result) {
     res.json({
       headers: result.headers,
     });
-    delete pool[req.params.id];
+    delete bank[req.params.id];
   };
   if (result) {
     callback(result);
   } else {
-    pool[req.params.id] = callback;
+    bank[req.params.id] = callback;
   }
 });
 

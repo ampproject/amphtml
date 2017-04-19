@@ -86,7 +86,7 @@ export class AmpPixel extends BaseElement {
           .then(src => {
             const pixel = this.referrerPolicy_
                 ? createNoReferrerPixel(this.element, src)
-                : createImagePixel(src);
+                : createImagePixel(this.win, src);
             dev().info(TAG, 'pixel triggered: ', src);
             return pixel;
           });
@@ -114,26 +114,28 @@ export class AmpPixel extends BaseElement {
  */
 function createNoReferrerPixel(parentElement, src) {
   if (isReferrerPolicySupported()) {
-    return createImagePixel(src, true);
+    return createImagePixel(parentElement.ownerDocument.defaultView, src, true);
   } else {
     // if "referrerPolicy" is not supported, use iframe wrapper
     // to scrub the referrer.
     const iframe = createElementWithAttributes(
         /** @type {!Document} */ (parentElement.ownerDocument), 'iframe', {
-          src: `javascript: '<img src="${src}">'`,
+          src: 'about:blank',
         });
     parentElement.appendChild(iframe);
+    createImagePixel(iframe.contentWindow, src);
     return iframe;
   }
 }
 
 /**
+ * @param {!Window} win
  * @param {string} src
  * @param {boolean=} noReferrer
  * @returns {!Image}
  */
-function createImagePixel(src, noReferrer) {
-  const image = new Image();
+function createImagePixel(win, src, noReferrer) {
+  const image = new win.Image();
   if (noReferrer) {
     image.referrerPolicy = 'no-referrer';
   }
