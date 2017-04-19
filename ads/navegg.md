@@ -34,8 +34,8 @@ The Navegg adapter only supports Doubleclick for now.
 
 ### Configuration
 
-For any help, please contact @
-[Rubicon Project](https://www.navegg.com/en/institutional/#contact])
+For any help, please contact
+[us](https://www.navegg.com/en/institutional/#contact])
 
 
 For the most up-to-date list of Doubleclick supported parameters and usage please refer to Doubleclick reference guide [here](google/doubleclick.md).
