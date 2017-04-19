@@ -28,7 +28,7 @@ import {dev} from '../../../src/log';
 import {viewerForDoc} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
-/** @typedef {{control: string, experiment: string}} */
+/** @typedef {{control: string, experiment: string, controlMeasureOnRender: string}} */
 export let ExperimentInfo;
 
 /** @type {!string} @private */
@@ -62,13 +62,11 @@ const INTERNALLY_SELECTED_ID = '2088462';
  * @param {!ExperimentInfo} internalBranches experiment and control branch IDs to
  *   use when experiment is triggered internally (i.e., via client-side
  *   selection).
- * @param {!string} controlWithDelayedId  Experiment ID string for the branch
- *   that counts Delayed Fetch on render
  * @return {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
-    externalBranches, internalBranches, controlWithDelayedId) {
+    externalBranches, internalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
     return false;
@@ -76,7 +74,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
 
   const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
       experimentName, externalBranches.control,
-      externalBranches.experiment, MANUAL_EXPERIMENT_ID, controlWithDelayedId);
+      externalBranches.experiment, externalBranches.controlMeasureOnRender,
+      MANUAL_EXPERIMENT_ID);
   const experimentInfo = {};
   experimentInfo[experimentName] = internalBranches;
   // Note: Because the same experimentName is being used everywhere here,
@@ -145,14 +144,14 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   the overall experiment.
  * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
  *   branch of the overall experiment.
- * @param {!string} manualId  ID of the manual experiment.
- * @param {!string} controlWithDelayedId  Experiment ID string for the branch
+ * @param {!string} controlMeasureOnRender  Experiment ID string for the branch
  *   that counts Delayed Fetch on render
+ * @param {!string} manualId  ID of the manual experiment.
  * @return {boolean}  Whether the experiment state was set from a command-line
  *   parameter or not.
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
-    controlBranchId, treatmentBranchId, manualId, controlWithDelayedId) {
+    controlBranchId, treatmentBranchId, controlMeasureOnRender, manualId) {
   const expParam = viewerForDoc(element).getParam('exp') ||
       parseQueryString(win.location.search)['exp'];
   if (!expParam) {
@@ -171,7 +170,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '0': null, // TODO Ensure does not generate exp id
     '1': controlBranchId,
     '2': treatmentBranchId,
-    '3': controlWithDelayedId,
+    '3': controlMeasureOnRender,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);

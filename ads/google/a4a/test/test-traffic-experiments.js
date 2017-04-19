@@ -42,7 +42,6 @@ import {
   DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
   DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
   DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-  DOUBLECLICK_COUNT_ON_RENDER,
 } from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js'; // eslint-disable-line
 import {EXPERIMENT_ATTRIBUTE} from '../utils';
 import {dev} from '../../../../src/log';
@@ -559,8 +558,7 @@ describe('all-traffic-experiments-tests', () => {
           DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
           DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
         expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
-          external, internal,
-          DOUBLECLICK_COUNT_ON_RENDER)).to.equal(test.shouldServeFastFetch);
+          external, internal)).to.equal(test.shouldServeFastFetch);
         expectCorrectBranchOnly(element, test.branchId);
         expect(win.document.cookie).to.be.null;
       });

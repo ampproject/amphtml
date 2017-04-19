@@ -32,9 +32,6 @@ import {isExperimentOn} from '../../../src/experiments';
 /** @const {string} */
 const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 
-/** @type {!string} @private */
-export const DOUBLECLICK_COUNT_ON_RENDER = '2093327';
-
 // The following experiment IDs are used by Google-side servers to
 // understand what experiment is running and what mode the A4A code is
 // running in.  In this experiment phase, we're testing 8 different
@@ -60,12 +57,14 @@ export const DOUBLECLICK_COUNT_ON_RENDER = '2093327';
 export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   control: '117152660',
   experiment: '117152661',
+  controlMeasureOnRender: '2093327',
 };
 
 /** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
 export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
   control: '2092619',
   experiment: '2092620',
+  controlMeasureOnRender: '2093327',
 };
 
 /** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
@@ -114,7 +113,7 @@ export function doubleclickIsA4AEnabled(win, element) {
   }
   const enableA4A = googleAdsIsA4AEnabled(
           win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          externalBranches, internalBranches, DOUBLECLICK_COUNT_ON_RENDER) ||
+          externalBranches, internalBranches) ||
       (a4aRequested && (isProxyOrigin(win.location) ||
        getMode(win).localDev || getMode(win).test));
   if (enableA4A && a4aRequested && !isInManualExperiment(element)) {

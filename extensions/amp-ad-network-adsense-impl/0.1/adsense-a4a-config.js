@@ -52,6 +52,7 @@ const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
   control: '117152650',
   experiment: '117152651',
+  controlMeasureOnRender: '2093326',
 };
 
 /** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo}  */
@@ -59,9 +60,6 @@ export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
   control: '117152670',
   experiment: '117152671',
 };
-
-/** @type {!string} @private */
-const ADSENSE_COUNT_ON_RENDER = '2093326';
 
 /**
  * @param {!Window} win
@@ -73,6 +71,5 @@ export function adsenseIsA4AEnabled(win, element) {
       googleAdsIsA4AEnabled(
         win, element, ADSENSE_A4A_EXPERIMENT_NAME,
         ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-        ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
-        ADSENSE_COUNT_ON_RENDER);
+        ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES);
 }
