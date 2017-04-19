@@ -201,3 +201,4 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   pingParameters[renderingMethodKey] = headers.get(renderingMethodHeader);
   reporter.setPingParameters(pingParameters);
 }
+
