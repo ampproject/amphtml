@@ -31,11 +31,17 @@ import {
   googleLifecycleReporterFactory,
   ReporterNamespace,
 } from '../../../ads/google/a4a/google-data-reporter';
+import {isInExperiment} from '../../../ads/google/a4a/traffic-experiments';
+import {
+  buildAmpAnalyticsConfig,
+  getCorrelator,
+} from '../../../ads/google/a4a/utils';
 import {user, dev} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
+import {insertAnalyticsElement} from '../../../src/analytics';
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -96,6 +102,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {!./layout-delay-meter.LayoutDelayMeter} */
     this.layoutDelayMeter_ = new LayoutDelayMeter(this.win);
+
+    /** @type {?string} */
+    this.adType = null;
   }
 
   /** @override */
@@ -124,9 +133,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.placeholder_ = this.getPlaceholder();
     this.fallback_ = this.getFallback();
 
-    const adType = this.element.getAttribute('type');
-    this.config = adConfig[adType];
-    user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
+    this.adType = this.element.getAttribute('type');
+    this.config = adConfig[this.adType];
+    user().assert(this.config,
+                  `Type "${this.adType}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
     this.uiHandler.init();
@@ -243,7 +253,26 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           this.element, undefined, opt_context);
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
           this);
-      return this.xOriginIframeHandler_.init(iframe);
+      const frameLoadPromise = this.xOriginIframeHandler_.init(iframe);
+
+      if ((this.adType == 'adsense' ||
+          this.adType == 'doubleclick') &&
+          (isInExperiment(this.element,  /** Dblclk a4acontrol */'117152660')
+          || isInExperiment(
+              this.element,  /** Adsense a4a control */ '117152650'))
+         ) {
+        const correlator = getCorrelator(this.win);
+        const slotId = this.element.getAttribute('data-amp-slot-index');
+        const urls = [
+          'https://csi.gstatic.com/csi?fromAnalytics=1' +
+              `&c=${correlator}&slotId=${slotId}&a4a=1`,
+        ];
+        insertAnalyticsElement(
+            this.element,
+            buildAmpAnalyticsConfig(this.win, this.element, urls, false),
+            /** Load amp-analytics extension */ true);
+      }
+      return frameLoadPromise;
     });
   }
 
