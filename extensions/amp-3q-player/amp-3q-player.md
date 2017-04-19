@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Main</td>
+    <td>In Development</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -48,6 +48,16 @@ limitations under the License.
 **data-id** (required)
 
 sdnPlayoutId from 3Q SDN
+
+**autoplay**
+
+If this attribute is present, and the browser supports autoplay:
+
+* the video is automatically muted before autoplay starts
+* when the video is scrolled out of view, the video is paused
+* when the video is scrolled into view, the video resumes playback
+* when the user taps the video, the video is unmuted
+* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
 ## Validation
 
