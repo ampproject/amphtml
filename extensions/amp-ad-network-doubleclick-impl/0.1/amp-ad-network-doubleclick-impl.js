@@ -206,10 +206,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
 
-    if (this.lifecycleReporter_.addPingsForVisibility) {
-      this.lifecycleReporter_.addPingsForVisibility(
-          this.element, this.getAmpDoc(), this.signals());
-    }
+    this.lifecycleReporter_.addPingsForVisibility(
+        this.element, this.signals());
 
     setStyles(dev().assertElement(this.iframe), {
       width: `${this.size_.width}px`,

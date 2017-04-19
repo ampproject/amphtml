@@ -266,7 +266,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
 
     this.lifecycleReporter_.addPingsForVisibility(
-        this.element, this.getAmpDoc(), this.signals());
+        this.element, this.signals());
 
     setStyles(dev().assertElement(this.iframe), {
       width: `${this.size_.width}px`,

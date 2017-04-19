@@ -56,10 +56,9 @@ export class BaseLifecycleReporter {
    * To be overridden.
    *
    * @param {!Element} unusedElement Amp ad element we are measuring.
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpDoc
    * @param {!Object} unusedSignals Signals object for element.
    */
-  addPingsForVisibility(unusedElement, unusedAmpDoc, unusedSignals) {}
+  addPingsForVisibility(unusedElement, unusedSignals) {}
 
   /**
    * A beacon function that will be called at various stages of the lifecycle.
@@ -286,16 +285,15 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * Adds CSI pings for various visibility measurements on element.
    *
    * @param {!Element} element Amp ad element we are measuring.
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
    * @param {!Object} signals Signals object for element.
    * @override
    */
-  addPingsForVisibility(element, ampDoc, signals) {
+  addPingsForVisibility(element, signals) {
     const readyPromise = Promise.race([
       signals.whenSignal(CommonSignals.INI_LOAD),
       signals.whenSignal(CommonSignals.LOAD_END),
     ]);
-    analyticsForDoc(ampDoc, true).then(analytics => {
+    analyticsForDoc(element, true).then(analytics => {
       const vis = analytics.getAnalyticsRoot(element).getVisibilityManager();
       // Can be any promise or `null`.
       // Element must be an AMP element at this time.
