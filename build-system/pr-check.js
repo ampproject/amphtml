@@ -25,7 +25,6 @@
  */
 const child_process = require('child_process');
 const path = require('path');
-const performance = require('performance');
 const minimist = require('minimist');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
