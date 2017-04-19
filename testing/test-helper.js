@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {installXhrService} from '../src/service/xhr-impl';
-import {xhrFor} from '../src/services';
+import {xhrServiceForTesting} from '../src/service/xhr-impl';
 import {getService, getServiceForDoc} from '../src/service';
 
 export function stubService(sandbox, win, serviceId, method) {
@@ -74,8 +73,7 @@ export function depositRequestUrl(id) {
 
 export function withdrawRequest(win, id) {
   const url = REQUEST_URL + 'withdraw/' + id;
-  installXhrService(win);
-  return xhrFor(win).fetchJson(url, {
+  return xhrServiceForTesting(win).fetchJson(url, {
     method: 'GET',
     ampCors: false,
     credentials: 'omit',
