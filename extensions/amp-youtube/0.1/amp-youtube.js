@@ -191,7 +191,10 @@ class AmpYoutube extends AMP.BaseElement {
 
     return this.loadPromise(iframe)
         .then(() => this.listenToFrame_())
-        .then(() => this.playerReadyPromise_);
+        .then(() => {
+          this.element.dispatchCustomEvent(VideoEvents.LOAD);
+          this.playerReadyResolver_(this.iframe_);
+        });
   }
 
   /** @override */
@@ -259,10 +262,7 @@ class AmpYoutube extends AMP.BaseElement {
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data.event == 'onReady') {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      this.playerReadyResolver_(this.iframe_);
-    } else if (data.event == 'infoDelivery' &&
+    if (data.event == 'infoDelivery' &&
         data.info && data.info.playerState !== undefined) {
       this.playerState_ = data.info.playerState;
       if (this.playerState_ == PlayerStates.PAUSED) {
