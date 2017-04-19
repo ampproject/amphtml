@@ -374,6 +374,11 @@ export function getErrorReportUrl(message, filename, line, col, error,
   url += '&fr=' + encodeURIComponent(self.location.originalHash
       || self.location.hash);
 
+  // Google App Engine maximum URL length.
+  if (url.length >= 2072) {
+    url = url.substr(0, 2072 - 10 /* length of suffix */)
+        + '&SHORTENED';
+  }
   return url;
 }
 
