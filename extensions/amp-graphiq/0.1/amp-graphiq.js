@@ -52,6 +52,9 @@ class AmpGraphiq extends AMP.BaseElement {
     /** @private {!string} */
     this.href_ = '';
 
+    /** @private {!string} */
+    this.domain_ = '';
+
     /** @private {?Function} */
     this.unlistenMessage_ = null;
   }
@@ -60,7 +63,7 @@ class AmpGraphiq extends AMP.BaseElement {
   * @override
   */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://w.graphiq.com', opt_onLayout);
+    this.preconnect.url(this.domain_, opt_onLayout);
   }
 
   /** @override */
@@ -70,6 +73,8 @@ class AmpGraphiq extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const isFrozen = this.element.getAttribute('data-frozen');
+    this.domain_ = isFrozen ? 'https://sw.graphiq.com' : 'https://w.graphiq.com';
     this.widgetId_ = user().assert(
         this.element.getAttribute('data-widget-id'),
         'The data-widget-id attribute is required for <amp-graphiq> %s',
@@ -103,7 +108,7 @@ class AmpGraphiq extends AMP.BaseElement {
         this.element.getAttribute('alt') || '');
     iframe.setAttribute('height', initialHeight);
     iframe.setAttribute('width', initialWidth);
-    iframe.src = 'https://w.graphiq.com/w/' + encodeURIComponent(this.widgetId_) +
+    iframe.src = this.domain_ + '/w/' + encodeURIComponent(this.widgetId_) +
         '?data-width=' + encodeURIComponent(initialWidth) +
         '&data-height=' + encodeURIComponent(initialHeight) +
         '&data-href=' + encodeURIComponent(this.href_) +
@@ -125,7 +130,7 @@ class AmpGraphiq extends AMP.BaseElement {
 
   /** @private */
   handleGraphiqMessages_(event) {
-    if (event.origin != 'https://w.graphiq.com' ||
+    if (event.origin != this.domain_ ||
         event.source != this.iframe_.contentWindow) {
       return;
     }

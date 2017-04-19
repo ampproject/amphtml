@@ -36,7 +36,7 @@ describe('amp-graphiq', () => {
     sandbox.restore();
   });
 
-  function getGraphiq(widgetId, opt_responsive, opt_beforeLayoutCallback) {
+  function getGraphiq(widgetId, opt_responsive, opt_beforeLayoutCallback, opt_isFrozen) {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const graphiq = iframe.doc.createElement('amp-graphiq');
@@ -46,6 +46,9 @@ describe('amp-graphiq', () => {
       graphiq.setAttribute('alt', 'Testing');
       if (opt_responsive) {
         graphiq.setAttribute('layout', 'responsive');
+      }
+      if (opt_isFrozen) {
+        graphiq.setAttribute('data-frozen', 'true');
       }
       // Placeholder
       const img = iframe.doc.createElement('amp-img');
@@ -82,27 +85,30 @@ describe('amp-graphiq', () => {
     // expect(image.getAttribute('referrerpolicy')).to.equal('origin');
   }
 
-  function testIframe(iframe) {
+  function testIframe(iframe, widgetId, opt_isFrozen = false) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('https://w.graphiq.com/w/dUuriXJo2qx' +
+    expect(iframe.src).to.equal('https://' +
+      (opt_isFrozen ? 'sw' : 'w') + '.graphiq.com/w/' + widgetId +
       '?data-width=600&data-height=512' +
-      '&data-href=https%3A%2F%2Fwww.graphiq.com%2Fvlp%2FdUuriXJo2qx' +
+      '&data-href=https%3A%2F%2Fwww.graphiq.com%2Fvlp%2F' + widgetId +
       '&data-amp-version=true');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Graphiq: Testing');
   }
 
   it('renders', () => {
-    return getGraphiq('dUuriXJo2qx').then(graphiq => {
-      testIframe(graphiq.querySelector('iframe'));
+    const widgetId = 'dUuriXJo2qx';
+    return getGraphiq(widgetId).then(graphiq => {
+      testIframe(graphiq.querySelector('iframe'), widgetId);
       testImage(graphiq.querySelector('amp-img'));
     });
   });
 
   it('removes iframe after unlayoutCallback', () => {
-    return getGraphiq('dUuriXJo2qx').then(graphiq => {
+    const widgetId = 'dUuriXJo2qx';
+    return getGraphiq(widgetId).then(graphiq => {
       const placeholder = graphiq.querySelector('[placeholder]');
-      testIframe(graphiq.querySelector('iframe'));
+      testIframe(graphiq.querySelector('iframe'), widgetId);
       const obj = graphiq.implementation_;
       obj.unlayoutCallback();
       expect(graphiq.querySelector('iframe')).to.be.null;
@@ -136,6 +142,14 @@ describe('amp-graphiq', () => {
 
       expect(attemptChangeHeight).to.be.calledOnce;
       expect(attemptChangeHeight.firstCall.args[0]).to.equal(newHeight);
+    });
+  });
+
+  it('support sw.graphiq.com domain', () => {
+    const widgetId = '20QHse7RHkp';
+    return getGraphiq(widgetId, false, false, true).then(graphiq => {
+      testIframe(graphiq.querySelector('iframe'), widgetId, true);
+      testImage(graphiq.querySelector('amp-img'));
     });
   });
 
