@@ -25,7 +25,6 @@
  */
 const child_process = require('child_process');
 const path = require('path');
-const performance = require('performance');
 const minimist = require('minimist');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
@@ -36,7 +35,7 @@ const gulp = 'node_modules/gulp/bin/gulp.js';
  * @return {DOMHighResTimeStamp}
  */
 function startTimer(functionName) {
-  const startTime = performance.now();
+  const startTime = Date.now();
   console.log(`\npr-check.js: Starting ${functionName}...\n`);
 }
 
@@ -46,7 +45,7 @@ function startTimer(functionName) {
  * @return {DOMHighResTimeStamp}
  */
 function stopTimer(functionName, startTime) {
-  const endTime = performance.now();
+  const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
   console.log(
       `\npr-check.js: Done executing ${functionName}. Total time: +
