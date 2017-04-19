@@ -57,30 +57,35 @@ const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   control: '117152660',
   experiment: '117152661',
+  controlMeasureOnRender: '2093327',
 };
 
 /** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
 export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
   control: '2092619',
   experiment: '2092620',
+  controlMeasureOnRender: '2093327',
 };
 
 /** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
 export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   control: '117152680',
   experiment: '117152681',
+  controlMeasureOnRender: null,
 };
 
 /** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
 export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
   control: '2092613',
   experiment: '2092614',
+  controlMeasureOnRender: null,
 };
 
 /** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
 export const DOUBLECLICK_A4A_BETA_BRANCHES = {
   control: '2077830',
   experiment: '2077831',
+  controlMeasureOnRender: null,
 };
 
 export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
