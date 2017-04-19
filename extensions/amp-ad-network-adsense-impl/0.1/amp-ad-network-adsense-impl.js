@@ -253,6 +253,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
+      dev().assert(!this.ampAnalyticsElement_);
       this.ampAnalyticsElement_ =
           insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
@@ -274,7 +275,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
-    if (this.ampAnalyticsElement_) {
+    dev().assert(this.ampAnalyticsElement_);
+    if(this.ampAnalyticsElement_ && this.ampAnalyticsElement_.parentElement) {
       this.ampAnalyticsElement_.parentElement.removeChild(
           this.ampAnalyticsElement_);
       this.ampAnalyticsElement_ = null;

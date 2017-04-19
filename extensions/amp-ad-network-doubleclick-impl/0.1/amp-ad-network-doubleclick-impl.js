@@ -192,7 +192,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
-    if (this.ampAnalyticsElement_) {
+    dev().assert(this.ampAnalyticsElement_);
+    if (this.ampAnalyticsElement_ && this.ampAnalyticsElement_.parentElement) {
       this.ampAnalyticsElement_.parentElement.removeChild(
           this.ampAnalyticsElement_);
       this.ampAnalyticsElement_ = null;
