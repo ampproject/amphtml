@@ -4,7 +4,7 @@ All members, committers and volunteers in this community are required to act acc
 
 ## Responsible and enforcing this code of conduct
 
-If you are being harassed, notice that someone else is being harassed, or have any other concerns, please contact us immediately: contact Malte Ubl (malte.ubl+coc@gmail.com) or Dima Voytenko dimav+coc@google.com. We are here to help you. Your reports will be taken seriously and not dismissed or argued with.
+If you are being harassed, notice that someone else is being harassed, or have any other concerns, please contact us immediately: contact xax (xaxiclouddev@gmail.com). 
 
 ## What we believe in and how we act
 
