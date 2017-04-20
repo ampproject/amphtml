@@ -23,6 +23,7 @@ import {whenDocumentComplete} from '../document-ready';
 import {urls} from '../config';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
+import {rateLimit} from '../utils/rate-limit';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -286,6 +287,17 @@ export class Performance {
       };
       this.viewer_.sendMessage('sendCsi', payload, /* cancelUnsent */true);
     }
+  }
+
+  /**
+   * Flush with a rate limit of 10 per second.
+   */
+  throttledFlush() {
+    if (!this.throttledFlush_) {
+      /** @private {function()} */
+      this.throttledFlush_ = rateLimit(this.win, this.flush, 100);
+    }
+    this.throttledFlush_();
   }
 
   /**

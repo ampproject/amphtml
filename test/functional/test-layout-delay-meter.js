@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {LayoutDelayMeter} from '../layout-delay-meter';
+import {LayoutDelayMeter} from '../../src/layout-delay-meter';
 import {
   installPerformanceService,
   performanceFor,
-} from '../../../../src/service/performance-impl';
+} from '../../src/service/performance-impl';
 import * as lolex from 'lolex';
 
 describes.realWin('layout-delay-meter', {
@@ -42,7 +42,7 @@ describes.realWin('layout-delay-meter', {
     clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
     tickSpy = sandbox.spy(perf, 'tickDelta');
 
-    meter = new LayoutDelayMeter(win);
+    meter = new LayoutDelayMeter(win, 2);
   });
 
   it('should tick when there is a delay', () => {
