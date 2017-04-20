@@ -313,7 +313,7 @@ function main(argv) {
   if (buildTargets.has('BUILD_SYSTEM')) {
     // command.testBuildSystem();
     // Testing. Remove.
-    command.runAllCommands();
+    runAllCommands();
   }
 
   if (buildTargets.has('RUNTIME')) {
