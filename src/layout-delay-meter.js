@@ -15,6 +15,7 @@
  */
 
 import {performanceForOrNull} from './services';
+import {dev} from './log';
 
 const LABEL_MAP = {
   0: 'cld',
@@ -34,7 +35,7 @@ export class LayoutDelayMeter {
   constructor(win, priority) {
     /** @private {!Window} */
     this.win_ = win;
-    /** @private {?../../../src/service/performance-impl.Performance} */
+    /** @private {?./service/performance-impl.Performance} */
     this.performance_ = performanceForOrNull(win);
     /** @private {?number} */
     this.firstInViewportTime_ = null;
@@ -76,7 +77,7 @@ export class LayoutDelayMeter {
     }
     const delay = this.win_.Math.max(
         this.firstLayoutTime_ - this.firstInViewportTime_, 0);
-    this.performance_.tickDelta(this.label_, delay);
+    this.performance_.tickDelta(dev().assertString(this.label_), delay);
     this.performance_.throttledFlush();
     this.done_ = true;
   }
