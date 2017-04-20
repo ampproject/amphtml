@@ -156,6 +156,8 @@ field_ref:
 field_name:
     NAME
       {$$ = yytext;}
+  | NUMERIC
+      {$$ = yytext;}
   ;
 
 /**

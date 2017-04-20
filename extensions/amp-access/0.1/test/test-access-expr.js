@@ -200,6 +200,7 @@ describe('evaluateAccessExpr', () => {
         str: 'A',
         num: 11,
         bool: true,
+        12: true,
       },
     };
 
@@ -214,11 +215,13 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('obj.str', resp)).to.be.true;
     expect(evaluateAccessExpr('obj.num', resp)).to.be.true;
     expect(evaluateAccessExpr('obj.other', resp)).to.be.false;
+    expect(evaluateAccessExpr('obj.12', resp)).to.be.true;
 
     expect(evaluateAccessExpr('NOT obj.bool', resp)).to.be.false;
     expect(evaluateAccessExpr('NOT obj.str', resp)).to.be.false;
     expect(evaluateAccessExpr('NOT obj.num', resp)).to.be.false;
     expect(evaluateAccessExpr('NOT obj.other', resp)).to.be.true;
+    expect(evaluateAccessExpr('NOT obj.12', resp)).to.be.false;
   });
 
   it('should shortcircuit nested expressions with missing parent', () => {
