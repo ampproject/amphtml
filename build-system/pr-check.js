@@ -216,19 +216,35 @@ const command = {
     stopTimer('buildRuntime: gulp dist --fortesting', startTime);
   },
   testRuntime: function() {
-    const startTime = startTimer('testRuntime');
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
+    let startTime = startTimer('testRuntime: gulp dep-check');
     execOrDie(`${gulp} dep-check`);
+    stopTimer('testRuntime: gulp dep-check', startTime);
+
     // Unit tests with Travis' default chromium
+    let startTime = startTimer('testRuntime: gulp test --nobuild --compiled');
     execOrDie(`${gulp} test --nobuild --compiled`);
+    stopTimer('testRuntime: gulp test --nobuild --compiled', startTime);
+
     // Integration tests with all saucelabs browsers
+    let startTime = startTimer(
+        'testRuntime: gulp test --nobuild --saucelabs ' +
+        '--integration --compiled');
     execOrDie(`${gulp} test --nobuild --saucelabs --integration --compiled`);
+    stopTimer(
+        'testRuntime: gulp test --nobuild --saucelabs --integration --compiled',
+        startTime);
+
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
+    let startTime = startTimer(
+        'testRuntime: gulp test --nobuild --saucelabs --oldchrome --compiled');
     execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
-    stopTimer('testRuntime', startTime);
+    stopTimer(
+        'testRuntime: gulp test --nobuild --saucelabs --oldchrome --compiled',
+        startTime);
   },
   presubmit: function() {
     const startTime = startTimer('presubmit');
