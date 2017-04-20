@@ -756,10 +756,6 @@ export class BaseElement {
     this.element.getResources()./*OK*/scheduleUnlayout(this.element, elements);
   }
 
-  scheduleMeasure(elements) {
-    this.element.getResources().scheduleMeasure(this.element, elements);
-  }
-
   /**
    * Update inViewport state of the specified children element or elements.
    * Resource manager will perform the actual changes to the inViewport state

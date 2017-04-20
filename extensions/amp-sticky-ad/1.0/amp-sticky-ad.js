@@ -69,8 +69,6 @@ class AmpStickyAd extends AMP.BaseElement {
     this.ad_.whenBuilt().then(() => {
       this.mutateElement(() => {
         toggle(this.element, true);
-      }).then(() => {
-        this.scheduleMeasure(this.ad_);
       });
     });
 

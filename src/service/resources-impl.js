@@ -698,23 +698,6 @@ export class Resources {
   }
 
   /**
-   * Schedules measure for the specified sub-elements that are children of the
-   * parent element. The parent element may choose to send this signal
-   * because it's an owner (see {@link setOwner}) and it does a mutations that
-   * may affect its children elements. In this case parent element may want to
-   * schedule measure for its children elements
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  scheduleMeasure(parentElement, subElements) {
-    const parentResource = Resource.forElement(parentElement);
-    subElements = elements_(subElements);
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.measure();
-    });
-  }
-
-  /**
    * Updates the priority of the resource. If there are tasks currently
    * scheduled, their priority is updated as well.
    * @param {!Element} element
@@ -836,6 +819,7 @@ export class Resources {
       },
       mutate: () => {
         mutator();
+
         // Mark itself and children for re-measurement.
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
@@ -1305,7 +1289,8 @@ export class Resources {
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner()) {
+        if (r.hasOwner() && !r.isMeasureRequested()) {
+          // If element has owner, and measure is not requested, do nothing.
           continue;
         }
         if (relayoutAll ||
