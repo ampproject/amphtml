@@ -41,7 +41,7 @@
     "browserify": "14.0.0",
     "chai": "3.5.0",
     "chai-as-promised": "5.2.0",
-    "cssnano": "3.3.2",
+    "cssnano": "3.7.5",
     "del": "2.2.0",
     "eslint": "3.14.1",
     "eslint-plugin-google-camelcase": "0.0.2",
