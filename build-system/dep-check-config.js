@@ -104,6 +104,8 @@ exports.rules = [
       'ads/google/a4a/**->src/services.js',
       'ads/google/a4a/performance.js->src/services.js',
       'ads/google/a4a/performance.js->src/service/variable-source.js',
+      'ads/google/a4a/performance.js->src/common-signals.js',
+      'ads/google/a4a/performance.js->src/analytics.js',
       // alp handler needs to depend on src files
       'ads/alp/handler.js->src/dom.js',
       'ads/alp/handler.js->src/config.js',

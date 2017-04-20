@@ -24,6 +24,7 @@ import {
   removeChildren,
   createElementWithAttributes,
 } from '../../../src/dom';
+
 import {cancellation, isCancellation} from '../../../src/error';
 import {
   installAnchorClickInterceptor,
@@ -165,6 +166,11 @@ export const LIFECYCLE_STAGES = {
   signatureVerifySuccess: '19',
   networkError: '20',
   friendlyIframeIniLoad: '21',
+  visHalf: '22',
+  visHalfIniLoad: '23',
+  firstVisible: '24',
+  visLoadAndOneSec: '25',
+  iniLoad: '26',
 };
 
 /**
@@ -1128,6 +1134,7 @@ export class AmpA4A extends AMP.BaseElement {
         }
       });
     }
+
     return installFriendlyIframeEmbed(
         this.iframe, this.element, {
           host: this.element,
