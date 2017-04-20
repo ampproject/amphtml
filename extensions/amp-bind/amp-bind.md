@@ -195,7 +195,7 @@ Expressions are similar to JavaScript with some important differences.
 
 - Expressions may only access the containing document's [state](#state).
 - Expressions **do not** have access to globals like `window` or `document`.
-- Only [whitelisted functions](#white-listed-functions) are allowed.
+- Only [white-listed functions](#white-listed-functions) are allowed.
 - Custom functions, classes and some control flow statements (e.g. `for`) are disallowed.
 - Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
 - A single expression is currently capped at 50 operands for performance reasons. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
