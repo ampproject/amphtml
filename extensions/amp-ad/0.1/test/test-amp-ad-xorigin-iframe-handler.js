@@ -55,6 +55,9 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     adImpl.getFallback = () => {
       return null;
     };
+    adImpl.lifecycleReporter = {
+      addPingsForVisibility: unusedElement => {},
+    };
     document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
     iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
