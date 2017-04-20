@@ -399,21 +399,9 @@ export class Bind {
       }
       const element = dev().assertElement(node);
       const tagName = element.tagName;
-      const observeElement = elementToObserve => {
-        this.mutationObserver_.observe(elementToObserve, {childList: true});
-      };
 
-      if (typeof element.getDynamicElementContainers === 'function') {
-        element.getDynamicElementContainers().forEach(observeElement);
-      } else if (element.tagName === 'FORM') {
-        ampFormServiceForDoc(this.ampdoc).then(ampFormService => {
-          return ampFormService.whenInitialized();
-        }).then(() => {
-          const form = formOrNullForElement(element);
-          dev().assert(form, 'Could not find form implementation for element.');
-          form.getDynamicElementContainers().forEach(observeElement);
-        });
-      }
+      // Begin observing element if it has dynamic children.
+      this.observeElementIfNecessary_(element);
 
       let boundProperties = this.scanElement_(element);
       // Stop scanning once |limit| bindings are reached.
@@ -507,6 +495,28 @@ export class Bind {
       }
     }
     return null;
+  }
+
+  /**
+   * Observes the dynamic children of `element` for mutations, if any,
+   * for rescanning for bindable attributes.
+   * @param {!Element} element
+   */
+  observeElementIfNecessary_(element) {
+    const observeElement = elementToObserve => {
+      this.mutationObserver_.observe(elementToObserve, {childList: true});
+    };
+    if (typeof element.getDynamicElementContainers === 'function') {
+      element.getDynamicElementContainers().forEach(observeElement);
+    } else if (element.tagName === 'FORM') {
+      ampFormServiceForDoc(this.ampdoc).then(ampFormService => {
+        return ampFormService.whenInitialized();
+      }).then(() => {
+        const form = formOrNullForElement(element);
+        dev().assert(form, 'Could not find form implementation for element.');
+        form.getDynamicElementContainers().forEach(observeElement);
+      });
+    }
   }
 
   /**
