@@ -36,6 +36,7 @@ describes.realWin('amp-pixel integration test', {
   });
 
   it.skip('should keep referrer', () => {
+    // TODO(@lannka): unskip this test
     const pixel = doc.createElement('amp-pixel');
     pixel.setAttribute('src', depositRequestUrl('has-referrer'));
     doc.body.appendChild(pixel);
@@ -46,6 +47,7 @@ describes.realWin('amp-pixel integration test', {
   });
 
   it.skip('should remove referrer', () => {
+    // TODO(@lannka): unskip this test
     const pixel = doc.createElement('amp-pixel');
     pixel.setAttribute('src', depositRequestUrl('no-referrer'));
     pixel.setAttribute('referrerpolicy', 'no-referrer');
