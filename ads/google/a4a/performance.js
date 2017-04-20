@@ -296,25 +296,25 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
       // Can be any promise or `null`.
       // Element must be an AMP element at this time.
       // 50% vis w/o ini load
-      vis.listenElement(element, {visiblePercentageMin: 50}, null,
+      vis.listenElement(element, {visiblePercentageMin: 50}, null, null,
                         () => {
                           this.sendPing('visHalf');
                         });
       // 50% vis w ini load
       vis.listenElement(element,
                         {visiblePercentageMin: 50},
-                        readyPromise,
+                        readyPromise, null,
                         () => {
                           this.sendPing('visHalfIniLoad');
                         });
       // first visible
-      vis.listenElement(element, {visiblePercentageMin: 1}, null,
+      vis.listenElement(element, {visiblePercentageMin: 1}, null, null,
                         () => {
                           this.sendPing('firstVisible');
                         });
       // ini-load
       vis.listenElement(element, {waitFor: 'ini-load'},
-                        readyPromise,
+                        readyPromise, null,
                         () => {
                           this.sendPing('iniLoad');
                         });
@@ -323,7 +323,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
       vis.listenElement(element,
                         {visiblePercentageMin: 1, waitFor: 'ini-load',
                          totalTimeMin: 1000},
-                        readyPromise,
+                        readyPromise, null,
                         () => {
                           this.sendPing('visLoadAndOneSec');
                         });
