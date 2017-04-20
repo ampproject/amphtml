@@ -46,6 +46,8 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    this.dataId = null;
   }
 
   /**
@@ -58,6 +60,12 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+
+    this.dataId = user().assert(
+      this.element.getAttribute('data-id'),
+      'The data-id attribute is required for <amp-3q-player> %s',
+      this.element);
+
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
@@ -68,17 +76,13 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const dataId = user().assert(
-        this.element.getAttribute('data-id'),
-        'The data-id attribute is required for <amp-3q-player> %s',
-        this.element);
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     this.applyFillContent(iframe, true);
     iframe.src = 'https://playout.3qsdn.com/' +
-        encodeURIComponent(dataId) + '?autoplay=true&amp=true';
+        encodeURIComponent(this.dataId) + '?autoplay=false&amp=true';
     this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
@@ -89,7 +93,8 @@ class Amp3QPlayer extends AMP.BaseElement {
       this.sdnBridge_.bind(this)
     );
 
-    return this.loadPromise(this.iframe_);
+    return this.loadPromise(this.iframe_).then(() =>
+        this.playerReadyPromise_);
   }
 
   /** @override */
