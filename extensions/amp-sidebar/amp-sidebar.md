@@ -78,7 +78,7 @@ Example:
 ### Opening and Closing the Sidebar
 Setting the `on` attribute on one or more elements within the page and setting it's method to `toggle` will toggle the sidebar when the element is tapped or clicked. Setting the element's method to `open` or `close` will open or close the sidebar.Tapping back on the partially-visible main content area closes the sidebar.
 
-Alternatively pressing the escape key on the keyboard will also close the lightbox.
+Alternatively pressing the escape key on the keyboard will also close the sidebar.
 
 Example:
 ```html
