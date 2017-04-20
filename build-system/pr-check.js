@@ -28,7 +28,8 @@ const path = require('path');
 const minimist = require('minimist');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
-const timerLogPrefix = '\e[33;1m' + 'pr-check.js' + '\e[0m: ';  // Yellow, bold.
+const timerLogPrefix =
+    '\x1b[33;1m' + 'pr-check.js' + '\x1b[0m: ';  // Yellow, bold.
 
 /**
  * Starts a timer to measure the execution time of the given function.
@@ -38,8 +39,8 @@ const timerLogPrefix = '\e[33;1m' + 'pr-check.js' + '\e[0m: ';  // Yellow, bold.
 function startTimer(functionName) {
   const startTime = Date.now();
   console.log(
-      timerLogPrefix + 'Starting ' + '\e[36m' +  // Cyan.
-      functionName + '\e[0m' + '...');
+      timerLogPrefix + 'Starting ' + '\x1b[36m' +  // Cyan.
+      functionName + '\x1b[0m' + '...');
   return startTime;
 }
 
@@ -55,9 +56,9 @@ function stopTimer(functionName, startTime) {
   const secs = executionTime.getSeconds();
   console.log(
       timerLogPrefix + 'Done executing ' +
-      '\e[36m' + functionName + '\e[0m' +  // Cyan.
+      '\x1b[36m' + functionName + '\x1b[0m' +  // Cyan.
       '. ' + 'Total time: ' +
-      '\e[32m' + mins + 'm ' + secs + 's.' + '\e[0m');  // Green.
+      '\x1b[32m' + mins + 'm ' + secs + 's.' + '\x1b[0m');  // Green.
 }
 
 /**
