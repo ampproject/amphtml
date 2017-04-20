@@ -35,6 +35,7 @@ import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
+import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {dev} from '../../../src/log';
@@ -108,6 +109,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
+
+    /** @private {?Element} */
+    this.ampAnalyticsElement_ = null;
   }
 
   /** @override */
@@ -239,18 +243,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.lifecycleReporter_.sendPing(eventName);
   }
 
-  /** @override */
-  unlayoutCallback() {
-    super.unlayoutCallback();
-    this.element.setAttribute('data-amp-slot-index',
-        this.win.ampAdSlotIdCounter++);
-    this.lifecycleReporter_ = this.initLifecycleReporter();
-    if (this.uniqueSlotId_) {
-      sharedState.removeSlot(this.uniqueSlotId_);
-    }
-    this.ampAnalyticsConfig_ = null;
-  }
-
   /**
    * @return {!../../../ads/google/a4a/performance.BaseLifecycleReporter}
    */
@@ -262,7 +254,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
-      insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      dev().assert(!this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ =
+          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
@@ -271,6 +265,22 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       width: `${this.size_.width}px`,
       height: `${this.size_.height}px`,
     });
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    super.unlayoutCallback();
+    this.element.setAttribute('data-amp-slot-index',
+        this.win.ampAdSlotIdCounter++);
+    this.lifecycleReporter_ = this.initLifecycleReporter();
+    if (this.uniqueSlotId_) {
+      sharedState.removeSlot(this.uniqueSlotId_);
+    }
+    if (this.ampAnalyticsElement_) {
+      removeElement(this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ = null;
+    }
+    this.ampAnalyticsConfig_ = null;
   }
 }
 
