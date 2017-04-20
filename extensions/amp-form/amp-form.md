@@ -164,7 +164,7 @@ For example, a common use case is to submit a form on input change (selecting a 
 See the [full example here](../../examples/forms.amp.html).
 
 ### Analytics Triggers
-`amp-form` triggers two events you can track in your `amp-analytics` config: `amp-form-submit-success` and `amp-form-submit-error`.
+`amp-form` triggers three events you can track in your `amp-analytics` config: `amp-form-submit`, `amp-form-submit-success`, and `amp-form-submit-error`.
 
 You can configure your analytics to send these events as in the example below.
 
@@ -173,9 +173,14 @@ You can configure your analytics to send these events as in the example below.
   <script type="application/json">
     {
       "requests": {
-        "event": "https://www.example.com/analytics/event?eid=${eventId}"
+        "event": "https://www.example.com/analytics/event?eid=${eventId}",
+        "searchEvent": "https://www.example.com/analytics/search?formId=${formId}&query=${formFields[query]}"
       },
       "triggers": {
+        "formSubmit": {
+          "on": "amp-form-submit",
+          "request": "searchEvent"
+        },
         "formSubmitSuccess": {
           "on": "amp-form-submit-success",
           "request": "event",
@@ -195,6 +200,23 @@ You can configure your analytics to send these events as in the example below.
   </script>
 </amp-analytics>
 ```
+
+The `amp-form-submit` event fires when a form request is initiated. The `amp-form-submit` event generates a set of variables that correspond to the specific form and the fields in the form. These variables can be used for analytics.
+
+For example, the following form has two fields:
+
+```html
+<form action-xhr="/register" method="POST" id="registration_form">
+  <input type="text" name="user_name" />
+  <input type="password" name="user_password" />
+  <input type="submit" value="Sign up" />
+</form>
+```
+When the `amp-form-submit` event fires, it generates the following variables containing the values that were specified in the form:
+
+* `formId`
+* `formFields[user_name]`
+* `formFields[user_password]`
 
 ## Success/Error Response Rendering
 `amp-form` allows publishers to render the responses using [Extended Templates](../../spec/amp-html-format.md#extended-templates).

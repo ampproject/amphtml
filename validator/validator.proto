@@ -169,7 +169,7 @@ message CssSpec {
   optional bool validate_amp4ads = 5;
 }
 
-// NEXT AVAILABLE TAG: 8
+// NEXT AVAILABLE TAG: 9
 message CdataSpec {
   // If set, the cdata contents cannot be greater than this length, in bytes.
   optional int32 max_bytes = 1 [ default = -1 ];
@@ -187,6 +187,9 @@ message CdataSpec {
   // If at least one CssSpec is provided, this cdata field will be parsed
   // as CSS3, and any parsing errors will become validation errors.
   optional CssSpec css_spec = 7;
+  // If set to true, then only whitespace may be in the cdata contents.
+  // This is useful for script tags that reference extensions etc.
+  optional bool whitespace_only = 8;
   // } end oneof
 
   // If any of these regexes match, then this cdata spec does not validate.
@@ -424,7 +427,7 @@ message TagSpec {
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 15
+// NEXT AVAILABLE TAG: 16
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -435,6 +438,9 @@ message ValidatorRules {
 
   // Spec URL for information about mustache templates.
   optional string template_spec_url = 8;
+
+  // Spec URL for information about styles and amp-custom stylesheet
+  optional string styles_spec_url = 15;
 
   repeated ErrorFormat error_formats = 9;
   repeated ErrorSpecificity error_specificity = 13;
@@ -497,7 +503,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 81
+  // NEXT AVAILABLE TAG: 83
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -509,6 +515,7 @@ message ValidationError {
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;
     DISALLOWED_ATTR = 3;
+    DISALLOWED_STYLE_ATTR = 81;
     INVALID_ATTR_VALUE = 4;
     ATTR_VALUE_REQUIRED_BY_LAYOUT = 27;
     IMPLIED_LAYOUT_INVALID = 22;
@@ -523,6 +530,7 @@ message ValidationError {
     STYLESHEET_TOO_LONG = 50;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
+    NON_WHITESPACE_CDATA_ENCOUNTERED = 82;
     DEV_MODE_ENABLED = 10;  // Deprecated, remove after 2016-04-01.
     DEPRECATED_ATTR = 11;
     DEPRECATED_TAG = 12;

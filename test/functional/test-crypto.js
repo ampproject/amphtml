@@ -22,6 +22,7 @@ import {
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
+import {extensionsFor} from '../../src/services';
 import {stringToBytes} from '../../src/utils/bytes';
 
 describes.realWin('crypto-impl', {}, env => {
@@ -93,7 +94,8 @@ describes.realWin('crypto-impl', {}, env => {
   }
 
   function createCrypto(win) {
-    const extensions = installExtensionsService(win);
+    installExtensionsService(win);
+    const extensions = extensionsFor(win);
     sandbox.stub(extensions, 'loadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(win);

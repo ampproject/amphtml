@@ -1,2 +1,2 @@
 FAIL
-amp-user-notification/0.1/test/validator-amp-user-notification.html:71:2 The specified layout 'CONTAINER' is not supported by tag 'amp-user-notification'. (see https://www.ampproject.org/docs/reference/components/amp-user-notification) [AMP_LAYOUT_PROBLEM]
+amp-user-notification/0.1/test/validator-amp-user-notification.html:71:2 The specified layout 'CONTAINER' is not supported by tag 'amp-user-notification'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-user-notification) [AMP_LAYOUT_PROBLEM]

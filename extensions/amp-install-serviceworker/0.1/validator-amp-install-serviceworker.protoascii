@@ -50,7 +50,7 @@ tags: {  # <amp-install-serviceworker>
     blacklisted_value_regex: "__amp_source_origin"
   }
 
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-install-serviceworker"
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-install-serviceworker"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

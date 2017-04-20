@@ -36,7 +36,7 @@ class AmpFitText extends AMP.BaseElement {
     /** @private @const */
     this.content_ = this.element.ownerDocument.createElement('div');
     this.applyFillContent(this.content_);
-    this.content_.classList.add('-amp-fit-text-content');
+    this.content_.classList.add('i-amphtml-fit-text-content');
     st.setStyles(this.content_, {zIndex: 2});
 
     /** @private @const */
@@ -140,7 +140,7 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
   const overflown = measurer./*OK*/offsetHeight > maxHeight;
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);
-  content.classList.toggle('-amp-fit-text-content-overflown', overflown);
+  content.classList.toggle('i-amphtml-fit-text-content-overflown', overflown);
   st.setStyles(content, {
     lineClamp: overflown ? numberOfLines : '',
     maxHeight: overflown ? st.px(lineHeight * numberOfLines) : '',

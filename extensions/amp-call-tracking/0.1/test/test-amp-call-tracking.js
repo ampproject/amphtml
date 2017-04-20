@@ -17,7 +17,7 @@
 import '../amp-call-tracking';
 import {clearResponseCache} from '../amp-call-tracking';
 import {createIframePromise} from '../../../../testing/iframe';
-import {xhrFor} from '../../../../src/xhr';
+import {xhrFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 

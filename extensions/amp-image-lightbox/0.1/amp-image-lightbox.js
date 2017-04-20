@@ -26,7 +26,7 @@ import {
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {historyForDoc} from '../../../src/history';
+import {historyForDoc} from '../../../src/services';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -34,8 +34,9 @@ import {
   moveLayoutRect,
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
-import {timerFor} from '../../../src/timer';
+import {timerFor, platformFor} from '../../../src/services';
 import {user, dev} from '../../../src/log';
+import {startsWith} from '../../../src/string';
 import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
@@ -82,11 +83,11 @@ export class ImageViewer {
 
     /** @private {!Element} */
     this.viewer_ = lightbox.element.ownerDocument.createElement('div');
-    this.viewer_.classList.add('-amp-image-lightbox-viewer');
+    this.viewer_.classList.add('i-amphtml-image-lightbox-viewer');
 
     /** @private {!Element} */
     this.image_ = lightbox.element.ownerDocument.createElement('img');
-    this.image_.classList.add('-amp-image-lightbox-viewer-image');
+    this.image_.classList.add('i-amphtml-image-lightbox-viewer-image');
     this.viewer_.appendChild(this.image_);
 
     /** @private {?../../../src/srcset.Srcset} */
@@ -725,7 +726,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       return;
     }
     this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.classList.add('-amp-image-lightbox-container');
+    this.container_.classList.add('i-amphtml-image-lightbox-container');
     this.element.appendChild(this.container_);
 
     this.imageViewer_ = new ImageViewer(this, this.win,
@@ -739,7 +740,7 @@ class AmpImageLightbox extends AMP.BaseElement {
         + '-caption');
 
     this.captionElement_.classList.add('amp-image-lightbox-caption');
-    this.captionElement_.classList.add('-amp-image-lightbox-caption');
+    this.captionElement_.classList.add('i-amphtml-image-lightbox-caption');
     this.container_.appendChild(this.captionElement_);
 
     // Invisible close button at the end of lightbox for screen-readers.
@@ -747,7 +748,7 @@ class AmpImageLightbox extends AMP.BaseElement {
         .createElement('button');
     // TODO(aghassemi, #4146) i18n
     screenReaderCloseButton.textContent = 'Close the lightbox';
-    screenReaderCloseButton.classList.add('-amp-screen-reader');
+    screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => {
@@ -798,7 +799,17 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     this.unlistenViewport_ = this.getViewport().onChanged(() => {
       if (this.active_) {
-        this.imageViewer_.measure();
+        // In IOS 10.3, the measured size of an element is incorrect if the
+        // element size depends on window size directly and the measurement
+        // happens in window.resize event. Adding a timeout for correct
+        // measurement. See https://github.com/ampproject/amphtml/issues/8479
+        if (startsWith(platformFor(this.win).getIosVersionString(), '10.3')) {
+          timerFor(this.win).delay(() => {
+            this.imageViewer_.measure();
+          }, 500);
+        } else {
+          this.imageViewer_.measure();
+        }
       }
     });
 
@@ -849,9 +860,10 @@ class AmpImageLightbox extends AMP.BaseElement {
    */
   toggleViewMode(opt_on) {
     if (opt_on !== undefined) {
-      this.container_.classList.toggle('-amp-image-lightbox-view-mode', opt_on);
+      this.container_.classList.toggle(
+          'i-amphtml-image-lightbox-view-mode', opt_on);
     } else {
-      this.container_.classList.toggle('-amp-image-lightbox-view-mode');
+      this.container_.classList.toggle('i-amphtml-image-lightbox-view-mode');
     }
   }
 
@@ -889,7 +901,7 @@ class AmpImageLightbox extends AMP.BaseElement {
           this.captionElement_.getAttribute('id'));
     }
 
-    this.captionElement_.classList.toggle('-amp-empty', !caption);
+    this.captionElement_.classList.toggle('i-amphtml-empty', !caption);
   }
 
   /** @private */
@@ -927,7 +939,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (this.sourceImage_ && isLoaded(this.sourceImage_) &&
             this.sourceImage_.src) {
       transLayer = this.element.ownerDocument.createElement('div');
-      transLayer.classList.add('-amp-image-lightbox-trans');
+      transLayer.classList.add('i-amphtml-image-lightbox-trans');
       this.element.ownerDocument.body.appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
@@ -946,7 +958,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       });
       transLayer.appendChild(clone);
 
-      this.sourceImage_.classList.add('-amp-ghost');
+      this.sourceImage_.classList.add('i-amphtml-ghost');
 
       // Move and resize the image to the location given by the lightbox.
       const dx = imageBox.left - rect.left;
@@ -1004,7 +1016,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     let transLayer = null;
     if (isLoaded(image) && image.src && this.sourceImage_) {
       transLayer = this.element.ownerDocument.createElement('div');
-      transLayer.classList.add('-amp-image-lightbox-trans');
+      transLayer.classList.add('i-amphtml-image-lightbox-trans');
       this.element.ownerDocument.body.appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
@@ -1046,7 +1058,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       anim.add(Math.min(0.8 - motionTime, 0.2), (time, complete) => {
         moveAndScale(time);
         if (complete) {
-          this.sourceImage_.classList.remove('-amp-ghost');
+          this.sourceImage_.classList.remove('i-amphtml-ghost');
         }
       }, motionTime, EXIT_CURVE_);
 
@@ -1062,7 +1074,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     return anim.start(dur).thenAlways(() => {
       if (this.sourceImage_) {
-        this.sourceImage_.classList.remove('-amp-ghost');
+        this.sourceImage_.classList.remove('i-amphtml-ghost');
       }
       this./*OK*/collapse();
       st.setStyles(this.element, {

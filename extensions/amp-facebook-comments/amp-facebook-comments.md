@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Embed the Facebook comments plugin.</td>
+    <td>Embeds the Facebook comments plugin.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -33,14 +33,11 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-facebook/">Annotated code example for amp-facebook-comments</a></td>
-  </tr>
 </table>
+
 ## Overview
 
-You can use the `amp-facebook-comments` component to embed the Facebook [comments plugin](https://developers.facebook.com/docs/plugins/comments).
+You can use the `amp-facebook-comments` component to embed the [Facebook comments plugin](https://developers.facebook.com/docs/plugins/comments).
 
 **Example**
 
@@ -55,16 +52,19 @@ You can use the `amp-facebook-comments` component to embed the Facebook [comment
 
 **data-href** (required)
 
-The URL of the comments page. For example: http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html.
+The URL of the comments page. For example, `http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html`.
 
 **data-numposts** (optional)
-See Facebook comments [documentation](https://developers.facebook.com/docs/plugins/comments/) for setting usage.
+
+The number of comments to show.  For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
 **data-order-by** (optional)
-See Facebook comments [documentation](https://developers.facebook.com/docs/plugins/comments/) for setting usage.
+
+The order to use when displaying comments. For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
 **data-colorscheme** (optional)
-See Facebook comments [documentation](https://developers.facebook.com/docs/plugins/comments/) for setting usage.
+
+The color scheme. For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
 **common attributes**
 

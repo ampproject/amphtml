@@ -46,7 +46,7 @@ tags: {  # <amp-list>
   # to reference the id of an existing template element.
   attrs: { name: "template" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-list"
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-list"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

@@ -21,19 +21,26 @@ import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
-import {userNotificationManagerFor} from '../../../src/user-notification';
+import {urlReplacementsForDoc} from '../../../src/services';
+import {userNotificationManagerFor} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
-import {xhrFor} from '../../../src/xhr';
+import {timerFor, viewerForDoc, xhrFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
+import {isEnumValue} from '../../../src/types';
 import {Activity} from './activity-impl';
 import {Cid} from './cid-impl';
 import {
     InstrumentationService,
     instrumentationServicePromiseForDoc,
+    AnalyticsEventType,
 } from './instrumentation';
-import {ExpansionOptions, variableServiceFor} from './variables';
+import {
+  ExpansionOptions,
+  installVariableService,
+  variableServiceFor,
+} from './variables';
 import {ANALYTICS_CONFIG} from './vendors';
+import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 
 // Register doc-service factory.
 AMP.registerServiceForDoc(
@@ -41,9 +48,14 @@ AMP.registerServiceForDoc(
 AMP.registerServiceForDoc('activity', Activity);
 AMP.registerServiceForDoc('cid', Cid);
 
-variableServiceFor(AMP.win);
+installVariableService(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
+
+const WHITELIST_EVENT_IN_SANDBOX = [
+  AnalyticsEventType.VISIBLE,
+  AnalyticsEventType.HIDDEN,
+];
 
 export class AmpAnalytics extends AMP.BaseElement {
 
@@ -73,6 +85,9 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.type_ = null;
 
+    /** @private {!boolean} */
+    this.isSandbox_ = element.hasAttribute('sandbox');
+
     /**
      * @private {Object<string, string>} A map of request names to the request
      * format string used by the tag to send data
@@ -100,6 +115,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {!../../../src/service/crypto-impl.Crypto} */
     this.cryptoService_ = cryptoFor(this.win);
+
+    /** @private {?Promise} */
+    this.iniPromise_ = null;
   }
 
   /** @override */
@@ -129,21 +147,17 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.consentPromise_ = userNotificationManagerFor(this.win)
           .then(service => service.get(this.consentNotificationId_));
     }
+
+    if (this.element.getAttribute('trigger') == 'immediate') {
+      this.ensureInitialized_();
+    }
   }
 
   /** @override */
   layoutCallback() {
     // Now that we are rendered, stop rendering the element to reduce
     // resource consumption.
-    toggle(this.element, false);
-
-    return this.consentPromise_
-        .then(this.fetchRemoteConfig_.bind(this))
-        .then(() => instrumentationServicePromiseForDoc(this.getAmpDoc()))
-        .then(instrumentation => {
-          this.instrumentation_ = instrumentation;
-        })
-        .then(this.onFetchRemoteConfigSuccess_.bind(this));
+    return this.ensureInitialized_();
   }
 
   /** @override */
@@ -152,6 +166,29 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  ensureInitialized_() {
+    if (this.iniPromise_) {
+      return this.iniPromise_;
+    }
+    toggle(this.element, false);
+    this.iniPromise_ =
+        viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+            // Rudimentary "idle" signal.
+            .then(() => timerFor(this.win).promise(1))
+            .then(() => this.consentPromise_)
+            .then(this.fetchRemoteConfig_.bind(this))
+            .then(() => instrumentationServicePromiseForDoc(this.getAmpDoc()))
+            .then(instrumentation => {
+              this.instrumentation_ = instrumentation;
+            })
+            .then(this.onFetchRemoteConfigSuccess_.bind(this));
+    return this.iniPromise_;
   }
 
   /**
@@ -201,14 +238,30 @@ export class AmpAnalytics extends AMP.BaseElement {
               'attributes are required for data to be collected.');
           continue;
         }
+        // Check for not supported trigger for sandboxed analytics
+        if (this.isSandbox_) {
+          const eventType = trigger['on'];
+          if (isEnumValue(AnalyticsEventType, eventType) &&
+              !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)) {
+            user().error(TAG, eventType + 'is not supported for amp-analytics' +
+            ' in scope');
+            continue;
+          }
+        }
+
         this.processExtraUrlParams_(trigger['extraUrlParams'],
             this.config_['extraUrlParamsReplaceMap']);
         promises.push(this.isSampledIn_(trigger).then(result => {
           if (!result) {
             return;
           }
-
-          if (trigger['selector']) {
+          // replace selector and selectionMethod
+          if (this.isSandbox_) {
+            // Only support selection of parent element for analytics in scope
+            trigger['selector'] = this.element.parentElement.tagName;
+            trigger['selectionMethod'] = 'closest';
+            this.addTriggerNoInline_(trigger);
+          } else if (trigger['selector']) {
             // Expand the selector using variable expansion.
             return this.variableService_.expandTemplate(
                 trigger['selector'], expansionOptions)
@@ -289,7 +342,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   fetchRemoteConfig_() {
     let remoteConfigUrl = this.element.getAttribute('config');
-    if (!remoteConfigUrl) {
+    if (!remoteConfigUrl || this.isSandbox_) {
       return Promise.resolve();
     }
     assertHttpsUrl(remoteConfigUrl, this.element);
@@ -345,8 +398,15 @@ export class AmpAnalytics extends AMP.BaseElement {
     return config;
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {!JSONType}
+   */
   getInlineConfigNoInline() {
+    if (this.element.CONFIG) {
+      // If the analytics element is created by runtime, return cached config.
+      return this.element.CONFIG;
+    }
     let inlineConfig = {};
     const TAG = this.getName_();
     try {
@@ -368,7 +428,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       user().error(TAG, 'Analytics config could not be ' +
           'parsed. Is it in a valid JSON format?', er);
     }
-    return inlineConfig;
+    return /** @type {!JSONType} */ (inlineConfig);
   }
 
   /**
@@ -493,9 +553,12 @@ export class AmpAnalytics extends AMP.BaseElement {
         const expansionOptions = this.expansionOptions_(event, trigger);
         return this.variableService_.expandTemplate(request, expansionOptions);
       })
-      .then(request =>
+      .then(request => {
+        const whiteList = this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
         // For consistency with amp-pixel we also expand any url replacements.
-        urlReplacementsForDoc(this.element).expandAsync(request))
+        return urlReplacementsForDoc(this.element).expandAsync(
+            request, undefined, whiteList);
+      })
       .then(request => {
         this.sendRequest_(request, trigger);
         return request;

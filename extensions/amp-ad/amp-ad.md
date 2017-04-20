@@ -50,8 +50,7 @@ custom element called `<amp-ad>`. No ad network provided JavaScript is allowed t
 different origin (via iframe sandbox) as the AMP document and executes the ad
 network’s JS inside that iframe sandbox.
 
-The `<amp-ad>` requires width and height values to be specified like all
-resources in AMP. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+The `<amp-ad>` requires width and height values to be specified according to the [rule](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#tldr-summary-of-layout-requirements--behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
 
 ```html
 <amp-ad width=300 height=250
@@ -81,6 +80,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 
 ## Supported ad networks
 
+- [A8](../../ads/a8.md)
 - [A9](../../ads/a9.md)
 - [AccessTrade](../../ads/accesstrade.md)
 - [Adblade](../../ads/adblade.md)
@@ -115,6 +115,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Criteo](../../ads/criteo.md)
 - [CSA](../../ads/google/csa.md)
 - [CxenseDisplay](../../ads/eas.md)
+- [Dianomi](../../ads/dianomi.md)
 - [DistroScale](../../ads/distroscale.md)
 - [Dot and Media](../../ads/dotandads.md)
 - [Doubleclick](../../ads/google/doubleclick.md)
@@ -123,7 +124,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [FlexOneELEPHANT](../../ads/f1e.md)
 - [Felmat](../../ads/felmat.md)
 - [Flite](../../ads/flite.md)
-- [Fusion](../../ads/fusion.md) 
+- [Fusion](../../ads/fusion.md)
 - [GenieeSSP](../../ads/genieessp.md)
 - [GMOSSP](../../ads/gmossp.md)
 - [Holder](../../ads/holder.md)
@@ -188,6 +189,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 
 ## Supported embed types
 
+- [Outbrain](../../ads/outbrain.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)
 
@@ -220,7 +222,7 @@ An optional attribute. If provided, will require confirming the [amp-user-notifi
 
 **data-loading-strategy**
 
-Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view. Supported value: `prefer-viewability-over-views`. 
+Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view. Supported value: `prefer-viewability-over-views`.
 
 **common attributes**
 

@@ -26,8 +26,6 @@ tags: {  # amp-fit-text
   }
   attr_lists: "common-extension-attrs"
 }
-# TODO(greggrothaus): amp-fit-text's attribute spec need flushing
-# out now that the spec is available.
 tags: {  # <amp-fit-text>
   tag_name: "AMP-FIT-TEXT"
   # <amp-fit-text> is whitelisted for <amp-sidebar>, otherwise:
@@ -36,7 +34,7 @@ tags: {  # <amp-fit-text>
   attrs: { name: "max-font-size" }
   attrs: { name: "min-font-size" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-fit-text"
+  spec_url: "https://www.ampproject.org/docs/reference/components/presentation/amp-fit-text"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

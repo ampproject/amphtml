@@ -35,7 +35,7 @@ tags: {  # <amp-anim>
   attrs: { name: "controls" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-anim"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

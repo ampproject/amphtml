@@ -40,10 +40,10 @@ describe('amp-lightbox-viewer', () => {
   function runTests(autoLightbox) {
     it('should build', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
-        const container = viewer.querySelector('.-amp-lbv');
+        const container = viewer.querySelector('.i-amphtml-lbv');
         expect(container).to.exist;
 
-        const mask = viewer.querySelector('.-amp-lbv-mask');
+        const mask = viewer.querySelector('.i-amphtml-lbv-mask');
         expect(mask).to.exist;
 
         const btns = viewer.querySelectorAll('[role=button]');
@@ -172,7 +172,7 @@ describe('amp-lightbox-viewer', () => {
         };
         return impl.activate({source: item1}).then(() => {
           assertLightboxed(item1, impl, true, /*closed*/ false);
-          const container = viewer.querySelector('.-amp-lbv');
+          const container = viewer.querySelector('.i-amphtml-lbv');
           const descriptionBox = viewer.querySelector('.amp-lbv-desc-box');
           const button = viewer.querySelector('.amp-lbv-button-next');
           expect(container).to.not.be.null;
@@ -209,10 +209,10 @@ describe('amp-lightbox-viewer', () => {
           expect(impl.activeElement_).to.equal(item1);
           assertLightboxed(item1, impl, true, /*closed*/ false);
           impl.openGallery_();
-          const container = viewer.querySelector('.-amp-lbv');
+          const container = viewer.querySelector('.i-amphtml-lbv');
           expect(container.getAttribute('gallery-view')).to.equal('');
           const gallery = viewer.querySelector(
-              '.-amp-lbv-gallery ');
+              '.i-amphtml-lbv-gallery ');
           expect(gallery.childNodes).to.have.length(3);
           gallery.childNodes[1].dispatchEvent(new Event('click'));
           expect(container.getAttribute('gallery-view')).to.be.null;
@@ -226,7 +226,7 @@ describe('amp-lightbox-viewer', () => {
     expect(element.classList.contains('amp-lightboxed')).to.equal(isIt);
 
     ancestorElements(element, p => {
-      expect(p.classList.contains('-amp-lightboxed-ancestor'))
+      expect(p.classList.contains('i-amphtml-lightboxed-ancestor'))
         .to.equal(!closed);
     });
 
@@ -238,7 +238,7 @@ describe('amp-lightbox-viewer', () => {
   }
 
   function assertControls(viewer, hasPrevious, hasNext) {
-    const container = viewer.querySelector('.-amp-lbv');
+    const container = viewer.querySelector('.i-amphtml-lbv');
     expect(container.hasAttribute('no-prev')).to.equal(!hasPrevious);
     expect(container.hasAttribute('no-next')).to.equal(!hasNext);
   }

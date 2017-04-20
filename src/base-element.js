@@ -18,8 +18,8 @@ import {Layout} from './layout';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
-import {viewportForDoc} from './viewport';
-import {vsyncFor} from './vsync';
+import {viewportForDoc} from './services';
+import {vsyncFor} from './services';
 import {user} from './log';
 
 
@@ -191,11 +191,22 @@ export class BaseElement {
   }
 
   /**
-   * Returns a previously measured layout box of the element.
+   * Returns a previously measured layout box adjusted to the viewport. This
+   * mainly affects fixed-position elements that are adjusted to be always
+   * relative to the document position in the viewport.
    * @return {!./layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
     return this.element.getLayoutBox();
+  }
+
+  /**
+   * Returns a previously measured layout box relative to the page. The
+   * fixed-position elements are relative to the top of the document.
+   * @return {!./layout-rect.LayoutRectDef}
+   */
+  getPageLayoutBox() {
+    return this.element.getPageLayoutBox();
   }
 
   /**
@@ -893,6 +904,18 @@ export class BaseElement {
    */
   mutatedAttributesCallback(unusedMutations) {
     // Subclasses may override.
+  }
+
+  /**
+   * Returns an array of elements in this element's subtree that this
+   * element owns that could have children added or removed dynamically.
+   * The array should not contain any ancestors of this element, but could
+   * contain this element itself.
+   * @return {!Array<!Element>}
+   * @public
+   */
+  getDynamicElementContainers() {
+    return [];
   }
 
   /**

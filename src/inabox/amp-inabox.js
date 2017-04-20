@@ -20,9 +20,13 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
+import {ampdocServiceFor} from '../ampdoc';
 import {startupChunk} from '../chunk';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
-import {installPerformanceService} from '../service/performance-impl';
+import {
+  installPerformanceService,
+  performanceFor,
+} from '../service/performance-impl';
 import {installPullToRefreshBlocker} from '../pull-to-refresh';
 import {installGlobalClickListenerForDoc} from '../document-click';
 import {installStyles, makeBodyVisible} from '../style-installer';
@@ -43,6 +47,7 @@ import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
 import {getMode} from '../mode';
+import {resourcesForDoc} from '../services';
 
 getMode(self).runtime = 'inabox';
 
@@ -59,7 +64,8 @@ try {
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  ampdocService = installDocService(self, /* isSingleDoc */ true);
+  installDocService(self,  /* isSingleDoc */ true);
+  ampdocService = ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
   makeBodyVisible(self.document);
@@ -68,8 +74,9 @@ try {
 startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
+  installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
-  const perf = installPerformanceService(self);
+  const perf = performanceFor(self);
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
@@ -113,6 +120,7 @@ startupChunk(self.document, function initial() {
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');
+      resourcesForDoc(ampdoc).ampInitComplete();
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.
       perf.flush();

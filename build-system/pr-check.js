@@ -83,7 +83,10 @@ function isBuildSystemFile(filePath) {
   return filePath.startsWith('build-system') &&
       // Exclude textproto from build-system since we want it to trigger
       // tests and type check.
-      path.extname(filePath) != '.textproto';
+      path.extname(filePath) != '.textproto' &&
+      // Exclude config files from build-system since we want it to trigger
+      // the flag config check.
+      !isFlagConfig(filePath);
 }
 
 /**
@@ -113,6 +116,17 @@ function isDocFile(filePath) {
 }
 
 /**
+ * Determines if the given file contains flag configurations, by comparing it
+ * against the well-known json config filenames for prod and canary.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isFlagConfig(filePath) {
+  const filename = path.basename(filePath);
+  return (filename == 'prod-config.json' || filename == 'canary-config.json');
+}
+
+/**
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
  * @param {!Array<string>} filePaths
@@ -120,8 +134,13 @@ function isDocFile(filePath) {
  */
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
-    return new Set(['BUILD_SYSTEM', 'VALIDATOR_WEBUI', 'VALIDATOR', 'RUNTIME',
-        'DOCS']);
+    return new Set([
+        'BUILD_SYSTEM',
+        'VALIDATOR_WEBUI',
+        'VALIDATOR',
+        'RUNTIME',
+        'DOCS',
+        'FLAG_CONFIG']);
   }
   const targetSet = new Set();
   for (p of filePaths) {
@@ -133,6 +152,8 @@ function determineBuildTargets(filePaths) {
       targetSet.add('VALIDATOR');
     } else if (isDocFile(p)) {
       targetSet.add('DOCS');
+    } else if (isFlagConfig(p)) {
+      targetSet.add('FLAG_CONFIG');
     } else {
       targetSet.add('RUNTIME');
     }
@@ -202,17 +223,28 @@ function main(argv) {
   const files = filesInPr(travisCommitRange);
   const buildTargets = determineBuildTargets(files);
 
+  if (buildTargets.has('FLAG_CONFIG')) {
+    files.forEach((file) => {
+      if (!isFlagConfig(file)) {
+        console.log('A pull request may not contain a mix of flag-config and ' +
+            'non-flag-config files. Please make your changes in separate ' +
+            'pull requests. First offending file: ' + file);
+        process.exit(1);
+      }
+    });
+  }
+
   if (buildTargets.length == 1 && buildTargets.has('DOCS')) {
     console.log('Only docs were updated, stopping build process.');
     return 0;
   }
 
-  if (files.includes('package.json') ?
-        !files.includes('yarn.lock') : files.includes('yarn.lock')) {
-    console.error('pr-check.js - any update to package.json or yarn.lock ' +
-        'must include the other file. Please update through yarn.');
-    process.exit(1);
-  }
+  //if (files.includes('package.json') ?
+        //!files.includes('yarn.lock') : files.includes('yarn.lock')) {
+    //console.error('pr-check.js - any update to package.json or yarn.lock ' +
+        //'must include the other file. Please update through yarn.');
+    //process.exit(1);
+  //}
 
   const sortedBuildTargets = [];
   for (const t of buildTargets) {

@@ -22,18 +22,17 @@ import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
     './ios-scrollfreeze-bug';
 import {
   getParentWindowFrameElement,
-  getServiceForDoc,
+  registerServiceBuilderForDoc,
 } from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
-import {platformFor} from '../platform';
+import {platformFor} from '../services';
 import {px, setStyle, setStyles, computedStyle} from '../style';
-import {timerFor} from '../timer';
-import {vsyncFor} from '../vsync';
-import {viewerForDoc} from '../viewer';
-import {isExperimentOn} from '../experiments';
+import {timerFor} from '../services';
+import {vsyncFor} from '../services';
+import {viewerForDoc} from '../services';
 import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
@@ -139,6 +138,7 @@ export class Viewport {
     this.fixedLayer_ = new FixedLayer(
         this.ampdoc,
         this.vsync_,
+        this.binding_.getBorderTop(),
         this.paddingTop_,
         this.binding_.requiresFixedLayerTransfer());
     this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
@@ -172,13 +172,8 @@ export class Viewport {
     if (isIframed(this.ampdoc.win)) {
       this.globalDoc_.documentElement.classList.add('i-amphtml-iframed');
     }
-
-    // TODO(sriramkrish85, #5319): Cleanup the experiment by making the effects
-    // on CSS permanent and removing the code block below.
-    if (this.ampdoc.isSingleDoc() &&
-            isExperimentOn(this.ampdoc.win, 'make-body-block')) {
-      this.globalDoc_.documentElement.classList.add(
-          'i-amphtml-make-body-block');
+    if (viewer.getParam('webview') === '1') {
+      this.globalDoc_.documentElement.classList.add('i-amphtml-webview');
     }
 
     // To avoid browser restore scroll position when traverse history
@@ -829,6 +824,13 @@ export class ViewportBindingDef {
   disconnect() {}
 
   /**
+   * Returns the width of top border if this type of viewport needs border
+   * offsetting. This is currently only needed for iOS to avoid scroll freeze.
+   * @return {number}
+   */
+  getBorderTop() {}
+
+  /**
    * Whether the binding requires fixed elements to be transfered to a
    * independent fixed layer.
    * @return {boolean}
@@ -950,14 +952,18 @@ export class ViewportBindingDef {
 export class ViewportBindingNatural_ {
 
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./viewer-impl.Viewer} viewer
    */
-  constructor(win, viewer) {
+  constructor(ampdoc, viewer) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @const {!Window} */
-    this.win = win;
+    this.win = ampdoc.win;
 
     /** @const {!../service/platform-impl.Platform} */
-    this.platform_ = platformFor(win);
+    this.platform_ = platformFor(this.win);
 
     /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
@@ -973,37 +979,6 @@ export class ViewportBindingNatural_ {
 
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
-
-    if (this.win.document.defaultView) {
-      waitForBody(this.win.document, () => {
-        const body = dev().assertElement(this.win.document.body);
-        // Override a user-supplied `body{overflow}` to be always visible. This
-        // style is set in runtime vs css to avoid conflicts with ios-embedded
-        // mode and fixed transfer layer.
-        setStyle(body, 'overflow', 'visible');
-
-        // Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS
-        // WebView does NOT respect `html {overflow-x: hidden}`.
-        // Note! For all other cases body's style should be
-        // `body {overflow: visible}` to avoid visibility issues with iframes.
-        if (this.platform_.isIos() &&
-            this.viewer_.getParam('webview') === '1') {
-          setStyles(body, {
-            overflowX: 'hidden',
-            overflowY: 'visible',
-          });
-        }
-
-        // Require `body{position:relative}`.
-        // TODO(dvoytenko, #5660): cleanup "make-body-relative" experiment by
-        // merging this style into `amp.css`.
-        if (isExperimentOn(this.win, 'make-body-relative')) {
-          setStyles(body, {
-            position: 'relative',
-          });
-        }
-      });
-    }
 
     dev().fine(TAG_, 'initialized natural viewport');
   }
@@ -1023,6 +998,11 @@ export class ViewportBindingNatural_ {
   /** @override */
   ensureReadyForElements() {
     // Nothing.
+  }
+
+  /** @override */
+  getBorderTop() {
+    return 0;
   }
 
   /** @override */
@@ -1093,8 +1073,10 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getScrollTop() {
-    return this.getScrollingElement_()./*OK*/scrollTop ||
+    const pageScrollTop = this.getScrollingElement_()./*OK*/scrollTop ||
         this.win./*OK*/pageYOffset;
+    const host = this.ampdoc.getRootNode().host;
+    return (host ? pageScrollTop - host./*OK*/offsetTop : pageScrollTop);
   }
 
   /** @override */
@@ -1212,6 +1194,11 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   ensureReadyForElements() {
     // Nothing.
+  }
+
+  /** @override */
+  getBorderTop() {
+    return 0;
   }
 
   /** @override */
@@ -1551,6 +1538,13 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.setupDone_ = false;
     waitForBody(this.win.document, this.setup_.bind(this));
 
+    // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
+    // iOS rendering bugs. See #8798 for details.
+    whenDocumentReady(this.win.document).then(() => {
+      this.win.document.documentElement.classList.add(
+          'i-amphtml-ios-overscroll');
+    });
+
     dev().fine(TAG_, 'initialized ios-embed-wrapper viewport');
   }
 
@@ -1601,6 +1595,12 @@ export class ViewportBindingIosEmbedWrapper_ {
   disconnect() {
     this.win.removeEventListener('resize', this.boundResizeEventListener_);
     this.wrapper_.removeEventListener('scroll', this.boundScrollEventListener_);
+  }
+
+  /** @override */
+  getBorderTop() {
+    // iOS needs an extra pixel to avoid scroll freezing.
+    return 1;
   }
 
   /** @override */
@@ -1825,16 +1825,15 @@ function createViewport(ampdoc) {
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')
-        // The overriding of document.body fails in iOS7.
-        // Also, iOS8 sometimes freezes scrolling.
-        && platformFor(ampdoc.win).getMajorVersion() > 8) {
+    // The overriding of document.body fails in iOS7.
+    // Also, iOS8 sometimes freezes scrolling.
+    if (platformFor(ampdoc.win).getIosMajorVersion() > 8) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
     }
   } else {
-    binding = new ViewportBindingNatural_(ampdoc.win, viewer);
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
   }
   return new Viewport(ampdoc, binding, viewer);
 }
@@ -1892,9 +1891,9 @@ function getViewportType(win, viewer) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Viewport}
  */
 export function installViewportServiceForDoc(ampdoc) {
-  return /** @type {!Viewport} */ (getServiceForDoc(ampdoc, 'viewport',
-      ampdoc => createViewport(ampdoc)));
+  registerServiceBuilderForDoc(ampdoc, 'viewport', ampdoc => {
+    return createViewport(ampdoc);
+  });
 }

@@ -20,11 +20,11 @@ import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {resourcesForDoc} from './resources';
+import {resourcesForDoc} from './services';
 import {setStyle, setStyles} from './style';
 
 
@@ -461,7 +461,7 @@ export function whenContentIniLoad(context, hostWin, rect) {
       .then(resources => {
         const promises = [];
         resources.forEach(r => {
-          if (EXCLUDE_INI_LOAD.indexOf(r.element.tagName) == -1) {
+          if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
             promises.push(r.loadedOnce());
           }
         });

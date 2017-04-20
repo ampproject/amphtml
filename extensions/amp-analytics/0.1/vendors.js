@@ -394,6 +394,67 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'dynatrace': {
+    'requests': {
+      'endpoint': '${protocol}://${tenant}.${environment}:${port}/ampbf',
+      'pageview': '${endpoint}?type=js&' +
+        'flavor=amp&' +
+        'v=1&' +
+        'a=1%7C1%7C_load_%7C_load_%7C-%7C${navTiming(navigationStart)}%7C' +
+		'${navTiming(domContentLoadedEventEnd)}%7C0%2C2%7C2%7C_onload_%7C' +
+		'_load_%7C-%7C${navTiming(domContentLoadedEventStart)}%7C' +
+		'${navTiming(domContentLoadedEventEnd)}%7C0&' +
+        'fId=${pageViewId}&' +
+        'vID=${clientId(rxVisitor)}&' +
+        'referer=${sourceUrl}&' +
+        'title=${title}&' +
+        'sw=${screenWidth}&' +
+        'sh=${screenHeight}&' +
+        'w=${viewportWidth}&' +
+        'h=${viewportHeight}&' +
+        'nt=a${navType}' +
+        'b${navTiming(navigationStart)}' +
+        'c${navTiming(navigationStart,redirectStart)}' +
+        'd${navTiming(navigationStart,redirectEnd)}' +
+        'e${navTiming(navigationStart,fetchStart)}' +
+        'f${navTiming(navigationStart,domainLookupStart)}' +
+        'g${navTiming(navigationStart,domainLookupEnd)}' +
+        'h${navTiming(navigationStart,connectStart)}' +
+        'i${navTiming(navigationStart,connectEnd)}' +
+        'j${navTiming(navigationStart,secureConnectionStart)}' +
+        'k${navTiming(navigationStart,requestStart)}' +
+        'l${navTiming(navigationStart,responseStart)}' +
+        'm${navTiming(navigationStart,responseEnd)}' +
+        'n${navTiming(navigationStart,domLoading)}' +
+        'o${navTiming(navigationStart,domInteractive)}' +
+        'p${navTiming(navigationStart,domContentLoadedEventStart)}' +
+        'q${navTiming(navigationStart,domContentLoadedEventEnd)}' +
+        'r${navTiming(navigationStart,domComplete)}' +
+        's${navTiming(navigationStart,loadEventStart)}' +
+        't${navTiming(navigationStart,loadEventEnd)}&' +
+        'app=${app}&' +
+        'time=${timestamp}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'vars': {
+      'app': 'ampapp',
+      'protocol': 'https',
+      'tenant': '',
+      'environment': 'live.dynatrace.com',
+      'port': '443',
+    },
+  },
+
   'euleriananalytics': {
     'vars': {
       'analyticsHost': '',
@@ -476,6 +537,8 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  // Important: please keep this in sync with the following config
+  // 'googleanalytics-v2'.
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
@@ -534,6 +597,87 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
           'clt=${contentLoadTime}&' +
           'dit=${domInteractiveTime}' +
           '${baseSuffix}',
+    },
+    'triggers': {
+      'performanceTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'sampleSpec': {
+          'sampleOn': '${clientId}',
+          'threshold': 1,
+        },
+      },
+    },
+    'extraUrlParamsReplaceMap': {
+      'dimension': 'cd',
+      'metric': 'cm',
+    },
+    'optout': '_gaUserPrefs.ioo',
+  },
+
+  // CAUTION: DO NOT USE THIS NOW!
+  // 'googleanalytics-v2' is an exact copy of 'googleanalytics'
+  // except that it uses a different cookie name for CLIENT_ID
+  // We're in the middle of cookie migration, waiting for corresponding changes
+  // at GA side. #5761
+  'googleanalytics-v2': {
+    'vars': {
+      'eventValue': '0',
+      'documentLocation': 'SOURCE_URL',
+      'clientId': 'CLIENT_ID(_ga)',
+      'dataSource': 'AMP',
+    },
+    'requests': {
+      'host': 'https://www.google-analytics.com',
+      'basePrefix': 'v=1&' +
+      '_v=a1&' +
+      'ds=${dataSource}&' +
+      'aip=true&' +
+      '_s=${requestCount}&' +
+      'dt=${title}&' +
+      'sr=${screenWidth}x${screenHeight}&' +
+      '_utmht=${timestamp}&' +
+      'cid=${clientId}&' +
+      'tid=${account}&' +
+      'dl=${documentLocation}&' +
+      'dr=${documentReferrer}&' +
+      'sd=${screenColorDepth}&' +
+      'ul=${browserLanguage}&' +
+      'de=${documentCharset}',
+      'baseSuffix': '&a=${pageViewId}&' +
+      'z=${random}',
+      'pageview': '${host}/r/collect?${basePrefix}&' +
+      't=pageview&' +
+      'jid=${random}&' +
+      '_r=1' +
+      '${baseSuffix}',
+      'event': '${host}/collect?${basePrefix}&' +
+      't=event&' +
+      'jid=&' +
+      'ec=${eventCategory}&' +
+      'ea=${eventAction}&' +
+      'el=${eventLabel}&' +
+      'ev=${eventValue}' +
+      '${baseSuffix}',
+      'social': '${host}/collect?${basePrefix}&' +
+      't=social&' +
+      'jid=&' +
+      'sa=${socialAction}&' +
+      'sn=${socialNetwork}&' +
+      'st=${socialTarget}' +
+      '${baseSuffix}',
+      'timing': '${host}/collect?${basePrefix}&' +
+      't=timing&' +
+      'jid=&' +
+      'plt=${pageLoadTime}&' +
+      'dns=${domainLookupTime}&' +
+      'tcp=${tcpConnectTime}&' +
+      'rrt=${redirectTime}&' +
+      'srt=${serverResponseTime}&' +
+      'pdt=${pageDownloadTime}&' +
+      'clt=${contentLoadTime}&' +
+      'dit=${domInteractiveTime}' +
+      '${baseSuffix}',
     },
     'triggers': {
       'performanceTiming': {
@@ -1146,11 +1290,31 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'image': true,
     },
   },
-
+  'rakam': {
+    'vars': {
+      'deviceId': 'CLIENT_ID(rakam_device_id)',
+    },
+    'requests': {
+      'base': '?api.api_key=${writeKey}' +
+        '&prop._platform=amp' +
+        '&prop._device_id=${deviceId}' +
+        '&prop.locale=${browserLanguage}' +
+        '&prop.path=${canonicalPath}' +
+        '&prop.url=${canonicalUrl}' +
+        '&prop.color_depth=${screenColorDepth}' +
+        '&prop._referrer=${documentReferrer}' +
+        '&prop.title=${title}' +
+        '&prop.timezone=${timezone}' +
+        '&prop._time=${timestamp}' +
+        '&prop.resolution=${screenWidth} × ${screenHeight}',
+      'pageview': 'https://${apiEndpoint}/event/pixel${base}&collection=${pageViewName}',
+      'custom': 'https://${apiEndpoint}/event/pixel${base}&collection=${collection}',
+    },
+  },
   'ibeatanalytics': {
     'requests': {
-      'host': 'https://ibeat.indiatimes.com',
-      'base': 'https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html',
+      'host': 'https://ibeats.indiatimes.com',
+      'base': 'https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html',
       'pageview': '${base}?' +
                 '&h=${h}' +
                 '&d=${h}' +

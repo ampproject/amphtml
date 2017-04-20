@@ -38,7 +38,7 @@ tags: {  # <amp-facebook-comments>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-facebook-comments"
+  spec_url: "https://www.ampproject.org/docs/reference/components/social/amp-facebook-comments"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

@@ -28,6 +28,11 @@ describe('BindEvaluator', () => {
     return evaluator.bindingsForTesting().length;
   }
 
+  function numberOfCachedExpressions() {
+    const cache = evaluator.expressionsForTesting();
+    return Object.keys(cache).length;
+  }
+
   it('should allow callers to add bindings multiple times', () => {
     expect(numberOfBindings()).to.equal(0);
     evaluator.addBindings([{
@@ -64,12 +69,23 @@ describe('BindEvaluator', () => {
     expect(numberOfBindings()).to.equal(0);
   });
 
-  it('should evaluate expressions given a scope with needed bindings', () => {
-    const bindingDef = {
+  it('should clean up removed expressions from its cache', () => {
+    expect(numberOfCachedExpressions()).to.equal(0);
+    evaluator.addBindings([{
       tagName: 'P',
       property: 'text',
       expressionString: 'oneplusone + 2',
-    };
+    }, {
+      tagName: 'A',
+      property: 'href',
+      expressionString: 'url',
+    }]);
+    expect(numberOfCachedExpressions()).to.equal(2);
+    evaluator.removeBindingsWithExpressionStrings(['url']);
+    expect(numberOfCachedExpressions()).to.equal(1);
+  });
+
+  it('should evaluate expressions given a scope with needed bindings', () => {
     expect(numberOfBindings()).to.equal(0);
     evaluator.addBindings([{
       tagName: 'P',

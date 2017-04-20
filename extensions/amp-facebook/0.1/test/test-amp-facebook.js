@@ -23,11 +23,8 @@ import {adopt} from '../../../../src/runtime';
 import {facebook} from '../../../../3p/facebook';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 import {resetServiceForTesting} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
-
-const scenarios = ['sentinel', 'amp3pSentinel'];
 
 describe('amp-facebook', function() {
   this.timeout(5000);
@@ -55,10 +52,6 @@ describe('amp-facebook', function() {
       return iframe.addElement(ampFB);
     });
   }
-
-  afterEach(() => {
-    toggleExperiment(window, 'sentinel-name-change', false);
-  });
 
   it('renders iframe in amp-facebook', () => {
     return getAmpFacebook(fbPostHref).then(ampFB => {
@@ -119,35 +112,30 @@ describe('amp-facebook', function() {
     });
   });
 
-  scenarios.forEach(sentinelName => {
-    it('resizes facebook posts', () => {
-      if (sentinelName == 'sentinel') {
-        toggleExperiment(window, 'sentinel-name-change', true);
-      }
-      const iframeSrc = 'http://ads.localhost:' + location.port +
-          '/test/fixtures/served/iframe.html';
-      resetServiceForTesting(window, 'bootstrapBaseUrl');
-      setDefaultBootstrapBaseUrlForTesting(iframeSrc);
-      return getAmpFacebook(
-          fbPostHref, undefined, /* opt_noFakeResources */ true).then(ampFB => {
-            return new Promise((resolve, unusedReject) => {
-              const iframe = ampFB.firstChild;
-              const impl = ampFB.implementation_;
-              impl.changeHeight = newHeight => {
-                expect(newHeight).to.equal(666);
-                resolve(ampFB);
-              };
-              const message = {
-                type: 'requestHeight',
-                is3p: true,
-                height: 666,
-              };
-              message[sentinelName] = iframe.getAttribute(
-                  'data-amp-3p-sentinel');
-              iframe.contentWindow.postMessage(message, '*');
-            });
+  it('resizes facebook posts', () => {
+    const iframeSrc = 'http://ads.localhost:' + location.port +
+        '/test/fixtures/served/iframe.html';
+    resetServiceForTesting(window, 'bootstrapBaseUrl');
+    setDefaultBootstrapBaseUrlForTesting(iframeSrc);
+    return getAmpFacebook(
+        fbPostHref, undefined, /* opt_noFakeResources */ true).then(ampFB => {
+          return new Promise((resolve, unusedReject) => {
+            const iframe = ampFB.firstChild;
+            const impl = ampFB.implementation_;
+            impl.changeHeight = newHeight => {
+              expect(newHeight).to.equal(666);
+              resolve(ampFB);
+            };
+            const message = {
+              type: 'requestHeight',
+              is3p: true,
+              height: 666,
+            };
+            message['sentinel'] = iframe.getAttribute(
+                'data-amp-3p-sentinel');
+            iframe.contentWindow.postMessage(message, '*');
           });
-    });
+        });
   });
 
   it('removes iframe after unlayoutCallback', () => {

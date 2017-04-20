@@ -1,4 +1,4 @@
 FAIL
-amp-youtube/0.1/test/validator-amp-youtube.html:36:2 The mandatory attribute 'data-videoid' is missing in tag 'amp-youtube'. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [AMP_TAG_PROBLEM]
-amp-youtube/0.1/test/validator-amp-youtube.html:38:2 The implied layout 'CONTAINER' is not supported by tag 'amp-youtube'. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [AMP_LAYOUT_PROBLEM]
-amp-youtube/0.1/test/validator-amp-youtube.html:41:2 The attribute 'data-videoid' in tag 'amp-youtube' is set to the invalid value 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [AMP_TAG_PROBLEM]
+amp-youtube/0.1/test/validator-amp-youtube.html:36:2 The mandatory attribute 'data-videoid' is missing in tag 'amp-youtube'. (see https://www.ampproject.org/docs/reference/components/media/amp-youtube) [AMP_TAG_PROBLEM]
+amp-youtube/0.1/test/validator-amp-youtube.html:38:2 The implied layout 'CONTAINER' is not supported by tag 'amp-youtube'. (see https://www.ampproject.org/docs/reference/components/media/amp-youtube) [AMP_LAYOUT_PROBLEM]
+amp-youtube/0.1/test/validator-amp-youtube.html:41:2 The attribute 'data-videoid' in tag 'amp-youtube' is set to the invalid value 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'. (see https://www.ampproject.org/docs/reference/components/media/amp-youtube) [AMP_TAG_PROBLEM]

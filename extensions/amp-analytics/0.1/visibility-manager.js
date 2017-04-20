@@ -23,9 +23,9 @@ import {VisibilityModel} from './visibility-model';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {map} from '../../../src/utils/object';
-import {resourcesForDoc} from '../../../src/resources';
-import {viewerForDoc} from '../../../src/viewer';
-import {viewportForDoc} from '../../../src/viewport';
+import {resourcesForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
 
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
@@ -200,14 +200,16 @@ export class VisibilityManager {
    * `readyPromise` is resolved, if specified.
    * @param {!Object<string, *>} spec
    * @param {?Promise} readyPromise
+   * @param {?function():!Promise} createReportPromiseFunc
    * @param {function(!Object<string, *>)} callback
    * @return {!UnlistenDef}
    */
-  listenRoot(spec, readyPromise, callback) {
+  listenRoot(spec, readyPromise, createReportPromiseFunc, callback) {
     const model = new VisibilityModel(
         spec,
         this.getRootVisibility.bind(this));
-    return this.listen_(model, spec, readyPromise, callback);
+    return this.listen_(
+        model, spec, readyPromise, createReportPromiseFunc, callback);
   }
 
   /**
@@ -217,32 +219,41 @@ export class VisibilityManager {
    * @param {!Element} element
    * @param {!Object<string, *>} spec
    * @param {?Promise} readyPromise
+   * @param {?function():!Promise} createReportPromiseFunc
    * @param {function(!Object<string, *>)} callback
    * @return {!UnlistenDef}
    */
-  listenElement(element, spec, readyPromise, callback) {
+  listenElement(
+      element, spec, readyPromise, createReportPromiseFunc, callback) {
     const model = new VisibilityModel(
         spec,
         this.getElementVisibility.bind(this, element));
-    return this.listen_(model, spec, readyPromise, callback, element);
+    return this.listen_(
+        model, spec, readyPromise, createReportPromiseFunc, callback, element);
   }
 
   /**
    * @param {!VisibilityModel} model
    * @param {!Object<string, *>} spec
    * @param {?Promise} readyPromise
+   * @param {?function():!Promise} createReportPromiseFunc
    * @param {function(!Object<string, *>)} callback
    * @param {!Element=} opt_element
    * @return {!UnlistenDef}
    * @private
    */
-  listen_(model, spec, readyPromise, callback, opt_element) {
+  listen_(model, spec,
+      readyPromise, createReportPromiseFunc, callback, opt_element) {
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
       readyPromise.then(() => {
         model.setReady(true);
       });
+    }
+
+    if (createReportPromiseFunc) {
+      model.setReportReady(createReportPromiseFunc);
     }
 
     // Process the event.
@@ -398,8 +409,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
   /** @override */
   observe(element, listener) {
-    this.polyfillAmpElementAsRootIfNeeded_(element);
-    this.getIntersectionObserver_().observe(element);
+    this.polyfillAmpElementIfNeeded_(element);
 
     const id = getElementId(element);
     let trackedElement = this.trackedElements_[id];
@@ -415,6 +425,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       listener(trackedElement.intersectionRatio);
     }
     trackedElement.listeners.push(listener);
+    this.getIntersectionObserver_().observe(element);
     return () => {
       const trackedElement = this.trackedElements_[id];
       if (trackedElement) {
@@ -473,6 +484,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     };
     this.unsubscribe(this.viewport_.onScroll(ticker));
     this.unsubscribe(this.viewport_.onChanged(ticker));
+    // Tick in the next event loop. That's how native InOb works.
     setTimeout(ticker);
     return intersectionObserverPolyfill;
   }
@@ -481,7 +493,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @param {!Element} element
    * @private
    */
-  polyfillAmpElementAsRootIfNeeded_(element) {
+  polyfillAmpElementIfNeeded_(element) {
     const win = this.ampdoc.win;
     if (nativeIntersectionObserverSupported(win)) {
       return;
@@ -492,7 +504,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       return;
     }
     element.getLayoutBox = () => {
-      return this.viewport_.getRect();
+      return this.viewport_.getLayoutRect(element);
     };
     element.getOwner = () => null;
   }
@@ -513,6 +525,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @private
    */
   onIntersectionChange_(target, intersectionRatio) {
+    intersectionRatio = Math.min(Math.max(intersectionRatio, 0), 1);
     const id = getElementId(target);
     const trackedElement = this.trackedElements_[id];
     if (trackedElement) {

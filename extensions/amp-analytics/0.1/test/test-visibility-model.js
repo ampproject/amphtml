@@ -221,7 +221,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         firstSeenTime: 0,
         lastSeenTime: 0,
         lastVisibleTime: 0,
-        fistVisibleTime: 0,
+        firstVisibleTime: 0,
         maxContinuousVisibleTime: 0,
         totalVisibleTime: 0,
         loadTimeVisibility: 0,
@@ -235,7 +235,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.firstSeenTime_ = 2;
       vh.lastSeenTime_ = 3;
       vh.lastVisibleTime_ = 4;
-      vh.fistVisibleTime_ = 5;
+      vh.firstVisibleTime_ = 5;
       vh.maxContinuousVisibleTime_ = 10;
       vh.totalVisibleTime_ = 11;
       vh.loadTimeVisibility_ = 0.1;
@@ -246,7 +246,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         firstSeenTime: 1,
         lastSeenTime: 2,
         lastVisibleTime: 3,
-        fistVisibleTime: 4,
+        firstVisibleTime: 4,
         // Durations:
         maxContinuousVisibleTime: 10,
         totalVisibleTime: 11,
@@ -263,15 +263,25 @@ describes.sandboxed('VisibilityModel', {}, () => {
     let vh;
     let updateStub;
     let eventSpy;
+    let visibilityValueForTesting = null;
 
     beforeEach(() => {
       vh = new VisibilityModel({
         minVisiblePercentage: 25,
         totalTimeMin: 10,
         continuousTimeMin: 10,
+        continuousTimeMax: 1000,
       }, NO_CALC);
-      updateStub = sandbox.stub(vh, 'update');
+      updateStub = sandbox.stub(vh, 'update', () => {
+        if (visibilityValueForTesting) {
+          vh.update_(visibilityValueForTesting);
+        }
+      });
       eventSpy = vh.eventResolver_ = sandbox.spy();
+    });
+
+    afterEach(() => {
+      visibilityValueForTesting = null;
     });
 
     it('conditions not met', () => {
@@ -370,6 +380,43 @@ describes.sandboxed('VisibilityModel', {}, () => {
       clock.tick(1000);
       expect(updateStub).to.not.be.called;
     });
+
+    describe('with reportReadyPromise', () => {
+      let reportPromise;
+      let promiseResolver;
+      beforeEach(() => {
+        reportPromise = new Promise(resolve => {
+          promiseResolver = resolve;
+        });
+        vh.setReportReady(() => {return reportPromise;});
+      });
+
+      it('conditions met, send when report ready', () => {
+        visibilityValueForTesting = 0.5;
+        vh.update_(1);
+        clock.tick(20);
+        vh.update_(1);
+        expect(eventSpy).to.not.be.called;
+        promiseResolver();
+        return reportPromise.then(() => {
+          expect(eventSpy).to.be.calledOnce;
+        });
+      });
+
+      it('conditions met, but no longer met when ready to report', () => {
+        visibilityValueForTesting = 1;
+        vh.update_(1);
+        clock.tick(20);
+        vh.update_(1);
+        eventSpy.reset();
+        expect(eventSpy).to.not.be.called;
+        clock.tick(1001);
+        promiseResolver();
+        return reportPromise.then(() => {
+          expect(eventSpy).to.not.be.called;
+        });
+      });
+    });
   });
 
 
@@ -421,9 +468,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.updateCounters_(0);
       expect(vh.matchesVisibility_).to.be.false;
 
-      vh.updateCounters_(-1);
-      expect(vh.matchesVisibility_).to.be.false;
-
       vh.updateCounters_(0.0001);
       expect(vh.matchesVisibility_).to.be.true;
 
@@ -432,9 +476,16 @@ describes.sandboxed('VisibilityModel', {}, () => {
 
       vh.updateCounters_(1);
       expect(vh.matchesVisibility_).to.be.true;
+    });
 
-      vh.updateCounters_(1.00001);
-      expect(vh.matchesVisibility_).to.be.false;
+    it('should NOT allow invalid values', () => {
+      const vh = new VisibilityModel(NO_SPEC, NO_CALC);
+      expect(() => {
+        vh.updateCounters_(-1);
+      }).to.throw(/invalid visibility value/);
+      expect(() => {
+        vh.updateCounters_(1.00001);
+      }).to.throw(/invalid visibility value/);
     });
 
     it('should match custom visibility position', () => {
@@ -443,9 +494,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
         visiblePercentageMax: 90,
       }, NO_CALC);
       vh.updateCounters_(0);
-      expect(vh.matchesVisibility_).to.be.false;
-
-      vh.updateCounters_(-1);
       expect(vh.matchesVisibility_).to.be.false;
 
       vh.updateCounters_(0.1);
@@ -462,9 +510,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
 
       vh.updateCounters_(1);
       expect(vh.matchesVisibility_).to.be.false;
-
-      vh.updateCounters_(1.00001);
-      expect(vh.matchesVisibility_).to.be.false;
     });
 
     it('should transition to visible and stay visible', () => {
@@ -472,7 +517,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       clock.tick(100);
       vh.updateCounters_(0.1);
       expect(vh.getState(startTime)).to.contains({
-        fistVisibleTime: 101,
+        firstVisibleTime: 101,
         lastVisibleTime: 101,
         totalVisibleTime: 0,
         maxContinuousVisibleTime: 0,
@@ -485,7 +530,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       clock.tick(100);
       vh.updateCounters_(0.05);
       expect(vh.getState(startTime)).to.contains({
-        fistVisibleTime: 101,  // Doesn't change.
+        firstVisibleTime: 101,  // Doesn't change.
         lastVisibleTime: 201,
         totalVisibleTime: 100,
         maxContinuousVisibleTime: 100,
@@ -498,7 +543,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       clock.tick(100);
       vh.updateCounters_(0.2);
       expect(vh.getState(startTime)).to.contains({
-        fistVisibleTime: 101,  // Doesn't change.
+        firstVisibleTime: 101,  // Doesn't change.
         lastVisibleTime: 301,
         totalVisibleTime: 200,
         maxContinuousVisibleTime: 200,
@@ -513,7 +558,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       clock.tick(100);
       vh.updateCounters_(0.1);
       expect(vh.getState(startTime)).to.contains({
-        fistVisibleTime: 101,
+        firstVisibleTime: 101,
         lastVisibleTime: 101,
         totalVisibleTime: 0,
         maxContinuousVisibleTime: 0,
@@ -526,7 +571,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       clock.tick(100);
       vh.updateCounters_(0.05);
       expect(vh.getState(startTime)).to.contains({
-        fistVisibleTime: 101,  // Doesn't change.
+        firstVisibleTime: 101,  // Doesn't change.
         lastVisibleTime: 201,
         totalVisibleTime: 100,
         maxContinuousVisibleTime: 100,
@@ -544,7 +589,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         maxContinuousVisibleTime: 200,
         lastVisibleTime: 301,
         // No changes.
-        fistVisibleTime: 101,
+        firstVisibleTime: 101,
         minVisiblePercentage: 5,
         maxVisiblePercentage: 10,
       });
@@ -558,7 +603,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         totalVisibleTime: 200,
         maxContinuousVisibleTime: 200,
         lastVisibleTime: 301,
-        fistVisibleTime: 101,
+        firstVisibleTime: 101,
         minVisiblePercentage: 5,
         maxVisiblePercentage: 10,
       });
@@ -573,7 +618,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         // No changes.
         totalVisibleTime: 200,
         maxContinuousVisibleTime: 200,
-        fistVisibleTime: 101,
+        firstVisibleTime: 101,
         minVisiblePercentage: 5,
       });
       expect(vh.lastVisibleUpdateTime_).to.equal(Date.now());
@@ -587,7 +632,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         totalVisibleTime: 300,
         // No changes.
         maxContinuousVisibleTime: 200,
-        fistVisibleTime: 101,
+        firstVisibleTime: 101,
         minVisiblePercentage: 5,
       });
       expect(vh.lastVisibleUpdateTime_).to.equal(Date.now());
@@ -786,7 +831,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         maxContinuousVisibleTime: 1000,
         totalVisibleTime: 1000,
         firstSeenTime: 1,
-        fistVisibleTime: 1001,
+        firstVisibleTime: 1001,
         lastSeenTime: 2001,
         lastVisibleTime: 2001,
       });
@@ -817,7 +862,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         maxContinuousVisibleTime: 2000,
         totalVisibleTime: 2000,
         firstSeenTime: 1,
-        fistVisibleTime: 1,
+        firstVisibleTime: 1,
         lastSeenTime: 2001,
         lastVisibleTime: 2001,
       });

@@ -228,7 +228,10 @@ var Fusion;
 Fusion.on;
 Fusion.on.warning;
 Fusion.loadAds;
+data.mediaZone;
+data.layout;
 data.space;
+data.parameters;
 
 // holder.js
 data.queue;
@@ -326,6 +329,7 @@ OX_bidder_options.callback;
 var OX_bidder_ads;
 var oxRequest;
 oxRequest.addAdUnit;
+oxRequest.addVariable;
 oxRequest.setAdSizes;
 oxRequest.getOrCreateAdUnit;
 var dfpData;

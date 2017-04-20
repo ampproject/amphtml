@@ -51,6 +51,10 @@
     "base": "https://scomcluster.cxense.com/Repo/rep.gif" ,
     "pageview": "https://scomcluster.cxense.com/Repo/rep.gif?ver=1&typ=pgv&sid=$siteId&ckp=_client_id_&loc=_source_url_&rnd=_random_&ref=_document_referrer_&ltm=_timestamp_&wsz=_screen_width_x_screen_height_&bln=_browser_language_&chs=_document_charset_&col=_screen_color_depth_&tzo=_timezone_&cp_cx_channel=amp"
   },
+  "dynatrace": {
+   "endpoint": "https://$tenant.live.dynatrace.com:443/ampbf",
+   "pageview": "https://$tenant.live.dynatrace.com:443/ampbf?type=js&flavor=amp&v=1&a=1%7C1%7C_load_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0%2C2%7C2%7C_onload_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0&fId=_page_view_id_&vID=_client_id_&referer=_source_url_&title=_title_&sw=_screen_width_&sh=_screen_height_&w=_viewport_width_&h=_viewport_height_&nt=a_nav_type_b_nav_timing_c_nav_timing_d_nav_timing_e_nav_timing_f_nav_timing_g_nav_timing_h_nav_timing_i_nav_timing_j_nav_timing_k_nav_timing_l_nav_timing_m_nav_timing_n_nav_timing_o_nav_timing_p_nav_timing_q_nav_timing_r_nav_timing_s_nav_timing_t_nav_timing_&app=ampapp&time=_timestamp_",
+  },
   "euleriananalytics": {
     "base": "https://$analyticsHost",
     "basePrefix": "-/_random_?euid-amp=_client_id_&url=_source_url_&",
@@ -64,6 +68,15 @@
     "event": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams&et=action&hsrc=3"
   },
   "googleanalytics": {
+    "host": "https://www.google-analytics.com",
+    "basePrefix": "v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
+    "baseSuffix": "&a=_page_view_id_&z=_random_",
+    "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&jid=_random_&_r=1&a=_page_view_id_&z=_random_",
+    "event": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&jid=&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=0&a=_page_view_id_&z=_random_",
+    "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&jid=&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
+    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
+  },
+  "googleanalytics-v2": {
     "host": "https://www.google-analytics.com",
     "basePrefix": "v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
     "baseSuffix": "&a=_page_view_id_&z=_random_",
@@ -112,9 +125,9 @@
   "mparticle": {
     "host": "https://pixels.mparticle.com",
     "endpointPath": "/v1/$apiKey/Pixel",
-    "baseParams": "et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=$debug&lc=$location&av=$appVersion",
-    "pageview": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=$debug&lc=$location&av=$appVersion",
-    "event": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=AppEvent&n=$eventName&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=$debug&lc=$location&av=$appVersion"
+    "baseParams": "et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion",
+    "pageview": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion",
+    "event": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=AppEvent&n=$eventName&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion"
   },
   "parsely": {
     "host": "https://srv.pixel.parsely.com",
@@ -183,9 +196,14 @@
     "pageload": "https://pp.lp4.io/pl?i=$id&ct=_dom_interactive_time_&rt=_page_download_time_&pt=_page_load_time_&p=_canonical_url_&c=amp&t=$type&s=$section&_t=amp&_r=_random_",
     "ping": "https://pp.lp4.io/u?i=$id&u=_client_id_&p=_canonical_url_&uActive=true&isPing=yes&c=amp&t=$type&s=$section&_t=amp&_r=_random_",
   },
+  "rakam": {
+    "base": "?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_",
+    "pageview": "https://$apiEndpoint/event/pixel?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=$pageViewName",
+    "custom": "https://$apiEndpoint/event/pixel?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=$collection"
+  },
   "ibeatanalytics": {
-    "host": "https://ibeat.indiatimes.com",
-    "base": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html",
-    "pageview": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_",
+    "host": "https://ibeats.indiatimes.com",
+    "base": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html",
+    "pageview": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_",
   },
 }

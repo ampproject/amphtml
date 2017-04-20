@@ -19,8 +19,8 @@ import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {dev} from '../../../src/log';
 import {serializeQueryString} from '../../../src/url';
 import {getTimingDataSync} from '../../../src/service/variable-source';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
-import {viewerForDoc} from '../../../src/viewer';
+import {urlReplacementsForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -99,6 +99,18 @@ export class BaseLifecycleReporter {
   reset() {
     this.extraVariables_ = new Object(null);
   }
+
+  /**
+   * Returns the initialization time of this reporter.
+   * @return {number} The initialization time in ms.
+   */
+  getInitTime() {}
+
+  /**
+   * Returns the time delta between initialization and now.
+   * @return {number} The time delta in ms.
+   */
+  getDeltaTime() {}
 }
 
 export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
@@ -142,8 +154,8 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     /** @private {time} @const */
     this.initTime_ = initTime;
 
-    /** @private {!function():number} @const */
-    this.getDeltaTime_ = (win.performance && win.performance.now.bind(
+    /** @const {!function():number} */
+    this.getDeltaTime = (win.performance && win.performance.now.bind(
             win.performance)) || (() => {return Date.now() - this.initTime_;});
 
     /** (Not constant b/c this can be overridden for testing.) @private */
@@ -192,7 +204,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    */
   buildPingAddress_(name) {
     const stageId = LIFECYCLE_STAGES[name] || 9999;
-    const delta = Math.round(this.getDeltaTime_());
+    const delta = Math.round(this.getDeltaTime());
     // Note: extraParams can end up empty if (a) this.extraVariables_ is empty
     // or (b) if all values are themselves empty or null.
     let extraParams = serializeQueryString(this.extraVariables_);
@@ -249,5 +261,13 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     pingElement.setAttribute('aria-hidden', 'true');
     this.element_.parentNode.insertBefore(pingElement, this.element_);
     dev().info('PING', url);
+  }
+
+  /**
+   * Returns the initialization time of this reporter.
+   * @return {number} The initialization time in ms.
+   */
+  getInitTime() {
+    return this.initTime_;
   }
 }

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {map} from '../../../src/utils/object';
 import {parseSrcset} from '../../../src/srcset';
+import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-bind';
@@ -31,11 +33,21 @@ let PropertyRulesDef;
  * Property rules that apply to any and all tags.
  * @private {Object<string, ?PropertyRulesDef>}
  */
-const GLOBAL_PROPERTY_RULES = {
+const GLOBAL_PROPERTY_RULES = map({
+  'text': null,
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
-};
+});
+
+/**
+ * Property rules that apply to all AMP elements.
+ * @private {Object<string, Object<string, ?PropertyRulesDef>>}
+ */
+const AMP_PROPERTY_RULES = map({
+  'width': null,
+  'height': null,
+});
 
 /**
  * Maps tag names to property names to PropertyRulesDef.
@@ -49,11 +61,11 @@ const ELEMENT_RULES = createElementRules_();
  * Map whose keys comprise all properties that contain URLs.
  * @private {Object<string, boolean>}
  */
-const URL_PROPERTIES = {
+const URL_PROPERTIES = map({
   'src': true,
   'srcset': true,
   'href': true,
-};
+});
 
 /**
  * BindValidator performs runtime validation of Bind expression results.
@@ -62,6 +74,18 @@ const URL_PROPERTIES = {
  * of the AMP validator's, selected with a focus on security and UX.
  */
 export class BindValidator {
+  /**
+   * Returns true if (tag, property) binding is allowed.
+   * Otherwise, returns false.
+   * @note `tag` and `property` are case-sensitive.
+   * @param {!string} tag
+   * @param {!string} property
+   * @return {boolean}
+   */
+  canBind(tag, property) {
+    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
+  }
+
   /**
    * Returns true if `value` is a valid result for a (tag, property) binding.
    * Otherwise, returns false.
@@ -78,13 +102,18 @@ export class BindValidator {
       rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
     }
 
-    // If there are no rules governing this binding, return true.
-    if (!rules) {
+    // If binding to (tag, property) is not allowed, return false.
+    if (rules === undefined) {
+      return false;
+    }
+
+    // If binding is allowed but have no specific rules, return true.
+    if (rules === null) {
       return true;
     }
 
     // Validate URL(s) if applicable.
-    if (value && URL_PROPERTIES.hasOwnProperty(property)) {
+    if (value && URL_PROPERTIES[property]) {
       let urls;
       if (property === 'srcset') {
         let srcset;
@@ -132,9 +161,9 @@ export class BindValidator {
     if (allowedProtocols && url) {
       const re = /^([^:\/?#.]+):[\s\S]*$/;
       const match = re.exec(url);
-
       if (match !== null) {
         const protocol = match[1].toLowerCase().trimLeft();
+        // hasOwnProperty() needed since nested objects are not prototype-less.
         if (!allowedProtocols.hasOwnProperty(protocol)) {
           return false;
         }
@@ -152,18 +181,19 @@ export class BindValidator {
    * @private
    */
   rulesForTagAndProperty_(tag, property) {
-    if (GLOBAL_PROPERTY_RULES.hasOwnProperty(property)) {
-      return GLOBAL_PROPERTY_RULES[property];
+    const globalPropertyRules = GLOBAL_PROPERTY_RULES[property];
+    if (globalPropertyRules !== undefined) {
+      return globalPropertyRules;
     }
-
-    let tagRules;
-    if (ELEMENT_RULES.hasOwnProperty(tag)) {
-      tagRules = ELEMENT_RULES[tag];
-    }
+    const tagRules = ELEMENT_RULES[tag];
+    // hasOwnProperty() needed since nested objects are not prototype-less.
     if (tagRules && tagRules.hasOwnProperty(property)) {
       return tagRules[property];
     }
-
+    const ampPropertyRules = AMP_PROPERTY_RULES[property];
+    if (startsWith(tag, 'AMP-') && ampPropertyRules !== undefined) {
+      return ampPropertyRules;
+    }
     return undefined;
   }
 }
@@ -174,67 +204,168 @@ export class BindValidator {
  */
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
-  const rules = {
+  const rules = map({
+    'AMP-BRIGHTCOVE': {
+      'data-account': null,
+      'data-embed': null,
+      'data-player': null,
+      'data-player-id': null,
+      'data-playlist-id': null,
+      'data-video-id': null,
+    },
+    'AMP-CAROUSEL': {
+      'slide': null,
+    },
+    'AMP-IFRAME': {
+      'src': null,
+    },
     'AMP-IMG': {
-      src: {
-        allowedProtocols: {
-          data: true,
-          http: true,
-          https: true,
+      'alt': null,
+      'attribution': null,
+      'src': {
+        'allowedProtocols': {
+          'data': true,
+          'http': true,
+          'https': true,
         },
       },
-      srcset: {
-        alternativeName: 'src',
+      'srcset': {
+        'alternativeName': 'src',
+      },
+    },
+    'AMP-SELECTOR': {
+      'selected': null,
+    },
+    'AMP-STATE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
       },
     },
     'AMP-VIDEO': {
-      src: {
-        allowedProtocols: {
-          https: true,
+      'alt': null,
+      'attribution': null,
+      'controls': null,
+      'loop': null,
+      'poster': null,
+      'preload': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
         },
       },
     },
-    A: {
-      href: {
-        allowedProtocols: {
-          ftp: true,
-          http: true,
-          https: true,
-          mailto: true,
+    'AMP-YOUTUBE': {
+      'data-videoid': null,
+    },
+    'A': {
+      'href': {
+        'allowedProtocols': {
+          'ftp': true,
+          'http': true,
+          'https': true,
+          'mailto': true,
           'fb-messenger': true,
-          intent: true,
-          skype: true,
-          sms: true,
-          snapchat: true,
-          tel: true,
-          tg: true,
-          threema: true,
-          twitter: true,
-          viber: true,
-          whatsapp: true,
+          'intent': true,
+          'skype': true,
+          'sms': true,
+          'snapchat': true,
+          'tel': true,
+          'tg': true,
+          'threema': true,
+          'twitter': true,
+          'viber': true,
+          'whatsapp': true,
         },
       },
     },
-    INPUT: {
-      type: {
+    'BUTTON': {
+      'disabled': null,
+      'type': null,
+      'value': null,
+    },
+    'FIELDSET': {
+      'disabled': null,
+    },
+    'INPUT': {
+      'accept': null,
+      'accesskey': null,
+      'autocomplete': null,
+      'checked': null,
+      'disabled': null,
+      'height': null,
+      'inputmode': null,
+      'max': null,
+      'maxlength': null,
+      'min': null,
+      'minlength': null,
+      'multiple': null,
+      'pattern': null,
+      'placeholder': null,
+      'readonly': null,
+      'required': null,
+      'selectiondirection': null,
+      'size': null,
+      'spellcheck': null,
+      'step': null,
+      'type': {
         blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
       },
+      'value': null,
+      'width': null,
     },
-    SOURCE: {
-      src: {
-        allowedProtocols: {
-          https: true,
+    'OPTION': {
+      'disabled': null,
+      'label': null,
+      'selected': null,
+      'value': null,
+    },
+    'OPTGROUP': {
+      'disabled': null,
+      'label': null,
+    },
+    'SELECT': {
+      'autofocus': null,
+      'disabled': null,
+      'multiple': null,
+      'required': null,
+      'size': null,
+    },
+    'SOURCE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
         },
       },
+      'type': null,
     },
-    TRACK: {
-      src: {
-        allowedProtocols: {
-          https: true,
+    'TRACK': {
+      'label': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
         },
       },
+      'srclang': null,
     },
-  };
-
+    'TEXTAREA': {
+      'autocomplete': null,
+      'autofocus': null,
+      'cols': null,
+      'disabled': null,
+      'maxlength': null,
+      'minlength': null,
+      'placeholder': null,
+      'readonly': null,
+      'required': null,
+      'rows': null,
+      'selectiondirection': null,
+      'selectionend': null,
+      'selectionstart': null,
+      'spellcheck': null,
+      'wrap': null,
+    },
+  });
   return rules;
 }

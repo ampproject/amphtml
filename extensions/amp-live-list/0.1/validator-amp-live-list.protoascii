@@ -66,14 +66,14 @@ tags: {  # <amp-live-list>
     supported_layouts: CONTAINER
     supported_layouts: FIXED_HEIGHT
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list"
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-live-list"
 }
 tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [update]"
   attrs: { name: "update" mandatory: true }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#update"
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-live-list#update"
 }
 tags: {
   html_format: AMP
@@ -83,14 +83,14 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-LIVE-LIST [items] item"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#items"
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-live-list#items"
 }
 tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [pagination]"
   attrs: { name: "pagination" mandatory: true }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#pagination"
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-live-list#pagination"
 }
 tags: {
   html_format: AMP
@@ -100,5 +100,5 @@ tags: {
   attrs: { name: "data-sort-time" mandatory: true }
   attrs: { name: "data-update-time" }
   attrs: { name: "data-tombstone" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#items"
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-live-list#items"
 }
