@@ -202,8 +202,8 @@
     "custom": "https://$apiEndpoint/event/pixel?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=$collection"
   },
   "ibeatanalytics": {
-    "host": "https://ibeat.indiatimes.com",
-    "base": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html",
-    "pageview": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_",
+    "host": "https://ibeats.indiatimes.com",
+    "base": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html",
+    "pageview": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_",
   },
 }
