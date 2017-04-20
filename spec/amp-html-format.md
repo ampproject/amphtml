@@ -465,11 +465,12 @@ All AMP template elements must go through AMP security review before they can be
 
 Currently, the following SVG elements are allowed:
 
-* basics: "svg", "g", "path", "glyph", "glyphRef", "marker", "view"
-* shapes: "circle", "line", "polygon", "polyline", "rect"
+* basics: "g", "glyph", "glyphRef", "image", "marker", "metadata", "path", "solidcolor", "svg", "switch", "view"
+* shapes: "circle", "ellipse", "line", "polygon", "polyline", "rect"
 * text: "text", "textPath", "tref", "tspan"
-* rendering: "clipPath", "filter", "linearGradient", "radialGradient", "mask", "pattern", "vkern", "hkern"
+* rendering: "clipPath", "filter", "hkern", "linearGradient", "mask", "pattern", "radialGradient", "vkern"
 * special: "defs" (all children above are allowed here), "symbol", "use"
+* filter: "feColorMatrix", "feComposite", "feGaussianBlur", "feMerge", "feMergeNode", "feOffset", "foreignObject"
 * ARIA: "desc", "title"
 
 As well as these attributes:
