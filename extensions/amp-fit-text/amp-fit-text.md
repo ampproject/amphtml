@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/">Annotated code example that includes amp-fit</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-fit-text/">Annotated code example that includes amp-fit</a></td>
   </tr>
 </table>
 
