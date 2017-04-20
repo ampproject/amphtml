@@ -31,12 +31,15 @@ import {
 import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
-import {resourcesForDoc} from './services';
-import {timerFor} from './services';
-import {vsyncFor} from './services';
+import {
+  resourcesForDoc,
+  performanceForOrNull,
+  timerFor,
+  vsyncFor,
+} from './services';
 import * as dom from './dom';
 import {setStyle, setStyles} from './style';
-
+import {LayoutDelayMeter} from './layout-delay-meter';
 
 const TAG_ = 'CustomElement';
 
@@ -549,6 +552,13 @@ function createBaseCustomElementClass(win) {
 
       /** @private @const */
       this.signals_ = new Signals();
+
+      const perf = performanceForOrNull(win);
+      /** @private {boolean} */
+      this.perfOn_ = perf && perf.isPerformanceTrackingOn();
+
+      /** @private {?./layout-delay-meter.LayoutDelayMeter} */
+      this.layoutDelayMeter_ = null;
     }
 
     /**
@@ -1184,6 +1194,9 @@ function createBaseCustomElementClass(win) {
       if (isLoadEvent) {
         this.signals_.signal(CommonSignals.LOAD_START);
       }
+      if (this.perfOn_) {
+        this.getLayoutDelayMeter_().startLayout();
+      }
       const promise = this.implementation_.layoutCallback();
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
@@ -1252,6 +1265,9 @@ function createBaseCustomElementClass(win) {
     updateInViewport_(inViewport) {
       this.implementation_.inViewport_ = inViewport;
       this.implementation_.viewportCallback(inViewport);
+      if (inViewport && this.perfOn_) {
+        this.getLayoutDelayMeter_().enterViewport();
+      }
     }
 
     /**
@@ -1649,6 +1665,18 @@ function createBaseCustomElementClass(win) {
           });
         }
       });
+    }
+
+    /**
+     * Returns an optional overflow element for this custom element.
+     * @return {!./layout-delay-meter.LayoutDelayMeter}
+     */
+    getLayoutDelayMeter_() {
+      if (!this.layoutDelayMeter_) {
+        this.layoutDelayMeter_ = new LayoutDelayMeter(
+            this.ownerDocument.defaultView, this.getPriority());
+      }
+      return this.layoutDelayMeter_;
     }
 
     /**
