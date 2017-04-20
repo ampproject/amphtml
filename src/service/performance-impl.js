@@ -276,7 +276,7 @@ export class Performance {
    */
   throttledFlush() {
     if (!this.throttledFlush_) {
-      /** @private {function} */
+      /** @private {function()} */
       this.throttledFlush_ = rateLimit(this.win, this.flush, 100);
     }
     this.throttledFlush_();

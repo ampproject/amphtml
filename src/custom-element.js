@@ -556,6 +556,9 @@ function createBaseCustomElementClass(win) {
       const perf = performanceForOrNull(win);
       /** @private {boolean} */
       this.perfOn_ = perf && perf.isPerformanceTrackingOn();
+
+      /** @private {?./layout-delay-meter.LayoutDelayMeter} */
+      this.layoutDelayMeter_ = null;
     }
 
     /**
@@ -1657,7 +1660,6 @@ function createBaseCustomElementClass(win) {
      */
     getLayoutDelayMeter_() {
       if (!this.layoutDelayMeter_) {
-        /** @private {!./layout-delay-meter.LayoutDelayMeter} */
         this.layoutDelayMeter_ = new LayoutDelayMeter(
             this.ownerDocument.defaultView, this.getPriority());
       }
