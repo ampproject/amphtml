@@ -16,7 +16,7 @@
 
 import {Observable} from './observable';
 import {dev} from './log';
-import {timerFor} from './timer';
+import {timerFor} from './services';
 import {listenOnce, listenOncePromise} from './event-helper';
 import {registerServiceBuilder} from './service';
 
