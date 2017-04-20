@@ -65,4 +65,22 @@ describe('rate-limit', () => {
     expect(callback).to.be.calledOnce;
     expect(callback).to.be.calledWith(7, 'another param');
   });
+
+  it('is re-entrant', () => {
+    let calls = 0;
+    let rateLimitedCallback;
+    function fn(call) {
+      if (calls++ < 1) {
+        rateLimitedCallback(calls);
+      }
+      expect(call + 1).to.equal(calls);
+    }
+    rateLimitedCallback = rateLimit(window, fn, 100);
+
+    rateLimitedCallback(calls);
+    expect(calls).to.equal(1);
+
+    clock.tick(100);
+    expect(calls).to.equal(2);
+  });
 });

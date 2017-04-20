@@ -30,10 +30,10 @@ export function rateLimit(win, callback, minInterval) {
 
   function fire(args) {
     nextCallArgs = null;
-    callback.apply(null, args);
-
     // Lock the fire for minInterval milliseconds
     locker = win.setTimeout(waiter, minInterval);
+
+    callback.apply(null, args);
   }
 
   function waiter() {
