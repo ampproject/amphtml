@@ -28,6 +28,8 @@ const path = require('path');
 const minimist = require('minimist');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
+const fileLogPrefix =
+    '\x1b[33;1m' + 'pr-check.js' + '\x1b[0m: ';  // Yellow, bold.
 
 /**
  * Starts a timer to measure the execution time of the given function.
@@ -36,7 +38,9 @@ const gulp = 'node_modules/gulp/bin/gulp.js';
  */
 function startTimer(functionName) {
   const startTime = Date.now();
-  console.log('\npr-check.js: Starting ' + functionName + '...');
+  console.log(
+      '\n' + fileLogPrefix + 'Running ' + '\x1b[36m' +  // Cyan.
+      functionName + '\x1b[0m' + '...');
   return startTime;
 }
 
@@ -51,8 +55,10 @@ function stopTimer(functionName, startTime) {
   const mins = executionTime.getMinutes();
   const secs = executionTime.getSeconds();
   console.log(
-      'pr-check.js: Done executing ' + functionName + '. ' +
-      'Total time: ' + mins + 'm ' + secs + 's.\n');
+      fileLogPrefix + 'Done running ' +
+      '\x1b[36m' + functionName + '\x1b[0m' +  // Cyan.
+      '. ' + 'Total time: ' +
+      '\x1b[32m' + mins + 'm ' + secs + 's.' + '\x1b[0m');  // Green.
 }
 
 /**
@@ -70,13 +76,15 @@ function exec(cmd) {
  * @param {string} cmd
  */
 function execOrDie(cmd) {
-  console.log(`\npr-check.js: ${cmd}\n`);
+  const startTime = startTimer(cmd);
   const p =
       child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
   if (p.status != 0) {
-    console.error(`\npr-check.js - exiting due to failing command: ${cmd}\n`);
+    console.error(`\n${fileLogPrefix}exiting due to failing command: ${cmd}`);
+    stopTimer(cmd, startTime);
     process.exit(p.status)
   }
+  stopTimer(cmd, startTime);
 }
 
 /**
@@ -190,76 +198,36 @@ function determineBuildTargets(filePaths) {
 
 const command = {
   testBuildSystem: function() {
-    const startTime = startTimer('testBuildSystem');
     execOrDie('npm run ava');
-    stopTimer('testBuildSystem', startTime);
   },
   buildRuntime: function() {
-    let startTime = startTimer('buildRuntime: gulp clean');
     execOrDie(`${gulp} clean`);
-    stopTimer('buildRuntime: gulp clean', startTime);
-
-    startTime = startTimer('buildRuntime: gulp lint');
     execOrDie(`${gulp} lint`);
-    stopTimer('buildRuntime: gulp lint', startTime);
-
-    startTime = startTimer('buildRuntime: gulp build');
     execOrDie(`${gulp} build`);
-    stopTimer('buildRuntime: gulp build', startTime);
-
-    startTime = startTimer('buildRuntime: gulp check-types');
     execOrDie(`${gulp} check-types`);
-    stopTimer('buildRuntime: gulp check-types', startTime);
-
-    startTime = startTimer('buildRuntime: gulp dist --fortesting');
     execOrDie(`${gulp} dist --fortesting`);
-    stopTimer('buildRuntime: gulp dist --fortesting', startTime);
   },
   testRuntime: function() {
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
-    let startTime = startTimer('testRuntime: gulp dep-check');
     execOrDie(`${gulp} dep-check`);
-    stopTimer('testRuntime: gulp dep-check', startTime);
-
     // Unit tests with Travis' default chromium
-    startTime = startTimer('testRuntime: gulp test --nobuild --compiled');
     execOrDie(`${gulp} test --nobuild --compiled`);
-    stopTimer('testRuntime: gulp test --nobuild --compiled', startTime);
-
     // Integration tests with all saucelabs browsers
-    startTime = startTimer(
-        'testRuntime: gulp test --nobuild --saucelabs ' +
-        '--integration --compiled');
     execOrDie(`${gulp} test --nobuild --saucelabs --integration --compiled`);
-    stopTimer(
-        'testRuntime: gulp test --nobuild --saucelabs --integration --compiled',
-        startTime);
-
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    startTime = startTimer(
-        'testRuntime: gulp test --nobuild --saucelabs --oldchrome --compiled');
     execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
-    stopTimer(
-        'testRuntime: gulp test --nobuild --saucelabs --oldchrome --compiled',
-        startTime);
   },
   presubmit: function() {
-    const startTime = startTimer('presubmit');
     execOrDie(`${gulp} presubmit`);
-    stopTimer('presubmit', startTime);
   },
   buildValidatorWebUI: function() {
-    const startTime = startTimer('buildValidatorWebUI');
     execOrDie('cd validator/webui && python build.py');
-    stopTimer('buildValidatorWebUI', startTime);
   },
   buildValidator: function() {
-    const startTime = startTimer('buildValidator');
     execOrDie('cd validator && python build.py');
-    stopTimer('buildValidator', startTime);
   },
 };
 
@@ -327,9 +295,7 @@ function main(argv) {
       sortedBuildTargets.join(', ') + '\n');
 
   if (buildTargets.has('BUILD_SYSTEM')) {
-    // command.testBuildSystem();
-    // Testing. Remove.
-    runAllCommands();
+    command.testBuildSystem();
   }
 
   if (buildTargets.has('RUNTIME')) {
