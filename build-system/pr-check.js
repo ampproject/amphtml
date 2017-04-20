@@ -39,7 +39,7 @@ const timerLogPrefix =
 function startTimer(functionName) {
   const startTime = Date.now();
   console.log(
-      timerLogPrefix + 'Starting ' + '\x1b[36m' +  // Cyan.
+      '\n' + timerLogPrefix + 'Starting ' + '\x1b[36m' +  // Cyan.
       functionName + '\x1b[0m' + '...');
   return startTime;
 }
@@ -333,9 +333,7 @@ function main(argv) {
       sortedBuildTargets.join(', ') + '\n');
 
   if (buildTargets.has('BUILD_SYSTEM')) {
-    // command.testBuildSystem();
-    // Testing. Remove.
-    runAllCommands();
+    command.testBuildSystem();
   }
 
   if (buildTargets.has('RUNTIME')) {
