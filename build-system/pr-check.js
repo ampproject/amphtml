@@ -223,12 +223,12 @@ const command = {
     stopTimer('testRuntime: gulp dep-check', startTime);
 
     // Unit tests with Travis' default chromium
-    let startTime = startTimer('testRuntime: gulp test --nobuild --compiled');
+    startTime = startTimer('testRuntime: gulp test --nobuild --compiled');
     execOrDie(`${gulp} test --nobuild --compiled`);
     stopTimer('testRuntime: gulp test --nobuild --compiled', startTime);
 
     // Integration tests with all saucelabs browsers
-    let startTime = startTimer(
+    startTime = startTimer(
         'testRuntime: gulp test --nobuild --saucelabs ' +
         '--integration --compiled');
     execOrDie(`${gulp} test --nobuild --saucelabs --integration --compiled`);
@@ -239,7 +239,7 @@ const command = {
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    let startTime = startTimer(
+    startTime = startTimer(
         'testRuntime: gulp test --nobuild --saucelabs --oldchrome --compiled');
     execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
     stopTimer(
