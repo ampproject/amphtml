@@ -40,7 +40,7 @@
     "body-parser": "1.14.2",
     "browserify": "14.0.0",
     "chai": "3.5.0",
-    "chai-as-promised": "5.2.0",
+    "chai-as-promised": "6.0.0",
     "cssnano": "3.3.2",
     "del": "2.2.0",
     "eslint": "3.14.1",
