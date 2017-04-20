@@ -166,6 +166,10 @@ operation:
       %{
         $$ = new AstNode(AstNodeType.TERNARY, [$1, $3, $5]);
       %}
+  | expr '?' ':' expr
+      %{
+        $$ = new AstNode(AstNodeType.TERNARY, [$1, $1, $4]);
+      %}
   ;
 
 invocation:
