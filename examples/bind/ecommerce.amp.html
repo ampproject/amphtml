@@ -11,7 +11,20 @@
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
 
+  <!-- We'd inline this in production. -->
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
   <style amp-custom>
+    #title {
+      text-align: center;
+      padding: 16px;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    #container {
+      padding: 32px 16px 64px 16px;
+      text-align: center;
+    }
     .selected {
       border: solid 1px red;
     }
@@ -25,35 +38,6 @@
 </head>
 
 <body>
-  <button onclick="AMP.toggleExperiment('amp-bind');window.location.href=window.location.href;">Toggle &lt;amp-bind&gt; experiment</button>
-  <button onclick="AMP.toggleExperiment('amp-selector');window.location.href=window.location.href;">Toggle &lt;amp-selector&gt; experiment</button>
-
-  <h2>E-commerce</h2>
-
-  <amp-img width=400 height=400 src="./shirts/black.jpg" [src]="shirts[selectedIndex].image"></amp-img>
-
-  <p>COLOR: <span [text]="shirts[selectedIndex].color">black</span></p>
-
-  <p>SIZE:
-    <span [text]="shirts[selectedIndex].sizes
-        ? shirts[selectedIndex].sizes.join(', ')
-        : 'Fetching available sizes...'">
-      XS
-    </span>
-  </p>
-
-  <amp-selector on="select:AMP.setState({selectedIndex: event.targetOption})">
-    <amp-img width=50 height=50 src="./shirts/black.jpg" option=0></amp-img>
-    <amp-img width=50 height=50 src="./shirts/blue.jpg" option=1></amp-img>
-    <amp-img width=50 height=50 src="./shirts/brown.jpg" option=2></amp-img>
-    <amp-img width=50 height=50 src="./shirts/dark-green.jpg" option=3></amp-img>
-    <amp-img width=50 height=50 src="./shirts/gray.jpg" option=4></amp-img>
-    <amp-img width=50 height=50 src="./shirts/light-gray.jpg" option=5></amp-img>
-    <amp-img width=50 height=50 src="./shirts/navy.jpg" option=6></amp-img>
-    <amp-img width=50 height=50 src="./shirts/white.jpg" option=7></amp-img>
-    <amp-img width=50 height=50 src="./shirts/wine.jpg" option=8></amp-img>
-  </amp-selector>
-
   <!--
     Available shirts, maps unique identifier to {color, image}. Sizes are fetched remotely.
 
@@ -115,15 +99,42 @@
           "image": "./shirts/navy.jpg"
         },
         "7": {
-          "color": "white",
-          "image": "./shirts/white.jpg"
-        },
-        "8": {
           "color": "wine",
           "image": "./shirts/wine.jpg"
         }
       }
     </script>
   </amp-state>
+
+  <h5 id="title" class="mdl-color--black mdl-color-text--white"><span class="mdl-color-text--red">(AMP)</span>PAREL</h5>
+
+  <div id="container">
+    <h5>MEN'S COTTON CREW NECK<br>LONG SLEEVE T-SHIRT</h5>
+    <h6 class="rating"><span class="mdl-color-text--red">★★★★☆</span> <span class="mdl-color-text--grey">(14)</span></h6>
+
+    <amp-img width=200 height=296 src="./shirts/black.jpg" [src]="shirts[selectedIndex].image"></amp-img>
+
+    <p>COLOR: <span [text]="shirts[selectedIndex].color">black</span></p>
+
+    <p>SIZE:
+      <span [text]="shirts[selectedIndex].sizes
+          ? shirts[selectedIndex].sizes.join(', ')
+          : 'Fetching available sizes...'">
+        XS
+      </span>
+    </p>
+
+    <amp-selector on="select:AMP.setState({selectedIndex: event.targetOption})">
+      <amp-img width=40 height=60 src="./shirts/black.jpg" option=0></amp-img>
+      <amp-img width=40 height=60 src="./shirts/blue.jpg" option=1></amp-img>
+      <amp-img width=40 height=60 src="./shirts/brown.jpg" option=2></amp-img>
+      <amp-img width=40 height=60 src="./shirts/dark-green.jpg" option=3></amp-img>
+      <amp-img width=40 height=60 src="./shirts/gray.jpg" option=4></amp-img>
+      <amp-img width=40 height=60 src="./shirts/light-gray.jpg" option=5></amp-img>
+      <amp-img width=40 height=60 src="./shirts/navy.jpg" option=6></amp-img>
+      <amp-img width=40 height=60 src="./shirts/white.jpg" option=7></amp-img>
+      <amp-img width=40 height=60 src="./shirts/wine.jpg" option=8></amp-img>
+    </amp-selector>
+  </div>
 </body>
 </html>
