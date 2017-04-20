@@ -37,6 +37,7 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
+import {removeElement} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
@@ -77,6 +78,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
+
+    /** @private {?Element} */
+    this.ampAnalyticsElement_ = null;
   }
 
   /** @override */
@@ -189,6 +193,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
+    if (this.ampAnalyticsElement_) {
+      removeElement(this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ = null;
+    }
     this.ampAnalyticsConfig_ = null;
   }
 
@@ -203,7 +211,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
-      insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      dev().assert(!this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ =
+          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);

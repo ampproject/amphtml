@@ -20,11 +20,7 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
-import {
-  removeChildren,
-  createElementWithAttributes,
-} from '../../../src/dom';
-
+import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
 import {
   installAnchorClickInterceptor,
@@ -863,11 +859,15 @@ export class AmpA4A extends AMP.BaseElement {
       return true;
     }
 
-    removeChildren(this.element);
+    // Remove rendering frame, if it exists.
+    if (this.iframe && this.iframe.parentElement) {
+      this.iframe.parentElement.removeChild(this.iframe);
+      this.iframe = null;
+    }
+
     this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
-    this.iframe = null;
     this.isVerifiedAmpCreative_ = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
