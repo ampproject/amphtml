@@ -44,7 +44,6 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/analytics';
 import {setStyles} from '../../../src/style';
 
-
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
@@ -206,6 +205,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.ampAnalyticsConfig_) {
       insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
+
+    this.lifecycleReporter_.addPingsForVisibility(this.element);
+
     setStyles(dev().assertElement(this.iframe), {
       width: `${this.size_.width}px`,
       height: `${this.size_.height}px`,

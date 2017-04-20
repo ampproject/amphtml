@@ -264,6 +264,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.ampAnalyticsConfig_) {
       insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
+
+    this.lifecycleReporter_.addPingsForVisibility(this.element);
+
     setStyles(dev().assertElement(this.iframe), {
       width: `${this.size_.width}px`,
       height: `${this.size_.height}px`,
@@ -272,4 +275,3 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 }
 
 AMP.registerElement('amp-ad-network-adsense-impl', AmpAdNetworkAdsenseImpl);
-
