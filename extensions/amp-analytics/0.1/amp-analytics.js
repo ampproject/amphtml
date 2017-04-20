@@ -15,6 +15,7 @@
  */
 
 import {isJsonScriptTag} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
@@ -220,6 +221,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
+    this.handleRequestsFrameUrl_(this.config_['requestsFrameUrl']);
+
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
@@ -275,6 +278,39 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     return Promise.all(promises);
+  }
+
+  handleRequestsFrameUrl_(requestsFrameUrl) {
+    // TODO: Safety check requestsFrameUrl!
+    // TODO: Use real values for sentinel and pageViewId
+    debugger;
+    // If frame doesn't exist for this requestsFrameUrl, create it.
+    let frame = AmpAnalytics.requestFramesMap.get(requestsFrameUrl);
+    if (!frame) {
+      let doc = this.element.ampdoc_.win.document;
+      let context = {
+        "_context": {
+          "location": requestsFrameUrl,
+          "canonicalUrl": requestsFrameUrl,
+          "startTime": new Date().getTime(),
+          "referrer": document.location.href,
+          "sentinel": "1-23456",
+          "pageViewId": "23456"
+        }
+      };
+      frame = createElementWithAttributes(doc, 'iframe', {
+        src: requestsFrameUrl,
+        sandbox: 'allow-scripts',
+        name: JSON.stringify(context)
+      });
+      frame.style.cssText='width:0;height:0;visibility:hidden;';
+      AmpAnalytics.requestFramesMap.set(requestsFrameUrl, frame);
+      doc.body.appendChild(frame);
+    }
+
+    // Now can send an event to:
+    // AmpAnalytics.requestFramesMap.get(requestsFrameUrl)'s function that it
+    // registered via registerAmpAnalyticsEventHandler()
   }
 
   /**
@@ -804,5 +840,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return new ExpansionOptions(vars, opt_iterations, opt_noEncode);
   }
 }
+AmpAnalytics.requestFramesMap = new Map();
 
 AMP.registerElement('amp-analytics', AmpAnalytics);

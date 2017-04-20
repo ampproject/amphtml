@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Requests Frame</title>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        if (window.context) {
+          debugger;
+          window.context.onAmpAnalyticsEvent(onAmpAnalyticsEvt);
+        } else {
+          window.addEventListener('amp-windowContextCreated', function(){
+            console.log("window.context created and ready to use");
+            // TODO: Write registerAmpAnalyticsEventHandler()!
+            debugger;
+            window.context.onAmpAnalyticsEvent(onAmpAnalyticsEvt);
+          });
+
+          // load ampcontext-lib.js which will create window.context
+          ampContextScript = document.createElement('script');
+          ampContextScript.src = "../dist.3p/current/ampcontext-lib.js";
+          document.head.appendChild(ampContextScript);
+        }
+      });
+
+      function onAmpAnalyticsEvt(evt) {
+        console.log("I got an event:");
+        console.dir(evt);
+        debugger;
+      }
+    </script>
+  </head>
+  <body>
+    This is the requests frame...
+  </body>
+</html>
