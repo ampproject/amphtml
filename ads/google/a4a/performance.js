@@ -287,11 +287,12 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @override
    */
   addPingsForVisibility(element) {
-    const readyPromise = Promise.race([
-      element.signals.whenSignal(CommonSignals.INI_LOAD),
-      element.signals.whenSignal(CommonSignals.LOAD_END),
-    ]);
     analyticsForDoc(element, true).then(analytics => {
+      const signals = element.signals();
+      const readyPromise = Promise.race([
+        signals.whenSignal(CommonSignals.INI_LOAD),
+        signals.whenSignal(CommonSignals.LOAD_END),
+      ]);
       const vis = analytics.getAnalyticsRoot(element).getVisibilityManager();
       // Can be any promise or `null`.
       // Element must be an AMP element at this time.
