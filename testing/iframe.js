@@ -52,6 +52,8 @@ let iframeCount = 0;
  * @param {number} initialIframeHeight in px.
  * @param {function(!Window)} opt_beforeLoad Called just before any other JS
  *     executes in the window.
+ * @param {function(string):string} opt_htmlTransform A transformation applied
+ *     to the html before anything else is done.
  * @return {!Promise<{
  *   win: !Window,
  *   doc: !Document,
@@ -59,7 +61,45 @@ let iframeCount = 0;
  *   awaitEvent: function(string, number):!Promise
  * }>}
  */
-export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad) {
+export function createFixtureIframe(fixture, initialIframeHeight,
+    opt_beforeLoad, opt_htmlTransform) {
+  let html = __html__[fixture];
+  if (!html) {
+    throw new Error('Cannot find fixture: ' + fixture);
+  }
+  if (opt_htmlTransform) {
+    html = opt_htmlTransform(html);
+  }
+  return createFixtureIframeFromHtml(html, initialIframeHeight, opt_beforeLoad);
+}
+
+/**
+ * Creates an iframe from raw HTML.
+ *
+ * Returns a promise for when the iframe is usable for testing that produces
+ * an object with properties related to the created iframe and utility methods:
+ * - win: The created window.
+ * - doc: The created document.
+ * - iframe: The host iframe element. Useful for e.g. resizing.
+ * - awaitEvent: A function that returns a promise for when the given custom
+ *   event fired at least the given number of times.
+ * - errors: Array of console.error fired during page load.
+ *
+ * setTimeout inside the iframe will go 10x normal speed.
+ * TODO(@cramforce): Add support for a fake clock.
+ *
+ * @param {string} html The raw HTML to use.
+ * @param {number} initialIframeHeight in px.
+ * @param {function(!Window)} opt_beforeLoad Called just before any other JS
+ *     executes in the window.
+ * @return {!Promise<{
+ *   win: !Window,
+ *   doc: !Document,
+ *   iframe: !Element,
+ *   awaitEvent: function(string, number):!Promise
+ * }>}
+ */
+export function createFixtureIframeFromHtml(html, initialIframeHeight, opt_beforeLoad) {
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
@@ -69,10 +109,6 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       'amp:load:start': 0,
     };
     const messages = [];
-    let html = __html__[fixture];
-    if (!html) {
-      throw new Error('Cannot find fixture: ' + fixture);
-    }
     html = maybeSwitchToCompiledJs(html);
     let firstLoad = true;
     window.ENABLE_LOG = true;
@@ -184,6 +220,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     }
   });
 }
+
 
 /**
  * Creates a super simple iframe. Use this in unit tests to register elements
