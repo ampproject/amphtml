@@ -32,7 +32,7 @@
   "devDependencies": {
     "autoprefixer": "6.7.0",
     "ava": "0.15.2",
-    "babel-core": "5.8.35",
+    "babel-core": "6.17.0",
     "babel-eslint": "6.1.2",
     "babelify": "6.4.0",
     "baconipsum": "0.1.2",
