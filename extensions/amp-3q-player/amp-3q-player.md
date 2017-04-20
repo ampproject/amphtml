@@ -37,7 +37,7 @@ limitations under the License.
 
 ## Example
 
-```html
+``` html
 <amp-3q-player
     data-id="c8dbe7f4-7f7f-11e6-a407-0cc47a188158"
     width="100%" height="100%"></amp-3q-player>
