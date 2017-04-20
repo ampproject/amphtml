@@ -48,8 +48,6 @@ describe('amp-lightbox-viewer', () => {
 
         const btns = viewer.querySelectorAll('[role=button]');
         expect(btns.length).to.equal(4);
-        expect(btns[0].className).to.equal('amp-lbv-button-next');
-        expect(btns[1].className).to.equal('amp-lbv-button-prev');
         expect(btns[2].className).to.equal('amp-lbv-button-close');
         expect(btns[3].className).to.equal(
             'amp-lbv-button-gallery');
@@ -63,10 +61,8 @@ describe('amp-lightbox-viewer', () => {
           callback();
         };
         assertLightboxed(item1, impl, false, /*closed*/ true);
-        assertControls(viewer, /*hasPrevious*/ false, /*hasNext*/ false);
         return impl.activate({source: item1}).then(() => {
           assertLightboxed(item1, impl, true, /*closed*/ false);
-          assertControls(viewer, /*hasPrevious*/ false, /*hasNext*/ true);
         });
       });
     });
@@ -78,15 +74,12 @@ describe('amp-lightbox-viewer', () => {
           callback();
         };
         assertLightboxed(item1, impl, false, /*closed*/ true);
-        assertControls(viewer, /*hasPrevious*/ false, /*hasNext*/ false);
         return impl.activate({source: item1}).then(() => {
           assertLightboxed(item1, impl, true, /*closed*/ false);
-          assertControls(viewer, /*hasPrevious*/ false, /*hasNext*/ true);
         }).then(() => {
           return impl.close_();
         }).then(() => {
           assertLightboxed(item1, impl, false, /*closed*/ true);
-          assertControls(viewer, /*hasPrevious*/ false, /*hasNext*/ false);
         });
       });
     });
@@ -106,7 +99,6 @@ describe('amp-lightbox-viewer', () => {
           assertLightboxed(item2, impl, true, /*closed*/ false);
           assertLightboxed(item3, impl, false, /*closed*/ false);
           assertLightboxed(item4, impl, false, /*closed*/ false);
-          assertControls(viewer, /*hasPrevious*/ true, /*hasNext*/ true);
         }).then(() => {
           // Should skip item3 since it is not lightboxable
           return impl.next_();
@@ -115,7 +107,6 @@ describe('amp-lightbox-viewer', () => {
           assertLightboxed(item2, impl, false, /*closed*/ false);
           assertLightboxed(item3, impl, false, /*closed*/ false);
           assertLightboxed(item4, impl, true, /*closed*/ false);
-          assertControls(viewer, /*hasPrevious*/ true, /*hasNext*/ false);
         }).then(() => {
           // Should be a no-op now that we are at the end of the roll
           return impl.next_();
@@ -124,7 +115,6 @@ describe('amp-lightbox-viewer', () => {
           assertLightboxed(item2, impl, false, /*closed*/ false);
           assertLightboxed(item3, impl, false, /*closed*/ false);
           assertLightboxed(item4, impl, true, /*closed*/ false);
-          assertControls(viewer, /*hasPrevious*/ true, /*hasNext*/ false);
         }).then(() => {
           // Should go back to item2 since item3 is not lightboxable
           return impl.previous_();
@@ -133,7 +123,6 @@ describe('amp-lightbox-viewer', () => {
           assertLightboxed(item2, impl, true, /*closed*/ false);
           assertLightboxed(item3, impl, false, /*closed*/ false);
           assertLightboxed(item4, impl, false, /*closed*/ false);
-          assertControls(viewer, /*hasPrevious*/ true, /*hasNext*/ true);
         }).then(() => {
           // Should go back to item1
           return impl.previous_();
@@ -142,7 +131,6 @@ describe('amp-lightbox-viewer', () => {
           assertLightboxed(item2, impl, false, /*closed*/ false);
           assertLightboxed(item3, impl, false, /*closed*/ false);
           assertLightboxed(item4, impl, false, /*closed*/ false);
-          assertControls(viewer, /*hasPrevious*/ false, /*hasNext*/ true);
         }).then(() => {
           // Should be a no-op now that we are at the beginning of the roll
           return impl.previous_();
@@ -151,7 +139,6 @@ describe('amp-lightbox-viewer', () => {
           assertLightboxed(item2, impl, false, /*closed*/ false);
           assertLightboxed(item3, impl, false, /*closed*/ false);
           assertLightboxed(item4, impl, false, /*closed*/ false);
-          assertControls(viewer, /*hasPrevious*/ false, /*hasNext*/ true);
         }).then(() => {
           return impl.close_();
         }).then(() => {
@@ -159,7 +146,6 @@ describe('amp-lightbox-viewer', () => {
           assertLightboxed(item2, impl, false, /*closed*/ true);
           assertLightboxed(item3, impl, false, /*closed*/ true);
           assertLightboxed(item4, impl, false, /*closed*/ true);
-          assertControls(viewer, /*hasPrevious*/ false, /*hasNext*/ false);
         });
       });
     });
@@ -173,7 +159,8 @@ describe('amp-lightbox-viewer', () => {
         return impl.activate({source: item1}).then(() => {
           assertLightboxed(item1, impl, true, /*closed*/ false);
           const container = viewer.querySelector('.i-amphtml-lbv');
-          const descriptionBox = viewer.querySelector('.amp-lbv-desc-box');
+          const descriptionBox = viewer.querySelector(
+              '.i-amphtml-lbv-desc-box');
           const button = viewer.querySelector('.amp-lbv-button-next');
           expect(container).to.not.be.null;
           expect(descriptionBox).to.not.be.null;
@@ -236,13 +223,6 @@ describe('amp-lightbox-viewer', () => {
       expect(impl.activeElement_).not.to.equal(element);
     }
   }
-
-  function assertControls(viewer, hasPrevious, hasNext) {
-    const container = viewer.querySelector('.i-amphtml-lbv');
-    expect(container.hasAttribute('no-prev')).to.equal(!hasPrevious);
-    expect(container.hasAttribute('no-next')).to.equal(!hasNext);
-  }
-
 
   function setUpDocument(doc, autoLightbox) {
     const createImage = function() {
