@@ -43,7 +43,7 @@ function startTimer(functionName) {
 /**
  * Stops the timer for the given function and prints the execution time.
  * @param {string} functionName
- * @return {DOMHighResTimeStamp}
+ * @return {Number}
  */
 function stopTimer(functionName, startTime) {
   const endTime = Date.now();
@@ -195,13 +195,25 @@ const command = {
     stopTimer('testBuildSystem', startTime);
   },
   buildRuntime: function() {
-    const startTime = startTimer('buildRuntime');
+    let startTime = startTimer('buildRuntime: gulp clean');
     execOrDie(`${gulp} clean`);
+    stopTimer('buildRuntime: gulp clean', startTime);
+
+    startTime = startTimer('buildRuntime: gulp lint');
     execOrDie(`${gulp} lint`);
+    stopTimer('buildRuntime: gulp lint', startTime);
+
+    startTime = startTimer('buildRuntime: gulp build');
     execOrDie(`${gulp} build`);
+    stopTimer('buildRuntime: gulp build', startTime);
+
+    startTime = startTimer('buildRuntime: gulp check-types');
     execOrDie(`${gulp} check-types`);
+    stopTimer('buildRuntime: gulp check-types', startTime);
+
+    startTime = startTimer('buildRuntime: gulp dist --fortesting');
     execOrDie(`${gulp} dist --fortesting`);
-    stopTimer('buildRuntime', startTime);
+    stopTimer('buildRuntime: gulp dist --fortesting', startTime);
   },
   testRuntime: function() {
     const startTime = startTimer('testRuntime');
