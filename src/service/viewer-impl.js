@@ -29,6 +29,7 @@ import {
 } from '../url';
 import {timerFor} from '../services';
 import {reportError} from '../error';
+import {setupHashBasedCommunication} from './viewer-hash-communication';
 import {VisibilityState} from '../visibility-state';
 
 const TAG_ = 'Viewer';
@@ -362,9 +363,10 @@ export class Viewer {
       }
     });
 
+    const hashBasedCommunicationWithViewer = this.getParam('com') == 'hash';
     // Remove hash when we have an incoming click tracking string
     // (see impression.js).
-    if (this.params_['click']) {
+    if (this.params_['click'] || hashBasedCommunicationWithViewer) {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
@@ -375,6 +377,9 @@ export class Viewer {
         this.win.history.replaceState({}, '', newUrl);
         dev().fine(TAG_, 'replace url:' + this.win.location.href);
       }
+    }
+    if (this.isWebviewEmbedded_ && hashBasedCommunicationWithViewer) {
+      setupHashBasedCommunication(this);
     }
 
     // Check if by the time the `Viewer`
