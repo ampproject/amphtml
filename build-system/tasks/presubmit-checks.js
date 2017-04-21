@@ -288,6 +288,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/url.js',
       'src/service/document-click.js',
+      'dist.3p/current/integration.js',
     ],
   },
   '\\.sendMessage\\(': {
