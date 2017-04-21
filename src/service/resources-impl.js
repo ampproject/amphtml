@@ -92,9 +92,6 @@ export class Resources {
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
 
-    /** @private @const {number} */
-    this.maxDpr_ = this.win.devicePixelRatio || 1;
-
     /** @private {number} */
     this.resourceIdCounter_ = 0;
 
@@ -345,23 +342,6 @@ export class Resources {
         body.classList.toggle(clazz, on);
       });
     });
-  }
-
-  /**
-   * Returns the maximum DPR available on this device.
-   * @return {number}
-   */
-  getMaxDpr() {
-    return this.maxDpr_;
-  }
-
-  /**
-   * Returns the most optimal DPR currently recommended.
-   * @return {number}
-   */
-  getDpr() {
-    // TODO(dvoytenko): return optimal DPR.
-    return this.maxDpr_;
   }
 
   /**

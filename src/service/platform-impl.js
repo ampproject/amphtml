@@ -29,6 +29,9 @@ export class Platform {
   constructor(win) {
     /** @const @private {!Navigator} */
     this.navigator_ = /** @type {!Navigator} */ (win.navigator);
+
+    /** @private @const {number} */
+    this.maxDpr_ = win.devicePixelRatio || 1;
   }
 
   /**
@@ -169,6 +172,15 @@ export class Platform {
       return null;
     }
     return Number(currentIosVersion.split('.')[0]);
+  }
+
+  /**
+   * Returns the most optimal DPR currently recommended.
+   * @return {number}
+   */
+  getDpr() {
+    // TODO(dvoytenko): return optimal DPR.
+    return this.maxDpr_;
   }
 };
 

@@ -71,15 +71,12 @@ export class ImageViewer {
    * @param {!function(T, number=):Promise<T>} loadPromise
    * @template T
    */
-  constructor(lightbox, win, loadPromise) {
+  constructor(lightbox, win) {
     /** @private {!AmpImageLightbox} */
     this.lightbox_ = lightbox;
 
     /** @const {!Window} */
     this.win = win;
-
-    /** @private {function(T, number=):Promise<T>} */
-    this.loadPromise_ = loadPromise;
 
     /** @private {!Element} */
     this.viewer_ = lightbox.element.ownerDocument.createElement('div');
@@ -315,7 +312,7 @@ export class ImageViewer {
     // and then naturally upgrade to a higher quality image.
     return timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
-      return this.loadPromise_(this.image_);
+      return this.lightbox_.loadPromise_(this.image_);
     });
   }
 
@@ -729,8 +726,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.container_.classList.add('i-amphtml-image-lightbox-container');
     this.element.appendChild(this.container_);
 
-    this.imageViewer_ = new ImageViewer(this, this.win,
-        this.loadPromise.bind(this));
+    this.imageViewer_ = new ImageViewer(this, this.win);
     this.container_.appendChild(this.imageViewer_.getElement());
 
     this.captionElement_ = this.element.ownerDocument.createElement('div');

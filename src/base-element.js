@@ -18,8 +18,7 @@ import {Layout} from './layout';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
-import {viewportForDoc} from './services';
-import {vsyncFor} from './services';
+import {viewportForDoc, vsyncFor, platformFor} from './services';
 import {user} from './log';
 
 
@@ -544,19 +543,11 @@ export class BaseElement {
   }
 
   /**
-   * Returns the maximum DPR available on this device.
-   * @return {number}
-   */
-  getMaxDpr() {
-    return this.element.getResources().getMaxDpr();
-  }
-
-  /**
    * Returns the most optimal DPR currently recommended.
    * @return {number}
    */
   getDpr() {
-    return this.element.getResources().getDpr();
+    return platformFor(this.win).getDpr();
   }
 
   /**

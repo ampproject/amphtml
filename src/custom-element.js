@@ -37,6 +37,7 @@ import {
   timerFor,
   vsyncFor,
 } from './services';
+import {getAmpDoc} from './ampdoc';
 import * as dom from './dom';
 import {setStyle, setStyles} from './style';
 import {LayoutDelayMeter} from './layout-delay-meter';
@@ -939,8 +940,7 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
-        const ampdocService = ampdocServiceFor(this.ownerDocument.defaultView);
-        this.ampdoc_ = ampdocService.getAmpDoc(this);
+        this.ampdoc_ = getAmpDoc(this);
       }
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.

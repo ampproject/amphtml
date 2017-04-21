@@ -124,7 +124,7 @@ function getLinkRels(doc) {
       }
 
       rels.split(/\s+/).forEach(rel => {
-        if (filteredLinkRels.indexOf(rel) != -1) {
+        if (filteredLinkRels.includes(rel)) {
           return;
         }
 
