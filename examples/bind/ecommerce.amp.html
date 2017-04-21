@@ -9,30 +9,98 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
 
   <!-- We'd inline this in production. -->
   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
   <style amp-custom>
-    #title {
-      text-align: center;
+    #header {
+      height: 24px;
       padding: 16px;
       margin: 0;
+      text-align: center;
       text-transform: uppercase;
       letter-spacing: 2px;
+      line-height: 24px;
+    }
+    .menu {
+      float: left;
+    }
+    .search {
+      float: right;
     }
     #container {
       padding: 32px 16px 64px 16px;
+    }
+    .title {
       text-align: center;
     }
-    .selected {
-      border: solid 1px red;
+    .rating {
+      margin-bottom: 0;
+      text-align: center;
     }
-    button {
+    .dots {
+      text-align: center;
+    }
+    .dots span {
+      display: inline-block;
+      background: #ccc;
+      border-radius: 4px;
+      width: 8px;
+      height: 8px;
+    }
+    .dots span.current {
+      background: #555;
+    }
+    .options {
+      margin: 16px 64px;
+    }
+    .options h6 {
+      text-transform: uppercase;
+      margin: 0 0 4px 0;
+    }
+    .colors table {
+      margin: 0 -8px;
+    }
+    .colors amp-img {
+      border: solid 2px white;
+    }
+    .colors amp-img[selected] {
+      outline: solid 2px red;
+    }
+    .sizes div {
       border: solid 1px black;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      font-weight: 800;
+      text-align: center;
     }
-    amp-img {
-      border: solid 1px white;
+    .sizes div[selected] {
+      background-color: gray;
+      color: white;
+      outline: none;
+    }
+    .unavailable::before {
+      content: '';
+      position: absolute;
+      border-top: 1px solid black;
+      margin-left: -15px;
+      width: 57px;
+      transform: rotate(45deg);
+      transform-origin: 0% 0%;
+    }
+    .quantity select {
+      font-size: 16px;
+      border: solid 1px gray;
+      padding: 8px;
+    }
+    table {
+      width: 100%;
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
@@ -41,7 +109,7 @@
   <!--
     Available shirts, maps unique identifier to {color, image}. Sizes are fetched remotely.
 
-    When a shirt color is selected, `selectedIndex` changes which causes this
+    When a shirt color is selected, `selected.id` changes which causes this
     <amp-state> to perform an XHR to the new [src] value. Upon completion,
     the XHR response is merged into the state under its "id" attribute ("shirts").
 
@@ -65,14 +133,17 @@
       - Force quotation marks for literal keys, AND
       - Reintroduce variables in object keys (removed in #7582)
 
-    <amp-state [src]="..." on="fetch:AMP.setState({"shirts": {selectedIndex: event.response}})"
+    <amp-state [src]="..." on="fetch:AMP.setState({"shirts": {selected: {id: event.response}}})"
   -->
-  <amp-state id="shirts" [src]="'/bind/ecommerce/sizes?shirt=' + selectedIndex">
+  <amp-state id="shirts" [src]="'/bind/ecommerce/sizes?shirt=' + selected.id">
     <script type="application/json">
       {
         "0": {
           "color": "black",
-          "image": "./shirts/black.jpg"
+          "image": "./shirts/black.jpg",
+          "sizes": {
+            "S": 9.99
+          }
         },
         "1": {
           "color": "blue",
@@ -106,35 +177,96 @@
     </script>
   </amp-state>
 
-  <h5 id="title" class="mdl-color--black mdl-color-text--white"><span class="mdl-color-text--red">(AMP)</span>PAREL</h5>
+  <amp-state id="selected">
+    <script type="application/json">
+      {
+        "id": 0,
+        "size": "S",
+        "slide": 0
+      }
+    </script>
+  </amp-state>
+
+  <header id="header" class="mdl-color--black mdl-color-text--white">
+    <amp-img class="menu" src="./img/ic_menu_white_24dp_1x.png" width=24 height=24></amp-img>
+    <span class="mdl-color-text--blue">(AMP)</span>PAREL
+    <amp-img class="search" src="./img/ic_search_white_24dp_1x.png" width=24 height=24></amp-img>
+  </header>
 
   <div id="container">
-    <h5>MEN'S COTTON CREW NECK<br>LONG SLEEVE T-SHIRT</h5>
+    <h5 class="title">MEN'S COTTON CREW NECK<br>LONG SLEEVE T-SHIRT</h5>
     <h6 class="rating"><span class="mdl-color-text--red">★★★★☆</span> <span class="mdl-color-text--grey">(14)</span></h6>
 
-    <amp-img width=200 height=296 src="./shirts/black.jpg" [src]="shirts[selectedIndex].image"></amp-img>
+    <amp-carousel type="slides" layout="fixed-height" height=250 on="slideChange:AMP.setState({selected: {slide: event.index}})">
+      <amp-img width=200 height=250 src="./shirts/black.jpg" [src]="shirts[selected.id].image"></amp-img>
+      <amp-img width=200 height=250 src="./shirts/black.jpg" [src]="shirts[selected.id].image"></amp-img>
+      <amp-img width=200 height=250 src="./shirts/black.jpg" [src]="shirts[selected.id].image"></amp-img>
+    </amp-carousel>
 
-    <p>COLOR: <span [text]="shirts[selectedIndex].color">black</span></p>
-
-    <p>SIZE:
-      <span [text]="shirts[selectedIndex].sizes
-          ? shirts[selectedIndex].sizes.join(', ')
-          : 'Fetching available sizes...'">
-        XS
-      </span>
+    <p class="dots">
+      <span [class]="selected.slide == 0 ? 'current' : ''" class="current"></span>
+      <span [class]="selected.slide == 1 ? 'current' : ''"></span>
+      <span [class]="selected.slide == 2 ? 'current' : ''"></span>
     </p>
 
-    <amp-selector on="select:AMP.setState({selectedIndex: event.targetOption})">
-      <amp-img width=40 height=60 src="./shirts/black.jpg" option=0></amp-img>
-      <amp-img width=40 height=60 src="./shirts/blue.jpg" option=1></amp-img>
-      <amp-img width=40 height=60 src="./shirts/brown.jpg" option=2></amp-img>
-      <amp-img width=40 height=60 src="./shirts/dark-green.jpg" option=3></amp-img>
-      <amp-img width=40 height=60 src="./shirts/gray.jpg" option=4></amp-img>
-      <amp-img width=40 height=60 src="./shirts/light-gray.jpg" option=5></amp-img>
-      <amp-img width=40 height=60 src="./shirts/navy.jpg" option=6></amp-img>
-      <amp-img width=40 height=60 src="./shirts/white.jpg" option=7></amp-img>
-      <amp-img width=40 height=60 src="./shirts/wine.jpg" option=8></amp-img>
-    </amp-selector>
+    <div class="options colors">
+      <h6>COLOR : <span [text]="shirts[selected.id].color">BLACK</span></h6>
+
+      <amp-selector on="select:AMP.setState({selected: {id: event.targetOption}})">
+        <table>
+          <tr>
+            <td><amp-img width=40 height=40 option=0 src="./shirts/swatch/black.jpg" selected></amp-img></td>
+            <td><amp-img width=40 height=40 option=1 src="./shirts/swatch/blue.jpg"></amp-img></td>
+            <td><amp-img width=40 height=40 option=2 src="./shirts/swatch/brown.jpg"></amp-img></td>
+            <td><amp-img width=40 height=40 option=3 src="./shirts/swatch/dark-green.jpg"></amp-img></td>
+          </tr>
+          <tr>
+            <td><amp-img width=40 height=40 option=4 src="./shirts/swatch/gray.jpg"></amp-img></td>
+            <td><amp-img width=40 height=40 option=5 src="./shirts/swatch/light-gray.jpg"></amp-img></td>
+            <td><amp-img width=40 height=40 option=6 src="./shirts/swatch/navy.jpg"></amp-img></td>
+            <td><amp-img width=40 height=40 option=7 src="./shirts/swatch/wine.jpg"></amp-img></td>
+          </tr>
+        </table>
+      </amp-selector>
+    </div>
+
+    <div class="options price">
+      <h6>PRICE : <span [text]="shirts[selected.id].sizes[selected.size] || '---'">9.99</span></h6>
+    </div>
+
+    <div class="options sizes">
+      <h6>SIZE :</h6>
+
+      <amp-selector on="select:AMP.setState({selected: {size: event.targetOption}})">
+        <table>
+          <tr>
+            <td><div option="S" [class]="(shirts[selected.id].sizes && !shirts[selected.id].sizes['S']) ? 'unavailable' : ''" selected>S</div></td>
+            <td><div option="M" [class]="(shirts[selected.id].sizes && !shirts[selected.id].sizes['M']) ? 'unavailable' : ''" class="unavailable">M</div></td>
+            <td><div option="L" [class]="(shirts[selected.id].sizes && !shirts[selected.id].sizes['L']) ? 'unavailable' : ''" class="unavailable">L</div></td>
+          </tr>
+        </table>
+      </amp-selector>
+    </div>
+
+    <div class="options quantity">
+      <h6>QUANTITY :</h6>
+      <select [disabled]="!shirts[selected.id].sizes[selected.size]">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+    </div>
+
+    <div class="options purchase">
+      <h5 [text]="shirts[selected.id].sizes ? (shirts[selected.id].sizes[selected.size] ? 'In stock' : 'Out of stock') : '---'"
+          [class]="shirts[selected.id].sizes[selected.size] ? 'mdl-color-text--grey' : 'mdl-color-text--red'">
+        IN STOCK</h5>
+
+      <button class="mdl-button mdl-button--raised mdl-button--accent"
+          [class]="'mdl-button mdl-button--raised mdl-button--accent ' + (shirts[selected.id].sizes[selected.size] ? '' : 'hidden')">ADD TO BAG</button>
+      <button class="mdl-button mdl-button--raised hidden"
+          [class]="'mdl-button mdl-button--raised ' + (shirts[selected.id].sizes[selected.size] ? 'hidden' : '')">EMAIL ME WHEN IN STOCK</button>
+    </div>
   </div>
 </body>
 </html>
