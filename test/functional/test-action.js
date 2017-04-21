@@ -945,7 +945,7 @@ describe('Core events', () => {
     sandbox.restore();
   });
 
-  it('should trigger tap event', () => {
+  it('should trigger tap event on click', () => {
     expect(window.document.addEventListener).to.have.been.calledWith('click');
     const handler = window.document.addEventListener.getCall(0).args[1];
     const element = {tagName: 'target1', nodeType: 1};
@@ -954,9 +954,18 @@ describe('Core events', () => {
     expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
   });
 
+  it('should trigger tap event on key press', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = {tagName: 'div', nodeType: 1};
+    const event = {target: element, keyCode: 13};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
+  });
+
   it('should trigger submit event', () => {
     expect(window.document.addEventListener).to.have.been.calledWith('submit');
-    const handler = window.document.addEventListener.getCall(1).args[1];
+    const handler = window.document.addEventListener.getCall(2).args[1];
     const element = {tagName: 'target1', nodeType: 1};
     const event = {target: element};
     handler(event);
@@ -965,7 +974,7 @@ describe('Core events', () => {
 
   it('should trigger change event', () => {
     expect(window.document.addEventListener).to.have.been.calledWith('change');
-    const handler = window.document.addEventListener.getCall(2).args[1];
+    const handler = window.document.addEventListener.getCall(3).args[1];
     const element = {tagName: 'target2', nodeType: 1};
     const event = {target: element};
     handler(event);
@@ -973,7 +982,7 @@ describe('Core events', () => {
   });
 
   it('should trigger change event with details for whitelisted inputs', () => {
-    const handler = window.document.addEventListener.getCall(2).args[1];
+    const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('input');
     element.setAttribute('type', 'range');
     element.setAttribute('min', '0');
