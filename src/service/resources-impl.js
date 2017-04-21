@@ -1289,7 +1289,8 @@ export class Resources {
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner()) {
+        if (r.hasOwner() && !r.isMeasureRequested()) {
+          // If element has owner, and measure is not requested, do nothing.
           continue;
         }
         if (relayoutAll ||
