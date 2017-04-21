@@ -176,7 +176,7 @@ invocation:
   |
     NAME args
       %{
-        $$ = new AstNode(AstNodeType.INVOCATION, [null, $2], $1)
+        $$ = new AstNode(AstNodeType.INVOCATION, [undefined, $2], $1)
       %}
   ;
 
