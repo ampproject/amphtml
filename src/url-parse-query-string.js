@@ -34,8 +34,8 @@ export function parseQueryString_(queryString) {
 
   let match;
   while ((match = regex.exec(queryString))) {
-    const name = decodeURIComponent(match[1]).trim();
-    const value = match[2] ? decodeURIComponent(match[2]).trim() : '';
+    const name = decodeURIComponent(match[1]);
+    const value = match[2] ? decodeURIComponent(match[2]) : '';
     params[name] = value;
   }
   return params;
