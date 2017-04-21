@@ -283,6 +283,13 @@ var forbiddenTerms = {
       'tools/experiments/experiments.js',
     ],
   },
+  'parseUrlWithA': {
+    message: 'Use parseUrl instead.',
+    whitelist: [
+      'src/url.js',
+      'src/service/document-click.js',
+    ],
+  },
   '\\.sendMessage\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
