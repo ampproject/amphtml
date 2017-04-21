@@ -325,6 +325,7 @@ export class AmpSelector extends AMP.BaseElement {
     if (delta === 0) {
       return;
     }
+    event.preventDefault();
 
     this.focusedIndex_ = (this.focusedIndex_ + delta) % this.options_.length;
     if (this.focusedIndex_ < 0) {
