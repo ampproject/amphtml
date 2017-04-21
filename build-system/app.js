@@ -441,7 +441,6 @@ app.use('/examples/amp-fresh.amp.(min.|max.)?html', function(req, res, next) {
     next();
 });
 
-
 app.use('/impression-proxy/', function(req, res) {
   assertCors(req, res, ['GET']);
   // Fake response with the following optional fields:
@@ -670,6 +669,28 @@ app.use('/bind/ecommerce/sizes', function(req, res, next) {
     object[req.query.shirt] = prices[req.query.shirt];
     res.json(object);
   }, 1000); // Simulate network delay.
+});
+
+app.use('/list/fruit-data/get', function(req, res, next) {
+  assertCors(req, res, ['GET']);
+  res.json({
+    items: [
+      {name: 'apple', quantity: 47, unitPrice: '0.33'},
+      {name: 'pear', quantity: 538, unitPrice: '0.54'},
+      {name: 'tomato', quantity: 0, unitPrice: '0.23'},
+    ],
+  });
+});
+
+app.use('/list/vegetable-data/get', function(req, res, next) {
+  assertCors(req, res, ['GET']);
+  res.json({
+    items: [
+      {name: 'cabbage', quantity: 5, unitPrice: '1.05'},
+      {name: 'carrot', quantity: 10, unitPrice: '0.01'},
+      {name: 'brocoli', quantity: 7, unitPrice: '0.02'},
+    ],
+  });
 });
 
 // Simulated Cloudflare signed Ad server
