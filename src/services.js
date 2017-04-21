@@ -72,9 +72,9 @@ export function activityForDoc(nodeOrDoc) {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<!../extensions/amp-form/0.1/amp-form.AmpFormService>}
  */
-export function ampFormServiceForDoc(nodeOrDoc) {
+export function ampFormServiceOrNullForDoc(nodeOrDoc) {
   return /** @type {!Promise<!../extensions/amp-form/0.1/amp-form.AmpFormService>} */ ( // eslint-disable-line max-len
-    getElementServiceForDoc(nodeOrDoc, 'amp-form', 'amp-form'));
+    getElementServiceIfAvailableForDoc(nodeOrDoc, 'amp-form', 'amp-form'));
 }
 
 /**

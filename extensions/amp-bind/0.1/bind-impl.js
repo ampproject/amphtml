@@ -17,6 +17,10 @@
 import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
+import {
+  ampFormServiceOrNullForDoc,
+  resourcesForDoc,
+} from '../../../src/services';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {deepMerge} from '../../../src/utils/object';
@@ -27,7 +31,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
-import {ampFormServiceForDoc, resourcesForDoc} from '../../../src/services';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 
@@ -136,15 +139,9 @@ export class Bind {
     });
 
     /**
-     * Form implementations are not filled in until ampdoc is ready.
-     * So we must wait for that to finish before scanning form elements
-     * for dynamic components.
-     * @private {!Promise}
+     * @private {?Promise}
      */
-    this.formInitializationPromise_ =
-        ampFormServiceForDoc(this.ampdoc).then(ampFormService => {
-          return ampFormService.whenInitialized();
-        });
+    this.formInitializationPromise_ = null;
 
     /**
      * @private {?Promise}
@@ -417,10 +414,14 @@ export class Bind {
       if (typeof element.getDynamicElementContainers === 'function') {
         element.getDynamicElementContainers().forEach(observeElement);
       } else if (element.tagName === 'FORM') {
-        this.formInitializationPromise_.then(() => {
+        this.getAmpFormInitializationPromise_().then(() => {
           const form = formOrNullForElement(element);
           dev().assert(form, 'could not find form implementation');
           form.getDynamicElementContainers().forEach(observeElement);
+        }, error => {
+          // Should only be reachable if the form script wasn't loaded but
+          // a form element was found.
+          reportError(error, element);
         });
       }
 
@@ -837,6 +838,28 @@ export class Bind {
       }
     });
   }
+
+  /*
+   * Form implementations are not filled in until ampdoc is ready.
+   * So we must wait for that to finish before scanning form elements
+   * for dynamic components.
+   * @return {!Promise}
+   * @private
+   */
+  getAmpFormInitializationPromise_() {
+    if (!this.formInitializationPromise_) {
+      const p = ampFormServiceOrNullForDoc(this.ampdoc).then(ampFormService => {
+        if (ampFormService) {
+          return ampFormService.whenInitialized();
+        } else {
+          throw new Error('Form service not present');
+        }
+      });
+      this.formInitializationPromise_ = p;
+    }
+    return this.formInitializationPromise_;
+  }
+
 
   /**
    * Returns true if both arrays contain the same strings.
