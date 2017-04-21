@@ -621,4 +621,5 @@ function adoptServicesForEmbed(childWin) {
   // to pass the "embeddable" flag if this set becomes too unwieldy.
   adoptServiceForEmbed(childWin, 'action');
   adoptServiceForEmbed(childWin, 'standard-actions');
+  adoptServiceForEmbed(childWin, 'clickhandler');
 }
