@@ -15,7 +15,6 @@
  */
 
 var argv = require('minimist')(process.argv.slice(2));
-var babel = require('babelify');
 var gulp = require('gulp-help')(require('gulp'));
 var glob = require('glob');
 var Karma = require('karma').Server;
