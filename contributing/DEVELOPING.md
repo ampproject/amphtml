@@ -68,10 +68,10 @@ For manual testing build AMP and start the Node.js server by running `gulp`.
 ### Serve Mode
 There are 3 serving modes:
 - MAX mode serves unminified AMP. You want to use this during normal dev. `gulp` serves MAX mode by default.
-- MIN mode serves minified AMP. This is closer to the prod setup. This is only avaialable after running `gulp dist --fortesting`. Serve MIN mode by adding `--compiled` to `gulp` command.
-- CDN mode serves prod. This file would not reflect your local changes. Serve CDN mode by adding `--cdn` to `gulp` command.
+- MIN mode serves minified AMP. This is closer to the prod setup. This is only available after running `gulp dist --fortesting`. Serve MIN mode by adding `--compiled` to `gulp` command.
+- CDN mode serves prod. These remote files would not reflect your local changes. Serve CDN mode by adding `--cdn` to `gulp` command.
 
-To switch serving mode in runtime. please to to http://localhost:8000/serve_mode=$mode. $mode can be `max/min/cdn`.
+To switch serving mode during runtime, go to http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the following values: `max`, `min,` or `cdn`.
 
 ### Examples
 
@@ -81,13 +81,13 @@ The content in the `examples` directory can be reached at: http://localhost:8000
 
 AMP ships with a local proxy for testing production AMP documents with the local JS version.
 
-For any public AMP document like: http://output.jsbin.com/pegizoq/quiet
+For any public AMP document like: http://output.jsbin.com/pegizoq/quiet,
 
-You can access is with the local JS at
+You can access it with the local JS at
 
-http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet
+http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet.
 
-Note local proxy will serve minified or unminified JS based on current serve mode. When serve mode is `cdn` local proxy will serve remote JS.
+**Note** The local proxy will serve minified or unminified JS based on the current serve mode. When serve mode is `cdn`, the local proxy will serve remote JS.
 When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
 flag so that we do not strip out the localhost code paths. (We do some
 code elimination to trim down the file size for the file we deploy to production)
