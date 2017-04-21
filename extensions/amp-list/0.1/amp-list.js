@@ -60,8 +60,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    const srcMutation = mutations['src'];
-    if (srcMutation != undefined) {
+    if (mutations['src'] != undefined) {
       this.populateList_();
     }
   }

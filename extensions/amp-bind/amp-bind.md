@@ -329,6 +329,11 @@ Only binding to the following components and attributes are allowed:
     <td>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
   </tr>
   <tr>
+    <td><code>&lt;amp-list></code></td>
+    <td><code>[src]</code><sup>1</sup></td>
+    <td>Fetches JSON from the new URL and re-renders, replacing old content.</td>
+  </tr>
+  <tr>
     <td><code>&lt;amp-selector></code></td>
     <td><code>[selected]</code><sup>1</sup></td>
     <td>Changes the currently selected children element(s)<br>identified by their <code>option</code> attribute values. Supports a comma-separated list of values for multiple selection. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
