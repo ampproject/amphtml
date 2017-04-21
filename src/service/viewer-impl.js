@@ -920,6 +920,12 @@ export class Viewer {
  * @private
  */
 function parseParams_(str, allParams) {
+  // Temporary workaround for a viewer sending a bad URL
+  // that has two # inside of it.
+  // See Google bug b/33706977
+  // If there is a # (but not at the start of the string)
+  // replace it with & before parsing.
+  str = str.replace(/(.)\#/, '$1&');
   const params = parseQueryString(str);
   for (const k in params) {
     allParams[k] = params[k];

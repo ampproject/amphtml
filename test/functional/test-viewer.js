@@ -104,6 +104,17 @@ describe('Viewer', () => {
     expect(viewer.getParam('other')).to.equal('something');
   });
 
+  it('handles broken URL encoding b/33706977', () => {
+    windowApi.name = '__AMP__viewportType=natural';
+    windowApi.location.hash = '#paddingTop=17#other=something';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.getPaddingTop()).to.equal(17);
+
+    // All of the startup params are also available via getParam.
+    expect(viewer.getParam('paddingTop')).to.equal('17');
+    expect(viewer.getParam('other')).to.equal('something');
+  });
+
   it('should configure ignore name and hash with explicit params', () => {
     const params = {
       'paddingTop': '171',
