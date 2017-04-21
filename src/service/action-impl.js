@@ -179,6 +179,14 @@ export class ActionService {
           this.trigger(dev().assertElement(event.target), 'tap', event);
         }
       });
+      this.root_.addEventListener('keydown', event => {
+        if (event.keyCode == 13 /* enter */ ||
+            event.keyCode == 32 /* space */) {
+          if (!event.defaultPrevented) {
+            this.trigger(dev().assertElement(event.target), 'tap', event);
+          }
+        }
+      });
     } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         this.trigger(dev().assertElement(event.target), name, event);
