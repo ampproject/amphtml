@@ -417,7 +417,7 @@ function getServiceInternal(holder, id) {
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
     if (s.resolve) {
-      s.resolve((s.obj));
+      s.resolve(s.obj);
     }
     s.build = null;
   }
@@ -507,14 +507,12 @@ function getServicePromiseOrNullInternal(holder, id) {
   if (s) {
     if (s.promise) {
       return s.promise;
-    } else if (s.obj) {
-      return s.promise = Promise.resolve(s.obj);
     } else {
-      dev().assert(s.build,
-          'Expected object, promise, or builder to be present');
-      const service = getServiceInternal(holder, id);
-      dev().assert(service, 'Unexpected null service');
-      return s.promise = Promise.resolve(/** @type {!Object} */ (service));
+      if (!s.obj) {
+        // Instantiate service
+        getServiceInternal(holder, id);
+      }
+      return s.promise = Promise.resolve(s.obj);
     }
   }
   return null;
