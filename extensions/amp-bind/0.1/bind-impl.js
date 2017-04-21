@@ -127,6 +127,9 @@ export class Bind {
       this.evaluator_ = new BindEvaluator();
     }
 
+    /** @const @private {!Function} */
+    this.boundObserveElement_ = this.observeElement_.bind(this);
+
     /**
      * Resolved when the service is fully initialized.
      * @const @private {Promise}
@@ -400,8 +403,9 @@ export class Bind {
       const element = dev().assertElement(node);
       const tagName = element.tagName;
 
-      // Begin observing element if it has dynamic children.
-      this.observeElementIfNecessary_(element);
+      // Observe elements that add/remove children during lifecycle
+      // so we can add/remove bindings as necessary in response.
+      this.observeDynamicChildrenOf_(element);
 
       let boundProperties = this.scanElement_(element);
       // Stop scanning once |limit| bindings are reached.
@@ -501,22 +505,29 @@ export class Bind {
    * Observes the dynamic children of `element` for mutations, if any,
    * for rescanning for bindable attributes.
    * @param {!Element} element
+   * @private
    */
-  observeElementIfNecessary_(element) {
-    const observeElement = elementToObserve => {
-      this.mutationObserver_.observe(elementToObserve, {childList: true});
-    };
+  observeDynamicChildrenOf_(element) {
     if (typeof element.getDynamicElementContainers === 'function') {
-      element.getDynamicElementContainers().forEach(observeElement);
+      element.getDynamicElementContainers().forEach(this.boundObserveElement_);
     } else if (element.tagName === 'FORM') {
       ampFormServiceForDoc(this.ampdoc).then(ampFormService => {
         return ampFormService.whenInitialized();
       }).then(() => {
         const form = formOrNullForElement(element);
         dev().assert(form, 'Could not find form implementation for element.');
-        form.getDynamicElementContainers().forEach(observeElement);
+        form.getDynamicElementContainers().forEach(this.boundObserveElement_);
       });
     }
+  }
+
+  /**
+   * Observes `element` for child mutations.
+   * @param {!Element} element
+   * @private
+   */
+  observeElement_(element) {
+    this.mutationObserver_.observe(element, {childList: true});
   }
 
   /**
