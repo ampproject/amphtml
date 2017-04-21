@@ -54,6 +54,7 @@ import {user} from '../../../src/log';
 import {tryParseJson} from '../../../src/json';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
+import {startsWith} from '../../../src/string';
 
 /*
  * These padding values are specifc to intagram embeds with
@@ -194,8 +195,7 @@ class AmpInstagram extends AMP.BaseElement {
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data ||
-        !(isObject(event.data) || event.data.indexOf('{') == 0)) {
+    if (!event.data || !(isObject(event.data) || startsWith(event.data, '{'))) {
       return;  // Doesn't look like JSON.
     }
     const data = isObject(event.data) ? event.data : tryParseJson(event.data);

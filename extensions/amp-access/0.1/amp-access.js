@@ -44,6 +44,7 @@ import {urlReplacementsForDoc} from '../../../src/services';
 import {viewerForDoc} from '../../../src/services';
 import {viewportForDoc} from '../../../src/services';
 import {vsyncFor} from '../../../src/services';
+import {startsWith} from '../../../src/string';
 
 
 /** @const */
@@ -784,7 +785,7 @@ export class AccessService {
         invocation.event.preventDefault();
       }
       this.loginWithType_('');
-    } else if (invocation.method.indexOf('login-') == 0) {
+    } else if (startsWith(invocation.method, 'login-')) {
       if (invocation.event) {
         invocation.event.preventDefault();
       }

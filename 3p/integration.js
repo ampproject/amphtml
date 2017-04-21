@@ -42,6 +42,7 @@ import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {getMode} from '../src/mode';
+import {startsWith} from '../src/string.js';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -739,7 +740,7 @@ export function parseFragment(fragment) {
     // Some browser, notably Firefox produce an encoded version of the fragment
     // while most don't. Since we know how the string should start, this is easy
     // to detect.
-    if (json.indexOf('{%22') == 0) {
+    if (startsWith(json, '{%22')) {
       json = decodeURIComponent(json);
     }
     return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});

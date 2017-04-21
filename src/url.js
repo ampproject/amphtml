@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {endsWith} from './string';
+import {startsWith, endsWith} from './string';
 import {user} from './log';
 import {getMode} from './mode';
 import {urls} from './config';
 import {isArray} from './types';
+import {parseQueryString_} from './url-parse-query-string';
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -242,37 +243,16 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
 /**
  * Parses the query string of an URL. This method returns a simple key/value
  * map. If there are duplicate keys the latest value is returned.
+ *
+ * This function is implemented in a separate file to avoid a circular
+ * dependency.
+ *
  * @param {string} queryString
  * @return {!Object<string>}
  */
 export function parseQueryString(queryString) {
-  const params = Object.create(null);
-  if (!queryString) {
-    return params;
-  }
-  if (queryString.indexOf('?') == 0 || queryString.indexOf('#') == 0) {
-    queryString = queryString.substr(1);
-  }
-  const pairs = queryString.split('&');
-  for (let i = 0; i < pairs.length; i++) {
-    const pair = pairs[i];
-    const eqIndex = pair.indexOf('=');
-    let name;
-    let value;
-    if (eqIndex != -1) {
-      name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
-      value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
-    } else {
-      name = decodeURIComponent(pair).trim();
-      value = '';
-    }
-    if (name) {
-      params[name] = value;
-    }
-  }
-  return params;
+  return parseQueryString_(queryString);
 }
-
 
 /**
  * Returns the URL without fragment. If URL doesn't contain fragment, the same
@@ -418,27 +398,23 @@ export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
   const relativeUrl = parseUrl(relativeUrlString);
 
   // Absolute URL.
-  if (relativeUrlString.toLowerCase().indexOf(relativeUrl.protocol) == 0) {
+  if (startsWith(relativeUrlString.toLowerCase(), relativeUrl.protocol)) {
     return relativeUrl.href;
   }
 
   // Protocol-relative URL.
-  if (relativeUrlString.indexOf('//') == 0) {
+  if (startsWith(relativeUrlString, '//')) {
     return baseUrl.protocol + relativeUrlString;
   }
 
   // Absolute path.
-  if (relativeUrlString.indexOf('/') == 0) {
+  if (startsWith(relativeUrlString, '/')) {
     return baseUrl.origin + relativeUrlString;
   }
 
   // Relative path.
-  const basePath = baseUrl.pathname.split('/');
-  return baseUrl.origin +
-      (basePath.length > 1 ?
-          basePath.slice(0, basePath.length - 1).join('/') :
-          '') +
-      '/' + relativeUrlString;
+  return baseUrl.origin + baseUrl.pathname.replace(/\/[^/]*$/, '/')
+      + relativeUrlString;
 }
 
 

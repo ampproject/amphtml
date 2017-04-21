@@ -16,6 +16,7 @@
 
 import {getMode} from './mode';
 import {urls} from './config';
+import {startsWith} from './string';
 
 /**
  * Triggers validation for the current document if there is a script in the
@@ -28,7 +29,7 @@ export function maybeValidate(win) {
     return;
   }
   const filename = win.location.href;
-  if (filename.indexOf('about:') == 0) {  // Should only happen in tests.
+  if (startsWith(filename, 'about:')) {  // Should only happen in tests.
     return;
   }
 
