@@ -113,7 +113,6 @@ describe('amp-graphiq', () => {
       obj.unlayoutCallback();
       expect(graphiq.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
-      expect(obj.iframePromise_).to.not.exist;
       expect(placeholder.style.display).to.be.equal('');
     });
   });
