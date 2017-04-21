@@ -783,7 +783,11 @@ function createBaseCustomElementClass(win) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
       if (this.isBuilt()) {
-        this.implementation_.onLayoutMeasure();
+        try {
+          this.implementation_.onLayoutMeasure();
+        } catch (e) {
+         reportError(e, this);
+        }
       }
 
       if (this.isLoadingEnabled_()) {
