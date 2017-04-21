@@ -32,6 +32,7 @@ import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
 import {removeElement} from '../../../src/dom';
+import {AmpPagePositionObserver} from '../../../src/service/position-observer-impl';
 
 const VISIBILITY_TIMEOUT = 10000;
 
@@ -66,6 +67,8 @@ export class AmpAdXOriginIframeHandler {
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(this.baseInstance_.getAmpDoc());
+
+    this.posOb = new AmpPagePositionObserver(this.baseInstance_.getAmpDoc());
   }
 
   /**
