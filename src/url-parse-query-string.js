@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {startsWith} from './string';
-
 const regex = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
 
 /**
