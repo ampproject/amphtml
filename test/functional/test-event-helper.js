@@ -35,14 +35,12 @@ describe('EventHelper', () => {
   }
 
   let sandbox;
-  let clock;
   let element;
   let loadObservable;
   let errorObservable;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     loadObservable = new Observable();
     errorObservable = new Observable();
     element = {
@@ -150,22 +148,6 @@ describe('EventHelper', () => {
       expect(result).to.equal(event);
     });
     loadObservable.fire(event);
-    return promise;
-  });
-
-  it('listenOncePromise - with time limit', () => {
-    const event = getEvent('load', element);
-    const promise = expect(listenOncePromise(element, 'load', false, 100))
-      .to.eventually.become(event);
-    clock.tick(99);
-    loadObservable.fire(event);
-    return promise;
-  });
-
-  it('listenOncePromise - timeout', () => {
-    const promise = expect(listenOncePromise(element, 'load', false, 100))
-      .to.eventually.be.rejectedWith('timeout');
-    clock.tick(101);
     return promise;
   });
 
