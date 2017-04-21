@@ -201,6 +201,15 @@ describe('service', () => {
       expect(p).to.not.be.null;
     });
 
+    it('should set service builders to null after instantiation', () => {
+      registerServiceBuilder(window, 'a', Class);
+      expect(window.services['a'].obj).to.be.null;
+      expect(window.services['a'].build).to.not.be.null;
+      getService(window, 'a');
+      expect(window.services['a'].obj).to.not.be.null;
+      expect(window.services['a'].build).to.be.null;
+    });
+
     it('should resolve service for a child window', () => {
       const c = getService(window, 'c', factory);
 

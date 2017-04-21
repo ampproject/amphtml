@@ -74,7 +74,7 @@ export class EmbeddableService {
 export function getExistingServiceOrNull(win, id) {
   win = getTopWindow(win);
   if (isServiceRegistered(win, id)) {
-    return getServiceInternal(win, win, id);
+    return getServiceInternal(win, id);
   } else {
     return null;
   }
@@ -138,7 +138,7 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       /* opt_ctor */ undefined,
       () => service);
   // Force service to build
-  getServiceInternal(embedWin, embedWin, id);
+  getServiceInternal(embedWin, id);
 }
 
 /**
@@ -152,7 +152,7 @@ function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
   // this in the future, but for now this gives us a better performance.
   const topWin = getTopWindow(embedWin);
   if (embedWin != topWin && isServiceRegistered(embedWin, id)) {
-    return getServiceInternal(embedWin, embedWin, id);
+    return getServiceInternal(embedWin, id);
   } else {
     return null;
   }
@@ -184,7 +184,7 @@ export function getService(win, id, opt_factory) {
         opt_factory,
         /* opt_instantiate */ true);
   }
-  return getServiceInternal(win, win, id);
+  return getServiceInternal(win, id);
 }
 
 /**
@@ -203,7 +203,7 @@ export function registerServiceBuilder(win,
   win = getTopWindow(win);
   registerServiceInternal(win, win, id, opt_constructor, opt_factory);
   if (opt_instantiate) {
-    getServiceInternal(win, win, id);
+    getServiceInternal(win, id);
   }
 }
 
@@ -225,7 +225,7 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
   const holder = getAmpdocServiceHolder(ampdoc);
   registerServiceInternal(holder, ampdoc, id, opt_constructor, opt_factory);
   if (opt_instantiate) {
-    getServiceInternal(holder, ampdoc, id);
+    getServiceInternal(holder, id);
   }
 }
 
@@ -280,7 +280,7 @@ export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
         opt_factory,
         /* opt_instantiate */ true);
   }
-  return getServiceInternal(holder, ampdoc, id);
+  return getServiceInternal(holder, id);
 }
 
 /**
@@ -402,12 +402,11 @@ function getAmpdocService(win) {
  * Get service `id` from `holder`. Assumes the service
  * has already been registered.
  * @param {!Object} holder Object holding the service instance.
- * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
  * @return {Object}
  * @template T
  */
-function getServiceInternal(holder, context, id) {
+function getServiceInternal(holder, id) {
   dev().assert(isServiceRegistered(holder, id),
       `Expected service ${id} to be registered`);
   const services = getServices(holder);
@@ -418,7 +417,7 @@ function getServiceInternal(holder, context, id) {
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
     if (s.resolve) {
-      s.resolve(/** @type {!Object} */(s.obj));
+      s.resolve((s.obj));
     }
     s.build = null;
   }
@@ -461,9 +460,8 @@ function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
   // The service may have been requested already, in which case there is a
   // pending promise that needs to fulfilled.
   if (s.resolve) {
-    s.obj = s.build();
-    s.resolve(/** @type {!Object} */(s.obj));
-    s.build = null;
+    // getServiceInternal will resolve the project.
+    getServiceInternal(holder, id);
   }
 }
 
@@ -514,8 +512,9 @@ function getServicePromiseOrNullInternal(holder, id) {
     } else {
       dev().assert(s.build,
           'Expected object, promise, or builder to be present');
-      s.obj = s.build();
-      return s.promise = Promise.resolve(s.obj);
+      const service = getServiceInternal(holder, id);
+      dev().assert(service, 'Unexpected null service');
+      return s.promise = Promise.resolve(/** @type {!Object} */ (service));
     }
   }
   return null;
