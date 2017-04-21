@@ -42,7 +42,7 @@ const TAG = 'clickhandler';
 /**
  * Install click handler service for ampdoc. Immediately instantiates the
  * the click handler service.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installGlobalClickListenerForDoc(ampdoc) {
   registerServiceBuilderForDoc(
@@ -57,28 +57,28 @@ export function installGlobalClickListenerForDoc(ampdoc) {
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * @implements {./service.EmbeddableService}
+ * @implements {../service.EmbeddableService}
  * @visibleForTesting
  */
 export class ClickHandler {
   /**
-   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
   constructor(ampdoc, opt_rootNode) {
-    /** @const {!./service/ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const {!Document|!ShadowRoot} */
     this.rootNode_ = opt_rootNode || ampdoc.getRootNode();
 
-    /** @private @const {!./service/viewport-impl.Viewport} */
+    /** @private @const {!./viewport-impl.Viewport} */
     this.viewport_ = viewportForDoc(this.ampdoc);
 
-    /** @private @const {!./service/viewer-impl.Viewer} */
+    /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(this.ampdoc);
 
-    /** @private @const {!./service/history-impl.History} */
+    /** @private @const {!./history-impl.History} */
     this.history_ = historyForDoc(this.ampdoc);
 
     const platform = platformFor(this.ampdoc.win);
@@ -97,7 +97,7 @@ export class ClickHandler {
 
     /**
      * Used for URL resolution in embeds.
-     * @private @const {?HTMLAnchorElement}
+     * @private {?HTMLAnchorElement}
      */
     this.embedA_ = null;
 
@@ -284,11 +284,13 @@ export class ClickHandler {
    */
   parseUrl_(url) {
     if (this.isEmbed_) {
-      if (!this.embedA_) {
+      let a = this.embedA_;
+      if (!a) {
         const embedDoc = (this.rootNode_.ownerDocument || this.rootNode_);
-        this.embedA_ = embedDoc.createElement('a');
+        a = /** @type {!HTMLAnchorElement} */ (embedDoc.createElement('a'));
+        this.embedA_ = a;
       }
-      return parseUrlWithA(this.embedA_, url);
+      return parseUrlWithA(a, url);
     }
     return parseUrl(url || this.ampdoc.win.location.href);
   }
