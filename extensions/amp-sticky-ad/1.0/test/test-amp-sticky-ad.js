@@ -190,7 +190,6 @@ describes.realWin('amp-sticky-ad 1.0 version', {
     });
 
     it('should wait for built and load-end signals', () => {
-      impl.ad_.isBuilt = () => false;
       impl.vsync_.mutate = function(callback) {
         callback();
       };
@@ -209,7 +208,6 @@ describes.realWin('amp-sticky-ad 1.0 version', {
     });
 
     it('should wait for built and render-start signals', () => {
-      impl.ad_.isBuilt = () => false;
       impl.vsync_.mutate = function(callback) {
         callback();
       };
@@ -356,6 +354,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     };
 
     impl.display_();
+    impl.ad_.signals().signal('built');
     impl.ad_.signals().signal('load-end');
     const layoutPromise = impl.layoutAd_();
     const bodyPromise = impl.viewport_.ampdoc.whenBodyAvailable();
@@ -394,6 +393,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     };
 
     impl.display_();
+    impl.ad_.signals().signal('built');
     impl.ad_.signals().signal('load-end');
     const layoutPromise = impl.layoutAd_();
     const bodyPromise = impl.viewport_.ampdoc.whenBodyAvailable();
