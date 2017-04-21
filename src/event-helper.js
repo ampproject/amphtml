@@ -90,7 +90,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
  */
 export function listenOncePromise(element, eventType, opt_capture, opt_cancel) {
   let unlisten;
-  const eventPromise = new Promise((resolve, unusedReject) => {
+  const eventPromise = new Promise(resolve => {
     unlisten = listenOnce(element, eventType, resolve, opt_capture);
   });
   eventPromise.then(unlisten, unlisten);
