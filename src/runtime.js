@@ -51,6 +51,7 @@ import {
 import {installActionServiceForDoc} from './service/action-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
+import {installGlobalClickListenerForDoc} from './service/document-click';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {extensionsFor} from './services';
 import {installHistoryServiceForDoc} from './service/history-impl';
@@ -145,6 +146,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
+  installGlobalClickListenerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
 
