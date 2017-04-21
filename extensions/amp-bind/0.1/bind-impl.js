@@ -114,11 +114,8 @@ export class Bind {
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
 
-    /**
-     * @const @private {MutationObserver}
-     */
-    this.mutationObserver_ =
-        new MutationObserver(this.onMutationsObserved_.bind(this));
+    /** @private {MutationObserver} */
+    this.mutationObserver_ = null;
 
     /** @const @private {boolean} */
     this.workerExperimentEnabled_ = isExperimentOn(this.win_, 'web-worker');
@@ -134,17 +131,6 @@ export class Bind {
     this.initializePromise_ = this.ampdoc.whenReady().then(() => {
       return this.initialize_();
     });
-
-    /**
-     * Form implementations are not filled in until ampdoc is ready.
-     * So we must wait for that to finish before scanning form elements
-     * for dynamic components.
-     * @private {!Promise}
-     */
-    this.formInitializationPromise_ =
-        ampFormServiceForDoc(this.ampdoc).then(ampFormService => {
-          return ampFormService.whenInitialized();
-        });
 
     /**
      * @private {?Promise}
@@ -410,19 +396,10 @@ export class Bind {
       }
       const element = dev().assertElement(node);
       const tagName = element.tagName;
-      const observeElement = elementToObserve => {
-        this.mutationObserver_.observe(elementToObserve, {childList: true});
-      };
 
-      if (typeof element.getDynamicElementContainers === 'function') {
-        element.getDynamicElementContainers().forEach(observeElement);
-      } else if (element.tagName === 'FORM') {
-        this.formInitializationPromise_.then(() => {
-          const form = formOrNullForElement(element);
-          dev().assert(form, 'could not find form implementation');
-          form.getDynamicElementContainers().forEach(observeElement);
-        });
-      }
+      // Observe elements that add/remove children during lifecycle
+      // so we can add/remove bindings as necessary in response.
+      this.observeDynamicChildrenOf_(element);
 
       let boundProperties = this.scanElement_(element);
       // Stop scanning once |limit| bindings are reached.
@@ -516,6 +493,39 @@ export class Bind {
       }
     }
     return null;
+  }
+
+  /**
+   * Observes the dynamic children of `element` for mutations, if any,
+   * for rescanning for bindable attributes.
+   * @param {!Element} element
+   * @private
+   */
+  observeDynamicChildrenOf_(element) {
+    if (typeof element.getDynamicElementContainers === 'function') {
+      element.getDynamicElementContainers().forEach(this.observeElement_, this);
+    } else if (element.tagName === 'FORM') {
+      ampFormServiceForDoc(this.ampdoc).then(ampFormService => {
+        return ampFormService.whenInitialized();
+      }).then(() => {
+        const form = formOrNullForElement(element);
+        dev().assert(form, 'Could not find form implementation for element.');
+        form.getDynamicElementContainers().forEach(this.observeElement_, this);
+      });
+    }
+  }
+
+  /**
+   * Observes `element` for child mutations.
+   * @param {!Element} element
+   * @private
+   */
+  observeElement_(element) {
+    if (!this.mutationObserver_) {
+      this.mutationObserver_ =
+          new MutationObserver(this.onMutationsObserved_.bind(this));
+    }
+    this.mutationObserver_.observe(element, {childList: true});
   }
 
   /**
