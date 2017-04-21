@@ -114,11 +114,8 @@ export class Bind {
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
 
-    /**
-     * @const @private {MutationObserver}
-     */
-    this.mutationObserver_ =
-        new MutationObserver(this.onMutationsObserved_.bind(this));
+    /** @private {MutationObserver} */
+    this.mutationObserver_ = null;
 
     /** @const @private {boolean} */
     this.workerExperimentEnabled_ = isExperimentOn(this.win_, 'web-worker');
@@ -126,9 +123,6 @@ export class Bind {
     if (!this.workerExperimentEnabled_) {
       this.evaluator_ = new BindEvaluator();
     }
-
-    /** @const @private {!Function} */
-    this.boundObserveElement_ = this.observeElement_.bind(this);
 
     /**
      * Resolved when the service is fully initialized.
@@ -509,14 +503,14 @@ export class Bind {
    */
   observeDynamicChildrenOf_(element) {
     if (typeof element.getDynamicElementContainers === 'function') {
-      element.getDynamicElementContainers().forEach(this.boundObserveElement_);
+      element.getDynamicElementContainers().forEach(this.observeElement_, this);
     } else if (element.tagName === 'FORM') {
       ampFormServiceForDoc(this.ampdoc).then(ampFormService => {
         return ampFormService.whenInitialized();
       }).then(() => {
         const form = formOrNullForElement(element);
         dev().assert(form, 'Could not find form implementation for element.');
-        form.getDynamicElementContainers().forEach(this.boundObserveElement_);
+        form.getDynamicElementContainers().forEach(this.observeElement_, this);
       });
     }
   }
@@ -527,6 +521,10 @@ export class Bind {
    * @private
    */
   observeElement_(element) {
+    if (!this.mutationObserver_) {
+      this.mutationObserver_ =
+          new MutationObserver(this.onMutationsObserved_.bind(this));
+    }
     this.mutationObserver_.observe(element, {childList: true});
   }
 
