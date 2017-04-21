@@ -414,6 +414,7 @@ function getServiceInternal(holder, id) {
   if (!s.obj) {
     dev().assert(s.build, `Service ${id} registered without builder nor impl.`);
     s.obj = s.build();
+    dev().assert(s.obj, `Service ${id} built to null.`);
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
     if (s.resolve) {
@@ -512,7 +513,7 @@ function getServicePromiseOrNullInternal(holder, id) {
         // Instantiate service
         getServiceInternal(holder, id);
       }
-      return s.promise = Promise.resolve(s.obj);
+      return s.promise = Promise.resolve(/** @type {!Object} */ (s.obj));
     }
   }
   return null;
