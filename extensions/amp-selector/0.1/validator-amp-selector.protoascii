@@ -33,6 +33,7 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   disallowed_ancestor: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-selector extension .js script"
+  attrs: { name: "keyboard-select-mode" }
   attrs: {
     name: "disabled"
     value: ""
