@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {startsWith} from './string';
+const regex = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
 
 /**
  * Parses the query string of an URL. This method returns a simple key/value
@@ -31,25 +31,12 @@ export function parseQueryString_(queryString) {
   if (!queryString) {
     return params;
   }
-  if (startsWith(queryString, '?') || startsWith(queryString, '#')) {
-    queryString = queryString.substr(1);
-  }
-  const pairs = queryString.split('&');
-  for (let i = 0; i < pairs.length; i++) {
-    const pair = pairs[i];
-    const eqIndex = pair.indexOf('=');
-    let name;
-    let value;
-    if (eqIndex != -1) {
-      name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
-      value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
-    } else {
-      name = decodeURIComponent(pair).trim();
-      value = '';
-    }
-    if (name) {
-      params[name] = value;
-    }
+
+  let match;
+  while ((match = regex.exec(queryString))) {
+    const name = decodeURIComponent(match[1]).trim();
+    const value = match[2] ? decodeURIComponent(match[2]).trim() : '';
+    params[name] = value;
   }
   return params;
 }
