@@ -26,6 +26,7 @@ import {timerFor} from './services';
 import {platformFor} from './services';
 import {viewerForDoc} from './services';
 import {dev} from './log';
+import {startsWith} from './string';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
@@ -219,7 +220,7 @@ class PreconnectService {
    * @return {boolean}
    */
   isInterestingUrl_(url) {
-    if (url.indexOf('https:') == 0 || url.indexOf('http:') == 0) {
+    if (startsWith(url, 'https:') || startsWith(url, 'http:')) {
       return true;
     }
     return false;

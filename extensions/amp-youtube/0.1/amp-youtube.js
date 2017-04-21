@@ -28,6 +28,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
+import {startsWith} from '../../../src/string';
 
 /**
  * @enum {number}
@@ -283,8 +284,7 @@ class AmpYoutube extends AMP.BaseElement {
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data ||
-        !(isObject(event.data) || event.data.indexOf('{') == 0)) {
+    if (!event.data || !(isObject(event.data) || startsWith(event.data, '{'))) {
       return;  // Doesn't look like JSON.
     }
     const data = isObject(event.data) ? event.data : tryParseJson(event.data);
