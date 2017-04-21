@@ -749,6 +749,7 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'src/url.js',
       'src/mode.js',
+      'dist.3p/current/integration.js',
     ],
   },
 };
