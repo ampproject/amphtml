@@ -209,7 +209,7 @@ case 26:
 break;
 case 27:
 
-        this.$ = new AstNode(AstNodeType.INVOCATION, [null, $$[$0]], $$[$0-1])
+        this.$ = new AstNode(AstNodeType.INVOCATION, [undefined, $$[$0]], $$[$0-1])
 
 break;
 case 28:
