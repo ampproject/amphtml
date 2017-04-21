@@ -434,7 +434,7 @@ export function detectJsEngineFromStack() {
     }
 
     // Safari does not show the context ("object."), just the function name.
-    if (stack.indexOf('t@') === 0) {
+    if (startsWith(stack, 't@')) {
       return 'Safari';
     }
 

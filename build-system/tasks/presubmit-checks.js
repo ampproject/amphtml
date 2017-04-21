@@ -737,6 +737,21 @@ var forbiddenTermsSrcInclusive = {
   '\\>\\>\\>\\>\\>\\>': {
     message: 'Unresolved merge conflict.',
   },
+  '\\.indexOf\\([\'"][^)]+\\)\\s*===?\\s*0\\b': {
+    message: 'use startsWith helper in src/string.js',
+    whitelist: [
+      'dist.3p/current/integration.js',
+    ],
+  },
+  '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
+  '/url-parse-query-string': {
+    message: 'Import parseQueryString from `src/url.js`',
+    whitelist: [
+      'src/url.js',
+      'src/mode.js',
+      'dist.3p/current/integration.js',
+    ],
+  },
 };
 
 // Terms that must appear in a source file.
