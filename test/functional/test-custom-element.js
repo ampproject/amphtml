@@ -39,7 +39,6 @@ import {
   getElementServiceForDoc,
   getElementServiceIfAvailableForDoc,
 } from '../../src/element-service';
-import * as sinon from 'sinon';
 import * as lolex from 'lolex';
 
 
