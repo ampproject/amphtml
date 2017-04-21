@@ -139,19 +139,9 @@ export class Bind {
     });
 
     /**
-     * Form implementations are not filled in until ampdoc is ready.
-     * So we must wait for that to finish before scanning form elements
-     * for dynamic components.
-     * @private {!Promise}
+     * @private {?Promise}
      */
-    this.formInitializationPromise_ =
-        ampFormServiceOrNullForDoc(this.ampdoc).then(ampFormService => {
-          if (ampFormService) {
-            return ampFormService.whenInitialized();
-          } else {
-            throw new Error('Form service not present');
-          }
-        });
+    this.formInitializationPromise_ = null;
 
     /**
      * @private {?Promise}
@@ -424,7 +414,7 @@ export class Bind {
       if (typeof element.getDynamicElementContainers === 'function') {
         element.getDynamicElementContainers().forEach(observeElement);
       } else if (element.tagName === 'FORM') {
-        this.formInitializationPromise_.then(() => {
+        this.getAmpFormInitializationPromise_().then(() => {
           const form = formOrNullForElement(element);
           dev().assert(form, 'could not find form implementation');
           form.getDynamicElementContainers().forEach(observeElement);
@@ -848,6 +838,28 @@ export class Bind {
       }
     });
   }
+
+  /*
+   * Form implementations are not filled in until ampdoc is ready.
+   * So we must wait for that to finish before scanning form elements
+   * for dynamic components.
+   * @return {!Promise}
+   * @private
+   */
+  getAmpFormInitializationPromise_() {
+    if (!this.formInitializationPromise_) {
+      const p = ampFormServiceOrNullForDoc(this.ampdoc).then(ampFormService => {
+        if (ampFormService) {
+          return ampFormService.whenInitialized();
+        } else {
+          throw new Error('Form service not present');
+        }
+      });
+      this.formInitializationPromise_ = p;
+    }
+    return this.formInitializationPromise_;
+  }
+
 
   /**
    * Returns true if both arrays contain the same strings.
