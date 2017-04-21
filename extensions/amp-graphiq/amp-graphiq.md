@@ -63,6 +63,10 @@ The Graphiq widget id.
 
 The `data-href` attribute can optionally be defined to override the default href used for the "See more details" link which appears in the widget. The default behavior is to link to an expanded view of the widget on Graphiq's site.
 
+**data-frozen** (optional)
+
+The existence of the `data-frozen` attribute will set the subdomain of the widget to `sw.graphiq.com`, indicating that the widget was frozen. A frozen widget's data does not update - it reflects whatever the data was at the time of freezing. `data-frozen` only changes the subdomain, **it does not freeze the visualization**. Thus, it can only be set for an already frozen widget, usually provided directly from Graphiq (which executes the freezing).
+
 **common attributes**
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
