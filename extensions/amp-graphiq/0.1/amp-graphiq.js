@@ -143,10 +143,7 @@ class AmpGraphiq extends AMP.BaseElement {
       return; // We only process valid JSON.
     }
     if (data.type === 'embed-size' && data.sentinel === 'amp') {
-      const height = data.height;
-      this.getVsync().measure(() => {
-        this.attemptChangeHeight(height).catch(() => {});
-      });
+      this.attemptChangeHeight(data.height).catch(() => {});
     }
   }
 
