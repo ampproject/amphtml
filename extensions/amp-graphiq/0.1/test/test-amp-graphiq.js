@@ -48,7 +48,7 @@ describe('amp-graphiq', () => {
         graphiq.setAttribute('layout', 'responsive');
       }
       if (opt_isFrozen) {
-        graphiq.setAttribute('data-frozen', 'true');
+        graphiq.setAttribute('data-frozen', '');
       }
       // Placeholder
       const img = iframe.doc.createElement('amp-img');
