@@ -925,6 +925,7 @@ export class Bind {
 
   /**
    * Print out the current state in the console.
+   * @private
    */
   printAmpState_() {
     const seen = [];
