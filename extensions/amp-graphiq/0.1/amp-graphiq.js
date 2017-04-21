@@ -73,7 +73,7 @@ class AmpGraphiq extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const isFrozen = this.element.getAttribute('data-frozen');
+    const isFrozen = this.element.hasAttribute('data-frozen');
     this.domain_ = isFrozen ? 'https://sw.graphiq.com' : 'https://w.graphiq.com';
     this.widgetId_ = user().assert(
         this.element.getAttribute('data-widget-id'),
