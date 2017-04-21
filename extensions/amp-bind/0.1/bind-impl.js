@@ -946,7 +946,6 @@ export class Bind {
     dev().info(TAG, s);
   }
 
-
   /**
    * Wait for bind scan to finish for testing.
    *
