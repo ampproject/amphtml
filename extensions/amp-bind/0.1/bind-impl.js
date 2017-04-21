@@ -22,7 +22,7 @@ import {dev, user} from '../../../src/log';
 import {deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {formOrNullForElement} from '../../../src/form';
-import {isArray, toArray} from '../../../src/types';
+import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
@@ -140,6 +140,7 @@ export class Bind {
     // Expose for testing on dev.
     if (getMode().localDev) {
       AMP.reinitializeBind = this.initialize_.bind(this);
+      AMP.printAmpState = this.printAmpState_.bind(this);
     }
   }
 
@@ -921,6 +922,29 @@ export class Bind {
 
     return false;
   }
+
+  /**
+   * Print out the current state in the console.
+   */
+  printAmpState_() {
+    const seen = [];
+    const seenNames = [];
+    const s = JSON.stringify(this.scope_, (key, value) => {
+      if (isObject(value)) {
+        const index = seen.indexOf(value);
+        if (index !== -1) {
+          const name = seenNames[index];
+          return `**Circular reference to '${name}'**`;
+        } else {
+          seenNames.push(key);
+          seen.push(value);
+        }
+      }
+      return value;
+    });
+    dev().info(TAG, s);
+  }
+
 
   /**
    * Wait for bind scan to finish for testing.
