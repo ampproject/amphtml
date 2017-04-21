@@ -242,6 +242,7 @@ function updateTabStatus(tabId, iconPrefix, title, text, color) {
 function validateUrlFromTab(tab) {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', tab.url, true);
+  xhr.setRequestHeader('Accept', 'text/html');
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
       const doc = xhr.responseText;
