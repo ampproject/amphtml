@@ -16,16 +16,17 @@
 
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {actionServiceForDoc} from '../../../src/services';
-import {closest} from '../../../src/dom';
+import {closest, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {isEnumValue} from '../../../src/types';
 
 /**
  * Set of namespaces that can be set for lifecycle reporters.
  *
  * @enum {string}
  */
-const KB_SUPPORT = {
+const KEYBOARD_SELECT_MODES = {
   NONE: 'none',
   FOCUS: 'focus',
   SELECT: 'select',
@@ -59,8 +60,8 @@ export class AmpSelector extends AMP.BaseElement {
     /** @private {number} */
     this.focusedIndex_ = 0;
 
-    /** @private {!KB_SUPPORT} */
-    this.kbSupportMode_ = KB_SUPPORT.FOCUS;
+    /** @private {!KEYBOARD_SELECT_MODES} */
+    this.kbSelectMode_ = KEYBOARD_SELECT_MODES.FOCUS;
   }
 
   /** @override */
@@ -84,24 +85,24 @@ export class AmpSelector extends AMP.BaseElement {
       this.element.setAttribute('aria-disabled', 'true');
     }
 
-    const kbSupportMode = this.element.getAttribute('keyboard-support');
-    if (kbSupportMode == 'none') {
-      this.kbSupportMode_ = KB_SUPPORT.NONE;
-    } else if (kbSupportMode == 'select') {
-      this.kbSupportMode_ = KB_SUPPORT.SELECT;
-      user().assert(!this.isMultiple_,
-        '[keyboard-support=select] not supported for ' +
-        'multiple selection amp-selector');
-    } else {
-      this.kbSupportMode_ = KB_SUPPORT.FOCUS;
+    let kbSelectMode = this.element.getAttribute('keyboard-select-mode');
+    if (!kbSelectMode) {
+      kbSelectMode = KEYBOARD_SELECT_MODES.NONE;
     }
-    this.element.setAttribute('keyboard-support', this.kbSupportMode_);
+    user().assert(isEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode),
+        'Invalid keyboard-select-mode');
+    user().assert(
+        !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
+        '[keyboard-select-mode=select] not supported for multiple ' +
+        'selection amp-selector');
+    this.kbSelectMode_ = kbSelectMode;
 
     this.init_();
     if (!this.isDisabled_) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
-      if (this.kbSupportMode_ !== KB_SUPPORT.NONE) {
-        this.element.addEventListener('keydown', this.keyHandler_.bind(this));
+      if (this.kbSelectMode_ !== KEYBOARD_SELECT_MODES.NONE) {
+        this.element.addEventListener('keydown',
+            this.keyDownHandler_.bind(this));
       }
     }
   }
@@ -151,30 +152,31 @@ export class AmpSelector extends AMP.BaseElement {
 
   /**
    * Determine which option should receive focus first and set tabIndex
-   * on all options accordingly.
+   * on all options accordingly. When kb-select-mode is not 'none',
+   * the selector's focus should behave like focus on a set of radio buttons.
    * In multi-select selectors, focus should just go to the first option.
    * In single-select selectors, focus should go to the initially selected
    * option, or to the first option if none are initially selected.
    * @private
    */
   updateFocus_() {
-    let firstSelectedIndex = -1;
-    for (let i = 0; i < this.options_.length; i++) {
-      const option = this.options_[i];
-      if (firstSelectedIndex == -1 && option.hasAttribute('selected')) {
-        firstSelectedIndex = i;
-      }
+    if (this.kbSelectMode_ === KEYBOARD_SELECT_MODES.NONE) {
+      // Don't manage focus.
+      return;
+    }
+
+    this.options_.forEach(option => {
       option.tabIndex = -1;
-    }
-    let initialFocusedElementIndex;
-    if (this.isMultiple_ || firstSelectedIndex == -1) {
-      initialFocusedElementIndex = 0;
+    });
+
+    let initialFocusedElement;
+    if (this.isMultiple_) {
+      initialFocusedElement = this.options_[0];
     } else {
-      initialFocusedElementIndex = firstSelectedIndex;
+      initialFocusedElement = this.selectedOptions_[0] || this.options_[0];
     }
-    this.focusedIndex_ = initialFocusedElementIndex;
-    const initialFocusedElement = this.options_[initialFocusedElementIndex];
     if (initialFocusedElement) {
+      this.focusedIndex_ = this.options_.indexOf(initialFocusedElement);
       initialFocusedElement.tabIndex = 0;
     }
   }
@@ -194,6 +196,7 @@ export class AmpSelector extends AMP.BaseElement {
       } else {
         this.clearSelection_(option);
       }
+      option.tabIndex = 0;
       this.options_.push(option);
     });
     this.updateFocus_();
@@ -262,7 +265,8 @@ export class AmpSelector extends AMP.BaseElement {
         selectedValues = this.setInputs_();
       }
 
-      // Don't change focus trigger action if selected values haven't changed.
+      // Don't trigger action or update focus if
+      // selected values haven't changed.
       if (selectedValues) {
         this.updateFocus_();
         // Trigger 'select' event with two data params:
@@ -300,40 +304,40 @@ export class AmpSelector extends AMP.BaseElement {
    * Handles keyboard events for the selectables.
    * @param {!Event} event
    */
-  keyHandler_(event) {
+  keyDownHandler_(event) {
     // Make currently selected option unfocusable
     this.options_[this.focusedIndex_].tabIndex = -1;
+
+    const dir = this.win.document.body.getAttribute('dir') || 'ltr';
+    let delta = 0;
 
     switch (event.keyCode) {
       case 37: // Left
       case 38: // Up
-        event.preventDefault();
-        if (this.focusedIndex_ == 0) {
-          // Selecting past the last option should
-          // loop back to the beginning.
-          this.focusedIndex_ = this.options_.length - 1;
-        } else {
-          this.focusedIndex_ = this.focusedIndex_ - 1;
-        }
+        delta = dir === 'rtl' ? 1 : -1;
         break;
       case 39: // Right
       case 40: // Down
-        event.preventDefault();
-        if (this.focusedIndex_ == this.options_.length - 1) {
-          // Selecting before the first option should
-          // loop back to the beginning.
-          this.focusedIndex_ = 0;
-        } else {
-          this.focusedIndex_ = this.focusedIndex_ + 1;
-        }
+        delta = dir === 'rtl' ? -1 : 1;
         break;
+    }
+
+    if (delta === 0) {
+      return;
+    }
+
+    this.focusedIndex_ = (this.focusedIndex_ + delta) % this.options_.length;
+    if (this.focusedIndex_ < 0) {
+      // Wrap back around
+      this.focusedIndex_ = this.focusedIndex_ + this.options_.length;
     }
 
     // Focus newly selected option
     const newSelectedOption = this.options_[this.focusedIndex_];
     newSelectedOption.tabIndex = 0;
-    newSelectedOption./*REVIEW*/focus();
-    if (!this.isMultiple_ && this.kbSupportMode_ == KB_SUPPORT.SELECT) {
+    tryFocus(newSelectedOption);
+    if (!this.isMultiple_ &&
+        this.kbSelectMode_ == KEYBOARD_SELECT_MODES.SELECT) {
       this.onOptionSelected_(newSelectedOption);
     }
   }

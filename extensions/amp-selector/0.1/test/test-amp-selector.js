@@ -86,7 +86,7 @@ describes.realWin('amp-selector', {
         keyCode: key,
         preventDefault: () => {},
       };
-      impl.keyHandler_(event);
+      impl.keyDownHandler_(event);
     }
 
     it('should build properly', () => {
@@ -567,17 +567,21 @@ describes.realWin('amp-selector', {
           ampSelector, 'select', /* CustomEvent */ eventMatcher);
     });
 
-    describe('keyboard-support', () => {
+    describe('keyboard-select-mode', () => {
 
-      it('should have `focus` mode by default', () => {
+      it('should have `none` mode by default', () => {
         const ampSelector = getSelector({});
         ampSelector.build();
-        expect(ampSelector.getAttribute('keyboard-support')).to.equal('focus');
+        expect(ampSelector.implementation_.kbSelectMode_).to.equal('none');
       });
 
       it('should initially focus selected option ONLY if ' +
          'it exists for single-select, otherwise first option', () => {
-        const selectorWithNoSelection = getSelector({});
+        const selectorWithNoSelection = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'focus',
+          },
+        });
         selectorWithNoSelection.build();
         expect(selectorWithNoSelection.children[0].tabIndex).to.equal(0);
         for (let i = 1; i < selectorWithNoSelection.children.length; i++) {
@@ -586,6 +590,9 @@ describes.realWin('amp-selector', {
         }
 
         const selectorWithSelection = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'focus',
+          },
           config: {
             count: 3,
           },
@@ -601,6 +608,7 @@ describes.realWin('amp-selector', {
         const ampSelector = getSelector({
           attributes: {
             multiple: true,
+            'keyboard-select-mode': 'focus',
           },
           config: {
             count: 3,
@@ -613,10 +621,10 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[2].tabIndex).to.equal(-1);
       });
 
-      it('should NOT update focus when keyboard-support is disabled', () => {
+      it('should NOT update focus if keyboard-select-mode is disabled', () => {
         const ampSelector = getSelector({
           attributes: {
-            'keyboard-support': 'none',
+            'keyboard-select-mode': 'none',
           },
           config: {
             count: 3,
@@ -629,8 +637,11 @@ describes.realWin('amp-selector', {
       });
 
       it('should update focus when the user presses the arrow keys when ' +
-         'keyboard-support is enabled', () => {
+         'keyboard-select-mode is enabled', () => {
         const ampSelector = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'focus',
+          },
           config: {
             count: 3,
           },
@@ -639,13 +650,13 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[0].tabIndex).to.equal(0);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(-1);
-        // Right
-        keyPress(ampSelector, 39);
-        expect(ampSelector.children[0].tabIndex).to.equal(-1);
-        expect(ampSelector.children[1].tabIndex).to.equal(0);
-        expect(ampSelector.children[2].tabIndex).to.equal(-1);
         // Left
         keyPress(ampSelector, 37);
+        expect(ampSelector.children[0].tabIndex).to.equal(-1);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(0);
+        // Right
+        keyPress(ampSelector, 39);
         expect(ampSelector.children[0].tabIndex).to.equal(0);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -654,6 +665,9 @@ describes.realWin('amp-selector', {
       it('should update focus for single-select when ' +
          'selection is changed without user interaction', () => {
         const ampSelector = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'focus',
+          },
           config: {
             count: 3,
           },
@@ -673,7 +687,7 @@ describes.realWin('amp-selector', {
       it('should NOT allow `select` mode for multi-select selectors', () => {
         const ampSelector = getSelector({
           attributes: {
-            'keyboard-support': 'select',
+            'keyboard-select-mode': 'select',
             multiple: true,
           },
         });
@@ -684,7 +698,7 @@ describes.realWin('amp-selector', {
       it('should ONLY change selection in `select` mode', () => {
         const ampSelector = getSelector({
           attributes: {
-            'keyboard-support': 'select',
+            'keyboard-select-mode': 'select',
           },
           config: {
             count: 3,
