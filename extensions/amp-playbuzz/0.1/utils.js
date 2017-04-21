@@ -130,7 +130,7 @@ export function composeEmbedUrl(options) {
     src: options.itemUrl,
     embedBy: '00000000-0000-0000-0000-000000000000',
     game: options.relativeUrl,
-    comments: undefined,
+    comments: 'undefined',
     useComments: options.displayComments,
     gameInfo: options.displayItemInfo,
     useShares: options.displayShareBar,

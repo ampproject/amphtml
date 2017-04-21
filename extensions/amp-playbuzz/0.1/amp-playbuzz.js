@@ -83,6 +83,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?boolean} */
     this.iframeLoaded_ = false;
 
+    /** @private {?boolean} */
+    this.scrollEventOnHalt_ = false;
+
     /** @private {Array.<function>} */
     this.unlisteners_ = [];
   }
@@ -101,7 +104,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     // EXPERIMENT
-    // AMP.toggleExperiment(EXPERIMENT, true); //for dev
+    // AMP.toggleExperiment('amp-playbuzz', true); //for dev
     user().assert(isExperimentOn(this.win, EXPERIMENT),
       `Enable ${EXPERIMENT} experiment`);
 
@@ -191,8 +194,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
       this.iframeLoaded_ = true;
       this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */ });
 
-      const unlisten = this.getViewport().onChanged(
+      const unlisten = this.getViewport().onScroll(
         this.sendScrollDataToItem_.bind(this));
+
       this.unlisteners_.push(unlisten);
     }.bind(this));
   }
@@ -265,21 +269,37 @@ class AmpPlaybuzz extends AMP.BaseElement {
     return embedUrl;
   }
 
-  sendScrollDataToItem_(changeEvent) {
-    if (!this.isInViewport()) {
+  sendScrollDataToItem_() {
+    if (this.scrollEventOnHalt_ || !this.isInViewport()) {
       return;
     }
 
+    this.scrollEventOnHalt_ = true;
+    const elementBox = this.getLayoutBox();
+    const viewport = this.getViewport();
+
     const scrollingData = {
       event: 'scroll',
-      windowHeight: changeEvent.height,
-      scroll: changeEvent.top,
-      offsetTop: this.getLayoutBox().top,
+      windowHeight: viewport.getSize().height,
+      scroll: viewport.getScrollTop(),
+      offsetTop: elementBox.top,
     };
 
-    this.notifyIframe_(scrollingData);
+    const isScrollOnElement = scrollingData.scroll > elementBox.top &&
+        scrollingData.scroll < elementBox.bottom;
+
+    if (isScrollOnElement) {
+      this.notifyIframe_(scrollingData);
+    }
+
+    this.haltScrollEventFor_(250);
   }
 
+  haltScrollEventFor_(milliseconds) {
+    setTimeout(() => {
+      this.scrollEventOnHalt_ = false;
+    }, milliseconds);
+  }
   //User might have made some progress or had the results when going inactive
   //TODO: build a message telling the iframe to pause
   /** @override */
