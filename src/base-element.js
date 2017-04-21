@@ -493,16 +493,14 @@ export class BaseElement {
 
   /**
    * Returns a promise that will resolve or fail based on the element's 'load'
-   * and 'error' events. Optionally this method takes a timeout, which will reject
-   * the promise if the resource has not loaded by then.
+   * and 'error' events.
    * @param {T} element
-   * @param {number=} opt_timeout
    * @return {!Promise<T>}
    * @template T
    * @final
    */
-  loadPromise(element, opt_timeout) {
-    return loadPromise(element, opt_timeout);
+  loadPromise(element) {
+    return loadPromise(element);
   }
 
   /** @private */
