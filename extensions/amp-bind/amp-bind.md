@@ -404,7 +404,6 @@ Only binding to the following components and attributes are allowed:
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes">textarea attributes</a>.</td>
   </tr>
 </table>
-
 <sup>1</sup>Denotes bindable attributes that don't have a non-bindable counterpart.
 
 ## Debugging
