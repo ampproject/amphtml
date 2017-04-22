@@ -154,6 +154,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
 - [plista](../../ads/plista.md)
+- [polymorphicAds](../../ads/polymorphicads.md)
 - [popin](../../ads/popin.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
