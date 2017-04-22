@@ -4,33 +4,23 @@
     <meta charset="UTF-8">
     <title>Requests Frame</title>
     <script>
-      document.addEventListener("DOMContentLoaded", function(event) {
-        if (window.context) {
-          debugger;
-          window.context.onAmpAnalyticsEvent(onAmpAnalyticsEvt);
-        } else {
-          window.addEventListener('amp-windowContextCreated', function(){
-            console.log("window.context created and ready to use");
-            // TODO: Write registerAmpAnalyticsEventHandler()!
-            debugger;
-            window.context.onAmpAnalyticsEvent(onAmpAnalyticsEvt);
-          });
+      window.onNewAmpAnalyticsInstance = (instance) => {
+        instance.registerAmpAnalyticsEventListener((arrayOfEventStrings) => {
+          for (evt of arrayOfEventStrings) {
+            // Respond to AMP Analytics event
+            console.log("Received event: " + evt);
+          }
+        });
+        // TODO: Could also do something like:
+        // instance.sendMessageToCreative('hello');
+      };
 
-          // load ampcontext-lib.js which will create window.context
-          ampContextScript = document.createElement('script');
-          ampContextScript.src = "../dist.3p/current/ampcontext-lib.js";
-          document.head.appendChild(ampContextScript);
-        }
-      });
-
-      function onAmpAnalyticsEvt(evt) {
-        console.log("I got an event:");
-        console.dir(evt);
-        debugger;
-      }
+      // Load the script specified in the iframe’s name attribute:
+      script = document.createElement('script');
+      script.src = JSON.parse(window.name).scriptSrc;
+      document.head.appendChild(script);
+      // The script will be loaded, and will call onNewAmpAnalyticsInstance()
     </script>
   </head>
-  <body>
-    This is the requests frame...
-  </body>
+  <!-- The frame will not be visible, so there is no need for a body tag. -->
 </html>

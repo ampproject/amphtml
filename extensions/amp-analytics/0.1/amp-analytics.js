@@ -221,7 +221,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
-    this.handleRequestsFrameUrl_(this.config_['requestsFrameUrl']);
+    this.handleRequestsFrameUrl_(this.config_);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -280,37 +280,21 @@ export class AmpAnalytics extends AMP.BaseElement {
     return Promise.all(promises);
   }
 
-  handleRequestsFrameUrl_(requestsFrameUrl) {
+  handleRequestsFrameUrl_(config) {
+    if (config['requestsFrameUrl'] && config['dataHash']) {
+      if (!config['dataHash'].startsWith('#')) {
+        config['requestsFrameUrl'] += '#';
+      }
+      config['requestsFrameUrl'] += config['dataHash'];
+    }
     // TODO: Safety check requestsFrameUrl!
-    // TODO: Use real values for sentinel and pageViewId
-    debugger;
     // If frame doesn't exist for this requestsFrameUrl, create it.
-    let frame = AmpAnalytics.requestFramesMap.get(requestsFrameUrl);
-    if (!frame) {
-      let doc = this.element.ampdoc_.win.document;
-      let context = {
-        "_context": {
-          "location": requestsFrameUrl,
-          "canonicalUrl": requestsFrameUrl,
-          "startTime": new Date().getTime(),
-          "referrer": document.location.href,
-          "sentinel": "1-23456",
-          "pageViewId": "23456"
-        }
-      };
-      frame = createElementWithAttributes(doc, 'iframe', {
-        src: requestsFrameUrl,
-        sandbox: 'allow-scripts',
-        name: JSON.stringify(context)
-      });
-      frame.style.cssText='width:0;height:0;visibility:hidden;';
-      AmpAnalytics.requestFramesMap.set(requestsFrameUrl, frame);
+    if (!AmpAnalytics.requestsFrames.has(config['requestsFrameUrl'])) {
+      const doc = this.element.ampdoc_.win.document;
+      const frame = AmpAnalytics.requestsFrames.create(doc,
+          config['requestsFrameUrl']);
       doc.body.appendChild(frame);
     }
-
-    // Now can send an event to:
-    // AmpAnalytics.requestFramesMap.get(requestsFrameUrl)'s function that it
-    // registered via registerAmpAnalyticsEventHandler()
   }
 
   /**
@@ -609,6 +593,30 @@ export class AmpAnalytics extends AMP.BaseElement {
           return request;
         });
   }
+/* TODO REMOVE THIS BEFORE CHECKING IN!
+    return Promise.all(requestPromises)
+      .then(() => {
+        request = this.addParamsToUrl_(request, params);
+        this.config_['vars']['requestCount']++;
+        const expansionOptions = this.expansionOptions_(event, trigger);
+        return this.variableService_.expandTemplate(request, expansionOptions);
+      })
+      .then(request => {
+        const whiteList = this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
+        // For consistency with amp-pixel we also expand any url replacements.
+        return urlReplacementsForDoc(this.element).expandAsync(
+            request, undefined, whiteList);
+      })
+      .then(request => {
+        if (this.config_['requestsFrameUrl']) {
+          AmpAnalytics.requestsFrames.send(this.config_['requestsFrameUrl'],
+            request);
+        } else {
+          this.sendRequest_(request, trigger);
+        }
+        return request;
+      });
+*/
 
   /**
    * @param {!JSONType} trigger JSON config block that resulted in this event.
@@ -840,6 +848,101 @@ export class AmpAnalytics extends AMP.BaseElement {
     return new ExpansionOptions(vars, opt_iterations, opt_noEncode);
   }
 }
-AmpAnalytics.requestFramesMap = new Map();
+
+/**
+ * Keeps track of the third-party vendors' cross-domain iframes. Only one
+ * static instance will be created, which will keep manage ALL amp-analytics
+ * tags.
+ */
+class AmpAnalyticsFrames {
+  constructor() {
+    this.map = new Map();
+  }
+
+  /**
+   * Create a cross-domain iframe
+   * @param {!Element} parent  The document node of the parent page
+   * @param {!string} requestsFrameUrl  The URL, including data hash if
+   * applicable, of the cross-domain iframe
+   * @return {!Element}
+   */
+  create(parent, requestsFrameUrl) {
+    const context = {
+      "scriptSrc": "/examples/analytics-3p-remote-frame-helper.js",
+    };
+    let frame = createElementWithAttributes(parent, 'iframe', {
+      sandbox: 'allow-scripts',
+      name: JSON.stringify(context)
+    });
+    frame.onload = () => {
+      this.setIsReady(requestsFrameUrl);
+    };
+    frame.src = requestsFrameUrl; // Set AFTER onload to avoid race
+    frame.style.cssText='width:0;height:0;visibility:hidden;';
+    this.map.set(requestsFrameUrl, {
+      frame: frame,
+      isReady: false,
+      msgQueue: [],
+    });
+    return frame;
+  }
+
+  /**
+   * Returns whether a requestsFrameUrl is already known
+   * @param {!string} requestsFrameUrl
+   * @return {!boolean}
+   */
+  has(requestsFrameUrl) {
+    return this.map.has(requestsFrameUrl);
+  }
+
+  /**
+   * Sends a message to a cross-domain frame, or queues the message if the
+   * frame is not yet ready to receive messages.
+   * TODO: Implement throttling if messages are sent too rapidly.
+   * @param {!string} requestsFrameUrl
+   * @param {!string} message
+   */
+  send(requestsFrameUrl, message) {
+    try {
+      const mapEntry = this.map.get(requestsFrameUrl);
+      if (mapEntry.isReady) {
+        this.send_(mapEntry.frame, [message]);
+      } else {
+        mapEntry.msgQueue.push(message);
+      }
+    } catch (err) {
+      console.error("Failed to send event '" + err + "' to URL '" +
+        requestsFrameUrl + "'");
+    }
+  }
+
+  /**
+   * Send an array of messages to a cross-domain iframe
+   * @param {!Element} frame  The cross-domain iframe
+   * @param {!Array<string>} messages  The messages to send
+   * @private
+   */
+  send_(frame, messages) {
+    // Warning: the following code is likely only temporary. Don't check
+    // in before getting resolution on that.
+    frame &&
+      frame.contentWindow.postMessage({ampAnalyticsEvents: messages}, '*');
+  }
+
+  /**
+   * Indicate that a cross-domain frame is ready to receive messages, and
+   * send all messages that were previously queued for it.
+   * @param {!string} requestsFrameUrl
+   */
+  setIsReady(requestsFrameUrl) {
+    let mapEntry = this.map.get(requestsFrameUrl);
+    mapEntry.isReady = true;
+    this.send_(mapEntry.frame, mapEntry.msgQueue);
+    mapEntry.msgQueue = [];
+    this.map.set(requestsFrameUrl, mapEntry);
+  }
+}
+AmpAnalytics.requestsFrames = new AmpAnalyticsFrames();
 
 AMP.registerElement('amp-analytics', AmpAnalytics);
