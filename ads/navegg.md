@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,16 +24,20 @@ The Navegg adapter only supports Doubleclick for now.
 
 ```html
 <amp-ad width=320 height=50
-        type="navegg"
-        data-acc="1"
-        data-slot="/4119129/mobile_ad_banner"
-        json='{"targeting":{"sport":["rugby","cricket"]}}'
-    ></amp-ad>
+  type="navegg"
+  data-acc="XXXXX"
+  data-slot="/4119129/mobile_ad_banner"
+  json='{"targeting":{"sport":["rugby","cricket"]}}'>
+</amp-ad>
 
 ```
 
 ### Configuration
 
+You need to specify the 'data-acc' with your Navegg Account ID:
+```javascript
+  data-acc="NAVEGG_ACCOUNT_ID"
+```
 For any help, please contact
 [us](https://www.navegg.com/en/institutional/#contact)
 

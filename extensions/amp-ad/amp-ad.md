@@ -149,6 +149,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
 - [Mixpo](../../ads/mixpo.md)
 - [myWidget](../../ads/mywidget.md)
 - [Nativo](../../ads/nativo.md)
+- [Navegg](../../ads/navegg.md)
 - [Nend](../../ads/nend.md)
 - [Nokta](../../ads/nokta.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)

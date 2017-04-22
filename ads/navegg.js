@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 
 /**
@@ -22,8 +22,9 @@ import {doubleclick} from '../ads/google/doubleclick';
  * @param {!Object} data
  */
 export function navegg(global, data) {
+  validateData(data, ['acc'], []);
   const acc = data.acc;
-  let seg, nvg = function() {};;
+  let seg, nvg = function() {};
   delete data.acc;
   nvg.prototype.getProfile = function() {};
   loadScript(global, 'https://tag.navdmp.com/amp.1.0.0.min.js', () => {
