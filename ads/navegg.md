@@ -35,7 +35,7 @@ The Navegg adapter only supports Doubleclick for now.
 ### Configuration
 
 You need to specify the 'data-acc' with your Navegg Account ID:
-```javascript
+```html
   data-acc="NAVEGG_ACCOUNT_ID"
 ```
 For any help, please contact
