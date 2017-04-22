@@ -423,6 +423,10 @@ export const adConfig = {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
 
+  navegg: {
+    renderStartImplemented: true,
+  },
+
   nend: {
     prefetch: 'https://js1.nend.net/js/amp.js',
     preconnect: [
