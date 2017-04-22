@@ -640,6 +640,7 @@ app.use('/bind/ecommerce/sizes', function(req, res, next) {
     var prices = {
       "0": {
         "sizes": {
+          "XS": 8.99,
           "S": 9.99,
         },
       },
@@ -653,16 +654,19 @@ app.use('/bind/ecommerce/sizes', function(req, res, next) {
       "2": {
         "sizes": {
           "L": 11.99,
+          "XL": 13.99,
         },
       },
       "3": {
         "sizes": {
           "M": 7.99,
           "L": 9.99,
+          "XL": 11.99,
         },
       },
       "4": {
         "sizes": {
+          "XS": 8.99,
           "S": 10.99,
           "L": 15.99,
         },
@@ -671,10 +675,12 @@ app.use('/bind/ecommerce/sizes', function(req, res, next) {
         "sizes": {
           "S": 8.99,
           "L": 14.99,
+          "XL": 11.99,
         },
       },
       "6": {
         "sizes": {
+          "XS": 8.99,
           "S": 9.99,
           "M": 12.99,
         },

@@ -54,7 +54,7 @@
       background: #555;
     }
     .options {
-      margin: 16px 64px;
+      margin: 16px 0;
     }
     .options h6 {
       text-transform: uppercase;
@@ -65,6 +65,8 @@
     }
     .colors amp-img {
       border: solid 2px white;
+      display: block;
+      margin: auto;
     }
     .colors amp-img[selected] {
       outline: solid 2px red;
@@ -86,7 +88,7 @@
       content: '';
       position: absolute;
       border-top: 1px solid black;
-      margin-left: -15px;
+      margin-left: 1px;
       width: 57px;
       transform: rotate(45deg);
       transform-origin: 0% 0%;
@@ -142,6 +144,7 @@
           "color": "black",
           "image": "./shirts/black.jpg",
           "sizes": {
+            "XS": 8.99,
             "S": 9.99
           }
         },
@@ -181,15 +184,19 @@
     <script type="application/json">
       {
         "id": 0,
-        "size": "S",
         "slide": 0
       }
     </script>
   </amp-state>
 
+  <amp-variable
+    id="showAddToBag"
+    value="!selectedSize || !shirts[selected.id].sizes || shirts[selected.id].sizes[selectedSize]">
+  </amp-variable>
+
   <header id="header" class="mdl-color--black mdl-color-text--white">
     <amp-img class="menu" src="./img/ic_menu_white_24dp_1x.png" width=24 height=24></amp-img>
-    <span class="mdl-color-text--blue">(AMP)</span>PAREL
+    <span class="mdl-color-text--blue">AMP</span>PAREL
     <amp-img class="search" src="./img/ic_search_white_24dp_1x.png" width=24 height=24></amp-img>
   </header>
 
@@ -231,18 +238,33 @@
     </div>
 
     <div class="options price">
-      <h6>PRICE : <span [text]="shirts[selected.id].sizes[selected.size] || '---'">9.99</span></h6>
+      <h6>PRICE : <span [text]="shirts[selected.id].sizes[selectedSize] || '---'">---</span></h6>
     </div>
 
     <div class="options sizes">
       <h6>SIZE :</h6>
 
-      <amp-selector on="select:AMP.setState({selected: {size: event.targetOption}})">
+      <amp-selector on="select:AMP.setState({selectedSize: event.targetOption})">
         <table>
           <tr>
-            <td><div option="S" [class]="(shirts[selected.id].sizes && !shirts[selected.id].sizes['S']) ? 'unavailable' : ''" selected>S</div></td>
-            <td><div option="M" [class]="(shirts[selected.id].sizes && !shirts[selected.id].sizes['M']) ? 'unavailable' : ''" class="unavailable">M</div></td>
-            <td><div option="L" [class]="(shirts[selected.id].sizes && !shirts[selected.id].sizes['L']) ? 'unavailable' : ''" class="unavailable">L</div></td>
+            <td [class]="!shirts[selected.id].sizes['XS'] ? 'unavailable' : ''">
+              <div option="XS">XS</div>
+            </td>
+            <td [class]="!shirts[selected.id].sizes['S'] ? 'unavailable' : ''">
+              <div option="S">S</div>
+            </td>
+            <td [class]="!shirts[selected.id].sizes['M'] ? 'unavailable' : ''"
+                class="unavailable">
+              <div option="M">M</div>
+            </td>
+            <td [class]="!shirts[selected.id].sizes['L'] ? 'unavailable' : ''"
+                class="unavailable">
+              <div option="L">L</div>
+            </td>
+            <td [class]="!shirts[selected.id].sizes['XL'] ? 'unavailable' : ''"
+                class="unavailable">
+              <div option="XL">XL</div>
+            </td>
           </tr>
         </table>
       </amp-selector>
@@ -250,7 +272,7 @@
 
     <div class="options quantity">
       <h6>QUANTITY :</h6>
-      <select [disabled]="!shirts[selected.id].sizes[selected.size]">
+      <select [disabled]="!shirts[selected.id].sizes[selectedSize]">
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
@@ -258,14 +280,25 @@
     </div>
 
     <div class="options purchase">
-      <h5 [text]="shirts[selected.id].sizes ? (shirts[selected.id].sizes[selected.size] ? 'In stock' : 'Out of stock') : '---'"
-          [class]="shirts[selected.id].sizes[selected.size] ? 'mdl-color-text--grey' : 'mdl-color-text--red'">
-        IN STOCK</h5>
+      <h5 [text]="(selectedSize && shirts[selected.id].sizes)
+            ? (shirts[selected.id].sizes[selectedSize] ? 'In stock' : 'Out of stock')
+            : '---'"
+          [class]="(!selectedSize || shirts[selected.id].sizes[selectedSize])
+            ? 'mdl-color-text--grey'
+            : 'mdl-color-text--red'">
+        ---</h5>
 
       <button class="mdl-button mdl-button--raised mdl-button--accent"
-          [class]="'mdl-button mdl-button--raised mdl-button--accent ' + (shirts[selected.id].sizes[selected.size] ? '' : 'hidden')">ADD TO BAG</button>
+          [class]="'mdl-button mdl-button--raised mdl-button--accent ' +
+            ((!selectedSize || !shirts[selected.id].sizes || shirts[selected.id].sizes[selectedSize]) ? '' : 'hidden')"
+          [disabled]="!selectedSize || !shirts[selected.id].sizes" disabled>
+        ADD TO BAG
+      </button>
       <button class="mdl-button mdl-button--raised hidden"
-          [class]="'mdl-button mdl-button--raised ' + (shirts[selected.id].sizes[selected.size] ? 'hidden' : '')">EMAIL ME WHEN IN STOCK</button>
+          [class]="'mdl-button mdl-button--raised ' +
+            ((!selectedSize || !shirts[selected.id].sizes || shirts[selected.id].sizes[selectedSize]) ? 'hidden' : '')">
+        EMAIL ME WHEN IN STOCK
+      </button>
     </div>
   </div>
 </body>
