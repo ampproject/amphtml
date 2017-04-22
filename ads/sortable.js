@@ -15,6 +15,8 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
+import {doubleclick} from './google/doubleclick';
+import {adsense} from './google/adsense';
 
 /**
  * @param {!Window} global
@@ -32,6 +34,17 @@ export function sortable(global, data) {
   ad.setAttribute('data-ad-name', data.name);
   ad.setAttribute('data-ad-size', size);
   slot.appendChild(ad);
+  /**
+   * For A/B testing our tags against doubleclick or adsense in AMP ads.
+   */
+  if(data.ab && data.ab === 'doubleclick' && data.ab_pct && Math.random()*100 < data.ab_pct) {
+    doubleclick(global, data);
+    return;
+  } 
+  if(data.ab && data.ab === 'adsense' && data.ab_pct && Math.random()*100 < data.ab_pct) {
+    adsense(global, data);
+    return;
+  } 
   loadScript(global, 'https://tags-cdn.deployads.com/a/'
       + encodeURIComponent(data.site) + '.js');
 }
