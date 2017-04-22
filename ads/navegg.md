@@ -25,7 +25,7 @@ The Navegg adapter only supports Doubleclick for now.
 ```html
 <amp-ad width=320 height=50
   type="navegg"
-  data-acc="XXXXX"
+  data-acc="XXXX"
   data-slot="/4119129/mobile_ad_banner"
   json='{"targeting":{"sport":["rugby","cricket"]}}'>
 </amp-ad>
