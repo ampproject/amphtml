@@ -228,10 +228,7 @@ var Fusion;
 Fusion.on;
 Fusion.on.warning;
 Fusion.loadAds;
-data.mediaZone;
-data.layout;
 data.space;
-data.parameters;
 
 // holder.js
 data.queue;
@@ -329,7 +326,6 @@ OX_bidder_options.callback;
 var OX_bidder_ads;
 var oxRequest;
 oxRequest.addAdUnit;
-oxRequest.addVariable;
 oxRequest.setAdSizes;
 oxRequest.getOrCreateAdUnit;
 var dfpData;
@@ -473,11 +469,15 @@ data.placementId;
 data.channel;
 data.publisher;
 data.dim;
-data.renderer;
-
-// zergnet.js
-window.zergnetWidgetId;
-data.zergid;
+<<<<<<< HEAD
+placement.includeRenderer;
+geckoTag.loadAds;
+geckoTag.placementReady;
+data.plc;
+data.sz;
+data.extra;
+// _ping_
+data.nativeIntersectionObserver
 var Fusion;
 Fusion.on;
 Fusion.on.warning;
@@ -488,3 +488,10 @@ data.adServer;
 data.mediaZone;
 data.layout;
 data.space;
+=======
+data.renderer;
+
+// zergnet.js
+window.zergnetWidgetId;
+data.zergid;
+>>>>>>> 76cd73bbcbd204981c5bdbdfb672abe25e4c964f
