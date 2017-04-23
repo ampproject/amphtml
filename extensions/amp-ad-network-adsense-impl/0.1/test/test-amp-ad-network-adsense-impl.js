@@ -488,6 +488,10 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
 
   describe('#getAdUrl', () => {
 
+    beforeEach(() => {
+      resetSharedState();
+    });
+
     afterEach(() =>
         toggleExperiment(window, 'as-use-attr-for-format', false));
 
