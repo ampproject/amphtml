@@ -92,6 +92,12 @@ export class Resources {
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
 
+    /**
+     * Used primarily for testing to allow build phase to proceed.
+     * @const @private {boolean}
+     */
+    this.isBuildOn_ = false;
+
     /** @private @const {number} */
     this.maxDpr_ = this.win.devicePixelRatio || 1;
 
@@ -489,7 +495,7 @@ export class Resources {
    */
   buildOrScheduleBuildForResource_(resource, checkForDupes = false,
       scheduleWhenBuilt = true) {
-    if (this.isRuntimeOn_) {
+    if (this.isRuntimeOn_ || this.isBuildOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
@@ -1250,7 +1256,6 @@ export class Resources {
    * @private
    */
   discoverWork_() {
-
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
     const now = Date.now();
