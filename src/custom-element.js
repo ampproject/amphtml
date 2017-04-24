@@ -786,7 +786,7 @@ function createBaseCustomElementClass(win) {
         try {
           this.implementation_.onLayoutMeasure();
         } catch (e) {
-         reportError(e, this);
+          reportError(e, this);
         }
       }
 
