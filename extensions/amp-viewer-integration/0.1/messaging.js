@@ -274,8 +274,8 @@ export class Messaging {
       handler = this.defaultHandler_;
     }
     if (!handler) {
-      throw new Error(
-        'Cannot handle request because handshake is not yet confirmed!');
+      throw new Error('Cannot handle request ' + message.name +
+      ' because handshake is not yet confirmed!');
     }
 
     const promise = handler(message.name, message.data, !!message.rsvp);
