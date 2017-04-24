@@ -1,0 +1,2 @@
+FAIL
+feature_tests/custom_element_case.html:30:2 The attribute 'custom-element' in tag 'amp-analytics extension .js script' is set to the invalid value 'Amp-Analytics'. (see https://www.ampproject.org/docs/reference/components/ads/amp-analytics) [AMP_TAG_PROBLEM]
