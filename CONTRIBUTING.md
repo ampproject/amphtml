@@ -114,7 +114,7 @@ GitHub issues labeled [Type: Weekly Status](https://github.com/ampproject/amphtm
 
 ### Weekly design reviews
 
-The community holds weekly design reviews as video conferences via Google Hangouts on Wednesdays at [1pm Pacific](https://www.google.com/?#q=1pm+pacific+in+local+time).
+The community holds weekly design reviews as video conferences via Google Hangouts on Wednesdays at [1pm Pacific](https://www.google.com/?#q=1pm+pacific+in+local+time).  If you have a design you would like to present but can never make this time (e.g. you are in a different time zone) please reach out on [Slack](https://amphtml.slack.com/messages/design-review/) ([sign up](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877)) and we will try to find a time that works for you.
 
 We use GitHub issues labeled [Type: Design Review](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Design+Review%22) to track design reviews.  The Design Review issue for a given week will have a link to the design docs being discussed that week as well as a link to the Hangout.  **When attending a design review please read through the design docs _before_ the review starts.**
 
