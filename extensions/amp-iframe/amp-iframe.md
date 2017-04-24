@@ -192,6 +192,7 @@ window.addEventListener('message', function(event) {
     event.data.changes.forEach(function (change) {
       console.log(change);
     });
+  };
 });
 ```
 
