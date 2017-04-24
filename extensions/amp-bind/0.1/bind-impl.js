@@ -590,6 +590,42 @@ export class Bind {
     });
   }
 
+
+  /**
+   * Determines which properties to update based on results of evaluation
+   * of all bound expression strings with the current scope. This method
+   * will only return properties that need to be updated along with their
+   * new value.
+   * @param {!Array<!BoundPropertyDef>} boundProperties
+   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @return {
+   *   !Array<{
+   *     boundProperty: !BoundPropertyDef,
+   *     newValue: !./bind-expression.BindExpressionResultDef,
+   *   }>
+   * }
+   * @private
+   */
+  calculateUpdates_(boundProperties, results) {
+    const propertyUpdates = [];
+    boundProperties.forEach(boundProperty => {
+      const {expressionString, previousResult} = boundProperty;
+      const newValue = results[expressionString];
+      if (newValue === undefined ||
+          this.shallowEquals_(newValue, previousResult)) {
+        user().fine(TAG, `Expression result unchanged or missing: ` +
+            `"${expressionString}"`);
+        return;
+      }
+
+      boundProperty.previousResult = newValue;
+      user().fine(TAG, `New expression result: ` +
+          `"${expressionString}" -> ${newValue}`);
+      propertyUpdates.push({boundProperty, newValue});
+    });
+    return propertyUpdates;
+  }
+
   /**
    * Applies expression results to DOM.
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
@@ -598,48 +634,29 @@ export class Bind {
   apply_(results) {
     const applyPromises = this.boundElements_.map(boundElement => {
 
-      const boundProperties = boundElement.boundProperties;
-      const propertyUpdates = [];
-      let height, width;
-
-      boundProperties.forEach(boundProperty => {
-        const {property, expressionString, previousResult} = boundProperty;
-        const newValue = results[expressionString];
-        if (newValue === undefined ||
-            this.shallowEquals_(newValue, previousResult)) {
-          user().fine(TAG, `Expression result unchanged or missing: ` +
-              `"${expressionString}"`);
-          return;
-        }
-
-        boundProperty.previousResult = newValue;
-        user().fine(TAG, `New expression result: ` +
-            `"${expressionString}" -> ${newValue}`);
-        propertyUpdates.push({boundProperty, newValue});
-        switch (property) {
-          case 'width':
-            width = isFiniteNumber(newValue) ? Number(newValue) : width;
-            break;
-          case 'height':
-            height = isFiniteNumber(newValue) ? Number(newValue) : height;
-            break;
-        }
-      });
+      let width, height;
+      const {element, boundProperties} = boundElement;
+      const propertyUpdates = this.calculateUpdates_(boundProperties, results);
 
       if (propertyUpdates.length == 0) {
         return Promise.resolve();
       }
 
-      const element = boundElement.element;
       return this.resources_.mutateElement(element, () => {
         const mutations = {};
 
         propertyUpdates.forEach(update => {
+          const newValue = update.newValue;
           const mutation = this.applyBinding_(update.boundProperty,
-            element,
-            update.newValue);
+              element, newValue);
           if (mutation) {
             mutations[mutation.name] = mutation.value;
+            const property = update.boundProperty.property;
+            if (property == 'width') {
+              width = isFiniteNumber(newValue) ? Number(newValue) : width;
+            } else if (property == 'height') {
+              height = isFiniteNumber(newValue) ? Number(newValue) : height;
+            }
           }
         });
 
