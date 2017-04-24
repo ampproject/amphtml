@@ -280,6 +280,13 @@ export class AmpAnalytics extends AMP.BaseElement {
     return Promise.all(promises);
   }
 
+  /**
+   * If requestsFrameUrl (and optionally dataHash as well) are specified in
+   * config, check whether third-party iframe already exists, and if not,
+   * create it.
+   * @param {!JSONType} config
+   * @private
+   */
   handleRequestsFrameUrl_(config) {
     if (config['requestsFrameUrl'] && config['dataHash']) {
       if (!config['dataHash'].startsWith('#')) {
@@ -292,7 +299,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!AmpAnalytics.requestsFrames.has(config['requestsFrameUrl'])) {
       const doc = this.element.ampdoc_.win.document;
       const frame = AmpAnalytics.requestsFrames.create(doc,
-          config['requestsFrameUrl']);
+        config['requestsFrameUrl']);
       doc.body.appendChild(frame);
     }
   }
@@ -851,12 +858,12 @@ export class AmpAnalytics extends AMP.BaseElement {
 
 /**
  * Keeps track of the third-party vendors' cross-domain iframes. Only one
- * static instance will be created, which will keep manage ALL amp-analytics
+ * static instance will be created, which will keep and manage ALL amp-analytics
  * tags.
  */
 class AmpAnalyticsFrames {
   constructor() {
-    this.map = new Map();
+    this.requestsFrameMap = new Map();
   }
 
   /**
@@ -867,19 +874,18 @@ class AmpAnalyticsFrames {
    * @return {!Element}
    */
   create(parent, requestsFrameUrl) {
-    const context = {
-      "scriptSrc": "/examples/analytics-3p-remote-frame-helper.js",
-    };
     let frame = createElementWithAttributes(parent, 'iframe', {
       sandbox: 'allow-scripts',
-      name: JSON.stringify(context)
+      name: JSON.stringify({
+        'scriptSrc': '/examples/analytics-3p-remote-frame-helper.js'
+      }),
     });
     frame.onload = () => {
       this.setIsReady(requestsFrameUrl);
     };
     frame.src = requestsFrameUrl; // Set AFTER onload to avoid race
     frame.style.cssText='width:0;height:0;visibility:hidden;';
-    this.map.set(requestsFrameUrl, {
+    this.requestsFrameMap.set(requestsFrameUrl, {
       frame: frame,
       isReady: false,
       msgQueue: [],
@@ -893,7 +899,7 @@ class AmpAnalyticsFrames {
    * @return {!boolean}
    */
   has(requestsFrameUrl) {
-    return this.map.has(requestsFrameUrl);
+    return this.requestsFrameMap.has(requestsFrameUrl);
   }
 
   /**
@@ -905,11 +911,11 @@ class AmpAnalyticsFrames {
    */
   send(requestsFrameUrl, message) {
     try {
-      const mapEntry = this.map.get(requestsFrameUrl);
-      if (mapEntry.isReady) {
-        this.send_(mapEntry.frame, [message]);
+      const requestsFrame = this.requestsFrameMap.get(requestsFrameUrl);
+      if (requestsFrame.isReady) {
+        this.send_(requestsFrame.frame, [message]);
       } else {
-        mapEntry.msgQueue.push(message);
+        requestsFrame.msgQueue.push(message);
       }
     } catch (err) {
       console.error("Failed to send event '" + err + "' to URL '" +
@@ -926,7 +932,7 @@ class AmpAnalyticsFrames {
   send_(frame, messages) {
     // Warning: the following code is likely only temporary. Don't check
     // in before getting resolution on that.
-    frame &&
+    frame && frame.contentWindow &&
       frame.contentWindow.postMessage({ampAnalyticsEvents: messages}, '*');
   }
 
@@ -936,11 +942,11 @@ class AmpAnalyticsFrames {
    * @param {!string} requestsFrameUrl
    */
   setIsReady(requestsFrameUrl) {
-    let mapEntry = this.map.get(requestsFrameUrl);
-    mapEntry.isReady = true;
-    this.send_(mapEntry.frame, mapEntry.msgQueue);
-    mapEntry.msgQueue = [];
-    this.map.set(requestsFrameUrl, mapEntry);
+    let requestsFrame = this.requestsFrameMap.get(requestsFrameUrl);
+    requestsFrame.isReady = true;
+    this.send_(requestsFrame.frame, requestsFrame.msgQueue);
+    requestsFrame.msgQueue = [];
+    this.requestsFrameMap.set(requestsFrameUrl, requestsFrame);
   }
 }
 AmpAnalytics.requestsFrames = new AmpAnalyticsFrames();

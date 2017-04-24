@@ -4,11 +4,21 @@
     <meta charset="UTF-8">
     <title>Requests Frame</title>
     <script>
+      /**
+       * To receive analytics events in a third-party frame, you must
+       * implement this method, with this signature. Within that method, you
+       * must create a function which processes the analytics events, and
+       * pass that function to the registerAmpAnalyticsEventListener() method
+       * of the object which is passed as a parameter to
+       * onNewAmpAnalyticsInstance().
+       * @param instance  Call registerAmpAnalyticsEventListener() on this,
+       * passing your function which will receive the analytics events.
+       */
       window.onNewAmpAnalyticsInstance = (instance) => {
         instance.registerAmpAnalyticsEventListener((arrayOfEventStrings) => {
           for (evt of arrayOfEventStrings) {
-            // Respond to AMP Analytics event
-            console.log("Received event: " + evt);
+            // Now, do something meaningful with the AMP Analytics event
+            console.log("Received an event: " + evt);
           }
         });
         // TODO: Could also do something like:
