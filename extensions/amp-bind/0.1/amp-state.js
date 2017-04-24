@@ -120,11 +120,10 @@ export class AmpState extends AMP.BaseElement {
 
   /**
    * @param {boolean} isInit
-   * @return {!Promise}
    * @private
    */
   fetchSrcAndUpdateState_(isInit) {
-    return fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
+    fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
       this.updateState_(json, isInit);
     });
   }
