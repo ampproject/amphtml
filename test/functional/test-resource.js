@@ -111,6 +111,7 @@ describe('Resource', () => {
   it('should not build before upgraded', () => {
     elementMock.expects('isUpgraded').returns(false).atLeast(1);
     elementMock.expects('build').never();
+    elementMock.expects('updateLayoutBox').never();
 
     resource.build();
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
@@ -120,6 +121,7 @@ describe('Resource', () => {
   it('should build after upgraded', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').once();
+    elementMock.expects('updateLayoutBox').never();
     resource.build();
     expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
   });
@@ -128,6 +130,7 @@ describe('Resource', () => {
     let permission = false;
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     sandbox.stub(resources, 'grantBuildPermission', () => permission);
+    elementMock.expects('updateLayoutBox').never();
     resource.build();
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
 
@@ -139,17 +142,23 @@ describe('Resource', () => {
   it('should blacklist on build failure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').throws('Failed').once();
+    elementMock.expects('updateLayoutBox').never();
     resource.build();
     expect(resource.blacklisted_).to.equal(true);
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
   });
 
   it('should mark as ready for layout if already measured', () => {
+    const box = layoutRectLtwh(0, 0, 100, 200);
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').once();
+    elementMock.expects('updateLayoutBox')
+        .withExactArgs(box)
+        .once();
     const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
+    resource.layoutBox_ = box;
     resource.build(false);
-    expect(stub.calledOnce).to.be.true;
+    expect(stub).to.be.calledOnce;
     expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
   });
 
