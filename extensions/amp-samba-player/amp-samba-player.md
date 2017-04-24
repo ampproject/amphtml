@@ -68,17 +68,13 @@ Example:
 
 ## Attributes
 
-**data-project-id** (required)
-
-The SambaTech platform project ID. This is an 32-digit hexadecimal sequence used to identify the publisher's project.
-
 **data-media-id**
 
 The SambaTech platform media ID. This is an 32-digit hexadecimal sequence that identifies media content.
 
-**data-media-protocol**
+**data-project-id** (required)
 
-The SambaPlayer protocol. This is a 4-5 characters sequence which might be HTTP or HTTPS.
+The SambaTech platform project ID. This is an 32-digit hexadecimal sequence used to identify the publisher's project.
 
 **data-param-***
 

@@ -17,64 +17,32 @@
 tags: {  # amp-samba-player
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-samba-player extension .js script"
   satisfies: "amp-samba-player extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-samba-player"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  requires: "amp-samba-player"
+  extension_spec: {
+    name: "amp-samba-player"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    value: "amp-samba-player"
-    mandatory: true
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-samba-player-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-samba-player.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-samba-player>
   html_format: AMP
   tag_name: "AMP-SAMBA-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
+  satisfies: "amp-samba-player"
   requires: "amp-samba-player extension .js script"
-  attrs: {
-    name: "data-project-id"
-    mandatory: true
-    value_regex_casei: "[0-9a-f]{32}"
-  }
   attrs: {
     name: "data-media-id"
     value_regex_casei: "[0-9a-f]{32}"
   }
   attrs: {
-    name: "data-env"
-    value_regex_casei: "[0-9a-z\\-]"
-  }
-  attrs: {
-    name: "data-protocol"
-    value_regex_casei: "[0-9a-z]{3,5}"
+    name: "data-project-id"
+    mandatory: true
+    value_regex_casei: "[0-9a-f]{32}"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-samba-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-samba-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

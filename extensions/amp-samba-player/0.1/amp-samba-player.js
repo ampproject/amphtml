@@ -19,26 +19,22 @@ import {getDataParamsFromAttributes,removeElement} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {videoManagerForDoc} from '../../../src/video-manager';
+import {videoManagerForDoc} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {tryParseJson} from '../../../src/json';
+import {getSourceOrigin} from '../../../src/url';
 import {user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-samba-player';
 
-/** @private {Object} */
-const API_MAP = {
-  'web4-7091': '//playerapitest2.liquidplatform.com:7091/embed/',
-  'localhost-8080': '//localhost:8080/player-api/embed/',
-  'web4-7021': '//playerapitest2.liquidplatform.com:7021/embed/',
-  'staging': '//staging-player-api.sambavideos.sambatech.com/v3/embed/',
-  'prod': '//fast.player.liquidplatform.com/pApiv2/embed/',
-};
+/** @private {String} */
+const API = 'https://fast.player.liquidplatform.com/pApiv2/embed/';
 
 /** @private {Object} */
 const EVENTS_MAP = {
-  'onPlay': VideoEvents.PLAY,
+  'onStart': VideoEvents.PLAY,
+  'onResume': VideoEvents.PLAY,
   'onPause': VideoEvents.PAUSE,
   'onMute': VideoEvents.MUTED,
   'onUnmute': VideoEvents.UNMUTED,
@@ -56,25 +52,14 @@ class AmpSambaPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.mediaId_ = '';
 
-    /** @private {string} */
-    this.env_ = 'prod';
-
-    /** @private {string} */
-    this.protocol_ = this.win.location.protocol || 'http';
-
     /** @private {Object} */
     this.params_ = {};
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @private {?Function} */
-    this.playerLoadResolver_ = null;
-
     /** @private {Promise} */
-    this.playerLoadPromise_ = new Promise(resolve => {
-      this.playerLoadResolver_ = resolve;
-    });
+    this.playerLoadPromise_ = null;
 
     // Event handlers bindings
     this.playerMessageHandler_ = this.playerMessageHandler_.bind(this);
@@ -83,7 +68,7 @@ class AmpSambaPlayer extends AMP.BaseElement {
   /** @override */
   preconnectCallback(opt_onLayout) {
     // host to serve the player
-    this.preconnect.url(API_MAP['prod'], opt_onLayout);
+    this.preconnect.url(API, opt_onLayout);
     // host to serve media contents
     this.preconnect.url('http://pvbps-sambavideos.akamaized.net', opt_onLayout);
   }
@@ -104,13 +89,6 @@ class AmpSambaPlayer extends AMP.BaseElement {
     // not required in case of live
     this.mediaId_ = this.element.getAttribute('data-media-id') || '';
 
-    // which environment to run
-    this.env_ = this.element.getAttribute('data-env') || this.env_;
-
-    // the protocol to be used (HTTP, HTTPS)
-    this.protocol_ = (this.element.getAttribute('data-protocol')
-      || this.protocol_).replace(/\:?$/, ':');
-
     // player features related params
     // WARN: methods missing on returned object (e.g. hasOwnProperty) so recreate it
     this.params_ = Object.assign({}, getDataParamsFromAttributes(this.element));
@@ -130,17 +108,16 @@ class AmpSambaPlayer extends AMP.BaseElement {
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
     let params = 'jsApi=true';
-    const s = '&';
 
     for (const k in this.params_) {
-      params += `${s}${k.replace(/url$/i, 'URL')}=${this.params_[k]}`;
+      params += `&${encodeURIComponent(k.replace(/url$/i, 'URL'))}=${encodeURIComponent(this.params_[k])}`;
     }
 
-    params += `&parentURL=#${this.element.ownerDocument.location.href}`;
+    params += `&parentURL=#${encodeURIComponent(getSourceOrigin(this.element.ownerDocument.location.href))}`;
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = `${this.protocol_}${API_MAP[this.env_]}${this.projectId_}/`
+    iframe.src = `${API}${this.projectId_}/`
       + `${this.mediaId_}?${params}`;
 
     this.applyFillContent(iframe);
@@ -149,11 +126,12 @@ class AmpSambaPlayer extends AMP.BaseElement {
 
     this.win.addEventListener('message', this.playerMessageHandler_);
 
-    return this.loadPromise(iframe)
+    this.playerLoadPromise_ = this.loadPromise(iframe)
       .then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
-        this.playerLoadResolver_(this.iframe_);
       });
+
+    return this.playerLoadPromise_;
   }
 
   /** @override */
@@ -166,6 +144,7 @@ class AmpSambaPlayer extends AMP.BaseElement {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
+      this.playerLoadPromise_ = null;
     }
 
     // "layoutCallback" must be called again
@@ -219,6 +198,10 @@ class AmpSambaPlayer extends AMP.BaseElement {
    * @private
    */
   sendMessage_(message, opt_params) {
+    if(!this.playerLoadPromise_ || !this.iframe_) {
+      return;
+    }
+
     if (opt_params == null) {
       opt_params = '';
     }
@@ -233,15 +216,13 @@ class AmpSambaPlayer extends AMP.BaseElement {
   }
 
   /**
-   * Handles messages sent by the player.
+   * Handles messages received from the player.
    * @param {MessageEvent} event
    * @private
    */
   playerMessageHandler_(event) {
     if (this.iframe_.src.indexOf(event.origin) === -1
-      || event.source !== this.iframe_.contentWindow
-      || typeof event.data !== 'string'
-      || event.data.indexOf('{') !== 0) {
+      || event.source !== this.iframe_.contentWindow) {
       return;
     }
 
@@ -252,7 +233,6 @@ class AmpSambaPlayer extends AMP.BaseElement {
     }
 
     const videoEvent = EVENTS_MAP[data.event];
-
     videoEvent && this.element.dispatchCustomEvent(videoEvent);
   }
 }
