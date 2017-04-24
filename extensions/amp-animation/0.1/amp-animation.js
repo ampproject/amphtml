@@ -90,12 +90,16 @@ export class AmpAnimation extends AMP.BaseElement {
     if (this.triggerOnVisibility_) {
       // Make the element minimally displayed to make sure that `layoutCallback`
       // is called.
-      setStyles(this.element, {
-        visibility: 'hidden',
-        width: '1px',
-        height: '1px',
-        display: 'block',
-        position: 'fixed',
+      this.mutateElement(() => {
+        setStyles(this.element, {
+          visibility: 'hidden',
+          top: '0px',
+          left: '0px',
+          width: '1px',
+          height: '1px',
+          display: 'block',
+          position: 'fixed',
+        });
       });
     }
 

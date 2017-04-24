@@ -110,12 +110,17 @@ describes.sandboxed('AmpAnimation', {}, () => {
       const anim = createAnim({trigger: 'visibility'}, {duration: 1001});
       expect(anim.triggerOnVisibility_).to.be.true;
 
-      // Animation is made to be always in viewport.
-      expect(anim.element.style['visibility']).to.equal('hidden');
-      expect(anim.element.style['width']).to.equal('1px');
-      expect(anim.element.style['height']).to.equal('1px');
-      expect(anim.element.style['display']).to.equal('block');
-      expect(anim.element.style['position']).to.equal('fixed');
+      // Animation is made to be always in viewport via mutateElement.
+      expect(anim.element.style['position']).to.not.equal('fixed');
+      return anim.mutateElement(() => {}).then(() => {
+        expect(anim.element.style['position']).to.equal('fixed');
+        expect(anim.element.style['visibility']).to.equal('hidden');
+        expect(anim.element.style['top']).to.equal('0px');
+        expect(anim.element.style['left']).to.equal('0px');
+        expect(anim.element.style['width']).to.equal('1px');
+        expect(anim.element.style['height']).to.equal('1px');
+        expect(anim.element.style['display']).to.equal('block');
+      });
     });
 
     it('should fail on invalid trigger', () => {
