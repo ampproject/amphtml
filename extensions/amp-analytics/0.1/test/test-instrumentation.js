@@ -23,6 +23,7 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  VisibilityTracker,
 } from '../events';
 import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
@@ -34,6 +35,7 @@ import {
     installResourcesServiceForDoc,
 } from '../../../../src/service/resources-impl';
 import {documentStateFor} from '../../../../src/service/document-state';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 describes.realWin('InstrumentationService', {amp: 1}, env => {
@@ -99,6 +101,10 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     beforeEach(() => {
       group = service.createAnalyticsGroup(analyticsElement);
       insStub = sandbox.stub(service, 'addListenerDepr_');
+    });
+
+    afterEach(() => {
+      toggleExperiment(win, 'visibility-v3', false);
     });
 
     it('should create group for the ampdoc root', () => {
@@ -212,6 +218,53 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(stub).to.be.calledOnce;
       expect(stub).to.be.calledWith(
           analyticsElement, 'ini-load', config, handler);
+    });
+
+    it('should add "visible-v3" trigger', () => {
+      const config = {on: 'visible-v3'};
+      group.addTrigger(config, handler);
+      const tracker = root.getTrackerOptional('visible-v3');
+      expect(tracker).to.be.instanceOf(VisibilityTracker);
+
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const handler = function() {};
+      group.addTrigger(config, handler);
+      expect(stub).to.be.calledOnce;
+      expect(stub).to.be.calledWith(
+          analyticsElement, 'visible-v3', config, handler);
+    });
+
+    it('should add "visible-v3" trigger for hidden', () => {
+      toggleExperiment(win, 'visibility-v3', true);
+      group = service.createAnalyticsGroup(analyticsElement);
+      const config = {on: 'hidden'};
+      const getTrackerSpy = sandbox.spy(root, 'getTracker');
+      group.addTrigger(config, () => {});
+      expect(getTrackerSpy).to.be.calledWith('visible-v3');
+      const tracker = root.getTrackerOptional('visible-v3');
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      group.addTrigger(config, () => {});
+      expect(stub).to.be.calledWith(analyticsElement, 'hidden-v3', config);
+    });
+
+    it('should use "visible-v3" for "visible" w/experiment', () => {
+      // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
+      toggleExperiment(win, 'visibility-v3', true);
+      group = service.createAnalyticsGroup(analyticsElement);
+      const config = {on: 'visible'};
+      group.addTrigger(config, handler);
+      const tracker = root.getTrackerOptional('visible-v3');
+      expect(tracker).to.be.instanceOf(VisibilityTracker);
+
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const handler = function() {};
+      group.addTrigger(config, handler);
+      expect(stub).to.be.calledOnce;
+      expect(stub).to.be.calledWith(
+          analyticsElement, 'visible-v3', config, handler);
     });
   });
 });

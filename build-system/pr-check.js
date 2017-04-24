@@ -28,6 +28,38 @@ const path = require('path');
 const minimist = require('minimist');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
+const fileLogPrefix =
+    '\x1b[33;1m' + 'pr-check.js' + '\x1b[0m: ';  // Yellow, bold.
+
+/**
+ * Starts a timer to measure the execution time of the given function.
+ * @param {string} functionName
+ * @return {DOMHighResTimeStamp}
+ */
+function startTimer(functionName) {
+  const startTime = Date.now();
+  console.log(
+      '\n' + fileLogPrefix + 'Running ' + '\x1b[36m' +  // Cyan.
+      functionName + '\x1b[0m' + '...');
+  return startTime;
+}
+
+/**
+ * Stops the timer for the given function and prints the execution time.
+ * @param {string} functionName
+ * @return {Number}
+ */
+function stopTimer(functionName, startTime) {
+  const endTime = Date.now();
+  const executionTime = new Date(endTime - startTime);
+  const mins = executionTime.getMinutes();
+  const secs = executionTime.getSeconds();
+  console.log(
+      fileLogPrefix + 'Done running ' +
+      '\x1b[36m' + functionName + '\x1b[0m' +  // Cyan.
+      '. ' + 'Total time: ' +
+      '\x1b[32m' + mins + 'm ' + secs + 's.' + '\x1b[0m');  // Green.
+}
 
 /**
  * Executes the provided command, returning its stdout as an array of lines.
@@ -44,13 +76,15 @@ function exec(cmd) {
  * @param {string} cmd
  */
 function execOrDie(cmd) {
-  console.log(`\npr-check.js: ${cmd}\n`);
+  const startTime = startTimer(cmd);
   const p =
       child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
   if (p.status != 0) {
-    console.error(`\npr-check.js - exiting due to failing command: ${cmd}\n`);
+    console.error(`\n${fileLogPrefix}exiting due to failing command: ${cmd}`);
+    stopTimer(cmd, startTime);
     process.exit(p.status)
   }
+  stopTimer(cmd, startTime);
 }
 
 /**
@@ -83,7 +117,10 @@ function isBuildSystemFile(filePath) {
   return filePath.startsWith('build-system') &&
       // Exclude textproto from build-system since we want it to trigger
       // tests and type check.
-      path.extname(filePath) != '.textproto';
+      path.extname(filePath) != '.textproto' &&
+      // Exclude config files from build-system since we want it to trigger
+      // the flag config check.
+      !isFlagConfig(filePath);
 }
 
 /**
@@ -113,6 +150,17 @@ function isDocFile(filePath) {
 }
 
 /**
+ * Determines if the given file contains flag configurations, by comparing it
+ * against the well-known json config filenames for prod and canary.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isFlagConfig(filePath) {
+  const filename = path.basename(filePath);
+  return (filename == 'prod-config.json' || filename == 'canary-config.json');
+}
+
+/**
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
  * @param {!Array<string>} filePaths
@@ -120,8 +168,13 @@ function isDocFile(filePath) {
  */
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
-    return new Set(['BUILD_SYSTEM', 'VALIDATOR_WEBUI', 'VALIDATOR', 'RUNTIME',
-        'DOCS']);
+    return new Set([
+        'BUILD_SYSTEM',
+        'VALIDATOR_WEBUI',
+        'VALIDATOR',
+        'RUNTIME',
+        'DOCS',
+        'FLAG_CONFIG']);
   }
   const targetSet = new Set();
   for (p of filePaths) {
@@ -133,6 +186,8 @@ function determineBuildTargets(filePaths) {
       targetSet.add('VALIDATOR');
     } else if (isDocFile(p)) {
       targetSet.add('DOCS');
+    } else if (isFlagConfig(p)) {
+      targetSet.add('FLAG_CONFIG');
     } else {
       targetSet.add('RUNTIME');
     }
@@ -192,27 +247,42 @@ function runAllCommands() {
  * @returns {number}
  */
 function main(argv) {
+  const startTime = startTimer('pr-check.js');
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
     console.log('Running all commands on push build.');
     runAllCommands();
+    stopTimer('pr-check.js', startTime);
     return 0;
   }
   const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
   const files = filesInPr(travisCommitRange);
   const buildTargets = determineBuildTargets(files);
 
+  if (buildTargets.has('FLAG_CONFIG')) {
+    files.forEach((file) => {
+      if (!isFlagConfig(file)) {
+        console.log('A pull request may not contain a mix of flag-config and ' +
+            'non-flag-config files. Please make your changes in separate ' +
+            'pull requests. First offending file: ' + file);
+        stopTimer('pr-check.js', startTime);
+        process.exit(1);
+      }
+    });
+  }
+
   if (buildTargets.length == 1 && buildTargets.has('DOCS')) {
     console.log('Only docs were updated, stopping build process.');
+    stopTimer('pr-check.js', startTime);
     return 0;
   }
 
-  if (files.includes('package.json') ?
-        !files.includes('yarn.lock') : files.includes('yarn.lock')) {
-    console.error('pr-check.js - any update to package.json or yarn.lock ' +
-        'must include the other file. Please update through yarn.');
-    process.exit(1);
-  }
+  //if (files.includes('package.json') ?
+        //!files.includes('yarn.lock') : files.includes('yarn.lock')) {
+    //console.error('pr-check.js - any update to package.json or yarn.lock ' +
+        //'must include the other file. Please update through yarn.');
+    //process.exit(1);
+  //}
 
   const sortedBuildTargets = [];
   for (const t of buildTargets) {
@@ -250,6 +320,7 @@ function main(argv) {
     command.buildValidator();
   }
 
+  stopTimer('pr-check.js', startTime);
   return 0;
 }
 

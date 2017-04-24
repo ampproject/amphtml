@@ -15,6 +15,7 @@
  */
 
 import {
+  createCustomEvent,
   isLoaded,
   listen,
   listenOnce,
@@ -34,14 +35,12 @@ describe('EventHelper', () => {
   }
 
   let sandbox;
-  let clock;
   let element;
   let loadObservable;
   let errorObservable;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     loadObservable = new Observable();
     errorObservable = new Observable();
     element = {
@@ -152,22 +151,6 @@ describe('EventHelper', () => {
     return promise;
   });
 
-  it('listenOncePromise - with time limit', () => {
-    const event = getEvent('load', element);
-    const promise = expect(listenOncePromise(element, 'load', false, 100))
-      .to.eventually.become(event);
-    clock.tick(99);
-    loadObservable.fire(event);
-    return promise;
-  });
-
-  it('listenOncePromise - timeout', () => {
-    const promise = expect(listenOncePromise(element, 'load', false, 100))
-      .to.eventually.be.rejectedWith('timeout');
-    clock.tick(101);
-    return promise;
-  });
-
   it('isLoaded for complete property', () => {
     expect(isLoaded(element)).to.equal(false);
     element.complete = true;
@@ -226,4 +209,13 @@ describe('EventHelper', () => {
     return promise;
   });
 
+  it('should polyfill CustomEvent constructor', () => {
+    const native = createCustomEvent(window, 'foo', {bar: 123});
+    expect(native.type).to.equal('foo');
+    expect(native.detail).to.deep.equal({bar: 123});
+
+    const polyfilled = createCustomEvent({document}, 'foo', {bar: 123});
+    expect(polyfilled.type).to.equal('foo');
+    expect(polyfilled.detail).to.deep.equal({bar: 123});
+  });
 });

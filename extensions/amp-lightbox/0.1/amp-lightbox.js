@@ -21,10 +21,10 @@ import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {childElementByTag} from '../../../src/dom.js';
 import {dev} from '../../../src/log';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {historyForDoc} from '../../../src/history';
+import {historyForDoc} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
-import {vsyncFor} from '../../../src/vsync';
-import {timerFor} from '../../../src/timer';
+import {vsyncFor} from '../../../src/services';
+import {timerFor} from '../../../src/services';
 import * as st from '../../../src/style';
 
 /** @const {string} */
@@ -390,7 +390,7 @@ class AmpLightbox extends AMP.BaseElement {
     });
     if (oldPos != newPos) {
       this.forEachVisibleChild_(oldPos, cell => {
-        if (seen.indexOf(cell) == -1) {
+        if (!seen.includes(cell)) {
           this.updateInViewport(cell, false);
         }
       });

@@ -24,18 +24,19 @@ import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
-import {fromClassForDoc} from '../service';
-import {inputFor} from '../input';
-import {viewerForDoc} from '../viewer';
-import {viewportForDoc} from '../viewport';
-import {installVsyncService} from './vsync-impl';
+import {installInputService} from '../input';
+import {registerServiceBuilderForDoc} from '../service';
+import {inputFor} from '../services';
+import {viewerForDoc} from '../services';
+import {viewportForDoc} from '../services';
+import {vsyncFor} from '../services';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
-import {documentInfoForDoc} from '../document-info';
+import {documentInfoForDoc} from '../services';
 import {computedStyle} from '../style';
 
 const TAG_ = 'Resources';
@@ -50,7 +51,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const DOM_NODE_UID_PROPERTY = '__AMP__NODE_UID';
 
 
 /**
@@ -92,6 +92,12 @@ export class Resources {
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
 
+    /**
+     * Used primarily for testing to allow build phase to proceed.
+     * @const @private {boolean}
+     */
+    this.isBuildOn_ = false;
+
     /** @private @const {number} */
     this.maxDpr_ = this.win.devicePixelRatio || 1;
 
@@ -105,7 +111,7 @@ export class Resources {
     this.addCount_ = 0;
 
     /** @private {number} */
-    this.nodeUidCount_ = 1;
+    this.buildAttemptsCount_ = 0;
 
     /** @private {boolean} */
     this.visible_ = this.viewer_.isVisible();
@@ -122,6 +128,12 @@ export class Resources {
      * @private {boolean}
      */
     this.firstPassAfterDocumentReady_ = true;
+
+    /**
+     * Whether AMP has been fully initialized.
+     * @private {boolean}
+     */
+    this.ampInitialized_ = false;
 
     /**
      * We also adjust the timeout penalty shortly after the first pass.
@@ -171,7 +183,7 @@ export class Resources {
     this.viewport_ = viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = installVsyncService(this.win);
+    this.vsync_ = vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -313,29 +325,9 @@ export class Resources {
     });
   }
 
-  /**
-   * Returns a subset of resources which is identified as being in the current
-   * viewport.
-   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
-   * @return {!Array<!Resource>}
-   * TODO(dvoytenko, #7815): remove once the reporting regression is confirmed.
-   */
-  getResourcesInViewportLegacy(opt_isInPrerender) {
-    opt_isInPrerender = opt_isInPrerender || false;
-    const viewportRect = this.viewport_.getRect();
-    return this.resources_.filter(r => {
-      if (r.hasOwner() || !r.isDisplayed() || !r.overlaps(viewportRect)) {
-        return false;
-      }
-      if (opt_isInPrerender && !r.prerenderAllowed()) {
-        return false;
-      }
-      return true;
-    });
-  }
-
   /** @private */
   monitorInput_() {
+    installInputService(this.win);
     const input = inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);
@@ -416,26 +408,17 @@ export class Resources {
   }
 
   /**
-   * @param {!Node} node
-   * @return {number}
-   */
-  getNodeUid(node) {
-    return node[DOM_NODE_UID_PROPERTY] ||
-        (node[DOM_NODE_UID_PROPERTY] = this.nodeUidCount_++);
-  }
-
-  /**
    * @param {!Resource} resource
    * @return {!Promise<!../layout-rect.LayoutRectDef>}
    * @private
    */
   ensuredMeasured_(resource) {
     if (resource.hasBeenMeasured()) {
-      return Promise.resolve(resource.getLayoutBox());
+      return Promise.resolve(resource.getPageLayoutBox());
     }
     return this.vsync_.measurePromise(() => {
       resource.measure();
-      return resource.getLayoutBox();
+      return resource.getPageLayoutBox();
     });
   }
 
@@ -481,10 +464,26 @@ export class Resources {
     } else {
       // Create and add a new resource.
       resource = new Resource((++this.resourceIdCounter_), element, this);
-      this.buildOrScheduleBuildForResource_(resource);
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
+  }
+
+  /**
+   * Limits the number of elements being build in pre-render phase to
+   * a finite number. Returns false if the number has been reached.
+   * @return {boolean}
+   */
+  grantBuildPermission() {
+    // For pre-render we want to limit the amount of CPU used, so we limit
+    // the number of elements build. For pre-render to "seem complete"
+    // we only need to build elements in the first viewport. We can't know
+    // which are actually in the viewport (because the decision is pre-layout,
+    // so we use a heuristic instead.
+    // Most documents have 10 or less AMP tags. By building 20 we should not
+    // change the behavior for the vast majority of docs, and almost always
+    // catch everything in the first viewport.
+    return this.buildAttemptsCount_++ < 20 || this.viewer_.hasBeenVisible();
   }
 
   /**
@@ -496,7 +495,7 @@ export class Resources {
    */
   buildOrScheduleBuildForResource_(resource, checkForDupes = false,
       scheduleWhenBuilt = true) {
-    if (this.isRuntimeOn_) {
+    if (this.isRuntimeOn_ || this.isBuildOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
@@ -506,8 +505,7 @@ export class Resources {
           this.schedulePass();
         }
       } else if (!resource.element.isBuilt()) {
-        if (!checkForDupes ||
-            this.pendingBuildResources_.indexOf(resource) == -1) {
+        if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
           this.buildReadyResources_(scheduleWhenBuilt);
@@ -935,6 +933,15 @@ export class Resources {
     this.vsync_.mutate(() => this.doPass_());
   }
 
+  /**
+   * Called when main AMP binary is fully initialized.
+   * May never be called in Shadow Mode.
+   */
+  ampInitComplete() {
+    this.ampInitialized_ = true;
+    this.schedulePass();
+  }
+
   /** @private */
   doPass_() {
     if (!this.isRuntimeOn_) {
@@ -975,11 +982,13 @@ export class Resources {
     this.vsyncScheduled_ = false;
 
     this.visibilityStateMachine_.setState(this.viewer_.getVisibilityState());
-    if (firstPassAfterDocumentReady) {
+    if (this.documentReady_ && this.ampInitialized_
+        && !this.ampdoc.signals().get(READY_SCAN_SIGNAL_)) {
       // This signal mainly signifies that most of elements have been measured
       // by now. This is mostly used to avoid measuring too many elements
       // individually. This will be superceeded by layers API, e.g.
       // "layer measured".
+      // May not be called in shadow mode.
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL_);
     }
 
@@ -1062,6 +1071,7 @@ export class Resources {
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
+        let topUnchangedBoundary = box.top;
         let bottomDisplacedBoundary = box.bottom;
         let newMargins = undefined;
         if (request.marginChange) {
@@ -1072,6 +1082,9 @@ export class Resources {
           }
           if (newMargins.bottom != undefined) {
             bottomMarginDiff = newMargins.bottom - margins.bottom;
+          }
+          if (topMarginDiff) {
+            topUnchangedBoundary = box.top - margins.top;
           }
           if (bottomMarginDiff) {
             // The lowest boundary of the element that would appear to be
@@ -1095,8 +1108,9 @@ export class Resources {
           // 3. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
-        } else if (topMarginDiff == 0 && box.bottom + Math.min(heightDiff, 0) >=
-              viewportRect.bottom - bottomOffset) {
+        } else if (topUnchangedBoundary >= viewportRect.bottom - bottomOffset ||
+            (topMarginDiff == 0 && box.bottom + Math.min(heightDiff, 0) >=
+             viewportRect.bottom - bottomOffset)) {
           // 4. Elements under viewport are resized immediately, but only if
           // an element's boundary is not changed above the viewport after
           // resize.
@@ -1242,7 +1256,6 @@ export class Resources {
    * @private
    */
   discoverWork_() {
-
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
     const now = Date.now();
@@ -1281,7 +1294,8 @@ export class Resources {
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner()) {
+        if (r.hasOwner() && !r.isMeasureRequested()) {
+          // If element has owner, and measure is not requested, do nothing.
           continue;
         }
         if (relayoutAll ||
@@ -1620,7 +1634,7 @@ export class Resources {
   completeScheduleChangeSize_(resource, newHeight, newWidth, marginChange,
       force, opt_callback) {
     resource.resetPendingChangeSize();
-    const layoutBox = resource.getLayoutBox();
+    const layoutBox = resource.getPageLayoutBox();
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
         (newWidth === undefined || newWidth == layoutBox.width) &&
         (marginChange === undefined || !areMarginsChanged(
@@ -1986,8 +2000,7 @@ export let SizeDef;
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Resources}
  */
 export function installResourcesServiceForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'resources', Resources);
+  registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
 };

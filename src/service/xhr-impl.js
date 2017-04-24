@@ -15,7 +15,7 @@
  */
 
 import {dev, user} from '../log';
-import {fromClass} from '../service';
+import {registerServiceBuilder, getService} from '../service';
 import {
   getSourceOrigin,
   getCorsUrl,
@@ -42,7 +42,7 @@ import {utf8EncodeSync} from '../utils/bytes';
  *   ampCors: (boolean|undefined)
  * }}
  */
-let FetchInitDef;
+export let FetchInitDef;
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -235,7 +235,7 @@ export class Xhr {
   fetch(input, opt_init) {
     const init = setupInit(opt_init);
     return this.fetchAmpCors_(input, init).then(response =>
-      assertSuccess(response));
+        assertSuccess(response));
   }
 
   /**
@@ -267,21 +267,20 @@ export class Xhr {
   }
 }
 
-
 /**
  * Normalized method name by uppercasing.
  * @param {string|undefined} method
  * @return {string}
  * @private
  */
-export function normalizeMethod_(method) {
+function normalizeMethod_(method) {
   if (method === undefined) {
     return 'GET';
   }
   method = method.toUpperCase();
 
   dev().assert(
-    allowedMethods_.indexOf(method) > -1,
+    allowedMethods_.includes(method),
     'Only one of %s is currently allowed. Got %s',
     allowedMethods_.join(', '),
     method
@@ -459,6 +458,15 @@ export class FetchResponse {
   }
 
   /**
+   * Create a copy of the response and return it.
+   * @return {!FetchResponse}
+   */
+  clone() {
+    dev().assert(!this.bodyUsed, 'Body already used');
+    return new FetchResponse(this.xhr_);
+  }
+
+  /**
    * Drains the response and returns the text.
    * @return {!Promise<string>}
    * @private
@@ -549,6 +557,14 @@ export class FetchResponseHeaders {
  * @param {!Window} window
  * @return {!Xhr}
  */
+export function xhrServiceForTesting(window) {
+  installXhrService(window);
+  return getService(window, 'xhr');
+}
+
+/**
+ * @param {!Window} window
+ */
 export function installXhrService(window) {
-  return fromClass(window, 'xhr', Xhr);
+  registerServiceBuilder(window, 'xhr', Xhr);
 };

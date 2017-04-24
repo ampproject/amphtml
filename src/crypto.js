@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForWindow} from './service';
+import {getService} from './service';
 
 /**
  * An object holding the public key and its hash.
@@ -33,7 +33,7 @@ export let PublicKeyInfoDef;
  */
 export function cryptoFor(window) {
   return (/** @type {!./service/crypto-impl.Crypto} */ (
-      getExistingServiceForWindow(window, 'crypto')));
+      getService(window, 'crypto')));
 }
 
 /**

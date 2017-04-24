@@ -16,7 +16,7 @@
 
 import {
   doubleclickIsA4AEnabled,
-  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
   DOUBLECLICK_A4A_BETA_BRANCHES,
   BETA_ATTRIBUTE,
 } from '../doubleclick-a4a-config';
@@ -78,6 +78,14 @@ describe('doubleclick-a4a-config', () => {
     it('should not enable a4a, even if requested, when on bad origin', () => {
       const elem = testFixture.doc.createElement('div');
       elem.setAttribute(BETA_ATTRIBUTE, 'true');
+      testFixture.doc.body.appendChild(elem);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+    });
+
+    it('should not enable a4a if useSameDomainRenderingUntilDeprecated', () => {
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('useSameDomainRenderingUntilDeprecated', 'true');
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
@@ -164,8 +172,9 @@ describe('doubleclick-a4a-config', () => {
       expect(elem0.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
       expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.true;
-      expect(isInExperiment(elem1,
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment)).to.be.true;
+      const experimentId =
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment;
+      expect(isInExperiment(elem1, experimentId)).to.be.true;
     });
   });
 });

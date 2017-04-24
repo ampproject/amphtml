@@ -15,13 +15,12 @@
  */
 
 import {Observable} from '../observable';
-import {fromClassForDoc} from '../service';
 import {isExperimentOn} from '../experiments';
+import {registerServiceBuilderForDoc} from '../service';
 import {setStyles} from '../style';
 import {toArray} from '../types';
 import {user} from '../log';
-import {viewportForDoc} from '../viewport';
-import {vsyncFor} from '../vsync';
+import {viewportForDoc, vsyncFor} from '../services';
 
 const ATTR = 'amp-fx-parallax';
 const EXPERIMENT = ATTR;
@@ -206,10 +205,14 @@ export class ParallaxElement {
 
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!ParallaxService}
  */
 export function installParallaxForDoc(nodeOrDoc) {
   const enabled = isExperimentOn(AMP.win, EXPERIMENT);
   user().assert(enabled, `Experiment "${EXPERIMENT}" is disabled.`);
-  return fromClassForDoc(nodeOrDoc, 'amp-fx-parallax', ParallaxService);
+  registerServiceBuilderForDoc(
+      nodeOrDoc,
+      'amp-fx-parallax',
+      ParallaxService,
+      /* opt_factory */ undefined,
+      /* opt instantiate */ true);
 };

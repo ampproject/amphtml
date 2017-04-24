@@ -25,7 +25,7 @@ import {
   isUserErrorMessage,
 } from './log';
 import {isProxyOrigin} from './url';
-import {isCanary} from './experiments';
+import {isCanary, experimentTogglesOrNull} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -339,7 +339,15 @@ export function getErrorReportUrl(message, filename, line, col, error,
   if (!detectedJsEngine) {
     detectedJsEngine = detectJsEngineFromStack();
   }
-  url += `&jse=${detectJsEngineFromStack}`;
+  url += `&jse=${detectedJsEngine}`;
+
+  const exps = [];
+  const experiments = experimentTogglesOrNull();
+  for (const exp in experiments) {
+    const on = experiments[exp];
+    exps.push(`${exp}=${on ? '1' : '0'}`);
+  }
+  url += `&exps=${encodeURIComponent(exps.join(','))}`;
 
   if (error) {
     const tagName = error && error.associatedElement
@@ -350,8 +358,10 @@ export function getErrorReportUrl(message, filename, line, col, error,
       url += `&args=${encodeURIComponent(JSON.stringify(error.args))}`;
     }
 
-    if (!isUserError) {
-      url += `&s=${encodeURIComponent(error.stack || '')}`;
+    if (!isUserError && !error.ignoreStack && error.stack) {
+      // Shorten
+      const stack = (error.stack || '').substr(0, 1000);
+      url += `&s=${encodeURIComponent(stack)}`;
     }
 
     error.message += ' _reported_';
@@ -366,6 +376,14 @@ export function getErrorReportUrl(message, filename, line, col, error,
   url += '&fr=' + encodeURIComponent(self.location.originalHash
       || self.location.hash);
 
+  // Google App Engine maximum URL length.
+  if (url.length >= 2072) {
+    url = url.substr(0, 2072 - 8 /* length of suffix */)
+        // Full remove last URL encoded entity.
+        .replace(/\%[^&%]+$/, '')
+        // Sentinel
+        + '&SHORT=1';
+  }
   return url;
 }
 
@@ -416,7 +434,7 @@ export function detectJsEngineFromStack() {
     }
 
     // Safari does not show the context ("object."), just the function name.
-    if (stack.indexOf('t@') === 0) {
+    if (startsWith(stack, 't@')) {
       return 'Safari';
     }
 

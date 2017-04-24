@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-fit-text';
 import {
@@ -55,7 +55,7 @@ describe('amp-fit-text component', () => {
   it('renders', () => {
     const text = 'Lorem ipsum';
     return getFitText(text).then(ft => {
-      const content = ft.querySelector('.-amp-fit-text-content');
+      const content = ft.querySelector('.i-amphtml-fit-text-content');
       expect(content).to.not.equal(null);
       expect(content.textContent).to.equal(text);
     });
@@ -169,7 +169,7 @@ describe('amp-fit-text updateOverflow', () => {
   it('should always fit on one line', () => {
     measurer./*OK*/innerHTML = 'A';
     updateOverflow_(content, measurer, 24, 20);
-    expect(classToggles['-amp-fit-text-content-overflown']).to.equal(false);
+    expect(classToggles['i-amphtml-fit-text-content-overflown']).to.be.false;
     expect(getLineClamp()).to.equal('');
     expect(content.style.maxHeight).to.equal('');
   });
@@ -177,7 +177,7 @@ describe('amp-fit-text updateOverflow', () => {
   it('should always fit on two lines', () => {
     measurer./*OK*/innerHTML = 'A<br>B';
     updateOverflow_(content, measurer, 24, 20);
-    expect(classToggles['-amp-fit-text-content-overflown']).to.equal(true);
+    expect(classToggles['i-amphtml-fit-text-content-overflown']).to.equal(true);
     expect(getLineClamp()).to.equal(1);
     expect(content.style.maxHeight).to.equal(23 + 'px');  // 23 = 20 * 1.15
   });

@@ -15,7 +15,7 @@
  */
 import {openWindowDialog} from '../../../src/dom';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 
 import {Util} from './util';
 
@@ -126,11 +126,8 @@ export class PinItButton {
       color: ['red', 'white'].indexOf(this.color) !== -1 ? this.color : 'gray',
     };
 
-    // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-    // form is in PROD for 1-2 weeks.
     const clazz = [
       `-amp-pinterest${CLASS.shape}${CLASS.height}`,
-      '-amp-fill-content',
       'i-amphtml-fill-content',
     ];
 

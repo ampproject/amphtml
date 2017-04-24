@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from './timer';
+import {timerFor} from './services';
 
 
 /**

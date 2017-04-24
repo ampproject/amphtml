@@ -22,6 +22,7 @@
 import {dev, user} from './log';
 import {isFiniteNumber} from './types';
 import {setStyles} from './style';
+import {startsWith} from './string';
 
 /**
  * @enum {string}
@@ -140,7 +141,7 @@ export function isLayoutSizeDefined(layout) {
  */
 export function isInternalElement(tag) {
   const tagName = (typeof tag == 'string') ? tag : tag.tagName;
-  return tagName && tagName.toLowerCase().indexOf('i-') == 0;
+  return tagName && startsWith(tagName.toLowerCase(), 'i-');
 }
 
 

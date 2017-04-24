@@ -25,6 +25,10 @@ import {
 } from '../../src/error';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
+import {
+  resetExperimentTogglesForTesting,
+  toggleExperiment,
+} from '../../src/experiments';
 import * as sinon from 'sinon';
 
 
@@ -94,9 +98,10 @@ describe('reportErrorToServer', () => {
     window.onerror = onError;
     sandbox.restore();
     window.viewerState = undefined;
+    resetExperimentTogglesForTesting(window);
   });
 
-  it('reportError with error object', () => {
+  it('reportError with error object', function SHOULD_BE_IN_STACK() {
     const e = new Error('XYZ');
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
@@ -108,7 +113,7 @@ describe('reportErrorToServer', () => {
     expect(query.m).to.equal('XYZ');
     expect(query.el).to.equal('u');
     expect(query.a).to.equal('0');
-    expect(query.s).to.equal(e.stack.trim());
+    expect(query.s).to.contain('SHOULD_BE_IN_STACK');
     expect(query['3p']).to.equal(undefined);
     expect(e.message).to.contain('_reported_');
     if (location.ancestorOrigins) {
@@ -119,6 +124,24 @@ describe('reportErrorToServer', () => {
     expect(query.r).to.contain('http://localhost');
     expect(query.noAmp).to.equal('1');
     expect(query.args).to.be.undefined;
+  });
+
+  it('reportError with error and ignore stack', () => {
+    const e = new Error('XYZ');
+    e.ignoreStack = true;
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
+          true));
+    const query = parseQueryString(url.search);
+    expect(query.s).to.be.undefined;
+
+    expect(url.href.indexOf(
+        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
+    expect(query.m).to.equal('XYZ');
+    expect(query.el).to.equal('u');
+    expect(query.a).to.equal('0');
+    expect(query['3p']).to.equal(undefined);
+    expect(e.message).to.contain('_reported_');
   });
 
   it('reportError with error object w/args', () => {
@@ -239,6 +262,7 @@ describe('reportErrorToServer', () => {
     expect(query.f).to.equal('foo.js');
     expect(query.l).to.equal('11');
     expect(query.c).to.equal('22');
+    expect(query.SHORT).to.be.undefined;
   });
 
   it('should accumulate errors', () => {
@@ -254,6 +278,22 @@ describe('reportErrorToServer', () => {
 
     expect(query.m).to.equal('3');
     expect(query.ae).to.equal('1,2');
+  });
+
+  it('should shorten very long reports', () => {
+    let message = 'TEST';
+    for (let i = 0; i < 4000; i++) {
+      message += '&';
+    }
+    const url = parseUrl(getErrorReportUrl(undefined, undefined, undefined,
+        undefined, new Error(message),true));
+    const query = parseQueryString(url.search);
+    expect(url.href.indexOf(
+        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
+
+    expect(query.m).to.match(/^TEST/);
+    expect(url.href.length <= 2072).to.be.ok;
+    expect(query.SHORT).to.equal('1');
   });
 
   it('should not double report', () => {
@@ -344,6 +384,20 @@ describe('reportErrorToServer', () => {
     expect(query.s).to.be.undefined;
   });
 
+  it('should report experiments', () => {
+    resetExperimentTogglesForTesting(window);
+    toggleExperiment(window, 'test-exp', true);
+    // Toggle on then off, so it's stored
+    toggleExperiment(window, 'disabled-exp', true);
+    toggleExperiment(window, 'disabled-exp', false);
+    const e = user().createError('123');
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
+          true));
+    const query = parseQueryString(url.search);
+    expect(query.exps).to.equal('test-exp=1,disabled-exp=0');
+  });
+
   describe('detectNonAmpJs', () => {
     let win;
     let scripts;
@@ -416,7 +470,7 @@ describes.sandboxed('reportError', {}, () => {
     window.AMP_MODE = {localDev: true, test: false};
     const result = reportError('error');
     expect(result).to.be.instanceOf(Error);
-    expect(result.message).to.be.equal('error');
+    expect(result.message).to.contain('error');
     expect(result.origError).to.be.equal('error');
     expect(result.reported).to.be.true;
     expect(() => {
@@ -428,7 +482,7 @@ describes.sandboxed('reportError', {}, () => {
     window.AMP_MODE = {localDev: true, test: false};
     const result = reportError(101);
     expect(result).to.be.instanceOf(Error);
-    expect(result.message).to.be.equal('101');
+    expect(result.message).to.contain('101');
     expect(result.origError).to.be.equal(101);
     expect(result.reported).to.be.true;
     expect(() => {
@@ -440,7 +494,7 @@ describes.sandboxed('reportError', {}, () => {
     window.AMP_MODE = {localDev: true, test: false};
     const result = reportError(null);
     expect(result).to.be.instanceOf(Error);
-    expect(result.message).to.be.equal('Unknown error');
+    expect(result.message).to.contain('Unknown error');
     expect(result.origError).to.be.undefined;
     expect(result.reported).to.be.true;
     expect(() => {

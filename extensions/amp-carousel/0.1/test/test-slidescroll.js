@@ -17,10 +17,9 @@
 import * as sinon from 'sinon';
 import '../amp-carousel';
 import {createIframePromise} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describe('SlideScroll', () => {
-  const SHOW_CLASS = '-amp-slide-item-show';
+  const SHOW_CLASS = 'i-amphtml-slide-item-show';
   let sandbox;
 
   beforeEach(() => {
@@ -34,7 +33,6 @@ describe('SlideScroll', () => {
   function getAmpSlideScroll(
       opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true) {
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-slidescroll', true);
       iframe.width = '1000';
       iframe.height = '1000';
       const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
@@ -77,15 +75,16 @@ describe('SlideScroll', () => {
     return getAmpSlideScroll().then(obj => {
       const ampSlideScroll = obj.ampSlideScroll;
       expect(
-          ampSlideScroll.getElementsByClassName('-amp-slides-container').length)
-              .to.equal(1);
+          ampSlideScroll.getElementsByClassName('i-amphtml-slides-container')
+              .length).to.equal(1);
       expect(
           ampSlideScroll.querySelectorAll(
-            '.-amp-slides-container > .-amp-slide-item').length).to.equal(5);
+            '.i-amphtml-slides-container > .i-amphtml-slide-item').length)
+                .to.equal(5);
       expect(
           ampSlideScroll.getElementsByClassName('amp-carousel-slide').length)
               .to.equal(5);
-      expect(ampSlideScroll.querySelector('.-amp-slides-container')
+      expect(ampSlideScroll.querySelector('.i-amphtml-slides-container')
             .getAttribute('aria-live')).to.equal('polite');
       const impl = ampSlideScroll.implementation_;
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
@@ -107,10 +106,10 @@ describe('SlideScroll', () => {
       impl.buildCarousel();
       expect(
           ampSlideScroll.getElementsByClassName(
-              '-amp-carousel-start-marker').length).to.be.at.least(1);
+              'i-amphtml-carousel-start-marker').length).to.be.at.least(1);
       expect(
           ampSlideScroll.getElementsByClassName(
-              '-amp-carousel-end-marker').length).to.be.at.least(1);
+              'i-amphtml-carousel-end-marker').length).to.be.at.least(1);
     });
   });
 
@@ -566,7 +565,6 @@ describe('SlideScroll', () => {
 
   describe('Looping', () => {
     beforeEach(() => {
-      toggleExperiment(window, 'amp-slidescroll', true);
       sandbox = sinon.sandbox.create();
     });
 
