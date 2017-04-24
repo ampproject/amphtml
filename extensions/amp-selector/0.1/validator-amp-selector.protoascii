@@ -46,7 +46,7 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   # <amp-bind>
   attrs: {
     name: "[selected]"
-    value_regex: "none|focus|select"
+    value_regex_casei: "none|focus|select"
   }
   reference_points: {
     tag_spec_name: "AMP-SELECTOR option"
