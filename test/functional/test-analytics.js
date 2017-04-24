@@ -88,7 +88,7 @@ describes.realWin('analytics', {amp: true}, env => {
       win.document.body.appendChild(ele);
       const baseEle = new BaseElement(ele);
       registerServiceBuilderForDoc(
-        ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
+          ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
       // Force instantiation
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
       const config = {

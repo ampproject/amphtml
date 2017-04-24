@@ -461,7 +461,7 @@ function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
   // The service may have been requested already, in which case there is a
   // pending promise that needs to fulfilled.
   if (s.resolve) {
-    // getServiceInternal will resolve the project.
+    // getServiceInternal will resolve the promise.
     getServiceInternal(holder, id);
   }
 }
@@ -509,10 +509,8 @@ function getServicePromiseOrNullInternal(holder, id) {
     if (s.promise) {
       return s.promise;
     } else {
-      if (!s.obj) {
-        // Instantiate service
-        getServiceInternal(holder, id);
-      }
+      // Instantiate service if not already instantiated.
+      getServiceInternal(holder, id);
       return s.promise = Promise.resolve(/** @type {!Object} */ (s.obj));
     }
   }
