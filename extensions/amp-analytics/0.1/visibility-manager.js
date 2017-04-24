@@ -200,14 +200,16 @@ export class VisibilityManager {
    * `readyPromise` is resolved, if specified.
    * @param {!Object<string, *>} spec
    * @param {?Promise} readyPromise
+   * @param {?function():!Promise} createReportPromiseFunc
    * @param {function(!Object<string, *>)} callback
    * @return {!UnlistenDef}
    */
-  listenRoot(spec, readyPromise, callback) {
+  listenRoot(spec, readyPromise, createReportPromiseFunc, callback) {
     const model = new VisibilityModel(
         spec,
         this.getRootVisibility.bind(this));
-    return this.listen_(model, spec, readyPromise, callback);
+    return this.listen_(
+        model, spec, readyPromise, createReportPromiseFunc, callback);
   }
 
   /**
@@ -217,32 +219,41 @@ export class VisibilityManager {
    * @param {!Element} element
    * @param {!Object<string, *>} spec
    * @param {?Promise} readyPromise
+   * @param {?function():!Promise} createReportPromiseFunc
    * @param {function(!Object<string, *>)} callback
    * @return {!UnlistenDef}
    */
-  listenElement(element, spec, readyPromise, callback) {
+  listenElement(
+      element, spec, readyPromise, createReportPromiseFunc, callback) {
     const model = new VisibilityModel(
         spec,
         this.getElementVisibility.bind(this, element));
-    return this.listen_(model, spec, readyPromise, callback, element);
+    return this.listen_(
+        model, spec, readyPromise, createReportPromiseFunc, callback, element);
   }
 
   /**
    * @param {!VisibilityModel} model
    * @param {!Object<string, *>} spec
    * @param {?Promise} readyPromise
+   * @param {?function():!Promise} createReportPromiseFunc
    * @param {function(!Object<string, *>)} callback
    * @param {!Element=} opt_element
    * @return {!UnlistenDef}
    * @private
    */
-  listen_(model, spec, readyPromise, callback, opt_element) {
+  listen_(model, spec,
+      readyPromise, createReportPromiseFunc, callback, opt_element) {
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
       readyPromise.then(() => {
         model.setReady(true);
       });
+    }
+
+    if (createReportPromiseFunc) {
+      model.setReportReady(createReportPromiseFunc);
     }
 
     // Process the event.
@@ -514,6 +525,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @private
    */
   onIntersectionChange_(target, intersectionRatio) {
+    intersectionRatio = Math.min(Math.max(intersectionRatio, 0), 1);
     const id = getElementId(target);
     const trackedElement = this.trackedElements_[id];
     if (trackedElement) {

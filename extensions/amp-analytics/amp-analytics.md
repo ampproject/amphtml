@@ -72,231 +72,11 @@ In the following example, we send analytics data to `https://example.com/analyti
 </amp-analytics>
 ```
 
-**Example**
-
-In the following example, we send pageview data to an analytics vendor, Google Analytics:
-
-```html
-<<<<<<< HEAD
-<amp-analytics type="XYZ"> ... </amp-analytics>
-```
-### Acquia Lift
-
-Type attribute value: `acquialift`
-
-Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` must be specified. More information about Acquia Lift can be found at [https://docs.acquia.com/lift](https://docs.acquia.com/lift).
-
-Please consult the documentation from your vendor, which may be linked in the sections below. You can also look at the [vendors.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/0.1/vendors.js) file for further information on each vendor's configuration.
-
-### Adobe Analytics
-
-Type attribute value: `adobeanalytics`
-
-Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [marketing.adobe.com](https://marketing.adobe.com/resources/help/en_US/sc/implement/accelerated-mobile-pages.html).
-
-### AFS Analytics
-
-Type attribute value: `afsanalytics`
-
-Adds support for AFS Analytics. Additionally, the `websiteid` and `server` variables must be specified. More details for adding AFS Analytics support can be found at [afsanalytics.com](https://www.afsanalytics.com/articles/developers/).
-
-### AT Internet
-
-Type attribute value: `atinternet`
-
-Adds support for AT Internet. More details for adding AT Internet support can be found at [developers.atinternet-solutions.com](http://developers.atinternet-solutions.com/javascript-en/advanced-features-javascript-en/accelerated-mobile-pages-amp-javascript-en/).
-
-### Burt
-
-Type attribute value: `burt`
-
-Adds support for Burt. Additionally, the `trackingKey` variable must be specified. It's also possible to specify the optional variables `category` and `subCategory`. More details can be found at [burtcorp.com](http://burtcorp.com).
-
-### Chartbeat
-
-Type attribute value: `chartbeat`
-
-Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/integrations.html#amp).
-
-### ColAnalytics
-
-Type attribute value: `colanalytics`
-
-Adds support for ColAnalytics. Additionally, you must specify a value for `id`.
-
-### Clicky Web Analytics
-
-Type attribute value: `clicky`
-
-Adds support for Clicky Web Analytics. More details for adding Clicky support can be found at [clicky.com](https://clicky.com/help/apps-plugins).
-
-### comScore
-
-Type attribute value: `comscore`
-
-Adds support for comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*. More information can be found at [comscore.com](http://www.comscore.com).
-
-### Cxense
-
-Type attribute value: `cxense`
-
-Adds support for Cxense Insight analytics. Requires defining *var* `siteId` with Cxense-provided *siteId*. More details can be found at [wiki.cxense.com](https://wiki.cxense.com/display/cust/Accelerated+Mobile+Pages+%28AMP%29+integration).
-
-### dynatrace
-
-Type attribute value: `dynatrace`
-
-Adds support for dynatrace. Requires defining *var* `app` with dynatrace-provided *appId* and *var* `tenant` with dynatrace-provided *tenantId*.
-
-### Eulerian Analytics
-
-Type attribute value: `euleriananalytics`
-
-Adds support for Eulerian Technologies Analytics. Requires defining *var* `analyticsHost` with Eulerian delegated domain. More details can be found at [eulerian.wiki](https://eulerian.wiki).
-
-### Gemius
-
-Type attribute value: `gemius`
-
-Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provided `prefix` and `identifier` variables must be specified. It's also possible to specify the optional variable `extraparams` (key1=value1|key2=value2). More details can be found at [gemius.com](https://www.gemius.com).
-
-### Google Analytics
-
-Type attribute value: `googleanalytics`
-
-Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
-
-### INFOnline / IVW
-
-Type attribute value: `infonline`
-
-Adds support for [INFOnline](https://www.infonline.de) / [IVW](http://www.ivw.de). Requires a copy of [amp-analytics-infonline.html](https://3p.ampproject.net/custom/amp-analytics-infonline.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. Example: if your AMP files are hosted on `www.example.com`, then `amp-analytics-infonline.html` needs to be on another subdomain such as `iframe.example.com` or `assets.example.com`.
-
-Additionally, the following variables must be defined:
-
-* `st`: Angebotskennung
-* `co`: comment
-* `cp`: code
-* `url`: HTTPS location of `amp-analytics-infonline.html`
-
-More details for adding INFOnline / IVW support can be found at [www.infonline.de](https://www.infonline.de/downloads/web-mew-und-ctv/).
-
-### Krux
-
-Type attribute value: `krux`
-
-Adds support for Krux.  Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
-
-### Linkpulse
-
-Type attribute value: `linkpulse`
-
-Adds support for Linkpulse. Configuration details can be found at [docs.linkpulse.com](http://docs.linkpulse.com)
-
-### Lotame
-
-Type attribute value: `lotame`
-
-Adds support for Lotame.  More information and configuration details can be found at [mylotame.force.com](https://mylotame.force.com/s/article/Google-AMP).
-
-### Médiamétrie
-
-Type attribute value: `mediametrie`
-
-Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`. Vars `level1` to `level4` are optional.  More information can be found at [mediametrie.com](http://www.mediametrie.com/).
-
-### mParticle
-
-Type attribute value: `mparticle`
-
-Adds support for mParticle. More details for adding mParticle support can be found at [docs.mparticle.com](http://docs.mparticle.com/?javascript#amp).
-
-### OEWA
-
-Type attribute value: `oewa`
-
-There is a variation called `oewadirect` wich does not use iframe-ping solution - and has a better client detection, by using AMP CLIENT_ID, this is currently EXPERIMENTAL,
-and as of today (01.07.2015) prohibited by the OEWA - as it does not use `oewa2.js`
-
-Adds support for [OEWA](https://www.oewa.at). Requires a copy of [amp-analytics-oewa.html](http://www.oewa.at/fileadmin/downloads/amp-analytics-oewa.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. Example: if your AMP files are hosted on `www.example.com`, then `amp-analytics-oewa.html` needs to be on another subdomain such as `oewa-amp.example.com`.
-
-Additionally, the following variables must be defined:
-
-in vars-section:
-* `s`: offer
-* `cp`: categorypath
-
-in requests-section:
-* `url`: HTTPS location of `amp-analytics-oewa.html`
-
-More details for adding ÖWA, support can be found [here](http://www.oewa.at/basic/implementierung).
-
-### Parsely
-
-Type attribute value: `parsely`
-
-Adds support for Parsely. Configuration details can be found at [parsely.com/docs](http://parsely.com/docs/integration/tracking/google-amp.html).
-
-### Piano
-
-Type attribute value: `piano`
-
-Adds support for Piano.  Configuration details can be found at [vx.piano.io](http://vx.piano.io/javascript-tracking-amp).
-
-### Rakam
-
-Type attribute value: `rakam`
-
-Adds support for Rakam.io. Configuration details can be found at [Rakam Documentation](https://rakam.io/integration/amp).
-
-### Quantcast Measurement
-
-Type attribute value: `quantcast`
-
-Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
-
-### Segment
-
-Type attribute value: `segment`
-
-Adds support for segment page views and events.
-To see the full list of fields that you can send, see [Segment Spec](https://segment.com/docs/spec/).
-
-### SOASTA mPulse
-
-Type attribute value: `mpulse`
-
-Adds support for [SOASTA mPulse](https://www.soasta.com/mPulse). Configuration details can be found at [docs.soasta.com](http://docs.soasta.com/).
-
-### SimpleReach
-
-Type attribute value: `simplereach`
-
-Adds support for SimpleReach.  Configuration details can be found at [simplereach.com/docs](http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation)
-
-### Snowplow Analytics
-
-Type attribute value: `snowplow`
-
-Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [github.com/snowplow/snowplow/wiki](https://github.com/snowplow/snowplow/wiki/Google-AMP-Tracker).
-
-### Webtrekk
-
-Type attribute value: `webtrekk`
-
-Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
-
-### Yandex Metrica
-
-Type attribute value: `metrika`
-
-Adds support for Yandex Metrica.  Configuration details can be found at [Yandex Support](https://yandex.com/support/metrica/code/install-counter-amp.xml).
-
 ## Attributes
 
 **type**
 
-Specifies the type of vendor.  For details, see the [Analytics vendors](#analytics-vendors) section above.
+Specifies the type of vendor.  For details, see the [Analytics vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) page.
 
 **config**
 
@@ -548,12 +328,13 @@ The element visibility trigger can be configured for any AMP element or a docume
 
 Notice that selector can be used to only specify a single element, not a collection. The element can be either an [AMP extended  element](https://github.xom/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags) or a document root.
 
-The element visibility trigger waits for element's [`ini-load`](#initial-load-trigger) signal before matching the `visibilitySpec`.
+The element visibility trigger waits for the signal specified by the `waitFor` property in `visibilitySpec` before tracking element visibility. If `waitFor` is not specified, it waits for element's [`ini-load`](#initial-load-trigger) signal. See `waitFor` docs for more details.
 
 
 <strong><a id="visibility-spec"></a>Visibility Spec</strong>
 
 The `visibilitySpec` is a set of conditions and properties that can be applied to `visible` or `hidden` triggers to change when they fire. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
+  - `waitFor` This property indicates that the visibility trigger should wait for a certain signal before tracking visibility. The supported values are     `none`, `ini-load` and `render-start`. If `waitFor` is undefined, it is defaulted to [`ini-load`](#initial-load-trigger) when selector is specified, or to `none` otherwise.
   - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
   - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `totalTimeMin` is defaulted to 0 when not specified.
   - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the lower bound (`visiblePercentageMin`) is inclusive while the upper bound (`visiblePercentageMax`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. They default to 0 and 100 when not specified.
@@ -567,6 +348,7 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
     "request": "pageview",
     "selector": "#ad1",
     "visibilitySpec": {
+      "waitFor": "ini-load",
       "visiblePercentageMin": 20,
       "totalTimeMin": 500,
       "continuousTimeMin": 200

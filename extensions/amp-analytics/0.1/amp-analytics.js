@@ -24,7 +24,7 @@ import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
-import {xhrFor} from '../../../src/services';
+import {timerFor, viewerForDoc, xhrFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {Activity} from './activity-impl';
@@ -115,6 +115,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {!../../../src/service/crypto-impl.Crypto} */
     this.cryptoService_ = cryptoFor(this.win);
+
+    /** @private {?Promise} */
+    this.iniPromise_ = null;
   }
 
   /** @override */
@@ -144,21 +147,17 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.consentPromise_ = userNotificationManagerFor(this.win)
           .then(service => service.get(this.consentNotificationId_));
     }
+
+    if (this.element.getAttribute('trigger') == 'immediate') {
+      this.ensureInitialized_();
+    }
   }
 
   /** @override */
   layoutCallback() {
     // Now that we are rendered, stop rendering the element to reduce
     // resource consumption.
-    toggle(this.element, false);
-
-    return this.consentPromise_
-        .then(this.fetchRemoteConfig_.bind(this))
-        .then(() => instrumentationServicePromiseForDoc(this.getAmpDoc()))
-        .then(instrumentation => {
-          this.instrumentation_ = instrumentation;
-        })
-        .then(this.onFetchRemoteConfigSuccess_.bind(this));
+    return this.ensureInitialized_();
   }
 
   /** @override */
@@ -167,6 +166,29 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  ensureInitialized_() {
+    if (this.iniPromise_) {
+      return this.iniPromise_;
+    }
+    toggle(this.element, false);
+    this.iniPromise_ =
+        viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+            // Rudimentary "idle" signal.
+            .then(() => timerFor(this.win).promise(1))
+            .then(() => this.consentPromise_)
+            .then(this.fetchRemoteConfig_.bind(this))
+            .then(() => instrumentationServicePromiseForDoc(this.getAmpDoc()))
+            .then(instrumentation => {
+              this.instrumentation_ = instrumentation;
+            })
+            .then(this.onFetchRemoteConfigSuccess_.bind(this));
+    return this.iniPromise_;
   }
 
   /**
@@ -220,7 +242,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (this.isSandbox_) {
           const eventType = trigger['on'];
           if (isEnumValue(AnalyticsEventType, eventType) &&
-              WHITELIST_EVENT_IN_SANDBOX.indexOf(eventType) == -1) {
+              !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)) {
             user().error(TAG, eventType + 'is not supported for amp-analytics' +
             ' in scope');
             continue;

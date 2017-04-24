@@ -20,10 +20,7 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
-import {
-  removeChildren,
-  createElementWithAttributes,
-} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
 import {
   installAnchorClickInterceptor,
@@ -165,6 +162,11 @@ export const LIFECYCLE_STAGES = {
   signatureVerifySuccess: '19',
   networkError: '20',
   friendlyIframeIniLoad: '21',
+  visHalf: '22',
+  visHalfIniLoad: '23',
+  firstVisible: '24',
+  visLoadAndOneSec: '25',
+  iniLoad: '26',
 };
 
 /**
@@ -321,6 +323,13 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isCollapsed_ = false;
+
+    /**
+     * Frame in which the creative renders (friendly if validated AMP, xdomain
+     * otherwise).
+     * {?HTMLIframeElement}
+     */
+    this.iframe = null;
   }
 
   /** @override */
@@ -807,6 +816,12 @@ export class AmpA4A extends AMP.BaseElement {
       if (this.isCollapsed_) {
         return Promise.resolve();
       }
+      // If this.iframe already exists, bail out here. This should only happen in
+      // testing context, not in production.
+      if (this.iframe) {
+        this.protectedEmitLifecycleEvent_('iframeAlreadyExists');
+        return Promise.resolve();
+      }
       if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_();
@@ -844,7 +859,12 @@ export class AmpA4A extends AMP.BaseElement {
       return true;
     }
 
-    removeChildren(this.element);
+    // Remove rendering frame, if it exists.
+    if (this.iframe && this.iframe.parentElement) {
+      this.iframe.parentElement.removeChild(this.iframe);
+      this.iframe = null;
+    }
+
     this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
@@ -919,7 +939,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Callback executed when creative has successfully rendered within the
-   * publisher page.  To be overridden by network implementations as needed.
+   * publisher page but prior to load (or ini-load for friendly frame AMP
+   * creative render).  To be overridden by network implementations as needed.
    *
    * @param {boolean} isVerifiedAmpCreative whether or not the creative was
    *    verified as AMP and therefore given preferential treatment.
@@ -1047,6 +1068,11 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderNonAmpCreative_() {
+    if (this.element.getAttribute('disable3pfallback') == 'true') {
+      user().warn(TAG, this.element.getAttribute('type'),
+        'fallback to 3p disabled');
+      return Promise.resolve(false);
+    }
     this.promiseErrorHandler_(
         new Error('fallback to 3p'),
         /* ignoreStack */ true);
@@ -1086,7 +1112,7 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
     this.protectedEmitLifecycleEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
-    const iframe = /** @type {!HTMLIFrameElement} */(
+    this.iframe = /** @type {!HTMLIFrameElement} */(
         createElementWithAttributes(
             /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
               // NOTE: It is possible for either width or height to be 'auto',
@@ -1098,7 +1124,7 @@ export class AmpA4A extends AMP.BaseElement {
               allowtransparency: '',
               scrolling: 'no',
             }));
-    this.applyFillContent(iframe);
+    this.applyFillContent(this.iframe);
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
       creativeMetaData.customStylesheets.forEach(s => {
@@ -1108,8 +1134,9 @@ export class AmpA4A extends AMP.BaseElement {
         }
       });
     }
+
     return installFriendlyIframeEmbed(
-        iframe, this.element, {
+        this.iframe, this.element, {
           host: this.element,
           url: this.adUrl_,
           html: creativeMetaData.minifiedCreative,
@@ -1170,16 +1197,21 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
-    const iframe = createElementWithAttributes(
+    this.iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES));
+    // TODO(keithwrightbos): noContentCallback?
+    this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
+    // Iframe is appended to element as part of xorigin frame handler init.
+    // Executive onCreativeRender after init to ensure it can get reference
+    // to frame but prior to load to allow for earlier access.
+    const frameLoadPromise =
+        this.xOriginIframeHandler_.init(this.iframe, /* opt_isA4A */ true);
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
     })(false);
-    // TODO(keithwrightbos): noContentCallback?
-    this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
-    return this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
+    return frameLoadPromise;
   }
 
   /**

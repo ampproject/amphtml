@@ -20,7 +20,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {documentInfoForDoc} from '../../../src/services';
 import {iterateCursor} from '../../../src/dom';
-import {setFormForElement} from '../../../src/form';
+import {formOrNullForElement, setFormForElement} from '../../../src/form';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -792,7 +792,18 @@ export class AmpFormService {
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    this.installStyles_(ampdoc).then(() => this.installHandlers_(ampdoc));
+    /** @const @private {!Promise} */
+    this.whenInitialized_ = this.installStyles_(ampdoc)
+        .then(() => this.installHandlers_(ampdoc));
+  }
+
+  /**
+   * Returns a promise that resolves when all form implementations (if any)
+   * have been upgraded.
+   * @return {!Promise}
+   */
+  whenInitialized() {
+    return this.whenInitialized_;
   }
 
   /**
@@ -841,7 +852,8 @@ export class AmpFormService {
     }
 
     iterateCursor(forms, (form, index) => {
-      if (!form.classList.contains('i-amphtml-form')) {
+      const existingAmpForm = formOrNullForElement(form);
+      if (!existingAmpForm) {
         new AmpForm(form, `amp-form-${index}`);
       }
     });

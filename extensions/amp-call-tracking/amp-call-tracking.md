@@ -61,6 +61,10 @@ of a valid JSON object with the following fields:
 - `phoneNumber` (required): Specifies the phone number to call when the user clicks the link. 
 - `formattedPhoneNumber` (optional): Specifies the phone number to display. If not specified, the value in `phoneNumber` is used.
 
+{% call callout('Important', type='caution') %}
+Your XHR endpoint needs to follow and implement [CORS Requests in AMP spec](../../spec/amp-cors-requests.md).
+{% endcall %}
+
 ## Validation
 
 See [amp-call-tracking rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-call-tracking/0.1/validator-amp-call-tracking.protoascii) in the AMP validator specification.

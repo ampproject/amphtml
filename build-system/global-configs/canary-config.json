@@ -18,6 +18,7 @@
   "amp-playbuzz": 1,
   "sentinel-name-change": 1,
   "chunked-amp": 1,
+  "pump-early-frame": 1,
   "make-body-relative": 1,
   "visibility-v2": 1,
   "amp-selector": 1,
@@ -25,5 +26,8 @@
   "amp-auto-ads": 1,
   "slidescroll-disable-css-snap": 1,
   "visibility-v3": 1,
-  "as-use-attr-for-format": 1
+  "as-use-attr-for-format": 1,
+  "web-worker": 1,
+  "a4aFastFetchDoubleclickLaunched": 0,
+  "a4aFastFetchAdSenseLaunched": 0
 }

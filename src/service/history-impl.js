@@ -70,7 +70,13 @@ export class History {
     /** @private {!Array<!Function|undefined>} */
     this.stackOnPop_ = [];
 
-    /** @private {!Array<!{callback:function():!Promise, resolve:!Function,reject:!Function}>} */
+    /**
+     * @private {!Array<!{
+     *   callback: function():!Promise,
+     *   resolve: !Function,
+     *   reject: !Function,
+     *   trace: (!Error|undefined)
+     * }>} */
     this.queue_ = [];
 
     this.binding_.setOnStackIndexUpdated(this.onStackIndexUpdated_.bind(this));
@@ -96,7 +102,7 @@ export class History {
         }
         return stackIndex;
       });
-    });
+    }, 'push');
   }
 
   /**
@@ -111,7 +117,7 @@ export class History {
       return this.binding_.pop(stateId).then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
       });
-    });
+    }, 'pop');
   }
 
   /**
@@ -131,7 +137,7 @@ export class History {
       return this.binding_.pop(this.stackIndex_).then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
       });
-    });
+    }, 'goBack');
   }
 
   /**
@@ -207,11 +213,12 @@ export class History {
 
   /**
    * @param {function():!Promise<RESULT>} callback
+   * @param {string} name
    * @return {!Promise<RESULT>}
    * @template RESULT
    * @private
    */
-  enque_(callback) {
+  enque_(callback, name) {
     let resolve;
     let reject;
     const promise = new Promise((aResolve, aReject) => {
@@ -219,11 +226,12 @@ export class History {
       reject = aReject;
     });
 
-    this.queue_.push({callback, resolve, reject});
+    // TODO(dvoytenko, #8785): cleanup after tracing.
+    const trace = new Error('history trace for ' + name + ': ');
+    this.queue_.push({callback, resolve, reject, trace});
     if (this.queue_.length == 1) {
       this.deque_();
     }
-
     return promise;
   }
 
@@ -247,6 +255,11 @@ export class History {
       task.resolve(result);
     }, reason => {
       dev().error(TAG_, 'failed to execute a task:', reason);
+      // TODO(dvoytenko, #8785): cleanup after tracing.
+      if (task.trace) {
+        task.trace.message += reason;
+        dev().error(TAG_, task.trace);
+      }
       task.reject(reason);
     }).then(() => {
       this.queue_.splice(0, 1);

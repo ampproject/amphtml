@@ -152,6 +152,13 @@ describe('BindExpression', () => {
     }).to.throw(Error, unsupportedFunctionError);
   });
 
+  it('should return null when invoking methods on null', () => {
+    expect(evaluate('null.charAt(0)')).to.be.null;
+    expect(evaluate('null.includes(3)')).to.be.null;
+    expect(evaluate('a.indexOf("baz")', {a: null})).to.be.null;
+    expect(evaluate('(false || null).replace("foo", "bar")')).to.be.null;
+  });
+
   it('should support variables', () => {
     expect(evaluate('foo', {foo: 'bar'})).to.equal('bar');
     expect(evaluate('foo', {foo: 1})).to.equal(1);
@@ -266,6 +273,13 @@ describe('BindExpression', () => {
     expect(() => {
       evaluate('Math.abs(-1)', {Math});
     }).to.throw(unsupportedFunctionError);
+  });
+
+  it('should support encodeURI and encodeURIComponent', () => {
+    expect(evaluate('encodeURI("http://www.google.com/s p a c e.html")'))
+        .to.equal('http://www.google.com/s%20p%20a%20c%20e.html');
+    expect(evaluate('encodeURIComponent("http://www.google.com/foo?foo=bar")'))
+        .to.equal('http%3A%2F%2Fwww.google.com%2Ffoo%3Ffoo%3Dbar');
   });
 
   it('should support BindArrays functions', () => {
@@ -440,8 +454,6 @@ describe('BindExpression', () => {
     expect(() => { evaluate('parseInt()'); }).to.throw();
     expect(() => { evaluate('decodeURI()'); }).to.throw();
     expect(() => { evaluate('decodeURIComponent()'); }).to.throw();
-    expect(() => { evaluate('encodeURI()'); }).to.throw();
-    expect(() => { evaluate('encodeURIComponent()'); }).to.throw();
     expect(() => { evaluate('escape()'); }).to.throw();
     expect(() => { evaluate('unescape()'); }).to.throw();
 

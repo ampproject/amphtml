@@ -35,11 +35,16 @@ import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
+import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
+import {dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {computedStyle} from '../../../src/style';
+import {
+  computedStyle,
+  setStyles,
+} from '../../../src/style';
 import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {insertAnalyticsElement} from '../../../src/analytics';
@@ -104,6 +109,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
+
+    /** @private {?Element} */
+    this.ampAnalyticsElement_ = null;
   }
 
   /** @override */
@@ -182,7 +190,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
+        this,
+        responseHeaders,
+        this.lifecycleReporter_.getDeltaTime(),
+        this.lifecycleReporter_.getInitTime());
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
@@ -231,20 +243,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.lifecycleReporter_.sendPing(eventName);
   }
 
-  /** @override */
-  unlayoutCallback() {
-    super.unlayoutCallback();
-    this.element.setAttribute('data-amp-slot-index',
-        this.win.ampAdSlotIdCounter++);
-    this.lifecycleReporter_ = this.initLifecycleReporter();
-    if (this.uniqueSlotId_) {
-      sharedState.removeSlot(this.uniqueSlotId_);
-    }
-    this.ampAnalyticsConfig_ = null;
-  }
-
   /**
-   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+   * @return {!../../../ads/google/a4a/performance.BaseLifecycleReporter}
    */
   initLifecycleReporter() {
     return googleLifecycleReporterFactory(this);
@@ -254,10 +254,34 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
-      insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      dev().assert(!this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ =
+          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
+
+    this.lifecycleReporter_.addPingsForVisibility(this.element);
+
+    setStyles(dev().assertElement(this.iframe), {
+      width: `${this.size_.width}px`,
+      height: `${this.size_.height}px`,
+    });
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    super.unlayoutCallback();
+    this.element.setAttribute('data-amp-slot-index',
+        this.win.ampAdSlotIdCounter++);
+    this.lifecycleReporter_ = this.initLifecycleReporter();
+    if (this.uniqueSlotId_) {
+      sharedState.removeSlot(this.uniqueSlotId_);
+    }
+    if (this.ampAnalyticsElement_) {
+      removeElement(this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ = null;
+    }
+    this.ampAnalyticsConfig_ = null;
   }
 }
 
 AMP.registerElement('amp-ad-network-adsense-impl', AmpAdNetworkAdsenseImpl);
-

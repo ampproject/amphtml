@@ -17,7 +17,6 @@
 import {
   getService,
   getServiceForDoc,
-  getExistingServiceForDoc,
   getServicePromiseForDoc,
   getExistingServiceForWindowOrNull,
   getExistingServiceForDocInEmbedScope,
@@ -70,6 +69,15 @@ export function activityForDoc(nodeOrDoc) {
 }
 
 /**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!Promise<!../extensions/amp-form/0.1/amp-form.AmpFormService>}
+ */
+export function ampFormServiceForDoc(nodeOrDoc) {
+  return /** @type {!Promise<!../extensions/amp-form/0.1/amp-form.AmpFormService>} */ ( // eslint-disable-line max-len
+    getElementServiceForDoc(nodeOrDoc, 'amp-form', 'amp-form'));
+}
+
+/**
  * @param {!Window} window
  * @return {!./service/batched-xhr-impl.BatchedXhr}
  */
@@ -78,13 +86,12 @@ export function batchedXhrFor(window) {
       getService(window, 'batched-xhr'));
 }
 
-// TODO(choumx): Investigate why amp-bind.Bind type reference not recognized.
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<*>}
+ * @return {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>}
  */
 export function bindForDoc(nodeOrDoc) {
-  return /** @type {!Promise<*>} */ (
+  return /** @type {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
       getElementServiceForDoc(nodeOrDoc, 'bind', 'amp-bind'));
 }
 
@@ -150,7 +157,7 @@ export function inputFor(win) {
  */
 export function parallaxForDoc(nodeOrDoc) {
   return /** @type {!./service/parallax-impl.ParallaxService} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
+      getServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
 }
 
 /**
@@ -272,7 +279,7 @@ export function videoManagerForDoc(nodeOrDoc) {
  */
 export function viewerForDoc(nodeOrDoc) {
   return /** @type {!./service/viewer-impl.Viewer} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'viewer'));
+      getServiceForDoc(nodeOrDoc, 'viewer'));
 }
 
 /**

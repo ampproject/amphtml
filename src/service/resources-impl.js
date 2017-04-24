@@ -92,6 +92,12 @@ export class Resources {
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
 
+    /**
+     * Used primarily for testing to allow build phase to proceed.
+     * @const @private {boolean}
+     */
+    this.isBuildOn_ = false;
+
     /** @private @const {number} */
     this.maxDpr_ = this.win.devicePixelRatio || 1;
 
@@ -408,11 +414,11 @@ export class Resources {
    */
   ensuredMeasured_(resource) {
     if (resource.hasBeenMeasured()) {
-      return Promise.resolve(resource.getLayoutBox());
+      return Promise.resolve(resource.getPageLayoutBox());
     }
     return this.vsync_.measurePromise(() => {
       resource.measure();
-      return resource.getLayoutBox();
+      return resource.getPageLayoutBox();
     });
   }
 
@@ -489,7 +495,7 @@ export class Resources {
    */
   buildOrScheduleBuildForResource_(resource, checkForDupes = false,
       scheduleWhenBuilt = true) {
-    if (this.isRuntimeOn_) {
+    if (this.isRuntimeOn_ || this.isBuildOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
@@ -499,8 +505,7 @@ export class Resources {
           this.schedulePass();
         }
       } else if (!resource.element.isBuilt()) {
-        if (!checkForDupes ||
-            this.pendingBuildResources_.indexOf(resource) == -1) {
+        if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
           this.buildReadyResources_(scheduleWhenBuilt);
@@ -1251,7 +1256,6 @@ export class Resources {
    * @private
    */
   discoverWork_() {
-
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
     const now = Date.now();
@@ -1290,7 +1294,8 @@ export class Resources {
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner()) {
+        if (r.hasOwner() && !r.isMeasureRequested()) {
+          // If element has owner, and measure is not requested, do nothing.
           continue;
         }
         if (relayoutAll ||
@@ -1629,7 +1634,7 @@ export class Resources {
   completeScheduleChangeSize_(resource, newHeight, newWidth, marginChange,
       force, opt_callback) {
     resource.resetPendingChangeSize();
-    const layoutBox = resource.getLayoutBox();
+    const layoutBox = resource.getPageLayoutBox();
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
         (newWidth === undefined || newWidth == layoutBox.width) &&
         (marginChange === undefined || !areMarginsChanged(

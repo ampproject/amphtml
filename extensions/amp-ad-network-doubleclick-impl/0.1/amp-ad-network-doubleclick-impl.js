@@ -37,11 +37,13 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
+import {removeElement} from '../../../src/dom';
+import {dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/analytics';
-
+import {setStyles} from '../../../src/style';
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
@@ -76,6 +78,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
+
+    /** @private {?Element} */
+    this.ampAnalyticsElement_ = null;
   }
 
   /** @override */
@@ -150,7 +155,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
+        this,
+        responseHeaders,
+        this.lifecycleReporter_.getDeltaTime(),
+        this.lifecycleReporter_.getInitTime());
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
@@ -160,7 +169,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return adResponsePromise.then(adResponse => {
       // If the server returned a size, use that, otherwise use the size that
       // we sent in the ad request.
-      adResponse.size = adResponse.size || this.size_;
+      if (adResponse.size) {
+        this.size_ = adResponse.size;
+      } else {
+        adResponse.size = this.size_;
+      }
       this.handleResize_(adResponse.size.width, adResponse.size.height);
       return Promise.resolve(adResponse);
     });
@@ -180,11 +193,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
+    if (this.ampAnalyticsElement_) {
+      removeElement(this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ = null;
+    }
     this.ampAnalyticsConfig_ = null;
   }
 
   /**
-   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+   * @return {!../../../ads/google/a4a/performance.BaseLifecycleReporter}
    */
   initLifecycleReporter() {
     return googleLifecycleReporterFactory(this);
@@ -194,8 +211,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
-      insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      dev().assert(!this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ =
+          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
+
+    this.lifecycleReporter_.addPingsForVisibility(this.element);
+
+    setStyles(dev().assertElement(this.iframe), {
+      width: `${this.size_.width}px`,
+      height: `${this.size_.height}px`,
+    });
   }
 
   /**

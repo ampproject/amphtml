@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import {performanceForOrNull} from '../../../src/services';
+import {performanceForOrNull} from './services';
+import {dev} from './log';
+
+const LABEL_MAP = {
+  0: 'cld',
+  2: 'adld',
+};
 
 /**
  * Measures the time latency between "first time in viewport" and
@@ -24,11 +30,12 @@ export class LayoutDelayMeter {
 
   /**
    * @param {!Window} win
+   * @param {number} priority
    */
-  constructor(win) {
+  constructor(win, priority) {
     /** @private {!Window} */
     this.win_ = win;
-    /** @private {?../../../src/service/performance-impl.Performance} */
+    /** @private {?./service/performance-impl.Performance} */
     this.performance_ = performanceForOrNull(win);
     /** @private {?number} */
     this.firstInViewportTime_ = null;
@@ -36,10 +43,12 @@ export class LayoutDelayMeter {
     this.firstLayoutTime_ = null;
     /** @private {boolean} */
     this.done_ = false;
+    /** @private {?string} */
+    this.label_ = LABEL_MAP[priority];
   }
 
   enterViewport() {
-    if (this.firstInViewportTime_) {
+    if (!this.label_ || this.firstInViewportTime_) {
       return;
     }
     this.firstInViewportTime_ = this.win_.Date.now();
@@ -47,7 +56,7 @@ export class LayoutDelayMeter {
   }
 
   startLayout() {
-    if (this.firstLayoutTime_) {
+    if (!this.label_ || this.firstLayoutTime_) {
       return;
     }
     this.firstLayoutTime_ = this.win_.Date.now();
@@ -68,9 +77,8 @@ export class LayoutDelayMeter {
     }
     const delay = this.win_.Math.max(
         this.firstLayoutTime_ - this.firstInViewportTime_, 0);
-    this.performance_.tickDelta('adld', delay);
-    // have to flush after tickDelta to prevent being overridden.
-    this.performance_.flush();
+    this.performance_.tickDelta(dev().assertString(this.label_), delay);
+    this.performance_.throttledFlush();
     this.done_ = true;
   }
 }
