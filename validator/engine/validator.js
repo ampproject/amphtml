@@ -837,7 +837,7 @@ class ChildTagMatcher {
     this.numChildTagsSeen_++;  // Increment this first to allow early exit.
     if (childTags.childTagNameOneof.length > 0) {
       const names = childTags.childTagNameOneof;
-      if (names.indexOf(tagName) === -1) {
+      if (!names.includes(tagName)) {
         if (!amp.validator.LIGHT) {
           const allowedNames = '[\'' + names.join('\', \'') + '\']';
           context.addError(
@@ -3026,12 +3026,21 @@ function validateAttributeInExtension(
 
   const extensionSpec = tagSpec.extensionSpec;
   // TagSpecs with extensions will only be evaluated if their dispatch_key
-  // matches, which is based on this custom-element/custom-template field.
+  // matches, which is based on this custom-element/custom-template field
+  // attribute value. The dispatch key matching is case-insensitive for
+  // faster lookups, so it still possible for the attribute value to not
+  // match if it contains upper-case letters.
   if (!extensionSpec.isCustomTemplate && attrName === 'custom-element') {
-    goog.asserts.assert(extensionSpec.name === attrValue);
+    if (extensionSpec.name !== attrValue) {
+      goog.asserts.assert(extensionSpec.name === attrValue.toLowerCase());
+      return false;
+    }
     return true;
   } else if (extensionSpec.isCustomTemplate && attrName === 'custom-template') {
-    goog.asserts.assert(extensionSpec.name === attrValue);
+    if (extensionSpec.name !== attrValue) {
+      goog.asserts.assert(extensionSpec.name === attrValue.toLowerCase());
+      return false;
+    }
     return true;
   } else if (attrName === 'src') {
     const srcUrlRe =

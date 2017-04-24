@@ -77,32 +77,6 @@ tags: {  # amp-analytics (json)
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-analytics"
 }
-# This tag isn't intended to be used by publishers directly, but may be
-# emitted by the AMP cache.
-tags: {  # amp-ad-metadata (json)
-  tag_name: "SCRIPT"
-  spec_name: "amp-ad-metadata .json script"
-  mandatory_parent: "BODY"
-  attrs: {
-    name: "amp-ad-metadata"
-    mandatory: true
-    value: ""
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "type"
-    mandatory: true
-    value_casei: "application/json"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "<!--"
-      error_message: "html comments"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-analytics"
-}
 tags: {  # <amp-analytics>
   tag_name: "AMP-ANALYTICS"
   disallowed_ancestor: "AMP-SIDEBAR"
