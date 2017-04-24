@@ -25,7 +25,6 @@ import {extensionsFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
-import {timerFor} from '../../../src/services';
 
 /** @const */
 const TAG = 'amp-lightbox-viewer';
@@ -128,7 +127,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.manager_.getElements().then(list => {
         const lightboxableElements = list;
         this.vsync_.mutate(() => {
+          let index = 0;
           lightboxableElements.forEach(element => {
+            element.setAttribute('amp-lbv-id', index++);
             let nodeToClone;
             if (element.classList.contains('i-amphtml-element')) {
               nodeToClone = element.cloneNode(false);
@@ -243,9 +244,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.updateInViewport(this.container_, true);
     this.scheduleLayout(this.container_);
 
-    // timerFor(this.win).delay(() => {
-    //   this.carousel_.implementation_.showSlideWhenReady_(2);
-    // }, 500);
+    const index = Number(element.getAttribute('amp-lbv-id'));
+    this.carousel_.implementation_.showSlideWhenReady_(index);
 
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
