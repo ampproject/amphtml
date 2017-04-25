@@ -29,8 +29,10 @@ export class AmpState extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @visibleForTesting {?Promise} */
-    this.updateStatePromise = null;
+    if (getMode().test) {
+      /** @visibleForTesting {?Promise} */
+      this.updateStatePromise = null;
+    }
   }
 
 
