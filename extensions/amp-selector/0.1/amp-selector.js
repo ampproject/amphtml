@@ -61,7 +61,7 @@ export class AmpSelector extends AMP.BaseElement {
     this.focusedIndex_ = 0;
 
     /** @private {!KEYBOARD_SELECT_MODES} */
-    this.kbSelectMode_ = KEYBOARD_SELECT_MODES.FOCUS;
+    this.kbSelectMode_ = KEYBOARD_SELECT_MODES.NONE;
   }
 
   /** @override */
