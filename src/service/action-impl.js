@@ -182,7 +182,8 @@ export class ActionService {
       this.root_.addEventListener('keydown', event => {
         if (event.keyCode == 13 /* enter */ ||
             event.keyCode == 32 /* space */) {
-          if (!event.defaultPrevented) {
+          if (!event.defaultPrevented &&
+              this.ampdoc.win.document.activeElement == event.target) {
             this.trigger(dev().assertElement(event.target), name, event);
           }
         }
