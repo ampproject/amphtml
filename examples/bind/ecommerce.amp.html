@@ -222,7 +222,7 @@
     </p>
 
     <div class="options colors">
-      <h6>COLOR : <span [text]="shirts[selected.id].color">BLACK</span></h6>
+      <h6>COLOR : <span [text]="shirts[selected.id].color">black</span></h6>
 
       <amp-selector on="select:AMP.setState({selected: {id: event.targetOption}})">
         <table>
@@ -277,7 +277,7 @@
 
     <div class="options quantity">
       <h6>QUANTITY :</h6>
-      <select [disabled]="!shirts[selected.id].sizes[selectedSize]">
+      <select disabled [disabled]="!shirts[selected.id].sizes[selectedSize]">
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
@@ -290,7 +290,8 @@
             : '---'"
           [class]="(!selectedSize || shirts[selected.id].sizes[selectedSize])
             ? 'mdl-color-text--grey'
-            : 'mdl-color-text--red'">
+            : 'mdl-color-text--red'"
+          class="mdl-color-text--grey">
         ---</h5>
 
       <!--
