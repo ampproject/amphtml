@@ -16,9 +16,11 @@
 
 import {isJsonScriptTag} from '../../../src/dom';
 import {createElementWithAttributes} from '../../../src/dom';
+import {loadPromise} from '../../../src/event-helper';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
-import {expandTemplate} from '../../../src/string';
+import {expandTemplate, startsWith} from '../../../src/string';
+import {setStyles} from '../../../src/style';
 import {isArray, isObject} from '../../../src/types';
 import {hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
@@ -221,7 +223,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
-    this.handleRequestsFrameUrl_(this.config_);
+    this.handleRequestsFrameUrl_();
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -284,26 +286,38 @@ export class AmpAnalytics extends AMP.BaseElement {
    * If requestsFrameUrl (and optionally dataHash as well) are specified in
    * config, check whether third-party iframe already exists, and if not,
    * create it.
-   * @param {!JSONType} config
    * @private
    */
-  handleRequestsFrameUrl_(config) {
-    if (config['requestsFrameUrl'] && config['dataHash']) {
-      if (!config['dataHash'].startsWith('#')) {
-        config['requestsFrameUrl'] += '#';
-      }
-      config['requestsFrameUrl'] += config['dataHash'];
+  handleRequestsFrameUrl_() {
+    if (!this.config_['requestsFrameUrl']) {
+      return;
     }
-    // TODO: Safety check requestsFrameUrl!
-    // If frame doesn't exist for this requestsFrameUrl, create it.
-    if (!AmpAnalytics.requestsFrames.has(config['requestsFrameUrl'])) {
-      const doc = this.element.ampdoc_.win.document;
-      const frame = AmpAnalytics.requestsFrames.create(doc,
-        config['requestsFrameUrl']);
+    const requestsFrameKey = this.buildRequestsFrameUrlWithDataHash(
+      this.config_['requestsFrameUrl'], this.config_['dataHash']);
+    // TODO: Safety check requestsFrameKey!
+    // If frame doesn't exist for this requestsFrameKey, create it.
+    if (!AmpAnalytics.requestsFrames.has(requestsFrameKey)) {
+      const doc = this.getAmpDoc().win.document;
+      const frame = AmpAnalytics.requestsFrames.create(doc, requestsFrameKey);
       doc.body.appendChild(frame);
     }
   }
 
+  /**
+   * Builds the full URL to a requestsFrame, from the base URL and the data
+   * hash. These are separate because while the base URL must be specified
+   * in vendors.js, the data hash may be specified from a static JSON block
+   * within the creative.
+   * @param {!string} requestsFrameUrl
+   * @param {string=} dataHash
+   */
+  buildRequestsFrameUrlWithDataHash(requestsFrameUrl, dataHash) {
+    if (dataHash) {
+      return requestsFrameUrl +
+          (startsWith(dataHash, '#') ? dataHash : '#' + dataHash);
+    }
+    return requestsFrameUrl;
+  }
   /**
    * Calls `AnalyticsGroup.addTrigger` and reports any errors. "NoInline" is
    * to avoid inlining this method so that `try/catch` does it veto
@@ -616,7 +630,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       })
       .then(request => {
         if (this.config_['requestsFrameUrl']) {
-          AmpAnalytics.requestsFrames.send(this.config_['requestsFrameUrl'],
+          const requestsFrameKey = this.buildRequestsFrameUrlWithDataHash(
+              this.config_['requestsFrameUrl'], this.config_['dataHash']);
+          AmpAnalytics.requestsFrames.send(requestsFrameKey,
             request);
         } else {
           this.sendRequest_(request, trigger);
@@ -863,33 +879,35 @@ export class AmpAnalytics extends AMP.BaseElement {
  */
 class AmpAnalyticsFrames {
   constructor() {
-    this.requestsFrameMap = new Map();
+    this.requestsFrameMap = map();
   }
 
   /**
    * Create a cross-domain iframe
-   * @param {!Element} parent  The document node of the parent page
+   * @param {!HTMLDocument} parent  The document node of the parent page
    * @param {!string} requestsFrameUrl  The URL, including data hash if
    * applicable, of the cross-domain iframe
    * @return {!Element}
    */
   create(parent, requestsFrameUrl) {
-    let frame = createElementWithAttributes(parent, 'iframe', {
+    // Warning: the scriptSrc URL below is only temporary. Don't check
+    // in before getting resolution on that.
+    const frame = createElementWithAttributes(parent, 'iframe', {
       sandbox: 'allow-scripts',
       name: JSON.stringify({
-        'scriptSrc': '/examples/analytics-3p-remote-frame-helper.js'
+        'scriptSrc': '/examples/analytics-3p-remote-frame-helper.js',
       }),
     });
-    frame.onload = () => {
+    loadPromise(frame).then(() => {
       this.setIsReady(requestsFrameUrl);
-    };
-    frame.src = requestsFrameUrl; // Set AFTER onload to avoid race
-    frame.style.cssText='width:0;height:0;visibility:hidden;';
-    this.requestsFrameMap.set(requestsFrameUrl, {
-      frame: frame,
+    });
+    frame.src = requestsFrameUrl; // Set AFTER loadPromise to avoid race
+    setStyles(frame, {width: 0,height: 0,visibility: 'hidden'});
+    this.requestsFrameMap[requestsFrameUrl] = {
+      frame,
       isReady: false,
       msgQueue: [],
-    });
+    };
     return frame;
   }
 
@@ -899,7 +917,7 @@ class AmpAnalyticsFrames {
    * @return {!boolean}
    */
   has(requestsFrameUrl) {
-    return this.requestsFrameMap.has(requestsFrameUrl);
+    return hasOwn(this.requestsFrameMap, requestsFrameUrl);
   }
 
   /**
@@ -910,16 +928,11 @@ class AmpAnalyticsFrames {
    * @param {!string} message
    */
   send(requestsFrameUrl, message) {
-    try {
-      const requestsFrame = this.requestsFrameMap.get(requestsFrameUrl);
-      if (requestsFrame.isReady) {
-        this.send_(requestsFrame.frame, [message]);
-      } else {
-        requestsFrame.msgQueue.push(message);
-      }
-    } catch (err) {
-      console.error("Failed to send event '" + err + "' to URL '" +
-        requestsFrameUrl + "'");
+    const requestsFrame = this.requestsFrameMap[requestsFrameUrl];
+    if (requestsFrame.isReady) {
+      this.send_(requestsFrame.frame, [message]);
+    } else {
+      requestsFrame.msgQueue.push(message);
     }
   }
 
@@ -942,11 +955,10 @@ class AmpAnalyticsFrames {
    * @param {!string} requestsFrameUrl
    */
   setIsReady(requestsFrameUrl) {
-    let requestsFrame = this.requestsFrameMap.get(requestsFrameUrl);
+    const requestsFrame = this.requestsFrameMap[requestsFrameUrl];
     requestsFrame.isReady = true;
     this.send_(requestsFrame.frame, requestsFrame.msgQueue);
     requestsFrame.msgQueue = [];
-    this.requestsFrameMap.set(requestsFrameUrl, requestsFrame);
   }
 }
 AmpAnalytics.requestsFrames = new AmpAnalyticsFrames();
