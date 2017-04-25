@@ -318,15 +318,19 @@ export class AmpSelector extends AMP.BaseElement {
 
     switch (event.keyCode) {
       case 37: // Left
+        // Left is considered 'previous' in LTR and 'next' in RTL.
         dir = isLtr ? -1 : 1;
         break;
       case 38: // Up
+        // Up is considered 'previous' in both LTR and RTL.
         dir = -1;
         break;
       case 39: // Right
+        // Right is considered 'next' in LTR and 'previous' in RTL.
         dir = isLtr ? 1 : -1;
         break;
       case 40: // Down
+        // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
     }
