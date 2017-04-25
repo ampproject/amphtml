@@ -31,10 +31,14 @@
 
   <div>
     <h2>Linked carousels</h2>
-    <p [text]="'Selected slide: ' + selectedSlide">Selected slide: None<p>
-
+    <p [text]="'Selected slide: ' + (selectedSlide || 0)">Selected slide: 0<p>
+    <p [text]="'Slide count: ' + (slideCount || 9)">Slide count: 9</p>
+    <div>
+     <button on="tap:AMP.setState({slideCount: slideCount != 4 ? 4 : 9})">Change slide count</button>
+    </div>
     <amp-carousel controls type=slides width=400 height=300
-        [slide]="selectedSlide" on="slideChange:AMP.setState({selectedSlide: event.index})">
+        [slide]="selectedSlide" on="slideChange:AMP.setState({selectedSlide: event.index})"
+        [slide-count]="slideCount">
       <amp-img src="https://ampbyexample.com/img/image1.jpg" width=400 height=300></amp-img>
       <amp-img src="https://ampbyexample.com/img/image2.jpg" width=400 height=300></amp-img>
       <amp-img src="https://ampbyexample.com/img/image3.jpg" width=400 height=300></amp-img>

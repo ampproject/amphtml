@@ -220,6 +220,22 @@ export class AmpSlideScroll extends BaseSlides {
     if (slide !== undefined) {
       this.showSlideWhenReady_(slide);
     }
+    const slideCount = mutations['slide-count'];
+    if (slideCount !== undefined && isFinite(slideCount)) {
+      let slideCountNum = Number(slideCount);
+      // Clamp count to between 0 and the total number of slides
+      slideCountNum = Math.max(Math.min(this.slides_.length, slideCountNum), 0);
+      this.noOfSlides_ = slideCountNum;
+      const showIndexArr = [];
+      for (let i = 0; i < slideCountNum; i++) {
+        showIndexArr.push(i);
+      }
+      this.hideRestOfTheSlides_(showIndexArr);
+      if (this.slideIndex_ > slideCountNum) {
+        this.showSlideWhenReady_(slideCountNum - 1);
+      }
+      this.setControlsState();
+    }
   }
 
   /**
@@ -296,7 +312,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   hasNext() {
-    return this.shouldLoop || this.slideIndex_ < this.slides_.length - 1;
+    return this.shouldLoop || this.slideIndex_ < this.noOfSlides_ - 1;
   }
 
   /** @override */
@@ -598,8 +614,8 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   hideRestOfTheSlides_(indexArr) {
-    const noOfSlides_ = this.noOfSlides_;
-    for (let i = 0; i < noOfSlides_; i++) {
+    const totalNumSlides = this.slides_.length;
+    for (let i = 0; i < totalNumSlides; i++) {
       if (!this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
         continue;
       }
