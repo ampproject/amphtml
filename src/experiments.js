@@ -38,6 +38,14 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 let toggles_ = null;
 
 /**
+ * @typedef {{
+ *   isTrafficEligible: !function(!Window):boolean,
+ *   branches: !Array<string>
+ * }}
+ */
+export let ExperimentInfo;
+
+/**
  * Whether we are in canary.
  * @param {!Window} win
  * @return {boolean}
@@ -219,4 +227,112 @@ export function resetExperimentTogglesForTesting(win) {
     domain: win.location.hostname,
   });
   toggles_ = null;
+}
+
+/**
+ * In some browser implementations of Math.random(), sequential calls of
+ * Math.random() are correlated and can cause a bias.  In particular,
+ * if the previous random() call was < 0.001 (as it will be if we select
+ * into an experiment), the next value could be less than 0.5 more than
+ * 50.7% of the time.  This provides an implementation that roots down into
+ * the crypto API, when available, to produce less biased samples.
+ *
+ * @return {number} Pseudo-random floating-point value on the range [0, 1).
+ */
+function slowButAccuratePrng() {
+  // TODO(tdrl): Implement.
+  return Math.random();
+}
+
+/**
+ * Container for alternate random number generator implementations.  This
+ * allows us to set an "accurate" PRNG for branch selection, but to mock it
+ * out easily in tests.
+ *
+ * @visibleForTesting
+ * @const {!{accuratePrng: function():number}}
+ */
+export const RANDOM_NUMBER_GENERATORS = {
+  accuratePrng: slowButAccuratePrng,
+};
+
+/**
+ * Selects, uniformly at random, a single item from the array.
+ * @param {!Array<string>} arr Object to select from.
+ * @return {?string} Single item from arr or null if arr was empty.
+ */
+function selectRandomItem(arr) {
+  const rn = RANDOM_NUMBER_GENERATORS.accuratePrng();
+  return arr[Math.floor(rn * arr.length)] || null;
+}
+
+/**
+ * Selects which page-level experiment branches are enabled. If a given
+ * experiment name is already set (including to the null / no branches selected
+ * state), this won't alter its state.
+ *
+ * Check whether a given experiment is set using isExperimentOn(win,
+ * experimentName) and, if it is on, look for which branch is selected in
+ * win.experimentBranches[experimentName].
+ *
+ * @param {!Window} win Window context on which to save experiment
+ *     selection state.
+ * @param {!Object<string, !ExperimentInfo>} experiments  Set of experiments to
+ *     configure for this page load.
+ * @visibleForTesting
+ */
+export function randomlySelectUnsetExperiments(win, experiments) {
+  win.experimentBranches = win.experimentBranches || {};
+  for (const experimentName in experiments) {
+    // Skip experimentName if it is not a key of experiments object or if it
+    // has already been populated by some other property.
+    if (!experiments.hasOwnProperty(experimentName) ||
+        win.experimentBranches.hasOwnProperty(experimentName)) {
+      continue;
+    }
+
+    if (!experiments[experimentName].isTrafficEligible ||
+        !experiments[experimentName].isTrafficEligible(win)) {
+      win.experimentBranches[experimentName] = null;
+      continue;
+    }
+
+    // If we're in the experiment, but we haven't already forced a specific
+    // experiment branch (e.g., via a test setup), then randomize the branch
+    // choice.
+    if (!win.experimentBranches[experimentName] &&
+        isExperimentOn(win, experimentName)) {
+      const branches = experiments[experimentName].branches;
+      win.experimentBranches[experimentName] = selectRandomItem(branches);
+    }
+  }
+}
+
+/**
+ * Returns the experiment branch enabled for the given experiment ID.
+ * For example, 'control' or 'experiment'.
+ *
+ * @param {!Window} win Window context to check for experiment state.
+ * @param {!string} experimentName Name of the experiment to check.
+ * @return {?string} Active experiment branch ID for experimentName (possibly
+ *     null if experimentName has been tested but no branch was enabled).
+ */
+export function getExperimentBranch(win, experimentName) {
+  return win.experimentBranches[experimentName];
+}
+
+/**
+ * Force enable (or disable) a specific branch of a given experiment name.
+ * Disables the experiment name altogether if branchId is falseish.
+ *
+ * @param {!Window} win Window context to check for experiment state.
+ * @param {!string} experimentName Name of the experiment to check.
+ * @param {?string} branchId ID of branch to force or null to disable
+ *     altogether.
+ * @visibleForTesting
+ */
+export function forceExperimentBranch(win, experimentName, branchId) {
+  win.experimentBranches = win.experimentBranches || {};
+  toggleExperiment(win, experimentName, !!branchId, true);
+  win.experimentBranches[experimentName] = branchId;
 }

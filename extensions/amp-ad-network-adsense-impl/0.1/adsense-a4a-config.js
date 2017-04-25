@@ -48,18 +48,21 @@ const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 // debug traffic profiling.  Once we have debugged the a4a implementation and
 // can disable profiling again, we can return these constants to being
 // private to this file.
-/** const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo}  */
+/**
+ * const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
+ */
 export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
   control: '117152650',
   experiment: '117152651',
   controlMeasureOnRender: '2093326',
 };
 
-/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo}  */
+/**
+ * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
+ */
 export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
   control: '117152670',
   experiment: '117152671',
-  controlMeasureOnRender: null,
 };
 
 /**
