@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 import {loadScript, validateData} from '../3p/3p';
 import {yandex} from './yandex';
-import {createElementWithAttributes} from '../src/dom';
 
 /**
  * @param {!Window} global
@@ -45,9 +44,9 @@ function loadAdFox(global, cb) {
  * @param {string} name
  */
 function createContainer(global, name) {
-  const d = createElementWithAttributes(global.document, 'div', {
-    id: name,
-  });
+  const d = global.document.createElement('div');
+  d.setAttribute('id', name);
+
   global.document.getElementById('c').appendChild(d);
 }
 
