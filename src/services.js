@@ -18,7 +18,7 @@ import {
   getService,
   getServiceForDoc,
   getServicePromiseForDoc,
-  getExistingServiceForWindowOrNull,
+  getExistingServiceOrNull,
   getExistingServiceForDocInEmbedScope,
 } from './service';
 import {
@@ -175,7 +175,7 @@ export function performanceFor(window) {
  */
 export function performanceForOrNull(window) {
   return /** @type {!./service/performance-impl.Performance}*/ (
-      getExistingServiceForWindowOrNull(window, 'performance'));
+      getExistingServiceOrNull(window, 'performance'));
 }
 
 /**
