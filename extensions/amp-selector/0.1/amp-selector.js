@@ -57,7 +57,12 @@ export class AmpSelector extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {number} */
+    /**
+     * The index of the option that should receive tab focus. Only one
+     * option should ever receive tab focus, with the other options reachable
+     * by arrow keys when the option is in focus.
+     * @private {number}
+     */
     this.focusedIndex_ = 0;
 
     /** @private {!KEYBOARD_SELECT_MODES} */
@@ -308,33 +313,34 @@ export class AmpSelector extends AMP.BaseElement {
     // Make currently selected option unfocusable
     this.options_[this.focusedIndex_].tabIndex = -1;
 
-    const dir = this.win.document.body.getAttribute('dir') || 'ltr';
-    const ltr = dir != 'rtl';
-    let delta = 0;
+    const isLtr = this.win.document.body.getAttribute('dir') != 'rtl';
+    let dir = 0;
 
     switch (event.keyCode) {
       case 37: // Left
-        delta = ltr ? -1 : 1;
+        dir = isLtr ? -1 : 1;
         break;
       case 38: // Up
-        delta = -1;
+        dir = -1;
         break;
       case 39: // Right
-        delta = ltr ? 1 : -1;
+        dir = isLtr ? 1 : -1;
         break;
       case 40: // Down
-        delta = 1;
+        dir = 1;
         break;
     }
 
-    if (delta == 0) {
+    if (dir == 0) {
       return;
     }
     event.preventDefault();
 
-    this.focusedIndex_ = (this.focusedIndex_ + delta) % this.options_.length;
+    // Change the focus to the next element in the specified direction.
+    // The selection should loop around if the user attempts to go one
+    // past the beginning or end.
+    this.focusedIndex_ = (this.focusedIndex_ + dir) % this.options_.length;
     if (this.focusedIndex_ < 0) {
-      // Wrap back around
       this.focusedIndex_ = this.focusedIndex_ + this.options_.length;
     }
 
