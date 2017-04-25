@@ -50,15 +50,19 @@
       margin-bottom: 0;
       text-align: center;
     }
+    #carousel {
+      margin: 16px;
+    }
     .dots {
       text-align: center;
     }
     .dots span {
       display: inline-block;
       background: #ccc;
-      border-radius: 4px;
-      width: 8px;
-      height: 8px;
+      border-radius: 6px;
+      width: 12px;
+      height: 12px;
+      margin: 4px;
     }
     .dots span.current {
       background: #555;
@@ -146,6 +150,9 @@
       - Reintroduce variables in object keys (removed in #7582)
 
     <amp-state [src]="..." on="fetch:AMP.setState({"shirts": {selected: {id: event.response}}})"
+
+    Note that shirt with ID == "0" contains size data (but other IDs don't)
+    because it's the default shirt color at page load.
   -->
   <amp-state id="shirts" [src]="'/bind/ecommerce/sizes?shirt=' + selected.id">
     <script type="application/json">
@@ -209,16 +216,20 @@
     <h5 class="title">MEN'S COTTON CREW NECK<br>LONG SLEEVE T-SHIRT</h5>
     <h6 class="rating"><span class="mdl-color-text--red">★★★★☆</span> <span class="mdl-color-text--grey">(14)</span></h6>
 
-    <amp-carousel type="slides" layout="fixed-height" height=250 on="slideChange:AMP.setState({selected: {slide: event.index}})">
+    <amp-carousel type="slides" layout="fixed-height" height=250 id="carousel"
+        [slide]="selected.slide" on="slideChange:AMP.setState({selected: {slide: event.index}})">
       <amp-img width=200 height=250 src="./shirts/black.jpg" [src]="shirts[selected.id].image"></amp-img>
-      <amp-img width=200 height=250 src="./shirts/black.jpg" [src]="shirts[selected.id].image"></amp-img>
-      <amp-img width=200 height=250 src="./shirts/black.jpg" [src]="shirts[selected.id].image"></amp-img>
+      <amp-img width=300 height=375 src="./shirts/black.jpg" [src]="shirts[selected.id].image"></amp-img>
+      <amp-img width=400 height=500 src="./shirts/black.jpg" [src]="shirts[selected.id].image"></amp-img>
     </amp-carousel>
 
     <p class="dots">
-      <span [class]="selected.slide == 0 ? 'current' : ''" class="current"></span>
-      <span [class]="selected.slide == 1 ? 'current' : ''"></span>
-      <span [class]="selected.slide == 2 ? 'current' : ''"></span>
+      <span [class]="selected.slide == 0 ? 'current' : ''" class="current"
+          on="tap:AMP.setState({selected: {slide: 0}})"></span>
+      <span [class]="selected.slide == 1 ? 'current' : ''"
+          on="tap:AMP.setState({selected: {slide: 1}})"></span>
+      <span [class]="selected.slide == 2 ? 'current' : ''"
+          on="tap:AMP.setState({selected: {slide: 2}})"></span>
     </p>
 
     <div class="options colors">
@@ -305,6 +316,15 @@
       </amp-variable>
       -->
 
+      <!--
+        Show the "ADD TO BAG" button when:
+        1. There is no selected size, OR
+        2. The sizes for the shirt color in the selected size has NOT been fetched yet, OR
+        3. The selected size for the selected color is available
+
+        Note that in cases (1) and (2) the button is visible but disabled. This replicates the behavior
+        in a certain e-commerce site I modeled this example off of. :)
+      -->
       <button class="mdl-button mdl-button--raised mdl-button--accent"
           [class]="'mdl-button mdl-button--raised mdl-button--accent ' +
             ((!selectedSize || !shirts[selected.id].sizes || shirts[selected.id].sizes[selectedSize]) ? '' : 'hidden')"
