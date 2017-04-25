@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
-import {batchedXhrFor} from '../../../src/services';
-import {getValueForExpr} from '../../../src/json';
+import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeChildren} from '../../../src/dom';
 import {templatesFor} from '../../../src/services';
-import {urlReplacementsForDoc} from '../../../src/services';
 import {user} from '../../../src/log';
-
 
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
@@ -40,12 +38,14 @@ export class AmpList extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
+
     if (!this.container_.hasAttribute('role')) {
       this.container_.setAttribute('role', 'list');
     }
 
-    /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsForDoc(this.getAmpDoc());
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
   }
 
   /** @override */
@@ -55,25 +55,37 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.urlReplacements_.expandAsync(assertHttpsUrl(
-        this.element.getAttribute('src'), this.element)).then(src => {
-          const opts = {};
-          if (this.element.hasAttribute('credentials')) {
-            opts.credentials = this.element.getAttribute('credentials');
-          }
-          if (!opts.credentials) {
-            opts.requireAmpResponseSourceOrigin = false;
-          }
-          return batchedXhrFor(this.win).fetchJson(src, opts);
-        }).then(data => {
-          user().assert(data != null, 'Response is undefined %s', this.element);
-          const itemsExpr = this.element.getAttribute('items') || 'items';
-          const items = getValueForExpr(data, itemsExpr);
-          user().assert(items && Array.isArray(items),
-              'Response must contain an array at "%s". %s %s',
-              itemsExpr, this.element, data);
+    return this.populateList_();
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    if (mutations['src'] != undefined) {
+      this.populateList_();
+    }
+  }
+
+  /** @override */
+  getDynamicElementContainers() {
+    return [this.container_];
+  }
+
+  /**
+   * Request list data from `src` and return a promise that resolves when
+   * the list has been populated with rendered list items.
+   * @return {!Promise}
+   */
+  populateList_() {
+    const itemsExpr = this.element.getAttribute('items') || 'items';
+    return fetchBatchedJsonFor(
+        this.getAmpDoc(), this.element, itemsExpr).then(items => {
+          user().assert(isArray(items),
+              'Response must contain an array at "%s". %s',
+              itemsExpr, this.element);
           return templatesFor(this.win).findAndRenderTemplateArray(
               this.element, items).then(this.rendered_.bind(this));
+        }, error => {
+          throw user().createError('Error fetching amp-list', error);
         });
   }
 
@@ -82,6 +94,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   rendered_(elements) {
+    removeChildren(this.container_);
     elements.forEach(element => {
       if (!element.hasAttribute('role')) {
         element.setAttribute('role', 'listitem');
@@ -98,6 +111,7 @@ export class AmpList extends AMP.BaseElement {
       }
     });
   }
+
 }
 
 AMP.registerElement('amp-list', AmpList);

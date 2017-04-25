@@ -757,6 +757,10 @@ describe('Action interceptor', () => {
     return target['__AMP_ACTION_QUEUE__'];
   }
 
+  function getActionHandler() {
+    return target['__AMP_ACTION_HANDLER__'];
+  }
+
 
   it('should not initialize until called', () => {
     expect(getQueue()).to.be.undefined;
@@ -788,11 +792,12 @@ describe('Action interceptor', () => {
     action.invoke_(target, 'method2', /* args */ null, 'source2', 'event2');
 
     expect(Array.isArray(getQueue())).to.be.true;
+    expect(getActionHandler()).to.be.undefined;
     expect(getQueue()).to.have.length(2);
 
     const handler = sandbox.spy();
     action.installActionHandler(target, handler);
-    expect(Array.isArray(getQueue())).to.be.false;
+    expect(getActionHandler()).to.not.be.undefined;
     expect(handler).to.have.not.been.called;
 
     clock.tick(10);
@@ -811,7 +816,6 @@ describe('Action interceptor', () => {
     expect(inv1.event).to.equal('event2');
 
     action.invoke_(target, 'method3', /* args */ null, 'source3', 'event3');
-    expect(Array.isArray(getQueue())).to.be.false;
     expect(handler).to.have.callCount(3);
     const inv2 = handler.getCall(2).args[0];
     expect(inv2.target).to.equal(target);
@@ -922,7 +926,6 @@ describe('Core events', () => {
   let sandbox;
   let win;
   let action;
-  let target;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -935,9 +938,6 @@ describe('Core events', () => {
     };
     action = new ActionService(new AmpDocSingle(win), document);
     sandbox.stub(action, 'trigger');
-    target = document.createElement('target');
-    target.setAttribute('id', 'amp-test-1');
-
     action.vsync_ = {mutate: callback => callback()};
   });
 
@@ -970,5 +970,24 @@ describe('Core events', () => {
     const event = {target: element};
     handler(event);
     expect(action.trigger).to.have.been.calledWith(element, 'change', event);
+  });
+
+  it('should trigger change event with details for whitelisted inputs', () => {
+    const handler = window.document.addEventListener.getCall(2).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('type', 'range');
+    element.setAttribute('min', '0');
+    element.setAttribute('max', '10');
+    element.setAttribute('value', '5');
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'change',
+        // Event doesn't seem to play well with sinon matchers
+        sinon.match(object => {
+          const detail = object.detail;
+          return detail.min == 0 && detail.max == 10 && detail.value == 5;
+        }));
   });
 });

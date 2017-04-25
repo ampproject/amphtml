@@ -29,21 +29,25 @@ import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
-  AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
-  injectActiveViewAmpAnalyticsElement,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
+import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
+import {dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {computedStyle} from '../../../src/style';
+import {
+  computedStyle,
+  setStyles,
+} from '../../../src/style';
 import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
+import {insertAnalyticsElement} from '../../../src/analytics';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -95,19 +99,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /**
      * Config to generate amp-analytics element for active view reporting.
-     * @type {?AmpAnalyticsConfigDef}
-     * @visibleForTesting
+     * @type {?JSONType}
+     * @private
      */
-    this.ampAnalyticsConfig = null;
+    this.ampAnalyticsConfig_ = null;
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
 
-    /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
-    this.responseHeaders_ = null;
-
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
+
+    /** @private {?Element} */
+    this.ampAnalyticsElement_ = null;
   }
 
   /** @override */
@@ -186,9 +190,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig =
-      extractAmpAnalyticsConfig(responseHeaders, this.extensions_);
-    this.responseHeaders_ = responseHeaders;
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
+        this,
+        responseHeaders,
+        this.lifecycleReporter_.getDeltaTime(),
+        this.lifecycleReporter_.getInitTime());
+    if (this.ampAnalyticsConfig_) {
+      // Load amp-analytics extensions
+      this.extensions_./*OK*/loadExtension('amp-analytics');
+    }
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders)
         .then(adResponse => {
           adResponse.size = this.size_;
@@ -233,6 +243,30 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.lifecycleReporter_.sendPing(eventName);
   }
 
+  /**
+   * @return {!../../../ads/google/a4a/performance.BaseLifecycleReporter}
+   */
+  initLifecycleReporter() {
+    return googleLifecycleReporterFactory(this);
+  }
+
+  /** @override */
+  onCreativeRender(isVerifiedAmpCreative) {
+    super.onCreativeRender(isVerifiedAmpCreative);
+    if (this.ampAnalyticsConfig_) {
+      dev().assert(!this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ =
+          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+    }
+
+    this.lifecycleReporter_.addPingsForVisibility(this.element);
+
+    setStyles(dev().assertElement(this.iframe), {
+      width: `${this.size_.width}px`,
+      height: `${this.size_.height}px`,
+    });
+  }
+
   /** @override */
   unlayoutCallback() {
     super.unlayoutCallback();
@@ -242,23 +276,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
-    this.ampAnalyticsConfig = null;
-  }
-
-  /**
-   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
-   */
-  initLifecycleReporter() {
-    return googleLifecycleReporterFactory(this);
-  }
-
-  /** @override */
-  onCreativeRender(isVerifiedAmpCreative) {
-    super.onCreativeRender(isVerifiedAmpCreative);
-    injectActiveViewAmpAnalyticsElement(
-        this, this.ampAnalyticsConfig, this.responseHeaders_);
+    if (this.ampAnalyticsElement_) {
+      removeElement(this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ = null;
+    }
+    this.ampAnalyticsConfig_ = null;
   }
 }
 
 AMP.registerElement('amp-ad-network-adsense-impl', AmpAdNetworkAdsenseImpl);
-

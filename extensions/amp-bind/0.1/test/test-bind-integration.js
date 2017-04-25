@@ -125,6 +125,41 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
+  describe('input integration', () => {
+    it('should update dependent bindings on range input changes', () => {
+      const rangeText = fixture.doc.getElementById('rangeText');
+      const range = fixture.doc.getElementById('range');
+      expect(rangeText.textContent).to.equal('Unbound');
+      // Calling #click() the range will not generate a change event
+      // so it must be generated manually.
+      range.value = 47;
+      range.dispatchEvent(new Event('change', {bubbles: true}));
+      return waitForBindApplication().then(() => {
+        expect(rangeText.textContent).to.equal('0 <= 47 <= 100');
+      });
+    });
+
+    it('should update dependent bindings on checkbox input changes', () => {
+      const checkboxText = fixture.doc.getElementById('checkboxText');
+      const checkbox = fixture.doc.getElementById('checkbox');
+      expect(checkboxText.textContent).to.equal('Unbound');
+      checkbox.click();
+      return waitForBindApplication().then(() => {
+        expect(checkboxText.textContent).to.equal('Checked: true');
+      });
+    });
+
+    it('should update dependent bindings on radio input changes', () => {
+      const radioText = fixture.doc.getElementById('radioText');
+      const radio = fixture.doc.getElementById('radio');
+      expect(radioText.textContent).to.equal('Unbound');
+      radio.click();
+      return waitForBindApplication().then(() => {
+        expect(radioText.textContent).to.equal('Checked: true');
+      });
+    });
+  });
+
   describe('amp-carousel integration', () => {
     it('should update dependent bindings on carousel slide changes', () => {
       const slideNum = fixture.doc.getElementById('slideNum');
@@ -304,7 +339,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-video integration', () => {
-    it('should change src when the src attribute binding changes', () => {
+    it('should support binding to src', () => {
       const button = fixture.doc.getElementById('changeVidSrcButton');
       const vid = fixture.doc.getElementById('video');
       expect(vid.getAttribute('src')).to
@@ -411,6 +446,32 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       return waitForBindApplication().then(() => {
         expect(ampIframe.getAttribute('src')).to.contain(newSrc);
         expect(iframe.src).to.contain(newSrc);
+      });
+    });
+  });
+
+  describe('amp-list', () => {
+    it('should support binding to src', () => {
+      const button = fixture.doc.getElementById('listSrcButton');
+      const list = fixture.doc.getElementById('list');
+      expect(list.getAttribute('src'))
+          .to.equal('https://www.google.com/unbound.json');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(list.getAttribute('src'))
+            .to.equal('https://www.google.com/bound.json');
+      });
+    });
+
+    it('should NOT change src when new value uses an invalid protocol', () => {
+      const button = fixture.doc.getElementById('httpListSrcButton');
+      const list = fixture.doc.getElementById('list');
+      expect(list.getAttribute('src'))
+          .to.equal('https://www.google.com/unbound.json');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(list.getAttribute('src'))
+            .to.equal('https://www.google.com/unbound.json');
       });
     });
   });

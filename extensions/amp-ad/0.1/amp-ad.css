@@ -37,6 +37,14 @@ amp-embed iframe {
   background-color: rgba(200, 200, 200, 0.5);
 }
 
+.i-amphtml-ad-default-holder[experiment1] {
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+.i-amphtml-ad-default-holder[experiment2] {
+  background-color: rgba(200, 200, 200, 0.05);
+}
+
 .i-amphtml-ad-default-holder:after {
   content: "Ad";
   background-color: rgba(0, 0, 0, 0.5);
@@ -48,10 +56,28 @@ amp-embed iframe {
   padding: 2px 4px;
 }
 
-amp-ad[data-a4a-upgrade-type='amp-ad-network-adsense-impl'] > iframe,
-amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'] > iframe {
+.i-amphtml-ad-default-holder[experiment1]:after,
+.i-amphtml-ad-default-holder[experiment2]:after {
+  font-size: 10px;
+  line-height: 10px;
+  padding: 3px 4px 0px 4px;
+  color: #696969;
+  background-color: transparent;
+  border: 1px, solid, #696969;
+  border-radius: 5px;
+}
+
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+amp-ad[type="adsense"] > iframe {
   top: 50% !important;
   left: 50% !important;
   transform: translate(-50%, -50%);
+}
+
+
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+amp-ad[data-a4a-upgrade-type="amp-ad-network-adsense-impl"] > iframe {
+  min-height: 0;
+  min-width: 0;
 }
 

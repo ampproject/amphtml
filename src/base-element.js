@@ -191,11 +191,22 @@ export class BaseElement {
   }
 
   /**
-   * Returns a previously measured layout box of the element.
+   * Returns a previously measured layout box adjusted to the viewport. This
+   * mainly affects fixed-position elements that are adjusted to be always
+   * relative to the document position in the viewport.
    * @return {!./layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
     return this.element.getLayoutBox();
+  }
+
+  /**
+   * Returns a previously measured layout box relative to the page. The
+   * fixed-position elements are relative to the top of the document.
+   * @return {!./layout-rect.LayoutRectDef}
+   */
+  getPageLayoutBox() {
+    return this.element.getPageLayoutBox();
   }
 
   /**
@@ -482,16 +493,14 @@ export class BaseElement {
 
   /**
    * Returns a promise that will resolve or fail based on the element's 'load'
-   * and 'error' events. Optionally this method takes a timeout, which will reject
-   * the promise if the resource has not loaded by then.
+   * and 'error' events.
    * @param {T} element
-   * @param {number=} opt_timeout
    * @return {!Promise<T>}
    * @template T
    * @final
    */
-  loadPromise(element, opt_timeout) {
-    return loadPromise(element, opt_timeout);
+  loadPromise(element) {
+    return loadPromise(element);
   }
 
   /** @private */

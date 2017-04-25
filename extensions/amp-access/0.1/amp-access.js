@@ -27,17 +27,16 @@ import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
 import {cidForDoc} from '../../../src/services';
 import {evaluateAccessExpr} from './access-expr';
-import {getService} from '../../../src/service';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStyles} from '../../../src/style-installer';
+import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
-import {performanceFor} from '../../../src/services';
+import {performanceForOrNull} from '../../../src/services';
 import {resourcesForDoc} from '../../../src/services';
 import {templatesFor} from '../../../src/services';
 import {timerFor} from '../../../src/services';
@@ -45,6 +44,7 @@ import {urlReplacementsForDoc} from '../../../src/services';
 import {viewerForDoc} from '../../../src/services';
 import {viewportForDoc} from '../../../src/services';
 import {vsyncFor} from '../../../src/services';
+import {startsWith} from '../../../src/string';
 
 
 /** @const */
@@ -73,14 +73,22 @@ const TEMPLATE_PROP = '__AMP_ACCESS__TEMPLATE';
  */
 export class AccessService {
   /**
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(win) {
-    /** @const {!Window} */
-    this.win = win;
-    installStyles(win.document, CSS, () => {}, false, 'amp-access');
+  constructor(ampdoc) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
-    const accessElement = win.document.getElementById('amp-access');
+    // Install styles.
+    if (ampdoc.isSingleDoc()) {
+      const root = /** @type {!Document} */ (ampdoc.getRootNode());
+      installStyles(root, CSS, () => {}, false, TAG);
+    } else {
+      const root = /** @type {!ShadowRoot} */ (ampdoc.getRootNode());
+      installStylesForShadowRoot(root, CSS, false, TAG);
+    }
+
+    const accessElement = ampdoc.getElementById('amp-access');
 
     /** @const @private {boolean} */
     this.enabled_ = !!accessElement;
@@ -89,10 +97,10 @@ export class AccessService {
     }
 
     /** @const @private {boolean} */
-    this.isServerEnabled_ = isExperimentOn(this.win, 'amp-access-server');
+    this.isServerEnabled_ = isExperimentOn(ampdoc.win, 'amp-access-server');
 
     /** @const @private {boolean} */
-    this.isJwtEnabled_ = isExperimentOn(this.win, 'amp-access-jwt');
+    this.isJwtEnabled_ = isExperimentOn(ampdoc.win, 'amp-access-jwt');
 
     /** @const @private {!Element} */
     this.accessElement_ = accessElement;
@@ -115,39 +123,39 @@ export class AccessService {
     this.adapter_ = this.createAdapter_(configJson);
 
     /** @const @private {string} */
-    this.pubOrigin_ = getSourceOrigin(win.location);
+    this.pubOrigin_ = getSourceOrigin(ampdoc.win.location);
 
     /** @const @private {!Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = timerFor(ampdoc.win);
 
     /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(win);
+    this.vsync_ = vsyncFor(ampdoc.win);
 
     /** @const @private {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsForDoc(win.document);
+    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
 
     // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
     // is migrated to ampdoc as well.
     /** @private @const {!Cid} */
-    this.cid_ = cidForDoc(win.document.documentElement);
+    this.cid_ = cidForDoc(ampdoc);
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerForDoc(win.document);
+    this.viewer_ = viewerForDoc(ampdoc);
 
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportForDoc(win.document);
+    this.viewport_ = viewportForDoc(ampdoc);
 
     /** @private @const {!Templates} */
-    this.templates_ = templatesFor(win);
+    this.templates_ = templatesFor(ampdoc.win);
 
     /** @private @const {!Resources} */
-    this.resources_ = resourcesForDoc(win.document);
+    this.resources_ = resourcesForDoc(ampdoc);
 
-    /** @private @const {!Performance} */
-    this.performance_ = performanceFor(win);
+    /** @private @const {?Performance} */
+    this.performance_ = performanceForOrNull(ampdoc.win);
 
     /** @private @const {function(string):Promise<string>} */
-    this.openLoginDialog_ = openLoginDialog.bind(null, win);
+    this.openLoginDialog_ = openLoginDialog.bind(null, ampdoc);
 
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
@@ -156,7 +164,7 @@ export class AccessService {
     this.authResponse_ = null;
 
     /** @const @private {!SignInProtocol} */
-    this.signIn_ = new SignInProtocol(win, this.viewer_, this.pubOrigin_,
+    this.signIn_ = new SignInProtocol(ampdoc, this.viewer_, this.pubOrigin_,
         configJson);
 
     /** @const @private {!Promise} */
@@ -182,9 +190,11 @@ export class AccessService {
 
     this.firstAuthorizationPromise_.then(() => {
       this.analyticsEvent_('access-authorization-received');
-      this.performance_.tick('aaa');
-      this.performance_.tickSinceVisible('aaav');
-      this.performance_.flush();
+      if (this.performance_) {
+        this.performance_.tick('aaa');
+        this.performance_.tickSinceVisible('aaav');
+        this.performance_.flush();
+      }
     });
   }
 
@@ -213,18 +223,18 @@ export class AccessService {
     switch (this.type_) {
       case AccessType.CLIENT:
         if (isJwt) {
-          return new AccessServerJwtAdapter(this.win, configJson, context);
+          return new AccessServerJwtAdapter(this.ampdoc, configJson, context);
         }
-        return new AccessClientAdapter(this.win, configJson, context);
+        return new AccessClientAdapter(this.ampdoc, configJson, context);
       case AccessType.SERVER:
         if (isJwt) {
-          return new AccessServerJwtAdapter(this.win, configJson, context);
+          return new AccessServerJwtAdapter(this.ampdoc, configJson, context);
         }
-        return new AccessServerAdapter(this.win, configJson, context);
+        return new AccessServerAdapter(this.ampdoc, configJson, context);
       case AccessType.VENDOR:
-        return new AccessVendorAdapter(this.win, configJson, context);
+        return new AccessVendorAdapter(this.ampdoc, configJson, context);
       case AccessType.OTHER:
-        return new AccessOtherAdapter(this.win, configJson, context);
+        return new AccessOtherAdapter(this.ampdoc, configJson, context);
     }
     throw dev().createError('Unsupported access type: ', this.type_);
   }
@@ -298,13 +308,20 @@ export class AccessService {
   }
 
   /**
+   * @return {!Element}
+   * @private
+   */
+  getRootElement_() {
+    const root = this.ampdoc.getRootNode();
+    return dev().assertElement(root.documentElement || root.body || root);
+  }
+
+  /**
    * @param {string} eventType
    * @private
    */
   analyticsEvent_(eventType) {
-    // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
-    // is migrated to ampdoc as well.
-    triggerAnalyticsEvent(this.win.document.documentElement, eventType);
+    triggerAnalyticsEvent(this.ampdoc, eventType);
   }
 
   /**
@@ -327,7 +344,7 @@ export class AccessService {
 
     // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
     // is migrated to ampdoc as well.
-    actionServiceForDoc(this.win.document.documentElement).installActionHandler(
+    actionServiceForDoc(this.ampdoc).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
     // Calculate login URLs right away.
@@ -463,11 +480,8 @@ export class AccessService {
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', false);
       this.buildLoginUrls_();
-      return new Promise((resolve, reject) => {
-        onDocumentReady(this.win.document, () => {
-          this.applyAuthorization_(response).then(resolve, reject);
-        });
-      });
+      return this.ampdoc.whenReady().then(
+          () => this.applyAuthorization_(response));
     }).catch(error => {
       user().error(TAG, 'Authorization failed: ', error);
       this.toggleTopClass_('amp-access-loading', false);
@@ -538,7 +552,7 @@ export class AccessService {
    * @private
    */
   applyAuthorization_(response) {
-    const elements = this.win.document.querySelectorAll('[amp-access]');
+    const elements = this.ampdoc.getRootNode().querySelectorAll('[amp-access]');
     const promises = [];
     for (let i = 0; i < elements.length; i++) {
       promises.push(this.applyAuthorizationToElement_(elements[i], response));
@@ -651,7 +665,7 @@ export class AccessService {
       return;
     }
     this.reportViewPromise_ = null;
-    onDocumentReady(this.win.document, () => {
+    this.ampdoc.whenReady().then(() => {
       if (this.viewer_.isVisible()) {
         this.reportWhenViewed_(timeToView);
       }
@@ -726,7 +740,7 @@ export class AccessService {
       unlistenSet.push(this.viewport_.onScroll(resolve));
 
       // 4. Tap: register a view.
-      unlistenSet.push(listenOnce(this.win.document.documentElement,
+      unlistenSet.push(listenOnce(this.ampdoc.getRootNode(),
           'click', resolve));
     }).then(() => {
       unlistenSet.forEach(unlisten => unlisten());
@@ -757,7 +771,7 @@ export class AccessService {
    */
   toggleTopClass_(className, on) {
     this.vsync_.mutate(() => {
-      this.win.document.documentElement.classList.toggle(className, on);
+      this.getRootElement_().classList.toggle(className, on);
     });
   }
 
@@ -771,7 +785,7 @@ export class AccessService {
         invocation.event.preventDefault();
       }
       this.loginWithType_('');
-    } else if (invocation.method.indexOf('login-') == 0) {
+    } else if (startsWith(invocation.method, 'login-')) {
       if (invocation.event) {
         invocation.event.preventDefault();
       }
@@ -950,14 +964,12 @@ class AccessTypeAdapterDef {
 }
 
 
-/**
- * @param {!Window} win
- * @return {!AccessService}
- */
-export function installAccessService(win) {
-  return getService(win, 'access', () => {
-    return new AccessService(win).start_();
-  });
-};
-
-installAccessService(AMP.win);
+// Register the extension services.
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerServiceForDoc(
+      'access',
+      /* ctor */ undefined,
+      ampdoc => {
+        return new AccessService(ampdoc).start_();
+      });
+});

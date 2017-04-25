@@ -411,11 +411,13 @@ describes.realWin('Events', {amp: 1}, env => {
     let eventResolver, eventPromise;
     let saveCallback;
     let matchEmptySpec;
+    let matchFunc;
 
     beforeEach(() => {
       tracker = new VisibilityTracker(root);
       visibilityManagerMock = sandbox.mock(root.getVisibilityManager());
-      iniLoadTrackerMock = sandbox.mock(tracker.iniLoadTracker_);
+      tracker.waitForTrackers_['ini-load'] = new IniLoadTracker(tracker.root);
+      iniLoadTrackerMock = sandbox.mock(tracker.waitForTrackers_['ini-load']);
 
       target.classList.add('i-amphtml-element');
       targetSignals = new Signals();
@@ -427,6 +429,15 @@ describes.realWin('Events', {amp: 1}, env => {
 
       matchEmptySpec = sinon.match(arg => {
         return Object.keys(arg).length == 0;
+      });
+      matchFunc = sinon.match(arg => {
+        if (typeof arg == 'function') {
+          const promise = arg();
+          if (typeof promise.then == 'function') {
+            return true;
+          }
+        }
+        return false;
       });
       saveCallback = sinon.match(arg => {
         if (typeof arg == 'function') {
@@ -454,6 +465,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               matchEmptySpec,
               /* readyPromise */ null,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -481,6 +493,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               matchEmptySpec,
               readyPromise,
+              null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -509,6 +522,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               config.visibilitySpec,
               readyPromise,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -526,11 +540,11 @@ describes.realWin('Events', {amp: 1}, env => {
     it('should add target listener', () => {
       const config = {visibilitySpec: {selector: '.target'}};
       const unlisten = sandbox.spy();
-      iniLoadTrackerMock.expects('getRootSignal').never();
+      iniLoadTrackerMock.expects('getRootSignal').once();
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
           .expects('getElementSignal')
-          .withExactArgs(target)
+          .withExactArgs('ini-load', target)
           .returns(readyPromise)
           .once();
       visibilityManagerMock
@@ -539,6 +553,7 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               config.visibilitySpec,
               readyPromise,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -570,7 +585,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
           .expects('getElementSignal')
-          .withExactArgs(target)
+          .withExactArgs('ini-load', target)
           .returns(readyPromise)
           .once();
       visibilityManagerMock
@@ -579,6 +594,7 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               matchEmptySpec,
               readyPromise,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -588,6 +604,130 @@ describes.realWin('Events', {amp: 1}, env => {
         return eventPromise.then(event => {
           expect(event.vars.totalVisibleTime).to.equal(10);
           expect(event.vars.foo).to.equal('bar');
+        });
+      });
+    });
+
+    it('should pass func to get reportReady with "hidden" trigger', () => {
+      const config = {visibilitySpec: {selector: '.target', waitFor: 'none'}};
+      visibilityManagerMock
+        .expects('listenElement')
+        .withExactArgs(
+            target,
+            config.visibilitySpec,
+            /* readyPromise */ null,
+            /* createReadyReportPromiseFunc */ matchFunc,
+            saveCallback)
+        .returns(null)
+        .once();
+      tracker.add(analyticsElement, 'hidden-v3', config, eventResolver);
+      // NOTE: createReadyReportPromiseFunc is
+      // fully tested in test-visibility-manager
+      return root.ampdoc.whenReady().then(() => {
+        saveCallback.callback({totalVisibleTime: 10});
+        return eventPromise.then(event => {
+          expect(event.vars.totalVisibleTime).to.equal(10);
+          expect(event.type).to.equal('hidden-v3');
+        });
+      });
+    });
+
+    describe('should wait on correct readyPromise', () => {
+      const selector = '.target';
+
+      it('with waitFor default value', () => {
+        // Default case: selector is not specified
+        expect(tracker.getReadyPromise(undefined, undefined)).to.be.null;
+        // Default case: waitFor is not specified, no AMP element selected
+        iniLoadTrackerMock
+          .expects('getRootSignal')
+          .returns(Promise.resolve())
+          .once();
+        const waitForTracker1 = tracker.getReadyPromise(undefined, ':root');
+        return waitForTracker1.then(() => {
+          iniLoadTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('ini-load', target)
+            .returns(Promise.resolve())
+            .once();
+          // Default case: waitFor is not specified, AMP element selected
+          const promise2 = tracker.getReadyPromise(undefined, selector, target);
+          target.signals().signal('ini-load');
+          return promise2;
+        });
+      });
+
+      it('with waitFor NONE', () => {
+        expect(tracker.getReadyPromise('none', undefined, undefined))
+            .to.be.null;
+        expect(tracker.getReadyPromise('none', ':root', undefined))
+            .to.be.null;
+        expect(tracker.getReadyPromise('none', selector, target))
+            .to.be.null;
+      });
+
+      it('with waitFor INI_LOAD', () => {
+        iniLoadTrackerMock
+          .expects('getRootSignal')
+          .returns(Promise.resolve())
+          .twice();
+        const promise =
+            tracker.getReadyPromise('ini-load', undefined, undefined);
+        return promise.then(() => {
+          const promise1 =
+            tracker.getReadyPromise('ini-load', ':root', undefined);
+          return promise1.then(() => {
+            iniLoadTrackerMock
+              .expects('getElementSignal')
+              .withExactArgs('ini-load', target)
+              .returns(Promise.resolve())
+              .once();
+            const promise2 =
+                tracker.getReadyPromise('ini-load', selector, target);
+            return promise2;
+          });
+        });
+      });
+
+      it('with waitFor RENDER_START', () => {
+        tracker.waitForTrackers_['render-start'] =
+            new SignalTracker(tracker.root);
+        const signalTrackerMock =
+            sandbox.mock(tracker.waitForTrackers_['render-start']);
+        signalTrackerMock
+          .expects('getRootSignal')
+          .withExactArgs('render-start')
+          .returns(Promise.resolve())
+          .twice();
+        const promise =
+            tracker.getReadyPromise('render-start', undefined, undefined);
+        return promise.then(() => {
+          const promise1 =
+              tracker.getReadyPromise('render-start', ':root', undefined);
+          return promise1.then(() => {
+            signalTrackerMock
+              .expects('getElementSignal')
+              .withExactArgs('render-start', target)
+              .returns(Promise.resolve())
+              .once();
+            const promise2 =
+                tracker.getReadyPromise('render-start', selector, target);
+            return promise2;
+          });
+        });
+      });
+    });
+
+    describe('should create correct readyReportPromise', () => {
+      it('with viewer hidden', () => {
+        const stub = sandbox.stub(tracker.root, 'getViewer', () => {
+          return {
+            isVisible: () => {return false;},
+          };
+        });
+        const promise = tracker.createReportReadyPromise_();
+        return promise.then(() => {
+          expect(stub).to.be.calledOnce;
         });
       });
     });

@@ -30,6 +30,7 @@ tags: {  # <amp-state> (json)
   tag_name: "SCRIPT"
   spec_name: "amp-bind extension .json script"
   mandatory_parent: "AMP-STATE"
+  satisfies: "amp-bind extension .json script"
   requires: "amp-bind extension .js script"
   attrs: { name: "nonce" }
   attrs: {
@@ -46,15 +47,51 @@ tags: {  # <amp-state> (json)
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-bind"
 }
-tags: {  # <amp-state>
+tags: {  # <amp-state> with json child
   html_format: AMP
   tag_name: "AMP-STATE"
+  spec_name: "amp-state"
+  satisfies: "amp-state"
+  requires: "amp-bind extension .js script"
+  requires: "amp-bind extension .json script"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    first_child_tag_name_oneof: "SCRIPT"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/:amp-bind"
+}
+tags: {  # <amp-state> with src
+  html_format: AMP
+  tag_name: "AMP-STATE"
+  spec_name: "amp-state[src]"
   satisfies: "amp-state"
   requires: "amp-bind extension .js script"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
     name: "id"
     mandatory: true
+  }
+  attrs: { name: "credentials" }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  child_tags: {
+    mandatory_num_child_tags: 0
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-bind"
 }

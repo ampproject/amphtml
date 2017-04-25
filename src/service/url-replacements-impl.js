@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {accessServiceForOrNull} from '../services';
+import {accessServiceForDocOrNull} from '../services';
 import {cidForDoc} from '../services';
 import {variantForOrNull} from '../services';
 import {shareTrackingForOrNull} from '../services';
@@ -68,8 +68,11 @@ export class GlobalVariableSource extends VariableSource {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @private @const {function(!Window):!Promise<?AccessService>} */
-    this.getAccessService_ = accessServiceForOrNull;
+    /**
+     * @private
+     * @const {function(!./ampdoc-impl.AmpDoc):!Promise<?AccessService>}
+     */
+    this.getAccessService_ = accessServiceForDocOrNull;
 
     /** @private {?Promise<?Object<string, string>>} */
     this.variants_ = null;
@@ -474,7 +477,7 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getAccessValue_(getter, expr) {
-    return this.getAccessService_(this.ampdoc.win).then(accessService => {
+    return this.getAccessService_(this.ampdoc).then(accessService => {
       if (!accessService) {
         // Access service is not installed.
         user().error(TAG, 'Access service is not installed to access: ', expr);

@@ -400,7 +400,7 @@ export class Extensions {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       stubElementIfNotKnown(topWin, extensionId);
-      if (LEGACY_ELEMENTS.indexOf(extensionId) == -1) {
+      if (!LEGACY_ELEMENTS.includes(extensionId)) {
         stubElementInChildWindow(childWin, extensionId);
       }
 
@@ -621,4 +621,5 @@ function adoptServicesForEmbed(childWin) {
   // to pass the "embeddable" flag if this set becomes too unwieldy.
   adoptServiceForEmbed(childWin, 'action');
   adoptServiceForEmbed(childWin, 'standard-actions');
+  adoptServiceForEmbed(childWin, 'clickhandler');
 }

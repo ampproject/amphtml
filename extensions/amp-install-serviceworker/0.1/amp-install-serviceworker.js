@@ -103,7 +103,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       // only engaged with superficially.
       timerFor(this.win).delay(() => {
         this.deferMutate(this.insertIframe_.bind(this));
-      }, 20000);
+      }, 10000);
     });
   }
 

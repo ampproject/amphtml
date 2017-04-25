@@ -252,7 +252,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   setSelection_(element) {
     // Exit if `element` is already selected.
-    if (this.selectedOptions_.indexOf(element) >= 0) {
+    if (this.selectedOptions_.includes(element)) {
       return;
     }
     if (!this.isMultiple_) {

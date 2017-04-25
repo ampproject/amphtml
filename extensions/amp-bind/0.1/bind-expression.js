@@ -38,31 +38,25 @@ const BUILT_IN_FUNCTIONS = 'built-in-functions';
 const FUNCTION_WHITELIST = (function() {
 
   /**
-   * Custom wrappers for mutating array methods so that we can offer the
-   * same functionality without allowing mutation on variables in bind scope.
+   * Similar to Array.prototype.splice, except it returns a copy of the
+   * passed-in array with the desired modifications.
+   * @param {!Array} array
+   * @param {number=} start
+   * @param {number=} deleteCount
+   * @param {...?} items
    */
-  const BindArrays = {
-    /**
-     * Similar to Array.prototype.splice, except it returns a copy of the
-     * passed-in array with the desired modifications.
-     * @param {!Array} array
-     * @param {number=} start
-     * @param {number=} deleteCount
-     * @param {...?} items
-     */
-    /*eslint "no-unused-vars": 0*/
-    'copyAndSplice': function(array, start, deleteCount, items) {
-      if (!isArray(array)) {
-        throw new Error(
-          `copyAndSplice: ${array} is not an array.`);
-      }
-      const copy = Array.prototype.slice.call(array);
-      Array.prototype.splice.apply(
-          copy,
-          Array.prototype.slice.call(arguments, 1));
-      return copy;
-    },
-  };
+  /*eslint "no-unused-vars": 0*/
+  function copyAndSplice(array, start, deleteCount, items) {
+    if (!isArray(array)) {
+      throw new Error(
+        `copyAndSplice: ${array} is not an array.`);
+    }
+    const copy = Array.prototype.slice.call(array);
+    Array.prototype.splice.apply(
+        copy,
+        Array.prototype.slice.call(arguments, 1));
+    return copy;
+  }
 
   const whitelist = {
     '[object Array]':
@@ -98,7 +92,9 @@ const FUNCTION_WHITELIST = (function() {
     Math.random,
     Math.round,
     Math.sign,
-    BindArrays.copyAndSplice,
+    encodeURI,
+    encodeURIComponent,
+    copyAndSplice,
   ];
   // Creates a prototype-less map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
@@ -201,7 +197,7 @@ export class BindExpression {
 
       case AstNodeType.INVOCATION:
         // Built-in functions don't have a caller object.
-        const isBuiltIn = (args[0] === null);
+        const isBuiltIn = (args[0] === undefined);
 
         const caller = this.eval_(args[0], scope);
         const params = this.eval_(args[1], scope);
@@ -216,6 +212,11 @@ export class BindExpression {
             unsupportedError = `${method} is not a supported function.`;
           }
         } else {
+          if (caller === null) {
+            user().warn(TAG, `Cannot invoke method ${method} on null; ` +
+                `returning null.`);
+            return null;
+          }
           const callerType = Object.prototype.toString.call(caller);
           const whitelist = FUNCTION_WHITELIST[callerType];
           if (whitelist) {

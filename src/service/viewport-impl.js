@@ -22,7 +22,7 @@ import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
     './ios-scrollfreeze-bug';
 import {
   getParentWindowFrameElement,
-  getServiceForDoc,
+  registerServiceBuilderForDoc,
 } from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
@@ -172,9 +172,8 @@ export class Viewport {
     if (isIframed(this.ampdoc.win)) {
       this.globalDoc_.documentElement.classList.add('i-amphtml-iframed');
     }
-    const platform = platformFor(this.ampdoc.win);
-    if (platform.isIos() && viewer.getParam('webview') === '1') {
-      this.globalDoc_.documentElement.classList.add('i-amphtml-ios-webview');
+    if (viewer.getParam('webview') === '1') {
+      this.globalDoc_.documentElement.classList.add('i-amphtml-webview');
     }
 
     // To avoid browser restore scroll position when traverse history
@@ -1539,6 +1538,13 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.setupDone_ = false;
     waitForBody(this.win.document, this.setup_.bind(this));
 
+    // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
+    // iOS rendering bugs. See #8798 for details.
+    whenDocumentReady(this.win.document).then(() => {
+      this.win.document.documentElement.classList.add(
+          'i-amphtml-ios-overscroll');
+    });
+
     dev().fine(TAG_, 'initialized ios-embed-wrapper viewport');
   }
 
@@ -1885,9 +1891,10 @@ function getViewportType(win, viewer) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Viewport}
  */
 export function installViewportServiceForDoc(ampdoc) {
-  return /** @type {!Viewport} */ (getServiceForDoc(ampdoc, 'viewport',
-      ampdoc => createViewport(ampdoc)));
+  registerServiceBuilderForDoc(ampdoc, 'viewport',
+      /* constructor */ undefined,
+      ampdoc => createViewport(ampdoc),
+      /* instantiate */ true);
 }

@@ -29,6 +29,8 @@ import {
   getServiceForDoc,
   getServicePromise,
   getServicePromiseForDoc,
+  getServicePromiseOrNull,
+  getServicePromiseOrNullForDoc,
   installServiceInEmbedScope,
   isDisposable,
   isEmbeddable,
@@ -209,6 +211,12 @@ describe('service', () => {
       });
     });
 
+    it('should NOT return null promise for registered services', () => {
+      registerServiceBuilder(window, 'a', Class);
+      const p = getServicePromiseOrNull(window, 'a');
+      expect(p).to.not.be.null;
+    });
+
     it('should resolve service for a child window', () => {
       const c = getService(window, 'c', factory);
 
@@ -367,8 +375,19 @@ describe('service', () => {
     it('should not instantiate service when registered', () => {
       registerServiceBuilderForDoc(ampdoc, 'fake service', factory);
       expect(count).to.equal(0);
+      getServicePromiseForDoc(ampdoc, 'fake service');
       getServiceForDoc(ampdoc, 'fake service');
       expect(count).to.equal(1);
+    });
+
+    it('should not instantiate service when registered (race)', () => {
+      getServicePromiseForDoc(ampdoc, 'fake service');
+      registerServiceBuilderForDoc(ampdoc, 'fake service', factory);
+      expect(count).to.equal(1);
+      getServiceForDoc(ampdoc, 'fake service');
+      return Promise.resolve().then(() => {
+        expect(count).to.equal(1);
+      });
     });
 
     it('should work without a factory', () => {
@@ -397,6 +416,12 @@ describe('service', () => {
           expect(factory).to.have.not.been.called;
         });
       });
+    });
+
+    it('should NOT return null promise for registered services', () => {
+      registerServiceBuilderForDoc(ampdoc, 'a', factory);
+      const p = getServicePromiseOrNullForDoc(ampdoc, 'a');
+      expect(p).to.not.be.null;
     });
 
     it('should resolve service for a child window', () => {

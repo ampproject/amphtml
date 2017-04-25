@@ -24,8 +24,9 @@ import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
+import {installInputService} from '../input';
 import {registerServiceBuilderForDoc} from '../service';
-import {inputFor} from '../input';
+import {inputFor} from '../services';
 import {viewerForDoc} from '../services';
 import {viewportForDoc} from '../services';
 import {vsyncFor} from '../services';
@@ -91,6 +92,12 @@ export class Resources {
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
 
+    /**
+     * Used primarily for testing to allow build phase to proceed.
+     * @const @private {boolean}
+     */
+    this.isBuildOn_ = false;
+
     /** @private @const {number} */
     this.maxDpr_ = this.win.devicePixelRatio || 1;
 
@@ -121,6 +128,12 @@ export class Resources {
      * @private {boolean}
      */
     this.firstPassAfterDocumentReady_ = true;
+
+    /**
+     * Whether AMP has been fully initialized.
+     * @private {boolean}
+     */
+    this.ampInitialized_ = false;
 
     /**
      * We also adjust the timeout penalty shortly after the first pass.
@@ -314,6 +327,7 @@ export class Resources {
 
   /** @private */
   monitorInput_() {
+    installInputService(this.win);
     const input = inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);
@@ -400,11 +414,11 @@ export class Resources {
    */
   ensuredMeasured_(resource) {
     if (resource.hasBeenMeasured()) {
-      return Promise.resolve(resource.getLayoutBox());
+      return Promise.resolve(resource.getPageLayoutBox());
     }
     return this.vsync_.measurePromise(() => {
       resource.measure();
-      return resource.getLayoutBox();
+      return resource.getPageLayoutBox();
     });
   }
 
@@ -481,7 +495,7 @@ export class Resources {
    */
   buildOrScheduleBuildForResource_(resource, checkForDupes = false,
       scheduleWhenBuilt = true) {
-    if (this.isRuntimeOn_) {
+    if (this.isRuntimeOn_ || this.isBuildOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
@@ -491,8 +505,7 @@ export class Resources {
           this.schedulePass();
         }
       } else if (!resource.element.isBuilt()) {
-        if (!checkForDupes ||
-            this.pendingBuildResources_.indexOf(resource) == -1) {
+        if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
           this.buildReadyResources_(scheduleWhenBuilt);
@@ -920,6 +933,15 @@ export class Resources {
     this.vsync_.mutate(() => this.doPass_());
   }
 
+  /**
+   * Called when main AMP binary is fully initialized.
+   * May never be called in Shadow Mode.
+   */
+  ampInitComplete() {
+    this.ampInitialized_ = true;
+    this.schedulePass();
+  }
+
   /** @private */
   doPass_() {
     if (!this.isRuntimeOn_) {
@@ -960,11 +982,13 @@ export class Resources {
     this.vsyncScheduled_ = false;
 
     this.visibilityStateMachine_.setState(this.viewer_.getVisibilityState());
-    if (firstPassAfterDocumentReady) {
+    if (this.documentReady_ && this.ampInitialized_
+        && !this.ampdoc.signals().get(READY_SCAN_SIGNAL_)) {
       // This signal mainly signifies that most of elements have been measured
       // by now. This is mostly used to avoid measuring too many elements
       // individually. This will be superceeded by layers API, e.g.
       // "layer measured".
+      // May not be called in shadow mode.
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL_);
     }
 
@@ -1232,7 +1256,6 @@ export class Resources {
    * @private
    */
   discoverWork_() {
-
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
     const now = Date.now();
@@ -1271,7 +1294,8 @@ export class Resources {
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner()) {
+        if (r.hasOwner() && !r.isMeasureRequested()) {
+          // If element has owner, and measure is not requested, do nothing.
           continue;
         }
         if (relayoutAll ||
@@ -1610,7 +1634,7 @@ export class Resources {
   completeScheduleChangeSize_(resource, newHeight, newWidth, marginChange,
       force, opt_callback) {
     resource.resetPendingChangeSize();
-    const layoutBox = resource.getLayoutBox();
+    const layoutBox = resource.getPageLayoutBox();
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
         (newWidth === undefined || newWidth == layoutBox.width) &&
         (marginChange === undefined || !areMarginsChanged(

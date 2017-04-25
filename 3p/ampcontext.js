@@ -40,38 +40,57 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.embedType_ = null;
 
-    /** @type {?string} */
-    this.clientId = null;
+    // ----------------------------------------------------
+    // Please keep public attributes alphabetically sorted.
+    // ----------------------------------------------------
 
-    /** @type {?Location} */
-    this.location = null;
+    /** @public {?string|undefined} */
+    this.canary = null;
 
     /** @type {?string} */
     this.canonicalUrl = null;
 
     /** @type {?string} */
-    this.pageViewId = null;
+    this.clientId = null;
 
-    /** @type {?string} */
-    this.sentinel = null;
+    /** @type {?string|undefined} */
+    this.container = null;
 
-    /** @type {?number} */
-    this.startTime = null;
-
-    /** @type {?string} */
-    this.referrer = null;
+    /** @type {?Object<String, *>} */
+    this.data = null;
 
     /** @type {?boolean} */
     this.hidden = null;
 
     /** @type {?Object} */
-    this.mode = null;
+    this.initialLayoutRect = null;
 
     /** @type {?Object} */
     this.initialIntersection = null;
 
+    /** @type {?Location} */
+    this.location = null;
+
+    /** @type {?Object} */
+    this.mode = null;
+
+    /** @type {?string} */
+    this.pageViewId = null;
+
+    /** @type {?string} */
+    this.referrer = null;
+
+    /** @type {?string} */
+    this.sentinel = null;
+
     /** @type {?string} */
     this.sourceUrl = null;
+
+    /** @type {?number} */
+    this.startTime = null;
+
+    /** @type {?string} */
+    this.tagName = null;
 
     this.findAndSetMetadata_();
 
@@ -198,28 +217,41 @@ export class AbstractAmpContext {
   }
 
   /**
+   *  Notifies the parent document of no content available inside embed.
+   */
+  noContentAvailable() {
+    this.client_.sendMessage(MessageType.NO_CONTENT);
+  }
+
+  /**
    *  Parse the metadata attributes from the name and add them to
    *  the class instance.
    *  @param {!Object|string} data
    *  @private
    */
   setupMetadata_(data) {
-    const dataObject = typeof data === 'string' ? tryParseJson(data) : data;
-    if (!dataObject) {
-      throw new Error('Could not setup metadata.');
-    }
+    const dataObject = dev().assert(
+        typeof data === 'string' ? tryParseJson(data) : data,
+        'Could not setup metadata.');
+
     const context = dataObject._context || dataObject.attributes._context;
-    this.location = context.location;
+
+    this.canary = context.canary;
     this.canonicalUrl = context.canonicalUrl;
     this.clientId = context.clientId;
-    this.pageViewId = context.pageViewId;
-    this.sentinel = context.sentinel;
-    this.startTime = context.startTime;
-    this.referrer = context.referrer;
-    this.mode = context.mode;
-    this.initialIntersection = context.initialIntersection;
+    this.container = context.container;
+    this.data = context.tagName;
     this.hidden = context.hidden;
+    this.initialLayoutRect = context.initialLayoutRect;
+    this.initialIntersection = context.initialIntersection;
+    this.location = context.location;
+    this.mode = context.mode;
+    this.pageViewId = context.pageViewId;
+    this.referrer = context.referrer;
+    this.sentinel = context.sentinel;
     this.sourceUrl = context.sourceUrl;
+    this.startTime = context.startTime;
+    this.tagName = context.tagName;
 
     this.embedType_ = dataObject.type || null;
   }

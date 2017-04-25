@@ -219,6 +219,8 @@ export class AmpAdXOriginIframeHandler {
       }
     });
 
+    this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
+
     // The actual ad load is eariliest of iframe.onload event and no-content.
     return Promise.race([iframeLoadPromise, noContentPromise]);
   }
@@ -302,6 +304,10 @@ export class AmpAdXOriginIframeHandler {
    */
   handleResize_(height, width, source, origin) {
     this.baseInstance_.getVsync().mutate(() => {
+      if (!this.iframe) {
+        // iframe can be cleanup before vsync.
+        return;
+      }
       const iframeHeight = this.iframe./*OK*/offsetHeight;
       const iframeWidth = this.iframe./*OK*/offsetWidth;
       this.uiHandler_.updateSize(height, width, iframeHeight,
