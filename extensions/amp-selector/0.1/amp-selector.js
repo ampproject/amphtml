@@ -100,7 +100,7 @@ export class AmpSelector extends AMP.BaseElement {
     this.init_();
     if (!this.isDisabled_) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
-      if (this.kbSelectMode_ !== KEYBOARD_SELECT_MODES.NONE) {
+      if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
         this.element.addEventListener('keydown',
             this.keyDownHandler_.bind(this));
       }
@@ -160,7 +160,7 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   updateFocus_() {
-    if (this.kbSelectMode_ === KEYBOARD_SELECT_MODES.NONE) {
+    if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES.NONE) {
       // Don't manage focus.
       return;
     }
@@ -309,20 +309,25 @@ export class AmpSelector extends AMP.BaseElement {
     this.options_[this.focusedIndex_].tabIndex = -1;
 
     const dir = this.win.document.body.getAttribute('dir') || 'ltr';
+    const ltr = dir != 'rtl';
     let delta = 0;
 
     switch (event.keyCode) {
       case 37: // Left
+        delta = ltr ? -1 : 1;
+        break;
       case 38: // Up
-        delta = dir === 'rtl' ? 1 : -1;
+        delta = -1;
         break;
       case 39: // Right
+        delta = ltr ? 1 : -1;
+        break;
       case 40: // Down
-        delta = dir === 'rtl' ? -1 : 1;
+        delta = 1;
         break;
     }
 
-    if (delta === 0) {
+    if (delta == 0) {
       return;
     }
     event.preventDefault();
