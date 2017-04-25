@@ -933,7 +933,7 @@ describe('SlideScroll', () => {
       });
     });
 
-    it('should update slide when `slide` attribute is mutated', () => {
+    it('should update slide when `slide` attribute mutates', () => {
       return getAmpSlideScroll(true).then(obj => {
         const ampSlideScroll = obj.ampSlideScroll;
         const impl = ampSlideScroll.implementation_;
@@ -949,6 +949,22 @@ describe('SlideScroll', () => {
         showSlideSpy.reset();
         impl.mutatedAttributesCallback({slide: Number.POSITIVE_INFINITY});
         expect(showSlideSpy.called).to.be.false;
+      });
+    });
+
+    it('should update slide count when `slide-count` attribute mutates', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        impl.showSlide_(4);
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+        const hideRestOfTheSlidesSpy =
+            sandbox.spy(impl, 'hideRestOfTheSlides_');
+
+        impl.mutatedAttributesCallback({'slide-count': 2});
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1]);
+        // Should move to last visible slide
+        expect(showSlideSpy).to.have.been.calledWith(1);
       });
     });
 
