@@ -29,13 +29,13 @@ var useHttps = argv.https != undefined;
 function serve() {
   // Get the serve mode
   if (argv.compiled) {
-    process.env.SERVE_MODE = 'min';
+    process.env.SERVE_MODE = 'compiled';
     util.log(util.colors.green('Serving minified js'));
   } else if (argv.cdn) {
     process.env.SERVE_MODE = 'cdn';
     util.log(util.colors.green('Serving current prod js'));
   } else {
-    process.env.SERVE_MODE = 'max';
+    process.env.SERVE_MODE = 'default';
     util.log(util.colors.green('Serving unminified js'));
   }
 
@@ -50,7 +50,7 @@ function serve() {
   });
 
   util.log(util.colors.yellow('Run `gulp build` then go to '
-      + getHost() + '/examples/article.amp.max.html'
+      + getHost() + '/examples/article.amp.html'
   ));
 }
 

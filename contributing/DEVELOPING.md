@@ -67,11 +67,11 @@ For manual testing build AMP and start the Node.js server by running `gulp`.
 
 ### Serve Mode
 There are 3 serving modes:
-- MAX mode serves unminified AMP. You want to use this during normal dev. `gulp` serves MAX mode by default.
-- MIN mode serves minified AMP. This is closer to the prod setup. This is only available after running `gulp dist --fortesting`. Serve MIN mode by adding `--compiled` to `gulp` command.
+- DEFAULT mode serves unminified AMP. You want to use this during normal dev.
+- COMPILED mode serves minified AMP. This is closer to the prod setup. This is only available after running `gulp dist --fortesting`. Serve MIN mode by adding `--compiled` to `gulp` command.
 - CDN mode serves prod. These remote files would not reflect your local changes. Serve CDN mode by adding `--cdn` to `gulp` command.
 
-To switch serving mode during runtime, go to http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the following values: `max`, `min,` or `cdn`.
+To switch serving mode during runtime, go to http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the following values: `default`, `compiled,` or `cdn`.
 
 ### Examples
 
@@ -105,7 +105,7 @@ A4A can be run either of these two modes:
 
 The following forms are supported:
 
-- local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
+- local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.html
 - proxied document with local sources: http://localhost:8000/a4a[-3p]/proxy/output.jsbin.com/pegizoq/quiet
 
 When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
@@ -132,7 +132,7 @@ Make sure to run gulp with `--with_inabox` flag.
 
 The following forms are supported:
 
-- local document: http://localhost:8000/inabox/examples/animations.amp.max.html
+- local document: http://localhost:8000/inabox/examples/animations.amp.html
 - proxied document with local sources: http://localhost:8000/inabox/proxy/output.jsbin.com/pegizoq/quiet
 
 Additionally, the following query parameters can be provided:

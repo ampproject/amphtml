@@ -28,7 +28,6 @@ var jsdom = require('jsdom');
 var path = require('path');
 var request = require('request');
 var url = require('url');
-// process.env.SERVE_MODE is defaulted to be 'max' if not specified
 
 app.use(bodyParser.json());
 app.use('/request-bank', require('./request-bank'));
@@ -47,7 +46,7 @@ app.use(function(req, res, next) {
 app.get('/serve_mode=:mode', function (req, res, next) {
   const newMode = req.params.mode;
   var info;
-  if (newMode == 'max' || newMode == 'min' || newMode == 'cdn') {
+  if (newMode == 'default' || newMode == 'compiled' || newMode == 'cdn') {
     process.env.SERVE_MODE = newMode;
     info = '<h2>Serve mode changed to ' + newMode + '</h2>';
     res.send(info);
@@ -257,8 +256,8 @@ var liveListDoc = null;
 var doctype = '<!doctype html>\n';
 app.use('/examples/live-list-update.amp.html', function(req, res, next) {
   var mode = process.env.SERVE_MODE;
-  if (mode != 'min' && mode != 'max') {
-    // Only handle min/max mode
+  if (mode != 'compiled' && mode != 'default') {
+    // Only handle compile(prev min)/default (prev max) mode
     next();
     return;
   }
@@ -824,7 +823,7 @@ app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
         });
         return;
       }
-      if (mode == 'max') {
+      if (mode == 'default') {
         var fileUrl = req.url;
         req.url = req.url.replace(/\.js$/, '.max.js');
       }
@@ -926,14 +925,14 @@ app.get('/dist/ww(.max)?.js', function(req, res) {
  */
 function replaceUrls(mode, file, hostName, inabox) {
   hostName = hostName || '';
-  if (mode == 'max') {
+  if (mode == 'default') {
     file = file.replace('https://cdn.ampproject.org/v0.js', hostName + '/dist/amp.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.js', hostName + '/dist/amp-inabox.js');
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g, hostName + '/dist/v0/$1.max.js');
     if (inabox) {
       file = file.replace('/dist/amp.js', '/dist/amp-inabox.js');
     }
-  } else if (mode == 'min') {
+  } else if (mode == 'compiled') {
     file = file.replace('https://cdn.ampproject.org/v0.js', hostName + '/dist/v0.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.js', hostName + '/dist/amp4ads-v0.js');
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g, hostName + '/dist/v0/$1.js');
@@ -985,9 +984,9 @@ function extractFilePathSuffix(path) {
 function getPathMode(path) {
   var suffix = extractFilePathSuffix(path);
   if (suffix == '.max.html') {
-    return 'max';
+    return 'default';
   } else if (suffix == '.min.html') {
-    return 'min';
+    return 'compiled';
   } else {
     return null;
   }
@@ -1071,9 +1070,9 @@ function generateInfo(filePath) {
       '<h3>Please go to <a href= ' + filePath +
       '>Unversioned Link</a> to view the page<h3>' +
       '<h3></h3>' +
-      '<h3><a href = /serve_mode=max>Change to max mode</a></h3>' +
-      '<h3><a href = /serve_mode=min>Change to min mode</a></h3>' +
-      '<h3><a href = /serve_mode=cdn>Change to cdn mode</a></h3>';
+      '<h3><a href = /serve_mode=default>Change to DEFAULT mode (unminified JS)</a></h3>' +
+      '<h3><a href = /serve_mode=compiled>Change to COMPILED mode (minified JS)</a></h3>' +
+      '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
   return info;
 }
 
