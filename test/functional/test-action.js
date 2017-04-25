@@ -959,8 +959,19 @@ describe('Core events', () => {
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = {tagName: 'div', nodeType: 1};
     const event = {target: element, keyCode: 13};
+    win.document.activeElement = element;
     handler(event);
     expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
+  });
+
+  it('should NOT trigger tap event on key press if event target is ' +
+     'not the active element', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = {tagName: 'div', nodeType: 1};
+    const event = {target: element, keyCode: 13};
+    handler(event);
+    expect(action.trigger).to.not.have.been.called;
   });
 
   it('should trigger submit event', () => {
