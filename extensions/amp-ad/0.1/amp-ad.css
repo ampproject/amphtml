@@ -51,7 +51,7 @@ amp-embed iframe {
   border-radius: 2px;
   color: #fff;
   font-size: 16px;
-  line-height: 16px;
+  line-height: 100%;
   font-family: Arial, sans-serif;
   padding: 2px 4px;
 }
@@ -60,11 +60,11 @@ amp-embed iframe {
 .i-amphtml-ad-default-holder[experiment2]:after {
   font-size: 10px;
   line-height: 10px;
-  padding: 3px 4px 0px 4px;
+  padding: 3px 4px 1px;
   color: #696969;
   background-color: transparent;
   border: 1px, solid, #696969;
-  border-radius: 5px;
+  border-radius: 2px;
 }
 
 amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
