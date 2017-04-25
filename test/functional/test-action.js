@@ -997,7 +997,7 @@ describe('Core events', () => {
     element.innerHTML =
         `<option value="foo"></option>
         <option value="bar"></option>
-        <option value="qux"></option>`
+        <option value="qux"></option>`;
     element.selectedIndex = 2;
     const event = {target: element};
     handler(event);
@@ -1006,7 +1006,7 @@ describe('Core events', () => {
         'change',
         sinon.match(object => {
           const detail = object.detail;
-          return detail.value == 'qux'
+          return detail.value == 'qux';
         }));
   });
 
