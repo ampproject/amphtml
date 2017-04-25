@@ -330,7 +330,7 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;amp-list></code></td>
-    <td><code>[src]</code><sup>1</sup></td>
+    <td><code>[src]</code></td>
     <td>Fetches JSON from the new URL and re-renders, replacing old content.</td>
   </tr>
   <tr>
