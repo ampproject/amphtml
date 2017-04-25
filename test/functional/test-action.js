@@ -990,4 +990,24 @@ describe('Core events', () => {
           return detail.min == 0 && detail.max == 10 && detail.value == 5;
         }));
   });
+
+  it('should trigger change event with details for select elements', () => {
+    const handler = window.document.addEventListener.getCall(2).args[1];
+    const element = document.createElement('select');
+    element.innerHTML =
+        `<option value="foo"></option>
+        <option value="bar"></option>
+        <option value="qux"></option>`
+    element.selectedIndex = 2;
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'change',
+        sinon.match(object => {
+          const detail = object.detail;
+          return detail.value == 'qux'
+        }));
+  });
+
 });

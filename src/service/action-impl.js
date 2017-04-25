@@ -216,6 +216,9 @@ export class ActionService {
         });
         event.detail = detail;
       }
+    } else if (event.target.tagName.toLowerCase() === 'select') {
+      detail['value'] = target['value'];
+      event.detail = detail;
     }
   }
 
