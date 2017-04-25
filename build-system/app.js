@@ -788,7 +788,12 @@ app.get('/dist/rtv/*/v0/*.js', function(req, res, next) {
     // This will not be useful until extension-location.js change in prod
     // Require url from cdn
     request(filePath, function (error, response) {
-      res.send(response);
+      if (error) {
+        res.status(404);
+        res.end();
+      } else {
+        res.send(response);
+      }
     });
     return;
   }
@@ -810,13 +815,18 @@ app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
         // Require url from cdn
         var filePath = 'https://cdn.ampproject.org/' + fileName;
         request(filePath, function(error, response) {
-          res.send(response);
+          if (error) {
+            res.status(404);
+            res.end();
+          } else {
+            res.send(response);
+          }
         });
         return;
       }
       if (mode == 'max') {
         var fileUrl = req.url;
-        req.url = fileUrl.substr(0, fileUrl.length - 3) + '.max.js';
+        req.url = req.url.replace(/\.js$/, '.max.js');
       }
       next();
     });
