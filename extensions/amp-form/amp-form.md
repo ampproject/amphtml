@@ -276,7 +276,7 @@ The redirect URL must be absolute HTTPS URL otherwise AMP will throw an error an
 
 **Known Issue**: Due to an [issue in Safari iOS](https://bugs.webkit.org/show_bug.cgi?id=165627) redirecting to deep linked URLs (URLs that would actually end up opening a native app) might fail when the AMP document is embedded. This is [tracked in this issue](https://github.com/ampproject/amphtml/issues/6953).
 
-```
+```text
 AMP-Redirect-To: https://example.com/forms/thank-you
 Access-Control-Expose-Headers: AMP-Redirect-To, Another-Header, And-Some-More
 ```
