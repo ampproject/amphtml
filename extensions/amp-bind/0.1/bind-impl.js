@@ -763,7 +763,10 @@ export class Bind {
         if (Array.isArray(expectedValue)) {
           classes = expectedValue;
         } else if (typeof expectedValue === 'string') {
-          classes = expectedValue.split(' ');
+          const trimmed = expectedValue.trim();
+          if (trimmed.length > 0) {
+            classes = trimmed.split(' ');
+          }
         } else {
           const err = user().createError(
               `${TAG}: "${expectedValue}" is not a valid result for [class].`);
