@@ -17,12 +17,15 @@
 import {EXPERIMENT_ATTRIBUTE, QQID_HEADER} from './utils';
 import {BaseLifecycleReporter, GoogleAdLifecycleReporter} from './performance';
 import {getMode} from '../../../src/mode';
-import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
+import {
+  isExperimentOn,
+  toggleExperiment,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 
 import {
     parseExperimentIds,
     isInManualExperiment,
-    randomlySelectUnsetPageExperiments,
 } from './traffic-experiments';
 import {
     ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
@@ -41,16 +44,16 @@ import {
  * general traffic-experiments mechanism and is configured via the
  * a4aProfilingRate property of the global config(s),
  * build-system/global-configs/{canary,prod}-config.js.  This object is just
- * necessary for the traffic-experiments.js API, which expects a branch list
+ * necessary for the page-level-experiments.js API, which expects a branch list
  * for each experiment.  We assign all pages to the "control" branch
  * arbitrarily.
  *
- * @const {!Object<string,!./traffic-experiments.ExperimentInfo>}
+ * @const {!Object<string,!../../../src/experiments.ExperimentInfo>}
  */
 export const PROFILING_BRANCHES = {
   a4aProfilingRate: {
-    control: 'unused',
-    experiment: 'unused',
+    isTrafficEligible: () => true,
+    branches: ['unused', 'unused'],
   },
 };
 
@@ -130,7 +133,7 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
   if (getMode().localDev) {
     toggleExperiment(win, experimentName, true, true);
   }
-  randomlySelectUnsetPageExperiments(win, PROFILING_BRANCHES);
+  randomlySelectUnsetExperiments(win, PROFILING_BRANCHES);
   if ((type == 'doubleclick' || type == 'adsense') &&
       isInReportableBranch(ampElement, namespace) &&
       isExperimentOn(win, experimentName)) {
