@@ -197,25 +197,33 @@ export class ActionService {
    * @param {!Event} event A `change` event.
    */
   addChangeDetails_(event) {
-    const detail = {};
+    const detail = map();
     const target = event.target;
-    if (event.target.tagName.toLowerCase() === 'input') {
-      const inputType = target.getAttribute('type');
-      const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
-      if (fieldsToInclude) {
-        Object.keys(fieldsToInclude).forEach(field => {
-          const expectedType = fieldsToInclude[field];
-          const value = target[field];
-          if (expectedType === 'number') {
-            detail[field] = Number(value);
-          } else if (expectedType === 'boolean') {
-            detail[field] = !!value;
-          } else {
-            detail[field] = String(value);
-          }
-        });
-        event.detail = detail;
-      }
+    const tagName = target.tagName.toLowerCase();
+    switch (tagName) {
+      case 'input':
+        const inputType = target.getAttribute('type');
+        const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
+        if (fieldsToInclude) {
+          Object.keys(fieldsToInclude).forEach(field => {
+            const expectedType = fieldsToInclude[field];
+            const value = target[field];
+            if (expectedType === 'number') {
+              detail[field] = Number(value);
+            } else if (expectedType === 'boolean') {
+              detail[field] = !!value;
+            } else {
+              detail[field] = String(value);
+            }
+          });
+        }
+        break;
+      case 'select':
+        detail.value = target.value;
+        break;
+    }
+    if (Object.keys(detail).length > 0) {
+      event.detail = detail;
     }
   }
 
