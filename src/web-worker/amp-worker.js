@@ -19,7 +19,6 @@ import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {getMode} from '../mode';
-import {isExperimentOn} from '../experiments';
 import {xhrFor} from '../services';
 
 const TAG = 'web-worker';
@@ -39,9 +38,6 @@ let PendingMessageDef;
  * @return {!Promise}
  */
 export function invokeWebWorker(win, method, opt_args) {
-  if (!isExperimentOn(win, TAG)) {
-    return Promise.reject(`Experiment "${TAG}" is disabled.`);
-  }
   if (!win.Worker) {
     return Promise.reject('Worker not supported in window.');
   }
