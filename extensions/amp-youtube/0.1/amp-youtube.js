@@ -75,9 +75,6 @@ class AmpYoutube extends AMP.BaseElement {
     this.playerReadyPromise_ = null;
 
     /** @private {?Function} */
-    this.playerReadyResolver_ = null;
-
-    /** @private {?Function} */
     this.unlistenMessage_ = null;
   }
 
@@ -119,10 +116,6 @@ class AmpYoutube extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.videoid_ = this.getVideoId_();
-
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
 
     // TODO(#3216): amp-youtube has a special case where 404s are not easily caught
     // hence the following hacky-solution.
@@ -188,7 +181,6 @@ class AmpYoutube extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
 
@@ -198,16 +190,13 @@ class AmpYoutube extends AMP.BaseElement {
       this.handleYoutubeMessages_.bind(this)
     );
 
-    this.win.addEventListener(
-      'message', event => this.handleYoutubeMessages_(event)
-    );
+    this.element.appendChild(this.iframe_);
+    this.playerReadyPromise_ = this.loadPromise(this.iframe_).then(() => {
+      this.listenToFrame_();
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
 
-    return this.loadPromise(iframe)
-        .then(() => this.listenToFrame_())
-        .then(() => {
-          this.element.dispatchCustomEvent(VideoEvents.LOAD);
-          this.playerReadyResolver_(this.iframe_);
-        });
+    return this.playerReadyPromise_ ;
   }
 
   /** @override */
@@ -220,10 +209,8 @@ class AmpYoutube extends AMP.BaseElement {
       this.unlistenMessage_();
     }
     this.playerState_ = PlayerStates.PAUSED;
+    this.playerReadyPromise_ = null;
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
     return true;  // Call layoutCallback again.
   }
 
@@ -266,6 +253,9 @@ class AmpYoutube extends AMP.BaseElement {
    * @private
    * */
   sendCommand_(command, opt_args) {
+    if (!this.playerReadyPromise_) {
+      return;
+    }
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
         const message = JSON.stringify({

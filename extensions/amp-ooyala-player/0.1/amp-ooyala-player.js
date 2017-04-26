@@ -22,6 +22,7 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isObject} from '../../../src/types';
+import {listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
 
@@ -42,6 +43,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /**
@@ -57,16 +61,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
-
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    this.iframe_ = iframe;
-
-    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
-    this.applyFillContent(iframe, true);
-    this.element.appendChild(iframe);
-
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
 
     installVideoManagerForDoc(this.element);
     videoManagerForDoc(this.element).register(this);
@@ -100,11 +94,22 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     src += '&ec=' + encodeURIComponent(embedCode) +
       '&pbid=' + encodeURIComponent(playerId);
+
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    this.iframe_ = iframe;
+
+    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
+    this.applyFillContent(iframe, true);
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+
     this.iframe_.src = src;
 
-    window.addEventListener('message',
-                            event => this.handleOoyalaMessages_(event));
+    this.unlistenMessage_ = listen(this.win, 'message', event => {
+      this.handleOoyalaMessages_(event);
+    });
 
+    this.element.appendChild(this.iframe_);
     return this.loadPromise(this.iframe_)
       .then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
@@ -118,6 +123,15 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     return true;
   }
 
