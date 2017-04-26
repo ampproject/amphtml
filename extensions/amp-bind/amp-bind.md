@@ -493,7 +493,7 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 <amp-state id="myRemoteState" src="https://data.com/articles.json">
 </amp-state>
 ```
-<br>
+
 #### Attributes
 
 **src**
