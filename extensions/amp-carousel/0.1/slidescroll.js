@@ -220,19 +220,18 @@ export class AmpSlideScroll extends BaseSlides {
     if (slide !== undefined) {
       this.showSlideWhenReady_(slide);
     }
-    const slideCount = mutations['slide-count'];
-    if (slideCount !== undefined && isFinite(slideCount)) {
-      let slideCountNum = Number(slideCount);
+    let slideCount = Number(mutations['slide-count']);
+    if (isFinite(slideCount)) {
       // Clamp count to between 0 and the total number of slides
-      slideCountNum = Math.max(Math.min(this.slides_.length, slideCountNum), 0);
-      this.noOfSlides_ = slideCountNum;
+      slideCount = Math.max(Math.min(this.slides_.length, slideCount), 0);
       const showIndexArr = [];
-      for (let i = 0; i < slideCountNum; i++) {
+      for (let i = 0; i < slideCount; i++) {
         showIndexArr.push(i);
       }
       this.hideRestOfTheSlides_(showIndexArr);
-      if (this.slideIndex_ > slideCountNum) {
-        this.showSlideWhenReady_(slideCountNum - 1);
+      this.noOfSlides_ = slideCount;
+      if (this.slideIndex_ > slideCount) {
+        this.showSlideWhenReady_(slideCount - 1);
       }
       this.setControlsState();
     }
