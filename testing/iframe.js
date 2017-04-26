@@ -319,13 +319,19 @@ export function createIframeWithMessageStub(win) {
   /**
    * Returns a Promise that resolves when the iframe acknowledged the reception
    * of the specified message.
+   * @param {function(?Object, !Object|string)|string} callbackOrType
+   *     A callback that determines if this is the message we expected. If a
+   *     string is passed, the determination is based on whether the message's
+   *     type matches the string.
    */
-  element.expectMessageFromParent = (type, callback) => {
-    if (typeof type === 'function') {
-      callback = type;
-      type = '';
-    } else if (!callback) {
-      callback = returnTrue;
+  element.expectMessageFromParent = (callbackOrType) => {
+    let filter;
+    if (typeof callbackOrType === 'string') {
+      filter = (data) => {
+        return 'type' in data && data.type == callbackOrType;
+      };
+    } else {
+      filter = callbackOrType;
     }
 
     return new Promise((resolve, reject) => {
@@ -335,11 +341,8 @@ export function createIframeWithMessageStub(win) {
         }
         const message = event.data.receivedMessage;
         const data = parseIfNeeded(message);
-        if (type && 'type' in data && data.type !== type) {
-          return;
-        }
         try {
-          if (callback(data, message)) {
+          if (filter(data, message)) {
             win.removeEventListener('message', listener);
             resolve(data || message);
           }
@@ -351,10 +354,6 @@ export function createIframeWithMessageStub(win) {
       win.addEventListener('message', listener);
     });
   };
-
-  function returnTrue() {
-    return true;
-  }
 
   return element;
 }
