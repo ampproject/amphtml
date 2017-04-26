@@ -55,8 +55,8 @@ const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 // private to this file.
 /** @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches} */
 export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
-  control: '117152660',
-  experiment: '117152661',
+  control: '117152662',
+  experiment: '117152663',
   controlMeasureOnRender: '2093327',
 };
 
