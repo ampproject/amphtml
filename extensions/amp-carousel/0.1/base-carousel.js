@@ -72,6 +72,11 @@ export class BaseCarousel extends AMP.BaseElement {
     // a way to be overridden.
     this.prevButton_.setAttribute('aria-label', 'Previous item in carousel');
     this.prevButton_.setAttribute('tabindex', 0);
+    this.prevButton_.onkeydown = event => {
+      if (event.keyCode == 13 /* enter */ || event.keyCode == 32 /* space */) {
+        this.interactionPrev();
+      }
+    };
     this.prevButton_.onclick = () => {
       this.interactionPrev();
     };
@@ -84,6 +89,11 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_.setAttribute('role', 'button');
     this.nextButton_.setAttribute('aria-label', 'Next item in carousel');
     this.nextButton_.setAttribute('tabindex', 0);
+    this.nextButton_.onkeydown = event => {
+      if (event.keyCode == 13 /* enter */ || event.keyCode == 32 /* space */) {
+        this.interactionNext();
+      }
+    };
     this.nextButton_.onclick = () => {
       this.interactionNext();
     };
