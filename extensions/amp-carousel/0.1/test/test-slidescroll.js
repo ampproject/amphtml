@@ -962,9 +962,16 @@ describe('SlideScroll', () => {
             sandbox.spy(impl, 'hideRestOfTheSlides_');
 
         impl.mutatedAttributesCallback({'slide-count': 2});
-        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1]);
+        // 0 appears twice since the carousel is set to loop.
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 0]);
         // Should move to last visible slide
         expect(showSlideSpy).to.have.been.calledWith(1);
+
+        showSlideSpy.reset();
+        hideRestOfTheSlidesSpy.reset();
+        impl.mutatedAttributesCallback({'slide-count': 5});
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 2]);
+        expect(showSlideSpy).to.not.have.been.called;
       });
     });
 
