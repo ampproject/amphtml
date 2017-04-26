@@ -177,7 +177,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
   // emitter
   handleNexxMessages_(event) {
-    if (event.data === undefined) {
+    if (!event.data || event.source !== this.iframe_.contentWindow) {
       return;
     }
 
