@@ -19,7 +19,7 @@ import {
   expectPostMessage,
 } from '../../testing/iframe';
 
-describe.only('test-iframe-createIframeWithMessageStub', () => {
+describe('test-iframe-createIframeWithMessageStub', () => {
 
   const data1 = {
     foo: 'bar',
