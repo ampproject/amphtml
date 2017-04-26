@@ -80,11 +80,6 @@ class Amp3QPlayer extends AMP.BaseElement {
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    this.applyFillContent(iframe, true);
-    iframe.src = 'https://playout.3qsdn.com/' +
-        encodeURIComponent(this.dataId) + '?autoplay=false&amp=true';
-    this.element.appendChild(iframe);
-
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
@@ -92,6 +87,11 @@ class Amp3QPlayer extends AMP.BaseElement {
       'message',
       this.sdnBridge_.bind(this)
     );
+
+    this.applyFillContent(iframe, true);
+    iframe.src = 'https://playout.3qsdn.com/' +
+      encodeURIComponent(this.dataId) + '?autoplay=false&amp=true';
+    this.element.appendChild(iframe);
 
     return this.loadPromise(this.iframe_).then(() =>
         this.playerReadyPromise_);
