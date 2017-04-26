@@ -667,9 +667,14 @@ describes.realWin('performance with experiment', {amp: true}, env => {
       perf.addEnabledExperiment('experiment-a'); // duplicated entry
       viewerSendMessageStub.reset();
       perf.flush();
-      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
-        ampexp: getMode(win).rtvVersion + ',experiment-a,experiment-b',
-      });
+      expect(viewerSendMessageStub).to.be.calledWith('sendCsi',
+          sandbox.match(payload => {
+            const experiments = payload.ampexp.split(',');
+            expect(experiments).to.have.length(3);
+            expect(experiments).to.have.members(
+                [getMode(win).rtvVersion, 'experiment-a', 'experiment-b']);
+            return true;
+          }));
     });
   });
 });
