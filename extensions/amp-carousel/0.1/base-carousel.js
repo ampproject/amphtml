@@ -71,9 +71,11 @@ export class BaseCarousel extends AMP.BaseElement {
     // TODO(erwinm): Does label need i18n support in the future? or provide
     // a way to be overridden.
     this.prevButton_.setAttribute('aria-label', 'Previous item in carousel');
+    this.prevButton_.setAttribute('tabindex', 0);
     this.prevButton_.onclick = () => {
       this.interactionPrev();
     };
+
     this.element.appendChild(this.prevButton_);
 
     this.nextButton_ = this.element.ownerDocument.createElement('div');
@@ -81,6 +83,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_.classList.add('amp-carousel-button-next');
     this.nextButton_.setAttribute('role', 'button');
     this.nextButton_.setAttribute('aria-label', 'Next item in carousel');
+    this.nextButton_.setAttribute('tabindex', 0);
     this.nextButton_.onclick = () => {
       this.interactionNext();
     };
