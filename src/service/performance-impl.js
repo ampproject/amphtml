@@ -316,10 +316,6 @@ export class Performance {
     if (isCanary(this.win)) {
       experiments.push('canary');
     }
-    // Check if it's the legacy CDN domain.
-    if (this.getHostname_() == urls.cdn.split('://')[1]) {
-      experiments.push('legacy-cdn-domain');
-    }
     return this.enabledExperiments_ = experiments.join(',');
   }
 
