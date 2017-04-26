@@ -80,7 +80,6 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.onclick = () => {
       this.interactionPrev();
     };
-
     this.element.appendChild(this.prevButton_);
 
     this.nextButton_ = this.element.ownerDocument.createElement('div');
