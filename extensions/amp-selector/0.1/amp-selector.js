@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {actionServiceForDoc} from '../../../src/services';
-import {closest, tryFocus} from '../../../src/dom';
+import {closestBySelector, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {isEnumValue} from '../../../src/types';
@@ -130,10 +130,10 @@ export class AmpSelector extends AMP.BaseElement {
       this.clearAllSelections_();
       return;
     }
-    let selectedArray = Array.isArray(newValue) ? newValue : [newValue];
+    const selectedArray = Array.isArray(newValue) ? newValue : [newValue];
     // Only use first value if multiple selection is disabled.
     if (!this.isMultiple_) {
-      selectedArray = selectedArray.slice(0, 1);
+      selectedArray.length = 1;
     }
     // Convert array values to strings and create map for fast lookup.
     const selectedMap = selectedArray.reduce((map, value) => {
@@ -252,7 +252,7 @@ export class AmpSelector extends AMP.BaseElement {
    * Handles user selection on an option.
    * @param {!Element} el The element selected.
    */
-  onOptionSelected_(el) {
+  onOptionPicked_(el) {
     if (el.hasAttribute('disabled')) {
       return;
     }
@@ -298,10 +298,10 @@ export class AmpSelector extends AMP.BaseElement {
       return;
     }
     if (!el.hasAttribute('option')) {
-      el = closest(el, e => e.hasAttribute('option'), this.element);
+      el = closestBySelector(el, '[option]');
     }
     if (el) {
-      this.onOptionSelected_(el);
+      this.onOptionPicked_(el);
     }
   }
 
@@ -310,9 +310,6 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   keyDownHandler_(event) {
-    // Make currently selected option unfocusable
-    this.options_[this.focusedIndex_].tabIndex = -1;
-
     const isLtr = this.win.document.body.getAttribute('dir') != 'rtl';
     let dir = 0;
 
@@ -340,6 +337,9 @@ export class AmpSelector extends AMP.BaseElement {
     }
     event.preventDefault();
 
+    // Make currently selected option unfocusable
+    this.options_[this.focusedIndex_].tabIndex = -1;
+
     // Change the focus to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
@@ -352,9 +352,8 @@ export class AmpSelector extends AMP.BaseElement {
     const newSelectedOption = this.options_[this.focusedIndex_];
     newSelectedOption.tabIndex = 0;
     tryFocus(newSelectedOption);
-    if (!this.isMultiple_ &&
-        this.kbSelectMode_ == KEYBOARD_SELECT_MODES.SELECT) {
-      this.onOptionSelected_(newSelectedOption);
+    if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES.SELECT) {
+      this.onOptionPicked_(newSelectedOption);
     }
   }
 
