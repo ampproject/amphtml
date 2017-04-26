@@ -638,32 +638,58 @@ app.use('/bind/ecommerce/sizes', function(req, res, next) {
   setTimeout(() => {
     var prices = {
       "0": {
-        "sizes": ["XS"]
+        "sizes": {
+          "XS": 8.99,
+          "S": 9.99,
+        },
       },
       "1": {
-        "sizes": ["S", "M", "L"]
+        "sizes": {
+          "S": 10.99,
+          "M": 12.99,
+          "L": 14.99,
+        },
       },
       "2": {
-        "sizes": ["XL"]
+        "sizes": {
+          "L": 11.99,
+          "XL": 13.99,
+        },
       },
       "3": {
-        "sizes": ["M", "XL"]
+        "sizes": {
+          "M": 7.99,
+          "L": 9.99,
+          "XL": 11.99,
+        },
       },
       "4": {
-        "sizes": ["S", "L"]
+        "sizes": {
+          "XS": 8.99,
+          "S": 10.99,
+          "L": 15.99,
+        },
       },
       "5": {
-        "sizes": ["S", "XL"]
+        "sizes": {
+          "S": 8.99,
+          "L": 14.99,
+          "XL": 11.99,
+        },
       },
       "6": {
-        "sizes": ["XS", "M"]
+        "sizes": {
+          "XS": 8.99,
+          "S": 9.99,
+          "M": 12.99,
+        },
       },
       "7": {
-        "sizes": ["M", "L", "XL"]
+        "sizes": {
+          "M": 10.99,
+          "L": 11.99,
+        },
       },
-      "8": {
-        "sizes": ["XS", "M", "XL"]
-      }
     };
     const object = {};
     object[req.query.shirt] = prices[req.query.shirt];
