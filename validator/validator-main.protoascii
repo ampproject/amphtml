@@ -1747,6 +1747,8 @@ attr_lists: {
   attrs: { name: "xlink:arcrole" }
   attrs: {
     name: "xlink:href"
+    # xlink:href is deprecated since SVG2 in favor of href.
+    alternative_names: "href"
     # Local (within document) URLs only for now.
     value_regex: "#.*"
   }
