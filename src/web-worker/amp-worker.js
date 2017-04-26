@@ -65,15 +65,17 @@ class AmpWorker {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @const @private {!Window} */
-    this.win_ = win;
-
     /** @const @private {!../service/xhr-impl.Xhr} */
     this.xhr_ = xhrFor(win);
 
+    // Use `testLocation` for testing with iframes. @see testing/iframe.js.
+    let loc = win.location;
+    if (getMode().test && win.testLocation) {
+      loc = win.testLocation;
+    }
     // Use RTV to make sure we fetch prod/canary/experiment correctly.
     const url = calculateEntryPointScriptUrl(
-        location, 'ww', getMode().localDev, /* opt_rtv */ !getMode().localDev);
+        loc, 'ww', getMode().localDev, /* opt_rtv */ !getMode().localDev);
     dev().fine(TAG, 'Fetching web worker from', url);
 
     /** @private {Worker} */
