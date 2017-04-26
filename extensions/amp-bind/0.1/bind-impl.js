@@ -225,12 +225,13 @@ export class Bind {
    */
   initialize_() {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    const promise = this.addBindingsForNode_(this.ampdoc.getBody());
+    let promise = this.addBindingsForNode_(this.ampdoc.getBody());
+    // Check default values against initial expression results in development.
     if (getMode().development) {
       // Check default values against initial expression results.
-      promise.then(() => {
-        this.evaluate_().then(results => this.verify_(results));
-      });
+      promise = promise.then(() => 
+        this.evaluate_().then(results => this.verify_(results))
+      );
     }
     if (getMode().test) {
       // Signal init completion for integration tests.
@@ -327,36 +328,34 @@ export class Bind {
    * @private
    */
   removeBindingsForNode_(node) {
-    return new Promise(resolve => {
-      // Eliminate bound elements that have node as an ancestor.
-      filterSplice(this.boundElements_, boundElement => {
-        return !node.contains(boundElement.element);
-      });
-
-      // Eliminate elements from the expression to elements map that
-      // have node as an ancestor. Delete expressions that are no longer
-      // bound to elements.
-      const deletedExpressions = [];
-      for (const expression in this.expressionToElements_) {
-        const elements = this.expressionToElements_[expression];
-        filterSplice(elements, element => {
-          return !node.contains(element);
-        });
-        if (elements.length == 0) {
-          deletedExpressions.push(expression);
-          delete this.expressionToElements_[expression];
-        }
-      }
-
-      // Remove the bindings from the evaluator.
-      if (deletedExpressions.length > 0) {
-        dev().fine(TAG, `Asking worker to remove expressions...`);
-        return invokeWebWorker(this.win_,
-            'bind.removeBindingsWithExpressionStrings', [deletedExpressions]);
-      }
-
-      resolve();
+    // Eliminate bound elements that have node as an ancestor.
+    filterSplice(this.boundElements_, boundElement => {
+      return !node.contains(boundElement.element);
     });
+
+    // Eliminate elements from the expression to elements map that
+    // have node as an ancestor. Delete expressions that are no longer
+    // bound to elements.
+    const deletedExpressions = [];
+    for (const expression in this.expressionToElements_) {
+      const elements = this.expressionToElements_[expression];
+      filterSplice(elements, element => {
+        return !node.contains(element);
+      });
+      if (elements.length == 0) {
+        deletedExpressions.push(expression);
+        delete this.expressionToElements_[expression];
+      }
+    }
+
+    // Remove the bindings from the evaluator.
+    if (deletedExpressions.length > 0) {
+      dev().fine(TAG, `Asking worker to remove expressions...`);
+      return invokeWebWorker(this.win_,
+          'bind.removeBindingsWithExpressionStrings', [deletedExpressions]);
+    } else {
+      return Promise.resolve();
+    }
   }
 
   /**
