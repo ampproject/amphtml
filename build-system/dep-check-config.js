@@ -50,6 +50,8 @@ exports.rules = [
           'third_party/closure-library/sha384-generated.js',
       'extensions/amp-mustache/0.1/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
+      'extensions/amp-timeago/0.1/amp-timeago.js->' +
+          'third_party/timeagojs/timeago.js',
       '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'extensions/amp-viz-vega/**->third_party/vega/vega.js',
