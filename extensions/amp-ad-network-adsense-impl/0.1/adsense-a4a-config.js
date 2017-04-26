@@ -52,8 +52,8 @@ const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
  * const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
  */
 export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
-  control: '117152650',
-  experiment: '117152651',
+  control: '117152652',
+  experiment: '117152653',
   controlMeasureOnRender: '2093326',
 };
 
