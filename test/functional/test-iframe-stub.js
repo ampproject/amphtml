@@ -19,11 +19,12 @@ import {
   expectPostMessage,
 } from '../../testing/iframe';
 
-describe('test-iframe-createIframeWithMessageStub', () => {
+describe.only('test-iframe-createIframeWithMessageStub', () => {
 
   const data1 = {
     foo: 'bar',
     test: true,
+    type: 'test',
   };
 
   const data2 = {
@@ -57,10 +58,36 @@ describe('test-iframe-createIframeWithMessageStub', () => {
 
   it('should echo back message to parent window', () => {
     iframe.contentWindow.postMessage(data1, '*');
-    return iframe.expectMessageFromParent(data1).then(() => {
+    return iframe.expectMessageFromParent('test').then(() => {
       iframe.contentWindow.postMessage(data2, '*');
+      return iframe.expectMessageFromParent((data, msg) => {
+        expect(data).to.jsonEqual(data2);
+        expect(msg).to.jsonEqual(data2);
+        return true;
+      });
     }).then(() => {
-      iframe.expectMessageFromParent(data2);
+      iframe.contentWindow.postMessage('test-' + JSON.stringify(data2), '*');
+      return iframe.expectMessageFromParent((data, msg) => {
+        expect(data).to.equal(null);
+        expect(msg).to.equal('test-' + JSON.stringify(data2));
+        return true;
+      });
+    }).then(() => {
+      iframe.contentWindow.postMessage('amp-' + JSON.stringify(data2), '*');
+      return iframe.expectMessageFromParent((data, msg) => {
+        expect(data).to.jsonEqual(data2);
+        expect(msg).to.equal('amp-' + JSON.stringify(data2));
+        return true;
+      });
+    }).then(() => {
+      iframe.contentWindow.postMessage(data2, '*');
+      return iframe.expectMessageFromParent((data, msg) => {
+        throw new Error('test');
+      }).then(() => {
+        throw new Error('should not get here');
+      }, () => {
+        expect(true).to.equal(true);
+      });
     });
   });
 });

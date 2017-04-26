@@ -18,6 +18,7 @@ import {FakeLocation} from './fake-dom';
 import {ampdocServiceFor} from '../src/ampdoc';
 import {cssText} from '../build/css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
+import {parseIfNeeded} from '../src/iframe-helper';
 import {
   installAmpdocServices,
   installRuntimeServices,
@@ -319,25 +320,42 @@ export function createIframeWithMessageStub(win) {
    * Returns a Promise that resolves when the iframe acknowledged the reception
    * of the specified message.
    */
-  element.expectMessageFromParent = msg => {
-    return new Promise(resolve => {
-      const listener = event => {
-        let expectMsg = msg;
-        let actualMsg = event.data.receivedMessage;
-        if (typeof expectMsg !== 'string') {
-          expectMsg = JSON.stringify(expectMsg);
-          actualMsg = JSON.stringify(actualMsg);
+  element.expectMessageFromParent = (type, callback) => {
+    if (typeof type === 'function') {
+      callback = type;
+      type = '';
+    } else if (!callback) {
+      callback = returnTrue;
+    }
+
+    return new Promise((resolve, reject) => {
+      function listener(event) {
+        if (event.source != element.contentWindow || !event.data.testStubEcho) {
+          return;
         }
-        if (event.source == element.contentWindow
-            && event.data.testStubEcho
-            && expectMsg == actualMsg) {
+        const message = event.data.receivedMessage;
+        const data = parseIfNeeded(message);
+        if (type && 'type' in data && data.type !== type) {
+          return;
+        }
+        try {
+          if (callback(data, message)) {
+            win.removeEventListener('message', listener);
+            resolve(data || message);
+          }
+        } catch (e) {
           win.removeEventListener('message', listener);
-          resolve(msg);
+          reject(e);
         }
-      };
+      }
       win.addEventListener('message', listener);
     });
   };
+
+  function returnTrue() {
+    return true;
+  }
+
   return element;
 }
 
