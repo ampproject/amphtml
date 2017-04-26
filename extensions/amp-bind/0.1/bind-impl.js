@@ -635,17 +635,17 @@ export class Bind {
     this.boundElements_.forEach(boundElement => {
 
       const {element, boundProperties} = boundElement;
-      const propertyUpdates = this.calculateUpdates_(boundProperties, results);
+      const updates = this.calculateUpdates_(boundProperties, results);
 
-      if (propertyUpdates.length == 0) {
+      if (updates.length == 0) {
         return;
       }
 
-      const p = this.resources_.mutateElement(element, () => {
+      const promise = this.resources_.mutateElement(element, () => {
         const mutations = {};
         let width, height;
 
-        propertyUpdates.forEach(update => {
+        updates.forEach(update => {
           const {boundProperty, newValue} = update;
           const mutation = this.applyBinding_(boundProperty, element, newValue);
           if (mutation) {
@@ -678,7 +678,7 @@ export class Bind {
           }
         }
       });
-      applyPromises.push(p);
+      applyPromises.push(promise);
     });
     return Promise.all(applyPromises);
   }
