@@ -607,7 +607,7 @@ export class Bind {
    * @private
    */
   calculateUpdates_(boundProperties, results) {
-    const propertyUpdates = [];
+    const updates = [];
     boundProperties.forEach(boundProperty => {
       const {expressionString, previousResult} = boundProperty;
       const newValue = results[expressionString];
@@ -615,15 +615,14 @@ export class Bind {
           this.shallowEquals_(newValue, previousResult)) {
         user().fine(TAG, `Expression result unchanged or missing: ` +
             `"${expressionString}"`);
-        return;
+      } else {
+        boundProperty.previousResult = newValue;
+        user().fine(TAG, `New expression result: ` +
+            `"${expressionString}" -> ${newValue}`);
+        updates.push({boundProperty, newValue});
       }
-
-      boundProperty.previousResult = newValue;
-      user().fine(TAG, `New expression result: ` +
-          `"${expressionString}" -> ${newValue}`);
-      propertyUpdates.push({boundProperty, newValue});
     });
-    return propertyUpdates;
+    return updates;
   }
 
   /**
@@ -632,26 +631,26 @@ export class Bind {
    * @private
    */
   apply_(results) {
-    const applyPromises = this.boundElements_.map(boundElement => {
+    const applyPromises = [];
+    this.boundElements_.forEach(boundElement => {
 
-      let width, height;
       const {element, boundProperties} = boundElement;
       const propertyUpdates = this.calculateUpdates_(boundProperties, results);
 
       if (propertyUpdates.length == 0) {
-        return Promise.resolve();
+        return;
       }
 
-      return this.resources_.mutateElement(element, () => {
+      const p = this.resources_.mutateElement(element, () => {
         const mutations = {};
+        let width, height;
 
         propertyUpdates.forEach(update => {
-          const newValue = update.newValue;
-          const mutation = this.applyBinding_(update.boundProperty,
-              element, newValue);
+          const {boundProperty, newValue} = update;
+          const mutation = this.applyBinding_(boundProperty, element, newValue);
           if (mutation) {
             mutations[mutation.name] = mutation.value;
-            const property = update.boundProperty.property;
+            const property = boundProperty.property;
             if (property == 'width') {
               width = isFiniteNumber(newValue) ? Number(newValue) : width;
             } else if (property == 'height') {
@@ -679,6 +678,7 @@ export class Bind {
           }
         }
       });
+      applyPromises.push(p);
     });
     return Promise.all(applyPromises);
   }
