@@ -21,8 +21,6 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {removeElement} from '../../../src/dom';
-import {isObject} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
 import {listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
@@ -128,7 +126,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.iframe_,'message', event => {
+    this.unlistenMessage_ = listen(this.win,'message', event => {
       this.handleNexxMessages_(event);
     });
 
@@ -172,27 +170,24 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   sendCommand_(command) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
-          'cmd': command,
-        }), '*');
+        this.iframe_.contentWindow./*OK*/postMessage({cmd: command}, '*');
       }
     });
   };
 
   // emitter
   handleNexxMessages_(event) {
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
-    if (data === undefined) {
-      return; // We only process valid JSON.
+    if (!event.data || event.source !== this.iframe_.contentWindow) {
+      return;
     }
 
-    if (data.cmd == 'play') {
+    if (event.data == 'play') {
       this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    } else if (data.cmd == 'pause') {
+    } else if (event.data == 'pause') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data.cmd == 'mute') {
+    } else if (event.data == 'mute') {
       this.element.dispatchCustomEvent(VideoEvents.MUTED);
-    } else if (data.cmd == 'unmute') {
+    } else if (event.data == 'unmute') {
       this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
     }
   }
