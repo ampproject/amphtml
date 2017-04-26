@@ -42,9 +42,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = null;
 
     /** @private {?Function} */
-    this.playerReadyResolver_ = null;
-
-    /** @private {?Function} */
     this.unlistenMessage_ = null;
   }
 
@@ -58,10 +55,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
-
     installVideoManagerForDoc(this.element);
     videoManagerForDoc(this.element).register(this);
   }
