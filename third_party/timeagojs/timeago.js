@@ -6,6 +6,45 @@
  */
 
 const locales = {};
+
+import {ar} from './locales/ar';
+import {be} from './locales/be';
+import {bg} from './locales/bg';
+import {ca} from './locales/ca';
+import {da} from './locales/da';
+import {de} from './locales/de';
+import {el} from './locales/el';
+import {en} from './locales/en';
+import {enShort} from './locales/enShort';
+import {es} from './locales/es';
+import {eu} from './locales/eu';
+import {fi} from './locales/fi';
+import {fr} from './locales/fr';
+import {he} from './locales/he';
+import {hu} from './locales/hu';
+import {inBG} from './locales/inBG';
+import {inHI} from './locales/inHI';
+import {inID} from './locales/inID';
+import {it} from './locales/it';
+import {ja} from './locales/ja';
+import {ko} from './locales/ko';
+import {ml} from './locales/ml';
+import {nbNO} from './locales/nbNO';
+import {nl} from './locales/nl';
+import {nnNO} from './locales/nnNO';
+import {pl} from './locales/pl';
+import {ptBR} from './locales/ptBR';
+import {ro} from './locales/ro';
+import {ru} from './locales/ru';
+import {sv} from './locales/sv';
+import {ta} from './locales/ta';
+import {th} from './locales/th';
+import {tr} from './locales/tr';
+import {uk} from './locales/uk';
+import {vi} from './locales/vi';
+import {zhCN} from './locales/zhCN';
+import {zhTW} from './locales/zhTW';
+
 // second, minute, hour, day, week, month, year(365 days)
 const SEC_ARRAY = [60, 60, 24, 7, 365 / 7 / 12, 12];
 const SEC_ARRAY_LEN = 6;
@@ -79,3 +118,41 @@ export function timeago(date, locale) {
 timeago.register = function(locale, localeFunc) {
   locales[locale] = localeFunc;
 };
+
+timeago.register('ar', ar);
+timeago.register('be', be);
+timeago.register('bg', bg);
+timeago.register('ca', ca);
+timeago.register('da', da);
+timeago.register('de', de);
+timeago.register('el', el);
+timeago.register('en', en);
+timeago.register('enShort', enShort);
+timeago.register('es', es);
+timeago.register('eu', eu);
+timeago.register('fi', fi);
+timeago.register('fr', fr);
+timeago.register('he', he);
+timeago.register('hu', hu);
+timeago.register('inBG', inBG);
+timeago.register('inHI', inHI);
+timeago.register('inID', inID);
+timeago.register('it', it);
+timeago.register('ja', ja);
+timeago.register('ko', ko);
+timeago.register('ml', ml);
+timeago.register('nbNO', nbNO);
+timeago.register('nl', nl);
+timeago.register('nnNO', nnNO);
+timeago.register('pl', pl);
+timeago.register('ptBR', ptBR);
+timeago.register('ro', ro);
+timeago.register('ru', ru);
+timeago.register('sv', sv);
+timeago.register('ta', ta);
+timeago.register('th', th);
+timeago.register('tr', tr);
+timeago.register('uk', uk);
+timeago.register('vi', vi);
+timeago.register('zhCN', zhCN);
+timeago.register('zhTW', zhTW);
