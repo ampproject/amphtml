@@ -197,9 +197,9 @@ export class ActionService {
    * @param {!Event} event A `change` event.
    */
   addChangeDetails_(event) {
-    const detail = {};
+    const detail = map();
     const target = event.target;
-    const tagName = event.target.tagName.toLowerCase();
+    const tagName = target.tagName.toLowerCase();
     switch (tagName) {
       case 'input':
         const inputType = target.getAttribute('type');
@@ -216,13 +216,14 @@ export class ActionService {
               detail[field] = String(value);
             }
           });
-          event.detail = detail;
         }
         break;
       case 'select':
-        detail['value'] = target['value'];
-        event.detail = detail;
+        detail.value = target.value;
         break;
+    }
+    if (Object.keys(detail).length > 0) {
+      event.detail = detail;
     }
   }
 
