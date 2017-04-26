@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-require('./babel-helpers');
-require('./changelog');
-require('./clean');
-require('./compile');
-require('./compile-access-expr');
-require('./compile-bind-expr');
-require('./csvify-size');
-require('./dep-check');
-require('./get-zindex');
-require('./lint');
-require('./extension-generator');
-require('./prepend-global');
-require('./presubmit-checks');
-require('./serve');
-require('./size');
-require('./release-tagging');
-require('./runtime-test');
-require('./validator');
-require('./visual-diff');
+var gulp = require('gulp-help')(require('gulp'));
+var util = require('gulp-util');
+
+
+/**
+ * Run visual diff tests
+ *
+ * @param {function} done callback
+ */
+function visualDiff() {
+  util.log(util.colors.yellow('Running visual diff tests...'));
+}
+
+
+gulp.task('visual-diff', 'Runs Visual diff tests.', visualDiff);
