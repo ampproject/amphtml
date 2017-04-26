@@ -258,7 +258,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       iframeHandler.init(iframe);
     });
 
-    it('should be able to use embed-state API', () => {
+    it.configure().skipOldChrome()
+    .run('should be able to use embed-state API', () => {
       iframe.postMessageToParent({
         type: 'send-embed-state',
         sentinel: 'amp3ptest' + testIndex,

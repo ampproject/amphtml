@@ -108,7 +108,7 @@ class TestConfig {
 
   skipOldChrome() {
     return this.skip(() => {
-      return this.platform.isChrome() && this.platform.getMajorVersion() < 58;
+      return this.platform.isChrome() && this.platform.getMajorVersion() < 48;
     });
   }
 
