@@ -32,7 +32,7 @@ import {
 } from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {resetServiceForTesting} from '../../../../src/service';
+import {resetServiceForTesting, getService} from '../../../../src/service';
 import {
   installDocumentStateService,
 } from '../../../../src/service/document-state';
@@ -270,6 +270,7 @@ describe('all-traffic-experiments-tests', () => {
     let win;
     let events;
     let element;
+    let addEnabledExperimentSpy;
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
@@ -309,6 +310,12 @@ describe('all-traffic-experiments-tests', () => {
       installViewerServiceForDoc(ampdoc);
       element = document.createElement('div');
       document.body.appendChild(element);
+      addEnabledExperimentSpy = sandbox.stub();
+      getService(win, 'performance', () => {
+        return {
+          addEnabledExperiment: addEnabledExperimentSpy,
+        };
+      });
     });
 
     afterEach(() => {
@@ -461,6 +468,12 @@ describe('all-traffic-experiments-tests', () => {
           external, internal)).to.equal(test.shouldServeFastFetch);
         expectCorrectBranchOnly(element, test.branchId);
         expect(win.document.cookie).to.be.null;
+        if (test.branchId) {
+          expect(addEnabledExperimentSpy)
+              .to.be.calledWith('expDoubleclickA4A-' + test.branchId);
+        } else {
+          expect(addEnabledExperimentSpy).to.not.be.called;
+        }
       });
     });
   });
