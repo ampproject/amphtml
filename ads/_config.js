@@ -256,6 +256,7 @@ export const adConfig = {
       'https://www.googletagservices.com/tag/js/gpt.js',
       'https://g.ezoic.net/ezoic/ampad.js',
     ],
+    clientIdScope: 'AMP_ECID_EZOIC',
   },
 
   f1e: {
