@@ -140,7 +140,7 @@ export class Bind {
     // Expose for testing on dev.
     if (getMode().localDev) {
       AMP.reinitializeBind = this.initialize_.bind(this);
-      AMP.printAmpState = this.printAmpState_.bind(this);
+      AMP.printState = this.printState_.bind(this);
     }
   }
 
@@ -927,7 +927,7 @@ export class Bind {
    * Print out the current state in the console.
    * @private
    */
-  printAmpState_() {
+  printState_() {
     const seen = [];
     const s = JSON.stringify(this.scope_, (key, value) => {
       if (isObject(value)) {
