@@ -139,7 +139,6 @@ export class Bind {
 
     // Expose for testing on dev.
     if (getMode().localDev) {
-      AMP.reinitializeBind = this.initialize_.bind(this);
       AMP.printState = this.printState_.bind(this);
     }
   }

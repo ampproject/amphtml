@@ -408,7 +408,7 @@ Only binding to the following components and attributes are allowed:
 
 ## Debugging
 
-Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development.
+Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development and to access special debugging functions.
 
 ### Warnings
 
@@ -470,6 +470,10 @@ There are several types of runtime errors that may be encountered when working w
     <td>Avoid banned URL protocols or expressions that would fail the AMP Validator.</td>
   </tr>
 </table>
+
+### Debugging State
+
+In development mode, use `AMP.printState()` to print the current state to the console.
 
 ## Appendix
 
