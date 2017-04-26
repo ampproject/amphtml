@@ -20,10 +20,10 @@ import {resourcesForDoc} from '../services';
 import {viewerForDoc} from '../services';
 import {viewportForDoc} from '../services';
 import {whenDocumentComplete} from '../document-ready';
-import {urls} from '../config';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
 import {rateLimit} from '../utils/rate-limit';
+import {map} from '../utils/object';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -92,8 +92,16 @@ export class Performance {
     /** @private {boolean} */
     this.isPerformanceTrackingOn_ = false;
 
-    /** @private {?string} */
-    this.enabledExperiments_ = null;
+    /** @private {!Object<string,boolean>} */
+    this.enabledExperiments_ = map();
+    /** @private {string} */
+    this.ampexp_ = '';
+
+    // Add RTV version as experiment ID, so we can slice the data by version.
+    this.addEnabledExperiment(getMode(this.win).rtvVersion);
+    if (isCanary(this.win)) {
+      this.addEnabledExperiment('canary');
+    }
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => {
@@ -281,11 +289,9 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      const experiments = this.getEnabledExperiments_();
-      const payload = experiments === '' ? undefined : {
-        ampexp: experiments,
-      };
-      this.viewer_.sendMessage('sendCsi', payload, /* cancelUnsent */true);
+      this.viewer_.sendMessage('sendCsi', {
+        ampexp: this.ampexp_,
+      }, /* cancelUnsent */true);
     }
   }
 
@@ -295,36 +301,17 @@ export class Performance {
   throttledFlush() {
     if (!this.throttledFlush_) {
       /** @private {function()} */
-      this.throttledFlush_ = rateLimit(this.win, this.flush, 100);
+      this.throttledFlush_ = rateLimit(this.win, this.flush.bind(this), 100);
     }
     this.throttledFlush_();
   }
 
   /**
-   * @returns {string} comma-separated list of experiment IDs
-   * @private
+   * @param {string} experimentId
    */
-  getEnabledExperiments_() {
-    if (this.enabledExperiments_ !== null) {
-      return this.enabledExperiments_;
-    }
-    const experiments = [];
-    // Add RTV version as experiment ID, so we can slice the data by version.
-    if (getMode(this.win).rtvVersion) {
-      experiments.push(getMode(this.win).rtvVersion);
-    }
-    if (isCanary(this.win)) {
-      experiments.push('canary');
-    }
-    // Check if it's the legacy CDN domain.
-    if (this.getHostname_() == urls.cdn.split('://')[1]) {
-      experiments.push('legacy-cdn-domain');
-    }
-    return this.enabledExperiments_ = experiments.join(',');
-  }
-
-  getHostname_() {
-    return this.win.location.hostname;
+  addEnabledExperiment(experimentId) {
+    this.enabledExperiments_[experimentId] = true;
+    this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
   }
 
   /**

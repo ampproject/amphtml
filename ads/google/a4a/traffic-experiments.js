@@ -30,7 +30,10 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {dev} from '../../../src/log';
-import {viewerForDoc} from '../../../src/services';
+import {
+  viewerForDoc,
+  performanceForOrNull,
+} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{
@@ -109,6 +112,10 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     const selectedBranch = getExperimentBranch(win, experimentName);
     if (selectedBranch) {
       addExperimentIdToElement(selectedBranch, element);
+      const perf = performanceForOrNull(win);
+      if (perf) {
+        perf.addEnabledExperiment(experimentName + '-' + selectedBranch);
+      }
     }
     // Detect how page was selected into the overall experimentName.
     if (isSetFromUrl) {

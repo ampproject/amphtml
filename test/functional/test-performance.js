@@ -650,23 +650,31 @@ describes.realWin('performance with experiment', {amp: true}, env => {
     perf = performanceFor(win);
   });
 
-  it('legacy-cdn-domain experiment enabled', () => {
-    sandbox.stub(perf, 'getHostname_', () => 'cdn.ampproject.org');
+  it('rtvVersion experiment', () => {
     return perf.coreServicesAvailable().then(() => {
-      perf.flush();
-      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
-        ampexp: getMode(win).rtvVersion + ',legacy-cdn-domain',
-      });
-    });
-  });
-
-  it('no experiment', () => {
-    sandbox.stub(perf, 'getHostname_', () => 'curls.cdn.ampproject.org');
-    return perf.coreServicesAvailable().then(() => {
+      viewerSendMessageStub.reset();
       perf.flush();
       expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
         ampexp: getMode(win).rtvVersion,
       });
+    });
+  });
+
+  it('addEnabledExperiment should work', () => {
+    return perf.coreServicesAvailable().then(() => {
+      perf.addEnabledExperiment('experiment-a');
+      perf.addEnabledExperiment('experiment-b');
+      perf.addEnabledExperiment('experiment-a'); // duplicated entry
+      viewerSendMessageStub.reset();
+      perf.flush();
+      expect(viewerSendMessageStub).to.be.calledWith('sendCsi',
+          sandbox.match(payload => {
+            const experiments = payload.ampexp.split(',');
+            expect(experiments).to.have.length(3);
+            expect(experiments).to.have.members(
+                [getMode(win).rtvVersion, 'experiment-a', 'experiment-b']);
+            return true;
+          }));
     });
   });
 });
