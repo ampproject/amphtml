@@ -89,14 +89,12 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       '&pbid=' + encodeURIComponent(playerId);
 
     const iframe = this.element.ownerDocument.createElement('iframe');
-    this.iframe_ = iframe;
-
-    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
     this.applyFillContent(iframe, true);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src = src;
 
-    this.iframe_.src = src;
+    this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(this.win, 'message', event => {
       this.handleOoyalaMessages_(event);
