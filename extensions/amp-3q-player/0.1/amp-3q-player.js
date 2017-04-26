@@ -167,7 +167,6 @@ class Amp3QPlayer extends AMP.BaseElement {
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
-
   /** @override */
   play() {
     this.sdnPostMessage_('play2');
