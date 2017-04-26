@@ -929,15 +929,11 @@ export class Bind {
    */
   printAmpState_() {
     const seen = [];
-    const seenNames = [];
     const s = JSON.stringify(this.scope_, (key, value) => {
       if (isObject(value)) {
-        const index = seen.indexOf(value);
-        if (index !== -1) {
-          const name = seenNames[index];
-          return `**Circular reference to '${name}'**`;
+        if (seen.includes(value)) {
+          return '[Circular]';
         } else {
-          seenNames.push(key);
           seen.push(value);
         }
       }
