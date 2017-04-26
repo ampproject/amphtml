@@ -258,6 +258,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       iframeHandler.init(iframe);
     });
 
+    // TODO(#8965) unskip test
     it.configure().skipOldChrome()
     .run('should be able to use embed-state API', () => {
       iframe.postMessageToParent({

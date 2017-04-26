@@ -216,8 +216,14 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
     // Not using arrow function here because otherwise the way closure behaves
     // prevents me from calling this.timeout(5000).
+<<<<<<< HEAD
     // TODO(@tdrl, #8965): Make this pass reliably on Travis.
     it.skip('with multiple slots', function() {
+=======
+    // TODO(#8965) unskip test
+    it.configure().skipOldChrome()
+    .run('with multiple slots', function() {
+>>>>>>> add todo
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
       // Reset counter for purpose of this test.
