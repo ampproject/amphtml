@@ -110,11 +110,10 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     });
 
     this.element.appendChild(this.iframe_);
-    return this.loadPromise(this.iframe_)
-      .then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-        this.playerReadyResolver_(this.iframe_);
-      });
+    this.playerReadyPromise_ = this.loadPromise(this.iframe_).then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
+    return this.playerReadyPromise_;
   }
 
   /** @override */
@@ -128,9 +127,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    this.playerReadyPromise_ = null;
 
     return true;
   }
@@ -172,34 +169,42 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Sends a command to the player through postMessage.
+   * @param {string} command
+   * @private
+   * */
+  sendCommand_(command) {
+    if (!this.playerReadyPromise_) {
+      return;
+    }
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        this.iframe_.contentWindow./*OK*/postMessage(command, '*');
+      }
+    });
+  }
+
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('play', '*');
-    });
+    this.sendCommand_('play');
   }
 
   /** @override */
   pause() {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('pause', '*');
-    });
+    this.sendCommand_('pause');
   }
 
   /** @override */
   mute() {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('mute', '*');
-    });
+    this.sendCommand_('mute');
   }
 
   /** @override */
   unmute() {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('unmute', '*');
-    });
+    this.sendCommand_('unmute');
   }
 
   /** @override */
