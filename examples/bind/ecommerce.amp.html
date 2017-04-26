@@ -152,7 +152,8 @@
     <amp-state [src]="..." on="fetch:AMP.setState({"shirts": {selected: {id: event.response}}})"
 
     Note that shirt with ID == "0" contains size data (but other IDs don't)
-    because it's the default shirt color at page load.
+    because it's the default shirt color at page load. Size data for other shirts
+    will be fetched via XHR when their corresponding colors are selected.
   -->
   <amp-state id="shirts" [src]="'/bind/ecommerce/sizes?shirt=' + selected.id">
     <script type="application/json">
