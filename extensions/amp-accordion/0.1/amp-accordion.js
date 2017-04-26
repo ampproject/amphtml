@@ -15,14 +15,10 @@
  */
 
 import {CSS} from '../../../build/amp-accordion-0.1.css';
-import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
 import {map} from '../../../src/utils/object';
-
-/** @const */
-const TAG = 'amp-accordion-session-state-optout';
 
 class AmpAccordion extends AMP.BaseElement {
 
@@ -52,9 +48,7 @@ class AmpAccordion extends AMP.BaseElement {
   buildCallback() {
     this.sections_ = this.getRealChildren();
 
-    if (isExperimentOn(this.win, TAG)) {
-      this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
-    }
+    this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
 
     this.element.setAttribute('role', 'tablist');
 
