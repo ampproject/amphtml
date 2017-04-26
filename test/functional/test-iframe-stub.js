@@ -81,7 +81,7 @@ describe.only('test-iframe-createIframeWithMessageStub', () => {
       });
     }).then(() => {
       iframe.contentWindow.postMessage(data2, '*');
-      return iframe.expectMessageFromParent((data, msg) => {
+      return iframe.expectMessageFromParent(() => {
         throw new Error('test');
       }).then(() => {
         throw new Error('should not get here');

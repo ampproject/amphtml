@@ -292,7 +292,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           requestedHeight: 217,
           type: 'embed-size-denied',
           sentinel: 'amp3ptest' + testIndex,
-        })
+        });
       });
     });
 
@@ -316,7 +316,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           requestedHeight: 217,
           type: 'embed-size-changed',
           sentinel: 'amp3ptest' + testIndex,
-        })
+        });
       });
     });
 
@@ -339,7 +339,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           requestedHeight: 217,
           type: 'embed-size-changed',
           sentinel: 'amp3ptest' + testIndex,
-        })
+        });
       });
     });
   });
