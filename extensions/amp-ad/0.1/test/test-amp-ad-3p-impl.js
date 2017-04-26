@@ -179,8 +179,9 @@ describe('amp-ad-3p-impl', () => {
     });
   });
 
-  describe('preconnectCallback', () => {
-    it('should add preconnect and prefech to DOM header', () => {
+  describe.only('preconnectCallback', () => {
+    it.configure().skipOldChrome()
+    .run('should add preconnect and prefech to DOM header', () => {
       ad3p.buildCallback();
       ad3p.preconnectCallback();
       return whenFirstVisible.then(() => {
