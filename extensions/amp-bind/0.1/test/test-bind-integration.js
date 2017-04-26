@@ -339,7 +339,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-video integration', () => {
-    it('should change src when the src attribute binding changes', () => {
+    it('should support binding to src', () => {
       const button = fixture.doc.getElementById('changeVidSrcButton');
       const vid = fixture.doc.getElementById('video');
       expect(vid.getAttribute('src')).to
@@ -446,6 +446,32 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       return waitForBindApplication().then(() => {
         expect(ampIframe.getAttribute('src')).to.contain(newSrc);
         expect(iframe.src).to.contain(newSrc);
+      });
+    });
+  });
+
+  describe('amp-list', () => {
+    it('should support binding to src', () => {
+      const button = fixture.doc.getElementById('listSrcButton');
+      const list = fixture.doc.getElementById('list');
+      expect(list.getAttribute('src'))
+          .to.equal('https://www.google.com/unbound.json');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(list.getAttribute('src'))
+            .to.equal('https://www.google.com/bound.json');
+      });
+    });
+
+    it('should NOT change src when new value uses an invalid protocol', () => {
+      const button = fixture.doc.getElementById('httpListSrcButton');
+      const list = fixture.doc.getElementById('list');
+      expect(list.getAttribute('src'))
+          .to.equal('https://www.google.com/unbound.json');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(list.getAttribute('src'))
+            .to.equal('https://www.google.com/unbound.json');
       });
     });
   });

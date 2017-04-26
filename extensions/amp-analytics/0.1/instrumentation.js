@@ -104,6 +104,11 @@ const EVENT_TRACKERS = {
     allowedFor: ALLOWED_FOR_ALL,
     klass: VisibilityTracker,
   },
+  'hidden-v3': {
+    name: 'visible-v3', // Reuse tracker with visibility
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: VisibilityTracker,
+  },
 };
 
 /** @const {string} */
@@ -566,8 +571,9 @@ export class AnalyticsGroup {
   addTrigger(config, handler) {
     let eventType = dev().assertString(config['on']);
     // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
-    if (eventType == 'visible' && this.visibilityV3_) {
-      eventType = 'visible-v3';
+    if ((eventType == 'visible' || eventType == 'hidden')
+        && this.visibilityV3_) {
+      eventType += '-v3';
     }
     let trackerProfile = EVENT_TRACKERS[eventType];
     if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {

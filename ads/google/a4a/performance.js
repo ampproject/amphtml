@@ -21,6 +21,8 @@ import {serializeQueryString} from '../../../src/url';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {viewerForDoc} from '../../../src/services';
+import {CommonSignals} from '../../../src/common-signals';
+import {analyticsForDoc} from '../../../src/analytics';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -49,6 +51,13 @@ export class BaseLifecycleReporter {
      */
     this.extraVariables_ = new Object(null);
   }
+
+  /**
+   * To be overridden.
+   *
+   * @param {!Element} unusedElement Amp ad element we are measuring.
+   */
+  addPingsForVisibility(unusedElement) {}
 
   /**
    * A beacon function that will be called at various stages of the lifecycle.
@@ -269,5 +278,56 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    */
   getInitTime() {
     return this.initTime_;
+  }
+
+  /**
+   * Adds CSI pings for various visibility measurements on element.
+   *
+   * @param {!Element} element Amp ad element we are measuring.
+   * @override
+   */
+  addPingsForVisibility(element) {
+    analyticsForDoc(element, true).then(analytics => {
+      const signals = element.signals();
+      const readyPromise = Promise.race([
+        signals.whenSignal(CommonSignals.INI_LOAD),
+        signals.whenSignal(CommonSignals.LOAD_END),
+      ]);
+      const vis = analytics.getAnalyticsRoot(element).getVisibilityManager();
+      // Can be any promise or `null`.
+      // Element must be an AMP element at this time.
+      // 50% vis w/o ini load
+      vis.listenElement(element, {visiblePercentageMin: 50}, null, null,
+                        () => {
+                          this.sendPing('visHalf');
+                        });
+      // 50% vis w ini load
+      vis.listenElement(element,
+                        {visiblePercentageMin: 50},
+                        readyPromise, null,
+                        () => {
+                          this.sendPing('visHalfIniLoad');
+                        });
+      // first visible
+      vis.listenElement(element, {visiblePercentageMin: 1}, null, null,
+                        () => {
+                          this.sendPing('firstVisible');
+                        });
+      // ini-load
+      vis.listenElement(element, {waitFor: 'ini-load'},
+                        readyPromise, null,
+                        () => {
+                          this.sendPing('iniLoad');
+                        });
+
+      // 50% vis, ini-load and 1 sec
+      vis.listenElement(element,
+                        {visiblePercentageMin: 1, waitFor: 'ini-load',
+                         totalTimeMin: 1000},
+                        readyPromise, null,
+                        () => {
+                          this.sendPing('visLoadAndOneSec');
+                        });
+    });
   }
 }

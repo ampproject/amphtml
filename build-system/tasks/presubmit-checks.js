@@ -283,6 +283,14 @@ var forbiddenTerms = {
       'tools/experiments/experiments.js',
     ],
   },
+  'parseUrlWithA': {
+    message: 'Use parseUrl instead.',
+    whitelist: [
+      'src/url.js',
+      'src/service/document-click.js',
+      'dist.3p/current/integration.js',
+    ],
+  },
   '\\.sendMessage\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
@@ -736,6 +744,21 @@ var forbiddenTermsSrcInclusive = {
   },
   '\\>\\>\\>\\>\\>\\>': {
     message: 'Unresolved merge conflict.',
+  },
+  '\\.indexOf\\([\'"][^)]+\\)\\s*===?\\s*0\\b': {
+    message: 'use startsWith helper in src/string.js',
+    whitelist: [
+      'dist.3p/current/integration.js',
+    ],
+  },
+  '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
+  '/url-parse-query-string': {
+    message: 'Import parseQueryString from `src/url.js`',
+    whitelist: [
+      'src/url.js',
+      'src/mode.js',
+      'dist.3p/current/integration.js',
+    ],
   },
 };
 

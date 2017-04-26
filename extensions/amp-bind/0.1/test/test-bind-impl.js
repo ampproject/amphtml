@@ -194,7 +194,9 @@ describes.realWin('Bind', {
 
   it('should verify class bindings in dev mode', () => {
     window.AMP_MODE = {development: true};
-    createElementWithBinding(`[class]="'foo'" class="foo"`); // No error.
+    createElementWithBinding(`[class]="'foo'" class="foo"`);
+    createElementWithBinding(`[class]="'foo'" class=" foo "`);
+    createElementWithBinding(`[class]="''"`);
     createElementWithBinding(`[class]="'bar'" class="qux"`); // Error.
     const errorStub = env.sandbox.stub(user(), 'createError');
     return onBindReady().then(() => {

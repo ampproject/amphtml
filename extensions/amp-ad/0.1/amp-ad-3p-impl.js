@@ -20,7 +20,6 @@ import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
 } from './concurrent-load';
-import {LayoutDelayMeter} from './layout-delay-meter';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -93,9 +92,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @type {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
     this.lifecycleReporter = googleLifecycleReporterFactory(
         this, ReporterNamespace.AMP);
-
-    /** @private {!./layout-delay-meter.LayoutDelayMeter} */
-    this.layoutDelayMeter_ = new LayoutDelayMeter(this.win);
   }
 
   /** @override */
@@ -217,8 +213,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.layoutDelayMeter_.startLayout();
-
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
@@ -251,9 +245,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   viewportCallback(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
-    }
-    if (inViewport) {
-      this.layoutDelayMeter_.enterViewport();
     }
   }
 

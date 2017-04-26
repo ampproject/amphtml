@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {fromClassForDoc} from '../../src/service';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
@@ -88,8 +87,10 @@ describes.realWin('analytics', {amp: true}, env => {
       const ele = win.document.createElement('div');
       win.document.body.appendChild(ele);
       const baseEle = new BaseElement(ele);
-      fromClassForDoc(
+      registerServiceBuilderForDoc(
           ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
+      // Force instantiation
+      getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
       const config = {
         'requests': {
           'pageview': 'https://example.com/analytics',

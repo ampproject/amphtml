@@ -28,6 +28,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
+import {startsWith} from '../../../src/string';
 
 /**
  * @enum {number}
@@ -203,7 +204,10 @@ class AmpYoutube extends AMP.BaseElement {
 
     return this.loadPromise(iframe)
         .then(() => this.listenToFrame_())
-        .then(() => this.playerReadyPromise_);
+        .then(() => {
+          this.element.dispatchCustomEvent(VideoEvents.LOAD);
+          this.playerReadyResolver_(this.iframe_);
+        });
   }
 
   /** @override */
@@ -280,18 +284,14 @@ class AmpYoutube extends AMP.BaseElement {
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data ||
-        !(isObject(event.data) || event.data.indexOf('{') == 0)) {
+    if (!event.data || !(isObject(event.data) || startsWith(event.data, '{'))) {
       return;  // Doesn't look like JSON.
     }
     const data = isObject(event.data) ? event.data : tryParseJson(event.data);
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data.event == 'onReady') {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      this.playerReadyResolver_(this.iframe_);
-    } else if (data.event == 'infoDelivery' &&
+    if (data.event == 'infoDelivery' &&
         data.info && data.info.playerState !== undefined) {
       this.playerState_ = data.info.playerState;
       if (this.playerState_ == PlayerStates.PAUSED) {

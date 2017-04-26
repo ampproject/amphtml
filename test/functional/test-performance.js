@@ -31,6 +31,7 @@ describes.realWin('performance', {amp: true}, env => {
   let clock;
   let win;
   let ampdoc;
+  let hasLoadTimes;
 
   beforeEach(() => {
     win = env.win;
@@ -39,6 +40,7 @@ describes.realWin('performance', {amp: true}, env => {
     clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
     installPerformanceService(env.win);
     perf = performanceFor(env.win);
+    hasLoadTimes = window.chrome && window.chrome.loadTimes;
   });
 
   describe('when viewer is not ready', () => {
@@ -258,7 +260,8 @@ describes.realWin('performance', {amp: true}, env => {
         return perf.coreServicesAvailable().then(() => {
           expect(flushSpy).to.have.callCount(3);
           expect(perf.isMessagingReady_).to.be.false;
-          expect(perf.events_.length).to.equal(4);
+          const count = hasLoadTimes ? 5 : 4;
+          expect(perf.events_.length).to.equal(count);
         });
       });
     });
@@ -563,28 +566,35 @@ describes.realWin('performance', {amp: true}, env => {
          'to be visible before before first viewport completion', () => {
         clock.tick(100);
         whenFirstVisibleResolve();
-        expect(tickSpy).to.have.callCount(2);
+        expect(tickSpy).to.have.callCount(hasLoadTimes ? 3 : 2);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
-          expect(tickSpy).to.have.callCount(3);
+          expect(tickSpy).to.have.callCount(hasLoadTimes ? 4 : 3);
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy).to.have.callCount(4);
+            expect(tickSpy).to.have.callCount(hasLoadTimes ? 4 : 3);
             expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
-            expect(tickSpy.withArgs('pc')).to.be.calledOnce;
-            expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
+            return whenFirstVisiblePromise.then(() => {
+              expect(tickSpy).to.have.callCount(hasLoadTimes ? 5 : 4);
+              expect(tickSpy.withArgs('pc')).to.be.calledOnce;
+              expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
+            });
           });
         });
       });
 
-      it('should tick `pc` with `delta=1` when viewport is complete ' +
+      it('should tick `pc` with `delta=0` when viewport is complete ' +
          'before user request document to be visible', () => {
         clock.tick(300);
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(tickSpy.withArgs('ol')).to.be.calledOnce;
-          expect(tickSpy.withArgs('pc')).to.be.calledOnce;
-          expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
+          expect(tickSpy.withArgs('pc')).to.have.callCount(0);
+          whenFirstVisibleResolve();
+          return whenFirstVisiblePromise.then(() => {
+            expect(tickSpy.withArgs('pc')).to.be.calledOnce;
+            expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
+          });
         });
       });
     });

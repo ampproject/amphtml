@@ -23,6 +23,7 @@ import {whenDocumentComplete} from '../document-ready';
 import {urls} from '../config';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
+import {rateLimit} from '../utils/rate-limit';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -96,7 +97,7 @@ export class Performance {
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => {
-      this.tick('ol');
+      this.onload_();
       this.flush();
     });
   }
@@ -151,6 +152,18 @@ export class Performance {
     });
   }
 
+  onload_() {
+    this.tick('ol');
+    // Detect deprecated first pain time API
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
+    // We'll use this until something better is available.
+    if (this.win.chrome && typeof this.win.chrome.loadTimes == 'function') {
+      this.tickDelta('fp',
+          this.win.chrome.loadTimes().firstPaintTime * 1000 -
+              this.win.performance.timing.navigationStart);
+    }
+  }
+
   /**
    * Measure the delay the user perceives of how long it takes
    * to load the initial viewport.
@@ -174,7 +187,13 @@ export class Performance {
             ? (this.win.Date.now() - docVisibleTime)
             //  Prerender was complete before visibility.
             : 0;
-        this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
+        this.viewer_.whenFirstVisible().then(() => {
+          // We only tick this if the page eventually becomes visible,
+          // since otherwise we heavily skew the metric towards the
+          // 0 case, since pre-renders that are never used are highly
+          // likely to fully load before they are never used :)
+          this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
+        });
         this.prerenderComplete_(userPerceivedVisualCompletenesssTime);
       } else {
         // If it didnt start in prerender, no need to calculate anything
@@ -268,6 +287,17 @@ export class Performance {
       };
       this.viewer_.sendMessage('sendCsi', payload, /* cancelUnsent */true);
     }
+  }
+
+  /**
+   * Flush with a rate limit of 10 per second.
+   */
+  throttledFlush() {
+    if (!this.throttledFlush_) {
+      /** @private {function()} */
+      this.throttledFlush_ = rateLimit(this.win, this.flush, 100);
+    }
+    this.throttledFlush_();
   }
 
   /**
