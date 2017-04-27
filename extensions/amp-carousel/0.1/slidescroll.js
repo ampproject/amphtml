@@ -493,7 +493,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   showSlideWhenReady_(value) {
     const index = parseInt(value, 10);
-    if (isFinite(index)) {
+    if (isFinite(index) && index > 0 && index < this.noOfSlides_) {
       // If we haven't been laid out yet, set `initialSlideIndex_` instead.
       if (this.slideIndex_ === null) {
         this.initialSlideIndex_ = index;
@@ -514,6 +514,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   showSlide_(newIndex) {
     const noOfSlides_ = this.noOfSlides_;
+    newIndex = dev().assertNumber(newIndex);
     if (newIndex < 0 ||
         newIndex >= noOfSlides_ ||
         this.slideIndex_ == newIndex) {
