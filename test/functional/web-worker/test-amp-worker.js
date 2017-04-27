@@ -43,6 +43,7 @@ describe('invokeWebWorker', () => {
       Worker: () => fakeWorker,
       Blob: sandbox.stub(),
       URL: {createObjectURL: sandbox.stub()},
+      location: window.location,
     };
 
     // Stub xhr.fetchText() to return a resolved promise.
