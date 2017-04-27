@@ -122,19 +122,19 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = this.getVideoIframeSrc_();
-    this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win,'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', event => {
       this.handleNexxMessages_(event);
     });
 
-    return this.loadPromise(this.iframe_)
-      .then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-        this.playerReadyResolver_(this.iframe_);
-      });
+    this.element.appendChild(this.iframe_);
+    const loaded = this.loadPromise(this.iframe_).then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
+    this.playerReadyResolver_(loaded);
+    return loaded;
   }
 
   pauseCallback() {
