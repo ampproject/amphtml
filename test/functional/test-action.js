@@ -960,8 +960,12 @@ describe('Core events', () => {
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'button');
-    const event = {target: element, keyCode: 13};
+    const event = {
+      target: element,
+      keyCode: 13,
+      preventDefault: sandbox.stub()};
     handler(event);
+    expect(event.preventDefault).to.have.been.called;
     expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
   });
 
