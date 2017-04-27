@@ -295,7 +295,9 @@ function main(argv) {
       sortedBuildTargets.join(', ') + '\n');
 
   if (buildTargets.has('BUILD_SYSTEM')) {
-    command.testBuildSystem();
+    // command.testBuildSystem();
+    // Testing.
+    runAllCommands();
   }
 
   if (buildTargets.has('RUNTIME')) {
