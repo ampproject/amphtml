@@ -414,9 +414,9 @@ export const adConfig = {
   },
 
   mobusi: {
-		preconnect: 'https://static.addevweb.com',
-		renderStartImplemented: true
-	},
+    preconnect: 'https://img.mobusi.com',
+    renderStartImplemented: true,
+  },
 
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
