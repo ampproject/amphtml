@@ -14,64 +14,9 @@
  * limitations under the License.
  */
 
-import {APP, Messaging, MessageType} from '../messaging';
+import {APP, Messaging, MessageType, WindowPortEmulator} from '../messaging';
 import {listen} from '../../../../src/event-helper';
 import {dev} from '../../../../src/log';
-
-/**
- * @fileoverview This class is a de-facto implementation of MessagePort
- * from Channel Messaging API:
- * https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API
- */
-class WindowPortEmulator {
-  /**
-   * @param {!Window} win
-   * @param {!Window} ampdoc
-   * @param {string} origin
-   * @param {number} id
-   */
-  constructor(win, ampdoc, origin, id) {
-    /** @const {!Window} */
-    this.win = win;
-    /** @const {!Window} */
-    this.ampdoc_ = ampdoc;
-    /** @private {string} */
-    this.origin_ = origin;
-    /** @private {number} */
-    this.id = id;
-  }
-
-  /**
-   * @param {string} eventType
-   * @param {function(!Event):undefined} handler
-   */
-  addEventListener(eventType, handler) {
-    listen(this.win, 'message', e => {
-      if (e.origin == this.origin_ && e.data.app == APP) {
-        this.log('got a message from the amp doc!', e.data);
-        handler(e);
-      }
-    }.bind(this));
-  }
-
-  /**
-   * @param {Object} data
-   */
-  postMessage(data) {
-    this.log('posting message to amp doc', data);
-    this.ampdoc_./*OK*/postMessage(data, this.origin_);
-  }
-  start() {
-  }
-
-  log() {
-    const var_args = Array.prototype.slice.call(arguments, 0);
-    var_args.unshift('[VIEWER ' + this.id + ']');
-    console/*OK*/.log.apply(console, var_args);
-  }
-}
-
-
 
 const CHANNEL_OPEN_MSG = 'channelOpen';
 
@@ -84,10 +29,10 @@ export class AmpViewerHost {
   /**
    * @param {!Window} win
    * @param {!HTMLIFrameElement} ampIframe
-   * @param {string} viewerOrigin
+   * @param {string} frameOrigin
    * @param {boolean} startPolling
    */
-  constructor(win, ampIframe, viewerOrigin, startPolling, opt_id) {
+  constructor(win, ampIframe, frameOrigin, startPolling, opt_id) {
     /** @const {!Window} */
     this.win = win;
     /** @const {!HTMLIFrameElement} */
@@ -96,32 +41,33 @@ export class AmpViewerHost {
     /** @const {string} */
     this.id = opt_id;
 
-    this.waitForHandshake_(viewerOrigin, startPolling);
+    this.waitForHandshake_(frameOrigin, startPolling);
   }
 
   /**
-   * @param {string} viewerOrigin
+   * @param {string} frameOrigin
    * @param {boolean} startPolling
    */
-  waitForHandshake_(viewerOrigin, startPolling) {
+  waitForHandshake_(frameOrigin, startPolling) {
     this.log('awaitHandshake_');
     const viewerId = this.id;
-    const target = this.ampIframe_.contentWindow;
+    const target = this.ampIframe_.contentWindow;//is this immediately available? race condition?
     const listener = function(event) {
-      if (event.origin == viewerOrigin &&
+      if (event.origin == frameOrigin &&
               this.isChannelOpen_(event.data) &&
               (!event.source || event.source == target)) {
-        this.log(' messaging established with ', viewerOrigin);
-        window.removeEventListener('message', listener, false);
+        this.log(' messaging established with ', frameOrigin);
+        this.win.removeEventListener('message', listener, false);
         const message = {
           app: APP,
           requestid: event.data.requestid,
           data: {},
           type: MessageType.RESPONSE,
         };
-        target./*OK*/postMessage(message, viewerOrigin);
+        target./*OK*/postMessage(message, frameOrigin);
 
-        const port = new WindowPortEmulator(this.win, target, viewerOrigin, this.id);
+        const port = new WindowPortEmulator(
+          this.win, frameOrigin, target, this.id);
         this.messaging_ = new Messaging(this.win, port);
         this.messaging_.setDefaultHandler(this.handleMessage_.bind(this));
 
@@ -131,7 +77,7 @@ export class AmpViewerHost {
         }, true);
       }
     }.bind(this);
-    window.addEventListener('message', listener, false);
+    this.win.addEventListener('message', listener, false);
   }
 
   isChannelOpen_(eventData) {

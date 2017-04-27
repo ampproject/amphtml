@@ -71,12 +71,18 @@ export class WindowPortEmulator {
   /**
    * @param {!Window} win
    * @param {string} origin
+   * @param {!Window} target
+   * @param {number} opt_id for dev logging.
    */
-  constructor(win, origin) {
+  constructor(win, origin, target, opt_id) {
     /** @const {!Window} */
     this.win = win;
     /** @private {string} */
     this.origin_ = origin;
+    /** @const {!Window} */
+    this.target_ = target;
+    /** @private {number} */
+    this.id = opt_id;
   }
 
   /**
@@ -86,7 +92,8 @@ export class WindowPortEmulator {
   addEventListener(eventType, handler) {
     listen(this.win, 'message', e => {
       if (e.origin == this.origin_ &&
-          e.source == this.win.parent && e.data.app == APP) {
+          e.source == this.target_ && e.data.app == APP) {
+        this.log('got a message: ', e.data);
         handler(e);
       }
     });
@@ -96,9 +103,14 @@ export class WindowPortEmulator {
    * @param {Object} data
    */
   postMessage(data) {
-    this.win.parent./*OK*/postMessage(data, this.origin_);
+    this.target_./*OK*/postMessage(data, this.origin_);
   }
   start() {
+  }
+  log() {
+    const var_args = Array.prototype.slice.call(arguments, 0);
+    var_args.unshift('[PORT ' + this.id + ']');
+    console/*OK*/.log.apply(console, var_args);
   }
 }
 

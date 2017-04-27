@@ -93,8 +93,8 @@ export class AmpViewerIntegration {
           });
     }
 
-    const port = new WindowPortEmulator(
-      this.win, dev().assertString(this.unconfirmedViewerOrigin_));
+    const port = new WindowPortEmulator(this.win,
+      dev().assertString(this.unconfirmedViewerOrigin_), this.win.parent);
     return this.openChannelAndStart_(
       viewer, ampdoc, new Messaging(this.win, port, this.isWebView_));
   }
@@ -124,8 +124,9 @@ export class AmpViewerIntegration {
               'Did not receive communication port from the Viewer!');
           }
           const port = e.ports && e.ports.length > 0 ? e.ports[0] :
-            new WindowPortEmulator(
-              this.win, dev().assertString(this.unconfirmedViewerOrigin_));
+            new WindowPortEmulator(this.win,
+              dev().assertString(this.unconfirmedViewerOrigin_),
+              this.win.parent);
           resolve(port);
           unlisten();
         }
