@@ -198,7 +198,6 @@ class AmpYoutube extends AMP.BaseElement {
     );
 
     this.element.appendChild(this.iframe_);
-
     return this.loadPromise(this.iframe_)
         .then(() => this.listenToFrame_())
         .then(() => {
