@@ -42,7 +42,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = null;
 
     /** @private {?Function} */
-    this.unlistenMessage_ = null;
+    this.playerReadyResolver_ = null;
   }
 
   /**
@@ -55,6 +55,10 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     installVideoManagerForDoc(this.element);
     videoManagerForDoc(this.element).register(this);
   }
@@ -89,22 +93,25 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       '&pbid=' + encodeURIComponent(playerId);
 
     const iframe = this.element.ownerDocument.createElement('iframe');
+    this.iframe_ = iframe;
+
+    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
     this.applyFillContent(iframe, true);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = src;
 
-    this.iframe_ = iframe;
+    this.iframe_.src = src;
 
-    this.unlistenMessage_ = listen(this.win, 'message', event => {
+    this.unlistenMessage_ = listen(this.win,'message', event => {
       this.handleOoyalaMessages_(event);
     });
 
     this.element.appendChild(this.iframe_);
-    this.playerReadyPromise_ = this.loadPromise(this.iframe_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
-    return this.playerReadyPromise_;
+    return this.loadPromise(this.iframe_)
+      .then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        this.playerReadyResolver_(this.iframe_);
+      });
   }
 
   /** @override */
@@ -118,7 +125,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = null;
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
 
     return true;
   }
@@ -166,9 +175,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
    * @private
    * */
   sendCommand_(command) {
-    if (!this.playerReadyPromise_) {
-      return;
-    }
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
         this.iframe_.contentWindow./*OK*/postMessage(command, '*');
