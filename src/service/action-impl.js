@@ -183,7 +183,8 @@ export class ActionService {
         if (event.keyCode == 13 /* enter */ ||
             event.keyCode == 32 /* space */) {
           const element = dev().assertElement(event.target);
-          if (element.getAttribute('role') == 'button') {
+          if (!event.defaultPrevented &&
+              element.getAttribute('role') == 'button') {
             this.trigger(element, name, event);
           }
         }
