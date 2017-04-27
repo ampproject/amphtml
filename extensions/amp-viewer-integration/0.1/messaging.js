@@ -314,7 +314,7 @@ export class Messaging {
         pending.reject(
           new Error(`Request ${message.name} failed: ${message.error}`));
       } else {
-        pending.resolve(message);
+        pending.resolve(message.data);
       }
     }
   }
