@@ -222,7 +222,7 @@ An optional attribute. If provided, will require confirming the [amp-user-notifi
 
 **data-loading-strategy**
 
-An optional attribute that takes a float value in range of `[0, 3]`, which instructs the ad to start load when it's within the given number of viewports away from the current viewport. The default value is 3. Use a smaller value to gain higher degree of viewability, with the risk of generating less views.
+An optional attribute that takes a float value in range of [0, 3], which instructs the ad to start loading when it's within the given number of viewports away from the current viewport. Use a smaller value to gain higher degree of viewability, with the risk of generating fewer views. If the attribute is not used, the default value is 3. If the attribute is used but the value is left blank, then a float value is assigned by the system which optimizes for viewability without drastically impacting the views.
 
 **common attributes**
 
