@@ -99,13 +99,7 @@ function getLikeContainer(global, data) {
 export function facebook(global, data) {
   const extension = global.context.tagName;
   let container;
-  if (extension === 'AMP-FACEBOOK-LIKE') {
-    container = getLikeContainer(global, data);
-  } else if (extension === 'AMP-FACEBOOK-COMMENTS') {
-    container = getCommentsContainer(global, data);
-  } else /*AMP-FACEBOOK */ {
-    container = getPostContainer(global, data);
-  }
+  if (extension === 'AMP-FACEBOOK-LIKE') { container = getLikeContainer(global, data);} else if (extension === 'AMP-FACEBOOK-COMMENTS') {container = getCommentsContainer(global, data);} else /*AMP-FACEBOOK */ {container = getPostContainer(global, data);}
 
   global.document.getElementById('c').appendChild(container);
 
