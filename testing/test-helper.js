@@ -18,13 +18,10 @@ import {xhrServiceForTesting} from '../src/service/xhr-impl';
 import {getService, getServiceForDoc} from '../src/service';
 
 export function stubService(sandbox, win, serviceId, method) {
-  const stub = sandbox.stub();
-  getService(win, serviceId, () => {
-    const service = {};
-    service[method] = stub;
-    return service;
+  const service = getService(win, serviceId, () => {
+    return {};
   });
-  return stub;
+  return sandbox.stub(service, method);
 }
 
 export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
