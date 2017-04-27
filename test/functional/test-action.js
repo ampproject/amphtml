@@ -1014,7 +1014,7 @@ describe('Core events', () => {
   });
 
   it('should trigger change event with details for select elements', () => {
-    const handler = window.document.addEventListener.getCall(2).args[1];
+    const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('select');
     element.innerHTML =
         `<option value="foo"></option>
