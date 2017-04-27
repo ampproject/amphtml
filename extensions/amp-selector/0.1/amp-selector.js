@@ -130,10 +130,10 @@ export class AmpSelector extends AMP.BaseElement {
       this.clearAllSelections_();
       return;
     }
-    const selectedArray = Array.isArray(newValue) ? newValue : [newValue];
+    let selectedArray = Array.isArray(newValue) ? newValue : [newValue];
     // Only use first value if multiple selection is disabled.
     if (!this.isMultiple_) {
-      selectedArray.length = 1;
+      selectedArray = selectedArray.slice(0, 1);
     }
     // Convert array values to strings and create map for fast lookup.
     const selectedMap = selectedArray.reduce((map, value) => {
