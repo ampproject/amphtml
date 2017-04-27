@@ -223,6 +223,10 @@ export class AmpLiveList extends AMP.BaseElement {
         this.itemsSlot_, true);
 
     this.registerAction('update', this.updateAction_.bind(this));
+
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
   }
 
   /** @override */
