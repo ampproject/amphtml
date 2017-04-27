@@ -24,6 +24,7 @@ import {
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Layout} from '../../../src/layout';
+import {addScreenReaderButton} from '../../../src/a11y';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {historyForDoc} from '../../../src/services';
@@ -744,21 +745,15 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.container_.appendChild(this.captionElement_);
 
     // Invisible close button at the end of lightbox for screen-readers.
-    const screenReaderCloseButton = this.element.ownerDocument
-        .createElement('button');
     // TODO(aghassemi, #4146) i18n
-    screenReaderCloseButton.textContent = 'Close the lightbox';
-    screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
-    // This is for screen-readers only, should not get a tab stop.
-    screenReaderCloseButton.tabIndex = -1;
-    screenReaderCloseButton.addEventListener('click', () => {
+    addScreenReaderButton(this.element, 'Close the lightbox', () => {
       this.close();
     });
-    this.element.appendChild(screenReaderCloseButton);
 
     const gestures = Gestures.get(this.element);
     this.element.addEventListener('click', e => {
       if (!this.entering_ &&
+            !e.target.classList.contains('i-amphtml-screen-reader') &&
             !this.imageViewer_.getImage().contains(/** @type {?Node} */ (
                 e.target))) {
         this.close();

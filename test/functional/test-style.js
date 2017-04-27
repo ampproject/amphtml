@@ -53,6 +53,14 @@ describe('Style', () => {
     expect(element.style.WebkitTransitionDuration).to.equal('1s');
   });
 
+  it('setStyle with important priority', () => {
+    const element = document.createElement('div');
+    st.setStyle(element, 'width', '1px', /* opt_units */ null,
+        /* opt_bypassCache */ false, /* opt_important */ true);
+    expect(element.style.width).to.equal('1px');
+    expect(element.getAttribute('style')).to.contain('!important');
+  });
+
   it('setStyles', () => {
     const element = document.createElement('div');
     st.setStyles(element, {
@@ -83,6 +91,15 @@ describe('Style', () => {
   it('camelCaseToTitleCase', () => {
     const str = 'theQuickBrownFox';
     expect(st.camelCaseToTitleCase(str)).to.equal('TheQuickBrownFox');
+  });
+
+  it('toSnakeCase', () => {
+    const camelCase = 'theQuickBrownFox';
+    const titleCase = 'TheQuickBrownFox';
+    const snakeCase = 'abc-def-ghi';
+    expect(st.toSnakeCase(camelCase)).to.equal('the-quick-brown-fox');
+    expect(st.toSnakeCase(titleCase)).to.equal('-the-quick-brown-fox');
+    expect(st.toSnakeCase(snakeCase)).to.equal(snakeCase);
   });
 
   it('removeAlphaFromColor', () => {

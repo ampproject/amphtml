@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {addScreenReaderButton} from '../../../src/a11y';
 import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
@@ -118,16 +119,9 @@ export class AmpSidebar extends AMP.BaseElement {
     });
 
     // Invisible close button at the end of sidebar for screen-readers.
-    const screenReaderCloseButton = this.document_.createElement('button');
-    // TODO(aghassemi, #4146) i18n
-    screenReaderCloseButton.textContent = 'Close the sidebar';
-    screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
-    // This is for screen-readers only, should not get a tab stop.
-    screenReaderCloseButton.tabIndex = -1;
-    screenReaderCloseButton.addEventListener('click', () => {
+    addScreenReaderButton(this.element, 'Close the sidebar', () => {
       this.close_();
     });
-    this.element.appendChild(screenReaderCloseButton);
 
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));

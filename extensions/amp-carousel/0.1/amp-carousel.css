@@ -36,6 +36,7 @@ amp-carousel {
   top: 50%;
   height: 34px;
   width: 34px;
+  border: 0;
   border-radius: 2px;
   opacity: 0;
   pointer-events: all;

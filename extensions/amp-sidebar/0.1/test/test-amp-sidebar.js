@@ -19,7 +19,6 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {platformFor} from '../../../../src/services';
 import {timerFor} from '../../../../src/services';
-import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import * as sinon from 'sinon';
 import '../amp-sidebar';
 
@@ -109,7 +108,8 @@ describe('amp-sidebar', () => {
       const closeButton = sidebarElement.lastElementChild;
       expect(closeButton).to.exist;
       expect(closeButton.tagName).to.equal('BUTTON');
-      assertScreenReaderElement(closeButton);
+      expect(closeButton.classList.contains('i-amphtml-screen-reader'))
+          .to.be.true;
       expect(impl.close_).to.have.not.been.called;
       closeButton.click();
       expect(impl.close_).to.be.calledOnce;

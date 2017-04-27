@@ -208,6 +208,45 @@ describe('amp-image-lightbox component', () => {
       expect(nullAddEventListenerSpy).to.have.not.been.called;
     });
   });
+
+  it('should create an invisible close button for screen readers only', () => {
+    return getImageLightbox().then(lightbox => {
+      const impl = lightbox.implementation_;
+      const closeSpy = sandbox.spy(impl, 'close');
+      const viewportOnChanged = sandbox.spy();
+      const enterLightboxMode = sandbox.spy();
+      const leaveLightboxMode = sandbox.spy();
+      impl.getViewport = () => {return {
+        onChanged: viewportOnChanged,
+        enterLightboxMode,
+        leaveLightboxMode,
+      };};
+      const historyPush = sandbox.spy();
+      impl.getHistory_ = () => {
+        return {push: () => {
+          historyPush();
+          return Promise.resolve(11);
+        }};
+      };
+      const enter = sandbox.spy();
+      impl.enter_ = enter;
+
+      const ampImage = document.createElement('amp-img');
+      ampImage.setAttribute('src', 'data:');
+      ampImage.setAttribute('width', '100');
+      ampImage.setAttribute('height', '100');
+      impl.activate({source: ampImage});
+
+      const closeButton = lightbox.lastElementChild;
+      expect(closeButton).to.exist;
+      expect(closeButton.tagName).to.equal('BUTTON');
+      expect(closeButton.classList.contains('i-amphtml-screen-reader'))
+          .to.be.true;
+      expect(closeSpy).to.have.not.been.called;
+      closeButton.click();
+      expect(closeSpy).to.be.calledOnce;
+    });
+  });
 });
 
 

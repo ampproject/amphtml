@@ -219,10 +219,10 @@ i-amphtml-sizer {
  * does not allow activation of buttons.
  */
 .i-amphtml-screen-reader {
-  position: fixed !important;
-  /* keep it on viewport */
-  top: 0px !important;
-  left: 0px !important;
+  position: absolute !important;
+  /* keep it on viewport. TalkBack likes this >=12px */
+  top: 12px !important;
+  left: 12px !important;
   /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
      before allowing buttons to be activated. */
   width: 2px !important;
@@ -231,12 +231,13 @@ i-amphtml-sizer {
   opacity: 0 !important;
   overflow: hidden !important;
   /* remove any margin or padding */
-  border: none !important;
+  border: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
   /* ensure no other style sets display to none */
   display: block !important;
   visibility: visible !important;
+  transform: none !important;
 }
 
 /* For author styling. */
