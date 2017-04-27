@@ -74,7 +74,10 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('tabindex', 0);
     this.prevButton_.onkeydown = event => {
       if (event.keyCode == 13 /* enter */ || event.keyCode == 32 /* space */) {
-        this.interactionPrev();
+        if (!event.defaultPrevented) {
+          event.preventDefault();
+          this.interactionPrev();
+        }
       }
     };
     this.prevButton_.onclick = () => {
@@ -90,7 +93,10 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_.setAttribute('tabindex', 0);
     this.nextButton_.onkeydown = event => {
       if (event.keyCode == 13 /* enter */ || event.keyCode == 32 /* space */) {
-        this.interactionNext();
+        if (!event.defaultPrevented) {
+          event.preventDefault();
+          this.interactionNext();
+        }
       }
     };
     this.nextButton_.onclick = () => {
