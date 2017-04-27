@@ -259,7 +259,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-state API', () => {
-      sandbox.stub(iframeHandler.viewer_, 'isVisible', () => true);
+      sandbox.stub/*OK*/(iframeHandler.viewer_, 'isVisible', () => true);
       iframe.postMessageToParent({
         type: 'send-embed-state',
         sentinel: 'amp3ptest' + testIndex,
