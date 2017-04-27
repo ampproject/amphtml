@@ -408,7 +408,7 @@ Only binding to the following components and attributes are allowed:
 
 ## Debugging
 
-Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development.
+Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development and to access special debugging functions.
 
 ### Warnings
 
@@ -471,6 +471,10 @@ There are several types of runtime errors that may be encountered when working w
   </tr>
 </table>
 
+### Debugging State
+
+In development mode, use `AMP.printState()` to print the current state to the console.
+
 ## Appendix
 
 ### `<amp-state>` specification
@@ -489,7 +493,7 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 <amp-state id="myRemoteState" src="https://data.com/articles.json">
 </amp-state>
 ```
-<br>
+
 #### Attributes
 
 **src**

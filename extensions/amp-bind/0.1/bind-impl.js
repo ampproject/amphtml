@@ -22,7 +22,7 @@ import {dev, user} from '../../../src/log';
 import {deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {formOrNullForElement} from '../../../src/form';
-import {isArray, toArray} from '../../../src/types';
+import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
@@ -139,7 +139,7 @@ export class Bind {
 
     // Expose for testing on dev.
     if (getMode().localDev) {
-      AMP.reinitializeBind = this.initialize_.bind(this);
+      AMP.printState = this.printState_.bind(this);
     }
   }
 
@@ -941,6 +941,25 @@ export class Bind {
     }
 
     return false;
+  }
+
+  /**
+   * Print out the current state in the console.
+   * @private
+   */
+  printState_() {
+    const seen = [];
+    const s = JSON.stringify(this.scope_, (key, value) => {
+      if (isObject(value)) {
+        if (seen.includes(value)) {
+          return '[Circular]';
+        } else {
+          seen.push(value);
+        }
+      }
+      return value;
+    });
+    dev().info(TAG, s);
   }
 
   /**
