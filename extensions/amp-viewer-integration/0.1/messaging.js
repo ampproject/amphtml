@@ -94,6 +94,10 @@ export class WindowPortEmulator {
       if (e.origin == this.origin_ &&
           e.source == this.target_ && e.data.app == APP) {
         this.log('got a message: ', e.data);
+        this.log(e.data.name);
+        if (e.data.name == 'scroll') {
+          debugger;
+        }
         handler(e);
       }
     });
@@ -186,6 +190,7 @@ export class Messaging {
    */
   handleMessage_(event) {
     // dev().fine(TAG, 'Got a message:', event.type, event.data);
+    console.log(TAG + ' Got a message:', event.type, event.data);
     const message = parseMessage(event.data);
     if (!message) {
       return;

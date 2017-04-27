@@ -51,7 +51,7 @@ export class AmpViewerHost {
   waitForHandshake_(frameOrigin, startPolling) {
     this.log('awaitHandshake_');
     const viewerId = this.id;
-    const target = this.ampIframe_.contentWindow;//is this immediately available? race condition?
+    const target = this.ampIframe_.contentWindow;
     const listener = function(event) {
       if (event.origin == frameOrigin &&
               this.isChannelOpen_(event.data) &&

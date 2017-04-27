@@ -239,7 +239,7 @@
       this.container.appendChild(this.iframe);
 
       // this.awaitHandshake_();
-      this.ampViewerHost_ = new AmpViewerHost(window, this.iframe, this.frameOrigin_, false /* startPolling */, this.id);
+      const ampViewerHost = new AmpViewerHost(window, this.iframe, this.frameOrigin_, false /* startPolling */, this.id);
 
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
@@ -251,7 +251,7 @@
 
 
     Viewer.prototype.awaitHandshake_ = function() {
-      log('Viewer.prototype.awaitHandshake_');
+      log('Viewer.prototype.awaitHandshake_', this.iframe.id);
       var targetId = this.iframe.id;
       var target = this.iframe.contentWindow;
       var targetOrigin = this.frameOrigin_;
@@ -259,7 +259,8 @@
         if (event.origin == targetOrigin &&
                 this.isChannelOpen_(event.data) &&
                 (!event.source || event.source == target)) {
-          log('event: ',event);
+          log('messaging established with ', this.frameOrigin_, this.iframe.id);
+          log('event: ',event, this.iframe.id);
           log('Viewer ' + this.id + ' messaging established with ',
               targetOrigin);
           window.removeEventListener('message', listener, false);
@@ -424,7 +425,7 @@
     };
 
     Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.processRequest_', type);
+      log('Viewer.prototype.processRequest_', type, data, awaitResponse, this.iframe.id);
       switch(type) {
         case 'documentLoaded':
           return this.documentReady_();
@@ -538,6 +539,7 @@
           false).start();
       addShowContainer('2');
 
+<<<<<<< HEAD
       new Viewer(
           'container3',
           '3',
@@ -558,6 +560,28 @@
           './article-fixed-header.amp.html?amp_js_v=0.1',
           false).start();
       addShowContainer('5');
+=======
+      // new Viewer(
+      //     'container3',
+      //     '3',
+      //     './article-access.amp.max.html?amp_js_v=0.1',
+      //     false).start();
+      // addShowContainer('3');
+
+      // new Viewer(
+      //     'container4',
+      //     '4',
+      //     './alp.amp.max.html',
+      //     false).start();
+      // addShowContainer('4');
+
+      // new Viewer(
+      //     'container5',
+      //     '5',
+      //     './article-fixed-header.amp.max.html?amp_js_v=0.1',
+      //     false).start();
+      // addShowContainer('5');
+>>>>>>> this
 
       showContainer('1');
     }

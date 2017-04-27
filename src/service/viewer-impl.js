@@ -831,7 +831,7 @@ export class Viewer {
       // Certain message deliverers return fake "Promise" instances called
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
-      return /** @type {!Promise<*>} */ (Promise.resolve(this.messageDeliverer_(
+      return /** @type {!Promise<*>} */ (Promise.resolve(this.messageDeliverer_(//here?
           eventType, data, awaitResponse)));
     }
 
