@@ -37,10 +37,14 @@ export function is3pThrottled(win) {
  */
 export function getAmpAdRenderOutsideViewport(element) {
   // Ad opts into lazier loading strategy where we only load ads that are
-  // at closer than 1.25 viewports away.
-  if (element.getAttribute('data-loading-strategy') ==
-      'prefer-viewability-over-views') {
+  // at closer given number of viewports away.
+  const rawValue = element.getAttribute('data-loading-strategy');
+  if (rawValue == 'prefer-viewability-over-views') {
     return 1.25;
+  }
+  const viewportNumber = parseFloat(rawValue);
+  if (viewportNumber >= 0 && viewportNumber <= 3) {
+    return viewportNumber;
   }
   return null;
 }

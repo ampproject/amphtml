@@ -222,7 +222,7 @@ An optional attribute. If provided, will require confirming the [amp-user-notifi
 
 **data-loading-strategy**
 
-Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view. Supported value: `prefer-viewability-over-views`.
+An optional attribute that takes a float value in range of `[0, 3]`, which instructs the ad to start load when it's within the given number of viewports away from the current viewport. The default value is 3. Use a smaller value to gain higher degree of viewability, with the risk of generating less views.
 
 **common attributes**
 
