@@ -3115,6 +3115,10 @@ tags: {  # <amp-pixel>
   tag_name: "AMP-PIXEL"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
+    name: "referrerpolicy"
+    value: "no-referrer"
+  }
+  attrs: {
     name: "src"
     mandatory: true
     value_url: {
