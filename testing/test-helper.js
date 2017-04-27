@@ -19,7 +19,9 @@ import {getService, getServiceForDoc} from '../src/service';
 
 export function stubService(sandbox, win, serviceId, method) {
   const service = getService(win, serviceId, () => {
-    return {};
+    return {
+      [method]: () => {},
+    };
   });
   return sandbox.stub(service, method);
 }
