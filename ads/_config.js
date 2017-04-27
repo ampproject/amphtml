@@ -413,18 +413,16 @@ export const adConfig = {
     ],
   },
 
-	mobusi: {
+  mobusi: {
 		preconnect: 'https://static.addevweb.com',
 		renderStartImplemented: true
 	},
 
-
-	mywidget: {
+  mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget.amp.js',
     renderStartImplemented: true,
   },
-
 
   nativo: {
     prefetch: 'https://s.ntv.io/serve/load.js',
