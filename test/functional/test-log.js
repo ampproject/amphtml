@@ -53,6 +53,7 @@ describe('Logging', () => {
         log: logSpy,
       },
       setTimeout: timeoutSpy,
+      reportError: error => error,
     };
   });
 
@@ -293,7 +294,7 @@ describe('Logging', () => {
     });
 
     // TODO(amphtml): Unskip when #8387 is fixed.
-    it.skip('should fail', () => {
+    it('should fail', () => {
       expect(function() {
         log.assert(false, 'xyz');
       }).to.throw(/xyz/);
