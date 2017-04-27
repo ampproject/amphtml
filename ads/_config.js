@@ -414,6 +414,8 @@ export const adConfig = {
     ],
   },
 
+  monetizer101: {},
+
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget.amp.js',
