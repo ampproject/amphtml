@@ -182,9 +182,9 @@ export class ActionService {
       this.root_.addEventListener('keydown', event => {
         if (event.keyCode == 13 /* enter */ ||
             event.keyCode == 32 /* space */) {
-          if (!event.defaultPrevented &&
-              this.ampdoc.win.document.activeElement == event.target) {
-            this.trigger(dev().assertElement(event.target), name, event);
+          const element = dev().assertElement(event.target);
+          if (element.getAttribute('role') == 'button') {
+            this.trigger(element, name, event);
           }
         }
       });
