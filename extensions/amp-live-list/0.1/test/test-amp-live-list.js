@@ -259,7 +259,9 @@ describe('amp-live-list', () => {
     buildElement(elem, dftAttrs);
     liveList.buildCallback();
     expect(liveList.element.getAttribute('aria-live')).to.equal('polite');
+  });
 
+  it('should use explicitly defined aria-live attribute value', () => {
     buildElement(elem, {
       'aria-live': 'assertive',
       'id': 'my-list',

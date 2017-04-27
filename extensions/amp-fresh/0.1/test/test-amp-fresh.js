@@ -82,10 +82,10 @@ describe('amp-fresh', () => {
   it('should have aria-live=polite by default', () => {
     fresh.buildCallback();
     expect(fresh.element.getAttribute('aria-live')).to.equal('polite');
+  });
 
+  it('should use explicitly defined aria-live attribute value', () => {
     elem.setAttribute('aria-live', 'assertive');
-    elem.setAttribute('id', 'amp-fresh-2');
-    fresh = new AmpFresh(elem);
     fresh.buildCallback();
     expect(fresh.element.getAttribute('aria-live')).to.equal('assertive');
   });
