@@ -18,6 +18,7 @@ import {FakeLocation} from './fake-dom';
 import {ampdocServiceFor} from '../src/ampdoc';
 import {cssText} from '../build/css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
+import {parseIfNeeded} from '../src/iframe-helper';
 import {
   installAmpdocServices,
   installRuntimeServices,
@@ -318,26 +319,42 @@ export function createIframeWithMessageStub(win) {
   /**
    * Returns a Promise that resolves when the iframe acknowledged the reception
    * of the specified message.
+   * @param {function(?Object, !Object|string)|string} callbackOrType
+   *     A callback that determines if this is the message we expected. If a
+   *     string is passed, the determination is based on whether the message's
+   *     type matches the string.
    */
-  element.expectMessageFromParent = msg => {
-    return new Promise(resolve => {
-      const listener = event => {
-        let expectMsg = msg;
-        let actualMsg = event.data.receivedMessage;
-        if (typeof expectMsg !== 'string') {
-          expectMsg = JSON.stringify(expectMsg);
-          actualMsg = JSON.stringify(actualMsg);
-        }
-        if (event.source == element.contentWindow
-            && event.data.testStubEcho
-            && expectMsg == actualMsg) {
-          win.removeEventListener('message', listener);
-          resolve(msg);
-        }
+  element.expectMessageFromParent = (callbackOrType) => {
+    let filter;
+    if (typeof callbackOrType === 'string') {
+      filter = (data) => {
+        return 'type' in data && data.type == callbackOrType;
       };
+    } else {
+      filter = callbackOrType;
+    }
+
+    return new Promise((resolve, reject) => {
+      function listener(event) {
+        if (event.source != element.contentWindow || !event.data.testStubEcho) {
+          return;
+        }
+        const message = event.data.receivedMessage;
+        const data = parseIfNeeded(message);
+        try {
+          if (filter(data, message)) {
+            win.removeEventListener('message', listener);
+            resolve(data || message);
+          }
+        } catch (e) {
+          win.removeEventListener('message', listener);
+          reject(e);
+        }
+      }
       win.addEventListener('message', listener);
     });
   };
+
   return element;
 }
 
