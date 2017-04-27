@@ -100,7 +100,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win,'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', event => {
       this.handleOoyalaMessages_(event);
     });
 
