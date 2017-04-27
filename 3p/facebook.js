@@ -82,7 +82,7 @@ function getLikeContainer(global, data) {
   container.setAttribute('data-action', data.action || 'like');
   container.setAttribute('data-colorscheme', data.colorscheme || 'light');
   container.setAttribute('data-href', data.href);
-  container.setAttribute('data-kid_directed_site', data.kid_directed_site || 'false');
+  container.setAttribute('data-kd_site', data.kd_site || 'false');
   container.setAttribute('data-layout', data.layout || 'standard');
   container.setAttribute('data-ref', data.ref || '');
   container.setAttribute('data-share', data.share || 'false');
@@ -99,7 +99,13 @@ function getLikeContainer(global, data) {
 export function facebook(global, data) {
   const extension = global.context.tagName;
   let container;
-  if (extension === 'AMP-FACEBOOK-LIKE') { container = getLikeContainer(global, data);} else if (extension === 'AMP-FACEBOOK-COMMENTS') {container = getCommentsContainer(global, data);} else /*AMP-FACEBOOK */ {container = getPostContainer(global, data);}
+  if (extension === 'AMP-FACEBOOK-LIKE') {
+    container = getLikeContainer(global, data);
+  } else if (extension === 'AMP-FACEBOOK-COMMENTS') {
+    container = getCommentsContainer(global, data);
+  } else /*AMP-FACEBOOK */ {
+    container = getPostContainer(global, data);
+  }
 
   global.document.getElementById('c').appendChild(container);
 
