@@ -264,8 +264,9 @@ function main(argv) {
       if (!isFlagConfig(file)) {
         console.log('A pull request may not contain a mix of flag-config and ' +
             'non-flag-config files. Please make your changes in separate ' +
-            'pull requests.');
-        console.log('Full list of files in this PR:');
+            'pull requests. If you see a long list of unrelated files below, ' +
+            'you may need to sync your branch to master.');
+        console.log('\nFull list of files in this PR:');
         files.forEach((file) => { console.log('\t' + file); });
         stopTimer('pr-check.js', startTime);
         process.exit(1);
