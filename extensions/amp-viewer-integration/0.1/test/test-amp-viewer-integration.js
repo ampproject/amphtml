@@ -189,12 +189,17 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
     it('handleMessage_ should resolve', () => {
+      const data = {
+        time: 12345678,
+        id: 'abcdefg',
+      };
+
       const event = {
         source: window,
         origin: viewerOrigin,
         data: {
           app: '__AMPHTML__',
-          data: null,
+          data: JSON.stringify(data),
           name: 'messageName',
           requestid: 1,
           rsvp: true,
@@ -213,6 +218,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       messaging.handleMessage_(event);
 
       expect(resolveSpy).to.have.been.calledOnce;
+      expect(resolveSpy).to.have.been.calledWith(JSON.stringify(data));
     });
 
     it('handleMessage_ should reject', () => {
