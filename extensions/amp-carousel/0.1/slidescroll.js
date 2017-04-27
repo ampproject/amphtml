@@ -493,7 +493,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   showSlideWhenReady_(value) {
     const index = parseInt(value, 10);
-    if (isFinite(index) && index > 0 && index < this.noOfSlides_) {
+    if (isFinite(index) && index >= 0 && index < this.noOfSlides_) {
       // If we haven't been laid out yet, set `initialSlideIndex_` instead.
       if (this.slideIndex_ === null) {
         this.initialSlideIndex_ = index;
@@ -501,7 +501,7 @@ export class AmpSlideScroll extends BaseSlides {
         this.showSlide_(index);
       }
     } else {
-      user().warn(TAG, 'Invalid [slide] value: %s', value);
+      user().error(TAG, 'Invalid [slide] value: %s', value);
     }
   }
 
@@ -537,7 +537,17 @@ export class AmpSlideScroll extends BaseSlides {
       this.updateInViewport(this.slides_[
           dev().assertNumber(this.slideIndex_)], false);
     }
-    this.updateInViewport(this.slides_[newIndex], true);
+    const newSlideInView = this.slides_[newIndex];
+
+    if (newSlideInView === undefined) {
+      dev.error(
+        TAG,
+        'Accessing a non-existant slide at index: %s, noOfSlides: %s',
+        newIndex,
+        noOfSlides_);
+    }
+
+    this.updateInViewport(newSlideInView, true);
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
