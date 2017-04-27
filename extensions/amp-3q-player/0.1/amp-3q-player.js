@@ -90,7 +90,7 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     this.applyFillContent(iframe, true);
     iframe.src = 'https://playout.3qsdn.com/' +
-      encodeURIComponent(this.dataId) + '?autoplay=false&amp=true';
+      encodeURIComponent(this.dataId) + '?autoplay=false&amp=true&ag=false';
     this.element.appendChild(iframe);
 
     return this.loadPromise(this.iframe_).then(() =>
