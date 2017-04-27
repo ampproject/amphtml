@@ -45,6 +45,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
+
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
   }
 
   /**
@@ -62,6 +65,10 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     installVideoManagerForDoc(this.element);
     videoManagerForDoc(this.element).register(this);
   }
@@ -123,11 +130,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     });
 
     this.element.appendChild(this.iframe_);
-    this.playerReadyPromise_ = this.loadPromise(this.iframe_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
-
-    return this.playerReadyPromise_;
+    return this.loadPromise(this.iframe_)
+      .then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        this.playerReadyResolver_(this.iframe_);
+      });
   }
 
   pauseCallback() {
@@ -153,15 +160,14 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = null;
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
 
     return true;
   }
 
   sendCommand_(command) {
-    if (!this.playerReadyPromise_) {
-      return;
-    }
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
         this.iframe_.contentWindow./*OK*/postMessage({cmd: command}, '*');
