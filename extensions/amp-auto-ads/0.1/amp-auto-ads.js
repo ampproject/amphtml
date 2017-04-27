@@ -40,6 +40,10 @@ export class AmpAutoAds extends AMP.BaseElement {
     user().assert(adNetwork, 'No AdNetworkConfig for type: ' + type);
 
     this.getConfig_(adNetwork.getConfigUrl()).then(configObj => {
+      if (!configObj) {
+        return;
+      }
+
       const placements = getPlacementsFromConfigObj(this.win, configObj);
       const attributes = Object.assign(adNetwork.getAttributes(),
           getAttributesFromConfigObj(configObj));
@@ -73,7 +77,7 @@ export class AmpAutoAds extends AMP.BaseElement {
         .fetchJson(configUrl, xhrInit)
         .catch(reason => {
           user().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
-          throw reason;
+          return null;
         });
   }
 }
