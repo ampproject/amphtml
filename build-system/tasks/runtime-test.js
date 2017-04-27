@@ -25,6 +25,8 @@ var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
 var karmaDefault = require('./karma.conf');
 
+// Whitespace change. DO NOT COMMIT.
+
 /**
  * Read in and process the configuration settings for karma
  * @return {!Object} Karma configuration
