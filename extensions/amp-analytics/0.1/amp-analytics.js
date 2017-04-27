@@ -388,8 +388,16 @@ export class AmpAnalytics extends AMP.BaseElement {
       },
     });
     const defaultConfig = this.predefinedConfig_['default'] || {};
-    const typeConfig = this.predefinedConfig_[
-      this.element.getAttribute('type')] || {};
+
+    const type = this.element.getAttribute('type');
+    if (type == 'googleanalytics-alpha') {
+      const TAG = this.getName_();
+      user().warn(TAG, '"googleanalytics-alpha" configuration is not ' +
+          'planned to be supported long-term. Avoid use of this value for ' +
+          'amp-analytics config attribute unless you plan to migrate before ' +
+          'deprecation');
+    }
+    const typeConfig = this.predefinedConfig_[type] || {};
 
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_(typeConfig, config, /* predefined */ true);
