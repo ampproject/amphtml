@@ -46,9 +46,10 @@ const AmpAdImplementation = {
 
 /** @const {!Object} */
 export const ValidAdContainerTypes = {
-  'AMP-STICKY-AD': 'sa',
+  'AMP-CAROUSEL': 'ac',
   'AMP-FX-FLYING-CARPET': 'fc',
   'AMP-LIGHTBOX': 'lb',
+  'AMP-STICKY-AD': 'sa',
 };
 
 /** @const {string} */
