@@ -18,7 +18,7 @@ import {writeScript} from '../3p/3p';
 
 export function mobusi(global, data) {
   const adsrc = data.src;
-  const timestamp = ((new Date()).getTime() % 2147483648) + Math.random();
+  const timestamp = (new Date.now() % 2147483648) + Math.random();
   if (typeof adsrc != 'undefined') {
     writeScript(global, adsrc + '&lgid=' + timestamp);
   }
