@@ -293,7 +293,6 @@ describe('Logging', () => {
       log = new Log(win, RETURNS_FINE, USER_ERROR_SENTINEL);
     });
 
-    // TODO(amphtml): Unskip when #8387 is fixed.
     it('should fail', () => {
       expect(function() {
         log.assert(false, 'xyz');
