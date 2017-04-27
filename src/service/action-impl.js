@@ -185,6 +185,7 @@ export class ActionService {
           const element = dev().assertElement(event.target);
           if (!event.defaultPrevented &&
               element.getAttribute('role') == 'button') {
+            event.preventDefault();
             this.trigger(element, name, event);
           }
         }
