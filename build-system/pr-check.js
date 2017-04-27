@@ -266,7 +266,7 @@ function main(argv) {
             'non-flag-config files. Please make your changes in separate ' +
             'pull requests.');
         console.log('Full list of files in this PR:');
-        files.forEach((file) => { console.log(file); });
+        files.forEach((file) => { console.log('\t' + file); });
         stopTimer('pr-check.js', startTime);
         process.exit(1);
       }
