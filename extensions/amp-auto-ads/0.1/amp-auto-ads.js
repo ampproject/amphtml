@@ -16,7 +16,7 @@
 
 import {AdTracker, getExistingAds} from './ad-tracker';
 import {AdStrategy} from './ad-strategy';
-import {dev, user} from '../../../src/log';
+import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
 import {isExperimentOn} from '../../../src/experiments';
@@ -72,8 +72,8 @@ export class AmpAutoAds extends AMP.BaseElement {
     return xhrFor(this.win)
         .fetchJson(configUrl, xhrInit)
         .catch(reason => {
-          dev().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
-          return null;
+          user().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
+          throw reason;
         });
   }
 }
