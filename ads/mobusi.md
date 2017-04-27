@@ -23,7 +23,7 @@ limitations under the License.
           type="mobusi"
           src="https://play.leadzu.com/banner_request.php?m=1GBTSITE40382X2&a=&idtm=300x450&lgid=324132413241234123">
     <div placeholder></div>
-    <div fallback></div>
+    <div fallback>No ads</div>
 ```
 
 ## Configuration
