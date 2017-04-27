@@ -65,7 +65,7 @@ The verb to display on the button. Can be either like or recommend.
 **data-colorscheme** (optional)
 The color scheme used by the plugin for any text outside of the button itself. Can be light or dark.
 
-**data-kid_directed_site** (optional)
+**data-kd_site** (*aka data-kid_directed_site in facebook sdk*) (optional)
 If your web site or online service, or a portion of your service, is directed to children under 13 you must enable this
 
 **data-layout** (optional)
