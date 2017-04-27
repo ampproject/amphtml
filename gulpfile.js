@@ -378,9 +378,14 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
   options = options || {};
   options.extraGlobs = opt_extraGlobs;
   var path = 'extensions/' + name + '/' + version;
+  if (name == 'amp-sticky-ad' && version == '0.1') {
+    // sticky-ad upgrade, 0.1  is deprecated.
+    path = 'extensions/' + name + '/1.0';
+  }
   var jsPath = path + '/' + name + '.js';
   var jsTestPath = path + '/test/' + 'test-' + name + '.js';
   if (argv.files && options.bundleOnlyIfListedInFiles) {
+    $$.util.log('in here?');
     const passedFiles = Array.isArray(argv.files) ? argv.files : [argv.files];
     const shouldBundle = passedFiles.some(glob => {
       return minimatch(jsPath, glob) || minimatch(jsTestPath, glob);
@@ -399,7 +404,10 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
     // Do not set watchers again when we get called by the watcher.
     var copy = Object.create(options);
     copy.watch = false;
+    $$.util.log('watching path ' + path);
     $$.watch(path + '/*', function() {
+      $$.util.log('name is ' + name);
+      $$.util.log('version is ' + version);
       buildExtension(name, version, hasCss, copy);
     });
   }
