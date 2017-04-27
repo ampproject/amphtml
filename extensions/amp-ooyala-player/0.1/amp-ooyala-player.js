@@ -171,7 +171,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
    * Sends a command to the player through postMessage.
    * @param {string} command
    * @private
-   * */
+   */
   sendCommand_(command) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {

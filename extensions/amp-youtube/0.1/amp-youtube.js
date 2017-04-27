@@ -260,7 +260,7 @@ class AmpYoutube extends AMP.BaseElement {
    * @param {string} command
    * @param {Array=} opt_args
    * @private
-   * */
+   */
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
