@@ -26,6 +26,10 @@ export const NETWORKS = /** @type {!JSONType} */ ({
     base: 'https://engine.betazerk.com',
   },
 
+  celtra: {
+    base: 'https://ads-amp.celtra.com',
+  },
+
   dianomi: {
     base: 'https://www.dianomi.com',
     src: 'https://www.dianomi.com/smartads.pl?format=a4a',
