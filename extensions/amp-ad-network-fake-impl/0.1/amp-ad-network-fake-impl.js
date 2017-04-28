@@ -63,7 +63,12 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
           const encoder = new TextEncoder('utf-8');
           return {
             creative: encoder.encode(creative).buffer,
-            signature: 'FAKESIG',
+            signatureInfo: {
+              signingServiceName: 'FAKESERVICE',
+              keypairId: 'FAKEKEY',
+              signature: 'FAKESIG',
+            },
+            // TODO(taymon): finish refactoring this
           };
         }
       }

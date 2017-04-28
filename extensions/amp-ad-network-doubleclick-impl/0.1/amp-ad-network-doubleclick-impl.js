@@ -155,28 +155,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
-        this,
-        responseHeaders,
-        this.lifecycleReporter_.getDeltaTime(),
-        this.lifecycleReporter_.getInitTime());
-    if (this.ampAnalyticsConfig_) {
-      // Load amp-analytics extensions
-      this.extensions_./*OK*/loadExtension('amp-analytics');
-    }
-    const adResponsePromise =
-        extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
-    return adResponsePromise.then(adResponse => {
-      // If the server returned a size, use that, otherwise use the size that
-      // we sent in the ad request.
-      if (adResponse.size) {
-        this.size_ = adResponse.size;
-      } else {
-        adResponse.size = this.size_;
-      }
-      this.handleResize_(adResponse.size.width, adResponse.size.height);
-      return Promise.resolve(adResponse);
-    });
+    this.ampAnalyticsConfig = extractAmpAnalyticsConfig(responseHeaders);
+    return super.extractCreativeAndSignature(responseText, responseHeaders)
+        .then((adResponse) => extractSize(adResponse, responseHeaders));
   }
 
   /** @override */
