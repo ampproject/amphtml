@@ -550,23 +550,12 @@ export class Extensions {
     if (getMode().test && this.win.testLocation) {
       loc = this.win.testLocation;
     }
-    const useCompiledJs = shouldUseCompiledJs();
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
-        getMode().localDev, getMode().test, useCompiledJs);
+        getMode().localDev);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
 }
-
-
-/**
- * @return {boolean}
- */
-function shouldUseCompiledJs() {
-  return getMode().test && self.ampTestRuntimeConfig &&
-      self.ampTestRuntimeConfig.useCompiledJs;
-}
-
 
 /**
  * Install builtins.

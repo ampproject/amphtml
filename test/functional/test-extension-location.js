@@ -34,49 +34,14 @@ describes.sandboxed('Extension Location', {}, () => {
       initLogConstructor();
     });
 
-    it('with local mode for testing with compiled js', () => {
+    it('with local mode', () => {
+      window.AMP_MODE = {rtvVersion: '123'};
       const script = calculateExtensionScriptUrl({
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'amp-ad', true, true, true);
-      expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
-    });
-
-    it('with local mode for testing without compiled js', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:80',
-        protocol: 'https:',
-      }, 'amp-ad', true, true, false);
-      expect(script).to.equal('https://localhost:80/dist/v0/amp-ad-0.1.max.js');
-    });
-
-    it('with local mode normal pathname', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'https:',
       }, 'amp-ad', true);
-      expect(script).to.equal('https://cdn.ampproject.org/v0/amp-ad-0.1.js');
-    });
-
-    it('with local mode min pathname', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.min.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'amp-ad', true);
-      expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
-    });
-
-    it('with local mode max pathname', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.max.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'amp-ad', true);
-      expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.max.js');
+      expect(script).to.equal('http://localhost:8000/dist/rtv/123/v0/amp-ad-0.1.js');
     });
 
     it('with remote mode', () => {
@@ -88,24 +53,6 @@ describes.sandboxed('Extension Location', {}, () => {
       }, 'amp-ad', false);
       expect(script).to.equal(
           'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js');
-    });
-
-    it('with document proxy mode: max', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: '/max/output.jsbin.com/pegizoq/quiet',
-        host: 'localhost:80',
-        protocol: 'http:',
-      }, 'amp-ad', true);
-      expect(script).to.equal('http://localhost:80/dist/v0/amp-ad-0.1.max.js');
-    });
-
-    it('with document proxy mode: min', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: '/min/output.jsbin.com/pegizoq/quiet',
-        host: 'localhost:80',
-        protocol: 'http:',
-      }, 'amp-ad', true);
-      expect(script).to.equal('http://localhost:80/dist/v0/amp-ad-0.1.js');
     });
   });
 
@@ -119,40 +66,13 @@ describes.sandboxed('Extension Location', {}, () => {
       initLogConstructor();
     });
 
-    it('with local mode for testing', () => {
+    it('with local mode', () => {
       const script = calculateEntryPointScriptUrl({
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'sw', true, true);
-      expect(script).to.equal('http://localhost:8000/dist/sw.js');
-    });
-
-    it('with local mode normal pathname', () => {
-      const script = calculateEntryPointScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'https:',
-      }, 'sw', true);
-      expect(script).to.equal('https://cdn.ampproject.org/sw.js');
-    });
-
-    it('with local mode min pathname', () => {
-      const script = calculateEntryPointScriptUrl({
-        pathname: 'examples/ads.amp.min.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
       }, 'sw', true);
       expect(script).to.equal('http://localhost:8000/dist/sw.js');
-    });
-
-    it('with local mode max pathname', () => {
-      const script = calculateEntryPointScriptUrl({
-        pathname: 'examples/ads.amp.max.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'sw', true);
-      expect(script).to.equal('http://localhost:8000/dist/sw.max.js');
     });
 
     it('with remote mode', () => {
@@ -164,15 +84,6 @@ describes.sandboxed('Extension Location', {}, () => {
       }, 'sw', false);
       expect(script).to.equal(
           'https://cdn.ampproject.org/sw.js');
-    });
-
-    it('with document proxy mode: min', () => {
-      const script = calculateEntryPointScriptUrl({
-        pathname: '/min/output.jsbin.com/pegizoq/quiet',
-        host: 'localhost:80',
-        protocol: 'http:',
-      }, 'sw', true);
-      expect(script).to.equal('http://localhost:80/dist/sw.js');
     });
   });
 });
