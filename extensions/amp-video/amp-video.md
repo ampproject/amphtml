@@ -103,7 +103,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Click-to-Play overlay
 Click-to-play is a common UX feature for video players on the web. `amp-video` supports
-`play` standard AMP action which allows us to implement this pattern overlays with ease.
+the standard `play` AMP action, allowing you to implement click-to-play easily.
 
 Please see [Click-to-play overlay for amp-video on AmpByExample.com](https://ampbyexample.com/advanced/click-to-play_overlay_for_amp-video/) for a sample.
 
