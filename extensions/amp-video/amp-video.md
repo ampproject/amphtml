@@ -48,8 +48,6 @@ The `amp-video` component HTML accepts up to three unique types of HTML nodes as
 
 `source` tag children can be used in the same way as the standard `video` tag, to specify different source files to play.
 
-One or zero immediate child nodes can have the `placeholder` attribute. If present, this node and its children form a placeholder that will display instead of the video. A click or tap anywhere inside of the `amp-video` container will replace the placeholder with the video itself.
-
 One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that will be displayed if HTML5 video is not supported on the user’s browser.
 
 ## Example
@@ -102,6 +100,12 @@ If present, will automatically loop the video back to the start upon reaching th
 **common attributes**
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Click-to-Play overlay
+Click-to-play is a common UX for video players on the web. `amp-video` supports
+`play` standard AMP action which allows us to implement this pattern overlays with ease.
+
+Please see [Click-to-play overlay for amp-video on AmpByExample.com](https://ampbyexample.com/advanced/click-to-play_overlay_for_amp-video/) for a sample.
 
 ## Validation
 
